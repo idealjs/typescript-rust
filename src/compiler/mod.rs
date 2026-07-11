@@ -1,0 +1,683 @@
+//! The compiler program, ported from `internal/compiler/`.
+//!
+//! `Program` orchestrates loading, parsing, and binding of source files, and
+//! exposes the inputs the type checker needs. Emit and full module resolution
+//! are not yet ported; this module provides the minimum needed to drive the
+//! CLI pipeline (parse + bind + report diagnostics).
+
+use std::collections::HashMap;
+use std::sync::Arc;
+
+use crate::ast::diagnostic::Diagnostic;
+use crate::ast::SourceFile;
+use crate::binder::Binder;
+use crate::core::compiler_options::CompilerOptions;
+use crate::core::text::TextRange;
+use crate::diagnostics::Category;
+use crate::parser::{script_kind_from_file_name, Parser};
+use crate::tspath;
+use crate::vfs::FS;
+
+use crate::tsoptions::ParsedCommandLine;
+
+// ────────────────────────────────────────────────────────────────────────────
+// CompilerHost
+// ────────────────────────────────────────────────────────────────────────────
+
+/// Provides the file system and environment context the compiler runs in.
+///
+/// Mirrors `compiler.CompilerHost` in Go (a reduced form).
+pub trait CompilerHost: Send + Sync {
+    fn fs(&self) -> &dyn FS;
+    fn current_directory(&self) -> &str;
+    fn default_library_path(&self) -> &str;
+    fn use_case_sensitive_file_names(&self) -> bool {
+        self.fs().use_case_sensitive_file_names()
+    }
+}
+
+/// A basic `CompilerHost` backed by a real (or virtual) file system.
+pub struct CompilerHostImpl {
+    fs: Arc<dyn FS>,
+    current_directory: String,
+    default_library_path: String,
+}
+
+impl CompilerHostImpl {
+    pub fn new(fs: Arc<dyn FS>, current_directory: String, default_library_path: String) -> Self {
+        Self {
+            fs,
+            current_directory,
+            default_library_path,
+        }
+    }
+}
+
+impl CompilerHost for CompilerHostImpl {
+    fn fs(&self) -> &dyn FS {
+        self.fs.as_ref()
+    }
+    fn current_directory(&self) -> &str {
+        &self.current_directory
+    }
+    fn default_library_path(&self) -> &str {
+        &self.default_library_path
+    }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// ProgramOptions
+// ────────────────────────────────────────────────────────────────────────────
+
+/// Options for constructing a `Program`.
+pub struct ProgramOptions {
+    pub config: ParsedCommandLine,
+    pub host: Arc<dyn CompilerHost>,
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Program
+// ────────────────────────────────────────────────────────────────────────────
+
+/// A compiled program: a set of parsed, bound source files plus diagnostics.
+///
+/// Mirrors `compiler.Program` in Go (a reduced form).
+pub struct Program {
+    options: CompilerOptions,
+    source_files: Vec<Arc<SourceFile>>,
+    source_files_by_name: HashMap<String, Arc<SourceFile>>,
+    default_library_file_names: std::collections::HashSet<String>,
+    diagnostics: Vec<Arc<Diagnostic>>,
+    host: Arc<dyn CompilerHost>,
+    config_file_name: String,
+}
+
+impl Program {
+    /// Create a new program: load lib files and input files, parse, and bind.
+    pub fn new(opts: ProgramOptions) -> Self {
+        let host = opts.host;
+        let options = opts.config.compiler_options.clone();
+        let config_file_name = opts.config.config_file_name.clone();
+
+        let mut source_files: Vec<Arc<SourceFile>> = Vec::new();
+        let mut by_name: HashMap<String, Arc<SourceFile>> = HashMap::new();
+        let mut default_lib_names: std::collections::HashSet<String> = std::collections::HashSet::new();
+        let mut diagnostics: Vec<Arc<Diagnostic>> = Vec::new();
+
+        // 1. Load default library files (unless --noLib).
+        if !options.no_lib.is_true() {
+            let lib_names = default_lib_file_names(&options);
+            let mut visited: std::collections::HashSet<String> = std::collections::HashSet::new();
+            for lib_name in &lib_names {
+                load_lib_recursive(
+                    lib_name,
+                    host.as_ref(),
+                    &mut source_files,
+                    &mut by_name,
+                    &mut default_lib_names,
+                    &mut visited,
+                    &mut diagnostics,
+                );
+            }
+        }
+
+        // 2. Load input files from the parsed command line / tsconfig.
+        //    Process `/// <reference path=... />` directives recursively so that
+        //    dependencies are loaded before dependent files (matching Go's ordering).
+        for file_name in &opts.config.file_names {
+            load_source_file_with_references(
+                file_name,
+                host.as_ref(),
+                &mut source_files,
+                &mut by_name,
+                &mut diagnostics,
+            );
+        }
+
+        // 3. Report any errors from the parsed command line itself.
+        for err in &opts.config.errors {
+            diagnostics.push(Arc::new(err.clone()));
+        }
+
+        // 4. Bind all source files.
+        let mut binder = Binder::new();
+        for file in &source_files {
+            binder.bind_source_file(file);
+        }
+
+        Program {
+            options,
+            source_files,
+            source_files_by_name: by_name,
+            default_library_file_names: default_lib_names,
+            diagnostics,
+            host,
+            config_file_name,
+        }
+    }
+
+    pub fn options(&self) -> &CompilerOptions {
+        &self.options
+    }
+
+    pub fn source_files(&self) -> &[Arc<SourceFile>] {
+        &self.source_files
+    }
+
+    pub fn get_source_file(&self, file_name: &str) -> Option<Arc<SourceFile>> {
+        self.source_files_by_name.get(file_name).cloned()
+    }
+
+    pub fn diagnostics(&self) -> &[Arc<Diagnostic>] {
+        &self.diagnostics
+    }
+
+    /// Diagnostics that should be reported (excludes lib-file diagnostics when
+    /// `skipLibCheck`-style suppression is desired for parse errors in libs).
+    pub fn get_diagnostics_to_report(&self) -> Vec<Arc<Diagnostic>> {
+        if self.options.skip_lib_check.is_true() {
+            self.diagnostics
+                .iter()
+                .filter(|d| {
+                    d.file
+                        .as_ref()
+                        .map(|f| !self.default_library_file_names.contains(&f.file_name))
+                        .unwrap_or(true)
+                })
+                .cloned()
+                .collect()
+        } else {
+            self.diagnostics.clone()
+        }
+    }
+
+    pub fn config_file_name(&self) -> &str {
+        &self.config_file_name
+    }
+
+    pub fn host(&self) -> &dyn CompilerHost {
+        self.host.as_ref()
+    }
+
+    pub fn is_source_file_default_library(&self, file_name: &str) -> bool {
+        self.default_library_file_names.contains(file_name)
+    }
+
+    pub fn file_exists(&self, file_name: &str) -> bool {
+        self.host.fs().file_exists(file_name)
+    }
+
+    /// Emit JavaScript output for all source files.
+    ///
+    /// Mirrors `Program.Emit` in Go. Writes `.js` files (and optionally
+    /// `.d.ts`, source maps) via the provided `write_file` callback.
+    pub fn emit(
+        &self,
+        write_file: &dyn Fn(&str, &str) -> std::io::Result<()>,
+    ) -> crate::emitter::EmitResult {
+        let fs = self.host.fs();
+        // Only emit non-lib source files.
+        let source_files: Vec<_> = self
+            .source_files
+            .iter()
+            .filter(|sf| !self.default_library_file_names.contains(&sf.file_name))
+            .cloned()
+            .collect();
+        crate::emitter::emit_program(&source_files, &self.options, fs, write_file)
+    }
+}
+
+impl crate::checker::Program for Program {
+    fn options(&self) -> &CompilerOptions {
+        &self.options
+    }
+    fn source_files(&self) -> &[Arc<SourceFile>] {
+        &self.source_files
+    }
+    fn bind_source_files(&self) {
+        // Binding is performed eagerly during construction.
+    }
+    fn file_exists(&self, file_name: &str) -> bool {
+        Program::file_exists(self, file_name)
+    }
+    fn get_source_file(&self, file_name: &str) -> Option<Arc<SourceFile>> {
+        Program::get_source_file(self, file_name)
+    }
+    fn is_source_file_default_library(&self, path: &str) -> bool {
+        Program::is_source_file_default_library(self, path)
+    }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// File loading helpers
+// ────────────────────────────────────────────────────────────────────────────
+
+/// Read and parse a file from the host file system, returning the source file
+/// and any parse diagnostics.
+fn read_and_parse(
+    file_name: &str,
+    host: &dyn CompilerHost,
+) -> Result<(Arc<SourceFile>, Vec<crate::parser::ParserDiagnostic>), String> {
+    let text = host
+        .fs()
+        .read_file(file_name)
+        .ok_or_else(|| format!("Cannot read file '{file_name}'."))?;
+    let (file, diags) = Parser::parse_source_file_text_with_diagnostics(file_name, text);
+    Ok((Arc::new(file), diags))
+}
+
+/// Load a source file and recursively process its `/// <reference path=... />`
+/// directives, so that referenced files are loaded before the referencing file.
+///
+/// Mirrors the triple-slash reference path resolution in Go's `fileLoader`.
+/// Referenced files are resolved relative to the containing file's directory,
+/// and each is loaded recursively before the containing file is added to the
+/// source file list. This produces a dependency-first ordering.
+fn load_source_file_with_references(
+    file_name: &str,
+    host: &dyn CompilerHost,
+    source_files: &mut Vec<Arc<SourceFile>>,
+    by_name: &mut HashMap<String, Arc<SourceFile>>,
+    diagnostics: &mut Vec<Arc<Diagnostic>>,
+) {
+    let normalized = tspath::normalize_path(file_name);
+    if by_name.contains_key(&normalized) {
+        return;
+    }
+
+    let (file, parse_diags) = match read_and_parse(&normalized, host) {
+        Ok(result) => result,
+        Err(msg) => {
+            diagnostics.push(Arc::new(file_error_diagnostic(&normalized, &msg)));
+            return;
+        }
+    };
+
+    for pd in &parse_diags {
+        diagnostics.push(Arc::new(parser_diagnostic_to_diagnostic(Arc::clone(&file), pd)));
+    }
+
+    // Mark as loaded before recursing to break cycles.
+    by_name.insert(normalized.clone(), Arc::clone(&file));
+
+    // Process `/// <reference path=... />` directives.
+    let text = file.text.as_str();
+    let refs = extract_reference_path_directives(text, &normalized);
+    for ref_path in &refs {
+        load_source_file_with_references(ref_path, host, source_files, by_name, diagnostics);
+    }
+
+    source_files.push(file);
+}
+
+/// Extract `/// <reference path="..." />` directives from source text.
+///
+/// Resolves each path relative to `containing_file`'s directory, mirroring
+/// Go's `resolveTripleslashPathReference`.
+fn extract_reference_path_directives(text: &str, containing_file: &str) -> Vec<String> {
+    let mut refs = Vec::new();
+    let base_dir = tspath::get_directory_path(containing_file);
+    for line in text.lines() {
+        let trimmed = line.trim_start();
+        let Some(rest) = trimmed.strip_prefix("///") else {
+            continue;
+        };
+        if let Some(start) = rest.find("path=\"") {
+            let after = &rest[start + 6..];
+            if let Some(end) = after.find('"') {
+                let path = &after[..end];
+                let resolved = if tspath::is_rooted_disk_path(path) {
+                    tspath::normalize_path(path)
+                } else {
+                    tspath::normalize_path(&tspath::combine_paths(&base_dir, &[path]))
+                };
+                refs.push(resolved);
+            }
+        } else if let Some(start) = rest.find("path='") {
+            let after = &rest[start + 6..];
+            if let Some(end) = after.find('\'') {
+                let path = &after[..end];
+                let resolved = if tspath::is_rooted_disk_path(path) {
+                    tspath::normalize_path(path)
+                } else {
+                    tspath::normalize_path(&tspath::combine_paths(&base_dir, &[path]))
+                };
+                refs.push(resolved);
+            }
+        }
+    }
+    refs
+}
+
+/// Recursively load a lib file and its `/// <reference lib="..." />` dependencies.
+fn load_lib_recursive(
+    lib_name: &str,
+    host: &dyn CompilerHost,
+    source_files: &mut Vec<Arc<SourceFile>>,
+    by_name: &mut HashMap<String, Arc<SourceFile>>,
+    default_lib_names: &mut std::collections::HashSet<String>,
+    visited: &mut std::collections::HashSet<String>,
+    diagnostics: &mut Vec<Arc<Diagnostic>>,
+) {
+    if !visited.insert(lib_name.to_string()) {
+        return;
+    }
+    let path = tspath::combine_paths(host.default_library_path(), &[lib_name]);
+    let text = match host.fs().read_file(&path) {
+        Some(t) => t,
+        None => {
+            // Lib file missing is non-fatal (the bundled set may be partial).
+            return;
+        }
+    };
+
+    // Resolve referenced libs before adding this file.
+    let references = extract_reference_lib_directives(&text);
+    for ref_lib in &references {
+        let ref_name = format!("lib.{ref_lib}.d.ts");
+        load_lib_recursive(
+            &ref_name,
+            host,
+            source_files,
+            by_name,
+            default_lib_names,
+            visited,
+            diagnostics,
+        );
+    }
+
+    let (file, parse_diags) = Parser::parse_source_file_text_with_diagnostics(&path, text);
+    let file = Arc::new(file);
+    for pd in &parse_diags {
+        diagnostics.push(Arc::new(parser_diagnostic_to_diagnostic(Arc::clone(&file), pd)));
+    }
+    default_lib_names.insert(path.clone());
+    by_name.insert(path.clone(), Arc::clone(&file));
+    source_files.push(file);
+}
+
+/// Extract `/// <reference lib="X" />` directives from source text.
+fn extract_reference_lib_directives(text: &str) -> Vec<String> {
+    let mut refs = Vec::new();
+    for line in text.lines() {
+        let trimmed = line.trim_start();
+        if let Some(rest) = trimmed.strip_prefix("///") {
+            if let Some(start) = rest.find("lib=\"") {
+                let after = &rest[start + 5..];
+                if let Some(end) = after.find('"') {
+                    refs.push(after[..end].to_string());
+                }
+            }
+        }
+    }
+    refs
+}
+
+/// Determine the default lib file name(s) from compiler options.
+///
+/// Mirrors a simplified `compiler.GetDefaultLibFileName` / `getDefaultLibFilenames`.
+fn default_lib_file_names(options: &CompilerOptions) -> Vec<String> {
+    if !options.lib.is_empty() {
+        return options
+            .lib
+            .iter()
+            .map(|l| {
+                if l.starts_with("lib.") {
+                    l.clone()
+                } else {
+                    format!("lib.{l}.d.ts")
+                }
+            })
+            .collect();
+    }
+    // Default: lib.d.ts (which references es5 + dom).
+    vec!["lib.d.ts".to_string()]
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Diagnostic conversion
+// ────────────────────────────────────────────────────────────────────────────
+
+fn parser_diagnostic_to_diagnostic(
+    file: Arc<SourceFile>,
+    pd: &crate::parser::ParserDiagnostic,
+) -> Diagnostic {
+    Diagnostic {
+        file: Some(file),
+        loc: pd.range,
+        code: 1003, // TS error code for parse errors (approximate)
+        category: Category::Error,
+        message: None,
+        message_key: "-1",
+        message_args: vec![pd.message.clone()],
+        message_chain: Vec::new(),
+        related_information: Vec::new(),
+        reports_unnecessary: false,
+        reports_deprecated: false,
+        skipped_on_no_emit: false,
+    }
+}
+
+fn file_error_diagnostic(file_name: &str, message: &str) -> Diagnostic {
+    Diagnostic {
+        file: None,
+        loc: TextRange::undefined(),
+        code: 6054, // "File '{0}' not found" (approximate)
+        category: Category::Error,
+        message: None,
+        message_key: "-1",
+        message_args: vec![format!("{message} '{file_name}'.")],
+        message_chain: Vec::new(),
+        related_information: Vec::new(),
+        reports_unnecessary: false,
+        reports_deprecated: false,
+        skipped_on_no_emit: false,
+    }
+}
+
+// Ensure `script_kind_from_file_name` is reachable (used by the parser).
+#[allow(dead_code)]
+fn _ensure_script_kind(file_name: &str) -> crate::ast::ScriptKind {
+    script_kind_from_file_name(file_name)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::bundled::{lib_path, BundledFS};
+    use crate::core::compiler_options::CompilerOptions;
+    use crate::core::tristate::Tristate;
+    use crate::tsoptions::parse_command_line;
+    use crate::vfs::{InMemoryFS, OsFS};
+
+    #[test]
+    fn program_parses_input_files() {
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/proj");
+        fs.insert_file("/proj/a.ts", "let x = 1;");
+        fs.insert_file("/proj/b.ts", "let y = ;");
+
+        let args: Vec<String> = vec!["--noLib".to_string(), "/proj/a.ts".to_string(), "/proj/b.ts".to_string()];
+        let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
+        let host = Arc::new(CompilerHostImpl::new(
+            fs,
+            "/proj".to_string(),
+            lib_path(),
+        ));
+        let program = Program::new(ProgramOptions { config: parsed, host });
+        assert_eq!(program.source_files().len(), 2);
+        // b.ts has a parse error.
+        assert!(program
+            .diagnostics()
+            .iter()
+            .any(|d| d.category == Category::Error));
+    }
+
+    #[test]
+    fn program_loads_bundled_libs() {
+        // Use the bundled lib files via BundledFS over OsFS.
+        let fs = Arc::new(BundledFS::new(Arc::new(OsFS)));
+        let args: Vec<String> = vec![];
+        let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
+        let host = Arc::new(CompilerHostImpl::new(
+            fs,
+            "/proj".to_string(),
+            lib_path(),
+        ));
+        let program = Program::new(ProgramOptions { config: parsed, host });
+        // lib.d.ts is the default lib; it should have loaded at least one lib file.
+        assert!(!program.source_files().is_empty());
+    }
+
+    #[test]
+    fn extract_reference_libs() {
+        let text = "/// <reference lib=\"es5\" />\n/// <reference lib=\"dom\" />\ninterface X {}";
+        let refs = extract_reference_lib_directives(text);
+        assert_eq!(refs, vec!["es5", "dom"]);
+    }
+
+    /// Port of Go's `TestProgram` (BasicFileOrdering case).
+    ///
+    /// Verifies that `/// <reference path=... />` directives cause referenced
+    /// files to be loaded, and that files are ordered with dependencies first
+    /// (deepest dependency before dependent).
+    ///
+    /// Go's `TestProgram` also covers import-based file ordering (FileOrderingImports,
+    /// FileOrderingCycles), but those require module resolution which is not yet
+    /// ported to Rust. This test covers the reference-path case.
+    #[test]
+    fn program_file_ordering_with_reference_paths() {
+        let fs = Arc::new(InMemoryFS::new());
+
+        // Build a chain: index.ts → 5.ts → 4.ts → 3.ts → 2.ts → 1.ts
+        //                index.ts → 10.ts → 9.ts → 8.ts → 7.ts → 6.ts
+        let files = [
+            ("/dev/src/index.ts", "/// <reference path='/dev/src2/a/5.ts' />\n/// <reference path='/dev/src2/a/10.ts' />"),
+            ("/dev/src2/a/5.ts", "/// <reference path='4.ts' />"),
+            ("/dev/src2/a/4.ts", "/// <reference path='b/3.ts' />"),
+            ("/dev/src2/a/b/3.ts", "/// <reference path='2.ts' />"),
+            ("/dev/src2/a/b/2.ts", "/// <reference path='c/1.ts' />"),
+            ("/dev/src2/a/b/c/1.ts", "console.log('hello');"),
+            ("/dev/src2/a/10.ts", "/// <reference path='b/c/d/9.ts' />"),
+            ("/dev/src2/a/b/c/d/9.ts", "/// <reference path='e/8.ts' />"),
+            ("/dev/src2/a/b/c/d/e/8.ts", "/// <reference path='7.ts' />"),
+            ("/dev/src2/a/b/c/d/e/7.ts", "/// <reference path='f/6.ts' />"),
+            ("/dev/src2/a/b/c/d/e/f/6.ts", "console.log('world!');"),
+        ];
+        for (name, content) in &files {
+            fs.insert_file(name, content);
+        }
+
+        let parsed = ParsedCommandLine {
+            compiler_options: {
+                let mut opts = CompilerOptions::default();
+                opts.no_lib = Tristate::True;
+                opts
+            },
+            file_names: vec!["/dev/src/index.ts".to_string()],
+            errors: vec![],
+            config_file_name: String::new(),
+            raw_options: None,
+            include: vec![],
+            exclude: vec![],
+            files_spec: vec![],
+            watch: false,
+        };
+        let host = Arc::new(CompilerHostImpl::new(
+            fs,
+            "/dev/src".to_string(),
+            lib_path(),
+        ));
+        let program = Program::new(ProgramOptions { config: parsed, host });
+
+        let actual: Vec<&str> = program
+            .source_files()
+            .iter()
+            .map(|f| f.file_name.as_str())
+            .collect();
+
+        let expected = vec![
+            "/dev/src2/a/b/c/1.ts",
+            "/dev/src2/a/b/2.ts",
+            "/dev/src2/a/b/3.ts",
+            "/dev/src2/a/4.ts",
+            "/dev/src2/a/5.ts",
+            "/dev/src2/a/b/c/d/e/f/6.ts",
+            "/dev/src2/a/b/c/d/e/7.ts",
+            "/dev/src2/a/b/c/d/e/8.ts",
+            "/dev/src2/a/b/c/d/9.ts",
+            "/dev/src2/a/10.ts",
+            "/dev/src/index.ts",
+        ];
+
+        assert_eq!(actual, expected);
+    }
+
+    /// Port of Go's `TestIncludeProcessorDiagnosticsWithMissingFileCasing`.
+    ///
+    /// On a case-sensitive filesystem, requesting `/src/MyFile.ts` when only
+    /// `/src/myFile.ts` exists should produce a "file not found" diagnostic
+    /// without panicking. Go's test exercises the include processor's case-
+    /// sensitivity diagnostic; Rust doesn't have an include processor, but the
+    /// Program must still handle missing files gracefully.
+    #[test]
+    fn include_processor_diagnostics_with_missing_file_casing() {
+        let fs = Arc::new(InMemoryFS::with_case_sensitivity(true));
+        fs.insert_dir("/src");
+        // Only the lowercase version exists.
+        fs.insert_file("/src/myFile.ts", "export const y = 2;");
+
+        let parsed = ParsedCommandLine {
+            compiler_options: {
+                let mut opts = CompilerOptions::default();
+                opts.no_lib = Tristate::True;
+                opts.skip_lib_check = Tristate::True;
+                opts
+            },
+            // List both casings as root files.
+            file_names: vec!["/src/MyFile.ts".to_string(), "/src/myFile.ts".to_string()],
+            errors: vec![],
+            config_file_name: String::new(),
+            raw_options: None,
+            include: vec![],
+            exclude: vec![],
+            files_spec: vec![],
+            watch: false,
+        };
+        let host = Arc::new(CompilerHostImpl::new(
+            fs,
+            "/".to_string(),
+            lib_path(),
+        ));
+        let program = Program::new(ProgramOptions { config: parsed, host });
+
+        // The program should not panic when computing diagnostics.
+        // /src/MyFile.ts does not exist on the case-sensitive FS, so we expect
+        // at least one error diagnostic about the missing file.
+        let diags = program.diagnostics();
+        assert!(
+            diags.iter().any(|d| d.category == Category::Error),
+            "expected at least one error diagnostic for missing /src/MyFile.ts, got: {:?}",
+            diags
+        );
+        // The existing /src/myFile.ts should still be loaded.
+        assert!(
+            program.get_source_file("/src/myFile.ts").is_some(),
+            "expected /src/myFile.ts to be loaded"
+        );
+    }
+
+    #[test]
+    fn extract_reference_path_directives_resolves_relative() {
+        let text = "/// <reference path='./b/3.ts' />\n/// <reference path='/abs/4.ts' />";
+        let refs = extract_reference_path_directives(text, "/dev/src2/a/5.ts");
+        assert_eq!(refs, vec!["/dev/src2/a/b/3.ts", "/abs/4.ts"]);
+    }
+
+    #[test]
+    fn extract_reference_path_directives_single_quotes() {
+        let text = "/// <reference path='b/3.ts' />";
+        let refs = extract_reference_path_directives(text, "/dev/src2/a/5.ts");
+        assert_eq!(refs, vec!["/dev/src2/a/b/3.ts"]);
+    }
+}

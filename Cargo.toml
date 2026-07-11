@@ -1,0 +1,59 @@
+[package]
+name = "tsox"
+version = "0.1.0"
+edition = "2021"
+description = "TypeScript compiler ported from Go to Rust"
+license = "Apache-2.0"
+
+[[bin]]
+name = "tsox"
+path = "src/main.rs"
+
+[lib]
+name = "tsox"
+path = "src/lib.rs"
+
+[dependencies]
+# Async runtime for LSP server
+tokio = { version = "1", features = ["full"] }
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+# Concurrent data structures
+dashmap = "6"
+# Arena allocator
+bumpalo = "3"
+# String interning
+string-interner = "0.17"
+# Logging
+tracing = "0.1"
+tracing-subscriber = "0.3"
+# Error handling
+anyhow = "1"
+thiserror = "1"
+# Unicode handling
+unicode-width = "0.2"
+# Hashing (matches Go's xxh3 usage)
+xxhash-rust = { version = "0.8", features = ["xxh3"] }
+# Regex (used in scanner)
+regex = "1"
+# Cross-platform path handling
+cfg-if = "1"
+# Bitflags for NodeFlags, ModifierFlags, etc.
+bitflags = "2"
+# Base64 encoding for source map data URLs
+base64 = "0.22"
+
+[dev-dependencies]
+pretty_assertions = "1"
+proptest = "1"
+criterion = "0.5"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+
+[profile.dev]
+opt-level = 0
+debug = true
