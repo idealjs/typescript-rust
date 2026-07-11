@@ -35,21 +35,13 @@ impl Tristate {
     }
 
     pub fn default_if_unknown(self, value: Tristate) -> Tristate {
-        if self.is_unknown() {
-            value
-        } else {
-            self
-        }
+        if self.is_unknown() { value } else { self }
     }
 }
 
 impl From<bool> for Tristate {
     fn from(b: bool) -> Self {
-        if b {
-            Tristate::True
-        } else {
-            Tristate::False
-        }
+        if b { Tristate::True } else { Tristate::False }
     }
 }
 
@@ -94,7 +86,13 @@ mod tests {
 
     #[test]
     fn default_if_unknown() {
-        assert_eq!(Tristate::Unknown.default_if_unknown(Tristate::True), Tristate::True);
-        assert_eq!(Tristate::False.default_if_unknown(Tristate::True), Tristate::False);
+        assert_eq!(
+            Tristate::Unknown.default_if_unknown(Tristate::True),
+            Tristate::True
+        );
+        assert_eq!(
+            Tristate::False.default_if_unknown(Tristate::True),
+            Tristate::False
+        );
     }
 }

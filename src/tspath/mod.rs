@@ -244,13 +244,13 @@ pub fn get_directory_path(path: &str) -> String {
         return path;
     }
     let path = remove_trailing_directory_separator(&path);
-    let last_slash = path.rfind('/').map_or(root_length, |i| {
-        if i < root_length {
-            root_length
-        } else {
-            i
-        }
-    });
+    let last_slash =
+        path.rfind('/').map_or(
+            root_length,
+            |i| {
+                if i < root_length { root_length } else { i }
+            },
+        );
     path[..last_slash].to_string()
 }
 
@@ -341,7 +341,10 @@ pub fn normalize_path(path: &str) -> String {
     let path = normalize_slashes(path);
     // Simple normalization: replace /./ with /, trim leading ./
     let simplified = path.replace("/./", "/");
-    let simplified = simplified.strip_prefix("./").unwrap_or(&simplified).to_string();
+    let simplified = simplified
+        .strip_prefix("./")
+        .unwrap_or(&simplified)
+        .to_string();
     if !has_relative_path_segment(&simplified) {
         return simplified;
     }
@@ -466,7 +469,17 @@ pub fn to_file_name_lower_case(file_name: &str) -> String {
     }
     file_name
         .chars()
-        .map(|r| if r == I_WITH_DOT { r } else { r.to_lowercase().collect::<String>().chars().next().unwrap_or(r) })
+        .map(|r| {
+            if r == I_WITH_DOT {
+                r
+            } else {
+                r.to_lowercase()
+                    .collect::<String>()
+                    .chars()
+                    .next()
+                    .unwrap_or(r)
+            }
+        })
         .collect()
 }
 
@@ -478,7 +491,10 @@ pub fn to_path(file_name: &str, base_path: &str, use_case_sensitive_file_names: 
         let combined = combine_paths(base_path, &[file_name]);
         normalize_path(&combined)
     };
-    Path(get_canonical_file_name(&non_canonicalized_path, use_case_sensitive_file_names))
+    Path(get_canonical_file_name(
+        &non_canonicalized_path,
+        use_case_sensitive_file_names,
+    ))
 }
 
 /// Remove a single trailing directory separator.
@@ -535,7 +551,11 @@ pub fn path_is_relative(path: &str) -> bool {
     if bytes.len() >= 2 && bytes[0] == b'.' && (bytes[1] == b'/' || bytes[1] == b'\\') {
         return true;
     }
-    if bytes.len() >= 3 && bytes[0] == b'.' && bytes[1] == b'.' && (bytes[2] == b'/' || bytes[2] == b'\\') {
+    if bytes.len() >= 3
+        && bytes[0] == b'.'
+        && bytes[1] == b'.'
+        && (bytes[2] == b'/' || bytes[2] == b'\\')
+    {
         return true;
     }
     false
@@ -602,18 +622,37 @@ pub const EXTENSION_CTS: &str = ".cts";
 pub const EXTENSION_DCTS: &str = ".d.cts";
 
 pub const SUPPORTED_TS_EXTENSIONS_FLAT: &[&str] = &[
-    EXTENSION_TS, EXTENSION_TSX, EXTENSION_DTS, EXTENSION_CTS, EXTENSION_DCTS, EXTENSION_MTS, EXTENSION_DMTS,
+    EXTENSION_TS,
+    EXTENSION_TSX,
+    EXTENSION_DTS,
+    EXTENSION_CTS,
+    EXTENSION_DCTS,
+    EXTENSION_MTS,
+    EXTENSION_DMTS,
 ];
 
-pub const SUPPORTED_JS_EXTENSIONS_FLAT: &[&str] = &[EXTENSION_JS, EXTENSION_JSX, EXTENSION_MJS, EXTENSION_CJS];
+pub const SUPPORTED_JS_EXTENSIONS_FLAT: &[&str] =
+    &[EXTENSION_JS, EXTENSION_JSX, EXTENSION_MJS, EXTENSION_CJS];
 
-pub const SUPPORTED_TS_IMPLEMENTATION_EXTENSIONS: &[&str] = &[EXTENSION_TS, EXTENSION_TSX, EXTENSION_MTS, EXTENSION_CTS];
+pub const SUPPORTED_TS_IMPLEMENTATION_EXTENSIONS: &[&str] =
+    &[EXTENSION_TS, EXTENSION_TSX, EXTENSION_MTS, EXTENSION_CTS];
 
-pub const SUPPORTED_DECLARATION_EXTENSIONS: &[&str] = &[EXTENSION_DTS, EXTENSION_DCTS, EXTENSION_DMTS];
+pub const SUPPORTED_DECLARATION_EXTENSIONS: &[&str] =
+    &[EXTENSION_DTS, EXTENSION_DCTS, EXTENSION_DMTS];
 
 pub const EXTENSIONS_TO_REMOVE: &[&str] = &[
-    EXTENSION_DTS, EXTENSION_DMTS, EXTENSION_DCTS, EXTENSION_MJS, EXTENSION_MTS, EXTENSION_CJS, EXTENSION_CTS,
-    EXTENSION_TS, EXTENSION_JS, EXTENSION_TSX, EXTENSION_JSX, EXTENSION_JSON,
+    EXTENSION_DTS,
+    EXTENSION_DMTS,
+    EXTENSION_DCTS,
+    EXTENSION_MJS,
+    EXTENSION_MTS,
+    EXTENSION_CJS,
+    EXTENSION_CTS,
+    EXTENSION_TS,
+    EXTENSION_JS,
+    EXTENSION_TSX,
+    EXTENSION_JSX,
+    EXTENSION_JSON,
 ];
 
 /// Whether an extension is a TypeScript extension.
@@ -720,9 +759,7 @@ pub fn get_any_extension_from_path(path: &str, extensions: &[&str], ignore_case:
             } else {
                 format!(".{}", extension)
             };
-            if path.len() >= ext.len()
-                && path.as_bytes()[path.len() - ext.len()] == b'.'
-            {
+            if path.len() >= ext.len() && path.as_bytes()[path.len() - ext.len()] == b'.' {
                 let path_extension = &path[path.len() - ext.len()..];
                 if stringutil::equate_string_case_insensitive(path_extension, &ext)
                     || (!ignore_case && path_extension == ext)
@@ -788,8 +825,10 @@ fn get_path_components_relative_to(
     to: &str,
     options: &ComparePathsOptions,
 ) -> Vec<String> {
-    let from_components = reduce_path_components(&get_path_components(from, &options.current_directory));
-    let to_components = reduce_path_components(&get_path_components(to, &options.current_directory));
+    let from_components =
+        reduce_path_components(&get_path_components(from, &options.current_directory));
+    let to_components =
+        reduce_path_components(&get_path_components(to, &options.current_directory));
 
     let max_common = from_components.len().min(to_components.len());
     let equality = options.equality_comparer();
@@ -833,11 +872,8 @@ pub fn get_relative_path_to_directory_or_url(
     is_absolute_path_an_url: bool,
     options: &ComparePathsOptions,
 ) -> String {
-    let mut path_components = get_path_components_relative_to(
-        directory_path_or_url,
-        relative_or_absolute_path,
-        options,
-    );
+    let mut path_components =
+        get_path_components_relative_to(directory_path_or_url, relative_or_absolute_path, options);
 
     if !path_components.is_empty() {
         let first_component = &path_components[0];
@@ -870,7 +906,8 @@ pub fn get_common_parents(
         return (vec![], std::collections::HashSet::new());
     }
     if paths.len() == 1 {
-        let components = reduce_path_components(&get_path_components(&paths[0], &options.current_directory));
+        let components =
+            reduce_path_components(&get_path_components(&paths[0], &options.current_directory));
         if components.len() < min_components {
             let mut ignored = std::collections::HashSet::new();
             ignored.insert(paths[0].clone());
@@ -882,7 +919,8 @@ pub fn get_common_parents(
     let mut ignored = std::collections::HashSet::new();
     let mut path_components: Vec<Vec<String>> = Vec::new();
     for path in paths {
-        let components = reduce_path_components(&get_path_components(path, &options.current_directory));
+        let components =
+            reduce_path_components(&get_path_components(path, &options.current_directory));
         if components.len() < min_components {
             ignored.insert(path.clone());
         } else {
@@ -920,8 +958,10 @@ fn get_common_parents_worker(
                 if last_common_index < min_components {
                     // Not enough components — fan out by grouping on the divergent component.
                     let mut ordered_groups: Vec<String> = Vec::new();
-                    let mut new_groups: std::collections::HashMap<String, (Vec<String>, Vec<Vec<String>>)> =
-                        std::collections::HashMap::new();
+                    let mut new_groups: std::collections::HashMap<
+                        String,
+                        (Vec<String>, Vec<Vec<String>>),
+                    > = std::collections::HashMap::new();
 
                     for g in component_groups {
                         let key = to_path(
@@ -1120,19 +1160,49 @@ mod tests {
         assert_eq!(get_path_components("c:/path", ""), vec!["c:/", "path"]);
         assert_eq!(get_path_components("//server", ""), vec!["//server"]);
         assert_eq!(get_path_components("//server/", ""), vec!["//server/"]);
-        assert_eq!(get_path_components("//server/share", ""), vec!["//server/", "share"]);
+        assert_eq!(
+            get_path_components("//server/share", ""),
+            vec!["//server/", "share"]
+        );
         assert_eq!(get_path_components("file:///", ""), vec!["file:///"]);
-        assert_eq!(get_path_components("file:///path", ""), vec!["file:///", "path"]);
+        assert_eq!(
+            get_path_components("file:///path", ""),
+            vec!["file:///", "path"]
+        );
         assert_eq!(get_path_components("file:///c:", ""), vec!["file:///c:"]);
-        assert_eq!(get_path_components("file:///c:d", ""), vec!["file:///", "c:d"]);
+        assert_eq!(
+            get_path_components("file:///c:d", ""),
+            vec!["file:///", "c:d"]
+        );
         assert_eq!(get_path_components("file:///c:/", ""), vec!["file:///c:/"]);
-        assert_eq!(get_path_components("file:///c:/path", ""), vec!["file:///c:/", "path"]);
-        assert_eq!(get_path_components("file://server", ""), vec!["file://server"]);
-        assert_eq!(get_path_components("file://server/", ""), vec!["file://server/"]);
-        assert_eq!(get_path_components("file://server/path", ""), vec!["file://server/", "path"]);
-        assert_eq!(get_path_components("http://server", ""), vec!["http://server"]);
-        assert_eq!(get_path_components("http://server/", ""), vec!["http://server/"]);
-        assert_eq!(get_path_components("http://server/path", ""), vec!["http://server/", "path"]);
+        assert_eq!(
+            get_path_components("file:///c:/path", ""),
+            vec!["file:///c:/", "path"]
+        );
+        assert_eq!(
+            get_path_components("file://server", ""),
+            vec!["file://server"]
+        );
+        assert_eq!(
+            get_path_components("file://server/", ""),
+            vec!["file://server/"]
+        );
+        assert_eq!(
+            get_path_components("file://server/path", ""),
+            vec!["file://server/", "path"]
+        );
+        assert_eq!(
+            get_path_components("http://server", ""),
+            vec!["http://server"]
+        );
+        assert_eq!(
+            get_path_components("http://server/", ""),
+            vec!["http://server/"]
+        );
+        assert_eq!(
+            get_path_components("http://server/path", ""),
+            vec!["http://server/", "path"]
+        );
     }
 
     // ── CombinePaths ──
@@ -1140,19 +1210,43 @@ mod tests {
     #[test]
     fn test_combine_paths() {
         // Non-rooted
-        assert_eq!(combine_paths("path", &["to", "file.ext"]), "path/to/file.ext");
-        assert_eq!(combine_paths("path", &["dir", "..", "to", "file.ext"]), "path/dir/../to/file.ext");
+        assert_eq!(
+            combine_paths("path", &["to", "file.ext"]),
+            "path/to/file.ext"
+        );
+        assert_eq!(
+            combine_paths("path", &["dir", "..", "to", "file.ext"]),
+            "path/dir/../to/file.ext"
+        );
         // POSIX
-        assert_eq!(combine_paths("/path", &["to", "file.ext"]), "/path/to/file.ext");
+        assert_eq!(
+            combine_paths("/path", &["to", "file.ext"]),
+            "/path/to/file.ext"
+        );
         assert_eq!(combine_paths("/path", &["/to", "file.ext"]), "/to/file.ext");
         // DOS
-        assert_eq!(combine_paths("c:/path", &["to", "file.ext"]), "c:/path/to/file.ext");
-        assert_eq!(combine_paths("c:/path", &["c:/to", "file.ext"]), "c:/to/file.ext");
+        assert_eq!(
+            combine_paths("c:/path", &["to", "file.ext"]),
+            "c:/path/to/file.ext"
+        );
+        assert_eq!(
+            combine_paths("c:/path", &["c:/to", "file.ext"]),
+            "c:/to/file.ext"
+        );
         // URL
-        assert_eq!(combine_paths("file:///path", &["to", "file.ext"]), "file:///path/to/file.ext");
-        assert_eq!(combine_paths("file:///path", &["file:///to", "file.ext"]), "file:///to/file.ext");
+        assert_eq!(
+            combine_paths("file:///path", &["to", "file.ext"]),
+            "file:///path/to/file.ext"
+        );
+        assert_eq!(
+            combine_paths("file:///path", &["file:///to", "file.ext"]),
+            "file:///to/file.ext"
+        );
 
-        assert_eq!(combine_paths("/", &["/node_modules/@types"]), "/node_modules/@types");
+        assert_eq!(
+            combine_paths("/", &["/node_modules/@types"]),
+            "/node_modules/@types"
+        );
         assert_eq!(combine_paths("/a/..", &[""]), "/a/..");
         assert_eq!(combine_paths("/a/..", &["b"]), "/a/../b");
         assert_eq!(combine_paths("/a/..", &["b/"]), "/a/../b/");
@@ -1265,13 +1359,19 @@ mod tests {
         assert_eq!(get_normalized_absolute_path("/base/../.a", ""), "/.a");
         assert_eq!(get_normalized_absolute_path("/base/./..a", ""), "/base/..a");
         assert_eq!(get_normalized_absolute_path("/base/../..a", ""), "/..a");
-        assert_eq!(get_normalized_absolute_path("/base/./..a/b", ""), "/base/..a/b");
+        assert_eq!(
+            get_normalized_absolute_path("/base/./..a/b", ""),
+            "/base/..a/b"
+        );
         assert_eq!(get_normalized_absolute_path("/base/../..a/b", ""), "/..a/b");
         assert_eq!(get_normalized_absolute_path("/base/./a.", ""), "/base/a.");
         assert_eq!(get_normalized_absolute_path("/base/../a.", ""), "/a.");
         assert_eq!(get_normalized_absolute_path("/base/./a..", ""), "/base/a..");
         assert_eq!(get_normalized_absolute_path("/base/../a..", ""), "/a..");
-        assert_eq!(get_normalized_absolute_path("/base/./a../b", ""), "/base/a../b");
+        assert_eq!(
+            get_normalized_absolute_path("/base/./a../b", ""),
+            "/base/a../b"
+        );
         assert_eq!(get_normalized_absolute_path("/base/../a../b", ""), "/a../b");
 
         // Edge cases
@@ -1296,17 +1396,32 @@ mod tests {
 
     #[test]
     fn test_to_file_name_lower_case() {
-        assert_eq!(to_file_name_lower_case("/user/UserName/projects/Project/file.ts"), "/user/username/projects/project/file.ts");
-        assert_eq!(to_file_name_lower_case("/user/UserName/projects/projectß/file.ts"), "/user/username/projects/projectß/file.ts");
+        assert_eq!(
+            to_file_name_lower_case("/user/UserName/projects/Project/file.ts"),
+            "/user/username/projects/project/file.ts"
+        );
+        assert_eq!(
+            to_file_name_lower_case("/user/UserName/projects/projectß/file.ts"),
+            "/user/username/projects/projectß/file.ts"
+        );
     }
 
     // ── ToPath ──
 
     #[test]
     fn test_to_path() {
-        assert_eq!(to_path("file.ext", "path/to", false).as_str(), "path/to/file.ext");
-        assert_eq!(to_path("file.ext", "/path/to", true).as_str(), "/path/to/file.ext");
-        assert_eq!(to_path("/path/to/../file.ext", "path/to", true).as_str(), "/path/file.ext");
+        assert_eq!(
+            to_path("file.ext", "path/to", false).as_str(),
+            "path/to/file.ext"
+        );
+        assert_eq!(
+            to_path("file.ext", "/path/to", true).as_str(),
+            "/path/to/file.ext"
+        );
+        assert_eq!(
+            to_path("/path/to/../file.ext", "path/to", true).as_str(),
+            "/path/file.ext"
+        );
     }
 
     // ── PathIsRelative ──
@@ -1348,7 +1463,9 @@ mod tests {
 
     #[test]
     fn test_contains_ignored_path() {
-        assert!(contains_ignored_path("/home/user/node_modules/.cache/file.ts"));
+        assert!(contains_ignored_path(
+            "/home/user/node_modules/.cache/file.ts"
+        ));
         assert!(contains_ignored_path("/project/.git/config"));
         assert!(contains_ignored_path("/project/.#file.ts"));
         assert!(!contains_ignored_path("/project/src/file.ts"));
@@ -1460,10 +1577,7 @@ mod tests {
             reduce_path_components(&vec!["".to_string(), "..".to_string(), "a".to_string()]),
             vec!["", "..", "a"]
         );
-        assert_eq!(
-            reduce_path_components(&vec!["/".to_string()]),
-            vec!["/"]
-        );
+        assert_eq!(reduce_path_components(&vec!["/".to_string()]), vec!["/"]);
         assert_eq!(
             reduce_path_components(&vec!["/".to_string(), ".".to_string()]),
             vec!["/"]
@@ -1473,11 +1587,7 @@ mod tests {
             vec!["/"]
         );
         assert_eq!(
-            reduce_path_components(&vec![
-                "/".to_string(),
-                "a".to_string(),
-                "..".to_string()
-            ]),
+            reduce_path_components(&vec!["/".to_string(), "a".to_string(), "..".to_string()]),
             vec!["/"]
         );
     }

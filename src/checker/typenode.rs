@@ -30,11 +30,17 @@ impl Checker {
         match node.kind {
             SyntaxKind::AnyKeyword | SyntaxKind::JSDocAllType => self.any_type(),
             SyntaxKind::JSDocNonNullableType => {
-                let inner = node.type_node().expect("JSDocNonNullableType has type").clone();
+                let inner = node
+                    .type_node()
+                    .expect("JSDocNonNullableType has type")
+                    .clone();
                 self.get_type_from_type_node(&inner)
             }
             SyntaxKind::JSDocNullableType => {
-                let inner = node.type_node().expect("JSDocNullableType has type").clone();
+                let inner = node
+                    .type_node()
+                    .expect("JSDocNullableType has type")
+                    .clone();
                 let t = self.get_type_from_type_node(&inner);
                 if self.strict_null_checks {
                     self.get_nullable_type(&t, TypeFlags::Null)
@@ -43,12 +49,18 @@ impl Checker {
                 }
             }
             SyntaxKind::JSDocVariadicType => {
-                let inner = node.type_node().expect("JSDocVariadicType has type").clone();
+                let inner = node
+                    .type_node()
+                    .expect("JSDocVariadicType has type")
+                    .clone();
                 let elem_type = self.get_type_from_type_node(&inner);
                 self.create_array_type(elem_type)
             }
             SyntaxKind::JSDocOptionalType => {
-                let inner = node.type_node().expect("JSDocOptionalType has type").clone();
+                let inner = node
+                    .type_node()
+                    .expect("JSDocOptionalType has type")
+                    .clone();
                 let t = self.get_type_from_type_node(&inner);
                 self.add_optionality(&t)
             }
@@ -87,7 +99,10 @@ impl Checker {
             SyntaxKind::IntersectionType => self.get_type_from_intersection_type_node(node),
             SyntaxKind::NamedTupleMember => self.get_type_from_named_tuple_type_node(node),
             SyntaxKind::ParenthesizedType => {
-                let inner = node.type_node().expect("ParenthesizedType has type").clone();
+                let inner = node
+                    .type_node()
+                    .expect("ParenthesizedType has type")
+                    .clone();
                 self.get_type_from_type_node(&inner)
             }
             SyntaxKind::RestType => self.get_type_from_rest_type_node(node),
@@ -115,7 +130,9 @@ impl Checker {
 
     /// Check if a type node has already been resolved.
     fn get_cached_type(&self, node: &Arc<Node>) -> Option<Arc<Type>> {
-        self.type_node_links.get(node).and_then(|l| l.resolved_type.clone())
+        self.type_node_links
+            .get(node)
+            .and_then(|l| l.resolved_type.clone())
     }
 
     /// Store a resolved type for a type node.
@@ -154,9 +171,7 @@ impl Checker {
 
     fn literal_type_from_literal_node(&mut self, literal: &Arc<Node>) -> Arc<Type> {
         match literal.kind {
-            SyntaxKind::StringLiteral => {
-                self.get_string_literal_type(literal.text())
-            }
+            SyntaxKind::StringLiteral => self.get_string_literal_type(literal.text()),
             SyntaxKind::NumericLiteral => {
                 if let Ok(n) = literal.text().parse::<f64>() {
                     self.get_number_literal_type(crate::jsnum::Number::from(n))
@@ -182,7 +197,8 @@ impl Checker {
                         regular_type: std::sync::OnceLock::new(),
                     }),
                 ));
-                self.bigint_literal_types.insert(text.to_string(), Arc::clone(&t));
+                self.bigint_literal_types
+                    .insert(text.to_string(), Arc::clone(&t));
                 t
             }
             SyntaxKind::TrueKeyword => self.true_type(),
@@ -306,9 +322,7 @@ impl Checker {
                         self.error_type()
                     }
                 }
-                SyntaxKind::ReadonlyKeyword => {
-                    self.get_type_from_type_node(&data.type_node)
-                }
+                SyntaxKind::ReadonlyKeyword => self.get_type_from_type_node(&data.type_node),
                 _ => self.error_type(),
             },
             _ => self.error_type(),

@@ -12,8 +12,7 @@ pub fn is_white_space_like(ch: char) -> bool {
 pub fn is_white_space_single_line(ch: char) -> bool {
     matches!(
         ch,
-        ' '
-            | '\t'
+        ' ' | '\t'
             | '\u{000B}'
             | '\u{000C}'
             | '\u{0085}'

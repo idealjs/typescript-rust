@@ -159,7 +159,10 @@ impl FS for BundledFS {
 /// (`lib.d.ts`) if it exists in the embedded set.
 fn bundled_lib_name(rest: &str) -> Option<&'static str> {
     let name = rest.strip_prefix("libs/").unwrap_or(rest);
-    bundled_libs().iter().find(|(n, _)| *n == name).map(|(n, _)| *n)
+    bundled_libs()
+        .iter()
+        .find(|(n, _)| *n == name)
+        .map(|(n, _)| *n)
 }
 
 #[cfg(test)]

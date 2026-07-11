@@ -64,9 +64,7 @@ impl PositionMap {
             return utf8_offset;
         }
         // Binary search: find the last entry where utf8_pos <= utf8_offset.
-        let lo = self
-            .entries
-            .partition_point(|e| e.utf8_pos <= utf8_offset);
+        let lo = self.entries.partition_point(|e| e.utf8_pos <= utf8_offset);
         if lo == 0 {
             return utf8_offset;
         }
@@ -130,7 +128,11 @@ mod tests {
 
         // Reverse: UTF-16 offset 22 should map to UTF-8 byte 23
         let x_utf16 = x_utf8 - 1;
-        assert_eq!(pm.utf16_to_utf8(x_utf16), x_utf8, "reverse at x: UTF16ToUTF8");
+        assert_eq!(
+            pm.utf16_to_utf8(x_utf16),
+            x_utf8,
+            "reverse at x: UTF16ToUTF8"
+        );
     }
 
     #[test]
@@ -148,7 +150,11 @@ mod tests {
         let b_utf8 = text.rfind('b').unwrap();
         let b_utf16 = b_utf8 - 2; // delta of 2 from emoji
         assert_eq!(pm.utf8_to_utf16(b_utf8), b_utf16, "at b: UTF8ToUTF16");
-        assert_eq!(pm.utf16_to_utf8(b_utf16), b_utf8, "reverse at b: UTF16ToUTF8");
+        assert_eq!(
+            pm.utf16_to_utf8(b_utf16),
+            b_utf8,
+            "reverse at b: UTF16ToUTF8"
+        );
     }
 
     #[test]
@@ -164,9 +170,9 @@ mod tests {
         // x: UTF-8 [6,7), UTF-16 [3,4)
         let tests = [
             (0usize, 0usize),
-            (2, 1),  // start of 🎉
-            (6, 3),  // x
-            (7, 4),  // end
+            (2, 1), // start of 🎉
+            (6, 3), // x
+            (7, 4), // end
         ];
         for &(utf8, utf16) in &tests {
             assert_eq!(pm.utf8_to_utf16(utf8), utf16, "UTF8ToUTF16({})", utf8);
@@ -184,7 +190,11 @@ mod tests {
         for i in 0..=utf16_len {
             let utf8_pos = pm.utf16_to_utf8(i);
             let back = pm.utf8_to_utf16(utf8_pos);
-            assert_eq!(back, i, "roundtrip UTF16->UTF8->UTF16: {} -> {} -> {}", i, utf8_pos, back);
+            assert_eq!(
+                back, i,
+                "roundtrip UTF16->UTF8->UTF16: {} -> {} -> {}",
+                i, utf8_pos, back
+            );
         }
     }
 
@@ -204,6 +214,10 @@ mod tests {
         let one_utf8 = text.rfind('1').unwrap();
         let one_utf16 = one_utf8 - 2;
         assert_eq!(pm.utf8_to_utf16(one_utf8), one_utf16, "at 1: UTF8ToUTF16");
-        assert_eq!(pm.utf16_to_utf8(one_utf16), one_utf8, "reverse at 1: UTF16ToUTF8");
+        assert_eq!(
+            pm.utf16_to_utf8(one_utf16),
+            one_utf8,
+            "reverse at 1: UTF16ToUTF8"
+        );
     }
 }

@@ -25,11 +25,7 @@ impl<T: Clone + Default> Expected<T> {
     }
 
     pub fn get_value(&self) -> Option<&T> {
-        if self.valid {
-            Some(&self.value)
-        } else {
-            None
-        }
+        if self.valid { Some(&self.value) } else { None }
     }
 
     pub fn actual_json_type(&self) -> &str {
@@ -291,10 +287,21 @@ pub struct DependencyFields {
 
 impl DependencyFields {
     pub fn has_dependency(&self, name: &str) -> bool {
-        self.dependencies.get_value().map_or(false, |d| d.contains_key(name))
-            || self.dev_dependencies.get_value().map_or(false, |d| d.contains_key(name))
-            || self.peer_dependencies.get_value().map_or(false, |d| d.contains_key(name))
-            || self.optional_dependencies.get_value().map_or(false, |d| d.contains_key(name))
+        self.dependencies
+            .get_value()
+            .map_or(false, |d| d.contains_key(name))
+            || self
+                .dev_dependencies
+                .get_value()
+                .map_or(false, |d| d.contains_key(name))
+            || self
+                .peer_dependencies
+                .get_value()
+                .map_or(false, |d| d.contains_key(name))
+            || self
+                .optional_dependencies
+                .get_value()
+                .map_or(false, |d| d.contains_key(name))
     }
 
     pub fn for_each_dependency<F: FnMut(&str, &str, &str) -> bool>(&self, mut f: F) {
@@ -354,9 +361,9 @@ pub struct Fields {
 /// Parse a package.json JSON string.
 pub fn parse(data: &str) -> Result<Fields, serde_json::Error> {
     let value: serde_json::Value = serde_json::from_str(data)?;
-    let obj = value.as_object().ok_or_else(|| {
-        serde::de::Error::custom("package.json must be a JSON object")
-    })?;
+    let obj = value
+        .as_object()
+        .ok_or_else(|| serde::de::Error::custom("package.json must be a JSON object"))?;
 
     let mut fields = Fields::default();
 
@@ -496,11 +503,26 @@ mod tests {
             "types": "./index.d.ts"
         }"#;
         let fields = parse(json).unwrap();
-        assert_eq!(fields.header_fields.name.get_value(), Some(&"my-package".to_string()));
-        assert_eq!(fields.header_fields.version.get_value(), Some(&"1.0.0".to_string()));
-        assert_eq!(fields.header_fields.r#type.get_value(), Some(&"module".to_string()));
-        assert_eq!(fields.path_fields.main.get_value(), Some(&"./index.js".to_string()));
-        assert_eq!(fields.path_fields.types.get_value(), Some(&"./index.d.ts".to_string()));
+        assert_eq!(
+            fields.header_fields.name.get_value(),
+            Some(&"my-package".to_string())
+        );
+        assert_eq!(
+            fields.header_fields.version.get_value(),
+            Some(&"1.0.0".to_string())
+        );
+        assert_eq!(
+            fields.header_fields.r#type.get_value(),
+            Some(&"module".to_string())
+        );
+        assert_eq!(
+            fields.path_fields.main.get_value(),
+            Some(&"./index.js".to_string())
+        );
+        assert_eq!(
+            fields.path_fields.types.get_value(),
+            Some(&"./index.d.ts".to_string())
+        );
     }
 
     #[test]
@@ -542,7 +564,10 @@ mod tests {
             }
         }"#;
         let fields = parse(json).unwrap();
-        assert_eq!(fields.path_fields.exports.compute_object_kind(), ObjectKind::Subpaths);
+        assert_eq!(
+            fields.path_fields.exports.compute_object_kind(),
+            ObjectKind::Subpaths
+        );
     }
 
     #[test]
@@ -555,6 +580,9 @@ mod tests {
             }
         }"#;
         let fields = parse(json).unwrap();
-        assert_eq!(fields.path_fields.exports.compute_object_kind(), ObjectKind::Conditions);
+        assert_eq!(
+            fields.path_fields.exports.compute_object_kind(),
+            ObjectKind::Conditions
+        );
     }
 }

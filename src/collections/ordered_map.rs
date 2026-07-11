@@ -96,7 +96,9 @@ impl<K: Eq + Hash + Clone, V> OrderedMap<K, V> {
 
     /// Iterate over `(key, value)` pairs in insertion order.
     pub fn iter(&self) -> impl Iterator<Item = (&K, &V)> {
-        self.keys.iter().filter_map(move |k| self.map.get(k).map(|v| (k, v)))
+        self.keys
+            .iter()
+            .filter_map(move |k| self.map.get(k).map(|v| (k, v)))
     }
 
     /// Number of entries.

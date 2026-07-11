@@ -9,11 +9,10 @@
 //! because our `Node` struct is immutable (`Arc<Node>`).
 
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use super::node::Node;
-use super::node_flags::ModifierFlags;
 
 // ────────────────────────────────────────────────────────────────────────────
 // SymbolFlags
@@ -82,10 +81,14 @@ impl SymbolFlags {
         .union(Self::TypeLiteral)
         .union(Self::TypeParameter)
         .union(Self::TypeAlias);
-    pub const NAMESPACE: Self = Self::ValueModule.union(Self::NamespaceModule).union(Self::ENUM);
+    pub const NAMESPACE: Self = Self::ValueModule
+        .union(Self::NamespaceModule)
+        .union(Self::ENUM);
     pub const MODULE: Self = Self::ValueModule.union(Self::NamespaceModule);
     pub const ACCESSOR: Self = Self::GetAccessor.union(Self::SetAccessor);
-    pub const BLOCK_SCOPED: Self = Self::BlockScopedVariable.union(Self::Class).union(Self::ENUM);
+    pub const BLOCK_SCOPED: Self = Self::BlockScopedVariable
+        .union(Self::Class)
+        .union(Self::ENUM);
     pub const PROPERTY_OR_ACCESSOR: Self = Self::Property.union(Self::ACCESSOR);
     pub const CLASS_MEMBER: Self = Self::Method.union(Self::ACCESSOR).union(Self::Property);
     pub const MODULE_MEMBER: Self = Self::VARIABLE
@@ -96,7 +99,10 @@ impl SymbolFlags {
         .union(Self::MODULE)
         .union(Self::TypeAlias)
         .union(Self::Alias);
-    pub const EXPORT_HAS_LOCAL: Self = Self::Function.union(Self::Class).union(Self::ENUM).union(Self::ValueModule);
+    pub const EXPORT_HAS_LOCAL: Self = Self::Function
+        .union(Self::Class)
+        .union(Self::ENUM)
+        .union(Self::ValueModule);
 }
 
 // ────────────────────────────────────────────────────────────────────────────

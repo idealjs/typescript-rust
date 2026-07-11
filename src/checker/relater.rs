@@ -207,9 +207,7 @@ impl Checker {
             (TypeData::Intrinsic(s), TypeData::Intrinsic(t)) => {
                 s.intrinsic_name == t.intrinsic_name
             }
-            (TypeData::Literal(s), TypeData::Literal(t)) => {
-                s.value == t.value
-            }
+            (TypeData::Literal(s), TypeData::Literal(t)) => s.value == t.value,
             (TypeData::TypeParameter(s), TypeData::TypeParameter(t)) => {
                 s.is_this_type == t.is_this_type
             }

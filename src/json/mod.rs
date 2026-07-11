@@ -5,14 +5,17 @@
 //! providing helper functions that mirror the Go API surface.
 
 pub use serde_json::{
-    from_slice, from_str, to_string, to_string_pretty, to_value, to_vec, to_vec_pretty,
-    Map, Value, Deserializer, Serializer,
+    Deserializer, Map, Serializer, Value, from_slice, from_str, to_string, to_string_pretty,
+    to_value, to_vec, to_vec_pretty,
 };
 
 use std::io::Write;
 
 /// Serialize a value to a JSON string with indentation.
-pub fn marshal_indent<T: serde::Serialize>(value: &T, indent: &str) -> Result<String, serde_json::Error> {
+pub fn marshal_indent<T: serde::Serialize>(
+    value: &T,
+    indent: &str,
+) -> Result<String, serde_json::Error> {
     if indent.is_empty() {
         return marshal(value);
     }
@@ -33,12 +36,17 @@ pub fn unmarshal<'de, T: serde::Deserialize<'de>>(data: &'de str) -> Result<T, s
 }
 
 /// Deserialize a JSON byte slice into a value.
-pub fn unmarshal_slice<'de, T: serde::Deserialize<'de>>(data: &'de [u8]) -> Result<T, serde_json::Error> {
+pub fn unmarshal_slice<'de, T: serde::Deserialize<'de>>(
+    data: &'de [u8],
+) -> Result<T, serde_json::Error> {
     serde_json::from_slice(data)
 }
 
 /// Serialize a value and write it to a writer.
-pub fn marshal_write<W: Write, T: serde::Serialize>(writer: &mut W, value: &T) -> Result<(), serde_json::Error> {
+pub fn marshal_write<W: Write, T: serde::Serialize>(
+    writer: &mut W,
+    value: &T,
+) -> Result<(), serde_json::Error> {
     serde_json::to_writer(writer, value)
 }
 
@@ -52,9 +60,9 @@ pub fn marshal_indent_write<W: Write, T: serde::Serialize>(
         return marshal_write(writer, value);
     }
     let s = marshal_indent(value, indent)?;
-    writer.write_all(s.as_bytes()).map_err(|e| {
-        serde_json::Error::io(e)
-    })
+    writer
+        .write_all(s.as_bytes())
+        .map_err(|e| serde_json::Error::io(e))
 }
 
 /// Re-indent pretty-printed JSON, replacing 2-space indentation with the given indent string.
@@ -80,7 +88,7 @@ fn reindent(s: &str, indent: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde::{Serialize, Deserialize};
+    use serde::{Deserialize, Serialize};
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     struct Point {

@@ -14,7 +14,6 @@ use std::sync::Arc;
 use crate::ast::node_data_generated::NodeData;
 use crate::ast::{Node, SourceFile};
 use crate::core::compiler_options::CompilerOptions;
-use crate::core::tristate::Tristate;
 use crate::tspath;
 use crate::vfs::FS;
 
@@ -84,7 +83,7 @@ pub fn emit_source_file(
 /// Compute the output `.js` file path for a source file.
 ///
 /// Mirrors a simplified version of `outputpaths.GetOutputPathsFor` / `getOwnEmitOutputFilePath`.
-fn get_js_output_path(source_file: &SourceFile, options: &CompilerOptions, fs: &dyn FS) -> String {
+fn get_js_output_path(source_file: &SourceFile, options: &CompilerOptions, _fs: &dyn FS) -> String {
     let file_name = &source_file.file_name;
     let extension = get_output_extension(file_name);
 
@@ -93,13 +92,16 @@ fn get_js_output_path(source_file: &SourceFile, options: &CompilerOptions, fs: &
         // For simplicity, use the source file's directory relative to the
         // common source directory (or current directory).
         let abs = tspath::get_normalized_absolute_path(file_name, "");
-        let dir = tspath::get_directory_path(&abs);
+        let _dir = tspath::get_directory_path(&abs);
         let base = tspath::get_base_file_name(file_name);
         let base_without_ext = tspath::remove_file_extension(&base);
         // Simple approach: strip the common prefix between source dir and outDir
         // For now, just put the file in outDir with the base name.
         // A more correct implementation would compute commonSourceDirectory.
-        tspath::combine_paths(&options.out_dir, &[&format!("{base_without_ext}{extension}")])
+        tspath::combine_paths(
+            &options.out_dir,
+            &[&format!("{base_without_ext}{extension}")],
+        )
     } else {
         // Output alongside source file.
         let without_ext = tspath::remove_file_extension(file_name);
@@ -398,9 +400,6 @@ fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) 
             collect_type_cuts(&d.statement, source, cuts);
             collect_type_cuts(&d.expression, source, cuts);
         }
-        NodeData::VariableStatement(_) => {
-            // Already handled above.
-        }
         // For nodes we don't specifically handle, recurse into children
         // to find type annotations in nested expressions.
         _ => {
@@ -434,11 +433,13 @@ pub fn emit_program(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::tristate::Tristate;
     use crate::parser::Parser;
     use crate::vfs::InMemoryFS;
 
     fn parse(source: &str) -> SourceFile {
-        let (file, _diags) = Parser::parse_source_file_text_with_diagnostics("/test.ts", source.to_string());
+        let (file, _diags) =
+            Parser::parse_source_file_text_with_diagnostics("/test.ts", source.to_string());
         file
     }
 
@@ -519,7 +520,9 @@ mod tests {
 
     #[test]
     fn emit_preserves_class() {
-        let js = emit_to_string("class Foo { x: number = 1; method(a: string): void { this.x = a.length; } }");
+        let js = emit_to_string(
+            "class Foo { x: number = 1; method(a: string): void { this.x = a.length; } }",
+        );
         assert!(js.contains("class Foo"));
         assert!(js.contains("x = 1"));
         assert!(js.contains("method(a)"));
@@ -654,7 +657,10 @@ mod tests {
         let options = CompilerOptions::default();
         let fs = InMemoryFS::new();
         let result = emit_program(&source_files, &options, &fs, &|_path, _data| {
-            Err(std::io::Error::new(std::io::ErrorKind::PermissionDenied, "denied"))
+            Err(std::io::Error::new(
+                std::io::ErrorKind::PermissionDenied,
+                "denied",
+            ))
         });
 
         assert!(result.emitted_files.is_empty());
@@ -690,9 +696,7 @@ mod tests {
 
         let mut options = CompilerOptions::default();
         options.no_emit_for_js_files = Tristate::True;
-        let result = emit_source_file(&sf, &options, &fs, &|path, data| {
-            fs.write_file(path, data)
-        });
+        let result = emit_source_file(&sf, &options, &fs, &|path, data| fs.write_file(path, data));
 
         assert!(result.emitted_files.is_empty());
         assert!(!fs.file_exists("/test.js"));
@@ -707,9 +711,7 @@ mod tests {
         sf.script_kind = crate::ast::ScriptKind::Js;
 
         let options = CompilerOptions::default();
-        let result = emit_source_file(&sf, &options, &fs, &|path, data| {
-            fs.write_file(path, data)
-        });
+        let result = emit_source_file(&sf, &options, &fs, &|path, data| fs.write_file(path, data));
 
         assert_eq!(result.emitted_files, vec!["/test.js".to_string()]);
     }

@@ -339,15 +339,13 @@ impl CompilerOptions {
         match self.module_resolution {
             ModuleResolutionKind::Unknown
             | ModuleResolutionKind::Classic
-            | ModuleResolutionKind::Node10 => {
-                match self.get_emit_module_kind() {
-                    ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 => {
-                        ModuleResolutionKind::Node16
-                    }
-                    ModuleKind::NodeNext => ModuleResolutionKind::NodeNext,
-                    _ => ModuleResolutionKind::Bundler,
+            | ModuleResolutionKind::Node10 => match self.get_emit_module_kind() {
+                ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 => {
+                    ModuleResolutionKind::Node16
                 }
-            }
+                ModuleKind::NodeNext => ModuleResolutionKind::NodeNext,
+                _ => ModuleResolutionKind::Bundler,
+            },
             other => other,
         }
     }
@@ -404,7 +402,10 @@ impl CompilerOptions {
     }
 
     pub fn get_jsx_transform_enabled(&self) -> bool {
-        matches!(self.jsx, JsxEmit::React | JsxEmit::ReactJSX | JsxEmit::ReactJSXDev)
+        matches!(
+            self.jsx,
+            JsxEmit::React | JsxEmit::ReactJSX | JsxEmit::ReactJSXDev
+        )
     }
 
     pub fn get_strict_option_value(&self, value: Tristate) -> bool {
@@ -444,7 +445,10 @@ impl CompilerOptions {
     }
 
     pub fn has_json_module_emit_enabled(&self) -> bool {
-        !matches!(self.get_emit_module_kind(), ModuleKind::System | ModuleKind::UMD)
+        !matches!(
+            self.get_emit_module_kind(),
+            ModuleKind::System | ModuleKind::UMD
+        )
     }
 
     pub fn uses_wildcard_types(&self) -> bool {
@@ -461,7 +465,10 @@ mod tests {
         let opts = CompilerOptions::default();
         assert_eq!(opts.get_emit_script_target(), ScriptTarget::LATEST_STANDARD);
         assert_eq!(opts.get_emit_module_kind(), ModuleKind::ES2022);
-        assert_eq!(opts.get_module_resolution_kind(), ModuleResolutionKind::Bundler);
+        assert_eq!(
+            opts.get_module_resolution_kind(),
+            ModuleResolutionKind::Bundler
+        );
     }
 
     #[test]
@@ -475,7 +482,10 @@ mod tests {
     fn node_next_resolution() {
         let mut opts = CompilerOptions::default();
         opts.module = ModuleKind::NodeNext;
-        assert_eq!(opts.get_module_resolution_kind(), ModuleResolutionKind::NodeNext);
+        assert_eq!(
+            opts.get_module_resolution_kind(),
+            ModuleResolutionKind::NodeNext
+        );
     }
 
     #[test]

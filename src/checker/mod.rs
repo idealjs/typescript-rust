@@ -21,8 +21,8 @@ pub mod checker;
 pub mod mapper;
 pub mod relater;
 pub mod tracer;
-pub mod types;
 pub mod typenode;
+pub mod types;
 pub mod utilities;
 
 pub use checker::*;

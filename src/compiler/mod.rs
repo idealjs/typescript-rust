@@ -8,13 +8,13 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::ast::diagnostic::Diagnostic;
 use crate::ast::SourceFile;
+use crate::ast::diagnostic::Diagnostic;
 use crate::binder::Binder;
 use crate::core::compiler_options::CompilerOptions;
 use crate::core::text::TextRange;
 use crate::diagnostics::Category;
-use crate::parser::{script_kind_from_file_name, Parser};
+use crate::parser::{Parser, script_kind_from_file_name};
 use crate::tspath;
 use crate::vfs::FS;
 
@@ -101,11 +101,15 @@ impl Program {
 
         let mut source_files: Vec<Arc<SourceFile>> = Vec::new();
         let mut by_name: HashMap<String, Arc<SourceFile>> = HashMap::new();
-        let mut default_lib_names: std::collections::HashSet<String> = std::collections::HashSet::new();
+        let mut default_lib_names: std::collections::HashSet<String> =
+            std::collections::HashSet::new();
         let mut diagnostics: Vec<Arc<Diagnostic>> = Vec::new();
 
         // 1. Load default library files (unless --noLib).
-        if !options.no_lib.is_true() {
+        // Go's program construction only loads default libs when there is at
+        // least one root file. Solution configs such as `files: []` should not
+        // parse libs by themselves.
+        if !opts.config.file_names.is_empty() && !options.no_lib.is_true() {
             let lib_names = default_lib_file_names(&options);
             let mut visited: std::collections::HashSet<String> = std::collections::HashSet::new();
             for lib_name in &lib_names {
@@ -294,7 +298,10 @@ fn load_source_file_with_references(
     };
 
     for pd in &parse_diags {
-        diagnostics.push(Arc::new(parser_diagnostic_to_diagnostic(Arc::clone(&file), pd)));
+        diagnostics.push(Arc::new(parser_diagnostic_to_diagnostic(
+            Arc::clone(&file),
+            pd,
+        )));
     }
 
     // Mark as loaded before recursing to break cycles.
@@ -389,7 +396,10 @@ fn load_lib_recursive(
     let (file, parse_diags) = Parser::parse_source_file_text_with_diagnostics(&path, text);
     let file = Arc::new(file);
     for pd in &parse_diags {
-        diagnostics.push(Arc::new(parser_diagnostic_to_diagnostic(Arc::clone(&file), pd)));
+        diagnostics.push(Arc::new(parser_diagnostic_to_diagnostic(
+            Arc::clone(&file),
+            pd,
+        )));
     }
     default_lib_names.insert(path.clone());
     by_name.insert(path.clone(), Arc::clone(&file));
@@ -484,7 +494,7 @@ fn _ensure_script_kind(file_name: &str) -> crate::ast::ScriptKind {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::bundled::{lib_path, BundledFS};
+    use crate::bundled::{BundledFS, lib_path};
     use crate::core::compiler_options::CompilerOptions;
     use crate::core::tristate::Tristate;
     use crate::tsoptions::parse_command_line;
@@ -497,36 +507,64 @@ mod tests {
         fs.insert_file("/proj/a.ts", "let x = 1;");
         fs.insert_file("/proj/b.ts", "let y = ;");
 
-        let args: Vec<String> = vec!["--noLib".to_string(), "/proj/a.ts".to_string(), "/proj/b.ts".to_string()];
+        let args: Vec<String> = vec![
+            "--noLib".to_string(),
+            "/proj/a.ts".to_string(),
+            "/proj/b.ts".to_string(),
+        ];
         let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
-        let host = Arc::new(CompilerHostImpl::new(
-            fs,
-            "/proj".to_string(),
-            lib_path(),
-        ));
-        let program = Program::new(ProgramOptions { config: parsed, host });
+        let host = Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
+        let program = Program::new(ProgramOptions {
+            config: parsed,
+            host,
+        });
         assert_eq!(program.source_files().len(), 2);
         // b.ts has a parse error.
-        assert!(program
-            .diagnostics()
-            .iter()
-            .any(|d| d.category == Category::Error));
+        assert!(
+            program
+                .diagnostics()
+                .iter()
+                .any(|d| d.category == Category::Error)
+        );
     }
 
     #[test]
-    fn program_loads_bundled_libs() {
+    fn program_does_not_load_bundled_libs_without_root_files() {
         // Use the bundled lib files via BundledFS over OsFS.
         let fs = Arc::new(BundledFS::new(Arc::new(OsFS)));
         let args: Vec<String> = vec![];
         let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
-        let host = Arc::new(CompilerHostImpl::new(
-            fs,
-            "/proj".to_string(),
-            lib_path(),
-        ));
-        let program = Program::new(ProgramOptions { config: parsed, host });
-        // lib.d.ts is the default lib; it should have loaded at least one lib file.
-        assert!(!program.source_files().is_empty());
+        let host = Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
+        let program = Program::new(ProgramOptions {
+            config: parsed,
+            host,
+        });
+        assert!(program.source_files().is_empty());
+    }
+
+    #[test]
+    fn program_loads_bundled_libs_with_root_files() {
+        // Use the bundled lib files via BundledFS over OsFS.
+        let inner = Arc::new(InMemoryFS::new());
+        inner.insert_dir("/proj");
+        inner.insert_file("/proj/a.ts", "let x = 1;");
+        let fs = Arc::new(BundledFS::new(inner));
+        let args: Vec<String> = vec!["/proj/a.ts".to_string()];
+        let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
+        let host = Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
+        let program = Program::new(ProgramOptions {
+            config: parsed,
+            host,
+        });
+        // lib.d.ts is the default lib; it should have loaded the root file plus
+        // at least one referenced lib file.
+        assert!(program.source_files().len() > 1);
+        assert!(
+            program
+                .source_files()
+                .iter()
+                .any(|file| file.file_name == "/proj/a.ts")
+        );
     }
 
     #[test]
@@ -552,7 +590,10 @@ mod tests {
         // Build a chain: index.ts → 5.ts → 4.ts → 3.ts → 2.ts → 1.ts
         //                index.ts → 10.ts → 9.ts → 8.ts → 7.ts → 6.ts
         let files = [
-            ("/dev/src/index.ts", "/// <reference path='/dev/src2/a/5.ts' />\n/// <reference path='/dev/src2/a/10.ts' />"),
+            (
+                "/dev/src/index.ts",
+                "/// <reference path='/dev/src2/a/5.ts' />\n/// <reference path='/dev/src2/a/10.ts' />",
+            ),
             ("/dev/src2/a/5.ts", "/// <reference path='4.ts' />"),
             ("/dev/src2/a/4.ts", "/// <reference path='b/3.ts' />"),
             ("/dev/src2/a/b/3.ts", "/// <reference path='2.ts' />"),
@@ -561,7 +602,10 @@ mod tests {
             ("/dev/src2/a/10.ts", "/// <reference path='b/c/d/9.ts' />"),
             ("/dev/src2/a/b/c/d/9.ts", "/// <reference path='e/8.ts' />"),
             ("/dev/src2/a/b/c/d/e/8.ts", "/// <reference path='7.ts' />"),
-            ("/dev/src2/a/b/c/d/e/7.ts", "/// <reference path='f/6.ts' />"),
+            (
+                "/dev/src2/a/b/c/d/e/7.ts",
+                "/// <reference path='f/6.ts' />",
+            ),
             ("/dev/src2/a/b/c/d/e/f/6.ts", "console.log('world!');"),
         ];
         for (name, content) in &files {
@@ -581,6 +625,9 @@ mod tests {
             include: vec![],
             exclude: vec![],
             files_spec: vec![],
+            has_include_spec: false,
+            has_exclude_spec: false,
+            has_files_spec: false,
             watch: false,
         };
         let host = Arc::new(CompilerHostImpl::new(
@@ -588,7 +635,10 @@ mod tests {
             "/dev/src".to_string(),
             lib_path(),
         ));
-        let program = Program::new(ProgramOptions { config: parsed, host });
+        let program = Program::new(ProgramOptions {
+            config: parsed,
+            host,
+        });
 
         let actual: Vec<&str> = program
             .source_files()
@@ -642,14 +692,16 @@ mod tests {
             include: vec![],
             exclude: vec![],
             files_spec: vec![],
+            has_include_spec: false,
+            has_exclude_spec: false,
+            has_files_spec: false,
             watch: false,
         };
-        let host = Arc::new(CompilerHostImpl::new(
-            fs,
-            "/".to_string(),
-            lib_path(),
-        ));
-        let program = Program::new(ProgramOptions { config: parsed, host });
+        let host = Arc::new(CompilerHostImpl::new(fs, "/".to_string(), lib_path()));
+        let program = Program::new(ProgramOptions {
+            config: parsed,
+            host,
+        });
 
         // The program should not panic when computing diagnostics.
         // /src/MyFile.ts does not exist on the case-sensitive FS, so we expect

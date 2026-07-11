@@ -66,12 +66,10 @@ pub fn new_array_to_single_type_mapper(sources: Vec<Arc<Type>>, target: Arc<Type
 }
 
 /// Create a mapper from a function.
-pub fn new_function_type_mapper(map_fn: impl Fn(&Type) -> Arc<Type> + Send + Sync + 'static) -> TypeMapper {
-    TypeMapper::new(
-        Arc::new(map_fn),
-        TypeMapperKind::Unknown,
-        false,
-    )
+pub fn new_function_type_mapper(
+    map_fn: impl Fn(&Type) -> Arc<Type> + Send + Sync + 'static,
+) -> TypeMapper {
+    TypeMapper::new(Arc::new(map_fn), TypeMapperKind::Unknown, false)
 }
 
 /// Merge two mappers (apply m1 first, then m2).
@@ -136,8 +134,8 @@ fn is_this_type_parameter(t: &Type) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::types::*;
+    use super::*;
     use std::sync::OnceLock;
 
     #[test]
@@ -192,14 +190,20 @@ mod tests {
     #[test]
     fn merge_mappers() {
         let m1 = new_function_type_mapper(|t: &Type| {
-            Arc::new(Type::new(t.flags, TypeData::Intrinsic(IntrinsicTypeData {
-                intrinsic_name: "m1".to_string(),
-            })))
+            Arc::new(Type::new(
+                t.flags,
+                TypeData::Intrinsic(IntrinsicTypeData {
+                    intrinsic_name: "m1".to_string(),
+                }),
+            ))
         });
         let m2 = new_function_type_mapper(|t: &Type| {
-            Arc::new(Type::new(t.flags, TypeData::Intrinsic(IntrinsicTypeData {
-                intrinsic_name: "m2".to_string(),
-            })))
+            Arc::new(Type::new(
+                t.flags,
+                TypeData::Intrinsic(IntrinsicTypeData {
+                    intrinsic_name: "m2".to_string(),
+                }),
+            ))
         });
 
         let merged = merge_type_mappers(Some(&m1), Some(&m2));
@@ -210,9 +214,12 @@ mod tests {
     #[test]
     fn merge_with_none() {
         let m1 = new_function_type_mapper(|t: &Type| {
-            Arc::new(Type::new(t.flags, TypeData::Intrinsic(IntrinsicTypeData {
-                intrinsic_name: "m1".to_string(),
-            })))
+            Arc::new(Type::new(
+                t.flags,
+                TypeData::Intrinsic(IntrinsicTypeData {
+                    intrinsic_name: "m1".to_string(),
+                }),
+            ))
         });
 
         let merged = merge_type_mappers(Some(&m1), None);

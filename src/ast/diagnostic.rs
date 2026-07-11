@@ -77,7 +77,11 @@ impl DiagnosticsCollection {
         inner.count += 1;
         if let Some(file) = &diagnostic.file {
             let file_name = file.file_name.clone();
-            inner.file_diagnostics.entry(file_name).or_default().push(diagnostic);
+            inner
+                .file_diagnostics
+                .entry(file_name)
+                .or_default()
+                .push(diagnostic);
             inner.file_diagnostics_sorted.clear();
         } else {
             inner.non_file_diagnostics.push(diagnostic);
@@ -107,6 +111,10 @@ impl DiagnosticsCollection {
     /// Get diagnostics for a specific file.
     pub fn get_for_file(&self, file_name: &str) -> Vec<Diagnostic> {
         let inner = self.inner.lock().unwrap();
-        inner.file_diagnostics.get(file_name).cloned().unwrap_or_default()
+        inner
+            .file_diagnostics
+            .get(file_name)
+            .cloned()
+            .unwrap_or_default()
     }
 }

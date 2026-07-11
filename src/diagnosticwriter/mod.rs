@@ -46,12 +46,7 @@ pub fn format_diagnostic_compact(diag: &Diagnostic) -> String {
     let mut out = String::new();
     if let Some(file) = &diag.file {
         let (line, col) = line_and_character(&file.line_map, diag.loc.pos());
-        out.push_str(&format!(
-            "{}({},{}): ",
-            file.file_name,
-            line + 1,
-            col + 1
-        ));
+        out.push_str(&format!("{}({},{}): ", file.file_name, line + 1, col + 1));
     }
     out.push_str(&format!("{} TS{}: ", diag.category.name(), diag.code));
     out.push_str(&message_text(diag));
@@ -153,7 +148,7 @@ mod tests {
     use super::*;
     use crate::ast::SourceFile;
     use crate::core::text::TextRange;
-    use crate::diagnostics::{new_ad_hoc_message, Category};
+    use crate::diagnostics::new_ad_hoc_message;
 
     fn make_file(text: &str) -> Arc<SourceFile> {
         use crate::ast::{Node, NodeData, NodeList, SyntaxKind};

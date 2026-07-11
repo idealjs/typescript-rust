@@ -155,8 +155,10 @@ impl Number {
     /// Parse a string to a Number, following ECMA262 StringToNumber.
     pub fn from_string(s: &str) -> Number {
         let s = s.trim_matches(|c: char| {
-            matches!(c, '\n' | '\r' | '\u{2028}' | '\u{2029}' | '\t' | '\u{000B}' | '\u{000C}' | '\u{FEFF}')
-                || c.is_whitespace()
+            matches!(
+                c,
+                '\n' | '\r' | '\u{2028}' | '\u{2029}' | '\t' | '\u{000B}' | '\u{000C}' | '\u{FEFF}'
+            ) || c.is_whitespace()
         });
 
         match s {
@@ -247,7 +249,11 @@ impl fmt::Display for Number {
             }
         }
         // Use serde_json for JS-compatible float formatting
-        write!(f, "{}", serde_json::to_string(&self.0).unwrap_or_else(|_| "NaN".to_string()))
+        write!(
+            f,
+            "{}",
+            serde_json::to_string(&self.0).unwrap_or_else(|_| "NaN".to_string())
+        )
     }
 }
 
@@ -321,7 +327,10 @@ fn is_number_rune(r: char) -> bool {
     if ('a'..='f').contains(&r) || ('A'..='F').contains(&r) {
         return true;
     }
-    matches!(r, '.' | '-' | '+' | 'x' | 'X' | 'o' | 'O' | 'b' | 'B' | 'e' | 'E')
+    matches!(
+        r,
+        '.' | '-' | '+' | 'x' | 'X' | 'o' | 'O' | 'b' | 'B' | 'e' | 'E'
+    )
 }
 
 /// A JS-like bigint, used for evaluating BigInt literals.
@@ -356,7 +365,9 @@ impl PseudoBigInt {
 
     /// Parse a BigInt literal (with trailing 'n') into a PseudoBigInt.
     pub fn parse(text: &str) -> PseudoBigInt {
-        let (text, negative) = text.strip_prefix('-').map_or((text, false), |rest| (rest, true));
+        let (text, negative) = text
+            .strip_prefix('-')
+            .map_or((text, false), |rest| (rest, true));
         let value = parse_pseudo_big_int(text);
         PseudoBigInt::new(&value, negative)
     }
@@ -590,8 +601,14 @@ mod tests {
             //   (Number(0x10000000000000000_i128 as f64), "0X10000000000000000")
             //   (Number(0x1000000000000A801_i128 as f64), "0X1000000000000A801")
             (Number::nan(), "0B0.0"),
-            (Number(1.231235345083403e91), "12312353450834030486384068034683603046834603806830644850340602384608368034634603680348603864"),
-            (Number::nan(), "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX8OOOOOOOOOOOOOOOOOOO"),
+            (
+                Number(1.231235345083403e91),
+                "12312353450834030486384068034683603046834603806830644850340602384608368034634603680348603864",
+            ),
+            (
+                Number::nan(),
+                "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX8OOOOOOOOOOOOOOOOOOO",
+            ),
             (Number::inf(1), "+Infinity"),
             (Number(1234.56), "  \t1234.56  "),
             (Number::nan(), "\u{200b}"),
@@ -873,8 +890,16 @@ mod tests {
             (Number(-1.0), Number::inf(-1), Number::nan()),
             (Number(1.0), Number::nan(), Number::nan()),
             // Cases where Rust's `f64::powf` agrees with the correctly-rounded result:
-            (Number(10.0), Number(308.0), num_from_bits(0x7fe1ccf385ebc8a0)),
-            (Number(10.0), Number(200.0), num_from_bits(0x6974e718d7d7625a)),
+            (
+                Number(10.0),
+                Number(308.0),
+                num_from_bits(0x7fe1ccf385ebc8a0),
+            ),
+            (
+                Number(10.0),
+                Number(200.0),
+                num_from_bits(0x6974e718d7d7625a),
+            ),
             // Skipped: {5, 210, 0x5e68557f31326bbb}. Rust's `powf` diverges from the
             // correctly-rounded result by 1 ULP (produces 0x5e68557f31326bbc).
         ];
@@ -928,7 +953,12 @@ mod tests {
             let s = test_number.to_string();
             for leading_zeros in 0..10 {
                 let lit = format!("{}{}n", "0".repeat(leading_zeros), s);
-                assert_eq!(PseudoBigInt::parse(&lit).to_string(), s, "literal: {:?}", lit);
+                assert_eq!(
+                    PseudoBigInt::parse(&lit).to_string(),
+                    s,
+                    "literal: {:?}",
+                    lit
+                );
             }
         }
 
@@ -953,16 +983,30 @@ mod tests {
             ("0X1Fn", "31"),
         ];
         for (lit, out) in non_decimal {
-            assert_eq!(PseudoBigInt::parse(lit).to_string(), *out, "literal: {:?}", lit);
+            assert_eq!(
+                PseudoBigInt::parse(lit).to_string(),
+                *out,
+                "literal: {:?}",
+                lit
+            );
         }
 
         // Subtest 3: can parse large literals.
-        assert_eq!(PseudoBigInt::parse("123456789012345678901234567890n").to_string(), "123456789012345678901234567890");
+        assert_eq!(
+            PseudoBigInt::parse("123456789012345678901234567890n").to_string(),
+            "123456789012345678901234567890"
+        );
         assert_eq!(
             PseudoBigInt::parse("0b1100011101110100100001111111101101100001101110011111000001110111001001110001111110000101011010010n").to_string(),
             "123456789012345678901234567890"
         );
-        assert_eq!(PseudoBigInt::parse("0o143564417755415637016711617605322n").to_string(), "123456789012345678901234567890");
-        assert_eq!(PseudoBigInt::parse("0x18ee90ff6c373e0ee4e3f0ad2n").to_string(), "123456789012345678901234567890");
+        assert_eq!(
+            PseudoBigInt::parse("0o143564417755415637016711617605322n").to_string(),
+            "123456789012345678901234567890"
+        );
+        assert_eq!(
+            PseudoBigInt::parse("0x18ee90ff6c373e0ee4e3f0ad2n").to_string(),
+            "123456789012345678901234567890"
+        );
     }
 }

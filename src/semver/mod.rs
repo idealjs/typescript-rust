@@ -160,15 +160,23 @@ fn parse_version(text: &str) -> Result<Version, SemverParseError> {
 
     // Parse major
     let (major_str, rest) = match input.find(|c: char| !c.is_ascii_digit()) {
-        Some(0) => return Err(SemverParseError { input: text.to_string() }),
+        Some(0) => {
+            return Err(SemverParseError {
+                input: text.to_string(),
+            });
+        }
         Some(i) => (&input[..i], &input[i..]),
         None => (input, ""),
     };
 
     if !is_valid_numeric_component(major_str) {
-        return Err(SemverParseError { input: text.to_string() });
+        return Err(SemverParseError {
+            input: text.to_string(),
+        });
     }
-    let major: u32 = major_str.parse().map_err(|_| SemverParseError { input: text.to_string() })?;
+    let major: u32 = major_str.parse().map_err(|_| SemverParseError {
+        input: text.to_string(),
+    })?;
 
     let mut minor = 0u32;
     let mut patch = 0u32;
@@ -179,14 +187,22 @@ fn parse_version(text: &str) -> Result<Version, SemverParseError> {
     if rest.starts_with('.') {
         rest = &rest[1..];
         let (minor_str, rest2) = match rest.find(|c: char| !c.is_ascii_digit()) {
-            Some(0) => return Err(SemverParseError { input: text.to_string() }),
+            Some(0) => {
+                return Err(SemverParseError {
+                    input: text.to_string(),
+                });
+            }
             Some(i) => (&rest[..i], &rest[i..]),
             None => (rest, ""),
         };
         if !is_valid_numeric_component(minor_str) {
-            return Err(SemverParseError { input: text.to_string() });
+            return Err(SemverParseError {
+                input: text.to_string(),
+            });
         }
-        minor = minor_str.parse().map_err(|_| SemverParseError { input: text.to_string() })?;
+        minor = minor_str.parse().map_err(|_| SemverParseError {
+            input: text.to_string(),
+        })?;
         rest = rest2;
 
         if rest.starts_with('.') {
@@ -196,9 +212,13 @@ fn parse_version(text: &str) -> Result<Version, SemverParseError> {
                 None => (rest, ""),
             };
             if !is_valid_numeric_component(patch_str) {
-                return Err(SemverParseError { input: text.to_string() });
+                return Err(SemverParseError {
+                    input: text.to_string(),
+                });
             }
-            patch = patch_str.parse().map_err(|_| SemverParseError { input: text.to_string() })?;
+            patch = patch_str.parse().map_err(|_| SemverParseError {
+                input: text.to_string(),
+            })?;
             rest = rest3;
 
             if rest.starts_with('-') {
@@ -208,7 +228,9 @@ fn parse_version(text: &str) -> Result<Version, SemverParseError> {
                     None => (rest, ""),
                 };
                 if !is_valid_prerelease(pre_str) {
-                    return Err(SemverParseError { input: text.to_string() });
+                    return Err(SemverParseError {
+                        input: text.to_string(),
+                    });
                 }
                 prerelease = pre_str.split('.').map(|s| s.to_string()).collect();
                 rest = rest4;
@@ -217,7 +239,9 @@ fn parse_version(text: &str) -> Result<Version, SemverParseError> {
             if rest.starts_with('+') {
                 rest = &rest[1..];
                 if !is_valid_build(rest) {
-                    return Err(SemverParseError { input: text.to_string() });
+                    return Err(SemverParseError {
+                        input: text.to_string(),
+                    });
                 }
                 build = rest.split('.').map(|s| s.to_string()).collect();
                 rest = "";
@@ -226,7 +250,9 @@ fn parse_version(text: &str) -> Result<Version, SemverParseError> {
     }
 
     if !rest.is_empty() {
-        return Err(SemverParseError { input: text.to_string() });
+        return Err(SemverParseError {
+            input: text.to_string(),
+        });
     }
 
     Ok(Version {
@@ -258,9 +284,7 @@ fn is_valid_prerelease(s: &str) -> bool {
     s.split('.').all(|part| {
         !part.is_empty()
             && part.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
-            && (part == "0"
-                || !part.starts_with('0')
-                || part.chars().any(|c| !c.is_ascii_digit()))
+            && (part == "0" || !part.starts_with('0') || part.chars().any(|c| !c.is_ascii_digit()))
     })
 }
 
@@ -268,9 +292,8 @@ fn is_valid_build(s: &str) -> bool {
     if s.is_empty() {
         return false;
     }
-    s.split('.').all(|part| {
-        !part.is_empty() && part.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
-    })
+    s.split('.')
+        .all(|part| !part.is_empty() && part.chars().all(|c| c.is_ascii_alphanumeric() || c == '-'))
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -406,9 +429,15 @@ fn parse_hyphen_comparators(
 
     if !is_wildcard(&right.major_str) {
         let (operator, operand) = if is_wildcard(&right.minor_str) {
-            (ComparatorOperator::LessThan, right.version.increment_major())
+            (
+                ComparatorOperator::LessThan,
+                right.version.increment_major(),
+            )
         } else if is_wildcard(&right.patch_str) {
-            (ComparatorOperator::LessThan, right.version.increment_minor())
+            (
+                ComparatorOperator::LessThan,
+                right.version.increment_minor(),
+            )
         } else {
             (ComparatorOperator::LessThanEqual, right.version.clone())
         };
@@ -458,9 +487,21 @@ fn parse_partial(text: &str) -> Option<PartialVersion> {
         return None;
     }
 
-    let major = if is_wildcard(&major_str) { 0 } else { major_str.parse().ok()? };
-    let minor = if is_wildcard(&minor_str) { 0 } else { minor_str.parse().ok()? };
-    let patch = if is_wildcard(&patch_str) { 0 } else { patch_str.parse().ok()? };
+    let major = if is_wildcard(&major_str) {
+        0
+    } else {
+        major_str.parse().ok()?
+    };
+    let minor = if is_wildcard(&minor_str) {
+        0
+    } else {
+        minor_str.parse().ok()?
+    };
+    let patch = if is_wildcard(&patch_str) {
+        0
+    } else {
+        patch_str.parse().ok()?
+    };
 
     let prerelease = Vec::new();
     let build = if build_part.is_empty() {
@@ -470,7 +511,13 @@ fn parse_partial(text: &str) -> Option<PartialVersion> {
     };
 
     Some(PartialVersion {
-        version: Version { major, minor, patch, prerelease, build },
+        version: Version {
+            major,
+            minor,
+            patch,
+            prerelease,
+            build,
+        },
         major_str,
         minor_str,
         patch_str,
@@ -596,7 +643,10 @@ fn parse_comparator(op: &str, result: &PartialVersion) -> Option<Vec<VersionComp
             } else {
                 ComparatorOperator::GreaterThanEqual
             };
-            comparators.push(VersionComparator { operator, operand: version });
+            comparators.push(VersionComparator {
+                operator,
+                operand: version,
+            });
         }
         "<=" | ">" => {
             let mut version = result.version.clone();
@@ -624,7 +674,10 @@ fn parse_comparator(op: &str, result: &PartialVersion) -> Option<Vec<VersionComp
                     ComparatorOperator::GreaterThan
                 };
             }
-            comparators.push(VersionComparator { operator, operand: version });
+            comparators.push(VersionComparator {
+                operator,
+                operand: version,
+            });
         }
         "=" | "" => {
             if is_wildcard(&result.minor_str) || is_wildcard(&result.patch_str) {

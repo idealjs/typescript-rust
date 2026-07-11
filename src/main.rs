@@ -6,7 +6,7 @@
 
 use std::process::ExitCode;
 
-use tsox::execute::{command_line, ExitStatus, OsSystem};
+use tsox::execute::{ExitStatus, OsSystem, command_line};
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();

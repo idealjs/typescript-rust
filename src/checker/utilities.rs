@@ -4,9 +4,7 @@
 //! functions used throughout the checker. Functions that require `Checker`
 //! state are methods on `Checker` in `checker.rs`.
 
-use std::sync::Arc;
-
-use crate::ast::{Node, Symbol, SyntaxKind};
+use crate::ast::{Symbol, SyntaxKind};
 
 use super::types::*;
 
@@ -211,7 +209,9 @@ pub fn is_tuple_type(t: &Type) -> bool {
     if t.flags.contains(TypeFlags::Object) {
         t.object_flags.contains(ObjectFlags::Tuple)
             || (t.object_flags.contains(ObjectFlags::Reference)
-                && t.target().map(|target| target.object_flags.contains(ObjectFlags::Tuple)).unwrap_or(false))
+                && t.target()
+                    .map(|target| target.object_flags.contains(ObjectFlags::Tuple))
+                    .unwrap_or(false))
     } else {
         false
     }
@@ -238,9 +238,8 @@ pub fn is_object_literal_type(t: &Type) -> bool {
 
 /// Whether a type can be used as a property name.
 pub fn is_type_usable_as_property_name(t: &Type) -> bool {
-    t.flags.intersects(
-        TYPE_FLAGS_STRING_OR_NUMBER_LITERAL_OR_UNIQUE | TypeFlags::ESSymbol,
-    )
+    t.flags
+        .intersects(TYPE_FLAGS_STRING_OR_NUMBER_LITERAL_OR_UNIQUE | TypeFlags::ESSymbol)
 }
 
 /// Get the property name string from a type.
@@ -394,7 +393,9 @@ pub fn is_optional_symbol(symbol: &Symbol) -> bool {
 
 /// Whether a symbol is a class member.
 pub fn is_class_member_symbol(symbol: &Symbol) -> bool {
-    symbol.flags.intersects(crate::ast::SymbolFlags::CLASS_MEMBER)
+    symbol
+        .flags
+        .intersects(crate::ast::SymbolFlags::CLASS_MEMBER)
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -684,7 +685,9 @@ mod tests {
     fn test_symbol_name_helpers() {
         assert!(is_computed_property_name("[foo]"));
         assert!(!is_computed_property_name("foo"));
-        assert!(is_internal_symbol_name(crate::ast::INTERNAL_SYMBOL_NAME_PREFIX));
+        assert!(is_internal_symbol_name(
+            crate::ast::INTERNAL_SYMBOL_NAME_PREFIX
+        ));
         assert!(!is_internal_symbol_name("normalName"));
     }
 

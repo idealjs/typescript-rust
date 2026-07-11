@@ -6,9 +6,9 @@
 //! Do not edit manually — edit ast.json and re-run the generator.
 
 #![allow(unused_imports)]
-use super::node_flags::{ModifierFlags, NodeFlags};
 use super::SyntaxKind;
-use super::node::{Node, NodeList, ModifierList};
+use super::node::{ModifierList, Node, NodeList};
+use super::node_flags::{ModifierFlags, NodeFlags};
 use crate::core::text::TextRange;
 use std::sync::Arc;
 
@@ -1423,927 +1423,2243 @@ where
 {
     match &node.data {
         NodeData::QualifiedName(data) => {
-            if visitor(&data.left) { return true; }
-            if visitor(&data.right) { return true; }
+            if visitor(&data.left) {
+                return true;
+            }
+            if visitor(&data.right) {
+                return true;
+            }
         }
         NodeData::ComputedPropertyName(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::Decorator(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::IfStatement(data) => {
-            if visitor(&data.expression) { return true; }
-            if visitor(&data.then_statement) { return true; }
-            if let Some(child) = &data.else_statement { if visitor(child) { return true; } }
+            if visitor(&data.expression) {
+                return true;
+            }
+            if visitor(&data.then_statement) {
+                return true;
+            }
+            if let Some(child) = &data.else_statement {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::DoStatement(data) => {
-            if visitor(&data.statement) { return true; }
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.statement) {
+                return true;
+            }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::WhileStatement(data) => {
-            if visitor(&data.expression) { return true; }
-            if visitor(&data.statement) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
+            if visitor(&data.statement) {
+                return true;
+            }
         }
         NodeData::ForStatement(data) => {
-            if let Some(child) = &data.initializer { if visitor(child) { return true; } }
-            if let Some(child) = &data.condition { if visitor(child) { return true; } }
-            if let Some(child) = &data.incrementor { if visitor(child) { return true; } }
-            if visitor(&data.statement) { return true; }
+            if let Some(child) = &data.initializer {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.condition {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.incrementor {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.statement) {
+                return true;
+            }
         }
         NodeData::ForInOrOfStatement(data) => {
-            if let Some(child) = &data.await_modifier { if visitor(child) { return true; } }
-            if visitor(&data.initializer) { return true; }
-            if visitor(&data.expression) { return true; }
-            if visitor(&data.statement) { return true; }
+            if let Some(child) = &data.await_modifier {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.initializer) {
+                return true;
+            }
+            if visitor(&data.expression) {
+                return true;
+            }
+            if visitor(&data.statement) {
+                return true;
+            }
         }
         NodeData::BreakStatement(data) => {
-            if let Some(child) = &data.label { if visitor(child) { return true; } }
+            if let Some(child) = &data.label {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ContinueStatement(data) => {
-            if let Some(child) = &data.label { if visitor(child) { return true; } }
+            if let Some(child) = &data.label {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ReturnStatement(data) => {
-            if let Some(child) = &data.expression { if visitor(child) { return true; } }
+            if let Some(child) = &data.expression {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::WithStatement(data) => {
-            if visitor(&data.expression) { return true; }
-            if visitor(&data.statement) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
+            if visitor(&data.statement) {
+                return true;
+            }
         }
         NodeData::SwitchStatement(data) => {
-            if visitor(&data.expression) { return true; }
-            if visitor(&data.case_block) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
+            if visitor(&data.case_block) {
+                return true;
+            }
         }
         NodeData::CaseBlock(data) => {
-            for child in data.clauses.iter() { if visitor(child) { return true; } }
+            for child in data.clauses.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::CaseOrDefaultClause(data) => {
-            if visitor(&data.expression) { return true; }
-            for child in data.statements.iter() { if visitor(child) { return true; } }
+            if visitor(&data.expression) {
+                return true;
+            }
+            for child in data.statements.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ThrowStatement(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::TryStatement(data) => {
-            if visitor(&data.try_block) { return true; }
-            if let Some(child) = &data.catch_clause { if visitor(child) { return true; } }
-            if let Some(child) = &data.finally_block { if visitor(child) { return true; } }
+            if visitor(&data.try_block) {
+                return true;
+            }
+            if let Some(child) = &data.catch_clause {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.finally_block {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::CatchClause(data) => {
-            if let Some(child) = &data.variable_declaration { if visitor(child) { return true; } }
-            if visitor(&data.block) { return true; }
+            if let Some(child) = &data.variable_declaration {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.block) {
+                return true;
+            }
         }
         NodeData::LabeledStatement(data) => {
-            if visitor(&data.label) { return true; }
-            if visitor(&data.statement) { return true; }
+            if visitor(&data.label) {
+                return true;
+            }
+            if visitor(&data.statement) {
+                return true;
+            }
         }
         NodeData::ExpressionStatement(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::Block(data) => {
-            for child in data.statements.iter() { if visitor(child) { return true; } }
+            for child in data.statements.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::VariableStatement(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.declaration_list) { return true; }
+            if visitor(&data.declaration_list) {
+                return true;
+            }
         }
         NodeData::VariableDeclaration(data) => {
-            if visitor(&data.name) { return true; }
-            if let Some(child) = &data.exclamation_token { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
-            if let Some(child) = &data.initializer { if visitor(child) { return true; } }
+            if visitor(&data.name) {
+                return true;
+            }
+            if let Some(child) = &data.exclamation_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.initializer {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::VariableDeclarationList(data) => {
-            for child in data.declarations.iter() { if visitor(child) { return true; } }
+            for child in data.declarations.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::BindingPattern(data) => {
-            for child in data.elements.iter() { if visitor(child) { return true; } }
+            for child in data.elements.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ParameterDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if let Some(child) = &data.dot_dot_dot_token { if visitor(child) { return true; } }
-            if visitor(&data.name) { return true; }
-            if let Some(child) = &data.question_token { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
-            if let Some(child) = &data.initializer { if visitor(child) { return true; } }
+            if let Some(child) = &data.dot_dot_dot_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.name) {
+                return true;
+            }
+            if let Some(child) = &data.question_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.initializer {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::BindingElement(data) => {
-            if let Some(child) = &data.dot_dot_dot_token { if visitor(child) { return true; } }
-            if let Some(child) = &data.property_name { if visitor(child) { return true; } }
-            if let Some(child) = &data.name { if visitor(child) { return true; } }
-            if let Some(child) = &data.initializer { if visitor(child) { return true; } }
+            if let Some(child) = &data.dot_dot_dot_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.property_name {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.name {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.initializer {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::MissingDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::FunctionDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if let Some(child) = &data.asterisk_token { if visitor(child) { return true; } }
-            if let Some(child) = &data.name { if visitor(child) { return true; } }
+            if let Some(child) = &data.asterisk_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.name {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.parameters.iter() { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
-            if let Some(child) = &data.full_signature { if visitor(child) { return true; } }
-            if let Some(child) = &data.body { if visitor(child) { return true; } }
+            for child in data.parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.full_signature {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.body {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ClassDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if let Some(child) = &data.name { if visitor(child) { return true; } }
+            if let Some(child) = &data.name {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
             if let Some(list) = &data.heritage_clauses {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.members.iter() { if visitor(child) { return true; } }
+            for child in data.members.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ClassExpression(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if let Some(child) = &data.name { if visitor(child) { return true; } }
+            if let Some(child) = &data.name {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
             if let Some(list) = &data.heritage_clauses {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.members.iter() { if visitor(child) { return true; } }
+            for child in data.members.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::HeritageClause(data) => {
-            for child in data.types.iter() { if visitor(child) { return true; } }
+            for child in data.types.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::InterfaceDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.name) { return true; }
+            if visitor(&data.name) {
+                return true;
+            }
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
             if let Some(list) = &data.heritage_clauses {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.members.iter() { if visitor(child) { return true; } }
+            for child in data.members.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::TypeAliasDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.name) { return true; }
+            if visitor(&data.name) {
+                return true;
+            }
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.type_node) { return true; }
+            if visitor(&data.type_node) {
+                return true;
+            }
         }
         NodeData::EnumMember(data) => {
-            if visitor(&data.name) { return true; }
-            if let Some(child) = &data.initializer { if visitor(child) { return true; } }
+            if visitor(&data.name) {
+                return true;
+            }
+            if let Some(child) = &data.initializer {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::EnumDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.name) { return true; }
-            for child in data.members.iter() { if visitor(child) { return true; } }
+            if visitor(&data.name) {
+                return true;
+            }
+            for child in data.members.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ModuleBlock(data) => {
-            for child in data.statements.iter() { if visitor(child) { return true; } }
+            for child in data.statements.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ImportDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if let Some(child) = &data.import_clause { if visitor(child) { return true; } }
-            if visitor(&data.module_specifier) { return true; }
-            if let Some(child) = &data.attributes { if visitor(child) { return true; } }
+            if let Some(child) = &data.import_clause {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.module_specifier) {
+                return true;
+            }
+            if let Some(child) = &data.attributes {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ExternalModuleReference(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::NamespaceImport(data) => {
-            if visitor(&data.name) { return true; }
+            if visitor(&data.name) {
+                return true;
+            }
         }
         NodeData::NamedImports(data) => {
-            for child in data.elements.iter() { if visitor(child) { return true; } }
+            for child in data.elements.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ExportAssignment(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.type_node) { return true; }
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.type_node) {
+                return true;
+            }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::NamespaceExportDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.name) { return true; }
+            if visitor(&data.name) {
+                return true;
+            }
         }
         NodeData::NamespaceExport(data) => {
-            if visitor(&data.name) { return true; }
+            if visitor(&data.name) {
+                return true;
+            }
         }
         NodeData::NamedExports(data) => {
-            for child in data.elements.iter() { if visitor(child) { return true; } }
+            for child in data.elements.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ExportSpecifier(data) => {
-            if let Some(child) = &data.property_name { if visitor(child) { return true; } }
-            if visitor(&data.name) { return true; }
+            if let Some(child) = &data.property_name {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.name) {
+                return true;
+            }
         }
         NodeData::CallSignatureDeclaration(data) => {
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.parameters.iter() { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
+            for child in data.parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ConstructSignatureDeclaration(data) => {
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.parameters.iter() { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
+            for child in data.parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ConstructorDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.parameters.iter() { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
-            if let Some(child) = &data.full_signature { if visitor(child) { return true; } }
-            if let Some(child) = &data.body { if visitor(child) { return true; } }
+            for child in data.parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.full_signature {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.body {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::GetAccessorDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.name) { return true; }
+            if visitor(&data.name) {
+                return true;
+            }
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.parameters.iter() { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
-            if let Some(child) = &data.full_signature { if visitor(child) { return true; } }
-            if let Some(child) = &data.body { if visitor(child) { return true; } }
+            for child in data.parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.full_signature {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.body {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::SetAccessorDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.name) { return true; }
+            if visitor(&data.name) {
+                return true;
+            }
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.parameters.iter() { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
-            if let Some(child) = &data.full_signature { if visitor(child) { return true; } }
-            if let Some(child) = &data.body { if visitor(child) { return true; } }
+            for child in data.parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.full_signature {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.body {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::IndexSignatureDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.parameters.iter() { if visitor(child) { return true; } }
-            if visitor(&data.type_node) { return true; }
+            for child in data.parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.type_node) {
+                return true;
+            }
         }
         NodeData::MethodSignatureDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.name) { return true; }
-            if let Some(child) = &data.postfix_token { if visitor(child) { return true; } }
+            if visitor(&data.name) {
+                return true;
+            }
+            if let Some(child) = &data.postfix_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.parameters.iter() { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
+            for child in data.parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::MethodDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if let Some(child) = &data.asterisk_token { if visitor(child) { return true; } }
-            if visitor(&data.name) { return true; }
-            if let Some(child) = &data.postfix_token { if visitor(child) { return true; } }
+            if let Some(child) = &data.asterisk_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.name) {
+                return true;
+            }
+            if let Some(child) = &data.postfix_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.parameters.iter() { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
-            if let Some(child) = &data.full_signature { if visitor(child) { return true; } }
-            if let Some(child) = &data.body { if visitor(child) { return true; } }
+            for child in data.parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.full_signature {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.body {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::PropertySignatureDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.name) { return true; }
-            if let Some(child) = &data.postfix_token { if visitor(child) { return true; } }
-            if visitor(&data.type_node) { return true; }
-            if visitor(&data.initializer) { return true; }
+            if visitor(&data.name) {
+                return true;
+            }
+            if let Some(child) = &data.postfix_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.type_node) {
+                return true;
+            }
+            if visitor(&data.initializer) {
+                return true;
+            }
         }
         NodeData::PropertyDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.name) { return true; }
-            if let Some(child) = &data.postfix_token { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
-            if let Some(child) = &data.initializer { if visitor(child) { return true; } }
+            if visitor(&data.name) {
+                return true;
+            }
+            if let Some(child) = &data.postfix_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.initializer {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ClassStaticBlockDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.body) { return true; }
+            if visitor(&data.body) {
+                return true;
+            }
         }
         NodeData::BinaryExpression(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.left) { return true; }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
-            if visitor(&data.operator_token) { return true; }
-            if visitor(&data.right) { return true; }
+            if visitor(&data.left) {
+                return true;
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.operator_token) {
+                return true;
+            }
+            if visitor(&data.right) {
+                return true;
+            }
         }
         NodeData::PrefixUnaryExpression(data) => {
-            if visitor(&data.operand) { return true; }
+            if visitor(&data.operand) {
+                return true;
+            }
         }
         NodeData::PostfixUnaryExpression(data) => {
-            if visitor(&data.operand) { return true; }
+            if visitor(&data.operand) {
+                return true;
+            }
         }
         NodeData::YieldExpression(data) => {
-            if let Some(child) = &data.asterisk_token { if visitor(child) { return true; } }
-            if let Some(child) = &data.expression { if visitor(child) { return true; } }
+            if let Some(child) = &data.asterisk_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.expression {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ArrowFunction(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.parameters.iter() { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
-            if let Some(child) = &data.full_signature { if visitor(child) { return true; } }
-            if visitor(&data.equals_greater_than_token) { return true; }
-            if visitor(&data.body) { return true; }
+            for child in data.parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.full_signature {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.equals_greater_than_token) {
+                return true;
+            }
+            if visitor(&data.body) {
+                return true;
+            }
         }
         NodeData::FunctionExpression(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if let Some(child) = &data.asterisk_token { if visitor(child) { return true; } }
-            if let Some(child) = &data.name { if visitor(child) { return true; } }
+            if let Some(child) = &data.asterisk_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.name {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.parameters.iter() { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
-            if let Some(child) = &data.full_signature { if visitor(child) { return true; } }
-            if visitor(&data.body) { return true; }
+            for child in data.parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.full_signature {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.body) {
+                return true;
+            }
         }
         NodeData::AsExpression(data) => {
-            if visitor(&data.expression) { return true; }
-            if visitor(&data.type_node) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
+            if visitor(&data.type_node) {
+                return true;
+            }
         }
         NodeData::SatisfiesExpression(data) => {
-            if visitor(&data.expression) { return true; }
-            if visitor(&data.type_node) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
+            if visitor(&data.type_node) {
+                return true;
+            }
         }
         NodeData::ConditionalExpression(data) => {
-            if visitor(&data.condition) { return true; }
-            if visitor(&data.question_token) { return true; }
-            if visitor(&data.when_true) { return true; }
-            if visitor(&data.colon_token) { return true; }
-            if visitor(&data.when_false) { return true; }
+            if visitor(&data.condition) {
+                return true;
+            }
+            if visitor(&data.question_token) {
+                return true;
+            }
+            if visitor(&data.when_true) {
+                return true;
+            }
+            if visitor(&data.colon_token) {
+                return true;
+            }
+            if visitor(&data.when_false) {
+                return true;
+            }
         }
         NodeData::PropertyAccessExpression(data) => {
-            if visitor(&data.expression) { return true; }
-            if let Some(child) = &data.question_dot_token { if visitor(child) { return true; } }
-            if visitor(&data.name) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
+            if let Some(child) = &data.question_dot_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.name) {
+                return true;
+            }
         }
         NodeData::ElementAccessExpression(data) => {
-            if visitor(&data.expression) { return true; }
-            if let Some(child) = &data.question_dot_token { if visitor(child) { return true; } }
-            if visitor(&data.argument_expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
+            if let Some(child) = &data.question_dot_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.argument_expression) {
+                return true;
+            }
         }
         NodeData::CallExpression(data) => {
-            if visitor(&data.expression) { return true; }
-            if let Some(child) = &data.question_dot_token { if visitor(child) { return true; } }
-            if let Some(list) = &data.type_arguments {
-                for child in list.iter() { if visitor(child) { return true; } }
+            if visitor(&data.expression) {
+                return true;
             }
-            for child in data.arguments.iter() { if visitor(child) { return true; } }
+            if let Some(child) = &data.question_dot_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(list) = &data.type_arguments {
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
+            }
+            for child in data.arguments.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::NewExpression(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
             if let Some(list) = &data.type_arguments {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
             if let Some(list) = &data.arguments {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::MetaProperty(data) => {
-            if visitor(&data.name) { return true; }
+            if visitor(&data.name) {
+                return true;
+            }
         }
         NodeData::NonNullExpression(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::SpreadElement(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::TemplateExpression(data) => {
-            if visitor(&data.head) { return true; }
-            for child in data.template_spans.iter() { if visitor(child) { return true; } }
+            if visitor(&data.head) {
+                return true;
+            }
+            for child in data.template_spans.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::TemplateSpan(data) => {
-            if visitor(&data.expression) { return true; }
-            if visitor(&data.literal) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
+            if visitor(&data.literal) {
+                return true;
+            }
         }
         NodeData::TaggedTemplateExpression(data) => {
-            if visitor(&data.tag) { return true; }
-            if visitor(&data.question_dot_token) { return true; }
-            if let Some(list) = &data.type_arguments {
-                for child in list.iter() { if visitor(child) { return true; } }
+            if visitor(&data.tag) {
+                return true;
             }
-            if visitor(&data.template) { return true; }
+            if visitor(&data.question_dot_token) {
+                return true;
+            }
+            if let Some(list) = &data.type_arguments {
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
+            }
+            if visitor(&data.template) {
+                return true;
+            }
         }
         NodeData::ParenthesizedExpression(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::ArrayLiteralExpression(data) => {
-            for child in data.elements.iter() { if visitor(child) { return true; } }
+            for child in data.elements.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ObjectLiteralExpression(data) => {
-            for child in data.properties.iter() { if visitor(child) { return true; } }
+            for child in data.properties.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::SpreadAssignment(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::PropertyAssignment(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.name) { return true; }
-            if let Some(child) = &data.postfix_token { if visitor(child) { return true; } }
-            if visitor(&data.type_node) { return true; }
-            if visitor(&data.initializer) { return true; }
+            if visitor(&data.name) {
+                return true;
+            }
+            if let Some(child) = &data.postfix_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.type_node) {
+                return true;
+            }
+            if visitor(&data.initializer) {
+                return true;
+            }
         }
         NodeData::ShorthandPropertyAssignment(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.name) { return true; }
-            if let Some(child) = &data.postfix_token { if visitor(child) { return true; } }
-            if visitor(&data.type_node) { return true; }
-            if let Some(child) = &data.equals_token { if visitor(child) { return true; } }
-            if let Some(child) = &data.object_assignment_initializer { if visitor(child) { return true; } }
+            if visitor(&data.name) {
+                return true;
+            }
+            if let Some(child) = &data.postfix_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.type_node) {
+                return true;
+            }
+            if let Some(child) = &data.equals_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.object_assignment_initializer {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::DeleteExpression(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::TypeOfExpression(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::VoidExpression(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::AwaitExpression(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::TypeAssertion(data) => {
-            if visitor(&data.type_node) { return true; }
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.type_node) {
+                return true;
+            }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::UnionTypeNode(data) => {
-            for child in data.types.iter() { if visitor(child) { return true; } }
+            for child in data.types.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::IntersectionTypeNode(data) => {
-            for child in data.types.iter() { if visitor(child) { return true; } }
+            for child in data.types.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ConditionalTypeNode(data) => {
-            if visitor(&data.check_type) { return true; }
-            if visitor(&data.extends_type) { return true; }
-            if visitor(&data.true_type) { return true; }
-            if visitor(&data.false_type) { return true; }
+            if visitor(&data.check_type) {
+                return true;
+            }
+            if visitor(&data.extends_type) {
+                return true;
+            }
+            if visitor(&data.true_type) {
+                return true;
+            }
+            if visitor(&data.false_type) {
+                return true;
+            }
         }
         NodeData::TypeOperatorNode(data) => {
-            if visitor(&data.type_node) { return true; }
+            if visitor(&data.type_node) {
+                return true;
+            }
         }
         NodeData::InferTypeNode(data) => {
-            if visitor(&data.type_parameter) { return true; }
+            if visitor(&data.type_parameter) {
+                return true;
+            }
         }
         NodeData::ArrayTypeNode(data) => {
-            if visitor(&data.element_type) { return true; }
+            if visitor(&data.element_type) {
+                return true;
+            }
         }
         NodeData::IndexedAccessTypeNode(data) => {
-            if visitor(&data.object_type) { return true; }
-            if visitor(&data.index_type) { return true; }
+            if visitor(&data.object_type) {
+                return true;
+            }
+            if visitor(&data.index_type) {
+                return true;
+            }
         }
         NodeData::TypeReferenceNode(data) => {
-            if visitor(&data.type_name) { return true; }
+            if visitor(&data.type_name) {
+                return true;
+            }
             if let Some(list) = &data.type_arguments {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::ExpressionWithTypeArguments(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
             if let Some(list) = &data.type_arguments {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::LiteralTypeNode(data) => {
-            if visitor(&data.literal) { return true; }
+            if visitor(&data.literal) {
+                return true;
+            }
         }
         NodeData::TypePredicateNode(data) => {
-            if let Some(child) = &data.asserts_modifier { if visitor(child) { return true; } }
-            if visitor(&data.parameter_name) { return true; }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
+            if let Some(child) = &data.asserts_modifier {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.parameter_name) {
+                return true;
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ImportAttribute(data) => {
-            if visitor(&data.name) { return true; }
-            if visitor(&data.value) { return true; }
+            if visitor(&data.name) {
+                return true;
+            }
+            if visitor(&data.value) {
+                return true;
+            }
         }
         NodeData::ImportAttributes(data) => {
-            for child in data.attributes.iter() { if visitor(child) { return true; } }
+            for child in data.attributes.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::TypeQueryNode(data) => {
-            if visitor(&data.expr_name) { return true; }
+            if visitor(&data.expr_name) {
+                return true;
+            }
             if let Some(list) = &data.type_arguments {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::MappedTypeNode(data) => {
-            if let Some(child) = &data.readonly_token { if visitor(child) { return true; } }
-            if visitor(&data.type_parameter) { return true; }
-            if let Some(child) = &data.name_type { if visitor(child) { return true; } }
-            if let Some(child) = &data.question_token { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
+            if let Some(child) = &data.readonly_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.type_parameter) {
+                return true;
+            }
+            if let Some(child) = &data.name_type {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.question_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.members {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::TypeLiteralNode(data) => {
-            for child in data.members.iter() { if visitor(child) { return true; } }
+            for child in data.members.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::TupleTypeNode(data) => {
-            for child in data.elements.iter() { if visitor(child) { return true; } }
+            for child in data.elements.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::NamedTupleMember(data) => {
-            if let Some(child) = &data.dot_dot_dot_token { if visitor(child) { return true; } }
-            if visitor(&data.name) { return true; }
-            if let Some(child) = &data.question_token { if visitor(child) { return true; } }
-            if visitor(&data.type_node) { return true; }
+            if let Some(child) = &data.dot_dot_dot_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.name) {
+                return true;
+            }
+            if let Some(child) = &data.question_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.type_node) {
+                return true;
+            }
         }
         NodeData::OptionalTypeNode(data) => {
-            if visitor(&data.type_node) { return true; }
+            if visitor(&data.type_node) {
+                return true;
+            }
         }
         NodeData::RestTypeNode(data) => {
-            if visitor(&data.type_node) { return true; }
+            if visitor(&data.type_node) {
+                return true;
+            }
         }
         NodeData::ParenthesizedTypeNode(data) => {
-            if visitor(&data.type_node) { return true; }
+            if visitor(&data.type_node) {
+                return true;
+            }
         }
         NodeData::FunctionTypeNode(data) => {
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.parameters.iter() { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
+            for child in data.parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ConstructorTypeNode(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.parameters.iter() { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
+            for child in data.parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::TemplateLiteralTypeNode(data) => {
-            if visitor(&data.head) { return true; }
-            for child in data.template_spans.iter() { if visitor(child) { return true; } }
+            if visitor(&data.head) {
+                return true;
+            }
+            for child in data.template_spans.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::TemplateLiteralTypeSpan(data) => {
-            if visitor(&data.type_node) { return true; }
-            if visitor(&data.literal) { return true; }
+            if visitor(&data.type_node) {
+                return true;
+            }
+            if visitor(&data.literal) {
+                return true;
+            }
         }
         NodeData::SyntheticExpression(data) => {
-            if let Some(child) = &data.tuple_name_source { if visitor(child) { return true; } }
+            if let Some(child) = &data.tuple_name_source {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::PartiallyEmittedExpression(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::JsxElement(data) => {
-            if visitor(&data.opening_element) { return true; }
-            for child in data.children.iter() { if visitor(child) { return true; } }
-            if visitor(&data.closing_element) { return true; }
+            if visitor(&data.opening_element) {
+                return true;
+            }
+            for child in data.children.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.closing_element) {
+                return true;
+            }
         }
         NodeData::JsxAttributes(data) => {
-            for child in data.properties.iter() { if visitor(child) { return true; } }
+            for child in data.properties.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::JsxNamespacedName(data) => {
-            if visitor(&data.namespace) { return true; }
-            if visitor(&data.name) { return true; }
+            if visitor(&data.namespace) {
+                return true;
+            }
+            if visitor(&data.name) {
+                return true;
+            }
         }
         NodeData::JsxOpeningElement(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if let Some(list) = &data.type_arguments {
-                for child in list.iter() { if visitor(child) { return true; } }
+            if visitor(&data.tag_name) {
+                return true;
             }
-            if visitor(&data.attributes) { return true; }
+            if let Some(list) = &data.type_arguments {
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
+            }
+            if visitor(&data.attributes) {
+                return true;
+            }
         }
         NodeData::JsxSelfClosingElement(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if let Some(list) = &data.type_arguments {
-                for child in list.iter() { if visitor(child) { return true; } }
+            if visitor(&data.tag_name) {
+                return true;
             }
-            if visitor(&data.attributes) { return true; }
+            if let Some(list) = &data.type_arguments {
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
+            }
+            if visitor(&data.attributes) {
+                return true;
+            }
         }
         NodeData::JsxFragment(data) => {
-            if visitor(&data.opening_fragment) { return true; }
-            for child in data.children.iter() { if visitor(child) { return true; } }
-            if visitor(&data.closing_fragment) { return true; }
+            if visitor(&data.opening_fragment) {
+                return true;
+            }
+            for child in data.children.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.closing_fragment) {
+                return true;
+            }
         }
         NodeData::JsxAttribute(data) => {
-            if visitor(&data.name) { return true; }
-            if let Some(child) = &data.initializer { if visitor(child) { return true; } }
+            if visitor(&data.name) {
+                return true;
+            }
+            if let Some(child) = &data.initializer {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::JsxSpreadAttribute(data) => {
-            if visitor(&data.expression) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
         }
         NodeData::JsxClosingElement(data) => {
-            if visitor(&data.tag_name) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
         }
         NodeData::JsxExpression(data) => {
-            if let Some(child) = &data.dot_dot_dot_token { if visitor(child) { return true; } }
-            if let Some(child) = &data.expression { if visitor(child) { return true; } }
+            if let Some(child) = &data.dot_dot_dot_token {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.expression {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::SyntaxList(data) => {
-            for child in data.children.iter() { if visitor(child) { return true; } }
+            for child in data.children.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::JSDoc(data) => {
-            for child in data.comment.iter() { if visitor(child) { return true; } }
+            for child in data.comment.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.tags {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocTypeExpression(data) => {
-            if visitor(&data.type_node) { return true; }
+            if visitor(&data.type_node) {
+                return true;
+            }
         }
         NodeData::JSDocNonNullableType(data) => {
-            if visitor(&data.type_node) { return true; }
+            if visitor(&data.type_node) {
+                return true;
+            }
         }
         NodeData::JSDocNullableType(data) => {
-            if visitor(&data.type_node) { return true; }
+            if visitor(&data.type_node) {
+                return true;
+            }
         }
         NodeData::JSDocVariadicType(data) => {
-            if visitor(&data.type_node) { return true; }
+            if visitor(&data.type_node) {
+                return true;
+            }
         }
         NodeData::JSDocOptionalType(data) => {
-            if visitor(&data.type_node) { return true; }
+            if visitor(&data.type_node) {
+                return true;
+            }
         }
         NodeData::JSDocTypeTag(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if visitor(&data.type_expression) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
+            if visitor(&data.type_expression) {
+                return true;
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocUnknownTag(data) => {
-            if visitor(&data.tag_name) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocTemplateTag(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if visitor(&data.constraint) { return true; }
-            for child in data.type_parameters.iter() { if visitor(child) { return true; } }
+            if visitor(&data.tag_name) {
+                return true;
+            }
+            if visitor(&data.constraint) {
+                return true;
+            }
+            for child in data.type_parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocReturnTag(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if let Some(child) = &data.type_expression { if visitor(child) { return true; } }
+            if visitor(&data.tag_name) {
+                return true;
+            }
+            if let Some(child) = &data.type_expression {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocPublicTag(data) => {
-            if visitor(&data.tag_name) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocPrivateTag(data) => {
-            if visitor(&data.tag_name) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocProtectedTag(data) => {
-            if visitor(&data.tag_name) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocReadonlyTag(data) => {
-            if visitor(&data.tag_name) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocOverrideTag(data) => {
-            if visitor(&data.tag_name) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocDeprecatedTag(data) => {
-            if visitor(&data.tag_name) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocSeeTag(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if visitor(&data.name_expression) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
+            if visitor(&data.name_expression) {
+                return true;
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocImplementsTag(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if visitor(&data.class_name) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
+            if visitor(&data.class_name) {
+                return true;
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocAugmentsTag(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if visitor(&data.class_name) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
+            if visitor(&data.class_name) {
+                return true;
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocSatisfiesTag(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if visitor(&data.type_expression) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
+            if visitor(&data.type_expression) {
+                return true;
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocThrowsTag(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if let Some(child) = &data.type_expression { if visitor(child) { return true; } }
+            if visitor(&data.tag_name) {
+                return true;
+            }
+            if let Some(child) = &data.type_expression {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocThisTag(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if visitor(&data.type_expression) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
+            if visitor(&data.type_expression) {
+                return true;
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocImportTag(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if let Some(child) = &data.import_clause { if visitor(child) { return true; } }
-            if visitor(&data.module_specifier) { return true; }
-            if let Some(child) = &data.attributes { if visitor(child) { return true; } }
+            if visitor(&data.tag_name) {
+                return true;
+            }
+            if let Some(child) = &data.import_clause {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.module_specifier) {
+                return true;
+            }
+            if let Some(child) = &data.attributes {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocCallbackTag(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if visitor(&data.type_expression) { return true; }
-            if let Some(child) = &data.name { if visitor(child) { return true; } }
+            if visitor(&data.tag_name) {
+                return true;
+            }
+            if visitor(&data.type_expression) {
+                return true;
+            }
+            if let Some(child) = &data.name {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocOverloadTag(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if visitor(&data.type_expression) { return true; }
+            if visitor(&data.tag_name) {
+                return true;
+            }
+            if visitor(&data.type_expression) {
+                return true;
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocTypedefTag(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if let Some(child) = &data.type_expression { if visitor(child) { return true; } }
-            if let Some(child) = &data.name { if visitor(child) { return true; } }
+            if visitor(&data.tag_name) {
+                return true;
+            }
+            if let Some(child) = &data.type_expression {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.name {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocSignature(data) => {
             if let Some(list) = &data.type_parameters {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            for child in data.parameters.iter() { if visitor(child) { return true; } }
-            if let Some(child) = &data.type_node { if visitor(child) { return true; } }
+            for child in data.parameters.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.type_node {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::JSDocNameReference(data) => {
-            if visitor(&data.name) { return true; }
+            if visitor(&data.name) {
+                return true;
+            }
         }
         NodeData::SourceFile(data) => {
-            for child in data.statements.iter() { if visitor(child) { return true; } }
-            if visitor(&data.end_of_file_token) { return true; }
+            for child in data.statements.iter() {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.end_of_file_token) {
+                return true;
+            }
         }
         NodeData::ModuleDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.name) { return true; }
-            if let Some(child) = &data.body { if visitor(child) { return true; } }
+            if visitor(&data.name) {
+                return true;
+            }
+            if let Some(child) = &data.body {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ImportEqualsDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.name) { return true; }
-            if visitor(&data.module_reference) { return true; }
+            if visitor(&data.name) {
+                return true;
+            }
+            if visitor(&data.module_reference) {
+                return true;
+            }
         }
         NodeData::ExportDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if let Some(child) = &data.export_clause { if visitor(child) { return true; } }
-            if let Some(child) = &data.module_specifier { if visitor(child) { return true; } }
-            if let Some(child) = &data.attributes { if visitor(child) { return true; } }
+            if let Some(child) = &data.export_clause {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.module_specifier {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.attributes {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ImportTypeNode(data) => {
-            if visitor(&data.argument) { return true; }
-            if let Some(child) = &data.attributes { if visitor(child) { return true; } }
-            if let Some(child) = &data.qualifier { if visitor(child) { return true; } }
+            if visitor(&data.argument) {
+                return true;
+            }
+            if let Some(child) = &data.attributes {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.qualifier {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.type_arguments {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::ImportClause(data) => {
-            if let Some(child) = &data.name { if visitor(child) { return true; } }
-            if let Some(child) = &data.named_bindings { if visitor(child) { return true; } }
+            if let Some(child) = &data.name {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.named_bindings {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::ImportSpecifier(data) => {
-            if let Some(child) = &data.property_name { if visitor(child) { return true; } }
-            if visitor(&data.name) { return true; }
+            if let Some(child) = &data.property_name {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if visitor(&data.name) {
+                return true;
+            }
         }
         NodeData::JSDocLink(data) => {
-            if let Some(child) = &data.name { if visitor(child) { return true; } }
+            if let Some(child) = &data.name {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::JSDocLinkPlain(data) => {
-            if let Some(child) = &data.name { if visitor(child) { return true; } }
+            if let Some(child) = &data.name {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::JSDocLinkCode(data) => {
-            if let Some(child) = &data.name { if visitor(child) { return true; } }
+            if let Some(child) = &data.name {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::TypeParameterDeclaration(data) => {
             if let Some(list) = &data.modifiers {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
-            if visitor(&data.name) { return true; }
-            if let Some(child) = &data.constraint { if visitor(child) { return true; } }
-            if let Some(child) = &data.expression { if visitor(child) { return true; } }
-            if let Some(child) = &data.default_type { if visitor(child) { return true; } }
+            if visitor(&data.name) {
+                return true;
+            }
+            if let Some(child) = &data.constraint {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.expression {
+                if visitor(child) {
+                    return true;
+                }
+            }
+            if let Some(child) = &data.default_type {
+                if visitor(child) {
+                    return true;
+                }
+            }
         }
         NodeData::SyntheticReferenceExpression(data) => {
-            if visitor(&data.expression) { return true; }
-            if visitor(&data.this_arg) { return true; }
+            if visitor(&data.expression) {
+                return true;
+            }
+            if visitor(&data.this_arg) {
+                return true;
+            }
         }
         NodeData::JSDocTypeLiteral(data) => {
             if let Some(list) = &data.jsdoc_property_tags {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         NodeData::JSDocParameterOrPropertyTag(data) => {
-            if visitor(&data.tag_name) { return true; }
-            if visitor(&data.name) { return true; }
-            if let Some(child) = &data.type_expression { if visitor(child) { return true; } }
+            if visitor(&data.tag_name) {
+                return true;
+            }
+            if visitor(&data.name) {
+                return true;
+            }
+            if let Some(child) = &data.type_expression {
+                if visitor(child) {
+                    return true;
+                }
+            }
             if let Some(list) = &data.comment {
-                for child in list.iter() { if visitor(child) { return true; } }
+                for child in list.iter() {
+                    if visitor(child) {
+                        return true;
+                    }
+                }
             }
         }
         _ => {}
@@ -2496,8 +3812,174 @@ pub fn node_type(node: &Node) -> Option<&Arc<Node>> {
 /// Check if a node is a Token.
 pub fn is_token(node: &Node) -> bool {
     match node.kind {
-        SyntaxKind::Unknown | SyntaxKind::EndOfFile | SyntaxKind::SingleLineCommentTrivia | SyntaxKind::MultiLineCommentTrivia | SyntaxKind::NewLineTrivia | SyntaxKind::WhitespaceTrivia | SyntaxKind::ConflictMarkerTrivia | SyntaxKind::NonTextFileMarkerTrivia | SyntaxKind::NumericLiteral | SyntaxKind::BigIntLiteral | SyntaxKind::StringLiteral | SyntaxKind::JsxText | SyntaxKind::JsxTextAllWhiteSpaces | SyntaxKind::RegularExpressionLiteral | SyntaxKind::NoSubstitutionTemplateLiteral | SyntaxKind::TemplateHead | SyntaxKind::TemplateMiddle | SyntaxKind::TemplateTail | SyntaxKind::OpenBraceToken | SyntaxKind::CloseBraceToken | SyntaxKind::OpenParenToken | SyntaxKind::CloseParenToken | SyntaxKind::OpenBracketToken | SyntaxKind::CloseBracketToken | SyntaxKind::DotToken | SyntaxKind::DotDotDotToken | SyntaxKind::SemicolonToken | SyntaxKind::CommaToken | SyntaxKind::QuestionDotToken | SyntaxKind::LessThanToken | SyntaxKind::LessThanSlashToken | SyntaxKind::GreaterThanToken | SyntaxKind::LessThanEqualsToken | SyntaxKind::GreaterThanEqualsToken | SyntaxKind::EqualsEqualsToken | SyntaxKind::ExclamationEqualsToken | SyntaxKind::EqualsEqualsEqualsToken | SyntaxKind::ExclamationEqualsEqualsToken | SyntaxKind::EqualsGreaterThanToken | SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::AsteriskToken | SyntaxKind::AsteriskAsteriskToken | SyntaxKind::SlashToken | SyntaxKind::PercentToken | SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken | SyntaxKind::LessThanLessThanToken | SyntaxKind::GreaterThanGreaterThanToken | SyntaxKind::GreaterThanGreaterThanGreaterThanToken | SyntaxKind::AmpersandToken | SyntaxKind::BarToken | SyntaxKind::CaretToken | SyntaxKind::ExclamationToken | SyntaxKind::TildeToken | SyntaxKind::AmpersandAmpersandToken | SyntaxKind::BarBarToken | SyntaxKind::QuestionToken | SyntaxKind::ColonToken | SyntaxKind::AtToken | SyntaxKind::QuestionQuestionToken | SyntaxKind::BacktickToken | SyntaxKind::HashToken | SyntaxKind::EqualsToken | SyntaxKind::PlusEqualsToken | SyntaxKind::MinusEqualsToken | SyntaxKind::AsteriskEqualsToken | SyntaxKind::AsteriskAsteriskEqualsToken | SyntaxKind::SlashEqualsToken | SyntaxKind::PercentEqualsToken | SyntaxKind::LessThanLessThanEqualsToken | SyntaxKind::GreaterThanGreaterThanEqualsToken | SyntaxKind::GreaterThanGreaterThanGreaterThanEqualsToken | SyntaxKind::AmpersandEqualsToken | SyntaxKind::BarEqualsToken | SyntaxKind::BarBarEqualsToken | SyntaxKind::AmpersandAmpersandEqualsToken | SyntaxKind::QuestionQuestionEqualsToken | SyntaxKind::CaretEqualsToken | SyntaxKind::Identifier | SyntaxKind::PrivateIdentifier | SyntaxKind::JSDocCommentTextToken | SyntaxKind::BreakKeyword | SyntaxKind::CaseKeyword | SyntaxKind::CatchKeyword | SyntaxKind::ClassKeyword | SyntaxKind::ConstKeyword | SyntaxKind::ContinueKeyword | SyntaxKind::DebuggerKeyword | SyntaxKind::DefaultKeyword | SyntaxKind::DeleteKeyword | SyntaxKind::DoKeyword | SyntaxKind::ElseKeyword | SyntaxKind::EnumKeyword | SyntaxKind::ExportKeyword | SyntaxKind::ExtendsKeyword | SyntaxKind::FalseKeyword | SyntaxKind::FinallyKeyword | SyntaxKind::ForKeyword | SyntaxKind::FunctionKeyword | SyntaxKind::IfKeyword | SyntaxKind::ImportKeyword | SyntaxKind::InKeyword | SyntaxKind::InstanceOfKeyword | SyntaxKind::NewKeyword | SyntaxKind::NullKeyword | SyntaxKind::ReturnKeyword | SyntaxKind::SuperKeyword | SyntaxKind::SwitchKeyword | SyntaxKind::ThisKeyword | SyntaxKind::ThrowKeyword | SyntaxKind::TrueKeyword | SyntaxKind::TryKeyword | SyntaxKind::TypeOfKeyword | SyntaxKind::VarKeyword | SyntaxKind::VoidKeyword | SyntaxKind::WhileKeyword | SyntaxKind::WithKeyword | SyntaxKind::ImplementsKeyword | SyntaxKind::InterfaceKeyword | SyntaxKind::LetKeyword | SyntaxKind::PackageKeyword | SyntaxKind::PrivateKeyword | SyntaxKind::ProtectedKeyword | SyntaxKind::PublicKeyword | SyntaxKind::StaticKeyword | SyntaxKind::YieldKeyword | SyntaxKind::AbstractKeyword | SyntaxKind::AccessorKeyword | SyntaxKind::AsKeyword | SyntaxKind::AssertsKeyword | SyntaxKind::AssertKeyword | SyntaxKind::AnyKeyword | SyntaxKind::AsyncKeyword | SyntaxKind::AwaitKeyword | SyntaxKind::BooleanKeyword | SyntaxKind::ConstructorKeyword | SyntaxKind::DeclareKeyword | SyntaxKind::GetKeyword | SyntaxKind::ImmediateKeyword | SyntaxKind::InferKeyword | SyntaxKind::IntrinsicKeyword | SyntaxKind::IsKeyword | SyntaxKind::KeyOfKeyword | SyntaxKind::ModuleKeyword | SyntaxKind::NamespaceKeyword | SyntaxKind::NeverKeyword | SyntaxKind::OutKeyword | SyntaxKind::ReadonlyKeyword | SyntaxKind::RequireKeyword | SyntaxKind::NumberKeyword | SyntaxKind::ObjectKeyword | SyntaxKind::SatisfiesKeyword | SyntaxKind::SetKeyword | SyntaxKind::StringKeyword | SyntaxKind::SymbolKeyword | SyntaxKind::TypeKeyword | SyntaxKind::UndefinedKeyword | SyntaxKind::UniqueKeyword | SyntaxKind::UnknownKeyword | SyntaxKind::UsingKeyword | SyntaxKind::FromKeyword | SyntaxKind::GlobalKeyword | SyntaxKind::BigIntKeyword | SyntaxKind::OverrideKeyword | SyntaxKind::OfKeyword | SyntaxKind::DeferKeyword => true,
-        _ => false
+        SyntaxKind::Unknown
+        | SyntaxKind::EndOfFile
+        | SyntaxKind::SingleLineCommentTrivia
+        | SyntaxKind::MultiLineCommentTrivia
+        | SyntaxKind::NewLineTrivia
+        | SyntaxKind::WhitespaceTrivia
+        | SyntaxKind::ConflictMarkerTrivia
+        | SyntaxKind::NonTextFileMarkerTrivia
+        | SyntaxKind::NumericLiteral
+        | SyntaxKind::BigIntLiteral
+        | SyntaxKind::StringLiteral
+        | SyntaxKind::JsxText
+        | SyntaxKind::JsxTextAllWhiteSpaces
+        | SyntaxKind::RegularExpressionLiteral
+        | SyntaxKind::NoSubstitutionTemplateLiteral
+        | SyntaxKind::TemplateHead
+        | SyntaxKind::TemplateMiddle
+        | SyntaxKind::TemplateTail
+        | SyntaxKind::OpenBraceToken
+        | SyntaxKind::CloseBraceToken
+        | SyntaxKind::OpenParenToken
+        | SyntaxKind::CloseParenToken
+        | SyntaxKind::OpenBracketToken
+        | SyntaxKind::CloseBracketToken
+        | SyntaxKind::DotToken
+        | SyntaxKind::DotDotDotToken
+        | SyntaxKind::SemicolonToken
+        | SyntaxKind::CommaToken
+        | SyntaxKind::QuestionDotToken
+        | SyntaxKind::LessThanToken
+        | SyntaxKind::LessThanSlashToken
+        | SyntaxKind::GreaterThanToken
+        | SyntaxKind::LessThanEqualsToken
+        | SyntaxKind::GreaterThanEqualsToken
+        | SyntaxKind::EqualsEqualsToken
+        | SyntaxKind::ExclamationEqualsToken
+        | SyntaxKind::EqualsEqualsEqualsToken
+        | SyntaxKind::ExclamationEqualsEqualsToken
+        | SyntaxKind::EqualsGreaterThanToken
+        | SyntaxKind::PlusToken
+        | SyntaxKind::MinusToken
+        | SyntaxKind::AsteriskToken
+        | SyntaxKind::AsteriskAsteriskToken
+        | SyntaxKind::SlashToken
+        | SyntaxKind::PercentToken
+        | SyntaxKind::PlusPlusToken
+        | SyntaxKind::MinusMinusToken
+        | SyntaxKind::LessThanLessThanToken
+        | SyntaxKind::GreaterThanGreaterThanToken
+        | SyntaxKind::GreaterThanGreaterThanGreaterThanToken
+        | SyntaxKind::AmpersandToken
+        | SyntaxKind::BarToken
+        | SyntaxKind::CaretToken
+        | SyntaxKind::ExclamationToken
+        | SyntaxKind::TildeToken
+        | SyntaxKind::AmpersandAmpersandToken
+        | SyntaxKind::BarBarToken
+        | SyntaxKind::QuestionToken
+        | SyntaxKind::ColonToken
+        | SyntaxKind::AtToken
+        | SyntaxKind::QuestionQuestionToken
+        | SyntaxKind::BacktickToken
+        | SyntaxKind::HashToken
+        | SyntaxKind::EqualsToken
+        | SyntaxKind::PlusEqualsToken
+        | SyntaxKind::MinusEqualsToken
+        | SyntaxKind::AsteriskEqualsToken
+        | SyntaxKind::AsteriskAsteriskEqualsToken
+        | SyntaxKind::SlashEqualsToken
+        | SyntaxKind::PercentEqualsToken
+        | SyntaxKind::LessThanLessThanEqualsToken
+        | SyntaxKind::GreaterThanGreaterThanEqualsToken
+        | SyntaxKind::GreaterThanGreaterThanGreaterThanEqualsToken
+        | SyntaxKind::AmpersandEqualsToken
+        | SyntaxKind::BarEqualsToken
+        | SyntaxKind::BarBarEqualsToken
+        | SyntaxKind::AmpersandAmpersandEqualsToken
+        | SyntaxKind::QuestionQuestionEqualsToken
+        | SyntaxKind::CaretEqualsToken
+        | SyntaxKind::Identifier
+        | SyntaxKind::PrivateIdentifier
+        | SyntaxKind::JSDocCommentTextToken
+        | SyntaxKind::BreakKeyword
+        | SyntaxKind::CaseKeyword
+        | SyntaxKind::CatchKeyword
+        | SyntaxKind::ClassKeyword
+        | SyntaxKind::ConstKeyword
+        | SyntaxKind::ContinueKeyword
+        | SyntaxKind::DebuggerKeyword
+        | SyntaxKind::DefaultKeyword
+        | SyntaxKind::DeleteKeyword
+        | SyntaxKind::DoKeyword
+        | SyntaxKind::ElseKeyword
+        | SyntaxKind::EnumKeyword
+        | SyntaxKind::ExportKeyword
+        | SyntaxKind::ExtendsKeyword
+        | SyntaxKind::FalseKeyword
+        | SyntaxKind::FinallyKeyword
+        | SyntaxKind::ForKeyword
+        | SyntaxKind::FunctionKeyword
+        | SyntaxKind::IfKeyword
+        | SyntaxKind::ImportKeyword
+        | SyntaxKind::InKeyword
+        | SyntaxKind::InstanceOfKeyword
+        | SyntaxKind::NewKeyword
+        | SyntaxKind::NullKeyword
+        | SyntaxKind::ReturnKeyword
+        | SyntaxKind::SuperKeyword
+        | SyntaxKind::SwitchKeyword
+        | SyntaxKind::ThisKeyword
+        | SyntaxKind::ThrowKeyword
+        | SyntaxKind::TrueKeyword
+        | SyntaxKind::TryKeyword
+        | SyntaxKind::TypeOfKeyword
+        | SyntaxKind::VarKeyword
+        | SyntaxKind::VoidKeyword
+        | SyntaxKind::WhileKeyword
+        | SyntaxKind::WithKeyword
+        | SyntaxKind::ImplementsKeyword
+        | SyntaxKind::InterfaceKeyword
+        | SyntaxKind::LetKeyword
+        | SyntaxKind::PackageKeyword
+        | SyntaxKind::PrivateKeyword
+        | SyntaxKind::ProtectedKeyword
+        | SyntaxKind::PublicKeyword
+        | SyntaxKind::StaticKeyword
+        | SyntaxKind::YieldKeyword
+        | SyntaxKind::AbstractKeyword
+        | SyntaxKind::AccessorKeyword
+        | SyntaxKind::AsKeyword
+        | SyntaxKind::AssertsKeyword
+        | SyntaxKind::AssertKeyword
+        | SyntaxKind::AnyKeyword
+        | SyntaxKind::AsyncKeyword
+        | SyntaxKind::AwaitKeyword
+        | SyntaxKind::BooleanKeyword
+        | SyntaxKind::ConstructorKeyword
+        | SyntaxKind::DeclareKeyword
+        | SyntaxKind::GetKeyword
+        | SyntaxKind::ImmediateKeyword
+        | SyntaxKind::InferKeyword
+        | SyntaxKind::IntrinsicKeyword
+        | SyntaxKind::IsKeyword
+        | SyntaxKind::KeyOfKeyword
+        | SyntaxKind::ModuleKeyword
+        | SyntaxKind::NamespaceKeyword
+        | SyntaxKind::NeverKeyword
+        | SyntaxKind::OutKeyword
+        | SyntaxKind::ReadonlyKeyword
+        | SyntaxKind::RequireKeyword
+        | SyntaxKind::NumberKeyword
+        | SyntaxKind::ObjectKeyword
+        | SyntaxKind::SatisfiesKeyword
+        | SyntaxKind::SetKeyword
+        | SyntaxKind::StringKeyword
+        | SyntaxKind::SymbolKeyword
+        | SyntaxKind::TypeKeyword
+        | SyntaxKind::UndefinedKeyword
+        | SyntaxKind::UniqueKeyword
+        | SyntaxKind::UnknownKeyword
+        | SyntaxKind::UsingKeyword
+        | SyntaxKind::FromKeyword
+        | SyntaxKind::GlobalKeyword
+        | SyntaxKind::BigIntKeyword
+        | SyntaxKind::OverrideKeyword
+        | SyntaxKind::OfKeyword
+        | SyntaxKind::DeferKeyword => true,
+        _ => false,
     }
 }
 
@@ -2555,7 +4037,7 @@ pub fn is_for_statement(node: &Node) -> bool {
 pub fn is_for_in_or_of_statement(node: &Node) -> bool {
     match node.kind {
         SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement => true,
-        _ => false
+        _ => false,
     }
 }
 
@@ -2593,7 +4075,7 @@ pub fn is_case_block(node: &Node) -> bool {
 pub fn is_case_or_default_clause(node: &Node) -> bool {
     match node.kind {
         SyntaxKind::CaseClause | SyntaxKind::DefaultClause => true,
-        _ => false
+        _ => false,
     }
 }
 
@@ -2651,7 +4133,7 @@ pub fn is_variable_declaration_list(node: &Node) -> bool {
 pub fn is_binding_pattern(node: &Node) -> bool {
     match node.kind {
         SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern => true,
-        _ => false
+        _ => false,
     }
 }
 
@@ -2838,8 +4320,13 @@ pub fn is_omitted_expression(node: &Node) -> bool {
 /// Check if a node is a KeywordExpression.
 pub fn is_keyword_expression(node: &Node) -> bool {
     match node.kind {
-        SyntaxKind::NullKeyword | SyntaxKind::TrueKeyword | SyntaxKind::FalseKeyword | SyntaxKind::ThisKeyword | SyntaxKind::SuperKeyword | SyntaxKind::ImportKeyword => true,
-        _ => false
+        SyntaxKind::NullKeyword
+        | SyntaxKind::TrueKeyword
+        | SyntaxKind::FalseKeyword
+        | SyntaxKind::ThisKeyword
+        | SyntaxKind::SuperKeyword
+        | SyntaxKind::ImportKeyword => true,
+        _ => false,
     }
 }
 
@@ -3021,8 +4508,19 @@ pub fn is_type_assertion(node: &Node) -> bool {
 /// Check if a node is a KeywordTypeNode.
 pub fn is_keyword_type_node(node: &Node) -> bool {
     match node.kind {
-        SyntaxKind::AnyKeyword | SyntaxKind::BigIntKeyword | SyntaxKind::BooleanKeyword | SyntaxKind::IntrinsicKeyword | SyntaxKind::NeverKeyword | SyntaxKind::NumberKeyword | SyntaxKind::ObjectKeyword | SyntaxKind::StringKeyword | SyntaxKind::SymbolKeyword | SyntaxKind::UndefinedKeyword | SyntaxKind::UnknownKeyword | SyntaxKind::VoidKeyword => true,
-        _ => false
+        SyntaxKind::AnyKeyword
+        | SyntaxKind::BigIntKeyword
+        | SyntaxKind::BooleanKeyword
+        | SyntaxKind::IntrinsicKeyword
+        | SyntaxKind::NeverKeyword
+        | SyntaxKind::NumberKeyword
+        | SyntaxKind::ObjectKeyword
+        | SyntaxKind::StringKeyword
+        | SyntaxKind::SymbolKeyword
+        | SyntaxKind::UndefinedKeyword
+        | SyntaxKind::UnknownKeyword
+        | SyntaxKind::VoidKeyword => true,
+        _ => false,
     }
 }
 
@@ -3470,7 +4968,7 @@ pub fn is_jsdoc_type_literal(node: &Node) -> bool {
 pub fn is_jsdoc_parameter_or_property_tag(node: &Node) -> bool {
     match node.kind {
         SyntaxKind::JSDocParameterTag | SyntaxKind::JSDocPropertyTag => true,
-        _ => false
+        _ => false,
     }
 }
 
@@ -3480,224 +4978,487 @@ pub fn is_jsdoc_parameter_or_property_tag(node: &Node) -> bool {
 
 pub fn is_trivia_kind(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::SingleLineCommentTrivia | SyntaxKind::MultiLineCommentTrivia | SyntaxKind::NewLineTrivia | SyntaxKind::WhitespaceTrivia | SyntaxKind::ConflictMarkerTrivia => true,
-        _ => false
+        SyntaxKind::SingleLineCommentTrivia
+        | SyntaxKind::MultiLineCommentTrivia
+        | SyntaxKind::NewLineTrivia
+        | SyntaxKind::WhitespaceTrivia
+        | SyntaxKind::ConflictMarkerTrivia => true,
+        _ => false,
     }
 }
 
 pub fn is_literal_kind(kind: SyntaxKind) -> bool {
-    (kind as i16) >= (SyntaxKind::NumericLiteral as i16) && (kind as i16) <= (SyntaxKind::NoSubstitutionTemplateLiteral as i16)
+    (kind as i16) >= (SyntaxKind::NumericLiteral as i16)
+        && (kind as i16) <= (SyntaxKind::NoSubstitutionTemplateLiteral as i16)
 }
 
 pub fn is_pseudo_literal_kind(kind: SyntaxKind) -> bool {
     match kind {
         SyntaxKind::TemplateHead | SyntaxKind::TemplateMiddle | SyntaxKind::TemplateTail => true,
-        _ => false
+        _ => false,
     }
 }
 
 pub fn is_punctuation_kind(kind: SyntaxKind) -> bool {
-    (kind as i16) >= (SyntaxKind::OpenBraceToken as i16) && (kind as i16) <= (SyntaxKind::CaretEqualsToken as i16)
+    (kind as i16) >= (SyntaxKind::OpenBraceToken as i16)
+        && (kind as i16) <= (SyntaxKind::CaretEqualsToken as i16)
 }
 
 pub fn is_keyword_kind(kind: SyntaxKind) -> bool {
-    (kind as i16) >= (SyntaxKind::BreakKeyword as i16) && (kind as i16) <= (SyntaxKind::DeferKeyword as i16)
+    (kind as i16) >= (SyntaxKind::BreakKeyword as i16)
+        && (kind as i16) <= (SyntaxKind::DeferKeyword as i16)
 }
 
 pub fn is_modifier_kind(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::AbstractKeyword | SyntaxKind::AccessorKeyword | SyntaxKind::AsyncKeyword | SyntaxKind::ConstKeyword | SyntaxKind::DeclareKeyword | SyntaxKind::DefaultKeyword | SyntaxKind::ExportKeyword | SyntaxKind::InKeyword | SyntaxKind::PrivateKeyword | SyntaxKind::ProtectedKeyword | SyntaxKind::PublicKeyword | SyntaxKind::ReadonlyKeyword | SyntaxKind::OutKeyword | SyntaxKind::OverrideKeyword | SyntaxKind::StaticKeyword => true,
-        _ => false
+        SyntaxKind::AbstractKeyword
+        | SyntaxKind::AccessorKeyword
+        | SyntaxKind::AsyncKeyword
+        | SyntaxKind::ConstKeyword
+        | SyntaxKind::DeclareKeyword
+        | SyntaxKind::DefaultKeyword
+        | SyntaxKind::ExportKeyword
+        | SyntaxKind::InKeyword
+        | SyntaxKind::PrivateKeyword
+        | SyntaxKind::ProtectedKeyword
+        | SyntaxKind::PublicKeyword
+        | SyntaxKind::ReadonlyKeyword
+        | SyntaxKind::OutKeyword
+        | SyntaxKind::OverrideKeyword
+        | SyntaxKind::StaticKeyword => true,
+        _ => false,
     }
 }
 
 pub fn is_keyword_type_kind(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::AnyKeyword | SyntaxKind::BigIntKeyword | SyntaxKind::BooleanKeyword | SyntaxKind::IntrinsicKeyword | SyntaxKind::NeverKeyword | SyntaxKind::NumberKeyword | SyntaxKind::ObjectKeyword | SyntaxKind::StringKeyword | SyntaxKind::SymbolKeyword | SyntaxKind::UndefinedKeyword | SyntaxKind::UnknownKeyword | SyntaxKind::VoidKeyword => true,
-        _ => false
+        SyntaxKind::AnyKeyword
+        | SyntaxKind::BigIntKeyword
+        | SyntaxKind::BooleanKeyword
+        | SyntaxKind::IntrinsicKeyword
+        | SyntaxKind::NeverKeyword
+        | SyntaxKind::NumberKeyword
+        | SyntaxKind::ObjectKeyword
+        | SyntaxKind::StringKeyword
+        | SyntaxKind::SymbolKeyword
+        | SyntaxKind::UndefinedKeyword
+        | SyntaxKind::UnknownKeyword
+        | SyntaxKind::VoidKeyword => true,
+        _ => false,
     }
 }
 
 pub fn is_keyword_expression_kind(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::NullKeyword | SyntaxKind::TrueKeyword | SyntaxKind::FalseKeyword | SyntaxKind::ThisKeyword | SyntaxKind::SuperKeyword | SyntaxKind::ImportKeyword => true,
-        _ => false
+        SyntaxKind::NullKeyword
+        | SyntaxKind::TrueKeyword
+        | SyntaxKind::FalseKeyword
+        | SyntaxKind::ThisKeyword
+        | SyntaxKind::SuperKeyword
+        | SyntaxKind::ImportKeyword => true,
+        _ => false,
     }
 }
 
 pub fn is_token_kind(kind: SyntaxKind) -> bool {
-    (kind as i16) >= (SyntaxKind::Unknown as i16) && (kind as i16) <= (SyntaxKind::DeferKeyword as i16)
+    (kind as i16) >= (SyntaxKind::Unknown as i16)
+        && (kind as i16) <= (SyntaxKind::DeferKeyword as i16)
 }
 
 pub fn is_jsx_token_kind(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::LessThanSlashToken | SyntaxKind::EndOfFile | SyntaxKind::ConflictMarkerTrivia | SyntaxKind::JsxText | SyntaxKind::JsxTextAllWhiteSpaces | SyntaxKind::OpenBraceToken | SyntaxKind::LessThanToken => true,
-        _ => false
+        SyntaxKind::LessThanSlashToken
+        | SyntaxKind::EndOfFile
+        | SyntaxKind::ConflictMarkerTrivia
+        | SyntaxKind::JsxText
+        | SyntaxKind::JsxTextAllWhiteSpaces
+        | SyntaxKind::OpenBraceToken
+        | SyntaxKind::LessThanToken => true,
+        _ => false,
     }
 }
 
 pub fn is_jsdoc_node_kind(kind: SyntaxKind) -> bool {
-    (kind as i16) >= (SyntaxKind::JSDocTypeExpression as i16) && (kind as i16) <= (SyntaxKind::JSDocImportTag as i16)
+    (kind as i16) >= (SyntaxKind::JSDocTypeExpression as i16)
+        && (kind as i16) <= (SyntaxKind::JSDocImportTag as i16)
 }
 
 pub fn is_import_phase_modifier_kind(kind: SyntaxKind) -> bool {
     match kind {
         SyntaxKind::TypeKeyword | SyntaxKind::DeferKeyword => true,
-        _ => false
+        _ => false,
     }
 }
 
 pub fn is_postfix_unary_operator(kind: SyntaxKind) -> bool {
     match kind {
         SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken => true,
-        _ => false
+        _ => false,
     }
 }
 
 pub fn is_prefix_unary_operator(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::TildeToken | SyntaxKind::ExclamationToken | SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken => true,
-        _ => false
+        SyntaxKind::PlusToken
+        | SyntaxKind::MinusToken
+        | SyntaxKind::TildeToken
+        | SyntaxKind::ExclamationToken
+        | SyntaxKind::PlusPlusToken
+        | SyntaxKind::MinusMinusToken => true,
+        _ => false,
     }
 }
 
 pub fn is_assignment_operator(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::EqualsToken | SyntaxKind::PlusEqualsToken | SyntaxKind::MinusEqualsToken | SyntaxKind::AsteriskAsteriskEqualsToken | SyntaxKind::AsteriskEqualsToken | SyntaxKind::SlashEqualsToken | SyntaxKind::PercentEqualsToken | SyntaxKind::AmpersandEqualsToken | SyntaxKind::BarEqualsToken | SyntaxKind::CaretEqualsToken | SyntaxKind::LessThanLessThanEqualsToken | SyntaxKind::GreaterThanGreaterThanGreaterThanEqualsToken | SyntaxKind::GreaterThanGreaterThanEqualsToken | SyntaxKind::BarBarEqualsToken | SyntaxKind::AmpersandAmpersandEqualsToken | SyntaxKind::QuestionQuestionEqualsToken => true,
-        _ => false
+        SyntaxKind::EqualsToken
+        | SyntaxKind::PlusEqualsToken
+        | SyntaxKind::MinusEqualsToken
+        | SyntaxKind::AsteriskAsteriskEqualsToken
+        | SyntaxKind::AsteriskEqualsToken
+        | SyntaxKind::SlashEqualsToken
+        | SyntaxKind::PercentEqualsToken
+        | SyntaxKind::AmpersandEqualsToken
+        | SyntaxKind::BarEqualsToken
+        | SyntaxKind::CaretEqualsToken
+        | SyntaxKind::LessThanLessThanEqualsToken
+        | SyntaxKind::GreaterThanGreaterThanGreaterThanEqualsToken
+        | SyntaxKind::GreaterThanGreaterThanEqualsToken
+        | SyntaxKind::BarBarEqualsToken
+        | SyntaxKind::AmpersandAmpersandEqualsToken
+        | SyntaxKind::QuestionQuestionEqualsToken => true,
+        _ => false,
     }
 }
 
 pub fn is_binary_operator(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::QuestionQuestionToken | SyntaxKind::AsteriskAsteriskToken | SyntaxKind::AsteriskToken | SyntaxKind::SlashToken | SyntaxKind::PercentToken | SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::LessThanLessThanToken | SyntaxKind::GreaterThanGreaterThanToken | SyntaxKind::GreaterThanGreaterThanGreaterThanToken | SyntaxKind::LessThanToken | SyntaxKind::LessThanEqualsToken | SyntaxKind::GreaterThanToken | SyntaxKind::GreaterThanEqualsToken | SyntaxKind::InstanceOfKeyword | SyntaxKind::InKeyword | SyntaxKind::EqualsEqualsToken | SyntaxKind::EqualsEqualsEqualsToken | SyntaxKind::ExclamationEqualsEqualsToken | SyntaxKind::ExclamationEqualsToken | SyntaxKind::AmpersandToken | SyntaxKind::BarToken | SyntaxKind::CaretToken | SyntaxKind::AmpersandAmpersandToken | SyntaxKind::BarBarToken | SyntaxKind::EqualsToken | SyntaxKind::PlusEqualsToken | SyntaxKind::MinusEqualsToken | SyntaxKind::AsteriskAsteriskEqualsToken | SyntaxKind::AsteriskEqualsToken | SyntaxKind::SlashEqualsToken | SyntaxKind::PercentEqualsToken | SyntaxKind::AmpersandEqualsToken | SyntaxKind::BarEqualsToken | SyntaxKind::CaretEqualsToken | SyntaxKind::LessThanLessThanEqualsToken | SyntaxKind::GreaterThanGreaterThanGreaterThanEqualsToken | SyntaxKind::GreaterThanGreaterThanEqualsToken | SyntaxKind::BarBarEqualsToken | SyntaxKind::AmpersandAmpersandEqualsToken | SyntaxKind::QuestionQuestionEqualsToken | SyntaxKind::CommaToken => true,
-        _ => false
+        SyntaxKind::QuestionQuestionToken
+        | SyntaxKind::AsteriskAsteriskToken
+        | SyntaxKind::AsteriskToken
+        | SyntaxKind::SlashToken
+        | SyntaxKind::PercentToken
+        | SyntaxKind::PlusToken
+        | SyntaxKind::MinusToken
+        | SyntaxKind::LessThanLessThanToken
+        | SyntaxKind::GreaterThanGreaterThanToken
+        | SyntaxKind::GreaterThanGreaterThanGreaterThanToken
+        | SyntaxKind::LessThanToken
+        | SyntaxKind::LessThanEqualsToken
+        | SyntaxKind::GreaterThanToken
+        | SyntaxKind::GreaterThanEqualsToken
+        | SyntaxKind::InstanceOfKeyword
+        | SyntaxKind::InKeyword
+        | SyntaxKind::EqualsEqualsToken
+        | SyntaxKind::EqualsEqualsEqualsToken
+        | SyntaxKind::ExclamationEqualsEqualsToken
+        | SyntaxKind::ExclamationEqualsToken
+        | SyntaxKind::AmpersandToken
+        | SyntaxKind::BarToken
+        | SyntaxKind::CaretToken
+        | SyntaxKind::AmpersandAmpersandToken
+        | SyntaxKind::BarBarToken
+        | SyntaxKind::EqualsToken
+        | SyntaxKind::PlusEqualsToken
+        | SyntaxKind::MinusEqualsToken
+        | SyntaxKind::AsteriskAsteriskEqualsToken
+        | SyntaxKind::AsteriskEqualsToken
+        | SyntaxKind::SlashEqualsToken
+        | SyntaxKind::PercentEqualsToken
+        | SyntaxKind::AmpersandEqualsToken
+        | SyntaxKind::BarEqualsToken
+        | SyntaxKind::CaretEqualsToken
+        | SyntaxKind::LessThanLessThanEqualsToken
+        | SyntaxKind::GreaterThanGreaterThanGreaterThanEqualsToken
+        | SyntaxKind::GreaterThanGreaterThanEqualsToken
+        | SyntaxKind::BarBarEqualsToken
+        | SyntaxKind::AmpersandAmpersandEqualsToken
+        | SyntaxKind::QuestionQuestionEqualsToken
+        | SyntaxKind::CommaToken => true,
+        _ => false,
     }
 }
 
 pub fn is_exponentiation_operator(kind: SyntaxKind) -> bool {
     match kind {
         SyntaxKind::AsteriskAsteriskToken => true,
-        _ => false
+        _ => false,
     }
 }
 
 pub fn is_multiplicative_operator(kind: SyntaxKind) -> bool {
     match kind {
         SyntaxKind::AsteriskToken | SyntaxKind::SlashToken | SyntaxKind::PercentToken => true,
-        _ => false
+        _ => false,
     }
 }
 
 pub fn is_multiplicative_operator_or_higher(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::AsteriskAsteriskToken | SyntaxKind::AsteriskToken | SyntaxKind::SlashToken | SyntaxKind::PercentToken => true,
-        _ => false
+        SyntaxKind::AsteriskAsteriskToken
+        | SyntaxKind::AsteriskToken
+        | SyntaxKind::SlashToken
+        | SyntaxKind::PercentToken => true,
+        _ => false,
     }
 }
 
 pub fn is_additive_operator(kind: SyntaxKind) -> bool {
     match kind {
         SyntaxKind::PlusToken | SyntaxKind::MinusToken => true,
-        _ => false
+        _ => false,
     }
 }
 
 pub fn is_additive_operator_or_higher(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::AsteriskAsteriskToken | SyntaxKind::AsteriskToken | SyntaxKind::SlashToken | SyntaxKind::PercentToken | SyntaxKind::PlusToken | SyntaxKind::MinusToken => true,
-        _ => false
+        SyntaxKind::AsteriskAsteriskToken
+        | SyntaxKind::AsteriskToken
+        | SyntaxKind::SlashToken
+        | SyntaxKind::PercentToken
+        | SyntaxKind::PlusToken
+        | SyntaxKind::MinusToken => true,
+        _ => false,
     }
 }
 
 pub fn is_shift_operator(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::LessThanLessThanToken | SyntaxKind::GreaterThanGreaterThanToken | SyntaxKind::GreaterThanGreaterThanGreaterThanToken => true,
-        _ => false
+        SyntaxKind::LessThanLessThanToken
+        | SyntaxKind::GreaterThanGreaterThanToken
+        | SyntaxKind::GreaterThanGreaterThanGreaterThanToken => true,
+        _ => false,
     }
 }
 
 pub fn is_shift_operator_or_higher(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::AsteriskAsteriskToken | SyntaxKind::AsteriskToken | SyntaxKind::SlashToken | SyntaxKind::PercentToken | SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::LessThanLessThanToken | SyntaxKind::GreaterThanGreaterThanToken | SyntaxKind::GreaterThanGreaterThanGreaterThanToken => true,
-        _ => false
+        SyntaxKind::AsteriskAsteriskToken
+        | SyntaxKind::AsteriskToken
+        | SyntaxKind::SlashToken
+        | SyntaxKind::PercentToken
+        | SyntaxKind::PlusToken
+        | SyntaxKind::MinusToken
+        | SyntaxKind::LessThanLessThanToken
+        | SyntaxKind::GreaterThanGreaterThanToken
+        | SyntaxKind::GreaterThanGreaterThanGreaterThanToken => true,
+        _ => false,
     }
 }
 
 pub fn is_relational_operator(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::LessThanToken | SyntaxKind::LessThanEqualsToken | SyntaxKind::GreaterThanToken | SyntaxKind::GreaterThanEqualsToken | SyntaxKind::InstanceOfKeyword | SyntaxKind::InKeyword => true,
-        _ => false
+        SyntaxKind::LessThanToken
+        | SyntaxKind::LessThanEqualsToken
+        | SyntaxKind::GreaterThanToken
+        | SyntaxKind::GreaterThanEqualsToken
+        | SyntaxKind::InstanceOfKeyword
+        | SyntaxKind::InKeyword => true,
+        _ => false,
     }
 }
 
 pub fn is_relational_operator_or_higher(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::AsteriskAsteriskToken | SyntaxKind::AsteriskToken | SyntaxKind::SlashToken | SyntaxKind::PercentToken | SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::LessThanLessThanToken | SyntaxKind::GreaterThanGreaterThanToken | SyntaxKind::GreaterThanGreaterThanGreaterThanToken | SyntaxKind::LessThanToken | SyntaxKind::LessThanEqualsToken | SyntaxKind::GreaterThanToken | SyntaxKind::GreaterThanEqualsToken | SyntaxKind::InstanceOfKeyword | SyntaxKind::InKeyword => true,
-        _ => false
+        SyntaxKind::AsteriskAsteriskToken
+        | SyntaxKind::AsteriskToken
+        | SyntaxKind::SlashToken
+        | SyntaxKind::PercentToken
+        | SyntaxKind::PlusToken
+        | SyntaxKind::MinusToken
+        | SyntaxKind::LessThanLessThanToken
+        | SyntaxKind::GreaterThanGreaterThanToken
+        | SyntaxKind::GreaterThanGreaterThanGreaterThanToken
+        | SyntaxKind::LessThanToken
+        | SyntaxKind::LessThanEqualsToken
+        | SyntaxKind::GreaterThanToken
+        | SyntaxKind::GreaterThanEqualsToken
+        | SyntaxKind::InstanceOfKeyword
+        | SyntaxKind::InKeyword => true,
+        _ => false,
     }
 }
 
 pub fn is_equality_operator(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::EqualsEqualsToken | SyntaxKind::EqualsEqualsEqualsToken | SyntaxKind::ExclamationEqualsEqualsToken | SyntaxKind::ExclamationEqualsToken => true,
-        _ => false
+        SyntaxKind::EqualsEqualsToken
+        | SyntaxKind::EqualsEqualsEqualsToken
+        | SyntaxKind::ExclamationEqualsEqualsToken
+        | SyntaxKind::ExclamationEqualsToken => true,
+        _ => false,
     }
 }
 
 pub fn is_equality_operator_or_higher(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::AsteriskAsteriskToken | SyntaxKind::AsteriskToken | SyntaxKind::SlashToken | SyntaxKind::PercentToken | SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::LessThanLessThanToken | SyntaxKind::GreaterThanGreaterThanToken | SyntaxKind::GreaterThanGreaterThanGreaterThanToken | SyntaxKind::LessThanToken | SyntaxKind::LessThanEqualsToken | SyntaxKind::GreaterThanToken | SyntaxKind::GreaterThanEqualsToken | SyntaxKind::InstanceOfKeyword | SyntaxKind::InKeyword | SyntaxKind::EqualsEqualsToken | SyntaxKind::EqualsEqualsEqualsToken | SyntaxKind::ExclamationEqualsEqualsToken | SyntaxKind::ExclamationEqualsToken => true,
-        _ => false
+        SyntaxKind::AsteriskAsteriskToken
+        | SyntaxKind::AsteriskToken
+        | SyntaxKind::SlashToken
+        | SyntaxKind::PercentToken
+        | SyntaxKind::PlusToken
+        | SyntaxKind::MinusToken
+        | SyntaxKind::LessThanLessThanToken
+        | SyntaxKind::GreaterThanGreaterThanToken
+        | SyntaxKind::GreaterThanGreaterThanGreaterThanToken
+        | SyntaxKind::LessThanToken
+        | SyntaxKind::LessThanEqualsToken
+        | SyntaxKind::GreaterThanToken
+        | SyntaxKind::GreaterThanEqualsToken
+        | SyntaxKind::InstanceOfKeyword
+        | SyntaxKind::InKeyword
+        | SyntaxKind::EqualsEqualsToken
+        | SyntaxKind::EqualsEqualsEqualsToken
+        | SyntaxKind::ExclamationEqualsEqualsToken
+        | SyntaxKind::ExclamationEqualsToken => true,
+        _ => false,
     }
 }
 
 pub fn is_bitwise_operator(kind: SyntaxKind) -> bool {
     match kind {
         SyntaxKind::AmpersandToken | SyntaxKind::BarToken | SyntaxKind::CaretToken => true,
-        _ => false
+        _ => false,
     }
 }
 
 pub fn is_bitwise_operator_or_higher(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::AsteriskAsteriskToken | SyntaxKind::AsteriskToken | SyntaxKind::SlashToken | SyntaxKind::PercentToken | SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::LessThanLessThanToken | SyntaxKind::GreaterThanGreaterThanToken | SyntaxKind::GreaterThanGreaterThanGreaterThanToken | SyntaxKind::LessThanToken | SyntaxKind::LessThanEqualsToken | SyntaxKind::GreaterThanToken | SyntaxKind::GreaterThanEqualsToken | SyntaxKind::InstanceOfKeyword | SyntaxKind::InKeyword | SyntaxKind::EqualsEqualsToken | SyntaxKind::EqualsEqualsEqualsToken | SyntaxKind::ExclamationEqualsEqualsToken | SyntaxKind::ExclamationEqualsToken | SyntaxKind::AmpersandToken | SyntaxKind::BarToken | SyntaxKind::CaretToken => true,
-        _ => false
+        SyntaxKind::AsteriskAsteriskToken
+        | SyntaxKind::AsteriskToken
+        | SyntaxKind::SlashToken
+        | SyntaxKind::PercentToken
+        | SyntaxKind::PlusToken
+        | SyntaxKind::MinusToken
+        | SyntaxKind::LessThanLessThanToken
+        | SyntaxKind::GreaterThanGreaterThanToken
+        | SyntaxKind::GreaterThanGreaterThanGreaterThanToken
+        | SyntaxKind::LessThanToken
+        | SyntaxKind::LessThanEqualsToken
+        | SyntaxKind::GreaterThanToken
+        | SyntaxKind::GreaterThanEqualsToken
+        | SyntaxKind::InstanceOfKeyword
+        | SyntaxKind::InKeyword
+        | SyntaxKind::EqualsEqualsToken
+        | SyntaxKind::EqualsEqualsEqualsToken
+        | SyntaxKind::ExclamationEqualsEqualsToken
+        | SyntaxKind::ExclamationEqualsToken
+        | SyntaxKind::AmpersandToken
+        | SyntaxKind::BarToken
+        | SyntaxKind::CaretToken => true,
+        _ => false,
     }
 }
 
 pub fn is_logical_operator(kind: SyntaxKind) -> bool {
     match kind {
         SyntaxKind::AmpersandAmpersandToken | SyntaxKind::BarBarToken => true,
-        _ => false
+        _ => false,
     }
 }
 
 pub fn is_logical_operator_or_higher(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::AsteriskAsteriskToken | SyntaxKind::AsteriskToken | SyntaxKind::SlashToken | SyntaxKind::PercentToken | SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::LessThanLessThanToken | SyntaxKind::GreaterThanGreaterThanToken | SyntaxKind::GreaterThanGreaterThanGreaterThanToken | SyntaxKind::LessThanToken | SyntaxKind::LessThanEqualsToken | SyntaxKind::GreaterThanToken | SyntaxKind::GreaterThanEqualsToken | SyntaxKind::InstanceOfKeyword | SyntaxKind::InKeyword | SyntaxKind::EqualsEqualsToken | SyntaxKind::EqualsEqualsEqualsToken | SyntaxKind::ExclamationEqualsEqualsToken | SyntaxKind::ExclamationEqualsToken | SyntaxKind::AmpersandToken | SyntaxKind::BarToken | SyntaxKind::CaretToken | SyntaxKind::AmpersandAmpersandToken | SyntaxKind::BarBarToken => true,
-        _ => false
+        SyntaxKind::AsteriskAsteriskToken
+        | SyntaxKind::AsteriskToken
+        | SyntaxKind::SlashToken
+        | SyntaxKind::PercentToken
+        | SyntaxKind::PlusToken
+        | SyntaxKind::MinusToken
+        | SyntaxKind::LessThanLessThanToken
+        | SyntaxKind::GreaterThanGreaterThanToken
+        | SyntaxKind::GreaterThanGreaterThanGreaterThanToken
+        | SyntaxKind::LessThanToken
+        | SyntaxKind::LessThanEqualsToken
+        | SyntaxKind::GreaterThanToken
+        | SyntaxKind::GreaterThanEqualsToken
+        | SyntaxKind::InstanceOfKeyword
+        | SyntaxKind::InKeyword
+        | SyntaxKind::EqualsEqualsToken
+        | SyntaxKind::EqualsEqualsEqualsToken
+        | SyntaxKind::ExclamationEqualsEqualsToken
+        | SyntaxKind::ExclamationEqualsToken
+        | SyntaxKind::AmpersandToken
+        | SyntaxKind::BarToken
+        | SyntaxKind::CaretToken
+        | SyntaxKind::AmpersandAmpersandToken
+        | SyntaxKind::BarBarToken => true,
+        _ => false,
     }
 }
 
 pub fn is_compound_assignment_operator(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::PlusEqualsToken | SyntaxKind::MinusEqualsToken | SyntaxKind::AsteriskAsteriskEqualsToken | SyntaxKind::AsteriskEqualsToken | SyntaxKind::SlashEqualsToken | SyntaxKind::PercentEqualsToken | SyntaxKind::AmpersandEqualsToken | SyntaxKind::BarEqualsToken | SyntaxKind::CaretEqualsToken | SyntaxKind::LessThanLessThanEqualsToken | SyntaxKind::GreaterThanGreaterThanGreaterThanEqualsToken | SyntaxKind::GreaterThanGreaterThanEqualsToken | SyntaxKind::BarBarEqualsToken | SyntaxKind::AmpersandAmpersandEqualsToken | SyntaxKind::QuestionQuestionEqualsToken => true,
-        _ => false
+        SyntaxKind::PlusEqualsToken
+        | SyntaxKind::MinusEqualsToken
+        | SyntaxKind::AsteriskAsteriskEqualsToken
+        | SyntaxKind::AsteriskEqualsToken
+        | SyntaxKind::SlashEqualsToken
+        | SyntaxKind::PercentEqualsToken
+        | SyntaxKind::AmpersandEqualsToken
+        | SyntaxKind::BarEqualsToken
+        | SyntaxKind::CaretEqualsToken
+        | SyntaxKind::LessThanLessThanEqualsToken
+        | SyntaxKind::GreaterThanGreaterThanGreaterThanEqualsToken
+        | SyntaxKind::GreaterThanGreaterThanEqualsToken
+        | SyntaxKind::BarBarEqualsToken
+        | SyntaxKind::AmpersandAmpersandEqualsToken
+        | SyntaxKind::QuestionQuestionEqualsToken => true,
+        _ => false,
     }
 }
 
 pub fn is_assignment_operator_or_higher(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::QuestionQuestionToken | SyntaxKind::AsteriskAsteriskToken | SyntaxKind::AsteriskToken | SyntaxKind::SlashToken | SyntaxKind::PercentToken | SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::LessThanLessThanToken | SyntaxKind::GreaterThanGreaterThanToken | SyntaxKind::GreaterThanGreaterThanGreaterThanToken | SyntaxKind::LessThanToken | SyntaxKind::LessThanEqualsToken | SyntaxKind::GreaterThanToken | SyntaxKind::GreaterThanEqualsToken | SyntaxKind::InstanceOfKeyword | SyntaxKind::InKeyword | SyntaxKind::EqualsEqualsToken | SyntaxKind::EqualsEqualsEqualsToken | SyntaxKind::ExclamationEqualsEqualsToken | SyntaxKind::ExclamationEqualsToken | SyntaxKind::AmpersandToken | SyntaxKind::BarToken | SyntaxKind::CaretToken | SyntaxKind::AmpersandAmpersandToken | SyntaxKind::BarBarToken | SyntaxKind::EqualsToken | SyntaxKind::PlusEqualsToken | SyntaxKind::MinusEqualsToken | SyntaxKind::AsteriskAsteriskEqualsToken | SyntaxKind::AsteriskEqualsToken | SyntaxKind::SlashEqualsToken | SyntaxKind::PercentEqualsToken | SyntaxKind::AmpersandEqualsToken | SyntaxKind::BarEqualsToken | SyntaxKind::CaretEqualsToken | SyntaxKind::LessThanLessThanEqualsToken | SyntaxKind::GreaterThanGreaterThanGreaterThanEqualsToken | SyntaxKind::GreaterThanGreaterThanEqualsToken | SyntaxKind::BarBarEqualsToken | SyntaxKind::AmpersandAmpersandEqualsToken | SyntaxKind::QuestionQuestionEqualsToken => true,
-        _ => false
+        SyntaxKind::QuestionQuestionToken
+        | SyntaxKind::AsteriskAsteriskToken
+        | SyntaxKind::AsteriskToken
+        | SyntaxKind::SlashToken
+        | SyntaxKind::PercentToken
+        | SyntaxKind::PlusToken
+        | SyntaxKind::MinusToken
+        | SyntaxKind::LessThanLessThanToken
+        | SyntaxKind::GreaterThanGreaterThanToken
+        | SyntaxKind::GreaterThanGreaterThanGreaterThanToken
+        | SyntaxKind::LessThanToken
+        | SyntaxKind::LessThanEqualsToken
+        | SyntaxKind::GreaterThanToken
+        | SyntaxKind::GreaterThanEqualsToken
+        | SyntaxKind::InstanceOfKeyword
+        | SyntaxKind::InKeyword
+        | SyntaxKind::EqualsEqualsToken
+        | SyntaxKind::EqualsEqualsEqualsToken
+        | SyntaxKind::ExclamationEqualsEqualsToken
+        | SyntaxKind::ExclamationEqualsToken
+        | SyntaxKind::AmpersandToken
+        | SyntaxKind::BarToken
+        | SyntaxKind::CaretToken
+        | SyntaxKind::AmpersandAmpersandToken
+        | SyntaxKind::BarBarToken
+        | SyntaxKind::EqualsToken
+        | SyntaxKind::PlusEqualsToken
+        | SyntaxKind::MinusEqualsToken
+        | SyntaxKind::AsteriskAsteriskEqualsToken
+        | SyntaxKind::AsteriskEqualsToken
+        | SyntaxKind::SlashEqualsToken
+        | SyntaxKind::PercentEqualsToken
+        | SyntaxKind::AmpersandEqualsToken
+        | SyntaxKind::BarEqualsToken
+        | SyntaxKind::CaretEqualsToken
+        | SyntaxKind::LessThanLessThanEqualsToken
+        | SyntaxKind::GreaterThanGreaterThanGreaterThanEqualsToken
+        | SyntaxKind::GreaterThanGreaterThanEqualsToken
+        | SyntaxKind::BarBarEqualsToken
+        | SyntaxKind::AmpersandAmpersandEqualsToken
+        | SyntaxKind::QuestionQuestionEqualsToken => true,
+        _ => false,
     }
 }
 
 pub fn is_logical_or_coalescing_assignment_operator(kind: SyntaxKind) -> bool {
     match kind {
-        SyntaxKind::AmpersandAmpersandEqualsToken | SyntaxKind::BarBarEqualsToken | SyntaxKind::QuestionQuestionEqualsToken => true,
-        _ => false
+        SyntaxKind::AmpersandAmpersandEqualsToken
+        | SyntaxKind::BarBarEqualsToken
+        | SyntaxKind::QuestionQuestionEqualsToken => true,
+        _ => false,
     }
 }
-

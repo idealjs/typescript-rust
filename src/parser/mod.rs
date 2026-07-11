@@ -201,6 +201,14 @@ impl Parser {
         ))
     }
 
+    fn missing_node(&self, pos: usize) -> Arc<Node> {
+        Arc::new(Node::with_loc(
+            SyntaxKind::MissingDeclaration,
+            NodeData::MissingDeclaration(MissingDeclarationData { modifiers: None }),
+            TextRange::new(pos, pos),
+        ))
+    }
+
     // ─────────────────────────────────────────────────────────────────────
     // Semicolon handling (ASI support)
     // ─────────────────────────────────────────────────────────────────────
@@ -360,6 +368,7 @@ impl Parser {
                     || self.token == SyntaxKind::ExtendsKeyword
                     || self.token == SyntaxKind::ImplementsKeyword
             }
+            ParsingContext::TypeArguments => self.token == SyntaxKind::GreaterThanToken,
             ParsingContext::ArgumentExpressions => {
                 self.token == SyntaxKind::CloseParenToken
                     || self.token == SyntaxKind::SemicolonToken
@@ -373,18 +382,14 @@ impl Parser {
                 self.token == SyntaxKind::CloseParenToken
                     || self.token == SyntaxKind::CloseBracketToken
             }
-            ParsingContext::TypeArguments => self.token != SyntaxKind::CommaToken,
             ParsingContext::HeritageClauses => {
                 self.token == SyntaxKind::OpenBraceToken
                     || self.token == SyntaxKind::CloseBraceToken
             }
             ParsingContext::JsxAttributes => {
-                self.token == SyntaxKind::GreaterThanToken
-                    || self.token == SyntaxKind::SlashToken
+                self.token == SyntaxKind::GreaterThanToken || self.token == SyntaxKind::SlashToken
             }
-            ParsingContext::JsxChildren => {
-                self.token == SyntaxKind::LessThanToken
-            }
+            ParsingContext::JsxChildren => self.token == SyntaxKind::LessThanToken,
             _ => false,
         }
     }
@@ -400,6 +405,10 @@ impl Parser {
             }
             ParsingContext::VariableDeclarations => self.is_binding_identifier_or_pattern(),
             ParsingContext::Parameters => self.is_start_of_parameter(),
+            ParsingContext::TypeMembers => !self.is_list_terminator(context),
+            ParsingContext::TypeArguments | ParsingContext::TupleElementTypes => {
+                self.is_start_of_type()
+            }
             ParsingContext::ClassMembers
             | ParsingContext::EnumMembers
             | ParsingContext::ObjectLiteralMembers => !self.is_list_terminator(context),
@@ -558,6 +567,7 @@ impl Parser {
             SyntaxKind::NamespaceKeyword | SyntaxKind::ModuleKeyword => {
                 self.parse_namespace_declaration()
             }
+            SyntaxKind::DeclareKeyword => self.parse_declaration_with_modifiers(Vec::new()),
             SyntaxKind::ImportKeyword => self.parse_import_declaration(),
             SyntaxKind::ExportKeyword => self.parse_export_declaration(),
             SyntaxKind::DebuggerKeyword => self.parse_debugger_statement(),
@@ -593,6 +603,13 @@ impl Parser {
     }
 
     fn parse_variable_statement(&mut self) -> Arc<Node> {
+        self.parse_variable_statement_with_modifiers(None)
+    }
+
+    fn parse_variable_statement_with_modifiers(
+        &mut self,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> {
         let pos = self.token_pos();
         let declaration_list = self.parse_variable_declaration_list(false);
         self.parse_semicolon();
@@ -600,7 +617,7 @@ impl Parser {
         Arc::new(Node::with_loc(
             SyntaxKind::VariableStatement,
             NodeData::VariableStatement(VariableStatementData {
-                modifiers: None,
+                modifiers,
                 declaration_list,
             }),
             TextRange::new(pos, end),
@@ -740,7 +757,10 @@ impl Parser {
             (None, Some(property_name))
         } else {
             self.expect(SyntaxKind::ColonToken);
-            (Some(property_name), Some(self.parse_identifier_or_pattern()))
+            (
+                Some(property_name),
+                Some(self.parse_identifier_or_pattern()),
+            )
         };
         let initializer = if self.token == SyntaxKind::EqualsToken {
             self.next_token();
@@ -773,9 +793,133 @@ impl Parser {
         }
     }
 
-    /// Parse a type (simplified — delegates to `parse_type_node`).
+    /// Parse a TypeScript type node.
     fn parse_type(&mut self) -> Arc<Node> {
-        // Simplified: just parse keyword types and identifiers
+        let pos = self.token_pos();
+        let mut type_node = self.parse_union_type_or_higher();
+        if self.parse_optional(SyntaxKind::ExtendsKeyword) {
+            let extends_type = self.parse_type();
+            self.expect(SyntaxKind::QuestionToken);
+            let true_type = self.parse_type();
+            self.expect(SyntaxKind::ColonToken);
+            let false_type = self.parse_type();
+            let end = false_type.end();
+            type_node = Arc::new(Node::with_loc(
+                SyntaxKind::ConditionalType,
+                NodeData::ConditionalTypeNode(ConditionalTypeNodeData {
+                    check_type: type_node,
+                    extends_type,
+                    true_type,
+                    false_type,
+                }),
+                TextRange::new(pos, end),
+            ));
+        }
+        type_node
+    }
+
+    fn parse_union_type_or_higher(&mut self) -> Arc<Node> {
+        self.parse_union_or_intersection_type(
+            SyntaxKind::BarToken,
+            SyntaxKind::UnionType,
+            Parser::parse_intersection_type_or_higher,
+        )
+    }
+
+    fn parse_intersection_type_or_higher(&mut self) -> Arc<Node> {
+        self.parse_union_or_intersection_type(
+            SyntaxKind::AmpersandToken,
+            SyntaxKind::IntersectionType,
+            Parser::parse_type_operator_or_higher,
+        )
+    }
+
+    fn parse_union_or_intersection_type(
+        &mut self,
+        operator: SyntaxKind,
+        node_kind: SyntaxKind,
+        parse_constituent: fn(&mut Self) -> Arc<Node>,
+    ) -> Arc<Node> {
+        let pos = self.token_pos();
+        let has_leading_operator = self.parse_optional(operator);
+        let mut types = vec![parse_constituent(self)];
+        while self.parse_optional(operator) {
+            types.push(parse_constituent(self));
+        }
+        if types.len() == 1 && !has_leading_operator {
+            return types.pop().unwrap();
+        }
+        let end = types.last().map_or(pos, |n| n.end());
+        let list = Arc::new(NodeList {
+            loc: TextRange::new(pos, end),
+            nodes: types,
+        });
+        let data = if node_kind == SyntaxKind::UnionType {
+            NodeData::UnionTypeNode(UnionTypeNodeData { types: list })
+        } else {
+            NodeData::IntersectionTypeNode(IntersectionTypeNodeData { types: list })
+        };
+        Arc::new(Node::with_loc(node_kind, data, TextRange::new(pos, end)))
+    }
+
+    fn parse_type_operator_or_higher(&mut self) -> Arc<Node> {
+        match self.token {
+            SyntaxKind::KeyOfKeyword | SyntaxKind::UniqueKeyword | SyntaxKind::ReadonlyKeyword => {
+                let pos = self.token_pos();
+                let operator = self.token;
+                self.next_token();
+                let type_node = self.parse_type_operator_or_higher();
+                let end = type_node.end();
+                Arc::new(Node::with_loc(
+                    SyntaxKind::TypeOperator,
+                    NodeData::TypeOperatorNode(TypeOperatorNodeData {
+                        operator,
+                        type_node,
+                    }),
+                    TextRange::new(pos, end),
+                ))
+            }
+            _ => self.parse_postfix_type_or_higher(),
+        }
+    }
+
+    fn parse_postfix_type_or_higher(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        let mut type_node = self.parse_non_array_type();
+        loop {
+            if self.token == SyntaxKind::OpenBracketToken {
+                self.next_token();
+                if self.token == SyntaxKind::CloseBracketToken {
+                    self.next_token();
+                    let end = self.token_pos();
+                    type_node = Arc::new(Node::with_loc(
+                        SyntaxKind::ArrayType,
+                        NodeData::ArrayTypeNode(ArrayTypeNodeData {
+                            element_type: type_node,
+                        }),
+                        TextRange::new(pos, end),
+                    ));
+                    continue;
+                }
+                let index_type = self.parse_type();
+                self.expect(SyntaxKind::CloseBracketToken);
+                let end = self.token_pos();
+                type_node = Arc::new(Node::with_loc(
+                    SyntaxKind::IndexedAccessType,
+                    NodeData::IndexedAccessTypeNode(IndexedAccessTypeNodeData {
+                        object_type: type_node,
+                        index_type,
+                    }),
+                    TextRange::new(pos, end),
+                ));
+                continue;
+            }
+            break;
+        }
+        type_node
+    }
+
+    fn parse_non_array_type(&mut self) -> Arc<Node> {
         match self.token {
             SyntaxKind::StringKeyword
             | SyntaxKind::NumberKeyword
@@ -801,8 +945,216 @@ impl Parser {
                     TextRange::new(pos, end),
                 ))
             }
-            _ => self.parse_identifier(),
+            SyntaxKind::NullKeyword
+            | SyntaxKind::TrueKeyword
+            | SyntaxKind::FalseKeyword
+            | SyntaxKind::NumericLiteral
+            | SyntaxKind::BigIntLiteral
+            | SyntaxKind::StringLiteral
+            | SyntaxKind::NoSubstitutionTemplateLiteral => self.parse_literal_type_node(),
+            SyntaxKind::ThisKeyword => {
+                let pos = self.token_pos();
+                let end = self.token_end();
+                self.next_token();
+                Arc::new(Node::with_loc(
+                    SyntaxKind::ThisType,
+                    NodeData::ThisTypeNode,
+                    TextRange::new(pos, end),
+                ))
+            }
+            SyntaxKind::OpenBraceToken => self.parse_type_literal(),
+            SyntaxKind::OpenBracketToken => self.parse_tuple_type(),
+            SyntaxKind::OpenParenToken => self.parse_parenthesized_or_function_type(),
+            SyntaxKind::LessThanToken => self.parse_function_type(),
+            SyntaxKind::NewKeyword | SyntaxKind::AbstractKeyword => self.parse_constructor_type(),
+            _ => self.parse_type_reference(),
         }
+    }
+
+    fn parse_literal_type_node(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        let literal = match self.token {
+            SyntaxKind::NullKeyword | SyntaxKind::TrueKeyword | SyntaxKind::FalseKeyword => {
+                self.parse_keyword_expression(self.token)
+            }
+            _ => self.parse_primary_expression(),
+        };
+        let end = literal.end();
+        Arc::new(Node::with_loc(
+            SyntaxKind::LiteralType,
+            NodeData::LiteralTypeNode(LiteralTypeNodeData { literal }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    fn parse_type_reference(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        let type_name = self.parse_entity_name();
+        let type_arguments = self.parse_optional_type_arguments();
+        let end = type_arguments
+            .as_ref()
+            .map_or_else(|| type_name.end(), |args| args.end());
+        Arc::new(Node::with_loc(
+            SyntaxKind::TypeReference,
+            NodeData::TypeReferenceNode(TypeReferenceNodeData {
+                type_name,
+                type_arguments,
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    fn parse_entity_name(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        let mut left = self.parse_identifier();
+        while self.parse_optional(SyntaxKind::DotToken) {
+            let right = self.parse_identifier();
+            let end = right.end();
+            left = Arc::new(Node::with_loc(
+                SyntaxKind::QualifiedName,
+                NodeData::QualifiedName(QualifiedNameData { left, right }),
+                TextRange::new(pos, end),
+            ));
+        }
+        left
+    }
+
+    fn parse_type_literal(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        self.expect(SyntaxKind::OpenBraceToken);
+        let members = self.parse_list(ParsingContext::TypeMembers, Parser::parse_type_member);
+        self.expect(SyntaxKind::CloseBraceToken);
+        let end = self.token_pos();
+        Arc::new(Node::with_loc(
+            SyntaxKind::TypeLiteral,
+            NodeData::TypeLiteralNode(TypeLiteralNodeData {
+                members: Arc::new(members),
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    fn parse_tuple_type(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        self.expect(SyntaxKind::OpenBracketToken);
+        let elements = self.parse_delimited_list(
+            ParsingContext::TupleElementTypes,
+            Parser::parse_tuple_element_type,
+        );
+        self.expect(SyntaxKind::CloseBracketToken);
+        let end = self.token_pos();
+        Arc::new(Node::with_loc(
+            SyntaxKind::TupleType,
+            NodeData::TupleTypeNode(TupleTypeNodeData {
+                elements: Arc::new(elements),
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    fn parse_tuple_element_type(&mut self) -> Arc<Node> {
+        if self.parse_optional(SyntaxKind::DotDotDotToken) {
+            let pos = self.token_pos();
+            let type_node = self.parse_type();
+            let end = type_node.end();
+            return Arc::new(Node::with_loc(
+                SyntaxKind::RestType,
+                NodeData::RestTypeNode(RestTypeNodeData { type_node }),
+                TextRange::new(pos, end),
+            ));
+        }
+        self.parse_type()
+    }
+
+    fn parse_parenthesized_or_function_type(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        let parameters = self.parse_parameter_list();
+        if self.parse_optional(SyntaxKind::EqualsGreaterThanToken) {
+            let type_node = if self.is_start_of_type() {
+                Some(self.parse_type())
+            } else {
+                None
+            };
+            let end = type_node.as_ref().map_or(self.token_pos(), |n| n.end());
+            return Arc::new(Node::with_loc(
+                SyntaxKind::FunctionType,
+                NodeData::FunctionTypeNode(FunctionTypeNodeData {
+                    type_parameters: None,
+                    parameters,
+                    type_node,
+                }),
+                TextRange::new(pos, end),
+            ));
+        }
+
+        let type_node = if parameters.nodes.len() == 1 {
+            parameters.nodes[0].clone()
+        } else {
+            self.missing_node(pos)
+        };
+        Arc::new(Node::with_loc(
+            SyntaxKind::ParenthesizedType,
+            NodeData::ParenthesizedTypeNode(ParenthesizedTypeNodeData { type_node }),
+            TextRange::new(pos, self.token_pos()),
+        ))
+    }
+
+    fn parse_function_type(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        let type_parameters = self.parse_optional_type_parameters();
+        let parameters = self.parse_parameter_list();
+        self.expect(SyntaxKind::EqualsGreaterThanToken);
+        let type_node = if self.is_start_of_type() {
+            Some(self.parse_type())
+        } else {
+            None
+        };
+        let end = type_node.as_ref().map_or(self.token_pos(), |n| n.end());
+        Arc::new(Node::with_loc(
+            SyntaxKind::FunctionType,
+            NodeData::FunctionTypeNode(FunctionTypeNodeData {
+                type_parameters,
+                parameters,
+                type_node,
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    fn parse_constructor_type(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        let modifiers = if self.token == SyntaxKind::AbstractKeyword {
+            let modifier_pos = self.token_pos();
+            let modifier_end = self.token_end();
+            self.next_token();
+            Some(self.make_modifier_list(vec![(
+                SyntaxKind::AbstractKeyword,
+                modifier_pos,
+                modifier_end,
+            )]))
+        } else {
+            None
+        };
+        self.expect(SyntaxKind::NewKeyword);
+        let type_parameters = self.parse_optional_type_parameters();
+        let parameters = self.parse_parameter_list();
+        self.expect(SyntaxKind::EqualsGreaterThanToken);
+        let type_node = if self.is_start_of_type() {
+            Some(self.parse_type())
+        } else {
+            None
+        };
+        let end = type_node.as_ref().map_or(self.token_pos(), |n| n.end());
+        Arc::new(Node::with_loc(
+            SyntaxKind::ConstructorType,
+            NodeData::ConstructorTypeNode(ConstructorTypeNodeData {
+                modifiers,
+                type_parameters,
+                parameters,
+                type_node,
+            }),
+            TextRange::new(pos, end),
+        ))
     }
 
     fn parse_if_statement(&mut self) -> Arc<Node> {
@@ -817,7 +1169,9 @@ impl Parser {
         } else {
             None
         };
-        let end = else_statement.as_ref().map_or(then_statement.end(), |n| n.end());
+        let end = else_statement
+            .as_ref()
+            .map_or(then_statement.end(), |n| n.end());
         Arc::new(Node::with_loc(
             SyntaxKind::IfStatement,
             NodeData::IfStatement(IfStatementData {
@@ -1022,7 +1376,10 @@ impl Parser {
     fn parse_case_block(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
-        let clauses = self.parse_list(ParsingContext::SwitchClauses, Parser::parse_case_or_default_clause);
+        let clauses = self.parse_list(
+            ParsingContext::SwitchClauses,
+            Parser::parse_case_or_default_clause,
+        );
         self.expect(SyntaxKind::CloseBraceToken);
         let end = self.token_pos();
         Arc::new(Node::with_loc(
@@ -1116,9 +1473,10 @@ impl Parser {
         } else {
             None
         };
-        let end = finally_block
-            .as_ref()
-            .map_or_else(|| catch_clause.as_ref().map_or(try_block.end(), |c| c.end()), |f| f.end());
+        let end = finally_block.as_ref().map_or_else(
+            || catch_clause.as_ref().map_or(try_block.end(), |c| c.end()),
+            |f| f.end(),
+        );
         Arc::new(Node::with_loc(
             SyntaxKind::TryStatement,
             NodeData::TryStatement(TryStatementData {
@@ -1208,6 +1566,43 @@ impl Parser {
             || self.is_literal_property_name()
     }
 
+    fn is_start_of_type(&self) -> bool {
+        matches!(
+            self.token,
+            SyntaxKind::AnyKeyword
+                | SyntaxKind::UnknownKeyword
+                | SyntaxKind::StringKeyword
+                | SyntaxKind::NumberKeyword
+                | SyntaxKind::BigIntKeyword
+                | SyntaxKind::SymbolKeyword
+                | SyntaxKind::BooleanKeyword
+                | SyntaxKind::UndefinedKeyword
+                | SyntaxKind::NeverKeyword
+                | SyntaxKind::ObjectKeyword
+                | SyntaxKind::VoidKeyword
+                | SyntaxKind::NullKeyword
+                | SyntaxKind::TrueKeyword
+                | SyntaxKind::FalseKeyword
+                | SyntaxKind::ThisKeyword
+                | SyntaxKind::TypeOfKeyword
+                | SyntaxKind::KeyOfKeyword
+                | SyntaxKind::UniqueKeyword
+                | SyntaxKind::ReadonlyKeyword
+                | SyntaxKind::NewKeyword
+                | SyntaxKind::AbstractKeyword
+                | SyntaxKind::StringLiteral
+                | SyntaxKind::NumericLiteral
+                | SyntaxKind::BigIntLiteral
+                | SyntaxKind::NoSubstitutionTemplateLiteral
+                | SyntaxKind::Identifier
+                | SyntaxKind::OpenBraceToken
+                | SyntaxKind::OpenBracketToken
+                | SyntaxKind::OpenParenToken
+                | SyntaxKind::LessThanToken
+                | SyntaxKind::BarToken
+        ) || is_keyword(self.token)
+    }
+
     fn is_literal_property_name(&self) -> bool {
         is_identifier_or_keyword(self.token)
             || self.token == SyntaxKind::StringLiteral
@@ -1270,7 +1665,10 @@ impl Parser {
                 self.next_token();
                 Arc::new(Node::with_loc(
                     SyntaxKind::BigIntLiteral,
-                    NodeData::BigIntLiteral(BigIntLiteralData { text, token_flags: 0 }),
+                    NodeData::BigIntLiteral(BigIntLiteralData {
+                        text,
+                        token_flags: 0,
+                    }),
                     TextRange::new(pos, end),
                 ))
             }
@@ -1431,10 +1829,7 @@ impl Parser {
             self.next_token();
             return Arc::new(Node::with_loc(
                 SyntaxKind::PostfixUnaryExpression,
-                NodeData::PostfixUnaryExpression(PostfixUnaryExpressionData {
-                    operand,
-                    operator,
-                }),
+                NodeData::PostfixUnaryExpression(PostfixUnaryExpressionData { operand, operator }),
                 TextRange::new(pos, op_end),
             ));
         }
@@ -1580,10 +1975,8 @@ impl Parser {
     fn parse_argument_list(&mut self) -> Arc<NodeList> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenParenToken);
-        let nodes = self.parse_delimited_list(
-            ParsingContext::ArgumentExpressions,
-            Parser::parse_argument,
-        );
+        let nodes =
+            self.parse_delimited_list(ParsingContext::ArgumentExpressions, Parser::parse_argument);
         self.expect(SyntaxKind::CloseParenToken);
         let end = self.token_pos();
         Arc::new(NodeList {
@@ -1607,9 +2000,18 @@ impl Parser {
     }
 
     fn parse_optional_type_arguments(&mut self) -> Option<Arc<NodeList>> {
-        // Simplified: type arguments using `<...>` — conflict with comparison operators
-        // is non-trivial. For now, we skip type argument parsing.
-        None
+        if self.token != SyntaxKind::LessThanToken {
+            return None;
+        }
+        let pos = self.token_pos();
+        self.next_token();
+        let args = self.parse_delimited_list(ParsingContext::TypeArguments, Parser::parse_type);
+        self.expect(SyntaxKind::GreaterThanToken);
+        let end = self.token_pos();
+        Some(Arc::new(NodeList {
+            loc: TextRange::new(pos, end),
+            nodes: args.nodes,
+        }))
     }
 
     fn parse_primary_expression(&mut self) -> Arc<Node> {
@@ -1646,7 +2048,10 @@ impl Parser {
                 self.next_token();
                 Arc::new(Node::with_loc(
                     SyntaxKind::BigIntLiteral,
-                    NodeData::BigIntLiteral(BigIntLiteralData { text, token_flags: 0 }),
+                    NodeData::BigIntLiteral(BigIntLiteralData {
+                        text,
+                        token_flags: 0,
+                    }),
                     TextRange::new(pos, end),
                 ))
             }
@@ -1711,7 +2116,11 @@ impl Parser {
         let pos = self.token_pos();
         let end = self.token_end();
         self.next_token();
-        Arc::new(Node::with_loc(kind, NodeData::Token, TextRange::new(pos, end)))
+        Arc::new(Node::with_loc(
+            kind,
+            NodeData::Token,
+            TextRange::new(pos, end),
+        ))
     }
 
     fn parse_parenthesized_or_arrow(&mut self) -> Arc<Node> {
@@ -1920,7 +2329,92 @@ impl Parser {
     // Declaration parsing
     // ─────────────────────────────────────────────────────────────────────
 
+    fn modifier_flag(kind: SyntaxKind) -> ModifierFlags {
+        match kind {
+            SyntaxKind::ExportKeyword => ModifierFlags::Export,
+            SyntaxKind::DeclareKeyword => ModifierFlags::Ambient,
+            SyntaxKind::DefaultKeyword => ModifierFlags::Default,
+            SyntaxKind::AbstractKeyword => ModifierFlags::Abstract,
+            SyntaxKind::StaticKeyword => ModifierFlags::Static,
+            SyntaxKind::ReadonlyKeyword => ModifierFlags::Readonly,
+            SyntaxKind::PublicKeyword => ModifierFlags::Public,
+            SyntaxKind::PrivateKeyword => ModifierFlags::Private,
+            SyntaxKind::ProtectedKeyword => ModifierFlags::Protected,
+            SyntaxKind::AsyncKeyword => ModifierFlags::Async,
+            SyntaxKind::ConstKeyword => ModifierFlags::Const,
+            _ => ModifierFlags::empty(),
+        }
+    }
+
+    fn make_modifier_list(&self, modifiers: Vec<(SyntaxKind, usize, usize)>) -> Arc<ModifierList> {
+        let mut flags = ModifierFlags::empty();
+        let nodes = modifiers
+            .into_iter()
+            .map(|(kind, pos, end)| {
+                flags |= Self::modifier_flag(kind);
+                Arc::new(Node::with_loc(
+                    kind,
+                    NodeData::Token,
+                    TextRange::new(pos, end),
+                ))
+            })
+            .collect();
+        Arc::new(ModifierList::new(nodes, flags))
+    }
+
+    fn parse_declaration_with_modifiers(
+        &mut self,
+        mut modifiers: Vec<(SyntaxKind, usize, usize)>,
+    ) -> Arc<Node> {
+        while matches!(
+            self.token,
+            SyntaxKind::ExportKeyword
+                | SyntaxKind::DeclareKeyword
+                | SyntaxKind::DefaultKeyword
+                | SyntaxKind::AbstractKeyword
+                | SyntaxKind::AsyncKeyword
+                | SyntaxKind::ReadonlyKeyword
+                | SyntaxKind::PublicKeyword
+                | SyntaxKind::PrivateKeyword
+                | SyntaxKind::ProtectedKeyword
+                | SyntaxKind::StaticKeyword
+        ) {
+            let kind = self.token;
+            let pos = self.token_pos();
+            let end = self.token_end();
+            self.next_token();
+            modifiers.push((kind, pos, end));
+        }
+
+        let modifiers = Some(self.make_modifier_list(modifiers));
+        match self.token {
+            SyntaxKind::FunctionKeyword => {
+                self.parse_function_declaration_with_modifiers(modifiers)
+            }
+            SyntaxKind::ClassKeyword => self.parse_class_declaration_with_modifiers(modifiers),
+            SyntaxKind::InterfaceKeyword => {
+                self.parse_interface_declaration_with_modifiers(modifiers)
+            }
+            SyntaxKind::TypeKeyword => self.parse_type_alias_declaration_with_modifiers(modifiers),
+            SyntaxKind::EnumKeyword => self.parse_enum_declaration_with_modifiers(modifiers),
+            SyntaxKind::NamespaceKeyword | SyntaxKind::ModuleKeyword => {
+                self.parse_namespace_declaration_with_modifiers(modifiers)
+            }
+            SyntaxKind::VarKeyword | SyntaxKind::LetKeyword | SyntaxKind::ConstKeyword => {
+                self.parse_variable_statement_with_modifiers(modifiers)
+            }
+            _ => self.parse_expression_statement(),
+        }
+    }
+
     fn parse_function_declaration(&mut self) -> Arc<Node> {
+        self.parse_function_declaration_with_modifiers(None)
+    }
+
+    fn parse_function_declaration_with_modifiers(
+        &mut self,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> {
         let pos = self.token_pos();
         self.next_token(); // consume 'function'
         let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
@@ -1942,7 +2436,7 @@ impl Parser {
         Arc::new(Node::with_loc(
             SyntaxKind::FunctionDeclaration,
             NodeData::FunctionDeclaration(FunctionDeclarationData {
-                modifiers: None,
+                modifiers,
                 asterisk_token,
                 name,
                 type_parameters,
@@ -1956,6 +2450,13 @@ impl Parser {
     }
 
     fn parse_class_declaration(&mut self) -> Arc<Node> {
+        self.parse_class_declaration_with_modifiers(None)
+    }
+
+    fn parse_class_declaration_with_modifiers(
+        &mut self,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> {
         let pos = self.token_pos();
         self.next_token(); // consume 'class'
         let name = if self.is_identifier() {
@@ -1970,7 +2471,7 @@ impl Parser {
         Arc::new(Node::with_loc(
             SyntaxKind::ClassDeclaration,
             NodeData::ClassDeclaration(ClassDeclarationData {
-                modifiers: None,
+                modifiers,
                 name,
                 type_parameters,
                 heritage_clauses,
@@ -1981,20 +2482,26 @@ impl Parser {
     }
 
     fn parse_interface_declaration(&mut self) -> Arc<Node> {
+        self.parse_interface_declaration_with_modifiers(None)
+    }
+
+    fn parse_interface_declaration_with_modifiers(
+        &mut self,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> {
         let pos = self.token_pos();
         self.next_token(); // consume 'interface'
         let name = self.parse_identifier();
         let type_parameters = self.parse_optional_type_parameters();
         let heritage_clauses = self.parse_heritage_clauses();
-        // Interface members
         self.expect(SyntaxKind::OpenBraceToken);
-        let members = self.parse_list(ParsingContext::ClassMembers, Parser::parse_class_member);
+        let members = self.parse_list(ParsingContext::TypeMembers, Parser::parse_type_member);
         self.expect(SyntaxKind::CloseBraceToken);
         let end = self.token_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::InterfaceDeclaration,
             NodeData::InterfaceDeclaration(InterfaceDeclarationData {
-                modifiers: None,
+                modifiers,
                 name,
                 type_parameters,
                 heritage_clauses,
@@ -2005,6 +2512,13 @@ impl Parser {
     }
 
     fn parse_type_alias_declaration(&mut self) -> Arc<Node> {
+        self.parse_type_alias_declaration_with_modifiers(None)
+    }
+
+    fn parse_type_alias_declaration_with_modifiers(
+        &mut self,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> {
         let pos = self.token_pos();
         self.next_token(); // consume 'type'
         let name = self.parse_identifier();
@@ -2016,7 +2530,7 @@ impl Parser {
         Arc::new(Node::with_loc(
             SyntaxKind::TypeAliasDeclaration,
             NodeData::TypeAliasDeclaration(TypeAliasDeclarationData {
-                modifiers: None,
+                modifiers,
                 name,
                 type_parameters,
                 type_node,
@@ -2026,6 +2540,13 @@ impl Parser {
     }
 
     fn parse_enum_declaration(&mut self) -> Arc<Node> {
+        self.parse_enum_declaration_with_modifiers(None)
+    }
+
+    fn parse_enum_declaration_with_modifiers(
+        &mut self,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> {
         let pos = self.token_pos();
         self.next_token(); // consume 'enum'
         let name = self.parse_identifier();
@@ -2036,7 +2557,7 @@ impl Parser {
         Arc::new(Node::with_loc(
             SyntaxKind::EnumDeclaration,
             NodeData::EnumDeclaration(EnumDeclarationData {
-                modifiers: None,
+                modifiers,
                 name,
                 members: Arc::new(members),
             }),
@@ -2045,6 +2566,13 @@ impl Parser {
     }
 
     fn parse_namespace_declaration(&mut self) -> Arc<Node> {
+        self.parse_namespace_declaration_with_modifiers(None)
+    }
+
+    fn parse_namespace_declaration_with_modifiers(
+        &mut self,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> {
         let pos = self.token_pos();
         let keyword = self.token;
         self.next_token(); // consume 'namespace' or 'module'
@@ -2052,7 +2580,8 @@ impl Parser {
         let body = if self.token == SyntaxKind::OpenBraceToken {
             let body_pos = self.token_pos();
             self.next_token(); // consume '{'
-            let statements = self.parse_list(ParsingContext::BlockStatements, Parser::parse_statement);
+            let statements =
+                self.parse_list(ParsingContext::BlockStatements, Parser::parse_statement);
             self.expect(SyntaxKind::CloseBraceToken);
             let end = self.token_pos();
             Some(Arc::new(Node::with_loc(
@@ -2070,7 +2599,7 @@ impl Parser {
         Arc::new(Node::with_loc(
             SyntaxKind::ModuleDeclaration,
             NodeData::ModuleDeclaration(ModuleDeclarationData {
-                modifiers: None,
+                modifiers,
                 keyword,
                 name,
                 body,
@@ -2165,9 +2694,7 @@ impl Parser {
         } else {
             None
         };
-        let end = named_bindings
-            .as_ref()
-            .map_or(name.end(), |n| n.end());
+        let end = named_bindings.as_ref().map_or(name.end(), |n| n.end());
         Arc::new(Node::with_loc(
             SyntaxKind::ImportClause,
             NodeData::ImportClause(ImportClauseData {
@@ -2195,7 +2722,10 @@ impl Parser {
     fn parse_named_imports(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
-        let elements = self.parse_list(ParsingContext::ImportOrExportSpecifiers, Parser::parse_import_specifier);
+        let elements = self.parse_list(
+            ParsingContext::ImportOrExportSpecifiers,
+            Parser::parse_import_specifier,
+        );
         self.expect(SyntaxKind::CloseBraceToken);
         let end = self.token_pos();
         Arc::new(Node::with_loc(
@@ -2278,7 +2808,16 @@ impl Parser {
 
     fn parse_export_declaration(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
+        let export_end = self.token_end();
         self.next_token(); // consume 'export'
+
+        if self.token == SyntaxKind::DeclareKeyword {
+            return self.parse_declaration_with_modifiers(vec![(
+                SyntaxKind::ExportKeyword,
+                pos,
+                export_end,
+            )]);
+        }
 
         // export default ...
         if self.token == SyntaxKind::DefaultKeyword {
@@ -2333,7 +2872,7 @@ impl Parser {
             SyntaxKind::TypeKeyword => return self.parse_type_alias_declaration(),
             SyntaxKind::EnumKeyword => return self.parse_enum_declaration(),
             SyntaxKind::NamespaceKeyword | SyntaxKind::ModuleKeyword => {
-                return self.parse_namespace_declaration()
+                return self.parse_namespace_declaration();
             }
             SyntaxKind::ConstKeyword | SyntaxKind::LetKeyword | SyntaxKind::VarKeyword => {
                 // export const/let/var x = ...
@@ -2395,7 +2934,10 @@ impl Parser {
     fn parse_named_exports(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
-        let elements = self.parse_list(ParsingContext::ImportOrExportSpecifiers, Parser::parse_export_specifier);
+        let elements = self.parse_list(
+            ParsingContext::ImportOrExportSpecifiers,
+            Parser::parse_export_specifier,
+        );
         self.expect(SyntaxKind::CloseBraceToken);
         let end = self.token_pos();
         Arc::new(Node::with_loc(
@@ -2503,10 +3045,8 @@ impl Parser {
         }
         let pos = self.token_pos();
         self.next_token();
-        let params = self.parse_delimited_list(
-            ParsingContext::TypeParameters,
-            Parser::parse_type_parameter,
-        );
+        let params =
+            self.parse_delimited_list(ParsingContext::TypeParameters, Parser::parse_type_parameter);
         self.expect(SyntaxKind::GreaterThanToken);
         let end = self.token_pos();
         Some(Arc::new(NodeList {
@@ -2528,9 +3068,10 @@ impl Parser {
         } else {
             None
         };
-        let end = default_type
-            .as_ref()
-            .map_or_else(|| constraint.as_ref().map_or(name.end(), |c| c.end()), |d| d.end());
+        let end = default_type.as_ref().map_or_else(
+            || constraint.as_ref().map_or(name.end(), |c| c.end()),
+            |d| d.end(),
+        );
         Arc::new(Node::with_loc(
             SyntaxKind::TypeParameter,
             NodeData::TypeParameterDeclaration(TypeParameterDeclarationData {
@@ -2568,9 +3109,10 @@ impl Parser {
         } else {
             None
         };
-        let end = initializer
-            .as_ref()
-            .map_or_else(|| type_node.as_ref().map_or(name.end(), |t| t.end()), |i| i.end());
+        let end = initializer.as_ref().map_or_else(
+            || type_node.as_ref().map_or(name.end(), |t| t.end()),
+            |i| i.end(),
+        );
         Arc::new(Node::with_loc(
             SyntaxKind::Parameter,
             NodeData::ParameterDeclaration(ParameterDeclarationData {
@@ -2648,6 +3190,158 @@ impl Parser {
         ))
     }
 
+    fn parse_type_member(&mut self) -> Arc<Node> {
+        if self.token == SyntaxKind::OpenParenToken || self.token == SyntaxKind::LessThanToken {
+            return self.parse_signature_member(SyntaxKind::CallSignature);
+        }
+        if self.token == SyntaxKind::NewKeyword {
+            return self.parse_signature_member(SyntaxKind::ConstructSignature);
+        }
+
+        let pos = self.token_pos();
+        let modifiers = self.parse_type_member_modifiers();
+        if self.is_index_signature_start() {
+            return self.parse_index_signature(pos, modifiers);
+        }
+
+        let name = self.parse_property_name();
+        let postfix_token = self.parse_optional_token(SyntaxKind::QuestionToken);
+        let type_parameters = self.parse_optional_type_parameters();
+        if self.token == SyntaxKind::OpenParenToken {
+            let parameters = self.parse_parameter_list();
+            let type_node = self.parse_optional_type_annotation();
+            self.parse_type_member_semicolon();
+            let end = self.token_pos();
+            return Arc::new(Node::with_loc(
+                SyntaxKind::MethodSignature,
+                NodeData::MethodSignatureDeclaration(MethodSignatureDeclarationData {
+                    modifiers,
+                    name,
+                    postfix_token,
+                    type_parameters,
+                    parameters,
+                    type_node,
+                }),
+                TextRange::new(pos, end),
+            ));
+        }
+
+        let type_node = self
+            .parse_optional_type_annotation()
+            .unwrap_or_else(|| self.missing_node(self.token_pos()));
+        let initializer = if self.parse_optional(SyntaxKind::EqualsToken) {
+            self.parse_type()
+        } else {
+            self.missing_node(self.token_pos())
+        };
+        self.parse_type_member_semicolon();
+        let end = self.token_pos();
+        Arc::new(Node::with_loc(
+            SyntaxKind::PropertySignature,
+            NodeData::PropertySignatureDeclaration(PropertySignatureDeclarationData {
+                modifiers,
+                name,
+                postfix_token,
+                type_node,
+                initializer,
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    fn parse_type_member_modifiers(&mut self) -> Option<Arc<ModifierList>> {
+        let mut modifiers = Vec::new();
+        while matches!(
+            self.token,
+            SyntaxKind::ReadonlyKeyword
+                | SyntaxKind::StaticKeyword
+                | SyntaxKind::PublicKeyword
+                | SyntaxKind::PrivateKeyword
+                | SyntaxKind::ProtectedKeyword
+        ) {
+            let kind = self.token;
+            let pos = self.token_pos();
+            let end = self.token_end();
+            self.next_token();
+            modifiers.push((kind, pos, end));
+        }
+        if modifiers.is_empty() {
+            None
+        } else {
+            Some(self.make_modifier_list(modifiers))
+        }
+    }
+
+    fn is_index_signature_start(&self) -> bool {
+        self.token == SyntaxKind::OpenBracketToken
+    }
+
+    fn parse_index_signature(
+        &mut self,
+        pos: usize,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> {
+        let parameters = self.parse_bracketedList(
+            ParsingContext::Parameters,
+            Parser::parse_parameter,
+            SyntaxKind::OpenBracketToken,
+            SyntaxKind::CloseBracketToken,
+        );
+        let type_node = self
+            .parse_optional_type_annotation()
+            .unwrap_or_else(|| self.missing_node(self.token_pos()));
+        self.parse_type_member_semicolon();
+        let end = self.token_pos();
+        Arc::new(Node::with_loc(
+            SyntaxKind::IndexSignature,
+            NodeData::IndexSignatureDeclaration(IndexSignatureDeclarationData {
+                modifiers,
+                parameters: Arc::new(parameters),
+                type_node,
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    fn parse_signature_member(&mut self, kind: SyntaxKind) -> Arc<Node> {
+        let pos = self.token_pos();
+        if kind == SyntaxKind::ConstructSignature {
+            self.expect(SyntaxKind::NewKeyword);
+        }
+        let type_parameters = self.parse_optional_type_parameters();
+        let parameters = self.parse_parameter_list();
+        let type_node = self.parse_optional_type_annotation();
+        self.parse_type_member_semicolon();
+        let end = self.token_pos();
+        if kind == SyntaxKind::CallSignature {
+            Arc::new(Node::with_loc(
+                SyntaxKind::CallSignature,
+                NodeData::CallSignatureDeclaration(CallSignatureDeclarationData {
+                    type_parameters,
+                    parameters,
+                    type_node,
+                }),
+                TextRange::new(pos, end),
+            ))
+        } else {
+            Arc::new(Node::with_loc(
+                SyntaxKind::ConstructSignature,
+                NodeData::ConstructSignatureDeclaration(ConstructSignatureDeclarationData {
+                    type_parameters,
+                    parameters,
+                    type_node,
+                }),
+                TextRange::new(pos, end),
+            ))
+        }
+    }
+
+    fn parse_type_member_semicolon(&mut self) {
+        if !self.parse_optional(SyntaxKind::SemicolonToken) {
+            self.parse_optional(SyntaxKind::CommaToken);
+        }
+    }
+
     fn parse_class_members(&mut self) -> NodeList {
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
@@ -2664,7 +3358,8 @@ impl Parser {
         // Simplified: parse as method or property
         let pos = self.token_pos();
         let name = self.parse_property_name();
-        let postfix_token = self.parse_optional_token(SyntaxKind::QuestionToken)
+        let postfix_token = self
+            .parse_optional_token(SyntaxKind::QuestionToken)
             .or_else(|| self.parse_optional_token(SyntaxKind::ExclamationToken));
 
         if self.token == SyntaxKind::OpenParenToken {
@@ -2853,6 +3548,38 @@ mod tests {
         let mut p = Parser::new("let x: number = 42;");
         let node = p.parse_statement();
         assert_eq!(node.kind, SyntaxKind::VariableStatement);
+    }
+
+    #[test]
+    fn parse_declare_variable_statement() {
+        let mut p = Parser::new("declare var x: string;");
+        let node = p.parse_statement();
+        assert_eq!(node.kind, SyntaxKind::VariableStatement);
+        assert!(p.diagnostics().is_empty());
+    }
+
+    #[test]
+    fn parse_declare_function_statement() {
+        let mut p = Parser::new("declare function f(): void;");
+        let node = p.parse_statement();
+        assert_eq!(node.kind, SyntaxKind::FunctionDeclaration);
+        assert!(p.diagnostics().is_empty());
+    }
+
+    #[test]
+    fn parse_declare_type_alias_statement() {
+        let mut p = Parser::new("declare type Name = string;");
+        let node = p.parse_statement();
+        assert_eq!(node.kind, SyntaxKind::TypeAliasDeclaration);
+        assert!(p.diagnostics().is_empty());
+    }
+
+    #[test]
+    fn parse_export_declare_interface_statement() {
+        let mut p = Parser::new("export declare interface Box { value: string; }");
+        let node = p.parse_statement();
+        assert_eq!(node.kind, SyntaxKind::InterfaceDeclaration);
+        assert!(p.diagnostics().is_empty());
     }
 
     #[test]

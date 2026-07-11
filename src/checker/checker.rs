@@ -9,13 +9,15 @@ use std::collections::HashMap;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
-use crate::ast::{Node, NodeFlags, ModifierFlags, SourceFile, Symbol, SymbolTable, DiagnosticsCollection, SyntaxKind};
-use crate::core::compiler_options::{CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget};
-use crate::core::tristate::Tristate;
-use crate::evaluator;
+use crate::ast::{
+    DiagnosticsCollection, ModifierFlags, Node, NodeFlags, SourceFile, Symbol, SymbolTable,
+    SyntaxKind,
+};
+use crate::core::compiler_options::{
+    CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget,
+};
 use crate::jsnum;
 
-use super::mapper;
 use super::tracer::Tracer;
 use super::types::*;
 
@@ -286,16 +288,27 @@ impl Checker {
 
         let legacy_decorators = compiler_options.experimental_decorators.is_true();
         let emit_standard_class_fields = compiler_options.get_emit_standard_class_fields();
-        let strict_null_checks = compiler_options.get_strict_option_value(compiler_options.strict_null_checks);
-        let strict_function_types = compiler_options.get_strict_option_value(compiler_options.strict_function_types);
-        let strict_bind_call_apply = compiler_options.get_strict_option_value(compiler_options.strict_bind_call_apply);
-        let strict_property_initialization = compiler_options.get_strict_option_value(compiler_options.strict_property_initialization);
-        let strict_builtin_iterator_return = compiler_options.get_strict_option_value(compiler_options.strict_builtin_iterator_return);
-        let no_implicit_any = compiler_options.get_strict_option_value(compiler_options.no_implicit_any);
-        let no_implicit_this = compiler_options.get_strict_option_value(compiler_options.no_implicit_this);
-        let use_unknown_in_catch_variables = compiler_options.get_strict_option_value(compiler_options.use_unknown_in_catch_variables);
-        let exact_optional_property_types = compiler_options.exact_optional_property_types.is_true();
-        let can_collect_symbol_alias_accessibility_data = compiler_options.verbatim_module_syntax.is_false_or_unknown();
+        let strict_null_checks =
+            compiler_options.get_strict_option_value(compiler_options.strict_null_checks);
+        let strict_function_types =
+            compiler_options.get_strict_option_value(compiler_options.strict_function_types);
+        let strict_bind_call_apply =
+            compiler_options.get_strict_option_value(compiler_options.strict_bind_call_apply);
+        let strict_property_initialization = compiler_options
+            .get_strict_option_value(compiler_options.strict_property_initialization);
+        let strict_builtin_iterator_return = compiler_options
+            .get_strict_option_value(compiler_options.strict_builtin_iterator_return);
+        let no_implicit_any =
+            compiler_options.get_strict_option_value(compiler_options.no_implicit_any);
+        let no_implicit_this =
+            compiler_options.get_strict_option_value(compiler_options.no_implicit_this);
+        let use_unknown_in_catch_variables = compiler_options
+            .get_strict_option_value(compiler_options.use_unknown_in_catch_variables);
+        let exact_optional_property_types =
+            compiler_options.exact_optional_property_types.is_true();
+        let can_collect_symbol_alias_accessibility_data = compiler_options
+            .verbatim_module_syntax
+            .is_false_or_unknown();
 
         let mut file_index_map = HashMap::new();
         for (i, file) in files.iter().enumerate() {
@@ -447,186 +460,216 @@ impl Checker {
 
     /// Get the `any` type.
     pub fn any_type(&self) -> Arc<Type> {
-        self.any_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::Any,
-                TypeData::Intrinsic(IntrinsicTypeData {
-                    intrinsic_name: "any".to_string(),
-                }),
-            ))
-        }).clone()
+        self.any_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Any,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "any".to_string(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     /// Get the `unknown` type.
     pub fn unknown_type(&self) -> Arc<Type> {
-        self.unknown_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::Unknown,
-                TypeData::Intrinsic(IntrinsicTypeData {
-                    intrinsic_name: "unknown".to_string(),
-                }),
-            ))
-        }).clone()
+        self.unknown_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Unknown,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "unknown".to_string(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     /// Get the `undefined` type.
     pub fn undefined_type(&self) -> Arc<Type> {
-        self.undefined_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::Undefined,
-                TypeData::Intrinsic(IntrinsicTypeData {
-                    intrinsic_name: "undefined".to_string(),
-                }),
-            ))
-        }).clone()
+        self.undefined_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Undefined,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "undefined".to_string(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     /// Get the `null` type.
     pub fn null_type(&self) -> Arc<Type> {
-        self.null_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::Null,
-                TypeData::Intrinsic(IntrinsicTypeData {
-                    intrinsic_name: "null".to_string(),
-                }),
-            ))
-        }).clone()
+        self.null_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Null,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "null".to_string(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     /// Get the `string` type.
     pub fn string_type(&self) -> Arc<Type> {
-        self.string_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::String,
-                TypeData::Intrinsic(IntrinsicTypeData {
-                    intrinsic_name: "string".to_string(),
-                }),
-            ))
-        }).clone()
+        self.string_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::String,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "string".to_string(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     /// Get the `number` type.
     pub fn number_type(&self) -> Arc<Type> {
-        self.number_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::Number,
-                TypeData::Intrinsic(IntrinsicTypeData {
-                    intrinsic_name: "number".to_string(),
-                }),
-            ))
-        }).clone()
+        self.number_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Number,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "number".to_string(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     /// Get the `bigint` type.
     pub fn bigint_type(&self) -> Arc<Type> {
-        self.bigint_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::BigInt,
-                TypeData::Intrinsic(IntrinsicTypeData {
-                    intrinsic_name: "bigint".to_string(),
-                }),
-            ))
-        }).clone()
+        self.bigint_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::BigInt,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "bigint".to_string(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     /// Get the `boolean` type.
     pub fn boolean_type(&self) -> Arc<Type> {
-        self.boolean_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::Boolean,
-                TypeData::Intrinsic(IntrinsicTypeData {
-                    intrinsic_name: "boolean".to_string(),
-                }),
-            ))
-        }).clone()
+        self.boolean_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Boolean,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "boolean".to_string(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     /// Get the `symbol` type.
     pub fn es_symbol_type(&self) -> Arc<Type> {
-        self.es_symbol_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::ESSymbol,
-                TypeData::Intrinsic(IntrinsicTypeData {
-                    intrinsic_name: "symbol".to_string(),
-                }),
-            ))
-        }).clone()
+        self.es_symbol_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::ESSymbol,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "symbol".to_string(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     /// Get the `void` type.
     pub fn void_type(&self) -> Arc<Type> {
-        self.void_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::Void,
-                TypeData::Intrinsic(IntrinsicTypeData {
-                    intrinsic_name: "void".to_string(),
-                }),
-            ))
-        }).clone()
+        self.void_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Void,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "void".to_string(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     /// Get the `never` type.
     pub fn never_type(&self) -> Arc<Type> {
-        self.never_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::Never,
-                TypeData::Intrinsic(IntrinsicTypeData {
-                    intrinsic_name: "never".to_string(),
-                }),
-            ))
-        }).clone()
+        self.never_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Never,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "never".to_string(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     /// Get the `object` type (non-primitive).
     pub fn non_primitive_type(&self) -> Arc<Type> {
-        self.non_primitive_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::NonPrimitive,
-                TypeData::Intrinsic(IntrinsicTypeData {
-                    intrinsic_name: "object".to_string(),
-                }),
-            ))
-        }).clone()
+        self.non_primitive_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::NonPrimitive,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "object".to_string(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     /// Get the `true` literal type.
     pub fn true_type(&self) -> Arc<Type> {
-        self.true_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::BooleanLiteral,
-                TypeData::Literal(LiteralTypeData {
-                    value: LiteralValue::Boolean(true),
-                    fresh_type: OnceLock::new(),
-                    regular_type: OnceLock::new(),
-                }),
-            ))
-        }).clone()
+        self.true_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::BooleanLiteral,
+                    TypeData::Literal(LiteralTypeData {
+                        value: LiteralValue::Boolean(true),
+                        fresh_type: OnceLock::new(),
+                        regular_type: OnceLock::new(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     /// Get the `false` literal type.
     pub fn false_type(&self) -> Arc<Type> {
-        self.false_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::BooleanLiteral,
-                TypeData::Literal(LiteralTypeData {
-                    value: LiteralValue::Boolean(false),
-                    fresh_type: OnceLock::new(),
-                    regular_type: OnceLock::new(),
-                }),
-            ))
-        }).clone()
+        self.false_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::BooleanLiteral,
+                    TypeData::Literal(LiteralTypeData {
+                        value: LiteralValue::Boolean(false),
+                        fresh_type: OnceLock::new(),
+                        regular_type: OnceLock::new(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     /// Get the `error` type.
     pub fn error_type(&self) -> Arc<Type> {
-        self.error_type.get_or_init(|| {
-            Arc::new(Type::new(
-                TypeFlags::Any,
-                TypeData::Intrinsic(IntrinsicTypeData {
-                    intrinsic_name: "error".to_string(),
-                }),
-            ))
-        }).clone()
+        self.error_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Any,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "error".to_string(),
+                    }),
+                ))
+            })
+            .clone()
     }
 
     // ────────────────────────────────────────────────────────────────────────
@@ -646,7 +689,8 @@ impl Checker {
                 regular_type: OnceLock::new(),
             }),
         ));
-        self.string_literal_types.insert(value.to_string(), Arc::clone(&t));
+        self.string_literal_types
+            .insert(value.to_string(), Arc::clone(&t));
         t
     }
 
@@ -701,7 +745,7 @@ impl Checker {
 
     /// Get combined modifier flags (caching the result).
     pub fn get_combined_modifier_flags(&mut self, node: &Arc<Node>) -> ModifierFlags {
-        let mut flags = ModifierFlags::empty();
+        let flags = ModifierFlags::empty();
         let mut current = Some(Arc::clone(node));
         while let Some(n) = current {
             current = n.parent.clone();
@@ -716,23 +760,53 @@ impl Checker {
 
 impl Checker {
     // Type accessors
-    pub fn get_string_type(&self) -> Arc<Type> { self.string_type() }
-    pub fn get_number_type(&self) -> Arc<Type> { self.number_type() }
-    pub fn get_boolean_type(&self) -> Arc<Type> { self.boolean_type() }
-    pub fn get_void_type(&self) -> Arc<Type> { self.void_type() }
-    pub fn get_undefined_type(&self) -> Arc<Type> { self.undefined_type() }
-    pub fn get_null_type(&self) -> Arc<Type> { self.null_type() }
-    pub fn get_any_type(&self) -> Arc<Type> { self.any_type() }
-    pub fn get_error_type(&self) -> Arc<Type> { self.error_type() }
-    pub fn get_never_type(&self) -> Arc<Type> { self.never_type() }
-    pub fn get_unknown_type(&self) -> Arc<Type> { self.unknown_type() }
-    pub fn get_bigint_type(&self) -> Arc<Type> { self.bigint_type() }
-    pub fn get_es_symbol_type(&self) -> Arc<Type> { self.es_symbol_type() }
+    pub fn get_string_type(&self) -> Arc<Type> {
+        self.string_type()
+    }
+    pub fn get_number_type(&self) -> Arc<Type> {
+        self.number_type()
+    }
+    pub fn get_boolean_type(&self) -> Arc<Type> {
+        self.boolean_type()
+    }
+    pub fn get_void_type(&self) -> Arc<Type> {
+        self.void_type()
+    }
+    pub fn get_undefined_type(&self) -> Arc<Type> {
+        self.undefined_type()
+    }
+    pub fn get_null_type(&self) -> Arc<Type> {
+        self.null_type()
+    }
+    pub fn get_any_type(&self) -> Arc<Type> {
+        self.any_type()
+    }
+    pub fn get_error_type(&self) -> Arc<Type> {
+        self.error_type()
+    }
+    pub fn get_never_type(&self) -> Arc<Type> {
+        self.never_type()
+    }
+    pub fn get_unknown_type(&self) -> Arc<Type> {
+        self.unknown_type()
+    }
+    pub fn get_bigint_type(&self) -> Arc<Type> {
+        self.bigint_type()
+    }
+    pub fn get_es_symbol_type(&self) -> Arc<Type> {
+        self.es_symbol_type()
+    }
 
     // Symbol accessors
-    pub fn get_unknown_symbol(&self) -> Option<Arc<Symbol>> { self.unknown_symbol.clone() }
-    pub fn get_undefined_symbol(&self) -> Option<Arc<Symbol>> { self.undefined_symbol.clone() }
-    pub fn get_arguments_symbol(&self) -> Option<Arc<Symbol>> { self.arguments_symbol.clone() }
+    pub fn get_unknown_symbol(&self) -> Option<Arc<Symbol>> {
+        self.unknown_symbol.clone()
+    }
+    pub fn get_undefined_symbol(&self) -> Option<Arc<Symbol>> {
+        self.undefined_symbol.clone()
+    }
+    pub fn get_arguments_symbol(&self) -> Option<Arc<Symbol>> {
+        self.arguments_symbol.clone()
+    }
 
     // Properties
     pub fn get_properties_of_type(&self, t: &Arc<Type>) -> Vec<Arc<Symbol>> {
@@ -742,7 +816,11 @@ impl Checker {
         Vec::new()
     }
 
-    pub fn get_signatures_of_type(&self, t: &Arc<Type>, kind: SignatureKind) -> Vec<Arc<Signature>> {
+    pub fn get_signatures_of_type(
+        &self,
+        t: &Arc<Type>,
+        kind: SignatureKind,
+    ) -> Vec<Arc<Signature>> {
         if let Some(structured) = t.as_structured() {
             return match kind {
                 SignatureKind::Call => structured.call_signatures().to_vec(),
@@ -765,7 +843,12 @@ impl Checker {
             if let Some(structured) = t.as_structured() {
                 // Check for numeric index info
                 for info in &structured.index_infos {
-                    if info.key_type.as_ref().map(|kt| kt.flags.contains(TypeFlags::Number)).unwrap_or(false) {
+                    if info
+                        .key_type
+                        .as_ref()
+                        .map(|kt| kt.flags.contains(TypeFlags::Number))
+                        .unwrap_or(false)
+                    {
                         return true;
                     }
                 }
@@ -779,8 +862,7 @@ impl Checker {
     pub fn is_array_type(&self, t: &Arc<Type>) -> bool {
         // A type is an array type if it's a reference to Array<T>
         // This is a simplified check; the full implementation resolves the target
-        t.flags.contains(TypeFlags::Object)
-            && t.object_flags.contains(ObjectFlags::Reference)
+        t.flags.contains(TypeFlags::Object) && t.object_flags.contains(ObjectFlags::Reference)
     }
 
     pub fn is_tuple_type(&self, t: &Arc<Type>) -> bool {
@@ -847,25 +929,20 @@ impl Checker {
     }
 
     // Get the type predicate of a signature
-    pub fn get_type_predicate_of_signature<'a>(&self, sig: &'a Arc<Signature>) -> Option<&'a TypePredicate> {
+    pub fn get_type_predicate_of_signature<'a>(
+        &self,
+        sig: &'a Arc<Signature>,
+    ) -> Option<&'a TypePredicate> {
         sig.resolved_type_predicate.as_deref()
     }
 
     // Get the base constraint of a type
     pub fn get_base_constraint_of_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         match &t.data {
-            TypeData::TypeParameter(tp) => {
-                tp.constrained.resolved_base_constraint.get().cloned()
-            }
-            TypeData::Conditional(ct) => {
-                ct.constrained.resolved_base_constraint.get().cloned()
-            }
-            TypeData::IndexedAccess(ia) => {
-                ia.constrained.resolved_base_constraint.get().cloned()
-            }
-            TypeData::Index(it) => {
-                it.constrained.resolved_base_constraint.get().cloned()
-            }
+            TypeData::TypeParameter(tp) => tp.constrained.resolved_base_constraint.get().cloned(),
+            TypeData::Conditional(ct) => ct.constrained.resolved_base_constraint.get().cloned(),
+            TypeData::IndexedAccess(ia) => ia.constrained.resolved_base_constraint.get().cloned(),
+            TypeData::Index(it) => it.constrained.resolved_base_constraint.get().cloned(),
             _ => None,
         }
     }
@@ -879,7 +956,7 @@ impl Checker {
     }
 
     // Get the type of a unique symbol
-    pub fn get_unique_symbol_type(&self, name: &str) -> Option<Arc<Type>> {
+    pub fn get_unique_symbol_type(&self, _name: &str) -> Option<Arc<Type>> {
         // Unique symbol types are cached by symbol ID, not by name
         // This is a simplified version
         None
@@ -908,7 +985,7 @@ mod tests {
 
     #[test]
     fn link_store_basic() {
-        let mut store: LinkStore<Node, NodeLinks> = LinkStore::new();
+        let store: LinkStore<Node, NodeLinks> = LinkStore::new();
         // We can't easily create a Node for testing, but we can verify the API
         // works with the Default impl.
         assert!(store.data.is_empty());

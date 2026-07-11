@@ -79,7 +79,8 @@ impl NodeFlags {
     /// Reachability check flags.
     pub const ReachabilityCheckFlags: Self = Self::HasImplicitReturn.union(Self::HasExplicitReturn);
     /// Reachability and emit flags.
-    pub const ReachabilityAndEmitFlags: Self = Self::ReachabilityCheckFlags.union(Self::HasAsyncFunctions);
+    pub const ReachabilityAndEmitFlags: Self =
+        Self::ReachabilityCheckFlags.union(Self::HasAsyncFunctions);
     /// All context flags.
     pub const ContextFlags: Self = Self::DisallowInContext
         .union(Self::DisallowConditionalTypesContext)
@@ -169,14 +170,17 @@ impl ModifierFlags {
         .union(Self::Decorator);
 
     /// All syntactic modifiers.
-    pub const SyntacticModifiers: Self = Self::SyntacticOrJSDocModifiers.union(Self::SyntacticOnlyModifiers);
+    pub const SyntacticModifiers: Self =
+        Self::SyntacticOrJSDocModifiers.union(Self::SyntacticOnlyModifiers);
 
     /// Accessibility modifiers: `public | private | protected`.
-    pub const AccessibilityModifier: Self = Self::Public.union(Self::Private).union(Self::Protected);
+    pub const AccessibilityModifier: Self =
+        Self::Public.union(Self::Private).union(Self::Protected);
 
     /// Parameter property modifiers.
-    pub const ParameterPropertyModifier: Self =
-        Self::AccessibilityModifier.union(Self::Readonly).union(Self::Override);
+    pub const ParameterPropertyModifier: Self = Self::AccessibilityModifier
+        .union(Self::Readonly)
+        .union(Self::Override);
 
     /// Non-public accessibility modifiers.
     pub const NonPublicAccessibilityModifier: Self = Self::Private.union(Self::Protected);

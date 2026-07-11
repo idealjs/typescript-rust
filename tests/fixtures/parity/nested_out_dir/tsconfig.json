@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "noLib": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "pretty": false
+  },
+  "files": ["src/lib/main.ts"]
+}

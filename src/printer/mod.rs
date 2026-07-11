@@ -6,8 +6,8 @@
 //! existing `emitter` module handles emit via source-text slicing.
 
 use std::collections::{HashMap, HashSet};
-use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU32, Ordering};
 
 use crate::ast::{Node, SyntaxKind};
 
@@ -227,7 +227,8 @@ impl<'a> NodeFactory<'a> {
         } else {
             text.to_string()
         };
-        let formatted = format_generated_name(true, &options.prefix, &display_text, &options.suffix);
+        let formatted =
+            format_generated_name(true, &options.prefix, &display_text, &options.suffix);
         let auto_generate = AutoGenerateInfo {
             flags: kind | (options.flags & !GeneratedIdentifierFlags::KIND_MASK),
             id,
@@ -274,14 +275,23 @@ impl<'a> NodeFactory<'a> {
         if !options.prefix.is_empty() || !options.suffix.is_empty() {
             options.flags |= GeneratedIdentifierFlags::OPTIMISTIC;
         }
-        self.new_generated_identifier(GeneratedIdentifierFlags::NODE, "", Some(Arc::clone(node)), options)
+        self.new_generated_identifier(
+            GeneratedIdentifierFlags::NODE,
+            "",
+            Some(Arc::clone(node)),
+            options,
+        )
     }
 
     pub fn new_unique_private_name(&self, text: &str) -> GeneratedName {
         self.new_unique_private_name_ex(text, AutoGenerateOptions::default())
     }
 
-    pub fn new_unique_private_name_ex(&self, text: &str, options: AutoGenerateOptions) -> GeneratedName {
+    pub fn new_unique_private_name_ex(
+        &self,
+        text: &str,
+        options: AutoGenerateOptions,
+    ) -> GeneratedName {
         self.new_generated_private_identifier(GeneratedIdentifierFlags::UNIQUE, text, None, options)
     }
 
@@ -297,7 +307,12 @@ impl<'a> NodeFactory<'a> {
         if !options.prefix.is_empty() || !options.suffix.is_empty() {
             options.flags |= GeneratedIdentifierFlags::OPTIMISTIC;
         }
-        self.new_generated_private_identifier(GeneratedIdentifierFlags::NODE, "", Some(Arc::clone(node)), options)
+        self.new_generated_private_identifier(
+            GeneratedIdentifierFlags::NODE,
+            "",
+            Some(Arc::clone(node)),
+            options,
+        )
     }
 }
 
@@ -449,7 +464,11 @@ impl NameGenerator {
             if scope.is_none() {
                 *scope = Some(Box::new(NameGenerationScope::new()));
             }
-            scope.as_mut().unwrap().reserved_names.insert(name.to_string());
+            scope
+                .as_mut()
+                .unwrap()
+                .reserved_names
+                .insert(name.to_string());
         } else if !temp {
             self.generated_names.insert(name.to_string());
         }
@@ -493,7 +512,10 @@ impl NameGenerator {
                 &auto_generate.suffix,
             )
         } else {
-            if let Some(cached) = self.auto_generated_id_to_generated_name.get(&auto_generate.id) {
+            if let Some(cached) = self
+                .auto_generated_id_to_generated_name
+                .get(&auto_generate.id)
+            {
                 return cached.clone();
             }
             let generated = self.make_name(name);
@@ -524,9 +546,11 @@ impl NameGenerator {
         }
         let generated = self.generate_name_for_node(node, private_name, flags, prefix, suffix);
         if private_name {
-            self.node_id_to_generated_private_name.insert(node_id, generated.clone());
+            self.node_id_to_generated_private_name
+                .insert(node_id, generated.clone());
         } else {
-            self.node_id_to_generated_name.insert(node_id, generated.clone());
+            self.node_id_to_generated_name
+                .insert(node_id, generated.clone());
         }
         generated
     }
@@ -552,52 +576,50 @@ impl NameGenerator {
                 )
             }
             SyntaxKind::ModuleDeclaration | SyntaxKind::EnumDeclaration => {
-                assert!(!private_name && prefix.is_empty() && suffix.is_empty(),
-                    "Generated name for a module or enum cannot be private and may have neither a prefix nor suffix");
+                assert!(
+                    !private_name && prefix.is_empty() && suffix.is_empty(),
+                    "Generated name for a module or enum cannot be private and may have neither a prefix nor suffix"
+                );
                 self.generate_name_for_module_or_enum(node)
             }
             SyntaxKind::ImportDeclaration | SyntaxKind::ExportDeclaration => {
-                assert!(!private_name && prefix.is_empty() && suffix.is_empty(),
-                    "Generated name for an import or export cannot be private and may have neither a prefix nor suffix");
+                assert!(
+                    !private_name && prefix.is_empty() && suffix.is_empty(),
+                    "Generated name for an import or export cannot be private and may have neither a prefix nor suffix"
+                );
                 self.generate_name_for_import_or_export_declaration(node)
             }
             SyntaxKind::FunctionDeclaration | SyntaxKind::ClassDeclaration => {
-                assert!(!private_name && prefix.is_empty() && suffix.is_empty(),
-                    "Generated name for a class or function declaration cannot be private and may have neither a prefix nor suffix");
+                assert!(
+                    !private_name && prefix.is_empty() && suffix.is_empty(),
+                    "Generated name for a class or function declaration cannot be private and may have neither a prefix nor suffix"
+                );
                 if let Some(name) = node.name() {
                     return self.generate_name_for_node(name, false, flags, "", "");
                 }
                 self.generate_name_for_export_default()
             }
             SyntaxKind::ExportAssignment => {
-                assert!(!private_name && prefix.is_empty() && suffix.is_empty(),
-                    "Generated name for an export assignment cannot be private and may have neither a prefix nor suffix");
+                assert!(
+                    !private_name && prefix.is_empty() && suffix.is_empty(),
+                    "Generated name for an export assignment cannot be private and may have neither a prefix nor suffix"
+                );
                 self.generate_name_for_export_default()
             }
             SyntaxKind::ClassExpression => {
-                assert!(!private_name && prefix.is_empty() && suffix.is_empty(),
-                    "Generated name for a class expression cannot be private and may have neither a prefix nor suffix");
+                assert!(
+                    !private_name && prefix.is_empty() && suffix.is_empty(),
+                    "Generated name for a class expression cannot be private and may have neither a prefix nor suffix"
+                );
                 self.make_unique_name("class", false, false, false, "", "")
             }
             SyntaxKind::MethodDeclaration | SyntaxKind::GetAccessor | SyntaxKind::SetAccessor => {
                 self.generate_name_for_method_or_accessor(node, private_name, prefix, suffix)
             }
             SyntaxKind::ComputedPropertyName => {
-                self.make_temp_variable_name(
-                    TEMP_FLAGS_AUTO,
-                    true,
-                    private_name,
-                    prefix,
-                    suffix,
-                )
+                self.make_temp_variable_name(TEMP_FLAGS_AUTO, true, private_name, prefix, suffix)
             }
-            _ => self.make_temp_variable_name(
-                TEMP_FLAGS_AUTO,
-                false,
-                private_name,
-                prefix,
-                suffix,
-            ),
+            _ => self.make_temp_variable_name(TEMP_FLAGS_AUTO, false, private_name, prefix, suffix),
         }
     }
 
@@ -648,34 +670,28 @@ impl NameGenerator {
     fn make_name(&mut self, name: &GeneratedName) -> String {
         let auto_generate = &name.auto_generate;
         match auto_generate.flags.kind() {
-            GeneratedIdentifierFlags::AUTO => {
-                self.make_temp_variable_name(
-                    TEMP_FLAGS_AUTO,
-                    auto_generate.flags.is_reserved_in_nested_scopes(),
-                    name.is_private,
-                    &auto_generate.prefix,
-                    &auto_generate.suffix,
-                )
-            }
-            GeneratedIdentifierFlags::LOOP => {
-                self.make_temp_variable_name(
-                    TEMP_FLAGS_I,
-                    auto_generate.flags.is_reserved_in_nested_scopes(),
-                    false,
-                    &auto_generate.prefix,
-                    &auto_generate.suffix,
-                )
-            }
-            GeneratedIdentifierFlags::UNIQUE => {
-                self.make_unique_name(
-                    name.text(),
-                    auto_generate.flags.is_optimistic(),
-                    auto_generate.flags.is_reserved_in_nested_scopes(),
-                    name.is_private,
-                    &auto_generate.prefix,
-                    &auto_generate.suffix,
-                )
-            }
+            GeneratedIdentifierFlags::AUTO => self.make_temp_variable_name(
+                TEMP_FLAGS_AUTO,
+                auto_generate.flags.is_reserved_in_nested_scopes(),
+                name.is_private,
+                &auto_generate.prefix,
+                &auto_generate.suffix,
+            ),
+            GeneratedIdentifierFlags::LOOP => self.make_temp_variable_name(
+                TEMP_FLAGS_I,
+                auto_generate.flags.is_reserved_in_nested_scopes(),
+                false,
+                &auto_generate.prefix,
+                &auto_generate.suffix,
+            ),
+            GeneratedIdentifierFlags::UNIQUE => self.make_unique_name(
+                name.text(),
+                auto_generate.flags.is_optimistic(),
+                auto_generate.flags.is_reserved_in_nested_scopes(),
+                name.is_private,
+                &auto_generate.prefix,
+                &auto_generate.suffix,
+            ),
             _ => name.text().to_string(),
         }
     }
@@ -768,12 +784,8 @@ impl NameGenerator {
 
         let mut i = 1;
         loop {
-            let full_name = format_generated_name(
-                private_name,
-                prefix,
-                &format!("{base_name}{i}"),
-                suffix,
-            );
+            let full_name =
+                format_generated_name(private_name, prefix, &format!("{base_name}{i}"), suffix);
             if self.check_unique_name(&full_name, private_name) {
                 self.reserve_name(&full_name, private_name, scoped, false);
                 return full_name;
@@ -849,12 +861,7 @@ fn make_identifier_from_module_name(module_name: &str) -> String {
     if start < pos {
         result.push_str(&base[start..pos]);
     }
-    if result
-        .chars()
-        .last()
-        .map(|c| c == '_')
-        .unwrap_or(false)
-    {
+    if result.chars().last().map(|c| c == '_').unwrap_or(false) {
         result.pop();
     }
     result
@@ -886,10 +893,8 @@ mod tests {
     use crate::parser::Parser;
 
     fn parse(source: &str) -> Arc<crate::ast::SourceFile> {
-        let (file, _diags) = Parser::parse_source_file_text_with_diagnostics(
-            "test.ts",
-            source.to_string(),
-        );
+        let (file, _diags) =
+            Parser::parse_source_file_text_with_diagnostics("test.ts", source.to_string());
         Arc::new(file)
     }
 
@@ -902,9 +907,7 @@ mod tests {
     }
 
     /// Create an `is_unique_local_name` callback that checks the binder's locals.
-    fn make_is_unique_local_name(
-        symbol_map: Arc<NodeSymbolMap>,
-    ) -> impl Fn(&str, &Node) -> bool {
+    fn make_is_unique_local_name(symbol_map: Arc<NodeSymbolMap>) -> impl Fn(&str, &Node) -> bool {
         move |name: &str, node: &Node| -> bool {
             let mask = SymbolFlags::VALUE | SymbolFlags::ExportValue | SymbolFlags::Alias;
             if let Some(locals) = symbol_map.locals_of(node) {
@@ -1176,7 +1179,7 @@ mod tests {
         };
         let func = &d.statements.nodes[0];
         let n = func.name().unwrap();
-        let name1 = factory.new_generated_name_for_node_ex(
+        let _name1 = factory.new_generated_name_for_node_ex(
             n,
             AutoGenerateOptions {
                 prefix: "a".to_string(),
@@ -1236,14 +1239,18 @@ mod tests {
         };
         let ns1_outer = &d.statements.nodes[0];
         let ns2_outer = &d.statements.nodes[1];
-        let crate::ast::node_data_generated::NodeData::ModuleDeclaration(ns1_data) = &ns1_outer.data else {
+        let crate::ast::node_data_generated::NodeData::ModuleDeclaration(ns1_data) =
+            &ns1_outer.data
+        else {
             panic!("expected ModuleDeclaration");
         };
         let ns1_body = ns1_data.body.as_ref().unwrap();
         let inner_ns1 = get_module_block_statements(ns1_body).unwrap()[0].clone();
         let name1 = factory.new_generated_name_for_node(&inner_ns1);
 
-        let crate::ast::node_data_generated::NodeData::ModuleDeclaration(ns2_data) = &ns2_outer.data else {
+        let crate::ast::node_data_generated::NodeData::ModuleDeclaration(ns2_data) =
+            &ns2_outer.data
+        else {
             panic!("expected ModuleDeclaration");
         };
         let ns2_body = ns2_data.body.as_ref().unwrap();
@@ -1268,14 +1275,18 @@ mod tests {
         };
         let ns1_outer = &d.statements.nodes[0];
         let ns2_outer = &d.statements.nodes[1];
-        let crate::ast::node_data_generated::NodeData::ModuleDeclaration(ns1_data) = &ns1_outer.data else {
+        let crate::ast::node_data_generated::NodeData::ModuleDeclaration(ns1_data) =
+            &ns1_outer.data
+        else {
             panic!("expected ModuleDeclaration");
         };
         let ns1_body = ns1_data.body.as_ref().unwrap();
         let inner_ns1 = get_module_block_statements(ns1_body).unwrap()[0].clone();
         let name1 = factory.new_generated_name_for_node(&inner_ns1);
 
-        let crate::ast::node_data_generated::NodeData::ModuleDeclaration(ns2_data) = &ns2_outer.data else {
+        let crate::ast::node_data_generated::NodeData::ModuleDeclaration(ns2_data) =
+            &ns2_outer.data
+        else {
             panic!("expected ModuleDeclaration");
         };
         let ns2_body = ns2_data.body.as_ref().unwrap();
@@ -1448,7 +1459,9 @@ mod tests {
             panic!("expected SourceFile");
         };
         let class_node = &d.statements.nodes[0];
-        let crate::ast::node_data_generated::NodeData::ClassDeclaration(class_data) = &class_node.data else {
+        let crate::ast::node_data_generated::NodeData::ClassDeclaration(class_data) =
+            &class_node.data
+        else {
             panic!("expected ClassDeclaration");
         };
         let n = &class_data.members.nodes[0];
@@ -1466,7 +1479,9 @@ mod tests {
             panic!("expected SourceFile");
         };
         let class_node = &d.statements.nodes[0];
-        let crate::ast::node_data_generated::NodeData::ClassDeclaration(class_data) = &class_node.data else {
+        let crate::ast::node_data_generated::NodeData::ClassDeclaration(class_data) =
+            &class_node.data
+        else {
             panic!("expected ClassDeclaration");
         };
         let n = &class_data.members.nodes[0];
@@ -1486,7 +1501,9 @@ mod tests {
             panic!("expected SourceFile");
         };
         let class_node = &d.statements.nodes[0];
-        let crate::ast::node_data_generated::NodeData::ClassDeclaration(class_data) = &class_node.data else {
+        let crate::ast::node_data_generated::NodeData::ClassDeclaration(class_data) =
+            &class_node.data
+        else {
             panic!("expected ClassDeclaration");
         };
         let n = &class_data.members.nodes[0];
@@ -1506,7 +1523,9 @@ mod tests {
             panic!("expected SourceFile");
         };
         let class_node = &d.statements.nodes[0];
-        let crate::ast::node_data_generated::NodeData::ClassDeclaration(class_data) = &class_node.data else {
+        let crate::ast::node_data_generated::NodeData::ClassDeclaration(class_data) =
+            &class_node.data
+        else {
             panic!("expected ClassDeclaration");
         };
         let member = &class_data.members.nodes[0];
@@ -1528,7 +1547,9 @@ mod tests {
             panic!("expected SourceFile");
         };
         let class_node = &d.statements.nodes[0];
-        let crate::ast::node_data_generated::NodeData::ClassDeclaration(class_data) = &class_node.data else {
+        let crate::ast::node_data_generated::NodeData::ClassDeclaration(class_data) =
+            &class_node.data
+        else {
             panic!("expected ClassDeclaration");
         };
         let member = &class_data.members.nodes[0];

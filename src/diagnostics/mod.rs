@@ -171,10 +171,7 @@ mod tests {
 
     #[test]
     fn format_with_args() {
-        assert_eq!(
-            format_message("'{0}' expected", &["foo"]),
-            "'foo' expected"
-        );
+        assert_eq!(format_message("'{0}' expected", &["foo"]), "'foo' expected");
     }
 
     #[test]

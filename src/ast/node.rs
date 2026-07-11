@@ -9,12 +9,12 @@
 //! `_scripts/ast.json` by `_scripts/generate-rust-ast.ts`. See
 //! `node_data_generated.rs`.
 
+use super::SyntaxKind;
 use super::node_data_generated::NodeData;
 use super::node_flags::{ModifierFlags, NodeFlags};
-use super::SyntaxKind;
 use crate::core::text::TextRange;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 /// A unique ID assigned to each node for debugging and caching.
 static NEXT_NODE_ID: AtomicU64 = AtomicU64::new(1);
@@ -267,8 +267,8 @@ pub enum ScriptKind {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::node_data_generated::IdentifierData;
+    use super::*;
 
     #[test]
     fn identifier_node() {

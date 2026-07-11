@@ -115,7 +115,11 @@ pub fn replace_element<T: Clone>(slice: &[T], i: usize, t: T) -> Vec<T> {
 }
 
 /// Insert `element` into `slice` keeping it sorted according to `cmp`.
-pub fn insert_sorted<T: Clone>(slice: &[T], element: &T, cmp: impl Fn(&T, &T) -> Ordering) -> Vec<T> {
+pub fn insert_sorted<T: Clone>(
+    slice: &[T],
+    element: &T,
+    cmp: impl Fn(&T, &T) -> Ordering,
+) -> Vec<T> {
     let i = slice
         .binary_search_by(|probe| cmp(probe, element))
         .unwrap_or_else(|e| e);
@@ -168,7 +172,11 @@ pub fn memoize<T: Clone + Send + Sync + 'static>(
     let create = std::sync::Mutex::new(Some(create));
     move || {
         cell.get_or_init(|| {
-            let create = create.lock().unwrap().take().expect("memoize closure called after init");
+            let create = create
+                .lock()
+                .unwrap()
+                .take()
+                .expect("memoize closure called after init");
             create()
         })
         .clone()

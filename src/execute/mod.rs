@@ -20,15 +20,18 @@
 //! ```
 
 use std::io::{IsTerminal, Write};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::time::Instant;
 
 use crate::bundled::{self, BundledFS};
 use crate::compiler::{CompilerHost, CompilerHostImpl, Program, ProgramOptions};
-use crate::diagnosticwriter::{format_diagnostic, report_diagnostics};
 use crate::core::compiler_options::CompilerOptions;
 use crate::core::tristate::Tristate;
-use crate::tsoptions::{get_parsed_command_line_of_config_file, parse_command_line, ParsedCommandLine};
+use crate::diagnosticwriter::{format_diagnostic, report_diagnostics};
+use crate::tsoptions::{
+    ParsedBuildCommandLine, ParsedCommandLine, get_parsed_command_line_of_config_file,
+    parse_build_command_line, parse_command_line,
+};
 use crate::tspath;
 use crate::vfs::{FS, OsFS};
 
@@ -39,7 +42,7 @@ use crate::vfs::{FS, OsFS};
 /// The process exit status returned by `command_line`.
 ///
 /// Mirrors `tsc.ExitStatus` in Go.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(i32)]
 pub enum ExitStatus {
     Success = 0,
@@ -146,24 +149,103 @@ impl System for OsSystem {
 /// regular compilation.
 pub fn command_line(sys: &dyn System, args: &[String]) -> CommandLineResult {
     if let Some(first) = args.first() {
-        let lower = first.to_lowercase();
-        if matches!(lower.as_str(), "-b" | "--b" | "-build" | "--build") {
-            // Build mode: strip the -b flag and run a regular compilation.
-            // A full build orchestrator (project references, incremental builds)
-            // is not yet ported; for now, -b behaves like a regular compilation
-            // that emits output files.
-            let build_args: Vec<String> = args[1..].to_vec();
-            let parsed = parse_command_line(
-                &build_args,
-                sys.current_directory(),
-                Some(sys.fs().as_ref()),
-            );
-            return tsc_compilation(sys, parsed);
+        if is_build_mode_arg(first) {
+            let parsed =
+                parse_build_command_line(args, sys.current_directory(), Some(sys.fs().as_ref()));
+            return tsc_build_compilation(sys, parsed);
         }
+    }
+
+    if args.iter().skip(1).any(|arg| is_build_mode_arg(arg)) {
+        let mut writer = sys.writer();
+        let _ = writeln!(
+            writer,
+            "error TS6369: Option '--build' must be the first command line argument."
+        );
+        return CommandLineResult {
+            status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
+        };
     }
 
     let parsed = parse_command_line(args, sys.current_directory(), Some(sys.fs().as_ref()));
     tsc_compilation(sys, parsed)
+}
+
+fn is_build_mode_arg(arg: &str) -> bool {
+    matches!(
+        arg.to_lowercase().as_str(),
+        "-b" | "--b" | "-build" | "--build"
+    )
+}
+
+fn tsc_build_compilation(
+    sys: &dyn System,
+    command_line: ParsedBuildCommandLine,
+) -> CommandLineResult {
+    let pretty = should_be_pretty(sys, &command_line.compiler_options);
+
+    if !command_line.errors.is_empty() {
+        let mut writer = sys.writer();
+        for e in &command_line.errors {
+            let _ = writeln!(writer, "{}", format_diagnostic(e, pretty));
+        }
+        return CommandLineResult {
+            status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
+        };
+    }
+
+    if command_line.compiler_options.help.is_true() || command_line.compiler_options.all.is_true() {
+        print_help(sys);
+        return CommandLineResult {
+            status: ExitStatus::Success,
+        };
+    }
+
+    let projects = command_line.resolved_project_paths();
+
+    let mut status = ExitStatus::Success;
+    for project in projects {
+        let config_file_name = if sys.fs().directory_exists(&project) {
+            let config = tspath::combine_paths(&project, &["tsconfig.json"]);
+            if !sys.fs().file_exists(&config) {
+                let mut writer = sys.writer();
+                let _ = writeln!(
+                    writer,
+                    "error TS5057: Cannot find a tsconfig.json file at the specified directory: '{config}'."
+                );
+                status = status.max(ExitStatus::DiagnosticsPresent_OutputsSkipped);
+                continue;
+            }
+            config
+        } else if sys.fs().file_exists(&project) {
+            project
+        } else {
+            let mut writer = sys.writer();
+            let _ = writeln!(writer, "error TS5083: Cannot read file '{project}'.");
+            status = status.max(ExitStatus::DiagnosticsPresent_OutputsSkipped);
+            continue;
+        };
+
+        let config = get_parsed_command_line_of_config_file(
+            &config_file_name,
+            &command_line.compiler_options,
+            sys.current_directory(),
+            sys.fs().as_ref(),
+        );
+        if !config.errors.is_empty() {
+            let mut writer = sys.writer();
+            for e in &config.errors {
+                let _ = writeln!(writer, "{}", format_diagnostic(e, pretty));
+            }
+            status = status.max(ExitStatus::DiagnosticsPresent_OutputsSkipped);
+            continue;
+        }
+
+        let result = perform_compilation(sys, config, pretty);
+        status = status.max(result.status);
+    }
+
+    CommandLineResult { status }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -229,9 +311,10 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
                 status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
             };
         }
-        let file_or_directory = tspath::normalize_path(
-            &tspath::combine_paths(sys.current_directory(), &[&options.project]),
-        );
+        let file_or_directory = tspath::normalize_path(&tspath::combine_paths(
+            sys.current_directory(),
+            &[&options.project],
+        ));
         if sys.fs().directory_exists(&file_or_directory) {
             config_file_name = tspath::combine_paths(&file_or_directory, &["tsconfig.json"]);
             if !sys.fs().file_exists(&config_file_name) {
@@ -383,37 +466,73 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
     if !options.lib.is_empty() {
         map.insert(
             "lib".to_string(),
-            Value::Array(options.lib.iter().map(|s| Value::String(s.clone())).collect()),
+            Value::Array(
+                options
+                    .lib
+                    .iter()
+                    .map(|s| Value::String(s.clone()))
+                    .collect(),
+            ),
         );
     }
     if !options.types.is_empty() {
         map.insert(
             "types".to_string(),
-            Value::Array(options.types.iter().map(|s| Value::String(s.clone())).collect()),
+            Value::Array(
+                options
+                    .types
+                    .iter()
+                    .map(|s| Value::String(s.clone()))
+                    .collect(),
+            ),
         );
     }
     if !options.type_roots.is_empty() {
         map.insert(
             "typeRoots".to_string(),
-            Value::Array(options.type_roots.iter().map(|s| Value::String(s.clone())).collect()),
+            Value::Array(
+                options
+                    .type_roots
+                    .iter()
+                    .map(|s| Value::String(s.clone()))
+                    .collect(),
+            ),
         );
     }
     if !options.root_dirs.is_empty() {
         map.insert(
             "rootDirs".to_string(),
-            Value::Array(options.root_dirs.iter().map(|s| Value::String(s.clone())).collect()),
+            Value::Array(
+                options
+                    .root_dirs
+                    .iter()
+                    .map(|s| Value::String(s.clone()))
+                    .collect(),
+            ),
         );
     }
     if !options.module_suffixes.is_empty() {
         map.insert(
             "moduleSuffixes".to_string(),
-            Value::Array(options.module_suffixes.iter().map(|s| Value::String(s.clone())).collect()),
+            Value::Array(
+                options
+                    .module_suffixes
+                    .iter()
+                    .map(|s| Value::String(s.clone()))
+                    .collect(),
+            ),
         );
     }
     if !options.custom_conditions.is_empty() {
         map.insert(
             "customConditions".to_string(),
-            Value::Array(options.custom_conditions.iter().map(|s| Value::String(s.clone())).collect()),
+            Value::Array(
+                options
+                    .custom_conditions
+                    .iter()
+                    .map(|s| Value::String(s.clone()))
+                    .collect(),
+            ),
         );
     }
 
@@ -432,7 +551,10 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
     // Boolean (Tristate) options — emit true/false when explicitly set
     let bool_opts: &[(&str, Tristate)] = &[
         ("allowJs", options.allow_js),
-        ("allowImportingTsExtensions", options.allow_importing_ts_extensions),
+        (
+            "allowImportingTsExtensions",
+            options.allow_importing_ts_extensions,
+        ),
         ("allowUmdGlobalAccess", options.allow_umd_global_access),
         ("allowUnreachableCode", options.allow_unreachable_code),
         ("allowUnusedLabels", options.allow_unused_labels),
@@ -446,9 +568,15 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
         ("emitDeclarationOnly", options.emit_declaration_only),
         ("emitDecoratorMetadata", options.emit_decorator_metadata),
         ("esModuleInterop", options.es_module_interop),
-        ("exactOptionalPropertyTypes", options.exact_optional_property_types),
+        (
+            "exactOptionalPropertyTypes",
+            options.exact_optional_property_types,
+        ),
         ("experimentalDecorators", options.experimental_decorators),
-        ("forceConsistentCasingInFileNames", options.force_consistent_casing_in_file_names),
+        (
+            "forceConsistentCasingInFileNames",
+            options.force_consistent_casing_in_file_names,
+        ),
         ("importHelpers", options.import_helpers),
         ("incremental", options.incremental),
         ("inlineSourceMap", options.inline_source_map),
@@ -459,34 +587,67 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
         ("noEmit", options.no_emit),
         ("noEmitOnError", options.no_emit_on_error),
         ("noErrorTruncation", options.no_error_truncation),
-        ("noFallthroughCasesInSwitch", options.no_fallthrough_cases_in_switch),
+        (
+            "noFallthroughCasesInSwitch",
+            options.no_fallthrough_cases_in_switch,
+        ),
         ("noImplicitAny", options.no_implicit_any),
         ("noImplicitOverride", options.no_implicit_override),
         ("noImplicitReturns", options.no_implicit_returns),
         ("noImplicitThis", options.no_implicit_this),
         ("noLib", options.no_lib),
-        ("noPropertyAccessFromIndexSignature", options.no_property_access_from_index_signature),
+        (
+            "noPropertyAccessFromIndexSignature",
+            options.no_property_access_from_index_signature,
+        ),
         ("noResolve", options.no_resolve),
-        ("noUncheckedIndexedAccess", options.no_unchecked_indexed_access),
-        ("noUncheckedSideEffectImports", options.no_unchecked_side_effect_imports),
+        (
+            "noUncheckedIndexedAccess",
+            options.no_unchecked_indexed_access,
+        ),
+        (
+            "noUncheckedSideEffectImports",
+            options.no_unchecked_side_effect_imports,
+        ),
         ("noUnusedLocals", options.no_unused_locals),
         ("noUnusedParameters", options.no_unused_parameters),
         ("preserveConstEnums", options.preserve_const_enums),
         ("removeComments", options.remove_comments),
         ("resolveJsonModule", options.resolve_json_module),
-        ("resolvePackageJsonExports", options.resolve_package_json_exports),
-        ("resolvePackageJsonImports", options.resolve_package_json_imports),
-        ("rewriteRelativeImportExtensions", options.rewrite_relative_import_extensions),
+        (
+            "resolvePackageJsonExports",
+            options.resolve_package_json_exports,
+        ),
+        (
+            "resolvePackageJsonImports",
+            options.resolve_package_json_imports,
+        ),
+        (
+            "rewriteRelativeImportExtensions",
+            options.rewrite_relative_import_extensions,
+        ),
         ("skipLibCheck", options.skip_lib_check),
         ("strict", options.strict),
         ("strictBindCallApply", options.strict_bind_call_apply),
-        ("strictBuiltinIteratorReturn", options.strict_builtin_iterator_return),
+        (
+            "strictBuiltinIteratorReturn",
+            options.strict_builtin_iterator_return,
+        ),
         ("strictFunctionTypes", options.strict_function_types),
         ("strictNullChecks", options.strict_null_checks),
-        ("strictPropertyInitialization", options.strict_property_initialization),
+        (
+            "strictPropertyInitialization",
+            options.strict_property_initialization,
+        ),
         ("stripInternal", options.strip_internal),
-        ("useDefineForClassFields", options.use_define_for_class_fields),
-        ("useUnknownInCatchVariables", options.use_unknown_in_catch_variables),
+        (
+            "useDefineForClassFields",
+            options.use_define_for_class_fields,
+        ),
+        (
+            "useUnknownInCatchVariables",
+            options.use_unknown_in_catch_variables,
+        ),
         ("verbatimModuleSyntax", options.verbatim_module_syntax),
     ];
     for (name, t) in bool_opts {
@@ -506,22 +667,40 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
     if !map.is_empty() {
         top.insert("compilerOptions".to_string(), Value::Object(map));
     }
-    if !config.files_spec.is_empty() {
+    if config.has_files_spec {
         top.insert(
             "files".to_string(),
-            Value::Array(config.files_spec.iter().map(|s| Value::String(s.clone())).collect()),
+            Value::Array(
+                config
+                    .files_spec
+                    .iter()
+                    .map(|s| Value::String(s.clone()))
+                    .collect(),
+            ),
         );
     }
-    if !config.include.is_empty() {
+    if config.has_include_spec {
         top.insert(
             "include".to_string(),
-            Value::Array(config.include.iter().map(|s| Value::String(s.clone())).collect()),
+            Value::Array(
+                config
+                    .include
+                    .iter()
+                    .map(|s| Value::String(s.clone()))
+                    .collect(),
+            ),
         );
     }
-    if !config.exclude.is_empty() {
+    if config.has_exclude_spec {
         top.insert(
             "exclude".to_string(),
-            Value::Array(config.exclude.iter().map(|s| Value::String(s.clone())).collect()),
+            Value::Array(
+                config
+                    .exclude
+                    .iter()
+                    .map(|s| Value::String(s.clone()))
+                    .collect(),
+            ),
         );
     }
 
@@ -651,26 +830,74 @@ fn print_help(sys: &dyn System) {
     let _ = writeln!(writer, "Version 5.2 (tsox, Rust port)");
     let _ = writeln!(writer);
     let _ = writeln!(writer, "Common options:");
-    let _ = writeln!(writer, "  -p, --project <file>   Compile the project given the path to its configuration file,");
-    let _ = writeln!(writer, "                         or to a folder with a 'tsconfig.json'.");
-    let _ = writeln!(writer, "  -b, --build            Build one or more projects and their dependencies, if out of date.");
+    let _ = writeln!(
+        writer,
+        "  -p, --project <file>   Compile the project given the path to its configuration file,"
+    );
+    let _ = writeln!(
+        writer,
+        "                         or to a folder with a 'tsconfig.json'."
+    );
+    let _ = writeln!(
+        writer,
+        "  -b, --build            Build one or more projects and their dependencies, if out of date."
+    );
     let _ = writeln!(writer, "  -w, --watch            Watch input files.");
-    let _ = writeln!(writer, "  -t, --target <ver>     Specify ECMAScript target version.");
-    let _ = writeln!(writer, "  -m, --module <kind>    Specify module code generation.");
-    let _ = writeln!(writer, "      --moduleResolution <kind>  Specify module resolution strategy.");
-    let _ = writeln!(writer, "      --lib <lib,...>    Specify library files to be included in the compilation.");
-    let _ = writeln!(writer, "      --outDir <dir>     Redirect output structure to the directory.");
-    let _ = writeln!(writer, "      --outFile <file>   Concatenate and emit output to single file.");
-    let _ = writeln!(writer, "      --sourceMap        Generates corresponding '.map' file.");
-    let _ = writeln!(writer, "      --declaration, -d  Generates corresponding '.d.ts' file.");
-    let _ = writeln!(writer, "      --strict           Enable all strict type-checking options.");
+    let _ = writeln!(
+        writer,
+        "  -t, --target <ver>     Specify ECMAScript target version."
+    );
+    let _ = writeln!(
+        writer,
+        "  -m, --module <kind>    Specify module code generation."
+    );
+    let _ = writeln!(
+        writer,
+        "      --moduleResolution <kind>  Specify module resolution strategy."
+    );
+    let _ = writeln!(
+        writer,
+        "      --lib <lib,...>    Specify library files to be included in the compilation."
+    );
+    let _ = writeln!(
+        writer,
+        "      --outDir <dir>     Redirect output structure to the directory."
+    );
+    let _ = writeln!(
+        writer,
+        "      --outFile <file>   Concatenate and emit output to single file."
+    );
+    let _ = writeln!(
+        writer,
+        "      --sourceMap        Generates corresponding '.map' file."
+    );
+    let _ = writeln!(
+        writer,
+        "      --declaration, -d  Generates corresponding '.d.ts' file."
+    );
+    let _ = writeln!(
+        writer,
+        "      --strict           Enable all strict type-checking options."
+    );
     let _ = writeln!(writer, "      --noEmit           Do not emit outputs.");
-    let _ = writeln!(writer, "      --skipLibCheck     Skip type checking of declaration files.");
+    let _ = writeln!(
+        writer,
+        "      --skipLibCheck     Skip type checking of declaration files."
+    );
     let _ = writeln!(writer, "      --help, -h         Print this message.");
-    let _ = writeln!(writer, "      --version, -v      Print the compiler's version.");
-    let _ = writeln!(writer, "      --all              Show all compiler options.");
+    let _ = writeln!(
+        writer,
+        "      --version, -v      Print the compiler's version."
+    );
+    let _ = writeln!(
+        writer,
+        "      --all              Show all compiler options."
+    );
     let _ = writeln!(writer);
-    let _ = writeln!(writer, "For more information, see https://www.typescriptlang.org/tsconfig");
+    let _ = writeln!(
+        writer,
+        "For more information, see https://www.typescriptlang.org/tsconfig"
+    );
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -682,6 +909,7 @@ mod tests {
     use super::*;
     use crate::bundled::BundledFS;
     use crate::vfs::InMemoryFS;
+    use std::sync::Mutex;
 
     /// A test System backed by an in-memory FS and a captured output buffer.
     struct TestSystem {
@@ -799,6 +1027,27 @@ mod tests {
     }
 
     #[test]
+    fn non_ascii_invalid_character_does_not_panic_in_command_line() {
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/proj");
+        fs.insert_file("/proj/middle-dot.ts", "·");
+        let sys = TestSystem::new(fs, "/proj");
+        let args = vec![
+            "--noLib".to_string(),
+            "--ignoreConfig".to_string(),
+            "--noEmitOnError".to_string(),
+            "/proj/middle-dot.ts".to_string(),
+        ];
+
+        let result = command_line(&sys, &args);
+
+        // Scanner-level invalid-character diagnostics are not wired into the
+        // command-line parser yet; this smoke test guards the packaged CLI path
+        // against the UTF-8 slicing panic reported for `·`.
+        assert_eq!(result.status, ExitStatus::Success);
+    }
+
+    #[test]
     fn finds_config_in_ancestor_directory() {
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/root");
@@ -819,15 +1068,19 @@ mod tests {
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
         fs.insert_file("/proj/a.ts", "let x: number = 1;");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{"compilerOptions":{"noLib":true},"files":["a.ts"]}"#,
+        );
         let sys = TestSystem::new(fs, "/proj");
-        let args = vec![
-            "-b".to_string(),
-            "--noLib".to_string(),
-            "--ignoreConfig".to_string(),
-            "/proj/a.ts".to_string(),
-        ];
+        let args = vec!["-b".to_string()];
         let result = command_line(&sys, &args);
-        assert_eq!(result.status, ExitStatus::Success);
+        assert_eq!(
+            result.status,
+            ExitStatus::Success,
+            "output:\n{}",
+            sys.output_string()
+        );
         // The -b flag should produce a .js output file.
         assert!(sys.fs().file_exists("/proj/a.js"));
         let js = sys.fs().read_file("/proj/a.js").unwrap();
@@ -838,7 +1091,10 @@ mod tests {
     fn regular_compilation_produces_output() {
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
-        fs.insert_file("/proj/b.ts", "function foo(a: number): number { return a; }");
+        fs.insert_file(
+            "/proj/b.ts",
+            "function foo(a: number): number { return a; }",
+        );
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
             "--noLib".to_string(),
@@ -983,22 +1239,25 @@ mod tests {
     fn build_mode_with_out_dir() {
         // Verify -b flag works in combination with --outDir.
         let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/proj");
         fs.insert_dir("/proj/src");
-        fs.insert_file("/proj/src/i.ts", "function add(a: number, b: number): number { return a + b; }");
+        fs.insert_file("/proj/src/i.ts", "let value: number = 1;");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{"compilerOptions":{"noLib":true,"outDir":"/proj/dist"},"files":["src/i.ts"]}"#,
+        );
         let sys = TestSystem::new(fs, "/proj");
-        let args = vec![
-            "-b".to_string(),
-            "--noLib".to_string(),
-            "--ignoreConfig".to_string(),
-            "--outDir".to_string(),
-            "/proj/dist".to_string(),
-            "/proj/src/i.ts".to_string(),
-        ];
+        let args = vec!["-b".to_string()];
         let result = command_line(&sys, &args);
-        assert_eq!(result.status, ExitStatus::Success);
+        assert_eq!(
+            result.status,
+            ExitStatus::Success,
+            "output:\n{}",
+            sys.output_string()
+        );
         assert!(sys.fs().file_exists("/proj/dist/i.js"));
         let js = sys.fs().read_file("/proj/dist/i.js").unwrap();
-        assert!(js.contains("function add(a, b)"));
+        assert!(js.contains("let value = 1;"));
         assert!(!js.contains(": number"));
     }
 
@@ -1077,7 +1336,11 @@ mod tests {
             }"#,
         );
         let sys = TestSystem::new(fs, "/proj");
-        let args = vec!["-p".to_string(), "tsconfig.json".to_string(), "--showConfig".to_string()];
+        let args = vec![
+            "-p".to_string(),
+            "tsconfig.json".to_string(),
+            "--showConfig".to_string(),
+        ];
         let result = command_line(&sys, &args);
         if result.status != ExitStatus::Success {
             panic!(
@@ -1112,7 +1375,11 @@ mod tests {
             }"#,
         );
         let sys = TestSystem::new(fs, "/proj");
-        let args = vec!["-p".to_string(), "tsconfig.json".to_string(), "--showConfig".to_string()];
+        let args = vec![
+            "-p".to_string(),
+            "tsconfig.json".to_string(),
+            "--showConfig".to_string(),
+        ];
         let result = command_line(&sys, &args);
         assert_eq!(result.status, ExitStatus::Success);
         let out = sys.output_string();
@@ -1135,7 +1402,11 @@ mod tests {
             }"#,
         );
         let sys = TestSystem::new(fs, "/proj");
-        let args = vec!["-p".to_string(), "tsconfig.json".to_string(), "--showConfig".to_string()];
+        let args = vec![
+            "-p".to_string(),
+            "tsconfig.json".to_string(),
+            "--showConfig".to_string(),
+        ];
         let result = command_line(&sys, &args);
         assert_eq!(result.status, ExitStatus::Success);
         let out = sys.output_string();
@@ -1309,8 +1580,6 @@ mod tests {
 
     #[test]
     fn build_not_first_argument() {
-        // When --build is not the first argument, it's treated as a regular
-        // compiler option, not as the build mode trigger.
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
         fs.insert_file("/proj/a.ts", "let x: number = 1;");
@@ -1322,10 +1591,8 @@ mod tests {
             "/proj/a.ts".to_string(),
         ];
         let result = command_line(&sys, &args);
-        // Should compile normally (not enter build mode since -b isn't first).
-        // The --build flag is parsed as a boolean option but doesn't trigger
-        // the build mode dispatch.
-        assert_eq!(result.status, ExitStatus::Success);
+        assert_eq!(result.status, ExitStatus::DiagnosticsPresent_OutputsSkipped);
+        assert!(sys.output_string().contains("must be the first"));
     }
 
     // ───────────────────────────────────────────────────────────────────────
@@ -1361,7 +1628,10 @@ mod tests {
         // but the compilation should still succeed and produce .js output.
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
-        fs.insert_file("/proj/a.ts", "export const x: number = 1;\nexport function foo(a: number): number { return a; }");
+        fs.insert_file(
+            "/proj/a.ts",
+            "export const x: number = 1;\nexport function foo(a: number): number { return a; }",
+        );
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
             "--noLib".to_string(),
@@ -1519,7 +1789,10 @@ mod tests {
         let result = command_line(&sys, &args);
         // Should have errors but output should not contain color codes.
         let out = sys.output_string();
-        assert!(!out.contains("\x1b["), "output should not contain ANSI codes: {out}");
+        assert!(
+            !out.contains("\x1b["),
+            "output should not contain ANSI codes: {out}"
+        );
         // Status indicates errors present.
         assert!(result.status != ExitStatus::Success);
     }
@@ -1585,7 +1858,11 @@ mod tests {
             }"#,
         );
         let sys = TestSystem::new(fs, "/proj");
-        let args = vec!["-p".to_string(), "tsconfig.json".to_string(), "--showConfig".to_string()];
+        let args = vec![
+            "-p".to_string(),
+            "tsconfig.json".to_string(),
+            "--showConfig".to_string(),
+        ];
         let result = command_line(&sys, &args);
         assert_eq!(result.status, ExitStatus::Success);
         // compileOnSave is not yet serialized in the simplified showConfig,
@@ -1609,7 +1886,11 @@ mod tests {
             }"#,
         );
         let sys = TestSystem::new(fs, "/proj");
-        let args = vec!["-p".to_string(), "tsconfig.json".to_string(), "--showConfig".to_string()];
+        let args = vec![
+            "-p".to_string(),
+            "tsconfig.json".to_string(),
+            "--showConfig".to_string(),
+        ];
         let result = command_line(&sys, &args);
         assert_eq!(result.status, ExitStatus::Success);
         let out = sys.output_string();
@@ -1624,10 +1905,7 @@ mod tests {
     fn missing_file_in_tsconfig_reports_error() {
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
-        fs.insert_file(
-            "/proj/tsconfig.json",
-            r#"{"files":["./doesNotExist.ts"]}"#,
-        );
+        fs.insert_file("/proj/tsconfig.json", r#"{"files":["./doesNotExist.ts"]}"#);
         let sys = TestSystem::new(fs, "/proj");
         let args = vec!["-p".to_string(), "./tsconfig.json".to_string()];
         let result = command_line(&sys, &args);

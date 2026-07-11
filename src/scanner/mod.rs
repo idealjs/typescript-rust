@@ -13,7 +13,7 @@ use std::sync::OnceLock;
 pub type ErrorCallback = fn(kind: DiagnosticKind, start: usize, length: usize);
 
 /// Simplified diagnostic kinds for the scanner.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DiagnosticKind {
     InvalidCharacter,
     UnterminatedStringLiteral,
@@ -171,7 +171,10 @@ fn punctuation() -> &'static HashMap<&'static str, SyntaxKind> {
         m.insert("%=", SyntaxKind::PercentEqualsToken);
         m.insert("<<=", SyntaxKind::LessThanLessThanEqualsToken);
         m.insert(">>=", SyntaxKind::GreaterThanGreaterThanEqualsToken);
-        m.insert(">>>=", SyntaxKind::GreaterThanGreaterThanGreaterThanEqualsToken);
+        m.insert(
+            ">>>=",
+            SyntaxKind::GreaterThanGreaterThanGreaterThanEqualsToken,
+        );
         m.insert("&=", SyntaxKind::AmpersandEqualsToken);
         m.insert("|=", SyntaxKind::BarEqualsToken);
         m.insert("^=", SyntaxKind::CaretEqualsToken);
@@ -331,7 +334,11 @@ impl Scanner {
         }
 
         // Number
-        if is_digit(c) || (c == '.' && self.pos + 1 < self.end && is_digit(self.text.as_bytes()[self.pos + 1] as char)) {
+        if is_digit(c)
+            || (c == '.'
+                && self.pos + 1 < self.end
+                && is_digit(self.text.as_bytes()[self.pos + 1] as char))
+        {
             return self.scan_number();
         }
 
@@ -379,7 +386,10 @@ impl Scanner {
         self.pos += 2;
         while self.pos < self.end {
             let c = self.text.as_bytes()[self.pos] as char;
-            if c == '*' && self.pos + 1 < self.end && self.text.as_bytes()[self.pos + 1] as char == '/' {
+            if c == '*'
+                && self.pos + 1 < self.end
+                && self.text.as_bytes()[self.pos + 1] as char == '/'
+            {
                 self.pos += 2;
                 break;
             }
@@ -411,9 +421,7 @@ impl Scanner {
 
     fn scan_number(&mut self) -> SyntaxKind {
         let start = self.pos;
-        if self.text.as_bytes()[self.pos] as char == '0'
-            && self.pos + 1 < self.end
-        {
+        if self.text.as_bytes()[self.pos] as char == '0' && self.pos + 1 < self.end {
             let next = self.text.as_bytes()[self.pos + 1] as char;
             if next == 'x' || next == 'X' {
                 // Hex
@@ -428,7 +436,10 @@ impl Scanner {
             if next == 'b' || next == 'B' {
                 // Binary
                 self.pos += 2;
-                while self.pos < self.end && (self.text.as_bytes()[self.pos] as char == '0' || self.text.as_bytes()[self.pos] as char == '1') {
+                while self.pos < self.end
+                    && (self.text.as_bytes()[self.pos] as char == '0'
+                        || self.text.as_bytes()[self.pos] as char == '1')
+                {
                     self.pos += 1;
                 }
                 self.token_end = self.pos;
@@ -438,7 +449,10 @@ impl Scanner {
             if next == 'o' || next == 'O' {
                 // Octal
                 self.pos += 2;
-                while self.pos < self.end && (self.text.as_bytes()[self.pos] as char >= '0' && self.text.as_bytes()[self.pos] as char <= '7') {
+                while self.pos < self.end
+                    && (self.text.as_bytes()[self.pos] as char >= '0'
+                        && self.text.as_bytes()[self.pos] as char <= '7')
+                {
                     self.pos += 1;
                 }
                 self.token_end = self.pos;
@@ -504,7 +518,11 @@ impl Scanner {
             if c == '\n' || c == '\r' {
                 // Unterminated string
                 if let Some(cb) = self.error_callback {
-                    cb(DiagnosticKind::UnterminatedStringLiteral, self.token_pos, self.pos - self.token_pos);
+                    cb(
+                        DiagnosticKind::UnterminatedStringLiteral,
+                        self.token_pos,
+                        self.pos - self.token_pos,
+                    );
                 }
                 break;
             }
@@ -529,7 +547,10 @@ impl Scanner {
                 self.pos += 1;
                 break;
             }
-            if c == '$' && self.pos + 1 < self.end && self.text.as_bytes()[self.pos + 1] as char == '{' {
+            if c == '$'
+                && self.pos + 1 < self.end
+                && self.text.as_bytes()[self.pos + 1] as char == '{'
+            {
                 self.pos += 2;
                 has_substitution = true;
                 break;
@@ -575,11 +596,15 @@ impl Scanner {
                 }
             }
         }
-        // Check 1-char tokens
-        if best_len == 0 && remaining.len() >= 1 {
-            if let Some(kind) = string_to_token(&remaining[..1]) {
-                best_match = Some(kind);
-                best_len = 1;
+        // Check 1-char tokens. `remaining` may start with a multi-byte UTF-8
+        // character, so slice by the first char's byte length instead of `..1`.
+        if best_len == 0 {
+            let first_len = remaining.chars().next().map(char::len_utf8).unwrap_or(0);
+            if first_len == 1 {
+                if let Some(kind) = string_to_token(&remaining[..first_len]) {
+                    best_match = Some(kind);
+                    best_len = first_len;
+                }
             }
         }
 
@@ -614,7 +639,10 @@ impl Scanner {
 // ────────────────────────────────────────────────────────────────────────────
 
 fn is_whitespace(c: char) -> bool {
-    matches!(c, ' ' | '\t' | '\n' | '\r' | '\x0B' | '\x0C' | '\u{A0}' | '\u{FEFF}')
+    matches!(
+        c,
+        ' ' | '\t' | '\n' | '\r' | '\x0B' | '\x0C' | '\u{A0}' | '\u{FEFF}'
+    )
 }
 
 fn is_digit(c: char) -> bool {
@@ -626,11 +654,17 @@ fn is_hex_digit(c: char) -> bool {
 }
 
 fn is_identifier_start(c: char) -> bool {
-    c.is_ascii_alphabetic() || c == '_' || c == '$' || (!c.is_ascii() && is_unicode_identifier_start(c))
+    c.is_ascii_alphabetic()
+        || c == '_'
+        || c == '$'
+        || (!c.is_ascii() && is_unicode_identifier_start(c))
 }
 
 fn is_identifier_part(c: char) -> bool {
-    c.is_ascii_alphanumeric() || c == '_' || c == '$' || (!c.is_ascii() && is_unicode_identifier_part(c))
+    c.is_ascii_alphanumeric()
+        || c == '_'
+        || c == '$'
+        || (!c.is_ascii() && is_unicode_identifier_part(c))
 }
 
 fn is_unicode_identifier_start(c: char) -> bool {
@@ -702,6 +736,20 @@ fn unescape_string(s: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::{Mutex, OnceLock};
+
+    static RECORDED_ERRORS: OnceLock<Mutex<Vec<(DiagnosticKind, usize, usize)>>> = OnceLock::new();
+
+    fn recorded_errors() -> &'static Mutex<Vec<(DiagnosticKind, usize, usize)>> {
+        RECORDED_ERRORS.get_or_init(|| Mutex::new(Vec::new()))
+    }
+
+    fn record_error(kind: DiagnosticKind, start: usize, length: usize) {
+        recorded_errors()
+            .lock()
+            .unwrap()
+            .push((kind, start, length));
+    }
 
     #[test]
     fn scan_identifiers_and_keywords() {
@@ -748,6 +796,32 @@ mod tests {
         assert_eq!(s.scan(), SyntaxKind::EqualsEqualsEqualsToken);
         assert_eq!(s.scan(), SyntaxKind::DotDotDotToken);
         assert_eq!(s.scan(), SyntaxKind::QuestionQuestionEqualsToken);
+    }
+
+    #[test]
+    fn scan_non_ascii_unknown_characters_do_not_split_utf8() {
+        recorded_errors().lock().unwrap().clear();
+        let mut s = Scanner::new("· 中 🦀").with_error_callback(record_error);
+
+        assert_eq!(s.scan(), SyntaxKind::Unknown);
+        assert_eq!(s.token_text(), "·");
+
+        assert_eq!(s.scan(), SyntaxKind::Identifier);
+        assert_eq!(s.token_text(), "中");
+
+        assert_eq!(s.scan(), SyntaxKind::Unknown);
+        assert_eq!(s.token_text(), "🦀");
+
+        assert_eq!(s.scan(), SyntaxKind::EndOfFile);
+
+        let errors = recorded_errors().lock().unwrap();
+        assert_eq!(
+            errors.as_slice(),
+            &[
+                (DiagnosticKind::InvalidCharacter, 0, "·".len()),
+                (DiagnosticKind::InvalidCharacter, "· 中 ".len(), "🦀".len()),
+            ]
+        );
     }
 
     #[test]

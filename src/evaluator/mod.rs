@@ -56,7 +56,13 @@ impl EvalValue {
         match self {
             EvalValue::String(s) => s.clone(),
             EvalValue::Number(n) => n.to_string(),
-            EvalValue::Bool(b) => if *b { "true".to_string() } else { "false".to_string() },
+            EvalValue::Bool(b) => {
+                if *b {
+                    "true".to_string()
+                } else {
+                    "false".to_string()
+                }
+            }
             EvalValue::BigInt(b) => b.to_string(),
         }
     }
@@ -121,7 +127,12 @@ pub fn evaluate_expression(
                     }
                 }
                 is_syntactically_string = result.is_syntactically_string;
-                return EvalResult::new(None, is_syntactically_string, resolved_other_files, has_external_references);
+                return EvalResult::new(
+                    None,
+                    is_syntactically_string,
+                    resolved_other_files,
+                    has_external_references,
+                );
             }
             EvalResult::none()
         }
@@ -130,16 +141,20 @@ pub fn evaluate_expression(
                 let left = evaluate_expression(&data.left, location, evaluate_entity);
                 let right = evaluate_expression(&data.right, location, evaluate_entity);
                 let operator = data.operator_token.kind;
-                let is_syntactically_string = (left.is_syntactically_string || right.is_syntactically_string)
+                let is_syntactically_string = (left.is_syntactically_string
+                    || right.is_syntactically_string)
                     && operator == SyntaxKind::PlusToken;
                 let resolved_other_files = left.resolved_other_files || right.resolved_other_files;
-                let has_external_references = left.has_external_references || right.has_external_references;
+                let has_external_references =
+                    left.has_external_references || right.has_external_references;
 
                 if let (Some(EvalValue::Number(left_num)), Some(EvalValue::Number(right_num))) =
                     (&left.value, &right.value)
                 {
                     let result = match operator {
-                        SyntaxKind::BarToken => Some(EvalValue::Number(left_num.bitwise_or(*right_num))),
+                        SyntaxKind::BarToken => {
+                            Some(EvalValue::Number(left_num.bitwise_or(*right_num)))
+                        }
                         SyntaxKind::AmpersandToken => {
                             Some(EvalValue::Number(left_num.bitwise_and(*right_num)))
                         }
@@ -152,8 +167,12 @@ pub fn evaluate_expression(
                         SyntaxKind::LessThanLessThanToken => {
                             Some(EvalValue::Number(left_num.left_shift(*right_num)))
                         }
-                        SyntaxKind::CaretToken => Some(EvalValue::Number(left_num.bitwise_xor(*right_num))),
-                        SyntaxKind::AsteriskToken => Some(EvalValue::Number(*left_num * *right_num)),
+                        SyntaxKind::CaretToken => {
+                            Some(EvalValue::Number(left_num.bitwise_xor(*right_num)))
+                        }
+                        SyntaxKind::AsteriskToken => {
+                            Some(EvalValue::Number(*left_num * *right_num))
+                        }
                         SyntaxKind::SlashToken => Some(EvalValue::Number(*left_num / *right_num)),
                         SyntaxKind::PlusToken => Some(EvalValue::Number(*left_num + *right_num)),
                         SyntaxKind::MinusToken => Some(EvalValue::Number(*left_num - *right_num)),
@@ -197,7 +216,12 @@ pub fn evaluate_expression(
                     }
                 }
 
-                return EvalResult::new(None, is_syntactically_string, resolved_other_files, has_external_references);
+                return EvalResult::new(
+                    None,
+                    is_syntactically_string,
+                    resolved_other_files,
+                    has_external_references,
+                );
             }
             EvalResult::none()
         }
@@ -242,8 +266,12 @@ pub fn evaluate_expression(
         SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression => {
             // Check if the expression is an entity name expression
             let is_entity = match &expr.data {
-                NodeData::PropertyAccessExpression(data) => is_entity_name_expression(&data.expression),
-                NodeData::ElementAccessExpression(data) => is_entity_name_expression(&data.expression),
+                NodeData::PropertyAccessExpression(data) => {
+                    is_entity_name_expression(&data.expression)
+                }
+                NodeData::ElementAccessExpression(data) => {
+                    is_entity_name_expression(&data.expression)
+                }
                 _ => false,
             };
             if is_entity {

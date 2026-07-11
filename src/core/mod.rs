@@ -3,8 +3,8 @@
 //! Ported from `internal/core/` in the Go implementation.
 
 pub mod arena;
-pub mod binary_search;
 pub mod bfs;
+pub mod binary_search;
 pub mod compiler_options;
 pub mod core;
 pub mod semaphore;

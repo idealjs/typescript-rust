@@ -63,7 +63,8 @@ impl Binder {
             SymbolFlags::ValueModule,
             file.file_name.clone(),
         ));
-        self.symbol_map.set_symbol(&file.node, Arc::clone(&file_symbol));
+        self.symbol_map
+            .set_symbol(&file.node, Arc::clone(&file_symbol));
         self.symbol_count += 1;
 
         // Set up container context
@@ -111,7 +112,7 @@ impl Binder {
         // 1) container's exports (if in a module/namespace)
         // 2) container's members (if in a class/interface/object)
         // 3) block-scope container's locals
-        if let Some(container) = &self.container {
+        if let Some(_container) = &self.container {
             if let Some(parent_sym) = &self.parent_symbol {
                 // For now, add to parent symbol's members
                 // In a full implementation, this would distinguish between
@@ -148,48 +149,49 @@ impl Binder {
         match &node.data {
             NodeData::VariableDeclaration(data) => self.node_text(&data.name),
             NodeData::VariableStatement(_) => String::new(),
-            NodeData::FunctionDeclaration(data) => {
-                data.name.as_ref().map(|n| self.node_text(n)).unwrap_or_default()
-            }
-            NodeData::FunctionExpression(data) => {
-                data.name.as_ref().map(|n| self.node_text(n)).unwrap_or_else(|| {
-                    INTERNAL_SYMBOL_NAME_FUNCTION.to_string()
-                })
-            }
+            NodeData::FunctionDeclaration(data) => data
+                .name
+                .as_ref()
+                .map(|n| self.node_text(n))
+                .unwrap_or_default(),
+            NodeData::FunctionExpression(data) => data
+                .name
+                .as_ref()
+                .map(|n| self.node_text(n))
+                .unwrap_or_else(|| INTERNAL_SYMBOL_NAME_FUNCTION.to_string()),
             NodeData::ArrowFunction(_) => INTERNAL_SYMBOL_NAME_FUNCTION.to_string(),
-            NodeData::ClassDeclaration(data) => {
-                data.name.as_ref().map(|n| self.node_text(n)).unwrap_or_default()
-            }
-            NodeData::ClassExpression(data) => {
-                data.name.as_ref().map(|n| self.node_text(n)).unwrap_or_else(|| {
-                    INTERNAL_SYMBOL_NAME_CLASS.to_string()
-                })
-            }
+            NodeData::ClassDeclaration(data) => data
+                .name
+                .as_ref()
+                .map(|n| self.node_text(n))
+                .unwrap_or_default(),
+            NodeData::ClassExpression(data) => data
+                .name
+                .as_ref()
+                .map(|n| self.node_text(n))
+                .unwrap_or_else(|| INTERNAL_SYMBOL_NAME_CLASS.to_string()),
             NodeData::InterfaceDeclaration(data) => self.node_text(&data.name),
             NodeData::TypeAliasDeclaration(data) => self.node_text(&data.name),
             NodeData::EnumDeclaration(data) => self.node_text(&data.name),
             NodeData::ModuleDeclaration(data) => self.node_text(&data.name),
             NodeData::ParameterDeclaration(data) => self.node_text(&data.name),
-            NodeData::BindingElement(data) => {
-                data.name.as_ref().map(|n| self.node_text(n)).unwrap_or_default()
-            }
-            NodeData::ImportSpecifier(data) => {
-                data.property_name.as_ref().map_or_else(
-                    || self.node_text(&data.name),
-                    |n| self.node_text(n),
-                )
-            }
-            NodeData::ImportClause(data) => {
-                data.name.as_ref().map_or_else(
-                    || {
-                        data.named_bindings.as_ref().map_or_else(
-                            || String::new(),
-                            |n| self.node_text(n),
-                        )
-                    },
-                    |n| self.node_text(n),
-                )
-            }
+            NodeData::BindingElement(data) => data
+                .name
+                .as_ref()
+                .map(|n| self.node_text(n))
+                .unwrap_or_default(),
+            NodeData::ImportSpecifier(data) => data
+                .property_name
+                .as_ref()
+                .map_or_else(|| self.node_text(&data.name), |n| self.node_text(n)),
+            NodeData::ImportClause(data) => data.name.as_ref().map_or_else(
+                || {
+                    data.named_bindings
+                        .as_ref()
+                        .map_or_else(|| String::new(), |n| self.node_text(n))
+                },
+                |n| self.node_text(n),
+            ),
             NodeData::PropertyDeclaration(data) => self.node_text(&data.name),
             NodeData::MethodDeclaration(data) => self.node_text(&data.name),
             NodeData::PropertyAssignment(data) => self.node_text(&data.name),
@@ -252,16 +254,32 @@ impl Binder {
                 self.declare_symbol(node, SymbolFlags::Function, SymbolFlags::VALUE);
             }
             SyntaxKind::FunctionExpression => {
-                self.bind_anonymous_declaration(node, SymbolFlags::Function, INTERNAL_SYMBOL_NAME_FUNCTION);
+                self.bind_anonymous_declaration(
+                    node,
+                    SymbolFlags::Function,
+                    INTERNAL_SYMBOL_NAME_FUNCTION,
+                );
             }
             SyntaxKind::ArrowFunction => {
-                self.bind_anonymous_declaration(node, SymbolFlags::Function, INTERNAL_SYMBOL_NAME_FUNCTION);
+                self.bind_anonymous_declaration(
+                    node,
+                    SymbolFlags::Function,
+                    INTERNAL_SYMBOL_NAME_FUNCTION,
+                );
             }
             SyntaxKind::ClassDeclaration => {
-                self.declare_symbol(node, SymbolFlags::Class, SymbolFlags::VALUE | SymbolFlags::TYPE);
+                self.declare_symbol(
+                    node,
+                    SymbolFlags::Class,
+                    SymbolFlags::VALUE | SymbolFlags::TYPE,
+                );
             }
             SyntaxKind::ClassExpression => {
-                self.bind_anonymous_declaration(node, SymbolFlags::Class, INTERNAL_SYMBOL_NAME_CLASS);
+                self.bind_anonymous_declaration(
+                    node,
+                    SymbolFlags::Class,
+                    INTERNAL_SYMBOL_NAME_CLASS,
+                );
             }
             SyntaxKind::InterfaceDeclaration => {
                 self.declare_symbol(node, SymbolFlags::Interface, SymbolFlags::TYPE);
@@ -270,13 +288,21 @@ impl Binder {
                 self.declare_symbol(node, SymbolFlags::TypeAlias, SymbolFlags::TYPE);
             }
             SyntaxKind::EnumDeclaration => {
-                self.declare_symbol(node, SymbolFlags::RegularEnum, SymbolFlags::VALUE | SymbolFlags::TYPE);
+                self.declare_symbol(
+                    node,
+                    SymbolFlags::RegularEnum,
+                    SymbolFlags::VALUE | SymbolFlags::TYPE,
+                );
             }
             SyntaxKind::ModuleDeclaration => {
                 self.declare_symbol(node, SymbolFlags::ValueModule, SymbolFlags::MODULE);
             }
             SyntaxKind::Parameter => {
-                self.declare_symbol(node, SymbolFlags::FunctionScopedVariable, SymbolFlags::VALUE);
+                self.declare_symbol(
+                    node,
+                    SymbolFlags::FunctionScopedVariable,
+                    SymbolFlags::VALUE,
+                );
             }
             SyntaxKind::PropertyDeclaration | SyntaxKind::PropertySignature => {
                 self.declare_symbol(node, SymbolFlags::Property, SymbolFlags::VALUE);
@@ -291,7 +317,11 @@ impl Binder {
                 self.declare_symbol(node, SymbolFlags::Property, SymbolFlags::VALUE);
             }
             SyntaxKind::EnumMember => {
-                self.declare_symbol(node, SymbolFlags::EnumMember, SymbolFlags::VALUE | SymbolFlags::TYPE);
+                self.declare_symbol(
+                    node,
+                    SymbolFlags::EnumMember,
+                    SymbolFlags::VALUE | SymbolFlags::TYPE,
+                );
             }
             SyntaxKind::GetAccessor => {
                 self.declare_symbol(node, SymbolFlags::GetAccessor, SymbolFlags::VALUE);
@@ -309,10 +339,18 @@ impl Binder {
                 self.declare_symbol(node, SymbolFlags::BlockScopedVariable, SymbolFlags::VALUE);
             }
             SyntaxKind::ObjectLiteralExpression => {
-                self.bind_anonymous_declaration(node, SymbolFlags::ObjectLiteral, INTERNAL_SYMBOL_NAME_OBJECT);
+                self.bind_anonymous_declaration(
+                    node,
+                    SymbolFlags::ObjectLiteral,
+                    INTERNAL_SYMBOL_NAME_OBJECT,
+                );
             }
             SyntaxKind::TypeLiteral => {
-                self.bind_anonymous_declaration(node, SymbolFlags::TypeLiteral, INTERNAL_SYMBOL_NAME_TYPE);
+                self.bind_anonymous_declaration(
+                    node,
+                    SymbolFlags::TypeLiteral,
+                    INTERNAL_SYMBOL_NAME_TYPE,
+                );
             }
             _ => {}
         }
@@ -328,12 +366,7 @@ impl Binder {
 
     /// Create an anonymous symbol (for function expressions, class expressions,
     /// object literals, type literals).
-    fn bind_anonymous_declaration(
-        &mut self,
-        node: &Arc<Node>,
-        flags: SymbolFlags,
-        name: &str,
-    ) {
+    fn bind_anonymous_declaration(&mut self, node: &Arc<Node>, flags: SymbolFlags, name: &str) {
         let symbol = self.new_symbol(flags, name.to_string());
         self.symbol_map.set_symbol(node, symbol);
     }
@@ -385,7 +418,9 @@ impl Binder {
         // This is safe because we don't alias the node itself.
         let this = self as *mut Self;
         crate::ast::node_data_generated::for_each_child(node, |child| {
-            unsafe { (*this).bind(child); }
+            unsafe {
+                (*this).bind(child);
+            }
             false
         });
     }
@@ -399,16 +434,14 @@ impl Binder {
 /// Get container flags for a node kind.
 fn get_container_flags(kind: SyntaxKind) -> ContainerFlags {
     match kind {
-        SyntaxKind::ClassDeclaration
-        | SyntaxKind::ClassExpression => {
+        SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => {
             ContainerFlags::IS_CONTAINER | ContainerFlags::HAS_LOCALS
         }
         SyntaxKind::InterfaceDeclaration
         | SyntaxKind::TypeLiteral
         | SyntaxKind::ObjectLiteralExpression
         | SyntaxKind::JsxAttributes => ContainerFlags::IS_CONTAINER,
-        SyntaxKind::FunctionExpression
-        | SyntaxKind::ArrowFunction => {
+        SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
             ContainerFlags::IS_CONTAINER
                 | ContainerFlags::IS_CONTROL_FLOW_CONTAINER
                 | ContainerFlags::IS_FUNCTION_LIKE
@@ -430,9 +463,7 @@ fn get_container_flags(kind: SyntaxKind) -> ContainerFlags {
                 | ContainerFlags::IS_FUNCTION_LIKE
                 | ContainerFlags::HAS_LOCALS
         }
-        SyntaxKind::Block
-        | SyntaxKind::ModuleDeclaration
-        | SyntaxKind::SourceFile => {
+        SyntaxKind::Block | SyntaxKind::ModuleDeclaration | SyntaxKind::SourceFile => {
             ContainerFlags::IS_CONTAINER
                 | ContainerFlags::IS_BLOCK_SCOPED_CONTAINER
                 | ContainerFlags::IS_CONTROL_FLOW_CONTAINER

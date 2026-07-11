@@ -62,7 +62,13 @@ impl PackageId {
 
 impl std::fmt::Display for PackageId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}@{}{}", self.package_name(), self.version, self.peer_dependencies)
+        write!(
+            f,
+            "{}@{}{}",
+            self.package_name(),
+            self.version,
+            self.peer_dependencies
+        )
     }
 }
 
@@ -144,7 +150,10 @@ pub fn parse_package_name(module_name: &str) -> (String, String) {
         }
     }
     match idx {
-        Some(i) => (module_name[..i].to_string(), module_name[i + 1..].to_string()),
+        Some(i) => (
+            module_name[..i].to_string(),
+            module_name[i + 1..].to_string(),
+        ),
         None => (module_name.to_string(), String::new()),
     }
 }
@@ -196,14 +205,21 @@ pub fn parse_node_module_from_path(resolved: &str, is_folder: bool) -> String {
         move_to_next_directory_separator_if_available(&path, index_after_node_modules, is_folder);
 
     if path.as_bytes().get(index_after_node_modules) == Some(&b'@') {
-        index_after_package_name =
-            move_to_next_directory_separator_if_available(&path, index_after_package_name, is_folder);
+        index_after_package_name = move_to_next_directory_separator_if_available(
+            &path,
+            index_after_package_name,
+            is_folder,
+        );
     }
 
     path[..index_after_package_name].to_string()
 }
 
-fn move_to_next_directory_separator_if_available(path: &str, prev_separator_index: usize, is_folder: bool) -> usize {
+fn move_to_next_directory_separator_if_available(
+    path: &str,
+    prev_separator_index: usize,
+    is_folder: bool,
+) -> usize {
     let offset = prev_separator_index + 1;
     if offset > path.len() {
         return if is_folder {
@@ -306,7 +322,10 @@ mod tests {
 
     #[test]
     fn package_name_from_types() {
-        assert_eq!(get_package_name_from_types_package_name("@types/foo"), "foo");
+        assert_eq!(
+            get_package_name_from_types_package_name("@types/foo"),
+            "foo"
+        );
         assert_eq!(
             get_package_name_from_types_package_name("@types/scope__name"),
             "@scope/name"
@@ -316,14 +335,38 @@ mod tests {
     #[test]
     fn parse_node_module_path() {
         // From Go tests
-        assert_eq!(parse_node_module_from_path("/a/node_modules/b/lib/index.d.ts", false), "/a/node_modules/b");
-        assert_eq!(parse_node_module_from_path("/a/node_modules/@scope/b/lib/index.d.ts", false), "/a/node_modules/@scope/b");
-        assert_eq!(parse_node_module_from_path("/a/node_modules/b/lib/File", true), "/a/node_modules/b");
-        assert_eq!(parse_node_module_from_path("/a/node_modules/@scope/b/lib/File", true), "/a/node_modules/@scope/b");
-        assert_eq!(parse_node_module_from_path("/a/node_modules/b", true), "/a/node_modules/b");
-        assert_eq!(parse_node_module_from_path("/a/node_modules/@scope/b", true), "/a/node_modules/@scope/b");
-        assert_eq!(parse_node_module_from_path("/a/node_modules/@scope", true), "/a/node_modules/@scope");
-        assert_eq!(parse_node_module_from_path("/a/node_modules/@types", true), "/a/node_modules/@types");
+        assert_eq!(
+            parse_node_module_from_path("/a/node_modules/b/lib/index.d.ts", false),
+            "/a/node_modules/b"
+        );
+        assert_eq!(
+            parse_node_module_from_path("/a/node_modules/@scope/b/lib/index.d.ts", false),
+            "/a/node_modules/@scope/b"
+        );
+        assert_eq!(
+            parse_node_module_from_path("/a/node_modules/b/lib/File", true),
+            "/a/node_modules/b"
+        );
+        assert_eq!(
+            parse_node_module_from_path("/a/node_modules/@scope/b/lib/File", true),
+            "/a/node_modules/@scope/b"
+        );
+        assert_eq!(
+            parse_node_module_from_path("/a/node_modules/b", true),
+            "/a/node_modules/b"
+        );
+        assert_eq!(
+            parse_node_module_from_path("/a/node_modules/@scope/b", true),
+            "/a/node_modules/@scope/b"
+        );
+        assert_eq!(
+            parse_node_module_from_path("/a/node_modules/@scope", true),
+            "/a/node_modules/@scope"
+        );
+        assert_eq!(
+            parse_node_module_from_path("/a/node_modules/@types", true),
+            "/a/node_modules/@types"
+        );
         assert_eq!(parse_node_module_from_path("/a/src/index.ts", false), "");
     }
 

@@ -98,7 +98,10 @@ fn parse_inner(pattern: &str, nested: bool) -> Result<(Glob, &str), String> {
                     // Check adjacency to '/'
                     let last_is_slash = elems.last().map_or(false, |e| matches!(e, Element::Slash));
                     let next_after_starstar = pattern.as_bytes().get(idx + 2).copied();
-                    if !last_is_slash && next_after_starstar != Some(b'/') && next_after_starstar.is_some() {
+                    if !last_is_slash
+                        && next_after_starstar != Some(b'/')
+                        && next_after_starstar.is_some()
+                    {
                         return Err("** may only be adjacent to '/'".to_string());
                     }
                     if !last_is_slash && next_after_starstar.is_none() && !elems.is_empty() {
@@ -138,10 +141,7 @@ fn parse_inner(pattern: &str, nested: bool) -> Result<(Glob, &str), String> {
                         return Err("unmatched '{'".to_string());
                     }
                 }
-                // Update chars iterator to skip past consumed portion
-                let consumed = pattern.len() - rest.len();
-                chars = pattern[consumed..].char_indices().peekable();
-                // Adjust indices - we need to reset based on the original pattern
+                // Continue parsing from the remaining text after the group.
                 let _ = bytes; // suppress unused warning
                 elems.push(Element::Group(group));
                 // Re-parse from rest
@@ -341,7 +341,9 @@ mod tests {
     use super::*;
 
     fn matches(pattern: &str, input: &str) -> bool {
-        Glob::parse(pattern).unwrap_or_else(|e| panic!("Failed to parse pattern '{}': {}", pattern, e)).is_match(input)
+        Glob::parse(pattern)
+            .unwrap_or_else(|e| panic!("Failed to parse pattern '{}': {}", pattern, e))
+            .is_match(input)
     }
 
     #[test]

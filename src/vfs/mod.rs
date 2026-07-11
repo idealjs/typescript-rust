@@ -160,7 +160,10 @@ impl InMemoryFS {
     }
 
     pub fn insert_file(&self, path: &str, content: &str) {
-        self.files.write().unwrap().insert(path.to_string(), content.to_string());
+        self.files
+            .write()
+            .unwrap()
+            .insert(path.to_string(), content.to_string());
     }
 
     pub fn insert_dir(&self, path: &str) {
@@ -188,7 +191,10 @@ impl FS for InMemoryFS {
     }
 
     fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
-        self.files.write().unwrap().insert(path.to_string(), data.to_string());
+        self.files
+            .write()
+            .unwrap()
+            .insert(path.to_string(), data.to_string());
         Ok(())
     }
 

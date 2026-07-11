@@ -7,7 +7,6 @@
 //! not yet mirror the full `NameMap`/did-you-mean machinery of the Go port.
 
 use std::collections::HashMap;
-use std::sync::Arc;
 
 use crate::ast::diagnostic::Diagnostic;
 use crate::core::compiler_options::{
@@ -46,98 +45,592 @@ pub struct OptionDecl {
 ///
 /// Mirrors a subset of `tsoptions.CommandLineCompilerOptions`.
 pub const OPTIONS: &[OptionDecl] = &[
-    OptionDecl { name: "help", short_name: Some("h"), kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "all", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "version", short_name: Some("v"), kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "init", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "project", short_name: Some("p"), kind: OptionKind::String, is_file_path: true },
-    OptionDecl { name: "build", short_name: Some("b"), kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "watch", short_name: Some("w"), kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "incremental", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "noEmit", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "noCheck", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "noLib", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "skipLibCheck", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "skipDefaultLibCheck", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "strict", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "strictNullChecks", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "strictFunctionTypes", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "strictBindCallApply", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "strictPropertyInitialization", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "strictBuiltinIteratorReturn", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "noImplicitAny", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "noImplicitThis", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "noImplicitOverride", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "noUnusedLocals", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "noUnusedParameters", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "noFallthroughCasesInSwitch", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "noUncheckedIndexedAccess", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "noPropertyAccessFromIndexSignature", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "noErrorTruncation", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "noEmitOnError", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "noResolve", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "useUnknownInCatchVariables", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "exactOptionalPropertyTypes", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "esModuleInterop", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "allowSyntheticDefaultImports", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "allowJs", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "checkJs", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "composite", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "declaration", short_name: Some("d"), kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "declarationMap", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "declarationDir", short_name: None, kind: OptionKind::String, is_file_path: true },
-    OptionDecl { name: "emitDeclarationOnly", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "sourceMap", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "inlineSourceMap", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "inlineSources", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "removeComments", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "isolatedModules", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "isolatedDeclarations", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "verbatimModuleSyntax", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "preserveConstEnums", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "importHelpers", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "experimentalDecorators", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "emitDecoratorMetadata", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "forceConsistentCasingInFileNames", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "listFiles", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "listFilesOnly", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "listEmittedFiles", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "explainFiles", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "extendedDiagnostics", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "diagnostics", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "pretty", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "showConfig", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "ignoreConfig", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "locale", short_name: None, kind: OptionKind::String, is_file_path: false },
-    OptionDecl { name: "target", short_name: Some("t"), kind: OptionKind::Enum, is_file_path: false },
-    OptionDecl { name: "module", short_name: Some("m"), kind: OptionKind::Enum, is_file_path: false },
-    OptionDecl { name: "moduleResolution", short_name: None, kind: OptionKind::Enum, is_file_path: false },
-    OptionDecl { name: "jsx", short_name: None, kind: OptionKind::Enum, is_file_path: false },
-    OptionDecl { name: "newLine", short_name: None, kind: OptionKind::Enum, is_file_path: false },
-    OptionDecl { name: "moduleDetection", short_name: None, kind: OptionKind::Enum, is_file_path: false },
-    OptionDecl { name: "lib", short_name: None, kind: OptionKind::List, is_file_path: false },
-    OptionDecl { name: "types", short_name: None, kind: OptionKind::List, is_file_path: false },
-    OptionDecl { name: "typeRoots", short_name: None, kind: OptionKind::List, is_file_path: true },
-    OptionDecl { name: "rootDirs", short_name: None, kind: OptionKind::List, is_file_path: true },
-    OptionDecl { name: "paths", short_name: None, kind: OptionKind::List, is_file_path: false },
-    OptionDecl { name: "outDir", short_name: None, kind: OptionKind::String, is_file_path: true },
-    OptionDecl { name: "outFile", short_name: None, kind: OptionKind::String, is_file_path: true },
-    OptionDecl { name: "rootDir", short_name: None, kind: OptionKind::String, is_file_path: true },
-    OptionDecl { name: "baseUrl", short_name: None, kind: OptionKind::String, is_file_path: true },
-    OptionDecl { name: "tsBuildInfoFile", short_name: None, kind: OptionKind::String, is_file_path: false },
-    OptionDecl { name: "sourceRoot", short_name: None, kind: OptionKind::String, is_file_path: false },
-    OptionDecl { name: "mapRoot", short_name: None, kind: OptionKind::String, is_file_path: false },
-    OptionDecl { name: "jsxFactory", short_name: None, kind: OptionKind::String, is_file_path: false },
-    OptionDecl { name: "jsxFragmentFactory", short_name: None, kind: OptionKind::String, is_file_path: false },
-    OptionDecl { name: "jsxImportSource", short_name: None, kind: OptionKind::String, is_file_path: false },
-    OptionDecl { name: "reactNamespace", short_name: None, kind: OptionKind::String, is_file_path: false },
-    OptionDecl { name: "generateTrace", short_name: None, kind: OptionKind::String, is_file_path: true },
-    OptionDecl { name: "singleThreaded", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
-    OptionDecl { name: "quiet", short_name: None, kind: OptionKind::Boolean, is_file_path: false },
+    OptionDecl {
+        name: "help",
+        short_name: Some("h"),
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "all",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "version",
+        short_name: Some("v"),
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "init",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "project",
+        short_name: Some("p"),
+        kind: OptionKind::String,
+        is_file_path: true,
+    },
+    OptionDecl {
+        name: "build",
+        short_name: Some("b"),
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "watch",
+        short_name: Some("w"),
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "incremental",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "noEmit",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "noCheck",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "noLib",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "skipLibCheck",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "skipDefaultLibCheck",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "strict",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "strictNullChecks",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "strictFunctionTypes",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "strictBindCallApply",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "strictPropertyInitialization",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "strictBuiltinIteratorReturn",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "noImplicitAny",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "noImplicitThis",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "noImplicitOverride",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "noUnusedLocals",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "noUnusedParameters",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "noFallthroughCasesInSwitch",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "noUncheckedIndexedAccess",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "noPropertyAccessFromIndexSignature",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "noErrorTruncation",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "noEmitOnError",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "noResolve",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "useUnknownInCatchVariables",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "exactOptionalPropertyTypes",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "esModuleInterop",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "allowSyntheticDefaultImports",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "allowJs",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "checkJs",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "composite",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "declaration",
+        short_name: Some("d"),
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "declarationMap",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "declarationDir",
+        short_name: None,
+        kind: OptionKind::String,
+        is_file_path: true,
+    },
+    OptionDecl {
+        name: "emitDeclarationOnly",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "sourceMap",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "inlineSourceMap",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "inlineSources",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "removeComments",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "isolatedModules",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "isolatedDeclarations",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "verbatimModuleSyntax",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "preserveConstEnums",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "importHelpers",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "experimentalDecorators",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "emitDecoratorMetadata",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "forceConsistentCasingInFileNames",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "listFiles",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "listFilesOnly",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "listEmittedFiles",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "explainFiles",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "extendedDiagnostics",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "diagnostics",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "pretty",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "showConfig",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "ignoreConfig",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "locale",
+        short_name: None,
+        kind: OptionKind::String,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "target",
+        short_name: Some("t"),
+        kind: OptionKind::Enum,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "module",
+        short_name: Some("m"),
+        kind: OptionKind::Enum,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "moduleResolution",
+        short_name: None,
+        kind: OptionKind::Enum,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "jsx",
+        short_name: None,
+        kind: OptionKind::Enum,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "newLine",
+        short_name: None,
+        kind: OptionKind::Enum,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "moduleDetection",
+        short_name: None,
+        kind: OptionKind::Enum,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "lib",
+        short_name: None,
+        kind: OptionKind::List,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "types",
+        short_name: None,
+        kind: OptionKind::List,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "typeRoots",
+        short_name: None,
+        kind: OptionKind::List,
+        is_file_path: true,
+    },
+    OptionDecl {
+        name: "rootDirs",
+        short_name: None,
+        kind: OptionKind::List,
+        is_file_path: true,
+    },
+    OptionDecl {
+        name: "paths",
+        short_name: None,
+        kind: OptionKind::List,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "outDir",
+        short_name: None,
+        kind: OptionKind::String,
+        is_file_path: true,
+    },
+    OptionDecl {
+        name: "outFile",
+        short_name: None,
+        kind: OptionKind::String,
+        is_file_path: true,
+    },
+    OptionDecl {
+        name: "rootDir",
+        short_name: None,
+        kind: OptionKind::String,
+        is_file_path: true,
+    },
+    OptionDecl {
+        name: "baseUrl",
+        short_name: None,
+        kind: OptionKind::String,
+        is_file_path: true,
+    },
+    OptionDecl {
+        name: "tsBuildInfoFile",
+        short_name: None,
+        kind: OptionKind::String,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "sourceRoot",
+        short_name: None,
+        kind: OptionKind::String,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "mapRoot",
+        short_name: None,
+        kind: OptionKind::String,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "jsxFactory",
+        short_name: None,
+        kind: OptionKind::String,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "jsxFragmentFactory",
+        short_name: None,
+        kind: OptionKind::String,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "jsxImportSource",
+        short_name: None,
+        kind: OptionKind::String,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "reactNamespace",
+        short_name: None,
+        kind: OptionKind::String,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "generateTrace",
+        short_name: None,
+        kind: OptionKind::String,
+        is_file_path: true,
+    },
+    OptionDecl {
+        name: "singleThreaded",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "quiet",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+];
+
+pub const BUILD_OPTIONS: &[OptionDecl] = &[
+    OptionDecl {
+        name: "build",
+        short_name: Some("b"),
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "verbose",
+        short_name: Some("v"),
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "dry",
+        short_name: Some("d"),
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "force",
+        short_name: Some("f"),
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "clean",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "builders",
+        short_name: None,
+        kind: OptionKind::Number,
+        is_file_path: false,
+    },
+    OptionDecl {
+        name: "stopBuildOnErrors",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+    },
 ];
 
 fn find_option(name: &str) -> Option<&'static OptionDecl> {
-    OPTIONS.iter().find(|o| o.name == name || o.short_name == Some(name))
+    OPTIONS
+        .iter()
+        .find(|o| o.name == name || o.short_name == Some(name))
+}
+
+fn find_build_option(name: &str) -> Option<&'static OptionDecl> {
+    BUILD_OPTIONS
+        .iter()
+        .chain(OPTIONS.iter())
+        .find(|o| o.name == name || o.short_name == Some(name))
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -191,13 +684,37 @@ pub struct ParsedCommandLine {
     pub include: Vec<String>,
     pub exclude: Vec<String>,
     pub files_spec: Vec<String>,
+    pub has_include_spec: bool,
+    pub has_exclude_spec: bool,
+    pub has_files_spec: bool,
     pub watch: bool,
 }
 
-impl ParsedCommandLine {
-    fn compiler_diagnostic(text: impl Into<String>) -> Diagnostic {
-        Diagnostic::new(None, TextRange::undefined(), new_ad_hoc_message(""), vec![])
-            .with_text(text)
+#[derive(Debug, Clone, Default)]
+pub struct BuildOptions {
+    pub clean: Tristate,
+    pub dry: Tristate,
+    pub force: Tristate,
+    pub verbose: Tristate,
+    pub stop_build_on_errors: Tristate,
+    pub builders: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct ParsedBuildCommandLine {
+    pub build_options: BuildOptions,
+    pub compiler_options: CompilerOptions,
+    pub projects: Vec<String>,
+    pub errors: Vec<Diagnostic>,
+    current_dir: String,
+}
+
+impl ParsedBuildCommandLine {
+    pub fn resolved_project_paths(&self) -> Vec<String> {
+        self.projects
+            .iter()
+            .map(|project| tspath::get_normalized_absolute_path(project, &self.current_dir))
+            .collect()
     }
 }
 
@@ -238,6 +755,80 @@ pub fn parse_command_line(
     current_dir: &str,
     fs: Option<&dyn FS>,
 ) -> ParsedCommandLine {
+    let (options, file_names, errors) =
+        parse_command_line_worker(args, current_dir, fs, find_option);
+
+    let mut compiler_options = CompilerOptions::default();
+    apply_options(&options, &mut compiler_options);
+    let watch = compiler_options.watch.is_true();
+    // Resolve relative file names to absolute paths.
+    let file_names = file_names
+        .iter()
+        .map(|f| tspath::get_normalized_absolute_path(f, current_dir))
+        .collect();
+
+    ParsedCommandLine {
+        compiler_options,
+        file_names,
+        errors,
+        config_file_name: String::new(),
+        raw_options: None,
+        include: Vec::new(),
+        exclude: Vec::new(),
+        files_spec: Vec::new(),
+        has_include_spec: false,
+        has_exclude_spec: false,
+        has_files_spec: false,
+        watch,
+    }
+}
+
+pub fn parse_build_command_line(
+    args: &[String],
+    current_dir: &str,
+    fs: Option<&dyn FS>,
+) -> ParsedBuildCommandLine {
+    let (options, mut projects, mut errors) =
+        parse_command_line_worker(args, current_dir, fs, find_build_option);
+
+    if projects.is_empty() {
+        projects.push(".".to_string());
+    }
+
+    let mut compiler_options = CompilerOptions::default();
+    apply_options(&options, &mut compiler_options);
+
+    let mut build_options = BuildOptions::default();
+    apply_build_options(&options, &mut build_options);
+
+    if build_options.clean.is_true() && build_options.force.is_true() {
+        errors.push(err("Options 'clean' and 'force' cannot be combined."));
+    }
+    if build_options.clean.is_true() && build_options.verbose.is_true() {
+        errors.push(err("Options 'clean' and 'verbose' cannot be combined."));
+    }
+    if build_options.clean.is_true() && compiler_options.watch.is_true() {
+        errors.push(err("Options 'clean' and 'watch' cannot be combined."));
+    }
+    if compiler_options.watch.is_true() && build_options.dry.is_true() {
+        errors.push(err("Options 'watch' and 'dry' cannot be combined."));
+    }
+
+    ParsedBuildCommandLine {
+        build_options,
+        compiler_options,
+        projects,
+        errors,
+        current_dir: current_dir.to_string(),
+    }
+}
+
+fn parse_command_line_worker(
+    args: &[String],
+    current_dir: &str,
+    fs: Option<&dyn FS>,
+    find: fn(&str) -> Option<&'static OptionDecl>,
+) -> (HashMap<String, OptValue>, Vec<String>, Vec<Diagnostic>) {
     let mut options: HashMap<String, OptValue> = HashMap::new();
     let mut file_names: Vec<String> = Vec::new();
     let mut errors: Vec<Diagnostic> = Vec::new();
@@ -258,12 +849,13 @@ pub fn parse_command_line(
                 if let Some(fs) = fs {
                     if let Some(content) = fs.read_file(&abs) {
                         let response_args = split_response_file(&content);
-                        let sub = parse_command_line(&response_args, current_dir, Some(fs));
-                        file_names.extend(sub.file_names);
-                        for (k, v) in sub_compiler_options_to_map(&sub.compiler_options) {
+                        let (sub_options, sub_files, sub_errors) =
+                            parse_command_line_worker(&response_args, current_dir, Some(fs), find);
+                        file_names.extend(sub_files);
+                        for (k, v) in sub_options {
                             options.insert(k, v);
                         }
-                        errors.extend(sub.errors);
+                        errors.extend(sub_errors);
                     } else {
                         errors.push(err(format!("Cannot read response file '{response_path}'.")));
                     }
@@ -279,7 +871,7 @@ pub fn parse_command_line(
                     Some((n, v)) => (n, Some(v.to_string())),
                     None => (name_part, None),
                 };
-                let opt = match find_option(name) {
+                let opt = match find(name) {
                     Some(o) => o,
                     None => {
                         errors.push(err(format!("Unknown option '{name}'.")));
@@ -293,27 +885,7 @@ pub fn parse_command_line(
             }
         }
     }
-
-    let mut compiler_options = CompilerOptions::default();
-    apply_options(&options, &mut compiler_options);
-    let watch = compiler_options.watch.is_true();
-    // Resolve relative file names to absolute paths.
-    let file_names = file_names
-        .iter()
-        .map(|f| tspath::get_normalized_absolute_path(f, current_dir))
-        .collect();
-
-    ParsedCommandLine {
-        compiler_options,
-        file_names,
-        errors,
-        config_file_name: String::new(),
-        raw_options: None,
-        include: Vec::new(),
-        exclude: Vec::new(),
-        files_spec: Vec::new(),
-        watch,
-    }
+    (options, file_names, errors)
 }
 
 fn parse_option_value(
@@ -668,10 +1240,42 @@ fn apply_options(options: &HashMap<String, OptValue>, out: &mut CompilerOptions)
     }
 }
 
-fn sub_compiler_options_to_map(_opts: &CompilerOptions) -> Vec<(String, OptValue)> {
-    // Response-file option merging is best-effort; a full round-trip is not
-    // implemented here. (Options from response files are merged by re-parsing.)
-    Vec::new()
+fn apply_build_options(options: &HashMap<String, OptValue>, out: &mut BuildOptions) {
+    for (name, value) in options {
+        match name.as_str() {
+            "clean" => {
+                if let Some(b) = value.as_bool() {
+                    out.clean = Tristate::from(b);
+                }
+            }
+            "dry" => {
+                if let Some(b) = value.as_bool() {
+                    out.dry = Tristate::from(b);
+                }
+            }
+            "force" => {
+                if let Some(b) = value.as_bool() {
+                    out.force = Tristate::from(b);
+                }
+            }
+            "verbose" => {
+                if let Some(b) = value.as_bool() {
+                    out.verbose = Tristate::from(b);
+                }
+            }
+            "stopBuildOnErrors" => {
+                if let Some(b) = value.as_bool() {
+                    out.stop_build_on_errors = Tristate::from(b);
+                }
+            }
+            "builders" => {
+                if let OptValue::Num(n) = value {
+                    out.builders = Some(*n as i32);
+                }
+            }
+            _ => {}
+        }
+    }
 }
 
 fn parse_script_target(s: &str) -> ScriptTarget {
@@ -842,9 +1446,9 @@ pub fn get_parsed_command_line_of_config_file(
     let config_text = match fs.read_file(config_file_name) {
         Some(t) => t,
         None => {
-            result
-                .errors
-                .push(err(format!("Cannot find a tsconfig.json file at the specified directory: '{config_file_name}'.")));
+            result.errors.push(err(format!(
+                "Cannot find a tsconfig.json file at the specified directory: '{config_file_name}'."
+            )));
             return result;
         }
     };
@@ -868,9 +1472,7 @@ pub fn get_parsed_command_line_of_config_file(
     let root_obj = match root.as_object() {
         Some(o) => o,
         None => {
-            result
-                .errors
-                .push(err("tsconfig.json must be an object."));
+            result.errors.push(err("tsconfig.json must be an object."));
             return result;
         }
     };
@@ -890,12 +1492,17 @@ pub fn get_parsed_command_line_of_config_file(
             result.include = parent.include;
             result.exclude = parent.exclude;
             result.files_spec = parent.files_spec;
+            result.has_include_spec = parent.has_include_spec;
+            result.has_exclude_spec = parent.has_exclude_spec;
+            result.has_files_spec = parent.has_files_spec;
             result.errors.extend(parent.errors);
         }
     }
 
     // `files`
     if let Some(files) = root_obj.get("files").and_then(|v| v.as_array()) {
+        result.has_files_spec = true;
+        result.files_spec.clear();
         for f in files {
             if let Some(s) = f.as_str() {
                 result.files_spec.push(s.to_string());
@@ -904,6 +1511,8 @@ pub fn get_parsed_command_line_of_config_file(
     }
     // `include`
     if let Some(include) = root_obj.get("include").and_then(|v| v.as_array()) {
+        result.has_include_spec = true;
+        result.include.clear();
         for f in include {
             if let Some(s) = f.as_str() {
                 result.include.push(s.to_string());
@@ -912,6 +1521,8 @@ pub fn get_parsed_command_line_of_config_file(
     }
     // `exclude`
     if let Some(exclude) = root_obj.get("exclude").and_then(|v| v.as_array()) {
+        result.has_exclude_spec = true;
+        result.exclude.clear();
         for f in exclude {
             if let Some(s) = f.as_str() {
                 result.exclude.push(s.to_string());
@@ -951,8 +1562,12 @@ pub fn get_parsed_command_line_of_config_file(
     let config_dir = tspath::get_directory_path(config_file_name);
     result.file_names = expand_file_names(
         &result.files_spec,
+        result.has_files_spec,
         &result.include,
+        result.has_include_spec,
         &result.exclude,
+        result.has_exclude_spec,
+        &result.compiler_options,
         &config_dir,
         fs,
     );
@@ -988,7 +1603,9 @@ fn extends_as_path(
     }
 }
 
-fn json_object_to_options(obj: &crate::json::Map<String, crate::json::Value>) -> HashMap<String, OptValue> {
+fn json_object_to_options(
+    obj: &crate::json::Map<String, crate::json::Value>,
+) -> HashMap<String, OptValue> {
     let mut out = HashMap::new();
     for (k, v) in obj {
         let val = json_to_opt_value(v);
@@ -1132,17 +1749,42 @@ fn merge_compiler_options(dst: &mut CompilerOptions, src: &CompilerOptions) {
 /// Resolve the set of input file names from `files`/`include`/`exclude` specs.
 fn expand_file_names(
     files: &[String],
+    has_files_spec: bool,
     include: &[String],
+    has_include_spec: bool,
     exclude: &[String],
+    has_exclude_spec: bool,
+    options: &CompilerOptions,
     base_dir: &str,
     fs: &dyn FS,
 ) -> Vec<String> {
     let mut result: Vec<String> = Vec::new();
     let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
 
-    let exclude_globs: Vec<Glob> = exclude
+    let mut effective_exclude = exclude.to_vec();
+    if !has_exclude_spec {
+        if !options.out_dir.is_empty() {
+            effective_exclude.push(options.out_dir.clone());
+        }
+        if !options.declaration_dir.is_empty() {
+            effective_exclude.push(options.declaration_dir.clone());
+        }
+    }
+    let exclude_dirs: Vec<String> = effective_exclude
         .iter()
-        .filter_map(|p| Glob::parse(p).ok())
+        .filter(|p| !p.contains('*') && !p.contains('?') && !p.contains('[') && !p.contains('{'))
+        .map(|p| tspath::get_normalized_absolute_path(p, base_dir))
+        .collect();
+    let exclude_globs: Vec<Glob> = effective_exclude
+        .iter()
+        .filter_map(|p| {
+            let spec = if tspath::path_is_absolute(p) {
+                p.clone()
+            } else {
+                tspath::combine_paths(base_dir, &[p])
+            };
+            Glob::parse(&spec).ok()
+        })
         .collect();
 
     let add = |path: &str, out: &mut Vec<String>, seen: &mut std::collections::HashSet<String>| {
@@ -1158,7 +1800,7 @@ fn expand_file_names(
     }
 
     // `include` glob expansion.
-    let include_specs: Vec<String> = if include.is_empty() && files.is_empty() {
+    let include_specs: Vec<String> = if !has_include_spec && !has_files_spec {
         vec!["**/*".to_string()]
     } else {
         include.to_vec()
@@ -1166,7 +1808,7 @@ fn expand_file_names(
     for spec in &include_specs {
         let matched = match_glob_spec(spec, base_dir, fs);
         for path in matched {
-            if is_excluded(&path, &exclude_globs) {
+            if is_excluded(&path, &exclude_globs, &exclude_dirs) {
                 continue;
             }
             if !is_supported_source_file(&path) {
@@ -1180,8 +1822,16 @@ fn expand_file_names(
     result
 }
 
-fn is_excluded(path: &str, exclude_globs: &[Glob]) -> bool {
+fn is_excluded(path: &str, exclude_globs: &[Glob], exclude_dirs: &[String]) -> bool {
     exclude_globs.iter().any(|g| g.is_match(path))
+        || exclude_dirs.iter().any(|dir| path_is_under_dir(path, dir))
+}
+
+fn path_is_under_dir(path: &str, dir: &str) -> bool {
+    path == dir
+        || path
+            .strip_prefix(dir)
+            .is_some_and(|rest| rest.starts_with('/'))
 }
 
 fn is_supported_source_file(path: &str) -> bool {
@@ -1201,17 +1851,33 @@ fn match_glob_spec(spec: &str, base_dir: &str, fs: &dyn FS) -> Vec<String> {
     } else {
         tspath::combine_paths(base_dir, &[spec])
     };
+    if !contains_glob_char(&abs_spec) {
+        if fs.file_exists(&abs_spec) {
+            results.push(abs_spec);
+            return results;
+        }
+        if fs.directory_exists(&abs_spec) {
+            walk_and_collect_files(&abs_spec, fs, &mut results);
+            return results;
+        }
+    }
     // Walk starting from the longest non-glob directory prefix of the spec.
     let walk_root = glob_base_dir(&abs_spec);
     walk_and_match(&abs_spec, &walk_root, fs, &mut results);
     results
 }
 
+fn contains_glob_char(spec: &str) -> bool {
+    spec.chars()
+        .any(|c| c == '*' || c == '?' || c == '{' || c == '[')
+}
+
 /// Return the longest directory prefix of `spec` that contains no glob
 /// metacharacters (`*`, `?`, `{`, `[`).
 fn glob_base_dir(spec: &str) -> String {
-    let metachars = |c: char| c == '*' || c == '?' || c == '{' || c == '[';
-    let first_meta = spec.chars().position(metachars);
+    let first_meta = spec
+        .chars()
+        .position(|c| c == '*' || c == '?' || c == '{' || c == '[');
     let prefix = match first_meta {
         Some(idx) => &spec[..idx],
         None => spec,
@@ -1224,6 +1890,17 @@ fn glob_base_dir(spec: &str) -> String {
     }
 }
 
+fn walk_and_collect_files(dir: &str, fs: &dyn FS, results: &mut Vec<String>) {
+    let entries = fs.get_accessible_entries(dir);
+    for file in &entries.files {
+        results.push(tspath::combine_paths(dir, &[file]));
+    }
+    for d in &entries.directories {
+        let full = tspath::combine_paths(dir, &[d]);
+        walk_and_collect_files(&full, fs, results);
+    }
+}
+
 fn walk_and_match(root_spec: &str, dir: &str, fs: &dyn FS, results: &mut Vec<String>) {
     let entries = fs.get_accessible_entries(dir);
     for file in &entries.files {
@@ -1233,8 +1910,12 @@ fn walk_and_match(root_spec: &str, dir: &str, fs: &dyn FS, results: &mut Vec<Str
         }
     }
     for d in &entries.directories {
-        // Skip node_modules and other common ignore dirs.
-        if d == "node_modules" || d == ".git" {
+        // Wildcard include walks skip common package folders like Go's vfsmatch.
+        if d.eq_ignore_ascii_case("node_modules")
+            || d.eq_ignore_ascii_case("bower_components")
+            || d.eq_ignore_ascii_case("jspm_packages")
+            || d == ".git"
+        {
             continue;
         }
         let full = tspath::combine_paths(dir, &[d]);
@@ -1350,7 +2031,10 @@ mod tests {
 
     #[test]
     fn parse_short_option() {
-        let args: Vec<String> = vec!["-p", "tsconfig.json"].into_iter().map(String::from).collect();
+        let args: Vec<String> = vec!["-p", "tsconfig.json"]
+            .into_iter()
+            .map(String::from)
+            .collect();
         let parsed = parse_command_line(&args, "/proj", None);
         assert_eq!(parsed.compiler_options.project, "tsconfig.json");
     }
@@ -1365,10 +2049,7 @@ mod tests {
         }"#;
         let stripped = strip_jsonc(input);
         let v: crate::json::Value = crate::json::from_str(&stripped).unwrap();
-        assert_eq!(
-            v["compilerOptions"]["target"].as_str(),
-            Some("ES5")
-        );
+        assert_eq!(v["compilerOptions"]["target"].as_str(), Some("ES5"));
     }
 
     #[test]
@@ -1376,10 +2057,13 @@ mod tests {
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/src");
-        fs.insert_file("/proj/tsconfig.json", r#"{
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
             "compilerOptions": { "target": "ES2017", "noEmit": true },
             "files": ["src/a.ts"]
-        }"#);
+        }"#,
+        );
         fs.insert_file("/proj/src/a.ts", "export const x = 1;");
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
@@ -1397,9 +2081,12 @@ mod tests {
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/src");
-        fs.insert_file("/proj/tsconfig.json", r#"{
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
             "include": ["src/**/*"]
-        }"#);
+        }"#,
+        );
         fs.insert_file("/proj/src/a.ts", "export const a = 1;");
         fs.insert_file("/proj/src/b.ts", "export const b = 2;");
         fs.insert_file("/proj/src/ignore.txt", "ignore me");
@@ -1422,11 +2109,10 @@ mod tests {
     /// containing `needle`. The Rust port stores ad-hoc error text in
     /// `Diagnostic.message_args[0]`.
     fn has_error_containing(parsed: &ParsedCommandLine, needle: &str) -> bool {
-        parsed.errors.iter().any(|e| {
-            e.message_args
-                .iter()
-                .any(|a| a.contains(needle))
-        })
+        parsed
+            .errors
+            .iter()
+            .any(|e| e.message_args.iter().any(|a| a.contains(needle)))
     }
 
     fn args(items: &[&str]) -> Vec<String> {
@@ -1463,6 +2149,56 @@ mod tests {
 
         let parsed_short = parse_command_line(&args(&["-b"]), "/proj", None);
         assert!(parsed_short.compiler_options.build.is_true());
+    }
+
+    #[test]
+    fn test_parse_build_command_line_defaults_to_current_project() {
+        let parsed = parse_build_command_line(&args(&["--build"]), "/proj", None);
+        assert_eq!(parsed.projects, vec!["."]);
+        assert_eq!(parsed.resolved_project_paths(), vec!["/proj"]);
+        assert!(parsed.compiler_options.build.is_true());
+    }
+
+    #[test]
+    fn test_parse_build_command_line_build_options() {
+        let parsed = parse_build_command_line(
+            &args(&["--build", "src", "tests", "--force", "-v", "--dry"]),
+            "/repo",
+            None,
+        );
+        assert_eq!(parsed.projects, vec!["src", "tests"]);
+        assert_eq!(
+            parsed.resolved_project_paths(),
+            vec!["/repo/src", "/repo/tests"]
+        );
+        assert!(parsed.build_options.force.is_true());
+        assert!(parsed.build_options.verbose.is_true());
+        assert!(parsed.build_options.dry.is_true());
+        assert!(parsed.compiler_options.build.is_true());
+        assert!(!parsed.compiler_options.version.is_true());
+    }
+
+    #[test]
+    fn test_parse_build_command_line_invalid_option_combinations() {
+        let parsed =
+            parse_build_command_line(&args(&["--build", "--clean", "--force"]), "/proj", None);
+        assert!(has_error_containing(
+            &ParsedCommandLine {
+                errors: parsed.errors,
+                ..ParsedCommandLine::default()
+            },
+            "cannot be combined"
+        ));
+
+        let parsed =
+            parse_build_command_line(&args(&["--build", "--watch", "--dry"]), "/proj", None);
+        assert!(has_error_containing(
+            &ParsedCommandLine {
+                errors: parsed.errors,
+                ..ParsedCommandLine::default()
+            },
+            "cannot be combined"
+        ));
     }
 
     #[test]
@@ -1524,7 +2260,10 @@ mod tests {
         // List values are split on commas and trimmed.
         assert_eq!(
             parsed.compiler_options.lib,
-            vec!["es2015.core".to_string(), "es2015.symbol.wellknown".to_string()]
+            vec![
+                "es2015.core".to_string(),
+                "es2015.symbol.wellknown".to_string()
+            ]
         );
         assert_eq!(parsed.file_names, vec!["/proj/0.ts"]);
     }
@@ -1534,11 +2273,7 @@ mod tests {
         // `0.ts --lib --sourceMap`: `--lib` does not consume `--sourceMap`.
         // (The Rust parser is case-sensitive for option names, so the canonical
         // camelCase spelling `--sourceMap` is required.)
-        let parsed = parse_command_line(
-            &args(&["0.ts", "--lib", "--sourceMap"]),
-            "/proj",
-            None,
-        );
+        let parsed = parse_command_line(&args(&["0.ts", "--lib", "--sourceMap"]), "/proj", None);
         assert!(parsed.compiler_options.lib.is_empty());
         assert!(parsed.compiler_options.source_map.is_true());
         assert_eq!(parsed.file_names, vec!["/proj/0.ts"]);
@@ -1585,11 +2320,7 @@ mod tests {
         // `--noImplicitAny t 0.ts`: boolean flags only consume `true`/`false`,
         // so `t` is treated as an input file (matches tsgo behavior). File names
         // are kept in insertion order (the command-line parser does not sort).
-        let parsed = parse_command_line(
-            &args(&["--noImplicitAny", "t", "0.ts"]),
-            "/proj",
-            None,
-        );
+        let parsed = parse_command_line(&args(&["--noImplicitAny", "t", "0.ts"]), "/proj", None);
         assert!(parsed.compiler_options.no_implicit_any.is_true());
         assert_eq!(parsed.file_names, vec!["/proj/t", "/proj/0.ts"]);
     }
@@ -1608,17 +2339,17 @@ mod tests {
             "/proj",
             None,
         );
-        assert_eq!(parsed.compiler_options.ts_build_info_file, "build.tsbuildinfo");
+        assert_eq!(
+            parsed.compiler_options.ts_build_info_file,
+            "build.tsbuildinfo"
+        );
     }
 
     #[test]
     fn test_parse_command_line_ts_build_info_file_null() {
         // `--tsBuildInfoFile null` is accepted (string options honor `null`).
-        let parsed = parse_command_line(
-            &args(&["--tsBuildInfoFile", "null", "0.ts"]),
-            "/proj",
-            None,
-        );
+        let parsed =
+            parse_command_line(&args(&["--tsBuildInfoFile", "null", "0.ts"]), "/proj", None);
         assert!(parsed.errors.is_empty());
         assert_eq!(parsed.compiler_options.ts_build_info_file, "");
     }
@@ -1628,7 +2359,11 @@ mod tests {
         // `--typeRoots t` parses as a single-element list.
         // (Note: unlike tsgo, the Rust port does not resolve list entries to
         // absolute paths on the command line, so we assert the parsed value.)
-        let parsed = parse_command_line(&args(&["--typeRoots", "t", "bug.ts"]), "/home/project", None);
+        let parsed = parse_command_line(
+            &args(&["--typeRoots", "t", "bug.ts"]),
+            "/home/project",
+            None,
+        );
         assert_eq!(parsed.compiler_options.type_roots, vec!["t".to_string()]);
         assert_eq!(parsed.file_names, vec!["/home/project/bug.ts"]);
     }
@@ -1806,13 +2541,19 @@ mod tests {
     fn test_parse_tsconfig_extends_merges_options() {
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
-        fs.insert_file("/proj/base.json", r#"{
+        fs.insert_file(
+            "/proj/base.json",
+            r#"{
             "compilerOptions": { "target": "ES2020", "strict": true }
-        }"#);
-        fs.insert_file("/proj/tsconfig.json", r#"{
+        }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
             "extends": "base.json",
             "compilerOptions": { "outDir": "./dist" }
-        }"#);
+        }"#,
+        );
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
             &CompilerOptions::default(),
@@ -1833,14 +2574,20 @@ mod tests {
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/src");
-        fs.insert_file("/proj/base.json", r#"{
+        fs.insert_file(
+            "/proj/base.json",
+            r#"{
             "compilerOptions": { "target": "ES2020" }
-        }"#);
-        fs.insert_file("/proj/tsconfig.json", r#"{
+        }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
             "extends": "base.json",
             "compilerOptions": { "outDir": "./dist" },
             "include": ["src/**/*"]
-        }"#);
+        }"#,
+        );
         fs.insert_file("/proj/src/a.ts", "export const a = 1;");
         fs.insert_file("/proj/src/b.ts", "export const b = 2;");
         let parsed = get_parsed_command_line_of_config_file(
@@ -1863,7 +2610,9 @@ mod tests {
         fs.insert_dir("/apath/src");
         fs.insert_dir("/apath/node_modules");
         fs.insert_dir("/apath/dist");
-        fs.insert_file("/apath/tsconfig.json", r#"{
+        fs.insert_file(
+            "/apath/tsconfig.json",
+            r#"{
             "compilerOptions": {
                 "outDir": "./dist",
                 "strict": true,
@@ -1877,7 +2626,8 @@ mod tests {
             "files": ["/apath/src/index.ts", "/apath/src/app.ts"],
             "include": ["/apath/src/**/*"],
             "exclude": ["/apath/node_modules", "/apath/dist"]
-        }"#);
+        }"#,
+        );
         fs.insert_file("/apath/src/index.ts", "");
         fs.insert_file("/apath/src/app.ts", "");
         fs.insert_file("/apath/node_modules/module.ts", "");
@@ -1899,13 +2649,14 @@ mod tests {
         assert!(parsed.compiler_options.no_implicit_any.is_true());
         assert_eq!(parsed.compiler_options.out_dir, "./dist");
         // Explicit `files` are included.
-        assert!(parsed.file_names.contains(&"/apath/src/index.ts".to_string()));
+        assert!(
+            parsed
+                .file_names
+                .contains(&"/apath/src/index.ts".to_string())
+        );
         assert!(parsed.file_names.contains(&"/apath/src/app.ts".to_string()));
         // node_modules is excluded during the include walk.
-        assert!(!parsed
-            .file_names
-            .iter()
-            .any(|f| f.contains("node_modules")));
+        assert!(!parsed.file_names.iter().any(|f| f.contains("node_modules")));
     }
 
     #[test]
@@ -1914,12 +2665,15 @@ mod tests {
         // `module: null` should produce no errors.
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
-        fs.insert_file("/proj/tsconfig.json", r#"{
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
             "compilerOptions": {
                 "target": null,
                 "module": null
             }
-        }"#);
+        }"#,
+        );
         fs.insert_file("/proj/app.ts", "");
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
@@ -1935,11 +2689,14 @@ mod tests {
         // Ported from "handles empty types array".
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
-        fs.insert_file("/proj/tsconfig.json", r#"{
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
             "compilerOptions": {
                 "types": []
             }
-        }"#);
+        }"#,
+        );
         fs.insert_file("/proj/app.ts", "");
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
@@ -1956,10 +2713,13 @@ mod tests {
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/src");
         fs.insert_dir("/proj/src/tests");
-        fs.insert_file("/proj/tsconfig.json", r#"{
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
             "include": ["src/**/*.ts"],
             "exclude": ["**/tests/**"]
-        }"#);
+        }"#,
+        );
         fs.insert_file("/proj/src/a.ts", "");
         fs.insert_file("/proj/src/b.ts", "");
         fs.insert_file("/proj/src/tests/skip.ts", "");
@@ -1974,7 +2734,41 @@ mod tests {
         // Excluded file is filtered out of the include expansion. The exclude
         // glob must match the absolute paths produced by the include walk, so a
         // `**/tests/**` pattern is used.
-        assert!(!parsed.file_names.contains(&"/proj/src/tests/skip.ts".to_string()));
+        assert!(
+            !parsed
+                .file_names
+                .contains(&"/proj/src/tests/skip.ts".to_string())
+        );
+    }
+
+    #[test]
+    fn test_parse_tsconfig_literal_directory_include_recurses() {
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/src");
+        fs.insert_dir("/proj/src/nested");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
+                "include": ["src"]
+            }"#,
+        );
+        fs.insert_file("/proj/src/a.ts", "");
+        fs.insert_file("/proj/src/nested/b.tsx", "");
+        fs.insert_file("/proj/src/nested/ignore.txt", "");
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(parsed.file_names.contains(&"/proj/src/a.ts".to_string()));
+        assert!(
+            parsed
+                .file_names
+                .contains(&"/proj/src/nested/b.tsx".to_string())
+        );
+        assert!(!parsed.file_names.iter().any(|f| f.ends_with("ignore.txt")));
     }
 
     #[test]
@@ -1995,12 +2789,113 @@ mod tests {
             "/proj",
             &fs,
         );
-        assert!(!parsed
-            .file_names
-            .iter()
-            .any(|f| f.contains("node_modules")));
+        assert!(!parsed.file_names.iter().any(|f| f.contains("node_modules")));
         assert!(parsed.file_names.contains(&"/proj/d.ts".to_string()));
         assert!(parsed.file_names.contains(&"/proj/folder/e.ts".to_string()));
+    }
+
+    #[test]
+    fn test_parse_tsconfig_files_empty_does_not_default_include() {
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/src");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
+                "files": [],
+                "references": [{ "path": "./tsconfig.app.json" }]
+            }"#,
+        );
+        fs.insert_file("/proj/src/a.ts", "");
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(parsed.has_files_spec);
+        assert!(parsed.file_names.is_empty());
+    }
+
+    #[test]
+    fn test_parse_tsconfig_excludes_out_dir_by_default() {
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/src");
+        fs.insert_dir("/proj/dist");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
+                "compilerOptions": { "outDir": "dist" }
+            }"#,
+        );
+        fs.insert_file("/proj/src/a.ts", "");
+        fs.insert_file("/proj/dist/a.d.ts", "");
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(parsed.file_names.contains(&"/proj/src/a.ts".to_string()));
+        assert!(!parsed.file_names.iter().any(|f| f.contains("/dist/")));
+    }
+
+    #[test]
+    fn test_parse_tsconfig_explicit_exclude_overrides_out_dir_default() {
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/dist");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
+                "compilerOptions": { "outDir": "dist" },
+                "exclude": ["obj"]
+            }"#,
+        );
+        fs.insert_file("/proj/dist/a.d.ts", "");
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(parsed.has_exclude_spec);
+        assert!(parsed.file_names.contains(&"/proj/dist/a.d.ts".to_string()));
+    }
+
+    #[test]
+    fn test_parse_tsconfig_skips_common_package_directories() {
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/node_modules");
+        fs.insert_dir("/proj/bower_components");
+        fs.insert_dir("/proj/jspm_packages");
+        fs.insert_file("/proj/tsconfig.json", "{}");
+        fs.insert_file("/proj/node_modules/a.ts", "");
+        fs.insert_file("/proj/bower_components/b.ts", "");
+        fs.insert_file("/proj/jspm_packages/c.ts", "");
+        fs.insert_file("/proj/d.ts", "");
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(!parsed.file_names.iter().any(|f| f.contains("node_modules")));
+        assert!(
+            !parsed
+                .file_names
+                .iter()
+                .any(|f| f.contains("bower_components"))
+        );
+        assert!(
+            !parsed
+                .file_names
+                .iter()
+                .any(|f| f.contains("jspm_packages"))
+        );
+        assert!(parsed.file_names.contains(&"/proj/d.ts".to_string()));
     }
 
     #[test]
@@ -2057,18 +2952,17 @@ mod tests {
         // precedence over those in tsconfig.json.
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
-        fs.insert_file("/proj/tsconfig.json", r#"{
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
             "compilerOptions": { "target": "ES2017", "strict": true }
-        }"#);
+        }"#,
+        );
         fs.insert_file("/proj/app.ts", "");
         let mut base = CompilerOptions::default();
         base.target = ScriptTarget::ES2022;
-        let parsed = get_parsed_command_line_of_config_file(
-            "/proj/tsconfig.json",
-            &base,
-            "/proj",
-            &fs,
-        );
+        let parsed =
+            get_parsed_command_line_of_config_file("/proj/tsconfig.json", &base, "/proj", &fs);
         // Command-line target wins; config-file strict is still inherited.
         assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2022);
         assert!(parsed.compiler_options.strict.is_true());
@@ -2091,9 +2985,12 @@ mod tests {
         fs.insert_dir("/dev");
         fs.insert_file("/dev/a.ts", "");
         fs.insert_file("/dev/b.ts", "");
-        fs.insert_file("/dev/tsconfig.json", r#"{
+        fs.insert_file(
+            "/dev/tsconfig.json",
+            r#"{
             "files": ["a.ts", "a.ts", "b.ts"]
-        }"#);
+        }"#,
+        );
         let parsed = get_parsed_command_line_of_config_file(
             "/dev/tsconfig.json",
             &CompilerOptions::default(),
@@ -2115,10 +3012,13 @@ mod tests {
         fs.insert_dir("/dev");
         fs.insert_file("/dev/a.ts", "");
         fs.insert_file("/dev/b.ts", "");
-        fs.insert_file("/dev/tsconfig.json", r#"{
+        fs.insert_file(
+            "/dev/tsconfig.json",
+            r#"{
             "files": ["a.ts", "b.ts"],
             "exclude": ["b.ts"]
-        }"#);
+        }"#,
+        );
         let parsed = get_parsed_command_line_of_config_file(
             "/dev/tsconfig.json",
             &CompilerOptions::default(),
@@ -2137,9 +3037,12 @@ mod tests {
         fs.insert_dir("/dev");
         fs.insert_file("/dev/a.ts", "");
         fs.insert_file("/dev/b.ts", "");
-        fs.insert_file("/dev/tsconfig.json", r#"{
+        fs.insert_file(
+            "/dev/tsconfig.json",
+            r#"{
             "include": ["a.ts", "b.ts"]
-        }"#);
+        }"#,
+        );
         let parsed = get_parsed_command_line_of_config_file(
             "/dev/tsconfig.json",
             &CompilerOptions::default(),
@@ -2176,12 +3079,16 @@ mod tests {
             "/home/projects/monorepo/apps/web",
             &fs,
         );
-        assert!(parsed
-            .file_names
-            .contains(&"/home/projects/monorepo/apps/web/app/a.ts".to_string()));
-        assert!(parsed
-            .file_names
-            .contains(&"/home/projects/monorepo/apps/web/app/b.tsx".to_string()));
+        assert!(
+            parsed
+                .file_names
+                .contains(&"/home/projects/monorepo/apps/web/app/a.ts".to_string())
+        );
+        assert!(
+            parsed
+                .file_names
+                .contains(&"/home/projects/monorepo/apps/web/app/b.tsx".to_string())
+        );
     }
 
     #[test]
@@ -2206,10 +3113,7 @@ mod tests {
             "/Users/ユーザー/プロジェクト",
             &fs,
         );
-        assert!(parsed
-            .file_names
-            .iter()
-            .any(|f| f.ends_with("/src/a.ts")));
+        assert!(parsed.file_names.iter().any(|f| f.ends_with("/src/a.ts")));
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -2225,8 +3129,7 @@ mod tests {
             assert!(!o.name.is_empty(), "found an option with an empty name");
         }
         // A few key options must be present.
-        let names: std::collections::HashSet<&str> =
-            OPTIONS.iter().map(|o| o.name).collect();
+        let names: std::collections::HashSet<&str> = OPTIONS.iter().map(|o| o.name).collect();
         for required in [
             "help",
             "version",
@@ -2244,7 +3147,10 @@ mod tests {
             "moduleResolution",
             "typeRoots",
         ] {
-            assert!(names.contains(required), "missing option declaration: {required}");
+            assert!(
+                names.contains(required),
+                "missing option declaration: {required}"
+            );
         }
     }
 

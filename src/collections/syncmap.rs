@@ -91,7 +91,10 @@ impl<K: Eq + Hash + Clone, V: Clone> SyncMap<K, V> {
     ///
     /// Mirrors `SyncMap.ToMap`.
     pub fn to_hash_map(&self) -> HashMap<K, V> {
-        self.inner.iter().map(|e| (e.key().clone(), e.value().clone())).collect()
+        self.inner
+            .iter()
+            .map(|e| (e.key().clone(), e.value().clone()))
+            .collect()
     }
 
     /// Collect all keys into a `Vec`.

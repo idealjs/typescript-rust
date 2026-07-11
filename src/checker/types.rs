@@ -101,26 +101,27 @@ bitflags! {
     }
 }
 
-pub const TYPE_FORMAT_FLAGS_NODE_BUILDER_MASK: TypeFormatFlags = TypeFormatFlags::from_bits_truncate(
-    TypeFormatFlags::NoTruncation.bits()
-        | TypeFormatFlags::WriteArrayAsGenericType.bits()
-        | TypeFormatFlags::GenerateNamesForShadowedTypeParams.bits()
-        | TypeFormatFlags::UseStructuralFallback.bits()
-        | TypeFormatFlags::WriteTypeArgumentsOfSignature.bits()
-        | TypeFormatFlags::UseFullyQualifiedType.bits()
-        | TypeFormatFlags::SuppressAnyReturnType.bits()
-        | TypeFormatFlags::MultilineObjectLiterals.bits()
-        | TypeFormatFlags::WriteClassExpressionAsTypeLiteral.bits()
-        | TypeFormatFlags::UseTypeOfFunction.bits()
-        | TypeFormatFlags::OmitParameterModifiers.bits()
-        | TypeFormatFlags::UseAliasDefinedOutsideCurrentScope.bits()
-        | TypeFormatFlags::AllowUniqueESSymbolType.bits()
-        | TypeFormatFlags::InTypeAlias.bits()
-        | TypeFormatFlags::UseInstantiationExpressions.bits()
-        | TypeFormatFlags::UseSingleQuotesForStringLiteralType.bits()
-        | TypeFormatFlags::NoTypeReduction.bits()
-        | TypeFormatFlags::OmitThisParameter.bits(),
-);
+pub const TYPE_FORMAT_FLAGS_NODE_BUILDER_MASK: TypeFormatFlags =
+    TypeFormatFlags::from_bits_truncate(
+        TypeFormatFlags::NoTruncation.bits()
+            | TypeFormatFlags::WriteArrayAsGenericType.bits()
+            | TypeFormatFlags::GenerateNamesForShadowedTypeParams.bits()
+            | TypeFormatFlags::UseStructuralFallback.bits()
+            | TypeFormatFlags::WriteTypeArgumentsOfSignature.bits()
+            | TypeFormatFlags::UseFullyQualifiedType.bits()
+            | TypeFormatFlags::SuppressAnyReturnType.bits()
+            | TypeFormatFlags::MultilineObjectLiterals.bits()
+            | TypeFormatFlags::WriteClassExpressionAsTypeLiteral.bits()
+            | TypeFormatFlags::UseTypeOfFunction.bits()
+            | TypeFormatFlags::OmitParameterModifiers.bits()
+            | TypeFormatFlags::UseAliasDefinedOutsideCurrentScope.bits()
+            | TypeFormatFlags::AllowUniqueESSymbolType.bits()
+            | TypeFormatFlags::InTypeAlias.bits()
+            | TypeFormatFlags::UseInstantiationExpressions.bits()
+            | TypeFormatFlags::UseSingleQuotesForStringLiteralType.bits()
+            | TypeFormatFlags::NoTypeReduction.bits()
+            | TypeFormatFlags::OmitThisParameter.bits(),
+    );
 
 // ────────────────────────────────────────────────────────────────────────────
 // SymbolFormatFlags
@@ -171,7 +172,8 @@ bitflags! {
 }
 
 pub const EXTERNAL_EMIT_HELPERS_FIRST: ExternalEmitHelpers = ExternalEmitHelpers::Rest;
-pub const EXTERNAL_EMIT_HELPERS_LAST: ExternalEmitHelpers = ExternalEmitHelpers::RewriteRelativeImportExtension;
+pub const EXTERNAL_EMIT_HELPERS_LAST: ExternalEmitHelpers =
+    ExternalEmitHelpers::RewriteRelativeImportExtension;
 pub const EXTERNAL_HELPERS_MODULE_NAME_TEXT: &str = "tslib";
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -218,12 +220,10 @@ bitflags! {
 }
 
 // Composite TypeFlags constants
-pub const TYPE_FLAGS_ANY_OR_UNKNOWN: TypeFlags = TypeFlags::from_bits_truncate(
-    TypeFlags::Any.bits() | TypeFlags::Unknown.bits(),
-);
-pub const TYPE_FLAGS_NULLABLE: TypeFlags = TypeFlags::from_bits_truncate(
-    TypeFlags::Undefined.bits() | TypeFlags::Null.bits(),
-);
+pub const TYPE_FLAGS_ANY_OR_UNKNOWN: TypeFlags =
+    TypeFlags::from_bits_truncate(TypeFlags::Any.bits() | TypeFlags::Unknown.bits());
+pub const TYPE_FLAGS_NULLABLE: TypeFlags =
+    TypeFlags::from_bits_truncate(TypeFlags::Undefined.bits() | TypeFlags::Null.bits());
 pub const TYPE_FLAGS_LITERAL: TypeFlags = TypeFlags::from_bits_truncate(
     TypeFlags::StringLiteral.bits()
         | TypeFlags::NumberLiteral.bits()
@@ -236,14 +236,15 @@ pub const TYPE_FLAGS_UNIT: TypeFlags = TypeFlags::from_bits_truncate(
         | TypeFlags::UniqueESSymbol.bits()
         | TYPE_FLAGS_NULLABLE.bits(),
 );
-pub const TYPE_FLAGS_FRESHABLE: TypeFlags = TypeFlags::from_bits_truncate(
-    TypeFlags::Enum.bits() | TYPE_FLAGS_LITERAL.bits(),
-);
+pub const TYPE_FLAGS_FRESHABLE: TypeFlags =
+    TypeFlags::from_bits_truncate(TypeFlags::Enum.bits() | TYPE_FLAGS_LITERAL.bits());
 pub const TYPE_FLAGS_STRING_OR_NUMBER_LITERAL: TypeFlags = TypeFlags::from_bits_truncate(
     TypeFlags::StringLiteral.bits() | TypeFlags::NumberLiteral.bits(),
 );
 pub const TYPE_FLAGS_STRING_OR_NUMBER_LITERAL_OR_UNIQUE: TypeFlags = TypeFlags::from_bits_truncate(
-    TypeFlags::StringLiteral.bits() | TypeFlags::NumberLiteral.bits() | TypeFlags::UniqueESSymbol.bits(),
+    TypeFlags::StringLiteral.bits()
+        | TypeFlags::NumberLiteral.bits()
+        | TypeFlags::UniqueESSymbol.bits(),
 );
 pub const TYPE_FLAGS_DEFINITELY_FALSY: TypeFlags = TypeFlags::from_bits_truncate(
     TypeFlags::StringLiteral.bits()
@@ -283,21 +284,16 @@ pub const TYPE_FLAGS_STRING_LIKE: TypeFlags = TypeFlags::from_bits_truncate(
 pub const TYPE_FLAGS_NUMBER_LIKE: TypeFlags = TypeFlags::from_bits_truncate(
     TypeFlags::Number.bits() | TypeFlags::NumberLiteral.bits() | TypeFlags::Enum.bits(),
 );
-pub const TYPE_FLAGS_BIG_INT_LIKE: TypeFlags = TypeFlags::from_bits_truncate(
-    TypeFlags::BigInt.bits() | TypeFlags::BigIntLiteral.bits(),
-);
-pub const TYPE_FLAGS_BOOLEAN_LIKE: TypeFlags = TypeFlags::from_bits_truncate(
-    TypeFlags::Boolean.bits() | TypeFlags::BooleanLiteral.bits(),
-);
-pub const TYPE_FLAGS_ENUM_LIKE: TypeFlags = TypeFlags::from_bits_truncate(
-    TypeFlags::Enum.bits() | TypeFlags::EnumLiteral.bits(),
-);
-pub const TYPE_FLAGS_ES_SYMBOL_LIKE: TypeFlags = TypeFlags::from_bits_truncate(
-    TypeFlags::ESSymbol.bits() | TypeFlags::UniqueESSymbol.bits(),
-);
-pub const TYPE_FLAGS_VOID_LIKE: TypeFlags = TypeFlags::from_bits_truncate(
-    TypeFlags::Void.bits() | TypeFlags::Undefined.bits(),
-);
+pub const TYPE_FLAGS_BIG_INT_LIKE: TypeFlags =
+    TypeFlags::from_bits_truncate(TypeFlags::BigInt.bits() | TypeFlags::BigIntLiteral.bits());
+pub const TYPE_FLAGS_BOOLEAN_LIKE: TypeFlags =
+    TypeFlags::from_bits_truncate(TypeFlags::Boolean.bits() | TypeFlags::BooleanLiteral.bits());
+pub const TYPE_FLAGS_ENUM_LIKE: TypeFlags =
+    TypeFlags::from_bits_truncate(TypeFlags::Enum.bits() | TypeFlags::EnumLiteral.bits());
+pub const TYPE_FLAGS_ES_SYMBOL_LIKE: TypeFlags =
+    TypeFlags::from_bits_truncate(TypeFlags::ESSymbol.bits() | TypeFlags::UniqueESSymbol.bits());
+pub const TYPE_FLAGS_VOID_LIKE: TypeFlags =
+    TypeFlags::from_bits_truncate(TypeFlags::Void.bits() | TypeFlags::Undefined.bits());
 pub const TYPE_FLAGS_PRIMITIVE: TypeFlags = TypeFlags::from_bits_truncate(
     TYPE_FLAGS_STRING_LIKE.bits()
         | TYPE_FLAGS_NUMBER_LIKE.bits()
@@ -328,9 +324,8 @@ pub const TYPE_FLAGS_DISJOINT_DOMAINS: TypeFlags = TypeFlags::from_bits_truncate
         | TYPE_FLAGS_VOID_LIKE.bits()
         | TypeFlags::Null.bits(),
 );
-pub const TYPE_FLAGS_UNION_OR_INTERSECTION: TypeFlags = TypeFlags::from_bits_truncate(
-    TypeFlags::Union.bits() | TypeFlags::Intersection.bits(),
-);
+pub const TYPE_FLAGS_UNION_OR_INTERSECTION: TypeFlags =
+    TypeFlags::from_bits_truncate(TypeFlags::Union.bits() | TypeFlags::Intersection.bits());
 pub const TYPE_FLAGS_STRUCTURED_TYPE: TypeFlags = TypeFlags::from_bits_truncate(
     TypeFlags::Object.bits() | TypeFlags::Union.bits() | TypeFlags::Intersection.bits(),
 );
@@ -338,7 +333,9 @@ pub const TYPE_FLAGS_TYPE_VARIABLE: TypeFlags = TypeFlags::from_bits_truncate(
     TypeFlags::TypeParameter.bits() | TypeFlags::IndexedAccess.bits(),
 );
 pub const TYPE_FLAGS_INSTANTIABLE_NON_PRIMITIVE: TypeFlags = TypeFlags::from_bits_truncate(
-    TYPE_FLAGS_TYPE_VARIABLE.bits() | TypeFlags::Conditional.bits() | TypeFlags::Substitution.bits(),
+    TYPE_FLAGS_TYPE_VARIABLE.bits()
+        | TypeFlags::Conditional.bits()
+        | TypeFlags::Substitution.bits(),
 );
 pub const TYPE_FLAGS_INSTANTIABLE_PRIMITIVE: TypeFlags = TypeFlags::from_bits_truncate(
     TypeFlags::Index.bits() | TypeFlags::TemplateLiteral.bits() | TypeFlags::StringMapping.bits(),
@@ -438,9 +435,8 @@ bitflags! {
     }
 }
 
-pub const OBJECT_FLAGS_CLASS_OR_INTERFACE: ObjectFlags = ObjectFlags::from_bits_truncate(
-    ObjectFlags::Class.bits() | ObjectFlags::Interface.bits(),
-);
+pub const OBJECT_FLAGS_CLASS_OR_INTERFACE: ObjectFlags =
+    ObjectFlags::from_bits_truncate(ObjectFlags::Class.bits() | ObjectFlags::Interface.bits());
 pub const OBJECT_FLAGS_REQUIRES_WIDENING: ObjectFlags = ObjectFlags::from_bits_truncate(
     ObjectFlags::ContainsWideningType.bits() | ObjectFlags::ContainsObjectOrArrayLiteral.bits(),
 );
@@ -449,9 +445,8 @@ pub const OBJECT_FLAGS_PROPAGATING_FLAGS: ObjectFlags = ObjectFlags::from_bits_t
         | ObjectFlags::ContainsObjectOrArrayLiteral.bits()
         | ObjectFlags::NonInferrableType.bits(),
 );
-pub const OBJECT_FLAGS_INSTANTIATED_MAPPED: ObjectFlags = ObjectFlags::from_bits_truncate(
-    ObjectFlags::Mapped.bits() | ObjectFlags::Instantiated.bits(),
-);
+pub const OBJECT_FLAGS_INSTANTIATED_MAPPED: ObjectFlags =
+    ObjectFlags::from_bits_truncate(ObjectFlags::Mapped.bits() | ObjectFlags::Instantiated.bits());
 pub const OBJECT_FLAGS_IS_GENERIC_TYPE: ObjectFlags = ObjectFlags::from_bits_truncate(
     ObjectFlags::IsGenericObjectType.bits() | ObjectFlags::IsGenericIndexType.bits(),
 );
@@ -482,9 +477,10 @@ pub const VARIANCE_FLAGS_VARIANCE_MASK: VarianceFlags = VarianceFlags::from_bits
         | VarianceFlags::Contravariant.bits()
         | VarianceFlags::Independent.bits(),
 );
-pub const VARIANCE_FLAGS_ALLOWS_STRUCTURAL_FALLBACK: VarianceFlags = VarianceFlags::from_bits_truncate(
-    VarianceFlags::Unmeasurable.bits() | VarianceFlags::Unreliable.bits(),
-);
+pub const VARIANCE_FLAGS_ALLOWS_STRUCTURAL_FALLBACK: VarianceFlags =
+    VarianceFlags::from_bits_truncate(
+        VarianceFlags::Unmeasurable.bits() | VarianceFlags::Unreliable.bits(),
+    );
 
 // ────────────────────────────────────────────────────────────────────────────
 // AccessFlags
@@ -543,12 +539,10 @@ bitflags! {
     }
 }
 
-pub const ELEMENT_FLAGS_FIXED: ElementFlags = ElementFlags::from_bits_truncate(
-    ElementFlags::Required.bits() | ElementFlags::Optional.bits(),
-);
-pub const ELEMENT_FLAGS_VARIABLE: ElementFlags = ElementFlags::from_bits_truncate(
-    ElementFlags::Rest.bits() | ElementFlags::Variadic.bits(),
-);
+pub const ELEMENT_FLAGS_FIXED: ElementFlags =
+    ElementFlags::from_bits_truncate(ElementFlags::Required.bits() | ElementFlags::Optional.bits());
+pub const ELEMENT_FLAGS_VARIABLE: ElementFlags =
+    ElementFlags::from_bits_truncate(ElementFlags::Rest.bits() | ElementFlags::Variadic.bits());
 pub const ELEMENT_FLAGS_NON_REQUIRED: ElementFlags = ElementFlags::from_bits_truncate(
     ElementFlags::Optional.bits() | ElementFlags::Rest.bits() | ElementFlags::Variadic.bits(),
 );
@@ -630,11 +624,19 @@ impl Ternary {
     }
 
     pub fn and(self, other: Ternary) -> Ternary {
-        if self.rank() <= other.rank() { self } else { other }
+        if self.rank() <= other.rank() {
+            self
+        } else {
+            other
+        }
     }
 
     pub fn or(self, other: Ternary) -> Ternary {
-        if self.rank() >= other.rank() { self } else { other }
+        if self.rank() >= other.rank() {
+            self
+        } else {
+            other
+        }
     }
 
     pub fn not(self) -> Ternary {
@@ -646,10 +648,18 @@ impl Ternary {
         }
     }
 
-    pub fn is_true(self) -> bool { self == Ternary::True }
-    pub fn is_false(self) -> bool { self == Ternary::False }
-    pub fn is_maybe(self) -> bool { self == Ternary::Maybe }
-    pub fn is_unknown(self) -> bool { self == Ternary::Unknown }
+    pub fn is_true(self) -> bool {
+        self == Ternary::True
+    }
+    pub fn is_false(self) -> bool {
+        self == Ternary::False
+    }
+    pub fn is_maybe(self) -> bool {
+        self == Ternary::Maybe
+    }
+    pub fn is_unknown(self) -> bool {
+        self == Ternary::Unknown
+    }
 }
 
 impl PartialOrd for Ternary {
@@ -672,17 +682,23 @@ impl From<bool> for Ternary {
 
 impl std::ops::BitAnd for Ternary {
     type Output = Ternary;
-    fn bitand(self, other: Ternary) -> Ternary { self.and(other) }
+    fn bitand(self, other: Ternary) -> Ternary {
+        self.and(other)
+    }
 }
 
 impl std::ops::BitOr for Ternary {
     type Output = Ternary;
-    fn bitor(self, other: Ternary) -> Ternary { self.or(other) }
+    fn bitor(self, other: Ternary) -> Ternary {
+        self.or(other)
+    }
 }
 
 impl std::ops::Not for Ternary {
     type Output = Ternary;
-    fn not(self) -> Ternary { Ternary::not(self) }
+    fn not(self) -> Ternary {
+        Ternary::not(self)
+    }
 }
 
 pub type TypeComparer = fn(&Type, &Type, bool) -> Ternary;
@@ -700,7 +716,10 @@ pub struct TypeAlias {
 
 impl TypeAlias {
     pub fn new(symbol: Option<Arc<Symbol>>, type_arguments: Vec<Arc<Type>>) -> Self {
-        Self { symbol, type_arguments }
+        Self {
+            symbol,
+            type_arguments,
+        }
     }
 }
 
@@ -747,7 +766,11 @@ pub enum TypeMapperKind {
 
 impl TypeMapper {
     pub fn new(map_fn: MapFn, kind: TypeMapperKind, maps_this_only: bool) -> Self {
-        Self { kind, map_fn, maps_this_only }
+        Self {
+            kind,
+            map_fn,
+            maps_this_only,
+        }
     }
 
     pub fn map(&self, t: &Type) -> Arc<Type> {
@@ -1720,7 +1743,10 @@ mod tests {
 
     #[test]
     fn literal_value_to_string() {
-        assert_eq!(LiteralValue::String("hello".to_string()).to_string(), "\"hello\"");
+        assert_eq!(
+            LiteralValue::String("hello".to_string()).to_string(),
+            "\"hello\""
+        );
         assert_eq!(LiteralValue::Boolean(true).to_string(), "true");
         assert_eq!(LiteralValue::Boolean(false).to_string(), "false");
         assert_eq!(LiteralValue::None.to_string(), "");

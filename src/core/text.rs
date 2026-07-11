@@ -99,9 +99,7 @@ impl TextRange {
 
 /// Compare two text ranges by position, then by end.
 pub fn compare_text_ranges(r1: &TextRange, r2: &TextRange) -> std::cmp::Ordering {
-    r1.pos
-        .cmp(&r2.pos)
-        .then(r1.end.cmp(&r2.end))
+    r1.pos.cmp(&r2.pos).then(r1.end.cmp(&r2.end))
 }
 
 #[cfg(test)]

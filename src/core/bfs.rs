@@ -242,8 +242,7 @@ fn update_min(a: &AtomicUsize, candidate: usize) -> bool {
         if current < candidate {
             return false;
         }
-        if a
-            .compare_exchange(current, candidate, Ordering::SeqCst, Ordering::SeqCst)
+        if a.compare_exchange(current, candidate, Ordering::SeqCst, Ordering::SeqCst)
             .is_ok()
         {
             return true;

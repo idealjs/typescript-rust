@@ -6,7 +6,7 @@
 
 use std::collections::HashMap;
 use std::sync::Mutex;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 /// A traced event with a timestamp and optional data.
 #[derive(Debug, Clone)]
@@ -74,11 +74,14 @@ impl Tracer {
         if !self.enabled {
             return;
         }
-        self.type_recordings.lock().unwrap().push(TypeRecordingEntry {
-            type_id,
-            type_flag_names: flag_names,
-            constructor_name: constructor_name.to_string(),
-        });
+        self.type_recordings
+            .lock()
+            .unwrap()
+            .push(TypeRecordingEntry {
+                type_id,
+                type_flag_names: flag_names,
+                constructor_name: constructor_name.to_string(),
+            });
     }
 
     /// Get elapsed time in microseconds since tracer start.
@@ -138,6 +141,7 @@ impl<'a> Drop for TraceSpan<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::time::Duration;
 
     #[test]
     fn tracer_basic() {
