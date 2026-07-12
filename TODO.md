@@ -9,7 +9,7 @@
 - Rust crate 当前名为 `tsox`，入口在 `src/main.rs`，库入口在 `src/lib.rs`。
 - Rust 侧已经有模块骨架：`ast`、`binder`、`checker`、`compiler`、`execute`、`parser`、`scanner`、`printer`、`tsoptions`、`vfs` 等。
 - `cargo test` 当前通过：589 个 lib 单测 + 2 个 parity 测试通过。
-- 关键缺口：Checker 仍是 stub（`check_source_file` 未实现真实逻辑），Binder 缺 flow graph 与 name resolver；module resolution、watch/build/incremental、fourslash/baseline、npm/vscode 包装尚未迁移到 Rust 方案。
+- 关键缺口：Checker `check_source_file` 已实现基础标识符解析 + TS2304 诊断，但缺类型推断、relater、flow narrowing；Binder 缺 flow graph 与 name resolver；module resolution、watch/build/incremental、fourslash/baseline、npm/vscode 包装尚未迁移到 Rust 方案。
 
 ## 2026-07-12 迁移进度快照
 
@@ -17,9 +17,9 @@
 |------|-----------|---------|--------|------|
 | Scanner | 1558 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 已完成；缺 trivia 节点、完整 regex 校验 |
 | Parser | 7115 | 9251 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 已完成；缺 reparser/jsdoc |
-| Binder | 607 | ~4000 | ~15% | 仅符号声明骨架；缺 flow graph、name resolver、reference resolver |
-| Checker | 5545 | ~50K+ | ~11% | 类型数据结构完整；`check_source_file` 为 stub；缺 relater/inference/flow/jsx/jsdoc |
-| Compiler | 743 | — | 基础 | Program 创建/解析/绑定/emit pipeline 已通；checker 已接入但无诊断输出 |
+| Binder | 614 | ~4000 | ~15% | 符号声明 + 容器递归绑定（函数参数/类成员/嵌套作用域）已完成；缺 flow graph、name resolver |
+| Checker | 5741 | ~50K+ | ~11% | 类型数据结构完整；`check_source_file` 已实现基础标识符解析 + TS2304 诊断；缺 relater/inference/flow/jsx/jsdoc |
+| Compiler | 743 | — | 基础 | Program 创建/解析/绑定/emit pipeline 已通；checker 已接入并输出基础 TS2304 诊断 |
 | Emitter | 774 | — | 基础 | JS emit 基础；缺 transformer 体系 |
 | Printer | 1568 | — | 基础 | 节点→文本基础 |
 | AST | ~5500 | — | 基础 | generated 节点 + symbol/flow 类型 |
@@ -27,10 +27,11 @@
 ## 下一阶段重点（2026-07-12 起）
 
 P3 Binder/Checker 是当前最大瓶颈：
-1. P3.6 实现 `check_source_file` 真实逻辑（先做 identifier resolution + TS2304 "Cannot find name"）
-2. P3.1 Binder flow graph 骨架（为后续 narrowing 打基础）
+1. P3.6 check_source_file 标识符解析 + TS2304 已实现 ✅
+2. P3.1a Binder 容器递归绑定已完成 ✅
 3. P3.7 Relater 基础规则（`is_type_assignable_to` 基本类型/字面量/union）
 4. P3.13 Diagnostics message 表对齐
+5. P3.2 Binder NameResolver 完整作用域链查找（`lookupName` / `lookupSymbol`）
 
 ## 迁移原则
 
@@ -417,6 +418,13 @@ Rust 现状：
 - [ ] `CALL` flow node：函数调用对 narrow 类型的影响。
 - [ ] `REduceLabel` / `Shared` / `Referenced` 后处理。
 
+### P3.1a Binder 容器递归绑定 ✅
+
+- [x] `bind_container` 设置 `parent_symbol` 为容器符号，使参数/成员等子节点添加到正确的作用域。
+- [x] 容器递归绑定：函数参数、类成员、Block 嵌套作用域。
+- [x] Checker `resolve_identifier` 改用 scope_stack 遍历（不依赖 parent pointer），消除假阳性 TS2304。
+- [x] `is_unique_local_name` 同时检查 locals + symbol members，修复名字生成冲突检测。
+
 ### P3.2 Binder NameResolver
 
 - [ ] 迁移 `internal/binder/nameresolver.go`（498 行）到 `src/binder/nameresolver.rs`。
@@ -449,9 +457,12 @@ Rust 现状：
 
 ### P3.6 Checker 核心入口
 
-- [ ] 实现 `check_source_file`：遍历 statements。
-- [ ] 实现 `check_statement`：variable / function / class / interface / type alias / enum / import / export。
-- [ ] 实现 `check_expression`：identifier / literal / binary / call / member access / arrow / object literal / array literal。
+- [x] 实现 `check_source_file`：遍历 statements，表达式解析，TS2304 诊断。
+- [x] 实现 `check_statement`：ExpressionStatement、VariableStatement、IfStatement、For/ForIn/ForOf/While/DoWhile、Return、Block、Switch、Throw、Try、LabeledStatement、各类 Declaration。
+- [x] 实现 `check_expression`：Identifier、Literal、Binary、Call、PropertyAccess、ElementAccess、Conditional、Array/ObjectLiteral、Arrow/FunctionExpression、TemplateExpression、Await/Yield/Spread、As/NonNull/Satisfies/TypeOf/Delete/Void、TaggedTemplate、JSX。
+- [x] 实现 `check_class_member` / `check_enum_member` / `check_heritage_clause` 等辅助方法。
+- [x] 实现标识符解析 `resolve_identifier`：遍历作用域链（locals + file symbol members），未找到时报告 TS2304。
+- [x] checker 诊断通过 `Program::get_semantic_diagnostics` 接入 execute 输出管线。
 - [ ] 节点 → 类型缓存（`get_cached_type` / `cache_type` 已有骨架，需在 check 路径中填充）。
 
 ### P3.7 Checker 类型关系（relater 完整规则）
@@ -741,7 +752,7 @@ Rust 现状：
 2026-07-11 已完成一轮低风险 warning 清理：
 
 - 已清理：明显未使用 import、只在测试中使用的 import 作用域、未使用变量、重复 match arm、无意义 iterator 赋值。
-- `cargo test` 当前通过：483 个 lib 单测 + 2 个 parity 测试。
+- `cargo test` 当前通过：589 个 lib 单测 + 2 个 parity 测试。
 - 剩余 lib warning 约 31 个，当前归类为迁移期可接受：
   - Go/TypeScript 命名对齐：`DiagnosticsPresent_OutputsSkipped`、`BlockScoped`、`parse_bracketedList` 等。
   - 暂未接入的迁移占位 API：`expected_json_type`、`next_auto_generate_id`、`compiler_diagnostic` 等。

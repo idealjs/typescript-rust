@@ -379,14 +379,12 @@ impl Binder {
     fn bind_container(&mut self, node: &Arc<Node>, _flags: ContainerFlags) {
         let prev_container = self.container.take();
         let prev_block = self.block_scope_container.take();
-        // For block-scoped containers (namespaces, blocks, etc.), clear parent_symbol
-        // so that declarations inside go to the block_scope_container's locals
-        // instead of the parent symbol's members.
-        let prev_parent_symbol = if is_block_scoped_container(node.kind) {
-            self.parent_symbol.take()
-        } else {
-            None
-        };
+        // Save the current parent_symbol. For container nodes that have a
+        // symbol (e.g. FunctionDeclaration), we'll replace it with the
+        // container's symbol so children are added to its members. For
+        // block-scoped containers without a symbol (e.g. Block), we clear
+        // it so children go into the block's locals.
+        let prev_parent_symbol = self.parent_symbol.take();
 
         self.container = Some(Arc::clone(node));
 
@@ -399,6 +397,15 @@ impl Binder {
         if has_locals(node.kind) {
             self.symbol_map.locals.insert(node.id(), SymbolTable::new());
         }
+
+        // Set parent_symbol to the container's symbol (if it has one).
+        // This ensures children (parameters, class members, etc.) are added
+        // to the container's symbol members rather than the outer scope.
+        if let Some(sym) = self.symbol_map.symbol_of(node) {
+            self.parent_symbol = Some(Arc::clone(sym));
+        }
+        // If the node has no symbol (e.g. Block), parent_symbol remains None,
+        // so declare_symbol falls through to the block_scope_container.locals.
 
         self.bind_children(node);
 

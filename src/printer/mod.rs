@@ -910,9 +910,19 @@ mod tests {
     fn make_is_unique_local_name(symbol_map: Arc<NodeSymbolMap>) -> impl Fn(&str, &Node) -> bool {
         move |name: &str, node: &Node| -> bool {
             let mask = SymbolFlags::VALUE | SymbolFlags::ExportValue | SymbolFlags::Alias;
+            // Check the node's locals (block-scoped variables).
             if let Some(locals) = symbol_map.locals_of(node) {
                 if let Some(sym) = locals.get(name) {
                     if sym.flags & mask != SymbolFlags::empty() {
+                        return false;
+                    }
+                }
+            }
+            // Check the node's symbol's members (function-scoped declarations
+            // like parameters, namespace members, etc.).
+            if let Some(sym) = symbol_map.symbol_of(node) {
+                if let Some(member) = sym.members.get(name) {
+                    if member.flags & mask != SymbolFlags::empty() {
                         return false;
                     }
                 }

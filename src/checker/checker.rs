@@ -273,6 +273,9 @@ pub struct Checker {
     /// The symbol of the source file currently being checked (top-level
     /// declarations land in its `members`).
     pub current_file_symbol: Option<Arc<Symbol>>,
+    /// Stack of container node IDs (functions, blocks, etc.) used for
+    /// identifier resolution when parent pointers are not available.
+    pub scope_stack: Vec<u64>,
 
     // Flow analysis
     pub flow_analysis_disabled: bool,
@@ -457,6 +460,7 @@ impl Checker {
             current_file: None,
             current_file_id: 0,
             current_file_symbol: None,
+            scope_stack: Vec::new(),
 
             flow_analysis_disabled: false,
             flow_invocation_count: 0,
@@ -1009,6 +1013,9 @@ impl Checker {
         self.current_file_id = file_id;
         self.current_file_symbol = source_file_symbol;
 
+        // Push the source file scope.
+        self.push_scope(&file_node);
+
         // Walk top-level statements.
         let statements: Vec<Arc<Node>> = match &file_node.data {
             crate::ast::NodeData::SourceFile(data) => data.statements.iter().cloned().collect(),
@@ -1018,6 +1025,7 @@ impl Checker {
             self.check_statement(stmt);
         }
 
+        self.pop_scope();
         self.current_file = None;
         self.current_file_id = 0;
         self.current_file_symbol = None;
@@ -1102,11 +1110,13 @@ impl Checker {
                 }
             }
             SyntaxKind::Block => {
+                self.push_scope(node);
                 if let crate::ast::NodeData::Block(data) = &node.data {
                     for stmt in data.statements.iter() {
                         self.check_statement(stmt);
                     }
                 }
+                self.pop_scope();
             }
             SyntaxKind::ThrowStatement => {
                 if let crate::ast::NodeData::ThrowStatement(data) = &node.data {
@@ -1116,36 +1126,85 @@ impl Checker {
             SyntaxKind::SwitchStatement => {
                 if let crate::ast::NodeData::SwitchStatement(data) = &node.data {
                     self.check_expression(&data.expression);
-                    for case in data.clauses.iter() {
-                        self.check_case_clause(case);
+                    // case_block is a CaseBlock node; walk its clauses.
+                    if let crate::ast::NodeData::CaseBlock(case_block) = &data.case_block.data {
+                        for case in case_block.clauses.iter() {
+                            self.check_case_clause(case);
+                        }
                     }
                 }
             }
-            // Declarations: a full checker would compute types and check
-            // initializers. For now, only check initializer expressions so
-            // that identifier references are visited.
-            SyntaxKind::VariableDeclaration => {
-                self.check_variable_declaration(node);
+            // Declarations: walk only expression-position children.
+            // Without parent pointers, we cannot detect declaration names
+            // via `is_declaration_name`, so we must handle each kind
+            // explicitly, skipping names and type-position children.
+            SyntaxKind::FunctionDeclaration => {
+                // Only check the function body; the name, parameters,
+                // type parameters, and return type are declarations/types.
+                self.push_scope(node);
+                if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
+                    if let Some(body) = &data.body {
+                        self.check_statement(body);
+                    }
+                }
+                self.pop_scope();
             }
-            SyntaxKind::FunctionDeclaration
-            | SyntaxKind::ClassDeclaration
-            | SyntaxKind::InterfaceDeclaration
+            SyntaxKind::ClassDeclaration => {
+                // Check heritage clauses (e.g. `extends Foo`).
+                self.push_scope(node);
+                if let crate::ast::NodeData::ClassDeclaration(data) = &node.data {
+                    if let Some(heritage) = &data.heritage_clauses {
+                        for clause in heritage.iter() {
+                            self.check_heritage_clause(clause);
+                        }
+                    }
+                    // Check member initializers.
+                    for member in data.members.iter() {
+                        self.check_class_member(member);
+                    }
+                }
+                self.pop_scope();
+            }
+            SyntaxKind::InterfaceDeclaration
             | SyntaxKind::TypeAliasDeclaration
-            | SyntaxKind::EnumDeclaration
             | SyntaxKind::ImportDeclaration
             | SyntaxKind::ImportEqualsDeclaration
             | SyntaxKind::ExportDeclaration
-            | SyntaxKind::ExportAssignment
             | SyntaxKind::NamespaceExportDeclaration
-            | SyntaxKind::ModuleDeclaration
             | SyntaxKind::ExportSpecifier
             | SyntaxKind::ImportSpecifier => {
-                // Walk children to find expression-position identifiers.
-                // Type-position identifiers are skipped by check_expression.
-                self.walk_children_for_expressions(node);
+                // No expression-position children to check — all type-level
+                // or import-level.
+            }
+            SyntaxKind::EnumDeclaration => {
+                // Check enum member initializers.
+                if let crate::ast::NodeData::EnumDeclaration(data) = &node.data {
+                    for member in data.members.iter() {
+                        self.check_enum_member(member);
+                    }
+                }
+            }
+            SyntaxKind::ExportAssignment => {
+                // `export default expr` or `export = expr`
+                if let crate::ast::NodeData::ExportAssignment(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::ModuleDeclaration => {
+                // Check the module body.
+                self.push_scope(node);
+                if let crate::ast::NodeData::ModuleDeclaration(data) = &node.data {
+                    if let Some(body) = &data.body {
+                        self.check_statement(body);
+                    }
+                }
+                self.pop_scope();
             }
             SyntaxKind::EmptyStatement | SyntaxKind::BreakStatement | SyntaxKind::ContinueStatement => {
                 // No expressions to check.
+            }
+            SyntaxKind::VariableDeclaration => {
+                self.check_variable_declaration(node);
             }
             _ => {
                 // Fallback: walk children to find expressions.
@@ -1183,12 +1242,73 @@ impl Checker {
     }
 
     fn check_case_clause(&mut self, node: &Arc<Node>) {
-        if let crate::ast::NodeData::CaseClause(data) = &node.data {
-            if let Some(expr) = &data.expression {
-                self.check_expression(expr);
+        if let crate::ast::NodeData::CaseOrDefaultClause(data) = &node.data {
+            if data.expression.kind != SyntaxKind::UnknownKeyword {
+                self.check_expression(&data.expression);
             }
             for stmt in data.statements.iter() {
                 self.check_statement(stmt);
+            }
+        }
+    }
+
+    fn check_heritage_clause(&mut self, node: &Arc<Node>) {
+        // Heritage clauses contain type references (e.g., `extends Foo`).
+        // These are type references, not expression references, so we skip
+        // them for now. Full checking will resolve the type later.
+    }
+
+    fn check_class_member(&mut self, node: &Arc<Node>) {
+        match node.kind {
+            SyntaxKind::MethodDeclaration
+            | SyntaxKind::Constructor
+            | SyntaxKind::GetAccessor
+            | SyntaxKind::SetAccessor => {
+                // Only check the body; the name, parameters, and return type
+                // are declarations/types.
+                let body: Option<Arc<Node>> = match &node.data {
+                    crate::ast::NodeData::MethodDeclaration(d) => d.body.clone(),
+                    crate::ast::NodeData::ConstructorDeclaration(d) => d.body.clone(),
+                    crate::ast::NodeData::GetAccessorDeclaration(d) => d.body.clone(),
+                    crate::ast::NodeData::SetAccessorDeclaration(d) => d.body.clone(),
+                    _ => None,
+                };
+                if let Some(body) = body {
+                    self.push_scope(node);
+                    match body.kind {
+                        SyntaxKind::Block => self.check_statement(&body),
+                        _ => self.check_expression(&body),
+                    }
+                    self.pop_scope();
+                }
+            }
+            SyntaxKind::PropertyDeclaration => {
+                // Only check the initializer; the name and type are
+                // declarations/types.
+                if let crate::ast::NodeData::PropertyDeclaration(data) = &node.data {
+                    if let Some(init) = &data.initializer {
+                        self.check_expression(init);
+                    }
+                }
+            }
+            SyntaxKind::PropertySignature => {
+                // All type-level — no expressions to check.
+            }
+            SyntaxKind::ClassStaticBlockDeclaration => {
+                if let crate::ast::NodeData::ClassStaticBlockDeclaration(data) = &node.data {
+                    self.check_statement(&data.body);
+                }
+            }
+            _ => {
+                // SemicolonClassElement etc. — no expressions.
+            }
+        }
+    }
+
+    fn check_enum_member(&mut self, node: &Arc<Node>) {
+        if let crate::ast::NodeData::EnumMember(data) = &node.data {
+            if let Some(init) = &data.initializer {
+                self.check_expression(init);
             }
         }
     }
@@ -1264,9 +1384,7 @@ impl Checker {
             SyntaxKind::ElementAccessExpression => {
                 if let crate::ast::NodeData::ElementAccessExpression(data) = &node.data {
                     self.check_expression(&data.expression);
-                    if let Some(arg) = &data.argument_expression {
-                        self.check_expression(arg);
-                    }
+                    self.check_expression(&data.argument_expression);
                 }
             }
             SyntaxKind::ConditionalExpression => {
@@ -1297,8 +1415,8 @@ impl Checker {
             SyntaxKind::TemplateExpression => {
                 if let crate::ast::NodeData::TemplateExpression(data) = &node.data {
                     for span in data.template_spans.iter() {
-                        if let Some(expr) = span.expression.as_ref() {
-                            self.check_expression(expr);
+                        if let crate::ast::NodeData::TemplateSpan(span_data) = &span.data {
+                            self.check_expression(&span_data.expression);
                         }
                     }
                 }
@@ -1354,9 +1472,7 @@ impl Checker {
             SyntaxKind::TaggedTemplateExpression => {
                 if let crate::ast::NodeData::TaggedTemplateExpression(data) = &node.data {
                     self.check_expression(&data.tag);
-                    if let Some(template) = &data.template {
-                        self.check_expression(template);
-                    }
+                    self.check_expression(&data.template);
                 }
             }
             SyntaxKind::JsxElement | SyntaxKind::JsxSelfClosingElement | SyntaxKind::JsxFragment => {
@@ -1378,9 +1494,7 @@ impl Checker {
             SyntaxKind::PropertyAssignment => {
                 if let crate::ast::NodeData::PropertyAssignment(data) = &node.data {
                     // The name is not a reference. The initializer is.
-                    if let Some(init) = &data.initializer {
-                        self.check_expression(init);
-                    }
+                    self.check_expression(&data.initializer);
                 }
             }
             SyntaxKind::ShorthandPropertyAssignment => {
@@ -1405,15 +1519,17 @@ impl Checker {
         // Walk children, but skip parameter names (they are declarations).
         // The simplest correct approach is to dispatch on the body only.
         let body: Option<Arc<Node>> = match &node.data {
-            crate::ast::NodeData::FunctionExpression(data) => data.body.clone(),
-            crate::ast::NodeData::ArrowFunction(data) => data.body.clone(),
+            crate::ast::NodeData::FunctionExpression(data) => Some(data.body.clone()),
+            crate::ast::NodeData::ArrowFunction(data) => Some(data.body.clone()),
             _ => None,
         };
         if let Some(body) = body {
+            self.push_scope(node);
             match body.kind {
                 SyntaxKind::Block => self.check_statement(&body),
                 _ => self.check_expression(&body),
             }
+            self.pop_scope();
         }
     }
 
@@ -1480,9 +1596,24 @@ impl Checker {
         self.diagnostics.add(diagnostic);
     }
 
-    /// Resolve an identifier reference by walking the parent chain and
-    /// checking each container's locals (and the file symbol's members at the
-    /// top level).
+    /// Push a container node onto the scope stack, making its symbol members
+    /// and locals visible for identifier resolution.
+    fn push_scope(&mut self, node: &Arc<Node>) {
+        self.scope_stack.push(node.id());
+    }
+
+    /// Pop the innermost scope from the scope stack.
+    fn pop_scope(&mut self) {
+        self.scope_stack.pop();
+    }
+
+    /// Resolve an identifier reference by walking the scope stack from
+    /// innermost to outermost, checking each container's symbol members and
+    /// locals.
+    ///
+    /// Since the parser does not set parent pointers on nodes, we cannot walk
+    /// the parent chain. Instead, we use the scope stack maintained by the
+    /// checker during AST traversal.
     ///
     /// Returns the resolved symbol, or `None` if not found.
     ///
@@ -1495,33 +1626,21 @@ impl Checker {
         };
         let symbol_map = self.program.symbol_map();
 
-        // Walk up the parent chain, checking locals at each container.
-        let mut current = node.parent.clone();
-        while let Some(parent) = current {
-            // Check if this parent is a container with locals.
-            if let Some(locals) = symbol_map.locals_of(&parent) {
+        // Walk the scope stack from innermost to outermost.
+        for &container_id in self.scope_stack.iter().rev() {
+            // Check the container's locals (block-scoped variables).
+            if let Some(locals) = symbol_map.locals.get(&container_id) {
                 if let Some(sym) = locals.get(name) {
                     return Some(Arc::clone(sym));
                 }
             }
-            // At the source file, also check the file symbol's members
-            // (top-level declarations land there).
-            if parent.kind == SyntaxKind::SourceFile {
-                if let Some(file_sym) = symbol_map.symbol_of(&parent) {
-                    if let Some(sym) = file_sym.members.get(name) {
-                        return Some(Arc::clone(sym));
-                    }
-                    // Also check the file's locals (block-scoped top-level
-                    // declarations may be there).
-                    if let Some(locals) = symbol_map.locals_of(&parent) {
-                        if let Some(sym) = locals.get(name) {
-                            return Some(Arc::clone(sym));
-                        }
-                    }
+            // Check the container's symbol members (function-scoped
+            // declarations like parameters, class members, etc.).
+            if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
+                if let Some(sym) = container_sym.members.get(name) {
+                    return Some(Arc::clone(sym));
                 }
-                break;
             }
-            current = parent.parent.clone();
         }
 
         // TODO: check globals (lib.d.ts symbols) once they are populated.
