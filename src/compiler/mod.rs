@@ -8,6 +8,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use crate::ast::NodeSymbolMap;
 use crate::ast::SourceFile;
 use crate::ast::diagnostic::Diagnostic;
 use crate::binder::Binder;
@@ -90,6 +91,10 @@ pub struct Program {
     diagnostics: Vec<Arc<Diagnostic>>,
     host: Arc<dyn CompilerHost>,
     config_file_name: String,
+    /// Side table from the binder: maps node IDs to symbols, locals, and flow
+    /// nodes. Shared across all source files in the program (node IDs are
+    /// globally unique).
+    symbol_map: NodeSymbolMap,
 }
 
 impl Program {
@@ -148,6 +153,7 @@ impl Program {
         for file in &source_files {
             binder.bind_source_file(file);
         }
+        let symbol_map = std::mem::take(&mut binder.symbol_map);
 
         Program {
             options,
@@ -157,6 +163,7 @@ impl Program {
             diagnostics,
             host,
             config_file_name,
+            symbol_map,
         }
     }
 
@@ -195,8 +202,31 @@ impl Program {
         }
     }
 
+    /// Run the type checker and return semantic diagnostics.
+    ///
+    /// Go: `Program.GetSemanticDiagnostics` → creates a `Checker`, calls
+    /// `checkSourceFile` for each source file, and returns accumulated diagnostics.
+    /// Currently the checker is a stub (P3.6), so this returns empty diagnostics,
+    /// but it wires up the full pipeline so future checker work is automatically
+    /// picked up.
+    pub fn get_semantic_diagnostics(self: &Arc<Self>) -> Vec<Diagnostic> {
+        let tracer = Arc::new(crate::checker::Tracer::new());
+        let program: Arc<dyn crate::checker::Program> = Arc::clone(self) as _;
+        let mut checker = crate::checker::Checker::new(program, tracer);
+        for file in &self.source_files {
+            checker.check_source_file(file);
+        }
+        checker.get_semantic_diagnostics()
+    }
+
     pub fn config_file_name(&self) -> &str {
         &self.config_file_name
+    }
+
+    /// Side table from the binder: maps node IDs to symbols, locals, and flow
+    /// nodes. Used by the checker for identifier resolution and flow analysis.
+    pub fn symbol_map(&self) -> &NodeSymbolMap {
+        &self.symbol_map
     }
 
     pub fn host(&self) -> &dyn CompilerHost {
@@ -249,6 +279,9 @@ impl crate::checker::Program for Program {
     }
     fn is_source_file_default_library(&self, path: &str) -> bool {
         Program::is_source_file_default_library(self, path)
+    }
+    fn symbol_map(&self) -> &NodeSymbolMap {
+        Program::symbol_map(self)
     }
 }
 
@@ -452,20 +485,7 @@ fn parser_diagnostic_to_diagnostic(
     file: Arc<SourceFile>,
     pd: &crate::parser::ParserDiagnostic,
 ) -> Diagnostic {
-    Diagnostic {
-        file: Some(file),
-        loc: pd.range,
-        code: 1003, // TS error code for parse errors (approximate)
-        category: Category::Error,
-        message: None,
-        message_key: "-1",
-        message_args: vec![pd.message.clone()],
-        message_chain: Vec::new(),
-        related_information: Vec::new(),
-        reports_unnecessary: false,
-        reports_deprecated: false,
-        skipped_on_no_emit: false,
-    }
+    Diagnostic::new(Some(file), pd.range, pd.message, pd.message_args.clone())
 }
 
 fn file_error_diagnostic(file_name: &str, message: &str) -> Diagnostic {
@@ -628,6 +648,8 @@ mod tests {
             has_include_spec: false,
             has_exclude_spec: false,
             has_files_spec: false,
+            references: vec![],
+            compile_on_save: None,
             watch: false,
         };
         let host = Arc::new(CompilerHostImpl::new(
@@ -695,6 +717,8 @@ mod tests {
             has_include_spec: false,
             has_exclude_spec: false,
             has_files_spec: false,
+            references: vec![],
+            compile_on_save: None,
             watch: false,
         };
         let host = Arc::new(CompilerHostImpl::new(fs, "/".to_string(), lib_path()));

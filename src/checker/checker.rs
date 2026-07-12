@@ -10,12 +10,13 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::ast::{
-    DiagnosticsCollection, ModifierFlags, Node, NodeFlags, SourceFile, Symbol, SymbolTable,
-    SyntaxKind,
+    DiagnosticsCollection, ModifierFlags, Node, NodeFlags, NodeSymbolMap, SourceFile, Symbol,
+    SymbolTable, SyntaxKind,
 };
 use crate::core::compiler_options::{
     CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget,
 };
+use crate::diagnostics::messages_generated::CANNOT_FIND_NAME_0;
 use crate::jsnum;
 
 use super::tracer::Tracer;
@@ -36,6 +37,9 @@ pub trait Program: Send + Sync {
     fn file_exists(&self, file_name: &str) -> bool;
     fn get_source_file(&self, file_name: &str) -> Option<Arc<SourceFile>>;
     fn is_source_file_default_library(&self, path: &str) -> bool;
+    /// Side table from the binder (symbols, locals, flow nodes), shared
+    /// across all source files in the program.
+    fn symbol_map(&self) -> &NodeSymbolMap;
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -262,6 +266,13 @@ pub struct Checker {
     pub current_node: Option<Arc<Node>>,
     pub inline_level: i32,
     pub serialization_level: i32,
+    /// The source file currently being checked.
+    pub current_file: Option<Arc<SourceFile>>,
+    /// The node ID of the source file currently being checked.
+    pub current_file_id: u64,
+    /// The symbol of the source file currently being checked (top-level
+    /// declarations land in its `members`).
+    pub current_file_symbol: Option<Arc<Symbol>>,
 
     // Flow analysis
     pub flow_analysis_disabled: bool,
@@ -443,6 +454,9 @@ impl Checker {
             current_node: None,
             inline_level: 0,
             serialization_level: 0,
+            current_file: None,
+            current_file_id: 0,
+            current_file_symbol: None,
 
             flow_analysis_disabled: false,
             flow_invocation_count: 0,
@@ -966,6 +980,699 @@ impl Checker {
     pub fn was_canceled(&self) -> bool {
         false
     }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Entry points (stubs — full implementation in P3.6)
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Type-check a single source file.
+    ///
+    /// Go: `Checker.checkSourceFile`. This is the main entry point invoked
+    /// by `Program.GetSemanticDiagnostics` for each source file.
+    ///
+    /// Currently implements a minimal subset of type checking:
+    /// - Walks statements and expressions.
+    /// - For identifiers in expression position, attempts to resolve them
+    ///   against the binder's symbol map (locals + file symbol members).
+    /// - Emits `TS2304 Cannot find name '{0}'.` for unresolvable identifiers.
+    ///
+    /// Full type-checking logic (type inference, relation checking, flow
+    /// narrowing, etc.) is added incrementally.
+    pub fn check_source_file(&mut self, file: &Arc<SourceFile>) {
+        let file_node = Arc::clone(&file.node);
+        let file_id = file_node.id();
+        let source_file_symbol = self.program.symbol_map().symbol_of(&file_node).cloned();
+
+        // Save file context for diagnostics.
+        let file_arc = Arc::clone(file);
+        self.current_file = Some(Arc::clone(&file_arc));
+        self.current_file_id = file_id;
+        self.current_file_symbol = source_file_symbol;
+
+        // Walk top-level statements.
+        let statements: Vec<Arc<Node>> = match &file_node.data {
+            crate::ast::NodeData::SourceFile(data) => data.statements.iter().cloned().collect(),
+            _ => Vec::new(),
+        };
+        for stmt in &statements {
+            self.check_statement(stmt);
+        }
+
+        self.current_file = None;
+        self.current_file_id = 0;
+        self.current_file_symbol = None;
+    }
+
+    /// Return the semantic diagnostics collected during type checking.
+    ///
+    /// Go: `Checker.getDiagnostics`.
+    pub fn get_semantic_diagnostics(&self) -> Vec<crate::ast::Diagnostic> {
+        self.diagnostics.get_all()
+    }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Statement and expression checking (P3.6 minimal implementation)
+// ────────────────────────────────────────────────────────────────────────────
+
+impl Checker {
+    /// Check a statement node.
+    ///
+    /// Go: `Checker.checkStatement`. Dispatches by node kind.
+    pub fn check_statement(&mut self, node: &Arc<Node>) {
+        self.current_node = Some(Arc::clone(node));
+        match node.kind {
+            SyntaxKind::ExpressionStatement => {
+                if let crate::ast::NodeData::ExpressionStatement(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::VariableStatement => {
+                if let crate::ast::NodeData::VariableStatement(data) = &node.data {
+                    self.check_variable_declaration_list(&data.declaration_list);
+                }
+            }
+            SyntaxKind::IfStatement => {
+                if let crate::ast::NodeData::IfStatement(data) = &node.data {
+                    self.check_expression(&data.expression);
+                    self.check_statement(&data.then_statement);
+                    if let Some(else_stmt) = &data.else_statement {
+                        self.check_statement(else_stmt);
+                    }
+                }
+            }
+            SyntaxKind::WhileStatement => {
+                if let crate::ast::NodeData::WhileStatement(data) = &node.data {
+                    self.check_expression(&data.expression);
+                    self.check_statement(&data.statement);
+                }
+            }
+            SyntaxKind::DoStatement => {
+                if let crate::ast::NodeData::DoStatement(data) = &node.data {
+                    self.check_statement(&data.statement);
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::ForStatement => {
+                if let crate::ast::NodeData::ForStatement(data) = &node.data {
+                    if let Some(init) = &data.initializer {
+                        self.check_for_initializer(init);
+                    }
+                    if let Some(cond) = &data.condition {
+                        self.check_expression(cond);
+                    }
+                    if let Some(incr) = &data.incrementor {
+                        self.check_expression(incr);
+                    }
+                    self.check_statement(&data.statement);
+                }
+            }
+            SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement => {
+                if let crate::ast::NodeData::ForInOrOfStatement(data) = &node.data {
+                    self.check_for_initializer(&data.initializer);
+                    self.check_expression(&data.expression);
+                    self.check_statement(&data.statement);
+                }
+            }
+            SyntaxKind::ReturnStatement => {
+                if let crate::ast::NodeData::ReturnStatement(data) = &node.data {
+                    if let Some(expr) = &data.expression {
+                        self.check_expression(expr);
+                    }
+                }
+            }
+            SyntaxKind::Block => {
+                if let crate::ast::NodeData::Block(data) = &node.data {
+                    for stmt in data.statements.iter() {
+                        self.check_statement(stmt);
+                    }
+                }
+            }
+            SyntaxKind::ThrowStatement => {
+                if let crate::ast::NodeData::ThrowStatement(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::SwitchStatement => {
+                if let crate::ast::NodeData::SwitchStatement(data) = &node.data {
+                    self.check_expression(&data.expression);
+                    for case in data.clauses.iter() {
+                        self.check_case_clause(case);
+                    }
+                }
+            }
+            // Declarations: a full checker would compute types and check
+            // initializers. For now, only check initializer expressions so
+            // that identifier references are visited.
+            SyntaxKind::VariableDeclaration => {
+                self.check_variable_declaration(node);
+            }
+            SyntaxKind::FunctionDeclaration
+            | SyntaxKind::ClassDeclaration
+            | SyntaxKind::InterfaceDeclaration
+            | SyntaxKind::TypeAliasDeclaration
+            | SyntaxKind::EnumDeclaration
+            | SyntaxKind::ImportDeclaration
+            | SyntaxKind::ImportEqualsDeclaration
+            | SyntaxKind::ExportDeclaration
+            | SyntaxKind::ExportAssignment
+            | SyntaxKind::NamespaceExportDeclaration
+            | SyntaxKind::ModuleDeclaration
+            | SyntaxKind::ExportSpecifier
+            | SyntaxKind::ImportSpecifier => {
+                // Walk children to find expression-position identifiers.
+                // Type-position identifiers are skipped by check_expression.
+                self.walk_children_for_expressions(node);
+            }
+            SyntaxKind::EmptyStatement | SyntaxKind::BreakStatement | SyntaxKind::ContinueStatement => {
+                // No expressions to check.
+            }
+            _ => {
+                // Fallback: walk children to find expressions.
+                self.walk_children_for_expressions(node);
+            }
+        }
+        self.current_node = None;
+    }
+
+    fn check_for_initializer(&mut self, node: &Arc<Node>) {
+        match node.kind {
+            SyntaxKind::VariableDeclarationList => {
+                self.check_variable_declaration_list(node);
+            }
+            _ => self.check_expression(node),
+        }
+    }
+
+    fn check_variable_declaration_list(&mut self, node: &Arc<Node>) {
+        if let crate::ast::NodeData::VariableDeclarationList(data) = &node.data {
+            for decl in data.declarations.iter() {
+                self.check_variable_declaration(decl);
+            }
+        }
+    }
+
+    fn check_variable_declaration(&mut self, node: &Arc<Node>) {
+        if let crate::ast::NodeData::VariableDeclaration(data) = &node.data {
+            // The name is a declaration, not a reference — skip it.
+            // The type annotation is in type position — skip it.
+            if let Some(init) = &data.initializer {
+                self.check_expression(init);
+            }
+        }
+    }
+
+    fn check_case_clause(&mut self, node: &Arc<Node>) {
+        if let crate::ast::NodeData::CaseClause(data) = &node.data {
+            if let Some(expr) = &data.expression {
+                self.check_expression(expr);
+            }
+            for stmt in data.statements.iter() {
+                self.check_statement(stmt);
+            }
+        }
+    }
+
+    /// Check an expression node: resolve identifier references and recurse
+    /// into sub-expressions.
+    ///
+    /// Go: `Checker.checkExpression`.
+    pub fn check_expression(&mut self, node: &Arc<Node>) {
+        self.current_node = Some(Arc::clone(node));
+        match node.kind {
+            SyntaxKind::Identifier => {
+                self.check_identifier_reference(node);
+            }
+            SyntaxKind::NumericLiteral
+            | SyntaxKind::StringLiteral
+            | SyntaxKind::BigIntLiteral
+            | SyntaxKind::TrueKeyword
+            | SyntaxKind::FalseKeyword
+            | SyntaxKind::NullKeyword
+            | SyntaxKind::ThisKeyword
+            | SyntaxKind::SuperKeyword
+            | SyntaxKind::RegularExpressionLiteral
+            | SyntaxKind::NoSubstitutionTemplateLiteral => {
+                // Literal expressions: no identifier references to resolve.
+            }
+            SyntaxKind::BinaryExpression => {
+                if let crate::ast::NodeData::BinaryExpression(data) = &node.data {
+                    self.check_expression(&data.left);
+                    self.check_expression(&data.right);
+                }
+            }
+            SyntaxKind::PrefixUnaryExpression => {
+                if let crate::ast::NodeData::PrefixUnaryExpression(data) = &node.data {
+                    self.check_expression(&data.operand);
+                }
+            }
+            SyntaxKind::PostfixUnaryExpression => {
+                if let crate::ast::NodeData::PostfixUnaryExpression(data) = &node.data {
+                    self.check_expression(&data.operand);
+                }
+            }
+            SyntaxKind::ParenthesizedExpression => {
+                if let crate::ast::NodeData::ParenthesizedExpression(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::CallExpression => {
+                if let crate::ast::NodeData::CallExpression(data) = &node.data {
+                    self.check_expression(&data.expression);
+                    for arg in data.arguments.iter() {
+                        self.check_expression(arg);
+                    }
+                }
+            }
+            SyntaxKind::NewExpression => {
+                if let crate::ast::NodeData::NewExpression(data) = &node.data {
+                    self.check_expression(&data.expression);
+                    if let Some(args) = &data.arguments {
+                        for arg in args.iter() {
+                            self.check_expression(arg);
+                        }
+                    }
+                }
+            }
+            SyntaxKind::PropertyAccessExpression => {
+                // Only check the left side; the right side is a property name,
+                // not an identifier reference.
+                if let crate::ast::NodeData::PropertyAccessExpression(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::ElementAccessExpression => {
+                if let crate::ast::NodeData::ElementAccessExpression(data) = &node.data {
+                    self.check_expression(&data.expression);
+                    if let Some(arg) = &data.argument_expression {
+                        self.check_expression(arg);
+                    }
+                }
+            }
+            SyntaxKind::ConditionalExpression => {
+                if let crate::ast::NodeData::ConditionalExpression(data) = &node.data {
+                    self.check_expression(&data.condition);
+                    self.check_expression(&data.when_true);
+                    self.check_expression(&data.when_false);
+                }
+            }
+            SyntaxKind::ArrayLiteralExpression => {
+                if let crate::ast::NodeData::ArrayLiteralExpression(data) = &node.data {
+                    for elem in data.elements.iter() {
+                        self.check_expression(elem);
+                    }
+                }
+            }
+            SyntaxKind::ObjectLiteralExpression => {
+                if let crate::ast::NodeData::ObjectLiteralExpression(data) = &node.data {
+                    for prop in data.properties.iter() {
+                        self.check_object_literal_element(prop);
+                    }
+                }
+            }
+            SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression => {
+                // Parameters are declarations; the body contains expressions.
+                self.check_function_like_body(node);
+            }
+            SyntaxKind::TemplateExpression => {
+                if let crate::ast::NodeData::TemplateExpression(data) = &node.data {
+                    for span in data.template_spans.iter() {
+                        if let Some(expr) = span.expression.as_ref() {
+                            self.check_expression(expr);
+                        }
+                    }
+                }
+            }
+            SyntaxKind::AwaitExpression => {
+                if let crate::ast::NodeData::AwaitExpression(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::YieldExpression => {
+                if let crate::ast::NodeData::YieldExpression(data) = &node.data {
+                    if let Some(expr) = &data.expression {
+                        self.check_expression(expr);
+                    }
+                }
+            }
+            SyntaxKind::SpreadElement => {
+                if let crate::ast::NodeData::SpreadElement(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::AsExpression => {
+                // The left side is an expression; the right side is a type.
+                if let crate::ast::NodeData::AsExpression(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::NonNullExpression => {
+                if let crate::ast::NodeData::NonNullExpression(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::SatisfiesExpression => {
+                if let crate::ast::NodeData::SatisfiesExpression(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::TypeOfExpression => {
+                if let crate::ast::NodeData::TypeOfExpression(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::DeleteExpression => {
+                if let crate::ast::NodeData::DeleteExpression(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::VoidExpression => {
+                if let crate::ast::NodeData::VoidExpression(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::TaggedTemplateExpression => {
+                if let crate::ast::NodeData::TaggedTemplateExpression(data) = &node.data {
+                    self.check_expression(&data.tag);
+                    if let Some(template) = &data.template {
+                        self.check_expression(template);
+                    }
+                }
+            }
+            SyntaxKind::JsxElement | SyntaxKind::JsxSelfClosingElement | SyntaxKind::JsxFragment => {
+                // JSX expressions contain child identifiers in property names
+                // and tag names that are not references. Walk only the
+                // expression-container children.
+                self.walk_children_for_expressions(node);
+            }
+            _ => {
+                // Fallback: walk children to find expressions.
+                self.walk_children_for_expressions(node);
+            }
+        }
+        self.current_node = None;
+    }
+
+    fn check_object_literal_element(&mut self, node: &Arc<Node>) {
+        match node.kind {
+            SyntaxKind::PropertyAssignment => {
+                if let crate::ast::NodeData::PropertyAssignment(data) = &node.data {
+                    // The name is not a reference. The initializer is.
+                    if let Some(init) = &data.initializer {
+                        self.check_expression(init);
+                    }
+                }
+            }
+            SyntaxKind::ShorthandPropertyAssignment => {
+                // `x` in `{ x }` is both a declaration and a reference to the
+                // outer-scope `x`. Check it as a reference.
+                if let crate::ast::NodeData::ShorthandPropertyAssignment(data) = &node.data {
+                    self.check_identifier_reference(&data.name);
+                }
+            }
+            SyntaxKind::SpreadAssignment => {
+                if let crate::ast::NodeData::SpreadAssignment(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            _ => {
+                self.walk_children_for_expressions(node);
+            }
+        }
+    }
+
+    fn check_function_like_body(&mut self, node: &Arc<Node>) {
+        // Walk children, but skip parameter names (they are declarations).
+        // The simplest correct approach is to dispatch on the body only.
+        let body: Option<Arc<Node>> = match &node.data {
+            crate::ast::NodeData::FunctionExpression(data) => data.body.clone(),
+            crate::ast::NodeData::ArrowFunction(data) => data.body.clone(),
+            _ => None,
+        };
+        if let Some(body) = body {
+            match body.kind {
+                SyntaxKind::Block => self.check_statement(&body),
+                _ => self.check_expression(&body),
+            }
+        }
+    }
+
+    /// Walk a node's children and check any that look like expressions.
+    /// Used as a fallback for node kinds we don't handle explicitly.
+    fn walk_children_for_expressions(&mut self, node: &Arc<Node>) {
+        // Collect children first to avoid borrow-checker issues.
+        let children: Vec<Arc<Node>> = {
+            let mut collected = Vec::new();
+            crate::ast::node_data_generated::for_each_child(node, |child| {
+                collected.push(Arc::clone(child));
+                false
+            });
+            collected
+        };
+        for child in &children {
+            // Skip type-position children and declaration names. We do this
+            // by checking the child's kind against a known set of expression-
+            // position kinds.
+            if is_expression_position_kind(child.kind) {
+                self.check_expression(child);
+            } else if is_statement_kind(child.kind) {
+                self.check_statement(child);
+            }
+            // Otherwise (type nodes, modifier lists, names, etc.) skip.
+        }
+    }
+
+    /// Check an identifier in expression position: attempt to resolve it,
+    /// and emit TS2304 if it cannot be found.
+    fn check_identifier_reference(&mut self, node: &Arc<Node>) {
+        // Skip if the identifier's text is empty (parser recovery).
+        let name = match &node.data {
+            crate::ast::NodeData::Identifier(data) => data.text.as_str(),
+            _ => return,
+        };
+        if name.is_empty() {
+            return;
+        }
+        // Skip if the identifier is the name of a declaration rather than a
+        // reference. We detect this by looking at the parent's kind and the
+        // slot the identifier occupies.
+        if is_declaration_name(node) {
+            return;
+        }
+        // Skip property access right-hand sides (e.g., `x.foo` — `foo` is a
+        // property name, not a reference).
+        if is_property_access_name(node) {
+            return;
+        }
+
+        if self.resolve_identifier(node).is_some() {
+            return;
+        }
+
+        // Emit TS2304 "Cannot find name '{0}'."
+        let file = self.current_file.clone();
+        let diagnostic = crate::ast::Diagnostic::new(
+            file,
+            node.loc,
+            CANNOT_FIND_NAME_0,
+            vec![name.to_string()],
+        );
+        self.diagnostics.add(diagnostic);
+    }
+
+    /// Resolve an identifier reference by walking the parent chain and
+    /// checking each container's locals (and the file symbol's members at the
+    /// top level).
+    ///
+    /// Returns the resolved symbol, or `None` if not found.
+    ///
+    /// Go: `Checker.resolveName` (reduced form — does not yet handle globals,
+    /// namespaces, or alias chasing).
+    pub fn resolve_identifier(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+        let name = match &node.data {
+            crate::ast::NodeData::Identifier(data) => data.text.as_str(),
+            _ => return None,
+        };
+        let symbol_map = self.program.symbol_map();
+
+        // Walk up the parent chain, checking locals at each container.
+        let mut current = node.parent.clone();
+        while let Some(parent) = current {
+            // Check if this parent is a container with locals.
+            if let Some(locals) = symbol_map.locals_of(&parent) {
+                if let Some(sym) = locals.get(name) {
+                    return Some(Arc::clone(sym));
+                }
+            }
+            // At the source file, also check the file symbol's members
+            // (top-level declarations land there).
+            if parent.kind == SyntaxKind::SourceFile {
+                if let Some(file_sym) = symbol_map.symbol_of(&parent) {
+                    if let Some(sym) = file_sym.members.get(name) {
+                        return Some(Arc::clone(sym));
+                    }
+                    // Also check the file's locals (block-scoped top-level
+                    // declarations may be there).
+                    if let Some(locals) = symbol_map.locals_of(&parent) {
+                        if let Some(sym) = locals.get(name) {
+                            return Some(Arc::clone(sym));
+                        }
+                    }
+                }
+                break;
+            }
+            current = parent.parent.clone();
+        }
+
+        // TODO: check globals (lib.d.ts symbols) once they are populated.
+        None
+    }
+}
+
+/// Whether a syntax kind is an expression-position kind.
+fn is_expression_position_kind(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
+        SyntaxKind::Identifier
+            | SyntaxKind::NumericLiteral
+            | SyntaxKind::StringLiteral
+            | SyntaxKind::BigIntLiteral
+            | SyntaxKind::TrueKeyword
+            | SyntaxKind::FalseKeyword
+            | SyntaxKind::NullKeyword
+            | SyntaxKind::ThisKeyword
+            | SyntaxKind::SuperKeyword
+            | SyntaxKind::RegularExpressionLiteral
+            | SyntaxKind::NoSubstitutionTemplateLiteral
+            | SyntaxKind::TemplateExpression
+            | SyntaxKind::BinaryExpression
+            | SyntaxKind::PrefixUnaryExpression
+            | SyntaxKind::PostfixUnaryExpression
+            | SyntaxKind::ParenthesizedExpression
+            | SyntaxKind::CallExpression
+            | SyntaxKind::NewExpression
+            | SyntaxKind::PropertyAccessExpression
+            | SyntaxKind::ElementAccessExpression
+            | SyntaxKind::ConditionalExpression
+            | SyntaxKind::ArrayLiteralExpression
+            | SyntaxKind::ObjectLiteralExpression
+            | SyntaxKind::ArrowFunction
+            | SyntaxKind::FunctionExpression
+            | SyntaxKind::AwaitExpression
+            | SyntaxKind::YieldExpression
+            | SyntaxKind::SpreadElement
+            | SyntaxKind::AsExpression
+            | SyntaxKind::NonNullExpression
+            | SyntaxKind::SatisfiesExpression
+            | SyntaxKind::TypeOfExpression
+            | SyntaxKind::DeleteExpression
+            | SyntaxKind::VoidExpression
+            | SyntaxKind::TaggedTemplateExpression
+            | SyntaxKind::JsxElement
+            | SyntaxKind::JsxSelfClosingElement
+            | SyntaxKind::JsxFragment
+            | SyntaxKind::ClassExpression
+            | SyntaxKind::OmittedExpression
+    )
+}
+
+/// Whether a syntax kind is a statement kind.
+fn is_statement_kind(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
+        SyntaxKind::ExpressionStatement
+            | SyntaxKind::VariableStatement
+            | SyntaxKind::IfStatement
+            | SyntaxKind::WhileStatement
+            | SyntaxKind::DoStatement
+            | SyntaxKind::ForStatement
+            | SyntaxKind::ForInStatement
+            | SyntaxKind::ForOfStatement
+            | SyntaxKind::ReturnStatement
+            | SyntaxKind::Block
+            | SyntaxKind::ThrowStatement
+            | SyntaxKind::SwitchStatement
+            | SyntaxKind::BreakStatement
+            | SyntaxKind::ContinueStatement
+            | SyntaxKind::EmptyStatement
+            | SyntaxKind::TryStatement
+            | SyntaxKind::DebuggerStatement
+            | SyntaxKind::LabeledStatement
+            | SyntaxKind::WithStatement
+            | SyntaxKind::VariableDeclaration
+            | SyntaxKind::FunctionDeclaration
+            | SyntaxKind::ClassDeclaration
+            | SyntaxKind::InterfaceDeclaration
+            | SyntaxKind::TypeAliasDeclaration
+            | SyntaxKind::EnumDeclaration
+            | SyntaxKind::ImportDeclaration
+            | SyntaxKind::ImportEqualsDeclaration
+            | SyntaxKind::ExportDeclaration
+            | SyntaxKind::ExportAssignment
+            | SyntaxKind::NamespaceExportDeclaration
+            | SyntaxKind::ModuleDeclaration
+    )
+}
+
+/// Whether an identifier node is the *name* of a declaration rather than a
+/// reference. We detect this by inspecting the parent node.
+fn is_declaration_name(node: &Arc<Node>) -> bool {
+    let Some(parent) = node.parent.as_ref() else {
+        return false;
+    };
+    let parent_kind = parent.kind;
+    // For declaration nodes whose `name` field is an identifier, the
+    // identifier is a declaration name, not a reference.
+    let name_field = crate::ast::node_data_generated::node_name(parent);
+    if let Some(name) = name_field {
+        if std::ptr::eq(name.as_ref() as *const Node, node.as_ref() as *const Node) {
+            return matches!(
+                parent_kind,
+                SyntaxKind::VariableDeclaration
+                    | SyntaxKind::FunctionDeclaration
+                    | SyntaxKind::ClassDeclaration
+                    | SyntaxKind::InterfaceDeclaration
+                    | SyntaxKind::TypeAliasDeclaration
+                    | SyntaxKind::EnumDeclaration
+                    | SyntaxKind::EnumMember
+                    | SyntaxKind::ModuleDeclaration
+                    | SyntaxKind::ImportSpecifier
+                    | SyntaxKind::ImportClause
+                    | SyntaxKind::ImportEqualsDeclaration
+                    | SyntaxKind::ExportSpecifier
+                    | SyntaxKind::NamespaceImport
+                    | SyntaxKind::Parameter
+                    | SyntaxKind::BindingElement
+                    | SyntaxKind::PropertyDeclaration
+                    | SyntaxKind::PropertySignature
+                    | SyntaxKind::MethodDeclaration
+                    | SyntaxKind::MethodSignature
+                    | SyntaxKind::GetAccessor
+                    | SyntaxKind::SetAccessor
+                    | SyntaxKind::PropertyAssignment
+                    | SyntaxKind::ShorthandPropertyAssignment
+                    | SyntaxKind::NamespaceExportDeclaration
+                    | SyntaxKind::NamespaceExport
+                    | SyntaxKind::LabeledStatement
+            );
+        }
+    }
+    false
+}
+
+/// Whether an identifier node is the property name on the right of a property
+/// access (`x.foo` — `foo` is the name, not a reference).
+fn is_property_access_name(node: &Arc<Node>) -> bool {
+    let Some(parent) = node.parent.as_ref() else {
+        return false;
+    };
+    if parent.kind != SyntaxKind::PropertyAccessExpression {
+        return false;
+    }
+    let Some(name_field) = crate::ast::node_data_generated::node_name(parent) else {
+        return false;
+    };
+    std::ptr::eq(name_field.as_ref() as *const Node, node.as_ref() as *const Node)
 }
 
 impl std::fmt::Debug for Checker {

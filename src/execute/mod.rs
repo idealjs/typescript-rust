@@ -19,11 +19,13 @@
 //!             └─ return ExitStatus
 //! ```
 
+use std::collections::HashSet;
 use std::io::{IsTerminal, Write};
 use std::sync::Arc;
 use std::time::Instant;
 
 use crate::bundled::{self, BundledFS};
+use crate::ast::diagnostic::Diagnostic;
 use crate::compiler::{CompilerHost, CompilerHostImpl, Program, ProgramOptions};
 use crate::core::compiler_options::CompilerOptions;
 use crate::core::tristate::Tristate;
@@ -204,48 +206,114 @@ fn tsc_build_compilation(
     let projects = command_line.resolved_project_paths();
 
     let mut status = ExitStatus::Success;
+    let mut seen_projects = HashSet::new();
     for project in projects {
-        let config_file_name = if sys.fs().directory_exists(&project) {
-            let config = tspath::combine_paths(&project, &["tsconfig.json"]);
-            if !sys.fs().file_exists(&config) {
-                let mut writer = sys.writer();
-                let _ = writeln!(
-                    writer,
-                    "error TS5057: Cannot find a tsconfig.json file at the specified directory: '{config}'."
-                );
-                status = status.max(ExitStatus::DiagnosticsPresent_OutputsSkipped);
-                continue;
-            }
-            config
-        } else if sys.fs().file_exists(&project) {
-            project
-        } else {
-            let mut writer = sys.writer();
-            let _ = writeln!(writer, "error TS5083: Cannot read file '{project}'.");
-            status = status.max(ExitStatus::DiagnosticsPresent_OutputsSkipped);
-            continue;
-        };
-
-        let config = get_parsed_command_line_of_config_file(
-            &config_file_name,
+        let result = build_project(
+            sys,
+            &project,
             &command_line.compiler_options,
-            sys.current_directory(),
-            sys.fs().as_ref(),
+            pretty,
+            &mut seen_projects,
         );
-        if !config.errors.is_empty() {
-            let mut writer = sys.writer();
-            for e in &config.errors {
-                let _ = writeln!(writer, "{}", format_diagnostic(e, pretty));
-            }
-            status = status.max(ExitStatus::DiagnosticsPresent_OutputsSkipped);
-            continue;
-        }
+        status = status.max(result.status);
+    }
 
+    CommandLineResult { status }
+}
+
+fn build_project(
+    sys: &dyn System,
+    project: &str,
+    compiler_options: &CompilerOptions,
+    pretty: bool,
+    seen_projects: &mut HashSet<String>,
+) -> CommandLineResult {
+    let config_file_name = match resolve_project_config(sys, project) {
+        Ok(config) => config,
+        Err(message) => {
+            let mut writer = sys.writer();
+            let _ = writeln!(writer, "{message}");
+            return CommandLineResult {
+                status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
+            };
+        }
+    };
+
+    let normalized_config = tspath::normalize_path(&config_file_name);
+    if !seen_projects.insert(normalized_config.clone()) {
+        return CommandLineResult {
+            status: ExitStatus::Success,
+        };
+    }
+
+    let config = get_parsed_command_line_of_config_file(
+        &normalized_config,
+        compiler_options,
+        sys.current_directory(),
+        sys.fs().as_ref(),
+    );
+    if !config.errors.is_empty() {
+        let mut writer = sys.writer();
+        for e in &config.errors {
+            let _ = writeln!(writer, "{}", format_diagnostic(e, pretty));
+        }
+        return CommandLineResult {
+            status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
+        };
+    }
+
+    let mut status = ExitStatus::Success;
+    for reference in resolve_project_references(&config) {
+        let result = build_project(sys, &reference, compiler_options, pretty, seen_projects);
+        status = status.max(result.status);
+    }
+
+    if !config.file_names.is_empty() {
         let result = perform_compilation(sys, config, pretty);
         status = status.max(result.status);
     }
 
     CommandLineResult { status }
+}
+
+fn resolve_project_config(sys: &dyn System, project: &str) -> Result<String, String> {
+    if sys.fs().directory_exists(project) {
+        let config = tspath::combine_paths(project, &["tsconfig.json"]);
+        if !sys.fs().file_exists(&config) {
+            return Err(format!(
+                "error TS5057: Cannot find a tsconfig.json file at the specified directory: '{config}'."
+            ));
+        }
+        Ok(config)
+    } else if sys.fs().file_exists(project) {
+        Ok(project.to_string())
+    } else {
+        Err(format!("error TS5083: Cannot read file '{project}'."))
+    }
+}
+
+fn resolve_project_references(config: &ParsedCommandLine) -> Vec<String> {
+    let config_dir = tspath::get_directory_path(&config.config_file_name);
+    config
+        .references
+        .iter()
+        .filter_map(|reference| {
+            let path = reference.as_object()?.get("path")?.as_str()?;
+            Some(resolve_config_file_name_of_project_reference(
+                &config_dir,
+                path,
+            ))
+        })
+        .collect()
+}
+
+fn resolve_config_file_name_of_project_reference(config_dir: &str, path: &str) -> String {
+    let resolved = tspath::get_normalized_absolute_path(path, config_dir);
+    if tspath::file_extension_is(&resolved, ".json") {
+        resolved
+    } else {
+        tspath::combine_paths(&resolved, &["tsconfig.json"])
+    }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -267,6 +335,11 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
     }
 
     let options = &command_line.compiler_options;
+
+    // --init
+    if options.init.is_true() {
+        return write_config_file(sys, options);
+    }
 
     // --version
     if options.version.is_true() {
@@ -703,6 +776,15 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
             ),
         );
     }
+    if !config.references.is_empty() {
+        top.insert(
+            "references".to_string(),
+            Value::Array(config.references.clone()),
+        );
+    }
+    if config.compile_on_save == Some(true) {
+        top.insert("compileOnSave".to_string(), Value::Bool(true));
+    }
 
     let json = Value::Object(top);
     let mut writer = sys.writer();
@@ -725,14 +807,28 @@ fn perform_compilation(
         sys.default_library_path().to_string(),
     ));
 
-    let program = Program::new(ProgramOptions {
+    let program = Arc::new(Program::new(ProgramOptions {
         config,
         host: Arc::clone(&host),
-    });
+    }));
 
     let diags = program.get_diagnostics_to_report();
     let mut writer = sys.writer();
     let error_count = report_diagnostics(&mut writer, &diags, pretty).unwrap_or(0);
+
+    // Run the type checker and merge semantic diagnostics.
+    let semantic_diags: Vec<Arc<Diagnostic>> = program
+        .get_semantic_diagnostics()
+        .into_iter()
+        .map(Arc::new)
+        .collect();
+    let semantic_error_count = if !semantic_diags.is_empty() {
+        let mut writer = sys.writer();
+        report_diagnostics(&mut writer, &semantic_diags, pretty).unwrap_or(0)
+    } else {
+        0
+    };
+    let error_count = error_count + semantic_error_count;
 
     let options = program.options();
 
@@ -900,6 +996,77 @@ fn print_help(sys: &dyn System) {
     );
 }
 
+fn write_config_file(sys: &dyn System, options: &CompilerOptions) -> CommandLineResult {
+    let config_file_name = tspath::combine_paths(sys.current_directory(), &["tsconfig.json"]);
+    if sys.fs().file_exists(&config_file_name) {
+        let mut writer = sys.writer();
+        let _ = writeln!(
+            writer,
+            "error TS5054: A 'tsconfig.json' file is already defined at: '{config_file_name}'."
+        );
+        return CommandLineResult {
+            status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
+        };
+    }
+
+    let config_text = generate_tsconfig(options);
+    if let Err(err) = sys.fs().write_file(&config_file_name, &config_text) {
+        let mut writer = sys.writer();
+        let _ = writeln!(
+            writer,
+            "error TS5033: Could not write file '{config_file_name}': {err}."
+        );
+        return CommandLineResult {
+            status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
+        };
+    }
+
+    let mut writer = sys.writer();
+    let _ = writeln!(writer);
+    let _ = writeln!(writer, "Created a new tsconfig.json");
+    let _ = writeln!(writer, "You can learn more at https://aka.ms/tsconfig");
+    CommandLineResult {
+        status: ExitStatus::Success,
+    }
+}
+
+fn generate_tsconfig(options: &CompilerOptions) -> String {
+    let target = crate::tsoptions::script_target_name(options.target).unwrap_or("esnext");
+    let module = crate::tsoptions::module_kind_name(options.module).unwrap_or("nodenext");
+    let jsx = crate::tsoptions::jsx_emit_name(options.jsx).unwrap_or("react-jsx");
+    let module_detection =
+        crate::tsoptions::module_detection_name(options.module_detection).unwrap_or("force");
+
+    format!(
+        concat!(
+            "{{\n",
+            "  // Visit https://aka.ms/tsconfig to read more about this file\n",
+            "  \"compilerOptions\": {{\n",
+            "    \"module\": \"{module}\",\n",
+            "    \"target\": \"{target}\",\n",
+            "    \"types\": [],\n",
+            "    \"sourceMap\": true,\n",
+            "    \"declaration\": true,\n",
+            "    \"declarationMap\": true,\n",
+            "    \"noUncheckedIndexedAccess\": true,\n",
+            "    \"exactOptionalPropertyTypes\": true,\n",
+            "    \"strict\": true,\n",
+            "    \"jsx\": \"{jsx}\",\n",
+            "    \"verbatimModuleSyntax\": true,\n",
+            "    \"isolatedModules\": true,\n",
+            "    \"noUncheckedSideEffectImports\": true,\n",
+            "    \"moduleDetection\": \"{module_detection}\",\n",
+            "    \"skipLibCheck\": true\n",
+            "  }}\n",
+            "}}\n"
+        ),
+        module = module,
+        target = target,
+        jsx = jsx,
+        module_detection = module_detection
+    )
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Tests
 // ────────────────────────────────────────────────────────────────────────────
@@ -994,6 +1161,32 @@ mod tests {
     }
 
     #[test]
+    fn init_flag_writes_tsconfig() {
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/proj");
+        let sys = TestSystem::new(Arc::clone(&fs), "/proj");
+        let args = vec!["--init".to_string()];
+        let result = command_line(&sys, &args);
+        assert_eq!(result.status, ExitStatus::Success);
+        let config = fs.read_file("/proj/tsconfig.json").unwrap();
+        assert!(config.contains("\"compilerOptions\""));
+        assert!(config.contains("\"strict\": true"));
+        assert!(sys.output_string().contains("Created a new tsconfig.json"));
+    }
+
+    #[test]
+    fn init_flag_errors_when_tsconfig_exists() {
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/proj");
+        fs.insert_file("/proj/tsconfig.json", "{}");
+        let sys = TestSystem::new(fs, "/proj");
+        let args = vec!["--init".to_string()];
+        let result = command_line(&sys, &args);
+        assert_eq!(result.status, ExitStatus::DiagnosticsPresent_OutputsSkipped);
+        assert!(sys.output_string().contains("already defined"));
+    }
+
+    #[test]
     fn no_config_no_files_shows_help_and_errors() {
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
@@ -1041,10 +1234,11 @@ mod tests {
 
         let result = command_line(&sys, &args);
 
-        // Scanner-level invalid-character diagnostics are not wired into the
-        // command-line parser yet; this smoke test guards the packaged CLI path
-        // against the UTF-8 slicing panic reported for `·`.
-        assert_eq!(result.status, ExitStatus::Success);
+        // The `·` (U+00B7) is an invalid character. Scanner errors are now
+        // wired into the parser diagnostics pipeline, so the CLI should report
+        // diagnostics present. This test primarily guards against the UTF-8
+        // slicing panic that `·` originally triggered.
+        assert_eq!(result.status, ExitStatus::DiagnosticsPresent_OutputsSkipped);
     }
 
     #[test]
@@ -1259,6 +1453,32 @@ mod tests {
         let js = sys.fs().read_file("/proj/dist/i.js").unwrap();
         assert!(js.contains("let value = 1;"));
         assert!(!js.contains(": number"));
+    }
+
+    #[test]
+    fn build_mode_builds_referenced_solution_project() {
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/src");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{"files":[],"references":[{"path":"./tsconfig.app.json"}]}"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.app.json",
+            r#"{"compilerOptions":{"noLib":true,"outDir":"/proj/dist"},"include":["src"]}"#,
+        );
+        fs.insert_file("/proj/src/app.ts", "export const app: number = 1;");
+        let sys = TestSystem::new(fs, "/proj");
+        let args = vec!["-b".to_string()];
+        let result = command_line(&sys, &args);
+        assert_eq!(
+            result.status,
+            ExitStatus::Success,
+            "output:\n{}",
+            sys.output_string()
+        );
+        assert!(sys.fs().file_exists("/proj/dist/app.js"));
     }
 
     // ───────────────────────────────────────────────────────────────────────
@@ -1865,8 +2085,8 @@ mod tests {
         ];
         let result = command_line(&sys, &args);
         assert_eq!(result.status, ExitStatus::Success);
-        // compileOnSave is not yet serialized in the simplified showConfig,
-        // but the command should still succeed.
+        let out = sys.output_string();
+        assert!(out.contains("\"compileOnSave\": true"), "output: {out}");
     }
 
     // ───────────────────────────────────────────────────────────────────────
@@ -1895,6 +2115,8 @@ mod tests {
         assert_eq!(result.status, ExitStatus::Success);
         let out = sys.output_string();
         assert!(out.contains("\"composite\": true"), "output: {out}");
+        assert!(out.contains("\"references\""), "output: {out}");
+        assert!(out.contains("\"path\": \"./packages/a\""), "output: {out}");
     }
 
     // ───────────────────────────────────────────────────────────────────────

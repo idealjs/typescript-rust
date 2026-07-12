@@ -687,6 +687,8 @@ pub struct ParsedCommandLine {
     pub has_include_spec: bool,
     pub has_exclude_spec: bool,
     pub has_files_spec: bool,
+    pub references: Vec<crate::json::Value>,
+    pub compile_on_save: Option<bool>,
     pub watch: bool,
 }
 
@@ -779,6 +781,8 @@ pub fn parse_command_line(
         has_include_spec: false,
         has_exclude_spec: false,
         has_files_spec: false,
+        references: Vec::new(),
+        compile_on_save: None,
         watch,
     }
 }
@@ -1497,6 +1501,14 @@ pub fn get_parsed_command_line_of_config_file(
             result.has_files_spec = parent.has_files_spec;
             result.errors.extend(parent.errors);
         }
+    }
+
+    if let Some(value) = root_obj.get("compileOnSave").and_then(|v| v.as_bool()) {
+        result.compile_on_save = Some(value);
+    }
+
+    if let Some(references) = root_obj.get("references").and_then(|v| v.as_array()) {
+        result.references = references.clone();
     }
 
     // `files`

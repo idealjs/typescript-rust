@@ -200,6 +200,8 @@ pub struct SourceFile {
     pub line_map: LineMap,
     pub language_variant: LanguageVariant,
     pub script_kind: ScriptKind,
+    /// `@ts-expect-error` / `@ts-ignore` directives collected by the scanner.
+    pub comment_directives: Vec<crate::scanner::CommentDirective>,
 }
 
 impl SourceFile {
@@ -210,19 +212,68 @@ impl SourceFile {
 }
 
 /// A mapping from line number to byte offset in the source text.
+///
+/// Mirrors Go's `ComputeECMALineStarts`, handling ECMAScript line
+/// terminators: LF (`\n`), CR (`\r`), CRLF (`\r\n`), LS (`\u2028`),
+/// and PS (`\u2029`).
 #[derive(Debug, Default)]
 pub struct LineMap {
     pub line_starts: Vec<u32>,
 }
 
+/// Check if a character is an ECMAScript line terminator.
+/// ES5 §7.3: LF, CR, LS (\u2028), PS (\u2029).
+fn is_line_break(ch: char) -> bool {
+    matches!(ch, '\n' | '\r' | '\u{2028}' | '\u{2029}')
+}
+
+/// Count the number of UTF-16 code units needed to represent a string.
+/// Mirrors Go's `core.UTF16Len`. BMP characters → 1 unit, astral → 2 units.
+pub fn utf16_len(s: &str) -> usize {
+    let mut n = 0usize;
+    for c in s.chars() {
+        n += c.len_utf16();
+    }
+    n
+}
+
 impl LineMap {
     pub fn from_text(text: &str) -> Self {
-        let mut line_starts = vec![0u32];
-        for (i, c) in text.char_indices() {
-            if c == '\n' {
-                line_starts.push((i + 1) as u32);
+        let mut line_starts = Vec::with_capacity(text.matches('\n').count() + 1);
+        line_starts.push(0u32);
+
+        let bytes = text.as_bytes();
+        let text_len = bytes.len();
+        let mut pos = 0usize;
+
+        while pos < text_len {
+            let b = bytes[pos];
+            if b < 0x80 {
+                // ASCII fast path
+                pos += 1;
+                if b == b'\r' {
+                    if pos < text_len && bytes[pos] == b'\n' {
+                        pos += 1;
+                    }
+                    line_starts.push(pos as u32);
+                } else if b == b'\n' {
+                    line_starts.push(pos as u32);
+                }
+            } else {
+                // Non-ASCII: decode UTF-8 rune
+                let s = &text[pos..];
+                match s.chars().next() {
+                    Some(ch) => {
+                        pos += ch.len_utf8();
+                        if is_line_break(ch) {
+                            line_starts.push(pos as u32);
+                        }
+                    }
+                    None => break, // shouldn't happen
+                }
             }
         }
+
         Self { line_starts }
     }
 
@@ -234,11 +285,17 @@ impl LineMap {
         }
     }
 
-    /// Get the column number (0-based) for a byte offset.
-    pub fn column_at(&self, offset: usize) -> usize {
+    /// Get the byte offset of the start of the line containing `offset`.
+    pub fn line_start(&self, offset: usize) -> usize {
         let line = self.line_at(offset);
-        let line_start = self.line_starts[line] as usize;
-        offset - line_start
+        self.line_starts[line] as usize
+    }
+
+    /// Get the UTF-16 column number (0-based) for a byte offset.
+    /// Mirrors Go's `GetECMALineAndUTF16CharacterOfPosition` character computation.
+    pub fn utf16_column_at(&self, text: &str, offset: usize) -> usize {
+        let line_start = self.line_start(offset);
+        utf16_len(&text[line_start..offset])
     }
 }
 
@@ -258,8 +315,11 @@ pub enum LanguageVariant {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ScriptKind {
     #[default]
-    Ts,
+    Unknown,
     Js,
+    Jsx,
+    Ts,
+    Tsx,
     Json,
     External,
     Deferred,
@@ -298,5 +358,76 @@ mod tests {
         assert_eq!(lm.line_at(4), 1);
         assert_eq!(lm.line_at(7), 1);
         assert_eq!(lm.line_at(8), 2);
+    }
+
+    #[test]
+    fn line_map_crlf() {
+        // \r\n should produce one line start, not two.
+        let lm = LineMap::from_text("abc\r\ndef\r\nghi");
+        assert_eq!(lm.line_starts, vec![0, 5, 10]);
+        assert_eq!(lm.line_at(0), 0);
+        assert_eq!(lm.line_at(3), 0);
+        assert_eq!(lm.line_at(5), 1);
+        assert_eq!(lm.line_at(10), 2);
+    }
+
+    #[test]
+    fn line_map_cr_only() {
+        // Bare \r is also a line terminator.
+        let lm = LineMap::from_text("abc\rdef");
+        assert_eq!(lm.line_starts, vec![0, 4]);
+        assert_eq!(lm.line_at(0), 0);
+        assert_eq!(lm.line_at(4), 1);
+    }
+
+    #[test]
+    fn line_map_unicode_line_separators() {
+        // \u2028 (LS) and \u2029 (PS) are ECMAScript line terminators.
+        let lm = LineMap::from_text("ab\u{2028}cd\u{2029}ef");
+        assert_eq!(lm.line_starts.len(), 3);
+        assert_eq!(lm.line_at(0), 0);
+        // \u2028 is 3 bytes in UTF-8, so "ab\u{2028}" is 5 bytes
+        assert_eq!(lm.line_at(5), 1);
+        // \u2029 is also 3 bytes, so "ab\u{2028}cd\u{2029}" is 10 bytes
+        assert_eq!(lm.line_at(10), 2);
+    }
+
+    #[test]
+    fn line_map_utf16_column_ascii() {
+        let text = "abc\ndef";
+        let lm = LineMap::from_text(text);
+        // On line 1, position 5 ('e') should be column 1
+        assert_eq!(lm.utf16_column_at(text, 5), 1);
+        // On line 1, position 6 ('f') should be column 2
+        assert_eq!(lm.utf16_column_at(text, 6), 2);
+    }
+
+    #[test]
+    fn line_map_utf16_column_non_ascii() {
+        // 'é' is 2 bytes in UTF-8 but 1 UTF-16 code unit (BMP).
+        let text = "café\ndef";
+        let lm = LineMap::from_text(text);
+        // c=byte0, a=byte1, f=byte2, é=bytes3-4, \n=byte5
+        // 'é' at byte offset 3 → UTF-16 column 3 (c=0, a=1, f=2, é=3)
+        assert_eq!(lm.utf16_column_at(text, 3), 3);
+        // Position after 'é' at byte offset 5 → UTF-16 column 4
+        assert_eq!(lm.utf16_column_at(text, 5), 4);
+    }
+
+    #[test]
+    fn line_map_utf16_column_emoji() {
+        // '🦀' (crab emoji) is 4 bytes in UTF-8 but 2 UTF-16 code units (surrogate pair).
+        let text = "x🦀y";
+        let lm = LineMap::from_text(text);
+        // 'y' is at byte offset 5, UTF-16 column 3 (x=0, 🦀=1-2, y=3)
+        assert_eq!(lm.utf16_column_at(text, 5), 3);
+    }
+
+    #[test]
+    fn utf16_len_basic() {
+        assert_eq!(utf16_len("abc"), 3);
+        assert_eq!(utf16_len("café"), 4); // é is BMP
+        assert_eq!(utf16_len("🦀"), 2); // emoji is astral → 2 UTF-16 units
+        assert_eq!(utf16_len("x🦀y"), 4); // 1 + 2 + 1
     }
 }

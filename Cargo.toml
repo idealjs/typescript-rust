@@ -34,6 +34,7 @@ anyhow = "1"
 thiserror = "1"
 # Unicode handling
 unicode-width = "0.2"
+unicode-ident = "1"
 # Hashing (matches Go's xxh3 usage)
 xxhash-rust = { version = "0.8", features = ["xxh3"] }
 # Regex (used in scanner)

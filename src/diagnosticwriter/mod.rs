@@ -9,16 +9,13 @@ use std::io::Write;
 use std::sync::Arc;
 
 use crate::ast::diagnostic::Diagnostic;
-use crate::ast::{LineMap, SourceFile};
+use crate::ast::{utf16_len, LineMap, SourceFile};
 use crate::diagnostics::Category;
 
-/// Convert a byte offset into a 0-based (line, column) pair within a source
-/// file, using its line map.
-///
-/// The column is a byte offset from the start of the line (the Go implementation
-/// uses UTF-16 code units; this approximation is sufficient for the compact
-/// reporter and is refined later).
-pub fn line_and_character(line_map: &LineMap, offset: usize) -> (usize, usize) {
+/// Convert a byte offset into a 0-based (line, character) pair within a source
+/// file, using its line map. The character is a UTF-16 code unit offset from
+/// the start of the line, matching Go's `GetECMALineAndUTF16CharacterOfPosition`.
+pub fn line_and_character(line_map: &LineMap, text: &str, offset: usize) -> (usize, usize) {
     let starts = &line_map.line_starts;
     if starts.is_empty() {
         return (0, 0);
@@ -35,7 +32,8 @@ pub fn line_and_character(line_map: &LineMap, offset: usize) -> (usize, usize) {
         }
     }
     let line = lo;
-    let col = offset.saturating_sub(starts[line] as usize);
+    let line_start = starts[line] as usize;
+    let col = utf16_len(&text[line_start..offset]);
     (line, col)
 }
 
@@ -45,7 +43,7 @@ pub fn line_and_character(line_map: &LineMap, offset: usize) -> (usize, usize) {
 pub fn format_diagnostic_compact(diag: &Diagnostic) -> String {
     let mut out = String::new();
     if let Some(file) = &diag.file {
-        let (line, col) = line_and_character(&file.line_map, diag.loc.pos());
+        let (line, col) = line_and_character(&file.line_map, &file.text, diag.loc.pos());
         out.push_str(&format!("{}({},{}): ", file.file_name, line + 1, col + 1));
     }
     out.push_str(&format!("{} TS{}: ", diag.category.name(), diag.code));
@@ -59,7 +57,7 @@ pub fn format_diagnostic_compact(diag: &Diagnostic) -> String {
 pub fn format_diagnostic_pretty(diag: &Diagnostic) -> String {
     let mut out = String::new();
     if let Some(file) = &diag.file {
-        let (line, col) = line_and_character(&file.line_map, diag.loc.pos());
+        let (line, col) = line_and_character(&file.line_map, &file.text, diag.loc.pos());
         out.push_str(&format!("{}:{}:{} - ", file.file_name, line + 1, col + 1));
     }
     out.push_str(&format!("{} TS{}: ", diag.category.name(), diag.code));
@@ -90,7 +88,7 @@ pub fn message_text(diag: &Diagnostic) -> String {
 /// Render the source line containing `pos` with a `~~~` squiggle of `len`.
 fn code_snippet(file: &SourceFile, pos: usize, len: usize) -> String {
     let text = &file.text;
-    let (line, col) = line_and_character(&file.line_map, pos);
+    let (line, col) = line_and_character(&file.line_map, text, pos);
     let line_start = file.line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     let line_end = text[line_start..]
         .find('\n')
@@ -171,13 +169,14 @@ mod tests {
             line_map,
             language_variant: crate::ast::LanguageVariant::Standard,
             script_kind: crate::ast::ScriptKind::Ts,
+            comment_directives: Vec::new(),
         })
     }
 
     #[test]
     fn line_and_character_basic() {
         let file = make_file("abc\ndef\nghi");
-        let (line, col) = line_and_character(&file.line_map, 5);
+        let (line, col) = line_and_character(&file.line_map, &file.text, 5);
         assert_eq!(line, 1);
         assert_eq!(col, 1);
     }
