@@ -800,63 +800,259 @@ impl Checker {
     }
 
     /// Get the contextual type for an initializer expression.
+    ///
+    /// In a variable, parameter or property declaration with a type annotation,
+    /// the contextual type of an initializer expression is the type of the
+    /// variable, parameter or property.
+    ///
+    /// Go: `getContextualTypeForInitializerExpression` (checker.go:29180)
     fn get_contextual_type_for_initializer_expression(
         &mut self,
-        _node: &Arc<crate::ast::Node>,
+        node: &Arc<crate::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
-        // TODO: implement
+        use crate::ast::NodeData;
+
+        let declaration = node.parent.as_ref()?;
+        // Check that node is indeed the initializer
+        let is_initializer = match &declaration.data {
+            NodeData::VariableDeclaration(data) => data.initializer.as_ref().map_or(false, |init| Arc::ptr_eq(init, node)),
+            NodeData::ParameterDeclaration(data) => data.initializer.as_ref().map_or(false, |init| Arc::ptr_eq(init, node)),
+            NodeData::PropertyDeclaration(data) => data.initializer.as_ref().map_or(false, |init| Arc::ptr_eq(init, node)),
+            NodeData::BindingElement(data) => data.initializer.as_ref().map_or(false, |init| Arc::ptr_eq(init, node)),
+            _ => false,
+        };
+        if !is_initializer {
+            return None;
+        }
+
+        // Get type from the declaration's type annotation if present
+        let type_node = match &declaration.data {
+            NodeData::VariableDeclaration(data) => data.type_node.as_ref(),
+            NodeData::ParameterDeclaration(data) => data.type_node.as_ref(),
+            NodeData::PropertyDeclaration(data) => data.type_node.as_ref(),
+            NodeData::PropertySignatureDeclaration(data) => Some(&data.type_node),
+            NodeData::BindingElement(_) => None,
+            _ => None,
+        };
+
+        if let Some(type_node) = type_node {
+            return Some(self.get_type_from_type_node(type_node));
+        }
+
+        // TODO: implement parameter contextual typing and binding patterns
         None
     }
 
     /// Get the contextual type for a return expression.
+    ///
+    /// Returns the return type annotation of the containing function, if any.
+    ///
+    /// Go: `getContextualTypeForReturnExpression` (checker.go:29378)
     fn get_contextual_type_for_return_expression(
         &mut self,
         _node: &Arc<crate::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
-        // TODO: implement
-        None
+        use crate::ast::NodeData;
+
+        // Walk up the parent chain to find the containing function
+        let mut current = _node.parent.as_ref()?.clone();
+        loop {
+            match current.kind {
+                SyntaxKind::FunctionDeclaration
+                | SyntaxKind::FunctionExpression
+                | SyntaxKind::ArrowFunction
+                | SyntaxKind::MethodDeclaration
+                | SyntaxKind::Constructor
+                | SyntaxKind::GetAccessor
+                | SyntaxKind::SetAccessor => {
+                    // Found containing function, check for return type annotation
+                    let type_node = match &current.data {
+                        NodeData::FunctionDeclaration(data) => data.type_node.clone(),
+                        NodeData::FunctionExpression(data) => data.type_node.clone(),
+                        NodeData::ArrowFunction(data) => data.type_node.clone(),
+                        NodeData::MethodDeclaration(data) => data.type_node.clone(),
+                        NodeData::ConstructorDeclaration(data) => data.type_node.clone(),
+                        NodeData::GetAccessorDeclaration(data) => data.type_node.clone(),
+                        NodeData::SetAccessorDeclaration(data) => data.type_node.clone(),
+                        _ => None,
+                    };
+                    if let Some(type_node) = type_node {
+                        return Some(self.get_type_from_type_node(&type_node));
+                    }
+                    return None;
+                }
+                SyntaxKind::SourceFile => return None,
+                _ => {
+                    current = current.parent.as_ref()?.clone();
+                }
+            }
+        }
     }
 
     /// Get the contextual type for a function argument.
+    ///
+    /// In a typed function call, an argument is contextually typed by the
+    /// type of the corresponding parameter.
+    ///
+    /// Go: `getContextualTypeForArgument` (checker.go:29519)
     fn get_contextual_type_for_argument(
         &mut self,
-        _call_node: &Arc<crate::ast::Node>,
-        _arg_node: &Arc<crate::ast::Node>,
+        call_node: &Arc<crate::ast::Node>,
+        arg_node: &Arc<crate::ast::Node>,
     ) -> Option<Arc<Type>> {
-        // TODO: implement
+        use crate::ast::NodeData;
+
+        // Get the arguments list
+        let args = match &call_node.data {
+            NodeData::CallExpression(data) => Some(&data.arguments),
+            NodeData::NewExpression(data) => data.arguments.as_ref(),
+            _ => None,
+        }?;
+
+        // Find the argument index
+        let arg_index = args.iter().position(|a| Arc::ptr_eq(a, arg_node))?;
+
+        // Get the expression type to find call signatures
+        let expression_type = match &call_node.data {
+            NodeData::CallExpression(data) => Some(self.get_type_of_node(&data.expression)),
+            NodeData::NewExpression(data) => Some(self.get_type_of_node(&data.expression)),
+            _ => None,
+        }?;
+
+        let signatures = self.get_signatures_of_type(&expression_type, SignatureKind::Call);
+        let signature = signatures.first()?;
+
+        // Get the parameter type at the argument index
+        if arg_index < signature.parameters.len() {
+            let param = &signature.parameters[arg_index];
+            return Some(self.get_type_of_symbol(param));
+        }
+
         None
     }
 
     /// Get the contextual type for a binary operand.
+    ///
+    /// In an assignment expression, the right operand is contextually typed
+    /// by the type of the left operand.
+    ///
+    /// Go: `getContextualTypeForBinaryOperand` (checker.go:29566)
     fn get_contextual_type_for_binary_operand(
         &mut self,
-        _node: &Arc<crate::ast::Node>,
+        node: &Arc<crate::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
-        // TODO: implement
-        None
+        use crate::ast::NodeData;
+
+        let parent = node.parent.as_ref()?;
+        let binary = match &parent.data {
+            NodeData::BinaryExpression(data) => data,
+            _ => return None,
+        };
+
+        // Only right operand gets contextual typing
+        if !Arc::ptr_eq(node, &binary.right) {
+            return None;
+        }
+
+        match binary.operator_token.kind {
+            SyntaxKind::EqualsToken
+            | SyntaxKind::AmpersandAmpersandEqualsToken
+            | SyntaxKind::BarBarEqualsToken
+            | SyntaxKind::QuestionQuestionEqualsToken => {
+                // Assignment: right operand is contextually typed by left operand
+                Some(self.get_type_of_node(&binary.left))
+            }
+            SyntaxKind::BarBarToken | SyntaxKind::QuestionQuestionToken => {
+                // || and ?? : right operand is contextually typed by left operand
+                Some(self.get_type_of_node(&binary.left))
+            }
+            SyntaxKind::AmpersandAmpersandToken | SyntaxKind::CommaToken => {
+                // && and comma: right operand is contextually typed by the parent expression
+                Some(self.get_type_of_node(&binary.left))
+            }
+            _ => None,
+        }
     }
 
     /// Get the contextual type for an object literal element.
+    ///
+    /// In an object literal contextually typed by a type T, the contextual
+    /// type of a property assignment is the type of the matching property
+    /// in T.
+    ///
+    /// Go: `getContextualTypeForObjectLiteralElement` (checker.go:29677)
     fn get_contextual_type_for_object_literal_element(
         &mut self,
-        _node: &Arc<crate::ast::Node>,
+        node: &Arc<crate::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
-        // TODO: implement
+        use crate::ast::NodeData;
+
+        // Get the parent object literal
+        let object_literal = node.parent.as_ref()?;
+
+        // Get the contextual type of the object literal
+        let contextual_type = self.get_contextual_type(object_literal, _context_flags)?;
+
+        // Get the property name from the element
+        let name = match &node.data {
+            NodeData::PropertyAssignment(data) => match &data.name.data {
+                NodeData::Identifier(id) => Some(id.text.clone()),
+                NodeData::StringLiteral(s) => Some(s.text.clone()),
+                _ => None,
+            },
+            NodeData::ShorthandPropertyAssignment(data) => match &data.name.data {
+                NodeData::Identifier(id) => Some(id.text.clone()),
+                _ => None,
+            },
+            _ => None,
+        }?;
+
+        // Look up the property in the contextual type's structured properties
+        if let Some(structured) = contextual_type.as_structured() {
+            for prop in &structured.properties {
+                if prop.name == name {
+                    return Some(self.get_type_of_symbol(prop));
+                }
+            }
+        }
+
         None
     }
 
     /// Get the contextual type for an array literal element.
+    ///
+    /// Returns the element type of the contextual type of the parent array
+    /// literal.
+    ///
+    /// Go: `getContextualTypeForElementExpression` (checker.go:29729)
     fn get_contextual_type_for_array_literal_element(
         &mut self,
         _node: &crate::ast::Node,
-        _parent: &crate::ast::Node,
+        parent: &Arc<crate::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
-        // TODO: implement
+        // Get the contextual type of the parent array literal
+        let contextual_type = self.get_contextual_type(parent, _context_flags)?;
+
+        // For an array/object type with type arguments, return the element type
+        let type_args = self.get_type_arguments(&contextual_type);
+        if !type_args.is_empty() {
+            return Some(Arc::clone(&type_args[0]));
+        }
+
+        // Try to get the element type from index info
+        if let Some(structured) = contextual_type.as_structured() {
+            for index_info in &structured.index_infos {
+                if let Some(ref value_type) = index_info.value_type {
+                    return Some(Arc::clone(value_type));
+                }
+            }
+        }
+
         None
     }
 
