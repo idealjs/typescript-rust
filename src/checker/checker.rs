@@ -276,6 +276,14 @@ pub struct Checker {
     /// Stack of container node IDs (functions, blocks, etc.) used for
     /// identifier resolution when parent pointers are not available.
     pub scope_stack: Vec<u64>,
+    /// Number of nested function scopes (not arrow functions) currently being checked.
+    /// Used to determine whether `arguments` is in scope.
+    pub function_scope_count: usize,
+    /// Number of nested arrow function scopes. Arrow functions do not have
+    /// their own `arguments` object.
+    pub arrow_function_scope_count: usize,
+    /// Whether globals have been populated from source file symbols.
+    pub globals_populated: bool,
 
     // Flow analysis
     pub flow_analysis_disabled: bool,
@@ -361,7 +369,10 @@ impl Checker {
 
             globals: SymbolTable::default(),
             undefined_symbol: None,
-            arguments_symbol: None,
+            arguments_symbol: Some(Arc::new(Symbol::new(
+                SymbolFlags::Property.union(SymbolFlags::Transient),
+                "arguments",
+            ))),
             require_symbol: None,
             unknown_symbol: None,
             global_this_symbol: None,
@@ -461,6 +472,9 @@ impl Checker {
             current_file_id: 0,
             current_file_symbol: None,
             scope_stack: Vec::new(),
+            function_scope_count: 0,
+            arrow_function_scope_count: 0,
+            globals_populated: false,
 
             flow_analysis_disabled: false,
             flow_invocation_count: 0,
@@ -470,6 +484,34 @@ impl Checker {
             tracer,
             mu: Mutex::new(()),
         }
+    }
+
+    /// Populate globals from source file symbols.
+    fn populate_globals(&mut self) {
+        for file in &self.files {
+            // Look up the source file's symbol from the symbol map
+            let symbol_map = self.program.symbol_map();
+            if let Some(file_sym) = symbol_map.symbol_of(&file.node) {
+                let before = self.globals.len();
+                // Merge the source file's members into globals
+                for (name, sym) in file_sym.members.iter() {
+                    self.globals.insert(name.clone(), Arc::clone(sym));
+                }
+                // Also merge the source file's locals
+                if let Some(locals) = symbol_map.locals_of(&file.node) {
+                    for (name, sym) in locals.iter() {
+                        self.globals.insert(name.clone(), Arc::clone(sym));
+                    }
+                }
+                let added = self.globals.len() - before;
+                eprintln!("populate_globals: file={} members={} added={}",
+                    file.file_name, file_sym.members.len(), added);
+            } else {
+                eprintln!("populate_globals: file={} no symbol found",
+                    file.file_name);
+            }
+        }
+        eprintln!("populate_globals: total globals={}", self.globals.len());
     }
 
     // ────────────────────────────────────────────────────────────────────────
@@ -1003,6 +1045,12 @@ impl Checker {
     /// Full type-checking logic (type inference, relation checking, flow
     /// narrowing, etc.) is added incrementally.
     pub fn check_source_file(&mut self, file: &Arc<SourceFile>) {
+        // Populate globals from source file symbols on first use.
+        if !self.globals_populated {
+            self.populate_globals();
+            self.globals_populated = true;
+        }
+
         let file_node = Arc::clone(&file.node);
         let file_id = file_node.id();
         let source_file_symbol = self.program.symbol_map().symbol_of(&file_node).cloned();
@@ -1320,13 +1368,13 @@ impl Checker {
             SyntaxKind::FunctionDeclaration => {
                 // Only check the function body; the name, parameters,
                 // type parameters, and return type are declarations/types.
-                self.push_scope(node);
+                self.push_function_scope(node);
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(body) = &data.body {
                         self.check_statement(body);
                     }
                 }
-                self.pop_scope();
+                self.pop_function_scope();
             }
             SyntaxKind::ClassDeclaration => {
                 // Check heritage clauses (e.g. `extends Foo`).
@@ -1453,12 +1501,12 @@ impl Checker {
                     _ => None,
                 };
                 if let Some(body) = body {
-                    self.push_scope(node);
+                    self.push_function_scope(node);
                     match body.kind {
                         SyntaxKind::Block => self.check_statement(&body),
                         _ => self.check_expression(&body),
                     }
-                    self.pop_scope();
+                    self.pop_function_scope();
                 }
             }
             SyntaxKind::PropertyDeclaration => {
@@ -1703,12 +1751,22 @@ impl Checker {
             _ => None,
         };
         if let Some(body) = body {
-            self.push_scope(node);
+            // Arrow functions do not have their own `arguments` object.
+            let is_arrow = matches!(node.data, crate::ast::NodeData::ArrowFunction(_));
+            if is_arrow {
+                self.push_arrow_function_scope(node);
+            } else {
+                self.push_function_scope(node);
+            }
             match body.kind {
                 SyntaxKind::Block => self.check_statement(&body),
                 _ => self.check_expression(&body),
             }
-            self.pop_scope();
+            if is_arrow {
+                self.pop_arrow_function_scope();
+            } else {
+                self.pop_function_scope();
+            }
         }
     }
 
@@ -1781,6 +1839,31 @@ impl Checker {
         self.scope_stack.push(node.id());
     }
 
+    /// Push a function-like scope and increment the function-like counter.
+    fn push_function_scope(&mut self, node: &Arc<Node>) {
+        self.function_scope_count += 1;
+        self.scope_stack.push(node.id());
+    }
+
+    /// Pop a function scope.
+    fn pop_function_scope(&mut self) {
+        self.function_scope_count -= 1;
+        self.scope_stack.pop();
+    }
+
+    /// Push an arrow function scope. Arrow functions do not have their own
+    /// `arguments` object.
+    fn push_arrow_function_scope(&mut self, node: &Arc<Node>) {
+        self.arrow_function_scope_count += 1;
+        self.scope_stack.push(node.id());
+    }
+
+    /// Pop an arrow function scope.
+    fn pop_arrow_function_scope(&mut self) {
+        self.arrow_function_scope_count -= 1;
+        self.scope_stack.pop();
+    }
+
     /// Pop the innermost scope from the scope stack.
     fn pop_scope(&mut self) {
         self.scope_stack.pop();
@@ -1806,6 +1889,8 @@ impl Checker {
     ///
     /// Only symbols whose flags intersect with `meaning` are considered.
     /// This mirrors the `meaning` parameter in Go's `NameResolver.Resolve`.
+    ///
+    /// Go: `NameResolver.Resolve` — scope stack walk + globals + special symbols.
     pub fn resolve_identifier_with_meaning(
         &self,
         node: &Arc<Node>,
@@ -1817,7 +1902,7 @@ impl Checker {
         };
         let symbol_map = self.program.symbol_map();
 
-        // Walk the scope stack from innermost to outermost.
+        // 1. Walk the scope stack from innermost to outermost.
         for &container_id in self.scope_stack.iter().rev() {
             // Check the container's locals (block-scoped variables).
             if let Some(locals) = symbol_map.locals.get(&container_id) {
@@ -1838,7 +1923,24 @@ impl Checker {
             }
         }
 
-        // TODO: check globals (lib.d.ts symbols) once they are populated.
+        // 2. Check for special built-in symbols.
+        // `arguments` is in scope inside function declarations, but not arrow functions.
+        if self.function_scope_count > 0
+            && name == "arguments"
+            && meaning.intersects(SymbolFlags::VARIABLE)
+        {
+            if let Some(ref sym) = self.arguments_symbol {
+                return Some(Arc::clone(sym));
+            }
+        }
+
+        // 3. Check globals (lib.d.ts symbols).
+        if let Some(sym) = self.globals.get(name) {
+            if sym.flags.intersects(meaning) {
+                return Some(Arc::clone(sym));
+            }
+        }
+
         None
     }
 }

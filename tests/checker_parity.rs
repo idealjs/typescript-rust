@@ -954,3 +954,48 @@ fn checker_jsdoc_enum_no_error() {
     );
     assert_no_diagnostics(&diags);
 }
+
+
+// ────────────────────────────────────────────────────────────────────────────
+// NameResolver: arguments symbol
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_arguments_in_function_no_error() {
+    // `arguments` is a built-in symbol inside function bodies.
+    let diags = check_source("function foo() { return arguments; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_arguments_outside_function_is_undefined() {
+    // `arguments` outside a function should be undefined.
+    let diags = check_source("let x = arguments;");
+    let count = diags.iter().filter(|d| d.code == 2304).count();
+    assert_eq!(count, 1, "Expected 1 TS2304 error, got {}", count);
+}
+
+#[test]
+fn checker_arguments_in_arrow_function() {
+    let diags = check_source("const foo = () => { return arguments; }");
+    let count = diags.iter().filter(|d| d.code == 2304).count();
+    assert_eq!(count, 1, "Expected 1 TS2304 error, got 0 - arrow functions have no arguments");
+}
+
+#[test]
+fn checker_arguments_in_method() {
+    let diags = check_source("class C { method() { return arguments; } }");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// NameResolver: global symbol resolution
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_global_symbol_with_lib() {
+    // With lib loaded, `Array` should be resolvable.
+    let diags = check_source_with_lib("let x = Array;", false);
+    let count = diags.iter().filter(|d| d.code == 2304).count();
+    assert_eq!(count, 0, "Expected 0 TS2304 errors (Array is a global), got {}", count);
+}

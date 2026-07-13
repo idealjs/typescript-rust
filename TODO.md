@@ -442,10 +442,13 @@ Rust 现状：
 - [x] 符号意义过滤：`resolve_identifier_with_meaning` 支持 SymbolFlags 过滤。
 - [x] For/ForIn/ForOf 循环作用域：push_scope/pop_scope 正确创建块级作用域。
 - [x] `resolveName` 入口供 checker 调用（`resolve_identifier` 及 `with_meaning` 变体）。
-- [ ] 迁移 `internal/binder/nameresolver.go` 完整逻辑到 `src/binder/nameresolver.rs`。
-- [ ] 特殊符号：`undefinedSymbol`、`argumentsSymbol`、`globalThisSymbol`。
-- [ ] 全局符号查找（lib.d.ts symbols）。
+- [ ] 迁移 `internal/binder/nameresolver.go` 完整逻辑到 `src/binder/nameresolver.rs`（剩余：箭头函数参数作用域、enum/namespace 成员查找、export default 别名、类型参数作用域限制、infer T 类型参数、装饰器位置调整、alias 符号解析）。
+- [x] 特殊符号：`argumentsSymbol`（支持函数体/方法内访问，箭头函数内不可访问）。
+- [ ] 特殊符号：`undefinedSymbol`、`globalThisSymbol`。
+- [x] 全局符号查找（lib.d.ts symbols）：`populate_globals` 从所有 source file 收集全局符号，`resolve_identifier_with_meaning` 在 scope 链和特殊符号之后查找 globals。
 - [ ] alias 符号解析（import alias、export alias）。
+
+2026-07-13: `argumentsSymbol` 实现完成（区分普通函数和箭头函数）。`populate_globals` 实现并接入 `check_source_file`，全局符号查找可用。测试：`checker_arguments_in_function_no_error`、`checker_arguments_outside_function_is_undefined`、`checker_arguments_in_arrow_function`、`checker_arguments_in_method`、`checker_global_symbol_with_lib` 通过。
 
 ### P3.3 Binder ReferenceResolver
 
