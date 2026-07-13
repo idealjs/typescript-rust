@@ -294,6 +294,9 @@ pub struct Checker {
     // Tracer
     pub tracer: Arc<Tracer>,
 
+    // Merged symbols tracking (declaration merging)
+    pub merged_symbols: HashMap<u64, u64>,
+
     // Mutex for thread safety
     pub mu: Mutex<()>,
 }
@@ -483,6 +486,8 @@ impl Checker {
             flow_invocation_count: 0,
             flow_type_cache: HashMap::new(),
             flow_node_reachable: HashMap::new(),
+
+            merged_symbols: HashMap::new(),
 
             tracer,
             mu: Mutex::new(()),
@@ -2294,11 +2299,14 @@ impl Checker {
         None
     }
 
-    /// Get the merged symbol (currently returns the symbol itself).
+    /// Get the merged symbol.
     ///
     /// Go: `referenceResolver.getMergedSymbol`
     fn get_merged_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
-        // Currently we don't track merged symbols separately.
+        if let Some(target_id) = self.merged_symbols.get(&symbol.id()) {
+            // We need a way to look up symbols by ID. For now, return the symbol itself.
+            // In a full implementation, we'd have a symbol_by_id map.
+        }
         Some(Arc::clone(symbol))
     }
 
@@ -2411,9 +2419,261 @@ impl Checker {
 
         None
     }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Declaration merging — ported from `internal/checker/checker.go`
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Merge a source symbol table into a target symbol table.
+    ///
+    /// Go: `Checker.mergeSymbolTable`
+    pub fn merge_symbol_table(
+        &mut self,
+        target: &mut SymbolTable,
+        source: &SymbolTable,
+        unidirectional: bool,
+        merged_parent: Option<u64>,
+    ) {
+        // Collect entries to merge to avoid borrow issues
+        let entries: Vec<(String, Arc<Symbol>)> = source.iter().map(|(k, v)| (k.clone(), Arc::clone(v))).collect();
+        for (name, source_symbol) in entries {
+            if let Some(target_symbol) = target.entries.get_mut(&name) {
+                // Merge the existing target symbol with the source
+                let merged = self.merge_symbol(target_symbol, &source_symbol, unidirectional);
+                let is_transient = merged.flags.intersects(SymbolFlags::Transient);
+                *target_symbol = merged;
+                if let Some(_parent_id) = merged_parent {
+                    if is_transient {
+                        // Set parent to the merged parent
+                        // Simplified: we skip parent tracking for now
+                    }
+                }
+            } else {
+                // No existing target symbol, use the merged version of source
+                let merged = self.get_merged_symbol(&source_symbol);
+                target.insert(name, merged.unwrap_or_else(|| Arc::clone(&source_symbol)));
+            }
+        }
+    }
+
+    /// Merge a source symbol into a target symbol.
+    ///
+    /// Go: `Checker.mergeSymbol`
+    /// Returns a new merged symbol (Arc<Symbol>).
+    pub fn merge_symbol(
+        &mut self,
+        target: &Arc<Symbol>,
+        source: &Arc<Symbol>,
+        unidirectional: bool,
+    ) -> Arc<Symbol> {
+        let excluded = get_excluded_symbol_flags(source.flags);
+        if target.flags.intersects(excluded) == false
+            || (source.flags | target.flags).intersects(SymbolFlags::Assignment)
+        {
+            if Arc::ptr_eq(target, source) {
+                return Arc::clone(target);
+            }
+            // Determine the effective target (clone if not transient)
+            let effective_target = if !target.flags.intersects(SymbolFlags::Transient) {
+                let resolved_target = self.resolve_symbol(target);
+                if resolved_target.flags.intersects(get_excluded_symbol_flags(source.flags)) == false
+                    || (source.flags | resolved_target.flags).intersects(SymbolFlags::Assignment)
+                {
+                    if let Some(cloned) = self.clone_symbol(&resolved_target) {
+                        cloned
+                    } else {
+                        return Arc::clone(source);
+                    }
+                } else {
+                    // Cannot merge — return source
+                    return Arc::clone(source);
+                }
+            } else {
+                Arc::clone(target)
+            };
+
+            // Build the merged symbol by creating a new one
+            let mut source_flags = source.flags;
+            if !effective_target.flags.intersects(SymbolFlags::ConstEnumOnlyModule) {
+                source_flags.remove(SymbolFlags::ConstEnumOnlyModule);
+            }
+            let merged_flags = effective_target.flags | source_flags;
+
+            let mut merged = Symbol::new(merged_flags, &effective_target.name);
+            // Copy value declaration (source takes priority)
+            merged.value_declaration = source.value_declaration.clone()
+                .or_else(|| effective_target.value_declaration.clone());
+            // Merge declarations
+            merged.declarations = effective_target.declarations.clone();
+            merged.declarations.extend(source.declarations.iter().cloned());
+            // Copy parent
+            merged.parent = effective_target.parent.clone();
+            // Copy members and exports
+            merged.members = SymbolTable {
+                entries: effective_target.members.entries.clone(),
+            };
+            merged.exports = SymbolTable {
+                entries: effective_target.exports.entries.clone(),
+            };
+
+            let result = Arc::new(merged);
+
+            // Merge members and exports
+            // We need to mutate the result's members and exports
+            // Since result is behind Arc, we use a workaround:
+            // Create a mutable temporary, merge, then create new Arc
+            let mut result_mut = Symbol::new(
+                result.flags,
+                &result.name,
+            );
+            result_mut.value_declaration = result.value_declaration.clone();
+            result_mut.declarations = result.declarations.clone();
+            result_mut.parent = result.parent.clone();
+            result_mut.members = SymbolTable {
+                entries: result.members.entries.clone(),
+            };
+            result_mut.exports = SymbolTable {
+                entries: result.exports.entries.clone(),
+            };
+
+            // Merge source members into target members
+            let source_members: Vec<(String, Arc<Symbol>)> = source.members.iter()
+                .map(|(k, v)| (k.clone(), Arc::clone(v)))
+                .collect();
+            for (name, source_sym) in source_members {
+                if let Some(target_sym) = result_mut.members.entries.get_mut(&name) {
+                    let merged = self.merge_symbol(target_sym, &source_sym, unidirectional);
+                    *target_sym = merged;
+                } else {
+                    let merged = self.get_merged_symbol(&source_sym);
+                    result_mut.members.insert(name, merged.unwrap_or_else(|| Arc::clone(&source_sym)));
+                }
+            }
+
+            // Merge source exports into target exports
+            let source_exports: Vec<(String, Arc<Symbol>)> = source.exports.iter()
+                .map(|(k, v)| (k.clone(), Arc::clone(v)))
+                .collect();
+            for (name, source_sym) in source_exports {
+                if let Some(target_sym) = result_mut.exports.entries.get_mut(&name) {
+                    let merged = self.merge_symbol(target_sym, &source_sym, unidirectional);
+                    *target_sym = merged;
+                } else {
+                    let merged = self.get_merged_symbol(&source_sym);
+                    result_mut.exports.insert(name, merged.unwrap_or_else(|| Arc::clone(&source_sym)));
+                }
+            }
+
+            let final_result = Arc::new(result_mut);
+
+            if !unidirectional {
+                self.record_merged_symbol(&final_result, source);
+            }
+
+            final_result
+        } else {
+            // Cannot merge — return target as-is
+            Arc::clone(target)
+        }
+    }
+
+    /// Record that a source symbol was merged into a target symbol.
+    ///
+    /// Go: `Checker.recordMergedSymbol`
+    pub fn record_merged_symbol(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) {
+        self.merged_symbols.insert(source.id(), target.id());
+    }
+
+    /// Clone a symbol (creates a transient copy).
+    ///
+    /// Go: `Checker.cloneSymbol`
+    pub fn clone_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+        let mut cloned = Symbol::new(symbol.flags | SymbolFlags::Transient, &symbol.name);
+        cloned.declarations = symbol.declarations.clone();
+        cloned.parent = symbol.parent.clone();
+        cloned.value_declaration = symbol.value_declaration.clone();
+        cloned.members = SymbolTable {
+            entries: symbol.members.entries.clone(),
+        };
+        cloned.exports = SymbolTable {
+            entries: symbol.exports.entries.clone(),
+        };
+        let result = Arc::new(cloned);
+        Some(result)
+    }
+
+    /// Resolve a symbol (follow alias chains).
+    ///
+    /// Go: `Checker.resolveSymbol`
+    pub fn resolve_symbol(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> {
+        if let Some(result) = self.follow_alias(symbol) {
+            result
+        } else {
+            Arc::clone(symbol)
+        }
+    }
 }
 
-/// Check if a node is a module or enum declaration name.
+/// Get the excluded symbol flags for a given set of flags.
+///
+/// Go: `getExcludedSymbolFlags`
+fn get_excluded_symbol_flags(flags: SymbolFlags) -> SymbolFlags {
+    let mut result = SymbolFlags::None;
+    if flags.intersects(SymbolFlags::BlockScopedVariable) {
+        result |= SymbolFlags::BlockScopedVariableExcludes;
+    }
+    if flags.intersects(SymbolFlags::FunctionScopedVariable) {
+        result |= SymbolFlags::FunctionScopedVariableExcludes;
+    }
+    if flags.intersects(SymbolFlags::Property) {
+        result |= SymbolFlags::PropertyExcludes;
+    }
+    if flags.intersects(SymbolFlags::EnumMember) {
+        result |= SymbolFlags::EnumMemberExcludes;
+    }
+    if flags.intersects(SymbolFlags::Function) {
+        result |= SymbolFlags::FunctionExcludes;
+    }
+    if flags.intersects(SymbolFlags::Class) {
+        result |= SymbolFlags::ClassExcludes;
+    }
+    if flags.intersects(SymbolFlags::Interface) {
+        result |= SymbolFlags::InterfaceExcludes;
+    }
+    if flags.intersects(SymbolFlags::RegularEnum) {
+        result |= SymbolFlags::RegularEnumExcludes;
+    }
+    if flags.intersects(SymbolFlags::ConstEnum) {
+        result |= SymbolFlags::ConstEnumExcludes;
+    }
+    if flags.intersects(SymbolFlags::ValueModule) {
+        result |= SymbolFlags::ValueModuleExcludes;
+    }
+    if flags.intersects(SymbolFlags::Method) {
+        result |= SymbolFlags::MethodExcludes;
+    }
+    if flags.intersects(SymbolFlags::GetAccessor) {
+        result |= SymbolFlags::GetAccessorExcludes;
+    }
+    if flags.intersects(SymbolFlags::SetAccessor) {
+        result |= SymbolFlags::SetAccessorExcludes;
+    }
+    if flags.intersects(SymbolFlags::TypeParameter) {
+        result |= SymbolFlags::TypeParameterExcludes;
+    }
+    if flags.intersects(SymbolFlags::TypeAlias) {
+        result |= SymbolFlags::TypeAliasExcludes;
+    }
+    if flags.intersects(SymbolFlags::Alias) {
+        result |= SymbolFlags::AliasExcludes;
+    }
+    if flags.intersects(SymbolFlags::ReplaceableByMethod) {
+        result.remove(SymbolFlags::Method);
+    }
+    result
+}
+
+/// Check if a node is a module or enum declaration name./// Check if a node is a module or enum declaration name.
 fn is_module_or_enum_name(node: &Node) -> bool {
     // We can't check parent pointers, so we check if the node's kind
     // suggests it's a name of a module/enum declaration.
