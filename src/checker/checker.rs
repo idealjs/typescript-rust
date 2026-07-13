@@ -1125,13 +1125,16 @@ impl Checker {
     ///
     /// Go: `Checker.getTypeOfSymbolAtLocation` / `getTypeOfNode`.
     pub fn get_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        // Check cache first
-        if let Some(links) = self.node_links.get(node) {
-            // We'll store resolved type in node_links or type_node_links
-            let _ = links;
+        // Check cache first (type_node_links stores resolved types for
+        // both type nodes and expression nodes).
+        if let Some(links) = self.type_node_links.get(node) {
+            if let Some(ref t) = links.resolved_type {
+                return Arc::clone(t);
+            }
         }
-        // For now, compute fresh each time
-        self.compute_type_of_node(node)
+        let result = self.compute_type_of_node(node);
+        self.type_node_links.get_or_default(node).resolved_type = Some(result.clone());
+        result
     }
 
     /// Compute the type of a node (without caching).
@@ -1933,7 +1936,8 @@ impl Checker {
             if let Some(locals) = symbol_map.locals.get(&container_id) {
                 if let Some(sym) = locals.get(name) {
                     if sym.flags.intersects(meaning) {
-                        return Some(Arc::clone(sym));
+                        // Follow alias chain if the symbol is a pure alias.
+                        return self.follow_alias(sym);
                     }
                 }
             }
@@ -1942,7 +1946,8 @@ impl Checker {
             if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
                 if let Some(sym) = container_sym.members.get(name) {
                     if sym.flags.intersects(meaning) {
-                        return Some(Arc::clone(sym));
+                        // Follow alias chain if the symbol is a pure alias.
+                        return self.follow_alias(sym);
                     }
                 }
             }
@@ -1968,6 +1973,46 @@ impl Checker {
         }
 
         None
+    }
+
+    /// Follow an alias symbol chain to find the resolved target.
+    ///
+    /// An alias symbol (created by import/export declarations) has
+    /// `SymbolFlags::Alias` and its `export_symbol` points to the target.
+    /// This method follows the chain until a non-alias target is found.
+    ///
+    /// Go: `Checker.resolveAlias` / `Checker.resolveSymbol`
+    pub fn follow_alias(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+        if !symbol.flags.intersects(SymbolFlags::Alias) {
+            return Some(Arc::clone(symbol));
+        }
+        // Check if it's a pure alias (not combined with other flags).
+        // Go: IsNonLocalAlias — pure alias or alias with Assignment flag.
+        let is_pure_alias = symbol.flags == SymbolFlags::Alias
+            || (symbol.flags.intersects(SymbolFlags::Alias)
+                && symbol.flags.intersects(SymbolFlags::Assignment));
+        if !is_pure_alias {
+            return Some(Arc::clone(symbol));
+        }
+        // Follow the export_symbol chain.
+        // Simple implementation without cycle detection (aliases are not
+        // created yet in the current binder).
+        let mut current = Arc::clone(symbol);
+        loop {
+            if let Some(ref target) = current.export_symbol {
+                let is_pure = target.flags == SymbolFlags::Alias
+                    || (target.flags.intersects(SymbolFlags::Alias)
+                        && target.flags.intersects(SymbolFlags::Assignment));
+                if is_pure {
+                    current = Arc::clone(target);
+                    continue;
+                }
+                return Some(Arc::clone(target));
+            } else {
+                // No export_symbol, return the alias itself.
+                return Some(Arc::clone(&current));
+            }
+        }
     }
 }
 

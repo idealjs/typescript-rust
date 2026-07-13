@@ -446,9 +446,9 @@ Rust 现状：
 - [x] 特殊符号：`argumentsSymbol`（支持函数体/方法内访问，箭头函数内不可访问）。
 - [x] 特殊符号：`undefinedSymbol`、`globalThisSymbol`（添加到 globals 表，通过全局符号查找路径解析）。
 - [x] 全局符号查找（lib.d.ts symbols）：`populate_globals` 从所有 source file 收集全局符号，`resolve_identifier_with_meaning` 在 scope 链和特殊符号之后查找 globals。
-- [ ] alias 符号解析（import alias、export alias）。
+- [x] alias 符号解析（import alias、export alias）：`follow_alias` 方法通过 `export_symbol` 链解析别名，`resolve_identifier_with_meaning` 在 scope 链查找后自动跟随别名。
 
-2026-07-13: `argumentsSymbol` 实现完成（区分普通函数和箭头函数）。`populate_globals` 实现并接入 `check_source_file`，全局符号查找可用。`undefinedSymbol` 和 `globalThisSymbol` 特殊符号实现并添加到 globals。测试：`checker_arguments_in_function_no_error`、`checker_arguments_outside_function_is_undefined`、`checker_arguments_in_arrow_function`、`checker_arguments_in_method`、`checker_global_symbol_with_lib`、`checker_undefined_is_resolvable`、`checker_global_this_is_resolvable` 通过。
+2026-07-13: `argumentsSymbol` 实现完成（区分普通函数和箭头函数）。`populate_globals` 实现并接入 `check_source_file`，全局符号查找可用。`undefinedSymbol` 和 `globalThisSymbol` 特殊符号实现并添加到 globals。`follow_alias` 方法实现别名链解析。`get_type_of_node` 实现类型缓存（使用 `type_node_links`）。`is_object_type_related_to` 实现属性类型深度检查。测试：`checker_arguments_in_function_no_error`、`checker_arguments_outside_function_is_undefined`、`checker_arguments_in_arrow_function`、`checker_arguments_in_method`、`checker_global_symbol_with_lib`、`checker_undefined_is_resolvable`、`checker_global_this_is_resolvable` 通过。`populate_globals` 实现并接入 `check_source_file`，全局符号查找可用。`undefinedSymbol` 和 `globalThisSymbol` 特殊符号实现并添加到 globals。测试：`checker_arguments_in_function_no_error`、`checker_arguments_outside_function_is_undefined`、`checker_arguments_in_arrow_function`、`checker_arguments_in_method`、`checker_global_symbol_with_lib`、`checker_undefined_is_resolvable`、`checker_global_this_is_resolvable` 通过。
 
 ### P3.3 Binder ReferenceResolver
 
@@ -481,7 +481,7 @@ Rust 现状：
 - [x] 实现 `check_class_member` / `check_enum_member` / `check_heritage_clause` 等辅助方法。
 - [x] 实现标识符解析 `resolve_identifier`：遍历作用域链（locals + file symbol members），未找到时报告 TS2304。
 - [x] checker 诊断通过 `Program::get_semantic_diagnostics` 接入 execute 输出管线。
-- [ ] 节点 → 类型缓存（`get_cached_type` / `cache_type` 已有骨架，需在 check 路径中填充）。
+- [x] 节点 → 类型缓存：`get_type_of_node` 使用 `type_node_links` 进行缓存（先检查缓存，再计算，再缓存），避免重复计算。
 
 ### P3.7 Checker 类型关系（relater 完整规则）
 
@@ -491,7 +491,8 @@ Rust 现状：
 - [x] Union 类型关系：`someTypeRelatedToType` / `eachTypeRelatedToType` / `typeRelatedToSomeType`。
 - [x] Intersection 类型关系：`someTypeRelatedToType` / `typeRelatedToEachType`。
 - [x] 对象类型结构检查：target 属性必须全部存在于 source（属性名级别，不含类型深度检查）。
-- [ ] `is_type_assignable_to` 完整规则：对象属性类型深度检查、数组、tuple、函数、泛型、条件类型、映射类型。
+- [x] 对象属性类型深度检查：`is_object_type_related_to` 递归检查每个属性的类型是否可赋值。
+- [ ] 数组、tuple、函数、泛型、条件类型、映射类型关系。
 - [ ] `relation_comparison_result` 缓存与递归保护。
 - [ ] Signature 比较（call/construct signatures）。
 - [ ] Index signature 比较。

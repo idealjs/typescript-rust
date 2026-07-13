@@ -142,7 +142,7 @@ impl Relation {
 
 impl Checker {
     /// Check if `source` is identical to `target`.
-    pub fn is_type_identical_to(&self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub fn is_type_identical_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
         // Fast path: same pointer
         if Arc::ptr_eq(source, target) {
             return true;
@@ -158,7 +158,7 @@ impl Checker {
     }
 
     /// Check if `source` is assignable to `target`.
-    pub fn is_type_assignable_to(&self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub fn is_type_assignable_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
         if Arc::ptr_eq(source, target) {
             return true;
         }
@@ -166,7 +166,7 @@ impl Checker {
     }
 
     /// Check if `source` is a subtype of `target`.
-    pub fn is_type_subtype_of(&self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub fn is_type_subtype_of(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
         if Arc::ptr_eq(source, target) {
             return true;
         }
@@ -174,7 +174,7 @@ impl Checker {
     }
 
     /// Check if `source` is a strict subtype of `target`.
-    pub fn is_type_strict_subtype_of(&self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub fn is_type_strict_subtype_of(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
         if Arc::ptr_eq(source, target) {
             return true;
         }
@@ -182,7 +182,7 @@ impl Checker {
     }
 
     /// Check if `source` is comparable to `target`.
-    pub fn is_type_comparable_to(&self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub fn is_type_comparable_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
         if Arc::ptr_eq(source, target) {
             return true;
         }
@@ -190,7 +190,7 @@ impl Checker {
     }
 
     /// Check if two types are comparable (in either direction).
-    pub fn are_types_comparable(&self, type1: &Arc<Type>, type2: &Arc<Type>) -> bool {
+    pub fn are_types_comparable(&mut self, type1: &Arc<Type>, type2: &Arc<Type>) -> bool {
         self.is_type_comparable_to(type1, type2) || self.is_type_comparable_to(type2, type1)
     }
 
@@ -199,7 +199,7 @@ impl Checker {
     /// Handles union/intersection/object types by delegating to specialized
     /// methods, falling back to `is_simple_type_related_to` for primitives.
     fn is_type_related_to(
-        &self,
+        &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
@@ -226,7 +226,7 @@ impl Checker {
 
     /// Handle union/intersection type relations.
     fn is_union_or_intersection_related_to(
-        &self,
+        &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
@@ -261,7 +261,7 @@ impl Checker {
     /// Source is a union/intersection: check if at least one constituent
     /// is related to target.
     fn some_type_related_to_type(
-        &self,
+        &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
@@ -279,7 +279,7 @@ impl Checker {
     /// Source is a union (for subtype/strictSubtype): check if ALL
     /// constituents are related to target.
     fn each_type_related_to_type(
-        &self,
+        &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
@@ -297,7 +297,7 @@ impl Checker {
 
     /// Target is a union: check if source is related to at least one constituent.
     fn type_related_to_some_type(
-        &self,
+        &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
@@ -314,7 +314,7 @@ impl Checker {
 
     /// Target is an intersection: check if source is related to ALL constituents.
     fn type_related_to_each_type(
-        &self,
+        &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
@@ -334,7 +334,7 @@ impl Checker {
     ///
     /// For assignability: source must have all properties of target.
     fn is_object_type_related_to(
-        &self,
+        &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
         _relation: RelationKind,
@@ -349,7 +349,16 @@ impl Checker {
         };
 
         for target_prop in &target_struct.properties {
-            if source_struct.members.get(&target_prop.name).is_none() {
+            // Check that source has a matching property by name.
+            let source_prop = match source_struct.members.get(&target_prop.name) {
+                Some(p) => p,
+                None => return false,
+            };
+            // Check that the source property type is assignable to the
+            // target property type (depth check).
+            let source_type = self.get_type_of_symbol(source_prop);
+            let target_type = self.get_type_of_symbol(target_prop);
+            if !self.is_type_assignable_to(&source_type, &target_type) {
                 return false;
             }
         }
@@ -365,7 +374,7 @@ impl Checker {
     ///
     /// This handles intrinsic types (by name), literal types (by value),
     /// and type parameters (by ID).
-    fn is_simple_type_identical_to(&self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    fn is_simple_type_identical_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
         match (&source.data, &target.data) {
             (TypeData::Intrinsic(s), TypeData::Intrinsic(t)) => {
                 s.intrinsic_name == t.intrinsic_name
@@ -393,7 +402,7 @@ impl Checker {
     /// - null/undefined rules (strict vs non-strict)
     /// - `any` source in assignable/comparable relation → true
     pub fn is_simple_type_related_to(
-        &self,
+        &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
