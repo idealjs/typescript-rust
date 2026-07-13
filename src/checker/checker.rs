@@ -11,7 +11,7 @@ use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::ast::{
     DiagnosticsCollection, ModifierFlags, Node, NodeFlags, NodeSymbolMap, SourceFile, Symbol,
-    SymbolTable, SyntaxKind,
+    SymbolFlags, SymbolTable, SyntaxKind,
 };
 use crate::core::compiler_options::{
     CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget,
@@ -1082,6 +1082,7 @@ impl Checker {
                 }
             }
             SyntaxKind::ForStatement => {
+                self.push_scope(node);
                 if let crate::ast::NodeData::ForStatement(data) = &node.data {
                     if let Some(init) = &data.initializer {
                         self.check_for_initializer(init);
@@ -1094,13 +1095,16 @@ impl Checker {
                     }
                     self.check_statement(&data.statement);
                 }
+                self.pop_scope();
             }
             SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement => {
+                self.push_scope(node);
                 if let crate::ast::NodeData::ForInOrOfStatement(data) = &node.data {
                     self.check_for_initializer(&data.initializer);
                     self.check_expression(&data.expression);
                     self.check_statement(&data.statement);
                 }
+                self.pop_scope();
             }
             SyntaxKind::ReturnStatement => {
                 if let crate::ast::NodeData::ReturnStatement(data) = &node.data {
@@ -1620,6 +1624,18 @@ impl Checker {
     /// Go: `Checker.resolveName` (reduced form — does not yet handle globals,
     /// namespaces, or alias chasing).
     pub fn resolve_identifier(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+        self.resolve_identifier_with_meaning(node, SymbolFlags::all())
+    }
+
+    /// Resolve an identifier with a specific meaning (symbol flags filter).
+    ///
+    /// Only symbols whose flags intersect with `meaning` are considered.
+    /// This mirrors the `meaning` parameter in Go's `NameResolver.Resolve`.
+    pub fn resolve_identifier_with_meaning(
+        &self,
+        node: &Arc<Node>,
+        meaning: SymbolFlags,
+    ) -> Option<Arc<Symbol>> {
         let name = match &node.data {
             crate::ast::NodeData::Identifier(data) => data.text.as_str(),
             _ => return None,
@@ -1631,14 +1647,18 @@ impl Checker {
             // Check the container's locals (block-scoped variables).
             if let Some(locals) = symbol_map.locals.get(&container_id) {
                 if let Some(sym) = locals.get(name) {
-                    return Some(Arc::clone(sym));
+                    if sym.flags.intersects(meaning) {
+                        return Some(Arc::clone(sym));
+                    }
                 }
             }
             // Check the container's symbol members (function-scoped
             // declarations like parameters, class members, etc.).
             if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
                 if let Some(sym) = container_sym.members.get(name) {
-                    return Some(Arc::clone(sym));
+                    if sym.flags.intersects(meaning) {
+                        return Some(Arc::clone(sym));
+                    }
                 }
             }
         }

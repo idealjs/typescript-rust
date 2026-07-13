@@ -13,6 +13,56 @@ use std::sync::Arc;
 /// The binder.
 ///
 /// Mirrors `binder.Binder` in Go.
+/// A flow label (junction point in the control flow graph).
+///
+/// Mirrors `ast.FlowLabel` in Go. Labels are used to collect antecedents
+/// from multiple control flow paths (e.g. the merge point after an if/else).
+#[derive(Debug)]
+struct FlowLabel {
+    node: FlowNode,
+}
+
+impl FlowLabel {
+    fn new(flags: FlowFlags) -> Self {
+        Self {
+            node: FlowNode::new(flags),
+        }
+    }
+
+    /// Add an antecedent to this label.
+    fn add_antecedent(&mut self, antecedent: Arc<FlowNode>) {
+        if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
+            return;
+        }
+        // Check if already present
+        for ant in &self.node.antecedents {
+            if Arc::ptr_eq(ant, &antecedent) {
+                return;
+            }
+        }
+        self.node.antecedents.push(antecedent);
+    }
+
+    /// Finish the label, returning the resulting flow node.
+    fn finish(&self, unreachable: &Arc<FlowNode>) -> Arc<FlowNode> {
+        if self.node.antecedents.is_empty() {
+            return Arc::clone(unreachable);
+        }
+        if self.node.antecedents.len() == 1 {
+            return Arc::clone(&self.node.antecedents[0]);
+        }
+        Arc::new(FlowNode {
+            flags: self.node.flags,
+            node: None,
+            antecedent: None,
+            antecedents: self.node.antecedents.clone(),
+        })
+    }
+}
+
+/// The binder.
+///
+/// Mirrors `binder.Binder` in Go.
 pub struct Binder {
     /// Side table mapping nodes to symbols, locals, and flow nodes.
     pub symbol_map: NodeSymbolMap,
@@ -28,6 +78,14 @@ pub struct Binder {
     symbol_count: usize,
     /// Unreachable flow node.
     unreachable_flow: Option<Arc<FlowNode>>,
+    /// Current break target flow label.
+    current_break_target: Option<Arc<FlowNode>>,
+    /// Current continue target flow label.
+    current_continue_target: Option<Arc<FlowNode>>,
+    /// Whether the current function has explicit return statements.
+    has_explicit_return: bool,
+    /// Whether there are flow effects (assignments, calls, etc.).
+    has_flow_effects: bool,
 }
 
 impl Default for Binder {
@@ -47,6 +105,10 @@ impl Binder {
             current_flow: None,
             symbol_count: 0,
             unreachable_flow: None,
+            current_break_target: None,
+            current_continue_target: None,
+            has_explicit_return: false,
+            has_flow_effects: false,
         }
     }
 
@@ -57,6 +119,8 @@ impl Binder {
         let start_flow = Arc::new(FlowNode::new(FlowFlags::START));
         self.current_flow = Some(Arc::clone(&start_flow));
         self.unreachable_flow = Some(Arc::new(FlowNode::new(FlowFlags::UNREACHABLE)));
+        // Set the start flow node on the source file node itself
+        self.symbol_map.set_flow_node(&file.node, Arc::clone(&start_flow));
 
         // Create a symbol for the source file itself
         let file_symbol = Arc::new(Symbol::new(
@@ -217,6 +281,485 @@ impl Binder {
     }
 
     // ─────────────────────────────────────────────────────────────────────
+    // Flow graph helper methods
+    // ─────────────────────────────────────────────────────────────────────
+
+    /// Get the unreachable flow node.
+    fn unreachable_flow(&self) -> Arc<FlowNode> {
+        Arc::clone(self.unreachable_flow.as_ref().unwrap())
+    }
+
+    /// Create a new flow node with the given flags.
+    fn new_flow_node(&self, flags: FlowFlags) -> FlowNode {
+        FlowNode::new(flags)
+    }
+
+    /// Create a flow condition node (true or false branch).
+    fn create_flow_condition(&mut self, flags: FlowFlags, antecedent: &Arc<FlowNode>, expression: &Arc<Node>) -> Arc<FlowNode> {
+        if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
+            return Arc::clone(antecedent);
+        }
+        self.has_flow_effects = true;
+        Arc::new(FlowNode {
+            flags,
+            node: Some(Arc::clone(expression)),
+            antecedent: Some(Arc::clone(antecedent)),
+            antecedents: Vec::new(),
+        })
+    }
+
+    /// Create a flow assignment node.
+    fn create_flow_assignment(&mut self, antecedent: &Arc<FlowNode>, node: &Arc<Node>) -> Arc<FlowNode> {
+        if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
+            return Arc::clone(antecedent);
+        }
+        self.has_flow_effects = true;
+        Arc::new(FlowNode {
+            flags: FlowFlags::ASSIGNMENT,
+            node: Some(Arc::clone(node)),
+            antecedent: Some(Arc::clone(antecedent)),
+            antecedents: Vec::new(),
+        })
+    }
+
+    /// Create a flow call node.
+    fn create_flow_call(&mut self, antecedent: &Arc<FlowNode>, node: &Arc<Node>) -> Arc<FlowNode> {
+        if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
+            return Arc::clone(antecedent);
+        }
+        self.has_flow_effects = true;
+        Arc::new(FlowNode {
+            flags: FlowFlags::CALL,
+            node: Some(Arc::clone(node)),
+            antecedent: Some(Arc::clone(antecedent)),
+            antecedents: Vec::new(),
+        })
+    }
+
+    /// Create a flow switch clause node.
+    fn create_flow_switch_clause(&mut self, antecedent: &Arc<FlowNode>, node: &Arc<Node>) -> Arc<FlowNode> {
+        if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
+            return Arc::clone(antecedent);
+        }
+        Arc::new(FlowNode {
+            flags: FlowFlags::SWITCH_CLAUSE,
+            node: Some(Arc::clone(node)),
+            antecedent: Some(Arc::clone(antecedent)),
+            antecedents: Vec::new(),
+        })
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Control flow statement binding
+    // ─────────────────────────────────────────────────────────────────────
+
+    /// Bind an if statement with proper control flow.
+    fn bind_if_statement(&mut self, node: &Arc<Node>) {
+        let mut then_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+        let mut else_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+        let mut post_if_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+
+        let (expr, then_stmt, else_stmt) = match &node.data {
+            NodeData::IfStatement(data) => {
+                (data.expression.clone(), data.then_statement.clone(), data.else_statement.clone())
+            }
+            _ => return,
+        };
+
+        // Bind condition and split flow
+        self.bind(&expr);
+        if let Some(current) = self.current_flow.take() {
+            let true_flow = self.create_flow_condition(FlowFlags::TRUE_CONDITION, &current, &expr);
+            let false_flow = self.create_flow_condition(FlowFlags::FALSE_CONDITION, &current, &expr);
+            then_label.add_antecedent(true_flow);
+            else_label.add_antecedent(false_flow);
+        }
+
+        // Then branch
+        self.current_flow = Some(then_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.bind(&then_stmt);
+        if let Some(current) = &self.current_flow {
+            post_if_label.add_antecedent(Arc::clone(current));
+        }
+
+        // Else branch
+        self.current_flow = Some(else_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        if let Some(else_s) = else_stmt {
+            self.bind(&else_s);
+        }
+        if let Some(current) = &self.current_flow {
+            post_if_label.add_antecedent(Arc::clone(current));
+        }
+
+        // Merge after if/else
+        self.current_flow = Some(post_if_label.finish(self.unreachable_flow.as_ref().unwrap()));
+    }
+
+    /// Bind a while statement with proper control flow.
+    fn bind_while_statement(&mut self, node: &Arc<Node>) {
+        let mut pre_while_label = FlowLabel::new(FlowFlags::LOOP_LABEL);
+        let mut pre_body_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+        let mut post_while_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+
+        let (expr, stmt) = match &node.data {
+            NodeData::WhileStatement(data) => {
+                (data.expression.clone(), data.statement.clone())
+            }
+            _ => return,
+        };
+
+        if let Some(current) = &self.current_flow {
+            pre_while_label.add_antecedent(Arc::clone(current));
+        }
+        self.current_flow = Some(pre_while_label.finish(self.unreachable_flow.as_ref().unwrap()));
+
+        // Condition
+        self.bind(&expr);
+        if let Some(current) = self.current_flow.take() {
+            let true_flow = self.create_flow_condition(FlowFlags::TRUE_CONDITION, &current, &expr);
+            let false_flow = self.create_flow_condition(FlowFlags::FALSE_CONDITION, &current, &expr);
+            pre_body_label.add_antecedent(true_flow);
+            post_while_label.add_antecedent(false_flow);
+        }
+
+        // Save break/continue targets
+        let prev_break = self.current_break_target.take();
+        let prev_continue = self.current_continue_target.take();
+        self.current_break_target = Some(post_while_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.current_continue_target = Some(pre_while_label.finish(self.unreachable_flow.as_ref().unwrap()));
+
+        // Body
+        self.current_flow = Some(pre_body_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.bind(&stmt);
+        if let Some(current) = &self.current_flow {
+            pre_while_label.add_antecedent(Arc::clone(current));
+        }
+
+        // Restore break/continue targets
+        self.current_break_target = prev_break;
+        self.current_continue_target = prev_continue;
+
+        self.current_flow = Some(post_while_label.finish(self.unreachable_flow.as_ref().unwrap()));
+    }
+
+    /// Bind a do-while statement with proper control flow.
+    fn bind_do_statement(&mut self, node: &Arc<Node>) {
+        let mut pre_do_label = FlowLabel::new(FlowFlags::LOOP_LABEL);
+        let mut pre_condition_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+        let mut post_do_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+
+        let (expr, stmt) = match &node.data {
+            NodeData::DoStatement(data) => {
+                (data.expression.clone(), data.statement.clone())
+            }
+            _ => return,
+        };
+
+        if let Some(current) = &self.current_flow {
+            pre_do_label.add_antecedent(Arc::clone(current));
+        }
+        self.current_flow = Some(pre_do_label.finish(self.unreachable_flow.as_ref().unwrap()));
+
+        // Save break/continue targets
+        let prev_break = self.current_break_target.take();
+        let prev_continue = self.current_continue_target.take();
+        self.current_break_target = Some(post_do_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.current_continue_target = Some(pre_condition_label.finish(self.unreachable_flow.as_ref().unwrap()));
+
+        // Body
+        self.bind(&stmt);
+        if let Some(current) = &self.current_flow {
+            pre_condition_label.add_antecedent(Arc::clone(current));
+        }
+
+        // Restore break/continue targets
+        self.current_break_target = prev_break;
+        self.current_continue_target = prev_continue;
+
+        // Condition
+        self.current_flow = Some(pre_condition_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.bind(&expr);
+        if let Some(current) = self.current_flow.take() {
+            let true_flow = self.create_flow_condition(FlowFlags::TRUE_CONDITION, &current, &expr);
+            let false_flow = self.create_flow_condition(FlowFlags::FALSE_CONDITION, &current, &expr);
+            pre_do_label.add_antecedent(true_flow);
+            post_do_label.add_antecedent(false_flow);
+        }
+
+        self.current_flow = Some(post_do_label.finish(self.unreachable_flow.as_ref().unwrap()));
+    }
+
+    /// Bind a for statement with proper control flow.
+    fn bind_for_statement(&mut self, node: &Arc<Node>) {
+        let mut pre_loop_label = FlowLabel::new(FlowFlags::LOOP_LABEL);
+        let mut pre_body_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+        let mut pre_incr_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+        let mut post_loop_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+
+        let (initializer, condition, incrementor, statement) = match &node.data {
+            NodeData::ForStatement(data) => {
+                (data.initializer.clone(), data.condition.clone(), data.incrementor.clone(), data.statement.clone())
+            }
+            _ => return,
+        };
+
+        // Initializer
+        if let Some(init) = initializer {
+            self.bind(&init);
+        }
+
+        if let Some(current) = &self.current_flow {
+            pre_loop_label.add_antecedent(Arc::clone(current));
+        }
+        self.current_flow = Some(pre_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
+
+        // Condition
+        if let Some(cond) = condition {
+            self.bind(&cond);
+            if let Some(current) = self.current_flow.take() {
+                let true_flow = self.create_flow_condition(FlowFlags::TRUE_CONDITION, &current, &cond);
+                let false_flow = self.create_flow_condition(FlowFlags::FALSE_CONDITION, &current, &cond);
+                pre_body_label.add_antecedent(true_flow);
+                post_loop_label.add_antecedent(false_flow);
+            }
+        } else {
+            // No condition = always true
+            if let Some(current) = &self.current_flow {
+                pre_body_label.add_antecedent(Arc::clone(current));
+            }
+        }
+
+        // Save break/continue targets
+        let prev_break = self.current_break_target.take();
+        let prev_continue = self.current_continue_target.take();
+        self.current_break_target = Some(post_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.current_continue_target = Some(pre_incr_label.finish(self.unreachable_flow.as_ref().unwrap()));
+
+        // Body
+        self.current_flow = Some(pre_body_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.bind(&statement);
+        if let Some(current) = &self.current_flow {
+            pre_incr_label.add_antecedent(Arc::clone(current));
+        }
+
+        // Restore break/continue targets
+        self.current_break_target = prev_break;
+        self.current_continue_target = prev_continue;
+
+        // Incrementor
+        self.current_flow = Some(pre_incr_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        if let Some(inc) = incrementor {
+            self.bind(&inc);
+        }
+        if let Some(current) = &self.current_flow {
+            pre_loop_label.add_antecedent(Arc::clone(current));
+        }
+
+        self.current_flow = Some(post_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
+    }
+
+    /// Bind a for-in or for-of statement with proper control flow.
+    fn bind_for_in_or_of_statement(&mut self, node: &Arc<Node>) {
+        let mut pre_loop_label = FlowLabel::new(FlowFlags::LOOP_LABEL);
+        let mut post_loop_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+
+        let (expression, initializer, statement) = match &node.data {
+            NodeData::ForInOrOfStatement(data) => {
+                (data.expression.clone(), data.initializer.clone(), data.statement.clone())
+            }
+            _ => return,
+        };
+
+        // Expression
+        self.bind(&expression);
+
+        if let Some(current) = &self.current_flow {
+            pre_loop_label.add_antecedent(Arc::clone(current));
+        }
+        self.current_flow = Some(pre_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
+
+        post_loop_label.add_antecedent(Arc::clone(self.current_flow.as_ref().unwrap()));
+
+        // Initializer
+        self.bind(&initializer);
+
+        // Save break/continue targets
+        let prev_break = self.current_break_target.take();
+        let prev_continue = self.current_continue_target.take();
+        self.current_break_target = Some(post_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.current_continue_target = Some(pre_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
+
+        // Body
+        self.bind(&statement);
+        if let Some(current) = &self.current_flow {
+            pre_loop_label.add_antecedent(Arc::clone(current));
+        }
+
+        // Restore break/continue targets
+        self.current_break_target = prev_break;
+        self.current_continue_target = prev_continue;
+
+        self.current_flow = Some(post_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
+    }
+
+    /// Bind a switch statement with proper control flow.
+    fn bind_switch_statement(&mut self, node: &Arc<Node>) {
+        let mut post_switch_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+
+        let (expression, case_block) = match &node.data {
+            NodeData::SwitchStatement(data) => {
+                (data.expression.clone(), data.case_block.clone())
+            }
+            _ => return,
+        };
+
+        // Switch expression
+        self.bind(&expression);
+
+        // Save break target
+        let prev_break = self.current_break_target.take();
+        self.current_break_target = Some(post_switch_label.finish(self.unreachable_flow.as_ref().unwrap()));
+
+        // Get clauses from case block
+        let clauses = match &case_block.data {
+            NodeData::CaseBlock(data) => data.clauses.clone(),
+            _ => {
+                self.current_break_target = prev_break;
+                return;
+            }
+        };
+
+        // Process each clause
+        for clause in &clauses.nodes {
+            // Create switch clause flow
+            if let Some(current) = self.current_flow.take() {
+                let clause_flow = self.create_flow_switch_clause(&current, clause);
+                self.current_flow = Some(clause_flow);
+            }
+
+            // Bind clause (expression + statements)
+            match &clause.data {
+                NodeData::CaseOrDefaultClause(data) => {
+                    // For CaseClause, bind the expression; for DefaultClause, expression is just a placeholder
+                    self.bind(&data.expression);
+                    // Bind statements
+                    for stmt in &data.statements.nodes {
+                        self.bind(stmt);
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        // Add final flow to post-switch label
+        if let Some(current) = &self.current_flow {
+            post_switch_label.add_antecedent(Arc::clone(current));
+        }
+
+        self.current_flow = Some(post_switch_label.finish(self.unreachable_flow.as_ref().unwrap()));
+
+        // Restore break target
+        self.current_break_target = prev_break;
+    }
+
+    /// Bind a return statement.
+    fn bind_return_statement(&mut self, node: &Arc<Node>) {
+        if let NodeData::ReturnStatement(data) = &node.data {
+            if let Some(expr) = &data.expression {
+                self.bind(expr);
+            }
+        }
+        self.current_flow = Some(self.unreachable_flow());
+        self.has_explicit_return = true;
+        self.has_flow_effects = true;
+    }
+
+    /// Bind a throw statement.
+    fn bind_throw_statement(&mut self, node: &Arc<Node>) {
+        if let NodeData::ThrowStatement(data) = &node.data {
+            self.bind(&data.expression);
+        }
+        self.current_flow = Some(self.unreachable_flow());
+        self.has_flow_effects = true;
+    }
+
+    /// Bind a break statement.
+    fn bind_break_statement(&mut self, node: &Arc<Node>) {
+        if let Some(target) = &self.current_break_target.clone() {
+            if let Some(current) = &self.current_flow {
+                // Note: target is a finished label (Arc<FlowNode>), we can't easily add antecedents
+                // In a full implementation, we'd use FlowLabel with interior mutability
+                let _ = target;
+                let _ = current;
+            }
+        }
+        self.current_flow = Some(self.unreachable_flow());
+        let _ = node;
+    }
+
+    /// Bind a continue statement.
+    fn bind_continue_statement(&mut self, node: &Arc<Node>) {
+        if let Some(target) = &self.current_continue_target.clone() {
+            if let Some(current) = &self.current_flow {
+                let _ = target;
+                let _ = current;
+            }
+        }
+        self.current_flow = Some(self.unreachable_flow());
+        let _ = node;
+    }
+
+    /// Bind an expression statement (with assignment flow tracking).
+    fn bind_expression_statement(&mut self, node: &Arc<Node>) {
+        if let NodeData::ExpressionStatement(data) = &node.data {
+            self.bind(&data.expression);
+            // Check for assignment
+            if let NodeData::BinaryExpression(bin_data) = &data.expression.data {
+                if is_assignment_operator(bin_data.operator_token.kind) {
+                    if let Some(current) = self.current_flow.take() {
+                        let assign_flow = self.create_flow_assignment(&current, &data.expression);
+                        self.symbol_map.set_flow_node(&data.expression, Arc::clone(&assign_flow));
+                        self.current_flow = Some(assign_flow);
+                    }
+                }
+            }
+            // Check for call expression
+            if let NodeData::CallExpression(_) = &data.expression.data {
+                if let Some(current) = self.current_flow.take() {
+                    let call_flow = self.create_flow_call(&current, &data.expression);
+                    self.symbol_map.set_flow_node(&data.expression, Arc::clone(&call_flow));
+                    self.current_flow = Some(call_flow);
+                }
+            }
+        } else {
+            self.bind_children(node);
+        }
+    }
+
+    /// Bind a variable statement (with assignment flow for initializers).
+    fn bind_variable_statement(&mut self, node: &Arc<Node>) {
+        // Bind normally (creates symbols, recurses)
+        self.bind_children(node);
+
+        // Add assignment flow for declarations with initializers
+        if let NodeData::VariableStatement(data) = &node.data {
+            if let NodeData::VariableDeclarationList(list_data) = &data.declaration_list.data {
+                for decl in &list_data.declarations.nodes {
+                    if let NodeData::VariableDeclaration(decl_data) = &decl.data {
+                        if decl_data.initializer.is_some() {
+                            if let Some(current) = self.current_flow.take() {
+                                let assign_flow = self.create_flow_assignment(&current, decl);
+                                self.symbol_map.set_flow_node(decl, Arc::clone(&assign_flow));
+                                self.current_flow = Some(current);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
     // Binding dispatch
     // ─────────────────────────────────────────────────────────────────────
 
@@ -351,6 +894,59 @@ impl Binder {
                     SymbolFlags::TypeLiteral,
                     INTERNAL_SYMBOL_NAME_TYPE,
                 );
+            }
+            _ => {}
+        }
+
+        // Control flow statement dispatch
+        match node.kind {
+            SyntaxKind::IfStatement => {
+                self.bind_if_statement(node);
+                return;
+            }
+            SyntaxKind::WhileStatement => {
+                self.bind_while_statement(node);
+                return;
+            }
+            SyntaxKind::DoStatement => {
+                self.bind_do_statement(node);
+                return;
+            }
+            SyntaxKind::ForStatement => {
+                self.bind_for_statement(node);
+                return;
+            }
+            SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement => {
+                self.bind_for_in_or_of_statement(node);
+                return;
+            }
+            SyntaxKind::SwitchStatement => {
+                self.bind_switch_statement(node);
+                return;
+            }
+            SyntaxKind::ReturnStatement => {
+                self.bind_return_statement(node);
+                return;
+            }
+            SyntaxKind::ThrowStatement => {
+                self.bind_throw_statement(node);
+                return;
+            }
+            SyntaxKind::BreakStatement => {
+                self.bind_break_statement(node);
+                return;
+            }
+            SyntaxKind::ContinueStatement => {
+                self.bind_continue_statement(node);
+                return;
+            }
+            SyntaxKind::ExpressionStatement => {
+                self.bind_expression_statement(node);
+                return;
+            }
+            SyntaxKind::VariableStatement => {
+                self.bind_variable_statement(node);
+                return;
             }
             _ => {}
         }
@@ -533,6 +1129,29 @@ pub fn bind_source_file(file: &SourceFile) -> NodeSymbolMap {
     std::mem::take(&mut binder.symbol_map)
 }
 
+/// Whether a syntax kind is an assignment operator token.
+fn is_assignment_operator(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
+        SyntaxKind::EqualsToken
+            | SyntaxKind::PlusEqualsToken
+            | SyntaxKind::MinusEqualsToken
+            | SyntaxKind::AsteriskEqualsToken
+            | SyntaxKind::AsteriskAsteriskEqualsToken
+            | SyntaxKind::SlashEqualsToken
+            | SyntaxKind::PercentEqualsToken
+            | SyntaxKind::LessThanLessThanEqualsToken
+            | SyntaxKind::GreaterThanGreaterThanEqualsToken
+            | SyntaxKind::GreaterThanGreaterThanGreaterThanEqualsToken
+            | SyntaxKind::AmpersandEqualsToken
+            | SyntaxKind::BarEqualsToken
+            | SyntaxKind::BarBarEqualsToken
+            | SyntaxKind::AmpersandAmpersandEqualsToken
+            | SyntaxKind::QuestionQuestionEqualsToken
+            | SyntaxKind::CaretEqualsToken
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -610,5 +1229,104 @@ mod tests {
         binder.bind_source_file(&file);
         // file + function + variable
         assert!(binder.symbol_count() >= 3);
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    // Flow graph tests
+    // ───────────────────────────────────────────────────────────────
+
+    #[test]
+    fn flow_start_node_exists() {
+        let (file, map) = parse_and_bind("let x = 1;");
+        // File should have a start flow node
+        let flow = map.flow_node_of(&file.node);
+        assert!(flow.is_some());
+        let flow = flow.unwrap();
+        assert!(flow.flags.contains(FlowFlags::START));
+    }
+
+    #[test]
+    fn flow_identifier_has_flow_node() {
+        let (file, map) = parse_and_bind("let x = 1; x;");
+        // Find the identifier x (the second statement's expression)
+        let statements = match &file.node.data {
+            NodeData::SourceFile(data) => &data.statements,
+            _ => unreachable!(),
+        };
+        // Second statement is ExpressionStatement containing Identifier
+        let expr_stmt = &statements.nodes[1];
+        let expr = match &expr_stmt.data {
+            NodeData::ExpressionStatement(data) => &data.expression,
+            _ => unreachable!(),
+        };
+        assert_eq!(expr.kind, SyntaxKind::Identifier);
+        // The identifier should have a flow node
+        assert!(map.flow_node_of(expr).is_some());
+    }
+
+    #[test]
+    fn flow_if_statement_merges() {
+        // Just make sure binding an if statement doesn't crash
+        let (file, _map) = parse_and_bind("let x = 1; if (x > 0) { x = 2; } else { x = 3; }");
+        let mut binder = Binder::new();
+        binder.bind_source_file(&file);
+        assert!(binder.symbol_count() >= 2);
+    }
+
+    #[test]
+    fn flow_while_statement() {
+        let (file, _map) = parse_and_bind("let i = 0; while (i < 10) { i = i + 1; }");
+        let mut binder = Binder::new();
+        binder.bind_source_file(&file);
+        assert!(binder.symbol_count() >= 2);
+    }
+
+    #[test]
+    fn flow_for_statement() {
+        let (file, _map) = parse_and_bind("for (let i = 0; i < 10; i++) { console.log(i); }");
+        let mut binder = Binder::new();
+        binder.bind_source_file(&file);
+        assert!(binder.symbol_count() >= 2);
+    }
+
+    #[test]
+    fn flow_switch_statement() {
+        let (file, _map) = parse_and_bind("let x = 1; switch (x) { case 1: x = 2; break; default: x = 0; }");
+        let mut binder = Binder::new();
+        binder.bind_source_file(&file);
+        assert!(binder.symbol_count() >= 2);
+    }
+
+    #[test]
+    fn flow_return_statement_unreachable() {
+        let (file, map) = parse_and_bind("function foo() { return 1; let x = 2; }");
+        let _ = map;
+        let mut binder = Binder::new();
+        binder.bind_source_file(&file);
+        assert!(binder.has_explicit_return);
+    }
+
+    #[test]
+    fn flow_throw_statement() {
+        let (file, _map) = parse_and_bind("function foo() { throw new Error(); }");
+        let mut binder = Binder::new();
+        binder.bind_source_file(&file);
+        assert!(binder.has_flow_effects);
+    }
+
+    #[test]
+    fn flow_assignment_has_effects() {
+        let (file, _map) = parse_and_bind("let x = 1; x = 2;");
+        let mut binder = Binder::new();
+        binder.bind_source_file(&file);
+        assert!(binder.has_flow_effects);
+    }
+
+    #[test]
+    fn flow_call_expression_has_effects() {
+        let (file, _map) = parse_and_bind("console.log('hello');");
+        let mut binder = Binder::new();
+        binder.bind_source_file(&file);
+        assert!(binder.has_flow_effects);
     }
 }

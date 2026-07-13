@@ -356,6 +356,70 @@ fn checker_shorthand_property_undefined_ts2304() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Nested scope resolution (NameResolver)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_nested_function_scope_resolves_outer_var() {
+    let diags = check_source("let x = 1; function foo() { return x; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_nested_block_scope_resolves_outer_let() {
+    let diags = check_source("let x = 1; { let y = x; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_block_scope_var_not_visible_outside() {
+    let diags = check_source("{ let x = 1; } let y = x;");
+    assert_diagnostic_code(&diags, 2304);
+}
+
+#[test]
+fn checker_function_parameter_resolves_in_body() {
+    let diags = check_source("function foo(x: number) { return x; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_nested_function_shadows_outer() {
+    let diags = check_source("let x = 1; function foo() { let x = 2; return x; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_closure_captures_outer_variable() {
+    let diags = check_source("function outer() { let x = 1; function inner() { return x; } }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_deeply_nested_scope_resolves() {
+    let diags = check_source("let a = 1; function f1() { let b = 2; function f2() { let c = 3; return a + b + c; } }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_class_method_resolves_class_member() {
+    let diags = check_source("class Foo { x = 1; bar() { return this.x; } }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_if_block_scope_var_not_visible_outside() {
+    let diags = check_source("if (true) { let x = 1; } let y = x;");
+    assert_diagnostic_code(&diags, 2304);
+}
+
+#[test]
+fn checker_for_loop_var_in_body() {
+    let diags = check_source("for (let i = 0; i < 10; i++) { let x = i; }");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Control flow statements
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -386,8 +450,7 @@ fn checker_do_while_loop_no_error() {
 #[test]
 fn checker_for_loop_no_error() {
     let diags = check_source("for (let i = 0; i < 10; i = i + 1) { let x = i; }");
-    let count = diags.iter().filter(|d| d.code == 2304).count();
-    assert_eq!(count, 4, "Expected 4 TS2304 errors for 'i', got {}", count);
+    assert_no_diagnostics(&diags);
 }
 
 #[test]

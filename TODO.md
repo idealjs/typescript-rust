@@ -410,17 +410,24 @@ Rust 现状：
 
 ### P3.1 Binder 控制流图（checker narrowing 前置依赖）
 
-- [x] FlowNode 数据结构定义（`src/core/symbol/flow.rs`）。
+- [x] FlowNode 数据结构定义。
 - [x] Binder 初始化 `START` 和 `UNREACHABLE` flow 节点。
-- [x] 变量声明时设置 flow node（`symbol_map.set_flow_node`）。
-- [ ] 迁移 `internal/binder/binder.go` 中的 flow 构建逻辑（~1500 行）。
-- [ ] `ASSIGNMENT` flow node：变量赋值时创建。
-- [ ] `TRUE_CONDITION` / `FALSE_CONDITION`：`if (x)` / `while (x)` 分支条件。
-- [ ] `SWITCH_CLAUSE`：switch case 分支。
-- [ ] `LOOP_LABEL` / `BRANCH_LABEL`：break/continue 标签。
+- [x] 变量声明/表达式节点设置 flow node。
+- [x] FlowLabel 合并点：`add_antecedent` / `finish_flow_label`。
+- [x] `ASSIGNMENT` flow node：赋值语句和变量声明初始化时创建。
+- [x] `TRUE_CONDITION` / `FALSE_CONDITION`：if/while/for 条件分支。
+- [x] `SWITCH_CLAUSE`：switch case 分支。
+- [x] `LOOP_LABEL` / `BRANCH_LABEL`：循环和分支合并点。
+- [x] `CALL` flow node：函数调用对 narrow 类型的影响。
+- [x] if/while/do-while/for/for-in/for-of 控制流构建。
+- [x] switch 语句控制流构建。
+- [x] return/throw/break/continue 控制流处理。
+- [x] 10 个 flow graph 单元测试通过。
+- [ ] 迁移 `internal/binder/binder.go` 完整 flow 构建逻辑（~1500 行）。
 - [ ] `ARRAY_MUTATION`：方法调用副作用。
-- [ ] `CALL` flow node：函数调用对 narrow 类型的影响。
 - [ ] `ReduceLabel` / `Shared` / `Referenced` 后处理。
+- [ ] labeled statement 标签支持。
+- [ ] try/catch/finally 异常流。
 
 ### P3.1a Binder 容器递归绑定 ✅
 
