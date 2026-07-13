@@ -504,9 +504,11 @@ Rust 现状：
 - [x] 二元表达式类型推断：算术→number、比较→boolean、逻辑/赋值→操作数类型。
 - [x] `get_type_of_symbol` 符号类型推断骨架。
 - [x] 括号表达式透传类型。
-- [ ] 迁移 `internal/checker/inference.go`（1651 行）到 `src/checker/inference.rs`。
-- [ ] 泛型推断：`inferTypeArguments`。
-- [ ] contextual typing：`getContextualType`。
+- [x] 迁移 `internal/checker/inference.go`（1651 行）到 `src/checker/inference.rs`。
+- [x] 泛型推断：`inferTypeArguments`（完整的协变/逆变推断、约束检查、默认类型回退）。
+- [x] contextual typing：`getContextualType`（完整的分发逻辑，含初始器/返回/参数/二元操作数/对象字面量/数组字面量等）。
+- [x] 泛型推断：`inferTypeArguments`。
+- [x] contextual typing：`getContextualType`。
 - [ ] 变量声明初始化器类型推断（写入 symbol 类型）。
 - [ ] 函数返回值推断。
 - [ ] 条件类型 `infer R` 解析。

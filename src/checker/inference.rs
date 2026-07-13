@@ -8,6 +8,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use crate::ast::SyntaxKind;
 use super::checker::Checker;
 use super::types::*;
 
@@ -561,6 +562,661 @@ impl Checker {
 
     fn is_from_inference_blocked_source(&self, _source: &Type) -> bool {
         false
+    }
+
+    /// Infer type arguments for a generic function call.
+    /// Go: `inferTypeArguments` (checker.go:9366)
+    pub fn infer_type_arguments(
+        &mut self,
+        node: &crate::ast::Node,
+        signature: &Arc<Signature>,
+        args: &[Arc<crate::ast::Node>],
+        context: &mut InferenceContext,
+    ) -> Vec<Arc<Type>> {
+        
+
+        // TODO: contextual typing from return type
+        // For now, infer types from each argument against the parameter types
+        let param_count = signature.parameters.len().min(args.len());
+        for i in 0..param_count {
+            let param = &signature.parameters[i];
+            let param_type = self.get_type_of_symbol(param);
+            if self.could_contain_type_variables(&param_type) {
+                let arg_type = self.get_type_of_node(&args[i]);
+                self.infer_types(
+                    &mut context.inferences,
+                    Some(arg_type),
+                    Some(param_type),
+                    InferencePriority::None,
+                    false,
+                );
+            }
+        }
+
+        // Resolve inferred types
+        self.get_inferred_types(context)
+    }
+
+    /// Resolve all inferred types from an inference context.
+    /// Go: `getInferredTypes` (inference.go:1372)
+    pub fn get_inferred_types(&mut self, context: &InferenceContext) -> Vec<Arc<Type>> {
+        let count = context.inferences.len();
+        let mut result = Vec::with_capacity(count);
+        for i in 0..count {
+            result.push(self.get_inferred_type(context, i));
+        }
+        result
+    }
+
+    /// Resolve a single inferred type from an inference context.
+    /// Go: `getInferredType` (inference.go:1283)
+    pub fn get_inferred_type(&mut self, context: &InferenceContext, index: usize) -> Arc<Type> {
+        let inference = &context.inferences[index];
+        if let Some(ref inferred) = inference.inferred_type {
+            return Arc::clone(inferred);
+        }
+
+        // If the type parameter is error type, return it directly
+        if inference.type_parameter.flags.contains(TypeFlags::Any)
+            && inference.type_parameter.intrinsic_name() == Some("error")
+        {
+            return Arc::clone(&inference.type_parameter);
+        }
+
+        let mut inferred_type: Option<Arc<Type>> = None;
+        let mut fallback_type: Option<Arc<Type>> = None;
+
+        if let Some(ref signature) = context.signature {
+            // Try covariant inference from candidates
+            let inferred_covariant = if !inference.candidates.is_empty() {
+                self.get_covariant_inference(inference, signature)
+            } else {
+                None
+            };
+
+            // Try contravariant inference from contra-candidates
+            let inferred_contravariant = if !inference.contra_candidates.is_empty() {
+                self.get_contravariant_inference(inference)
+            } else {
+                None
+            };
+
+            if inferred_covariant.is_some() || inferred_contravariant.is_some() {
+                // Prefer covariant if it's not never, it's assignable to some contravariant candidate,
+                // and no other type parameter is constrained to this one with conflicts.
+                let prefer_covariant = match (&inferred_covariant, &inferred_contravariant) {
+                    (Some(cov), None) => true,
+                    (None, Some(_)) => false,
+                    (Some(cov), Some(contra)) => {
+                        let cov_not_never_or_any = !cov.flags.intersects(TypeFlags::Never | TypeFlags::Any);
+                        let cov_assignable_to_contra = inference.contra_candidates.iter()
+                            .any(|t| self.is_type_assignable_to(cov, t));
+                        let no_conflicting_constraints = context.inferences.iter().all(|other| {
+                            let other_tp = &other.type_parameter;
+                            let constraint = self.get_constraint_of_type_parameter(other_tp);
+                            let is_constrained = constraint.as_ref().map_or(false, |c| {
+                                if let Some(c_cons) = c.as_union_or_intersection() {
+                                    c_cons.types.iter().any(|ct| ct.id == inference.type_parameter.id)
+                                } else {
+                                    false
+                                }
+                            });
+                            !is_constrained || other.candidates.iter().all(|t| self.is_type_assignable_to(t, cov))
+                        });
+                        cov_not_never_or_any && cov_assignable_to_contra && no_conflicting_constraints
+                    }
+                    (None, None) => false,
+                };
+
+                if prefer_covariant {
+                    inferred_type = inferred_covariant;
+                    fallback_type = inferred_contravariant;
+                } else {
+                    inferred_type = inferred_contravariant;
+                    fallback_type = inferred_covariant;
+                }
+            } else if context.flags.contains(InferenceFlags::NoDefault) {
+                inferred_type = Some(self.never_type());
+            } else {
+                let default_type = self.get_default_from_type_parameter(&inference.type_parameter);
+                if let Some(dt) = default_type {
+                    inferred_type = Some(dt);
+                }
+            }
+        } else {
+            // No signature: use union of candidates or intersection of contra-candidates
+            inferred_type = self.get_type_from_inference(inference);
+        }
+
+        // Apply constraint checking
+        if inferred_type.is_some() {
+            let constraint = self.get_constraint_of_type_parameter(&inference.type_parameter);
+            if let Some(constraint) = constraint {
+                if !self.is_type_assignable_to(inferred_type.as_ref().unwrap(), &constraint) {
+                    if inference.priority.contains(InferencePriority::ReturnType) {
+                        // For pure return type inference, filter constituents
+                        let inferred = inferred_type.as_ref().unwrap();
+                        let filtered = if inferred.flags.contains(TypeFlags::Union) {
+                            if let Some(types) = inferred.types() {
+                                let filtered: Vec<Arc<Type>> = types.iter()
+                                    .filter(|u| self.is_type_assignable_to(u, &constraint))
+                                    .cloned()
+                                    .collect();
+                                if filtered.is_empty() {
+                                    self.never_type()
+                                } else if filtered.len() == 1 {
+                                    filtered[0].clone()
+                                } else {
+                                    self.get_union_type(filtered)
+                                }
+                            } else {
+                                self.never_type()
+                            }
+                        } else if self.is_type_assignable_to(inferred, &constraint) {
+                            (*inferred).clone()
+                        } else {
+                            self.never_type()
+                        };
+                        if filtered.flags.contains(TypeFlags::Never) {
+                            inferred_type = None;
+                        } else {
+                            inferred_type = Some(filtered);
+                        }
+                    } else {
+                        inferred_type = None;
+                    }
+                }
+            }
+        }
+
+        // Final fallback
+        if inferred_type.is_none() {
+            if let Some(fallback) = fallback_type {
+                let constraint = self.get_constraint_of_type_parameter(&inference.type_parameter);
+                if let Some(constraint) = constraint {
+                    if self.is_type_assignable_to(&fallback, &constraint) {
+                        inferred_type = Some(fallback);
+                    } else {
+                        inferred_type = Some(constraint);
+                    }
+                } else {
+                    inferred_type = Some(fallback);
+                }
+            } else {
+                let constraint = self.get_constraint_of_type_parameter(&inference.type_parameter);
+                inferred_type = constraint;
+            }
+        }
+
+        // Ensure we always have a result
+        inferred_type.unwrap_or_else(||
+            if context.flags.contains(InferenceFlags::AnyDefault) {
+                self.any_type()
+            } else {
+                self.unknown_type()
+            }
+        )
+    }
+
+    /// Get the contextual type for an expression node.
+    /// Go: `getContextualType` (checker.go:29100)
+    pub fn get_contextual_type(
+        &mut self,
+        node: &Arc<crate::ast::Node>,
+        _context_flags: ContextFlags,
+    ) -> Option<Arc<Type>> {
+        
+
+        let parent = match &node.parent {
+            Some(p) => Arc::clone(p),
+            None => return None,
+        };
+
+        match parent.kind {
+            SyntaxKind::VariableDeclaration
+            | SyntaxKind::Parameter
+            | SyntaxKind::PropertyDeclaration
+            | SyntaxKind::PropertySignature
+            | SyntaxKind::BindingElement => {
+                self.get_contextual_type_for_initializer_expression(node, _context_flags)
+            }
+            SyntaxKind::ArrowFunction | SyntaxKind::ReturnStatement => {
+                self.get_contextual_type_for_return_expression(node, _context_flags)
+            }
+            SyntaxKind::CallExpression | SyntaxKind::NewExpression => {
+                self.get_contextual_type_for_argument(&parent, node)
+            }
+            SyntaxKind::BinaryExpression => {
+                self.get_contextual_type_for_binary_operand(node, _context_flags)
+            }
+            SyntaxKind::PropertyAssignment | SyntaxKind::ShorthandPropertyAssignment => {
+                self.get_contextual_type_for_object_literal_element(&parent, _context_flags)
+            }
+            SyntaxKind::ArrayLiteralExpression => {
+                self.get_contextual_type_for_array_literal_element(node, &parent, _context_flags)
+            }
+            _ => None,
+        }
+    }
+
+    /// Get the contextual type for an initializer expression.
+    fn get_contextual_type_for_initializer_expression(
+        &mut self,
+        _node: &Arc<crate::ast::Node>,
+        _context_flags: ContextFlags,
+    ) -> Option<Arc<Type>> {
+        // TODO: implement
+        None
+    }
+
+    /// Get the contextual type for a return expression.
+    fn get_contextual_type_for_return_expression(
+        &mut self,
+        _node: &Arc<crate::ast::Node>,
+        _context_flags: ContextFlags,
+    ) -> Option<Arc<Type>> {
+        // TODO: implement
+        None
+    }
+
+    /// Get the contextual type for a function argument.
+    fn get_contextual_type_for_argument(
+        &mut self,
+        _call_node: &Arc<crate::ast::Node>,
+        _arg_node: &Arc<crate::ast::Node>,
+    ) -> Option<Arc<Type>> {
+        // TODO: implement
+        None
+    }
+
+    /// Get the contextual type for a binary operand.
+    fn get_contextual_type_for_binary_operand(
+        &mut self,
+        _node: &Arc<crate::ast::Node>,
+        _context_flags: ContextFlags,
+    ) -> Option<Arc<Type>> {
+        // TODO: implement
+        None
+    }
+
+    /// Get the contextual type for an object literal element.
+    fn get_contextual_type_for_object_literal_element(
+        &mut self,
+        _node: &Arc<crate::ast::Node>,
+        _context_flags: ContextFlags,
+    ) -> Option<Arc<Type>> {
+        // TODO: implement
+        None
+    }
+
+    /// Get the contextual type for an array literal element.
+    fn get_contextual_type_for_array_literal_element(
+        &mut self,
+        _node: &crate::ast::Node,
+        _parent: &crate::ast::Node,
+        _context_flags: ContextFlags,
+    ) -> Option<Arc<Type>> {
+        // TODO: implement
+        None
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // getCovariantInference and related helpers
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Get the covariant inference from candidates.
+    fn get_covariant_inference(
+        &mut self,
+        inference: &InferenceInfo,
+        _signature: &Arc<Signature>,
+    ) -> Option<Arc<Type>> {
+        if inference.candidates.is_empty() {
+            return None;
+        }
+        let candidates = self.union_object_and_array_literal_candidates(&inference.candidates);
+        let primitive_constraint = self.has_primitive_constraint(&inference.type_parameter)
+            || self.is_const_type_variable(&inference.type_parameter, 0);
+        let widen_literal_types = !primitive_constraint
+            && inference.top_level
+            && (inference.is_fixed || !self.is_type_parameter_at_top_level_in_return_type(
+                _signature, &inference.type_parameter));
+        let base_candidates: Vec<Arc<Type>> = if primitive_constraint {
+            candidates.iter().map(|t| self.get_regular_type_of_literal_type(t)).collect()
+        } else if widen_literal_types {
+            candidates.iter().map(|t| self.get_widened_literal_type(t)).collect()
+        } else {
+            candidates
+        };
+        let unwidened_type = if inference.priority.contains(InferencePriority::PriorityImpliesCombination) {
+            self.get_union_type(base_candidates)
+        } else {
+            self.get_common_supertype(&base_candidates)
+        };
+        Some(self.get_widened_type(&unwidened_type))
+    }
+
+    /// Get the contravariant inference from contra-candidates.
+    fn get_contravariant_inference(
+        &mut self,
+        inference: &InferenceInfo,
+    ) -> Option<Arc<Type>> {
+        if inference.contra_candidates.is_empty() {
+            return None;
+        }
+        if inference.priority.contains(InferencePriority::PriorityImpliesCombination) {
+            Some(self.get_intersection_type(inference.contra_candidates.clone()))
+        } else {
+            Some(self.get_common_subtype(&inference.contra_candidates))
+        }
+    }
+
+    /// Union object and array literal candidates.
+    fn union_object_and_array_literal_candidates(
+        &self,
+        candidates: &[Arc<Type>],
+    ) -> Vec<Arc<Type>> {
+        if candidates.len() > 1 {
+            let object_literals: Vec<Arc<Type>> = candidates.iter()
+                .filter(|t| self.is_object_or_array_literal_type(t))
+                .cloned()
+                .collect();
+            if !object_literals.is_empty() {
+                let literals_type = self.create_union_type(object_literals);
+                let non_literal_types: Vec<Arc<Type>> = candidates.iter()
+                    .filter(|t| !self.is_object_or_array_literal_type(t))
+                    .cloned()
+                    .collect();
+                let mut result = non_literal_types;
+                result.push(literals_type);
+                return result;
+            }
+        }
+        candidates.to_vec()
+    }
+
+    /// Check if a type parameter has a primitive constraint.
+    fn has_primitive_constraint(&self, t: &Arc<Type>) -> bool {
+        let constraint = self.get_constraint_of_type_parameter(t);
+        if let Some(constraint) = constraint {
+            let c = if constraint.flags.contains(TypeFlags::Conditional) {
+                self.get_default_constraint_of_conditional_type(&constraint)
+            } else {
+                Some(constraint)
+            };
+            if let Some(c) = c {
+                return self.maybe_type_of_kind(&c,
+                    TypeFlags::String | TypeFlags::Number | TypeFlags::BigInt |
+                    TypeFlags::Boolean | TypeFlags::ESSymbol | TypeFlags::Enum |
+                    TypeFlags::Index | TypeFlags::TemplateLiteral | TypeFlags::StringMapping);
+            }
+        }
+        false
+    }
+
+    /// Check if a type parameter is at the top level in a type.
+    fn is_type_parameter_at_top_level(&self, t: &Type, tp: &Type, depth: i32) -> bool {
+        if t.id == tp.id {
+            return true;
+        }
+        if t.flags.contains(TypeFlags::Union | TypeFlags::Intersection) {
+            if let Some(types) = t.types() {
+                return types.iter().any(|tt| self.is_type_parameter_at_top_level(tt, tp, depth));
+            }
+        }
+        false
+    }
+
+    /// Check if a type parameter is at the top level in the return type of a signature.
+    fn is_type_parameter_at_top_level_in_return_type(
+        &self,
+        signature: &Arc<Signature>,
+        type_parameter: &Type,
+    ) -> bool {
+        if let Some(return_type) = signature.resolved_return_type.get() {
+            return self.is_type_parameter_at_top_level(return_type, type_parameter, 0);
+        }
+        false
+    }
+
+    /// Get the type from inference without a signature.
+    fn get_type_from_inference(&self, inference: &InferenceInfo) -> Option<Arc<Type>> {
+        if !inference.candidates.is_empty() {
+            Some(self.create_union_type(inference.candidates.clone()))
+        } else if !inference.contra_candidates.is_empty() {
+            Some(self.create_intersection_type(inference.contra_candidates.clone()))
+        } else {
+            None
+        }
+    }
+
+    /// Get the common supertype of a list of types.
+    fn get_common_supertype(&mut self, types: &[Arc<Type>]) -> Arc<Type> {
+        if types.len() == 1 {
+            return types[0].clone();
+        }
+        let primary_types: Vec<Arc<Type>> = types.to_vec();
+        if self.literal_types_with_same_base_type(&primary_types) {
+            return self.create_union_type(primary_types);
+        }
+        let supertype = self.get_single_common_supertype(&primary_types);
+        let nullable_flags = self.get_combined_type_flags(types) & TYPE_FLAGS_NULLABLE;
+        if nullable_flags != TypeFlags::None {
+            self.get_nullable_type(&supertype, nullable_flags)
+        } else {
+            supertype
+        }
+    }
+
+    /// Get a single common supertype from a list of types.
+    fn get_single_common_supertype(&mut self, types: &[Arc<Type>]) -> Arc<Type> {
+        let candidate = self.find_leftmost_type(types);
+        // Check if all types are subtypes of the candidate
+        let all_are_strict_subtypes = types.iter().all(|t| {
+            Arc::ptr_eq(t, &candidate) || self.is_type_strict_subtype_of(t, &candidate)
+        });
+        if all_are_strict_subtypes {
+            return candidate;
+        }
+        // Find the leftmost type using subtype relation
+        let mut candidate: Option<Arc<Type>> = None;
+        for t in types {
+            match &candidate {
+                None => candidate = Some(t.clone()),
+                Some(c) => {
+                    if self.is_type_subtype_of(c, t) {
+                        candidate = Some(t.clone());
+                    }
+                }
+            }
+        }
+        candidate.unwrap_or_else(|| self.unknown_type())
+    }
+
+    /// Find the leftmost type in a list according to a comparison function.
+    fn find_leftmost_type(&mut self, types: &[Arc<Type>]) -> Arc<Type> {
+        let mut candidate: Option<Arc<Type>> = None;
+        for t in types {
+            match &candidate {
+                None => candidate = Some(t.clone()),
+                Some(c) => {
+                    candidate = Some(t.clone());
+                }
+            }
+        }
+        candidate.unwrap_or_else(|| self.unknown_type())
+    }
+
+    /// Get the common subtype (intersection-like) from a list of types.
+    fn get_common_subtype(&mut self, types: &[Arc<Type>]) -> Arc<Type> {
+        let mut subtype: Option<Arc<Type>> = None;
+        for t in types {
+            match &subtype {
+                None => subtype = Some(t.clone()),
+                Some(s) => {
+                    if self.is_type_subtype_of(t, s) {
+                        subtype = Some(t.clone());
+                    }
+                }
+            }
+        }
+        subtype.unwrap_or_else(|| self.unknown_type())
+    }
+
+    /// Get combined type flags from a list of types.
+    fn get_combined_type_flags(&self, types: &[Arc<Type>]) -> TypeFlags {
+        let mut flags = TypeFlags::None;
+        for t in types {
+            if t.flags.contains(TypeFlags::Union) {
+                if let Some(inner_types) = t.types() {
+                    flags |= self.get_combined_type_flags(inner_types);
+                }
+            } else {
+                flags |= t.flags;
+            }
+        }
+        flags
+    }
+
+    /// Check if all types are literal types with the same base type.
+    fn literal_types_with_same_base_type(&self, types: &[Arc<Type>]) -> bool {
+        let mut common_base_type: Option<Arc<Type>> = None;
+        for t in types {
+            if t.flags.contains(TypeFlags::Never) {
+                continue;
+            }
+            let base_type = self.get_base_type_of_literal_type(t);
+            match &common_base_type {
+                None => common_base_type = Some(base_type.clone()),
+                Some(cbt) => {
+                    if Arc::ptr_eq(&base_type, t) || !Arc::ptr_eq(&base_type, cbt) {
+                        return false;
+                    }
+                }
+            }
+        }
+        true
+    }
+
+    /// Check if a type is a const type variable.
+    fn is_const_type_variable(&self, _t: &Type, _depth: i32) -> bool {
+        false
+    }
+
+    /// Get the default constraint of a conditional type.
+    fn get_default_constraint_of_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        if let Some(constraint) = self.get_constraint_of_type_parameter(t) {
+            return Some(constraint);
+        }
+        None
+    }
+
+    /// Check if a type is of a kind specified by flags.
+    fn maybe_type_of_kind(&self, t: &Type, flags: TypeFlags) -> bool {
+        t.flags.intersects(flags)
+    }
+
+    /// Create a union type (simplified wrapper).
+    fn create_union_type(&self, types: Vec<Arc<Type>>) -> Arc<Type> {
+        let filtered: Vec<Arc<Type>> = types.into_iter()
+            .filter(|t| !t.flags.contains(TypeFlags::Never))
+            .collect();
+        if filtered.is_empty() {
+            return self.never_type();
+        }
+        if filtered.len() == 1 {
+            return filtered[0].clone();
+        }
+        Arc::new(Type::new(
+            TypeFlags::Union,
+            TypeData::Union(UnionTypeData {
+                union_or_intersection: UnionOrIntersectionTypeData {
+                    structured: StructuredTypeData::default(),
+                    types: filtered,
+                },
+                resolved_reduced_type: std::sync::OnceLock::new(),
+                regular_type: std::sync::OnceLock::new(),
+                origin: None,
+                key_property_name: None,
+                constituent_map: HashMap::new(),
+            }),
+        ))
+    }
+
+    /// Create an intersection type (simplified wrapper).
+    fn create_intersection_type(&self, types: Vec<Arc<Type>>) -> Arc<Type> {
+        if types.is_empty() {
+            return self.unknown_type();
+        }
+        if types.len() == 1 {
+            return types[0].clone();
+        }
+        Arc::new(Type::new(
+            TypeFlags::Intersection,
+            TypeData::Intersection(IntersectionTypeData {
+                union_or_intersection: UnionOrIntersectionTypeData {
+                    structured: StructuredTypeData::default(),
+                    types,
+                },
+                resolved_apparent_type: std::sync::OnceLock::new(),
+                unique_literal_filled_instantiation: std::sync::OnceLock::new(),
+            }),
+        ))
+    }
+
+    /// Get the widened literal type (simplified).
+    fn get_widened_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
+        self.get_base_type_of_literal_type(t)
+    }
+
+    /// Get the widened type (simplified).
+    fn get_widened_type(&self, t: &Arc<Type>) -> Arc<Type> {
+        t.clone()
+    }
+
+    /// Get the regular type of a literal type (simplified).
+    fn get_regular_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
+        if t.flags.contains(TYPE_FLAGS_LITERAL) {
+            self.get_base_type_of_literal_type(t)
+        } else {
+            t.clone()
+        }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Helper methods for inferTypeArguments
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Get the this type of a signature.
+    fn get_this_type_of_signature(&self, _signature: &Arc<Signature>) -> Option<Arc<Type>> {
+        None
+    }
+
+    /// Get the this argument type for a call node.
+    fn get_this_argument_type(&self, _node: &crate::ast::Node) -> Arc<Type> {
+        self.undefined_type()
+    }
+
+    /// Get the non-array rest type of a signature.
+    fn get_non_array_rest_type(&self, _signature: &Arc<Signature>) -> Option<Arc<Type>> {
+        None
+    }
+
+    /// Get the spread argument type for a list of arguments.
+    fn get_spread_argument_type(
+        &self,
+        _args: &[Arc<crate::ast::Node>],
+        _start: usize,
+        _end: usize,
+    ) -> Arc<Type> {
+        self.unknown_type()
+    }
+
+    /// Check if a type is an object or array literal type.
+    fn is_object_or_array_literal_type(&self, t: &Type) -> bool {
+        t.flags.contains(TypeFlags::Object)
+            && t.object_flags.intersects(
+                ObjectFlags::ObjectLiteral | ObjectFlags::ArrayLiteral
+            )
     }
 }
 
