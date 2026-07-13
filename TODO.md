@@ -9,7 +9,7 @@
 - Rust crate 当前名为 `tsox`，入口在 `src/main.rs`，库入口在 `src/lib.rs`。
 - Rust 侧已经有模块骨架：`ast`、`binder`、`checker`、`compiler`、`execute`、`parser`、`scanner`、`printer`、`tsoptions`、`vfs` 等。
 - `cargo test` 当前通过：589 个 lib 单测 + 2 个 emit parity 测试 + 106 个 checker parity 测试通过。
-- 关键缺口：Checker `check_source_file` 已实现基础标识符解析 + TS2304 诊断，但缺类型推断、relater、flow narrowing；Binder 缺 flow graph 与 name resolver；module resolution、watch/build/incremental、fourslash/baseline、npm/vscode 包装尚未迁移到 Rust 方案。
+- 关键缺口：Checker `check_source_file` 已实现基础标识符解析 + TS2304 诊断；relater 基础规则已实现；但缺 relater 完整规则、类型推断、flow narrowing；Binder 缺完整 flow graph 构建、name resolver；module resolution、watch/build/incremental、fourslash/baseline、npm/vscode 包装尚未迁移到 Rust 方案。
 
 ## 2026-07-12 迁移进度快照
 
@@ -17,8 +17,8 @@
 |------|-----------|---------|--------|------|
 | Scanner | 1558 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 已完成；缺 trivia 节点、完整 regex 校验 |
 | Parser | 7115 | 9251 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 已完成；缺 reparser/jsdoc |
-| Binder | 614 | ~4000 | ~15% | 符号声明 + 容器递归绑定（函数参数/类成员/嵌套作用域）已完成；缺 flow graph、name resolver |
-| Checker | 5741 | ~50K+ | ~11% | 类型数据结构完整；`check_source_file` 已实现基础标识符解析 + TS2304 诊断；106 个 checker parity fixtures 通过（P3.14 ✅）；缺 relater/inference/flow/jsx/jsdoc |
+| Binder | 614 | ~4000 | ~15% | 符号声明 + 容器递归绑定 + FlowNode 数据结构 + START/UNREACHABLE 初始化已完成；缺完整 flow graph 构建、name resolver |
+| Checker | 5741 | ~50K+ | ~11% | 类型数据结构完整；`check_source_file` 已实现基础标识符解析 + TS2304 诊断；relater 基础规则（any/unknown/never/基本类型/字面量）已实现；106 个 checker parity fixtures 通过（P3.14 ✅）；缺 relater 完整规则、inference、flow narrowing、jsx/jsdoc |
 | Compiler | 743 | — | 基础 | Program 创建/解析/绑定/emit pipeline 已通；checker 已接入并输出基础 TS2304 诊断 |
 | Emitter | 774 | — | 基础 | JS emit 基础；缺 transformer 体系 |
 | Printer | 1568 | — | 基础 | 节点→文本基础 |
@@ -410,6 +410,9 @@ Rust 现状：
 
 ### P3.1 Binder 控制流图（checker narrowing 前置依赖）
 
+- [x] FlowNode 数据结构定义（`src/core/symbol/flow.rs`）。
+- [x] Binder 初始化 `START` 和 `UNREACHABLE` flow 节点。
+- [x] 变量声明时设置 flow node（`symbol_map.set_flow_node`）。
 - [ ] 迁移 `internal/binder/binder.go` 中的 flow 构建逻辑（~1500 行）。
 - [ ] `ASSIGNMENT` flow node：变量赋值时创建。
 - [ ] `TRUE_CONDITION` / `FALSE_CONDITION`：`if (x)` / `while (x)` 分支条件。
@@ -417,7 +420,7 @@ Rust 现状：
 - [ ] `LOOP_LABEL` / `BRANCH_LABEL`：break/continue 标签。
 - [ ] `ARRAY_MUTATION`：方法调用副作用。
 - [ ] `CALL` flow node：函数调用对 narrow 类型的影响。
-- [ ] `REduceLabel` / `Shared` / `Referenced` 后处理。
+- [ ] `ReduceLabel` / `Shared` / `Referenced` 后处理。
 
 ### P3.1a Binder 容器递归绑定 ✅
 
@@ -468,10 +471,11 @@ Rust 现状：
 
 ### P3.7 Checker 类型关系（relater 完整规则）
 
-- [ ] 迁移 `internal/checker/relater.go`（5006 行）到 `src/checker/relater.rs`（当前 423 行）。
-- [ ] `is_type_assignable_to` 完整规则：基本类型、字面量、union/intersection、对象、数组、tuple、函数、泛型、条件类型、映射类型。
-- [ ] `is_type_subtype_of` / `is_type_strict_subtype_of`。
-- [ ] `is_type_comparable_to`。
+- [x] 迁移 `internal/checker/relater.go` 基础骨架到 `src/checker/relater.rs`（当前 423 行，Go 原版 5006 行）。
+- [x] `is_type_assignable_to` 基础规则：any、unknown、never、基本类型、字面量（`isSimpleTypeRelatedTo`）。
+- [x] `is_type_subtype_of` / `is_type_comparable_to` 基础实现。
+- [ ] `is_type_assignable_to` 完整规则：union/intersection、对象、数组、tuple、函数、泛型、条件类型、映射类型。
+- [ ] `is_type_strict_subtype_of`。
 - [ ] `relation_comparison_result` 缓存与递归保护。
 
 ### P3.8 Checker 类型推断
