@@ -1473,11 +1473,13 @@ impl Checker {
             }
             SyntaxKind::EnumDeclaration => {
                 // Check enum member initializers.
+                self.push_scope(node);
                 if let crate::ast::NodeData::EnumDeclaration(data) = &node.data {
                     for member in data.members.iter() {
                         self.check_enum_member(member);
                     }
                 }
+                self.pop_scope();
             }
             SyntaxKind::ExportAssignment => {
                 // `export default expr` or `export = expr`
@@ -1962,7 +1964,8 @@ impl Checker {
     /// Only symbols whose flags intersect with `meaning` are considered.
     /// This mirrors the `meaning` parameter in Go's `NameResolver.Resolve`.
     ///
-    /// Go: `NameResolver.Resolve` — scope stack walk + globals + special symbols.
+    /// Go: `NameResolver.Resolve` — scope stack walk → module/enum exports →
+    /// class/interface type params → globals → `arguments` → `require`.
     pub fn resolve_identifier_with_meaning(
         &self,
         node: &Arc<Node>,
@@ -1980,7 +1983,6 @@ impl Checker {
             if let Some(locals) = symbol_map.locals.get(&container_id) {
                 if let Some(sym) = locals.get(name) {
                     if sym.flags.intersects(meaning) {
-                        // Follow alias chain if the symbol is a pure alias.
                         return self.follow_alias(sym);
                     }
                 }
@@ -1990,8 +1992,36 @@ impl Checker {
             if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
                 if let Some(sym) = container_sym.members.get(name) {
                     if sym.flags.intersects(meaning) {
-                        // Follow alias chain if the symbol is a pure alias.
                         return self.follow_alias(sym);
+                    }
+                }
+                // Module/namespace export lookup.
+                if container_sym.flags.intersects(SymbolFlags::MODULE) {
+                    if let Some(sym) = container_sym.exports.get(name) {
+                        // Skip pure alias export specifiers (e.g. `export { X }`).
+                        let is_export_specifier = sym.flags == SymbolFlags::Alias
+                            && sym.declarations.iter().any(|d| d.kind == SyntaxKind::ExportSpecifier);
+                        if !is_export_specifier {
+                            return self.follow_alias(sym);
+                        }
+                    }
+                }
+                // Enum export lookup.
+                if container_sym.flags.intersects(SymbolFlags::ENUM) {
+                    if let Some(sym) = container_sym.exports.get(name) {
+                        if sym.flags.intersects(meaning) {
+                            return self.follow_alias(sym);
+                        }
+                    }
+                }
+                // Class/Interface type parameter lookup.
+                if container_sym.flags.intersects(SymbolFlags::Class)
+                    || container_sym.flags.intersects(SymbolFlags::Interface)
+                {
+                    if let Some(sym) = container_sym.members.get(name) {
+                        if sym.flags.intersects(meaning & SymbolFlags::TYPE) {
+                            return self.follow_alias(sym);
+                        }
                     }
                 }
             }
@@ -2009,7 +2039,6 @@ impl Checker {
         }
 
         // 3. Check globals (lib.d.ts symbols).
-        // Go adds SymbolFlags::GlobalLookup to the meaning when looking up globals.
         if let Some(sym) = self.globals.get(name) {
             if sym.flags.intersects(meaning.union(SymbolFlags::GlobalLookup)) {
                 return Some(Arc::clone(sym));
