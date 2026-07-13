@@ -992,6 +992,31 @@ impl Checker {
         None
     }
 
+    // Get the resolved (true) type of a conditional type
+    pub fn get_resolved_type_of_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        if let TypeData::Conditional(ct) = &t.data {
+            // Try resolved true type first, then resolved false type
+            if let Some(rt) = ct.resolved_true_type.get() {
+                return Some(rt.clone());
+            }
+            if let Some(rt) = ct.resolved_false_type.get() {
+                return Some(rt.clone());
+            }
+        }
+        None
+    }
+
+    // Get the constraint of a mapped type
+    pub fn get_constraint_of_mapped_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        if let TypeData::Mapped(mt) = &t.data {
+            return mt.constraint_type.clone();
+        }
+        if let TypeData::ReverseMapped(rm) = &t.data {
+            return rm.constraint_type.clone();
+        }
+        None
+    }
+
     // Get the true type of a conditional type
     pub fn get_true_type_of_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if let TypeData::Conditional(ct) = &t.data {
@@ -1230,7 +1255,22 @@ impl Checker {
         if symbol.flags.contains(SymbolFlags::BlockScopedVariable)
             || symbol.flags.contains(SymbolFlags::FunctionScopedVariable)
         {
-            // TODO: get type from declaration
+            // Try to get cached type from the value declaration node
+            if let Some(decl) = &symbol.value_declaration {
+                if let Some(links) = self.type_node_links.get(decl) {
+                    if let Some(ref t) = links.resolved_type {
+                        return Arc::clone(t);
+                    }
+                }
+            }
+            // Try to get type from declarations
+            for decl in &symbol.declarations {
+                if let Some(links) = self.type_node_links.get(decl) {
+                    if let Some(ref t) = links.resolved_type {
+                        return Arc::clone(t);
+                    }
+                }
+            }
             self.get_any_type()
         } else {
             self.get_any_type()
@@ -1488,10 +1528,14 @@ impl Checker {
 
     fn check_variable_declaration(&mut self, node: &Arc<Node>) {
         if let crate::ast::NodeData::VariableDeclaration(data) = &node.data {
-            // The name is a declaration, not a reference — skip it.
-            // The type annotation is in type position — skip it.
             if let Some(init) = &data.initializer {
                 self.check_expression(init);
+                // If there's no type annotation, infer the type from the initializer
+                if data.type_node.is_none() {
+                    let init_type = self.get_type_of_node(init);
+                    // Cache the inferred type for the variable name node
+                    self.type_node_links.get_or_default(&data.name).resolved_type = Some(init_type);
+                }
             }
         }
     }

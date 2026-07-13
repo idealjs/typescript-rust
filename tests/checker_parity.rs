@@ -1015,3 +1015,24 @@ fn checker_global_this_is_resolvable() {
     let count = diags.iter().filter(|d| d.code == 2304).count();
     assert_eq!(count, 0, "Expected 0 TS2304 errors (globalThis is a global), got {}", count);
 }
+
+#[test]
+fn checker_type_inference_variable_declaration() {
+    // Variable declaration with initializer infers the type.
+    let diags = check_source("let x = 42; let y = x;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_type_inference_string_variable() {
+    // Variable declaration with string initializer.
+    let diags = check_source("let x = \"hello\"; let y = x;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_type_inference_binary_expression() {
+    // Variable with binary expression initializer.
+    let diags = check_source("let x = 1 + 2;");
+    assert_no_diagnostics(&diags);
+}

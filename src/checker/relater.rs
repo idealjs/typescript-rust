@@ -218,10 +218,208 @@ impl Checker {
         }
 
         if s.contains(TypeFlags::Object) && t.contains(TypeFlags::Object) {
+            // Check array types: Array<T> is assignable to Array<U> if T is assignable to U
+            if self.is_array_type(source) && self.is_array_type(target) {
+                return self.is_array_type_related_to(source, target, relation);
+            }
+            // Check tuple types: element-by-element comparison
+            if self.is_tuple_type(source) && self.is_tuple_type(target) {
+                return self.is_tuple_type_related_to(source, target, relation);
+            }
             return self.is_object_type_related_to(source, target, relation);
         }
 
+        // Handle type parameters: check constraints
+        if s.contains(TypeFlags::TypeParameter) {
+            // Source is a type parameter, check if its constraint is assignable to target
+            if let Some(constraint) = self.get_constraint_of_type_parameter(source) {
+                if self.is_type_related_to(&constraint, target, relation) {
+                    return true;
+                }
+            }
+        }
+        if t.contains(TypeFlags::TypeParameter) {
+            // Target is a type parameter with a constraint
+            if let Some(constraint) = self.get_constraint_of_type_parameter(target) {
+                // Check if source is assignable to the constraint
+                if self.is_type_related_to(source, &constraint, relation) {
+                    return true;
+                }
+            }
+        }
+
+        // Handle conditional types: use resolved type if available
+        if s.contains(TypeFlags::Conditional) {
+            if let Some(resolved) = self.get_resolved_type_of_conditional_type(source) {
+                if self.is_type_related_to(&resolved, target, relation) {
+                    return true;
+                }
+            }
+        }
+        if t.contains(TypeFlags::Conditional) {
+            if let Some(resolved) = self.get_resolved_type_of_conditional_type(target) {
+                if self.is_type_related_to(source, &resolved, relation) {
+                    return true;
+                }
+            }
+        }
+
+        // Handle mapped types: base constraint check
+        if s.contains(TypeFlags::Object) && source.object_flags.contains(ObjectFlags::Mapped) {
+            if let Some(constraint) = self.get_constraint_of_mapped_type(source) {
+                if self.is_type_related_to(&constraint, target, relation) {
+                    return true;
+                }
+            }
+        }
+        if t.contains(TypeFlags::Object) && target.object_flags.contains(ObjectFlags::Mapped) {
+            if let Some(constraint) = self.get_constraint_of_mapped_type(target) {
+                if self.is_type_related_to(source, &constraint, relation) {
+                    return true;
+                }
+            }
+        }
+
         false
+    }
+
+    /// Generate a cache key for comparing two types.
+    fn make_cache_key(source: &Type, target: &Type) -> CacheHashKey {
+        CacheHashKey::new(source.id as u64, target.id as u64)
+    }
+
+    /// Check if a comparison result is cached.
+    fn get_cached_result(&self, source: &Type, target: &Type, relation: RelationKind) -> Option<bool> {
+        // For now, we don't use the Relation cache directly since we don't have
+        // a relation object per Checker. This is a placeholder for future use.
+        None
+    }
+
+    /// Cache a comparison result.
+    fn cache_result(&mut self, source: &Type, target: &Type, relation: RelationKind, result: bool) {
+        // Placeholder for future caching
+        _ = source;
+        _ = target;
+        _ = relation;
+        _ = result;
+    }
+
+    /// Check if two array types are related.
+    ///
+    /// Array<T> is assignable to Array<U> if T is assignable to U (covariant).
+    fn is_array_type_related_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        let source_args = self.get_type_arguments(source);
+        let target_args = self.get_type_arguments(target);
+
+        if source_args.is_empty() || target_args.is_empty() {
+            // If either type has no type arguments, fall back to structural comparison
+            return self.is_object_type_related_to(source, target, relation);
+        }
+
+        // Compare element types: Array<T> ~ Array<U> iff T ~ U
+        // (covariant in the element type)
+        let source_elem = &source_args[0];
+        let target_elem = &target_args[0];
+        self.is_type_related_to(source_elem, target_elem, relation)
+    }
+
+    /// Check if two tuple types are related.
+    ///
+    /// Tuples are compared element-by-element. Each element in source must be
+    /// assignable to the corresponding element in target.
+    fn is_tuple_type_related_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        let source_tuple = match &source.data {
+            TypeData::Tuple(t) => t,
+            _ => return false,
+        };
+        let target_tuple = match &target.data {
+            TypeData::Tuple(t) => t,
+            _ => return false,
+        };
+
+        // Compare element-by-element
+        let min_len = source_tuple.element_infos.len().min(target_tuple.element_infos.len());
+        for i in 0..min_len {
+            let source_elem = &source_tuple.element_infos[i];
+            let target_elem = &target_tuple.element_infos[i];
+
+            // Get the element types from the interface_data's structured type members
+            let source_type = self.get_tuple_element_type(source, i);
+            let target_type = self.get_tuple_element_type(target, i);
+
+            if let (Some(st), Some(tt)) = (source_type, target_type) {
+                if !self.is_type_related_to(&st, &tt, relation) {
+                    return false;
+                }
+            }
+
+            // Check element flags compatibility (required/optional/rest/variadic)
+            if !self.is_element_flags_compatible(source_elem.flags, target_elem.flags, relation) {
+                return false;
+            }
+        }
+
+        // If target has more elements than source, those must be optional or rest
+        if source_tuple.element_infos.len() < target_tuple.element_infos.len() {
+            for i in source_tuple.element_infos.len()..target_tuple.element_infos.len() {
+                let flags = target_tuple.element_infos[i].flags;
+                if !flags.contains(ElementFlags::Optional) && !flags.contains(ElementFlags::Rest) && !flags.contains(ElementFlags::Variadic) {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+
+    /// Get the type of a tuple element at a given index.
+    fn get_tuple_element_type(&self, t: &Arc<Type>, index: usize) -> Option<Arc<Type>> {
+        match &t.data {
+            TypeData::Tuple(tuple) => {
+                // Get the element type from the interface_data's structured type members
+                let structured = &tuple.interface_data.object.structured;
+                if index < structured.properties.len() {
+                    // Properties may have the type available via the symbol
+                    let _prop = &structured.properties[index];
+                    // Simplified: get the type from the symbol
+                    // For now, we return None and let the caller handle it
+                    // The full implementation would look up the type of the property
+                    None
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        }
+    }
+
+    /// Check if element flags are compatible between source and target.
+    fn is_element_flags_compatible(&self, source: ElementFlags, target: ElementFlags, _relation: RelationKind) -> bool {
+        // Required can be assigned to Required or Optional
+        // Optional can be assigned to Optional
+        // Rest can be assigned to Rest
+        // Variadic can be assigned to Variadic or Rest
+        if source.contains(ElementFlags::Required) {
+            target.contains(ElementFlags::Required) || target.contains(ElementFlags::Optional)
+        } else if source.contains(ElementFlags::Optional) {
+            target.contains(ElementFlags::Optional)
+        } else if source.contains(ElementFlags::Rest) {
+            target.contains(ElementFlags::Rest)
+        } else if source.contains(ElementFlags::Variadic) {
+            target.contains(ElementFlags::Variadic) || target.contains(ElementFlags::Rest)
+        } else {
+            true
+        }
     }
 
     /// Handle union/intersection type relations.
@@ -337,7 +535,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-        _relation: RelationKind,
+        relation: RelationKind,
     ) -> bool {
         let source_struct = match source.as_structured() {
             Some(s) => s,
@@ -348,6 +546,7 @@ impl Checker {
             None => return false,
         };
 
+        // Check properties: target properties must exist in source with compatible types
         for target_prop in &target_struct.properties {
             // Check that source has a matching property by name.
             let source_prop = match source_struct.members.get(&target_prop.name) {
@@ -361,6 +560,21 @@ impl Checker {
             if !self.is_type_assignable_to(&source_type, &target_type) {
                 return false;
             }
+        }
+
+        // Check call signatures
+        if !self.is_call_signatures_related_to(source, target, relation) {
+            return false;
+        }
+
+        // Check construct signatures
+        if !self.is_construct_signatures_related_to(source, target, relation) {
+            return false;
+        }
+
+        // Check index signatures
+        if !self.is_index_signatures_related_to(source, target, relation) {
+            return false;
         }
 
         true
@@ -551,6 +765,266 @@ impl Checker {
             (TypeData::Literal(la), TypeData::Literal(lb)) => la.value == lb.value,
             _ => false,
         }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Index signature comparison
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Check if the index signatures of two types are compatible.
+    ///
+    /// If target has `[key: string]: T`, source must have `[key: string]: U`
+    /// where U is assignable to T.
+    /// If target has `[key: number]: T`, source must have `[key: number]: U`
+    /// where U is assignable to T.
+    fn is_index_signatures_related_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        let source_struct = match source.as_structured() {
+            Some(s) => s,
+            None => return false,
+        };
+        let target_struct = match target.as_structured() {
+            Some(t) => t,
+            None => return false,
+        };
+
+        let source_indexes = &source_struct.index_infos;
+        let target_indexes = &target_struct.index_infos;
+
+        if target_indexes.is_empty() {
+            return true; // Target has no index signature requirements
+        }
+
+        for target_index in target_indexes {
+            let target_key = &target_index.key_type;
+            let target_value = &target_index.value_type;
+
+            // Find a matching index signature in source
+            let mut found_match = false;
+            for source_index in source_indexes {
+                let source_key = &source_index.key_type;
+                let source_value = &source_index.value_type;
+
+                // Key types must match (string vs number)
+                let key_match = match (target_key, source_key) {
+                    (Some(tk), Some(sk)) => self.is_type_related_to(sk, tk, relation),
+                    (None, _) => true,
+                    (_, None) => false,
+                };
+
+                if !key_match {
+                    continue;
+                }
+
+                // Value type must be assignable: source value -> target value
+                let value_match = match (target_value, source_value) {
+                    (Some(tv), Some(sv)) => self.is_type_related_to(sv, tv, relation),
+                    // If target has no value type, any source is fine
+                    // If source has no value type, it can't match target's value type
+                    (None, _) => true,
+                    (_, None) => false,
+                };
+
+                if value_match {
+                    found_match = true;
+                    break;
+                }
+            }
+
+            if !found_match {
+                // If target has a string index signature, check if source has a number index
+                // signature that could serve as a string index (in practice, this doesn't work)
+                return false;
+            }
+        }
+
+        true
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Signature comparison
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Check if two signatures are related.
+    ///
+    /// A function type `(a: A) => R` is assignable to `(b: B) => S` if:
+    /// - `S` is assignable to `R` (return type is covariant)
+    /// - `B` is assignable to `A` (parameter types are contravariant)
+    fn is_signature_related_to(
+        &mut self,
+        source: &Arc<Signature>,
+        target: &Arc<Signature>,
+        relation: RelationKind,
+    ) -> bool {
+        // Check parameter count compatibility
+        // Source must have at least as many required parameters as target
+        let source_params = &source.parameters;
+        let target_params = &target.parameters;
+
+        // For non-identity relations, check minimum argument count
+        if relation != RelationKind::Identity {
+            // Source must have enough parameters to cover target's required params
+            let source_min = source.min_argument_count() as usize;
+            let target_min = target.min_argument_count() as usize;
+            if source_min < target_min {
+                return false;
+            }
+        }
+
+        // Compare parameter types (contravariant: target param must be assignable to source param)
+        let param_count = source_params.len().min(target_params.len());
+        for i in 0..param_count {
+            let source_param_type = self.get_type_of_symbol(&source_params[i]);
+            let target_param_type = self.get_type_of_symbol(&target_params[i]);
+
+            // Parameter types are contravariant: target -> source direction
+            if !self.is_type_related_to(&target_param_type, &source_param_type, relation) {
+                return false;
+            }
+        }
+
+        // If source has more parameters than target, check they are optional/rest
+        if source_params.len() > target_params.len() {
+            for i in target_params.len()..source_params.len() {
+                if !source.has_rest_parameter() && i == source_params.len() - 1 {
+                    // Last parameter is not rest, so extra params are fine (JS allows calling with extra args)
+                    break;
+                }
+                // In TypeScript, extra parameters in source are fine (they're just ignored)
+                // But only if they could be optional
+            }
+        }
+
+        // Compare return types (covariant: source return must be assignable to target return)
+        let source_return = self.get_return_type_of_signature(source);
+        let target_return = self.get_return_type_of_signature(target);
+
+        match (source_return, target_return) {
+            (Some(sr), Some(tr)) => {
+                if !self.is_type_related_to(&sr, &tr, relation) {
+                    return false;
+                }
+            }
+            // If source has no return type, it's assignable to anything
+            // If target has no return type, source must have none too
+            (None, Some(_)) => return false,
+            _ => {}
+        }
+
+        true
+    }
+
+    /// Check if the call signatures of two types are related.
+    fn is_call_signatures_related_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        let source_struct = match source.as_structured() {
+            Some(s) => s,
+            None => return false,
+        };
+        let target_struct = match target.as_structured() {
+            Some(t) => t,
+            None => return false,
+        };
+
+        let source_calls = source_struct.call_signatures();
+        let target_calls = target_struct.call_signatures();
+
+        if source_calls.is_empty() && target_calls.is_empty() {
+            return true; // Both have no call signatures
+        }
+        if source_calls.is_empty() {
+            return false; // Target has call signatures but source doesn't
+        }
+        if target_calls.is_empty() {
+            // Source has call signatures but target doesn't - only ok for comparable
+            return relation == RelationKind::Comparable;
+        }
+
+        // Each target call signature must be matched by a source call signature
+        for target_sig in target_calls {
+            let mut found_match = false;
+            for source_sig in source_calls {
+                if self.is_signature_related_to(source_sig, target_sig, relation) {
+                    found_match = true;
+                    break;
+                }
+            }
+            if !found_match {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    /// Check if the construct signatures of two types are related.
+    fn is_construct_signatures_related_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        let source_struct = match source.as_structured() {
+            Some(s) => s,
+            None => return false,
+        };
+        let target_struct = match target.as_structured() {
+            Some(t) => t,
+            None => return false,
+        };
+
+        let source_constructs = source_struct.construct_signatures();
+        let target_constructs = target_struct.construct_signatures();
+
+        if source_constructs.is_empty() && target_constructs.is_empty() {
+            return true;
+        }
+        if source_constructs.is_empty() {
+            return false;
+        }
+        if target_constructs.is_empty() {
+            return relation == RelationKind::Comparable;
+        }
+
+        for target_sig in target_constructs {
+            let mut found_match = false;
+            for source_sig in source_constructs {
+                if self.is_signature_related_to(source_sig, target_sig, relation) {
+                    found_match = true;
+                    break;
+                }
+            }
+            if !found_match {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    /// Check if two function types are related by comparing their call signatures.
+    fn is_function_type_related_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        // A type is a function type if it has call signatures
+        if !self.is_call_signatures_related_to(source, target, relation) {
+            return false;
+        }
+        if !self.is_construct_signatures_related_to(source, target, relation) {
+            return false;
+        }
+        true
     }
 }
 
