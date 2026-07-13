@@ -1044,6 +1044,181 @@ impl Checker {
 // ────────────────────────────────────────────────────────────────────────────
 
 impl Checker {
+    // ─────────────────────────────────────────────────────────────────────
+    // Type inference
+    // ─────────────────────────────────────────────────────────────────────
+
+    /// Get the type of a node, computing and caching it if necessary.
+    ///
+    /// Go: `Checker.getTypeOfSymbolAtLocation` / `getTypeOfNode`.
+    pub fn get_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        // Check cache first
+        if let Some(links) = self.node_links.get(node) {
+            // We'll store resolved type in node_links or type_node_links
+            let _ = links;
+        }
+        // For now, compute fresh each time
+        self.compute_type_of_node(node)
+    }
+
+    /// Compute the type of a node (without caching).
+    fn compute_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        match node.kind {
+            // Literal types
+            SyntaxKind::NumericLiteral => {
+                if let crate::ast::NodeData::NumericLiteral(data) = &node.data {
+                    return self.infer_number_literal_type(&data.text);
+                }
+                self.number_type()
+            }
+            SyntaxKind::StringLiteral => {
+                if let crate::ast::NodeData::StringLiteral(data) = &node.data {
+                    return self.infer_string_literal_type(&data.text);
+                }
+                self.string_type()
+            }
+            SyntaxKind::NoSubstitutionTemplateLiteral => {
+                self.string_type()
+            }
+            SyntaxKind::TrueKeyword => {
+                self.true_type()
+            }
+            SyntaxKind::FalseKeyword => {
+                self.false_type()
+            }
+            SyntaxKind::NullKeyword => {
+                self.null_type()
+            }
+            SyntaxKind::UndefinedKeyword => {
+                self.undefined_type()
+            }
+            SyntaxKind::BigIntLiteral => {
+                self.bigint_type()
+            }
+            SyntaxKind::ArrayLiteralExpression => {
+                self.get_any_type() // TODO: infer tuple/array type
+            }
+            SyntaxKind::ObjectLiteralExpression => {
+                self.get_any_type() // TODO: infer object type
+            }
+            SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
+                self.get_any_type() // TODO: infer function type
+            }
+            SyntaxKind::Identifier => {
+                self.get_type_of_identifier(node)
+            }
+            // Binary expressions
+            SyntaxKind::BinaryExpression => {
+                self.get_type_of_binary_expression(node)
+            }
+            SyntaxKind::PrefixUnaryExpression | SyntaxKind::PostfixUnaryExpression => {
+                self.get_any_type() // TODO: unary expression type
+            }
+            SyntaxKind::CallExpression => {
+                self.get_any_type() // TODO: return type inference
+            }
+            SyntaxKind::PropertyAccessExpression => {
+                self.get_any_type() // TODO: property access type
+            }
+            SyntaxKind::ElementAccessExpression => {
+                self.get_any_type() // TODO: element access type
+            }
+            SyntaxKind::ParenthesizedExpression => {
+                if let crate::ast::NodeData::ParenthesizedExpression(data) = &node.data {
+                    return self.get_type_of_node(&data.expression);
+                }
+                self.get_any_type()
+            }
+            SyntaxKind::AsExpression | SyntaxKind::SatisfiesExpression => {
+                self.get_any_type() // TODO: use type annotation
+            }
+            _ => {
+                self.get_any_type()
+            }
+        }
+    }
+
+    /// Get the type of an identifier reference.
+    fn get_type_of_identifier(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        if let Some(symbol) = self.resolve_identifier(node) {
+            self.get_type_of_symbol(&symbol)
+        } else {
+            self.get_any_type()
+        }
+    }
+
+    /// Get the type of a symbol.
+    pub fn get_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+        // For now, return any for most symbols
+        // TODO: implement proper symbol type resolution
+        if symbol.flags.contains(SymbolFlags::BlockScopedVariable)
+            || symbol.flags.contains(SymbolFlags::FunctionScopedVariable)
+        {
+            // TODO: get type from declaration
+            self.get_any_type()
+        } else {
+            self.get_any_type()
+        }
+    }
+
+    /// Get the type of a binary expression.
+    fn get_type_of_binary_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        use crate::ast::SyntaxKind::*;
+        if let crate::ast::NodeData::BinaryExpression(data) = &node.data {
+            match data.operator_token.kind {
+                // Arithmetic operators return number
+                PlusToken | MinusToken | AsteriskToken | SlashToken | PercentToken
+                | AsteriskAsteriskToken | LessThanLessThanToken
+                | GreaterThanGreaterThanToken | GreaterThanGreaterThanGreaterThanToken
+                | AmpersandToken | BarToken | CaretToken => {
+                    self.number_type()
+                }
+                // Comparison operators return boolean
+                LessThanToken | GreaterThanToken | LessThanEqualsToken
+                | GreaterThanEqualsToken | EqualsEqualsToken
+                | ExclamationEqualsToken | EqualsEqualsEqualsToken
+                | ExclamationEqualsEqualsToken | InKeyword | InstanceOfKeyword => {
+                    self.boolean_type()
+                }
+                // Logical operators return union of operands (simplified)
+                AmpersandAmpersandToken | BarBarToken | QuestionQuestionToken => {
+                    self.get_type_of_node(&data.left)
+                }
+                // Assignment operators return the right-hand side type
+                EqualsToken | PlusEqualsToken | MinusEqualsToken
+                | AsteriskEqualsToken | SlashEqualsToken | PercentEqualsToken
+                | AsteriskAsteriskEqualsToken
+                | LessThanLessThanEqualsToken
+                | GreaterThanGreaterThanEqualsToken
+                | GreaterThanGreaterThanGreaterThanEqualsToken
+                | AmpersandEqualsToken | BarEqualsToken | CaretEqualsToken
+                | BarBarEqualsToken | AmpersandAmpersandEqualsToken
+                | QuestionQuestionEqualsToken => {
+                    self.get_type_of_node(&data.right)
+                }
+                _ => self.get_any_type(),
+            }
+        } else {
+            self.get_any_type()
+        }
+    }
+
+    /// Get a number literal type (inferred).
+    fn infer_number_literal_type(&mut self, text: &str) -> Arc<Type> {
+        // For now, just return number type
+        // TODO: create literal type
+        let _ = text;
+        self.number_type()
+    }
+
+    /// Get a string literal type (inferred).
+    fn infer_string_literal_type(&mut self, text: &str) -> Arc<Type> {
+        // For now, just return string type
+        // TODO: create literal type
+        let _ = text;
+        self.string_type()
+    }
+
     /// Check a statement node.
     ///
     /// Go: `Checker.checkStatement`. Dispatches by node kind.

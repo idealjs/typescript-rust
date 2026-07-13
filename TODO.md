@@ -495,11 +495,18 @@ Rust 现状：
 
 ### P3.8 Checker 类型推断
 
+- [x] `get_type_of_node` 基础框架：节点类型推断入口。
+- [x] 字面量类型推断：数字、字符串、布尔、null、undefined、bigint。
+- [x] 二元表达式类型推断：算术→number、比较→boolean、逻辑/赋值→操作数类型。
+- [x] `get_type_of_symbol` 符号类型推断骨架。
+- [x] 括号表达式透传类型。
 - [ ] 迁移 `internal/checker/inference.go`（1651 行）到 `src/checker/inference.rs`。
 - [ ] 泛型推断：`inferTypeArguments`。
 - [ ] contextual typing：`getContextualType`。
-- [ ] 二元运算符类型推断。
+- [ ] 变量声明初始化器类型推断（写入 symbol 类型）。
+- [ ] 函数返回值推断。
 - [ ] 条件类型 `infer R` 解析。
+- [ ] 类型推断缓存（node_links.resolved_type）。
 
 ### P3.9 Checker 控制流 narrowing
 
