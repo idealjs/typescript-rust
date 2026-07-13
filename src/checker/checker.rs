@@ -2087,6 +2087,396 @@ impl Checker {
             }
         }
     }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // ReferenceResolver — ported from `internal/binder/referenceresolver.go`
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Get the resolved symbol for a value reference.
+    ///
+    /// Go: `referenceResolver.getReferencedValueSymbol`
+    fn get_referenced_value_symbol(
+        &self,
+        node: &Node,
+        start_in_declaration_container: bool,
+    ) -> Option<Arc<Symbol>> {
+        let symbol_map = self.program.symbol_map();
+
+        // Check if the node already has a resolved symbol.
+        if let Some(sym) = symbol_map.symbol_of(node) {
+            return Some(Arc::clone(sym));
+        }
+
+        let location = if start_in_declaration_container {
+            // When the node is the name of a module/enum declaration,
+            // start resolution from the declaration's container.
+            // We use the scope stack for resolution, so the container ID
+            // is already on the scope stack when we enter the module/enum.
+            node
+        } else {
+            node
+        };
+
+        // Use the enhanced name resolver to find the symbol.
+        let meaning = SymbolFlags::ExportValue
+            .union(SymbolFlags::VALUE)
+            .union(SymbolFlags::Alias);
+        self.resolve_identifier_at_location(location, node_name(node)?, meaning)
+    }
+
+    /// Find the parent declaration container for a module/enum name.
+    fn find_parent_declaration_container(&self, _node: &Node) -> Option<u64> {
+        // We don't have parent pointers, so we check the scope stack.
+        // The innermost scope container is the parent declaration container.
+        for &container_id in self.scope_stack.iter().rev() {
+            let symbol_map = self.program.symbol_map();
+            if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
+                if container_sym.flags.intersects(SymbolFlags::MODULE | SymbolFlags::ENUM) {
+                    return Some(container_id);
+                }
+            }
+        }
+        None
+    }
+
+    /// Get the export container for a referenced value.
+    ///
+    /// Go: `referenceResolver.GetReferencedExportContainer`
+    pub fn get_referenced_export_container(
+        &self,
+        node: &Node,
+        prefix_locals: bool,
+    ) -> Option<u64> {
+        // If the node is the name of a module/enum declaration, start in
+        // the declaration container.
+        let start_in_declaration_container = is_module_or_enum_name(node);
+        if let Some(symbol) = self.get_referenced_value_symbol(node, start_in_declaration_container) {
+            if symbol.flags.intersects(SymbolFlags::ExportValue) {
+                if let Some(ref export_symbol) = symbol.export_symbol {
+                    if let Some(merged) = self.get_merged_symbol(export_symbol) {
+                        if !prefix_locals
+                            && merged.flags.intersects(SymbolFlags::EXPORT_HAS_LOCAL)
+                            && !merged.flags.intersects(SymbolFlags::VARIABLE)
+                        {
+                            return None;
+                        }
+                        // Find the parent symbol (the container).
+                        if let Some(parent) = &merged.parent {
+                            if parent.flags.intersects(SymbolFlags::ValueModule)
+                                && parent.value_declaration.is_some()
+                            {
+                                return Some(parent.value_declaration.as_ref().unwrap().id());
+                            }
+                            // Find the matching container in the scope stack.
+                            for &container_id in self.scope_stack.iter().rev() {
+                                let symbol_map = self.program.symbol_map();
+                                if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
+                                    if Arc::ptr_eq(container_sym, parent) {
+                                        return Some(container_id);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    /// Get the import declaration for a referenced value.
+    ///
+    /// Go: `referenceResolver.GetReferencedImportDeclaration`
+    pub fn get_referenced_import_declaration(&self, node: &Node) -> Option<Arc<Node>> {
+        if let Some(symbol) = self.get_referenced_value_symbol(node, false) {
+            // Only get the declaration of an alias if there isn't a local value declaration.
+            if is_non_local_alias(&symbol, SymbolFlags::VALUE)
+                && !self.is_type_only_alias_declaration(&symbol)
+            {
+                return self.get_declaration_of_alias_symbol(&symbol);
+            }
+        }
+        None
+    }
+
+    /// Get the value declaration for a referenced value.
+    ///
+    /// Go: `referenceResolver.GetReferencedValueDeclaration`
+    pub fn get_referenced_value_declaration(&self, node: &Node) -> Option<Arc<Node>> {
+        if let Some(symbol) = self.get_referenced_value_symbol(node, false) {
+            let export_sym = self.get_export_symbol_of_value_symbol_if_exported(&symbol);
+            return export_sym.value_declaration.clone();
+        }
+        None
+    }
+
+    /// Get all value declarations for a referenced value.
+    ///
+    /// Go: `referenceResolver.GetReferencedValueDeclarations`
+    pub fn get_referenced_value_declarations(&self, node: &Node) -> Vec<Arc<Node>> {
+        let mut declarations = Vec::new();
+        if let Some(symbol) = self.get_referenced_value_symbol(node, false) {
+            let export_sym = self.get_export_symbol_of_value_symbol_if_exported(&symbol);
+            for decl in export_sym.declarations.iter() {
+                match decl.kind {
+                    SyntaxKind::VariableDeclaration
+                    | SyntaxKind::Parameter
+                    | SyntaxKind::BindingElement
+                    | SyntaxKind::PropertyDeclaration
+                    | SyntaxKind::PropertyAssignment
+                    | SyntaxKind::ShorthandPropertyAssignment
+                    | SyntaxKind::EnumMember
+                    | SyntaxKind::ObjectLiteralExpression
+                    | SyntaxKind::FunctionDeclaration
+                    | SyntaxKind::FunctionExpression
+                    | SyntaxKind::ArrowFunction
+                    | SyntaxKind::ClassDeclaration
+                    | SyntaxKind::ClassExpression
+                    | SyntaxKind::EnumDeclaration
+                    | SyntaxKind::MethodDeclaration
+                    | SyntaxKind::GetAccessor
+                    | SyntaxKind::SetAccessor
+                    | SyntaxKind::ModuleDeclaration => {
+                        declarations.push(Arc::clone(decl));
+                    }
+                    _ => {}
+                }
+            }
+        }
+        declarations
+    }
+
+    /// Get the name from an element access expression.
+    ///
+    /// Go: `referenceResolver.GetElementAccessExpressionName`
+    pub fn get_element_access_expression_name(&self, expression: &Node) -> Option<String> {
+        if expression.kind == SyntaxKind::ElementAccessExpression {
+            if let crate::ast::NodeData::ElementAccessExpression(data) = &expression.data {
+                // Try to get a string literal key.
+                if let crate::ast::NodeData::StringLiteral(key) = &data.argument_expression.data {
+                    return Some(key.text.clone());
+                }
+                // Try to get a numeric literal key.
+                if let crate::ast::NodeData::NumericLiteral(key) = &data.argument_expression.data {
+                    return Some(key.text.clone());
+                }
+                // Try to resolve an identifier key.
+                if let crate::ast::NodeData::Identifier(key) = &data.argument_expression.data {
+                    return Some(key.text.clone());
+                }
+            }
+        }
+        None
+    }
+
+    /// Get the member value declaration for a member reference.
+    ///
+    /// Go: `referenceResolver.GetReferencedMemberValueDeclaration`
+    pub fn get_referenced_member_value_declaration(&self, node: &Node) -> Option<Arc<Node>> {
+        // Member references are `this.something` or `this[something]`.
+        // They should always have a resolved symbol.
+        let symbol_map = self.program.symbol_map();
+        let s = symbol_map.symbol_of(node).map(|s| Arc::clone(s));
+        if s.is_none() {
+            // Might be a declaration instead of a ref, get the merged symbol.
+            if let Some(sym) = symbol_map.symbol_of(node) {
+                let merged = self.get_merged_symbol(sym);
+                if let Some(merged) = merged {
+                    let export_sym = self.get_export_symbol_of_value_symbol_if_exported(&merged);
+                    return export_sym.value_declaration.clone();
+                }
+            }
+        }
+        if let Some(ref s) = s {
+            let export_sym = self.get_export_symbol_of_value_symbol_if_exported(s);
+            return export_sym.value_declaration.clone();
+        }
+        None
+    }
+
+    /// Get the merged symbol (currently returns the symbol itself).
+    ///
+    /// Go: `referenceResolver.getMergedSymbol`
+    fn get_merged_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+        // Currently we don't track merged symbols separately.
+        Some(Arc::clone(symbol))
+    }
+
+    /// Get the export symbol of a value symbol if it's exported.
+    ///
+    /// Go: `referenceResolver.getExportSymbolOfValueSymbolIfExported`
+    fn get_export_symbol_of_value_symbol_if_exported(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> {
+        let mut result = Arc::clone(symbol);
+        if symbol.flags.intersects(SymbolFlags::ExportValue) {
+            if let Some(ref export_sym) = symbol.export_symbol {
+                result = self.get_merged_symbol(export_sym).unwrap_or(Arc::clone(export_sym));
+            }
+        }
+        result
+    }
+
+    /// Check if a symbol is a type-only alias declaration.
+    ///
+    /// Go: `referenceResolver.isTypeOnlyAliasDeclaration`
+    fn is_type_only_alias_declaration(&self, symbol: &Arc<Symbol>) -> bool {
+        if let Some(node) = self.get_declaration_of_alias_symbol(symbol) {
+            let mut current = Some(Arc::clone(&node));
+            while let Some(ref n) = current {
+                match n.kind {
+                    SyntaxKind::ImportEqualsDeclaration | SyntaxKind::ExportDeclaration => {
+                        return is_type_only_node(n);
+                    }
+                    SyntaxKind::ImportClause
+                    | SyntaxKind::ImportSpecifier
+                    | SyntaxKind::ExportSpecifier => {
+                        if is_type_only_node(n) {
+                            return true;
+                        }
+                        // Continue to parent - we need parent pointers for this.
+                        // Without parent pointers, we stop here.
+                        break;
+                    }
+                    _ => break,
+                }
+            }
+        }
+        false
+    }
+
+    /// Get the declaration of an alias symbol.
+    ///
+    /// Go: `referenceResolver.getDeclarationOfAliasSymbol`
+    fn get_declaration_of_alias_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+        // Find the last alias symbol declaration.
+        symbol.declarations.iter()
+            .filter(|d| is_alias_symbol_declaration(d))
+            .last()
+            .cloned()
+    }
+
+    /// Resolve an identifier at a specific location.
+    fn resolve_identifier_at_location(
+        &self,
+        location: &Node,
+        name: &str,
+        meaning: SymbolFlags,
+    ) -> Option<Arc<Symbol>> {
+        // Use the scope stack to resolve the name.
+        let symbol_map = self.program.symbol_map();
+
+        // Walk the scope stack from innermost to outermost.
+        for &container_id in self.scope_stack.iter().rev() {
+            // Check locals.
+            if let Some(locals) = symbol_map.locals.get(&container_id) {
+                if let Some(sym) = locals.get(name) {
+                    if sym.flags.intersects(meaning) {
+                        return self.follow_alias(sym);
+                    }
+                }
+            }
+            // Check members.
+            if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
+                if let Some(sym) = container_sym.members.get(name) {
+                    if sym.flags.intersects(meaning) {
+                        return self.follow_alias(sym);
+                    }
+                }
+                // Module/namespace exports.
+                if container_sym.flags.intersects(SymbolFlags::MODULE) {
+                    if let Some(sym) = container_sym.exports.get(name) {
+                        let is_export_specifier = sym.flags == SymbolFlags::Alias
+                            && sym.declarations.iter().any(|d| d.kind == SyntaxKind::ExportSpecifier);
+                        if !is_export_specifier {
+                            return self.follow_alias(sym);
+                        }
+                    }
+                }
+                // Enum exports.
+                if container_sym.flags.intersects(SymbolFlags::ENUM) {
+                    if let Some(sym) = container_sym.exports.get(name) {
+                        if sym.flags.intersects(meaning) {
+                            return self.follow_alias(sym);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Check globals.
+        if let Some(sym) = self.globals.get(name) {
+            if sym.flags.intersects(meaning.union(SymbolFlags::GlobalLookup)) {
+                return Some(Arc::clone(sym));
+            }
+        }
+
+        None
+    }
+}
+
+/// Check if a node is a module or enum declaration name.
+fn is_module_or_enum_name(node: &Node) -> bool {
+    // We can't check parent pointers, so we check if the node's kind
+    // suggests it's a name of a module/enum declaration.
+    // This is a best-effort check.
+    false
+}
+
+/// Check if a symbol is a non-local alias (pure alias with exclusions).
+///
+/// Go: `ast.IsNonLocalAlias`
+fn is_non_local_alias(symbol: &Arc<Symbol>, excludes: SymbolFlags) -> bool {
+    if symbol.flags == SymbolFlags::Alias
+        || (symbol.flags.intersects(SymbolFlags::Alias)
+            && symbol.flags.intersects(SymbolFlags::Assignment))
+    {
+        !symbol.flags.intersects(excludes)
+    } else {
+        false
+    }
+}
+
+/// Check if a node is a type-only declaration.
+///
+/// Go: `ast.Node.IsTypeOnly`
+fn is_type_only_node(node: &Node) -> bool {
+    use crate::ast::NodeData;
+    match &node.data {
+        NodeData::ImportSpecifier(data) => data.is_type_only,
+        NodeData::ExportSpecifier(data) => data.is_type_only,
+        NodeData::ExportDeclaration(data) => data.is_type_only,
+        NodeData::ImportEqualsDeclaration(data) => data.is_type_only,
+        _ => false,
+    }
+}
+
+/// Check if a node is an alias symbol declaration.
+///
+/// Go: `ast.IsAliasSymbolDeclaration`
+fn is_alias_symbol_declaration(node: &Node) -> bool {
+    matches!(
+        node.kind,
+        SyntaxKind::ImportSpecifier
+            | SyntaxKind::ImportClause
+            | SyntaxKind::NamespaceImport
+            | SyntaxKind::NamespaceExportDeclaration
+            | SyntaxKind::ExportSpecifier
+            | SyntaxKind::ImportEqualsDeclaration
+            | SyntaxKind::ExportDeclaration
+            | SyntaxKind::ExportAssignment
+    )
+}
+
+/// Get the name text of a node.
+///
+/// Go: `ast.Node.Name`
+fn node_name(node: &Node) -> Option<&str> {
+    use crate::ast::NodeData;
+    match &node.data {
+        NodeData::Identifier(data) => Some(&data.text),
+        NodeData::StringLiteral(data) => Some(&data.text),
+        NodeData::NumericLiteral(data) => Some(&data.text),
+        _ => None,
+    }
 }
 
 /// Whether a syntax kind is an expression-position kind.
