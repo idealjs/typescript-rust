@@ -162,7 +162,7 @@ impl Checker {
         if Arc::ptr_eq(source, target) {
             return true;
         }
-        self.is_simple_type_related_to(source, target, RelationKind::Assignable)
+        self.is_type_related_to(source, target, RelationKind::Assignable)
     }
 
     /// Check if `source` is a subtype of `target`.
@@ -170,7 +170,7 @@ impl Checker {
         if Arc::ptr_eq(source, target) {
             return true;
         }
-        self.is_simple_type_related_to(source, target, RelationKind::Subtype)
+        self.is_type_related_to(source, target, RelationKind::Subtype)
     }
 
     /// Check if `source` is a strict subtype of `target`.
@@ -178,7 +178,7 @@ impl Checker {
         if Arc::ptr_eq(source, target) {
             return true;
         }
-        self.is_simple_type_related_to(source, target, RelationKind::StrictSubtype)
+        self.is_type_related_to(source, target, RelationKind::StrictSubtype)
     }
 
     /// Check if `source` is comparable to `target`.
@@ -186,12 +186,175 @@ impl Checker {
         if Arc::ptr_eq(source, target) {
             return true;
         }
-        self.is_simple_type_related_to(source, target, RelationKind::Comparable)
+        self.is_type_related_to(source, target, RelationKind::Comparable)
     }
 
     /// Check if two types are comparable (in either direction).
     pub fn are_types_comparable(&self, type1: &Arc<Type>, type2: &Arc<Type>) -> bool {
         self.is_type_comparable_to(type1, type2) || self.is_type_comparable_to(type2, type1)
+    }
+
+    /// Main entry point for type relation checking.
+    ///
+    /// Handles union/intersection/object types by delegating to specialized
+    /// methods, falling back to `is_simple_type_related_to` for primitives.
+    fn is_type_related_to(
+        &self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        if self.is_simple_type_related_to(source, target, relation) {
+            return true;
+        }
+
+        let s = source.flags;
+        let t = target.flags;
+
+        if s.contains(TYPE_FLAGS_UNION_OR_INTERSECTION)
+            || t.contains(TYPE_FLAGS_UNION_OR_INTERSECTION)
+        {
+            return self.is_union_or_intersection_related_to(source, target, relation);
+        }
+
+        if s.contains(TypeFlags::Object) && t.contains(TypeFlags::Object) {
+            return self.is_object_type_related_to(source, target, relation);
+        }
+
+        false
+    }
+
+    /// Handle union/intersection type relations.
+    fn is_union_or_intersection_related_to(
+        &self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        let s = source.flags;
+
+        if s.contains(TypeFlags::Union) {
+            if relation == RelationKind::Assignable || relation == RelationKind::Comparable {
+                return self.some_type_related_to_type(source, target, relation);
+            } else {
+                return self.each_type_related_to_type(source, target, relation);
+            }
+        }
+
+        if s.contains(TypeFlags::Intersection) {
+            return self.some_type_related_to_type(source, target, relation);
+        }
+
+        let t = target.flags;
+
+        if t.contains(TypeFlags::Union) {
+            return self.type_related_to_some_type(source, target, relation);
+        }
+
+        if t.contains(TypeFlags::Intersection) {
+            return self.type_related_to_each_type(source, target, relation);
+        }
+
+        false
+    }
+
+    /// Source is a union/intersection: check if at least one constituent
+    /// is related to target.
+    fn some_type_related_to_type(
+        &self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        if let Some(ui) = source.as_union_or_intersection() {
+            for t in &ui.types {
+                if self.is_type_related_to(t, target, relation) {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    /// Source is a union (for subtype/strictSubtype): check if ALL
+    /// constituents are related to target.
+    fn each_type_related_to_type(
+        &self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        if let Some(ui) = source.as_union_or_intersection() {
+            for t in &ui.types {
+                if !self.is_type_related_to(t, target, relation) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        false
+    }
+
+    /// Target is a union: check if source is related to at least one constituent.
+    fn type_related_to_some_type(
+        &self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        if let Some(ui) = target.as_union_or_intersection() {
+            for t in &ui.types {
+                if self.is_type_related_to(source, t, relation) {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    /// Target is an intersection: check if source is related to ALL constituents.
+    fn type_related_to_each_type(
+        &self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        if let Some(ui) = target.as_union_or_intersection() {
+            for t in &ui.types {
+                if !self.is_type_related_to(source, t, relation) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        false
+    }
+
+    /// Check object type relation (structural typing).
+    ///
+    /// For assignability: source must have all properties of target.
+    fn is_object_type_related_to(
+        &self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        _relation: RelationKind,
+    ) -> bool {
+        let source_struct = match source.as_structured() {
+            Some(s) => s,
+            None => return false,
+        };
+        let target_struct = match target.as_structured() {
+            Some(t) => t,
+            None => return false,
+        };
+
+        for target_prop in &target_struct.properties {
+            if source_struct.members.get(&target_prop.name).is_none() {
+                return false;
+            }
+        }
+
+        true
     }
 
     // ────────────────────────────────────────────────────────────────────────

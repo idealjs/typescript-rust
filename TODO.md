@@ -9,7 +9,7 @@
 - Rust crate 当前名为 `tsox`，入口在 `src/main.rs`，库入口在 `src/lib.rs`。
 - Rust 侧已经有模块骨架：`ast`、`binder`、`checker`、`compiler`、`execute`、`parser`、`scanner`、`printer`、`tsoptions`、`vfs` 等。
 - `cargo test` 当前通过：589 个 lib 单测 + 2 个 emit parity 测试 + 106 个 checker parity 测试通过。
-- 关键缺口：Checker `check_source_file` 已实现基础标识符解析 + TS2304 诊断；relater 基础规则已实现；但缺 relater 完整规则、类型推断、flow narrowing；Binder 缺完整 flow graph 构建、name resolver；module resolution、watch/build/incremental、fourslash/baseline、npm/vscode 包装尚未迁移到 Rust 方案。
+- 关键缺口：Checker `check_source_file` 已实现基础标识符解析 + TS2304 诊断；relater 已实现 simple types + union/intersection + 对象属性名结构检查；但缺属性类型深度检查、函数/tuple/泛型/条件类型关系、类型推断、flow narrowing；Binder 缺完整 flow graph 构建、name resolver；module resolution、watch/build/incremental、fourslash/baseline、npm/vscode 包装尚未迁移到 Rust 方案。
 
 ## 2026-07-12 迁移进度快照
 
@@ -18,7 +18,7 @@
 | Scanner | 1558 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 已完成；缺 trivia 节点、完整 regex 校验 |
 | Parser | 7115 | 9251 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 已完成；缺 reparser/jsdoc |
 | Binder | 614 | ~4000 | ~15% | 符号声明 + 容器递归绑定 + FlowNode 数据结构 + START/UNREACHABLE 初始化已完成；缺完整 flow graph 构建、name resolver |
-| Checker | 5741 | ~50K+ | ~11% | 类型数据结构完整；`check_source_file` 已实现基础标识符解析 + TS2304 诊断；relater 基础规则（any/unknown/never/基本类型/字面量）已实现；106 个 checker parity fixtures 通过（P3.14 ✅）；缺 relater 完整规则、inference、flow narrowing、jsx/jsdoc |
+| Checker | 5904 | ~50K+ | ~12% | 类型数据结构完整；`check_source_file` 已实现基础标识符解析 + TS2304 诊断；relater 实现 simple types + union/intersection + 对象属性名结构检查；106 个 checker parity fixtures 通过（P3.14 ✅）；缺属性类型深度检查、函数/tuple/泛型/条件类型、inference、flow narrowing |
 | Compiler | 743 | — | 基础 | Program 创建/解析/绑定/emit pipeline 已通；checker 已接入并输出基础 TS2304 诊断 |
 | Emitter | 774 | — | 基础 | JS emit 基础；缺 transformer 体系 |
 | Printer | 1568 | — | 基础 | 节点→文本基础 |
@@ -471,12 +471,16 @@ Rust 现状：
 
 ### P3.7 Checker 类型关系（relater 完整规则）
 
-- [x] 迁移 `internal/checker/relater.go` 基础骨架到 `src/checker/relater.rs`（当前 423 行，Go 原版 5006 行）。
+- [x] 迁移 `internal/checker/relater.go` 基础骨架到 `src/checker/relater.rs`（当前 586 行，Go 原版 5006 行）。
 - [x] `is_type_assignable_to` 基础规则：any、unknown、never、基本类型、字面量（`isSimpleTypeRelatedTo`）。
-- [x] `is_type_subtype_of` / `is_type_comparable_to` 基础实现。
-- [ ] `is_type_assignable_to` 完整规则：union/intersection、对象、数组、tuple、函数、泛型、条件类型、映射类型。
-- [ ] `is_type_strict_subtype_of`。
+- [x] `is_type_subtype_of` / `is_type_comparable_to` / `is_type_strict_subtype_of` 基础实现。
+- [x] Union 类型关系：`someTypeRelatedToType` / `eachTypeRelatedToType` / `typeRelatedToSomeType`。
+- [x] Intersection 类型关系：`someTypeRelatedToType` / `typeRelatedToEachType`。
+- [x] 对象类型结构检查：target 属性必须全部存在于 source（属性名级别，不含类型深度检查）。
+- [ ] `is_type_assignable_to` 完整规则：对象属性类型深度检查、数组、tuple、函数、泛型、条件类型、映射类型。
 - [ ] `relation_comparison_result` 缓存与递归保护。
+- [ ] Signature 比较（call/construct signatures）。
+- [ ] Index signature 比较。
 
 ### P3.8 Checker 类型推断
 
