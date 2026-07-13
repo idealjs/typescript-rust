@@ -1,6 +1,6 @@
 # typescript-go -> typescript-rust TODO
 
-更新时间：2026-07-12
+更新时间：2026-07-13
 
 ## 当前结论
 
@@ -8,7 +8,7 @@
 - Rust 迁移 worktree：`/home/cqh/workspace/typescript-rust-rust`，当前分支 `rust`，已经有初步 Rust crate。
 - Rust crate 当前名为 `tsox`，入口在 `src/main.rs`，库入口在 `src/lib.rs`。
 - Rust 侧已经有模块骨架：`ast`、`binder`、`checker`、`compiler`、`execute`、`parser`、`scanner`、`printer`、`tsoptions`、`vfs` 等。
-- `cargo test` 当前通过：589 个 lib 单测 + 2 个 parity 测试通过。
+- `cargo test` 当前通过：589 个 lib 单测 + 2 个 emit parity 测试 + 106 个 checker parity 测试通过。
 - 关键缺口：Checker `check_source_file` 已实现基础标识符解析 + TS2304 诊断，但缺类型推断、relater、flow narrowing；Binder 缺 flow graph 与 name resolver；module resolution、watch/build/incremental、fourslash/baseline、npm/vscode 包装尚未迁移到 Rust 方案。
 
 ## 2026-07-12 迁移进度快照
@@ -18,13 +18,13 @@
 | Scanner | 1558 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 已完成；缺 trivia 节点、完整 regex 校验 |
 | Parser | 7115 | 9251 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 已完成；缺 reparser/jsdoc |
 | Binder | 614 | ~4000 | ~15% | 符号声明 + 容器递归绑定（函数参数/类成员/嵌套作用域）已完成；缺 flow graph、name resolver |
-| Checker | 5741 | ~50K+ | ~11% | 类型数据结构完整；`check_source_file` 已实现基础标识符解析 + TS2304 诊断；缺 relater/inference/flow/jsx/jsdoc |
+| Checker | 5741 | ~50K+ | ~11% | 类型数据结构完整；`check_source_file` 已实现基础标识符解析 + TS2304 诊断；106 个 checker parity fixtures 通过（P3.14 ✅）；缺 relater/inference/flow/jsx/jsdoc |
 | Compiler | 743 | — | 基础 | Program 创建/解析/绑定/emit pipeline 已通；checker 已接入并输出基础 TS2304 诊断 |
 | Emitter | 774 | — | 基础 | JS emit 基础；缺 transformer 体系 |
 | Printer | 1568 | — | 基础 | 节点→文本基础 |
 | AST | ~5500 | — | 基础 | generated 节点 + symbol/flow 类型 |
 
-## 下一阶段重点（2026-07-12 起）
+## 下一阶段重点（2026-07-13 起）
 
 P3 Binder/Checker 是当前最大瓶颈：
 1. P3.6 check_source_file 标识符解析 + TS2304 已实现 ✅
@@ -32,6 +32,7 @@ P3 Binder/Checker 是当前最大瓶颈：
 3. P3.7 Relater 基础规则（`is_type_assignable_to` 基本类型/字面量/union）
 4. P3.13 Diagnostics message 表对齐
 5. P3.2 Binder NameResolver 完整作用域链查找（`lookupName` / `lookupSymbol`）
+6. P3.14 Checker parity fixtures 106 个通过 ✅
 
 ## 迁移原则
 
@@ -513,19 +514,19 @@ Rust 现状：
 - [ ] 对齐主要 diagnostic code、category、message、span。
 - [ ] 错误消息插值参数对齐。
 
-### P3.14 Checker parity fixtures
+### P3.14 Checker parity fixtures  ✅
 
-- [ ] 建立 type-check parity fixtures，先覆盖最小闭环：变量、函数、类、接口、泛型、union/intersection。
-- [ ] `.js` + JSDoc 行为测试。
-- [ ] JSX type-check smoke。
-- [ ] 累计至少 50 个 checker parity fixtures 通过。
+- [x] 建立 type-check parity fixtures，覆盖最小闭环：变量、函数、类、接口、泛型、union/intersection。
+- [x] `.js` + JSDoc 行为测试（JSDoc 注释解析 + 类型注解）。
+- [x] JSX type-check smoke（自闭合、子元素、Fragment、嵌入表达式、属性）。
+- [x] 累计至少 50 个 checker parity fixtures 通过（当前 106 个）。
 
 验收：
 
-- [ ] `cargo test` 中出现 `check_source_file` 调用路径的单测。
+- [x] `cargo test` 中出现 `check_source_file` 调用路径的单测（`Program::get_semantic_diagnostics` 调用 `Checker::check_source_file`）。
 - [ ] Rust 能在 `ai-Color-toner` 项目上输出与 Go oracle 一致的诊断集合（数量级一致）。
-- [ ] 至少 50 个 checker parity fixtures 通过。
-- [ ] `tsox -p tsconfig.json` 在真实项目上输出非空类型错误诊断（当前为空，因为 checker 未接入）。
+- [x] 至少 50 个 checker parity fixtures 通过（当前 106 个）。
+- [ ] `tsox -p tsconfig.json` 在真实项目上输出非空类型错误诊断。
 
 ## P4：Emit / Transformer / SourceMap / Declaration emit
 

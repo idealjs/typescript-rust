@@ -1,7 +1,7 @@
 //! Build script.
 //!
 //! Bundles the `lib.*.d.ts` files into the binary by copying them from the
-//! sibling Go project (`../typescript-rust/internal/bundled/libs`) into
+//! sibling Go project (`../internal/bundled/libs`) into
 //! `OUT_DIR` and generating a Rust module that exposes them via
 //! `include_str!`. This mirrors Go's `go:embed` of `internal/bundled/libs`.
 //!
@@ -18,7 +18,7 @@ fn main() {
 
     // Source of the bundled lib files: the Go project's libs directory.
     // Fall back to a local `bundled/libs` directory if present.
-    let go_libs_dir = manifest_dir.join("../typescript-rust/internal/bundled/libs");
+    let go_libs_dir = PathBuf::from("/workspace/internal/bundled/libs");
     let local_libs_dir = manifest_dir.join("bundled/libs");
     let libs_source_dir: PathBuf = if go_libs_dir.is_dir() {
         go_libs_dir.canonicalize().unwrap_or(go_libs_dir)
