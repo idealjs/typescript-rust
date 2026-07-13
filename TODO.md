@@ -514,9 +514,12 @@ Rust 现状：
 
 ### P3.13 Diagnostics message 表
 
-- [ ] 迁移/生成 Go 的 diagnostic message 表，避免手写漂移。
-- [ ] 对齐主要 diagnostic code、category、message、span。
-- [ ] 错误消息插值参数对齐。
+- [x] 迁移/生成 Go 的 diagnostic message 表（2154 条消息，`messages_generated.rs`）。
+- [x] 对齐主要 diagnostic code、category、message。
+- [x] `key_to_message` 函数（按 key 查找 Message）。
+- [x] `format_message` 占位符插值（`{0}`/`{1}` 等）。
+- [ ] `format_message` 行为完全对齐 Go（UTF-8 校验、无效索引 panic）。
+- [ ] 本地化支持（locale/loc_generated）。
 
 ### P3.14 Checker parity fixtures  ✅
 
