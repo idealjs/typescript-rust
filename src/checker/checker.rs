@@ -10,7 +10,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::ast::{
-    DiagnosticsCollection, ModifierFlags, Node, NodeFlags, NodeSymbolMap, SourceFile, Symbol,
+    CheckFlags, DiagnosticsCollection, ModifierFlags, Node, NodeFlags, NodeSymbolMap, SourceFile, Symbol,
     SymbolFlags, SymbolTable, SyntaxKind,
 };
 use crate::core::compiler_options::{
@@ -337,7 +337,7 @@ impl Checker {
             file_index_map.insert(file.id(), i);
         }
 
-        Self {
+        let mut checker = Self {
             id: NEXT_CHECKER_ID.fetch_add(1, Ordering::Relaxed),
             program,
             compiler_options,
@@ -368,7 +368,10 @@ impl Checker {
             can_collect_symbol_alias_accessibility_data,
 
             globals: SymbolTable::default(),
-            undefined_symbol: None,
+            undefined_symbol: Some(Arc::new(Symbol::new(
+                SymbolFlags::Property,
+                "undefined",
+            ))),
             arguments_symbol: Some(Arc::new(Symbol::new(
                 SymbolFlags::Property.union(SymbolFlags::Transient),
                 "arguments",
@@ -483,7 +486,29 @@ impl Checker {
 
             tracer,
             mu: Mutex::new(()),
+    };
+
+        // Initialize global_this_symbol and add built-in symbols to globals
+        {
+            // Create globalThis symbol
+            let mut global_this = Symbol::new(
+                SymbolFlags::ValueModule,
+                "globalThis",
+            );
+            global_this.check_flags = CheckFlags::Readonly;
+            let global_this = Arc::new(global_this);
+            checker.globals
+                .insert("globalThis".to_string(), Arc::clone(&global_this));
+            checker.global_this_symbol = Some(global_this);
+
+            // Add undefined to globals
+            if let Some(ref undef) = checker.undefined_symbol {
+                checker.globals
+                    .insert("undefined".to_string(), Arc::clone(undef));
+            }
         }
+
+        checker
     }
 
     /// Populate globals from source file symbols.
@@ -1935,8 +1960,9 @@ impl Checker {
         }
 
         // 3. Check globals (lib.d.ts symbols).
+        // Go adds SymbolFlags::GlobalLookup to the meaning when looking up globals.
         if let Some(sym) = self.globals.get(name) {
-            if sym.flags.intersects(meaning) {
+            if sym.flags.intersects(meaning.union(SymbolFlags::GlobalLookup)) {
                 return Some(Arc::clone(sym));
             }
         }

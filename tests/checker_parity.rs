@@ -999,3 +999,19 @@ fn checker_global_symbol_with_lib() {
     let count = diags.iter().filter(|d| d.code == 2304).count();
     assert_eq!(count, 0, "Expected 0 TS2304 errors (Array is a global), got {}", count);
 }
+
+#[test]
+fn checker_undefined_is_resolvable() {
+    // `undefined` is a built-in global symbol.
+    let diags = check_source_with_lib("let x = undefined;", false);
+    let count = diags.iter().filter(|d| d.code == 2304).count();
+    assert_eq!(count, 0, "Expected 0 TS2304 errors (undefined is a global), got {}", count);
+}
+
+#[test]
+fn checker_global_this_is_resolvable() {
+    // `globalThis` is a built-in global symbol.
+    let diags = check_source_with_lib("let x = globalThis;", false);
+    let count = diags.iter().filter(|d| d.code == 2304).count();
+    assert_eq!(count, 0, "Expected 0 TS2304 errors (globalThis is a global), got {}", count);
+}
