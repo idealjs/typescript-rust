@@ -60,6 +60,16 @@ impl FlowLabel {
     }
 }
 
+/// Active label tracking for labeled statements.
+#[derive(Debug)]
+struct ActiveLabel {
+    name: String,
+    break_target: Arc<FlowNode>,
+    continue_target: Option<Arc<FlowNode>>,
+    referenced: bool,
+    next: Option<Box<ActiveLabel>>,
+}
+
 /// The binder.
 ///
 /// Mirrors `binder.Binder` in Go.
@@ -82,6 +92,12 @@ pub struct Binder {
     current_break_target: Option<Arc<FlowNode>>,
     /// Current continue target flow label.
     current_continue_target: Option<Arc<FlowNode>>,
+    /// Current exception target flow label (for try-catch-finally).
+    current_exception_target: Option<Arc<FlowNode>>,
+    /// Current return target flow label (for try-finally with IIFE).
+    current_return_target: Option<Arc<FlowNode>>,
+    /// Active label list (for labeled statements with break/continue).
+    active_label_list: Option<Box<ActiveLabel>>,
     /// Whether the current function has explicit return statements.
     has_explicit_return: bool,
     /// Whether there are flow effects (assignments, calls, etc.).
@@ -107,6 +123,9 @@ impl Binder {
             unreachable_flow: None,
             current_break_target: None,
             current_continue_target: None,
+            current_exception_target: None,
+            current_return_target: None,
+            active_label_list: None,
             has_explicit_return: false,
             has_flow_effects: false,
         }
@@ -334,6 +353,66 @@ impl Binder {
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
         })
+    }
+
+    /// Create a flow mutation node (for array mutations like push, unshift, idx assignment).
+    fn create_flow_mutation(&mut self, antecedent: &Arc<FlowNode>, node: &Arc<Node>) -> Arc<FlowNode> {
+        if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
+            return Arc::clone(antecedent);
+        }
+        self.set_flow_node_referenced(antecedent);
+        self.has_flow_effects = true;
+        let result = Arc::new(FlowNode {
+            flags: FlowFlags::ARRAY_MUTATION,
+            node: Some(Arc::clone(node)),
+            antecedent: Some(Arc::clone(antecedent)),
+            antecedents: Vec::new(),
+        });
+        // Add to exception target if we're inside a try block
+        if let Some(target) = &self.current_exception_target {
+            self.add_antecedent_to_flow(target, &result);
+        }
+        result
+    }
+
+    /// Mark a flow node as referenced (sets Referenced flag, then Shared on subsequent calls).
+    fn set_flow_node_referenced(&self, flow: &FlowNode) {
+        // We need interior mutability for this. Since FlowNode is behind Arc,
+        // we use a raw pointer cast. This is safe because we only modify flags.
+        let ptr = flow as *const FlowNode as *mut FlowNode;
+        unsafe {
+            if (*ptr).flags.contains(FlowFlags::REFERENCED) {
+                (*ptr).flags = (*ptr).flags | FlowFlags::SHARED;
+            } else {
+                (*ptr).flags = (*ptr).flags | FlowFlags::REFERENCED;
+            }
+        }
+    }
+
+    /// Create a reduce label node (for try-finally flow graph).
+    fn create_reduce_label(&self, antecedents: &[Arc<FlowNode>], antecedent: &Arc<FlowNode>) -> Arc<FlowNode> {
+        Arc::new(FlowNode {
+            flags: FlowFlags::REDUCE_LABEL,
+            node: None,
+            antecedent: Some(Arc::clone(antecedent)),
+            antecedents: antecedents.to_vec(),
+        })
+    }
+
+    /// Add an antecedent to a flow label (checking for duplicates).
+    fn add_antecedent_to_flow(&self, label: &Arc<FlowNode>, antecedent: &Arc<FlowNode>) {
+        if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
+            return;
+        }
+        for ant in &label.antecedents {
+            if Arc::ptr_eq(ant, antecedent) {
+                return;
+            }
+        }
+        let ptr = Arc::as_ptr(label) as *mut FlowNode;
+        unsafe {
+            (*ptr).antecedents.push(Arc::clone(antecedent));
+        }
     }
 
     /// Create a flow switch clause node.
@@ -683,30 +762,239 @@ impl Binder {
         self.has_flow_effects = true;
     }
 
+    /// Bind a try/catch/finally statement with proper control flow.
+    ///
+    /// Mirrors `binder.bindTryStatement` in Go.
+    fn bind_try_statement(&mut self, node: &Arc<Node>) {
+        let stmt = match &node.data {
+            NodeData::TryStatement(data) => data,
+            _ => return,
+        };
+
+        let save_return_target = self.current_return_target.take();
+        let save_exception_target = self.current_exception_target.take();
+
+        let mut normal_exit_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+        let mut return_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+        let mut exception_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+
+        let mut finally_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+
+        if stmt.finally_block.is_some() {
+            self.current_return_target = Some(return_label.finish(&self.unreachable_flow()));
+        }
+
+        // Add current flow as possible exception source
+        if let Some(current) = &self.current_flow {
+            exception_label.add_antecedent(Arc::clone(current));
+        }
+        self.current_exception_target = Some(Arc::clone(&exception_label.finish(&self.unreachable_flow())));
+
+        // Bind try block
+        self.bind(&stmt.try_block);
+        // Try block normal exit -> normal_exit_label
+        if let Some(current) = &self.current_flow {
+            normal_exit_label.add_antecedent(Arc::clone(current));
+        }
+        // Try block exception -> exception_label (already set above)
+
+        // Bind catch clause if present
+        if let Some(catch_clause) = &stmt.catch_clause {
+            // Set current flow to exception label (the catch block starts here)
+            self.current_flow = Some(exception_label.finish(&self.unreachable_flow()));
+            self.bind(catch_clause);
+            // Catch block normal exit -> normal_exit_label
+            if let Some(current) = &self.current_flow {
+                normal_exit_label.add_antecedent(Arc::clone(current));
+            }
+        }
+
+        self.current_return_target = save_return_target;
+        self.current_exception_target = save_exception_target;
+
+        // Bind finally block if present
+        if let Some(finally_block) = &stmt.finally_block {
+            // Combine all possible donors into the finally label
+            for ant in &normal_exit_label.node.antecedents {
+                finally_label.add_antecedent(Arc::clone(ant));
+            }
+            for ant in &exception_label.node.antecedents {
+                finally_label.add_antecedent(Arc::clone(ant));
+            }
+            for ant in &return_label.node.antecedents {
+                finally_label.add_antecedent(Arc::clone(ant));
+            }
+
+            self.current_flow = Some(finally_label.finish(&self.unreachable_flow()));
+            self.bind(finally_block);
+
+            if self.current_flow.as_ref().map_or(false, |f| f.flags.contains(FlowFlags::UNREACHABLE)) {
+                self.current_flow = Some(self.unreachable_flow());
+            } else {
+                // Handle return paths through finally
+                if self.current_return_target.is_some() && !return_label.node.antecedents.is_empty() {
+                    if let Some(current_flow) = &self.current_flow {
+                        let reduce = self.create_reduce_label(&return_label.node.antecedents, current_flow);
+                        if let Some(rt) = &self.current_return_target {
+                            self.add_antecedent_to_flow(rt, &reduce);
+                        }
+                    }
+                }
+                // Handle exception paths through finally
+                if self.current_exception_target.is_some() && !exception_label.node.antecedents.is_empty() {
+                    if let Some(current_flow) = &self.current_flow {
+                        let reduce = self.create_reduce_label(&exception_label.node.antecedents, current_flow);
+                        if let Some(et) = &self.current_exception_target {
+                            self.add_antecedent_to_flow(et, &reduce);
+                        }
+                    }
+                }
+                // Normal exit path through finally
+                if !normal_exit_label.node.antecedents.is_empty() {
+                    if let Some(current_flow) = &self.current_flow {
+                        self.current_flow = Some(self.create_reduce_label(&normal_exit_label.node.antecedents, current_flow));
+                    }
+                } else {
+                    self.current_flow = Some(self.unreachable_flow());
+                }
+            }
+        } else {
+            self.current_flow = Some(normal_exit_label.finish(&self.unreachable_flow()));
+        }
+    }
+
     /// Bind a break statement.
     fn bind_break_statement(&mut self, node: &Arc<Node>) {
-        if let Some(target) = &self.current_break_target.clone() {
+        // Check for labeled break first
+        let label_name = if let NodeData::BreakStatement(data) = &node.data {
+            data.label.as_ref().map(|l| self.node_text(l))
+        } else {
+            None
+        };
+
+        if let Some(name) = label_name {
+            // Look for a matching active label
+            let mut found = false;
+            let mut current = &self.active_label_list;
+            while let Some(label) = current {
+                if label.name == name {
+                    if let Some(current_flow) = &self.current_flow {
+                        self.add_antecedent_to_flow(&label.break_target, current_flow);
+                    }
+                    found = true;
+                    break;
+                }
+                current = &label.next;
+            }
+            let _ = found;
+        } else if let Some(target) = &self.current_break_target {
+            // Unlabeled break to the innermost break target
             if let Some(current) = &self.current_flow {
-                // Note: target is a finished label (Arc<FlowNode>), we can't easily add antecedents
-                // In a full implementation, we'd use FlowLabel with interior mutability
-                let _ = target;
-                let _ = current;
+                self.add_antecedent_to_flow(target, current);
             }
         }
         self.current_flow = Some(self.unreachable_flow());
-        let _ = node;
     }
 
     /// Bind a continue statement.
     fn bind_continue_statement(&mut self, node: &Arc<Node>) {
-        if let Some(target) = &self.current_continue_target.clone() {
+        // Check for labeled continue first
+        let label_name = if let NodeData::ContinueStatement(data) = &node.data {
+            data.label.as_ref().map(|l| self.node_text(l))
+        } else {
+            None
+        };
+
+        if let Some(name) = label_name {
+            // Look for a matching active label with a continue target
+            let mut current = &self.active_label_list;
+            while let Some(label) = current {
+                if label.name == name {
+                    if let Some(continue_target) = &label.continue_target {
+                        if let Some(current_flow) = &self.current_flow {
+                            self.add_antecedent_to_flow(continue_target, current_flow);
+                        }
+                    }
+                    break;
+                }
+                current = &label.next;
+            }
+        } else if let Some(target) = &self.current_continue_target {
             if let Some(current) = &self.current_flow {
-                let _ = target;
-                let _ = current;
+                self.add_antecedent_to_flow(target, current);
             }
         }
         self.current_flow = Some(self.unreachable_flow());
-        let _ = node;
+    }
+
+    /// Bind a labeled statement.
+    ///
+    /// Mirrors `binder.bindLabeledStatement` in Go.
+    fn bind_labeled_statement(&mut self, node: &Arc<Node>) {
+        let stmt = match &node.data {
+            NodeData::LabeledStatement(data) => data,
+            _ => return,
+        };
+
+        let label_name = self.node_text(&stmt.label);
+        let break_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+        let break_target = break_label.finish(self.unreachable_flow.as_ref().unwrap());
+
+        // Determine if this is a label for an iteration statement (has continue target)
+        let continue_target = match &stmt.statement.data {
+            NodeData::WhileStatement(_) | NodeData::DoStatement(_)
+            | NodeData::ForStatement(_) | NodeData::ForInOrOfStatement(_) => {
+                Some(self.current_continue_target.clone().unwrap_or_else(|| self.unreachable_flow()))
+            }
+            _ => None,
+        };
+
+        let active_label = Box::new(ActiveLabel {
+            name: label_name,
+            break_target: Arc::clone(&break_target),
+            continue_target,
+            referenced: false,
+            next: self.active_label_list.take(),
+        });
+
+        self.active_label_list = Some(active_label);
+
+        // Bind the statement (the loop body, etc.)
+        self.bind(&stmt.statement);
+
+        // Restore active label list
+        self.active_label_list = self.active_label_list.take().and_then(|l| l.next);
+
+        // Finish break target
+        if let Some(current) = &self.current_flow {
+            self.add_antecedent_to_flow(&break_target, current);
+        }
+        self.current_flow = Some(break_target);
+    }
+
+    /// Check if an identifier is push or unshift (for array mutation tracking).
+    fn is_push_or_unshift_identifier(&self, name: &str) -> bool {
+        name == "push" || name == "unshift"
+    }
+
+    /// Bind a call expression for flow tracking (array mutation detection).
+    ///
+    /// Mirrors `binder.bindCallExpressionFlow` in Go.
+    fn bind_call_expression_flow(&mut self, node: &Arc<Node>) {
+        if let NodeData::CallExpression(data) = &node.data {
+            let expr = &data.expression;
+            // Check for property access expression like arr.push()
+            if let NodeData::PropertyAccessExpression(prop) = &expr.data {
+                let name = self.node_text(&prop.name);
+                if self.is_push_or_unshift_identifier(&name) {
+                    // This is an array mutation call: create a flow mutation node
+                    let current = self.current_flow.clone();
+                    if let Some(current) = current {
+                        self.current_flow = Some(self.create_flow_mutation(&current, node));
+                    }
+                }
+            }
+        }
     }
 
     /// Bind an expression statement (with assignment flow tracking).
@@ -720,6 +1008,13 @@ impl Binder {
                         let assign_flow = self.create_flow_assignment(&current, &data.expression);
                         self.symbol_map.set_flow_node(&data.expression, Arc::clone(&assign_flow));
                         self.current_flow = Some(assign_flow);
+                    }
+                    // Check for element access assignment (array mutation: arr[i] = val)
+                    if let NodeData::ElementAccessExpression(_) = &bin_data.left.data {
+                        let current = self.current_flow.clone();
+                        if let Some(current) = current {
+                            self.current_flow = Some(self.create_flow_mutation(&current, node));
+                        }
                     }
                 }
             }
@@ -947,6 +1242,18 @@ impl Binder {
             SyntaxKind::VariableStatement => {
                 self.bind_variable_statement(node);
                 return;
+            }
+            SyntaxKind::TryStatement => {
+                self.bind_try_statement(node);
+                return;
+            }
+            SyntaxKind::LabeledStatement => {
+                self.bind_labeled_statement(node);
+                return;
+            }
+            SyntaxKind::CallExpression => {
+                self.bind_call_expression_flow(node);
+                // Don't return - also check for children after call expression flow
             }
             _ => {}
         }
