@@ -9,7 +9,7 @@
 - Rust crate 当前名为 `tsox`，入口在 `src/main.rs`，库入口在 `src/lib.rs`。
 - Rust 侧已经有模块骨架：`ast`、`binder`、`checker`、`compiler`、`execute`、`parser`、`scanner`、`printer`、`tsoptions`、`vfs` 等。
 - `cargo test` 当前通过：589 个 lib 单测 + 2 个 emit parity 测试 + 106 个 checker parity 测试通过。
-- 关键缺口：Checker `check_source_file` 已实现基础标识符解析 + TS2304 诊断；relater 已实现 simple types + union/intersection + 对象属性名结构检查；但缺属性类型深度检查、函数/tuple/泛型/条件类型关系、类型推断、flow narrowing；Binder 缺完整 flow graph 构建、name resolver；module resolution、watch/build/incremental、fourslash/baseline、npm/vscode 包装尚未迁移到 Rust 方案。
+- 关键缺口：Checker `check_source_file` 已实现基础标识符解析 + TS2304 诊断；relater 已实现 simple types + union/intersection + 对象属性名结构检查；NameResolver 已实现基础作用域链 + meaning 过滤；但缺属性类型深度检查、函数/tuple/泛型/条件类型关系、类型推断、flow narrowing；Binder 缺完整 flow graph 构建、全局符号查找、alias 解析；module resolution、watch/build/incremental、fourslash/baseline、npm/vscode 包装尚未迁移到 Rust 方案。
 
 ## 2026-07-12 迁移进度快照
 
@@ -17,8 +17,8 @@
 |------|-----------|---------|--------|------|
 | Scanner | 1558 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 已完成；缺 trivia 节点、完整 regex 校验 |
 | Parser | 7115 | 9251 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 已完成；缺 reparser/jsdoc |
-| Binder | 614 | ~4000 | ~15% | 符号声明 + 容器递归绑定 + FlowNode 数据结构 + START/UNREACHABLE 初始化已完成；缺完整 flow graph 构建、name resolver |
-| Checker | 5904 | ~50K+ | ~12% | 类型数据结构完整；`check_source_file` 已实现基础标识符解析 + TS2304 诊断；relater 实现 simple types + union/intersection + 对象属性名结构检查；106 个 checker parity fixtures 通过（P3.14 ✅）；缺属性类型深度检查、函数/tuple/泛型/条件类型、inference、flow narrowing |
+| Binder | 614 | ~4000 | ~18% | 符号声明 + 容器递归绑定 + FlowNode 数据结构 + START/UNREACHABLE 初始化 + 基础作用域链查找（NameResolver）已完成；缺完整 flow graph 构建、全局符号查找、alias 解析 |
+| Checker | 5904 | ~50K+ | ~12% | 类型数据结构完整；`check_source_file` 已实现基础标识符解析 + TS2304 诊断；relater 实现 simple types + union/intersection + 对象属性名结构检查；116 个 checker parity fixtures 通过（P3.14 ✅）；缺属性类型深度检查、函数/tuple/泛型/条件类型、inference、flow narrowing |
 | Compiler | 743 | — | 基础 | Program 创建/解析/绑定/emit pipeline 已通；checker 已接入并输出基础 TS2304 诊断 |
 | Emitter | 774 | — | 基础 | JS emit 基础；缺 transformer 体系 |
 | Printer | 1568 | — | 基础 | 节点→文本基础 |
@@ -431,10 +431,14 @@ Rust 现状：
 
 ### P3.2 Binder NameResolver
 
-- [ ] 迁移 `internal/binder/nameresolver.go`（498 行）到 `src/binder/nameresolver.rs`。
-- [ ] 作用域链查找：`lookupName` / `lookupSymbol`。
+- [x] 基础作用域链查找：`resolve_identifier` 遍历 scope_stack（locals + members）。
+- [x] 符号意义过滤：`resolve_identifier_with_meaning` 支持 SymbolFlags 过滤。
+- [x] For/ForIn/ForOf 循环作用域：push_scope/pop_scope 正确创建块级作用域。
+- [x] `resolveName` 入口供 checker 调用（`resolve_identifier` 及 `with_meaning` 变体）。
+- [ ] 迁移 `internal/binder/nameresolver.go` 完整逻辑到 `src/binder/nameresolver.rs`。
 - [ ] 特殊符号：`undefinedSymbol`、`argumentsSymbol`、`globalThisSymbol`。
-- [ ] `resolveName` 入口供 checker 调用。
+- [ ] 全局符号查找（lib.d.ts symbols）。
+- [ ] alias 符号解析（import alias、export alias）。
 
 ### P3.3 Binder ReferenceResolver
 
