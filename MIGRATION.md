@@ -4,6 +4,14 @@ This worktree contains the Rust migration of the Go native TypeScript compiler.
 The Go implementation is kept as the behavior oracle until Rust parity is broad
 enough to stand alone.
 
+> **规划文档**：迁移目标、阶段任务、进度快照、下阶段优先级统一记录在
+> [`TODO.md`](./TODO.md)。本文档只保留流程审计与行为差异细节，按阶段查阅。
+>
+> 2026-07-29 状态摘要：`cargo test` 通过（599 lib + 2 emit parity + 126
+> checker parity）。Parser ~77%、Binder ~41%、Checker ~18%。当前焦点为
+> P3.7/P3.8/P3.1/P3.9（类型关系补齐 → 推断收尾 → flow graph 收尾 →
+> narrowing），详见 TODO.md “下阶段优先级”。
+
 ## Worktrees
 
 - Go oracle worktree: `/home/cqh/workspace/typescript-rust`
