@@ -247,6 +247,38 @@ fn checker_assignable_array_annotation_array_literal_no_error() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Tuple type annotations: `[T, U, ...]`
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_assignable_tuple_wrong_primitive_ts2322() {
+    // A `number` is not assignable to `[number, string]`.
+    let diags = check_source("let x: [number, string] = 42;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_assignable_tuple_string_to_number_tuple_ts2322() {
+    // A `string` is not assignable to `[number, string]`.
+    let diags = check_source("let x: [number, string] = 'hi';");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_assignable_tuple_array_literal_no_error() {
+    // An array literal (widened to `any`) is assignable to `[number, string]`.
+    let diags = check_source("let x: [number, string] = [1, 'hi'];");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_assignable_tuple_annotation_no_init_no_error() {
+    // Just declaring a tuple-typed variable without an initializer is fine.
+    let diags = check_source("let x: [number, string];");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Function declarations (no diagnostics expected)
 // ────────────────────────────────────────────────────────────────────────────
 

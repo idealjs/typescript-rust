@@ -392,18 +392,13 @@ impl Checker {
     fn get_tuple_element_type(&self, t: &Arc<Type>, index: usize) -> Option<Arc<Type>> {
         match &t.data {
             TypeData::Tuple(tuple) => {
-                // Get the element type from the interface_data's structured type members
-                let structured = &tuple.interface_data.object.structured;
-                if index < structured.properties.len() {
-                    // Properties may have the type available via the symbol
-                    let _prop = &structured.properties[index];
-                    // Simplified: get the type from the symbol
-                    // For now, we return None and let the caller handle it
-                    // The full implementation would look up the type of the property
-                    None
-                } else {
-                    None
-                }
+                // The element type is stored directly on `TupleElementInfo`
+                // (mirrors Go's `TupleElementInfo.Type`). This avoids the
+                // need to re-resolve a structured member symbol.
+                tuple
+                    .element_infos
+                    .get(index)
+                    .and_then(|info| info.type_.clone())
             }
             _ => None,
         }

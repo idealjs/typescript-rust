@@ -968,6 +968,10 @@ pub struct TupleTypeData {
 pub struct TupleElementInfo {
     pub flags: ElementFlags,
     pub labeled_declaration: Option<Arc<Node>>,
+    /// The element type. Stored alongside `flags` so that the relater can
+    /// compare tuple element types without re-resolving the structured
+    /// member symbols. Mirrors `TupleElementInfo.Type` in Go.
+    pub type_: Option<Arc<Type>>,
 }
 
 #[derive(Debug)]

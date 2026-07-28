@@ -506,23 +506,28 @@ impl Checker {
     pub fn create_tuple_type(&mut self, element_types: Vec<Arc<Type>>) -> Arc<Type> {
         let element_infos: Vec<TupleElementInfo> = element_types
             .iter()
-            .map(|_| TupleElementInfo {
-                flags: ElementFlags::None,
+            .map(|t| TupleElementInfo {
+                flags: ElementFlags::Required,
                 labeled_declaration: None,
+                type_: Some(Arc::clone(t)),
             })
             .collect();
         let fixed_length = element_types.len();
-        Arc::new(Type::new(
-            TypeFlags::Object,
-            TypeData::Tuple(TupleTypeData {
+        Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Tuple,
+            id: 0,
+            symbol: None,
+            alias: None,
+            data: TypeData::Tuple(TupleTypeData {
                 interface_data: InterfaceTypeData::default(),
                 element_infos,
                 min_length: fixed_length,
                 fixed_length,
-                combined_flags: ElementFlags::None,
+                combined_flags: ElementFlags::Required,
                 readonly: false,
             }),
-        ))
+        })
     }
 
     pub fn get_index_type(&mut self, _type: &Arc<Type>) -> Arc<Type> {
