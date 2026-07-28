@@ -308,6 +308,60 @@ fn checker_var_type_inference_propagates_via_symbol_no_error() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Function return type inference (P3.8b)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_function_inferred_return_number_no_error() {
+    // `f` infers `number` as its return type; assigning `f()` to a
+    // `number`-typed variable should be fine.
+    let diags = check_source("function f() { return 42; } let y: number = f();");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_function_inferred_return_number_assigned_to_string_ts2322() {
+    // `f` infers `number`; assigning `f()` to a `string` must fail.
+    let diags = check_source("function f() { return 42; } let y: string = f();");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_arrow_function_inferred_return_no_error() {
+    // `f` infers `number` (return expression is `x * 2` where x is number).
+    let diags = check_source(
+        "const f = (x: number) => x * 2;\
+         let y: number = f(3);",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_arrow_function_inferred_return_string_to_number_ts2322() {
+    // `f` infers `string`; assigning `f()` to a `number` must fail.
+    let diags = check_source(
+        "const f = () => 'hi';\
+         let y: number = f();",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_function_with_explicit_return_type_no_error() {
+    // Explicit return-type annotation should be honored.
+    let diags = check_source("function f(): number { return 42; } let y: number = f();");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_function_no_return_infers_void_to_number_ts2322() {
+    // A function with no `return` infers `void`; assigning `f()` to a
+    // `number`-typed variable should fail TS2322.
+    let diags = check_source("function f() {} let y: number = f();");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Function declarations (no diagnostics expected)
 // ────────────────────────────────────────────────────────────────────────────
 

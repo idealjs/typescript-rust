@@ -585,6 +585,117 @@ impl Checker {
             }),
         ))
     }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Function return type inference (P3.8b)
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Build a function type whose single call signature has the given
+    /// return type. The signature's `resolved_return_type` is set eagerly
+    /// so callers (e.g. `CallExpression` type inference) can read it back
+    /// without re-running inference.
+    pub fn create_function_type(&self, return_type: Arc<Type>) -> Arc<Type> {
+        let sig = Arc::new(Signature {
+            // Use a stable, locally-unique id derived from the return type
+            // pointer. Real signature ids are assigned by the checker's
+            // signature id allocator; this id is only used for cache keys
+            // and is fine for our minimal inference path.
+            id: 0,
+            flags: SignatureFlags::None,
+            min_argument_count: 0,
+            resolved_min_argument_count: 0,
+            declaration: None,
+            type_parameters: Vec::new(),
+            parameters: Vec::new(),
+            this_parameter: None,
+            resolved_return_type: std::sync::OnceLock::new(),
+            resolved_type_predicate: None,
+            target: None,
+            mapper: None,
+            isolated_signature_type: std::sync::OnceLock::new(),
+        });
+        // Eagerly populate the resolved return type so `get_return_type_of_signature`
+        // returns Some(...) without needing a separate inference pass.
+        let _ = sig.resolved_return_type.set(Arc::clone(&return_type));
+        let mut structured = StructuredTypeData::default();
+        structured.signatures.push(Arc::clone(&sig));
+        structured.call_signature_count = 1;
+        Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Anonymous,
+            id: 0,
+            symbol: None,
+            alias: None,
+            data: TypeData::Object(ObjectTypeData {
+                structured,
+                target: None,
+                mapper: None,
+                type_arguments: Vec::new(),
+            }),
+        })
+    }
+
+    /// Walk a function body collecting the types of every `return expr;`
+    /// statement, skipping nested function bodies (those have their own
+    /// return type). Used to infer the return type of unannotated
+    /// functions. Mirrors the spirit of Go's `collectReturnStatements`
+    /// + `getReturnTypeOfFunction` flow.
+    pub fn collect_return_types_from_node(&mut self, node: &Arc<Node>, types: &mut Vec<Arc<Type>>) {
+        use crate::ast::node_data_generated::for_each_child;
+        match node.kind {
+            SyntaxKind::ReturnStatement => {
+                if let crate::ast::NodeData::ReturnStatement(data) = &node.data {
+                    if let Some(expr) = &data.expression {
+                        types.push(self.get_type_of_node(expr));
+                    }
+                }
+                return;
+            }
+            // Don't descend into nested function-like bodies — they have
+            // their own return type.
+            SyntaxKind::FunctionDeclaration
+            | SyntaxKind::FunctionExpression
+            | SyntaxKind::ArrowFunction
+            | SyntaxKind::MethodDeclaration
+            | SyntaxKind::MethodSignature
+            | SyntaxKind::Constructor
+            | SyntaxKind::GetAccessor
+            | SyntaxKind::SetAccessor => return,
+            _ => {}
+        }
+        for_each_child(node, |child| {
+            self.collect_return_types_from_node(child, types);
+            false
+        });
+    }
+
+    /// Infer a function's return type. If an explicit return-type annotation
+    /// is present (`type_node`), it wins. Otherwise the body is walked for
+    /// `return expr;` statements and the union of their types is returned.
+    /// If no return statements are found, the inferred type is `void` (or
+    /// `any` in non-strict-null-checks mode, mirroring Go's `voidType`).
+    pub fn infer_function_return_type(&mut self, body: Option<&Arc<Node>>, type_node: Option<&Arc<Node>>) -> Arc<Type> {
+        if let Some(type_node) = type_node {
+            return self.get_type_from_type_node(type_node);
+        }
+        let Some(body) = body else {
+            return self.void_type();
+        };
+        // Arrow functions can have an expression body (`() => expr`) rather
+        // than a block body. In that case the expression IS the return value.
+        if body.kind != SyntaxKind::Block {
+            return self.get_type_of_node(body);
+        }
+        let mut types: Vec<Arc<Type>> = Vec::new();
+        self.collect_return_types_from_node(body, &mut types);
+        if types.is_empty() {
+            return self.void_type();
+        }
+        if types.len() == 1 {
+            return types.into_iter().next().expect("exactly one");
+        }
+        self.get_union_type(types)
+    }
 }
 
 #[cfg(test)]

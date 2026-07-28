@@ -1219,7 +1219,10 @@ impl Checker {
                 self.get_any_type() // TODO: infer object type
             }
             SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
-                self.get_any_type() // TODO: infer function type
+                self.get_type_of_function_like(node)
+            }
+            SyntaxKind::FunctionDeclaration => {
+                self.get_type_of_function_like(node)
             }
             SyntaxKind::Identifier => {
                 self.get_type_of_identifier(node)
@@ -1232,7 +1235,7 @@ impl Checker {
                 self.get_any_type() // TODO: unary expression type
             }
             SyntaxKind::CallExpression => {
-                self.get_any_type() // TODO: return type inference
+                self.get_return_type_of_call_expression(node)
             }
             SyntaxKind::PropertyAccessExpression => {
                 self.get_any_type() // TODO: property access type
@@ -1270,6 +1273,8 @@ impl Checker {
         // TODO: implement proper symbol type resolution
         if symbol.flags.contains(SymbolFlags::BlockScopedVariable)
             || symbol.flags.contains(SymbolFlags::FunctionScopedVariable)
+            || symbol.flags.contains(SymbolFlags::Function)
+            || symbol.flags.contains(SymbolFlags::Class)
         {
             // 1. Symbol-level cache (`value_symbol_links[symbol].resolved_type`),
             //    mirrors Go's `symbol.links.type`.
@@ -1300,6 +1305,44 @@ impl Checker {
         } else {
             self.get_any_type()
         }
+    }
+
+    /// Get the type of a function-like expression (FunctionExpression /
+    /// ArrowFunction). Returns an anonymous object type whose single call
+    /// signature has the inferred (or annotated) return type.
+    fn get_type_of_function_like(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let (body, type_node) = match &node.data {
+            crate::ast::NodeData::FunctionExpression(data) => (Some(&data.body), data.type_node.as_ref()),
+            crate::ast::NodeData::ArrowFunction(data) => (Some(&data.body), data.type_node.as_ref()),
+            crate::ast::NodeData::FunctionDeclaration(data) => (data.body.as_ref(), data.type_node.as_ref()),
+            _ => return self.get_any_type(),
+        };
+        let return_type = self.infer_function_return_type(body, type_node);
+        self.create_function_type(return_type)
+    }
+
+    /// Get the return type of a `CallExpression`. Resolves the called
+    /// expression's type; if it's a function type with at least one call
+    /// signature, return that signature's resolved return type. Otherwise
+    /// fall back to `any`.
+    fn get_return_type_of_call_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let callee = match &node.data {
+            crate::ast::NodeData::CallExpression(data) => &data.expression,
+            _ => return self.get_any_type(),
+        };
+        let callee_type = self.get_type_of_node(callee);
+        if let Some(structured) = callee_type.as_structured() {
+            for sig in structured.call_signatures() {
+                if let Some(rt) = self.get_return_type_of_signature(sig) {
+                    return rt;
+                }
+                // Signature without a resolved return type — fall back to
+                // any so callers don't blow up. The full Go checker would
+                // run inference here; that's P3.8c.
+                return self.get_any_type();
+            }
+        }
+        self.get_any_type()
     }
 
     /// Get the type of a binary expression.
@@ -1468,6 +1511,26 @@ impl Checker {
                     }
                 }
                 self.pop_function_scope();
+                // Compute the function's type (with inferred return type)
+                // and cache it on the declaration node + symbol so later
+                // references (e.g. `let y = f()`) can recover it. Mirrors
+                // Go's `getSymbolLinks(symbol).type = getWidenedTypeOfFunction`.
+                let fn_type = self.get_type_of_function_like(node);
+                self.type_node_links
+                    .get_or_default(node)
+                    .resolved_type = Some(fn_type.clone());
+                if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
+                    if let Some(name) = &data.name {
+                        if let Some(symbol) = self.resolve_identifier(name) {
+                            self.value_symbol_links
+                                .get_or_default(&symbol)
+                                .resolved_type = Some(fn_type.clone());
+                            self.type_node_links
+                                .get_or_default(name)
+                                .resolved_type = Some(fn_type);
+                        }
+                    }
+                }
             }
             SyntaxKind::ClassDeclaration => {
                 // Check heritage clauses (e.g. `extends Foo`).
