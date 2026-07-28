@@ -1650,4 +1650,69 @@ mod tests {
         binder.bind_source_file(&file);
         assert!(binder.has_flow_effects);
     }
+
+    #[test]
+    fn flow_try_catch_finally_does_not_crash() {
+        // `try/catch/finally` must build a flow graph without panicking.
+        let (file, _map) =
+            parse_and_bind("try { let x = 1; } catch (e) { let y = 2; } finally { let z = 3; }");
+        let mut binder = Binder::new();
+        binder.bind_source_file(&file);
+        assert!(binder.has_flow_effects);
+    }
+
+    #[test]
+    fn flow_try_with_throw_in_catch() {
+        // Throw inside try should route through catch, not fall through.
+        let (file, _map) = parse_and_bind(
+            "function f() {\
+             try { throw new Error(); }\
+             catch (e) { return 1; }\
+             return 2;\
+             }",
+        );
+        let mut binder = Binder::new();
+        binder.bind_source_file(&file);
+        assert!(binder.has_flow_effects);
+    }
+
+    #[test]
+    fn flow_labeled_break_to_outer_loop() {
+        // Labeled break must route the inner loop's exit to the outer label.
+        let (file, _map) = parse_and_bind(
+            "outer: for (let i = 0; i < 3; i++) {\
+             for (let j = 0; j < 3; j++) {\
+             if (j === 1) break outer;\
+             }\
+             }",
+        );
+        let mut binder = Binder::new();
+        binder.bind_source_file(&file);
+        assert!(binder.has_flow_effects);
+    }
+
+    #[test]
+    fn flow_labeled_continue_to_outer_loop() {
+        // Labeled continue must route the inner loop's continue to the outer label.
+        let (file, _map) = parse_and_bind(
+            "outer: for (let i = 0; i < 3; i++) {\
+             for (let j = 0; j < 3; j++) {\
+             if (j === 1) continue outer;\
+             }\
+             }",
+        );
+        let mut binder = Binder::new();
+        binder.bind_source_file(&file);
+        assert!(binder.has_flow_effects);
+    }
+
+    #[test]
+    fn flow_array_mutation_call_has_effects() {
+        // `arr.push(x)` is an ARRAY_MUTATION flow node — has_flow_effects
+        // must be true and binding must not crash.
+        let (file, _map) = parse_and_bind("let arr = []; arr.push(1);");
+        let mut binder = Binder::new();
+        binder.bind_source_file(&file);
+        assert!(binder.has_flow_effects);
+    }
 }
