@@ -1259,9 +1259,18 @@ impl Checker {
     }
 
     /// Get the type of an identifier reference.
+    ///
+    /// If the identifier has an associated flow node (set by the binder),
+    /// the declared type is narrowed based on control-flow constraints
+    /// (e.g. `if (x !== null)` narrows `x` in the then-branch).
     fn get_type_of_identifier(&mut self, node: &Arc<Node>) -> Arc<Type> {
         if let Some(symbol) = self.resolve_identifier(node) {
-            self.get_type_of_symbol(&symbol)
+            let flow = self
+                .program
+                .symbol_map()
+                .flow_node_of(node)
+                .map(Arc::clone);
+            self.get_narrowed_type_of_symbol(&symbol, flow.as_ref())
         } else {
             self.get_any_type()
         }

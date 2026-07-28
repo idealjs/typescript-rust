@@ -18,6 +18,7 @@
 //! etc.) is added incrementally in future sessions.
 
 pub mod checker;
+pub mod flow;
 pub mod mapper;
 pub mod relater;
 pub mod tracer;
