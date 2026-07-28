@@ -1271,7 +1271,15 @@ impl Checker {
         if symbol.flags.contains(SymbolFlags::BlockScopedVariable)
             || symbol.flags.contains(SymbolFlags::FunctionScopedVariable)
         {
-            // Try to get cached type from the value declaration node
+            // 1. Symbol-level cache (`value_symbol_links[symbol].resolved_type`),
+            //    mirrors Go's `symbol.links.type`.
+            if let Some(links) = self.value_symbol_links.get(symbol) {
+                if let Some(ref t) = links.resolved_type {
+                    return Arc::clone(t);
+                }
+            }
+            // 2. Node-level cache on the value declaration — this is where
+            //    `check_variable_declaration` writes the resolved type.
             if let Some(decl) = &symbol.value_declaration {
                 if let Some(links) = self.type_node_links.get(decl) {
                     if let Some(ref t) = links.resolved_type {
@@ -1279,7 +1287,8 @@ impl Checker {
                     }
                 }
             }
-            // Try to get type from declarations
+            // 3. Fallback: any of the symbol's declarations might carry a
+            //    cached type (e.g. parameter declarations).
             for decl in &symbol.declarations {
                 if let Some(links) = self.type_node_links.get(decl) {
                     if let Some(ref t) = links.resolved_type {
@@ -1556,7 +1565,7 @@ impl Checker {
             // flow: when a type annotation is present, the initializer must be
             // assignable to it (TS2322). When no annotation is present, the
             // type is inferred from the initializer.
-            match (&data.type_node, &data.initializer) {
+            let resolved_type = match (&data.type_node, &data.initializer) {
                 (Some(type_node), Some(init)) => {
                     let annotation_type = self.get_type_from_type_node(type_node);
                     let init_type = self.get_type_of_node(init);
@@ -1572,24 +1581,33 @@ impl Checker {
                             ],
                         ));
                     }
-                    // Cache the annotation type as the variable's type.
-                    self.type_node_links
-                        .get_or_default(&data.name)
-                        .resolved_type = Some(annotation_type);
+                    annotation_type
                 }
-                (Some(type_node), None) => {
-                    let annotation_type = self.get_type_from_type_node(type_node);
-                    self.type_node_links
-                        .get_or_default(&data.name)
-                        .resolved_type = Some(annotation_type);
-                }
-                (None, Some(init)) => {
-                    let init_type = self.get_type_of_node(init);
-                    self.type_node_links
-                        .get_or_default(&data.name)
-                        .resolved_type = Some(init_type);
-                }
-                (None, None) => {}
+                (Some(type_node), None) => self.get_type_from_type_node(type_node),
+                (None, Some(init)) => self.get_type_of_node(init),
+                (None, None) => self.get_any_type(),
+            };
+            // Cache the resolved type on the VariableDeclaration node — this
+            // is what `symbol.value_declaration` points to, so
+            // `get_type_of_symbol` can recover the type via `type_node_links`.
+            // (Previously this was stored on `data.name`, the Identifier
+            // child node, which `get_type_of_symbol` never inspects.)
+            self.type_node_links
+                .get_or_default(node)
+                .resolved_type = Some(resolved_type.clone());
+            // Also cache on the Identifier so direct `get_type_of_node(name)`
+            // callers (e.g. hover on the name) hit the cache without
+            // recursing through the symbol.
+            self.type_node_links
+                .get_or_default(&data.name)
+                .resolved_type = Some(resolved_type.clone());
+            // And mirror onto `value_symbol_links[symbol]` so symbol-driven
+            // lookups (without going through a node) work as well. Mirrors
+            // Go's `symbol.links.type`.
+            if let Some(symbol) = self.resolve_identifier(&data.name) {
+                self.value_symbol_links
+                    .get_or_default(&symbol)
+                    .resolved_type = Some(resolved_type);
             }
         }
     }

@@ -289,6 +289,24 @@ fn checker_recursive_object_type_does_not_overflow() {
     assert_no_diagnostics(&diags);
 }
 
+#[test]
+fn checker_var_type_inference_propagates_via_symbol_ts2322() {
+    // `x` is inferred as `number`; assigning it to a `string`-typed
+    // variable must report TS2322. Before the value_symbol_links cache
+    // was wired into `get_type_of_symbol`, `x`'s type fell back to
+    // `any` and this slipped through silently.
+    let diags = check_source("let x = 42; let y: string = x;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_var_type_inference_propagates_via_symbol_no_error() {
+    // `x` is inferred as `number`; assigning it to another `number`
+    // variable must not produce a diagnostic.
+    let diags = check_source("let x = 42; let y: number = x;");
+    assert_no_diagnostics(&diags);
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Function declarations (no diagnostics expected)
 // ────────────────────────────────────────────────────────────────────────────
