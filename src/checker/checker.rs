@@ -212,6 +212,11 @@ pub struct Checker {
     /// being resolved, to break cycles in recursive type aliases
     /// (e.g. `type A = B; type B = A`).
     pub resolving_type_aliases: HashSet<*const Symbol>,
+    /// Recursion depth of `is_type_related_to`. Capped at
+    /// `RELATER_MAX_DEPTH` to prevent stack overflow on recursive
+    /// structural types such as `type Box<T> = { next: Box<T> | null }`.
+    /// Mirrors `Checker.relationStackDepth` in Go (relater.go).
+    pub relater_depth: u32,
     pub spread_links: LinkStore<Symbol, SpreadLinks>,
     pub variance_links: LinkStore<Symbol, VarianceLinks>,
     pub reverse_mapped_symbol_links: LinkStore<Symbol, ReverseMappedSymbolLinks>,
@@ -427,6 +432,7 @@ impl Checker {
             type_alias_links: LinkStore::new(),
             declared_type_links: LinkStore::new(),
             resolving_type_aliases: HashSet::new(),
+            relater_depth: 0,
             spread_links: LinkStore::new(),
             variance_links: LinkStore::new(),
             reverse_mapped_symbol_links: LinkStore::new(),

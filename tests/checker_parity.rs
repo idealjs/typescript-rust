@@ -278,6 +278,17 @@ fn checker_assignable_tuple_annotation_no_init_no_error() {
     assert_no_diagnostics(&diags);
 }
 
+#[test]
+fn checker_recursive_object_type_does_not_overflow() {
+    // Recursive structural type — the relater must terminate via the
+    // depth guard instead of blowing the native stack.
+    let diags = check_source(
+        "type Box = { value: number; next: Box | null };\
+         let x: Box = { value: 1, next: null };",
+    );
+    assert_no_diagnostics(&diags);
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Function declarations (no diagnostics expected)
 // ────────────────────────────────────────────────────────────────────────────

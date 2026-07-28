@@ -93,6 +93,13 @@ pub const RELATION_COMPARISON_RESULT_OVERFLOW: RelationComparisonResult =
             | RelationComparisonResult::StackDepthOverflow.bits(),
     );
 
+/// Maximum recursion depth for `is_type_related_to` before the relater
+/// gives up and optimistically assumes the types are related. Matches the
+/// spirit of Go's `stackDepthOverflow` constant in `relater.go` (128).
+/// Without this, recursive structural types such as
+/// `type Box<T> = { next: Box<T> | null }` blow the native stack.
+pub const RELATER_MAX_DEPTH: u32 = 128;
+
 /// The kind of relation being checked.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum RelationKind {
@@ -199,6 +206,26 @@ impl Checker {
     /// Handles union/intersection/object types by delegating to specialized
     /// methods, falling back to `is_simple_type_related_to` for primitives.
     fn is_type_related_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        // Recursion guard: structural comparisons on recursive types
+        // (e.g. `type Box<T> = { next: Box<T> | null }`) can blow the native
+        // stack. Once we exceed `RELATER_MAX_DEPTH`, optimistically assume
+        // the types are related — Go's relater does the same when it hits
+        // `stackDepthOverflow`.
+        if self.relater_depth >= RELATER_MAX_DEPTH {
+            return true;
+        }
+        self.relater_depth += 1;
+        let result = self.is_type_related_to_inner(source, target, relation);
+        self.relater_depth -= 1;
+        result
+    }
+
+    fn is_type_related_to_inner(
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
