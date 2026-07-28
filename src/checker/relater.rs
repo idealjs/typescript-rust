@@ -211,8 +211,14 @@ impl Checker {
         let s = source.flags;
         let t = target.flags;
 
-        if s.contains(TYPE_FLAGS_UNION_OR_INTERSECTION)
-            || t.contains(TYPE_FLAGS_UNION_OR_INTERSECTION)
+        // NOTE: `intersects` (not `contains`) — a type "is a union or
+        // intersection" if it has *any* of those bits set, not both. `contains`
+        // would require the argument to be a subset of the type's flags, so
+        // `Union.contains(Union | Intersection)` is false and this branch was
+        // never reachable. This latent bug was masked because the relater was
+        // not wired into diagnostics (same-type cases passed via Arc::ptr_eq).
+        if s.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
+            || t.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
         {
             return self.is_union_or_intersection_related_to(source, target, relation);
         }
@@ -644,7 +650,7 @@ impl Checker {
         }
 
         // String-like types are assignable to `string`
-        if s.contains(TYPE_FLAGS_STRING_LIKE) && t.contains(TypeFlags::String) {
+        if s.intersects(TYPE_FLAGS_STRING_LIKE) && t.contains(TypeFlags::String) {
             return true;
         }
 
@@ -659,7 +665,7 @@ impl Checker {
         }
 
         // Number-like types are assignable to `number`
-        if s.contains(TYPE_FLAGS_NUMBER_LIKE) && t.contains(TypeFlags::Number) {
+        if s.intersects(TYPE_FLAGS_NUMBER_LIKE) && t.contains(TypeFlags::Number) {
             return true;
         }
 
@@ -674,17 +680,17 @@ impl Checker {
         }
 
         // BigInt-like → BigInt
-        if s.contains(TYPE_FLAGS_BIG_INT_LIKE) && t.contains(TypeFlags::BigInt) {
+        if s.intersects(TYPE_FLAGS_BIG_INT_LIKE) && t.contains(TypeFlags::BigInt) {
             return true;
         }
 
         // Boolean-like → Boolean
-        if s.contains(TYPE_FLAGS_BOOLEAN_LIKE) && t.contains(TypeFlags::Boolean) {
+        if s.intersects(TYPE_FLAGS_BOOLEAN_LIKE) && t.contains(TypeFlags::Boolean) {
             return true;
         }
 
         // Symbol-like → ESSymbol
-        if s.contains(TYPE_FLAGS_ES_SYMBOL_LIKE) && t.contains(TypeFlags::ESSymbol) {
+        if s.intersects(TYPE_FLAGS_ES_SYMBOL_LIKE) && t.contains(TypeFlags::ESSymbol) {
             return true;
         }
 
@@ -694,8 +700,8 @@ impl Checker {
         // EnumLiteral → EnumLiteral: simplified
         if s.contains(TypeFlags::EnumLiteral)
             && t.contains(TypeFlags::EnumLiteral)
-            && s.contains(TYPE_FLAGS_LITERAL)
-            && t.contains(TYPE_FLAGS_LITERAL)
+            && s.intersects(TYPE_FLAGS_LITERAL)
+            && t.intersects(TYPE_FLAGS_LITERAL)
             && self.literal_values_equal(source, target)
         {
             return true;
@@ -705,14 +711,14 @@ impl Checker {
         // to anything except `never`. Since unions and intersections may reduce
         // to `never`, we exclude them here.
         if s.contains(TypeFlags::Undefined)
-            && (!self.strict_null_checks && !t.contains(TYPE_FLAGS_UNION_OR_INTERSECTION)
-                || t.contains(TypeFlags::Undefined | TypeFlags::Void))
+            && (!self.strict_null_checks && !t.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
+                || t.intersects(TypeFlags::Undefined | TypeFlags::Void))
         {
             return true;
         }
 
         if s.contains(TypeFlags::Null)
-            && (!self.strict_null_checks && !t.contains(TYPE_FLAGS_UNION_OR_INTERSECTION)
+            && (!self.strict_null_checks && !t.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
                 || t.contains(TypeFlags::Null))
         {
             return true;

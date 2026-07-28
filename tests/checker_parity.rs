@@ -174,6 +174,58 @@ fn checker_uninitialized_var_no_error() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Assignability: the relater is now wired into variable declarations.
+// `let x: T = init` requires `init` assignable to `T` (TS2322).
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_assignable_keyword_to_same_keyword_no_error() {
+    // string -> string, number -> number, boolean -> boolean
+    let diags = check_source("let a: string = 'hi'; let b: number = 1; let c: boolean = true;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_assignable_number_init_to_string_annotation_ts2322() {
+    let diags = check_source("let x: string = 42;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_assignable_string_init_to_number_annotation_ts2322() {
+    let diags = check_source("let x: number = 'hi';");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_assignable_number_init_to_boolean_annotation_ts2322() {
+    let diags = check_source("let x: boolean = 1;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_assignable_boolean_init_to_number_annotation_ts2322() {
+    let diags = check_source("let x: number = true;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_assignable_to_union_member_no_error() {
+    let diags = check_source(
+        "let a: string | number = 42;\
+         let b: string | number = 'hi';",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_assignable_outside_union_ts2322() {
+    // `true` is not a member of `string | number`.
+    let diags = check_source("let x: string | number = true;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Function declarations (no diagnostics expected)
 // ────────────────────────────────────────────────────────────────────────────
 

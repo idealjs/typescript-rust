@@ -16,7 +16,7 @@ use crate::ast::{
 use crate::core::compiler_options::{
     CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget,
 };
-use crate::diagnostics::messages_generated::CANNOT_FIND_NAME_0;
+use crate::diagnostics::messages_generated::{CANNOT_FIND_NAME_0, TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1};
 use crate::jsnum;
 
 use super::tracer::Tracer;
@@ -1537,12 +1537,48 @@ impl Checker {
         if let crate::ast::NodeData::VariableDeclaration(data) = &node.data {
             if let Some(init) = &data.initializer {
                 self.check_expression(init);
-                // If there's no type annotation, infer the type from the initializer
-                if data.type_node.is_none() {
+            }
+            // Resolve the variable's type and check assignability of the
+            // initializer against the (optional) type annotation.
+            //
+            // This is the first place the relater is wired into the diagnostic
+            // flow: when a type annotation is present, the initializer must be
+            // assignable to it (TS2322). When no annotation is present, the
+            // type is inferred from the initializer.
+            match (&data.type_node, &data.initializer) {
+                (Some(type_node), Some(init)) => {
+                    let annotation_type = self.get_type_from_type_node(type_node);
                     let init_type = self.get_type_of_node(init);
-                    // Cache the inferred type for the variable name node
-                    self.type_node_links.get_or_default(&data.name).resolved_type = Some(init_type);
+                    if !self.is_type_assignable_to(&init_type, &annotation_type) {
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            file,
+                            init.loc,
+                            TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                            vec![
+                                self.type_to_string(&init_type),
+                                self.type_to_string(&annotation_type),
+                            ],
+                        ));
+                    }
+                    // Cache the annotation type as the variable's type.
+                    self.type_node_links
+                        .get_or_default(&data.name)
+                        .resolved_type = Some(annotation_type);
                 }
+                (Some(type_node), None) => {
+                    let annotation_type = self.get_type_from_type_node(type_node);
+                    self.type_node_links
+                        .get_or_default(&data.name)
+                        .resolved_type = Some(annotation_type);
+                }
+                (None, Some(init)) => {
+                    let init_type = self.get_type_of_node(init);
+                    self.type_node_links
+                        .get_or_default(&data.name)
+                        .resolved_type = Some(init_type);
+                }
+                (None, None) => {}
             }
         }
     }
