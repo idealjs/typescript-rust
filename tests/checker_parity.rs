@@ -225,6 +225,27 @@ fn checker_assignable_outside_union_ts2322() {
     assert_diagnostic_code(&diags, 2322);
 }
 
+#[test]
+fn checker_assignable_array_annotation_wrong_primitive_ts2322() {
+    // A `number` is not assignable to `string[]`.
+    let diags = check_source("let x: string[] = 42;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_assignable_array_annotation_primitive_to_array_ts2322() {
+    // A `string` is not assignable to `number[]`.
+    let diags = check_source("let x: number[] = 'hi';");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_assignable_array_annotation_array_literal_no_error() {
+    // An array literal (currently widened to `any`) is assignable to `number[]`.
+    let diags = check_source("let x: number[] = [1, 2, 3];");
+    assert_no_diagnostics(&diags);
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Function declarations (no diagnostics expected)
 // ────────────────────────────────────────────────────────────────────────────
