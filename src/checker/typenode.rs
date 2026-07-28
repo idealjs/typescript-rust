@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use crate::ast::node_data_generated::NodeData;
-use crate::ast::{Node, SyntaxKind};
+use crate::ast::{Node, SymbolFlags, SyntaxKind};
 
 use super::checker::Checker;
 use super::types::*;
@@ -211,9 +211,64 @@ impl Checker {
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
-        let result = self.error_type();
+        let result = self.resolve_type_reference(node);
         self.cache_type(node, result.clone());
         result
+    }
+
+    /// Resolve a `TypeReference` (`Foo`, `Foo<T>`) or
+    /// `ExpressionWithTypeArguments` to its `Type`.
+    ///
+    /// Currently resolves type aliases (`type Foo = ...`) by recursively
+    /// resolving the alias's declared type. Interface/class/enum references
+    /// fall back to `error_type` (= `any`) so no false positives are produced
+    /// until their object-type construction is ported.
+    fn resolve_type_reference(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let type_name = match &node.data {
+            NodeData::TypeReferenceNode(data) => &data.type_name,
+            NodeData::ExpressionWithTypeArguments(data) => &data.expression,
+            _ => return self.error_type(),
+        };
+        // Only Identifier names are handled for now; QualifiedName
+        // (e.g. `A.B`) needs module/namespace resolution.
+        if type_name.kind != SyntaxKind::Identifier {
+            return self.error_type();
+        }
+        let symbol = match self.resolve_identifier(type_name) {
+            Some(s) => s,
+            None => return self.error_type(),
+        };
+        if !symbol.flags.contains(SymbolFlags::TypeAlias) {
+            // Interface/class/enum/etc.: defer to error_type (any) for now.
+            return self.error_type();
+        }
+        // Cycle guard: a recursive alias (`type A = B; type B = A`) would
+        // otherwise infinite-loop here.
+        let key = Arc::as_ptr(&symbol) as *const crate::ast::Symbol;
+        if !self.resolving_type_aliases.insert(key) {
+            return self.error_type();
+        }
+        // Reuse a previously-computed declared type if present.
+        let cached = self
+            .type_alias_links
+            .get(&symbol)
+            .and_then(|l| l.declared_type.clone());
+        let resolved = cached.unwrap_or_else(|| {
+            // Find the TypeAliasDeclaration and resolve its type_node.
+            let mut found = self.error_type();
+            for decl in &symbol.declarations {
+                if let NodeData::TypeAliasDeclaration(data) = &decl.data {
+                    found = self.get_type_from_type_node(&data.type_node);
+                    break;
+                }
+            }
+            self.type_alias_links
+                .get_or_default(&symbol)
+                .declared_type = Some(Arc::clone(&found));
+            found
+        });
+        self.resolving_type_aliases.remove(&key);
+        resolved
     }
 
     fn get_type_from_type_query_node(&mut self, node: &Arc<Node>) -> Arc<Type> {

@@ -374,6 +374,51 @@ fn checker_type_alias_intersection_no_error() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Type alias assignability: a TypeReference resolves to the alias's declared
+// type, so the relater can check assignability against named aliases.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_type_alias_assignable_value_no_error() {
+    let diags = check_source("type Str = string;\nlet x: Str = 'hi';");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_type_alias_mismatch_ts2322() {
+    // `Str` aliases `string`; assigning a number must error.
+    let diags = check_source("type Str = string;\nlet x: Str = 42;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_type_alias_to_union_mismatch_ts2322() {
+    let diags = check_source("type U = string | number;\nlet x: U = true;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_type_alias_to_union_member_no_error() {
+    let diags = check_source("type U = string | number;\nlet x: U = 42;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_transitive_type_alias_mismatch_ts2322() {
+    // `A` aliases `B` aliases `number`; a string is not assignable.
+    let diags = check_source("type B = number;\ntype A = B;\nlet x: A = 'hi';");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_recursive_type_alias_does_not_crash() {
+    // Indirectly recursive aliases must be broken by the cycle guard and
+    // resolve to `any` (no diagnostic), never stack-overflow.
+    let diags = check_source("type A = B;\ntype B = A;\nlet x: A = 1;");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // TS2304: Cannot find name (undefined references)
 // ────────────────────────────────────────────────────────────────────────────
 

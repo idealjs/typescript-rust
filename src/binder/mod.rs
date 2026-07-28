@@ -187,9 +187,23 @@ impl Binder {
         let name = self.get_declaration_name(node);
         let symbol = self.new_symbol(includes, name.clone());
 
-        // Add the declaration to the symbol
-        // (symbol.declarations is not mutable through Arc, so we'd need interior
-        // mutability — for now, the symbol_map tracks the primary symbol)
+        // Record this declaration node on the symbol. `Symbol` is behind an
+        // `Arc`; the binder runs single-threaded before any checker access, so
+        // we mutate through the raw pointer (same pattern used for `members`
+        // below). This lets the checker recover the AST declaration from a
+        // symbol (e.g. resolving a type alias's declared type).
+        {
+            let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+            unsafe {
+                (*symbol_mut).declarations.push(Arc::clone(node));
+                // The first declaration is also the value declaration.
+                if (*symbol_mut).value_declaration.is_none()
+                    && includes.contains(SymbolFlags::VALUE)
+                {
+                    (*symbol_mut).value_declaration = Some(Arc::clone(node));
+                }
+            }
+        }
 
         // Add to appropriate symbol table
         // 1) container's exports (if in a module/namespace)

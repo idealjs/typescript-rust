@@ -5,7 +5,7 @@
 //! the `Checker` struct, its initialization, and the core entry points.
 //! Full type-checking logic is added incrementally.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
@@ -208,6 +208,10 @@ pub struct Checker {
     pub members_and_exports_links: LinkStore<Symbol, MembersAndExportsLinks>,
     pub type_alias_links: LinkStore<Symbol, TypeAliasLinks>,
     pub declared_type_links: LinkStore<Symbol, DeclaredTypeLinks>,
+    /// Symbols (by raw pointer identity) whose declared type is currently
+    /// being resolved, to break cycles in recursive type aliases
+    /// (e.g. `type A = B; type B = A`).
+    pub resolving_type_aliases: HashSet<*const Symbol>,
     pub spread_links: LinkStore<Symbol, SpreadLinks>,
     pub variance_links: LinkStore<Symbol, VarianceLinks>,
     pub reverse_mapped_symbol_links: LinkStore<Symbol, ReverseMappedSymbolLinks>,
@@ -422,6 +426,7 @@ impl Checker {
             members_and_exports_links: LinkStore::new(),
             type_alias_links: LinkStore::new(),
             declared_type_links: LinkStore::new(),
+            resolving_type_aliases: HashSet::new(),
             spread_links: LinkStore::new(),
             variance_links: LinkStore::new(),
             reverse_mapped_symbol_links: LinkStore::new(),
