@@ -1440,11 +1440,21 @@ impl Checker {
             }
             SyntaxKind::PrefixUnaryExpression => {
                 if let crate::ast::NodeData::PrefixUnaryExpression(data) = &node.data {
-                    // `!x` → boolean; `+x`/`-x`/`~x`/`++x`/`--x` → number.
-                    if data.operator == SyntaxKind::ExclamationToken {
-                        return self.boolean_type();
+                    // The parser currently represents `delete x` and
+                    // `void x` as PrefixUnaryExpression with DeleteKeyword /
+                    // VoidKeyword as the operator (Go creates separate
+                    // DeleteExpression / VoidExpression nodes). Handle both
+                    // representations here.
+                    match data.operator {
+                        // `!x` → boolean.
+                        SyntaxKind::ExclamationToken => return self.boolean_type(),
+                        // `delete x` → boolean.
+                        SyntaxKind::DeleteKeyword => return self.boolean_type(),
+                        // `void x` → undefined.
+                        SyntaxKind::VoidKeyword => return self.undefined_type(),
+                        // `+x`/`-x`/`~x`/`++x`/`--x` → number.
+                        _ => return self.number_type(),
                     }
-                    return self.number_type();
                 }
                 self.get_any_type()
             }
@@ -1478,6 +1488,65 @@ impl Checker {
                 // `x satisfies T` keeps the type of `x` (the assertion does
                 // not change the expression's type, only validates it).
                 if let crate::ast::NodeData::SatisfiesExpression(data) = &node.data {
+                    return self.get_type_of_node(&data.expression);
+                }
+                self.get_any_type()
+            }
+            SyntaxKind::TypeAssertionExpression => {
+                // `<T>x` has the type of the type annotation `T`.
+                if let crate::ast::NodeData::TypeAssertion(data) = &node.data {
+                    return self.get_type_from_type_node(&data.type_node);
+                }
+                self.get_any_type()
+            }
+            SyntaxKind::NonNullExpression => {
+                // `x!` has the type of `x` (ideally with null/undefined
+                // removed, but for now we return the expression type).
+                if let crate::ast::NodeData::NonNullExpression(data) = &node.data {
+                    return self.get_type_of_node(&data.expression);
+                }
+                self.get_any_type()
+            }
+            SyntaxKind::ConditionalExpression => {
+                // `cond ? a : b` — simplified to the type of `when_true`.
+                // The full implementation would compute the union of the
+                // true and false branch types.
+                if let crate::ast::NodeData::ConditionalExpression(data) = &node.data {
+                    return self.get_type_of_node(&data.when_true);
+                }
+                self.get_any_type()
+            }
+            SyntaxKind::TemplateExpression => {
+                // `` `a${x}b` `` → string.
+                self.string_type()
+            }
+            SyntaxKind::TaggedTemplateExpression => {
+                // `` tag`...` `` → result of calling the tag function.
+                if let crate::ast::NodeData::TaggedTemplateExpression(data) = &node.data {
+                    let tag_type = self.get_type_of_node(&data.tag);
+                    if let Some(structured) = tag_type.as_structured() {
+                        for sig in structured.call_signatures() {
+                            if let Some(rt) = self.get_return_type_of_signature(sig) {
+                                return rt;
+                            }
+                            return self.get_any_type();
+                        }
+                    }
+                }
+                self.get_any_type()
+            }
+            SyntaxKind::DeleteExpression => {
+                // `delete x` → boolean.
+                self.boolean_type()
+            }
+            SyntaxKind::VoidExpression => {
+                // `void x` → undefined.
+                self.undefined_type()
+            }
+            SyntaxKind::AwaitExpression => {
+                // `await x` → unwrapped type of the awaited expression.
+                // Simplified: return the expression's type.
+                if let crate::ast::NodeData::AwaitExpression(data) = &node.data {
                     return self.get_type_of_node(&data.expression);
                 }
                 self.get_any_type()
@@ -2271,6 +2340,12 @@ impl Checker {
             SyntaxKind::AsExpression => {
                 // The left side is an expression; the right side is a type.
                 if let crate::ast::NodeData::AsExpression(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::TypeAssertionExpression => {
+                // `<T>x`: the left side is a type; the right is an expression.
+                if let crate::ast::NodeData::TypeAssertion(data) = &node.data {
                     self.check_expression(&data.expression);
                 }
             }

@@ -3126,19 +3126,24 @@ impl Parser {
                 ))
             }
             SyntaxKind::VoidKeyword | SyntaxKind::DeleteKeyword => {
-                let operator = self.token;
-                let op_pos = self.token_pos();
+                let pos = self.token_pos();
+                let is_delete = self.token == SyntaxKind::DeleteKeyword;
                 self.next_token();
-                let operand = self.parse_unary_expression();
-                let loc = TextRange::new(op_pos, operand.end());
-                Arc::new(Node::with_loc(
-                    SyntaxKind::PrefixUnaryExpression,
-                    NodeData::PrefixUnaryExpression(PrefixUnaryExpressionData {
-                        operator,
-                        operand,
-                    }),
-                    loc,
-                ))
+                let expression = self.parse_unary_expression();
+                let end = expression.end();
+                if is_delete {
+                    Arc::new(Node::with_loc(
+                        SyntaxKind::DeleteExpression,
+                        NodeData::DeleteExpression(DeleteExpressionData { expression }),
+                        TextRange::new(pos, end),
+                    ))
+                } else {
+                    Arc::new(Node::with_loc(
+                        SyntaxKind::VoidExpression,
+                        NodeData::VoidExpression(VoidExpressionData { expression }),
+                        TextRange::new(pos, end),
+                    ))
+                }
             }
             SyntaxKind::AwaitKeyword => {
                 let pos = self.token_pos();
@@ -3151,8 +3156,29 @@ impl Parser {
                     TextRange::new(pos, end),
                 ))
             }
+            SyntaxKind::LessThanToken if self.language_variant != LanguageVariant::Jsx => {
+                // Type assertion: `<T>expr` (only in non-JSX files).
+                self.parse_type_assertion()
+            }
             _ => self.parse_postfix_expression(),
         }
+    }
+
+    /// Parse a type assertion expression: `<T>expr`.
+    ///
+    /// Only called in non-JSX files (`.ts`, not `.tsx`).
+    fn parse_type_assertion(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        self.next_token(); // consume `<`
+        let type_node = self.parse_type();
+        self.expect(SyntaxKind::GreaterThanToken);
+        let expression = self.parse_unary_expression();
+        let end = expression.end();
+        Arc::new(Node::with_loc(
+            SyntaxKind::TypeAssertionExpression,
+            NodeData::TypeAssertion(TypeAssertionData { type_node, expression }),
+            TextRange::new(pos, end),
+        ))
     }
 
     fn parse_postfix_expression(&mut self) -> Arc<Node> {

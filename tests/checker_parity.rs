@@ -2171,3 +2171,81 @@ fn checker_string_array_element_access_returns_string_no_error() {
     let diags = check_source("let arr: string[] = ['a']; let y: string = arr[0];");
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// More expression type inference: non-null, conditional, template, delete, void
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_non_null_expression_returns_expression_type_no_error() {
+    // `x!` has the type of `x` (here `number`).
+    let diags = check_source("let x: number | null = 1; let y: number = x!;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_type_assertion_expression_uses_type_annotation_no_error() {
+    // `<number>x` has type `number` (angle-bracket assertion).
+    let diags = check_source("let x: any = 1; let y: number = <number>x;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_type_assertion_expression_wrong_annotation_ts2322() {
+    // `<string>x` has type `string`; assigning to `number` fails.
+    let diags = check_source("let x: any = 1; let y: number = <string>x;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_conditional_expression_returns_true_branch_type_no_error() {
+    // `cond ? a : b` → type of `a` (here `number`).
+    let diags = check_source("let cond = true; let y: number = cond ? 1 : 2;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_conditional_expression_true_branch_wrong_type_ts2322() {
+    // `cond ? 'hi' : 2` → type of true branch is `string`.
+    let diags = check_source("let cond = true; let y: number = cond ? 'hi' : 2;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_template_expression_returns_string_no_error() {
+    // `` `${x}` `` → string.
+    let diags = check_source("let x = 1; let y: string = `${x}`;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_template_expression_returns_string_ts2322() {
+    // `` `${x}` `` → string; assigning to `number` fails.
+    let diags = check_source("let x = 1; let y: number = `${x}`;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_delete_expression_returns_boolean_no_error() {
+    // `delete x` → boolean.
+    let diags = check_source("let x = 1; let y: boolean = delete x;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_void_expression_returns_undefined_no_error() {
+    // `void x` → undefined.
+    let diags = check_source("let x = 1; let y: undefined = void x;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_void_expression_returns_undefined_ts2322() {
+    // `void x` → undefined; assigning to `number` fails.
+    // Requires --strictNullChecks to make `undefined` not assignable to `number`.
+    let diags = check_source_tsx_with_args(
+        "let x = 1; let y: number = void x;",
+        &["--strictNullChecks", "true"],
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
