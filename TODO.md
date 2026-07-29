@@ -395,9 +395,15 @@ parenthesization for function types in unions/arrays；serialization level 递�
 
 ### P3.11 Checker emitresolver
 
-- [ ] 迁移 `internal/checker/emitresolver.go`（1322 行）。
-- [ ] `getEmitResolver`：emit 阶段所需符号信息（`isDeclarationVisible`、
-  `isOptional` 等）。
+已完成：`emitresolver.rs` 模块；`is_declaration_visible`、`get_enum_member_value`
+（string/number/negative numeric）、`is_optional_parameter`、
+`is_literal_const_declaration`、`get_constant_value`、
+`is_referenced_alias_declaration`、`is_value_alias_declaration`、
+`get_effective_declaration_flags`、`get_symbol_of_declaration`、
+`is_const_enum_member`。
+
+- [ ] 完整的 visibility tracking（alias marking visitor）。
+- [ ] `isEntityNameVisible`/`isSymbolAccessible`（declaration emit 需要）。
 
 ### P3.12 Checker JSX / JSDoc / Grammar checks
 
