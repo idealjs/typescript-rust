@@ -561,7 +561,6 @@ impl Checker {
             // Look up the source file's symbol from the symbol map
             let symbol_map = self.program.symbol_map();
             if let Some(file_sym) = symbol_map.symbol_of(&file.node) {
-                let before = self.globals.len();
                 // Merge the source file's members into globals
                 for (name, sym) in file_sym.members.iter() {
                     self.globals.insert(name.clone(), Arc::clone(sym));
@@ -572,15 +571,8 @@ impl Checker {
                         self.globals.insert(name.clone(), Arc::clone(sym));
                     }
                 }
-                let added = self.globals.len() - before;
-                eprintln!("populate_globals: file={} members={} added={}",
-                    file.file_name, file_sym.members.len(), added);
-            } else {
-                eprintln!("populate_globals: file={} no symbol found",
-                    file.file_name);
             }
         }
-        eprintln!("populate_globals: total globals={}", self.globals.len());
     }
 
     // ────────────────────────────────────────────────────────────────────────
@@ -2191,9 +2183,27 @@ impl Checker {
                 //   - JsxExpression children (and recursively, nested JSX)
                 //   - JsxAttribute initializers / JsxSpreadAttribute expressions
                 self.check_jsx_element(node);
+                // Run JSX-specific type checks on the opening-like element.
+                let opening = match node.kind {
+                    SyntaxKind::JsxElement => match &node.data {
+                        crate::ast::NodeData::JsxElement(d) => Some(Arc::clone(&d.opening_element)),
+                        _ => None,
+                    },
+                    SyntaxKind::JsxSelfClosingElement => Some(Arc::clone(node)),
+                    SyntaxKind::JsxFragment => match &node.data {
+                        crate::ast::NodeData::JsxFragment(d) => Some(Arc::clone(&d.opening_fragment)),
+                        _ => None,
+                    },
+                    _ => None,
+                };
+                if let Some(opening) = opening {
+                    self.check_jsx_opening_like_element(&opening);
+                }
             }
             SyntaxKind::JsxExpression => {
                 if let crate::ast::NodeData::JsxExpression(data) = &node.data {
+                    // Grammar check (e.g. comma operator).
+                    self.check_grammar_jsx_expression(node);
                     if let Some(expr) = &data.expression {
                         self.check_expression(expr);
                     }

@@ -12,8 +12,8 @@
 use std::sync::Arc;
 
 use crate::ast::{
-    is_class_declaration, is_class_expression, is_module_block, is_source_file, ModifierFlags,
-    Node, NodeData, NodeFlags, SyntaxKind,
+    is_class_declaration, is_class_expression, is_jsx_namespaced_name, is_module_block,
+    is_source_file, ModifierFlags, Node, NodeData, NodeFlags, SyntaxKind,
 };
 use crate::diagnostics::messages_generated::*;
 use crate::diagnostics::Message;
@@ -29,12 +29,12 @@ impl Checker {
     /// Emit a grammar error on the given node.
     ///
     /// Mirrors Go's `grammarErrorOnNode`.
-    fn grammar_error_on_node(&mut self, node: &Arc<Node>, message: &Message) -> bool {
+    pub(crate) fn grammar_error_on_node(&mut self, node: &Arc<Node>, message: &Message) -> bool {
         self.grammar_error_on_node_with_args(node, message, &[])
     }
 
     /// Emit a grammar error on the given node with formatted arguments.
-    fn grammar_error_on_node_with_args(
+    pub(crate) fn grammar_error_on_node_with_args(
         &mut self,
         node: &Arc<Node>,
         message: &Message,
@@ -1159,5 +1159,172 @@ fn modifier_to_flag(kind: SyntaxKind) -> ModifierFlags {
         SyntaxKind::InKeyword => ModifierFlags::In,
         SyntaxKind::OutKeyword => ModifierFlags::Out,
         _ => ModifierFlags::empty(),
+    }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// JSX grammar checks
+// ────────────────────────────────────────────────────────────────────────────
+
+impl Checker {
+    /// Validate a JSX element's tag name and attribute list.
+    ///
+    /// Mirrors Go's `checkGrammarJsxElement`:
+    /// - Validate the tag name (namespace-name rules).
+    /// - Validate any explicit type arguments (JSX elements cannot have
+    ///   type arguments).
+    /// - Reject duplicate attribute names (TS17001).
+    /// - Reject empty JSX attribute expressions (TS17000).
+    pub fn check_grammar_jsx_element(&mut self, node: &Arc<Node>) -> bool {
+        let tag_name = match super::jsx::jsx_tag_name(node) {
+            Some(t) => t,
+            None => return false,
+        };
+
+        if self.check_grammar_jsx_name(&tag_name) {
+            return true;
+        }
+
+        // Type arguments are not allowed on JSX elements.
+        let type_args: Option<Vec<Arc<Node>>> = match &node.data {
+            NodeData::JsxOpeningElement(data) => {
+                data.type_arguments.as_ref().map(|l| l.iter().cloned().collect())
+            }
+            NodeData::JsxSelfClosingElement(data) => {
+                data.type_arguments.as_ref().map(|l| l.iter().cloned().collect())
+            }
+            _ => None,
+        };
+        if let Some(args) = type_args {
+            if !args.is_empty() {
+                // TS2558: Expected 0 type arguments, got N.
+                // Reuse the generic message; the Go implementation uses
+                // diagnostics.Expected_0_type_arguments_but_got_1.
+                let count = args.len().to_string();
+                return self.grammar_error_on_node_with_args(
+                    node,
+                    &EXPECTED_0_TYPE_ARGUMENTS_BUT_GOT_1,
+                    &["0".to_string(), count],
+                );
+            }
+        }
+
+        // Check for duplicate attribute names and empty JSX expressions.
+        let attrs = match super::jsx::jsx_attributes(node) {
+            Some(a) => a,
+            None => return false,
+        };
+        let properties: Vec<Arc<Node>> = match &attrs.data {
+            NodeData::JsxAttributes(data) => data.properties.iter().cloned().collect(),
+            _ => return false,
+        };
+
+        let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
+        for attr in &properties {
+            if attr.kind == SyntaxKind::JsxSpreadAttribute {
+                continue;
+            }
+            let (name_node, initializer) = match &attr.data {
+                NodeData::JsxAttribute(d) => (Arc::clone(&d.name), d.initializer.clone()),
+                _ => continue,
+            };
+            let text = name_node.text().to_string();
+            if !seen.insert(text.clone()) {
+                return self.grammar_error_on_node(&name_node, &JSX_ELEMENTS_CANNOT_HAVE_MULTIPLE_ATTRIBUTES_WITH_THE_SAME_NAME);
+            }
+            if let Some(init) = initializer {
+                if init.kind == SyntaxKind::JsxExpression {
+                    if let NodeData::JsxExpression(d) = &init.data {
+                        if d.expression.is_none() {
+                            return self.grammar_error_on_node(
+                                &init,
+                                &JSX_ATTRIBUTES_MUST_ONLY_BE_ASSIGNED_A_NON_EMPTY_EXPRESSION,
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        false
+    }
+
+    /// Validate a JSX tag name expression.
+    ///
+    /// Mirrors Go's `checkGrammarJsxName`:
+    /// - TS2633: JSX property access expressions cannot include JSX
+    ///   namespace names.
+    /// - TS2639: React components cannot include JSX namespace names
+    ///   (when JSX transform is enabled and the namespace is not
+    ///   intrinsic).
+    pub fn check_grammar_jsx_name(&mut self, node: &Arc<Node>) -> bool {
+        // Property access whose expression is a JSX namespaced name:
+        //   <foo:bar.baz />  — invalid.
+        if node.kind == SyntaxKind::PropertyAccessExpression {
+            if let NodeData::PropertyAccessExpression(data) = &node.data {
+                let expr = &data.expression;
+                if is_jsx_namespaced_name(expr) {
+                    return self.grammar_error_on_node(
+                        expr,
+                        &JSX_PROPERTY_ACCESS_EXPRESSIONS_CANNOT_INCLUDE_JSX_NAMESPACE_NAMES,
+                    );
+                }
+            }
+        }
+        // JSX namespaced name used as a React component when JSX
+        // transform is enabled and the namespace isn't an intrinsic.
+        if is_jsx_namespaced_name(node)
+            && self.is_jsx_transform_enabled()
+        {
+            let namespace_text = match &node.data {
+                NodeData::JsxNamespacedName(data) => data.namespace.text().to_string(),
+                _ => String::new(),
+            };
+            if !super::jsx::is_intrinsic_jsx_name(&namespace_text) {
+                return self.grammar_error_on_node(
+                    node,
+                    &REACT_COMPONENTS_CANNOT_INCLUDE_JSX_NAMESPACE_NAMES,
+                );
+            }
+        }
+        false
+    }
+
+    /// Validate a JSX expression (`{...}`).
+    ///
+    /// Mirrors Go's `checkGrammarJsxExpression`:
+    /// - TS18007: JSX expressions may not use the comma operator.
+    pub fn check_grammar_jsx_expression(&mut self, node: &Arc<Node>) -> bool {
+        let expr = match &node.data {
+            NodeData::JsxExpression(data) => &data.expression,
+            _ => return false,
+        };
+        let Some(expr) = expr else { return false };
+        // A comma sequence is a BinaryExpression with a CommaToken.
+        if is_comma_sequence(expr) {
+            return self.grammar_error_on_node(
+                expr,
+                &JSX_EXPRESSIONS_MAY_NOT_USE_THE_COMMA_OPERATOR_DID_YOU_MEAN_TO_WRITE_AN_ARRAY,
+            );
+        }
+        false
+    }
+
+    /// Whether JSX emit/transform is enabled (i.e. `--jsx` is not `None`).
+    fn is_jsx_transform_enabled(&self) -> bool {
+        self.compiler_options.jsx != crate::core::compiler_options::JsxEmit::None
+    }
+}
+
+/// Whether `node` is a comma-sequence expression (`a, b`).
+///
+/// Mirrors Go's `ast.IsCommaSequence`.
+fn is_comma_sequence(node: &Arc<Node>) -> bool {
+    if node.kind != SyntaxKind::BinaryExpression {
+        return false;
+    }
+    match &node.data {
+        NodeData::BinaryExpression(data) => data.operator_token.kind == SyntaxKind::CommaToken,
+        _ => false,
     }
 }

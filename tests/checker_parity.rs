@@ -30,9 +30,35 @@ fn check_source_with_lib(source: &str, no_lib: bool) -> Vec<tsox::ast::Diagnosti
     check_source_named_with_lib("/proj/entry.ts", source, no_lib)
 }
 
-/// Like `check_source` but uses a `.tsx` filename to enable JSX parsing.
+/// Like `check_source` but uses a `.tsx` filename to enable JSX parsing,
+/// passes `--jsx preserve`, and disables `--noImplicitAny` (since the
+/// tests run without lib.d.ts and don't have a JSX namespace in scope).
 fn check_source_tsx(source: &str) -> Vec<tsox::ast::Diagnostic> {
-    check_source_named_with_lib("/proj/entry.tsx", source, true)
+    check_source_tsx_with_args(source, &["--jsx", "preserve", "--noImplicitAny", "false"])
+}
+
+/// Like `check_source_tsx` but with extra CLI args.
+fn check_source_tsx_with_args(source: &str, extra_args: &[&str]) -> Vec<tsox::ast::Diagnostic> {
+    let fs = Arc::new(InMemoryFS::new());
+    fs.insert_dir("/proj");
+    fs.insert_file("/proj/entry.tsx", source);
+
+    let mut args = vec!["--noLib".to_string()];
+    for a in extra_args {
+        args.push((*a).to_string());
+    }
+    args.push("/proj/entry.tsx".to_string());
+    let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
+
+    let host: Arc<dyn tsox::compiler::CompilerHost> =
+        Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
+
+    let program = Arc::new(Program::new(ProgramOptions {
+        config: parsed,
+        host,
+    }));
+
+    program.get_semantic_diagnostics()
 }
 
 /// Run the checker on a single source file with an explicit filename and
@@ -1143,6 +1169,55 @@ fn checker_jsx_undefined_expression_in_curly() {
     // `undefinedVar` is not in scope: expect TS2304.
     let diags = check_source_tsx("const el = <div>{undefinedVar}</div>;");
     assert_diagnostic_code(&diags, 2304);
+}
+
+#[test]
+fn checker_jsx_precondition_jsx_flag_missing() {
+    // No `--jsx` flag: expect TS17004 ("Cannot use JSX unless the
+    // '--jsx' flag is provided").
+    let diags = check_source_tsx_with_args(
+        "const el = <div />;",
+        &[], // no --jsx
+    );
+    assert_diagnostic_code(&diags, 17004);
+}
+
+#[test]
+fn checker_jsx_duplicate_attribute_names() {
+    // Two attributes with the same name: expect TS17001.
+    let diags = check_source_tsx("const el = <div data-x='1' data-x='2' />;");
+    assert_diagnostic_code(&diags, 17001);
+}
+
+#[test]
+fn checker_jsx_comma_operator_in_expression() {
+    // Comma operator in JSX expression: expect TS18007. The Go check
+    // only flags a direct BinaryExpression-with-CommaToken, so we don't
+    // wrap the comma in parentheses.
+    let diags = check_source_tsx("const a = 1; const b = 2; const el = <div>{a, b}</div>;");
+    assert_diagnostic_code(&diags, 18007);
+}
+
+#[test]
+fn checker_jsx_component_no_signatures() {
+    // `Foo` has no call/construct signatures: expect TS2604.
+    let diags = check_source_tsx("const Foo = 42;\nconst el = <Foo />;");
+    assert_diagnostic_code(&diags, 2604);
+}
+
+#[test]
+fn checker_jsx_function_component_no_error() {
+    // `Foo` is a function (has call signature): no error expected.
+    let diags = check_source_tsx("function Foo() { return 1; }\nconst el = <Foo />;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+#[ignore = "TODO: requires class construct-signature tracking in the type system"]
+fn checker_jsx_class_component_no_error() {
+    // `Foo` is a class (has construct signature): no error expected.
+    let diags = check_source_tsx("class Foo {}\nconst el = <Foo />;");
+    assert_no_diagnostics(&diags);
 }
 
 // ────────────────────────────────────────────────────────────────────────────
