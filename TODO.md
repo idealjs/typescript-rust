@@ -57,8 +57,8 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-29）
 
-测试基线：`cargo test` 通过（607 个 lib 单测 + 2 个 emit parity + 243 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 137 个）。
+测试基线：`cargo test` 通过（607 个 lib 单测 + 2 个 emit parity + 250 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 144 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
@@ -344,12 +344,17 @@ do-while/for/for-in/for-of/switch 控制流、return/throw/break/continue、
 已完成：`relater.go` 基础骨架；`is_type_assignable_to` 基础规则
 （any/unknown/never/基本类型/字面量）；`is_type_subtype_of`/
 `is_type_comparable_to`/`is_type_strict_subtype_of`；union/intersection
-类型关系；对象类型结构检查 + 属性类型深度检查 `is_object_type_related_to`。
+类型关系；对象类型结构检查 + 属性类型深度检查 `is_object_type_related_to`；
+数组类型协变关系（`is_array_type_related_to`）；tuple 元素逐项比较
+（`is_tuple_type_related_to`）；call/construct signature 比较
+（`signatures_related_to` 含 pairwise/single-signature/N×M fallback、
+`compare_signatures_related` 含 bivariant/contravariant 参数比较、
+rest/optional/min-argument-count 处理、return type 比较、void/any wildcard）；
+index signature 比较（`is_index_signatures_related_to`）；generic type
+reference 协变/逆变推断（`generic_type_reference_related_to`）。
 
-- [ ] 数组、tuple、函数、泛型、条件类型、映射类型关系。
+- [ ] 条件类型、映射类型关系。
 - [ ] `relation_comparison_result` 缓存与递归保护。
-- [ ] Signature 比较（call/construct signatures）。
-- [ ] Index signature 比较。
 
 ### P3.8 Checker 类型推断
 
@@ -364,7 +369,10 @@ conditional 表达式 union 类型推断（`cond ? 1 : 'hi'` → `number | strin
 对象字面量类型推断（`{ a: 1, b: 'hi' }` → `{ a: 1, b: 'hi' }`，保留 literal
 类型以支持 discriminated union 赋值）；`TypeLiteral` 节点解析为结构化对象类型
 （`{ a: number; b: string }` 注解生成带 property signature 的 anonymous object
-type，含循环保护）；`get_type_of_symbol` 扩展支持 `Property` flag 符号。
+type，含循环保护）；`FunctionType`/`ConstructorType` 节点解析为带 call/construct
+signature 的对象类型（`get_type_from_function_type_node`/
+`get_type_from_constructor_type_node` + `build_signature_from_function_like_type_node`
+含参数/rest/optional 处理）；`get_type_of_symbol` 扩展支持 `Property` flag 符号。
 
 - [ ] 条件类型 `infer R` 解析。（已部分完成，conditional branch 推断待补）
 - [ ] 类型推断缓存（`node_links.resolved_type`）。（已通过 `type_node_links` 完成）

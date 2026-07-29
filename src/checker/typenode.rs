@@ -364,8 +364,8 @@ impl Checker {
             NodeData::TypeLiteralNode(data) => {
                 self.get_type_from_type_literal_members(&data.members)
             }
-            // FunctionType / ConstructorType — defer to error_type for now
-            // (proper resolution needs signature construction).
+            NodeData::FunctionTypeNode(_) => self.get_type_from_function_type_node(node),
+            NodeData::ConstructorTypeNode(_) => self.get_type_from_constructor_type_node(node),
             _ => self.error_type(),
         };
         self.cache_type(node, result.clone());
@@ -416,6 +416,158 @@ impl Checker {
                     ..Default::default()
                 },
                 ..Default::default()
+            }),
+        })
+    }
+
+    /// Resolve a `FunctionType` node `(x: number) => string` to an anonymous
+    /// object type with a single call signature. Parameter types and the
+    /// return type are resolved from the AST. Rest parameters
+    /// (`...args: number[]`) and optional parameters (`x?: number`) are
+    /// honored via `SignatureFlags::HasRestParameter` and
+    /// `min_argument_count` respectively. Generic type parameters
+    /// (`<T>(x: T) => T`) are skipped for now (the signature is non-generic).
+    /// Note: cache handling is done by the caller
+    /// (`get_type_from_type_literal_or_function_or_constructor_type_node`).
+    fn get_type_from_function_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        match &node.data {
+            NodeData::FunctionTypeNode(data) => {
+                let sig = self.build_signature_from_function_like_type_node(
+                    &data.parameters,
+                    data.type_node.as_ref(),
+                    /* is_construct */ false,
+                );
+                self.create_function_or_constructor_type(vec![sig], false)
+            }
+            _ => self.error_type(),
+        }
+    }
+
+    /// Resolve a `ConstructorType` node `new (x: number) => Foo` to an
+    /// anonymous object type with a single construct signature. Cache
+    /// handling is done by the caller.
+    fn get_type_from_constructor_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        match &node.data {
+            NodeData::ConstructorTypeNode(data) => {
+                let sig = self.build_signature_from_function_like_type_node(
+                    &data.parameters,
+                    data.type_node.as_ref(),
+                    /* is_construct */ true,
+                );
+                self.create_function_or_constructor_type(vec![sig], true)
+            }
+            _ => self.error_type(),
+        }
+    }
+
+    /// Build a `Signature` from a function-like type node's parameter list
+    /// and return type node. Each parameter is turned into a `Symbol` whose
+    /// resolved type is stored in `value_symbol_links` (so the relater's
+    /// `get_type_of_symbol` returns it during signature comparison).
+    fn build_signature_from_function_like_type_node(
+        &mut self,
+        parameters: &Arc<NodeList>,
+        type_node: Option<&Arc<Node>>,
+        is_construct: bool,
+    ) -> Arc<Signature> {
+        let mut param_symbols: Vec<Arc<Symbol>> = Vec::with_capacity(parameters.len());
+        let mut flags = SignatureFlags::None;
+        if is_construct {
+            flags |= SignatureFlags::Construct;
+        }
+        // `min_argument_count` = number of leading required (non-optional,
+        // non-rest) parameters.
+        let mut min_argument_count: i32 = 0;
+        let mut reached_optional_or_rest = false;
+        for (i, param) in parameters.iter().enumerate() {
+            let NodeData::ParameterDeclaration(pd) = &param.data else {
+                continue;
+            };
+            let is_rest = pd.dot_dot_dot_token.is_some();
+            let is_optional = pd.question_token.is_some();
+            // Resolve the parameter's type annotation (default to `any`).
+            let param_type = match pd.type_node.as_ref() {
+                Some(tn) => self.get_type_from_type_node(tn),
+                None => self.get_any_type(),
+            };
+            // Use the parameter name when it's an identifier; otherwise
+            // synthesize a positional name.
+            let name = pd.name.text().to_string();
+            let name = if name.is_empty() {
+                format!("__arg{}", i)
+            } else {
+                name
+            };
+            let sym = Arc::new(Symbol::new(SymbolFlags::Property, name));
+            self.value_symbol_links.insert(
+                &sym,
+                ValueSymbolLinks {
+                    resolved_type: Some(param_type),
+                    ..Default::default()
+                },
+            );
+            param_symbols.push(sym);
+            if is_rest {
+                flags |= SignatureFlags::HasRestParameter;
+                reached_optional_or_rest = true;
+            } else if is_optional {
+                reached_optional_or_rest = true;
+            }
+            if !reached_optional_or_rest {
+                min_argument_count += 1;
+            }
+        }
+        // Resolve return type.
+        let return_type = match type_node {
+            Some(tn) => self.get_type_from_type_node(tn),
+            None => self.get_any_type(),
+        };
+        let sig = Arc::new(Signature {
+            id: 0,
+            flags,
+            min_argument_count,
+            resolved_min_argument_count: -1,
+            declaration: None,
+            type_parameters: Vec::new(),
+            parameters: param_symbols,
+            this_parameter: None,
+            resolved_return_type: std::sync::OnceLock::new(),
+            resolved_type_predicate: None,
+            target: None,
+            mapper: None,
+            isolated_signature_type: std::sync::OnceLock::new(),
+        });
+        // Eagerly populate the resolved return type so
+        // `get_return_type_of_signature` returns `Some(...)` without a
+        // separate inference pass.
+        let _ = sig.resolved_return_type.set(return_type);
+        sig
+    }
+
+    /// Create an anonymous object type with the given signatures. When
+    /// `is_construct` is false, all signatures are call signatures
+    /// (`call_signature_count = sigs.len()`); when true, all are construct
+    /// signatures (`call_signature_count = 0`).
+    fn create_function_or_constructor_type(
+        &self,
+        sigs: Vec<Arc<Signature>>,
+        is_construct: bool,
+    ) -> Arc<Type> {
+        let call_signature_count = if is_construct { 0 } else { sigs.len() };
+        let mut structured = StructuredTypeData::default();
+        structured.signatures = sigs;
+        structured.call_signature_count = call_signature_count;
+        Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Anonymous,
+            id: 0,
+            symbol: None,
+            alias: None,
+            data: TypeData::Object(ObjectTypeData {
+                structured,
+                target: None,
+                mapper: None,
+                type_arguments: Vec::new(),
             }),
         })
     }

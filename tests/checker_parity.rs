@@ -2375,3 +2375,72 @@ fn checker_object_literal_infer_string_property_to_number_ts2322() {
     let diags = check_source("let obj = { a: 'hi' }; let y: { a: number } = obj;");
     assert_diagnostic_code(&diags, 2322);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Function type annotations: `(x: number) => string`
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_function_type_annotation_no_error() {
+    // A function expression assignable to `(x: number) => number`.
+    let diags = check_source(
+        "let f: (x: number) => number = (x) => x + 1;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_function_type_wrong_return_type_ts2322() {
+    // `(x) => 'hi'` is not assignable to `(x: number) => number`.
+    let diags = check_source(
+        "let f: (x: number) => number = (x) => 'hi';",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_function_type_extra_parameters_no_error() {
+    // TS allows a function with more parameters to be assigned to a type
+    // expecting fewer (extra params are ignored by callers).
+    let diags = check_source(
+        "let f: (x: number) => number = (x: number, y: number) => x + y;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_function_type_optional_parameter_no_error() {
+    // `(x?: number) => number` is assignable to `(x: number) => number`
+    // because optional params are compatible with required (bivariant).
+    let diags = check_source(
+        "let f: (x: number) => number = (x?: number) => (x ?? 0) + 1;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_function_type_rest_parameter_no_error() {
+    // `(...args: number[]) => number` is assignable to `(x: number) => number`.
+    let diags = check_source(
+        "let f: (x: number) => number = (...args: number[]) => args[0] ?? 0;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_function_type_no_params_no_error() {
+    // `() => number` assignable to `() => number`.
+    let diags = check_source(
+        "let f: () => number = () => 42;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_function_type_void_return_no_error() {
+    // A function returning `number` is assignable to `() => void`.
+    let diags = check_source(
+        "let f: () => void = () => 42;",
+    );
+    assert_no_diagnostics(&diags);
+}
