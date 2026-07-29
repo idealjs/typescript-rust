@@ -356,11 +356,14 @@ do-while/for/for-in/for-of/switch 控制流、return/throw/break/continue、
 已完成：`get_type_of_node` 框架；字面量/二元/括号类型推断；`get_type_of_symbol`
 骨架；`inference.go` 迁移（`inferTypeArguments` 协变/逆变/约束/默认回退）；
 contextual typing（`getContextualType` 完整分发）；函数返回值推断（含 literal
-widening，`return 42` → `number`）。
+widening，`return 42` → `number`）；表达式类型推断补齐（`as`/`satisfies`/
+type assertion `<T>x`/`!x`/conditional `? :`/template/delete/void/await/
+property access `x.prop`/element access `x[i]`/unary `!`/`+`/`-`/`++`/`--`）；
+数组字面量类型推断（`[1,2,3]` → `number[]`）；`NewExpression` 构造签名返回类型。
 
-- [ ] 变量声明初始化器类型推断（写入 symbol 类型）。
-- [ ] 条件类型 `infer R` 解析。
-- [ ] 类型推断缓存（`node_links.resolved_type`）。
+- [ ] 条件类型 `infer R` 解析。（已部分完成，conditional branch 推断待补）
+- [ ] 类型推断缓存（`node_links.resolved_type`）。（已通过 `type_node_links` 完成）
+- [ ] 对象字面量类型推断（`{ a: 1 }` → `{ a: number }`）。
 
 ### P3.9 Checker 控制流 narrowing
 
