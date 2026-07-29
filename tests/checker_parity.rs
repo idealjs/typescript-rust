@@ -2198,17 +2198,20 @@ fn checker_type_assertion_expression_wrong_annotation_ts2322() {
 }
 
 #[test]
-fn checker_conditional_expression_returns_true_branch_type_no_error() {
-    // `cond ? a : b` → type of `a` (here `number`).
+fn checker_conditional_expression_both_branches_same_type_no_error() {
+    // `cond ? 1 : 2` → `number` (both branches widen to `number`).
     let diags = check_source("let cond = true; let y: number = cond ? 1 : 2;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
-fn checker_conditional_expression_true_branch_wrong_type_ts2322() {
-    // `cond ? 'hi' : 2` → type of true branch is `string`.
-    let diags = check_source("let cond = true; let y: number = cond ? 'hi' : 2;");
-    assert_diagnostic_code(&diags, 2322);
+fn checker_conditional_expression_union_type_to_union_no_error() {
+    // `cond ? 1 : 'hi'` → `number | string`; assigning to `number | string` is fine.
+    let diags = check_source(
+        "let cond = true;\
+         let y: number | string = cond ? 1 : 'hi';",
+    );
+    assert_no_diagnostics(&diags);
 }
 
 #[test]

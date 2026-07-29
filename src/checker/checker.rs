@@ -1512,11 +1512,13 @@ impl Checker {
                 self.get_any_type()
             }
             SyntaxKind::ConditionalExpression => {
-                // `cond ? a : b` — simplified to the type of `when_true`.
-                // The full implementation would compute the union of the
-                // true and false branch types.
+                // `cond ? a : b` → widened union of `a` and `b` types.
                 if let crate::ast::NodeData::ConditionalExpression(data) = &node.data {
-                    return self.get_type_of_node(&data.when_true);
+                    let true_type = self.get_type_of_node(&data.when_true);
+                    let false_type = self.get_type_of_node(&data.when_false);
+                    let true_widened = self.get_widened_type_of_literal(&true_type);
+                    let false_widened = self.get_widened_type_of_literal(&false_type);
+                    return self.get_union_type(vec![true_widened, false_widened]);
                 }
                 self.get_any_type()
             }
