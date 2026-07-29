@@ -713,6 +713,29 @@ impl Checker {
             .clone()
     }
 
+    /// Get the `(...args: any) => any` "top function" wildcard type.
+    ///
+    /// Mirrors Go's `anyFunctionType`. In the relater, a function-type
+    /// wildcard source is assignable to every other function type; a
+    /// non-wildcard source is *not* assignable to a wildcard target.
+    /// The type is represented as an empty anonymous object — the relater
+    /// short-circuits on `Arc::ptr_eq` before ever consulting its
+    /// signatures, so we don't need to populate them.
+    pub fn any_function_type(&self) -> Arc<Type> {
+        self.any_function_type
+            .get_or_init(|| {
+                Arc::new(Type {
+                    flags: TypeFlags::Object,
+                    object_flags: ObjectFlags::Anonymous,
+                    id: 0,
+                    symbol: None,
+                    alias: None,
+                    data: TypeData::Object(ObjectTypeData::default()),
+                })
+            })
+            .clone()
+    }
+
     /// Get the `object` type (non-primitive).
     pub fn non_primitive_type(&self) -> Arc<Type> {
         self.non_primitive_type

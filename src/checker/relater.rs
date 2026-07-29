@@ -9,6 +9,9 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use crate::ast::SyntaxKind;
+use crate::checker::is_tuple_type;
+
 use super::checker::Checker;
 use super::types::*;
 
@@ -33,6 +36,12 @@ pub const SIGNATURE_CHECK_MODE_CALLBACK: SignatureCheckMode =
     SignatureCheckMode::from_bits_truncate(
         SignatureCheckMode::BivariantCallback.bits() | SignatureCheckMode::StrictCallback.bits(),
     );
+
+impl SignatureCheckMode {
+    /// Convenience alias matching Go's `SignatureCheckModeCallback` constant.
+    /// Equivalent to `BivariantCallback | StrictCallback`.
+    pub const Callback: Self = SIGNATURE_CHECK_MODE_CALLBACK;
+}
 
 bitflags::bitflags! {
     /// Flags controlling intersection state during type comparison.
@@ -874,168 +883,820 @@ impl Checker {
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // Signature comparison
+    // Signature comparison (ported from internal/checker/relater.go)
     // ────────────────────────────────────────────────────────────────────────
 
-    /// Check if two signatures are related.
+    /// Compare a source signature against a target signature.
     ///
-    /// A function type `(a: A) => R` is assignable to `(b: B) => S` if:
-    /// - `S` is assignable to `R` (return type is covariant)
-    /// - `B` is assignable to `A` (parameter types are contravariant)
-    fn is_signature_related_to(
+    /// Direct port of Go's `compareSignaturesRelated`. Returns a Ternary:
+    /// - `True` if `source` is related to `target` under `relation`
+    /// - `False` if not
+    /// - `Maybe`/`Unknown` for partial results (currently unused)
+    ///
+    /// Handles (in order):
+    /// 1. Pointer-equality fast path.
+    /// 2. The "top signature" short-circuit (a `(...args: any) => any`
+    ///    source matches any target).
+    /// 3. Strict-top-signature asymmetry (strict subtype relation).
+    /// 4. Parameter count check (with rest/tuple-rest handling).
+    /// 5. Generic signature instantiation (skipped — we erase).
+    /// 6. `this` type comparison (covariant for void source, contravariant
+    ///    otherwise, bivariant when `strict_function_types` is off).
+    /// 7. Per-parameter type comparison (bivariant by default; strictly
+    ///    contravariant when `strict_function_types` is on and neither
+    ///    side is a method/constructor).
+    /// 8. Return type comparison (covariant; bivariant for callbacks).
+    /// 9. Type predicate comparison (for type guards).
+    pub fn compare_signatures_related(
         &mut self,
         source: &Arc<Signature>,
         target: &Arc<Signature>,
+        check_mode: SignatureCheckMode,
         relation: RelationKind,
-    ) -> bool {
-        // Check parameter count compatibility
-        // Source must have at least as many required parameters as target
-        let source_params = &source.parameters;
-        let target_params = &target.parameters;
+    ) -> Ternary {
+        // 1. Fast path: same pointer.
+        if Arc::ptr_eq(source, target) {
+            return Ternary::True;
+        }
 
-        // For non-identity relations, check minimum argument count
-        if relation != RelationKind::Identity {
-            // Source must have enough parameters to cover target's required params
-            let source_min = source.min_argument_count() as usize;
-            let target_min = target.min_argument_count() as usize;
-            if source_min < target_min {
-                return false;
+        // 2. Top-signature short-circuit: a top-signature target matches
+        //    anything (the source doesn't need to be top, since `any` is
+        //    a wildcard). Strict-subtype relation additionally requires
+        //    the source to *also* be a top signature.
+        let source_is_top = if check_mode.contains(SignatureCheckMode::StrictTopSignature)
+            && self.is_top_signature(source)
+        {
+            true
+        } else {
+            false
+        };
+        if !source_is_top && self.is_top_signature(target) {
+            return Ternary::True;
+        }
+        if check_mode.contains(SignatureCheckMode::StrictTopSignature)
+            && source_is_top
+            && !self.is_top_signature(target)
+        {
+            return Ternary::False;
+        }
+
+        // 4. Parameter count check.
+        let target_count = self.get_parameter_count(target);
+        let source_has_more = if !self.has_effective_rest_parameter(target) {
+            if check_mode.contains(SignatureCheckMode::StrictArity) {
+                self.has_effective_rest_parameter(source)
+                    || self.get_parameter_count(source) > target_count
+            } else {
+                self.get_min_argument_count(source) > target_count
+            }
+        } else {
+            false
+        };
+        if source_has_more {
+            return Ternary::False;
+        }
+
+        // 5. Generic signature instantiation. We don't yet support generic
+        //    signature instantiation in the relater (it requires
+        //    `instantiateSignatureInContextOf` from `inference.go`).
+        //    Instead we erase — `getErasedSignature` returns the same
+        //    signature when there are no type parameters, which is the
+        //    common case for our current parity fixtures.
+        let source = if !source.type_parameters.is_empty()
+            && !type_parameters_same(source.type_parameters.as_slice(), target.type_parameters.as_slice())
+        {
+            self.get_erased_signature(source)
+        } else {
+            Arc::clone(source)
+        };
+        let target = if !source.type_parameters.is_empty()
+            && !type_parameters_same(source.type_parameters.as_slice(), target.type_parameters.as_slice())
+        {
+            self.get_erased_signature(target)
+        } else {
+            Arc::clone(target)
+        };
+
+        let source_count = self.get_parameter_count(&source);
+        let source_rest = self.get_non_array_rest_type(&source);
+        let target_rest = self.get_non_array_rest_type(&target);
+
+        // 6. Variance selection. `strict_function_types` makes method-shaped
+        //    signatures stay bivariant; everything else is contravariant on
+        //    parameters. We approximate "method-shaped" by checking the
+        //    declaration kind via the signature's declaration node.
+        let strict_variance = !check_mode.contains(SignatureCheckMode::Callback)
+            && self.strict_function_types
+            && !self.signature_is_method_or_constructor(&target);
+
+        let mut result = Ternary::True;
+
+        // 7. `this` type comparison.
+        let source_this = self.get_this_type_of_signature(&source);
+        if let Some(source_this) = source_this {
+            if !source_this.flags.contains(TypeFlags::Void) {
+                let target_this = self.get_this_type_of_signature(&target);
+                if let Some(target_this) = target_this {
+                    let mut related = Ternary::False;
+                    if !strict_variance {
+                        related = self.compare_types(source_this.clone(), target_this.clone(), relation, false);
+                    }
+                    if related.is_false() {
+                        related = self.compare_types(target_this, source_this, relation, false);
+                    }
+                    if related.is_false() {
+                        return Ternary::False;
+                    }
+                    result = result.and(related);
+                }
             }
         }
 
-        // Compare parameter types (contravariant: target param must be assignable to source param)
-        let param_count = source_params.len().min(target_params.len());
+        // 8. Per-parameter type comparison.
+        let param_count = if source_rest.is_some() || target_rest.is_some() {
+            source_count.min(target_count)
+        } else {
+            source_count.max(target_count)
+        };
+        let rest_index = if source_rest.is_some() || target_rest.is_some() {
+            param_count.saturating_sub(1) as isize
+        } else {
+            -1
+        };
         for i in 0..param_count {
-            let source_param_type = self.get_type_of_symbol(&source_params[i]);
-            let target_param_type = self.get_type_of_symbol(&target_params[i]);
+            let source_type = if i as isize == rest_index {
+                self.get_rest_or_any_type_at_position(&source, i)
+            } else {
+                self.try_get_type_at_position(&source, i)
+                    .unwrap_or_else(|| self.any_type())
+            };
+            let target_type = if i as isize == rest_index {
+                self.get_rest_or_any_type_at_position(&target, i)
+            } else {
+                self.try_get_type_at_position(&target, i)
+                    .unwrap_or_else(|| self.any_type())
+            };
 
-            // Parameter types are contravariant: target -> source direction
-            if !self.is_type_related_to(&target_param_type, &source_param_type, relation) {
-                return false;
+            // Skip if both are the same pointer and we're not in strict-arity mode.
+            if Arc::ptr_eq(&source_type, &target_type)
+                && !check_mode.contains(SignatureCheckMode::StrictArity)
+            {
+                continue;
             }
+
+            // Bivariant/contravariant parameter comparison.
+            // Default: bivariant — try source→target first, fall back to target→source.
+            let mut related = Ternary::False;
+            if !check_mode.contains(SignatureCheckMode::Callback) && !strict_variance {
+                related = self.compare_types(source_type.clone(), target_type.clone(), relation, false);
+            }
+            if related.is_false() {
+                related = self.compare_types(target_type.clone(), source_type.clone(), relation, false);
+            }
+            if related.is_false() {
+                return Ternary::False;
+            }
+            result = result.and(related);
         }
 
-        // If source has more parameters than target, check they are optional/rest
-        if source_params.len() > target_params.len() {
-            for i in target_params.len()..source_params.len() {
-                if !source.has_rest_parameter() && i == source_params.len() - 1 {
-                    // Last parameter is not rest, so extra params are fine (JS allows calling with extra args)
-                    break;
+        // 9. Return type comparison.
+        if !check_mode.contains(SignatureCheckMode::IgnoreReturnTypes) {
+            let target_return = self.get_non_circular_return_type_of_signature(&target);
+            // `void` and `any` target returns match anything.
+            if !Arc::ptr_eq(&target_return, &self.void_type())
+                && !target_return.flags.contains(TypeFlags::Any)
+            {
+                let source_return = self.get_non_circular_return_type_of_signature(&source);
+                let target_type_predicate = self.get_type_predicate_of_signature(&target).cloned();
+                if let Some(target_tp) = target_type_predicate {
+                    let source_tp = self.get_type_predicate_of_signature(&source).cloned();
+                    match source_tp {
+                        Some(source_tp) => {
+                            result = result.and(self.compare_type_predicate_related_to(
+                                &source_tp,
+                                &target_tp,
+                                relation,
+                            ));
+                        }
+                        None => {
+                            // Source lacks a type predicate but target has one.
+                            if matches!(
+                                target_tp.kind,
+                                TypePredicateKind::Identifier | TypePredicateKind::This
+                            ) {
+                                return Ternary::False;
+                            }
+                        }
+                    }
+                    if result.is_false() {
+                        return result;
+                    }
+                } else {
+                    // No type predicate on target: covariant return check.
+                    // For callback signatures, also check bivariantly.
+                    let mut related = Ternary::False;
+                    if check_mode.contains(SignatureCheckMode::BivariantCallback) {
+                        related = self.compare_types(
+                            target_return.clone(),
+                            source_return.clone(),
+                            relation,
+                            false,
+                        );
+                    }
+                    if related.is_false() {
+                        related = self.compare_types(source_return, target_return, relation, false);
+                    }
+                    result = result.and(related);
+                    if result.is_false() {
+                        return result;
+                    }
                 }
-                // In TypeScript, extra parameters in source are fine (they're just ignored)
-                // But only if they could be optional
             }
         }
 
-        // Compare return types (covariant: source return must be assignable to target return)
-        let source_return = self.get_return_type_of_signature(source);
-        let target_return = self.get_return_type_of_signature(target);
+        result
+    }
 
-        match (source_return, target_return) {
-            (Some(sr), Some(tr)) => {
-                if !self.is_type_related_to(&sr, &tr, relation) {
-                    return false;
+    /// Compare two type predicates.
+    /// Direct port of Go's `compareTypePredicateRelatedTo`.
+    pub fn compare_type_predicate_related_to(
+        &mut self,
+        source: &TypePredicate,
+        target: &TypePredicate,
+        relation: RelationKind,
+    ) -> Ternary {
+        if source.kind != target.kind {
+            return Ternary::False;
+        }
+        if matches!(source.kind, TypePredicateKind::Identifier | TypePredicateKind::AssertsIdentifier)
+            && source.parameter_index != target.parameter_index
+        {
+            return Ternary::False;
+        }
+        match (&source.t, &target.t) {
+            (None, None) => Ternary::True,
+            (Some(s), None) => Ternary::True,
+            (Some(s), Some(t)) => self.compare_types(s.clone(), t.clone(), relation, false),
+            (None, Some(_)) => Ternary::False,
+        }
+    }
+
+    /// Compare two types under a relation, returning a Ternary.
+    /// Currently wraps `is_type_related_to` and converts the bool result.
+    pub fn compare_types(
+        &mut self,
+        source: Arc<Type>,
+        target: Arc<Type>,
+        relation: RelationKind,
+        _report_errors: bool,
+    ) -> Ternary {
+        if self.is_type_related_to(&source, &target, relation) {
+            Ternary::True
+        } else {
+            Ternary::False
+        }
+    }
+
+    /// Whether a signature's declaration is a method or constructor.
+    /// Used by `compare_signatures_related` to keep method-shaped
+    /// signatures bivariant even under `strict_function_types`.
+    /// Mirrors Go's `target.declaration.Kind` check.
+    fn signature_is_method_or_constructor(&self, sig: &Arc<Signature>) -> bool {
+        let Some(decl) = sig.declaration.as_ref() else {
+            return false;
+        };
+        matches!(
+            decl.kind,
+            SyntaxKind::MethodDeclaration
+                | SyntaxKind::MethodSignature
+                | SyntaxKind::Constructor
+        )
+    }
+
+    /// Direct port of Go's `signaturesRelatedTo`. Compares the call (or
+    /// construct) signature lists of two types, choosing one of three
+    /// comparison strategies based on the lists' shapes.
+    pub fn signatures_related_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        kind: SignatureKind,
+        relation: RelationKind,
+    ) -> Ternary {
+        // Wildcard: `anyFunctionType` source matches any function target.
+        if Arc::ptr_eq(source, &self.any_function_type()) {
+            return Ternary::True;
+        }
+        // Wildcard: non-wildcard source does NOT match a wildcard target.
+        if Arc::ptr_eq(target, &self.any_function_type()) {
+            return Ternary::False;
+        }
+
+        let source_sigs = self.get_signatures_of_type(source, kind);
+        let target_sigs = self.get_signatures_of_type(target, kind);
+
+        // Construct-signature abstractness check (skipped: we don't yet
+        // populate SignatureFlagsAbstract on signatures in the Rust port).
+        if kind == SignatureKind::Construct
+            && !source_sigs.is_empty()
+            && !target_sigs.is_empty()
+        {
+            // Future: mirror Go's constructorVisibilitiesAreCompatible.
+        }
+
+        // Identity relation fast path.
+        if relation == RelationKind::Identity {
+            return self.signatures_identical_to(source, target, kind);
+        }
+
+        let check_mode = match relation {
+            RelationKind::Subtype => SignatureCheckMode::StrictTopSignature,
+            RelationKind::StrictSubtype => SignatureCheckMode::from_bits_truncate(
+                SignatureCheckMode::StrictTopSignature.bits() | SignatureCheckMode::StrictArity.bits(),
+            ),
+            _ => SignatureCheckMode::None,
+        };
+
+        let mut result = Ternary::True;
+
+        // Strategy selection mirrors Go's switch in `signaturesRelatedTo`.
+        let source_instantiated = source.object_flags.contains(ObjectFlags::Instantiated);
+        let target_instantiated = target.object_flags.contains(ObjectFlags::Instantiated);
+        let same_target = match (source.target(), target.target()) {
+            (Some(s), Some(t)) => Arc::ptr_eq(&s, &t),
+            _ => false,
+        };
+        if (source_instantiated && target_instantiated && same_target)
+            || (source.object_flags.contains(ObjectFlags::Reference)
+                && target.object_flags.contains(ObjectFlags::Reference)
+                && same_target)
+        {
+            // Pairwise comparison of signatures (erase generics).
+            let min_len = source_sigs.len().min(target_sigs.len());
+            for i in 0..min_len {
+                let related = self.compare_signatures_related(
+                    &source_sigs[i],
+                    &target_sigs[i],
+                    check_mode,
+                    relation,
+                );
+                if related.is_false() {
+                    return Ternary::False;
+                }
+                result = result.and(related);
+            }
+            // If signature counts differ, the longer side must be matched
+            // by the same N×M logic below.
+            if source_sigs.len() != target_sigs.len() {
+                // Fall through to N×M for unmatched signatures.
+                for t in &target_sigs[min_len..] {
+                    let mut found = false;
+                    for s in &source_sigs[min_len..] {
+                        let related =
+                            self.compare_signatures_related(s, t, check_mode, relation);
+                        if !related.is_false() {
+                            result = result.and(related);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if !found {
+                        return Ternary::False;
+                    }
                 }
             }
-            // If source has no return type, it's assignable to anything
-            // If target has no return type, source must have none too
-            (None, Some(_)) => return false,
-            _ => {}
+        } else if source_sigs.len() == 1 && target_sigs.len() == 1 {
+            // Single-signature fast path. For non-comparable relations we
+            // erase generics; for `Comparable` we always erase (Go behavior).
+            let erase = relation == RelationKind::Comparable;
+            let s = if erase { self.get_erased_signature(&source_sigs[0]) } else { Arc::clone(&source_sigs[0]) };
+            let t = if erase { self.get_erased_signature(&target_sigs[0]) } else { Arc::clone(&target_sigs[0]) };
+            result = self.compare_signatures_related(&s, &t, check_mode, relation);
+        } else {
+            // N×M fallback: every target signature must be matched by some
+            // source signature. We don't propagate errors here (errorNode
+            // plumbing isn't wired up yet).
+            for t in &target_sigs {
+                let mut found = false;
+                for s in &source_sigs {
+                    let related = self.compare_signatures_related(
+                        s,
+                        t,
+                        check_mode,
+                        relation,
+                    );
+                    if !related.is_false() {
+                        result = result.and(related);
+                        found = true;
+                        break;
+                    }
+                }
+                if !found {
+                    return Ternary::False;
+                }
+            }
         }
+        result
+    }
 
+    /// Direct port of Go's `signaturesIdenticalTo`. Compares signature
+    /// counts and pairwise signatures for identity.
+    pub fn signatures_identical_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        kind: SignatureKind,
+    ) -> Ternary {
+        let source_sigs = self.get_signatures_of_type(source, kind);
+        let target_sigs = self.get_signatures_of_type(target, kind);
+        if source_sigs.len() != target_sigs.len() {
+            return Ternary::False;
+        }
+        let mut result = Ternary::True;
+        for i in 0..source_sigs.len() {
+            let related = self.compare_signatures_identical(
+                &source_sigs[i],
+                &target_sigs[i],
+                false, // partialMatch
+                false, // ignoreThisTypes
+                false, // ignoreReturnTypes
+            );
+            if related.is_false() {
+                return Ternary::False;
+            }
+            result = result.and(related);
+        }
+        result
+    }
+
+    /// Direct port of Go's `compareSignaturesIdentical`. Currently we
+    /// delegate to `compare_signatures_related` with the StrictArity mode,
+    /// which approximates identity checking for non-generic signatures.
+    pub fn compare_signatures_identical(
+        &mut self,
+        source: &Arc<Signature>,
+        target: &Arc<Signature>,
+        _partial_match: bool,
+        _ignore_this_types: bool,
+        ignore_return_types: bool,
+    ) -> Ternary {
+        let mut mode = SignatureCheckMode::StrictArity;
+        if ignore_return_types {
+            mode |= SignatureCheckMode::IgnoreReturnTypes;
+        }
+        self.compare_signatures_related(source, target, mode, RelationKind::Identity)
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Signature helpers (ported from internal/checker/utilities.go and
+    // internal/checker/relater.go signature utilities)
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Whether a signature has a rest parameter whose rest type is a tuple
+    /// with a variadic element. Such a rest parameter is not "effective"
+    /// for arity purposes (it's a fixed tuple spread).
+    /// Mirrors Go's `hasEffectiveRestParameter`.
+    pub fn has_effective_rest_parameter(&mut self, sig: &Arc<Signature>) -> bool {
+        if !sig.has_rest_parameter() {
+            return false;
+        }
+        let Some(last) = sig.parameters.last() else {
+            return true;
+        };
+        let rest_type = self.get_type_of_symbol(last);
+        if is_tuple_type(&rest_type) {
+            if let TypeData::Tuple(t) = &rest_type.data {
+                return t.combined_flags.contains(ElementFlags::Variadic);
+            }
+        }
         true
     }
 
+    /// Get parameter count, accounting for tuple rest spreading.
+    /// Mirrors Go's `getParameterCount`.
+    pub fn get_parameter_count(&mut self, sig: &Arc<Signature>) -> usize {
+        let length = sig.parameters.len();
+        if !sig.has_rest_parameter() {
+            return length;
+        }
+        let Some(last) = sig.parameters.last() else {
+            return length;
+        };
+        let rest_type = self.get_type_of_symbol(last);
+        if is_tuple_type(&rest_type) {
+            if let TypeData::Tuple(t) = &rest_type.data {
+                let variadic_offset = if t.combined_flags.contains(ElementFlags::Variadic) {
+                    0
+                } else {
+                    1
+                };
+                return length + t.fixed_length - variadic_offset;
+            }
+        }
+        length
+    }
+
+    /// Get the minimum argument count of a signature.
+    /// Mirrors Go's `getMinArgumentCount`.
+    pub fn get_min_argument_count(&mut self, sig: &Arc<Signature>) -> usize {
+        // Use the cached value if it's been computed.
+        if sig.resolved_min_argument_count != -1 {
+            return sig.resolved_min_argument_count.max(0) as usize;
+        }
+
+        let mut min_argument_count: i32 = -1;
+        if sig.has_rest_parameter() {
+            if let Some(last) = sig.parameters.last() {
+                let rest_type = self.get_type_of_symbol(last);
+                if is_tuple_type(&rest_type) {
+                    if let TypeData::Tuple(t) = &rest_type.data {
+                        let first_optional = t
+                            .element_infos
+                            .iter()
+                            .position(|info| !info.flags.contains(ElementFlags::Required));
+                        let required_count = match first_optional {
+                            Some(i) => i,
+                            None => t.fixed_length,
+                        };
+                        if required_count > 0 {
+                            min_argument_count = (sig.parameters.len() - 1 + required_count) as i32;
+                        }
+                    }
+                }
+            }
+        }
+        if min_argument_count == -1 {
+            min_argument_count = sig.min_argument_count;
+        }
+
+        // Walk back over trailing void-typed parameters (Go behavior):
+        // `(x: void) => void` has minArgumentCount 0.
+        let mut mc = min_argument_count;
+        let mut i = mc - 1;
+        while i >= 0 {
+            match self.try_get_type_at_position(sig, i as usize) {
+                Some(t) if t.flags.contains(TypeFlags::Void) => {
+                    mc = i;
+                }
+                _ => break,
+            }
+            i -= 1;
+        }
+        mc.max(0) as usize
+    }
+
+    /// Get the type of a parameter at a given position, returning `any` if
+    /// out of range. Mirrors Go's `getTypeAtPosition`.
+    pub fn get_type_at_position(&mut self, sig: &Arc<Signature>, pos: usize) -> Arc<Type> {
+        self.try_get_type_at_position(sig, pos)
+            .unwrap_or_else(|| self.any_type())
+    }
+
+    /// Try to get the type of a parameter at a given position.
+    /// Mirrors Go's `tryGetTypeAtPosition`.
+    pub fn try_get_type_at_position(
+        &mut self,
+        sig: &Arc<Signature>,
+        pos: usize,
+    ) -> Option<Arc<Type>> {
+        let rest_offset = if sig.has_rest_parameter() { 1 } else { 0 };
+        let param_count = sig.parameters.len() - rest_offset;
+        if pos < param_count {
+            return Some(self.get_type_of_symbol(&sig.parameters[pos]));
+        }
+        if sig.has_rest_parameter() {
+            let rest_param = &sig.parameters[param_count];
+            let rest_type = self.get_type_of_symbol(rest_param);
+            // If the rest type is a tuple, index into it.
+            if is_tuple_type(&rest_type) {
+                if let TypeData::Tuple(t) = &rest_type.data {
+                    let index = pos - param_count;
+                    let has_variadic = t.combined_flags.contains(ElementFlags::Variadic);
+                    if index < t.fixed_length || has_variadic {
+                        // Index access on a tuple — return the element type if
+                        // we have it, else `None` (caller falls back to `any`).
+                        return t
+                            .element_infos
+                            .get(index)
+                            .and_then(|info| info.type_.clone())
+                            .or_else(|| Some(self.any_type()));
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    /// Get the rest type at a position, transforming `any[]` to just `any`.
+    /// Mirrors Go's `getRestOrAnyTypeAtPosition`.
+    pub fn get_rest_or_any_type_at_position(
+        &mut self,
+        sig: &Arc<Signature>,
+        pos: usize,
+    ) -> Arc<Type> {
+        let rest_type = self.get_rest_type_at_position(sig, pos);
+        if let Some(rt) = &rest_type {
+            if self.is_array_type(rt) {
+                let elem = self.get_type_arguments(rt).into_iter().next();
+                if let Some(elem) = elem {
+                    if elem.flags.contains(TypeFlags::Any) {
+                        return self.any_type();
+                    }
+                }
+            }
+        }
+        rest_type.unwrap_or_else(|| self.any_type())
+    }
+
+    /// Get the rest type at a position. Simplified port of Go's
+    /// `getRestTypeAtPosition`.
+    pub fn get_rest_type_at_position(
+        &mut self,
+        sig: &Arc<Signature>,
+        pos: usize,
+    ) -> Option<Arc<Type>> {
+        let parameter_count = self.get_parameter_count(sig);
+        if pos >= parameter_count.saturating_sub(1) {
+            // The rest position itself — return the effective rest type.
+            return self.get_effective_rest_type(sig);
+        }
+        None
+    }
+
+    /// Get the effective rest type of a signature.
+    /// Simplified port of Go's `getEffectiveRestType`.
+    pub fn get_effective_rest_type(&mut self, sig: &Arc<Signature>) -> Option<Arc<Type>> {
+        if !sig.has_rest_parameter() {
+            return None;
+        }
+        let last = sig.parameters.last()?;
+        let rest_type = self.get_type_of_symbol(last);
+        // If the rest type is a tuple, the effective rest is the tuple itself
+        // (we don't yet split it into spread elements).
+        Some(rest_type)
+    }
+
+    /// Get the "non-array" rest type — the element type if the rest is an
+    /// array type, the tuple type itself if it's a tuple. Returns `None`
+    /// if the signature has no rest parameter.
+    /// Used by `compare_signatures_related` to decide between tuple-spread
+    /// and array-rest parameter comparison.
+    /// Mirrors Go's `getNonArrayRestType`.
+    pub fn get_non_array_rest_type(&mut self, sig: &Arc<Signature>) -> Option<Arc<Type>> {
+        if !sig.has_rest_parameter() {
+            return None;
+        }
+        let last = sig.parameters.last()?;
+        let rest_type = self.get_type_of_symbol(last);
+        // If it's a tuple, we don't treat it as an array rest.
+        if is_tuple_type(&rest_type) {
+            return Some(rest_type);
+        }
+        // If it's an array type, the non-array rest is the element type.
+        if self.is_array_type(&rest_type) {
+            return self.get_type_arguments(&rest_type).into_iter().next();
+        }
+        Some(rest_type)
+    }
+
+    /// Whether a signature is `(...args: any) => any` or
+    /// `(...args: never) => any/unknown`. Mirrors Go's `isTopSignature`.
+    pub fn is_top_signature(&mut self, sig: &Arc<Signature>) -> bool {
+        if !sig.type_parameters.is_empty() {
+            return false;
+        }
+        // thisParameter check: if present, must be `any`.
+        if let Some(this_param) = &sig.this_parameter {
+            let this_type = self.get_type_of_symbol(this_param);
+            if !this_type.flags.contains(TypeFlags::Any) {
+                return false;
+            }
+        }
+        if sig.parameters.len() != 1 || !sig.has_rest_parameter() {
+            return false;
+        }
+        let Some(param) = sig.parameters.first() else {
+            return false;
+        };
+        let param_type = self.get_type_of_symbol(param);
+        let rest_type = if self.is_array_type(&param_type) {
+            self.get_type_arguments(&param_type).into_iter().next()
+        } else {
+            Some(param_type)
+        };
+        match rest_type {
+            Some(rt) => {
+                if !rt.flags.intersects(TypeFlags::Any | TypeFlags::Never) {
+                    return false;
+                }
+                let return_type = self.get_return_type_of_signature(sig);
+                match return_type {
+                    Some(rt) => rt.flags.intersects(TYPE_FLAGS_ANY_OR_UNKNOWN),
+                    None => false,
+                }
+            }
+            None => false,
+        }
+    }
+
+    /// Get the type of the `this` parameter of a signature.
+    /// Mirrors Go's `getThisTypeOfSignature`.
+    pub fn get_this_type_of_signature(&self, sig: &Arc<Signature>) -> Option<Arc<Type>> {
+        let this_param = sig.this_parameter.as_ref()?;
+        let links = self.value_symbol_links.get(this_param)?;
+        links.resolved_type.clone()
+    }
+
+    /// Get the return type of a signature, avoiding infinite recursion when
+    /// the return type is itself computed from the signature.
+    /// Mirrors Go's `getNonCircularReturnTypeOfSignature`. Currently we just
+    /// return the resolved return type.
+    pub fn get_non_circular_return_type_of_signature(
+        &self,
+        sig: &Arc<Signature>,
+    ) -> Arc<Type> {
+        self.get_return_type_of_signature(sig)
+            .unwrap_or_else(|| self.any_type())
+    }
+
+    /// Get the erased signature (with type parameters replaced by their
+    /// constraints). Since we don't yet support generic signature
+    /// instantiation, this returns the same signature.
+    /// Mirrors Go's `getErasedSignature`.
+    pub fn get_erased_signature(&self, sig: &Arc<Signature>) -> Arc<Signature> {
+        Arc::clone(sig)
+    }
+
+    /// Get the canonical form of a signature. Since we don't yet support
+    /// generic signature instantiation, this returns the same signature.
+    /// Mirrors Go's `getCanonicalSignature`.
+    pub fn get_canonical_signature(&self, sig: &Arc<Signature>) -> Arc<Signature> {
+        Arc::clone(sig)
+    }
+
+    /// Format a signature as a string for diagnostics.
+    /// Simplified port of Go's `signatureToString`.
+    pub fn signature_to_string(&self, sig: &Arc<Signature>) -> String {
+        let params: Vec<String> = sig.parameters.iter().map(|p| p.name.clone()).collect();
+        let return_str = self
+            .get_return_type_of_signature(sig)
+            .map(|t| self.type_to_string(&t))
+            .unwrap_or_else(|| "void".to_string());
+        format!("({}) => {}", params.join(", "), return_str)
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Higher-level signature comparison entry points
+    // ────────────────────────────────────────────────────────────────────────
+
     /// Check if the call signatures of two types are related.
+    /// Wraps `signatures_related_to` with the call-signature kind.
     fn is_call_signatures_related_to(
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
     ) -> bool {
-        let source_struct = match source.as_structured() {
-            Some(s) => s,
-            None => return false,
-        };
-        let target_struct = match target.as_structured() {
-            Some(t) => t,
-            None => return false,
-        };
+        let source_sigs = self.get_signatures_of_type(source, SignatureKind::Call);
+        let target_sigs = self.get_signatures_of_type(target, SignatureKind::Call);
 
-        let source_calls = source_struct.call_signatures();
-        let target_calls = target_struct.call_signatures();
-
-        if source_calls.is_empty() && target_calls.is_empty() {
-            return true; // Both have no call signatures
+        if source_sigs.is_empty() && target_sigs.is_empty() {
+            return true;
         }
-        if source_calls.is_empty() {
-            return false; // Target has call signatures but source doesn't
-        }
-        if target_calls.is_empty() {
-            // Source has call signatures but target doesn't - only ok for comparable
+        if target_sigs.is_empty() {
+            // Source has call signatures but target doesn't.
             return relation == RelationKind::Comparable;
         }
-
-        // Each target call signature must be matched by a source call signature
-        for target_sig in target_calls {
-            let mut found_match = false;
-            for source_sig in source_calls {
-                if self.is_signature_related_to(source_sig, target_sig, relation) {
-                    found_match = true;
-                    break;
-                }
-            }
-            if !found_match {
-                return false;
-            }
+        if source_sigs.is_empty() {
+            // Target has call signatures but source doesn't.
+            return false;
         }
-
-        true
+        self.signatures_related_to(source, target, SignatureKind::Call, relation)
+            .is_true()
     }
 
     /// Check if the construct signatures of two types are related.
+    /// Wraps `signatures_related_to` with the construct-signature kind.
     fn is_construct_signatures_related_to(
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
     ) -> bool {
-        let source_struct = match source.as_structured() {
-            Some(s) => s,
-            None => return false,
-        };
-        let target_struct = match target.as_structured() {
-            Some(t) => t,
-            None => return false,
-        };
+        let source_sigs = self.get_signatures_of_type(source, SignatureKind::Construct);
+        let target_sigs = self.get_signatures_of_type(target, SignatureKind::Construct);
 
-        let source_constructs = source_struct.construct_signatures();
-        let target_constructs = target_struct.construct_signatures();
-
-        if source_constructs.is_empty() && target_constructs.is_empty() {
+        if source_sigs.is_empty() && target_sigs.is_empty() {
             return true;
         }
-        if source_constructs.is_empty() {
-            return false;
-        }
-        if target_constructs.is_empty() {
+        if target_sigs.is_empty() {
             return relation == RelationKind::Comparable;
         }
-
-        for target_sig in target_constructs {
-            let mut found_match = false;
-            for source_sig in source_constructs {
-                if self.is_signature_related_to(source_sig, target_sig, relation) {
-                    found_match = true;
-                    break;
-                }
-            }
-            if !found_match {
-                return false;
-            }
+        if source_sigs.is_empty() {
+            return false;
         }
-
-        true
+        self.signatures_related_to(source, target, SignatureKind::Construct, relation)
+            .is_true()
     }
 
     /// Check if two function types are related by comparing their call signatures.
@@ -1053,6 +1714,239 @@ impl Checker {
             return false;
         }
         true
+    }
+}
+
+/// Check if two slices of type parameters are the same (by pointer identity).
+/// Mirrors Go's `core.Same` for type parameter slices.
+fn type_parameters_same(a: &[Arc<Type>], b: &[Arc<Type>]) -> bool {
+    if a.len() != b.len() {
+        return false;
+    }
+    a.iter().zip(b.iter()).all(|(x, y)| Arc::ptr_eq(x, y))
+}
+
+impl Checker {
+    // ────────────────────────────────────────────────────────────────────────
+    // Index signature comparison (improved port of relater.go)
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Improved port of `indexSignaturesRelatedTo`. Handles:
+    /// - Identity relation: delegates to `index_signatures_identical_to`.
+    /// - Target with a string index whose value type is `any` (and source
+    ///   is non-primitive, relation is not strict subtype): short-circuit
+    ///   to true. This matches the common `{ [key: string]: any }` target.
+    /// - Generic mapped-type source with a target string index: compare the
+    ///   mapped type's template type against the target's value type.
+    /// - Otherwise: structural lookup via `type_related_to_index_info`.
+    pub fn index_signatures_related_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        source_is_primitive: bool,
+        relation: RelationKind,
+    ) -> Ternary {
+        if relation == RelationKind::Identity {
+            return self.index_signatures_identical_to(source, target);
+        }
+        let target_indexes = self.get_index_infos_of_type(target);
+        let target_has_string_index = target_indexes.iter().any(|info| {
+            info.key_type
+                .as_ref()
+                .map(|k| k.flags.contains(TypeFlags::String))
+                .unwrap_or(false)
+        });
+        let mut result = Ternary::True;
+        for target_info in &target_indexes {
+            let target_value_any = target_info
+                .value_type
+                .as_ref()
+                .map(|v| v.flags.contains(TypeFlags::Any))
+                .unwrap_or(false);
+            let target_key_is_string = target_info
+                .key_type
+                .as_ref()
+                .map(|k| k.flags.contains(TypeFlags::String))
+                .unwrap_or(false);
+            let related = if relation != RelationKind::StrictSubtype
+                && !source_is_primitive
+                && target_has_string_index
+                && target_key_is_string
+                && target_value_any
+            {
+                Ternary::True
+            } else if self.is_generic_mapped_type(source) && target_key_is_string {
+                let template = self.get_template_type_from_mapped_type(source);
+                match template {
+                    Some(template) => {
+                        let target_value = target_info.value_type.clone().unwrap_or_else(|| self.any_type());
+                        self.compare_types(template, target_value, relation, false)
+                    }
+                    None => Ternary::False,
+                }
+            } else {
+                self.type_related_to_index_info(source, target_info, relation)
+            };
+            if related.is_false() {
+                return Ternary::False;
+            }
+            result = result.and(related);
+        }
+        result
+    }
+
+    /// Port of `typeRelatedToIndexInfo`. Looks up the source's index info
+    /// for the target's key type and compares value types.
+    pub fn type_related_to_index_info(
+        &mut self,
+        source: &Arc<Type>,
+        target_info: &IndexInfo,
+        relation: RelationKind,
+    ) -> Ternary {
+        let target_key = match &target_info.key_type {
+            Some(k) => k,
+            None => return Ternary::True,
+        };
+        let source_info = self.get_applicable_index_info(source, target_key);
+        if let Some(source_info) = source_info {
+            return self.index_info_related_to(&source_info, target_info, relation);
+        }
+        // Source has no matching index signature: structural comparison
+        // against source's properties is not yet implemented (we don't have
+        // `isObjectTypeWithInferableIndex` / `membersRelatedToIndexInfo`),
+        // so we fail — matching Go's behavior for non-inferable sources.
+        Ternary::False
+    }
+
+    /// Port of `indexInfoRelatedTo`. Compares two index infos' value types.
+    pub fn index_info_related_to(
+        &mut self,
+        source_info: &IndexInfo,
+        target_info: &IndexInfo,
+        relation: RelationKind,
+    ) -> Ternary {
+        let source_value = source_info.value_type.clone().unwrap_or_else(|| self.any_type());
+        let target_value = target_info.value_type.clone().unwrap_or_else(|| self.any_type());
+        self.compare_types(source_value, target_value, relation, false)
+    }
+
+    /// Port of `indexSignaturesIdenticalTo`. Requires same count and
+    /// pairwise key/value/readonly equality.
+    pub fn index_signatures_identical_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> Ternary {
+        let source_infos = self.get_index_infos_of_type(source);
+        let target_infos = self.get_index_infos_of_type(target);
+        if source_infos.len() != target_infos.len() {
+            return Ternary::False;
+        }
+        for target_info in &target_infos {
+            let target_key = match &target_info.key_type {
+                Some(k) => Arc::clone(k),
+                None => continue,
+            };
+            let source_info = self.get_index_info_of_type(source, &target_key);
+            let related = match source_info {
+                Some(si) => {
+                    let sv = si.value_type.clone().unwrap_or_else(|| self.any_type());
+                    let tv = target_info.value_type.clone().unwrap_or_else(|| self.any_type());
+                    let type_related =
+                        self.compare_types(sv, tv, RelationKind::Identity, false);
+                    let readonly_match = si.is_readonly == target_info.is_readonly;
+                    if type_related.is_true() && readonly_match {
+                        Ternary::True
+                    } else {
+                        Ternary::False
+                    }
+                }
+                None => Ternary::False,
+            };
+            if related.is_false() {
+                return Ternary::False;
+            }
+        }
+        Ternary::True
+    }
+
+    /// Get the index infos of a type. Currently delegates to the structured
+    /// type's `index_infos` field.
+    pub fn get_index_infos_of_type(&self, t: &Arc<Type>) -> Vec<Arc<IndexInfo>> {
+        t.as_structured()
+            .map(|s| s.index_infos.clone())
+            .unwrap_or_default()
+    }
+
+    /// Get the index info of a type for a specific key type.
+    pub fn get_index_info_of_type(
+        &self,
+        t: &Arc<Type>,
+        key_type: &Arc<Type>,
+    ) -> Option<Arc<IndexInfo>> {
+        let infos = self.get_index_infos_of_type(t);
+        for info in infos {
+            if let Some(info_key) = &info.key_type {
+                if Arc::ptr_eq(info_key, key_type)
+                    || info_key.flags == key_type.flags
+                {
+                    return Some(info);
+                }
+            }
+        }
+        None
+    }
+
+    /// Get the applicable index info of a source for a given key type.
+    /// Mirrors Go's `getApplicableIndexInfo`. Number index keys are
+    /// applicable to string indexes (a string index accepts numbers).
+    pub fn get_applicable_index_info(
+        &self,
+        source: &Arc<Type>,
+        key_type: &Arc<Type>,
+    ) -> Option<Arc<IndexInfo>> {
+        let infos = self.get_index_infos_of_type(source);
+        for info in infos {
+            if let Some(info_key) = &info.key_type {
+                // Direct match.
+                if Arc::ptr_eq(info_key, key_type) {
+                    return Some(info);
+                }
+                // A number key is applicable to a string index target.
+                if info_key.flags.contains(TypeFlags::Number)
+                    && key_type.flags.contains(TypeFlags::String)
+                {
+                    return Some(info);
+                }
+                // A string key is applicable to a number index target
+                // (strings are numbers in JS).
+                if info_key.flags.contains(TypeFlags::String)
+                    && key_type.flags.contains(TypeFlags::Number)
+                {
+                    return Some(info);
+                }
+            }
+        }
+        None
+    }
+
+    /// Whether a type is a generic mapped type (has a constraint and
+    /// template type). Mirrors Go's `isGenericMappedType`.
+    pub fn is_generic_mapped_type(&self, t: &Arc<Type>) -> bool {
+        if let TypeData::Mapped(m) = &t.data {
+            m.type_parameter.is_some() && m.template_type.is_some()
+        } else {
+            false
+        }
+    }
+
+    /// Get the template type of a mapped type.
+    /// Mirrors Go's `getTemplateTypeFromMappedType`.
+    pub fn get_template_type_from_mapped_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        if let TypeData::Mapped(m) = &t.data {
+            return m.template_type.clone();
+        }
+        None
     }
 }
 

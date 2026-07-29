@@ -1367,7 +1367,7 @@ pub enum TypePredicateKind {
     AssertsIdentifier,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TypePredicate {
     pub kind: TypePredicateKind,
     pub parameter_index: i32,

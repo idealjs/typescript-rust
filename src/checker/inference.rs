@@ -1382,19 +1382,12 @@ impl Checker {
     // Helper methods for inferTypeArguments
     // ────────────────────────────────────────────────────────────────────────
 
-    /// Get the this type of a signature.
-    fn get_this_type_of_signature(&self, _signature: &Arc<Signature>) -> Option<Arc<Type>> {
-        None
-    }
+    // `get_this_type_of_signature` and `get_non_array_rest_type` are
+    // implemented in `relater.rs` (real implementations, not stubs).
 
     /// Get the this argument type for a call node.
     fn get_this_argument_type(&self, _node: &crate::ast::Node) -> Arc<Type> {
         self.undefined_type()
-    }
-
-    /// Get the non-array rest type of a signature.
-    fn get_non_array_rest_type(&self, _signature: &Arc<Signature>) -> Option<Arc<Type>> {
-        None
     }
 
     /// Get the spread argument type for a list of arguments.
