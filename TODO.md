@@ -367,12 +367,13 @@ contextual typing（`getContextualType` 完整分发）。
 已完成：`narrowType`/`getNarrowedTypeOfSymbol`、null/undefined 排除、`typeof`
 narrowing、truthiness narrowing、`instanceof`/`in` narrowing、discriminated union
 narrowing（`obj.kind === "value"`）、assignment-driven type 更新、switch 语句
-narrowing（`switch (x)`/`switch (obj.kind)`，含 default 子句）、7+4 个 parity
-fixtures。
+narrowing（`switch (x)`/`switch (obj.kind)`，含 default 子句）、type predicate
+（user-defined type guard）narrowing（`if (isString(x))`/`if (!isString(x))`）、
+7+4+3 个 parity fixtures。
 
 - [ ] `typeof` switch narrowing（`switch (typeof x)`）。
 - [ ] `switch (true)` narrowing。
-- [ ] type predicate（user-defined type guard）narrowing。
+- [ ] `asserts x is T` narrowing（assertion 函数）。
 - [ ] optional chain containment narrowing。
 - [ ] equality narrowing for literal types 完善（`==` loose 比较、enum 成员）。
 

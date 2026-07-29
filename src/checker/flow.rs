@@ -295,6 +295,13 @@ impl Checker {
             return self.narrow_by_binary(type_, expr, symbol, kind);
         }
 
+        // Call expression: `isString(x)` — type predicate narrowing.
+        // A user-defined type guard function (declared with `x is T`) narrows
+        // its argument in the true/false branches.
+        if expr.kind == SyntaxKind::CallExpression {
+            return self.narrow_by_call_expression(type_, expr, symbol, kind);
+        }
+
         // Bare identifier: `if (x)` — truthiness narrowing.
         if self.is_symbol_identifier(expr, symbol) {
             return self.narrow_by_truthiness(type_, kind);
@@ -669,6 +676,68 @@ impl Checker {
             types.push(self.never_type());
         }
         types
+    }
+
+    /// Narrow based on a call expression with a type predicate.
+    ///
+    /// Mirrors Go's `narrowTypeByCallExpression` (flow.go ~L444). When the
+    /// called function has a type predicate (`x is T`), narrows the argument
+    /// matching the predicate's parameter to the predicate type.
+    fn narrow_by_call_expression(
+        &mut self,
+        type_: &Arc<Type>,
+        expr: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+        kind: NarrowKind,
+    ) -> Arc<Type> {
+        let NodeData::CallExpression(call) = &expr.data else {
+            return Arc::clone(type_);
+        };
+        let callee_type = self.get_type_of_node(&call.expression);
+        let signatures = self.get_signatures_of_type(&callee_type, SignatureKind::Call);
+        let assume_true = kind == NarrowKind::TrueBranch;
+        for sig in &signatures {
+            let Some(predicate) = self.compute_type_predicate_of_signature(sig) else {
+                continue;
+            };
+            // Only `x is T` and `asserts x is T` predicates narrow arguments.
+            if predicate.kind != TypePredicateKind::Identifier
+                && predicate.kind != TypePredicateKind::AssertsIdentifier
+            {
+                continue;
+            }
+            let Some(pred_type) = &predicate.t else {
+                continue;
+            };
+            let param_idx = predicate.parameter_index as usize;
+            let Some(arg) = call.arguments.nodes.get(param_idx) else {
+                continue;
+            };
+            // The argument must be the symbol being narrowed.
+            if !self.is_symbol_identifier(arg, symbol) {
+                continue;
+            }
+            return self.narrow_by_type_predicate(type_, pred_type, assume_true);
+        }
+        Arc::clone(type_)
+    }
+
+    /// Narrow `type_` to (or away from) the predicate type.
+    ///
+    /// In the true branch, intersect with the predicate type (e.g. `x is
+    /// string` → narrow to `string`). In the false branch, remove the
+    /// predicate type from the union.
+    fn narrow_by_type_predicate(
+        &mut self,
+        type_: &Arc<Type>,
+        pred_type: &Arc<Type>,
+        assume_true: bool,
+    ) -> Arc<Type> {
+        if assume_true {
+            self.intersect_or_narrow(type_, pred_type)
+        } else {
+            self.remove_type_from_union(type_, pred_type)
+        }
     }
 
     /// Check if `expr` is `typeof <symbol>`.

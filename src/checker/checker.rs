@@ -10,8 +10,8 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::ast::{
-    CheckFlags, DiagnosticsCollection, ModifierFlags, Node, NodeFlags, NodeSymbolMap, SourceFile, Symbol,
-    SymbolFlags, SymbolTable, SyntaxKind,
+    CheckFlags, DiagnosticsCollection, ModifierFlags, Node, NodeData, NodeFlags, NodeSymbolMap,
+    SourceFile, Symbol, SymbolFlags, SymbolTable, SyntaxKind,
 };
 use crate::core::compiler_options::{
     CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget,
@@ -1083,6 +1083,80 @@ impl Checker {
         sig: &'a Arc<Signature>,
     ) -> Option<&'a TypePredicate> {
         sig.resolved_type_predicate.as_deref()
+    }
+
+    /// Compute the type predicate of a signature on demand.
+    ///
+    /// Mirrors Go's `getTypePredicateOfSignature` (relater.go ~L2016) but
+    /// without caching (since `Signature` is behind `Arc`). Checks the
+    /// signature's declaration for a `TypePredicateNode` return type
+    /// annotation (e.g. `x is string`) and creates a `TypePredicate` from it.
+    /// Returns `None` if the signature has no type predicate.
+    pub fn compute_type_predicate_of_signature(
+        &mut self,
+        sig: &Arc<Signature>,
+    ) -> Option<TypePredicate> {
+        // Check cache first.
+        if let Some(pred) = sig.resolved_type_predicate.as_deref() {
+            // `<<unresolved>>` is the sentinel for "no type predicate".
+            if pred.parameter_name == "<<unresolved>>" {
+                return None;
+            }
+            return Some(pred.clone());
+        }
+        // Compute from declaration.
+        let decl = sig.declaration.as_ref()?;
+        let type_node = decl.type_node()?;
+        if type_node.kind != SyntaxKind::TypePredicate {
+            return None;
+        }
+        let NodeData::TypePredicateNode(pred_data) = &type_node.data else {
+            return None;
+        };
+        let t = pred_data
+            .type_node
+            .as_ref()
+            .map(|tn| self.get_type_from_type_node(tn));
+        let is_this = pred_data.parameter_name.kind == SyntaxKind::ThisKeyword
+            || pred_data.parameter_name.kind == SyntaxKind::ThisType;
+        let kind = if pred_data.asserts_modifier.is_some() {
+            if is_this {
+                TypePredicateKind::AssertsThis
+            } else {
+                TypePredicateKind::AssertsIdentifier
+            }
+        } else {
+            if is_this {
+                TypePredicateKind::This
+            } else {
+                TypePredicateKind::Identifier
+            }
+        };
+        let parameter_name = if is_this {
+            String::new()
+        } else {
+            match &pred_data.parameter_name.data {
+                NodeData::Identifier(id) => id.text.clone(),
+                _ => String::new(),
+            }
+        };
+        let parameter_index = if kind == TypePredicateKind::Identifier
+            || kind == TypePredicateKind::AssertsIdentifier
+        {
+            sig.parameters
+                .iter()
+                .position(|p| p.name == parameter_name)
+                .map(|i| i as i32)
+                .unwrap_or(-1)
+        } else {
+            0
+        };
+        Some(TypePredicate {
+            kind,
+            parameter_index,
+            parameter_name,
+            t,
+        })
     }
 
     // Get the base constraint of a type

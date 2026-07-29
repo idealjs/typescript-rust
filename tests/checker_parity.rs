@@ -1441,3 +1441,50 @@ fn checker_narrowing_switch_default_discriminant_property() {
     );
     assert_no_diagnostics(&diags);
 }
+
+#[test]
+fn checker_narrowing_type_predicate_true_branch() {
+    // `if (isString(x))` narrows `x` to `string` in the true branch.
+    let diags = check_source(
+        "function isString(x: unknown): x is string {\
+             return typeof x === \"string\";\
+         }\
+         let x: string | number = 0;\
+         if (isString(x)) {\
+             let y: string = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_type_predicate_false_branch() {
+    // `if (!isString(x))` narrows `x` to `number` in the true branch of `!`.
+    let diags = check_source(
+        "function isString(x: unknown): x is string {\
+             return typeof x === \"string\";\
+         }\
+         let x: string | number = 0;\
+         if (!isString(x)) {\
+             let y: number = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_type_predicate_else_branch() {
+    // `if (isString(x)) { ... } else { ... }` narrows `x` to `number` in else.
+    let diags = check_source(
+        "function isString(x: unknown): x is string {\
+             return typeof x === \"string\";\
+         }\
+         let x: string | number = 0;\
+         if (isString(x)) {\
+             let y: string = x;\
+         } else {\
+             let z: number = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
