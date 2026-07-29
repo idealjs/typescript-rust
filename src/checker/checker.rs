@@ -1466,6 +1466,9 @@ impl Checker {
             SyntaxKind::CallExpression => {
                 self.get_return_type_of_call_expression(node)
             }
+            SyntaxKind::NewExpression => {
+                self.get_return_type_of_new_expression(node)
+            }
             SyntaxKind::PropertyAccessExpression => {
                 self.get_type_of_property_access(node)
             }
@@ -1648,6 +1651,28 @@ impl Checker {
                 // Signature without a resolved return type — fall back to
                 // any so callers don't blow up. The full Go checker would
                 // run inference here; that's P3.8c.
+                return self.get_any_type();
+            }
+        }
+        self.get_any_type()
+    }
+
+    /// Get the return type of a `NewExpression` (`new Foo()`).
+    ///
+    /// Resolves the constructor expression's type, looks for construct
+    /// signatures, and returns the first signature's return type (the
+    /// instance type). Falls back to `any`.
+    fn get_return_type_of_new_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let callee = match &node.data {
+            crate::ast::NodeData::NewExpression(data) => &data.expression,
+            _ => return self.get_any_type(),
+        };
+        let callee_type = self.get_type_of_node(callee);
+        if let Some(structured) = callee_type.as_structured() {
+            for sig in structured.construct_signatures() {
+                if let Some(rt) = self.get_return_type_of_signature(sig) {
+                    return rt;
+                }
                 return self.get_any_type();
             }
         }
