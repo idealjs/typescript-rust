@@ -14,6 +14,7 @@ use crate::checker::is_tuple_type;
 use crate::jsnum;
 
 use super::checker::Checker;
+use super::inference::{InferenceContext, InferenceInfo, InferencePriority};
 use super::types::*;
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -2758,6 +2759,248 @@ impl Checker {
     /// fall back to structural comparison (correct but possibly slower).
     pub fn conditional_is_distribution_dependent(&self, _t: &Arc<Type>) -> bool {
         true
+    }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Conditional type `infer R` resolution (P3.8c)
+//
+// Ports the `infer`-position handling of `getConditionalType`
+// (internal/checker/checker.go ~L24208). When a conditional has
+// `infer R` type parameters in its extends clause, we:
+//   1. Set up an InferenceContext keyed on the infer type parameters.
+//   2. Call `infer_types(check, extends)` to populate the inferences.
+//   3. Resolve the inferred types via `get_inferred_types`.
+//   4. Build a mapper that substitutes the inferred types for the
+//      infer type parameters, and use it to decide which branch to
+//      take and to instantiate the chosen branch.
+//
+// The full Go implementation also handles distributive conditionals
+// (where the check type is a type parameter), deferred checks, tuple
+// destructuring, permissive/restrictive instantiations, and 1000-level
+// tail recursion. Our simplified port handles the common case where the
+// check type is concrete (no remaining type parameters) and the infer
+// type parameters can be resolved by direct structural matching.
+// ────────────────────────────────────────────────────────────────────────────
+
+impl Checker {
+    /// Resolve a conditional type `T extends U ? X : Y` to either `X` or `Y`
+    /// based on whether `T` is assignable to `U`. Handles the `infer R`
+    /// case by setting up an inference context and substituting the
+    /// inferred types into the chosen branch.
+    ///
+    /// Returns `Some(resolved)` when the conditional can be evaluated, or
+    /// `None` when:
+    ///   - the type isn't a conditional,
+    ///   - the check or extends type is missing,
+    ///   - the check type is still generic (contains type parameters),
+    ///   - inference fails to produce a candidate for one or more infer
+    ///     type parameters.
+    ///
+    /// Caches the result in `resolved_true_type` / `resolved_false_type`
+    /// so subsequent lookups via `get_resolved_type_of_conditional_type`
+    /// don't re-run the resolution.
+    pub fn resolve_conditional_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        let ct = match &t.data {
+            TypeData::Conditional(ct) => ct,
+            _ => return None,
+        };
+
+        // Fast path: cached result.
+        if let Some(rt) = ct.resolved_true_type.get() {
+            return Some(Arc::clone(rt));
+        }
+        if let Some(rt) = ct.resolved_false_type.get() {
+            return Some(Arc::clone(rt));
+        }
+
+        let check_type = ct.check_type.clone()?;
+        let extends_type = ct.extends_type.clone()?;
+
+        // Error type short-circuit (matches Go).
+        if check_type.flags.contains(TypeFlags::Any)
+            && check_type.intrinsic_name() == Some("error")
+        {
+            return Some(Arc::clone(&check_type));
+        }
+
+        // If the check type is still generic, we can't evaluate yet.
+        // Go checks `isDeferredType`; we approximate by checking for any
+        // TypeParameter flags anywhere in the check type.
+        if type_contains_type_parameter(&check_type) {
+            return None;
+        }
+
+        // Set up the inference context for `infer R` parameters (if any).
+        let infer_params: Vec<Arc<Type>> = ct
+            .root
+            .as_ref()
+            .map(|r| r.infer_type_parameters.clone())
+            .unwrap_or_default();
+        let inferences: Vec<InferenceInfo> = infer_params
+            .iter()
+            .map(|p| InferenceInfo::new(Arc::clone(p)))
+            .collect();
+        let mut context = InferenceContext::new(inferences);
+
+        if !infer_params.is_empty() {
+            // Run inference: match check_type against extends_type, with
+            // the infer type parameters as inference targets.
+            self.infer_types(
+                &mut context.inferences,
+                Some(Arc::clone(&check_type)),
+                Some(Arc::clone(&extends_type)),
+                InferencePriority::NoConstraints | InferencePriority::AlwaysStrict,
+                false,
+            );
+            // Verify every infer type parameter got a candidate. If any
+            // didn't, we can't safely resolve the conditional.
+            let inferred = self.get_inferred_types(&context);
+            for inf in &inferred {
+                if inf.flags.contains(TypeFlags::Any)
+                    && inf.intrinsic_name() == Some("error")
+                {
+                    return None;
+                }
+            }
+        }
+
+        // Decide which branch to take. Go uses permissive/restrictive
+        // instantiations to handle distribution; we use the direct
+        // assignability check.
+        let take_true = self.is_type_assignable_to(&check_type, &extends_type);
+
+        // Choose the branch and (if there were infer params) instantiate
+        // it with the inferred types. Without a full `instantiateType`,
+        // we substitute directly via `substitute_infer_type_parameters`.
+        let branch = if take_true {
+            self.get_true_type_from_conditional_type(t)
+        } else {
+            self.get_false_type_from_conditional_type(t)
+        };
+
+        branch.map(|branch| {
+            let resolved = if !infer_params.is_empty() {
+                let inferred = self.get_inferred_types(&context);
+                self.substitute_infer_type_parameters(&branch, &infer_params, &inferred)
+            } else {
+                Arc::clone(&branch)
+            };
+            // Cache the result so subsequent lookups don't re-run.
+            // SAFETY: `resolved_true_type` / `resolved_false_type` are
+            // `OnceLock` and we just verified they're unset. `set` returns
+            // `Result<(), _>`; we ignore the error in the rare race case.
+            if let TypeData::Conditional(ct2) = &t.data {
+                let cell = if take_true {
+                    &ct2.resolved_true_type
+                } else {
+                    &ct2.resolved_false_type
+                };
+                let _ = cell.set(Arc::clone(&resolved));
+            }
+            resolved
+        })
+    }
+
+    /// Substitute occurrences of `infer_params[i]` in `t` with
+    /// `substitutions[i]`. Simplified port of Go's `instantiateType` for
+    /// the infer-parameter case — walks the type recursively and replaces
+    /// pointer-equal occurrences. Doesn't handle aliases, mapped type
+    /// constraints, or other complex instantiation scenarios.
+    pub fn substitute_infer_type_parameters(
+        &mut self,
+        t: &Arc<Type>,
+        params: &[Arc<Type>],
+        substitutions: &[Arc<Type>],
+    ) -> Arc<Type> {
+        // Fast path: no parameters to substitute.
+        if params.is_empty() || substitutions.is_empty() {
+            return Arc::clone(t);
+        }
+        // Fast path: direct pointer match — return the substitution.
+        for (i, p) in params.iter().enumerate() {
+            if Arc::ptr_eq(p, t) {
+                return Arc::clone(&substitutions[i.min(substitutions.len() - 1)]);
+            }
+        }
+        // Recursive substitution into structured types. We only handle
+        // the cases that show up in conditional branches: unions,
+        // intersections, and other type references. Object types with
+        // type arguments require a full `create_type_reference` which is
+        // not yet ported; we return them as-is. Other kinds (mapped,
+        // indexed access, etc.) are likewise returned as-is.
+        match &t.data {
+            TypeData::Union(u) => {
+                let new_types: Vec<Arc<Type>> = u
+                    .union_or_intersection
+                    .types
+                    .iter()
+                    .map(|inner| self.substitute_infer_type_parameters(inner, params, substitutions))
+                    .collect();
+                self.get_union_type(new_types)
+            }
+            TypeData::Intersection(i) => {
+                let new_types: Vec<Arc<Type>> = i
+                    .union_or_intersection
+                    .types
+                    .iter()
+                    .map(|inner| self.substitute_infer_type_parameters(inner, params, substitutions))
+                    .collect();
+                self.get_intersection_type(new_types)
+            }
+            // For nested conditional types, object type references with
+            // type arguments, mapped types, etc., we don't recursively
+            // substitute (that would risk re-resolution or require a full
+            // `instantiateType`); return as-is. Go handles these via
+            // `instantiateType`, which walks the type and substitutes
+            // there.
+            _ => Arc::clone(t),
+        }
+    }
+}
+
+/// Whether a type contains any type-parameter subterm. Used by
+/// `resolve_conditional_type` to decide whether the conditional can be
+/// evaluated now or must be deferred until the type parameters are
+/// substituted with concrete types.
+fn type_contains_type_parameter(t: &Arc<Type>) -> bool {
+    if t.flags.contains(TypeFlags::TypeParameter) {
+        return true;
+    }
+    match &t.data {
+        TypeData::Union(u) => u
+            .union_or_intersection
+            .types
+            .iter()
+            .any(type_contains_type_parameter),
+        TypeData::Intersection(i) => i
+            .union_or_intersection
+            .types
+            .iter()
+            .any(type_contains_type_parameter),
+        TypeData::Object(o) => o
+            .type_arguments
+            .iter()
+            .any(type_contains_type_parameter)
+            || o
+                .target
+                .as_ref()
+                .map(type_contains_type_parameter)
+                .unwrap_or(false),
+        TypeData::Conditional(ct) => {
+            ct.check_type.as_ref().map(type_contains_type_parameter).unwrap_or(false)
+                || ct.extends_type.as_ref().map(type_contains_type_parameter).unwrap_or(false)
+                || ct.resolved_true_type.get().map(type_contains_type_parameter).unwrap_or(false)
+                || ct.resolved_false_type.get().map(type_contains_type_parameter).unwrap_or(false)
+        }
+        TypeData::Mapped(m) => {
+            m.constraint_type.as_ref().map(type_contains_type_parameter).unwrap_or(false)
+                || m.template_type.as_ref().map(type_contains_type_parameter).unwrap_or(false)
+                || m.name_type.as_ref().map(type_contains_type_parameter).unwrap_or(false)
+                || m.type_parameter.as_ref().map(type_contains_type_parameter).unwrap_or(false)
+        }
+        TypeData::TypeParameter(_) => true,
+        _ => false,
     }
 }
 
