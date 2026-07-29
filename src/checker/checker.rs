@@ -1438,17 +1438,28 @@ impl Checker {
             SyntaxKind::BinaryExpression => {
                 self.get_type_of_binary_expression(node)
             }
-            SyntaxKind::PrefixUnaryExpression | SyntaxKind::PostfixUnaryExpression => {
-                self.get_any_type() // TODO: unary expression type
+            SyntaxKind::PrefixUnaryExpression => {
+                if let crate::ast::NodeData::PrefixUnaryExpression(data) = &node.data {
+                    // `!x` → boolean; `+x`/`-x`/`~x`/`++x`/`--x` → number.
+                    if data.operator == SyntaxKind::ExclamationToken {
+                        return self.boolean_type();
+                    }
+                    return self.number_type();
+                }
+                self.get_any_type()
+            }
+            SyntaxKind::PostfixUnaryExpression => {
+                // `x++` / `x--` → number.
+                self.number_type()
             }
             SyntaxKind::CallExpression => {
                 self.get_return_type_of_call_expression(node)
             }
             SyntaxKind::PropertyAccessExpression => {
-                self.get_any_type() // TODO: property access type
+                self.get_type_of_property_access(node)
             }
             SyntaxKind::ElementAccessExpression => {
-                self.get_any_type() // TODO: element access type
+                self.get_type_of_element_access(node)
             }
             SyntaxKind::ParenthesizedExpression => {
                 if let crate::ast::NodeData::ParenthesizedExpression(data) = &node.data {
@@ -1456,8 +1467,20 @@ impl Checker {
                 }
                 self.get_any_type()
             }
-            SyntaxKind::AsExpression | SyntaxKind::SatisfiesExpression => {
-                self.get_any_type() // TODO: use type annotation
+            SyntaxKind::AsExpression => {
+                // `x as T` has the type of the type annotation `T`.
+                if let crate::ast::NodeData::AsExpression(data) = &node.data {
+                    return self.get_type_from_type_node(&data.type_node);
+                }
+                self.get_any_type()
+            }
+            SyntaxKind::SatisfiesExpression => {
+                // `x satisfies T` keeps the type of `x` (the assertion does
+                // not change the expression's type, only validates it).
+                if let crate::ast::NodeData::SatisfiesExpression(data) = &node.data {
+                    return self.get_type_of_node(&data.expression);
+                }
+                self.get_any_type()
             }
             _ => {
                 self.get_any_type()
@@ -1600,6 +1623,108 @@ impl Checker {
             }
         } else {
             self.get_any_type()
+        }
+    }
+
+    /// Get the type of a `PropertyAccessExpression` (`x.prop`).
+    ///
+    /// Resolves the type of `x`, looks up `prop` as a property on that
+    /// type, and returns the property's type. Falls back to `any` when
+    /// the property is not found or the object type is unknown.
+    fn get_type_of_property_access(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let (obj_expr, name) = match &node.data {
+            crate::ast::NodeData::PropertyAccessExpression(data) => {
+                (&data.expression, &data.name)
+            }
+            _ => return self.get_any_type(),
+        };
+        let obj_type = self.get_type_of_node(obj_expr);
+        let name_text = name.text();
+        if let Some(t) = self.get_property_type_of_type(&obj_type, name_text) {
+            return t;
+        }
+        // For array types, common properties like `length` are numbers;
+        // methods like `push`/`pop`/etc. fall back to `any` for now.
+        if name_text == "length" && self.is_array_type(&obj_type) {
+            return self.number_type();
+        }
+        self.get_any_type()
+    }
+
+    /// Get the type of an `ElementAccessExpression` (`x[key]`).
+    ///
+    /// For array types (`T[]`), returns the element type `T`. For tuple
+    /// types, returns the element at the given index (or a union of all
+    /// element types for non-constant indices). Falls back to `any`.
+    fn get_type_of_element_access(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let (obj_expr, arg_expr) = match &node.data {
+            crate::ast::NodeData::ElementAccessExpression(data) => {
+                (&data.expression, &data.argument_expression)
+            }
+            _ => return self.get_any_type(),
+        };
+        let obj_type = self.get_type_of_node(obj_expr);
+
+        // Tuple element access with a numeric literal index.
+        if self.is_tuple_type(&obj_type) {
+            if let Some(index) = self.get_constant_numeric_value(arg_expr) {
+                if let Some(t) = self.get_tuple_element_type(&obj_type, index as usize) {
+                    return t;
+                }
+            }
+            // Non-constant index on a tuple → union of all element types.
+            // For now, fall back to `any`.
+            return self.get_any_type();
+        }
+
+        // Array element access → element type.
+        if self.is_array_type(&obj_type) {
+            return self.get_array_element_type(&obj_type);
+        }
+
+        // Object with a string/number index signature → index signature
+        // value type.
+        if let Some(structured) = obj_type.as_structured() {
+            for info in &structured.index_infos {
+                if let Some(key_type) = &info.key_type {
+                    if key_type.flags.contains(crate::checker::TypeFlags::String)
+                        || key_type.flags.contains(crate::checker::TypeFlags::Number)
+                    {
+                        if let Some(val_type) = &info.value_type {
+                            return Arc::clone(val_type);
+                        }
+                    }
+                }
+            }
+        }
+
+        self.get_any_type()
+    }
+
+    /// Get the element type of an array type (`Array<T>` → `T`).
+    fn get_array_element_type(&self, t: &Arc<Type>) -> Arc<Type> {
+        match &t.data {
+            crate::checker::TypeData::Object(obj) => {
+                // `Array<T>` is a reference type with one type argument.
+                if let Some(elem) = obj.type_arguments.first() {
+                    return Arc::clone(elem);
+                }
+                self.get_any_type()
+            }
+            crate::checker::TypeData::EvolvingArray(ea) => {
+                ea.element_type.clone().unwrap_or_else(|| self.get_any_type())
+            }
+            _ => self.get_any_type(),
+        }
+    }
+
+    /// Try to extract a constant numeric value from a literal expression.
+    fn get_constant_numeric_value(&self, node: &Arc<Node>) -> Option<f64> {
+        match &node.data {
+            crate::ast::NodeData::NumericLiteral(data) => {
+                data.text.parse::<f64>().ok()
+            }
+            _ => None,
         }
     }
 

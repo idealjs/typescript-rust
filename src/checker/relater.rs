@@ -475,7 +475,7 @@ impl Checker {
     }
 
     /// Get the type of a tuple element at a given index.
-    fn get_tuple_element_type(&self, t: &Arc<Type>, index: usize) -> Option<Arc<Type>> {
+    pub(super) fn get_tuple_element_type(&self, t: &Arc<Type>, index: usize) -> Option<Arc<Type>> {
         match &t.data {
             TypeData::Tuple(tuple) => {
                 // The element type is stored directly on `TupleElementInfo`

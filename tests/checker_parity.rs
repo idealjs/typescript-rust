@@ -2067,3 +2067,107 @@ fn checker_type_display_unknown() {
         args
     );
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Expression type inference: `as`, `satisfies`, unary, property/element access
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_as_expression_uses_type_annotation_no_error() {
+    // `x as string` has type `string`; assigning to `string` is fine.
+    let diags = check_source("let x: unknown = 0; let y: string = x as string;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_as_expression_wrong_annotation_ts2322() {
+    // `x as number` has type `number`; assigning to `string` fails.
+    let diags = check_source("let x: unknown = 0; let y: string = x as number;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_satisfies_expression_keeps_expression_type_no_error() {
+    // `x satisfies string` keeps the type of `x` (here `string`),
+    // so assigning to `string` is fine.
+    let diags = check_source("let x = 'hi'; let y: string = x satisfies string;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_satisfies_expression_keeps_expression_type_ts2322() {
+    // `x satisfies string` keeps the type of `x` (here `number`),
+    // so assigning to `string` fails even though `satisfies string`.
+    let diags = check_source("let x = 42; let y: string = x satisfies string;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_prefix_unary_not_returns_boolean_no_error() {
+    // `!x` has type `boolean`.
+    let diags = check_source("let x = 1; let y: boolean = !x;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_prefix_unary_not_returns_boolean_ts2322() {
+    // `!x` has type `boolean`; assigning to `number` fails.
+    let diags = check_source("let x = 1; let y: number = !x;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_prefix_unary_minus_returns_number_no_error() {
+    // `-x` has type `number`.
+    let diags = check_source("let x = 1; let y: number = -x;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_prefix_unary_minus_returns_number_ts2322() {
+    // `-x` has type `number`; assigning to `string` fails.
+    let diags = check_source("let x = 1; let y: string = -x;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_postfix_increment_returns_number_no_error() {
+    // `x++` has type `number`.
+    let diags = check_source("let x = 1; let y: number = x++;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_array_length_property_returns_number_no_error() {
+    // `arr.length` has type `number`.
+    let diags = check_source("let arr: number[] = [1, 2, 3]; let y: number = arr.length;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_array_length_property_returns_number_ts2322() {
+    // `arr.length` has type `number`; assigning to `string` fails.
+    let diags = check_source("let arr: number[] = [1, 2, 3]; let y: string = arr.length;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_array_element_access_returns_element_type_no_error() {
+    // `arr[0]` on `number[]` has type `number`.
+    let diags = check_source("let arr: number[] = [1, 2, 3]; let y: number = arr[0];");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_array_element_access_returns_element_type_ts2322() {
+    // `arr[0]` on `number[]` has type `number`; assigning to `string` fails.
+    let diags = check_source("let arr: number[] = [1, 2, 3]; let y: string = arr[0];");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_string_array_element_access_returns_string_no_error() {
+    // `arr[0]` on `string[]` has type `string`.
+    let diags = check_source("let arr: string[] = ['a']; let y: string = arr[0];");
+    assert_no_diagnostics(&diags);
+}

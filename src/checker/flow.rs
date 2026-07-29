@@ -1919,12 +1919,12 @@ impl Checker {
 
     /// Look up a property symbol by name on a structured type.
     /// Returns `None` for non-structured types or missing properties.
-    fn get_property_of_type(&self, t: &Arc<Type>, name: &str) -> Option<Arc<Symbol>> {
+    pub(super) fn get_property_of_type(&self, t: &Arc<Type>, name: &str) -> Option<Arc<Symbol>> {
         t.as_structured()?.members.get(name).cloned()
     }
 
     /// Get the type of a named property on a type, if the property exists.
-    fn get_property_type_of_type(&mut self, t: &Arc<Type>, name: &str) -> Option<Arc<Type>> {
+    pub(super) fn get_property_type_of_type(&mut self, t: &Arc<Type>, name: &str) -> Option<Arc<Type>> {
         let sym = self.get_property_of_type(t, name)?;
         Some(self.get_type_of_symbol(&sym))
     }
