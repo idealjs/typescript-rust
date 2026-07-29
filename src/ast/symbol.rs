@@ -338,6 +338,12 @@ impl FlowFlags {
     pub const fn contains(self, other: Self) -> bool {
         (self.0 & other.0) == other.0
     }
+
+    /// Returns true if any bit of `other` is set in `self`.
+    /// Mirrors Go's `flags&mask != 0` idiom.
+    pub const fn intersects(self, other: Self) -> bool {
+        (self.0 & other.0) != 0
+    }
 }
 
 impl std::ops::BitOr for FlowFlags {

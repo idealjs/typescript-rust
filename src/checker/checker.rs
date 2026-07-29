@@ -1015,6 +1015,101 @@ impl Checker {
         Arc::clone(t)
     }
 
+    /// Widen a type by replacing fresh literal types with their primitive
+    /// base types. Mirrors Go's `getWidenedType`/`getWidenedLiteralType`
+    /// (checker.go ~L18268/L25395) for the function-return-type use case.
+    ///
+    /// - Literal types (string/number/bigint/boolean) → their primitive base.
+    /// - Unique `symbol` literals → `symbol`.
+    /// - Unions → a new union with each constituent widened (nullable
+    ///   constituents are preserved as-is, matching Go).
+    /// - All other types are returned unchanged.
+    ///
+    /// Freshness tracking (`freshType`) is not yet implemented in the Rust
+    /// port, so this widens *all* literal types. This matches TypeScript's
+    /// observable behavior for the common cases (e.g. `function f() { return
+    /// 42; }` infers `number`).
+    pub fn get_widened_type(&self, t: &Arc<Type>) -> Arc<Type> {
+        // Nullable types are not widened (Go skips them in union widening).
+        if t.flags.intersects(TYPE_FLAGS_NULLABLE) {
+            return Arc::clone(t);
+        }
+        // Literal types → primitive base.
+        if t.flags.intersects(TYPE_FLAGS_LITERAL) {
+            return self.get_base_type_of_literal_type(t);
+        }
+        // Unique symbol → symbol.
+        if t.flags.contains(TypeFlags::UniqueESSymbol) {
+            return self.es_symbol_type();
+        }
+        // Unions: widen each non-nullable constituent.
+        if let TypeData::Union(union_data) = &t.data {
+            let widened: Vec<Arc<Type>> = union_data
+                .union_or_intersection
+                .types
+                .iter()
+                .map(|member| self.get_widened_type(member))
+                .collect();
+            // Avoid allocating a new union if nothing changed.
+            if widened
+                .iter()
+                .zip(union_data.union_or_intersection.types.iter())
+                .all(|(w, o)| Arc::ptr_eq(w, o))
+            {
+                return Arc::clone(t);
+            }
+            // Rebuild via get_union_type to deduplicate/flatten. We need
+            // &mut self for that, but get_union_type only mutates caches;
+            // since this method takes &self we work around it by constructing
+            // a minimal union without caching. For the return-type use case
+            // this is acceptable.
+            return self.build_union_from_types(widened);
+        }
+        Arc::clone(t)
+    }
+
+    /// Build a union type from a vec of constituents without the full
+    /// `get_union_type` caching machinery (used by `get_widened_type` which
+    /// runs under an immutable borrow).
+    fn build_union_from_types(&self, types: Vec<Arc<Type>>) -> Arc<Type> {
+        if types.is_empty() {
+            return self.never_type();
+        }
+        if types.len() == 1 {
+            return types.into_iter().next().expect("exactly one");
+        }
+        // Deduplicate by pointer identity and flatten nested unions.
+        let mut seen: Vec<Arc<Type>> = Vec::new();
+        for t in types {
+            if let TypeData::Union(u) = &t.data {
+                for inner in &u.union_or_intersection.types {
+                    if !seen.iter().any(|s| Arc::ptr_eq(s, inner)) {
+                        seen.push(Arc::clone(inner));
+                    }
+                }
+            } else if !seen.iter().any(|s| Arc::ptr_eq(s, &t)) {
+                seen.push(t);
+            }
+        }
+        if seen.len() == 1 {
+            return seen.into_iter().next().expect("exactly one");
+        }
+        Arc::new(Type::new(
+            TypeFlags::Union,
+            TypeData::Union(UnionTypeData {
+                union_or_intersection: UnionOrIntersectionTypeData {
+                    structured: StructuredTypeData::default(),
+                    types: seen,
+                },
+                resolved_reduced_type: std::sync::OnceLock::new(),
+                regular_type: std::sync::OnceLock::new(),
+                origin: None,
+                key_property_name: None,
+                constituent_map: HashMap::new(),
+            }),
+        ))
+    }
+
     // Get the constraint of a type parameter
     pub fn get_constraint_of_type_parameter(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if let TypeData::TypeParameter(tp) = &t.data {
@@ -1495,18 +1590,17 @@ impl Checker {
 
     /// Get a number literal type (inferred).
     fn infer_number_literal_type(&mut self, text: &str) -> Arc<Type> {
-        // For now, just return number type
-        // TODO: create literal type
-        let _ = text;
-        self.number_type()
+        // Parse the numeric literal text and create a literal type.
+        let num = crate::jsnum::Number::from_string(text);
+        if num.is_nan() {
+            return self.number_type();
+        }
+        self.get_number_literal_type(num)
     }
 
     /// Get a string literal type (inferred).
     fn infer_string_literal_type(&mut self, text: &str) -> Arc<Type> {
-        // For now, just return string type
-        // TODO: create literal type
-        let _ = text;
-        self.string_type()
+        self.get_string_literal_type(text)
     }
 
     /// Check a statement node.

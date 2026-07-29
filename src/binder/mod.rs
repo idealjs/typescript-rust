@@ -1310,7 +1310,7 @@ impl Binder {
     // ─────────────────────────────────────────────────────────────────────
 
     /// Bind a container node: save/restore container context, then bind children.
-    fn bind_container(&mut self, node: &Arc<Node>, _flags: ContainerFlags) {
+    fn bind_container(&mut self, node: &Arc<Node>, flags: ContainerFlags) {
         let prev_container = self.container.take();
         let prev_block = self.block_scope_container.take();
         // Save the current parent_symbol. For container nodes that have a
@@ -1341,7 +1341,28 @@ impl Binder {
         // If the node has no symbol (e.g. Block), parent_symbol remains None,
         // so declare_symbol falls through to the block_scope_container.locals.
 
+        // Function-like containers get their own fresh control flow graph:
+        // a new START flow node, with the outer flow saved and restored.
+        // This prevents flow effects inside the function body (e.g. a
+        // `return` marking the flow UNREACHABLE) from leaking into the
+        // enclosing scope. Mirrors Go's `bindChildren` flow handling for
+        // `ContainerFlagsIsFunctionLike` containers.
+        let is_function_like = flags.contains(ContainerFlags::IS_FUNCTION_LIKE);
+        let prev_flow = if is_function_like {
+            self.current_flow.take()
+        } else {
+            None
+        };
+        if is_function_like {
+            self.current_flow = Some(Arc::new(FlowNode::new(FlowFlags::START)));
+        }
+
         self.bind_children(node);
+
+        // Restore the outer flow for function-like containers.
+        if is_function_like {
+            self.current_flow = prev_flow;
+        }
 
         self.container = prev_container;
         self.block_scope_container = prev_block;

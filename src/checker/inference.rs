@@ -1364,11 +1364,6 @@ impl Checker {
         self.get_base_type_of_literal_type(t)
     }
 
-    /// Get the widened type (simplified).
-    fn get_widened_type(&self, t: &Arc<Type>) -> Arc<Type> {
-        t.clone()
-    }
-
     /// Get the regular type of a literal type (simplified).
     fn get_regular_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
         if t.flags.contains(TYPE_FLAGS_LITERAL) {

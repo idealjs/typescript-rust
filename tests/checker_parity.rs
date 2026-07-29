@@ -1529,3 +1529,95 @@ fn checker_narrowing_optional_chain_not_equal_undefined() {
     );
     assert_no_diagnostics(&diags);
 }
+
+// P3.9e: Improved equality narrowing for literal types
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_narrowing_equality_replaces_string_with_literal() {
+    // `x === "foo"` narrows `string` to `"foo"` (replace primitive with
+    // literal). `let y: "foo" = x` should succeed in the true branch.
+    let diags = check_source(
+        "let x: string | number = 0;\
+         if (x === \"foo\") {\
+             let y: \"foo\" = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_equality_replaces_number_with_literal() {
+    // `x === 42` narrows `number` to `42`.
+    let diags = check_source(
+        "let x: string | number = \"\";\
+         if (x === 42) {\
+             let y: 42 = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_equality_strict_null_vs_undefined() {
+    // `x === undefined` narrows to `undefined` only (not `null`).
+    let diags = check_source(
+        "let x: string | null | undefined = null;\
+         if (x === undefined) {\
+             let y: undefined = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_equality_strict_null_kept() {
+    // `x === null` narrows to `null` only (not `undefined`).
+    let diags = check_source(
+        "let x: string | null | undefined = undefined;\
+         if (x === null) {\
+             let y: null = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_equality_false_branch_removes_literal() {
+    // `x !== "foo"` (false branch of ===) → remove `"foo"` from the union.
+    // `x` should be `number` in the false branch.
+    let diags = check_source(
+        "let x: \"foo\" | number = \"foo\";\
+         if (x === \"foo\") {\
+         } else {\
+             let y: number = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_equality_false_branch_non_unit_no_narrow() {
+    // `x !== someObject` — value is not a unit type, so the false branch
+    // should not narrow (x remains `{ a: string } | number`).
+    let diags = check_source(
+        "let x: { a: string } | number = { a: \"\" };\
+         if (x === { a: \"hi\" }) {\
+         } else {\
+             let y: { a: string } | number = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_equality_any_not_narrowed() {
+    // `any` type is not narrowed by equality comparisons.
+    let diags = check_source(
+        "let x: any = 0;\
+         if (x === \"foo\") {\
+             let y: any = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}

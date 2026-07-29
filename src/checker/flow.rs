@@ -107,7 +107,10 @@ impl Checker {
         }
 
         // TRUE_CONDITION / FALSE_CONDITION → narrow based on the condition.
-        if flow.flags.contains(FlowFlags::CONDITION) {
+        // Use `intersects` (not `contains`) because CONDITION is a composite
+        // mask of TRUE_CONDITION | FALSE_CONDITION, and a flow node only has
+        // one of those bits set. Mirrors Go's `flags&FlowFlagsCondition != 0`.
+        if flow.flags.intersects(FlowFlags::CONDITION) {
             let kind = if flow.flags.contains(FlowFlags::TRUE_CONDITION) {
                 NarrowKind::TrueBranch
             } else {
@@ -416,14 +419,229 @@ impl Checker {
         let _ = is_symbol_on_left;
 
         let value_type = self.get_type_of_node(value_node);
-        if narrow_to_value {
-            // Narrow to the value's type (intersect with current type for
-            // union members).
-            self.intersect_or_narrow(type_, &value_type)
-        } else {
-            // Remove the value's type from the union.
-            self.remove_type_from_union(type_, &value_type)
+        self.narrow_by_equality(type_, &value_type, narrow_to_value, is_loose)
+    }
+
+    /// Narrow `type_` based on an equality comparison with `value_type`.
+    ///
+    /// Mirrors Go's `narrowTypeByEquality` (flow.go ~L556). Improvements over
+    /// the previous simple intersect/remove logic:
+    ///
+    /// - Skips narrowing for `any`.
+    /// - Distinguishes `null` vs `undefined` for strict equality (`===`/`!==`)
+    ///   while treating both together for loose equality (`==`/`!=`).
+    /// - In the true branch, filters constituents to those comparable to the
+    ///   value (or coercible under `==`), then replaces primitive types with
+    ///   matching literal types from the value (e.g. `string` → `"foo"`).
+    /// - In the false branch, only narrows when the value is a unit type
+    ///   (literal/enum), removing constituents that are unit-like and
+    ///   comparable to the value.
+    fn narrow_by_equality(
+        &mut self,
+        type_: &Arc<Type>,
+        value_type: &Arc<Type>,
+        narrow_to_value: bool,
+        is_loose: bool,
+    ) -> Arc<Type> {
+        // `any` is not narrowed by equality comparisons.
+        if type_.flags.contains(TypeFlags::Any) {
+            return Arc::clone(type_);
         }
+        // Nullable value type (null or undefined): narrow by facts.
+        if value_type.flags.intersects(TYPE_FLAGS_NULLABLE) {
+            if !self.strict_null_checks {
+                return Arc::clone(type_);
+            }
+            let value_is_null = value_type.flags.contains(TypeFlags::Null);
+            // For loose equality (==/!=), both null and undefined match each
+            // other. For strict equality (===/!==), narrow to the specific
+            // nullable kind.
+            return if is_loose {
+                if narrow_to_value {
+                    self.filter_type_by_flags(type_, TYPE_FLAGS_NULLABLE)
+                } else {
+                    self.remove_flags_from_union(type_, TYPE_FLAGS_NULLABLE)
+                }
+            } else if value_is_null {
+                if narrow_to_value {
+                    self.filter_type_by_flags(type_, TypeFlags::Null)
+                } else {
+                    self.remove_flags_from_union(type_, TypeFlags::Null)
+                }
+            } else {
+                if narrow_to_value {
+                    self.filter_type_by_flags(type_, TypeFlags::Undefined)
+                } else {
+                    self.remove_flags_from_union(type_, TypeFlags::Undefined)
+                }
+            };
+        }
+        if narrow_to_value {
+            // True branch of `===`/`==` (or false branch of `!==`/`!=`):
+            // keep constituents comparable to the value, or coercible under
+            // loose equality. Then replace primitives with matching literals.
+            let filtered = self.filter_comparable_or_coercible(type_, value_type, is_loose);
+            self.replace_primitives_with_literals(&filtered, value_type)
+        } else {
+            // False branch: only narrow when the value is a unit type
+            // (literal, enum, unique symbol). Remove constituents that are
+            // unit-like and comparable to the value.
+            if !value_type.flags.intersects(TYPE_FLAGS_UNIT) {
+                return Arc::clone(type_);
+            }
+            self.remove_comparable_units(type_, value_type)
+        }
+    }
+
+    /// Filter `type_` to keep only constituents comparable to `value_type`.
+    /// For loose equality (`==`), also keeps constituents coercible under the
+    /// double-equals rules (number/string/boolean vs number/string/boolean).
+    ///
+    /// Mirrors Go's `filterType` call in `narrowTypeByEquality` (flow.go ~L589).
+    fn filter_comparable_or_coercible(
+        &mut self,
+        type_: &Arc<Type>,
+        value_type: &Arc<Type>,
+        is_loose: bool,
+    ) -> Arc<Type> {
+        let constituents = self.constituent_types(type_);
+        let value_constituents = self.constituent_types(value_type);
+        let matching: Vec<Arc<Type>> = constituents
+            .into_iter()
+            .filter(|t| {
+                // Keep if comparable to any value constituent.
+                let comparable = value_constituents
+                    .iter()
+                    .any(|vc| self.is_type_comparable_to(t, vc));
+                if comparable {
+                    return true;
+                }
+                // For loose equality, also keep coercible types.
+                is_loose
+                    && value_constituents
+                        .iter()
+                        .any(|vc| Self::is_coercible_under_double_equals(t, vc))
+            })
+            .collect();
+        self.rebuild_union_or_never(type_, matching)
+    }
+
+    /// Remove from `type_` all constituents that are unit-like (literal/enum)
+    /// and comparable to `value_type`.
+    ///
+    /// Mirrors Go's `filterType` call in `narrowTypeByEquality` (flow.go ~L595).
+    fn remove_comparable_units(
+        &mut self,
+        type_: &Arc<Type>,
+        value_type: &Arc<Type>,
+    ) -> Arc<Type> {
+        let constituents = self.constituent_types(type_);
+        let value_constituents = self.constituent_types(value_type);
+        let remaining: Vec<Arc<Type>> = constituents
+            .into_iter()
+            .filter(|t| {
+                // Only remove unit-like types.
+                if !t.flags.intersects(TYPE_FLAGS_UNIT) {
+                    return true;
+                }
+                // Keep if NOT comparable to any value constituent.
+                !value_constituents
+                    .iter()
+                    .any(|vc| self.is_type_comparable_to(t, vc))
+            })
+            .collect();
+        self.rebuild_union_or_never(type_, remaining)
+    }
+
+    /// Replace primitive types (string/number/bigint) in `type_` with the
+    /// matching literal types from `value_type`.
+    ///
+    /// E.g. when comparing `string | number` against `"foo"`, the `string`
+    /// constituent is replaced with `"foo"`. Mirrors Go's
+    /// `replacePrimitivesWithLiterals` (flow.go ~L1886).
+    fn replace_primitives_with_literals(
+        &mut self,
+        type_: &Arc<Type>,
+        value_type: &Arc<Type>,
+    ) -> Arc<Type> {
+        // Only replace if the type has primitives and the value has literals.
+        let has_primitives =
+            type_.flags.intersects(TypeFlags::String | TypeFlags::Number | TypeFlags::BigInt);
+        let has_literals = value_type
+            .flags
+            .intersects(TYPE_FLAGS_LITERAL | TypeFlags::TemplateLiteral | TypeFlags::StringMapping);
+        if !has_primitives || !has_literals {
+            return Arc::clone(type_);
+        }
+        // Collect literal constituents from the value type, grouped by kind.
+        let value_constituents = self.constituent_types(value_type);
+        let string_literals: Vec<Arc<Type>> = value_constituents
+            .iter()
+            .filter(|t| {
+                t.flags.intersects(
+                    TypeFlags::StringLiteral | TypeFlags::TemplateLiteral | TypeFlags::StringMapping,
+                )
+            })
+            .cloned()
+            .collect();
+        let number_literals: Vec<Arc<Type>> = value_constituents
+            .iter()
+            .filter(|t| t.flags.contains(TypeFlags::NumberLiteral))
+            .cloned()
+            .collect();
+        let bigint_literals: Vec<Arc<Type>> = value_constituents
+            .iter()
+            .filter(|t| t.flags.contains(TypeFlags::BigIntLiteral))
+            .cloned()
+            .collect();
+        let constituents = self.constituent_types(type_);
+        let mut result: Vec<Arc<Type>> = Vec::new();
+        for t in constituents {
+            if t.flags.contains(TypeFlags::String) {
+                // Replace `string` with matching string literals. If the value
+                // also has a `string` constituent, keep the primitive.
+                let has_string_value =
+                    value_type.flags.contains(TypeFlags::String) || string_literals.is_empty();
+                if has_string_value {
+                    result.push(t);
+                } else {
+                    result.extend(string_literals.iter().cloned());
+                }
+            } else if t.flags.contains(TypeFlags::Number) {
+                let has_number_value =
+                    value_type.flags.contains(TypeFlags::Number) || number_literals.is_empty();
+                if has_number_value {
+                    result.push(t);
+                } else {
+                    result.extend(number_literals.iter().cloned());
+                }
+            } else if t.flags.contains(TypeFlags::BigInt) {
+                let has_bigint_value =
+                    value_type.flags.contains(TypeFlags::BigInt) || bigint_literals.is_empty();
+                if has_bigint_value {
+                    result.push(t);
+                } else {
+                    result.extend(bigint_literals.iter().cloned());
+                }
+            } else {
+                result.push(t);
+            }
+        }
+        self.rebuild_union_or_never(type_, result)
+    }
+
+    /// Check if `source` is coercible to `target` under the `==` operator.
+    ///
+    /// Mirrors Go's `isCoercibleUnderDoubleEquals` (flow.go ~L1907). A type
+    /// is coercible if it is a number/string/boolean-literal and the target
+    /// is a number/string/boolean (or vice versa).
+    fn is_coercible_under_double_equals(source: &Arc<Type>, target: &Arc<Type>) -> bool {
+        source
+            .flags
+            .intersects(TypeFlags::Number | TypeFlags::String | TypeFlags::BooleanLiteral)
+            && target
+                .flags
+                .intersects(TypeFlags::Number | TypeFlags::String | TypeFlags::Boolean)
     }
 
     /// `x instanceof Foo` — narrow `x` to the instance type of `Foo`.

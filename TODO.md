@@ -355,10 +355,10 @@ do-while/for/for-in/for-of/switch 控制流、return/throw/break/continue、
 
 已完成：`get_type_of_node` 框架；字面量/二元/括号类型推断；`get_type_of_symbol`
 骨架；`inference.go` 迁移（`inferTypeArguments` 协变/逆变/约束/默认回退）；
-contextual typing（`getContextualType` 完整分发）。
+contextual typing（`getContextualType` 完整分发）；函数返回值推断（含 literal
+widening，`return 42` → `number`）。
 
 - [ ] 变量声明初始化器类型推断（写入 symbol 类型）。
-- [ ] 函数返回值推断。
 - [ ] 条件类型 `infer R` 解析。
 - [ ] 类型推断缓存（`node_links.resolved_type`）。
 
@@ -370,12 +370,15 @@ narrowing（`obj.kind === "value"`）、assignment-driven type 更新、switch �
 narrowing（`switch (x)`/`switch (obj.kind)`，含 default 子句）、type predicate
 （user-defined type guard）narrowing（`if (isString(x))`/`if (!isString(x))`）、
 optional chain containment narrowing（`if (x?.a)`/`x?.a === value`）、
-7+4+3+3 个 parity fixtures。
+equality narrowing for literal types（`==` loose 比较、enum 成员、literal
+replacement、strict null/undefined 区分、false-branch unit removal）、
+function return type widening（`return 42` → `number`）、function-like container
+flow isolation（`bind_container` 为函数体保存/恢复 `current_flow`）、
+7+4+3+3+7 个 parity fixtures。
 
 - [ ] `typeof` switch narrowing（`switch (typeof x)`）。
 - [ ] `switch (true)` narrowing。
 - [ ] `asserts x is T` narrowing（assertion 函数）。
-- [ ] equality narrowing for literal types 完善（`==` loose 比较、enum 成员）。
 
 ### P3.10 Checker nodebuilder
 

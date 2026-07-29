@@ -745,6 +745,18 @@ impl Checker {
             return true;
         }
 
+        // Plain literal → same-kind literal (matching value). E.g. `"foo"` is
+        // assignable to `"foo"`, `42` to `42`, `true` to `true`. This is the
+        // non-enum counterpart of the enum-literal checks above. Mirrors Go's
+        // `isSimpleTypeRelatedTo` literal comparisons.
+        if s.intersects(TYPE_FLAGS_LITERAL)
+            && t.intersects(TYPE_FLAGS_LITERAL)
+            && (s & TYPE_FLAGS_LITERAL) == (t & TYPE_FLAGS_LITERAL)
+            && self.literal_values_equal(source, target)
+        {
+            return true;
+        }
+
         // Number-like types are assignable to `number`
         if s.intersects(TYPE_FLAGS_NUMBER_LIKE) && t.contains(TypeFlags::Number) {
             return true;

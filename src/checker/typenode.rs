@@ -674,6 +674,11 @@ impl Checker {
     /// `return expr;` statements and the union of their types is returned.
     /// If no return statements are found, the inferred type is `void` (or
     /// `any` in non-strict-null-checks mode, mirroring Go's `voidType`).
+    ///
+    /// Mirrors Go's `getReturnTypeFromBody` (checker.go ~L20031). Literal
+    /// return types are widened to their primitive base (e.g. `42` →
+    /// `number`, `"foo"` → `string`) when no explicit return-type annotation
+    /// is present, matching TypeScript's literal-widening rules.
     pub fn infer_function_return_type(&mut self, body: Option<&Arc<Node>>, type_node: Option<&Arc<Node>>) -> Arc<Type> {
         if let Some(type_node) = type_node {
             return self.get_type_from_type_node(type_node);
@@ -684,17 +689,22 @@ impl Checker {
         // Arrow functions can have an expression body (`() => expr`) rather
         // than a block body. In that case the expression IS the return value.
         if body.kind != SyntaxKind::Block {
-            return self.get_type_of_node(body);
+            let t = self.get_type_of_node(body);
+            return self.get_widened_type(&t);
         }
         let mut types: Vec<Arc<Type>> = Vec::new();
         self.collect_return_types_from_node(body, &mut types);
         if types.is_empty() {
             return self.void_type();
         }
-        if types.len() == 1 {
-            return types.into_iter().next().expect("exactly one");
-        }
-        self.get_union_type(types)
+        let inferred = if types.len() == 1 {
+            types.into_iter().next().expect("exactly one")
+        } else {
+            self.get_union_type(types)
+        };
+        // Widen fresh literal types to their primitive base (e.g. `42` →
+        // `number`) for unannotated function returns.
+        self.get_widened_type(&inferred)
     }
 }
 
