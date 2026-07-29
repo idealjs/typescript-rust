@@ -1420,10 +1420,11 @@ impl Checker {
                 self.bigint_type()
             }
             SyntaxKind::ArrayLiteralExpression => {
-                self.get_any_type() // TODO: infer tuple/array type
+                return self.get_type_of_array_literal(node);
             }
             SyntaxKind::ObjectLiteralExpression => {
-                self.get_any_type() // TODO: infer object type
+                // TODO: infer object type from properties
+                self.get_any_type()
             }
             SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
                 self.get_type_of_function_like(node)
@@ -1794,6 +1795,72 @@ impl Checker {
                 data.text.parse::<f64>().ok()
             }
             _ => None,
+        }
+    }
+
+    /// Get the type of an array literal expression `[e1, e2, ...]`.
+    ///
+    /// Infers `Array<T>` where `T` is the widened type of the elements.
+    /// If all elements have the same widened type (e.g. all numbers), the
+    /// array type is `number[]`. If elements have mixed types, the array
+    /// type is `any[]` for now (a proper union would be `Array<A | B>`).
+    /// Empty arrays infer `any[]`.
+    fn get_type_of_array_literal(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let elements = match &node.data {
+            crate::ast::NodeData::ArrayLiteralExpression(data) => &data.elements,
+            _ => return self.get_any_type(),
+        };
+        if elements.is_empty() {
+            return self.create_array_type(self.get_any_type());
+        }
+        // Get the widened type of each element.
+        let mut element_types: Vec<Arc<Type>> = Vec::new();
+        for elem in elements.iter() {
+            // Skip spread elements for now.
+            if elem.kind == SyntaxKind::SpreadElement {
+                return self.create_array_type(self.get_any_type());
+            }
+            let t = self.get_type_of_node(elem);
+            element_types.push(self.get_widened_type_of_literal(&t));
+        }
+        // If all elements have the same type, use it.
+        let first = &element_types[0];
+        let all_same = element_types[1..]
+            .iter()
+            .all(|t| Arc::ptr_eq(t, first) || self.types_are_equal(t, first));
+        if all_same {
+            return self.create_array_type(Arc::clone(first));
+        }
+        // Mixed types → any[] for now.
+        self.create_array_type(self.get_any_type())
+    }
+
+    /// Widen a literal type to its base type (e.g. `3` → `number`).
+    fn get_widened_type_of_literal(&self, t: &Arc<Type>) -> Arc<Type> {
+        if t.flags.contains(crate::checker::TypeFlags::StringLiteral)
+            || t.flags.contains(crate::checker::TypeFlags::NumberLiteral)
+            || t.flags.contains(crate::checker::TypeFlags::BigIntLiteral)
+            || t.flags.contains(crate::checker::TypeFlags::BooleanLiteral)
+        {
+            return self.get_base_type_of_literal_type(t);
+        }
+        Arc::clone(t)
+    }
+
+    /// Check if two types are equal (by identity or by kind/flags).
+    fn types_are_equal(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool {
+        if Arc::ptr_eq(a, b) {
+            return true;
+        }
+        if a.flags != b.flags {
+            return false;
+        }
+        // For intrinsic types, compare the intrinsic name.
+        match (&a.data, &b.data) {
+            (crate::checker::TypeData::Intrinsic(a), crate::checker::TypeData::Intrinsic(b)) => {
+                a.intrinsic_name == b.intrinsic_name
+            }
+            _ => false,
         }
     }
 

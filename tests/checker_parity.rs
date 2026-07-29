@@ -2249,3 +2249,49 @@ fn checker_void_expression_returns_undefined_ts2322() {
     );
     assert_diagnostic_code(&diags, 2322);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Array literal type inference: `[1, 2, 3]` → `number[]`
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_array_literal_infer_number_array_no_error() {
+    // `[1, 2, 3]` infers `number[]`; assigning to `number[]` is fine.
+    let diags = check_source("let arr = [1, 2, 3]; let y: number[] = arr;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_array_literal_infer_number_array_ts2322() {
+    // `[1, 2, 3]` infers `number[]`; assigning to `string[]` fails.
+    let diags = check_source("let arr = [1, 2, 3]; let y: string[] = arr;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_array_literal_infer_string_array_no_error() {
+    // `['a', 'b']` infers `string[]`.
+    let diags = check_source("let arr = ['a', 'b']; let y: string[] = arr;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_array_literal_infer_string_array_ts2322() {
+    // `['a', 'b']` infers `string[]`; assigning to `number[]` fails.
+    let diags = check_source("let arr = ['a', 'b']; let y: number[] = arr;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_array_literal_element_access_after_inference_no_error() {
+    // `arr[0]` where `arr` is inferred `number[]` → `number`.
+    let diags = check_source("let arr = [1, 2, 3]; let y: number = arr[0];");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_array_literal_empty_no_error() {
+    // Empty array `[]` infers `any[]`; assigning to `number[]` is fine.
+    let diags = check_source("let arr = []; let y: number[] = arr;");
+    assert_no_diagnostics(&diags);
+}
