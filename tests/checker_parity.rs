@@ -1825,3 +1825,69 @@ fn checker_narrowing_switch_true_default_negates_all() {
     );
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// asserts x is T narrowing (assertion functions)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_narrowing_asserts_is_type() {
+    // `asserts x is string` narrows `x` to `string` after the call.
+    let diags = check_source(
+        "function assertString(v: unknown): asserts v is string {}\
+         let x: string | number = 0;\
+         assertString(x);\
+         let y: string = x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_asserts_is_type_union() {
+    // `asserts x is string | number` narrows to the union.
+    let diags = check_source(
+        "function assertVal(v: unknown): asserts v is string | number {}\
+         let x: string | number | boolean = false;\
+         assertVal(x);\
+         let y: string | number = x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_asserts_plain_removes_nullable() {
+    // Plain `asserts x` (no type) narrows to truthy (removes null/undefined).
+    let diags = check_source(
+        "function assert(v: unknown): asserts v {}\
+         let x: string | null = null;\
+         assert(x);\
+         let y: string = x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_asserts_is_type_second_param() {
+    // Assertion on the second parameter.
+    let diags = check_source(
+        "function check(cond: boolean, v: unknown): asserts v is string {}\
+         let x: string | number = 0;\
+         check(true, x);\
+         let y: string = x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_asserts_does_not_affect_other_vars() {
+    // Assertion on `x` should not narrow `z`.
+    let diags = check_source(
+        "function assertString(v: unknown): asserts v is string {}\
+         let x: string | number = 0;\
+         let z: string | number = 0;\
+         assertString(x);\
+         let y: string = x;\
+         let w: string | number = z;",
+    );
+    assert_no_diagnostics(&diags);
+}

@@ -378,9 +378,9 @@ typeof switch narrowing（`switch (typeof x)`，含 default 子句排除）、
 parser fix（`typeof x` 现在解析为 `TypeOfExpression` 而非 `PrefixUnaryExpression`）、
 switch (true) narrowing（`switch (true) { case cond: ... }`，含 default 子句
 排除全部 case 条件、前序 case 条件取反）、
-7+4+3+3+7+6+5 个 parity fixtures。
-
-- [ ] `asserts x is T` narrowing（assertion 函数）。
+asserts x is T narrowing（assertion 函数，`asserts x` truthy 收窄、
+`asserts x is T` 类型收窄、多参数支持、CALL flow 节点收窄）、
+7+4+3+3+7+6+5+5 个 parity fixtures。
 
 ### P3.10 Checker nodebuilder
 

@@ -160,15 +160,30 @@ impl Checker {
             return self.narrow_by_switch_clause(&antecedent_type, flow, symbol);
         }
 
-        // ARRAY_MUTATION / CALL → these may invalidate narrowing, but for
-        // now we just recurse into the antecedent.
-        if flow.flags.contains(FlowFlags::ARRAY_MUTATION)
-            || flow.flags.contains(FlowFlags::CALL)
-        {
+        // ARRAY_MUTATION → recurse into the antecedent (array mutations
+        // invalidate element-type narrowing, but we don't track that yet).
+        if flow.flags.contains(FlowFlags::ARRAY_MUTATION) {
             if let Some(antecedent) = &flow.antecedent {
                 return self.narrow_type(type_, antecedent, symbol, depth + 1);
             }
             return Arc::clone(type_);
+        }
+
+        // CALL → assertion function narrowing. If the call is to an
+        // assertion function (`asserts x` or `asserts x is T`), the
+        // argument is narrowed after the call (since the function throws
+        // if the assertion fails). Mirrors Go's `getTypeAtFlowCall`
+        // (flow.go ~L288). Non-assertion calls just recurse.
+        if flow.flags.contains(FlowFlags::CALL) {
+            let antecedent_type = if let Some(antecedent) = &flow.antecedent {
+                self.narrow_type(type_, antecedent, symbol, depth + 1)
+            } else {
+                Arc::clone(type_)
+            };
+            if let Some(call_expr) = &flow.node {
+                return self.narrow_by_assertion_call(&antecedent_type, call_expr, symbol);
+            }
+            return antecedent_type;
         }
 
         // Junction (multiple antecedents): narrow through each and compute
@@ -1350,6 +1365,61 @@ impl Checker {
                 continue;
             }
             return self.narrow_by_type_predicate(type_, pred_type, assume_true);
+        }
+        Arc::clone(type_)
+    }
+
+    /// Narrow `type_` after an assertion function call.
+    ///
+    /// Mirrors Go's `getTypeAtFlowCall` (flow.go ~L288). If `call_expr`
+    /// calls an assertion function (`asserts x` or `asserts x is T`), the
+    /// argument corresponding to `symbol` is narrowed:
+    ///
+    /// - `asserts x is T` → narrow to `T` (intersect with the predicate type).
+    /// - `asserts x` (no type) → narrow to truthy (remove `null`/`undefined`).
+    ///
+    /// Non-assertion calls leave `type_` unchanged.
+    fn narrow_by_assertion_call(
+        &mut self,
+        type_: &Arc<Type>,
+        call_expr: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+    ) -> Arc<Type> {
+        let NodeData::CallExpression(call) = &call_expr.data else {
+            return Arc::clone(type_);
+        };
+        let callee_type = self.get_type_of_node(&call.expression);
+        let signatures = self.get_signatures_of_type(&callee_type, SignatureKind::Call);
+        for sig in &signatures {
+            let Some(predicate) = self.compute_type_predicate_of_signature(sig) else {
+                continue;
+            };
+            // Only assertion functions narrow after the call.
+            if predicate.kind != TypePredicateKind::AssertsIdentifier
+                && predicate.kind != TypePredicateKind::AssertsThis
+            {
+                continue;
+            }
+            // For `asserts this` / `asserts this is T`, the asserted value
+            // is the receiver (the `this` of the method call), not an
+            // argument. We don't track `this` narrowing yet.
+            if predicate.kind == TypePredicateKind::AssertsThis {
+                continue;
+            }
+            let param_idx = predicate.parameter_index as usize;
+            let Some(arg) = call.arguments.nodes.get(param_idx) else {
+                continue;
+            };
+            // The argument must be the symbol being narrowed.
+            if !self.is_symbol_identifier(arg, symbol) {
+                continue;
+            }
+            if let Some(pred_type) = &predicate.t {
+                // `asserts x is T` → narrow to T.
+                return self.intersect_or_narrow(type_, pred_type);
+            }
+            // Plain `asserts x` → narrow to truthy (remove null/undefined).
+            return self.remove_flags_from_union(type_, TYPE_FLAGS_NULLABLE);
         }
         Arc::clone(type_)
     }
