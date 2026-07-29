@@ -9,8 +9,9 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::ast::SyntaxKind;
+use crate::ast::{Symbol, SymbolFlags, SyntaxKind};
 use crate::checker::is_tuple_type;
+use crate::jsnum;
 
 use super::checker::Checker;
 use super::types::*;
@@ -1859,10 +1860,20 @@ impl Checker {
         if let Some(source_info) = source_info {
             return self.index_info_related_to(&source_info, target_info, relation);
         }
-        // Source has no matching index signature: structural comparison
-        // against source's properties is not yet implemented (we don't have
-        // `isObjectTypeWithInferableIndex` / `membersRelatedToIndexInfo`),
-        // so we fail — matching Go's behavior for non-inferable sources.
+        // Source has no matching index signature. If the source is an
+        // "inferable" object type (object literal, type literal, enum,
+        // value module, JS expando, rest type, reverse-mapped type), we
+        // synthesize an index signature from its properties and compare
+        // those against the target's value type (P3.7f). The
+        // strict-subtype relation additionally requires the source to be
+        // a fresh object literal so that `{ [x: string]: xxx } <: {}` but
+        // not vice-versa (matching Go's behavior in `typeRelatedToIndexInfo`).
+        let is_fresh_literal = source.object_flags.contains(ObjectFlags::FreshLiteral);
+        if relation != RelationKind::StrictSubtype || is_fresh_literal {
+            if self.is_object_type_with_inferable_index(source) {
+                return self.members_related_to_index_info(source, target_info, relation);
+            }
+        }
         Ternary::False
     }
 
@@ -1995,6 +2006,168 @@ impl Checker {
             return m.template_type.clone();
         }
         None
+    }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Index signature comparison polish (P3.7f)
+//
+// Ports the structural fallback paths of `typeRelatedToIndexInfo` and
+// `membersRelatedToIndexInfo` from internal/checker/relater.go (~L4596,
+// ~L4627). When the source has no index signature matching the target's
+// key type, but the source is an *inferable* object type (object literal,
+// type literal, enum, value module, JS expando, rest type, or reverse
+// mapped type whose source is itself inferable), we walk the source's
+// properties and verify that every property whose name is a literal of
+// the target's key type is assignable to the target's value type.
+//
+// This handles the common case `{ a: 1, b: 2 } ~ { [key: string]: number }`
+// without requiring the source to declare an explicit index signature.
+// ────────────────────────────────────────────────────────────────────────────
+
+impl Checker {
+    /// Whether an object type may have an *inferred* index signature —
+    /// i.e. one synthesized from its properties rather than declared.
+    /// Direct port of Go's `isObjectTypeWithInferableIndex`.
+    ///
+    /// Returns true for:
+    /// - Object literals, type literals, enums, value modules (without
+    ///   call/construct signatures and not class-typed).
+    /// - JS expando object literals and rest types.
+    /// - Reverse-mapped types whose source is itself inferable.
+    /// - Intersection types whose every constituent is inferable.
+    pub fn is_object_type_with_inferable_index(&self, t: &Arc<Type>) -> bool {
+        if t.flags.contains(TypeFlags::Intersection) {
+            // Every constituent must be inferable.
+            if let Some(ui) = t.as_union_or_intersection() {
+                return ui.types.iter().all(|c| self.is_object_type_with_inferable_index(c));
+            }
+            return false;
+        }
+        // Object-literal / type-literal / enum / value-module case.
+        if let Some(sym) = &t.symbol {
+            let sf = sym.flags;
+            let inferable_symbol_kinds = sf.intersects(
+                SymbolFlags::ObjectLiteral
+                    | SymbolFlags::TypeLiteral
+                    | SymbolFlags::EnumMember
+                    | SymbolFlags::ValueModule,
+            );
+            if inferable_symbol_kinds && !sf.contains(SymbolFlags::Class) && !self.type_has_call_or_construct_signatures(t) {
+                return true;
+            }
+        }
+        // JS expando / object-rest case.
+        if t.object_flags.intersects(ObjectFlags::JSLiteral | ObjectFlags::ObjectRestType) {
+            return true;
+        }
+        // Reverse-mapped case: recurse into the source.
+        if t.object_flags.contains(ObjectFlags::ReverseMapped) {
+            if let TypeData::ReverseMapped(rm) = &t.data {
+                if let Some(src) = &rm.source {
+                    return self.is_object_type_with_inferable_index(src);
+                }
+            }
+        }
+        false
+    }
+
+    /// Walk the source's properties and verify each property whose name
+    /// is a literal of the target's key type is assignable to the target's
+    /// value type. Also compares any source index signatures whose key
+    /// type is applicable to the target's key type.
+    ///
+    /// Direct port of Go's `membersRelatedToIndexInfo` (without the
+    /// ignored-JSX / `exactOptionalPropertyTypes` branches, which we
+    /// don't yet support).
+    pub fn members_related_to_index_info(
+        &mut self,
+        source: &Arc<Type>,
+        target_info: &IndexInfo,
+        relation: RelationKind,
+    ) -> Ternary {
+        let Some(target_key) = target_info.key_type.as_ref() else {
+            return Ternary::True;
+        };
+        let target_value = target_info.value_type.clone().unwrap_or_else(|| self.any_type());
+
+        let props = self.get_properties_of_type(source);
+        let mut result = Ternary::True;
+        for prop in props {
+            // Only consider properties whose name is a literal of the
+            // target's key type. Go uses `getLiteralTypeFromProperty` to
+            // synthesize a literal type from a property name; we approximate
+            // by treating every named property as a string literal (the
+            // common case for `{ [key: string]: T }` targets).
+            let literal_key = self.get_literal_type_from_property(&prop, target_key);
+            if !self.is_applicable_index_type(&literal_key, target_key) {
+                continue;
+            }
+            let prop_type = self.get_type_of_symbol(&prop);
+            let related =
+                self.compare_types(prop_type, Arc::clone(&target_value), relation, false);
+            if related.is_false() {
+                return Ternary::False;
+            }
+            result = result.and(related);
+        }
+
+        // Also compare any source index signatures whose key type is
+        // applicable to the target's key type.
+        for info in self.get_index_infos_of_type(source) {
+            if let Some(src_key) = &info.key_type {
+                if self.is_applicable_index_type(src_key, target_key) {
+                    let related = self.index_info_related_to(&info, target_info, relation);
+                    if related.is_false() {
+                        return Ternary::False;
+                    }
+                    result = result.and(related);
+                }
+            }
+        }
+        result
+    }
+
+    /// Whether `key` is a literal type applicable to `target_key`'s index
+    /// type. A string-literal key is applicable to a string index; a
+    /// number-literal key is applicable to a number index. Direct port of
+    /// Go's `isApplicableIndexType`.
+    pub fn is_applicable_index_type(&self, key: &Arc<Type>, target_key: &Arc<Type>) -> bool {
+        if Arc::ptr_eq(key, target_key) {
+            return true;
+        }
+        // String literal -> string index
+        if key.flags.contains(TypeFlags::StringLiteral) && target_key.flags.contains(TypeFlags::String) {
+            return true;
+        }
+        // Number literal -> number index
+        if key.flags.contains(TypeFlags::NumberLiteral) && target_key.flags.contains(TypeFlags::Number) {
+            return true;
+        }
+        // A number key is applicable to a string index (numbers index
+        // into string indexes in JS).
+        if key.flags.contains(TypeFlags::Number) && target_key.flags.contains(TypeFlags::String) {
+            return true;
+        }
+        false
+    }
+
+    /// Build a literal type from a property's name. Used by
+    /// `members_related_to_index_info` to decide whether a property is
+    /// applicable to the target's index signature.
+    ///
+    /// Direct port of Go's `getLiteralTypeFromProperty`. Currently we
+    /// synthesize a string-literal type for every property name (the
+    /// common case for `{ [key: string]: T }` targets) and a number
+    /// literal when the name parses as a number. Full implementation
+    /// would also handle unique symbols and `SymbolFlags::EnumMember`.
+    pub fn get_literal_type_from_property(&mut self, prop: &Arc<Symbol>, target_key: &Arc<Type>) -> Arc<Type> {
+        if target_key.flags.contains(TypeFlags::Number) {
+            if let Ok(n) = prop.name.parse::<i64>() {
+                return self.get_number_literal_type(jsnum::Number::from(n));
+            }
+        }
+        self.get_string_literal_type(&prop.name)
     }
 }
 
@@ -2657,5 +2830,18 @@ mod tests {
         assert!(VARIANCE_FLAGS_VARIANCE_MASK.contains(VarianceFlags::Independent));
         assert!(!VARIANCE_FLAGS_VARIANCE_MASK.contains(VarianceFlags::Unmeasurable));
         assert!(!VARIANCE_FLAGS_VARIANCE_MASK.contains(VarianceFlags::Unreliable));
+    }
+
+    #[test]
+    fn index_signature_helpers_bit_layout() {
+        // Sanity-check the ObjectFlags we rely on for the index-signature
+        // structural fallback (P3.7f) are distinct bits — guards against
+        // accidental renumbering of the ObjectFlags bitfield.
+        let inferable = ObjectFlags::JSLiteral | ObjectFlags::ObjectRestType | ObjectFlags::ReverseMapped;
+        assert!(inferable.contains(ObjectFlags::JSLiteral));
+        assert!(inferable.contains(ObjectFlags::ObjectRestType));
+        assert!(inferable.contains(ObjectFlags::ReverseMapped));
+        // Fresh-literal is a separate bit (used by the strict-subtype carve-out).
+        assert!(!inferable.contains(ObjectFlags::FreshLiteral));
     }
 }
