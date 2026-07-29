@@ -817,8 +817,102 @@ impl Checker {
             }
         }
 
-        // TODO: `switch (true)` pattern.
+        // Case 4: discriminant is `true` → `switch (true) { case cond: ... }`.
+        // Each case clause's expression is a boolean condition that narrows
+        // the symbol. Mirrors Go's `narrowTypeBySwitchOnTrue` (flow.go ~L1166).
+        if discriminant.kind == SyntaxKind::TrueKeyword {
+            return self.narrow_by_switch_on_true(type_, clause, switch_stmt, symbol);
+        }
+
         Arc::clone(type_)
+    }
+
+    /// Narrow for `switch (true) { case cond: ... }` where the discriminant
+    /// is the literal `true`.
+    ///
+    /// Mirrors Go's `narrowTypeBySwitchOnTrue` (flow.go ~L1166). Each case
+    /// clause's expression is a boolean condition (e.g. `x === "foo"`,
+    /// `isString(x)`). The narrowing works as follows:
+    ///
+    /// - For all case clauses *preceding* the current one, the condition was
+    ///   false (otherwise we'd have entered that case). Narrow with the
+    ///   false branch.
+    /// - For the current `CaseClause`, the condition is true. Narrow with
+    ///   the true branch.
+    /// - For the `DefaultClause`, all case conditions are false. Narrow with
+    ///   the false branch for all cases.
+    ///
+    /// Fallthrough (multiple cases without `break`) is not yet handled; each
+    /// clause is treated independently. This matches the common case where
+    /// each case has a `break`.
+    fn narrow_by_switch_on_true(
+        &mut self,
+        type_: &Arc<Type>,
+        clause: &Arc<Node>,
+        switch_stmt: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+    ) -> Arc<Type> {
+        let NodeData::SwitchStatement(switch_data) = &switch_stmt.data else {
+            return Arc::clone(type_);
+        };
+        let NodeData::CaseBlock(case_block) = &switch_data.case_block.data else {
+            return Arc::clone(type_);
+        };
+        let clauses = &case_block.clauses.nodes;
+
+        // Find the current clause index.
+        let current_idx = match clauses.iter().position(|c| Arc::ptr_eq(c, clause)) {
+            Some(i) => i,
+            None => return Arc::clone(type_),
+        };
+
+        let is_default = clause.kind == SyntaxKind::DefaultClause;
+        let mut t = Arc::clone(type_);
+
+        // Narrow away all preceding case clauses (they didn't match).
+        for i in 0..current_idx {
+            if clauses[i].kind == SyntaxKind::CaseClause {
+                if let NodeData::CaseOrDefaultClause(cd) = &clauses[i].data {
+                    t = self.narrow_by_expression(
+                        &t,
+                        &cd.expression,
+                        symbol,
+                        NarrowKind::FalseBranch,
+                        0,
+                    );
+                }
+            }
+        }
+
+        if is_default {
+            // Default clause: also narrow away all subsequent case clauses.
+            for i in (current_idx + 1)..clauses.len() {
+                if clauses[i].kind == SyntaxKind::CaseClause {
+                    if let NodeData::CaseOrDefaultClause(cd) = &clauses[i].data {
+                        t = self.narrow_by_expression(
+                            &t,
+                            &cd.expression,
+                            symbol,
+                            NarrowKind::FalseBranch,
+                            0,
+                        );
+                    }
+                }
+            }
+            return t;
+        }
+
+        // CaseClause: narrow with the condition being true.
+        if let NodeData::CaseOrDefaultClause(cd) = &clause.data {
+            t = self.narrow_by_expression(
+                &t,
+                &cd.expression,
+                symbol,
+                NarrowKind::TrueBranch,
+                0,
+            );
+        }
+        t
     }
 
     /// Narrow for `switch (typeof x) { case "string": ... }` where `typeof x`

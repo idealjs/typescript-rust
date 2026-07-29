@@ -376,9 +376,10 @@ function return type widening（`return 42` → `number`）、function-like cont
 flow isolation（`bind_container` 为函数体保存/恢复 `current_flow`）、
 typeof switch narrowing（`switch (typeof x)`，含 default 子句排除）、
 parser fix（`typeof x` 现在解析为 `TypeOfExpression` 而非 `PrefixUnaryExpression`）、
-7+4+3+3+7+6 个 parity fixtures。
+switch (true) narrowing（`switch (true) { case cond: ... }`，含 default 子句
+排除全部 case 条件、前序 case 条件取反）、
+7+4+3+3+7+6+5 个 parity fixtures。
 
-- [ ] `switch (true)` narrowing。
 - [ ] `asserts x is T` narrowing（assertion 函数）。
 
 ### P3.10 Checker nodebuilder

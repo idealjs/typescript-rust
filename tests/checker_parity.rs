@@ -1731,3 +1731,97 @@ fn checker_narrowing_typeof_switch_unreachable_case_never() {
     );
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// switch (true) narrowing
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_narrowing_switch_true_equality() {
+    // `switch (true) { case x === "foo": ... }` narrows `x` to `"foo"`.
+    let diags = check_source(
+        "let x: string | number = 0;\
+         switch (true) {\
+             case x === \"foo\":\
+                 let y: string = x;\
+                 break;\
+             case x === 42:\
+                 let z: number = x;\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_switch_true_not_equal() {
+    // `case x !== null:` in `switch (true)` narrows away null in the true branch.
+    let diags = check_source(
+        "let x: string | null = null;\
+         switch (true) {\
+             case x !== null:\
+                 let y: string = x;\
+                 break;\
+             default:\
+                 let z: null = x;\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_switch_true_preceding_cases_negated() {
+    // In the second case, the first case's condition is false, so `x !== "foo"`
+    // narrows `x` to `"foo"` (negation of `x !== "foo"`).
+    let diags = check_source(
+        "let x: \"foo\" | \"bar\" | number = \"foo\";\
+         switch (true) {\
+             case typeof x === \"string\":\
+                 let a: string = x;\
+                 break;\
+             default:\
+                 let b: number = x;\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_switch_true_type_predicate() {
+    // `case isString(x):` narrows `x` to `string` using type predicate.
+    let diags = check_source(
+        "function isString(v: any): v is string { return typeof v === \"string\"; }\
+         let x: string | number = 0;\
+         switch (true) {\
+             case isString(x):\
+                 let y: string = x;\
+                 break;\
+             default:\
+                 let z: number = x;\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_switch_true_default_negates_all() {
+    // In the default clause, all case conditions are false.
+    // `x === "foo"` is false → x is not "foo"; `x === 42` is false → x is not 42.
+    // The remaining type is `boolean`.
+    let diags = check_source(
+        "let x: \"foo\" | 42 | boolean = false;\
+         switch (true) {\
+             case x === \"foo\":\
+                 break;\
+             case x === 42:\
+                 break;\
+             default:\
+                 let z: boolean = x;\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
