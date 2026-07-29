@@ -384,10 +384,12 @@ asserts x is T narrowing（assertion 函数，`asserts x` truthy 收窄、
 
 ### P3.10 Checker nodebuilder
 
-- [ ] 迁移 `internal/checker/nodebuilderimpl.go`（3585 行）+
-  `nodebuilder.go` + `nodebuilder_hover.go` + `nodebuilderscopes.go` +
-  `pseudotypenodebuilder.go` + `nodecopy.go`。
-- [ ] `type_to_string`：类型 → 可读字符串（当前 stub）。
+已完成：`nodebuilder.rs` 模块；`type_to_string`/`type_to_string_ex` 直接序列化
+（intrinsic/literal/union/intersection/type parameter/indexed access/template
+literal/tuple/array/reference/function/object literal/enum/symbol 类型）；
+parenthesization for function types in unions/arrays；serialization level 递归保护；
+5 个 type display parity fixtures（通过 TS2322 message_args 验证）。
+
 - [ ] `symbol_to_type_node`/`symbol_to_display_parts`。
 - [ ] hover 信息生成。
 

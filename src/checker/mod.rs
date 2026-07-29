@@ -20,6 +20,7 @@
 pub mod checker;
 pub mod flow;
 pub mod mapper;
+pub mod nodebuilder;
 pub mod relater;
 pub mod tracer;
 pub mod typenode;

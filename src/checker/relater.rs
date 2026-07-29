@@ -1698,12 +1698,13 @@ impl Checker {
 
     /// Format a signature as a string for diagnostics.
     /// Simplified port of Go's `signatureToString`.
-    pub fn signature_to_string(&self, sig: &Arc<Signature>) -> String {
+    pub fn signature_to_string(&mut self, sig: &Arc<Signature>) -> String {
         let params: Vec<String> = sig.parameters.iter().map(|p| p.name.clone()).collect();
-        let return_str = self
-            .get_return_type_of_signature(sig)
-            .map(|t| self.type_to_string(&t))
-            .unwrap_or_else(|| "void".to_string());
+        let return_type = self.get_return_type_of_signature(sig);
+        let return_str = match return_type {
+            Some(t) => self.type_to_string(&t),
+            None => "void".to_string(),
+        };
         format!("({}) => {}", params.join(", "), return_str)
     }
 

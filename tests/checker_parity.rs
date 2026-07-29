@@ -1891,3 +1891,88 @@ fn checker_narrowing_asserts_does_not_affect_other_vars() {
     );
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Type display (type_to_string) via diagnostic message args
+// ────────────────────────────────────────────────────────────────────────────
+
+/// Find a TS2322 diagnostic and return its message args.
+fn get_ts2322_args(diags: &[tsox::ast::Diagnostic]) -> Vec<String> {
+    diags
+        .iter()
+        .find(|d| d.code == 2322)
+        .map(|d| d.message_args.clone())
+        .unwrap_or_default()
+}
+
+#[test]
+fn checker_type_display_string_literal() {
+    // `"foo"` is not assignable to `number` → message args should contain `"foo"`.
+    let diags = check_source("let x: number = \"foo\";");
+    let args = get_ts2322_args(&diags);
+    assert!(!args.is_empty(), "Expected TS2322");
+    assert!(
+        args.iter().any(|a| a.contains("\"foo\"")),
+        "Expected \"foo\" in args: {:?}",
+        args
+    );
+}
+
+#[test]
+fn checker_type_display_number_literal() {
+    // `42` is not assignable to `string` → message args should contain `42`.
+    let diags = check_source("let x: string = 42;");
+    let args = get_ts2322_args(&diags);
+    assert!(!args.is_empty(), "Expected TS2322");
+    assert!(
+        args.iter().any(|a| a == "42"),
+        "Expected '42' in args: {:?}",
+        args
+    );
+}
+
+#[test]
+fn checker_type_display_union() {
+    // `string | number` not assignable to `boolean` → should contain `string | number`.
+    let diags = check_source(
+        "let x: string | number = 0;\
+         let y: boolean = x;",
+    );
+    let args = get_ts2322_args(&diags);
+    assert!(!args.is_empty(), "Expected TS2322");
+    assert!(
+        args.iter().any(|a| a.contains("string | number")),
+        "Expected 'string | number' in args: {:?}",
+        args
+    );
+}
+
+#[test]
+fn checker_type_display_boolean_literal() {
+    // `true` not assignable to `string` → should contain `true`.
+    let diags = check_source("let x: string = true;");
+    let args = get_ts2322_args(&diags);
+    assert!(!args.is_empty(), "Expected TS2322");
+    assert!(
+        args.iter().any(|a| a == "true"),
+        "Expected 'true' in args: {:?}",
+        args
+    );
+}
+
+#[test]
+fn checker_type_display_unknown() {
+    // `unknown` display: assigning `unknown` to `string` (without assertion)
+    // should fail and mention `unknown`.
+    let diags = check_source(
+        "let x: unknown = 0;\
+         let y: string = x;",
+    );
+    let args = get_ts2322_args(&diags);
+    assert!(!args.is_empty(), "Expected TS2322");
+    assert!(
+        args.iter().any(|a| a == "unknown"),
+        "Expected 'unknown' in args: {:?}",
+        args
+    );
+}

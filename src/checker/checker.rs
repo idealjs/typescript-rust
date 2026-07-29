@@ -993,11 +993,6 @@ impl Checker {
         super::utilities::is_tuple_type(t)
     }
 
-    // Type conversion
-    pub fn type_to_string(&self, t: &Arc<Type>) -> String {
-        super::utilities::type_to_string(t)
-    }
-
     // Base type of literal
     pub fn get_base_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
         if t.flags.contains(TypeFlags::StringLiteral) {
@@ -1834,14 +1829,13 @@ impl Checker {
                     let init_type = self.get_type_of_node(init);
                     if !self.is_type_assignable_to(&init_type, &annotation_type) {
                         let file = self.current_file.clone();
+                        let init_str = self.type_to_string(&init_type);
+                        let annot_str = self.type_to_string(&annotation_type);
                         self.diagnostics.add(crate::ast::Diagnostic::new(
                             file,
                             init.loc,
                             TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                            vec![
-                                self.type_to_string(&init_type),
-                                self.type_to_string(&annotation_type),
-                            ],
+                            vec![init_str, annot_str],
                         ));
                     }
                     annotation_type
