@@ -1364,3 +1364,80 @@ fn checker_narrowing_assignment_updates_type() {
     );
     assert_no_diagnostics(&diags);
 }
+
+#[test]
+fn checker_narrowing_switch_on_symbol() {
+    // `switch (x)` narrows `x` to the case expression's type in each case.
+    let diags = check_source(
+        "let x: string | number = 0;\
+         switch (x) {\
+             case \"foo\":\
+                 let y: string = x;\
+                 break;\
+             case 42:\
+                 let z: number = x;\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_switch_default_removes_cases() {
+    // In the `default` clause, `x` narrows to types not covered by any case.
+    // Here `string` is covered by `case \"foo\"` and `number` by `case 42`,
+    // so the default branch has `never` — but we still allow assignment to
+    // `string | number` because TS is conservative for non-exhaustive checks.
+    let diags = check_source(
+        "let x: string | number | boolean = 0;\
+         switch (x) {\
+             case \"foo\":\
+                 break;\
+             case 42:\
+                 break;\
+             default:\
+                 let z: boolean = x;\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_switch_on_discriminant_property() {
+    // `switch (obj.kind)` narrows `obj` to the constituent whose `kind`
+    // matches the case expression.
+    let diags = check_source(
+        "type T = { kind: \"foo\", value: string } | { kind: \"bar\", count: number };\
+         let obj: T = { kind: \"foo\", value: \"x\" };\
+         switch (obj.kind) {\
+             case \"foo\":\
+                 let v: string = obj.value;\
+                 break;\
+             case \"bar\":\
+                 let c: number = obj.count;\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_switch_default_discriminant_property() {
+    // In the `default` clause of a switch on a discriminant property, `obj`
+    // narrows to the constituent whose `kind` doesn't match any case.
+    let diags = check_source(
+        "type T = { kind: \"foo\", value: string } | { kind: \"bar\", count: number } | { kind: \"baz\", flag: boolean };\
+         let obj: T = { kind: \"foo\", value: \"x\" };\
+         switch (obj.kind) {\
+             case \"foo\":\
+                 break;\
+             case \"bar\":\
+                 break;\
+             default:\
+                 let f: boolean = obj.flag;\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}

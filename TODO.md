@@ -364,11 +364,17 @@ contextual typing（`getContextualType` 完整分发）。
 
 ### P3.9 Checker 控制流 narrowing
 
-- [ ] 依赖 P3.1 binder flow graph。
-- [ ] `narrowType`：根据 flow node 收窄类型（`if (x !== null)` → 排除 null）。
-- [ ] `getNarrowedTypeOfSymbol`。
-- [ ] discriminated union narrowing。
-- [ ] `typeof`/`instanceof`/`in` narrowing。
+已完成：`narrowType`/`getNarrowedTypeOfSymbol`、null/undefined 排除、`typeof`
+narrowing、truthiness narrowing、`instanceof`/`in` narrowing、discriminated union
+narrowing（`obj.kind === "value"`）、assignment-driven type 更新、switch 语句
+narrowing（`switch (x)`/`switch (obj.kind)`，含 default 子句）、7+4 个 parity
+fixtures。
+
+- [ ] `typeof` switch narrowing（`switch (typeof x)`）。
+- [ ] `switch (true)` narrowing。
+- [ ] type predicate（user-defined type guard）narrowing。
+- [ ] optional chain containment narrowing。
+- [ ] equality narrowing for literal types 完善（`==` loose 比较、enum 成员）。
 
 ### P3.10 Checker nodebuilder
 

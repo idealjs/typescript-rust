@@ -356,6 +356,11 @@ pub struct FlowNode {
     pub node: Option<Arc<Node>>,
     pub antecedent: Option<Arc<FlowNode>>,
     pub antecedents: Vec<Arc<FlowNode>>,
+    /// Auxiliary node for SWITCH_CLAUSE flows: stores the enclosing
+    /// `SwitchStatement` so the checker can resolve the discriminant
+    /// expression. `None` for all other flow kinds. Mirrors the
+    /// `FlowSwitchClauseData.SwitchStatement` field in Go.
+    pub switch_statement: Option<Arc<Node>>,
 }
 
 impl FlowNode {
@@ -365,6 +370,7 @@ impl FlowNode {
             node: None,
             antecedent: None,
             antecedents: Vec::new(),
+            switch_statement: None,
         }
     }
 }

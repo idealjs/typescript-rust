@@ -56,6 +56,7 @@ impl FlowLabel {
             node: None,
             antecedent: None,
             antecedents: self.node.antecedents.clone(),
+            switch_statement: None,
         })
     }
 }
@@ -338,6 +339,7 @@ impl Binder {
             node: Some(Arc::clone(expression)),
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
+            switch_statement: None,
         })
     }
 
@@ -352,6 +354,7 @@ impl Binder {
             node: Some(Arc::clone(node)),
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
+            switch_statement: None,
         })
     }
 
@@ -366,6 +369,7 @@ impl Binder {
             node: Some(Arc::clone(node)),
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
+            switch_statement: None,
         })
     }
 
@@ -381,6 +385,7 @@ impl Binder {
             node: Some(Arc::clone(node)),
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
+            switch_statement: None,
         });
         // Add to exception target if we're inside a try block
         if let Some(target) = &self.current_exception_target {
@@ -410,6 +415,7 @@ impl Binder {
             node: None,
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: antecedents.to_vec(),
+            switch_statement: None,
         })
     }
 
@@ -430,15 +436,26 @@ impl Binder {
     }
 
     /// Create a flow switch clause node.
-    fn create_flow_switch_clause(&mut self, antecedent: &Arc<FlowNode>, node: &Arc<Node>) -> Arc<FlowNode> {
+    ///
+    /// `switch_statement` is the enclosing `SwitchStatement` node, used by
+    /// the checker to resolve the discriminant expression for narrowing.
+    /// `clause` is the `CaseClause` or `DefaultClause` node, used to
+    /// resolve the case expression(s) being matched.
+    fn create_flow_switch_clause(
+        &mut self,
+        antecedent: &Arc<FlowNode>,
+        clause: &Arc<Node>,
+        switch_statement: &Arc<Node>,
+    ) -> Arc<FlowNode> {
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return Arc::clone(antecedent);
         }
         Arc::new(FlowNode {
             flags: FlowFlags::SWITCH_CLAUSE,
-            node: Some(Arc::clone(node)),
+            node: Some(Arc::clone(clause)),
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
+            switch_statement: Some(Arc::clone(switch_statement)),
         })
     }
 
@@ -726,7 +743,7 @@ impl Binder {
         for clause in &clauses.nodes {
             // Create switch clause flow
             if let Some(current) = self.current_flow.take() {
-                let clause_flow = self.create_flow_switch_clause(&current, clause);
+                let clause_flow = self.create_flow_switch_clause(&current, clause, node);
                 self.current_flow = Some(clause_flow);
             }
 

@@ -144,6 +144,19 @@ impl Checker {
             return Arc::clone(type_);
         }
 
+        // SWITCH_CLAUSE → narrow based on the switch case expression.
+        // Mirrors Go's `getTypeAtSwitchClause` (flow.go ~L1046). We first
+        // recurse into the antecedent to get the narrowed type at this flow
+        // point, then apply switch-specific narrowing on top.
+        if flow.flags.contains(FlowFlags::SWITCH_CLAUSE) {
+            let antecedent_type = if let Some(antecedent) = &flow.antecedent {
+                self.narrow_type(type_, antecedent, symbol, depth + 1)
+            } else {
+                Arc::clone(type_)
+            };
+            return self.narrow_by_switch_clause(&antecedent_type, flow, symbol);
+        }
+
         // ARRAY_MUTATION / CALL → these may invalidate narrowing, but for
         // now we just recurse into the antecedent.
         if flow.flags.contains(FlowFlags::ARRAY_MUTATION)
@@ -503,6 +516,159 @@ impl Checker {
             })
             .collect();
         Some(self.rebuild_union_or_never(type_, filtered))
+    }
+
+    /// Narrow `type_` based on a switch clause.
+    ///
+    /// Mirrors Go's `getTypeAtSwitchClause` (flow.go ~L1046). Dispatches to
+    /// the appropriate narrowing strategy based on the switch discriminant:
+    ///
+    /// - `switch (x)` → `narrow_by_switch_on_discriminant`
+    /// - `switch (obj.kind)` → `narrow_by_switch_on_discriminant_property`
+    ///
+    /// `typeof x` and `switch (true)` variants are not yet supported.
+    fn narrow_by_switch_clause(
+        &mut self,
+        type_: &Arc<Type>,
+        flow: &Arc<FlowNode>,
+        symbol: &Arc<Symbol>,
+    ) -> Arc<Type> {
+        let Some(switch_stmt) = &flow.switch_statement else {
+            return Arc::clone(type_);
+        };
+        let NodeData::SwitchStatement(switch_data) = &switch_stmt.data else {
+            return Arc::clone(type_);
+        };
+        let discriminant = &switch_data.expression;
+        let Some(clause) = &flow.node else {
+            return Arc::clone(type_);
+        };
+
+        // Case 1: discriminant is the symbol itself → `switch (x) { ... }`
+        if self.is_symbol_identifier(discriminant, symbol) {
+            return self.narrow_by_switch_on_discriminant(type_, clause, switch_stmt);
+        }
+
+        // Case 2: discriminant is a property access on the symbol →
+        // `switch (obj.kind) { ... }`
+        if self.is_property_access_on_symbol(discriminant, symbol) {
+            return self.narrow_by_switch_on_discriminant_property(
+                type_, clause, switch_stmt, discriminant,
+            );
+        }
+
+        // TODO: `switch (typeof x)` and `switch (true)` patterns.
+        Arc::clone(type_)
+    }
+
+    /// Narrow for `switch (x) { case value: ... }` where `x` is the symbol.
+    ///
+    /// Mirrors Go's `narrowTypeBySwitchOnDiscriminant` (flow.go ~L1078). For
+    /// a `CaseClause`, narrows to the case expression's type; for a
+    /// `DefaultClause`, narrows to the types not covered by any case.
+    fn narrow_by_switch_on_discriminant(
+        &mut self,
+        type_: &Arc<Type>,
+        clause: &Arc<Node>,
+        switch_stmt: &Arc<Node>,
+    ) -> Arc<Type> {
+        let case_types = self.get_switch_clause_types(switch_stmt);
+        if clause.kind == SyntaxKind::DefaultClause {
+            // Default clause: narrow to types not covered by any case.
+            // Keep constituents that don't overlap with any case type.
+            let constituents = self.constituent_types(type_);
+            let remaining: Vec<Arc<Type>> = constituents
+                .into_iter()
+                .filter(|t| {
+                    !case_types
+                        .iter()
+                        .any(|ct| self.types_overlap(t, ct))
+                })
+                .collect();
+            return self.rebuild_union_or_never(type_, remaining);
+        }
+        // CaseClause: narrow to the case expression's type.
+        let NodeData::CaseOrDefaultClause(clause_data) = &clause.data else {
+            return Arc::clone(type_);
+        };
+        let case_type = self.get_type_of_node(&clause_data.expression);
+        self.intersect_or_narrow(type_, &case_type)
+    }
+
+    /// Narrow for `switch (obj.kind) { case "value": ... }` where `obj.kind`
+    /// is a property access on the symbol.
+    ///
+    /// Mirrors Go's `narrowTypeBySwitchOnDiscriminantProperty` (flow.go
+    /// ~L1210). For a `CaseClause`, keeps only the union constituents whose
+    /// discriminant property matches the case type; for a `DefaultClause`,
+    /// keeps only constituents whose discriminant property does not match
+    /// any case.
+    fn narrow_by_switch_on_discriminant_property(
+        &mut self,
+        type_: &Arc<Type>,
+        clause: &Arc<Node>,
+        switch_stmt: &Arc<Node>,
+        access: &Arc<Node>,
+    ) -> Arc<Type> {
+        let Some(prop_name) = Self::get_accessed_property_name_from_node(access) else {
+            return Arc::clone(type_);
+        };
+        // Only narrow unions.
+        if !type_.is_union() {
+            return Arc::clone(type_);
+        }
+        let case_types = self.get_switch_clause_types(switch_stmt);
+        let is_default = clause.kind == SyntaxKind::DefaultClause;
+        let constituents = self.constituent_types(type_);
+        let filtered: Vec<Arc<Type>> = constituents
+            .into_iter()
+            .filter(|t| {
+                let prop_type = self.get_property_type_of_type(t, &prop_name);
+                let Some(prop_type) = prop_type else {
+                    // No property → keep only in default clause.
+                    return is_default;
+                };
+                if is_default {
+                    // Default: keep constituents whose property doesn't
+                    // match any case type.
+                    !case_types
+                        .iter()
+                        .any(|ct| self.types_overlap(&prop_type, ct))
+                } else {
+                    // Case: keep constituents whose property matches at
+                    // least one case type.
+                    case_types
+                        .iter()
+                        .any(|ct| self.types_overlap(&prop_type, ct))
+                }
+            })
+            .collect();
+        self.rebuild_union_or_never(type_, filtered)
+    }
+
+    /// Get the types of all case clauses in a switch statement.
+    ///
+    /// Mirrors Go's `getSwitchClauseTypes` (flow.go ~L2005). Returns a
+    /// `Vec` with one entry per clause: the case expression's type for
+    /// `CaseClause`s, and `never` for `DefaultClause`s.
+    fn get_switch_clause_types(&mut self, switch_stmt: &Arc<Node>) -> Vec<Arc<Type>> {
+        let NodeData::SwitchStatement(switch_data) = &switch_stmt.data else {
+            return Vec::new();
+        };
+        let NodeData::CaseBlock(case_block) = &switch_data.case_block.data else {
+            return Vec::new();
+        };
+        let mut types = Vec::with_capacity(case_block.clauses.len());
+        for clause in &case_block.clauses.nodes {
+            if clause.kind == SyntaxKind::CaseClause {
+                if let NodeData::CaseOrDefaultClause(cd) = &clause.data {
+                    types.push(self.get_type_of_node(&cd.expression));
+                    continue;
+                }
+            }
+            types.push(self.never_type());
+        }
+        types
     }
 
     /// Check if `expr` is `typeof <symbol>`.
