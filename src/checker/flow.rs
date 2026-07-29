@@ -307,6 +307,16 @@ impl Checker {
             return self.narrow_by_truthiness(type_, kind);
         }
 
+        // Optional chain containing the symbol: `if (x?.a)` — in the true
+        // branch, `x` cannot be null/undefined (otherwise `x?.a` would be
+        // `undefined`, which is falsy). Mirrors Go's `narrowTypeByTruthiness`
+        // optional chain containment check (flow.go ~L432).
+        if kind == NarrowKind::TrueBranch
+            && self.optional_chain_contains_reference(expr, symbol)
+        {
+            return self.remove_nullable_from_union(type_);
+        }
+
         // `typeof x === "string"` is a BinaryExpression, handled above.
         // `x instanceof Foo` is also a BinaryExpression.
 
@@ -378,6 +388,21 @@ impl Checker {
             type_, expr, symbol, kind,
         ) {
             return narrowed;
+        }
+
+        // Optional chain containment: `x?.a === value` — if the value
+        // excludes null/undefined, then `x` cannot be null/undefined.
+        // Mirrors Go's `narrowTypeByOptionalChainContainment` (flow.go
+        // ~L1019).
+        if self.optional_chain_contains_reference(&bin.left, symbol) {
+            return self.narrow_by_optional_chain_containment(
+                type_, op, &bin.right, kind,
+            );
+        }
+        if self.optional_chain_contains_reference(&bin.right, symbol) {
+            return self.narrow_by_optional_chain_containment(
+                type_, op, &bin.left, kind,
+            );
         }
 
         // Simple `x === value` or `value === x` patterns.
@@ -676,6 +701,119 @@ impl Checker {
             types.push(self.never_type());
         }
         types
+    }
+
+    /// Check if `source` is an optional chain (`?.`) whose root expression
+    /// resolves to `symbol`.
+    ///
+    /// Mirrors Go's `optionalChainContainsReference` (flow.go ~L1830).
+    /// Walks down the optional chain: `x?.a?.b` → checks if `x` is `symbol`.
+    fn optional_chain_contains_reference(
+        &self,
+        source: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+    ) -> bool {
+        let mut current = Arc::clone(source);
+        loop {
+            let (inner, is_optional) = match &current.data {
+                NodeData::PropertyAccessExpression(pa) => {
+                    (&pa.expression, pa.question_dot_token.is_some())
+                }
+                NodeData::ElementAccessExpression(ea) => {
+                    (&ea.expression, ea.question_dot_token.is_some())
+                }
+                NodeData::CallExpression(ce) => {
+                    (&ce.expression, ce.question_dot_token.is_some())
+                }
+                NodeData::NonNullExpression(ne) => (&ne.expression, false),
+                NodeData::ParenthesizedExpression(pe) => (&pe.expression, false),
+                _ => return false,
+            };
+            if is_optional && self.is_symbol_identifier(inner, symbol) {
+                return true;
+            }
+            if !is_optional
+                && !matches!(
+                    &current.data,
+                    NodeData::NonNullExpression(_) | NodeData::ParenthesizedExpression(_)
+                )
+            {
+                // Not an optional chain and not a transparent wrapper — stop.
+                return false;
+            }
+            current = Arc::clone(inner);
+        }
+    }
+
+    /// Narrow by optional chain containment: `x?.a === value`.
+    ///
+    /// Mirrors Go's `narrowTypeByOptionalChainContainment` (flow.go ~L1019).
+    /// When the comparison value excludes null/undefined, removes null and
+    /// undefined from `x`'s type in the branch where the comparison holds.
+    fn narrow_by_optional_chain_containment(
+        &mut self,
+        type_: &Arc<Type>,
+        op: SyntaxKind,
+        value_node: &Arc<Node>,
+        kind: NarrowKind,
+    ) -> Arc<Type> {
+        let is_equality = op == SyntaxKind::EqualsEqualsEqualsToken
+            || op == SyntaxKind::EqualsEqualsToken;
+        let is_loose = op == SyntaxKind::EqualsEqualsToken
+            || op == SyntaxKind::ExclamationEqualsToken;
+        // For loose equality (==/!=), nullable = null | undefined.
+        // For strict equality (===/!==), nullable = undefined only.
+        let nullable_flags = if is_loose {
+            TypeFlags::Undefined | TypeFlags::Null
+        } else {
+            TypeFlags::Undefined
+        };
+        let value_type = self.get_type_of_node(value_node);
+        // If the value type excludes null/undefined (i.e. none of its
+        // constituents have the nullable flags), remove nullable from `x`
+        // in the branch where the comparison holds.
+        // If the value type IS null/undefined, remove nullable in the
+        // opposite branch.
+        let value_is_nullable = self.type_contains_flags(&value_type, nullable_flags);
+        let value_excludes_nullable = !value_is_nullable;
+        let remove_nullable = if is_equality {
+            // `x?.a === value`: remove nullable if value excludes it (true
+            // branch), or if value IS nullable (false branch).
+            (kind == NarrowKind::TrueBranch && value_excludes_nullable)
+                || (kind == NarrowKind::FalseBranch && value_is_nullable)
+        } else {
+            // `x?.a !== value`: remove nullable if value excludes it (false
+            // branch), or if value IS nullable (true branch).
+            (kind == NarrowKind::FalseBranch && value_excludes_nullable)
+                || (kind == NarrowKind::TrueBranch && value_is_nullable)
+        };
+        if remove_nullable {
+            self.remove_nullable_from_union(type_)
+        } else {
+            Arc::clone(type_)
+        }
+    }
+
+    /// Remove `null` and `undefined` from a union type.
+    fn remove_nullable_from_union(&self, type_: &Arc<Type>) -> Arc<Type> {
+        self.remove_flags_from_union(type_, TypeFlags::Undefined | TypeFlags::Null)
+    }
+
+    /// Check if `type_` or any of its union constituents has any of `flags`.
+    fn type_contains_flags(&self, type_: &Arc<Type>, flags: TypeFlags) -> bool {
+        if type_.flags.intersects(flags) {
+            return true;
+        }
+        if type_.is_union() {
+            if let TypeData::Union(u) = &type_.data {
+                return u
+                    .union_or_intersection
+                    .types
+                    .iter()
+                    .any(|t| t.flags.intersects(flags));
+            }
+        }
+        false
     }
 
     /// Narrow based on a call expression with a type predicate.

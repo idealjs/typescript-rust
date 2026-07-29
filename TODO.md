@@ -369,12 +369,12 @@ narrowing、truthiness narrowing、`instanceof`/`in` narrowing、discriminated u
 narrowing（`obj.kind === "value"`）、assignment-driven type 更新、switch 语句
 narrowing（`switch (x)`/`switch (obj.kind)`，含 default 子句）、type predicate
 （user-defined type guard）narrowing（`if (isString(x))`/`if (!isString(x))`）、
-7+4+3 个 parity fixtures。
+optional chain containment narrowing（`if (x?.a)`/`x?.a === value`）、
+7+4+3+3 个 parity fixtures。
 
 - [ ] `typeof` switch narrowing（`switch (typeof x)`）。
 - [ ] `switch (true)` narrowing。
 - [ ] `asserts x is T` narrowing（assertion 函数）。
-- [ ] optional chain containment narrowing。
 - [ ] equality narrowing for literal types 完善（`==` loose 比较、enum 成员）。
 
 ### P3.10 Checker nodebuilder

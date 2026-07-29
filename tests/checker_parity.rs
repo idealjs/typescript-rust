@@ -1488,3 +1488,44 @@ fn checker_narrowing_type_predicate_else_branch() {
     );
     assert_no_diagnostics(&diags);
 }
+
+#[test]
+fn checker_narrowing_optional_chain_truthiness() {
+    // `if (x?.a)` in the true branch narrows `x` to exclude null/undefined.
+    let diags = check_source(
+        "type T = { a: string } | null;\
+         let x: T = null;\
+         if (x?.a) {\
+             let y: { a: string } = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_optional_chain_equality() {
+    // `x?.a === \"foo\"` narrows `x` to exclude null/undefined in the true
+    // branch (because if x were null, x?.a would be undefined, not \"foo\").
+    let diags = check_source(
+        "type T = { a: string } | null;\
+         let x: T = null;\
+         if (x?.a === \"foo\") {\
+             let y: { a: string } = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_optional_chain_not_equal_undefined() {
+    // `x?.a !== undefined` narrows `x` to exclude null/undefined in the
+    // true branch.
+    let diags = check_source(
+        "type T = { a: string } | null;\
+         let x: T = null;\
+         if (x?.a !== undefined) {\
+             let y: { a: string } = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
