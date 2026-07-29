@@ -1759,6 +1759,9 @@ impl Checker {
                     }
                     self.check_grammar_parameter_list(&data.parameters);
                 }
+                // JSDoc check: validate @param tags against actual
+                // parameters. No-op until JSDoc parsing (P2.7) lands.
+                self.check_unmatched_jsdoc_parameters(node);
                 // Only check the function body; the name, parameters,
                 // type parameters, and return type are declarations/types.
                 self.push_function_scope(node);

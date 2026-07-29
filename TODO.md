@@ -405,12 +405,17 @@ parenthesization for function types in unions/arrays；serialization level 递�
 - [ ] 完整的 visibility tracking（alias marking visitor）。
 - [ ] `isEntityNameVisible`/`isSymbolAccessible`（declaration emit 需要）。
 
-### P3.12 Checker JSX / JSDoc / Grammar checks
+### P3.12 Checker JSX / JSDoc / Grammar checks（已完成）
 
-- [ ] 迁移 `internal/checker/jsx.go`（1482 行）：JSX 元素类型检查、属性检查。
-- [ ] 迁移 `internal/checker/jsdoc.go`：JSDoc 类型检查。
-- [ ] 迁移 `internal/checker/grammarchecks.go`（2202 行）：语法层面规则
-  （`override`、`abstract`、`accessor` 等）。
+已完成：
+- [x] 迁移 `internal/checker/grammarchecks.go`（P3.12a）：modifier 校验、
+  parameter list 校验、break/continue target 校验、JSX grammar 校验
+  （tag name、type arguments、duplicate attributes、comma operator）。
+- [x] 迁移 `internal/checker/jsx.go`（P3.12b）：JSX 元素类型检查、component
+  signature 检查（TS2604）、intrinsic element 校验、attribute 校验。
+- [x] 迁移 `internal/checker/jsdoc.go`（P3.12c）：`check_unmatched_jsdoc_parameters`
+  + `contains_arguments_reference`。JSDoc 检查在 P2.7（JSDoc parser）落地前为
+  no-op，但 `contains_arguments_reference` 独立可用。
 
 ### P3.13 Diagnostics message 表
 
