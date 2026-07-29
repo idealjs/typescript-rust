@@ -27,11 +27,26 @@ fn check_source(source: &str) -> Vec<tsox::ast::Diagnostic> {
 
 /// Like `check_source` but with optional lib loading.
 fn check_source_with_lib(source: &str, no_lib: bool) -> Vec<tsox::ast::Diagnostic> {
+    check_source_named_with_lib("/proj/entry.ts", source, no_lib)
+}
+
+/// Like `check_source` but uses a `.tsx` filename to enable JSX parsing.
+fn check_source_tsx(source: &str) -> Vec<tsox::ast::Diagnostic> {
+    check_source_named_with_lib("/proj/entry.tsx", source, true)
+}
+
+/// Run the checker on a single source file with an explicit filename and
+/// optional lib loading.
+fn check_source_named_with_lib(
+    path: &str,
+    source: &str,
+    no_lib: bool,
+) -> Vec<tsox::ast::Diagnostic> {
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
-    fs.insert_file("/proj/entry.ts", source);
+    fs.insert_file(path, source);
 
-    let mut args = vec!["/proj/entry.ts".to_string()];
+    let mut args = vec![path.to_string()];
     if no_lib {
         args.insert(0, "--noLib".to_string());
     }
@@ -1088,7 +1103,7 @@ fn checker_only_whitespace_no_error() {
 
 #[test]
 fn checker_jsx_self_closing_element_no_error() {
-    let diags = check_source("const el = <div />;");
+    let diags = check_source_tsx("const el = <div />;");
     // JSX identifiers are walked as children-for-expressions.
     // `div` is a tag name (not a reference), so no errors expected.
     assert_no_diagnostics(&diags);
@@ -1096,37 +1111,38 @@ fn checker_jsx_self_closing_element_no_error() {
 
 #[test]
 fn checker_jsx_element_with_children_no_error() {
-    let diags = check_source("const el = <div><span>hello</span></div>;");
+    let diags = check_source_tsx("const el = <div><span>hello</span></div>;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_jsx_fragment_no_error() {
-    let diags = check_source("const el = <><div>a</div><div>b</div></>;");
+    let diags = check_source_tsx("const el = <><div>a</div><div>b</div></>;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_jsx_with_expression_curly_no_error() {
-    let diags = check_source("const x = 42;\nconst el = <div>{x}</div>;");
+    let diags = check_source_tsx("const x = 42;\nconst el = <div>{x}</div>;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_jsx_attribute_string_no_error() {
-    let diags = check_source("const el = <div className='container' />;");
+    let diags = check_source_tsx("const el = <div className='container' />;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_jsx_attribute_expression_no_error() {
-    let diags = check_source("const x = 42;\nconst el = <div data-value={x} />;");
+    let diags = check_source_tsx("const x = 42;\nconst el = <div data-value={x} />;");
     assert_no_diagnostics(&diags);
 }
 #[test]
 fn checker_jsx_undefined_expression_in_curly() {
-    let diags = check_source("const el = <div>{undefinedVar}</div>;");
-    assert_no_diagnostics(&diags);
+    // `undefinedVar` is not in scope: expect TS2304.
+    let diags = check_source_tsx("const el = <div>{undefinedVar}</div>;");
+    assert_diagnostic_code(&diags, 2304);
 }
 
 // ────────────────────────────────────────────────────────────────────────────

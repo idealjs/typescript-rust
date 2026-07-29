@@ -118,6 +118,29 @@ impl HasId for SourceFile {
 
 static NEXT_CHECKER_ID: AtomicU32 = AtomicU32::new(1);
 
+/// Kind of break/continue control-flow context.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BreakContinueContextKind {
+    /// `for`, `while`, `do-while`, `for-in`, `for-of`.
+    Loop,
+    /// `switch` statement.
+    Switch,
+    /// Function-like boundary (break/continue cannot cross).
+    Function,
+    /// Labeled statement (stores the label text).
+    Labeled,
+}
+
+/// A break/continue context entry on the checker's context stack.
+#[derive(Debug, Clone)]
+pub struct BreakContinueContext {
+    pub kind: BreakContinueContextKind,
+    /// Label text for `Labeled` entries.
+    pub label: Option<String>,
+    /// Whether the labeled statement's body is an iteration (for `continue`).
+    pub is_iteration: bool,
+}
+
 /// The type checker. This is the core of the TypeScript compiler.
 ///
 /// In Go, this struct has ~320 fields. The Rust port organizes them into
@@ -293,6 +316,10 @@ pub struct Checker {
     pub arrow_function_scope_count: usize,
     /// Whether globals have been populated from source file symbols.
     pub globals_populated: bool,
+    /// Stack of break/continue contexts (loops, switches, functions, labels).
+    /// Used by `check_grammar_break_or_continue_statement` since parent
+    /// pointers are not set on nodes.
+    pub break_continue_context_stack: Vec<BreakContinueContext>,
 
     // Flow analysis
     pub flow_analysis_disabled: bool,
@@ -492,6 +519,7 @@ impl Checker {
             function_scope_count: 0,
             arrow_function_scope_count: 0,
             globals_populated: false,
+            break_continue_context_stack: Vec::new(),
 
             flow_analysis_disabled: false,
             flow_invocation_count: 0,
@@ -1611,7 +1639,11 @@ impl Checker {
             }
             SyntaxKind::VariableStatement => {
                 if let crate::ast::NodeData::VariableStatement(data) = &node.data {
+                    // Grammar check: validate the variable declaration list.
+                    self.check_grammar_variable_declaration_list(&data.declaration_list);
                     self.check_variable_declaration_list(&data.declaration_list);
+                    // Grammar check: validate modifiers (export, declare, etc.).
+                    self.check_grammar_modifiers(node);
                 }
             }
             SyntaxKind::IfStatement => {
@@ -1626,12 +1658,24 @@ impl Checker {
             SyntaxKind::WhileStatement => {
                 if let crate::ast::NodeData::WhileStatement(data) = &node.data {
                     self.check_expression(&data.expression);
+                    self.break_continue_context_stack.push(BreakContinueContext {
+                        kind: BreakContinueContextKind::Loop,
+                        label: None,
+                        is_iteration: true,
+                    });
                     self.check_statement(&data.statement);
+                    self.break_continue_context_stack.pop();
                 }
             }
             SyntaxKind::DoStatement => {
                 if let crate::ast::NodeData::DoStatement(data) = &node.data {
+                    self.break_continue_context_stack.push(BreakContinueContext {
+                        kind: BreakContinueContextKind::Loop,
+                        label: None,
+                        is_iteration: true,
+                    });
                     self.check_statement(&data.statement);
+                    self.break_continue_context_stack.pop();
                     self.check_expression(&data.expression);
                 }
             }
@@ -1647,7 +1691,13 @@ impl Checker {
                     if let Some(incr) = &data.incrementor {
                         self.check_expression(incr);
                     }
+                    self.break_continue_context_stack.push(BreakContinueContext {
+                        kind: BreakContinueContextKind::Loop,
+                        label: None,
+                        is_iteration: true,
+                    });
                     self.check_statement(&data.statement);
+                    self.break_continue_context_stack.pop();
                 }
                 self.pop_scope();
             }
@@ -1656,7 +1706,13 @@ impl Checker {
                 if let crate::ast::NodeData::ForInOrOfStatement(data) = &node.data {
                     self.check_for_initializer(&data.initializer);
                     self.check_expression(&data.expression);
+                    self.break_continue_context_stack.push(BreakContinueContext {
+                        kind: BreakContinueContextKind::Loop,
+                        label: None,
+                        is_iteration: true,
+                    });
                     self.check_statement(&data.statement);
+                    self.break_continue_context_stack.pop();
                 }
                 self.pop_scope();
             }
@@ -1684,12 +1740,18 @@ impl Checker {
             SyntaxKind::SwitchStatement => {
                 if let crate::ast::NodeData::SwitchStatement(data) = &node.data {
                     self.check_expression(&data.expression);
+                    self.break_continue_context_stack.push(BreakContinueContext {
+                        kind: BreakContinueContextKind::Switch,
+                        label: None,
+                        is_iteration: false,
+                    });
                     // case_block is a CaseBlock node; walk its clauses.
                     if let crate::ast::NodeData::CaseBlock(case_block) = &data.case_block.data {
                         for case in case_block.clauses.iter() {
                             self.check_case_clause(case);
                         }
                     }
+                    self.break_continue_context_stack.pop();
                 }
             }
             // Declarations: walk only expression-position children.
@@ -1697,14 +1759,28 @@ impl Checker {
             // via `is_declaration_name`, so we must handle each kind
             // explicitly, skipping names and type-position children.
             SyntaxKind::FunctionDeclaration => {
+                // Grammar check: validate modifiers and parameter list.
+                self.check_grammar_modifiers(node);
+                if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
+                    if let Some(tps) = &data.type_parameters {
+                        let _ = tps; // TODO: check_grammar_type_parameter_list
+                    }
+                    self.check_grammar_parameter_list(&data.parameters);
+                }
                 // Only check the function body; the name, parameters,
                 // type parameters, and return type are declarations/types.
                 self.push_function_scope(node);
+                self.break_continue_context_stack.push(BreakContinueContext {
+                    kind: BreakContinueContextKind::Function,
+                    label: None,
+                    is_iteration: false,
+                });
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(body) = &data.body {
                         self.check_statement(body);
                     }
                 }
+                self.break_continue_context_stack.pop();
                 self.pop_function_scope();
                 // Compute the function's type (with inferred return type)
                 // and cache it on the declaration node + symbol so later
@@ -1728,6 +1804,8 @@ impl Checker {
                 }
             }
             SyntaxKind::ClassDeclaration => {
+                // Grammar check: validate modifiers.
+                self.check_grammar_modifiers(node);
                 // Check heritage clauses (e.g. `extends Foo`).
                 self.push_scope(node);
                 if let crate::ast::NodeData::ClassDeclaration(data) = &node.data {
@@ -1780,8 +1858,12 @@ impl Checker {
                 }
                 self.pop_scope();
             }
-            SyntaxKind::EmptyStatement | SyntaxKind::BreakStatement | SyntaxKind::ContinueStatement => {
+            SyntaxKind::EmptyStatement => {
                 // No expressions to check.
+            }
+            SyntaxKind::BreakStatement | SyntaxKind::ContinueStatement => {
+                // Grammar check: validate break/continue targets.
+                self.check_grammar_break_or_continue_statement(node);
             }
             SyntaxKind::VariableDeclaration => {
                 self.check_variable_declaration(node);
@@ -2104,10 +2186,18 @@ impl Checker {
                 }
             }
             SyntaxKind::JsxElement | SyntaxKind::JsxSelfClosingElement | SyntaxKind::JsxFragment => {
-                // JSX expressions contain child identifiers in property names
-                // and tag names that are not references. Walk only the
-                // expression-container children.
-                self.walk_children_for_expressions(node);
+                // JSX tag names, attribute names, and closing-element tag
+                // names are not identifier references. Only walk:
+                //   - JsxExpression children (and recursively, nested JSX)
+                //   - JsxAttribute initializers / JsxSpreadAttribute expressions
+                self.check_jsx_element(node);
+            }
+            SyntaxKind::JsxExpression => {
+                if let crate::ast::NodeData::JsxExpression(data) = &node.data {
+                    if let Some(expr) = &data.expression {
+                        self.check_expression(expr);
+                    }
+                }
             }
             _ => {
                 // Fallback: walk children to find expressions.
@@ -2193,6 +2283,86 @@ impl Checker {
                 self.check_statement(child);
             }
             // Otherwise (type nodes, modifier lists, names, etc.) skip.
+        }
+    }
+
+    /// Check a JSX element/fragment: walk only JsxExpression children,
+    /// nested JSX, and attribute initializers. Tag names and attribute names
+    /// are not identifier references.
+    fn check_jsx_element(&mut self, node: &Arc<Node>) {
+        // For JsxElement, walk attributes (of opening_element) and children.
+        // For JsxSelfClosingElement, walk attributes and type_arguments.
+        // For JsxFragment, walk children.
+        let opening_element: Option<Arc<Node>> = match &node.data {
+            crate::ast::NodeData::JsxElement(data) => Some(Arc::clone(&data.opening_element)),
+            crate::ast::NodeData::JsxSelfClosingElement(_) => Some(Arc::clone(node)),
+            _ => None,
+        };
+        let children: Vec<Arc<Node>> = match &node.data {
+            crate::ast::NodeData::JsxElement(data) => {
+                data.children.iter().cloned().collect()
+            }
+            crate::ast::NodeData::JsxFragment(data) => {
+                data.children.iter().cloned().collect()
+            }
+            _ => Vec::new(),
+        };
+
+        // Walk attributes (skip tag_name and closing tag_name).
+        if let Some(opening) = opening_element {
+            let attributes: Option<Arc<Node>> = match &opening.data {
+                crate::ast::NodeData::JsxOpeningElement(data) => {
+                    Some(Arc::clone(&data.attributes))
+                }
+                crate::ast::NodeData::JsxSelfClosingElement(data) => {
+                    Some(Arc::clone(&data.attributes))
+                }
+                _ => None,
+            };
+            if let Some(attrs) = attributes {
+                if let crate::ast::NodeData::JsxAttributes(data) = &attrs.data {
+                    for attr in data.properties.iter() {
+                        self.check_jsx_attribute(attr);
+                    }
+                }
+            }
+            // Also walk type_arguments if present (they are type-position).
+        }
+
+        // Walk children.
+        for child in &children {
+            self.check_jsx_child(child);
+        }
+    }
+
+    /// Check a single JSX attribute: skip the name, check the initializer.
+    fn check_jsx_attribute(&mut self, node: &Arc<Node>) {
+        match &node.data {
+            crate::ast::NodeData::JsxAttribute(data) => {
+                if let Some(init) = &data.initializer {
+                    self.check_expression(init);
+                }
+            }
+            crate::ast::NodeData::JsxSpreadAttribute(data) => {
+                self.check_expression(&data.expression);
+            }
+            _ => {}
+        }
+    }
+
+    /// Check a single JSX child (text, expression, or nested element).
+    fn check_jsx_child(&mut self, node: &Arc<Node>) {
+        match node.kind {
+            SyntaxKind::JsxElement
+            | SyntaxKind::JsxSelfClosingElement
+            | SyntaxKind::JsxFragment => {
+                self.check_expression(node);
+            }
+            SyntaxKind::JsxExpression => {
+                self.check_expression(node);
+            }
+            // JsxText, JsxTextAllWhiteSpaces: no references.
+            _ => {}
         }
     }
 

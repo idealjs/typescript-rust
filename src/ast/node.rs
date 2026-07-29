@@ -104,6 +104,80 @@ impl Node {
     pub fn name(&self) -> Option<&Arc<Node>> {
         crate::ast::node_data_generated::node_name(self)
     }
+
+    /// The modifier list of a declaration, if any.
+    ///
+    /// Mirrors `Node.Modifiers()` in Go.
+    pub fn modifiers(&self) -> Option<&Arc<ModifierList>> {
+        crate::ast::node::node_modifiers(self)
+    }
+
+    /// The modifier nodes (as a slice of `Arc<Node>`), if any.
+    ///
+    /// Mirrors `Node.ModifierNodes()` in Go.
+    pub fn modifier_nodes(&self) -> &[Arc<Node>] {
+        match self.modifiers() {
+            Some(ml) => &ml.list.nodes,
+            None => &[],
+        }
+    }
+
+    /// Combined modifier flags (syntactic only; does not include JSDoc
+    /// modifiers). Mirrors `ast.GetSyntacticModifierFlags` in Go.
+    pub fn syntactic_modifier_flags(&self) -> ModifierFlags {
+        match self.modifiers() {
+            Some(ml) => ml.modifier_flags,
+            None => ModifierFlags::empty(),
+        }
+    }
+
+    /// Whether the node has the given syntactic modifier flag set.
+    pub fn has_syntactic_modifier(&self, flags: ModifierFlags) -> bool {
+        self.syntactic_modifier_flags().intersects(flags)
+    }
+}
+
+/// Get the modifier list of a node, if any.
+///
+/// Mirrors `Node.Modifiers()` in Go. This is a hand-written counterpart to
+/// the generated accessors in `node_data_generated.rs`, since the generator
+/// does not yet emit a modifiers accessor.
+pub fn node_modifiers(node: &Node) -> Option<&Arc<ModifierList>> {
+    use super::node_data_generated::*;
+    match &node.data {
+        NodeData::VariableStatement(d) => d.modifiers.as_ref(),
+        NodeData::ParameterDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::MissingDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::FunctionDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ClassDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ClassExpression(d) => d.modifiers.as_ref(),
+        NodeData::InterfaceDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::TypeAliasDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::EnumDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ImportDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ExportAssignment(d) => d.modifiers.as_ref(),
+        NodeData::NamespaceExportDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ConstructorDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::GetAccessorDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::SetAccessorDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::IndexSignatureDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::MethodSignatureDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::MethodDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::PropertySignatureDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::PropertyDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ClassStaticBlockDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::BinaryExpression(d) => d.modifiers.as_ref(),
+        NodeData::ArrowFunction(d) => d.modifiers.as_ref(),
+        NodeData::FunctionExpression(d) => d.modifiers.as_ref(),
+        NodeData::PropertyAssignment(d) => d.modifiers.as_ref(),
+        NodeData::ShorthandPropertyAssignment(d) => d.modifiers.as_ref(),
+        NodeData::ConstructorTypeNode(d) => d.modifiers.as_ref(),
+        NodeData::ModuleDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ImportEqualsDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ExportDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::TypeParameterDeclaration(d) => d.modifiers.as_ref(),
+        _ => None,
+    }
 }
 
 /// A list of nodes, preserving source location.

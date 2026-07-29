@@ -20,6 +20,7 @@
 pub mod checker;
 pub mod emitresolver;
 pub mod flow;
+pub mod grammarchecks;
 pub mod mapper;
 pub mod nodebuilder;
 pub mod relater;
