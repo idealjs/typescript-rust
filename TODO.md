@@ -57,8 +57,8 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-29）
 
-测试基线：`cargo test` 通过（599 个 lib 单测 + 2 个 emit parity + 126 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 20 个）。
+测试基线：`cargo test` 通过（607 个 lib 单测 + 2 个 emit parity + 243 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 137 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
@@ -359,11 +359,17 @@ contextual typing（`getContextualType` 完整分发）；函数返回值推断�
 widening，`return 42` → `number`）；表达式类型推断补齐（`as`/`satisfies`/
 type assertion `<T>x`/`!x`/conditional `? :`/template/delete/void/await/
 property access `x.prop`/element access `x[i]`/unary `!`/`+`/`-`/`++`/`--`）；
-数组字面量类型推断（`[1,2,3]` → `number[]`）；`NewExpression` 构造签名返回类型。
+数组字面量类型推断（`[1,2,3]` → `number[]`）；`NewExpression` 构造签名返回类型；
+conditional 表达式 union 类型推断（`cond ? 1 : 'hi'` → `number | string`）；
+对象字面量类型推断（`{ a: 1, b: 'hi' }` → `{ a: 1, b: 'hi' }`，保留 literal
+类型以支持 discriminated union 赋值）；`TypeLiteral` 节点解析为结构化对象类型
+（`{ a: number; b: string }` 注解生成带 property signature 的 anonymous object
+type，含循环保护）；`get_type_of_symbol` 扩展支持 `Property` flag 符号。
 
 - [ ] 条件类型 `infer R` 解析。（已部分完成，conditional branch 推断待补）
 - [ ] 类型推断缓存（`node_links.resolved_type`）。（已通过 `type_node_links` 完成）
-- [ ] 对象字面量类型推断（`{ a: 1 }` → `{ a: number }`）。
+- [ ] Fresh literal type widening（对象字面量在无 contextual type 时应 widening
+  literal 属性，目前保留 literal 以兼容 discriminated union 赋值）。
 
 ### P3.9 Checker 控制流 narrowing
 

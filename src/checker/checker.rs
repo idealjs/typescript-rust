@@ -1423,8 +1423,7 @@ impl Checker {
                 return self.get_type_of_array_literal(node);
             }
             SyntaxKind::ObjectLiteralExpression => {
-                // TODO: infer object type from properties
-                self.get_any_type()
+                return self.get_type_of_object_literal(node);
             }
             SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
                 self.get_type_of_function_like(node)
@@ -1589,6 +1588,7 @@ impl Checker {
             || symbol.flags.contains(SymbolFlags::FunctionScopedVariable)
             || symbol.flags.contains(SymbolFlags::Function)
             || symbol.flags.contains(SymbolFlags::Class)
+            || symbol.flags.contains(SymbolFlags::Property)
         {
             // 1. Symbol-level cache (`value_symbol_links[symbol].resolved_type`),
             //    mirrors Go's `symbol.links.type`.
@@ -1860,6 +1860,118 @@ impl Checker {
         }
         // Mixed types → any[] for now.
         self.create_array_type(self.get_any_type())
+    }
+
+    /// Get the type of an object literal expression `{ a: 1, b: "hi" }`.
+    ///
+    /// Infers an anonymous object type `{ a: number, b: string }` where each
+    /// property's type is taken from its initializer. Literal initializers
+    /// keep their literal type (e.g. `{ kind: "foo" }` → `{ kind: "foo" }`)
+    /// rather than being widened — this mirrors TypeScript's "fresh literal"
+    /// behavior so that object literals remain assignable to discriminated
+    /// unions like `{ kind: "foo" } | { kind: "bar" }`. Spread elements
+    /// (`{ ...x }`) and computed property names currently fall back to
+    /// `any` for the whole type (the full Go checker would compute a union
+    /// with the spread target's apparent type).
+    fn get_type_of_object_literal(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let properties = match &node.data {
+            crate::ast::NodeData::ObjectLiteralExpression(data) => &data.properties,
+            _ => return self.get_any_type(),
+        };
+        // Collect (name, type) pairs first so that we can borrow
+        // `&mut self.value_symbol_links` below without re-entering the type
+        // computation (which also borrows `&mut self`).
+        let mut prop_pairs: Vec<(String, Arc<Type>)> = Vec::new();
+        let mut fell_back_to_any = false;
+        for prop in properties.iter() {
+            match &prop.data {
+                NodeData::PropertyAssignment(data) => {
+                    let name = self.get_property_name_from_node(&data.name);
+                    if name.is_empty() {
+                        fell_back_to_any = true;
+                        break;
+                    }
+                    // Keep literal types (no widening) so object literals
+                    // remain assignable to discriminated unions.
+                    let t = self.get_type_of_node(&data.initializer);
+                    prop_pairs.push((name, t));
+                }
+                NodeData::ShorthandPropertyAssignment(data) => {
+                    let name = self.get_property_name_from_node(&data.name);
+                    if name.is_empty() {
+                        fell_back_to_any = true;
+                        break;
+                    }
+                    // Shorthand `{ a }` — resolve the identifier's type
+                    // (which is the bound variable's type, e.g. `number`
+                    // for `let a = 42`). The variable's type is already
+                    // widened at its declaration, so no widening here.
+                    let t = self.get_type_of_node(&data.name);
+                    prop_pairs.push((name, t));
+                }
+                NodeData::SpreadAssignment(_) => {
+                    // Spread isn't supported yet — fall back to `any` for
+                    // the whole object type.
+                    fell_back_to_any = true;
+                    break;
+                }
+                _ => {
+                    fell_back_to_any = true;
+                    break;
+                }
+            }
+        }
+        if fell_back_to_any {
+            return self.get_any_type();
+        }
+        // Build the anonymous object type with property symbols. Each
+        // symbol's resolved type is stored in `value_symbol_links` so
+        // `get_type_of_symbol` returns it during relater property checks.
+        let mut members = SymbolTable::new();
+        let mut props: Vec<Arc<Symbol>> = Vec::with_capacity(prop_pairs.len());
+        for (name, t) in prop_pairs {
+            let symbol = Arc::new(Symbol::new(
+                SymbolFlags::Property,
+                name.clone(),
+            ));
+            members.insert(name, Arc::clone(&symbol));
+            self.value_symbol_links.insert(
+                &symbol,
+                ValueSymbolLinks {
+                    resolved_type: Some(t),
+                    ..Default::default()
+                },
+            );
+            props.push(symbol);
+        }
+        Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Anonymous | ObjectFlags::ObjectLiteral,
+            id: 0,
+            symbol: None,
+            alias: None,
+            data: TypeData::Object(ObjectTypeData {
+                structured: StructuredTypeData {
+                    members,
+                    properties: props,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        })
+    }
+
+    /// Extract the property name string from a name node (identifier,
+    /// string literal, numeric literal). Returns an empty string for
+    /// computed property names (caller should skip those).
+    fn get_property_name_from_node(&self, node: &Arc<Node>) -> String {
+        match &node.data {
+            NodeData::Identifier(id) => id.text.clone(),
+            NodeData::StringLiteral(s) => s.text.clone(),
+            NodeData::NumericLiteral(n) => n.text.clone(),
+            NodeData::ComputedPropertyName(_) => String::new(),
+            _ => node.text().to_string(),
+        }
     }
 
     /// Widen a literal type to its base type (e.g. `3` → `number`).

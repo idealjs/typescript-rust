@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use crate::ast::node_data_generated::NodeData;
-use crate::ast::{Node, SymbolFlags, SyntaxKind};
+use crate::ast::{Node, NodeList, Symbol, SymbolFlags, SymbolTable, SyntaxKind};
 
 use super::checker::Checker;
 use super::types::*;
@@ -355,9 +355,69 @@ impl Checker {
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
-        let result = self.error_type();
+        // Reserve a cache slot first to break cycles on recursive types
+        // like `type Box = { value: number; next: Box | null }`. During
+        // member resolution a back-reference to this node returns the
+        // reserved `error_type` (≈ `any`) instead of infinite-looping.
+        self.cache_type(node, self.error_type());
+        let result = match &node.data {
+            NodeData::TypeLiteralNode(data) => {
+                self.get_type_from_type_literal_members(&data.members)
+            }
+            // FunctionType / ConstructorType — defer to error_type for now
+            // (proper resolution needs signature construction).
+            _ => self.error_type(),
+        };
         self.cache_type(node, result.clone());
         result
+    }
+
+    /// Build an anonymous object type from a `TypeLiteral`'s member list
+    /// (e.g. `{ a: number; b: string }`).
+    ///
+    /// Currently handles `PropertySignature` members; other member kinds
+    /// (MethodSignature, IndexSignature, CallSignature, ConstructSignature)
+    /// are skipped — their support requires signature/index-info
+    /// construction which is part of P3.7.
+    fn get_type_from_type_literal_members(&mut self, members: &Arc<NodeList>) -> Arc<Type> {
+        let mut symbol_table = SymbolTable::new();
+        let mut props: Vec<Arc<Symbol>> = Vec::new();
+        for member in members.iter() {
+            if let NodeData::PropertySignatureDeclaration(data) = &member.data {
+                // `node.text()` returns the name for identifier/string/
+                // numeric literal names, and "" for computed property names.
+                let name = data.name.text().to_string();
+                if name.is_empty() {
+                    continue;
+                }
+                let prop_type = self.get_type_from_type_node(&data.type_node);
+                let symbol = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
+                self.value_symbol_links.insert(
+                    &symbol,
+                    ValueSymbolLinks {
+                        resolved_type: Some(prop_type),
+                        ..Default::default()
+                    },
+                );
+                symbol_table.insert(name, Arc::clone(&symbol));
+                props.push(symbol);
+            }
+        }
+        Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Anonymous,
+            id: 0,
+            symbol: None,
+            alias: None,
+            data: TypeData::Object(ObjectTypeData {
+                structured: StructuredTypeData {
+                    members: symbol_table,
+                    properties: props,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        })
     }
 
     fn get_type_from_type_operator_node(&mut self, node: &Arc<Node>) -> Arc<Type> {

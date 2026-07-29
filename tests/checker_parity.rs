@@ -2298,3 +2298,80 @@ fn checker_array_literal_empty_no_error() {
     let diags = check_source("let arr = []; let y: number[] = arr;");
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Object literal type inference: `{ a: 1, b: "hi" }` → `{ a: number, b: string }`
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_object_literal_infer_number_property_no_error() {
+    // `{ a: 1 }` infers `{ a: number }`; assigning to `{ a: number }` is fine.
+    let diags = check_source("let obj = { a: 1 }; let y: { a: number } = obj;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_object_literal_infer_number_property_to_string_ts2322() {
+    // `{ a: 1 }` infers `{ a: number }`; assigning to `{ a: string }` fails.
+    let diags = check_source("let obj = { a: 1 }; let y: { a: string } = obj;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_object_literal_infer_multiple_properties_no_error() {
+    // `{ a: 1, b: 'hi' }` infers `{ a: number, b: string }`.
+    let diags = check_source(
+        "let obj = { a: 1, b: 'hi' };\
+         let y: { a: number; b: string } = obj;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_object_literal_infer_missing_property_ts2322() {
+    // `{ a: 1 }` infers `{ a: number }`; assigning to `{ a: number; b: string }`
+    // must fail because `b` is missing in the source.
+    let diags = check_source(
+        "let obj = { a: 1 };\
+         let y: { a: number; b: string } = obj;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_object_literal_infer_boolean_property_no_error() {
+    // `{ flag: true }` infers `{ flag: boolean }` (literal `true` widens to `boolean`).
+    let diags = check_source(
+        "let obj = { flag: true };\
+         let y: { flag: boolean } = obj;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_object_literal_infer_nested_object_no_error() {
+    // `{ a: { b: 1 } }` infers `{ a: { b: number } }`.
+    let diags = check_source(
+        "let obj = { a: { b: 1 } };\
+         let y: { a: { b: number } } = obj;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_object_literal_infer_shorthand_property_no_error() {
+    // `{ a }` where `a` is `number` infers `{ a: number }`.
+    let diags = check_source(
+        "let a = 42;\
+         let obj = { a };\
+         let y: { a: number } = obj;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_object_literal_infer_string_property_to_number_ts2322() {
+    // `{ a: 'hi' }` infers `{ a: string }`; assigning to `{ a: number }` fails.
+    let diags = check_source("let obj = { a: 'hi' }; let y: { a: number } = obj;");
+    assert_diagnostic_code(&diags, 2322);
+}
