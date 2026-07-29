@@ -1269,3 +1269,98 @@ fn checker_type_inference_binary_expression() {
     let diags = check_source("let x = 1 + 2;");
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// P3.9: Control flow narrowing smoke tests
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_narrowing_null_removed_in_true_branch() {
+    // `x !== null` in the true branch narrows `x` to `string`.
+    // Assigning the narrowed `x` to a `string`-typed variable should
+    // produce no diagnostics.
+    let diags = check_source(
+        "let x: string | null = null;\
+         if (x !== null) {\
+             let y: string = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_null_kept_in_false_branch() {
+    // `x !== null` is false → `x` is `null` in the else branch.
+    // Assigning `x` to `null` should succeed.
+    let diags = check_source(
+        "let x: string | null = null;\
+         if (x !== null) {\
+             x = null;\
+         } else {\
+             let y: null = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_typeof_string() {
+    // `typeof x === \"string\"` narrows `x` to `string`.
+    let diags = check_source(
+        "let x: string | number = 0;\
+         if (typeof x === \"string\") {\
+             let y: string = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_typeof_number() {
+    // `typeof x === \"number\"` narrows `x` to `number`.
+    let diags = check_source(
+        "let x: string | number = \"\";\
+         if (typeof x === \"number\") {\
+             let y: number = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_truthiness_removes_null() {
+    // `if (x)` removes falsy types (null, undefined, void, false, 0, \"\")
+    // in the true branch.
+    let diags = check_source(
+        "let x: string | null = null;\
+         if (x) {\
+             let y: string = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_discriminated_union_literal() {
+    // Discriminated union narrowing: `obj.kind === \"foo\"` narrows
+    // `obj` to the constituent whose `kind` is `\"foo\"`.
+    let diags = check_source(
+        "type T = { kind: \"foo\", value: string } | { kind: \"bar\", count: number };\
+         let obj: T = { kind: \"foo\", value: \"x\" };\
+         if (obj.kind === \"foo\") {\
+             let v: string = obj.value;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_assignment_updates_type() {
+    // After `x = \"hello\"`, `x` is narrowed to `string`.
+    let diags = check_source(
+        "let x: string | number = 0;\
+         x = \"hello\";\
+         let y: string = x;",
+    );
+    assert_no_diagnostics(&diags);
+}
