@@ -374,9 +374,10 @@ equality narrowing for literal types（`==` loose 比较、enum 成员、literal
 replacement、strict null/undefined 区分、false-branch unit removal）、
 function return type widening（`return 42` → `number`）、function-like container
 flow isolation（`bind_container` 为函数体保存/恢复 `current_flow`）、
-7+4+3+3+7 个 parity fixtures。
+typeof switch narrowing（`switch (typeof x)`，含 default 子句排除）、
+parser fix（`typeof x` 现在解析为 `TypeOfExpression` 而非 `PrefixUnaryExpression`）、
+7+4+3+3+7+6 个 parity fixtures。
 
-- [ ] `typeof` switch narrowing（`switch (typeof x)`）。
 - [ ] `switch (true)` narrowing。
 - [ ] `asserts x is T` narrowing（assertion 函数）。
 

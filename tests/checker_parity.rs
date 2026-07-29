@@ -1621,3 +1621,113 @@ fn checker_narrowing_equality_any_not_narrowed() {
     );
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// typeof switch narrowing (switch (typeof x))
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_narrowing_typeof_switch_string() {
+    // `switch (typeof x)` narrows `x` to `string` in the `"string"` case.
+    let diags = check_source(
+        "let x: string | number = 0;\
+         switch (typeof x) {\
+             case \"string\":\
+                 let y: string = x;\
+                 break;\
+             case \"number\":\
+                 let z: number = x;\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_typeof_switch_default_excludes_cases() {
+    // In the `default` clause, `x` narrows to types not covered by any case.
+    // Here `string` and `number` are covered, so default leaves `boolean`.
+    let diags = check_source(
+        "let x: string | number | boolean = 0;\
+         switch (typeof x) {\
+             case \"string\":\
+                 break;\
+             case \"number\":\
+                 break;\
+             default:\
+                 let z: boolean = x;\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_typeof_switch_string_literal_kept() {
+    // A literal `"foo"` is a subtype of `string`, so in the `"string"` case
+    // it should remain `"foo"` (not be widened to `string`).
+    let diags = check_source(
+        "let x: \"foo\" | 42 = 42;\
+         switch (typeof x) {\
+             case \"string\":\
+                 let y: \"foo\" = x;\
+                 break;\
+             case \"number\":\
+                 let z: 42 = x;\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_typeof_switch_undefined() {
+    // `case "undefined":` narrows to `undefined`.
+    let diags = check_source(
+        "let x: string | undefined = undefined;\
+         switch (typeof x) {\
+             case \"string\":\
+                 let y: string = x;\
+                 break;\
+             case \"undefined\":\
+                 let z: undefined = x;\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_typeof_switch_boolean() {
+    // `case "boolean":` narrows to `boolean`.
+    let diags = check_source(
+        "let x: string | boolean = false;\
+         switch (typeof x) {\
+             case \"string\":\
+                 let y: string = x;\
+                 break;\
+             case \"boolean\":\
+                 let z: boolean = x;\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_typeof_switch_unreachable_case_never() {
+    // `case "number":` on a `string | boolean` type is unreachable — the
+    // narrowed type should be `never`. Assigning `never` to `number` is
+    // allowed, so no diagnostic.
+    let diags = check_source(
+        "let x: string | boolean = false;\
+         switch (typeof x) {\
+             case \"number\":\
+                 let z: number = x;\
+                 break;\
+             default:\
+                 break;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}

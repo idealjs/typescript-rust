@@ -807,8 +807,190 @@ impl Checker {
             );
         }
 
-        // TODO: `switch (typeof x)` and `switch (true)` patterns.
+        // Case 3: discriminant is `typeof x` where `x` is the symbol →
+        // `switch (typeof x) { case "string": ... }`
+        if discriminant.kind == SyntaxKind::TypeOfExpression {
+            if let NodeData::TypeOfExpression(typeof_data) = &discriminant.data {
+                if self.is_symbol_identifier(&typeof_data.expression, symbol) {
+                    return self.narrow_by_switch_on_typeof(type_, clause, switch_stmt);
+                }
+            }
+        }
+
+        // TODO: `switch (true)` pattern.
         Arc::clone(type_)
+    }
+
+    /// Narrow for `switch (typeof x) { case "string": ... }` where `typeof x`
+    /// is the discriminant and `x` is the symbol.
+    ///
+    /// Mirrors Go's `narrowTypeBySwitchOnTypeOf` (flow.go ~L1136). For a
+    /// `CaseClause`, narrows `x` to the type implied by the typeof string
+    /// (e.g. `case "string":` → `string`). For a `DefaultClause`, narrows
+    /// `x` to exclude the types covered by all cases.
+    ///
+    /// The mapping from typeof string to type mirrors Go's
+    /// `narrowTypeByTypeName` (flow.go ~L645):
+    /// - `"string"` → `string`
+    /// - `"number"` → `number`
+    /// - `"bigint"` → `bigint`
+    /// - `"boolean"` → `boolean`
+    /// - `"symbol"` → `symbol`
+    /// - `"undefined"` → `undefined`
+    /// - `"object"` → `object | null` (typeof null === "object")
+    /// - `"function"` → `Function`
+    /// - other/unknown → `object` (host object)
+    fn narrow_by_switch_on_typeof(
+        &mut self,
+        type_: &Arc<Type>,
+        clause: &Arc<Node>,
+        switch_stmt: &Arc<Node>,
+    ) -> Arc<Type> {
+        let witnesses = self.get_switch_clause_typeof_witnesses(switch_stmt);
+        let Some(witnesses) = witnesses else {
+            return Arc::clone(type_);
+        };
+        // Pre-compute the implied types for all witnesses (avoids mutable
+        // borrows inside closures).
+        let implied_types: Vec<Arc<Type>> = witnesses
+            .iter()
+            .map(|w| self.typeof_string_to_type(w))
+            .collect();
+        if clause.kind == SyntaxKind::DefaultClause {
+            // Default clause: keep constituents that don't match any case's
+            // typeof string.
+            let constituents = self.constituent_types(type_);
+            let remaining: Vec<Arc<Type>> = constituents
+                .into_iter()
+                .filter(|t| !implied_types.iter().any(|it| self.types_overlap(t, it)))
+                .collect();
+            return self.rebuild_union_or_never(type_, remaining);
+        }
+        // CaseClause: narrow to the type implied by the case's typeof string.
+        let NodeData::CaseOrDefaultClause(clause_data) = &clause.data else {
+            return Arc::clone(type_);
+        };
+        let case_text = self.literal_text_of(&clause_data.expression);
+        let Some(case_text) = case_text else {
+            return Arc::clone(type_);
+        };
+        let implied = self.typeof_string_to_type(&case_text);
+        // Intersect: keep the part of `type_` that is assignable to `implied`.
+        // For unions, filter to constituents that overlap `implied`.
+        if type_.is_union() {
+            let constituents = self.constituent_types(type_);
+            let matching: Vec<Arc<Type>> = constituents
+                .into_iter()
+                .filter(|t| self.types_overlap(t, &implied))
+                .collect();
+            return self.rebuild_union_or_never(type_, matching);
+        }
+        // Non-union: if the type overlaps the implied type, narrow to the
+        // implied type (e.g. `string | number` was already handled above;
+        // for a plain `string` type with `case "string":`, keep `string`).
+        if self.types_overlap(type_, &implied) {
+            // If the original type is a subtype of (or equal to) the implied
+            // type, keep it as-is (e.g. a literal `"foo"` stays `"foo"`
+            // under `case "string":`).
+            if self.is_type_assignable_to(type_, &implied) {
+                return Arc::clone(type_);
+            }
+            return implied;
+        }
+        // No overlap → never (this case is unreachable for this symbol).
+        self.never_type()
+    }
+
+    /// Get the typeof string witnesses for each case clause in a switch.
+    ///
+    /// Mirrors Go's `getSwitchClauseTypeOfWitnesses` (flow.go ~L1968).
+    /// Returns `None` if any case clause's expression is not a string
+    /// literal (in which case typeof narrowing doesn't apply).
+    fn get_switch_clause_typeof_witnesses(
+        &mut self,
+        switch_stmt: &Arc<Node>,
+    ) -> Option<Vec<String>> {
+        let NodeData::SwitchStatement(switch_data) = &switch_stmt.data else {
+            return None;
+        };
+        let NodeData::CaseBlock(case_block) = &switch_data.case_block.data else {
+            return None;
+        };
+        let mut witnesses = Vec::with_capacity(case_block.clauses.len());
+        for clause in &case_block.clauses.nodes {
+            if clause.kind == SyntaxKind::CaseClause {
+                if let NodeData::CaseOrDefaultClause(cd) = &clause.data {
+                    let text = self.literal_text_of(&cd.expression);
+                    match text {
+                        Some(t) => witnesses.push(t),
+                        None => return None, // non-string-literal case
+                    }
+                } else {
+                    witnesses.push(String::new());
+                }
+            } else {
+                // DefaultClause: empty witness marker.
+                witnesses.push(String::new());
+            }
+        }
+        Some(witnesses)
+    }
+
+    /// Map a typeof result string to the corresponding `Type`.
+    ///
+    /// Mirrors Go's `narrowTypeByTypeName` (flow.go ~L645). For unknown
+    /// strings, falls back to `object` (host object), matching Go's
+    /// `TypeFactsTypeofEQHostObject` behavior.
+    fn typeof_string_to_type(&mut self, text: &str) -> Arc<Type> {
+        match text {
+            "string" => self.string_type(),
+            "number" => self.number_type(),
+            "bigint" => self.bigint_type(),
+            "boolean" => self.boolean_type(),
+            "symbol" => self.es_symbol_type(),
+            "undefined" => self.undefined_type(),
+            "object" => {
+                // typeof null === "object", so "object" includes null.
+                // Also includes non-primitive objects.
+                let non_primitive = self.non_primitive_type();
+                let null = self.null_type();
+                self.get_union_type(vec![non_primitive, null])
+            }
+            "function" => {
+                // Use the global Function type if available, otherwise
+                // fall back to any_function_type.
+                if let Some(f) = self.any_function_type.get() {
+                    Arc::clone(f)
+                } else {
+                    self.any_type()
+                }
+            }
+            _ => self.non_primitive_type(),
+        }
+    }
+
+    /// Get the string text of a string-literal-like expression node.
+    ///
+    /// Mirrors Go's `ast.IsStringLiteralLike` + `Text()` combo. Returns
+    /// `None` if the node is not a string literal.
+    fn literal_text_of(&self, node: &Arc<Node>) -> Option<String> {
+        match node.kind {
+            SyntaxKind::StringLiteral => {
+                if let NodeData::StringLiteral(data) = &node.data {
+                    Some(data.text.clone())
+                } else {
+                    None
+                }
+            }
+            SyntaxKind::NoSubstitutionTemplateLiteral => {
+                if let NodeData::NoSubstitutionTemplateLiteral(data) = &node.data {
+                    Some(data.text.clone())
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        }
     }
 
     /// Narrow for `switch (x) { case value: ... }` where `x` is the symbol.

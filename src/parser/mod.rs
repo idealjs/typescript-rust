@@ -3111,7 +3111,21 @@ impl Parser {
                     loc,
                 ))
             }
-            SyntaxKind::TypeOfKeyword | SyntaxKind::VoidKeyword | SyntaxKind::DeleteKeyword => {
+            SyntaxKind::TypeOfKeyword => {
+                // `typeof x` → TypeOfExpression (distinct from PrefixUnaryExpression
+                // for `!x`, `-x`, etc.). The flow analyzer uses this node kind to
+                // detect `switch (typeof x)` patterns.
+                let pos = self.token_pos();
+                self.next_token();
+                let expression = self.parse_unary_expression();
+                let end = expression.end();
+                Arc::new(Node::with_loc(
+                    SyntaxKind::TypeOfExpression,
+                    NodeData::TypeOfExpression(TypeOfExpressionData { expression }),
+                    TextRange::new(pos, end),
+                ))
+            }
+            SyntaxKind::VoidKeyword | SyntaxKind::DeleteKeyword => {
                 let operator = self.token;
                 let op_pos = self.token_pos();
                 self.next_token();
