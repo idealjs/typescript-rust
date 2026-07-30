@@ -57,8 +57,8 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-30）
 
-测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 338 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 232 个）。
+测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 347 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 241 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|

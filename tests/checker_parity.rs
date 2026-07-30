@@ -3282,3 +3282,106 @@ fn checker_catch_variable_no_error() {
     );
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// P3.10: Interface type resolution. `interface Foo { a: number }` now
+// resolves to an anonymous object type with property signatures, enabling
+// assignability checks against interface-typed variables.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_interface_assignable_no_error() {
+    // Object literal with matching properties is assignable to the interface.
+    let diags = check_source(
+        "interface Foo { a: number; b: string }\n\
+         let x: Foo = { a: 1, b: 'hi' };",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_interface_missing_property_ts2741() {
+    // Missing property `b` should report an error.
+    let diags = check_source(
+        "interface Foo { a: number; b: string }\n\
+         let x: Foo = { a: 1 };",
+    );
+    assert!(diags.iter().any(|d| d.code != 0));
+}
+
+#[test]
+fn checker_interface_wrong_property_type_ts2322() {
+    // Wrong property type should report TS2322.
+    let diags = check_source(
+        "interface Foo { a: number }\n\
+         let x: Foo = { a: 'hi' };",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_interface_property_access_no_error() {
+    // Accessing a property on an interface-typed variable should work.
+    let diags = check_source(
+        "interface Foo { a: number }\n\
+         let x: Foo = { a: 1 };\n\
+         let y: number = x.a;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_interface_property_access_missing_ts2339() {
+    // Accessing a non-existent property should report TS2339.
+    let diags = check_source(
+        "interface Foo { a: number }\n\
+         let x: Foo = { a: 1 };\n\
+         x.b;",
+    );
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_generic_interface_substitution_no_error() {
+    // Generic interface `Box<T>` with `Box<number>` should substitute `T`
+    // with `number` in the `value` property type.
+    let diags = check_source(
+        "interface Box<T> { value: T }\n\
+         let x: Box<number> = { value: 1 };",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_generic_interface_substitution_mismatch_ts2322() {
+    // Generic interface `Box<T>` with `Box<number>` — assigning a string
+    // value should fail because `T` is substituted with `number`.
+    let diags = check_source(
+        "interface Box<T> { value: T }\n\
+         let x: Box<number> = { value: 'hi' };",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_interface_method_signature_no_error() {
+    // Interface with a method signature — calling the method via a
+    // function-expression property should work.
+    let diags = check_source(
+        "interface Foo { greet(): void }\n\
+         let x: Foo = { greet: () => {} };\n\
+         x.greet();",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_interface_index_signature_no_error() {
+    // Interface with an index signature — accessing by string key should work.
+    let diags = check_source(
+        "interface Foo { [key: string]: number }\n\
+         let x: Foo = { a: 1 };\n\
+         let y: number = x.a;",
+    );
+    assert_no_diagnostics(&diags);
+}

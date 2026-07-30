@@ -254,8 +254,13 @@ impl Checker {
             }
             return self.get_type_parameter_from_symbol(&symbol);
         }
+        if symbol.flags.contains(SymbolFlags::Interface) {
+            // Interface: build an anonymous object type from the interface's
+            // members (PropertySignature, MethodSignature, IndexSignature).
+            return self.resolve_interface_type(&symbol, type_arguments);
+        }
         if !symbol.flags.contains(SymbolFlags::TypeAlias) {
-            // Interface/class/enum/etc.: defer to error_type (any) for now.
+            // Class/enum/etc.: defer to error_type (any) for now.
             return self.error_type();
         }
         // Cycle guard: a recursive alias (`type A = B; type B = A`) would
@@ -338,6 +343,195 @@ impl Checker {
             }
         }
         (tp_symbols, type_node.unwrap_or_else(|| Arc::clone(&symbol.declarations[0])))
+    }
+
+    /// Resolve an `interface` declaration to an anonymous object type.
+    ///
+    /// Builds the type from the interface's members (PropertySignature,
+    /// MethodSignature, IndexSignature). For generic interfaces (`Box<T>`),
+    /// the type arguments are pushed onto the substitution stack before
+    /// resolving members, so type-parameter references inside member types
+    /// resolve to the corresponding type arguments.
+    ///
+    /// Heritage clauses (`extends A`) are not yet merged — only the
+    /// interface's own members are included.
+    fn resolve_interface_type(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        type_arguments: Option<Arc<NodeList>>,
+    ) -> Arc<Type> {
+        // For non-generic interfaces, reuse a cached declared type.
+        let has_type_args = type_arguments.is_some();
+        if !has_type_args {
+            if let Some(cached) = self
+                .type_alias_links
+                .get(symbol)
+                .and_then(|l| l.declared_type.clone())
+            {
+                return cached;
+            }
+        }
+        // Cycle guard for recursive interface references.
+        let key = Arc::as_ptr(symbol) as *const crate::ast::Symbol;
+        if !self.resolving_type_aliases.insert(key) {
+            return self.error_type();
+        }
+        // Find the InterfaceDeclaration node.
+        let decl = symbol
+            .declarations
+            .iter()
+            .find(|d| matches!(d.data, NodeData::InterfaceDeclaration(_)));
+        let result = match decl.map(|d| &d.data) {
+            Some(NodeData::InterfaceDeclaration(data)) => {
+                // Collect type-parameter symbols for substitution.
+                let tp_symbols = match &data.type_parameters {
+                    Some(tps) => {
+                        let sym_map = self.program.symbol_map();
+                        let collected: Vec<Arc<Symbol>> = tps
+                            .iter()
+                            .filter_map(|tp| sym_map.symbol_of(tp).map(Arc::clone))
+                            .collect();
+                        collected
+                    }
+                    None => Vec::new(),
+                };
+                // Push the type-argument substitution mapping for generic
+                // interfaces.
+                if has_type_args {
+                    let arg_types: Vec<Arc<Type>> = type_arguments
+                        .as_ref()
+                        .unwrap()
+                        .iter()
+                        .map(|a| self.get_type_from_type_node(a))
+                        .collect();
+                    let mut mapping = HashMap::new();
+                    for (i, tp_sym) in tp_symbols.iter().enumerate() {
+                        if let Some(arg) = arg_types.get(i) {
+                            let k = Arc::as_ptr(tp_sym) as *const crate::ast::Symbol;
+                            mapping.insert(k, Arc::clone(arg));
+                        }
+                    }
+                    self.type_argument_stack.push(mapping);
+                }
+                // Push scope so type-parameter references in member types
+                // resolve via the scope stack.
+                self.push_scope(symbol.declarations.iter().next().expect("interface has a declaration"));
+                let result = self.build_interface_type_from_members(&data.members);
+                self.pop_scope();
+                if has_type_args {
+                    self.type_argument_stack.pop();
+                }
+                result
+            }
+            _ => self.error_type(),
+        };
+        self.resolving_type_aliases.remove(&key);
+        if !has_type_args {
+            self.type_alias_links
+                .get_or_default(symbol)
+                .declared_type = Some(result.clone());
+        }
+        result
+    }
+
+    /// Build an anonymous object type from an interface's member list.
+    /// Handles PropertySignature, MethodSignature, and IndexSignature.
+    fn build_interface_type_from_members(&mut self, members: &Arc<NodeList>) -> Arc<Type> {
+        let mut symbol_table = SymbolTable::new();
+        let mut props: Vec<Arc<Symbol>> = Vec::new();
+        let mut index_infos: Vec<Arc<crate::checker::IndexInfo>> = Vec::new();
+        let mut signatures: Vec<Arc<Signature>> = Vec::new();
+        for member in members.iter() {
+            match &member.data {
+                NodeData::PropertySignatureDeclaration(data) => {
+                    let name = data.name.text().to_string();
+                    if name.is_empty() {
+                        continue;
+                    }
+                    let prop_type = self.get_type_from_type_node(&data.type_node);
+                    let symbol = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
+                    self.value_symbol_links.insert(
+                        &symbol,
+                        ValueSymbolLinks {
+                            resolved_type: Some(prop_type),
+                            ..Default::default()
+                        },
+                    );
+                    symbol_table.insert(name, Arc::clone(&symbol));
+                    props.push(symbol);
+                }
+                NodeData::MethodSignatureDeclaration(data) => {
+                    let name = data.name.text().to_string();
+                    if name.is_empty() {
+                        continue;
+                    }
+                    // Build a function type from the method signature.
+                    let return_type = match data.type_node.as_ref() {
+                        Some(tn) => self.get_type_from_type_node(tn),
+                        None => self.get_any_type(),
+                    };
+                    let sig = self.build_signature_from_function_like_type_node(
+                        &data.parameters,
+                        return_type,
+                        /* is_construct */ false,
+                        /* contextual_signature */ None,
+                        /* declaration */ Some(Arc::clone(member)),
+                    );
+                    let fn_type = self.create_function_or_constructor_type(vec![sig], false);
+                    let symbol = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
+                    self.value_symbol_links.insert(
+                        &symbol,
+                        ValueSymbolLinks {
+                            resolved_type: Some(fn_type),
+                            ..Default::default()
+                        },
+                    );
+                    symbol_table.insert(name, Arc::clone(&symbol));
+                    props.push(symbol);
+                }
+                NodeData::IndexSignatureDeclaration(data) => {
+                    let mut key_type = None;
+                    let mut value_type = None;
+                    if let Some(param) = data.parameters.iter().next() {
+                        if let NodeData::ParameterDeclaration(pd) = &param.data {
+                            key_type = pd
+                                .type_node
+                                .as_ref()
+                                .map(|t| self.get_type_from_type_node(t));
+                        }
+                    }
+                    value_type = Some(self.get_type_from_type_node(&data.type_node));
+                    index_infos.push(Arc::new(crate::checker::IndexInfo {
+                        key_type,
+                        value_type,
+                        is_readonly: false,
+                        declaration: Some(Arc::clone(member)),
+                        index_symbol: None,
+                        components: Vec::new(),
+                    }));
+                }
+                _ => {}
+            }
+        }
+        let call_signature_count = signatures.len();
+        Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Anonymous,
+            id: 0,
+            symbol: None,
+            alias: None,
+            data: TypeData::Object(ObjectTypeData {
+                structured: StructuredTypeData {
+                    members: symbol_table,
+                    properties: props,
+                    index_infos,
+                    signatures,
+                    call_signature_count,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        })
     }
 
     /// Build a `TypeParameter` type from a `TypeParameter` symbol, resolving
