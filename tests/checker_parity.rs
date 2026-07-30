@@ -1229,7 +1229,6 @@ fn checker_jsx_function_component_no_error() {
 }
 
 #[test]
-#[ignore = "TODO: requires class construct-signature tracking in the type system"]
 fn checker_jsx_class_component_no_error() {
     // `Foo` is a class (has construct signature): no error expected.
     let diags = check_source_tsx("class Foo {}\nconst el = <Foo />;");
