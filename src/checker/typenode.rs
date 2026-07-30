@@ -747,7 +747,7 @@ impl Checker {
     /// (real TS reports an error there). Each member's literal type is cached
     /// on its symbol via `value_symbol_links` so that `Color.Red` property
     /// access can recover the literal type.
-    fn resolve_enum_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn resolve_enum_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
         // Reuse a cached declared type if present.
         if let Some(cached) = self
             .type_alias_links
@@ -761,17 +761,14 @@ impl Checker {
         if !self.resolving_type_aliases.insert(key) {
             return self.error_type();
         }
-        // Find the EnumDeclaration node.
-        let decl = symbol
-            .declarations
-            .iter()
-            .find(|d| matches!(d.data, NodeData::EnumDeclaration(_)));
-        // Collect (member_symbol, member_name, initializer_node) triples
-        // before computing types so that `&mut self.value_symbol_links` and
-        // `&mut self.get_type_of_node` don't alias `symbol.members`.
+        // Collect members from ALL EnumDeclaration nodes in the symbol's
+        // declarations list. Merged enums (`enum E { A } enum E { B }`) share
+        // a single symbol whose `declarations` carries each declaration; the
+        // resulting enum type is the union of every declaration's members.
+        // Mirrors Go's `getDeclaredTypeOfEnum`.
         let sym_map = self.program.symbol_map();
         let mut entries: Vec<(Option<Arc<Symbol>>, String, Option<Arc<Node>>)> = Vec::new();
-        if let Some(decl) = decl {
+        for decl in symbol.declarations.iter() {
             if let NodeData::EnumDeclaration(data) = &decl.data {
                 for member_node in data.members.iter() {
                     let NodeData::EnumMember(member) = &member_node.data else {

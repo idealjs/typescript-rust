@@ -4710,3 +4710,92 @@ fn hover_arrow_function_variable() {
         "expected arrow hover to mention param/return types, got {info:?}"
     );
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Declaration merge (namespace+function, namespace+class, enum+enum)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_namespace_function_merge_no_error() {
+    // `function N` + `namespace N` merge: N is callable AND has members.
+    let diags = check_source(
+        "function N(): void {}\n\
+         namespace N { export const x: number = 1; }\n\
+         N();\n\
+         const y: number = N.x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_namespace_class_merge_no_error() {
+    // `class N` + `namespace N` merge: N is constructable AND has members.
+    let diags = check_source(
+        "class N { prop: number = 1; }\n\
+         namespace N { export const x: number = 1; }\n\
+         const inst: N = new N();\n\
+         const y: number = N.x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_merged_enum_members_visible_no_error() {
+    // Two `enum E` declarations merge; members from both are visible as
+    // both values and types.
+    let diags = check_source(
+        "enum E { A = 1 }\n\
+         enum E { B = 2 }\n\
+         const a: E = E.A;\n\
+         const b: E = E.B;\n\
+         const c: E.A = E.A;\n\
+         const d: E.B = E.B;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_merged_enum_type_union_all_members_no_error() {
+    // The enum type E should include both E.A and E.B from merged decls.
+    let diags = check_source(
+        "enum E { A = 1 }\n\
+         enum E { B = 2 }\n\
+         function f(x: E) {}\n\
+         f(E.A);\n\
+         f(E.B);",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_merged_enum_member_wrong_type_ts2322() {
+    // E.B is a number (2), not a string — enum member access resolves to
+    // the correct literal type (not `any`).
+    let diags = check_source(
+        "enum E { A = 1 }\n\
+         enum E { B = 2 }\n\
+         const x: string = E.B;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_single_enum_member_wrong_type_ts2322() {
+    // Baseline: Color.Red is a number (0), not a string.
+    let diags = check_source(
+        "enum Color { Red = 0 }\n\
+         const x: string = Color.Red;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_merged_enum_string_not_assignable_ts2322() {
+    // String is not assignable to the merged enum type E.
+    let diags = check_source(
+        "enum E { A = 1 }\n\
+         enum E { B = 2 }\n\
+         const x: E = \"hi\";",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}

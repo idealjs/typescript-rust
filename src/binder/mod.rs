@@ -1747,7 +1747,8 @@ fn get_container_flags(kind: SyntaxKind) -> ContainerFlags {
         SyntaxKind::InterfaceDeclaration
         | SyntaxKind::TypeLiteral
         | SyntaxKind::ObjectLiteralExpression
-        | SyntaxKind::JsxAttributes => ContainerFlags::IS_CONTAINER,
+        | SyntaxKind::JsxAttributes
+        | SyntaxKind::EnumDeclaration => ContainerFlags::IS_CONTAINER,
         SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
             ContainerFlags::IS_CONTAINER
                 | ContainerFlags::IS_CONTROL_FLOW_CONTAINER

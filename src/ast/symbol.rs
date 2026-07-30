@@ -261,7 +261,7 @@ static NEXT_SYMBOL_ID: AtomicU64 = AtomicU64::new(1);
 /// A map from name to symbol.
 ///
 /// Mirrors `ast.SymbolTable` in Go.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct SymbolTable {
     pub entries: HashMap<String, Arc<Symbol>>,
 }

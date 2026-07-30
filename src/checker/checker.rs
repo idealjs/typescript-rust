@@ -1999,6 +1999,20 @@ impl Checker {
 
     /// Get the type of a symbol.
     pub fn get_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+        // Declaration merging: when a symbol has both the `ValueModule` flag
+        // (a `namespace N` declaration) and a value-side flag (`Function`,
+        // `Class`, `RegularEnum`, or `ConstEnum`), the resolved type must
+        // combine the value type's call/construct signatures with the
+        // namespace's exported members. Mirrors Go's
+        // `getDeclaredTypeOfSymbol` namespace + value merge.
+        if symbol.flags.contains(SymbolFlags::ValueModule)
+            && (symbol.flags.contains(SymbolFlags::Function)
+                || symbol.flags.contains(SymbolFlags::Class)
+                || symbol.flags.contains(SymbolFlags::RegularEnum)
+                || symbol.flags.contains(SymbolFlags::ConstEnum))
+        {
+            return self.get_type_of_merged_namespace_symbol(symbol);
+        }
         // For now, return any for most symbols
         // TODO: implement proper symbol type resolution
         if symbol.flags.contains(SymbolFlags::BlockScopedVariable)
@@ -2006,6 +2020,7 @@ impl Checker {
             || symbol.flags.contains(SymbolFlags::Function)
             || symbol.flags.contains(SymbolFlags::Class)
             || symbol.flags.contains(SymbolFlags::Property)
+            || symbol.flags.contains(SymbolFlags::EnumMember)
         {
             // 1. Symbol-level cache (`value_symbol_links[symbol].resolved_type`),
             //    mirrors Go's `symbol.links.type`.
@@ -2037,9 +2052,221 @@ impl Checker {
             // Namespace: build an anonymous object type from the namespace's
             // exported members. `resolve_namespace_type` caches the result.
             self.resolve_namespace_type(symbol)
+        } else if symbol.flags.intersects(SymbolFlags::ENUM) {
+            // Enum used as a value (`Color.Red`): build an anonymous object
+            // type whose members are the enum's members, each carrying its
+            // literal type (populated by `resolve_enum_type`). Mirrors Go's
+            // `getDeclaredTypeOfSymbol` enum value type.
+            self.resolve_enum_value_type(symbol)
         } else {
             self.get_any_type()
         }
+    }
+
+    /// Resolve the type of a symbol that has both a namespace declaration
+    /// (`namespace N { ... }`) and a value declaration (`function N`, `class
+    /// N`, `enum N`). The result combines the value type's call/construct
+    /// signatures with the namespace's exported members as properties, so
+    /// both `N()`/`new N()` and `N.exportedMember` type-check.
+    ///
+    /// Mirrors the namespace slice of Go's `getDeclaredTypeOfSymbol`, which
+    /// folds the value-side type into the namespace object type.
+    fn get_type_of_merged_namespace_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+        // Cached merged type on `type_alias_links[symbol].declared_type`.
+        if let Some(cached) = self
+            .type_alias_links
+            .get(symbol)
+            .and_then(|l| l.declared_type.clone())
+        {
+            return cached;
+        }
+
+        // 1. Resolve the value type (function/class/enum) via the value-side
+        //    resolution path (which looks up `value_symbol_links` and
+        //    `type_node_links` caches populated during statement checking).
+        let value_type = self.get_value_type_of_symbol(symbol);
+
+        // 2. Resolve the namespace members. `resolve_namespace_type` caches
+        //    its result on `type_alias_links[symbol].declared_type`; we
+        //    overwrite that cache with the merged type below so subsequent
+        //    lookups see the combined type.
+        let ns_type = self.resolve_namespace_type(symbol);
+
+        // 3. Build the merged type: take the namespace object type (which
+        //    carries members + properties) and copy in the value type's
+        //    call/construct signatures. The resulting anonymous object type
+        //    supports both `N()` / `new N()` and `N.member`.
+        let (call_sigs, construct_sigs) = match &value_type.data {
+            TypeData::Object(obj) => {
+                let cs = obj.structured.call_signatures().to_vec();
+                let xs = obj.structured.construct_signatures().to_vec();
+                (cs, xs)
+            }
+            _ => (Vec::new(), Vec::new()),
+        };
+        let merged = if call_sigs.is_empty() && construct_sigs.is_empty() {
+            // No signatures to merge (e.g. the value type wasn't resolved
+            // yet); just return the namespace type so members are visible.
+            ns_type
+        } else {
+            // Build a fresh structured type that carries the namespace's
+            // members/properties/index_infos plus the value type's
+            // call/construct signatures. `StructuredTypeData.signatures`
+            // stores call signatures first (count = call_signature_count),
+            // then construct signatures.
+            let ns_obj = match &ns_type.data {
+                TypeData::Object(obj) => obj,
+                _ => {
+                    // Namespace type isn't an object (unexpected); nothing
+                    // to merge into, so return the value type which carries
+                    // the signatures.
+                    self.type_alias_links
+                        .get_or_default(symbol)
+                        .declared_type = Some(Arc::clone(&value_type));
+                    return value_type;
+                }
+            };
+            let ns_structured = &ns_obj.structured;
+            let mut structured = StructuredTypeData::default();
+            structured.members = ns_structured.members.clone();
+            structured.properties = ns_structured.properties.clone();
+            structured.index_infos = ns_structured.index_infos.clone();
+            // Existing namespace signatures (e.g. from a nested namespace
+            // with its own call signatures) come after the value type's
+            // call signatures but before construct signatures.
+            let existing_sigs = ns_structured.signatures.clone();
+            let existing_call_count = ns_structured.call_signature_count;
+            structured.call_signature_count = call_sigs.len() + existing_call_count;
+            structured.signatures = call_sigs;
+            structured
+                .signatures
+                .extend(existing_sigs[..existing_call_count].to_vec());
+            structured.signatures.extend(construct_sigs);
+            structured
+                .signatures
+                .extend(existing_sigs[existing_call_count..].to_vec());
+            Arc::new(Type {
+                flags: TypeFlags::Object,
+                object_flags: ObjectFlags::Anonymous,
+                id: 0,
+                symbol: Some(Arc::clone(symbol)),
+                alias: None,
+                data: TypeData::Object(ObjectTypeData {
+                    structured,
+                    target: None,
+                    mapper: None,
+                    type_arguments: Vec::new(),
+                }),
+            })
+        };
+
+        // Cache the merged type so future lookups hit the cache above.
+        self.type_alias_links
+            .get_or_default(symbol)
+            .declared_type = Some(Arc::clone(&merged));
+        merged
+    }
+
+    /// Resolve the value-side type of a symbol (function, class, variable,
+    /// property) by consulting the symbol-level and node-level caches
+    /// populated during statement/expression checking. This is the value-
+    /// only subset of `get_type_of_symbol` — it does NOT consider the
+    /// `ValueModule` flag, so it can be used to recover the function/class
+    /// type of a merged namespace+value symbol without recursing back into
+    /// the namespace resolution path.
+    fn get_value_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+        // 1. Symbol-level cache (`value_symbol_links[symbol].resolved_type`),
+        //    mirrors Go's `symbol.links.type`.
+        if let Some(links) = self.value_symbol_links.get(symbol) {
+            if let Some(ref t) = links.resolved_type {
+                return Arc::clone(t);
+            }
+        }
+        // 2. Node-level cache on the value declaration — this is where
+        //    `check_variable_declaration` / `check_function_declaration`
+        //    write the resolved type.
+        if let Some(decl) = &symbol.value_declaration {
+            if let Some(links) = self.type_node_links.get(decl) {
+                if let Some(ref t) = links.resolved_type {
+                    return Arc::clone(t);
+                }
+            }
+        }
+        // 3. Fallback: any of the symbol's declarations might carry a
+        //    cached type (e.g. parameter declarations).
+        for decl in &symbol.declarations {
+            if let Some(links) = self.type_node_links.get(decl) {
+                if let Some(ref t) = links.resolved_type {
+                    return Arc::clone(t);
+                }
+            }
+        }
+        self.get_any_type()
+    }
+
+    /// Build the value-side type of an enum symbol — an anonymous object
+    /// type whose members are the enum's members, each carrying its literal
+    /// type. This is what makes `Color.Red` (as a value expression) resolve
+    /// to the literal type `0` rather than `any`.
+    ///
+    /// `resolve_enum_type` (the type-side resolver) populates each member
+    /// symbol's `value_symbol_links.resolved_type` with its literal type;
+    /// this method first calls `resolve_enum_type` to ensure those are set,
+    /// then builds an object type wrapping the enum symbol's members table.
+    fn resolve_enum_value_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+        // Reuse a cached value type on `value_symbol_links[symbol]`.
+        if let Some(links) = self.value_symbol_links.get(symbol) {
+            if let Some(ref t) = links.resolved_type {
+                return Arc::clone(t);
+            }
+        }
+        // Ensure member literal types are populated by resolving the enum's
+        // type-side union (this writes to each member symbol's links).
+        let _ = self.resolve_enum_type(symbol);
+        // Build an anonymous object type from the enum's members table.
+        let members: Vec<(String, Arc<Symbol>)> = symbol
+            .members
+            .iter()
+            .map(|(k, v)| (k.clone(), Arc::clone(v)))
+            .collect();
+        let mut symbol_table = SymbolTable::new();
+        let mut props: Vec<Arc<Symbol>> = Vec::new();
+        for (name, member_sym) in &members {
+            if name.starts_with("\u{FE}") {
+                continue;
+            }
+            // Ensure the member's type is resolvable; the property symbol
+            // carries the literal type via value_symbol_links.
+            let _ = self.get_type_of_symbol(member_sym);
+            symbol_table.insert(name.clone(), Arc::clone(member_sym));
+            props.push(Arc::clone(member_sym));
+        }
+        let result = Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Anonymous,
+            id: 0,
+            symbol: Some(Arc::clone(symbol)),
+            alias: None,
+            data: TypeData::Object(ObjectTypeData {
+                structured: StructuredTypeData {
+                    constrained: ConstrainedTypeData::default(),
+                    members: symbol_table,
+                    properties: props,
+                    signatures: Vec::new(),
+                    call_signature_count: 0,
+                    index_infos: Vec::new(),
+                    object_type_without_abstract_construct_signatures:
+                        std::sync::OnceLock::new(),
+                },
+                target: None,
+                mapper: None,
+                type_arguments: Vec::new(),
+            }),
+        });
+        self.value_symbol_links
+            .get_or_default(symbol)
+            .resolved_type = Some(Arc::clone(&result));
+        result
     }
 
     /// Get the type of a function-like expression (FunctionExpression /

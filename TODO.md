@@ -55,17 +55,17 @@ npm install && npm run build
 - 每个迁移行为都应新增或扩展一个 parity case，优先对比 exit code、stdout、
   stderr、输出文件内容。
 
-## 当前进度快照（2026-07-30）
+## 当前进度快照（2026-07-31）
 
-测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 466 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 360 个）。
+测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 480 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 374 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
 | Scanner | 1558 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 完成；缺 trivia 节点、完整 regex 校验 |
 | Parser | 7115 | 9251 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；缺 reparser/jsdoc |
-| Binder | 1639 | ~4000 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 完成；缺完整 flow graph、ARRAY_MUTATION、try/catch/finally、labeled statement、完整 declaration merge |
-| Checker | 9400 | ~50K+ | ~19% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查 + 比较无重叠检查 TS2367 + 不可调用/不可构造检查 TS2349/TS2351；466 parity fixtures 通过；缺 emitresolver visibility tracking、完整 declaration merge checker 侧 |
+| Binder | 1640 | ~4000 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 + EnumDeclaration 容器化 完成；缺完整 flow graph、ARRAY_MUTATION、try/catch/finally、labeled statement |
+| Checker | 9600 | ~50K+ | ~19% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查 + 比较无重叠检查 TS2367 + 不可调用/不可构造检查 TS2349/TS2351 + 只读属性赋值检查 TS2540 + declaration merge checker 侧（namespace+function/class 合并 + enum+enum 合并 + enum 成员值类型解析）；480 parity fixtures 通过；缺 emitresolver visibility tracking |
 | Compiler | 759 | — | 基础 | Program 创建/解析/绑定/emit pipeline 通；checker 已接入 |
 | Emitter | 774 | — | 基础 | JS emit 基础；缺 transformer 体系 |
 | Printer | 1578 | — | 基础 | 节点→文本基础 |
@@ -337,9 +337,11 @@ function overload、enum+enum），则将新 declaration 追加到既有 symbol 
 改为遍历 symbol 的全部 `InterfaceDeclaration` 节点，将 members 拼接为单一
 匿名对象类型，对齐 Go 的 `getDeclaredTypeOfInterface`。
 
-- [x] declaration merge：interface + interface（namespace/function/class/enum
-  的 binder 合并规则已写入 `can_merge_symbols`，但 checker 侧的 namespace
-  类型解析、function overload 签名合并、enum 成员合并仍待落地）。
+- [x] declaration merge：interface + interface；namespace+function/class/enum
+  在 checker 侧合并（`get_type_of_merged_namespace_symbol` 将 value 签名与
+  namespace 成员合并为单一对象类型）；enum+enum 合并（`resolve_enum_type`
+  遍历全部 `EnumDeclaration` 收集成员）；enum 成员值类型解析
+  （`resolve_enum_value_type` 构建 enum 对象类型使 `Color.Red` 返回字面量类型）。
 - [ ] export binding：`export { A }` 的 `exportSymbol` → local symbol 链。
 - [ ] import binding：`import { A }` 的 `aliasSymbol` → resolved symbol。
 - [ ] `delayedSymbol`/`aliasSymbol` 特殊符号处理。
