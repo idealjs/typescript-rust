@@ -2187,14 +2187,20 @@ impl Checker {
     /// `new Foo(arg)` calls (TS2345).
     fn get_type_of_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let members = match &node.data {
-            crate::ast::NodeData::ClassDeclaration(data) => &data.members,
+            crate::ast::NodeData::ClassDeclaration(data) => (&data.members, data.heritage_clauses.clone()),
             _ => return self.get_any_type(),
         };
+        // Build the class's instance type (including inherited members from
+        // `extends`) to use as the construct signature's return type. This
+        // makes `new Foo()` return the instance type, so `instance.prop`
+        // is properly checked. Mirrors Go's `createClassType` →
+        // `getInstanceTypeFromClassType`.
+        let instance_type = self.build_class_instance_type_with_base(node);
         // Push the class scope so type-parameter references in constructor
         // parameter annotations resolve.
         self.push_scope(node);
         let mut construct_sigs: Vec<Arc<Signature>> = Vec::new();
-        for member in members.iter() {
+        for member in members.0.iter() {
             if member.kind != SyntaxKind::Constructor {
                 continue;
             }
@@ -2202,10 +2208,9 @@ impl Checker {
                 crate::ast::NodeData::ConstructorDeclaration(data) => &data.parameters,
                 _ => continue,
             };
-            let return_type = self.get_any_type(); // instance type
             let sig = self.build_signature_from_function_like_type_node(
                 params,
-                return_type,
+                Arc::clone(&instance_type),
                 /* is_construct */ true,
                 /* contextual_signature */ None,
                 /* declaration */ Some(Arc::clone(member)),
@@ -2218,7 +2223,7 @@ impl Checker {
             // Synthesize a no-arg construct signature.
             let sig = self.build_signature_from_function_like_type_node(
                 &Arc::new(NodeList::default()),
-                self.get_any_type(),
+                Arc::clone(&instance_type),
                 /* is_construct */ true,
                 None,
                 /* declaration */ None,

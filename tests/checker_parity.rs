@@ -592,6 +592,88 @@ fn checker_generic_constraint_no_error() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// New expression instance type
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_new_expression_property_access_no_error() {
+    // `new Foo()` returns the instance type; `f.x` resolves.
+    let diags = check_source(
+        "class Foo { x: number = 1; }\n\
+         let f = new Foo();\n\
+         let n: number = f.x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_new_expression_property_missing_ts2339() {
+    // `f.missing` does not exist on the instance type.
+    let diags = check_source(
+        "class Foo { x: number = 1; }\n\
+         let f = new Foo();\n\
+         f.missing;",
+    );
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_new_expression_method_call_no_error() {
+    // `f.greet()` resolves to the instance method.
+    let diags = check_source(
+        "class Foo { greet(): string { return 'hi'; } }\n\
+         let f = new Foo();\n\
+         let s: string = f.greet();",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_new_expression_inherited_property_no_error() {
+    // `new Derived()` has inherited `x` from `Base`.
+    let diags = check_source(
+        "class Base { x: number = 1; }\n\
+         class Derived extends Base {}\n\
+         let d = new Derived();\n\
+         let n: number = d.x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_new_expression_inherited_method_no_error() {
+    // `new Derived()` has inherited `greet()` from `Base`.
+    let diags = check_source(
+        "class Base { greet(): string { return 'hi'; } }\n\
+         class Derived extends Base {}\n\
+         let d = new Derived();\n\
+         let s: string = d.greet();",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_new_expression_wrong_property_type_ts2322() {
+    // `f.x` is `number`, not `string`.
+    let diags = check_source(
+        "class Foo { x: number = 1; }\n\
+         let f = new Foo();\n\
+         let s: string = f.x;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_new_expression_constructor_args_ts2345() {
+    // `new Foo('hi')` — constructor expects `number`.
+    let diags = check_source(
+        "class Foo { constructor(n: number) {} }\n\
+         new Foo('hi');",
+    );
+    assert_diagnostic_code(&diags, 2345);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Union and intersection types (no diagnostics expected)
 // ────────────────────────────────────────────────────────────────────────────
 
