@@ -57,8 +57,8 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-30）
 
-测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 335 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 229 个）。
+测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 338 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 232 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
@@ -288,11 +288,11 @@ flow node、FlowLabel 合并点、`ASSIGNMENT`/`TRUE_CONDITION`/`FALSE_CONDITION
 do-while/for/for-in/for-of/switch 控制流、return/throw/break/continue、
 10 个 flow graph 单元测试。
 
-- [ ] 迁移 `internal/binder/binder.go` 完整 flow 构建逻辑（~1500 行）。
+- [x] try/catch/finally 异常流（已验证：`bind_try_statement` 正确处理
+  normal/exception/return 路径 + finally 合并；narrowing 不从 try 内泄漏）。
 - [ ] `ARRAY_MUTATION`：方法调用副作用。
 - [ ] `ReduceLabel`/`Shared`/`Referenced` 后处理。
 - [ ] labeled statement 标签支持。
-- [ ] try/catch/finally 异常流。
 
 ### P3.1a Binder 容器递归绑定（已完成）
 

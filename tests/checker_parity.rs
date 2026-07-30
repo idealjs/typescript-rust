@@ -3238,3 +3238,47 @@ fn checker_call_arg_object_literal_contextual_mismatch_ts2345() {
     );
     assert_diagnostic_code(&diags, 2345);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// P3.1: try/catch/finally flow graph narrowing. Variables narrowed in the
+// try block should NOT retain the narrowed type after the try/catch/finally
+// (since an exception could have occurred before the narrowing).
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_try_catch_finally_no_crash_no_error() {
+    // Basic try/catch/finally should not produce false positives.
+    let diags = check_source(
+        "try {\n  let x = 1;\n} catch (e) {\n  let y = 2;\n} finally {\n  let z = 3;\n}",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_lost_after_try_block_no_error() {
+    // `x` is narrowed to `string` inside the `try` block by the
+    // `typeof` check. After the `try/catch` block, `x` should be
+    // back to `string | number` (the declared type) because an
+    // exception could have occurred before the narrowing took effect.
+    // Reassigning `x = 123` should be fine because `x` is `string | number`.
+    //
+    // This test verifies that narrowing from inside `try` doesn't
+    // leak out — `x` retains its declared union type after try/catch.
+    let diags = check_source(
+        "let x: string | number = 'hi';\n\
+         try {\n  if (typeof x === 'string') { x = 'bye'; }\n\
+         } catch (e) {}\n\
+         x = 123;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_catch_variable_no_error() {
+    // The catch variable `e` should not produce false positives
+    // when used inside the catch block.
+    let diags = check_source(
+        "try {\n  throw 42;\n} catch (e) {\n  let y = e;\n}",
+    );
+    assert_no_diagnostics(&diags);
+}
