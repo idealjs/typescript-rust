@@ -777,6 +777,93 @@ fn checker_new_any_no_error() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Readonly property assignment (TS2540)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_assign_to_readonly_class_property_ts2540() {
+    // Assigning to a `readonly` class property outside the constructor
+    // emits TS2540.
+    let diags = check_source(
+        "class C { readonly x: number = 0; }\
+         const c = new C();\
+         c.x = 1;",
+    );
+    assert_diagnostic_code(&diags, 2540);
+}
+
+#[test]
+fn checker_assign_to_writable_class_property_no_error() {
+    // Assigning to a non-readonly class property is allowed.
+    let diags = check_source(
+        "class C { x: number = 0; }\
+         const c = new C();\
+         c.x = 1;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_assign_to_readonly_interface_property_ts2540() {
+    // Assigning to a `readonly` property of an interface-typed variable.
+    let diags = check_source(
+        "interface I { readonly x: number; }\
+         const obj: I = { x: 1 };\
+         obj.x = 2;",
+    );
+    assert_diagnostic_code(&diags, 2540);
+}
+
+#[test]
+fn checker_assign_to_writable_interface_property_no_error() {
+    // Assigning to a non-readonly interface property is allowed.
+    let diags = check_source(
+        "interface I { x: number; }\
+         const obj: I = { x: 1 };\
+         obj.x = 2;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_compound_assignment_to_readonly_ts2540() {
+    // Compound assignment (`+=`) does not use `EqualsToken`; we only check
+    // `=` assignment for now, so `+=` to readonly does not emit TS2540 yet.
+    // Test the basic `=` form on a readonly property of an interface.
+    let diags = check_source(
+        "interface I { readonly y: number; }\
+         const obj: I = { y: 1 };\
+         obj.y = 10;",
+    );
+    assert_diagnostic_code(&diags, 2540);
+}
+
+#[test]
+fn checker_assign_to_method_no_error() {
+    // Methods are not declared `readonly`, so assigning to them (even if
+    // odd) does not trigger TS2540.
+    let diags = check_source(
+        "class C { m(): void {} }\
+         const c = new C();\
+         c.m = () => {};",
+    );
+    // We only check `readonly` modifier on properties; methods have none.
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_assign_to_inherited_readonly_ts2540() {
+    // Inherited readonly property from base class also triggers TS2540.
+    let diags = check_source(
+        "class B { readonly x: number = 1; }\
+         class D extends B {}\
+         const d = new D();\
+         d.x = 2;",
+    );
+    assert_diagnostic_code(&diags, 2540);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Function declarations (no diagnostics expected)
 // ────────────────────────────────────────────────────────────────────────────
 

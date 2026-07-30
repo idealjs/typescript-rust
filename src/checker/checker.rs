@@ -18,7 +18,8 @@ use crate::core::compiler_options::{
 };
 use crate::diagnostics::messages_generated::{
     ARGUMENT_EXPRESSION_EXPECTED, ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1,
-    CANNOT_FIND_NAME_0, PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+    CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_READ_ONLY_PROPERTY, CANNOT_FIND_NAME_0,
+    PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
     THIS_COMPARISON_APPEARS_TO_BE_UNINTENTIONAL_BECAUSE_THE_TYPES_0_AND_1_HAVE_NO_OVERLAP,
     THIS_EXPRESSION_IS_NOT_CALLABLE, THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE,
     TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
@@ -2381,6 +2382,48 @@ impl Checker {
         self.get_any_type()
     }
 
+    /// Whether a property named `name` on type `t` is declared `readonly`.
+    ///
+    /// Walks the structured type's `members` symbol table to find the
+    /// property's symbol, then inspects each declaration node for the
+    /// `ReadonlyKeyword` modifier. Mirrors Go's
+    /// `isReadonlySymbol`/`getDeclarationModifierFlagsFromDeclarations`
+    /// read-only check used by `checkAssignmentStatement`.
+    ///
+    /// Returns `false` if the type is not structured, the property doesn't
+    /// exist, or the symbol has no declaration with `readonly`. Conservative
+    /// (returns `false`) to avoid false positives.
+    fn is_property_readonly(&self, t: &Arc<Type>, name: &str) -> bool {
+        let Some(structured) = t.as_structured() else {
+            return false;
+        };
+        let Some(symbol) = structured.members.get(name) else {
+            return false;
+        };
+        // Check if any of the symbol's declarations carry the `readonly`
+        // modifier (e.g. `readonly x: number` in a class body or
+        // `readonly` parameter property).
+        for decl in &symbol.declarations {
+            let modifiers = match &decl.data {
+                crate::ast::NodeData::PropertyDeclaration(d) => &d.modifiers,
+                crate::ast::NodeData::PropertySignatureDeclaration(d) => &d.modifiers,
+                crate::ast::NodeData::ParameterDeclaration(d) => &d.modifiers,
+                _ => continue,
+            };
+            if let Some(m) = modifiers {
+                if m.modifier_flags.contains(ModifierFlags::Readonly) {
+                    return true;
+                }
+            }
+        }
+        // Also honor `CheckFlags::Readonly` set elsewhere (e.g. on
+        // synthetic property symbols created from index signatures).
+        if symbol.check_flags.contains(CheckFlags::Readonly) {
+            return true;
+        }
+        false
+    }
+
     /// Whether a property named `name` exists on `t`, handling unions,
     /// intersections, type parameters, arrays, and primitives.
     ///
@@ -3756,6 +3799,30 @@ impl Checker {
                 if let crate::ast::NodeData::BinaryExpression(data) = &node.data {
                     self.check_expression(&data.left);
                     self.check_expression(&data.right);
+                    use crate::ast::SyntaxKind::*;
+                    // TS2540: `obj.prop = value` where `prop` is declared
+                    // `readonly` (a `readonly` modifier on a class property
+                    // or parameter property). Mirrors Go's
+                    // `checkAssignmentStatement` read-only check.
+                    if data.operator_token.kind == EqualsToken
+                        && data.left.kind == SyntaxKind::PropertyAccessExpression
+                    {
+                        if let crate::ast::NodeData::PropertyAccessExpression(pa) =
+                            &data.left.data
+                        {
+                            let obj_type = self.get_type_of_node(&pa.expression);
+                            let name_text = pa.name.text();
+                            if self.is_property_readonly(&obj_type, name_text) {
+                                let file = self.current_file.clone();
+                                self.diagnostics.add(crate::ast::Diagnostic::new(
+                                    file,
+                                    pa.name.loc,
+                                    CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_READ_ONLY_PROPERTY,
+                                    vec![name_text.to_string()],
+                                ));
+                            }
+                        }
+                    }
                     // TS2367: For equality/relational comparisons between
                     // types with no overlap, the comparison is always
                     // `false` (or `true` for `!=`/`!==`). Mirrors Go's
@@ -3763,7 +3830,6 @@ impl Checker {
                     // (checker.go ~L13800). Skipped for `any`/`unknown`/
                     // `never`/`null`/`undefined` operands (per Go's
                     // `isTypeRelatedTo` short-circuits).
-                    use crate::ast::SyntaxKind::*;
                     let is_equality_op = matches!(
                         data.operator_token.kind,
                         EqualsEqualsToken

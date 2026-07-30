@@ -11,7 +11,10 @@ use std::collections::HashMap;
 use std::sync::{Arc, OnceLock};
 
 use crate::ast::node_data_generated::NodeData;
-use crate::ast::{ModifierFlags, ModifierList, Node, NodeList, Symbol, SymbolFlags, SymbolTable, SyntaxKind};
+use crate::ast::{
+    CheckFlags, ModifierFlags, ModifierList, Node, NodeList, Symbol, SymbolFlags, SymbolTable,
+    SyntaxKind,
+};
 use crate::jsnum;
 
 use super::checker::Checker;
@@ -552,7 +555,18 @@ impl Checker {
                     if is_optional {
                         flags |= SymbolFlags::Optional;
                     }
-                    let symbol = Arc::new(Symbol::new(flags, name.clone()));
+                    let mut symbol = Symbol::new(flags, name.clone());
+                    // Propagate the `readonly` modifier onto the synthetic
+                    // symbol so the checker can detect TS2540 assignments
+                    // to readonly interface properties. Mirrors Go's
+                    // `getDeclarationModifierFlagsFromSymbol` returning
+                    // `ModifierFlagsReadonly`.
+                    if let Some(m) = &data.modifiers {
+                        if m.modifier_flags.contains(ModifierFlags::Readonly) {
+                            symbol.check_flags |= CheckFlags::Readonly;
+                        }
+                    }
+                    let symbol = Arc::new(symbol);
                     self.value_symbol_links.insert(
                         &symbol,
                         ValueSymbolLinks {
@@ -647,7 +661,18 @@ impl Checker {
                     if is_optional {
                         flags |= SymbolFlags::Optional;
                     }
-                    let symbol = Arc::new(Symbol::new(flags, name.clone()));
+                    let mut symbol = Symbol::new(flags, name.clone());
+                    // Propagate the `readonly` modifier so the checker can
+                    // emit TS2540 for assignments to readonly class properties
+                    // outside the constructor. Mirrors Go's
+                    // `getDeclarationModifierFlagsFromDeclarations` returning
+                    // `ModifierFlagsReadonly`.
+                    if let Some(m) = &data.modifiers {
+                        if m.modifier_flags.contains(ModifierFlags::Readonly) {
+                            symbol.check_flags |= CheckFlags::Readonly;
+                        }
+                    }
+                    let symbol = Arc::new(symbol);
                     self.value_symbol_links.insert(
                         &symbol,
                         ValueSymbolLinks {
