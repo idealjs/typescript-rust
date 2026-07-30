@@ -591,8 +591,46 @@ impl Checker {
         args: &[Arc<crate::ast::Node>],
         context: &mut InferenceContext,
     ) -> Vec<Arc<Type>> {
-        // TODO: contextual typing from return type
-        // For now, infer types from each argument against the parameter types
+        // Contextual typing from return type.
+        //
+        // If the call expression has a contextual type (e.g., from a variable
+        // annotation), infer from that contextual type to the return type of
+        // the signature. For example, given:
+        //   declare function wrap<T, U>(cb: (x: T) => U): (x: T) => U;
+        //   let f: (x: string) => number = wrap(s => s.length);
+        // we infer T=string, U=number from the declared type of `f`.
+        //
+        // This ports the non-JSX, non-decorator branch of Go's
+        // `inferTypeArguments`. The full Go implementation also handles
+        // binding-pattern inference and outer inference context cloning;
+        // those require additional infrastructure and are deferred.
+        if matches!(
+            node.kind,
+            SyntaxKind::CallExpression | SyntaxKind::NewExpression
+        ) {
+            // Only call/new expressions have a contextual return type path.
+            // (Go also handles binary expressions and decorators elsewhere.)
+            //
+            // We check the parent chain directly to find a contextual type
+            // (e.g., a variable declaration with a type annotation). The full
+            // Go path uses `getContextualType`; here we inline a subset that
+            // covers the common `let x: T = expr(...)` pattern.
+            if let Some(contextual_type) = self.get_contextual_type_for_call_or_new(node) {
+                if let Some(return_type) = self.get_return_type_of_signature(signature) {
+                    if self.could_contain_type_variables(&return_type) {
+                        self.infer_types(
+                            &mut context.inferences,
+                            Some(contextual_type),
+                            Some(return_type),
+                            InferencePriority::ReturnType,
+                            false,
+                        );
+                    }
+                }
+            }
+        }
+
+        // Infer types from each argument against the parameter types.
         let param_count = signature.parameters.len().min(args.len());
         for i in 0..param_count {
             let param = &signature.parameters[i];
@@ -879,8 +917,167 @@ impl Checker {
             return Some(self.get_type_from_type_node(type_node));
         }
 
-        // TODO: implement parameter contextual typing and binding patterns
+        // No type annotation. If the declaration is a BindingElement, attempt
+        // to derive a contextual type from the binding pattern's initializer.
+        // This ports the binding-pattern branch of Go's
+        // `getContextualTypeForInitializerExpression` (which calls
+        // `getTypeFromBindingPattern`). We implement a simplified version that
+        // walks up to the enclosing VariableDeclaration, evaluates the
+        // initializer's type, and indexes into it for array/object patterns.
+        if let NodeData::BindingElement(_) = &declaration.data {
+            if let Some(ctx) = self.get_contextual_type_from_binding_element(declaration) {
+                return Some(ctx);
+            }
+        }
+
         None
+    }
+
+    /// Derive a contextual type for a `BindingElement`'s initializer by
+    /// walking up to the enclosing `VariableDeclaration` and evaluating the
+    /// initializer expression's type, then indexing into it for array/object
+    /// binding patterns.
+    ///
+    /// Simplified port of Go's `getTypeFromBindingPattern` +
+    /// `getContextualTypeForBindingElement`. The full Go implementation
+    /// constructs an anonymous object type from the pattern; here we return
+    /// the element/property type for the specific binding element so that
+    /// initializers like `const [a = 42] = arr` get `arr`'s element type as
+    /// context.
+    fn get_contextual_type_from_binding_element(
+        &mut self,
+        binding_element: &Arc<crate::ast::Node>,
+    ) -> Option<Arc<Type>> {
+        use crate::ast::NodeData;
+
+        // BindingElement → BindingPattern → VariableDeclaration
+        let binding_pattern = binding_element.parent.as_ref()?;
+        let var_declaration = binding_pattern.parent.as_ref()?;
+
+        let var_data = match &var_declaration.data {
+            NodeData::VariableDeclaration(d) => d,
+            _ => return None,
+        };
+
+        let initializer = var_data.initializer.as_ref()?;
+        let init_type = self.get_type_of_node(initializer);
+
+        match binding_pattern.kind {
+            SyntaxKind::ArrayBindingPattern => {
+                // Find this element's index in the pattern.
+                let elements = match &binding_pattern.data {
+                    NodeData::BindingPattern(d) => &d.elements,
+                    _ => return None,
+                };
+                let idx = elements
+                    .nodes
+                    .iter()
+                    .position(|e| Arc::ptr_eq(e, binding_element))?;
+                // Element type of the initializer (if array/tuple).
+                self.get_element_type_of_array(&init_type, idx)
+            }
+            SyntaxKind::ObjectBindingPattern => {
+                // Property name from the binding element.
+                let be_data = match &binding_element.data {
+                    NodeData::BindingElement(d) => d,
+                    _ => return None,
+                };
+                let property_name = be_data.property_name.as_ref().unwrap_or_else(|| {
+                    be_data
+                        .name
+                        .as_ref()
+                        .expect("binding element has name or property_name")
+                });
+                let name = property_name.text();
+                self.property_type_of_type(&init_type, &name)
+            }
+            _ => None,
+        }
+    }
+
+    /// Get the element type at `index` from an array or tuple type.
+    fn get_element_type_of_array(
+        &mut self,
+        t: &Arc<Type>,
+        index: usize,
+    ) -> Option<Arc<Type>> {
+        // Tuple type: return the specific element type if in range.
+        if let TypeData::Tuple(tuple) = &t.data {
+            if index < tuple.element_infos.len() {
+                if let Some(ref elem) = tuple.element_infos[index].type_ {
+                    return Some(Arc::clone(elem));
+                }
+            }
+        }
+        // Array<T>: return T (always succeeds, defaults to `any`).
+        if t.flags.contains(TypeFlags::Object) {
+            return Some(self.get_array_element_type(t));
+        }
+        None
+    }
+
+    /// Get the type of a named property of an object/interface type.
+    /// (Reuses `get_property_of_type` from flow.rs via `pub(super)`; defined
+    /// here under a different name to avoid clashing with flow.rs's
+    /// `get_property_type_of_type`.)
+    fn property_type_of_type(
+        &mut self,
+        t: &Arc<Type>,
+        name: &str,
+    ) -> Option<Arc<Type>> {
+        let prop = self.get_property_of_type(t, name)?;
+        Some(self.get_type_of_symbol(&prop))
+    }
+
+    /// Inline subset of `get_contextual_type` for call/new expressions.
+    ///
+    /// Returns the contextual type when a call/new expression is the
+    /// initializer of a variable/parameter/property declaration with a type
+    /// annotation, or the return value of a function with a return type
+    /// annotation. This covers the common pattern
+    /// `let x: T = genericFn(...)` where T should flow into inference of
+    /// genericFn's return type.
+    fn get_contextual_type_for_call_or_new(
+        &mut self,
+        node: &crate::ast::Node,
+    ) -> Option<Arc<Type>> {
+        use crate::ast::NodeData;
+
+        let parent = node.parent.as_ref()?;
+        match &parent.data {
+            NodeData::VariableDeclaration(data) => {
+                data.type_node
+                    .as_ref()
+                    .map(|tn| self.get_type_from_type_node(tn))
+            }
+            NodeData::ReturnStatement(_) => {
+                // return genericFn(...) — contextual type is the function's
+                // declared return type.
+                let fn_node = parent.parent.as_ref()?;
+                self.get_return_type_annotation_of_function(fn_node)
+            }
+            _ => None,
+        }
+    }
+
+    /// Get the declared return type annotation of a function-like node.
+    fn get_return_type_annotation_of_function(
+        &mut self,
+        node: &crate::ast::Node,
+    ) -> Option<Arc<Type>> {
+        use crate::ast::NodeData;
+
+        let type_node = match &node.data {
+            NodeData::FunctionDeclaration(d) => d.type_node.as_ref(),
+            NodeData::FunctionExpression(d) => d.type_node.as_ref(),
+            NodeData::ArrowFunction(d) => d.type_node.as_ref(),
+            NodeData::MethodDeclaration(d) => d.type_node.as_ref(),
+            NodeData::MethodSignatureDeclaration(d) => d.type_node.as_ref(),
+            NodeData::GetAccessorDeclaration(d) => d.type_node.as_ref(),
+            NodeData::SetAccessorDeclaration(_) => None,
+            _ => None,
+        };
+        type_node.map(|tn| self.get_type_from_type_node(tn))
     }
 
     /// Get the contextual type for a return expression.

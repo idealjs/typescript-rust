@@ -98,10 +98,15 @@ arity）+ 12 个 parity fixtures。
    `MapFn` 签名从 `Fn(&Type)` 改为 `Fn(&Arc<Type>)`，使不匹配时返回输入
    类型而非错误目标。**遗留**：`isEnumTypeRelatedTo` 的 enum member 值比较
    （需 `getEnumMemberValue` + `enumRelation` 缓存）待后续补齐。
-2. **P3.8 Checker 推断收尾**：`inference.rs` 两处 TODO——contextual typing
-   from return type、parameter contextual typing + binding patterns；
-   freshness tracking（`checker.rs:1460` freshType）影响 literal widening
-   精度。
+2. **P3.8 Checker 推断收尾**（部分完成）：`inference.rs` 两处 TODO 已落地
+   ——contextual typing from return type（`infer_type_arguments` 中从调用
+   表达式的上下文类型推断返回类型，覆盖 `let x: T = genericFn(...)` 与
+   `return genericFn(...)` 模式）、parameter contextual typing + binding
+   patterns（`get_contextual_type_for_initializer_expression` 中 BindingElement
+   分支，回溯到 VariableDeclaration initializer 类型并按 array/object pattern
+   提取元素/属性类型）。**遗留**：freshness tracking（`checker.rs:1460`
+   freshType，影响 literal widening 精度）需要 `OBJECT_FLAGS_REQUIRES_WIDENING`
+   在创建类型时设置 + `getWidenedTypeOfObjectLiteral` 完整移植，留后续。
 3. **P3.1 Binder flow graph 收尾**：`ReduceLabel`/`Shared`/`Referenced`
    后处理、labeled statement。try/catch/finally 已完成。
 4. **P3.9 Checker 控制流 narrowing**：已大体完成，按 fixture 缺口补齐。
