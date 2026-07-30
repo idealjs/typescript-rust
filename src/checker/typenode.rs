@@ -498,11 +498,9 @@ impl Checker {
                 // type (real TS would report TS2717 here).
                 let merged_members: Vec<Arc<Node>> = interface_decls
                     .iter()
-                    .flat_map(|decl| {
-                        match &decl.data {
-                            NodeData::InterfaceDeclaration(d) => d.members.iter().cloned(),
-                            _ => unreachable!(),
-                        }
+                    .flat_map(|decl| match &decl.data {
+                        NodeData::InterfaceDeclaration(d) => d.members.iter().cloned(),
+                        _ => unreachable!(),
                     })
                     .collect();
                 let merged_list = Arc::new(NodeList::new(merged_members));
@@ -942,9 +940,7 @@ impl Checker {
                 ..Default::default()
             }),
         });
-        self.type_alias_links
-            .get_or_default(symbol)
-            .declared_type = Some(Arc::clone(&result));
+        self.type_alias_links.get_or_default(symbol).declared_type = Some(Arc::clone(&result));
         result
     }
 
@@ -1758,10 +1754,9 @@ impl Checker {
                             return self.get_type_of_symbol(sym);
                         }
                         // Fall back to index signature.
-                        if let Some(value_type) = self.lookup_index_signature_value(
-                            structured,
-                            index_type,
-                        ) {
+                        if let Some(value_type) =
+                            self.lookup_index_signature_value(structured, index_type)
+                        {
                             return value_type;
                         }
                     }
@@ -1866,9 +1861,10 @@ impl Checker {
             span_texts.push(template_token_text(&literal_node));
         }
         // Attempt to flatten: every span type must be a concrete literal.
-        let all_literal = span_types
-            .iter()
-            .all(|t| t.flags.intersects(TYPE_FLAGS_LITERAL | TypeFlags::Null | TypeFlags::Undefined));
+        let all_literal = span_types.iter().all(|t| {
+            t.flags
+                .intersects(TYPE_FLAGS_LITERAL | TypeFlags::Null | TypeFlags::Undefined)
+        });
         if all_literal {
             let mut sb = String::new();
             sb.push_str(&head_text);
@@ -1975,7 +1971,9 @@ impl Checker {
             .symbol_map()
             .symbol_of(&data.type_parameter)
             .map(Arc::clone);
-        let tp_key = tp_symbol.as_ref().map(|s| Arc::as_ptr(s) as *const crate::ast::Symbol);
+        let tp_key = tp_symbol
+            .as_ref()
+            .map(|s| Arc::as_ptr(s) as *const crate::ast::Symbol);
         // Optional (`?`) modifier.
         let is_optional = data
             .question_token

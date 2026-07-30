@@ -16,9 +16,12 @@ use crate::ast::{
 use crate::core::compiler_options::{
     CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget,
 };
+use crate::core::text::TextRange;
 use crate::diagnostics::messages_generated::{
+    A_SPREAD_ARGUMENT_MUST_EITHER_HAVE_A_TUPLE_TYPE_OR_BE_PASSED_TO_A_REST_PARAMETER,
     ARGUMENT_EXPRESSION_EXPECTED, ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1,
     CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_READ_ONLY_PROPERTY, CANNOT_FIND_NAME_0,
+    EXPECTED_0_ARGUMENTS_BUT_GOT_1, EXPECTED_AT_LEAST_0_ARGUMENTS_BUT_GOT_1,
     PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
     THIS_COMPARISON_APPEARS_TO_BE_UNINTENTIONAL_BECAUSE_THE_TYPES_0_AND_1_HAVE_NO_OVERLAP,
     THIS_EXPRESSION_IS_NOT_CALLABLE, THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE,
@@ -835,9 +838,7 @@ impl Checker {
             .set(arr.clone())
             .ok()
             .map(|()| arr.clone())
-            .unwrap_or_else(|| {
-                self.auto_array_type.get().cloned().unwrap_or(arr)
-            })
+            .unwrap_or_else(|| self.auto_array_type.get().cloned().unwrap_or(arr))
     }
 
     /// Create an evolving array type with the given element type.
@@ -1242,9 +1243,7 @@ impl Checker {
                 };
                 Self::is_ambient_module(grandparent)
                     && matches!(&grandparent.parent, Some(ggp) if ggp.kind == SyntaxKind::SourceFile)
-                    && !Self::is_external_or_common_js_module(
-                        grandparent.parent.as_ref().unwrap(),
-                    )
+                    && !Self::is_external_or_common_js_module(grandparent.parent.as_ref().unwrap())
             }
             _ => false,
         }
@@ -1274,10 +1273,7 @@ impl Checker {
         match node.kind {
             SyntaxKind::ImportEqualsDeclaration => Some(Arc::clone(node)),
             SyntaxKind::ImportClause => node.parent.clone(),
-            SyntaxKind::NamespaceImport => node
-                .parent
-                .clone()
-                .and_then(|p| p.parent.clone()),
+            SyntaxKind::NamespaceImport => node.parent.clone().and_then(|p| p.parent.clone()),
             SyntaxKind::ImportSpecifier => node
                 .parent
                 .clone()
@@ -2107,7 +2103,10 @@ impl Checker {
                 // When not inside a class (e.g. top-level `this` in a
                 // module), falls back to `any` (or `globalThis` in
                 // script-mode — simplified to `any` here).
-                self.this_type_stack.last().cloned().unwrap_or_else(|| self.get_any_type())
+                self.this_type_stack
+                    .last()
+                    .cloned()
+                    .unwrap_or_else(|| self.get_any_type())
             }
             _ => self.get_any_type(),
         }
@@ -2202,8 +2201,7 @@ impl Checker {
         let recurse = match &parent.data {
             NodeData::ParenthesizedExpression(_) => true,
             NodeData::BinaryExpression(bin) => {
-                (bin.operator_token.kind == SyntaxKind::EqualsToken
-                    && Arc::ptr_eq(&bin.left, node))
+                (bin.operator_token.kind == SyntaxKind::EqualsToken && Arc::ptr_eq(&bin.left, node))
                     || (bin.operator_token.kind == SyntaxKind::CommaToken
                         && Arc::ptr_eq(&bin.right, node))
             }
@@ -2339,9 +2337,8 @@ impl Checker {
                     // Namespace type isn't an object (unexpected); nothing
                     // to merge into, so return the value type which carries
                     // the signatures.
-                    self.type_alias_links
-                        .get_or_default(symbol)
-                        .declared_type = Some(Arc::clone(&value_type));
+                    self.type_alias_links.get_or_default(symbol).declared_type =
+                        Some(Arc::clone(&value_type));
                     return value_type;
                 }
             };
@@ -2380,9 +2377,7 @@ impl Checker {
         };
 
         // Cache the merged type so future lookups hit the cache above.
-        self.type_alias_links
-            .get_or_default(symbol)
-            .declared_type = Some(Arc::clone(&merged));
+        self.type_alias_links.get_or_default(symbol).declared_type = Some(Arc::clone(&merged));
         merged
     }
 
@@ -2474,17 +2469,14 @@ impl Checker {
                     signatures: Vec::new(),
                     call_signature_count: 0,
                     index_infos: Vec::new(),
-                    object_type_without_abstract_construct_signatures:
-                        std::sync::OnceLock::new(),
+                    object_type_without_abstract_construct_signatures: std::sync::OnceLock::new(),
                 },
                 target: None,
                 mapper: None,
                 type_arguments: Vec::new(),
             }),
         });
-        self.value_symbol_links
-            .get_or_default(symbol)
-            .resolved_type = Some(Arc::clone(&result));
+        self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&result));
         result
     }
 
@@ -2646,7 +2638,9 @@ impl Checker {
     /// `new Foo(arg)` calls (TS2345).
     fn get_type_of_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let members = match &node.data {
-            crate::ast::NodeData::ClassDeclaration(data) => (&data.members, data.heritage_clauses.clone()),
+            crate::ast::NodeData::ClassDeclaration(data) => {
+                (&data.members, data.heritage_clauses.clone())
+            }
             _ => return self.get_any_type(),
         };
         // Build the class's instance type (including inherited members from
@@ -2698,7 +2692,9 @@ impl Checker {
     /// fall back to `any`.
     fn get_return_type_of_call_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let callee = match &node.data {
-            crate::ast::NodeData::CallExpression(data) => (&data.expression, data.arguments.clone()),
+            crate::ast::NodeData::CallExpression(data) => {
+                (&data.expression, data.arguments.clone())
+            }
             _ => return self.get_any_type(),
         };
         let callee_type = self.get_type_of_node(&callee.0);
@@ -3121,32 +3117,173 @@ impl Checker {
             self.find_matching_signature(signatures, &arguments)
         };
         let sig = Arc::clone(&signatures[matching_idx]);
-        let file = self.current_file.clone();
-        for (i, arg) in arguments.iter().enumerate() {
-            if i < sig.parameters.len() {
-                let param_type = self.get_type_of_symbol(&sig.parameters[i]);
-                // `any` parameter → always assignable, skip.
-                if param_type.flags.contains(TypeFlags::Any) {
-                    continue;
-                }
-                let arg_type = self.get_type_of_node(arg);
-                if !self.is_type_assignable_to(&arg_type, &param_type) {
-                    let arg_str = self.type_to_string(&arg_type);
-                    let param_str = self.type_to_string(&param_type);
-                    self.diagnostics.add(crate::ast::Diagnostic::new(
-                        file.clone(),
-                        arg.loc,
-                        ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1,
-                        vec![arg_str, param_str],
-                    ));
-                }
-            }
-            // Arguments beyond the declared parameter list are only valid
-            // when the signature has a rest parameter; the rest element
-            // type check would require unwrapping the array type, which we
-            // defer. For now, extra arguments on non-rest signatures are
-            // not reported here (the grammar check covers arity separately).
+        // Arity check: mirror Go's `getArgumentArityError`. If the argument
+        // count doesn't match the signature's parameter range, emit TS2554
+        // ("Expected N arguments, but got M") or TS2555 ("Expected at least N
+        // arguments, but got M") for rest-parameter signatures, and skip the
+        // per-argument type checks (matching tsc, which reports the arity
+        // error as the primary call error).
+        if !self.check_call_arity(node, &sig, &arguments, callee_expr, is_new) {
+            return;
         }
+        let file = self.current_file.clone();
+        // When the signature has a rest parameter (always the last one),
+        // arguments at/after the rest position are checked against the rest
+        // element type, not the rest array type. Mirrors Go's
+        // `getTypeAtPosition` rest handling.
+        let has_rest = sig.has_rest_parameter();
+        let rest_index = if has_rest {
+            sig.parameters.len().saturating_sub(1)
+        } else {
+            usize::MAX
+        };
+        let rest_element_type = if has_rest {
+            let rest_param_type = self.get_type_of_symbol(&sig.parameters[rest_index]);
+            Some(self.get_array_element_type(&rest_param_type))
+        } else {
+            None
+        };
+        for (i, arg) in arguments.iter().enumerate() {
+            // Determine the parameter type to check against.
+            let param_type = if has_rest && i >= rest_index {
+                // Rest position: check against the array element type.
+                Arc::clone(rest_element_type.as_ref().unwrap())
+            } else if i < sig.parameters.len() {
+                self.get_type_of_symbol(&sig.parameters[i])
+            } else {
+                // Beyond declared params with no rest — should have been
+                // caught by the arity check; skip to avoid false positives.
+                continue;
+            };
+            // `any` parameter → always assignable, skip.
+            if param_type.flags.contains(TypeFlags::Any) {
+                continue;
+            }
+            let arg_type = self.get_type_of_node(arg);
+            if !self.is_type_assignable_to(&arg_type, &param_type) {
+                let arg_str = self.type_to_string(&arg_type);
+                let param_str = self.type_to_string(&param_type);
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file.clone(),
+                    arg.loc,
+                    ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1,
+                    vec![arg_str, param_str],
+                ));
+            }
+        }
+    }
+
+    /// Check call/new-expression argument arity against a signature.
+    ///
+    /// Mirrors the common cases of Go's `getArgumentArityError`: detects
+    /// spread arguments (TS2556), too-few arguments (TS2554/TS2555), and
+    /// too-many arguments on non-rest signatures (TS2554). Returns `true`
+    /// when arity is acceptable (no diagnostic emitted), `false` otherwise.
+    ///
+    /// For too-few errors the diagnostic spans the callee expression
+    /// (matching Go's `getErrorNodeForCallNode`); for too-many errors it
+    /// spans the extra arguments, from `args[maxCount]` to the last arg.
+    /// The `parameterRange` string follows tsc: `min` for rest signatures,
+    /// `min-max` when min < max, otherwise `min`.
+    fn check_call_arity(
+        &mut self,
+        node: &Arc<Node>,
+        sig: &Arc<Signature>,
+        arguments: &Arc<NodeList>,
+        callee_expr: &Arc<Node>,
+        is_new: bool,
+    ) -> bool {
+        let arg_count = arguments.len();
+
+        // Spread arguments require a rest parameter or a tuple-typed rest.
+        // Mirror Go's `getSpreadArgumentIndex` + early return.
+        if let Some(spread_idx) = arguments
+            .nodes
+            .iter()
+            .position(|a| matches!(a.data, crate::ast::NodeData::SpreadElement(_)))
+        {
+            // A spread is allowed only when it falls at/after the minimum
+            // argument count and the signature has an effective rest
+            // parameter or enough declared parameters to cover it.
+            let min_count = self.get_min_argument_count(sig);
+            let max_count = self.get_parameter_count(sig);
+            let has_rest = self.has_effective_rest_parameter(sig);
+            let spread_ok = spread_idx >= min_count && (has_rest || spread_idx < max_count);
+            if !spread_ok {
+                let file = self.current_file.clone();
+                let spread_node = Arc::clone(&arguments.nodes[spread_idx]);
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    spread_node.loc,
+                    A_SPREAD_ARGUMENT_MUST_EITHER_HAVE_A_TUPLE_TYPE_OR_BE_PASSED_TO_A_REST_PARAMETER,
+                    vec![],
+                ));
+                return false;
+            }
+            // Otherwise the spread is structurally acceptable; defer the
+            // per-element type check.
+            return true;
+        }
+
+        let min_count = self.get_min_argument_count(sig);
+        let max_count = self.get_parameter_count(sig);
+        let has_rest = self.has_effective_rest_parameter(sig);
+
+        // Too many arguments: only an error when there's no effective rest
+        // parameter. The error span covers the trailing extra arguments.
+        if !has_rest && arg_count > max_count {
+            let file = self.current_file.clone();
+            let loc = self.extra_arguments_range(arguments, max_count);
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file,
+                loc,
+                EXPECTED_0_ARGUMENTS_BUT_GOT_1,
+                vec![min_count.to_string(), arg_count.to_string()],
+            ));
+            return false;
+        }
+
+        // Too few arguments.
+        if arg_count < min_count {
+            let file = self.current_file.clone();
+            // Error node: for CallExpression, the callee (optionally the
+            // property-access name); for NewExpression, the whole node.
+            let error_loc = if is_new { node.loc } else { callee_expr.loc };
+            let message = if has_rest {
+                EXPECTED_AT_LEAST_0_ARGUMENTS_BUT_GOT_1
+            } else {
+                EXPECTED_0_ARGUMENTS_BUT_GOT_1
+            };
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file,
+                error_loc,
+                message,
+                vec![min_count.to_string(), arg_count.to_string()],
+            ));
+            return false;
+        }
+
+        true
+    }
+
+    /// Compute the source range for "too many arguments" errors: from the
+    /// first extra argument (`args[maxCount]`) to the end of the last
+    /// argument. Mirrors Go's `getArgumentArityError` trailing-args span.
+    fn extra_arguments_range(&self, arguments: &Arc<NodeList>, max_count: usize) -> TextRange {
+        if max_count >= arguments.nodes.len() {
+            // Defensive: fall back to the whole call's argument range.
+            return arguments.loc;
+        }
+        let start = arguments.nodes[max_count].loc.pos;
+        let mut end = arguments
+            .nodes
+            .last()
+            .map(|a| a.loc.end)
+            .unwrap_or(arguments.loc.end);
+        if end < start {
+            end = start;
+        }
+        TextRange { pos: start, end }
     }
 
     /// Check whether a signature accepts all given arguments (used for
@@ -3155,7 +3292,11 @@ impl Checker {
     ///
     /// Mirrors the "is applicable signature" test in Go's
     /// `checkCallArguments`/`signatureIsAssignable`.
-    fn signature_accepts_arguments(&mut self, sig: &Arc<Signature>, arguments: &Arc<NodeList>) -> bool {
+    fn signature_accepts_arguments(
+        &mut self,
+        sig: &Arc<Signature>,
+        arguments: &Arc<NodeList>,
+    ) -> bool {
         for (i, arg) in arguments.iter().enumerate() {
             if i < sig.parameters.len() {
                 let param_type = self.get_type_of_symbol(&sig.parameters[i]);
@@ -3571,10 +3712,7 @@ impl Checker {
                         // Clone the `Arc<Type>` out of the stack first so we
                         // don't hold an immutable borrow of `self` while
                         // calling mutable methods below.
-                        let expected = self
-                            .return_type_stack
-                            .last()
-                            .and_then(|opt| opt.clone());
+                        let expected = self.return_type_stack.last().and_then(|opt| opt.clone());
                         if let Some(expected) = expected {
                             let actual = self.get_type_of_node(expr);
                             // `any` return value → always assignable.
@@ -3596,10 +3734,7 @@ impl Checker {
                         // a non-void/non-undefined return type, this is an
                         // error (TS1135). Mirrors Go's `checkReturnStatement`
                         // empty-return branch.
-                        let expected = self
-                            .return_type_stack
-                            .last()
-                            .and_then(|opt| opt.clone());
+                        let expected = self.return_type_stack.last().and_then(|opt| opt.clone());
                         if let Some(expected) = expected {
                             if !expected.flags.contains(TypeFlags::Void)
                                 && !expected.flags.contains(TypeFlags::Undefined)
@@ -3692,7 +3827,8 @@ impl Checker {
                             self.value_symbol_links
                                 .get_or_default(&symbol)
                                 .resolved_type = Some(symbol_type.clone());
-                            self.type_node_links.get_or_default(name).resolved_type = Some(symbol_type);
+                            self.type_node_links.get_or_default(name).resolved_type =
+                                Some(symbol_type);
                         }
                     }
                 }
@@ -4253,8 +4389,7 @@ impl Checker {
                     if data.operator_token.kind == EqualsToken
                         && data.left.kind == SyntaxKind::PropertyAccessExpression
                     {
-                        if let crate::ast::NodeData::PropertyAccessExpression(pa) =
-                            &data.left.data
+                        if let crate::ast::NodeData::PropertyAccessExpression(pa) = &data.left.data
                         {
                             let obj_type = self.get_type_of_node(&pa.expression);
                             let name_text = pa.name.text();
@@ -4568,10 +4703,8 @@ impl Checker {
                     // `ReturnStatement` node is involved). Mirrors Go's
                     // `checkFunctionExpressionBody` for arrow bodies.
                     self.check_expression(&body);
-                    if let Some(expected) = self
-                        .return_type_stack
-                        .last()
-                        .and_then(|opt| opt.clone())
+                    if let Some(expected) =
+                        self.return_type_stack.last().and_then(|opt| opt.clone())
                     {
                         let actual = self.get_type_of_node(&body);
                         if !actual.flags.contains(TypeFlags::Any)

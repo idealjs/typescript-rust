@@ -116,9 +116,7 @@ impl Checker {
                 // non-source-file container are visible if exported.
                 let is_ambient_element = node.kind != SyntaxKind::ImportEqualsDeclaration
                     && parent.kind != SyntaxKind::SourceFile
-                    && parent
-                        .flags
-                        .contains(crate::ast::NodeFlags::Ambient);
+                    && parent.flags.contains(crate::ast::NodeFlags::Ambient);
                 if !is_exported && !is_ambient_element {
                     // Not exported: visible only in a global (non-module) script.
                     return Self::is_global_source_file(&parent);
@@ -170,9 +168,9 @@ impl Checker {
 
             // Default binding, namespace import and import specifier are
             // visible only on demand (marked by the alias marking visitor).
-            SyntaxKind::ImportClause | SyntaxKind::NamespaceImport | SyntaxKind::ImportSpecifier => {
-                false
-            }
+            SyntaxKind::ImportClause
+            | SyntaxKind::NamespaceImport
+            | SyntaxKind::ImportSpecifier => false,
 
             // Type parameters are always visible.
             SyntaxKind::TypeParameter => true,
@@ -187,11 +185,7 @@ impl Checker {
             // re-export of the named binding; it contributes to the symbol's
             // external visibility.
             SyntaxKind::ExportSpecifier => {
-                let export_decl = match node
-                    .parent
-                    .clone()
-                    .and_then(|p| p.parent.clone())
-                {
+                let export_decl = match node.parent.clone().and_then(|p| p.parent.clone()) {
                     Some(ed) if ed.kind == SyntaxKind::ExportDeclaration => ed,
                     _ => return false,
                 };
@@ -231,7 +225,9 @@ impl Checker {
         {
             return;
         }
-        self.declaration_file_links.get_or_default(file).aliases_marked = true;
+        self.declaration_file_links
+            .get_or_default(file)
+            .aliases_marked = true;
         // Save/restore file context (mirrors check_source_file) so that
         // `resolve_name_in_file_scope` can find the file's symbol.
         let saved_file = self.current_file.take();
@@ -320,7 +316,9 @@ impl Checker {
             let mut next_symbol: Option<Arc<Symbol>> = None;
             let declarations = sym.declarations.clone();
             for declaration in declarations.iter() {
-                self.declaration_links.get_or_default(declaration).is_visible = true.into();
+                self.declaration_links
+                    .get_or_default(declaration)
+                    .is_visible = true.into();
 
                 // Follow `import d = a.b.c` chains: the first identifier of
                 // the module reference is the next link to resolve.
@@ -470,12 +468,15 @@ impl Checker {
         enclosing_declaration: &Arc<Node>,
     ) -> SymbolAccessibilityResult {
         let meaning = Self::meaning_of_entity_name_reference(entity_name);
-        let first_identifier = Self::first_identifier_of(entity_name).unwrap_or_else(|| Arc::clone(entity_name));
+        let first_identifier =
+            Self::first_identifier_of(entity_name).unwrap_or_else(|| Arc::clone(entity_name));
 
-        let symbol = self.resolve_name_in_enclosure(enclosing_declaration, first_identifier.text(), meaning);
+        let symbol =
+            self.resolve_name_in_enclosure(enclosing_declaration, first_identifier.text(), meaning);
 
         if let Some(sym) = &symbol {
-            if sym.flags.contains(SymbolFlags::TypeParameter) && meaning.contains(SymbolFlags::TYPE) {
+            if sym.flags.contains(SymbolFlags::TypeParameter) && meaning.contains(SymbolFlags::TYPE)
+            {
                 return SymbolAccessibilityResult {
                     accessibility: SymbolAccessibility::Accessible,
                     ..Default::default()
@@ -565,7 +566,7 @@ impl Checker {
                 | SyntaxKind::BinaryExpression
                 | SyntaxKind::ExpressionWithTypeArguments
         ) || (parent.kind == SyntaxKind::TypePredicate
-                && matches!(&parent.data, NodeData::TypePredicateNode(tp) if tp.parameter_name.id() == entity_name.id()));
+            && matches!(&parent.data, NodeData::TypePredicateNode(tp) if tp.parameter_name.id() == entity_name.id()));
         if is_value_position {
             return SymbolFlags::VALUE | SymbolFlags::ExportValue;
         }
@@ -592,7 +593,10 @@ impl Checker {
     /// Returns `Some(Accessible)` if visible, `None` if not visible. The
     /// aliases-to-make-visible computation is simplified: unexported imports
     /// and variable statements whose parent is visible are marked visible.
-    fn has_visible_declarations(&mut self, symbol: &Arc<Symbol>) -> Option<SymbolAccessibilityResult> {
+    fn has_visible_declarations(
+        &mut self,
+        symbol: &Arc<Symbol>,
+    ) -> Option<SymbolAccessibilityResult> {
         let declarations = symbol.declarations.clone();
         for declaration in declarations.iter() {
             if declaration.kind == SyntaxKind::Identifier {
@@ -604,12 +608,14 @@ impl Checker {
             // Try to mark an unexported alias as visible if its parent is
             // visible (these aliases can name types in a declaration file).
             if let Some(any_import) = Checker::get_any_import_syntax(declaration) {
-                let is_exported = any_import
-                    .has_syntactic_modifier(crate::ast::ModifierFlags::Export);
+                let is_exported =
+                    any_import.has_syntactic_modifier(crate::ast::ModifierFlags::Export);
                 if !is_exported {
                     if let Some(parent) = any_import.parent.clone() {
                         if self.is_declaration_visible(&parent) {
-                            self.declaration_links.get_or_default(declaration).is_visible = true.into();
+                            self.declaration_links
+                                .get_or_default(declaration)
+                                .is_visible = true.into();
                             continue;
                         }
                     }
@@ -625,7 +631,9 @@ impl Checker {
                     {
                         if let Some(container) = vs.parent.clone() {
                             if self.is_declaration_visible(&container) {
-                                self.declaration_links.get_or_default(declaration).is_visible = true.into();
+                                self.declaration_links
+                                    .get_or_default(declaration)
+                                    .is_visible = true.into();
                                 continue;
                             }
                         }
@@ -638,7 +646,9 @@ impl Checker {
             {
                 if let Some(parent) = declaration.parent.clone() {
                     if self.is_declaration_visible(&parent) {
-                        self.declaration_links.get_or_default(declaration).is_visible = true.into();
+                        self.declaration_links
+                            .get_or_default(declaration)
+                            .is_visible = true.into();
                         continue;
                     }
                 }

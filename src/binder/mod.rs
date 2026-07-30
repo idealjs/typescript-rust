@@ -344,8 +344,16 @@ impl Binder {
         let existing_ns = existing_flags.contains(SymbolFlags::ValueModule);
         let new_ns = new_flags.contains(SymbolFlags::ValueModule);
         if existing_ns || new_ns {
-            let other_existing = if existing_ns { new_flags } else { existing_flags };
-            let _other_new = if existing_ns { existing_flags } else { new_flags };
+            let other_existing = if existing_ns {
+                new_flags
+            } else {
+                existing_flags
+            };
+            let _other_new = if existing_ns {
+                existing_flags
+            } else {
+                new_flags
+            };
             // The non-namespace side must be one of: ValueModule, Function,
             // Class, RegularEnum, ConstEnum.
             let can_merge_with_ns = other_existing.contains(SymbolFlags::ValueModule)
@@ -1243,7 +1251,10 @@ impl Binder {
     /// Mirrors Go's `ast.IsEntityNameExpression` (identifier or qualified
     /// name).
     fn is_entity_name_expression(&self, node: &Arc<Node>) -> bool {
-        matches!(node.kind, SyntaxKind::Identifier | SyntaxKind::QualifiedName)
+        matches!(
+            node.kind,
+            SyntaxKind::Identifier | SyntaxKind::QualifiedName
+        )
     }
 
     /// Bind a call expression for flow tracking (array mutation detection).

@@ -1658,18 +1658,14 @@ fn checker_class_extends_multilevel_no_error() {
 #[test]
 fn checker_class_this_property_access_ts2339() {
     // `this` inside a class resolves to the instance type.
-    let diags = check_source(
-        "class C { x: number = 1; test() { return this.missing; } }",
-    );
+    let diags = check_source("class C { x: number = 1; test() { return this.missing; } }");
     assert_diagnostic_code(&diags, 2339);
 }
 
 #[test]
 fn checker_class_this_property_access_no_error() {
     // `this` inside a class resolves to the instance type.
-    let diags = check_source(
-        "class C { x: number = 1; test() { return this.x; } }",
-    );
+    let diags = check_source("class C { x: number = 1; test() { return this.x; } }");
     assert_no_diagnostics(&diags);
 }
 
@@ -3155,6 +3151,97 @@ fn checker_call_arg_fewer_args_no_error() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Call-argument arity (TS2554 / TS2555)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_call_too_few_args_ts2554() {
+    // `f()` where `f(x: number)` expects 1 arg → TS2554.
+    let diags = check_source("function f(x: number) {} f();");
+    assert_diagnostic_code(&diags, 2554);
+}
+
+#[test]
+fn checker_call_too_many_args_ts2554() {
+    // `f(1, 2)` where `f(x: number)` expects 1 arg → TS2554.
+    let diags = check_source("function f(x: number) {} f(1, 2);");
+    assert_diagnostic_code(&diags, 2554);
+}
+
+#[test]
+fn checker_call_exact_args_no_error() {
+    let diags = check_source("function f(a: number, b: string) {} f(1, 'hi');");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_optional_param_no_args_no_error() {
+    // Optional params don't count toward the minimum.
+    let diags = check_source("function f(a?: number) {} f();");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_rest_param_no_args_no_error() {
+    // Rest param with min 0 → `f()` is fine.
+    let diags = check_source("function f(...args: number[]) {} f();");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_rest_param_many_args_no_error() {
+    // Rest param accepts any number of trailing args.
+    let diags = check_source("function f(...args: number[]) {} f(1, 2, 3);");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_required_then_rest_too_few_ts2555() {
+    // `f()` where `f(a: number, ...rest: string[])` requires at least 1 → TS2555.
+    let diags = check_source("function f(a: number, ...rest: string[]) {} f();");
+    assert_diagnostic_code(&diags, 2555);
+}
+
+#[test]
+fn checker_call_required_then_rest_enough_no_error() {
+    // `f(1)` satisfies the minimum (1) for `f(a: number, ...rest: string[])`.
+    let diags = check_source("function f(a: number, ...rest: string[]) {} f(1);");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_new_too_few_args_ts2554() {
+    // `new Foo()` where ctor expects 1 arg → TS2554.
+    let diags = check_source("class Foo { constructor(x: number) {} } let f = new Foo();");
+    assert_diagnostic_code(&diags, 2554);
+}
+
+#[test]
+fn checker_new_too_many_args_ts2554() {
+    // `new Foo(1, 2)` where ctor expects 1 arg → TS2554.
+    let diags = check_source("class Foo { constructor(x: number) {} } let f = new Foo(1, 2);");
+    assert_diagnostic_code(&diags, 2554);
+}
+
+#[test]
+fn checker_call_overload_too_few_ts2554() {
+    // Overload set: no signature accepts 0 args → TS2554.
+    let diags = check_source(
+        "function f(x: number): void; function f(x: string): void; function f(x: any) {} f();",
+    );
+    assert_diagnostic_code(&diags, 2554);
+}
+
+#[test]
+fn checker_call_overload_matching_no_error() {
+    // One overload matches `(1)` exactly.
+    let diags = check_source(
+        "function f(x: number): void; function f(x: string): void; function f(x: any) {} f(1);",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // More expression type inference: non-null, conditional, template, delete, void
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -3845,18 +3932,14 @@ fn checker_indexed_access_via_alias_no_error() {
 #[test]
 fn checker_template_literal_type_concrete_flatten_no_error() {
     // All spans concrete → flatten to "a-1-b".
-    let diags = check_source(
-        "type T = `a-${1}-b`;\nlet x: \"a-1-b\" = null as any as T;",
-    );
+    let diags = check_source("type T = `a-${1}-b`;\nlet x: \"a-1-b\" = null as any as T;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_template_literal_type_concrete_flatten_mismatch_ts2322() {
     // `a-${1}` flattens to "a-1"; assigning to "a-2" fails.
-    let diags = check_source(
-        "type T = `a-${1}`;\nlet x: \"a-2\" = null as any as T;",
-    );
+    let diags = check_source("type T = `a-${1}`;\nlet x: \"a-2\" = null as any as T;");
     assert_diagnostic_code(&diags, 2322);
 }
 
@@ -3864,18 +3947,16 @@ fn checker_template_literal_type_concrete_flatten_mismatch_ts2322() {
 fn checker_template_literal_type_string_span_no_error() {
     // `${string}` span → template-literal type. A concrete string literal
     // is assignable to it.
-    let diags = check_source(
-        "type T = `prefix-${string}`;\nlet x: T = null as any as `prefix-hello`;",
-    );
+    let diags =
+        check_source("type T = `prefix-${string}`;\nlet x: T = null as any as `prefix-hello`;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_template_literal_type_multiple_spans_flatten_no_error() {
     // Multiple concrete spans: `x-${true}-${"y"}` → "x-true-y".
-    let diags = check_source(
-        "type T = `x-${true}-${\"y\"}`;\nlet x: \"x-true-y\" = null as any as T;",
-    );
+    let diags =
+        check_source("type T = `x-${true}-${\"y\"}`;\nlet x: \"x-true-y\" = null as any as T;");
     assert_no_diagnostics(&diags);
 }
 
@@ -3895,9 +3976,8 @@ fn checker_template_literal_type_via_alias_no_error() {
 #[test]
 fn checker_mapped_type_literal_union_no_error() {
     // `{ [K in "a" | "b"]: number }` → `{ a: number; b: number }`.
-    let diags = check_source(
-        "type M = { [K in \"a\" | \"b\"]: number };\nlet x: M = { a: 1, b: 2 };",
-    );
+    let diags =
+        check_source("type M = { [K in \"a\" | \"b\"]: number };\nlet x: M = { a: 1, b: 2 };");
     assert_no_diagnostics(&diags);
 }
 
@@ -3905,9 +3985,8 @@ fn checker_mapped_type_literal_union_no_error() {
 fn checker_mapped_type_literal_union_mismatch_ts2322() {
     // `{ [K in "a" | "b"]: number }` → `{ a: number; b: number }`.
     // Assigning a string to `a` fails.
-    let diags = check_source(
-        "type M = { [K in \"a\" | \"b\"]: number };\nlet x: M = { a: \"hi\", b: 2 };",
-    );
+    let diags =
+        check_source("type M = { [K in \"a\" | \"b\"]: number };\nlet x: M = { a: \"hi\", b: 2 };");
     assert_diagnostic_code(&diags, 2322);
 }
 
@@ -4460,7 +4539,10 @@ fn hover_info_for(source: &str, name: &str) -> Option<String> {
     let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
     let host: Arc<dyn tsox::compiler::CompilerHost> =
         Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
-    let program = Arc::new(Program::new(ProgramOptions { config: parsed, host }));
+    let program = Arc::new(Program::new(ProgramOptions {
+        config: parsed,
+        host,
+    }));
 
     let tracer = Arc::new(Tracer::new());
     let program_dyn: Arc<dyn tsox::checker::Program> = Arc::clone(&program) as _;
@@ -4827,7 +4909,10 @@ fn build_checker(source: &str) -> Checker {
 }
 
 /// Find the first top-level statement of `kind` in the entry source file.
-fn first_statement<'a>(checker: &'a Checker, kind: SyntaxKind) -> Option<std::sync::Arc<tsox::ast::Node>> {
+fn first_statement<'a>(
+    checker: &'a Checker,
+    kind: SyntaxKind,
+) -> Option<std::sync::Arc<tsox::ast::Node>> {
     let file = checker
         .files
         .iter()
@@ -4872,8 +4957,7 @@ fn visibility_non_exported_function_in_module_not_visible() {
         .nodes
         .iter()
         .find(|n| {
-            n.kind == SyntaxKind::FunctionDeclaration
-                && n.name().map(|nm| nm.text()) == Some("g")
+            n.kind == SyntaxKind::FunctionDeclaration && n.name().map(|nm| nm.text()) == Some("g")
         })
         .cloned()
         .expect("g function");
@@ -5127,4 +5211,3 @@ fn visibility_export_specifier_reexport_visible() {
         "export {{ x }} (no module specifier) should be visible"
     );
 }
-

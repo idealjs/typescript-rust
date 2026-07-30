@@ -838,9 +838,7 @@ impl Checker {
         let result = self.resolve_alias_body(symbol);
         self.resolving_type_aliases.remove(&key);
         // Cache the result for future lookups.
-        self.type_alias_links
-            .get_or_default(symbol)
-            .declared_type = Some(Arc::clone(&result));
+        self.type_alias_links.get_or_default(symbol).declared_type = Some(Arc::clone(&result));
         Some(result)
     }
 
