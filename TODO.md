@@ -57,8 +57,8 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-30）
 
-测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 355 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 249 个）。
+测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 400 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 294 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
@@ -386,6 +386,16 @@ reference 协变/逆变推断（`generic_type_reference_related_to`）。
   扩展支持 `PropertyDeclaration`/`MethodDeclaration`，跳过 static 成员与
   构造函数），与每个接口类型做 `is_type_assignable_to`，失败时报 TS2420。
   4 条 implements parity 测试通过（缺失成员/匹配方法/返回类型不匹配/属性匹配）。
+- [x] 索引访问类型 `T[K]`：`get_type_from_indexed_access_type_node` 替换
+  stub，新增 `get_indexed_access_type` 处理 string-literal 索引、union 索引
+  （`T[keyof T]`/`T["a"|"b"]`）、`number` 索引（array/tuple 元素类型）、
+  type-parameter 约束穿透、index signature 回退。8 条索引访问 parity
+  测试通过。
+- [x] 模板字面量类型：`get_type_from_template_type_node` 替换 stub，
+  `build_template_literal_type` 对全字面量 span 展平为 `StringLiteral`，
+  否则保留 `TemplateLiteral` 类型（texts/types 数组）。parser 新增
+  `create_template_token_node` 从 raw token text 提取 cooked 文本。
+  5 条模板字面量 parity 测试通过。
 
 ### P3.8 Checker 类型推断
 
