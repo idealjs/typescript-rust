@@ -432,9 +432,13 @@ impl Checker {
     fn get_type_from_function_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
         match &node.data {
             NodeData::FunctionTypeNode(data) => {
+                let return_type = match data.type_node.as_ref() {
+                    Some(tn) => self.get_type_from_type_node(tn),
+                    None => self.get_any_type(),
+                };
                 let sig = self.build_signature_from_function_like_type_node(
                     &data.parameters,
-                    data.type_node.as_ref(),
+                    return_type,
                     /* is_construct */ false,
                 );
                 self.create_function_or_constructor_type(vec![sig], false)
@@ -449,9 +453,13 @@ impl Checker {
     fn get_type_from_constructor_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
         match &node.data {
             NodeData::ConstructorTypeNode(data) => {
+                let return_type = match data.type_node.as_ref() {
+                    Some(tn) => self.get_type_from_type_node(tn),
+                    None => self.get_any_type(),
+                };
                 let sig = self.build_signature_from_function_like_type_node(
                     &data.parameters,
-                    data.type_node.as_ref(),
+                    return_type,
                     /* is_construct */ true,
                 );
                 self.create_function_or_constructor_type(vec![sig], true)
@@ -461,13 +469,20 @@ impl Checker {
     }
 
     /// Build a `Signature` from a function-like type node's parameter list
-    /// and return type node. Each parameter is turned into a `Symbol` whose
-    /// resolved type is stored in `value_symbol_links` (so the relater's
-    /// `get_type_of_symbol` returns it during signature comparison).
-    fn build_signature_from_function_like_type_node(
+    /// and a pre-resolved return type. Each parameter is turned into a
+    /// `Symbol` whose resolved type is stored in `value_symbol_links` (so
+    /// the relater's `get_type_of_symbol` returns it during signature
+    /// comparison).
+    ///
+    /// The return type is passed in already-resolved (rather than as a type
+    /// node) so that this helper can be shared by both type-annotation
+    /// resolution (where the return type comes from a `TypeNode`) and
+    /// function-expression type inference (where the return type is inferred
+    /// from the body via `infer_function_return_type`).
+    pub fn build_signature_from_function_like_type_node(
         &mut self,
         parameters: &Arc<NodeList>,
-        type_node: Option<&Arc<Node>>,
+        return_type: Arc<Type>,
         is_construct: bool,
     ) -> Arc<Signature> {
         let mut param_symbols: Vec<Arc<Symbol>> = Vec::with_capacity(parameters.len());
@@ -517,11 +532,6 @@ impl Checker {
                 min_argument_count += 1;
             }
         }
-        // Resolve return type.
-        let return_type = match type_node {
-            Some(tn) => self.get_type_from_type_node(tn),
-            None => self.get_any_type(),
-        };
         let sig = Arc::new(Signature {
             id: 0,
             flags,
@@ -548,7 +558,7 @@ impl Checker {
     /// `is_construct` is false, all signatures are call signatures
     /// (`call_signature_count = sigs.len()`); when true, all are construct
     /// signatures (`call_signature_count = 0`).
-    fn create_function_or_constructor_type(
+    pub fn create_function_or_constructor_type(
         &self,
         sigs: Vec<Arc<Signature>>,
         is_construct: bool,
@@ -801,51 +811,6 @@ impl Checker {
     // ────────────────────────────────────────────────────────────────────────
     // Function return type inference (P3.8b)
     // ────────────────────────────────────────────────────────────────────────
-
-    /// Build a function type whose single call signature has the given
-    /// return type. The signature's `resolved_return_type` is set eagerly
-    /// so callers (e.g. `CallExpression` type inference) can read it back
-    /// without re-running inference.
-    pub fn create_function_type(&self, return_type: Arc<Type>) -> Arc<Type> {
-        let sig = Arc::new(Signature {
-            // Use a stable, locally-unique id derived from the return type
-            // pointer. Real signature ids are assigned by the checker's
-            // signature id allocator; this id is only used for cache keys
-            // and is fine for our minimal inference path.
-            id: 0,
-            flags: SignatureFlags::None,
-            min_argument_count: 0,
-            resolved_min_argument_count: 0,
-            declaration: None,
-            type_parameters: Vec::new(),
-            parameters: Vec::new(),
-            this_parameter: None,
-            resolved_return_type: std::sync::OnceLock::new(),
-            resolved_type_predicate: None,
-            target: None,
-            mapper: None,
-            isolated_signature_type: std::sync::OnceLock::new(),
-        });
-        // Eagerly populate the resolved return type so `get_return_type_of_signature`
-        // returns Some(...) without needing a separate inference pass.
-        let _ = sig.resolved_return_type.set(Arc::clone(&return_type));
-        let mut structured = StructuredTypeData::default();
-        structured.signatures.push(Arc::clone(&sig));
-        structured.call_signature_count = 1;
-        Arc::new(Type {
-            flags: TypeFlags::Object,
-            object_flags: ObjectFlags::Anonymous,
-            id: 0,
-            symbol: None,
-            alias: None,
-            data: TypeData::Object(ObjectTypeData {
-                structured,
-                target: None,
-                mapper: None,
-                type_arguments: Vec::new(),
-            }),
-        })
-    }
 
     /// Walk a function body collecting the types of every `return expr;`
     /// statement, skipping nested function bodies (those have their own

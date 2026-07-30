@@ -1622,17 +1622,29 @@ impl Checker {
     }
 
     /// Get the type of a function-like expression (FunctionExpression /
-    /// ArrowFunction). Returns an anonymous object type whose single call
-    /// signature has the inferred (or annotated) return type.
+    /// ArrowFunction / FunctionDeclaration). Returns an anonymous object
+    /// type whose single call signature carries the inferred (or annotated)
+    /// return type *and* the parameter types resolved from each parameter's
+    /// type annotation. Parameters without an annotation fall back to `any`
+    /// (or the contextual type when one is available — not yet wired up
+    /// here). Building the signature with real parameter symbols lets the
+    /// relater detect parameter-type mismatches when assigning a function
+    /// expression to a function-type annotation (e.g.
+    /// `let f: (x: number) => number = (x: string) => x.length;` → TS2322).
     fn get_type_of_function_like(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        let (body, type_node) = match &node.data {
-            crate::ast::NodeData::FunctionExpression(data) => (Some(&data.body), data.type_node.as_ref()),
-            crate::ast::NodeData::ArrowFunction(data) => (Some(&data.body), data.type_node.as_ref()),
-            crate::ast::NodeData::FunctionDeclaration(data) => (data.body.as_ref(), data.type_node.as_ref()),
+        let (parameters, body, type_node) = match &node.data {
+            crate::ast::NodeData::FunctionExpression(data) => (&data.parameters, Some(&data.body), data.type_node.as_ref()),
+            crate::ast::NodeData::ArrowFunction(data) => (&data.parameters, Some(&data.body), data.type_node.as_ref()),
+            crate::ast::NodeData::FunctionDeclaration(data) => (&data.parameters, data.body.as_ref(), data.type_node.as_ref()),
             _ => return self.get_any_type(),
         };
         let return_type = self.infer_function_return_type(body, type_node);
-        self.create_function_type(return_type)
+        let sig = self.build_signature_from_function_like_type_node(
+            parameters,
+            return_type,
+            /* is_construct */ false,
+        );
+        self.create_function_or_constructor_type(vec![sig], false)
     }
 
     /// Get the return type of a `CallExpression`. Resolves the called

@@ -372,12 +372,18 @@ conditional 表达式 union 类型推断（`cond ? 1 : 'hi'` → `number | strin
 type，含循环保护）；`FunctionType`/`ConstructorType` 节点解析为带 call/construct
 signature 的对象类型（`get_type_from_function_type_node`/
 `get_type_from_constructor_type_node` + `build_signature_from_function_like_type_node`
-含参数/rest/optional 处理）；`get_type_of_symbol` 扩展支持 `Property` flag 符号。
+含参数/rest/optional 处理）；`get_type_of_symbol` 扩展支持 `Property` flag 符号；
+函数表达式/箭头函数参数类型推断（`get_type_of_function_like` 改用
+`build_signature_from_function_like_type_node` 构建带参数符号的签名，relater
+可检测参数类型不匹配 TS2322，如 `(x: string) => 1` 不可赋值给 `(x: number) => number`）。
 
 - [ ] 条件类型 `infer R` 解析。（已部分完成，conditional branch 推断待补）
 - [ ] 类型推断缓存（`node_links.resolved_type`）。（已通过 `type_node_links` 完成）
 - [ ] Fresh literal type widening（对象字面量在无 contextual type 时应 widening
   literal 属性，目前保留 literal 以兼容 discriminated union 赋值）。
+- [ ] contextual typing 注入箭头函数参数类型（当前无注解参数回退 `any`，
+  应从 contextual function type 推断参数类型，如 `(x) => x + 1` 在
+  `let f: (x: number) => number = ...` 上下文中 `x` 应为 `number`）。
 
 ### P3.9 Checker 控制流 narrowing
 

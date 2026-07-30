@@ -2399,11 +2399,23 @@ fn checker_function_type_wrong_return_type_ts2322() {
 }
 
 #[test]
-fn checker_function_type_extra_parameters_no_error() {
-    // TS allows a function with more parameters to be assigned to a type
-    // expecting fewer (extra params are ignored by callers).
+fn checker_function_type_extra_parameters_ts2322() {
+    // TS does NOT allow a function with *more required parameters* than the
+    // target type to be assigned — calling through the target would leave
+    // the extra required param undefined ("Target signature provides too
+    // few arguments").
     let diags = check_source(
         "let f: (x: number) => number = (x: number, y: number) => x + y;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_function_type_fewer_parameters_no_error() {
+    // The reverse — a function with *fewer* parameters assigned to a type
+    // expecting more — IS allowed (extra params are ignored by the callee).
+    let diags = check_source(
+        "let f: (x: number, y: number) => number = (x: number) => x + 1;",
     );
     assert_no_diagnostics(&diags);
 }
@@ -2441,6 +2453,74 @@ fn checker_function_type_void_return_no_error() {
     // A function returning `number` is assignable to `() => void`.
     let diags = check_source(
         "let f: () => void = () => 42;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Parameter type mismatch detection (P3.8: function-expression signature
+// inference). Now that `get_type_of_function_like` builds a signature with
+// the arrow/function expression's parameter types, the relater can detect
+// parameter-type mismatches against a contextual function-type annotation.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_arrow_param_type_mismatch_ts2322() {
+    // `(x: string) => number` is not assignable to `(x: number) => number`
+    // because `string` is not assignable to `number` (parameters are
+    // contravariant under strictFunctionTypes, bivariant otherwise —
+    // either way `string` vs `number` fails in both directions).
+    let diags = check_source(
+        "let f: (x: number) => number = (x: string) => 1;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_arrow_param_type_match_no_error() {
+    // `(x: number) => number` is assignable to `(x: number) => number`.
+    let diags = check_source(
+        "let f: (x: number) => number = (x: number) => x + 1;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_arrow_two_param_type_mismatch_ts2322() {
+    // Second parameter type mismatch: `(a: number, b: string)` vs
+    // `(a: number, b: number)`.
+    let diags = check_source(
+        "let f: (a: number, b: number) => number = (a: number, b: string) => 1;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_arrow_param_subtype_no_error() {
+    // Bivariant parameter check: `string | number` parameter is assignable
+    // to a `string | number` target parameter (same type both ways).
+    let diags = check_source(
+        "let f: (x: string | number) => number = (x: string | number) => 1;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_function_expression_param_type_mismatch_ts2322() {
+    // Same as the arrow case but with a `function` expression.
+    let diags = check_source(
+        "let f: (x: number) => number = function (x: string) { return 1; };",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_arrow_unannotated_param_no_error() {
+    // Unannotated arrow param falls back to `any`, which is assignable to
+    // anything (bivariant). `let f: (x: number) => number = (x) => x + 1;`
+    // is the canonical contextually-typed arrow and must not error.
+    let diags = check_source(
+        "let f: (x: number) => number = (x) => x + 1;",
     );
     assert_no_diagnostics(&diags);
 }
