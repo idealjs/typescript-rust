@@ -3076,3 +3076,48 @@ fn checker_keyof_constrained_type_parameter_no_error() {
     );
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// P3.7: Conditional type relation (source assignable to conditional target)
+// and recursive structural type cycle detection.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_conditional_target_accepts_true_branch_no_error() {
+    // `T extends U ? X : Y` as a *target*: a value of type `X` is
+    // assignable to the conditional when the conditional is known to
+    // take the true branch (check is assignable to extends).
+    // `number extends number ? string : number` resolves to `string`,
+    // so a `string` value is assignable.
+    let diags = check_source(
+        "type C = number extends number ? string : number;\nlet x: string = \"hi\" as C;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_recursive_structural_type_assignable_no_error() {
+    // Recursive structural type `Box<T> = { next: Box<T> | null }`.
+    // Comparing `Box<number>` to `Box<number>` must not stack-overflow
+    // and must be assignable. Exercises the relater's cycle detection
+    // (relation_in_progress) and depth guard.
+    let diags = check_source(
+        "type Box<T> = { next: Box<T> | null };\nlet x: Box<number> = { next: null };",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_recursive_structural_type_self_assignable_no_error() {
+    // Two mutually-recursive structural types with the same shape must be
+    // assignable. The relater's `relation_in_progress` cycle set breaks
+    // the infinite recursion when comparing `A.next` (type `A | null`)
+    // against `B.next` (type `B | null`), which would otherwise reach
+    // `A` vs `B` again.
+    let diags = check_source(
+        "type A = { value: number; next: A | null };\n\
+         type B = { value: number; next: B | null };\n\
+         let x: B = { value: 1, next: null } as A;",
+    );
+    assert_no_diagnostics(&diags);
+}

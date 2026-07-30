@@ -55,17 +55,17 @@ npm install && npm run build
 - 每个迁移行为都应新增或扩展一个 parity case，优先对比 exit code、stdout、
   stderr、输出文件内容。
 
-## 当前进度快照（2026-07-29）
+## 当前进度快照（2026-07-30）
 
-测试基线：`cargo test` 通过（607 个 lib 单测 + 2 个 emit parity + 250 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 144 个）。
+测试基线：`cargo test` 通过（607 个 lib 单测 + 2 个 emit parity + 324 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 218 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
 | Scanner | 1558 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 完成；缺 trivia 节点、完整 regex 校验 |
 | Parser | 7115 | 9251 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；缺 reparser/jsdoc |
 | Binder | 1639 | ~4000 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 完成；缺完整 flow graph、ARRAY_MUTATION、try/catch/finally、labeled statement、完整 declaration merge |
-| Checker | 8902 | ~50K+ | ~18% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 基础 + union/intersection + 对象属性深度检查；inference 含泛型推断 + contextual typing；126 parity fixtures 通过；缺 flow narrowing、nodebuilder、emitresolver、JSX/JSDoc/grammar checks、复杂类型关系 |
+| Checker | 9050 | ~50K+ | ~18% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；324 parity fixtures 通过；缺 nodebuilder、emitresolver、JSX/JSDoc/grammar checks、mapped type 节点解析 |
 | Compiler | 759 | — | 基础 | Program 创建/解析/绑定/emit pipeline 通；checker 已接入 |
 | Emitter | 774 | — | 基础 | JS emit 基础；缺 transformer 体系 |
 | Printer | 1578 | — | 基础 | 节点→文本基础 |
@@ -353,8 +353,14 @@ rest/optional/min-argument-count 处理、return type 比较、void/any wildcard
 index signature 比较（`is_index_signatures_related_to`）；generic type
 reference 协变/逆变推断（`generic_type_reference_related_to`）。
 
-- [ ] 条件类型、映射类型关系。
-- [ ] `relation_comparison_result` 缓存与递归保护。
+- [x] 条件类型、映射类型关系（`conditional_type_related_to` 含
+  permissive/restrictive 短路、`mapped_type_related_to` 含 constraint
+  逆变 + template 协变；mapped type 节点解析仍为 stub，待 P3.8
+  `get_type_from_mapped_type_node` 落地后才能真正触发 mapped 比较）。
+- [x] `relation_comparison_result` 缓存与递归保护：`RelationCacheKey`
+  以 `Arc::as_ptr` 指针身份 + `RelationKind` 为键（因 `Type::id` 尚未
+  全量赋值），`relation_cache` 按 top-level call 清空，
+  `relation_in_progress` 做循环检测，`relater_depth` 做深度兜底。
 
 ### P3.8 Checker 类型推断
 

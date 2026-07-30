@@ -250,6 +250,22 @@ pub struct Checker {
     /// structural types such as `type Box<T> = { next: Box<T> | null }`.
     /// Mirrors `Checker.relationStackDepth` in Go (relater.go).
     pub relater_depth: u32,
+    /// Per-call relation comparison cache. Stores the final boolean
+    /// result of `is_type_related_to` for a `(source, target, relation)`
+    /// triple so that repeated sub-comparisons within a single top-level
+    /// call don't recompute. Cleared at the start of each top-level call
+    /// (when `relater_depth` transitions from 0 to 1) to avoid caching
+    /// optimistic cycle-broken results across calls.
+    /// Mirrors Go's `Relation.results` (relater.go).
+    pub relation_cache: HashMap<crate::checker::relater::RelationCacheKey, bool>,
+    /// Set of `(source, target, relation)` triples currently being
+    /// computed higher up the relater call stack. When a triple is
+    /// already in this set, we've hit a recursive cycle (e.g.
+    /// `type Box<T> = { next: Box<T> | null }` comparing `Box<X>` to
+    /// `Box<Y>` recursively reaches `Box<X>` vs `Box<Y>` again) and we
+    /// optimistically return `true` to break the cycle.
+    /// Mirrors Go's `visited` set pattern in `structuredTypeRelatedTo`.
+    pub relation_in_progress: std::collections::HashSet<crate::checker::relater::RelationCacheKey>,
     pub spread_links: LinkStore<Symbol, SpreadLinks>,
     pub variance_links: LinkStore<Symbol, VarianceLinks>,
     pub reverse_mapped_symbol_links: LinkStore<Symbol, ReverseMappedSymbolLinks>,
@@ -471,6 +487,8 @@ impl Checker {
             resolving_type_aliases: HashSet::new(),
             type_argument_stack: Vec::new(),
             relater_depth: 0,
+            relation_cache: HashMap::new(),
+            relation_in_progress: std::collections::HashSet::new(),
             spread_links: LinkStore::new(),
             variance_links: LinkStore::new(),
             reverse_mapped_symbol_links: LinkStore::new(),

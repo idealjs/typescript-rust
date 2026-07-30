@@ -113,7 +113,7 @@ pub const RELATION_COMPARISON_RESULT_OVERFLOW: RelationComparisonResult =
 pub const RELATER_MAX_DEPTH: u32 = 128;
 
 /// The kind of relation being checked.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum RelationKind {
     #[default]
     Identity,
@@ -121,6 +121,24 @@ pub enum RelationKind {
     StrictSubtype,
     Assignable,
     Comparable,
+}
+
+/// Key into the per-call relation cache. Combines the source and target
+/// `Type` pointers (via `Arc::as_ptr`) with the `RelationKind`, since the
+/// same type pair may compare differently under different relations
+/// (e.g. `Subtype` vs `Assignable`).
+///
+/// We use pointer identity rather than `Type::id` because the `id` field
+/// is not yet populated with unique values across all Type construction
+/// sites (many bypass `Type::new` and leave `id` at 0). Pointer identity
+/// is stable for the lifetime of a single top-level comparison (during
+/// which the Arcs are kept alive) and the cache is cleared at top-level
+/// entry, so stale pointers never accumulate.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct RelationCacheKey {
+    pub source_ptr: usize,
+    pub target_ptr: usize,
+    pub relation: RelationKind,
 }
 
 /// A relation cache that stores comparison results.
@@ -217,6 +235,26 @@ impl Checker {
     ///
     /// Handles union/intersection/object types by delegating to specialized
     /// methods, falling back to `is_simple_type_related_to` for primitives.
+    ///
+    /// Implements two layers of recursion protection (mirroring Go's
+    /// `relater.go`):
+    ///
+    /// 1. **Cycle detection** via `relation_in_progress`: when the same
+    ///    `(source, target, relation)` triple is encountered higher up
+    ///    the call stack (e.g. comparing `Box<X>` to `Box<Y>` reaches
+    ///    `Box<X>` vs `Box<Y>` again via a `next` property), we
+    ///    optimistically return `true` to terminate the cycle. This is
+    ///    correct for the common mutually-recursive case.
+    ///
+    /// 2. **Depth guard** via `relater_depth`: once the comparison stack
+    ///    exceeds `RELATER_MAX_DEPTH` (128), we also return `true`. This
+    ///    catches pathological cases the cycle set might miss (very deep
+    ///    chains of distinct types).
+    ///
+    /// A per-call `relation_cache` memoises results so repeated
+    /// sub-comparisons within a single top-level call don't recompute.
+    /// The cache is cleared at top-level entry (depth 0 → 1) to avoid
+    /// carrying optimistic cycle-broken results across calls.
     fn is_type_related_to(
         &mut self,
         source: &Arc<Type>,
@@ -231,9 +269,33 @@ impl Checker {
         if self.relater_depth >= RELATER_MAX_DEPTH {
             return true;
         }
+        // On top-level entry, reset the per-call caches so optimistic
+        // cycle-broken results from a previous call don't leak in.
+        if self.relater_depth == 0 {
+            self.relation_cache.clear();
+            self.relation_in_progress.clear();
+        }
+        let key = RelationCacheKey {
+            source_ptr: Arc::as_ptr(source) as usize,
+            target_ptr: Arc::as_ptr(target) as usize,
+            relation,
+        };
+        // Cycle break: if this triple is already being computed higher up
+        // the stack, assume `true` to terminate the recursion.
+        if self.relation_in_progress.contains(&key) {
+            return true;
+        }
+        // Cache hit: a previous sub-comparison within this top-level call
+        // already determined the result.
+        if let Some(&cached) = self.relation_cache.get(&key) {
+            return cached;
+        }
+        self.relation_in_progress.insert(key);
         self.relater_depth += 1;
         let result = self.is_type_related_to_inner(source, target, relation);
         self.relater_depth -= 1;
+        self.relation_in_progress.remove(&key);
+        self.relation_cache.insert(key, result);
         result
     }
 
@@ -374,27 +436,6 @@ impl Checker {
         }
 
         false
-    }
-
-    /// Generate a cache key for comparing two types.
-    fn make_cache_key(source: &Type, target: &Type) -> CacheHashKey {
-        CacheHashKey::new(source.id as u64, target.id as u64)
-    }
-
-    /// Check if a comparison result is cached.
-    fn get_cached_result(&self, source: &Type, target: &Type, relation: RelationKind) -> Option<bool> {
-        // For now, we don't use the Relation cache directly since we don't have
-        // a relation object per Checker. This is a placeholder for future use.
-        None
-    }
-
-    /// Cache a comparison result.
-    fn cache_result(&mut self, source: &Type, target: &Type, relation: RelationKind, result: bool) {
-        // Placeholder for future caching
-        _ = source;
-        _ = target;
-        _ = relation;
-        _ = result;
     }
 
     /// Check if two array types are related.
@@ -3122,6 +3163,47 @@ mod tests {
         rel.set(key, RelationComparisonResult::Succeeded);
         assert!(rel.get(&key) == RelationComparisonResult::Succeeded);
         assert_eq!(rel.size(), 1);
+    }
+
+    #[test]
+    fn relation_cache_key_distinguishes_relation_kinds() {
+        // The same (source, target) pair under different relations must
+        // produce distinct cache keys — otherwise `Assignable` and
+        // `Subtype` results would collide.
+        let k1 = RelationCacheKey {
+            source_ptr: 0x1000,
+            target_ptr: 0x2000,
+            relation: RelationKind::Assignable,
+        };
+        let k2 = RelationCacheKey {
+            source_ptr: 0x1000,
+            target_ptr: 0x2000,
+            relation: RelationKind::Subtype,
+        };
+        assert_ne!(k1, k2);
+
+        let mut set = std::collections::HashSet::new();
+        set.insert(k1);
+        // k2 is a different key, so it's not in the set.
+        assert!(!set.contains(&k2));
+        set.insert(k2);
+        assert_eq!(set.len(), 2);
+    }
+
+    #[test]
+    fn relation_cache_key_distinguishes_type_pointers() {
+        // Different source/target pointer pairs must produce distinct keys.
+        let k1 = RelationCacheKey {
+            source_ptr: 0x1000,
+            target_ptr: 0x2000,
+            relation: RelationKind::Assignable,
+        };
+        let k2 = RelationCacheKey {
+            source_ptr: 0x3000,
+            target_ptr: 0x2000,
+            relation: RelationKind::Assignable,
+        };
+        assert_ne!(k1, k2);
     }
 
     #[test]
