@@ -3527,3 +3527,154 @@ fn checker_non_empty_array_literal_no_error() {
     );
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Hover / quick info (P3.10 symbol_to_type_node / hover info)
+//
+// `get_quick_info_text(node)` returns the plain-text hover string for a
+// node. We exercise it via a small helper that walks the AST to find the
+// first identifier with a given name. This mirrors (very minimally) what
+// the LSP `textDocument/hover` request returns.
+// ────────────────────────────────────────────────────────────────────────────
+
+use tsox::ast::{NodeData, SyntaxKind};
+use tsox::checker::{Checker, Tracer};
+
+/// Build a program from `source`, run the checker, and invoke
+/// `get_quick_info_text` on the first identifier named `name` in the
+/// file's AST. Returns the hover string (or `None` if the name isn't
+/// found).
+fn hover_info_for(source: &str, name: &str) -> Option<String> {
+    let fs = Arc::new(InMemoryFS::new());
+    fs.insert_dir("/proj");
+    fs.insert_file("/proj/entry.ts", source);
+
+    let args = vec!["--noLib".to_string(), "/proj/entry.ts".to_string()];
+    let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
+    let host: Arc<dyn tsox::compiler::CompilerHost> =
+        Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
+    let program = Arc::new(Program::new(ProgramOptions { config: parsed, host }));
+
+    let tracer = Arc::new(Tracer::new());
+    let program_dyn: Arc<dyn tsox::checker::Program> = Arc::clone(&program) as _;
+    let mut checker = Checker::new(program_dyn, tracer);
+    for file in program.source_files() {
+        checker.check_source_file(file);
+    }
+
+    let target = find_identifier(&program.source_files()[0].node, name)?;
+    Some(checker.get_quick_info_text(&target))
+}
+
+/// Recursively walk `node`'s subtree looking for the first `Identifier`
+/// whose text matches `name`.
+fn find_identifier(node: &Arc<tsox::ast::Node>, name: &str) -> Option<Arc<tsox::ast::Node>> {
+    if node.kind == SyntaxKind::Identifier {
+        if let NodeData::Identifier(id) = &node.data {
+            if id.text == name {
+                return Some(Arc::clone(node));
+            }
+        }
+    }
+    let mut found: Option<Arc<tsox::ast::Node>> = None;
+    tsox::ast::node_data_generated::for_each_child(node, |child| {
+        if found.is_none() {
+            found = find_identifier(child, name);
+        }
+        found.is_some()
+    });
+    found
+}
+
+#[test]
+fn hover_let_variable_number() {
+    let info = hover_info_for("let x: number = 0;", "x").expect("hover");
+    assert_eq!(info, "let x: number");
+}
+
+#[test]
+fn hover_const_variable_string() {
+    let info = hover_info_for("const s: string = \"hi\";", "s").expect("hover");
+    assert_eq!(info, "const s: string");
+}
+
+#[test]
+fn hover_let_variable_inferred_type() {
+    // `let x = 1;` infers `number` via literal widening.
+    let info = hover_info_for("let x = 1;", "x").expect("hover");
+    assert_eq!(info, "let x: number");
+}
+
+#[test]
+fn hover_function_declaration() {
+    let info = hover_info_for(
+        "function f(a: string, b: number): boolean { return true; }",
+        "f",
+    )
+    .expect("hover");
+    assert_eq!(info, "function f(a: string, b: number): boolean");
+}
+
+#[test]
+fn hover_class_declaration_no_type_params() {
+    let info = hover_info_for("class Foo {}", "Foo").expect("hover");
+    assert_eq!(info, "class Foo");
+}
+
+#[test]
+fn hover_class_declaration_with_type_params() {
+    let info = hover_info_for("class Foo<T, U> {}", "Foo").expect("hover");
+    assert_eq!(info, "class Foo<T, U>");
+}
+
+#[test]
+fn hover_interface_declaration_no_type_params() {
+    let info = hover_info_for("interface Bar { x: number; }", "Bar").expect("hover");
+    assert_eq!(info, "interface Bar");
+}
+
+#[test]
+fn hover_interface_declaration_with_type_params() {
+    let info = hover_info_for("interface Bar<T> { x: T; }", "Bar").expect("hover");
+    assert_eq!(info, "interface Bar<T>");
+}
+
+#[test]
+fn hover_enum_declaration() {
+    let info = hover_info_for("enum Color { Red, Green, Blue }", "Color").expect("hover");
+    assert_eq!(info, "enum Color");
+}
+
+#[test]
+fn hover_type_alias_declaration_primitive() {
+    let info = hover_info_for("type MyNumber = number;", "MyNumber").expect("hover");
+    assert_eq!(info, "type MyNumber = number");
+}
+
+#[test]
+fn hover_type_alias_declaration_with_type_params() {
+    let info = hover_info_for("type Id<T> = T;", "Id").expect("hover");
+    // The aliased type of `Id<T>` is just `T`, but we haven't
+    // instantiated it under a particular `T` here, so we only assert
+    // the prefix.
+    assert!(
+        info.starts_with("type Id<T> = "),
+        "expected `type Id<T> = ...`, got {info:?}"
+    );
+}
+
+#[test]
+fn hover_var_keyword_variable() {
+    let info = hover_info_for("var v: string = \"hi\";", "v").expect("hover");
+    assert_eq!(info, "var v: string");
+}
+
+#[test]
+fn hover_arrow_function_variable() {
+    let info = hover_info_for("let f = (a: number): string => \"hi\";", "f").expect("hover");
+    // Arrow-function type is `(a: number) => string`.
+    assert!(
+        info.contains("number") && info.contains("string"),
+        "expected arrow hover to mention param/return types, got {info:?}"
+    );
+}

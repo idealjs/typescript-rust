@@ -10,7 +10,7 @@
 
 use std::sync::Arc;
 
-use crate::ast::{Symbol, SymbolFlags};
+use crate::ast::{Node, NodeData, Symbol, SymbolFlags, SyntaxKind};
 
 use super::checker::Checker;
 use super::types::*;
@@ -483,6 +483,405 @@ impl Checker {
         } else {
             s
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Symbol-to-string (hover info / quick info)
+    //
+    // Ported from `internal/checker/printer.go`'s `symbolToStringEx`. The
+    // Go implementation builds an AST entity-name node via the NodeBuilder
+    // and then prints it; we take the simpler direct-to-string approach
+    // (matching `type_to_string` above). For hover info we additionally
+    // synthesize a `let x: T` / `function f(): T` / `class C` /
+    // `interface I` / `enum E` / `type T = ...` shape from the symbol's
+    // declarations and resolved type.
+    // ─────────────────────────────────────────────────────────────────────
+
+    /// Format a symbol as a simple name. Mirrors Go's `SymbolToString` (the
+    /// no-flags convenience overload). Returns just the symbol's name,
+    /// without a kind prefix or type annotation — useful for diagnostic
+    /// messages like TS2304.
+    pub fn symbol_to_string(&mut self, symbol: &Arc<Symbol>) -> String {
+        self.symbol_to_string_ex(
+            symbol,
+            SymbolFormatFlags::AllowAnyNodeKind,
+            SymbolFlags::all(),
+        )
+    }
+
+    /// Format a symbol with explicit flags and semantic meaning.
+    ///
+    /// `meaning` filters which symbol aspect to use when a symbol carries
+    /// multiple meanings (e.g. a class is both a value and a type). Pass
+    /// `SymbolFlags::all()` to consider any meaning.
+    ///
+    /// Unlike Go's `symbolToStringEx`, this implementation:
+    /// - Returns just the symbol's local name (no module chain); we don't
+    ///   yet model the full symbol parent chain needed for qualified names.
+    /// - Appends type arguments for generic symbols when the
+    ///   `WriteTypeParametersOrArguments` flag is set.
+    pub fn symbol_to_string_ex(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        flags: SymbolFormatFlags,
+        _meaning: SymbolFlags,
+    ) -> String {
+        let name = symbol.name.clone();
+        // Write type arguments for generic class/interface/type-alias symbols
+        // when the flag is set. We recover the type parameters from the
+        // symbol's first declaration (if any) and format each as its name.
+        if flags.contains(SymbolFormatFlags::WriteTypeParametersOrArguments) {
+            if let Some(tps) = self.collect_type_parameter_names(symbol) {
+                if !tps.is_empty() {
+                    return format!("{}<{}>", name, tps.join(", "));
+                }
+            }
+        }
+        name
+    }
+
+    /// Collect the names of type parameters declared on `symbol` (e.g. the
+    /// `<T, U>` on `interface Foo<T, U>`). Returns `None` when the symbol
+    /// has no type parameters.
+    fn collect_type_parameter_names(&self, symbol: &Arc<Symbol>) -> Option<Vec<String>> {
+        for decl in &symbol.declarations {
+            let tps = match &decl.data {
+                NodeData::ClassDeclaration(d) => d.type_parameters.as_ref(),
+                NodeData::InterfaceDeclaration(d) => d.type_parameters.as_ref(),
+                NodeData::TypeAliasDeclaration(d) => d.type_parameters.as_ref(),
+                NodeData::FunctionDeclaration(d) => d.type_parameters.as_ref(),
+                _ => continue,
+            };
+            if let Some(tps) = tps {
+                return Some(
+                    tps.iter()
+                        .map(|tp| match &tp.data {
+                            NodeData::TypeParameterDeclaration(tpd) => tpd.name.text().to_string(),
+                            _ => String::new(),
+                        })
+                        .collect(),
+                );
+            }
+        }
+        None
+    }
+
+    /// Build hover text for `node` (an identifier or other expression).
+    ///
+    /// Mirrors the simplified `getQuickInfoAndDeclarationAtLocation` flow
+    /// in `internal/ls/hover.go` (without the classified-display-parts
+    /// machinery — we return a single plain-text string). Returns the
+    /// empty string when no quick info is available.
+    ///
+    /// Examples:
+    /// - `let x: number = 0;` hovering over `x` → `let x: number`
+    /// - `function f(a: string): number { ... }` hovering over `f` →
+    ///   `function f(a: string): number`
+    /// - `class Foo<T> { ... }` hovering over `Foo` → `class Foo<T>`
+    /// - `interface Bar { ... }` hovering over `Bar` → `interface Bar`
+    /// - `enum Color { Red, Green }` hovering over `Color` → `enum Color`
+    pub fn get_quick_info_text(&mut self, node: &Arc<Node>) -> String {
+        // For `this` in expression position.
+        if node.kind == SyntaxKind::ThisKeyword {
+            let t = self.get_type_of_node(node);
+            return format!("this: {}", self.type_to_string(&t));
+        }
+        // Resolve the symbol at the node. Try the scope stack first (works
+        // during checking), then fall back to walking up the AST looking
+        // for an ancestor with a symbol in the symbol_map (works after
+        // checking is complete — e.g. for hover info in a separate pass).
+        let symbol = self.resolve_identifier(node).or_else(|| {
+            let symbol_map = self.program.symbol_map();
+            let mut current: Option<&Arc<Node>> = Some(node);
+            while let Some(n) = current {
+                if let Some(sym) = symbol_map.symbol_of(n) {
+                    return Some(Arc::clone(sym));
+                }
+                current = n.parent.as_ref();
+            }
+            None
+        });
+        let Some(symbol) = symbol else {
+            // No symbol: if the node has a type (e.g. literal), show it.
+            if self.node_has_type(node) {
+                let t = self.get_type_of_node(node);
+                return self.type_to_string(&t);
+            }
+            return String::new();
+        };
+        self.format_quick_info_for_symbol(&symbol, node)
+    }
+
+    /// Format the quick-info (hover) text for `symbol` at the location of
+    /// `node`. Determines the kind prefix (`let`, `function`, `class`, …)
+    /// from the symbol's declaration and appends the type/signature.
+    fn format_quick_info_for_symbol(&mut self, symbol: &Arc<Symbol>, node: &Arc<Node>) -> String {
+        let flags = symbol.flags;
+        // Determine the kind prefix from the symbol flags. Mirrors the
+        // dispatch in `getQuickInfoAndDeclarationAtLocation` (hover.go).
+        // Use `intersects` (not `contains`) because some flag groups like
+        // `VARIABLE` are unions of multiple bits and a symbol may carry
+        // only one of them.
+        if flags.intersects(SymbolFlags::Function) {
+            return self.format_function_quick_info(symbol, /*is_method=*/ false);
+        }
+        if flags.intersects(SymbolFlags::Method) {
+            return self.format_function_quick_info(symbol, /*is_method=*/ true);
+        }
+        if flags.intersects(SymbolFlags::Class) {
+            return self.format_class_quick_info(symbol);
+        }
+        if flags.intersects(SymbolFlags::Interface) {
+            return self.format_interface_quick_info(symbol);
+        }
+        if flags.intersects(SymbolFlags::ENUM) {
+            return self.format_enum_quick_info(symbol);
+        }
+        if flags.intersects(SymbolFlags::TypeAlias) {
+            return self.format_type_alias_quick_info(symbol);
+        }
+        if flags.intersects(SymbolFlags::TypeParameter) {
+            return self.format_type_parameter_quick_info(symbol);
+        }
+        if flags.intersects(SymbolFlags::EnumMember) {
+            return self.format_enum_member_quick_info(symbol);
+        }
+        // Variable / property / parameter.
+        if flags.intersects(SymbolFlags::VARIABLE)
+            || flags.intersects(SymbolFlags::Property)
+            || flags.intersects(SymbolFlags::ACCESSOR)
+        {
+            return self.format_variable_quick_info(symbol, node);
+        }
+        if flags.intersects(SymbolFlags::MODULE) {
+            return format!("module {}", symbol.name);
+        }
+        if flags.intersects(SymbolFlags::NamespaceModule) {
+            return format!("namespace {}", symbol.name);
+        }
+        if flags.intersects(SymbolFlags::Alias) {
+            return self.format_alias_quick_info(symbol);
+        }
+        // Fallback: just the symbol name + its resolved type.
+        let t = self.get_type_of_symbol(symbol);
+        format!("{}: {}", symbol.name, self.type_to_string(&t))
+    }
+
+    fn format_function_quick_info(&mut self, symbol: &Arc<Symbol>, is_method: bool) -> String {
+        let prefix = if is_method { "" } else { "function " };
+        let name = self.symbol_to_string_ex(
+            symbol,
+            SymbolFormatFlags::WriteTypeParametersOrArguments,
+            SymbolFlags::all(),
+        );
+        let t = self.get_type_of_symbol(symbol);
+        // Function-typed object type: extract the call signature.
+        if let Some(structured) = t.as_structured() {
+            if let Some(sig) = structured.call_signatures().first() {
+                let params = self.format_signature_parameters(sig);
+                let ret = sig
+                    .resolved_return_type
+                    .get()
+                    .cloned()
+                    .unwrap_or_else(|| self.any_type());
+                let ret_str = self.type_to_string(&ret);
+                return format!("{}{}({}): {}", prefix, name, params, ret_str);
+            }
+        }
+        // Fallback: just show the resolved type string.
+        format!("{}{}: {}", prefix, name, self.type_to_string(&t))
+    }
+
+    fn format_class_quick_info(&mut self, symbol: &Arc<Symbol>) -> String {
+        let name = self.symbol_to_string_ex(
+            symbol,
+            SymbolFormatFlags::WriteTypeParametersOrArguments,
+            SymbolFlags::all(),
+        );
+        format!("class {}", name)
+    }
+
+    fn format_interface_quick_info(&mut self, symbol: &Arc<Symbol>) -> String {
+        let name = self.symbol_to_string_ex(
+            symbol,
+            SymbolFormatFlags::WriteTypeParametersOrArguments,
+            SymbolFlags::all(),
+        );
+        format!("interface {}", name)
+    }
+
+    fn format_enum_quick_info(&mut self, symbol: &Arc<Symbol>) -> String {
+        format!("enum {}", symbol.name)
+    }
+
+    fn format_type_alias_quick_info(&mut self, symbol: &Arc<Symbol>) -> String {
+        let name = self.symbol_to_string_ex(
+            symbol,
+            SymbolFormatFlags::WriteTypeParametersOrArguments,
+            SymbolFlags::all(),
+        );
+        // Try to resolve the aliased type for display.
+        if let Some(t) = self.try_get_type_alias_declared_type(symbol) {
+            let t_str = self.type_to_string(&t);
+            format!("type {} = {}", name, t_str)
+        } else {
+            format!("type {}", name)
+        }
+    }
+
+    fn format_type_parameter_quick_info(&mut self, symbol: &Arc<Symbol>) -> String {
+        let constraint = self.get_constraint_of_type_parameter_symbol(symbol);
+        match constraint {
+            Some(c) => format!("{} extends {}", symbol.name, self.type_to_string(&c)),
+            None => symbol.name.clone(),
+        }
+    }
+
+    fn format_enum_member_quick_info(&mut self, symbol: &Arc<Symbol>) -> String {
+        let t = self.get_type_of_symbol(symbol);
+        format!("{}.{}", "<enum>", self.type_to_string(&t))
+    }
+
+    fn format_variable_quick_info(&mut self, symbol: &Arc<Symbol>, _node: &Arc<Node>) -> String {
+        // Determine `let` vs `const` vs `var` from the declaration. The
+        // binder currently tags all variable declarations (var/let/const)
+        // with `BlockScopedVariable`, so we look at the parent
+        // `VariableDeclarationList`'s `NodeFlags` to disambiguate.
+        let prefix = self.variable_decl_prefix(symbol);
+        let t = self.get_type_of_symbol(symbol);
+        format!("{}{}: {}", prefix, symbol.name, self.type_to_string(&t))
+    }
+
+    /// Return `"let "`, `"const "`, or `"var "` based on the symbol's
+    /// declaration list.
+    fn variable_decl_prefix(&self, symbol: &Arc<Symbol>) -> &'static str {
+        for decl in &symbol.declarations {
+            if let Some(parent) = &decl.parent {
+                if parent.kind == SyntaxKind::VariableDeclarationList {
+                    if parent.flags.contains(crate::ast::NodeFlags::Const) {
+                        return "const ";
+                    }
+                    if parent.flags.contains(crate::ast::NodeFlags::Let) {
+                        return "let ";
+                    }
+                    // Neither `Const` nor `Let` → `var`.
+                    return "var ";
+                }
+            }
+        }
+        // Default fallback: use the symbol flag.
+        if symbol.flags.contains(SymbolFlags::BlockScopedVariable) {
+            "let "
+        } else {
+            "var "
+        }
+    }
+
+    fn format_alias_quick_info(&mut self, symbol: &Arc<Symbol>) -> String {
+        format!("import {}", symbol.name)
+    }
+
+    /// Format a signature's parameter list as `a: T, b: U`.
+    fn format_signature_parameters(&mut self, sig: &Signature) -> String {
+        let parts: Vec<String> = sig
+            .parameters
+            .iter()
+            .map(|param| {
+                let name = param.name.clone();
+                let param_type = self.get_type_of_symbol(param);
+                let type_str = self.type_to_string(&param_type);
+                if param.flags.contains(SymbolFlags::Optional) {
+                    format!("{}?: {}", name, type_str)
+                } else {
+                    format!("{}: {}", name, type_str)
+                }
+            })
+            .collect();
+        parts.join(", ")
+    }
+
+    /// Check if a variable symbol was declared with `const`.
+    fn symbol_is_const(&self, symbol: &Arc<Symbol>) -> bool {
+        for decl in &symbol.declarations {
+            if let Some(parent) = &decl.parent {
+                // VariableDeclarationList carries the `const`/`let` keyword
+                // on its parent Node's `flags` (NodeFlags::Const), not on
+                // the data struct itself.
+                if parent.kind == SyntaxKind::VariableDeclarationList
+                    && parent.flags.contains(crate::ast::NodeFlags::Const)
+                {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    /// Try to get the declared type of a type alias symbol. Triggers
+    /// resolution (with cycle protection) when the cache is empty, so hover
+    /// info on an otherwise-unreferenced alias still displays its body.
+    fn try_get_type_alias_declared_type(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+        // Check the cached declared type on `type_alias_links`.
+        if let Some(links) = self.type_alias_links.get(symbol) {
+            if let Some(t) = &links.declared_type {
+                return Some(Arc::clone(t));
+            }
+        }
+        // Cycle guard: a recursive alias (`type A = B; type B = A`) would
+        // otherwise infinite-loop. Reuses the same `resolving_type_aliases`
+        // set as `resolve_type_reference` so cycles are detected across both
+        // entry points.
+        let key = Arc::as_ptr(symbol) as *const crate::ast::Symbol;
+        if !self.resolving_type_aliases.insert(key) {
+            return None;
+        }
+        let result = self.resolve_alias_body(symbol);
+        self.resolving_type_aliases.remove(&key);
+        // Cache the result for future lookups.
+        self.type_alias_links
+            .get_or_default(symbol)
+            .declared_type = Some(Arc::clone(&result));
+        Some(result)
+    }
+
+    /// Try to get the constraint of a type parameter symbol. Wraps the
+    /// checker's existing `get_constraint_of_type_parameter` by first
+    /// resolving the symbol to its declared type-parameter type.
+    fn get_constraint_of_type_parameter_symbol(
+        &mut self,
+        symbol: &Arc<Symbol>,
+    ) -> Option<Arc<Type>> {
+        let t = self.get_type_of_symbol(symbol);
+        if t.flags.contains(TypeFlags::TypeParameter) {
+            return self.get_constraint_of_type_parameter(&t);
+        }
+        None
+    }
+
+    /// Cheap check whether `get_type_of_node` would produce a meaningful
+    /// type for `node` (used to gate fallback hover output).
+    fn node_has_type(&self, node: &Arc<Node>) -> bool {
+        matches!(
+            node.kind,
+            SyntaxKind::NumericLiteral
+                | SyntaxKind::StringLiteral
+                | SyntaxKind::NoSubstitutionTemplateLiteral
+                | SyntaxKind::TemplateExpression
+                | SyntaxKind::ArrayLiteralExpression
+                | SyntaxKind::ObjectLiteralExpression
+                | SyntaxKind::BinaryExpression
+                | SyntaxKind::PrefixUnaryExpression
+                | SyntaxKind::PostfixUnaryExpression
+                | SyntaxKind::CallExpression
+                | SyntaxKind::NewExpression
+                | SyntaxKind::PropertyAccessExpression
+                | SyntaxKind::ElementAccessExpression
+                | SyntaxKind::ParenthesizedExpression
+                | SyntaxKind::ConditionalExpression
+                | SyntaxKind::TypeAssertionExpression
+                | SyntaxKind::AsExpression
+                | SyntaxKind::NonNullExpression
+        )
     }
 }
 

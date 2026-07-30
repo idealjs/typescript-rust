@@ -320,7 +320,14 @@ impl Checker {
     }
 
     /// Resolve the declared type of a type alias symbol (the alias body).
-    fn resolve_alias_body(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    ///
+    /// Public so that the nodebuilder (hover info) can trigger resolution
+    /// of an alias that has not been encountered during normal checking.
+    /// Does NOT perform cycle protection or cache the result — callers are
+    /// responsible for both. `resolve_type_reference` (the in-checker
+    /// caller) maintains its own cycle guard and cache; the nodebuilder's
+    /// `try_get_type_alias_declared_type` does the same.
+    pub fn resolve_alias_body(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
         for decl in &symbol.declarations {
             if let NodeData::TypeAliasDeclaration(data) = &decl.data {
                 return self.get_type_from_type_node(&data.type_node);
