@@ -57,15 +57,15 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-30）
 
-测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 400 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 294 个）。
+测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 416 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 310 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
 | Scanner | 1558 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 完成；缺 trivia 节点、完整 regex 校验 |
 | Parser | 7115 | 9251 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；缺 reparser/jsdoc |
 | Binder | 1639 | ~4000 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 完成；缺完整 flow graph、ARRAY_MUTATION、try/catch/finally、labeled statement、完整 declaration merge |
-| Checker | 9050 | ~50K+ | ~18% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；324 parity fixtures 通过；缺 nodebuilder、emitresolver、JSX/JSDoc/grammar checks、mapped type 节点解析 |
+| Checker | 9400 | ~50K+ | ~19% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；416 parity fixtures 通过；缺 emitresolver visibility tracking、完整 declaration merge checker 侧 |
 | Compiler | 759 | — | 基础 | Program 创建/解析/绑定/emit pipeline 通；checker 已接入 |
 | Emitter | 774 | — | 基础 | JS emit 基础；缺 transformer 体系 |
 | Printer | 1578 | — | 基础 | 节点→文本基础 |
@@ -396,6 +396,16 @@ reference 协变/逆变推断（`generic_type_reference_related_to`）。
   否则保留 `TemplateLiteral` 类型（texts/types 数组）。parser 新增
   `create_template_token_node` 从 raw token text 提取 cooked 文本。
   5 条模板字面量 parity 测试通过。
+- [x] 映射类型缓存修复：`get_cached_type`/`cache_type` 在
+  `type_argument_stack` 非空时跳过读写，避免映射类型 `T[K]` 在不同 K
+  替换下返回首个 key 的缓存结果。7 条映射类型 parity 测试全部通过。
+- [x] 类 `extends` 继承 + `this` 类型解析：`build_class_instance_type_with_base`
+  递归解析 `extends` 基类的实例类型并合并属性（派生覆盖基类）；
+  `resolve_base_class_instance_type` 从 heritage clause 解析基类符号并构建
+  实例类型（含循环保护）；`merge_instance_types` 合并基类+派生属性列表；
+  `this_type_stack` 在类成员检查期间提供 `this`/`super` 的实例类型；
+  `implements` 检查改用 `build_class_instance_type_with_base` 使继承的成员
+  也满足接口。10 条类继承 parity 测试通过。
 
 ### P3.8 Checker 类型推断
 
