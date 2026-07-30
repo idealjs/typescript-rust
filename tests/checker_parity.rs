@@ -2719,6 +2719,134 @@ fn checker_narrowing_asserts_does_not_affect_other_vars() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// instanceof / in / boolean narrowing (P3.9 fixture gaps)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_narrowing_instanceof_true_branch() {
+    // After `x instanceof Foo`, x is Foo in the true branch.
+    let diags = check_source(
+        "class Foo { greet() {} }\
+         function f(x: Foo | string) {\
+         \x20   if (x instanceof Foo) {\
+         \x20       x.greet();\
+         \x20   }\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_instanceof_false_branch() {
+    // In the false branch of `x instanceof Foo`, x is string.
+    let diags = check_source(
+        "class Foo {}\
+         function f(x: Foo | string) {\
+         \x20   if (!(x instanceof Foo)) {\
+         \x20       let s: string = x;\
+         \x20   }\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_in_keyword_true_branch() {
+    // After `'b' in obj`, obj is narrowed to the constituent with `b`.
+    let diags = check_source(
+        "type A = { a: number };\
+         type B = { b: number };\
+         function f(obj: A | B) {\
+         \x20   if ('b' in obj) {\
+         \x20       let n: number = obj.b;\
+         \x20   }\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_in_keyword_false_branch() {
+    // In the false branch of `'b' in obj`, obj is narrowed to A.
+    let diags = check_source(
+        "function f(obj: { a: number } | { b: number }) {\
+         \x20   if (!('b' in obj)) {\
+         \x20       let n: number = obj.a;\
+         \x20   }\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_boolean_comparison_true() {
+    // `x === true` narrows x to `true` in the true branch.
+    let diags = check_source(
+        "function f(x: boolean) {\
+         \x20   if (x === true) {\
+         \x20       let t: true = x;\
+         \x20   }\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_boolean_comparison_false_branch() {
+    // `x === true` narrows x to `false` in the else branch.
+    let diags = check_source(
+        "function f(x: boolean) {\
+         \x20   if (x === true) {\
+         \x20   } else {\
+         \x20       let f2: false = x;\
+         \x20   }\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_instanceof_property_access_error() {
+    // Before the instanceof guard, accessing `greet()` should error (TS2339).
+    let diags = check_source(
+        "class Foo { greet() {} }\
+         function f(x: Foo | string) {\
+         \x20   x.greet();\
+         }",
+    );
+    let count = diags.iter().filter(|d| d.code == 2339).count();
+    assert_eq!(count, 1, "Expected TS2339 for x.greet() on union type");
+}
+
+#[test]
+fn checker_narrowing_and_condition() {
+    // `x !== null && ok` — x is narrowed to string in the true branch.
+    let diags = check_source(
+        "function f(x: string | null, ok: boolean) {\
+         \x20   if (x !== null && ok) {\
+         \x20       let s: string = x;\
+         \x20   }\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_or_branch_union() {
+    // `x === null || ok` — in the false branch of `||`, x is string.
+    let diags = check_source(
+        "function f(x: string | null, ok: boolean) {\
+         \x20   if (x === null || ok) {\
+         \x20   } else {\
+         \x20       let s: string = x;\
+         \x20   }\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+
+// ────────────────────────────────────────────────────────────────────────────
 // Type display (type_to_string) via diagnostic message args
 // ────────────────────────────────────────────────────────────────────────────
 

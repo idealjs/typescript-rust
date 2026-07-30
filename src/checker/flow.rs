@@ -246,6 +246,12 @@ impl Checker {
         kind: NarrowKind,
         depth: u32,
     ) -> Arc<Type> {
+        // Parenthesized expression: unwrap and recurse.
+        if expr.kind == SyntaxKind::ParenthesizedExpression {
+            if let NodeData::ParenthesizedExpression(p) = &expr.data {
+                return self.narrow_by_expression(type_, &p.expression, symbol, kind, depth);
+            }
+        }
         // Logical AND: `a && b` — both sides are true in the true branch.
         if expr.kind == SyntaxKind::BinaryExpression {
             if let NodeData::BinaryExpression(bin) = &expr.data {
@@ -456,6 +462,30 @@ impl Checker {
         // `any` is not narrowed by equality comparisons.
         if type_.flags.contains(TypeFlags::Any) {
             return Arc::clone(type_);
+        }
+        // Boolean comparison narrowing: `x === true` / `x === false`.
+        // When the type contains `Boolean` and the value is a boolean
+        // literal, narrow to the matching literal (true branch) or the
+        // opposite literal (false branch). Mirrors Go's
+        // `narrowTypeByBooleanComparison` (flow.go ~L793).
+        if value_type.flags.contains(TypeFlags::BooleanLiteral)
+            && type_.flags.contains(TypeFlags::Boolean)
+            && !is_loose
+        {
+            let is_true_value = match value_type.literal_value() {
+                Some(LiteralValue::Boolean(b)) => *b,
+                _ => true,
+            };
+            let target_is_true = if narrow_to_value {
+                is_true_value
+            } else {
+                !is_true_value
+            };
+            return if target_is_true {
+                self.true_type()
+            } else {
+                self.false_type()
+            };
         }
         // Nullable value type (null or undefined): narrow by facts.
         if value_type.flags.intersects(TYPE_FLAGS_NULLABLE) {
@@ -704,13 +734,23 @@ impl Checker {
             NarrowKind::TrueBranch => true,
             NarrowKind::FalseBranch => false,
         };
+        // Mirrors Go's `narrowTypeByInKeyword` (flow.go ~L988):
+        // - True branch (`'p' in x` is true): remove types that definitely
+        //   DON'T have `p`; keep types that have it or where presence is
+        //   unknown (index signatures etc.).
+        // - False branch (`'p' in x` is false): remove types that definitely
+        //   HAVE `p`; keep types that don't have it or where presence is
+        //   unknown.
         let constituents = self.constituent_types(type_);
         let filtered: Vec<Arc<Type>> = constituents
             .into_iter()
             .filter(|t| {
                 let has_prop = self.type_has_property(t, &prop_name);
-                keep_present == has_prop.is_definitely()
-                    && (keep_present || !has_prop.is_definitely_not())
+                if keep_present {
+                    !has_prop.is_definitely_not()
+                } else {
+                    !has_prop.is_definitely()
+                }
             })
             .collect();
         self.rebuild_union_or_never(type_, filtered)
