@@ -57,8 +57,8 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-30）
 
-测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 416 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 310 个）。
+测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 428 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 322 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
@@ -406,6 +406,15 @@ reference 协变/逆变推断（`generic_type_reference_related_to`）。
   `this_type_stack` 在类成员检查期间提供 `this`/`super` 的实例类型；
   `implements` 检查改用 `build_class_instance_type_with_base` 使继承的成员
   也满足接口。10 条类继承 parity 测试通过。
+- [x] 函数重载解析：`build_overload_function_type` 从符号的全部 FunctionDeclaration
+  收集无 body 的重载签名构建多签名函数类型；`find_matching_signature`/
+  `signature_accepts_arguments` 按序匹配首个可接受参数的签名；
+  `get_return_type_of_call_expression`/`check_call_arguments` 均使用匹配签名。
+  5 条重载 parity 测试通过。
+- [x] `new` 表达式实例类型：`get_type_of_class_declaration` 将构造签名返回类型
+  设为类实例类型（含 `extends` 继承成员），使 `new Foo()` 返回有类型的实例，
+  `instance.prop` 触发 TS2339、类型赋值触发 TS2322、构造参数检查触发 TS2345。
+  7 条 new 表达式 parity 测试通过。
 
 ### P3.8 Checker 类型推断
 
