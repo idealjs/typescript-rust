@@ -2300,6 +2300,122 @@ fn checker_string_array_element_access_returns_string_no_error() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Call-expression argument type checking (TS2345)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_call_arg_matching_type_no_error() {
+    // `f(42)` — `number` arg to `number` param → no error.
+    let diags = check_source("function f(x: number) {} f(42);");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_arg_string_to_number_ts2345() {
+    // `f('hi')` — `string` not assignable to `number` param → TS2345.
+    let diags = check_source("function f(x: number) {} f('hi');");
+    assert_diagnostic_code(&diags, 2345);
+}
+
+#[test]
+fn checker_call_arg_number_to_string_ts2345() {
+    // `f(42)` — `number` not assignable to `string` param → TS2345.
+    let diags = check_source("function f(x: string) {} f(42);");
+    assert_diagnostic_code(&diags, 2345);
+}
+
+#[test]
+fn checker_call_arg_boolean_to_number_ts2345() {
+    // `f(true)` — `boolean` not assignable to `number` param → TS2345.
+    let diags = check_source("function f(x: number) {} f(true);");
+    assert_diagnostic_code(&diags, 2345);
+}
+
+#[test]
+fn checker_call_arg_union_member_no_error() {
+    // `f(42)` — `number` is a member of `string | number` → no error.
+    let diags = check_source("function f(x: string | number) {} f(42);");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_arg_outside_union_ts2345() {
+    // `f(true)` — `boolean` not in `string | number` → TS2345.
+    let diags = check_source("function f(x: string | number) {} f(true);");
+    assert_diagnostic_code(&diags, 2345);
+}
+
+#[test]
+fn checker_call_arg_any_param_no_error() {
+    // `any` param accepts anything.
+    let diags = check_source("function f(x: any) {} f('hi'); f(42); f(true);");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_multiple_args_first_mismatch_ts2345() {
+    // Only the first argument mismatches.
+    let diags = check_source("function f(a: number, b: string) {} f('hi', 'ok');");
+    assert_diagnostic_code(&diags, 2345);
+}
+
+#[test]
+fn checker_call_multiple_args_second_mismatch_ts2345() {
+    // Only the second argument mismatches.
+    let diags = check_source("function f(a: number, b: string) {} f(1, 42);");
+    assert_diagnostic_code(&diags, 2345);
+}
+
+#[test]
+fn checker_call_arrow_function_arg_ts2345() {
+    // Arrow function callee.
+    let diags = check_source("let f = (x: number) => x; f('hi');");
+    assert_diagnostic_code(&diags, 2345);
+}
+
+#[test]
+fn checker_call_arg_matching_object_type_no_error() {
+    // Object literal arg matching the param's object type.
+    let diags = check_source("function f(p: { a: number }) {} f({ a: 1 });");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_arg_object_missing_property_ts2345() {
+    // `{ b: 1 }` not assignable to `{ a: number }` → TS2345.
+    let diags = check_source("function f(p: { a: number }) {} f({ b: 1 });");
+    assert_diagnostic_code(&diags, 2345);
+}
+
+#[test]
+fn checker_call_arg_wrong_property_type_ts2345() {
+    // `{ a: 'hi' }` not assignable to `{ a: number }` → TS2345.
+    let diags = check_source("function f(p: { a: number }) {} f({ a: 'hi' });");
+    assert_diagnostic_code(&diags, 2345);
+}
+
+#[test]
+fn checker_new_expression_arg_ts2345() {
+    // `new Foo('hi')` — `string` not assignable to `number` param → TS2345.
+    let diags = check_source("class Foo { constructor(x: number) {} } let f = new Foo('hi');");
+    assert_diagnostic_code(&diags, 2345);
+}
+
+#[test]
+fn checker_new_expression_arg_no_error() {
+    // `new Foo(42)` — `number` to `number` → no error.
+    let diags = check_source("class Foo { constructor(x: number) {} } let f = new Foo(42);");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_arg_fewer_args_no_error() {
+    // Fewer args than params (missing optional args are OK).
+    let diags = check_source("function f(a: number, b?: string) {} f(42);");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // More expression type inference: non-null, conditional, template, delete, void
 // ────────────────────────────────────────────────────────────────────────────
 

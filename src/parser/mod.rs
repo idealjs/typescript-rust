@@ -3233,12 +3233,30 @@ impl Parser {
         } else {
             self.parse_left_hand_side_expression()
         };
+        // `parse_left_hand_side_expression` may have consumed a trailing
+        // argument list as a CallExpression (e.g. `new Foo('hi')` was parsed
+        // as `new (Foo('hi'))`). In that case, unwrap the CallExpression:
+        // its callee becomes the `new` target, and its arguments become the
+        // `new` arguments. This matches Go tsc's behavior where the
+        // argument list belongs to the `new`, not to a call on the target.
+        let (expression, extracted_args) =
+            if expression.kind == SyntaxKind::CallExpression {
+                if let NodeData::CallExpression(data) = &expression.data {
+                    (Arc::clone(&data.expression), Some(data.arguments.clone()))
+                } else {
+                    (expression, None)
+                }
+            } else {
+                (expression, None)
+            };
         let type_arguments = self.parse_optional_type_arguments();
-        let arguments = if self.token == SyntaxKind::OpenParenToken {
-            Some(self.parse_argument_list())
-        } else {
-            None
-        };
+        let arguments = extracted_args.or_else(|| {
+            if self.token == SyntaxKind::OpenParenToken {
+                Some(self.parse_argument_list())
+            } else {
+                None
+            }
+        });
         let end = arguments.as_ref().map_or(expression.end(), |a| a.end());
         Arc::new(Node::with_loc(
             SyntaxKind::NewExpression,
@@ -5539,7 +5557,9 @@ impl Parser {
             .or_else(|| self.parse_optional_token(SyntaxKind::ExclamationToken));
 
         if self.token == SyntaxKind::OpenParenToken {
-            // Method
+            // Check if this is a constructor (`constructor(...) {}`).
+            let is_constructor = name.kind == SyntaxKind::Identifier
+                && name.text() == "constructor";
             let type_parameters = self.parse_optional_type_parameters();
             let parameters = self.parse_parameter_list();
             let type_node = self.parse_optional_return_type();
@@ -5550,6 +5570,20 @@ impl Parser {
                 None
             };
             let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
+            if is_constructor {
+                return Arc::new(Node::with_loc(
+                    SyntaxKind::Constructor,
+                    NodeData::ConstructorDeclaration(ConstructorDeclarationData {
+                        modifiers,
+                        type_parameters,
+                        parameters,
+                        type_node,
+                        full_signature: None,
+                        body,
+                    }),
+                    TextRange::new(pos, end),
+                ));
+            }
             return Arc::new(Node::with_loc(
                 SyntaxKind::MethodDeclaration,
                 NodeData::MethodDeclaration(MethodDeclarationData {

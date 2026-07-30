@@ -397,6 +397,14 @@ contextual function type 的 call signature，无注解参数继承对应位置�
   `members_related_to_index_info`（使 `{ a: 1 }` 可赋值给 `{ [key: string]: number }`）；
   flow 修复 `types_overlap`/`narrow_by_switch_on_discriminant_property` 支持 literal
   比较。16 条 TS2339 parity 测试全部通过。
+- [x] 调用表达式参数类型检查（TS2345）。已实现 `check_call_arguments` 解析 callee
+  类型并比对各参数类型与签名参数类型；覆盖 CallExpression/NewExpression、对象字面量
+  参数、联合类型参数、arrow function callee；`get_type_of_class_declaration` 从
+  constructor 构建构造签名并缓存到 class symbol；parser 修复 `new Foo('hi')` 被解析
+  为 `new (Foo('hi'))` 的问题（unwrap trailing CallExpression）；parser 增补
+  `Constructor` 声明解析（`constructor(...)` 现在生成 `ConstructorDeclaration` 而非
+  `MethodDeclaration`）；binder 将 `Constructor` 加入 `is_block_scoped_container` 使
+  构造函数参数存入 locals。16 条 TS2345 parity 测试全部通过。
 
 ### P3.9 Checker 控制流 narrowing
 

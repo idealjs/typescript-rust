@@ -1456,6 +1456,7 @@ fn is_block_scoped_container(kind: SyntaxKind) -> bool {
             | SyntaxKind::ForStatement
             | SyntaxKind::ForInStatement
             | SyntaxKind::ForOfStatement
+            | SyntaxKind::Constructor
     )
 }
 

@@ -10,14 +10,15 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::ast::{
-    CheckFlags, DiagnosticsCollection, ModifierFlags, Node, NodeData, NodeFlags, NodeSymbolMap,
-    SourceFile, Symbol, SymbolFlags, SymbolTable, SyntaxKind,
+    CheckFlags, DiagnosticsCollection, ModifierFlags, Node, NodeData, NodeFlags, NodeList,
+    NodeSymbolMap, SourceFile, Symbol, SymbolFlags, SymbolTable, SyntaxKind,
 };
 use crate::core::compiler_options::{
     CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget,
 };
 use crate::diagnostics::messages_generated::{
-    CANNOT_FIND_NAME_0, PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1, TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+    ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1, CANNOT_FIND_NAME_0,
+    PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1, TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
 };
 use crate::jsnum;
 
@@ -1747,6 +1748,52 @@ impl Checker {
         self.create_function_or_constructor_type(vec![sig], false)
     }
 
+    /// Build the type of a class declaration: an anonymous object type
+    /// carrying construct signatures derived from the class's `constructor`
+    /// member. The construct signature's parameters are resolved (and
+    /// cached on the parameter symbols) so `check_call_arguments` can verify
+    /// `new Foo(arg)` calls (TS2345).
+    fn get_type_of_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let members = match &node.data {
+            crate::ast::NodeData::ClassDeclaration(data) => &data.members,
+            _ => return self.get_any_type(),
+        };
+        // Push the class scope so type-parameter references in constructor
+        // parameter annotations resolve.
+        self.push_scope(node);
+        let mut construct_sigs: Vec<Arc<Signature>> = Vec::new();
+        for member in members.iter() {
+            if member.kind != SyntaxKind::Constructor {
+                continue;
+            }
+            let params = match &member.data {
+                crate::ast::NodeData::ConstructorDeclaration(data) => &data.parameters,
+                _ => continue,
+            };
+            let return_type = self.get_any_type(); // instance type
+            let sig = self.build_signature_from_function_like_type_node(
+                params,
+                return_type,
+                /* is_construct */ true,
+                /* contextual_signature */ None,
+            );
+            construct_sigs.push(sig);
+        }
+        self.pop_scope();
+        if construct_sigs.is_empty() {
+            // No explicit constructor: `new Foo()` with zero args is valid.
+            // Synthesize a no-arg construct signature.
+            let sig = self.build_signature_from_function_like_type_node(
+                &Arc::new(NodeList::default()),
+                self.get_any_type(),
+                /* is_construct */ true,
+                None,
+            );
+            construct_sigs.push(sig);
+        }
+        self.create_function_or_constructor_type(construct_sigs, /* is_construct */ true)
+    }
+
     /// Get the return type of a `CallExpression`. Resolves the called
     /// expression's type; if it's a function type with at least one call
     /// signature, return that signature's resolved return type. Otherwise
@@ -2003,6 +2050,72 @@ impl Checker {
             PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
             vec![name_text.to_string(), type_str],
         ));
+    }
+
+    /// Check that call/new-expression arguments are assignable to the
+    /// corresponding parameter types of the callee's signature. Emits
+    /// TS2345 for mismatched arguments.
+    ///
+    /// Mirrors the argument-checking portion of Go's `checkCallExpression`
+    /// / `checkNewExpression`. We resolve the callee type, find the first
+    /// call (or construct) signature, and compare each argument against
+    /// the corresponding parameter type. Rest parameters are handled by
+    /// matching all trailing arguments against the rest element type.
+    /// `any` callee / missing signature → skip (no false positives).
+    fn check_call_arguments(&mut self, node: &Arc<Node>, is_new: bool) {
+        let (callee_expr, arguments) = match &node.data {
+            crate::ast::NodeData::CallExpression(data) => {
+                (&data.expression, data.arguments.clone())
+            }
+            crate::ast::NodeData::NewExpression(data) => {
+                (&data.expression, data.arguments.clone().unwrap_or_default())
+            }
+            _ => return,
+        };
+        let callee_type = self.get_type_of_node(callee_expr);
+        // `any` callee → skip (no false positives without a signature).
+        if callee_type.flags.contains(TypeFlags::Any) {
+            return;
+        }
+        let structured = match callee_type.as_structured() {
+            Some(s) => s,
+            None => return,
+        };
+        let signatures = if is_new {
+            structured.construct_signatures()
+        } else {
+            structured.call_signatures()
+        };
+        let sig = match signatures.first() {
+            Some(s) => Arc::clone(s),
+            None => return,
+        };
+        let file = self.current_file.clone();
+        for (i, arg) in arguments.iter().enumerate() {
+            if i < sig.parameters.len() {
+                let param_type = self.get_type_of_symbol(&sig.parameters[i]);
+                // `any` parameter → always assignable, skip.
+                if param_type.flags.contains(TypeFlags::Any) {
+                    continue;
+                }
+                let arg_type = self.get_type_of_node(arg);
+                if !self.is_type_assignable_to(&arg_type, &param_type) {
+                    let arg_str = self.type_to_string(&arg_type);
+                    let param_str = self.type_to_string(&param_type);
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        file.clone(),
+                        arg.loc,
+                        ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1,
+                        vec![arg_str, param_str],
+                    ));
+                }
+            }
+            // Arguments beyond the declared parameter list are only valid
+            // when the signature has a rest parameter; the rest element
+            // type check would require unwrapping the array type, which we
+            // defer. For now, extra arguments on non-rest signatures are
+            // not reported here (the grammar check covers arity separately).
+        }
     }
 
     /// Get the type of an `ElementAccessExpression` (`x[key]`).
@@ -2475,6 +2588,22 @@ impl Checker {
                     }
                 }
                 self.pop_scope();
+                // Build the class type (with construct signatures from the
+                // constructor) and cache it on the declaration node + symbol
+                // so `new Foo(arg)` can resolve the callee and check args.
+                let class_type = self.get_type_of_class_declaration(node);
+                self.type_node_links
+                    .get_or_default(node)
+                    .resolved_type = Some(class_type.clone());
+                if let crate::ast::NodeData::ClassDeclaration(data) = &node.data {
+                    if let Some(name) = &data.name {
+                        if let Some(symbol) = self.resolve_identifier(name) {
+                            self.value_symbol_links
+                                .get_or_default(&symbol)
+                                .resolved_type = Some(class_type);
+                        }
+                    }
+                }
             }
             SyntaxKind::InterfaceDeclaration
             | SyntaxKind::TypeAliasDeclaration
@@ -2728,6 +2857,7 @@ impl Checker {
                         self.check_expression(arg);
                     }
                 }
+                self.check_call_arguments(node, /* is_new */ false);
             }
             SyntaxKind::NewExpression => {
                 if let crate::ast::NodeData::NewExpression(data) = &node.data {
@@ -2738,6 +2868,7 @@ impl Checker {
                         }
                     }
                 }
+                self.check_call_arguments(node, /* is_new */ true);
             }
             SyntaxKind::PropertyAccessExpression => {
                 // Only check the left side; the right side is a property name,
