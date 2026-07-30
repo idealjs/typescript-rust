@@ -3185,3 +3185,56 @@ fn checker_object_literal_contextual_mismatch_ts2322() {
     let diags = check_source("let x: { a: 2 } = { a: 1 };");
     assert_diagnostic_code(&diags, 2322);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// P3.8: Contextual typing for CallExpression arguments. Arrow function
+// parameters inherit types from the contextual signature, and object
+// literal arguments preserve literal types when checked against the
+// parameter type.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_call_arg_arrow_contextual_param_type_ts2339() {
+    // Arrow function argument: `x` should be contextually typed as
+    // `{ a: number }` from the parameter type, so `x.b` should report
+    // TS2339 (no property `b`). Without contextual typing, `x` would
+    // be `any` and no error would be reported.
+    let diags = check_source(
+        "function f(cb: (x: { a: number }) => void): void {}\n\
+         f((x) => x.b);",
+    );
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_call_arg_arrow_contextual_valid_no_error() {
+    // Arrow function argument: `x` contextually typed as `{ a: number }`,
+    // accessing `x.a` is valid.
+    let diags = check_source(
+        "function f(cb: (x: { a: number }) => void): void {}\n\
+         f((x) => x.a);",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_arg_object_literal_contextual_no_error() {
+    // Object literal argument: `{ a: 1 }` is contextually typed by
+    // `{ a: number }`. The literal `1` is assignable to `number`.
+    let diags = check_source(
+        "function f(x: { a: number }): void {}\n\
+         f({ a: 1 });",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_arg_object_literal_contextual_mismatch_ts2345() {
+    // Object literal argument: `{ a: 'hi' }` is NOT assignable to
+    // `{ a: number }`.
+    let diags = check_source(
+        "function f(x: { a: number }): void {}\n\
+         f({ a: 'hi' });",
+    );
+    assert_diagnostic_code(&diags, 2345);
+}

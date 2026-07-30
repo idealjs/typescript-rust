@@ -3171,6 +3171,14 @@ impl Checker {
     }
 
     fn check_function_like_body(&mut self, node: &Arc<Node>) {
+        // Compute the function's type first. This triggers contextual
+        // typing: when the function is a call argument (e.g.
+        // `f((x) => x.toFixed())`), `get_type_of_function_like` calls
+        // `get_contextual_type` which resolves the parameter type from
+        // the callee's signature. The resolved parameter types are stored
+        // in `value_symbol_links` so that `check_function_like_body`'s
+        // body walk (below) sees them when resolving parameter references.
+        self.get_type_of_node(node);
         // Walk children, but skip parameter names (they are declarations).
         // The simplest correct approach is to dispatch on the body only.
         let body: Option<Arc<Node>> = match &node.data {

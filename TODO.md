@@ -57,8 +57,8 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-30）
 
-测试基线：`cargo test` 通过（607 个 lib 单测 + 2 个 emit parity + 324 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 218 个）。
+测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 335 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 229 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
@@ -406,8 +406,13 @@ contextual function type 的 call signature，无注解参数继承对应位置�
   对象字面量递归 widen 每个属性（`{ a: 1 }` → `{ a: number }`），嵌套对象
   字面量也递归处理。有类型注解时不 widen（contextual typing 保留 literal）。
   7 条 widening parity 测试通过。
-- [ ] contextual typing 扩展到 CallExpression 参数（`get_contextual_type_for_argument`
-  已具备，需把推断结果落回；当前仅变量声明初始化器走通）。
+- [x] contextual typing 扩展到 CallExpression 参数（`get_contextual_type_for_argument`
+  已具备，需把推断结果落回；当前仅变量声明初始化器走通）。已修复
+  `check_function_like_body`：在 body 检查前先调用 `get_type_of_node(node)`
+  触发 `get_type_of_function_like` → `get_contextual_type` →
+  `get_contextual_type_for_argument`，使 call argument 位置的箭头函数/函数表达式
+  参数能继承 callee 签名对应位置的参数类型。4 条 contextual typing parity 测试
+  通过（含 TS2339 属性不存在检测、valid 属性访问、对象字面量 contextual mismatch）。
 - [x] 成员访问类型检查（`x.toUpperCase()` 在 `x: number` 上应报 TS2339）。已实现
   `check_property_access`/`has_property_of_type`，覆盖对象字面量、原始类型、联合/
   交叉类型、类型参数约束、数组/元组 `length`、索引签名；binder 增补 `TypeParameter`
