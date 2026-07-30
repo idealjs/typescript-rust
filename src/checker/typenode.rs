@@ -28,6 +28,18 @@ fn is_static_modifier(modifiers: &Option<Arc<ModifierList>>) -> bool {
         .unwrap_or(false)
 }
 
+/// Extract the cooked text of a template token (`TemplateHead`,
+/// `TemplateMiddle`, `TemplateTail`). These tokens carry a `text` field
+/// in their node data (the cooked form, with escapes resolved).
+fn template_token_text(node: &Arc<Node>) -> String {
+    match &node.data {
+        NodeData::TemplateHead(d) => d.text.clone(),
+        NodeData::TemplateMiddle(d) => d.text.clone(),
+        NodeData::TemplateTail(d) => d.text.clone(),
+        _ => String::new(),
+    }
+}
+
 impl Checker {
     /// Convert an AST type node into a `Type`.
     ///
@@ -1324,7 +1336,7 @@ impl Checker {
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
-        let result = self.error_type();
+        let result = self.build_template_literal_type(node);
         self.cache_type(node, result.clone());
         result
     }
@@ -1779,6 +1791,107 @@ impl Checker {
             }
         }
         None
+    }
+
+    /// Build a `TemplateLiteral` type (or a flattened `StringLiteral` when
+    /// all spans are concrete) from a `TemplateLiteralTypeNode`.
+    ///
+    /// Mirrors a simplified subset of Go's
+    /// `getTypeFromTypeNode`→`getTemplateLiteralType`:
+    ///   - Collect the head text and each span's (type, literal-text) pair.
+    ///   - If every span type is a concrete literal
+    ///     (string/number/boolean/null/undefined), flatten the whole
+    ///     template into a single `StringLiteral` type — e.g.
+    ///     `` `a-${1}-b` `` → `"a-1-b"`.
+    ///   - Otherwise (e.g. `` `${string}` ``, `` `${T}` ``), keep a
+    ///     `TemplateLiteral` type with the texts/types arrays so the
+    ///     relater/nodebuilder can handle it.
+    fn build_template_literal_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let (head, spans) = match &node.data {
+            NodeData::TemplateLiteralTypeNode(data) => {
+                (Arc::clone(&data.head), Arc::clone(&data.template_spans))
+            }
+            _ => return self.error_type(),
+        };
+        let head_text = template_token_text(&head);
+        // Collect (type, literal_text) for each span.
+        let mut span_types: Vec<Arc<Type>> = Vec::new();
+        let mut span_texts: Vec<String> = Vec::new();
+        for span_node in spans.iter() {
+            let (type_node, literal_node) = match &span_node.data {
+                NodeData::TemplateLiteralTypeSpan(data) => {
+                    (Arc::clone(&data.type_node), Arc::clone(&data.literal))
+                }
+                _ => return self.error_type(),
+            };
+            span_types.push(self.get_type_from_type_node(&type_node));
+            span_texts.push(template_token_text(&literal_node));
+        }
+        // Attempt to flatten: every span type must be a concrete literal.
+        let all_literal = span_types
+            .iter()
+            .all(|t| t.flags.intersects(TYPE_FLAGS_LITERAL | TypeFlags::Null | TypeFlags::Undefined));
+        if all_literal {
+            let mut sb = String::new();
+            sb.push_str(&head_text);
+            for (t, text) in span_types.iter().zip(span_texts.iter()) {
+                sb.push_str(&self.template_string_for_type(t));
+                sb.push_str(text);
+            }
+            return self.get_string_literal_type(&sb);
+        }
+        // Build a TemplateLiteral type.
+        let mut texts = Vec::with_capacity(span_types.len() + 1);
+        texts.push(head_text);
+        for t in span_texts {
+            texts.push(t);
+        }
+        Arc::new(Type::new(
+            TypeFlags::TemplateLiteral,
+            TypeData::TemplateLiteral(TemplateLiteralTypeData {
+                constrained: ConstrainedTypeData::default(),
+                texts,
+                types: span_types,
+            }),
+        ))
+    }
+
+    /// String representation of a literal type for template-literal
+    /// flattening. Mirrors Go's `getTemplateStringForType`:
+    /// string-literal → the literal value, number → its decimal form,
+    /// boolean → "true"/"false", null → "null", undefined → "undefined".
+    fn template_string_for_type(&self, t: &Arc<Type>) -> String {
+        if t.flags.contains(TypeFlags::StringLiteral) {
+            if let TypeData::Literal(lit) = &t.data {
+                if let LiteralValue::String(s) = &lit.value {
+                    return s.clone();
+                }
+            }
+            return String::new();
+        }
+        if t.flags.contains(TypeFlags::NumberLiteral) {
+            if let TypeData::Literal(lit) = &t.data {
+                if let LiteralValue::Number(n) = &lit.value {
+                    return n.to_string();
+                }
+            }
+            return String::new();
+        }
+        if t.flags.contains(TypeFlags::BooleanLiteral) {
+            if let TypeData::Literal(lit) = &t.data {
+                if let LiteralValue::Boolean(b) = &lit.value {
+                    return if *b { "true".into() } else { "false".into() };
+                }
+            }
+            return String::new();
+        }
+        if t.flags.contains(TypeFlags::Null) {
+            return "null".into();
+        }
+        if t.flags.contains(TypeFlags::Undefined) {
+            return "undefined".into();
+        }
+        String::new()
     }
 
     /// Flatten a type into its string-literal values.

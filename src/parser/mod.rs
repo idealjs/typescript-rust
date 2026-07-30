@@ -357,6 +357,57 @@ impl Parser {
         ))
     }
 
+    /// Create a template token node (`TemplateHead`, `TemplateMiddle`,
+    /// `TemplateTail`) with the cooked text extracted from the scanner's
+    /// raw token text. The scanner stores the raw form (e.g. `` `a-${ ``);
+    /// we strip the leading/trailing delimiters to get the cooked content
+    /// (e.g. "a"). Mirrors Go's scanner which stores the cooked value
+    /// separately.
+    fn create_template_token_node(&self) -> Arc<Node> {
+        let raw = self.scanner.token_text();
+        let cooked = match self.token {
+            SyntaxKind::TemplateHead => {
+                // Strip leading ` and trailing ${
+                let s = raw.strip_prefix('`').unwrap_or(raw);
+                s.strip_suffix("${").unwrap_or(s).to_string()
+            }
+            SyntaxKind::TemplateMiddle => {
+                // Strip leading } and trailing ${
+                let s = raw.strip_prefix('}').unwrap_or(raw);
+                s.strip_suffix("${").unwrap_or(s).to_string()
+            }
+            SyntaxKind::TemplateTail => {
+                // Strip leading } and trailing `
+                let s = raw.strip_prefix('}').unwrap_or(raw);
+                s.strip_suffix('`').unwrap_or(s).to_string()
+            }
+            _ => raw.to_string(),
+        };
+        let data = match self.token {
+            SyntaxKind::TemplateHead => NodeData::TemplateHead(TemplateHeadData {
+                text: cooked.clone(),
+                raw_text: raw.to_string(),
+                template_flags: 0,
+            }),
+            SyntaxKind::TemplateMiddle => NodeData::TemplateMiddle(TemplateMiddleData {
+                text: cooked.clone(),
+                raw_text: raw.to_string(),
+                template_flags: 0,
+            }),
+            SyntaxKind::TemplateTail => NodeData::TemplateTail(TemplateTailData {
+                text: cooked.clone(),
+                raw_text: raw.to_string(),
+                template_flags: 0,
+            }),
+            _ => NodeData::Token,
+        };
+        Arc::new(Node::with_loc(
+            self.token,
+            data,
+            TextRange::new(self.token_pos(), self.token_end()),
+        ))
+    }
+
     fn missing_node(&self, pos: usize) -> Arc<Node> {
         Arc::new(Node::with_loc(
             SyntaxKind::MissingDeclaration,
@@ -1765,7 +1816,7 @@ impl Parser {
         // Go: parseTemplateType
         // Current token is TemplateHead; create the head node.
         let pos = self.token_pos();
-        let head = self.create_token_node();
+        let head = self.create_template_token_node();
         self.next_token();
         let template_spans = self.parse_template_type_spans();
         let end = template_spans.end();
@@ -1808,7 +1859,7 @@ impl Parser {
         let literal = if self.token == SyntaxKind::CloseBraceToken {
             self.next_template_token();
             self.last_template_literal_was_middle = self.token == SyntaxKind::TemplateMiddle;
-            let lit = self.create_token_node();
+            let lit = self.create_template_token_node();
             self.next_token();
             lit
         } else {

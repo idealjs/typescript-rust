@@ -3148,6 +3148,56 @@ fn checker_indexed_access_via_alias_no_error() {
     assert_no_diagnostics(&diags);
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Template literal types: `a-${string}`, `a-${1}-b`
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_template_literal_type_concrete_flatten_no_error() {
+    // All spans concrete → flatten to "a-1-b".
+    let diags = check_source(
+        "type T = `a-${1}-b`;\nlet x: \"a-1-b\" = null as any as T;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_template_literal_type_concrete_flatten_mismatch_ts2322() {
+    // `a-${1}` flattens to "a-1"; assigning to "a-2" fails.
+    let diags = check_source(
+        "type T = `a-${1}`;\nlet x: \"a-2\" = null as any as T;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_template_literal_type_string_span_no_error() {
+    // `${string}` span → template-literal type. A concrete string literal
+    // is assignable to it.
+    let diags = check_source(
+        "type T = `prefix-${string}`;\nlet x: T = null as any as `prefix-hello`;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_template_literal_type_multiple_spans_flatten_no_error() {
+    // Multiple concrete spans: `x-${true}-${"y"}` → "x-true-y".
+    let diags = check_source(
+        "type T = `x-${true}-${\"y\"}`;\nlet x: \"x-true-y\" = null as any as T;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_template_literal_type_via_alias_no_error() {
+    // Template literal type referenced through a type alias.
+    let diags = check_source(
+        "type Prefix<T> = `pre-${T}`;\ntype P = Prefix<\"x\">;\nlet v: \"pre-x\" = null as any as P;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
 #[test]
 fn checker_keyof_constrained_type_parameter_no_error() {
     // `keyof T` where T extends { a: number; b: string } → "a" | "b".
