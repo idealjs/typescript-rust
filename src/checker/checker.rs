@@ -1112,6 +1112,82 @@ impl Checker {
         Arc::clone(t)
     }
 
+    /// Widen the type of a variable's initializer when no type annotation
+    /// is present. Mirrors Go's `getWidenTypeOfLiteralType` +
+    /// `getWidenedTypeOfFreshObjectLiteralType` plumbing that runs at the
+    /// variable-declaration site.
+    ///
+    /// Unlike `get_widened_type` (which only widens literal/union types),
+    /// this also handles fresh object literal types by widening each
+    /// property type, and is recursive for nested object literals.
+    ///
+    /// Without this, `let x = { a: 1 }` would infer `{ a: 1 }` (literal)
+    /// instead of `{ a: number }` (widened), making `x = { a: 2 }` a
+    /// false-positive TS2322.
+    pub fn widen_initializer_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        // Fresh object literal: widen each property's type recursively.
+        if crate::checker::is_object_literal_type(t) {
+            return self.widen_object_literal_type(t);
+        }
+        // Evolving array literal: element type is already widened at
+        // creation; nothing more to do here.
+        if t.object_flags.contains(ObjectFlags::EvolvingArray) {
+            return Arc::clone(t);
+        }
+        // All other types: defer to the standard widening (handles
+        // literals, unique symbols, and unions of literals).
+        self.get_widened_type(t)
+    }
+
+    /// Build a widened copy of a fresh object literal type: each
+    /// property's literal type is widened to its primitive base
+    /// (`1` → `number`, `'hi'` → `string`, `true` → `boolean`).
+    /// Nested object literals are widened recursively.
+    fn widen_object_literal_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        let structured = match t.as_structured() {
+            Some(s) => s,
+            None => return Arc::clone(t),
+        };
+        // Collect (name, widened_type) pairs first to avoid re-borrowing
+        // `&mut self` while iterating over the structured type's members.
+        let mut widened_pairs: Vec<(String, Arc<Type>)> = Vec::new();
+        for prop in &structured.properties {
+            let prop_type = self.get_type_of_symbol(prop);
+            let widened = self.widen_initializer_type(&prop_type);
+            widened_pairs.push((prop.name.clone(), widened));
+        }
+        // Build the widened object type with fresh property symbols.
+        let mut members = SymbolTable::new();
+        let mut props: Vec<Arc<Symbol>> = Vec::with_capacity(widened_pairs.len());
+        for (name, t) in widened_pairs {
+            let symbol = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
+            members.insert(name, Arc::clone(&symbol));
+            self.value_symbol_links.insert(
+                &symbol,
+                ValueSymbolLinks {
+                    resolved_type: Some(t),
+                    ..Default::default()
+                },
+            );
+            props.push(symbol);
+        }
+        Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Anonymous | ObjectFlags::ObjectLiteral,
+            id: 0,
+            symbol: None,
+            alias: None,
+            data: TypeData::Object(ObjectTypeData {
+                structured: StructuredTypeData {
+                    members,
+                    properties: props,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        })
+    }
+
     /// Build a union type from a vec of constituents without the full
     /// `get_union_type` caching machinery (used by `get_widened_type` which
     /// runs under an immutable borrow).
@@ -2746,7 +2822,17 @@ impl Checker {
                     annotation_type
                 }
                 (Some(type_node), None) => self.get_type_from_type_node(type_node),
-                (None, Some(init)) => self.get_type_of_node(init),
+                (None, Some(init)) => {
+                    // No type annotation: infer from the initializer, then
+                    // widen fresh literal types (e.g. `{ a: 1 }` →
+                    // `{ a: number }`, `1` → `number`). This mirrors Go's
+                    // `getWidenTypeOfLiteralType` call at the variable-
+                    // declaration site. Widening is skipped when a type
+                    // annotation is present (the annotation guides the
+                    // contextual typing and preserves literal types).
+                    let init_type = self.get_type_of_node(init);
+                    self.widen_initializer_type(&init_type)
+                }
                 (None, None) => self.get_any_type(),
             };
             // Cache the resolved type on the VariableDeclaration node — this

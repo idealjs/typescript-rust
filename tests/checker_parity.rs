@@ -3121,3 +3121,67 @@ fn checker_recursive_structural_type_self_assignable_no_error() {
     );
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// P3.8: Fresh literal type widening for variable declarations without
+// a type annotation. Object literals widen each property's literal type
+// to its primitive base (`1` → `number`, `'hi'` → `string`, `true` → `boolean`).
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_object_literal_widening_reassignment_no_error() {
+    // `let x = { a: 1 }` infers `{ a: number }` (widened), so reassigning
+    // `x = { a: 2 }` is fine. Without widening, `x` would be `{ a: 1 }`
+    // and `{ a: 2 }` would not be assignable (TS2322 false positive).
+    let diags = check_source("let x = { a: 1 };\nx = { a: 2 };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_object_literal_widening_property_assignment_no_error() {
+    // `let x = { a: 1 }` infers `{ a: number }`, so `x.a = 2` is fine.
+    // Without widening, `x.a` would be `1` and assigning `2` would fail.
+    let diags = check_source("let x = { a: 1 };\nx.a = 2;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_object_literal_widening_string_no_error() {
+    // String literal property widens to `string`.
+    let diags = check_source("let x = { a: 'hi' };\nx = { a: 'bye' };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_object_literal_widening_boolean_no_error() {
+    // Boolean literal property widens to `boolean`.
+    let diags = check_source("let x = { flag: true };\nx = { flag: false };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_object_literal_widening_nested_no_error() {
+    // Nested object literal: inner literal types also widen.
+    let diags = check_source(
+        "let x = { a: { b: 1 } };\nx = { a: { b: 2 } };",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_object_literal_contextual_preserves_literal_no_error() {
+    // When a type annotation IS present, the object literal's literal
+    // types are preserved (contextual typing) and checked against the
+    // annotation. `{ a: 1 }` is assignable to `{ a: 1 }` (literal match).
+    let diags = check_source("let x: { a: 1 } = { a: 1 };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_object_literal_contextual_mismatch_ts2322() {
+    // Contextual typing preserves the literal `1`, which is NOT assignable
+    // to `{ a: 2 }` (different literal). This confirms that widening only
+    // happens when there's no type annotation.
+    let diags = check_source("let x: { a: 2 } = { a: 1 };");
+    assert_diagnostic_code(&diags, 2322);
+}

@@ -400,8 +400,12 @@ contextual function type 的 call signature，无注解参数继承对应位置�
   仅处理 union/intersection，导致 `(infer R)[]` extends 不被替换、条件恒走 false 分支）。
   18 个 conditional type parity 测试通过。
 - [ ] 类型推断缓存（`node_links.resolved_type`）。（已通过 `type_node_links` 完成）
-- [ ] Fresh literal type widening（对象字面量在无 contextual type 时应 widening
-  literal 属性，目前保留 literal 以兼容 discriminated union 赋值）。
+- [x] Fresh literal type widening（对象字面量在无 contextual type 时应 widening
+  literal 属性）。已实现 `widen_initializer_type` +
+  `widen_object_literal_type`：变量声明无注解时对初始化器类型做 widening，
+  对象字面量递归 widen 每个属性（`{ a: 1 }` → `{ a: number }`），嵌套对象
+  字面量也递归处理。有类型注解时不 widen（contextual typing 保留 literal）。
+  7 条 widening parity 测试通过。
 - [ ] contextual typing 扩展到 CallExpression 参数（`get_contextual_type_for_argument`
   已具备，需把推断结果落回；当前仅变量声明初始化器走通）。
 - [x] 成员访问类型检查（`x.toUpperCase()` 在 `x: number` 上应报 TS2339）。已实现
