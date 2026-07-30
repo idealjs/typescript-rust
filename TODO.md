@@ -57,15 +57,15 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-30）
 
-测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 428 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 322 个）。
+测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 443 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 337 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
 | Scanner | 1558 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 完成；缺 trivia 节点、完整 regex 校验 |
 | Parser | 7115 | 9251 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；缺 reparser/jsdoc |
 | Binder | 1639 | ~4000 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 完成；缺完整 flow graph、ARRAY_MUTATION、try/catch/finally、labeled statement、完整 declaration merge |
-| Checker | 9400 | ~50K+ | ~19% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；416 parity fixtures 通过；缺 emitresolver visibility tracking、完整 declaration merge checker 侧 |
+| Checker | 9400 | ~50K+ | ~19% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查；443 parity fixtures 通过；缺 emitresolver visibility tracking、完整 declaration merge checker 侧 |
 | Compiler | 759 | — | 基础 | Program 创建/解析/绑定/emit pipeline 通；checker 已接入 |
 | Emitter | 774 | — | 基础 | JS emit 基础；缺 transformer 体系 |
 | Printer | 1578 | — | 基础 | 节点→文本基础 |
@@ -490,6 +490,15 @@ contextual function type 的 call signature，无注解参数继承对应位置�
   `value_symbol_links` 使 `Color.Red` 属性访问可恢复 literal 类型；枚举整体
   类型缓存到 `type_alias_links.declared_type`，递归引用通过
   `resolving_type_aliases` 循环保护。7 条 enum parity 测试全部通过。
+- [x] 返回语句类型检查（TS2322 / TS1135）。已完成：`return_type_stack` 跟踪
+  当前函数声明的返回类型；`FunctionDeclaration`/`MethodDeclaration`/
+  `Constructor`/`GetAccessor`/`SetAccessor`/`FunctionExpression`/`ArrowFunction`
+  处理器在检查 body 前 push 声明的返回类型（无注解时 push `None` 跳过），
+  检查完 pop；`ReturnStatement` 处理器取栈顶 `Arc<Type>`（clone 避免借用冲突）
+  并用 `is_type_assignable_to` 检查返回值类型可赋值性，失败时报 TS2322；
+  `return;` 无值但声明类型非 `void`/`undefined`/`any` 时报 TS1135；箭头函数
+  表达式体（`() => expr`）直接检查 `expr` 类型对声明返回类型的可赋值性。
+  15 条返回类型 parity 测试通过（含函数声明/箭头函数表达式体与方法/accessor）。
 
 ### P3.9 Checker 控制流 narrowing
 

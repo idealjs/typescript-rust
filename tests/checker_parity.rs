@@ -408,6 +408,123 @@ fn checker_function_no_return_infers_void_to_number_ts2322() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Return statement type checking (TS2322 / TS1135)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_return_type_mismatch_ts2322() {
+    // `return "hi"` does not match declared `number` return type.
+    let diags = check_source("function f(): number { return \"hi\"; }");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_return_type_match_no_error() {
+    // `return 42` matches declared `number` return type.
+    let diags = check_source("function f(): number { return 42; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_return_type_string_match_no_error() {
+    // `return "x"` matches declared `string` return type.
+    let diags = check_source("function f(): string { return \"x\"; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_return_type_boolean_mismatch_ts2322() {
+    // `return 1` does not match declared `boolean` return type.
+    let diags = check_source("function f(): boolean { return 1; }");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_return_missing_value_ts1135() {
+    // `return;` with no value in function declaring `string` return type.
+    let diags = check_source("function f(): string { return; }");
+    assert_diagnostic_code(&diags, 1135);
+}
+
+#[test]
+fn checker_return_missing_value_in_number_function_ts1135() {
+    // `return;` with no value in function declaring `number` return type.
+    let diags = check_source("function f(): number { return; }");
+    assert_diagnostic_code(&diags, 1135);
+}
+
+#[test]
+fn checker_return_void_no_value_no_error() {
+    // `return;` is allowed when declared return type is `void`.
+    let diags = check_source("function f(): void { return; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_return_no_annotation_no_value_no_error() {
+    // `return;` is allowed when there is no return-type annotation.
+    let diags = check_source("function f() { return; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_arrow_return_type_mismatch_ts2322() {
+    // Arrow function `return "hi"` does not match declared `number`.
+    let diags = check_source("const f = (): number => { return \"hi\"; };");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_arrow_expression_body_return_type_mismatch_ts2322() {
+    // Arrow function expression body returning wrong type.
+    let diags = check_source("const f = (): number => \"hi\";");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_method_return_type_mismatch_ts2322() {
+    // Class method `return "hi"` does not match declared `number`.
+    let diags = check_source("class C { m(): number { return \"hi\"; } }");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_get_accessor_return_type_mismatch_ts2322() {
+    // `get` accessor returning wrong type.
+    let diags = check_source("class C { get x(): number { return \"hi\"; } }");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_return_union_type_no_error() {
+    // `return "a"` is assignable to declared `string | number`.
+    let diags = check_source(
+        "type S = string | number;\
+         function f(): S { return \"a\"; }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_return_literal_to_widen_no_error() {
+    // `return 42` matches declared `number` (literal widens to base).
+    let diags = check_source("function f(): number { return 42; } let y = f();");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_nested_function_return_type_check_ts2322() {
+    // Nested function declaration with its own return-type annotation.
+    let diags = check_source(
+        "function outer(): void {\
+             function inner(): number { return \"bad\"; }\
+             inner();\
+         }",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Function declarations (no diagnostics expected)
 // ────────────────────────────────────────────────────────────────────────────
 

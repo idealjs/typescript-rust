@@ -17,8 +17,9 @@ use crate::core::compiler_options::{
     CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget,
 };
 use crate::diagnostics::messages_generated::{
-    ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1, CANNOT_FIND_NAME_0,
-    PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1, TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+    ARGUMENT_EXPRESSION_EXPECTED, ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1,
+    CANNOT_FIND_NAME_0, PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
 };
 use crate::jsnum;
 
@@ -362,6 +363,14 @@ pub struct Checker {
     /// `getThisTypeOfObjectLiteral`/`getThisType` infrastructure.
     pub this_type_stack: Vec<Arc<Type>>,
 
+    /// Stack of declared return types for the enclosing function. When
+    /// checking a `return expr;` statement, `expr`'s type is compared
+    /// against the top of this stack (the function's declared return
+    /// type). `None` entries mean the function has no explicit return-type
+    /// annotation (inferred). Mirrors Go's `expectedReturn` tracking in
+    /// `checkReturnStatement`/`checkFunctionExpressionBody`.
+    pub return_type_stack: Vec<Option<Arc<Type>>>,
+
     // Flow analysis
     pub flow_analysis_disabled: bool,
     pub flow_invocation_count: i32,
@@ -564,6 +573,7 @@ impl Checker {
             globals_populated: false,
             break_continue_context_stack: Vec::new(),
             this_type_stack: Vec::new(),
+            return_type_stack: Vec::new(),
 
             flow_analysis_disabled: false,
             flow_invocation_count: 0,
@@ -3031,6 +3041,56 @@ impl Checker {
                 if let crate::ast::NodeData::ReturnStatement(data) = &node.data {
                     if let Some(expr) = &data.expression {
                         self.check_expression(expr);
+                        // Check that the return value's type is assignable
+                        // to the enclosing function's declared return type.
+                        // Mirrors Go's `checkReturnStatement` (checker.go
+                        // ~L11800). When there's no declared return type
+                        // (inferred), the stack entry is `None` and we skip.
+                        // Clone the `Arc<Type>` out of the stack first so we
+                        // don't hold an immutable borrow of `self` while
+                        // calling mutable methods below.
+                        let expected = self
+                            .return_type_stack
+                            .last()
+                            .and_then(|opt| opt.clone());
+                        if let Some(expected) = expected {
+                            let actual = self.get_type_of_node(expr);
+                            // `any` return value → always assignable.
+                            if !actual.flags.contains(TypeFlags::Any)
+                                && !self.is_type_assignable_to(&actual, &expected)
+                            {
+                                let actual_str = self.type_to_string(&actual);
+                                let expected_str = self.type_to_string(&expected);
+                                self.diagnostics.add(crate::ast::Diagnostic::new(
+                                    self.current_file.clone(),
+                                    expr.loc,
+                                    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                                    vec![actual_str, expected_str],
+                                ));
+                            }
+                        }
+                    } else {
+                        // `return;` with no value — if the function declares
+                        // a non-void/non-undefined return type, this is an
+                        // error (TS1135). Mirrors Go's `checkReturnStatement`
+                        // empty-return branch.
+                        let expected = self
+                            .return_type_stack
+                            .last()
+                            .and_then(|opt| opt.clone());
+                        if let Some(expected) = expected {
+                            if !expected.flags.contains(TypeFlags::Void)
+                                && !expected.flags.contains(TypeFlags::Undefined)
+                                && !expected.flags.contains(TypeFlags::Any)
+                            {
+                                self.diagnostics.add(crate::ast::Diagnostic::new(
+                                    self.current_file.clone(),
+                                    node.loc,
+                                    ARGUMENT_EXPRESSION_EXPECTED,
+                                    vec![],
+                                ));
+                            }
+                        }
                     }
                 }
             }
@@ -3122,11 +3182,25 @@ impl Checker {
                         label: None,
                         is_iteration: false,
                     });
+                // Push the declared return type so `return expr;` statements
+                // in the body can be checked against it. `None` means the
+                // function has no explicit return-type annotation (return
+                // type is inferred) — in that case return-statement checking
+                // is skipped. Mirrors Go's `expectedReturn` tracking.
+                let declared_return = match &node.data {
+                    crate::ast::NodeData::FunctionDeclaration(data) => data
+                        .type_node
+                        .as_ref()
+                        .map(|tn| self.get_type_from_type_node(tn)),
+                    _ => None,
+                };
+                self.return_type_stack.push(declared_return);
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(body) = &data.body {
                         self.check_statement(body);
                     }
                 }
+                self.return_type_stack.pop();
                 self.break_continue_context_stack.pop();
                 self.pop_function_scope();
             }
@@ -3560,19 +3634,35 @@ impl Checker {
             | SyntaxKind::SetAccessor => {
                 // Only check the body; the name, parameters, and return type
                 // are declarations/types.
-                let body: Option<Arc<Node>> = match &node.data {
-                    crate::ast::NodeData::MethodDeclaration(d) => d.body.clone(),
-                    crate::ast::NodeData::ConstructorDeclaration(d) => d.body.clone(),
-                    crate::ast::NodeData::GetAccessorDeclaration(d) => d.body.clone(),
-                    crate::ast::NodeData::SetAccessorDeclaration(d) => d.body.clone(),
-                    _ => None,
+                let (body, type_node): (Option<Arc<Node>>, Option<Arc<Node>>) = match &node.data {
+                    crate::ast::NodeData::MethodDeclaration(d) => {
+                        (d.body.clone(), d.type_node.clone())
+                    }
+                    crate::ast::NodeData::ConstructorDeclaration(d) => {
+                        (d.body.clone(), d.type_node.clone())
+                    }
+                    crate::ast::NodeData::GetAccessorDeclaration(d) => {
+                        (d.body.clone(), d.type_node.clone())
+                    }
+                    crate::ast::NodeData::SetAccessorDeclaration(d) => {
+                        (d.body.clone(), d.type_node.clone())
+                    }
+                    _ => (None, None),
                 };
                 if let Some(body) = body {
                     self.push_function_scope(node);
+                    // Push the declared return type so `return expr;`
+                    // statements in the body can be checked against it.
+                    // `None` means no explicit return-type annotation.
+                    let declared_return = type_node
+                        .as_ref()
+                        .map(|tn| self.get_type_from_type_node(tn));
+                    self.return_type_stack.push(declared_return);
                     match body.kind {
                         SyntaxKind::Block => self.check_statement(&body),
                         _ => self.check_expression(&body),
                     }
+                    self.return_type_stack.pop();
                     self.pop_function_scope();
                 }
             }
@@ -3860,10 +3950,14 @@ impl Checker {
         self.get_type_of_node(node);
         // Walk children, but skip parameter names (they are declarations).
         // The simplest correct approach is to dispatch on the body only.
-        let body: Option<Arc<Node>> = match &node.data {
-            crate::ast::NodeData::FunctionExpression(data) => Some(data.body.clone()),
-            crate::ast::NodeData::ArrowFunction(data) => Some(data.body.clone()),
-            _ => None,
+        let (body, type_node): (Option<Arc<Node>>, Option<Arc<Node>>) = match &node.data {
+            crate::ast::NodeData::FunctionExpression(data) => {
+                (Some(data.body.clone()), data.type_node.clone())
+            }
+            crate::ast::NodeData::ArrowFunction(data) => {
+                (Some(data.body.clone()), data.type_node.clone())
+            }
+            _ => (None, None),
         };
         if let Some(body) = body {
             // Arrow functions do not have their own `arguments` object.
@@ -3873,10 +3967,44 @@ impl Checker {
             } else {
                 self.push_function_scope(node);
             }
+            // Push the declared return type so `return expr;` statements
+            // in the body can be checked against it. `None` means no
+            // explicit return-type annotation (return type inferred).
+            let declared_return = type_node
+                .as_ref()
+                .map(|tn| self.get_type_from_type_node(tn));
+            self.return_type_stack.push(declared_return);
             match body.kind {
                 SyntaxKind::Block => self.check_statement(&body),
-                _ => self.check_expression(&body),
+                _ => {
+                    // Arrow function expression body (`() => expr`): the
+                    // expression IS the return value, so check its type
+                    // against the declared return type directly (no
+                    // `ReturnStatement` node is involved). Mirrors Go's
+                    // `checkFunctionExpressionBody` for arrow bodies.
+                    self.check_expression(&body);
+                    if let Some(expected) = self
+                        .return_type_stack
+                        .last()
+                        .and_then(|opt| opt.clone())
+                    {
+                        let actual = self.get_type_of_node(&body);
+                        if !actual.flags.contains(TypeFlags::Any)
+                            && !self.is_type_assignable_to(&actual, &expected)
+                        {
+                            let actual_str = self.type_to_string(&actual);
+                            let expected_str = self.type_to_string(&expected);
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                body.loc,
+                                TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                                vec![actual_str, expected_str],
+                            ));
+                        }
+                    }
+                }
             }
+            self.return_type_stack.pop();
             if is_arrow {
                 self.pop_arrow_function_scope();
             } else {
