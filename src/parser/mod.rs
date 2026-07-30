@@ -2614,6 +2614,22 @@ impl Parser {
     fn parse_expression_statement(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         let expression = self.parse_expression();
+        // Labeled statement: `label: statement`. Mirrors Go's
+        // `parseExpressionStatement` which calls `parseLabeledStatement`
+        // when the token following the optional expression is `:`.
+        if self.token == SyntaxKind::ColonToken && expression.kind == SyntaxKind::Identifier {
+            self.next_token(); // consume ':'
+            let statement = self.parse_statement();
+            let end = self.token_pos();
+            return Arc::new(Node::with_loc(
+                SyntaxKind::LabeledStatement,
+                NodeData::LabeledStatement(LabeledStatementData {
+                    label: expression,
+                    statement,
+                }),
+                TextRange::new(pos, end),
+            ));
+        }
         self.parse_semicolon();
         let end = self.token_pos();
         Arc::new(Node::with_loc(

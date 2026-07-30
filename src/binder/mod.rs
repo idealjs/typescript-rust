@@ -591,6 +591,9 @@ impl Binder {
         unsafe {
             (*ptr).antecedents.push(Arc::clone(antecedent));
         }
+        // Mark the antecedent as referenced (or shared if already referenced).
+        // Mirrors Go's `setFlowNodeReferenced` called from `addAntecedent`.
+        self.set_flow_node_referenced(antecedent);
     }
 
     /// Create a flow switch clause node.
@@ -1092,20 +1095,36 @@ impl Binder {
         };
 
         if let Some(name) = label_name {
-            // Look for a matching active label
-            let mut found = false;
-            let mut current = &self.active_label_list;
-            while let Some(label) = current {
-                if label.name == name {
-                    if let Some(current_flow) = &self.current_flow {
-                        self.add_antecedent_to_flow(&label.break_target, current_flow);
+            // Two-pass lookup: first find the matching label's break target
+            // (immutable borrow), then mark it referenced (mutable borrow).
+            // Mirrors Go's `activeLabel.referenced = true` in
+            // `bindBreakOrContinueStatement`.
+            let break_target = {
+                let mut current = &self.active_label_list;
+                let mut found = None;
+                while let Some(label) = current {
+                    if label.name == name {
+                        found = Some(Arc::clone(&label.break_target));
+                        break;
                     }
-                    found = true;
-                    break;
+                    current = &label.next;
                 }
-                current = &label.next;
+                found
+            };
+            if let Some(target) = break_target {
+                if let Some(current_flow) = &self.current_flow {
+                    self.add_antecedent_to_flow(&target, current_flow);
+                }
+                // Mark the matching label as referenced.
+                let mut current = &mut self.active_label_list;
+                while let Some(label) = current {
+                    if label.name == name {
+                        label.referenced = true;
+                        break;
+                    }
+                    current = &mut label.next;
+                }
             }
-            let _ = found;
         } else if let Some(target) = &self.current_break_target {
             // Unlabeled break to the innermost break target
             if let Some(current) = &self.current_flow {
@@ -1125,18 +1144,34 @@ impl Binder {
         };
 
         if let Some(name) = label_name {
-            // Look for a matching active label with a continue target
-            let mut current = &self.active_label_list;
-            while let Some(label) = current {
-                if label.name == name {
-                    if let Some(continue_target) = &label.continue_target {
-                        if let Some(current_flow) = &self.current_flow {
-                            self.add_antecedent_to_flow(continue_target, current_flow);
-                        }
+            // Two-pass lookup: first find the matching label's continue target
+            // (immutable borrow), then mark it referenced (mutable borrow).
+            // Mirrors Go's `activeLabel.referenced = true`.
+            let continue_target = {
+                let mut current = &self.active_label_list;
+                let mut found = None;
+                while let Some(label) = current {
+                    if label.name == name {
+                        found = label.continue_target.clone();
+                        break;
                     }
-                    break;
+                    current = &label.next;
                 }
-                current = &label.next;
+                found
+            };
+            if let Some(target) = continue_target {
+                if let Some(current_flow) = &self.current_flow {
+                    self.add_antecedent_to_flow(&target, current_flow);
+                }
+                // Mark the matching label as referenced.
+                let mut current = &mut self.active_label_list;
+                while let Some(label) = current {
+                    if label.name == name {
+                        label.referenced = true;
+                        break;
+                    }
+                    current = &mut label.next;
+                }
             }
         } else if let Some(target) = &self.current_continue_target {
             if let Some(current) = &self.current_flow {
@@ -1185,8 +1220,27 @@ impl Binder {
         // Bind the statement (the loop body, etc.)
         self.bind(&stmt.statement);
 
+        // Check if the label was referenced by a break/continue statement.
+        // Mirrors Go's `if !b.activeLabelList.referenced { ... }` — an
+        // unreferenced label is marked `NodeFlags::Unreachable` so the
+        // checker can report it (TS7028 unused label).
+        let was_referenced = self
+            .active_label_list
+            .as_ref()
+            .map_or(false, |l| l.referenced);
+
         // Restore active label list
         self.active_label_list = self.active_label_list.take().and_then(|l| l.next);
+
+        if !was_referenced {
+            // Mark the label node as unreachable (unused label). The checker
+            // will decide whether to report TS7028 based on the enclosing
+            // context (e.g., `allowUnusedLabels`).
+            let label_ptr = Arc::as_ptr(&stmt.label) as *mut Node;
+            unsafe {
+                (*label_ptr).flags |= NodeFlags::Unreachable;
+            }
+        }
 
         // Finish break target
         if let Some(current) = &self.current_flow {

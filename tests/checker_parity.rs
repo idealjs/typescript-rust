@@ -5211,3 +5211,55 @@ fn visibility_export_specifier_reexport_visible() {
         "export {{ x }} (no module specifier) should be visible"
     );
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Labeled statements (P3.1 binder flow graph 收尾)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_labeled_break_no_error() {
+    // A labeled `break` should resolve to the enclosing label and produce
+    // no diagnostics.
+    let diags = check_source(
+        "let sum = 0;\n\
+         outer: for (let i = 0; i < 3; i++) {\n\
+         \x20   for (let j = 0; j < 3; j++) {\n\
+         \x20       if (j === 2) break outer;\n\
+         \x20       sum += j;\n\
+         \x20   }\n\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_labeled_continue_no_error() {
+    // A labeled `continue` should resume the outer loop without error.
+    let diags = check_source(
+        "let count = 0;\n\
+         outer: for (let i = 0; i < 3; i++) {\n\
+         \x20   for (let j = 0; j < 3; j++) {\n\
+         \x20       if (j === 1) continue outer;\n\
+         \x20       count++;\n\
+         \x20   }\n\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_unlabeled_break_in_labeled_loop_no_error() {
+    // An unlabeled `break` inside a labeled loop should still break the
+    // innermost loop — the label is simply unused (but valid syntax).
+    let diags = check_source(
+        "let sum = 0;\n\
+         label: for (let i = 0; i < 3; i++) {\n\
+         \x20   for (let j = 0; j < 3; j++) {\n\
+         \x20       if (j === 1) break;\n\
+         \x20       sum += j;\n\
+         \x20   }\n\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+

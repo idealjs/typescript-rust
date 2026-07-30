@@ -107,8 +107,15 @@ arity）+ 12 个 parity fixtures。
    提取元素/属性类型）。**遗留**：freshness tracking（`checker.rs:1460`
    freshType，影响 literal widening 精度）需要 `OBJECT_FLAGS_REQUIRES_WIDENING`
    在创建类型时设置 + `getWidenedTypeOfObjectLiteral` 完整移植，留后续。
-3. **P3.1 Binder flow graph 收尾**：`ReduceLabel`/`Shared`/`Referenced`
-   后处理、labeled statement。try/catch/finally 已完成。
+3. **P3.1 Binder flow graph 收尾**（已完成）：`ReduceLabel`/`Shared`/`Referenced`
+   后处理（`set_flow_node_referenced` 在 `add_antecedent_to_flow`/
+   `create_flow_mutation` 中标记 REFERENCED→SHARED；`create_reduce_label`
+   用于 try-finally）、labeled statement（parser `parse_expression_statement`
+   识别 `identifier:` 并生成 `LabeledStatement`；binder `bind_labeled_statement`
+   维护 `active_label_list` + break/continue 标签查找 + 未引用标签
+   `NodeFlags::Unreachable`；checker `check_statement` 推送 `Labeled`
+   break/continue context 使 `break label`/`continue label` 通过 grammar
+   校验）。3 个 labeled statement parity 测试通过。
 4. **P3.9 Checker 控制流 narrowing**：已大体完成，按 fixture 缺口补齐。
 5. **P3.10 Checker nodebuilder**：`symbol_to_type_node`/`symbol_to_display_parts`
    （declaration emit 前置）。
@@ -119,16 +126,6 @@ arity）+ 12 个 parity fixtures。
    与 `_scripts/generate-rust-diagnostics.ts`（或建立 Rust 自有 schema），
    使 `node_data_generated.rs`/`messages_generated.rs` 可重复生成。
 8. **P1 CLI/tsconfig 收尾**：declaration-driven option parser（NameMap/
-   did-you-mean/alternate-mode）、watch options 独立建模、`extends` package
-   resolution、typed project references、no-input diagnostics、`vfsmatch`。
-4. **P3.9 Checker 控制流 narrowing**：`narrowType`、`getNarrowedTypeOfSymbol`、
-   discriminated union、`typeof`/`instanceof`/`in` narrowing。
-5. **P3.10 Checker nodebuilder**：`type_to_string`、`symbol_to_type_node`、
-   hover 信息。诊断文本对齐 oracle 的关键缺口。
-6. **P3.2 Binder NameResolver 收尾**：箭头函数参数作用域、enum/namespace
-   成员查找、export default 别名、类型参数作用域限制、`infer T`、装饰器
-   位置调整。
-7. **P1 CLI/tsconfig 收尾**：declaration-driven option parser（NameMap/
    did-you-mean/alternate-mode）、watch options 独立建模、`extends` package
    resolution、typed project references、no-input diagnostics、`vfsmatch`。
 
@@ -334,8 +331,8 @@ do-while/for/for-in/for-of/switch 控制流、return/throw/break/continue、
   对 `autoArrayType` 与 `EvolvingArray` 类型豁免 `push`/`unshift` 属性检查
   （无 lib.d.ts 时仍允许 evolving-array 链路）；`finalize_evolving_array_type`
   在最终读取时退化为普通 `Array<T>`。6 条 evolving array parity 测试通过。
-- [ ] `ReduceLabel`/`Shared`/`Referenced` 后处理。
-- [ ] labeled statement 标签支持。
+- [x] `ReduceLabel`/`Shared`/`Referenced` 后处理。
+- [x] labeled statement 标签支持。
 
 ### P3.1a Binder 容器递归绑定（已完成）
 

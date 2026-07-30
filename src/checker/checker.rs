@@ -3940,6 +3940,33 @@ impl Checker {
             SyntaxKind::EmptyStatement => {
                 // No expressions to check.
             }
+            SyntaxKind::LabeledStatement => {
+                // Push a Labeled context so that `break label`/`continue label`
+                // can resolve to this label, then check the nested statement.
+                // The label identifier itself is NOT an expression and must
+                // not be resolved (mirrors Go's `checkStatement` dispatching
+                // `LabeledStatement` to `bindLabeledStatement` + statement
+                // check without visiting the label name as a reference).
+                if let crate::ast::NodeData::LabeledStatement(data) = &node.data {
+                    let label_text = data.label.text().to_string();
+                    let is_iteration = matches!(
+                        data.statement.kind,
+                        SyntaxKind::WhileStatement
+                            | SyntaxKind::DoStatement
+                            | SyntaxKind::ForStatement
+                            | SyntaxKind::ForInStatement
+                            | SyntaxKind::ForOfStatement
+                    );
+                    self.break_continue_context_stack
+                        .push(BreakContinueContext {
+                            kind: BreakContinueContextKind::Labeled,
+                            label: Some(label_text),
+                            is_iteration,
+                        });
+                    self.check_statement(&data.statement);
+                    self.break_continue_context_stack.pop();
+                }
+            }
             SyntaxKind::BreakStatement | SyntaxKind::ContinueStatement => {
                 // Grammar check: validate break/continue targets.
                 self.check_grammar_break_or_continue_statement(node);
