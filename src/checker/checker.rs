@@ -2118,6 +2118,68 @@ impl Checker {
         self.create_function_or_constructor_type(vec![sig], false)
     }
 
+    /// Build a multi-signature function type from a symbol's overload
+    /// declarations. In TypeScript, overloaded functions have multiple
+    /// `FunctionDeclaration` nodes for the same symbol: the overload
+    /// signatures (without bodies) come first, followed by a single
+    /// implementation signature (with a body). Only the overload signatures
+    /// are visible to callers — the implementation is internal.
+    ///
+    /// This method collects all overload declarations (those without a body)
+    /// and builds a function type with one signature per overload. If there
+    /// is only one declaration (no overloads), returns `None` (the caller
+    /// should use the single-signature type from `get_type_of_function_like`).
+    ///
+    /// Mirrors Go's `getSignaturesOfType` for function types, which returns
+    /// all call signatures (populated during `createSignatureForFunction`).
+    fn build_overload_function_type(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+        // Collect all FunctionDeclaration nodes for this symbol.
+        let fn_decls: Vec<Arc<Node>> = symbol
+            .declarations
+            .iter()
+            .filter(|d| d.kind == SyntaxKind::FunctionDeclaration)
+            .cloned()
+            .collect();
+        if fn_decls.len() <= 1 {
+            return None; // Not an overload set.
+        }
+        // Build a signature for each overload (declarations without a body).
+        // The implementation (with a body) is excluded from the visible
+        // signature list — callers only see the overloads.
+        let mut signatures: Vec<Arc<Signature>> = Vec::new();
+        for decl in &fn_decls {
+            let has_body = match &decl.data {
+                crate::ast::NodeData::FunctionDeclaration(data) => data.body.is_some(),
+                _ => false,
+            };
+            if has_body {
+                continue; // Skip the implementation.
+            }
+            let (parameters, type_node) = match &decl.data {
+                crate::ast::NodeData::FunctionDeclaration(data) => {
+                    (&data.parameters, data.type_node.as_ref())
+                }
+                _ => continue,
+            };
+            let return_type = match type_node {
+                Some(tn) => self.get_type_from_type_node(tn),
+                None => self.get_any_type(),
+            };
+            let sig = self.build_signature_from_function_like_type_node(
+                parameters,
+                return_type,
+                /* is_construct */ false,
+                /* contextual_signature */ None,
+                /* declaration */ Some(Arc::clone(decl)),
+            );
+            signatures.push(sig);
+        }
+        if signatures.is_empty() {
+            return None;
+        }
+        Some(self.create_function_or_constructor_type(signatures, false))
+    }
+
     /// Build the type of a class declaration: an anonymous object type
     /// carrying construct signatures derived from the class's `constructor`
     /// member. The construct signature's parameters are resolved (and
@@ -2172,20 +2234,30 @@ impl Checker {
     /// fall back to `any`.
     fn get_return_type_of_call_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let callee = match &node.data {
-            crate::ast::NodeData::CallExpression(data) => &data.expression,
+            crate::ast::NodeData::CallExpression(data) => (&data.expression, data.arguments.clone()),
             _ => return self.get_any_type(),
         };
-        let callee_type = self.get_type_of_node(callee);
+        let callee_type = self.get_type_of_node(&callee.0);
         if let Some(structured) = callee_type.as_structured() {
-            for sig in structured.call_signatures() {
-                if let Some(rt) = self.get_return_type_of_signature(sig) {
-                    return rt;
-                }
-                // Signature without a resolved return type — fall back to
-                // any so callers don't blow up. The full Go checker would
-                // run inference here; that's P3.8c.
+            let signatures = structured.call_signatures();
+            if signatures.is_empty() {
                 return self.get_any_type();
             }
+            // Overload resolution: find the first signature that accepts
+            // the call's arguments. If multiple signatures exist (overloads),
+            // try each in order; otherwise use the first (only) signature.
+            let matching_idx = if signatures.len() == 1 {
+                0
+            } else {
+                self.find_matching_signature(signatures, &callee.1)
+            };
+            let sig = &signatures[matching_idx];
+            if let Some(rt) = self.get_return_type_of_signature(sig) {
+                return rt;
+            }
+            // Signature without a resolved return type — fall back to
+            // any so callers don't blow up.
+            return self.get_any_type();
         }
         self.get_any_type()
     }
@@ -2465,11 +2537,17 @@ impl Checker {
     /// TS2345 for mismatched arguments.
     ///
     /// Mirrors the argument-checking portion of Go's `checkCallExpression`
-    /// / `checkNewExpression`. We resolve the callee type, find the first
-    /// call (or construct) signature, and compare each argument against
-    /// the corresponding parameter type. Rest parameters are handled by
+    /// / `checkNewExpression`. We resolve the callee type, find the call
+    /// (or construct) signatures, and compare each argument against the
+    /// corresponding parameter type. Rest parameters are handled by
     /// matching all trailing arguments against the rest element type.
     /// `any` callee / missing signature → skip (no false positives).
+    ///
+    /// When the callee has multiple signatures (function overloads),
+    /// overload resolution is performed: each signature is tried in order,
+    /// and the first one whose parameters accept all arguments is used.
+    /// If no signature matches, the error is reported against the first
+    /// signature (matching TypeScript's behavior).
     fn check_call_arguments(&mut self, node: &Arc<Node>, is_new: bool) {
         let (callee_expr, arguments) = match &node.data {
             crate::ast::NodeData::CallExpression(data) => {
@@ -2494,10 +2572,18 @@ impl Checker {
         } else {
             structured.call_signatures()
         };
-        let sig = match signatures.first() {
-            Some(s) => Arc::clone(s),
-            None => return,
+        if signatures.is_empty() {
+            return;
+        }
+        // Overload resolution: if multiple signatures exist, find the first
+        // that accepts all arguments. If none matches, report errors
+        // against the first signature.
+        let matching_idx = if signatures.len() == 1 {
+            0
+        } else {
+            self.find_matching_signature(signatures, &arguments)
         };
+        let sig = Arc::clone(&signatures[matching_idx]);
         let file = self.current_file.clone();
         for (i, arg) in arguments.iter().enumerate() {
             if i < sig.parameters.len() {
@@ -2524,6 +2610,51 @@ impl Checker {
             // defer. For now, extra arguments on non-rest signatures are
             // not reported here (the grammar check covers arity separately).
         }
+    }
+
+    /// Check whether a signature accepts all given arguments (used for
+    /// overload resolution). Returns `true` if every argument is
+    /// assignable to the corresponding parameter type.
+    ///
+    /// Mirrors the "is applicable signature" test in Go's
+    /// `checkCallArguments`/`signatureIsAssignable`.
+    fn signature_accepts_arguments(&mut self, sig: &Arc<Signature>, arguments: &Arc<NodeList>) -> bool {
+        for (i, arg) in arguments.iter().enumerate() {
+            if i < sig.parameters.len() {
+                let param_type = self.get_type_of_symbol(&sig.parameters[i]);
+                // `any` parameter → always assignable.
+                if param_type.flags.contains(TypeFlags::Any) {
+                    continue;
+                }
+                let arg_type = self.get_type_of_node(arg);
+                if !self.is_type_assignable_to(&arg_type, &param_type) {
+                    return false;
+                }
+            } else {
+                // More arguments than parameters (without rest) — not
+                // applicable. (Rest-parameter handling is deferred.)
+                return false;
+            }
+        }
+        true
+    }
+
+    /// Find the index of the first signature that accepts the given
+    /// arguments (overload resolution). If no signature matches, returns
+    /// 0 (the first signature is used for error reporting).
+    ///
+    /// Mirrors Go's overload resolution loop in `checkCallArguments`.
+    fn find_matching_signature(
+        &mut self,
+        signatures: &[Arc<Signature>],
+        arguments: &Arc<NodeList>,
+    ) -> usize {
+        for (idx, sig) in signatures.iter().enumerate() {
+            if self.signature_accepts_arguments(sig, arguments) {
+                return idx;
+            }
+        }
+        0
     }
 
     /// Get the type of an `ElementAccessExpression` (`x[key]`).
@@ -2959,10 +3090,22 @@ impl Checker {
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(name) = &data.name {
                         if let Some(symbol) = self.resolve_identifier(name) {
+                            // For overloaded functions, build a multi-signature
+                            // type from all overload declarations (excluding
+                            // the implementation). Only the implementation
+                            // declaration has a body; when we reach it, all
+                            // overload declarations have already been
+                            // processed by the binder. The combined type
+                            // replaces the single-signature type on the symbol
+                            // so callers see all overloads.
+                            let symbol_type = match self.build_overload_function_type(&symbol) {
+                                Some(overload_type) => overload_type,
+                                None => fn_type.clone(),
+                            };
                             self.value_symbol_links
                                 .get_or_default(&symbol)
-                                .resolved_type = Some(fn_type.clone());
-                            self.type_node_links.get_or_default(name).resolved_type = Some(fn_type);
+                                .resolved_type = Some(symbol_type.clone());
+                            self.type_node_links.get_or_default(name).resolved_type = Some(symbol_type);
                         }
                     }
                 }

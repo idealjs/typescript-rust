@@ -444,6 +444,68 @@ fn checker_nested_function_no_error() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Function overloads
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_overload_matching_first_signature_no_error() {
+    // `f("hi")` matches the first overload (string → number).
+    let diags = check_source(
+        "function f(x: string): number;\n\
+         function f(x: number): string;\n\
+         function f(x: any): any { return x; }\n\
+         let n: number = f(\"hi\");",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_overload_matching_second_signature_no_error() {
+    // `f(42)` matches the second overload (number → string).
+    let diags = check_source(
+        "function f(x: string): number;\n\
+         function f(x: number): string;\n\
+         function f(x: any): any { return x; }\n\
+         let s: string = f(42);",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_overload_wrong_return_type_ts2322() {
+    // `f("hi")` returns `number` (first overload), not `string`.
+    let diags = check_source(
+        "function f(x: string): number;\n\
+         function f(x: number): string;\n\
+         function f(x: any): any { return x; }\n\
+         let s: string = f(\"hi\");",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_overload_no_matching_signature_ts2345() {
+    // `f(true)` matches neither `string` nor `number` overload.
+    let diags = check_source(
+        "function f(x: string): number;\n\
+         function f(x: number): string;\n\
+         function f(x: any): any { return x; }\n\
+         f(true);",
+    );
+    assert_diagnostic_code(&diags, 2345);
+}
+
+#[test]
+fn checker_overload_single_implementation_no_error() {
+    // A function with just an implementation (no overloads) should work.
+    let diags = check_source(
+        "function f(x: number): number { return x + 1; }\n\
+         let n: number = f(42);",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Class declarations (no diagnostics expected)
 // ────────────────────────────────────────────────────────────────────────────
 
