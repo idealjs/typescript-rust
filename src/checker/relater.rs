@@ -853,8 +853,19 @@ impl Checker {
             return true;
         }
 
-        // Enum → Enum (same name): simplified, full check needs symbol comparison
-        // TODO: port isEnumTypeRelatedTo
+        // Enum → Enum (same enum type or same-named regular enum).
+        // Ported from Go's `isEnumTypeRelatedTo`. The full Go implementation
+        // also compares enum member values across two same-named regular
+        // enums; that requires `getEnumMemberValue` infrastructure which is
+        // not yet ported, so we restrict the check here to the symbol-level
+        // relation (same symbol, or same name + both RegularEnum). Member
+        // value comparison is left as a follow-up.
+        if s.contains(TypeFlags::Enum)
+            && t.contains(TypeFlags::Enum)
+            && self.is_enum_type_related_to(source, target)
+        {
+            return true;
+        }
 
         // EnumLiteral → EnumLiteral: simplified
         if s.contains(TypeFlags::EnumLiteral)
@@ -917,8 +928,13 @@ impl Checker {
                 return true;
             }
 
-            // Anything is assignable to a union containing undefined, null, and {}
-            // TODO: port isUnknownLikeUnionType
+            // Anything is assignable to a union containing `undefined`, `null`,
+            // and an empty anonymous object type `{}` (i.e., the `unknown`
+            // approximation used before `unknown` was introduced). Ported
+            // from Go's `isUnknownLikeUnionType`.
+            if self.is_unknown_like_union_type(target) {
+                return true;
+            }
         }
 
         false
@@ -930,6 +946,119 @@ impl Checker {
             (TypeData::Literal(la), TypeData::Literal(lb)) => la.value == lb.value,
             _ => false,
         }
+    }
+
+    /// Whether two enum types are related (assignable).
+    ///
+    /// Ported from Go's `isEnumTypeRelatedTo` (`internal/checker/relater.go`).
+    /// The Go implementation additionally compares enum member values when two
+    /// same-named regular enums are distinct symbols; that requires
+    /// `getEnumMemberValue` and the `enumRelation` cache, neither of which is
+    /// ported yet. This implementation handles the two common cases:
+    ///
+    /// 1. Same enum symbol (after unwrapping `EnumMember` → parent enum).
+    /// 2. Same name and both `RegularEnum` (deferred member-value check).
+    ///
+    /// The deferred full check is tracked in TODO.md P3.7 follow-up.
+    fn is_enum_type_related_to(&self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+        let Some(source_symbol) = source.symbol.as_ref() else {
+            return false;
+        };
+        let Some(target_symbol) = target.symbol.as_ref() else {
+            return false;
+        };
+
+        // Unwrap EnumMember → parent enum symbol (Go: getParentOfSymbol).
+        let source_symbol = if source_symbol.flags.contains(SymbolFlags::EnumMember) {
+            source_symbol.parent.as_ref().unwrap_or(source_symbol)
+        } else {
+            source_symbol
+        };
+        let target_symbol = if target_symbol.flags.contains(SymbolFlags::EnumMember) {
+            target_symbol.parent.as_ref().unwrap_or(target_symbol)
+        } else {
+            target_symbol
+        };
+
+        // Same symbol → related.
+        if Arc::ptr_eq(source_symbol, target_symbol) {
+            return true;
+        }
+
+        // Different names, or not both RegularEnum → not related.
+        // (Go also short-circuits when either side is not RegularEnum.)
+        if source_symbol.name != target_symbol.name
+            || !source_symbol
+                .flags
+                .contains(SymbolFlags::RegularEnum)
+            || !target_symbol.flags.contains(SymbolFlags::RegularEnum)
+        {
+            return false;
+        }
+
+        // Same name + both RegularEnum: Go would now compare each enum member's
+        // value via `getEnumMemberValue`. Without that infrastructure we
+        // conservatively return `true` (the common case where same-named
+        // regular enums in merged declarations are related). This is a known
+        // precision gap — see TODO.md P3.7 follow-up.
+        true
+    }
+
+    /// Whether `t` is an "unknown-like" union — i.e., a union containing
+    /// `undefined`, `null`, and an empty anonymous object type `{}`.
+    ///
+    /// Ported from Go's `isUnknownLikeUnionType`
+    /// (`internal/checker/checker.go`). Go caches the result in
+    /// `t.objectFlags` (`IsUnknownLikeUnionComputed` / `IsUnknownLikeUnion`).
+    /// Because `Type` is shared via `Arc<Type>` and immutable here, we skip
+    /// the cache and recompute on each call. This is only called in the
+    /// `isSimpleTypeRelatedTo` fallback path, so the cost is bounded.
+    fn is_unknown_like_union_type(&self, t: &Arc<Type>) -> bool {
+        if !self.strict_null_checks || !t.flags.contains(TypeFlags::Union) {
+            return false;
+        }
+        let Some(types) = t.types() else {
+            return false;
+        };
+        if types.len() < 3 {
+            return false;
+        }
+        let has_undefined = types
+            .iter()
+            .any(|ty| ty.flags.contains(TypeFlags::Undefined));
+        let has_null = types.iter().any(|ty| ty.flags.contains(TypeFlags::Null));
+        let has_empty_object = types
+            .iter()
+            .any(|ty| self.is_empty_anonymous_object_type(ty));
+        has_undefined && has_null && has_empty_object
+    }
+
+    /// Whether `t` is an empty anonymous object type (i.e., `{}`).
+    ///
+    /// Ported from Go's `IsEmptyAnonymousObjectType`
+    /// (`internal/checker/checker.go`):
+    /// `t.objectFlags&Anonymous != 0 && (MembersResolved && isEmptyResolvedType
+    /// || symbol is TypeLiteral && members empty)`.
+    fn is_empty_anonymous_object_type(&self, t: &Arc<Type>) -> bool {
+        if !t.object_flags.contains(ObjectFlags::Anonymous) {
+            return false;
+        }
+        if t.object_flags.contains(ObjectFlags::MembersResolved) {
+            // Members already resolved: check structured type is empty.
+            return self.structured_type_is_empty(t);
+        }
+        // Fall back to symbol-based check: type literal symbol with no members.
+        if let Some(sym) = t.symbol.as_ref() {
+            if sym.flags.contains(SymbolFlags::TypeLiteral) {
+                return self.get_properties_of_type(t).is_empty();
+            }
+        }
+        false
+    }
+
+    /// Whether a structured (object) type has zero resolved members.
+    fn structured_type_is_empty(&self, t: &Arc<Type>) -> bool {
+        self.get_properties_of_type(t).is_empty()
     }
 
     // ────────────────────────────────────────────────────────────────────────

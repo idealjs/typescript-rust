@@ -728,7 +728,12 @@ impl TypeAlias {
 // ────────────────────────────────────────────────────────────────────────────
 
 /// Maps one type to another (e.g., type parameter → inferred type).
-pub type MapFn = Arc<dyn Fn(&Type) -> Arc<Type> + Send + Sync>;
+///
+/// Takes `&Arc<Type>` (not `&Type`) so that mappers can return the input
+/// type unchanged via `Arc::clone` when no mapping applies — this matches
+/// Go's `Mapper.map` returning the input interface value directly and
+/// avoids the prior placeholder behavior of returning an unrelated target.
+pub type MapFn = Arc<dyn Fn(&Arc<Type>) -> Arc<Type> + Send + Sync>;
 
 pub struct TypeMapper {
     pub kind: TypeMapperKind,
@@ -773,7 +778,7 @@ impl TypeMapper {
         }
     }
 
-    pub fn map(&self, t: &Type) -> Arc<Type> {
+    pub fn map(&self, t: &Arc<Type>) -> Arc<Type> {
         (self.map_fn)(t)
     }
 

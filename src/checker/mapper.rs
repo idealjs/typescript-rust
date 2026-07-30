@@ -14,14 +14,14 @@ use super::types::{Type, TypeMapper, TypeMapperKind};
 pub fn new_simple_type_mapper(source: Arc<Type>, target: Arc<Type>) -> TypeMapper {
     let maps_this_only = is_this_type_parameter(&source);
     TypeMapper::new(
-        Arc::new(move |t: &Type| {
-            if std::ptr::eq(t, source.as_ref()) {
+        Arc::new(move |t: &Arc<Type>| {
+            if Arc::ptr_eq(t, &source) {
                 Arc::clone(&target)
             } else {
-                // Can't cheaply return Arc<Type> from &Type without cloning;
-                // in practice the checker passes Arc<Type> around, not &Type.
-                // This is a design simplification.
-                Arc::clone(&target) // placeholder
+                // No mapping applies: return the input type unchanged.
+                // This matches Go's `SimpleTypeMapper.map` returning `t` when
+                // `t != source`.
+                Arc::clone(t)
             }
         }),
         TypeMapperKind::Simple,
@@ -33,15 +33,14 @@ pub fn new_simple_type_mapper(source: Arc<Type>, target: Arc<Type>) -> TypeMappe
 pub fn new_array_type_mapper(sources: Vec<Arc<Type>>, targets: Vec<Arc<Type>>) -> TypeMapper {
     let maps_this_only = sources.len() == 1 && is_this_type_parameter(&sources[0]);
     TypeMapper::new(
-        Arc::new(move |t: &Type| {
+        Arc::new(move |t: &Arc<Type>| {
             for (i, s) in sources.iter().enumerate() {
-                if std::ptr::eq(t, s.as_ref()) {
+                if Arc::ptr_eq(t, s) {
                     return Arc::clone(&targets[i]);
                 }
             }
-            // Type not in source list - return as-is (but we can't make Arc from &Type)
-            // This is handled at a higher level in practice.
-            Arc::clone(&targets[0]) // placeholder
+            // Type not in source list: return unchanged (Go returns `t`).
+            Arc::clone(t)
         }),
         TypeMapperKind::Array,
         maps_this_only,
@@ -52,13 +51,14 @@ pub fn new_array_type_mapper(sources: Vec<Arc<Type>>, targets: Vec<Arc<Type>>) -
 pub fn new_array_to_single_type_mapper(sources: Vec<Arc<Type>>, target: Arc<Type>) -> TypeMapper {
     let maps_this_only = sources.len() == 1 && is_this_type_parameter(&sources[0]);
     TypeMapper::new(
-        Arc::new(move |t: &Type| {
+        Arc::new(move |t: &Arc<Type>| {
             for s in &sources {
-                if std::ptr::eq(t, s.as_ref()) {
+                if Arc::ptr_eq(t, s) {
                     return Arc::clone(&target);
                 }
             }
-            Arc::clone(&target) // placeholder
+            // Type not in source list: return unchanged (Go returns `t`).
+            Arc::clone(t)
         }),
         TypeMapperKind::Array,
         maps_this_only,
@@ -67,7 +67,7 @@ pub fn new_array_to_single_type_mapper(sources: Vec<Arc<Type>>, target: Arc<Type
 
 /// Create a mapper from a function.
 pub fn new_function_type_mapper(
-    map_fn: impl Fn(&Type) -> Arc<Type> + Send + Sync + 'static,
+    map_fn: impl Fn(&Arc<Type>) -> Arc<Type> + Send + Sync + 'static,
 ) -> TypeMapper {
     TypeMapper::new(Arc::new(map_fn), TypeMapperKind::Unknown, false)
 }
@@ -79,7 +79,7 @@ pub fn merge_type_mappers(m1: Option<&TypeMapper>, m2: Option<&TypeMapper>) -> O
             let m1 = m1.clone();
             let m2 = m2.clone();
             Some(TypeMapper::new(
-                Arc::new(move |t: &Type| {
+                Arc::new(move |t: &Arc<Type>| {
                     let t1 = m1.map(t);
                     m2.map(&t1)
                 }),
@@ -189,7 +189,7 @@ mod tests {
 
     #[test]
     fn merge_mappers() {
-        let m1 = new_function_type_mapper(|t: &Type| {
+        let m1 = new_function_type_mapper(|t: &Arc<Type>| {
             Arc::new(Type::new(
                 t.flags,
                 TypeData::Intrinsic(IntrinsicTypeData {
@@ -197,7 +197,7 @@ mod tests {
                 }),
             ))
         });
-        let m2 = new_function_type_mapper(|t: &Type| {
+        let m2 = new_function_type_mapper(|t: &Arc<Type>| {
             Arc::new(Type::new(
                 t.flags,
                 TypeData::Intrinsic(IntrinsicTypeData {
@@ -213,7 +213,7 @@ mod tests {
 
     #[test]
     fn merge_with_none() {
-        let m1 = new_function_type_mapper(|t: &Type| {
+        let m1 = new_function_type_mapper(|t: &Arc<Type>| {
             Arc::new(Type::new(
                 t.flags,
                 TypeData::Intrinsic(IntrinsicTypeData {
@@ -228,5 +228,74 @@ mod tests {
 
         let merged = merge_type_mappers(None, None);
         assert!(merged.is_none());
+    }
+
+    #[test]
+    fn simple_mapper_returns_input_when_no_match() {
+        // Regression: previously the placeholder returned `target` for any
+        // non-matching input. The correct behavior (matching Go) is to
+        // return the input type unchanged.
+        let source = Arc::new(Type::new(
+            TypeFlags::TypeParameter,
+            TypeData::TypeParameter(TypeParameterData {
+                constrained: ConstrainedTypeData::default(),
+                constraint: None,
+                target: None,
+                mapper: None,
+                is_this_type: false,
+                resolved_default_type: OnceLock::new(),
+            }),
+        ));
+        let target = Arc::new(Type::new(
+            TypeFlags::String,
+            TypeData::Intrinsic(IntrinsicTypeData {
+                intrinsic_name: "string".to_string(),
+            }),
+        ));
+        let other = Arc::new(Type::new(
+            TypeFlags::Number,
+            TypeData::Intrinsic(IntrinsicTypeData {
+                intrinsic_name: "number".to_string(),
+            }),
+        ));
+
+        let mapper = new_simple_type_mapper(Arc::clone(&source), Arc::clone(&target));
+        // Matching input maps to target.
+        let mapped = mapper.map(&source);
+        assert!(Arc::ptr_eq(&mapped, &target));
+        // Non-matching input returns the input itself, NOT target.
+        let passthrough = mapper.map(&other);
+        assert!(Arc::ptr_eq(&passthrough, &other));
+    }
+
+    #[test]
+    fn array_mapper_returns_input_when_no_match() {
+        let source = Arc::new(Type::new(
+            TypeFlags::TypeParameter,
+            TypeData::TypeParameter(TypeParameterData {
+                constrained: ConstrainedTypeData::default(),
+                constraint: None,
+                target: None,
+                mapper: None,
+                is_this_type: false,
+                resolved_default_type: OnceLock::new(),
+            }),
+        ));
+        let target = Arc::new(Type::new(
+            TypeFlags::String,
+            TypeData::Intrinsic(IntrinsicTypeData {
+                intrinsic_name: "string".to_string(),
+            }),
+        ));
+        let other = Arc::new(Type::new(
+            TypeFlags::Number,
+            TypeData::Intrinsic(IntrinsicTypeData {
+                intrinsic_name: "number".to_string(),
+            }),
+        ));
+
+        let mapper = new_array_type_mapper(vec![Arc::clone(&source)], vec![Arc::clone(&target)]);
+        let passthrough = mapper.map(&other);
+        assert!(Arc::ptr_eq(&passthrough, &other));
     }
 }

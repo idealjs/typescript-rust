@@ -90,10 +90,14 @@ arity）+ 12 个 parity fixtures。
 含 spread、rest 元素类型检查、overload arity + 12 个 parity fixtures；详见
 [`ANALYSIS.md`](./ANALYSIS.md) 第 9 节）：
 
-1. **P3.7 Checker 类型关系补齐**：补齐 `isEnumTypeRelatedTo`、
-   `isUnknownLikeUnionType`（relater.rs 两处 TODO）；修复 mapper.rs 三处
-   placeholder 闭包回退（`new_simple_type_mapper`/`new_array_type_mapper`），
-   否则类型替换在 fallback 分支返回原类型，存在正确性风险。
+1. **P3.7 Checker 类型关系补齐**（已完成）：补齐 `isEnumTypeRelatedTo`、
+   `isUnknownLikeUnionType`（relater.rs 两处 TODO 已落地，含
+   `is_empty_anonymous_object_type`/`structured_type_is_empty` 辅助）；
+   修复 mapper.rs 三处 placeholder 闭包回退（`new_simple_type_mapper`/
+   `new_array_type_mapper`/`new_array_to_single_type_mapper`）——将
+   `MapFn` 签名从 `Fn(&Type)` 改为 `Fn(&Arc<Type>)`，使不匹配时返回输入
+   类型而非错误目标。**遗留**：`isEnumTypeRelatedTo` 的 enum member 值比较
+   （需 `getEnumMemberValue` + `enumRelation` 缓存）待后续补齐。
 2. **P3.8 Checker 推断收尾**：`inference.rs` 两处 TODO——contextual typing
    from return type、parameter contextual typing + binding patterns；
    freshness tracking（`checker.rs:1460` freshType）影响 literal widening
