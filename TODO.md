@@ -1,35 +1,41 @@
 # typescript-go -> typescript-rust 迁移目标与任务
 
-更新时间：2026-07-29
+更新时间：2026-07-31
 
 本文档是迁移工作的**唯一规划文档**。流程审计、行为差异细节记录在
-`MIGRATION.md`，按阶段查阅。
+`MIGRATION.md`，按阶段查阅。Go vs Rust 结构对比与已完成项盘点见
+`ANALYSIS.md`。
 
 ## 项目背景
 
-- Go 源 worktree（oracle）：`/home/cqh/workspace/typescript-rust`，分支 `main`
-- Rust 迁移 worktree：`/home/cqh/workspace/typescript-rust-rust`，分支 `rust`
+- Go 源 worktree（oracle）：`/Users/cqh/workspace/typescript-go`，分支 `main`
+- Rust 迁移 worktree（主工作目录）：`/Users/cqh/workspace/typescript-rust`，分支 `rust`
 - Rust crate：`tsox`，入口 `src/main.rs`，库入口 `src/lib.rs`
 - `edition = "2024"`，`rust-version = "1.96"`（Cargo 1.96 不支持 `edition = "2026"`）
+
+> Worktree 布局（2026-07-31 重组）：主工作目录跑 `rust` 分支以支持编辑工具；
+> Go oracle 放在独立 worktree `typescript-go`（`main` 分支）以便构建 oracle
+> 二进制与对照源码。parity 测试的 `TSGO_ORACLE` 指向
+> `/Users/cqh/workspace/typescript-go/built/local/tsgo`。
 
 ## 验收命令
 
 ```sh
-# 全量 Rust 测试（需 rustc 1.96+）
+# 全量 Rust 测试（需 rustc 1.96+；cargo 在 ~/.cargo/bin）
 cargo test
 
 # parity 集成测试，需 Go oracle 二进制
-TSGO_ORACLE=/home/cqh/workspace/typescript-rust/built/local/tsgo cargo test --test parity
+TSGO_ORACLE=/Users/cqh/workspace/typescript-go/built/local/tsgo cargo test --test parity
 
 # 未设 TSGO_ORACLE 时按以下顺序自动查找 oracle，找不到则跳过并打印原因：
-# 1. /home/cqh/workspace/typescript-rust/built/local/tsgo
-# 2. /home/cqh/workspace/typescript-rust/_packages/native-preview/bin/tsgo
+# 1. /Users/cqh/workspace/typescript-go/built/local/tsgo
+# 2. /Users/cqh/workspace/typescript-rust/_packages/native-preview/bin/tsgo
 ```
 
-构建 Go oracle：
+构建 Go oracle（在 Go worktree）：
 
 ```sh
-cd /home/cqh/workspace/typescript-rust
+cd /Users/cqh/workspace/typescript-go
 npm install && npm run build
 # 产物：built/local/tsgo
 ```
@@ -57,37 +63,55 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-31）
 
-测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 489 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 383 个）。
+测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 501 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 395 个）。本轮新增
+TS2554/TS2555 参数数量检查（含 spread TS2556、rest 元素类型检查、overload
+arity）+ 12 个 parity fixtures。
 
-| 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
+| 模块 | Rust 行数（实测） | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
-| Scanner | 1558 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 完成；缺 trivia 节点、完整 regex 校验 |
-| Parser | 7115 | 9251 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；缺 reparser/jsdoc |
-| Binder | 1640 | ~4000 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 + EnumDeclaration 容器化 完成；缺完整 flow graph、ARRAY_MUTATION、try/catch/finally、labeled statement |
-| Checker | 9600 | ~50K+ | ~19% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查 + 比较无重叠检查 TS2367 + 不可调用/不可构造检查 TS2349/TS2351 + 只读属性赋值检查 TS2540 + declaration merge checker 侧（namespace+function/class 合并 + enum+enum 合并 + enum 成员值类型解析）；emitresolver visibility tracking（is_declaration_visible + alias marking visitor + is_entity_name_visible 基础版）完成；489 parity fixtures 通过 |
-| Compiler | 759 | — | 基础 | Program 创建/解析/绑定/emit pipeline 通；checker 已接入 |
-| Emitter | 774 | — | 基础 | JS emit 基础；缺 transformer 体系 |
-| Printer | 1578 | — | 基础 | 节点→文本基础 |
-| AST | ~5500 | — | 基础 | generated 节点 + symbol/flow 类型 |
+| Scanner | 1570 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 完成；缺 trivia 节点、完整 regex 校验 |
+| Parser | 7282 | 9275 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；缺 reparser/jsdoc |
+| Binder | 2104 | ~3601 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 + EnumDeclaration 容器化 完成；缺 ReduceLabel/Shared/Referenced 后处理、labeled statement、完整 scope chain、ReferenceResolver |
+| Checker | 22527 | ~59975 | ~20% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查 + 比较无重叠检查 TS2367 + 不可调用/不可构造检查 TS2349/TS2351 + 只读属性赋值检查 TS2540 + declaration merge checker 侧 + 参数数量检查 TS2554/TS2555/TS2556 + rest 元素类型检查；emitresolver visibility tracking 完成；501 parity fixtures 通过。**已知 stub**：mapper placeholder（3 处闭包回退）、freshness tracking、isEnumTypeRelatedTo/isUnknownLikeUnionType 未迁移、nodebuilder symbol_to_type_node |
+| Compiler | 768 | — | 基础 | Program 创建/解析/绑定/emit pipeline 通；checker 已接入 |
+| Emitter | 774 | — | 基础 | JS emit 基础（源文本切片式）；缺 transformer 体系、declaration emit |
+| Printer | 1578 | — | 基础 | 仅 NameGenerator；完整 AST→文本未迁移 |
+| AST | 7476 | 21671 | 基础 | generated 节点 + symbol/flow 类型；**生成脚本缺失**（`_scripts/generate-rust-ast.ts` 未入库） |
+| Diagnostics | 24260 | 9568 | 完成 | 2154 条消息；**生成脚本缺失**（`_scripts/generate-rust-diagnostics.ts` 未入库）；本地化未实现 |
 
 `--lsp` 和 `--api` 当前为 stub。`cargo fmt --check` 仍未对齐全仓；触碰文件时
-顺手格式化，整仓格式化单独排期。剩余 warning 约 31 个，归类为迁移期可接受
+顺手格式化，整仓格式化单独排期。剩余 warning 约 77 个，归类为迁移期可接受
 （Go/TS 命名对齐、未接入的占位 API、一处 checker re-export 冲突）。
 
 ## 下阶段优先级
 
-按依赖与价值排序，逐项推进：
+按依赖与价值排序，逐项推进（本轮已补齐 TS2554/TS2555/TS2556 参数数量检查
+含 spread、rest 元素类型检查、overload arity + 12 个 parity fixtures；详见
+[`ANALYSIS.md`](./ANALYSIS.md) 第 9 节）：
 
-1. **P3.7 Checker 类型关系补齐**：数组、tuple、函数、泛型、条件类型、映射
-   类型关系 + signature/index signature 比较。这是 inference/narrowing 真正
-   可用的前置。
-2. **P3.8 Checker 推断收尾**：变量声明初始化器类型写入 symbol、函数返回值
-   推断、条件类型 `infer R` 解析、`type_node_links` 缓存。contextual typing
-   入口已具备，需把推断结果落回符号/节点。
-3. **P3.1 Binder flow graph 收尾**：`ARRAY_MUTATION`、`ReduceLabel`/`Shared`/
-   `Referenced` 后处理、labeled statement、try/catch/finally 异常流。这是
-   P3.9 narrowing 的硬依赖。
+1. **P3.7 Checker 类型关系补齐**：补齐 `isEnumTypeRelatedTo`、
+   `isUnknownLikeUnionType`（relater.rs 两处 TODO）；修复 mapper.rs 三处
+   placeholder 闭包回退（`new_simple_type_mapper`/`new_array_type_mapper`），
+   否则类型替换在 fallback 分支返回原类型，存在正确性风险。
+2. **P3.8 Checker 推断收尾**：`inference.rs` 两处 TODO——contextual typing
+   from return type、parameter contextual typing + binding patterns；
+   freshness tracking（`checker.rs:1460` freshType）影响 literal widening
+   精度。
+3. **P3.1 Binder flow graph 收尾**：`ReduceLabel`/`Shared`/`Referenced`
+   后处理、labeled statement。try/catch/finally 已完成。
+4. **P3.9 Checker 控制流 narrowing**：已大体完成，按 fixture 缺口补齐。
+5. **P3.10 Checker nodebuilder**：`symbol_to_type_node`/`symbol_to_display_parts`
+   （declaration emit 前置）。
+6. **P3.2 Binder NameResolver 收尾**：箭头函数参数作用域、enum/namespace
+   成员查找、export default 别名、类型参数作用域限制、`infer T`、装饰器
+   位置调整。
+7. **P2.0 AST/diagnostics 生成链路**：补齐 `_scripts/generate-rust-ast.ts`
+   与 `_scripts/generate-rust-diagnostics.ts`（或建立 Rust 自有 schema），
+   使 `node_data_generated.rs`/`messages_generated.rs` 可重复生成。
+8. **P1 CLI/tsconfig 收尾**：declaration-driven option parser（NameMap/
+   did-you-mean/alternate-mode）、watch options 独立建模、`extends` package
+   resolution、typed project references、no-input diagnostics、`vfsmatch`。
 4. **P3.9 Checker 控制流 narrowing**：`narrowType`、`getNarrowedTypeOfSymbol`、
    discriminated union、`typeof`/`instanceof`/`in` narrowing。
 5. **P3.10 Checker nodebuilder**：`type_to_string`、`symbol_to_type_node`、
