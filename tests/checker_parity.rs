@@ -3749,6 +3749,52 @@ fn checker_namespace_merge_missing_member_ts2339() {
 }
 
 #[test]
+fn checker_optional_property_no_error() {
+    // Optional property on an interface should allow undefined.
+    let diags = check_source(
+        "interface Opt { x?: number; }\n\
+         const o: Opt = { };\n\
+         const n: number | undefined = o.x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_optional_property_wrong_type_ts2322() {
+    // Wrong type for optional property should fail.
+    let diags = check_source(
+        "interface Opt { x?: number; }\n\
+         const o: Opt = { x: \"hi\" };",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_class_inherits_method_no_error() {
+    // Basic class inheritance with `extends`: derived class should
+    // inherit the base class's method and resolve the property access.
+    let diags = check_source(
+        "class Base { method(): number { return 1; } }\n\
+         class Derived extends Base { }\n\
+         const d = new Derived();\n\
+         const n = d.method();",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+#[ignore = "TODO: implement `implements` heritage-clause checking (TS2420)"]
+fn checker_class_implements_interface_missing_member_ts2420() {
+    // `implements` without the required member should report TS2420.
+    let diags = check_source(
+        "interface IFoo { bar(): number; }\n\
+         class C implements IFoo { }",
+    );
+    // TS2420: Class 'C' incorrectly implements interface 'IFoo'.
+    assert_diagnostic_code(&diags, 2420);
+}
+
+#[test]
 fn hover_arrow_function_variable() {
     let info = hover_info_for("let f = (a: number): string => \"hi\";", "f").expect("hover");
     // Arrow-function type is `(a: number) => string`.

@@ -694,7 +694,17 @@ impl Checker {
             // Check that source has a matching property by name.
             let source_prop = match source_struct.members.get(&target_prop.name) {
                 Some(p) => p,
-                None => return false,
+                None => {
+                    // Missing property: allowed only when the target
+                    // property is optional (`x?: T`). The target property's
+                    // type is already `T | undefined` (see
+                    // `build_interface_type_from_members`), so a missing
+                    // source property is treated as `undefined`.
+                    if target_prop.flags.contains(SymbolFlags::Optional) {
+                        continue;
+                    }
+                    return false;
+                }
             };
             // Check that the source property type is assignable to the
             // target property type (depth check).

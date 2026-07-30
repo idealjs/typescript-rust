@@ -494,8 +494,23 @@ impl Checker {
                     if name.is_empty() {
                         continue;
                     }
-                    let prop_type = self.get_type_from_type_node(&data.type_node);
-                    let symbol = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
+                    let mut prop_type = self.get_type_from_type_node(&data.type_node);
+                    let is_optional = data
+                        .postfix_token
+                        .as_ref()
+                        .map(|t| t.kind == SyntaxKind::QuestionToken)
+                        .unwrap_or(false);
+                    // Optional properties (`x?: T`) have type `T | undefined`
+                    // so that `undefined` is a valid value and missing
+                    // properties are allowed in object-literal assignment.
+                    if is_optional {
+                        prop_type = self.get_optional_type(prop_type);
+                    }
+                    let mut flags = SymbolFlags::Property;
+                    if is_optional {
+                        flags |= SymbolFlags::Optional;
+                    }
+                    let symbol = Arc::new(Symbol::new(flags, name.clone()));
                     self.value_symbol_links.insert(
                         &symbol,
                         ValueSymbolLinks {
@@ -1352,6 +1367,12 @@ impl Checker {
     // ────────────────────────────────────────────────────────────────────────
     // Type creation helpers
     // ────────────────────────────────────────────────────────────────────────
+
+    /// Build the optional type `T | undefined` for a property `x?: T`.
+    /// Mirrors Go's `getOptionalType`.
+    pub fn get_optional_type(&mut self, t: Arc<Type>) -> Arc<Type> {
+        self.get_union_type(vec![t, self.undefined_type()])
+    }
 
     pub fn get_union_type(&mut self, types: Vec<Arc<Type>>) -> Arc<Type> {
         if types.is_empty() {
