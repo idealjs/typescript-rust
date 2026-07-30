@@ -12,6 +12,7 @@ use std::sync::{Arc, OnceLock};
 
 use crate::ast::node_data_generated::NodeData;
 use crate::ast::{Node, NodeList, Symbol, SymbolFlags, SymbolTable, SyntaxKind};
+use crate::jsnum;
 
 use super::checker::Checker;
 use super::types::*;
@@ -259,8 +260,12 @@ impl Checker {
             // members (PropertySignature, MethodSignature, IndexSignature).
             return self.resolve_interface_type(&symbol, type_arguments);
         }
+        if symbol.flags.intersects(SymbolFlags::ENUM) {
+            // Enum: build a union of all enum member literal types.
+            return self.resolve_enum_type(&symbol);
+        }
         if !symbol.flags.contains(SymbolFlags::TypeAlias) {
-            // Class/enum/etc.: defer to error_type (any) for now.
+            // Class/etc.: defer to error_type (any) for now.
             return self.error_type();
         }
         // Cycle guard: a recursive alias (`type A = B; type B = A`) would
@@ -282,9 +287,8 @@ impl Checker {
                 .and_then(|l| l.declared_type.clone());
             cached.unwrap_or_else(|| {
                 let found = self.resolve_alias_body(&symbol);
-                self.type_alias_links
-                    .get_or_default(&symbol)
-                    .declared_type = Some(Arc::clone(&found));
+                self.type_alias_links.get_or_default(&symbol).declared_type =
+                    Some(Arc::clone(&found));
                 found
             })
         } else {
@@ -293,7 +297,10 @@ impl Checker {
             // resolve the body, and pop.
             let (tp_symbols, type_node) = self.collect_alias_type_params_and_body(&symbol);
             let arg_types: Vec<Arc<Type>> = match &type_arguments {
-                Some(args) => args.iter().map(|a| self.get_type_from_type_node(a)).collect(),
+                Some(args) => args
+                    .iter()
+                    .map(|a| self.get_type_from_type_node(a))
+                    .collect(),
                 None => Vec::new(),
             };
             let mut mapping = HashMap::new();
@@ -342,7 +349,10 @@ impl Checker {
                 break;
             }
         }
-        (tp_symbols, type_node.unwrap_or_else(|| Arc::clone(&symbol.declarations[0])))
+        (
+            tp_symbols,
+            type_node.unwrap_or_else(|| Arc::clone(&symbol.declarations[0])),
+        )
     }
 
     /// Resolve an `interface` declaration to an anonymous object type.
@@ -415,7 +425,13 @@ impl Checker {
                 }
                 // Push scope so type-parameter references in member types
                 // resolve via the scope stack.
-                self.push_scope(symbol.declarations.iter().next().expect("interface has a declaration"));
+                self.push_scope(
+                    symbol
+                        .declarations
+                        .iter()
+                        .next()
+                        .expect("interface has a declaration"),
+                );
                 let result = self.build_interface_type_from_members(&data.members);
                 self.pop_scope();
                 if has_type_args {
@@ -427,9 +443,7 @@ impl Checker {
         };
         self.resolving_type_aliases.remove(&key);
         if !has_type_args {
-            self.type_alias_links
-                .get_or_default(symbol)
-                .declared_type = Some(result.clone());
+            self.type_alias_links.get_or_default(symbol).declared_type = Some(result.clone());
         }
         result
     }
@@ -534,6 +548,114 @@ impl Checker {
         })
     }
 
+    /// Resolve an `enum` declaration to a union of its member literal types.
+    ///
+    /// Mirrors Go's `getEnumMemberType`/enum resolution in
+    /// `internal/checker/checker.go`. Numeric enums with no explicit
+    /// initializer auto-increment from the previous numeric value (starting
+    /// at 0); string-enum members without an initializer fall back to `any`
+    /// (real TS reports an error there). Each member's literal type is cached
+    /// on its symbol via `value_symbol_links` so that `Color.Red` property
+    /// access can recover the literal type.
+    fn resolve_enum_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+        // Reuse a cached declared type if present.
+        if let Some(cached) = self
+            .type_alias_links
+            .get(symbol)
+            .and_then(|l| l.declared_type.clone())
+        {
+            return cached;
+        }
+        // Cycle guard for recursive enum references.
+        let key = Arc::as_ptr(symbol) as *const crate::ast::Symbol;
+        if !self.resolving_type_aliases.insert(key) {
+            return self.error_type();
+        }
+        // Find the EnumDeclaration node.
+        let decl = symbol
+            .declarations
+            .iter()
+            .find(|d| matches!(d.data, NodeData::EnumDeclaration(_)));
+        // Collect (member_symbol, member_name, initializer_node) triples
+        // before computing types so that `&mut self.value_symbol_links` and
+        // `&mut self.get_type_of_node` don't alias `symbol.members`.
+        let sym_map = self.program.symbol_map();
+        let mut entries: Vec<(Option<Arc<Symbol>>, String, Option<Arc<Node>>)> = Vec::new();
+        if let Some(decl) = decl {
+            if let NodeData::EnumDeclaration(data) = &decl.data {
+                for member_node in data.members.iter() {
+                    let NodeData::EnumMember(member) = &member_node.data else {
+                        continue;
+                    };
+                    let member_name = member.name.text().to_string();
+                    let member_sym = sym_map.symbol_of(member_node).map(Arc::clone);
+                    entries.push((member_sym, member_name, member.initializer.clone()));
+                }
+            }
+        }
+        let result = if entries.is_empty() {
+            self.error_type()
+        } else {
+            let mut member_types: Vec<Arc<Type>> = Vec::new();
+            let mut next_value: Option<f64> = Some(0.0);
+            for (member_sym, member_name, initializer) in &entries {
+                let member_type = match initializer {
+                    Some(init) => {
+                        // Resolve the initializer expression's type.
+                        let t = self.get_type_of_node(init);
+                        // Track numeric values for auto-increment of
+                        // subsequent initializer-less members.
+                        if t.flags.contains(TypeFlags::NumberLiteral) {
+                            if let TypeData::Literal(LiteralTypeData {
+                                value: LiteralValue::Number(n),
+                                ..
+                            }) = &t.data
+                            {
+                                next_value = Some(n.0 + 1.0);
+                            }
+                        } else if t.flags.contains(TypeFlags::StringLiteral) {
+                            // String enum: no auto-increment.
+                            next_value = None;
+                        }
+                        t
+                    }
+                    None => match next_value {
+                        Some(v) => {
+                            next_value = Some(v + 1.0);
+                            self.get_number_literal_type(jsnum::Number::from(v))
+                        }
+                        None => {
+                            // String enum without initializer — error in
+                            // real TS, fall back to any.
+                            self.get_any_type()
+                        }
+                    },
+                };
+                // Store the member's type on its symbol so that `Color.Red`
+                // property access can recover it.
+                if let Some(ms) = member_sym {
+                    self.value_symbol_links.insert(
+                        ms,
+                        ValueSymbolLinks {
+                            resolved_type: Some(Arc::clone(&member_type)),
+                            ..Default::default()
+                        },
+                    );
+                }
+                let _ = member_name; // name recorded for future diagnostics
+                member_types.push(member_type);
+            }
+            match member_types.len() {
+                0 => self.never_type(),
+                1 => member_types.into_iter().next().unwrap(),
+                _ => self.get_union_type(member_types),
+            }
+        };
+        self.resolving_type_aliases.remove(&key);
+        self.type_alias_links.get_or_default(symbol).declared_type = Some(result.clone());
+        result
+    }
+
     /// Build a `TypeParameter` type from a `TypeParameter` symbol, resolving
     /// its constraint (if any) from the declaration.
     fn get_type_parameter_from_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
@@ -567,9 +689,7 @@ impl Checker {
                 resolved_default_type: OnceLock::new(),
             }),
         });
-        self.type_alias_links
-            .get_or_default(symbol)
-            .declared_type = Some(Arc::clone(&tp));
+        self.type_alias_links.get_or_default(symbol).declared_type = Some(Arc::clone(&tp));
         tp
     }
 
@@ -712,7 +832,10 @@ impl Checker {
                     let mut value_type = None;
                     if let Some(param) = data.parameters.iter().next() {
                         if let NodeData::ParameterDeclaration(pd) = &param.data {
-                            key_type = pd.type_node.as_ref().map(|t| self.get_type_from_type_node(t));
+                            key_type = pd
+                                .type_node
+                                .as_ref()
+                                .map(|t| self.get_type_from_type_node(t));
                         }
                     }
                     value_type = Some(self.get_type_from_type_node(&data.type_node));
@@ -1020,11 +1143,7 @@ impl Checker {
                 NodeData::InferTypeNode(data) => &data.type_parameter,
                 _ => return self.error_type(),
             };
-            let symbol = self
-                .program
-                .symbol_map()
-                .symbol_of(tp_node)
-                .map(Arc::clone);
+            let symbol = self.program.symbol_map().symbol_of(tp_node).map(Arc::clone);
             match symbol {
                 Some(sym) => self.get_type_parameter_from_symbol(&sym),
                 None => self.error_type(),
@@ -1045,10 +1164,9 @@ impl Checker {
     /// parameters are substituted (e.g. during `is_type_assignable_to`).
     fn build_conditional_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let (check_type_node, extends_type_node) = match &node.data {
-            NodeData::ConditionalTypeNode(data) => (
-                Arc::clone(&data.check_type),
-                Arc::clone(&data.extends_type),
-            ),
+            NodeData::ConditionalTypeNode(data) => {
+                (Arc::clone(&data.check_type), Arc::clone(&data.extends_type))
+            }
             _ => return self.error_type(),
         };
 
@@ -1260,10 +1378,7 @@ impl Checker {
                 let names = self.string_literal_values(&k);
                 common = Some(match common.take() {
                     None => names,
-                    Some(acc) => acc
-                        .into_iter()
-                        .filter(|n| names.contains(n))
-                        .collect(),
+                    Some(acc) => acc.into_iter().filter(|n| names.contains(n)).collect(),
                 });
             }
             let names = common.unwrap_or_default();
@@ -1283,8 +1398,7 @@ impl Checker {
                 TypeData::Intersection(i) => &i.union_or_intersection.types,
                 _ => return self.never_type(),
             };
-            let keys: Vec<Arc<Type>> =
-                types.iter().map(|c| self.get_index_type(c)).collect();
+            let keys: Vec<Arc<Type>> = types.iter().map(|c| self.get_index_type(c)).collect();
             return self.get_union_type(keys);
         }
         // Type parameter: resolve through the constraint.
@@ -1302,8 +1416,11 @@ impl Checker {
                 return self.never_type();
             }
             // Collect names first to avoid borrowing `self` while iterating.
-            let names: Vec<String> =
-                structured.properties.iter().map(|p| p.name.clone()).collect();
+            let names: Vec<String> = structured
+                .properties
+                .iter()
+                .map(|p| p.name.clone())
+                .collect();
             let literals: Vec<Arc<Type>> = names
                 .into_iter()
                 .map(|n| self.get_string_literal_type(&n))
@@ -1445,7 +1562,11 @@ impl Checker {
     /// return types are widened to their primitive base (e.g. `42` →
     /// `number`, `"foo"` → `string`) when no explicit return-type annotation
     /// is present, matching TypeScript's literal-widening rules.
-    pub fn infer_function_return_type(&mut self, body: Option<&Arc<Node>>, type_node: Option<&Arc<Node>>) -> Arc<Type> {
+    pub fn infer_function_return_type(
+        &mut self,
+        body: Option<&Arc<Node>>,
+        type_node: Option<&Arc<Node>>,
+    ) -> Arc<Type> {
         if let Some(type_node) = type_node {
             return self.get_type_from_type_node(type_node);
         }

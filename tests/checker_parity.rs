@@ -98,10 +98,7 @@ fn check_sources(files: &[(&str, &str)]) -> Vec<tsox::ast::Diagnostic> {
     check_sources_with_lib(files, true)
 }
 
-fn check_sources_with_lib(
-    files: &[(&str, &str)],
-    no_lib: bool,
-) -> Vec<tsox::ast::Diagnostic> {
+fn check_sources_with_lib(files: &[(&str, &str)], no_lib: bool) -> Vec<tsox::ast::Diagnostic> {
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     for (name, content) in files {
@@ -142,7 +139,11 @@ fn assert_no_diagnostics(diags: &[tsox::ast::Diagnostic]) {
             .iter()
             .map(|d| format!("  TS{}: {}", d.code, d.message_args.join(", ")))
             .collect();
-        panic!("Expected no diagnostics, got {}:\n{}", diags.len(), msg.join("\n"));
+        panic!(
+            "Expected no diagnostics, got {}:\n{}",
+            diags.len(),
+            msg.join("\n")
+        );
     }
 }
 
@@ -199,7 +200,11 @@ fn checker_const_declaration_no_error() {
 fn checker_multiple_var_declarations_no_error() {
     let diags = check_source("let a = 1, b = 2, c = 3;");
     let count = diags.iter().filter(|d| d.code == 2304).count();
-    assert_eq!(count, 2, "Expected 2 TS2304 errors for 'b' and 'c', got {}", count);
+    assert_eq!(
+        count, 2,
+        "Expected 2 TS2304 errors for 'b' and 'c', got {}",
+        count
+    );
 }
 
 #[test]
@@ -518,7 +523,9 @@ fn checker_generic_interface_no_error() {
 
 #[test]
 fn checker_generic_constraint_no_error() {
-    let diags = check_source("function longest<T extends { length: number }>(a: T, b: T): T { return a.length >= b.length ? a : b; }");
+    let diags = check_source(
+        "function longest<T extends { length: number }>(a: T, b: T): T { return a.length >= b.length ? a : b; }",
+    );
     assert_no_diagnostics(&diags);
 }
 
@@ -546,7 +553,9 @@ fn checker_type_alias_union_no_error() {
 
 #[test]
 fn checker_type_alias_intersection_no_error() {
-    let diags = check_source("type Named = { name: string };\ntype Aged = { age: number };\ntype Person = Named & Aged;");
+    let diags = check_source(
+        "type Named = { name: string };\ntype Aged = { age: number };\ntype Person = Named & Aged;",
+    );
     assert_no_diagnostics(&diags);
 }
 
@@ -671,7 +680,9 @@ fn checker_closure_captures_outer_variable() {
 
 #[test]
 fn checker_deeply_nested_scope_resolves() {
-    let diags = check_source("let a = 1; function f1() { let b = 2; function f2() { let c = 3; return a + b + c; } }");
+    let diags = check_source(
+        "let a = 1; function f1() { let b = 2; function f2() { let c = 3; return a + b + c; } }",
+    );
     assert_no_diagnostics(&diags);
 }
 
@@ -821,7 +832,8 @@ fn checker_type_alias_primitive_no_error() {
 
 #[test]
 fn checker_type_alias_object_no_error() {
-    let diags = check_source("type Point = { x: number; y: number };\nlet p: Point = { x: 1, y: 2 };");
+    let diags =
+        check_source("type Point = { x: number; y: number };\nlet p: Point = { x: 1, y: 2 };");
     assert_no_diagnostics(&diags);
 }
 
@@ -833,7 +845,9 @@ fn checker_type_alias_union_literal_no_error() {
 
 #[test]
 fn checker_type_alias_generic_no_error() {
-    let diags = check_source("type Result<T> = { success: true; value: T } | { success: false; error: string };");
+    let diags = check_source(
+        "type Result<T> = { success: true; value: T } | { success: false; error: string };",
+    );
     assert_no_diagnostics(&diags);
 }
 
@@ -971,7 +985,9 @@ fn checker_class_extends_no_error() {
 
 #[test]
 fn checker_class_implements_interface_no_error() {
-    let diags = check_source("interface Named { name: string; }\nclass Person implements Named { name: string = 'Alice'; }");
+    let diags = check_source(
+        "interface Named { name: string; }\nclass Person implements Named { name: string = 'Alice'; }",
+    );
     assert_no_diagnostics(&diags);
 }
 
@@ -1279,7 +1295,6 @@ fn checker_jsdoc_enum_no_error() {
     assert_no_diagnostics(&diags);
 }
 
-
 // ────────────────────────────────────────────────────────────────────────────
 // NameResolver: arguments symbol
 // ────────────────────────────────────────────────────────────────────────────
@@ -1303,7 +1318,10 @@ fn checker_arguments_outside_function_is_undefined() {
 fn checker_arguments_in_arrow_function() {
     let diags = check_source("const foo = () => { return arguments; }");
     let count = diags.iter().filter(|d| d.code == 2304).count();
-    assert_eq!(count, 1, "Expected 1 TS2304 error, got 0 - arrow functions have no arguments");
+    assert_eq!(
+        count, 1,
+        "Expected 1 TS2304 error, got 0 - arrow functions have no arguments"
+    );
 }
 
 #[test]
@@ -1321,7 +1339,11 @@ fn checker_global_symbol_with_lib() {
     // With lib loaded, `Array` should be resolvable.
     let diags = check_source_with_lib("let x = Array;", false);
     let count = diags.iter().filter(|d| d.code == 2304).count();
-    assert_eq!(count, 0, "Expected 0 TS2304 errors (Array is a global), got {}", count);
+    assert_eq!(
+        count, 0,
+        "Expected 0 TS2304 errors (Array is a global), got {}",
+        count
+    );
 }
 
 #[test]
@@ -1329,7 +1351,11 @@ fn checker_undefined_is_resolvable() {
     // `undefined` is a built-in global symbol.
     let diags = check_source_with_lib("let x = undefined;", false);
     let count = diags.iter().filter(|d| d.code == 2304).count();
-    assert_eq!(count, 0, "Expected 0 TS2304 errors (undefined is a global), got {}", count);
+    assert_eq!(
+        count, 0,
+        "Expected 0 TS2304 errors (undefined is a global), got {}",
+        count
+    );
 }
 
 #[test]
@@ -1337,7 +1363,11 @@ fn checker_global_this_is_resolvable() {
     // `globalThis` is a built-in global symbol.
     let diags = check_source_with_lib("let x = globalThis;", false);
     let count = diags.iter().filter(|d| d.code == 2304).count();
-    assert_eq!(count, 0, "Expected 0 TS2304 errors (globalThis is a global), got {}", count);
+    assert_eq!(
+        count, 0,
+        "Expected 0 TS2304 errors (globalThis is a global), got {}",
+        count
+    );
 }
 
 #[test]
@@ -2626,18 +2656,14 @@ fn checker_object_literal_infer_string_property_to_number_ts2322() {
 #[test]
 fn checker_function_type_annotation_no_error() {
     // A function expression assignable to `(x: number) => number`.
-    let diags = check_source(
-        "let f: (x: number) => number = (x) => x + 1;",
-    );
+    let diags = check_source("let f: (x: number) => number = (x) => x + 1;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_function_type_wrong_return_type_ts2322() {
     // `(x) => 'hi'` is not assignable to `(x: number) => number`.
-    let diags = check_source(
-        "let f: (x: number) => number = (x) => 'hi';",
-    );
+    let diags = check_source("let f: (x: number) => number = (x) => 'hi';");
     assert_diagnostic_code(&diags, 2322);
 }
 
@@ -2647,9 +2673,7 @@ fn checker_function_type_extra_parameters_ts2322() {
     // target type to be assigned — calling through the target would leave
     // the extra required param undefined ("Target signature provides too
     // few arguments").
-    let diags = check_source(
-        "let f: (x: number) => number = (x: number, y: number) => x + y;",
-    );
+    let diags = check_source("let f: (x: number) => number = (x: number, y: number) => x + y;");
     assert_diagnostic_code(&diags, 2322);
 }
 
@@ -2657,9 +2681,7 @@ fn checker_function_type_extra_parameters_ts2322() {
 fn checker_function_type_fewer_parameters_no_error() {
     // The reverse — a function with *fewer* parameters assigned to a type
     // expecting more — IS allowed (extra params are ignored by the callee).
-    let diags = check_source(
-        "let f: (x: number, y: number) => number = (x: number) => x + 1;",
-    );
+    let diags = check_source("let f: (x: number, y: number) => number = (x: number) => x + 1;");
     assert_no_diagnostics(&diags);
 }
 
@@ -2667,36 +2689,28 @@ fn checker_function_type_fewer_parameters_no_error() {
 fn checker_function_type_optional_parameter_no_error() {
     // `(x?: number) => number` is assignable to `(x: number) => number`
     // because optional params are compatible with required (bivariant).
-    let diags = check_source(
-        "let f: (x: number) => number = (x?: number) => (x ?? 0) + 1;",
-    );
+    let diags = check_source("let f: (x: number) => number = (x?: number) => (x ?? 0) + 1;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_function_type_rest_parameter_no_error() {
     // `(...args: number[]) => number` is assignable to `(x: number) => number`.
-    let diags = check_source(
-        "let f: (x: number) => number = (...args: number[]) => args[0] ?? 0;",
-    );
+    let diags = check_source("let f: (x: number) => number = (...args: number[]) => args[0] ?? 0;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_function_type_no_params_no_error() {
     // `() => number` assignable to `() => number`.
-    let diags = check_source(
-        "let f: () => number = () => 42;",
-    );
+    let diags = check_source("let f: () => number = () => 42;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_function_type_void_return_no_error() {
     // A function returning `number` is assignable to `() => void`.
-    let diags = check_source(
-        "let f: () => void = () => 42;",
-    );
+    let diags = check_source("let f: () => void = () => 42;");
     assert_no_diagnostics(&diags);
 }
 
@@ -2713,18 +2727,14 @@ fn checker_arrow_param_type_mismatch_ts2322() {
     // because `string` is not assignable to `number` (parameters are
     // contravariant under strictFunctionTypes, bivariant otherwise —
     // either way `string` vs `number` fails in both directions).
-    let diags = check_source(
-        "let f: (x: number) => number = (x: string) => 1;",
-    );
+    let diags = check_source("let f: (x: number) => number = (x: string) => 1;");
     assert_diagnostic_code(&diags, 2322);
 }
 
 #[test]
 fn checker_arrow_param_type_match_no_error() {
     // `(x: number) => number` is assignable to `(x: number) => number`.
-    let diags = check_source(
-        "let f: (x: number) => number = (x: number) => x + 1;",
-    );
+    let diags = check_source("let f: (x: number) => number = (x: number) => x + 1;");
     assert_no_diagnostics(&diags);
 }
 
@@ -2732,9 +2742,8 @@ fn checker_arrow_param_type_match_no_error() {
 fn checker_arrow_two_param_type_mismatch_ts2322() {
     // Second parameter type mismatch: `(a: number, b: string)` vs
     // `(a: number, b: number)`.
-    let diags = check_source(
-        "let f: (a: number, b: number) => number = (a: number, b: string) => 1;",
-    );
+    let diags =
+        check_source("let f: (a: number, b: number) => number = (a: number, b: string) => 1;");
     assert_diagnostic_code(&diags, 2322);
 }
 
@@ -2742,18 +2751,14 @@ fn checker_arrow_two_param_type_mismatch_ts2322() {
 fn checker_arrow_param_subtype_no_error() {
     // Bivariant parameter check: `string | number` parameter is assignable
     // to a `string | number` target parameter (same type both ways).
-    let diags = check_source(
-        "let f: (x: string | number) => number = (x: string | number) => 1;",
-    );
+    let diags = check_source("let f: (x: string | number) => number = (x: string | number) => 1;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_function_expression_param_type_mismatch_ts2322() {
     // Same as the arrow case but with a `function` expression.
-    let diags = check_source(
-        "let f: (x: number) => number = function (x: string) { return 1; };",
-    );
+    let diags = check_source("let f: (x: number) => number = function (x: string) { return 1; };");
     assert_diagnostic_code(&diags, 2322);
 }
 
@@ -2762,9 +2767,7 @@ fn checker_arrow_unannotated_param_no_error() {
     // Unannotated arrow param falls back to `any`, which is assignable to
     // anything (bivariant). `let f: (x: number) => number = (x) => x + 1;`
     // is the canonical contextually-typed arrow and must not error.
-    let diags = check_source(
-        "let f: (x: number) => number = (x) => x + 1;",
-    );
+    let diags = check_source("let f: (x: number) => number = (x) => x + 1;");
     assert_no_diagnostics(&diags);
 }
 
@@ -2782,9 +2785,7 @@ fn checker_contextual_param_return_type_mismatch_ts2322() {
     // `x` (a `string`), which is not assignable to the expected `number`
     // return type → TS2322. Without contextual typing `x` would be `any`
     // and this would silently pass.
-    let diags = check_source(
-        "let f: (x: string) => number = (x) => x;",
-    );
+    let diags = check_source("let f: (x: string) => number = (x) => x;");
     assert_diagnostic_code(&diags, 2322);
 }
 
@@ -2792,9 +2793,7 @@ fn checker_contextual_param_return_type_mismatch_ts2322() {
 fn checker_contextual_param_return_type_match_no_error() {
     // `x` inherits `number`; returning `x` (a `number`) matches the
     // expected `number` return type.
-    let diags = check_source(
-        "let f: (x: number) => number = (x) => x;",
-    );
+    let diags = check_source("let f: (x: number) => number = (x) => x;");
     assert_no_diagnostics(&diags);
 }
 
@@ -2802,9 +2801,7 @@ fn checker_contextual_param_return_type_match_no_error() {
 fn checker_contextual_param_arithmetic_no_error() {
     // `x` inherits `number`; `x + 1` is `number`, matching the expected
     // `number` return type.
-    let diags = check_source(
-        "let f: (x: number) => number = (x) => x + 1;",
-    );
+    let diags = check_source("let f: (x: number) => number = (x) => x + 1;");
     assert_no_diagnostics(&diags);
 }
 
@@ -2812,9 +2809,7 @@ fn checker_contextual_param_arithmetic_no_error() {
 fn checker_contextual_param_block_body_return_ts2322() {
     // Block-bodied arrow: `x` inherits `number`; `return x;` yields
     // `number`, but the annotation expects `string` → TS2322.
-    let diags = check_source(
-        "let f: (x: number) => string = (x) => { return x; };",
-    );
+    let diags = check_source("let f: (x: number) => string = (x) => { return x; };");
     assert_diagnostic_code(&diags, 2322);
 }
 
@@ -2822,9 +2817,7 @@ fn checker_contextual_param_block_body_return_ts2322() {
 fn checker_contextual_param_two_params_return_ts2322() {
     // `a`/`b` inherit `number`/`string` respectively; returning `b` (a
     // `string`) doesn't match the expected `number` return type.
-    let diags = check_source(
-        "let f: (a: number, b: string) => number = (a, b) => b;",
-    );
+    let diags = check_source("let f: (a: number, b: string) => number = (a, b) => b;");
     assert_diagnostic_code(&diags, 2322);
 }
 
@@ -2832,9 +2825,7 @@ fn checker_contextual_param_two_params_return_ts2322() {
 fn checker_contextual_param_function_expression_ts2322() {
     // Same contextual-typing behavior for `function` expressions: `x`
     // inherits `string`; returning `x` doesn't match the expected `number`.
-    let diags = check_source(
-        "let f: (x: string) => number = function (x) { return x; };",
-    );
+    let diags = check_source("let f: (x: string) => number = function (x) { return x; };");
     assert_diagnostic_code(&diags, 2322);
 }
 
@@ -2843,9 +2834,7 @@ fn checker_contextual_param_fewer_params_no_error() {
     // A function expression with FEWER params than the contextual signature
     // is allowed (extra params are ignored by the callee). The single param
     // `x` inherits `number`; returning `x` matches the expected `number`.
-    let diags = check_source(
-        "let f: (x: number, y: number) => number = (x) => x;",
-    );
+    let diags = check_source("let f: (x: number, y: number) => number = (x) => x;");
     assert_no_diagnostics(&diags);
 }
 
@@ -2856,28 +2845,32 @@ fn checker_contextual_param_fewer_params_no_error() {
 #[test]
 fn checker_conditional_true_branch_no_error() {
     // `number extends number` is true → T = "yes".
-    let diags = check_source("type T = number extends number ? \"yes\" : \"no\";\nlet x: T = \"yes\";");
+    let diags =
+        check_source("type T = number extends number ? \"yes\" : \"no\";\nlet x: T = \"yes\";");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_conditional_true_branch_mismatch_ts2322() {
     // T = "yes" but we assign "no".
-    let diags = check_source("type T = number extends number ? \"yes\" : \"no\";\nlet x: T = \"no\";");
+    let diags =
+        check_source("type T = number extends number ? \"yes\" : \"no\";\nlet x: T = \"no\";");
     assert_diagnostic_code(&diags, 2322);
 }
 
 #[test]
 fn checker_conditional_false_branch_no_error() {
     // `number extends string` is false → T = "no".
-    let diags = check_source("type T = number extends string ? \"yes\" : \"no\";\nlet x: T = \"no\";");
+    let diags =
+        check_source("type T = number extends string ? \"yes\" : \"no\";\nlet x: T = \"no\";");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_conditional_false_branch_mismatch_ts2322() {
     // T = "no" but we assign "yes".
-    let diags = check_source("type T = number extends string ? \"yes\" : \"no\";\nlet x: T = \"yes\";");
+    let diags =
+        check_source("type T = number extends string ? \"yes\" : \"no\";\nlet x: T = \"yes\";");
     assert_diagnostic_code(&diags, 2322);
 }
 
@@ -2997,27 +2990,23 @@ fn checker_keyof_object_type_no_error() {
 #[test]
 fn checker_keyof_object_type_single_key_no_error() {
     // `keyof { x: 1 }` = "x".
-    let diags = check_source(
-        "type K = keyof { x: 1 };\nlet x: \"x\" = null as any as K;",
-    );
+    let diags = check_source("type K = keyof { x: 1 };\nlet x: \"x\" = null as any as K;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_keyof_object_type_subset_assignable_no_error() {
     // `keyof { a: number }` = "a". "a" IS assignable to "a" | "b" (subset).
-    let diags = check_source(
-        "type K = keyof { a: number };\nlet x: \"a\" | \"b\" = null as any as K;",
-    );
+    let diags =
+        check_source("type K = keyof { a: number };\nlet x: \"a\" | \"b\" = null as any as K;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_keyof_object_type_missing_key_ts2322() {
     // `keyof { a: number; b: string }` = "a" | "b", but target expects only "a".
-    let diags = check_source(
-        "type K = keyof { a: number; b: string };\nlet x: \"a\" = null as any as K;",
-    );
+    let diags =
+        check_source("type K = keyof { a: number; b: string };\nlet x: \"a\" = null as any as K;");
     assert_diagnostic_code(&diags, 2322);
 }
 
@@ -3033,18 +3022,14 @@ fn checker_keyof_via_type_alias_no_error() {
 #[test]
 fn checker_keyof_never_type() {
     // `keyof never` = never. Assigning never to a string-literal type is OK.
-    let diags = check_source(
-        "type K = keyof never;\nlet x: \"a\" = null as any as K;",
-    );
+    let diags = check_source("type K = keyof never;\nlet x: \"a\" = null as any as K;");
     assert_no_diagnostics(&diags);
 }
 
 #[test]
 fn checker_keyof_empty_object_is_never() {
     // `keyof {}` = never (no keys). Assigning never is OK.
-    let diags = check_source(
-        "type K = keyof {};\nlet x: \"a\" = null as any as K;",
-    );
+    let diags = check_source("type K = keyof {};\nlet x: \"a\" = null as any as K;");
     assert_no_diagnostics(&diags);
 }
 
@@ -3162,9 +3147,7 @@ fn checker_object_literal_widening_boolean_no_error() {
 #[test]
 fn checker_object_literal_widening_nested_no_error() {
     // Nested object literal: inner literal types also widen.
-    let diags = check_source(
-        "let x = { a: { b: 1 } };\nx = { a: { b: 2 } };",
-    );
+    let diags = check_source("let x = { a: { b: 1 } };\nx = { a: { b: 2 } };");
     assert_no_diagnostics(&diags);
 }
 
@@ -3277,9 +3260,7 @@ fn checker_narrowing_lost_after_try_block_no_error() {
 fn checker_catch_variable_no_error() {
     // The catch variable `e` should not produce false positives
     // when used inside the catch block.
-    let diags = check_source(
-        "try {\n  throw 42;\n} catch (e) {\n  let y = e;\n}",
-    );
+    let diags = check_source("try {\n  throw 42;\n} catch (e) {\n  let y = e;\n}");
     assert_no_diagnostics(&diags);
 }
 
@@ -3382,6 +3363,81 @@ fn checker_interface_index_signature_no_error() {
         "interface Foo { [key: string]: number }\n\
          let x: Foo = { a: 1 };\n\
          let y: number = x.a;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Enum type resolution
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_numeric_enum_no_error() {
+    // Numeric enum: `Color.Red` should have type `0` (number literal).
+    let diags = check_source(
+        "enum Color { Red, Green, Blue }\n\
+         let x: Color = Color.Red;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_numeric_enum_member_values() {
+    // Numeric enum with explicit values.
+    let diags = check_source(
+        "enum Direction { Up = 1, Down = 2 }\n\
+         let x: Direction = Direction.Up;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_string_enum_no_error() {
+    // String enum: members have string literal types.
+    let diags = check_source(
+        "enum Direction { Up = 'UP', Down = 'DOWN' }\n\
+         let x: Direction = Direction.Up;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_enum_property_access_no_error() {
+    // Accessing an enum member should resolve to its literal type.
+    let diags = check_source(
+        "enum Color { Red = 0, Green = 1 }\n\
+         let r = Color.Red;\n\
+         let g = Color.Green;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_enum_wrong_assign_ts2322() {
+    // Assigning a non-enum value to an enum-typed variable should fail.
+    let diags = check_source(
+        "enum Color { Red, Green, Blue }\n\
+         let x: Color = 42;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_mixed_enum_no_error() {
+    // Mixed enum with both numeric and string members.
+    let diags = check_source(
+        "enum Shape { Circle = 0, Square = 'SQ' }\n\
+         let x: Shape = Shape.Circle;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_enum_auto_increment() {
+    // Auto-increment: Green should be 1, Blue should be 2.
+    let diags = check_source(
+        "enum Color { Red = 0, Green, Blue }\n\
+         let x: Color = Color.Green;",
     );
     assert_no_diagnostics(&diags);
 }

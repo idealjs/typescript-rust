@@ -57,8 +57,8 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-30）
 
-测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 347 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 241 个）。
+测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 355 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 249 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
@@ -430,6 +430,12 @@ contextual function type 的 call signature，无注解参数继承对应位置�
   `Constructor` 声明解析（`constructor(...)` 现在生成 `ConstructorDeclaration` 而非
   `MethodDeclaration`）；binder 将 `Constructor` 加入 `is_block_scoped_container` 使
   构造函数参数存入 locals。16 条 TS2345 parity 测试全部通过。
+- [x] Enum 类型解析。已完成：`resolve_enum_type` 构建枚举成员 literal 类型
+  union，支持数字/字符串/混合枚举、数字枚举 auto-increment（无初始化器成员
+  从上一个数值 +1，起始 0）；每个成员的 literal 类型写入成员符号的
+  `value_symbol_links` 使 `Color.Red` 属性访问可恢复 literal 类型；枚举整体
+  类型缓存到 `type_alias_links.declared_type`，递归引用通过
+  `resolving_type_aliases` 循环保护。7 条 enum parity 测试全部通过。
 
 ### P3.9 Checker 控制流 narrowing
 
