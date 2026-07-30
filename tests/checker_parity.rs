@@ -3441,3 +3441,89 @@ fn checker_enum_auto_increment() {
     );
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Evolving array types (ARRAY_MUTATION flow nodes)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_evolving_array_push_number_no_error() {
+    // `let x = []; x.push(1)` — after the push, x's element type should be
+    // `number`, so `x[0]` should be assignable to `number`.
+    let diags = check_source(
+        "let x = [];\n\
+         x.push(1);\n\
+         let y: number = x[0];",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_evolving_array_push_string_no_error() {
+    // `let x = []; x.push('hi')` — after the push, x's element type should be
+    // `string`.
+    let diags = check_source(
+        "let x = [];\n\
+         x.push('hi');\n\
+         let y: string = x[0];",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_evolving_array_push_mismatch_ts2322() {
+    // `let x = []; x.push(1)` — element type is `number`, so assigning
+    // `x[0]` to a `string` variable should fail with TS2322.
+    let diags = check_source(
+        "let x = [];\n\
+         x.push(1);\n\
+         let y: string = x[0];",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_evolving_array_multiple_pushes_no_error() {
+    // Multiple pushes of the same type should not error.
+    let diags = check_source(
+        "let x = [];\n\
+         x.push(1);\n\
+         x.push(2);\n\
+         x.push(3);\n\
+         let y: number = x[0];",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_evolving_array_empty_no_error() {
+    // An empty evolving array (no pushes) should finalize to `any[]`,
+    // which is assignable to `any`.
+    let diags = check_source(
+        "let x = [];\n\
+         let y = x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_evolving_array_unshift_no_error() {
+    // `unshift` should also evolve the array type.
+    let diags = check_source(
+        "let x = [];\n\
+         x.unshift(1);\n\
+         let y: number = x[0];",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_non_empty_array_literal_no_error() {
+    // Non-empty array literal `[1, 2, 3]` should infer `number[]`
+    // directly (not evolving).
+    let diags = check_source(
+        "let x = [1, 2, 3];\n\
+         let y: number = x[0];",
+    );
+    assert_no_diagnostics(&diags);
+}

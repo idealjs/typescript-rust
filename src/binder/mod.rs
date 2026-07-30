@@ -146,7 +146,8 @@ impl Binder {
         self.current_flow = Some(Arc::clone(&start_flow));
         self.unreachable_flow = Some(Arc::new(FlowNode::new(FlowFlags::UNREACHABLE)));
         // Set the start flow node on the source file node itself
-        self.symbol_map.set_flow_node(&file.node, Arc::clone(&start_flow));
+        self.symbol_map
+            .set_flow_node(&file.node, Arc::clone(&start_flow));
 
         // Create a symbol for the source file itself
         let file_symbol = Arc::new(Symbol::new(
@@ -356,7 +357,12 @@ impl Binder {
     }
 
     /// Create a flow condition node (true or false branch).
-    fn create_flow_condition(&mut self, flags: FlowFlags, antecedent: &Arc<FlowNode>, expression: &Arc<Node>) -> Arc<FlowNode> {
+    fn create_flow_condition(
+        &mut self,
+        flags: FlowFlags,
+        antecedent: &Arc<FlowNode>,
+        expression: &Arc<Node>,
+    ) -> Arc<FlowNode> {
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return Arc::clone(antecedent);
         }
@@ -371,7 +377,11 @@ impl Binder {
     }
 
     /// Create a flow assignment node.
-    fn create_flow_assignment(&mut self, antecedent: &Arc<FlowNode>, node: &Arc<Node>) -> Arc<FlowNode> {
+    fn create_flow_assignment(
+        &mut self,
+        antecedent: &Arc<FlowNode>,
+        node: &Arc<Node>,
+    ) -> Arc<FlowNode> {
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return Arc::clone(antecedent);
         }
@@ -401,7 +411,11 @@ impl Binder {
     }
 
     /// Create a flow mutation node (for array mutations like push, unshift, idx assignment).
-    fn create_flow_mutation(&mut self, antecedent: &Arc<FlowNode>, node: &Arc<Node>) -> Arc<FlowNode> {
+    fn create_flow_mutation(
+        &mut self,
+        antecedent: &Arc<FlowNode>,
+        node: &Arc<Node>,
+    ) -> Arc<FlowNode> {
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return Arc::clone(antecedent);
         }
@@ -436,7 +450,11 @@ impl Binder {
     }
 
     /// Create a reduce label node (for try-finally flow graph).
-    fn create_reduce_label(&self, antecedents: &[Arc<FlowNode>], antecedent: &Arc<FlowNode>) -> Arc<FlowNode> {
+    fn create_reduce_label(
+        &self,
+        antecedents: &[Arc<FlowNode>],
+        antecedent: &Arc<FlowNode>,
+    ) -> Arc<FlowNode> {
         Arc::new(FlowNode {
             flags: FlowFlags::REDUCE_LABEL,
             node: None,
@@ -497,9 +515,11 @@ impl Binder {
         let mut post_if_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
 
         let (expr, then_stmt, else_stmt) = match &node.data {
-            NodeData::IfStatement(data) => {
-                (data.expression.clone(), data.then_statement.clone(), data.else_statement.clone())
-            }
+            NodeData::IfStatement(data) => (
+                data.expression.clone(),
+                data.then_statement.clone(),
+                data.else_statement.clone(),
+            ),
             _ => return,
         };
 
@@ -507,7 +527,8 @@ impl Binder {
         self.bind(&expr);
         if let Some(current) = self.current_flow.take() {
             let true_flow = self.create_flow_condition(FlowFlags::TRUE_CONDITION, &current, &expr);
-            let false_flow = self.create_flow_condition(FlowFlags::FALSE_CONDITION, &current, &expr);
+            let false_flow =
+                self.create_flow_condition(FlowFlags::FALSE_CONDITION, &current, &expr);
             then_label.add_antecedent(true_flow);
             else_label.add_antecedent(false_flow);
         }
@@ -539,9 +560,7 @@ impl Binder {
         let mut post_while_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
 
         let (expr, stmt) = match &node.data {
-            NodeData::WhileStatement(data) => {
-                (data.expression.clone(), data.statement.clone())
-            }
+            NodeData::WhileStatement(data) => (data.expression.clone(), data.statement.clone()),
             _ => return,
         };
 
@@ -554,7 +573,8 @@ impl Binder {
         self.bind(&expr);
         if let Some(current) = self.current_flow.take() {
             let true_flow = self.create_flow_condition(FlowFlags::TRUE_CONDITION, &current, &expr);
-            let false_flow = self.create_flow_condition(FlowFlags::FALSE_CONDITION, &current, &expr);
+            let false_flow =
+                self.create_flow_condition(FlowFlags::FALSE_CONDITION, &current, &expr);
             pre_body_label.add_antecedent(true_flow);
             post_while_label.add_antecedent(false_flow);
         }
@@ -562,8 +582,10 @@ impl Binder {
         // Save break/continue targets
         let prev_break = self.current_break_target.take();
         let prev_continue = self.current_continue_target.take();
-        self.current_break_target = Some(post_while_label.finish(self.unreachable_flow.as_ref().unwrap()));
-        self.current_continue_target = Some(pre_while_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.current_break_target =
+            Some(post_while_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.current_continue_target =
+            Some(pre_while_label.finish(self.unreachable_flow.as_ref().unwrap()));
 
         // Body
         self.current_flow = Some(pre_body_label.finish(self.unreachable_flow.as_ref().unwrap()));
@@ -586,9 +608,7 @@ impl Binder {
         let mut post_do_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
 
         let (expr, stmt) = match &node.data {
-            NodeData::DoStatement(data) => {
-                (data.expression.clone(), data.statement.clone())
-            }
+            NodeData::DoStatement(data) => (data.expression.clone(), data.statement.clone()),
             _ => return,
         };
 
@@ -600,8 +620,10 @@ impl Binder {
         // Save break/continue targets
         let prev_break = self.current_break_target.take();
         let prev_continue = self.current_continue_target.take();
-        self.current_break_target = Some(post_do_label.finish(self.unreachable_flow.as_ref().unwrap()));
-        self.current_continue_target = Some(pre_condition_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.current_break_target =
+            Some(post_do_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.current_continue_target =
+            Some(pre_condition_label.finish(self.unreachable_flow.as_ref().unwrap()));
 
         // Body
         self.bind(&stmt);
@@ -614,11 +636,13 @@ impl Binder {
         self.current_continue_target = prev_continue;
 
         // Condition
-        self.current_flow = Some(pre_condition_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.current_flow =
+            Some(pre_condition_label.finish(self.unreachable_flow.as_ref().unwrap()));
         self.bind(&expr);
         if let Some(current) = self.current_flow.take() {
             let true_flow = self.create_flow_condition(FlowFlags::TRUE_CONDITION, &current, &expr);
-            let false_flow = self.create_flow_condition(FlowFlags::FALSE_CONDITION, &current, &expr);
+            let false_flow =
+                self.create_flow_condition(FlowFlags::FALSE_CONDITION, &current, &expr);
             pre_do_label.add_antecedent(true_flow);
             post_do_label.add_antecedent(false_flow);
         }
@@ -634,9 +658,12 @@ impl Binder {
         let mut post_loop_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
 
         let (initializer, condition, incrementor, statement) = match &node.data {
-            NodeData::ForStatement(data) => {
-                (data.initializer.clone(), data.condition.clone(), data.incrementor.clone(), data.statement.clone())
-            }
+            NodeData::ForStatement(data) => (
+                data.initializer.clone(),
+                data.condition.clone(),
+                data.incrementor.clone(),
+                data.statement.clone(),
+            ),
             _ => return,
         };
 
@@ -654,8 +681,10 @@ impl Binder {
         if let Some(cond) = condition {
             self.bind(&cond);
             if let Some(current) = self.current_flow.take() {
-                let true_flow = self.create_flow_condition(FlowFlags::TRUE_CONDITION, &current, &cond);
-                let false_flow = self.create_flow_condition(FlowFlags::FALSE_CONDITION, &current, &cond);
+                let true_flow =
+                    self.create_flow_condition(FlowFlags::TRUE_CONDITION, &current, &cond);
+                let false_flow =
+                    self.create_flow_condition(FlowFlags::FALSE_CONDITION, &current, &cond);
                 pre_body_label.add_antecedent(true_flow);
                 post_loop_label.add_antecedent(false_flow);
             }
@@ -669,8 +698,10 @@ impl Binder {
         // Save break/continue targets
         let prev_break = self.current_break_target.take();
         let prev_continue = self.current_continue_target.take();
-        self.current_break_target = Some(post_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
-        self.current_continue_target = Some(pre_incr_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.current_break_target =
+            Some(post_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.current_continue_target =
+            Some(pre_incr_label.finish(self.unreachable_flow.as_ref().unwrap()));
 
         // Body
         self.current_flow = Some(pre_body_label.finish(self.unreachable_flow.as_ref().unwrap()));
@@ -701,9 +732,11 @@ impl Binder {
         let mut post_loop_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
 
         let (expression, initializer, statement) = match &node.data {
-            NodeData::ForInOrOfStatement(data) => {
-                (data.expression.clone(), data.initializer.clone(), data.statement.clone())
-            }
+            NodeData::ForInOrOfStatement(data) => (
+                data.expression.clone(),
+                data.initializer.clone(),
+                data.statement.clone(),
+            ),
             _ => return,
         };
 
@@ -723,8 +756,10 @@ impl Binder {
         // Save break/continue targets
         let prev_break = self.current_break_target.take();
         let prev_continue = self.current_continue_target.take();
-        self.current_break_target = Some(post_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
-        self.current_continue_target = Some(pre_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.current_break_target =
+            Some(post_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.current_continue_target =
+            Some(pre_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
 
         // Body
         self.bind(&statement);
@@ -744,9 +779,7 @@ impl Binder {
         let mut post_switch_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
 
         let (expression, case_block) = match &node.data {
-            NodeData::SwitchStatement(data) => {
-                (data.expression.clone(), data.case_block.clone())
-            }
+            NodeData::SwitchStatement(data) => (data.expression.clone(), data.case_block.clone()),
             _ => return,
         };
 
@@ -755,7 +788,8 @@ impl Binder {
 
         // Save break target
         let prev_break = self.current_break_target.take();
-        self.current_break_target = Some(post_switch_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        self.current_break_target =
+            Some(post_switch_label.finish(self.unreachable_flow.as_ref().unwrap()));
 
         // Get clauses from case block
         let clauses = match &case_block.data {
@@ -846,7 +880,9 @@ impl Binder {
         if let Some(current) = &self.current_flow {
             exception_label.add_antecedent(Arc::clone(current));
         }
-        self.current_exception_target = Some(Arc::clone(&exception_label.finish(&self.unreachable_flow())));
+        self.current_exception_target = Some(Arc::clone(
+            &exception_label.finish(&self.unreachable_flow()),
+        ));
 
         // Bind try block
         self.bind(&stmt.try_block);
@@ -886,22 +922,31 @@ impl Binder {
             self.current_flow = Some(finally_label.finish(&self.unreachable_flow()));
             self.bind(finally_block);
 
-            if self.current_flow.as_ref().map_or(false, |f| f.flags.contains(FlowFlags::UNREACHABLE)) {
+            if self
+                .current_flow
+                .as_ref()
+                .map_or(false, |f| f.flags.contains(FlowFlags::UNREACHABLE))
+            {
                 self.current_flow = Some(self.unreachable_flow());
             } else {
                 // Handle return paths through finally
-                if self.current_return_target.is_some() && !return_label.node.antecedents.is_empty() {
+                if self.current_return_target.is_some() && !return_label.node.antecedents.is_empty()
+                {
                     if let Some(current_flow) = &self.current_flow {
-                        let reduce = self.create_reduce_label(&return_label.node.antecedents, current_flow);
+                        let reduce =
+                            self.create_reduce_label(&return_label.node.antecedents, current_flow);
                         if let Some(rt) = &self.current_return_target {
                             self.add_antecedent_to_flow(rt, &reduce);
                         }
                     }
                 }
                 // Handle exception paths through finally
-                if self.current_exception_target.is_some() && !exception_label.node.antecedents.is_empty() {
+                if self.current_exception_target.is_some()
+                    && !exception_label.node.antecedents.is_empty()
+                {
                     if let Some(current_flow) = &self.current_flow {
-                        let reduce = self.create_reduce_label(&exception_label.node.antecedents, current_flow);
+                        let reduce = self
+                            .create_reduce_label(&exception_label.node.antecedents, current_flow);
                         if let Some(et) = &self.current_exception_target {
                             self.add_antecedent_to_flow(et, &reduce);
                         }
@@ -910,7 +955,10 @@ impl Binder {
                 // Normal exit path through finally
                 if !normal_exit_label.node.antecedents.is_empty() {
                     if let Some(current_flow) = &self.current_flow {
-                        self.current_flow = Some(self.create_reduce_label(&normal_exit_label.node.antecedents, current_flow));
+                        self.current_flow = Some(self.create_reduce_label(
+                            &normal_exit_label.node.antecedents,
+                            current_flow,
+                        ));
                     }
                 } else {
                     self.current_flow = Some(self.unreachable_flow());
@@ -1000,10 +1048,14 @@ impl Binder {
 
         // Determine if this is a label for an iteration statement (has continue target)
         let continue_target = match &stmt.statement.data {
-            NodeData::WhileStatement(_) | NodeData::DoStatement(_)
-            | NodeData::ForStatement(_) | NodeData::ForInOrOfStatement(_) => {
-                Some(self.current_continue_target.clone().unwrap_or_else(|| self.unreachable_flow()))
-            }
+            NodeData::WhileStatement(_)
+            | NodeData::DoStatement(_)
+            | NodeData::ForStatement(_)
+            | NodeData::ForInOrOfStatement(_) => Some(
+                self.current_continue_target
+                    .clone()
+                    .unwrap_or_else(|| self.unreachable_flow()),
+            ),
             _ => None,
         };
 
@@ -1031,20 +1083,80 @@ impl Binder {
     }
 
     /// Check if an identifier is push or unshift (for array mutation tracking).
+    /// Mirrors Go's `ast.IsPushOrUnshiftIdentifier`.
     fn is_push_or_unshift_identifier(&self, name: &str) -> bool {
         name == "push" || name == "unshift"
     }
 
+    /// Check if an expression is a narrowable operand (identifier, property
+    /// access chain, parenthesized, etc.). Mirrors Go's `isNarrowableOperand` +
+    /// `containsNarrowableReference`. Used to gate ARRAY_MUTATION flow nodes
+    /// so that `arr.push(x)` (where `arr` is an identifier) is tracked but
+    /// `getFoo().push(x)` is not.
+    fn is_narrowable_operand(&self, expr: &Arc<Node>) -> bool {
+        match expr.kind {
+            SyntaxKind::Identifier
+            | SyntaxKind::ThisKeyword
+            | SyntaxKind::SuperKeyword
+            | SyntaxKind::MetaProperty => true,
+            SyntaxKind::PropertyAccessExpression
+            | SyntaxKind::ParenthesizedExpression
+            | SyntaxKind::NonNullExpression => {
+                if let Some(inner) = expr.expression() {
+                    self.is_narrowable_operand(&inner)
+                } else {
+                    false
+                }
+            }
+            SyntaxKind::ElementAccessExpression => {
+                // Element access is narrowable if the argument is a
+                // string/numeric literal or an entity-name expression whose
+                // receiver is narrowable.
+                if let NodeData::ElementAccessExpression(ea) = &expr.data {
+                    if self.is_string_or_numeric_literal_like(&ea.argument_expression) {
+                        return true;
+                    }
+                    return self.is_entity_name_expression(&ea.argument_expression)
+                        && self.is_narrowable_operand(&ea.expression);
+                }
+                false
+            }
+            _ => false,
+        }
+    }
+
+    /// Mirrors Go's `ast.IsStringOrNumericLiteralLike`.
+    fn is_string_or_numeric_literal_like(&self, node: &Arc<Node>) -> bool {
+        matches!(
+            node.kind,
+            SyntaxKind::StringLiteral
+                | SyntaxKind::NumericLiteral
+                | SyntaxKind::NoSubstitutionTemplateLiteral
+        )
+    }
+
+    /// Mirrors Go's `ast.IsEntityNameExpression` (identifier or qualified
+    /// name).
+    fn is_entity_name_expression(&self, node: &Arc<Node>) -> bool {
+        matches!(node.kind, SyntaxKind::Identifier | SyntaxKind::QualifiedName)
+    }
+
     /// Bind a call expression for flow tracking (array mutation detection).
     ///
-    /// Mirrors `binder.bindCallExpressionFlow` in Go.
+    /// Mirrors `binder.bindCallExpressionFlow` in Go. Handles:
+    /// - Optional chains (delegates to `bind_optional_chain_flow`)
+    /// - IIFE (function/arrow expression): bind args then callee
+    /// - `super()`: create a CALL flow node
+    /// - `arr.push(x)` / `arr.unshift(x)`: create an ARRAY_MUTATION flow node
     fn bind_call_expression_flow(&mut self, node: &Arc<Node>) {
         if let NodeData::CallExpression(data) = &node.data {
             let expr = &data.expression;
             // Check for property access expression like arr.push()
             if let NodeData::PropertyAccessExpression(prop) = &expr.data {
                 let name = self.node_text(&prop.name);
-                if self.is_push_or_unshift_identifier(&name) {
+                if self.is_push_or_unshift_identifier(&name)
+                    && self.is_narrowable_operand(&prop.expression)
+                {
                     // This is an array mutation call: create a flow mutation node
                     let current = self.current_flow.clone();
                     if let Some(current) = current {
@@ -1064,7 +1176,8 @@ impl Binder {
                 if is_assignment_operator(bin_data.operator_token.kind) {
                     if let Some(current) = self.current_flow.take() {
                         let assign_flow = self.create_flow_assignment(&current, &data.expression);
-                        self.symbol_map.set_flow_node(&data.expression, Arc::clone(&assign_flow));
+                        self.symbol_map
+                            .set_flow_node(&data.expression, Arc::clone(&assign_flow));
                         self.current_flow = Some(assign_flow);
                     }
                     // Check for element access assignment (array mutation: arr[i] = val)
@@ -1080,7 +1193,8 @@ impl Binder {
             if let NodeData::CallExpression(_) = &data.expression.data {
                 if let Some(current) = self.current_flow.take() {
                     let call_flow = self.create_flow_call(&current, &data.expression);
-                    self.symbol_map.set_flow_node(&data.expression, Arc::clone(&call_flow));
+                    self.symbol_map
+                        .set_flow_node(&data.expression, Arc::clone(&call_flow));
                     self.current_flow = Some(call_flow);
                 }
             }
@@ -1102,7 +1216,8 @@ impl Binder {
                         if decl_data.initializer.is_some() {
                             if let Some(current) = self.current_flow.take() {
                                 let assign_flow = self.create_flow_assignment(&current, decl);
-                                self.symbol_map.set_flow_node(decl, Arc::clone(&assign_flow));
+                                self.symbol_map
+                                    .set_flow_node(decl, Arc::clone(&assign_flow));
                                 self.current_flow = Some(current);
                             }
                         }
@@ -1501,9 +1616,7 @@ impl Binder {
             let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
             unsafe {
                 (*symbol_mut).declarations.push(Arc::clone(node));
-                if (*symbol_mut).value_declaration.is_none()
-                    && flags.contains(SymbolFlags::VALUE)
-                {
+                if (*symbol_mut).value_declaration.is_none() && flags.contains(SymbolFlags::VALUE) {
                     (*symbol_mut).value_declaration = Some(Arc::clone(node));
                 }
             }
@@ -1778,7 +1891,8 @@ mod tests {
 
     #[test]
     fn flow_switch_statement() {
-        let (file, _map) = parse_and_bind("let x = 1; switch (x) { case 1: x = 2; break; default: x = 0; }");
+        let (file, _map) =
+            parse_and_bind("let x = 1; switch (x) { case 1: x = 2; break; default: x = 0; }");
         let mut binder = Binder::new();
         binder.bind_source_file(&file);
         assert!(binder.symbol_count() >= 2);

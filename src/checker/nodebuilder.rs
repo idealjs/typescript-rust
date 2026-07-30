@@ -296,8 +296,7 @@ impl Checker {
         // Array type: if there's exactly one type argument and the symbol
         // name is `Array`, format as `T[]` (or `Array<T>` if flagged).
         let is_array = obj_data.type_arguments.len() == 1
-            && t
-                .symbol
+            && t.symbol
                 .as_ref()
                 .map(|s| s.name == "Array" || s.name == "ReadonlyArray")
                 .unwrap_or(false);
@@ -354,10 +353,7 @@ impl Checker {
                 let name = param.name.clone();
                 let param_type = self.get_type_of_symbol(param);
                 let type_str = self.type_to_string_ex(&param_type, flags);
-                if param
-                    .flags
-                    .contains(crate::ast::SymbolFlags::Optional)
-                {
+                if param.flags.contains(crate::ast::SymbolFlags::Optional) {
                     format!("{}?: {}", name, type_str)
                 } else {
                     format!("{}: {}", name, type_str)

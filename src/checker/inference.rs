@@ -8,10 +8,9 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::ast::SyntaxKind;
 use super::checker::Checker;
 use super::types::*;
-
+use crate::ast::SyntaxKind;
 
 // ────────────────────────────────────────────────────────────────────────────
 // InferenceKey
@@ -213,15 +212,19 @@ impl Checker {
                 vec![Arc::clone(source)]
             };
             let target_types = target.types().unwrap_or_default().to_vec();
-            let (temp_sources, temp_targets) = self.infer_from_matching_types(
-                state, &source_types, &target_types, true,
-            );
+            let (temp_sources, temp_targets) =
+                self.infer_from_matching_types(state, &source_types, &target_types, true);
             if temp_targets.is_empty() {
                 return;
             }
             let target = self.get_union_type(temp_targets);
             if temp_sources.is_empty() {
-                self.infer_with_priority(state, source, &target, InferencePriority::NakedTypeVariable);
+                self.infer_with_priority(
+                    state,
+                    source,
+                    &target,
+                    InferencePriority::NakedTypeVariable,
+                );
                 return;
             }
             let source = self.get_union_type(temp_sources);
@@ -260,9 +263,8 @@ impl Checker {
             vec![Arc::clone(source)]
         };
         let target_types = target.types().unwrap_or_default().to_vec();
-        let (sources, targets) = self.infer_from_matching_types(
-            state, &source_types, &target_types, false,
-        );
+        let (sources, targets) =
+            self.infer_from_matching_types(state, &source_types, &target_types, false);
         if targets.is_empty() {
             return;
         }
@@ -289,9 +291,8 @@ impl Checker {
             vec![Arc::clone(source)]
         };
         let target_types = target.types().unwrap_or_default().to_vec();
-        let (sources, targets) = self.infer_matching_types_identical(
-            state, &source_types, &target_types,
-        );
+        let (sources, targets) =
+            self.infer_matching_types_identical(state, &source_types, &target_types);
         if sources.is_empty() || targets.is_empty() {
             return;
         }
@@ -312,16 +313,19 @@ impl Checker {
             return;
         }
         // Find the inference index first to avoid borrow conflicts
-        let inference_idx = state.inferences.iter().position(|info| info.type_parameter.id == target.id);
+        let inference_idx = state
+            .inferences
+            .iter()
+            .position(|info| info.type_parameter.id == target.id);
         let Some(idx) = inference_idx else { return };
-        
+
         // Capture state values before mutable borrow
         let priority = state.priority;
         let contravariant = state.contravariant;
         let bivariant = state.bivariant;
         let depth = state.depth;
         let propagation_type = state.propagation_type.clone();
-        
+
         let mut cleared = false;
         let inference = &mut state.inferences[idx];
         if source.object_flags.contains(ObjectFlags::NonInferrableType) {
@@ -339,12 +343,20 @@ impl Checker {
             }
             if priority == inference.priority {
                 if contravariant && !bivariant {
-                    if !inference.contra_candidates.iter().any(|c| Arc::ptr_eq(c, &candidate)) {
+                    if !inference
+                        .contra_candidates
+                        .iter()
+                        .any(|c| Arc::ptr_eq(c, &candidate))
+                    {
                         inference.contra_candidates.push(candidate);
                         cleared = true;
                     }
                 } else {
-                    if !inference.candidates.iter().any(|c| Arc::ptr_eq(c, &candidate)) {
+                    if !inference
+                        .candidates
+                        .iter()
+                        .any(|c| Arc::ptr_eq(c, &candidate))
+                    {
                         inference.candidates.push(candidate);
                         inference.candidate_depths.push(depth);
                         cleared = true;
@@ -365,7 +377,11 @@ impl Checker {
                 info.inferred_type = None;
             }
         }
-        state.inference_priority = if state.inference_priority.bits() < state.priority.bits() { state.inference_priority } else { state.priority };
+        state.inference_priority = if state.inference_priority.bits() < state.priority.bits() {
+            state.inference_priority
+        } else {
+            state.priority
+        };
     }
 
     fn infer_from_object_types(
@@ -481,7 +497,9 @@ impl Checker {
                         _ => true,
                     };
                     if key_match {
-                        if let (Some(tv), Some(sv)) = (&target_index.value_type, &source_index.value_type) {
+                        if let (Some(tv), Some(sv)) =
+                            (&target_index.value_type, &source_index.value_type)
+                        {
                             self.infer_from_types(state, sv, tv);
                         }
                     }
@@ -573,8 +591,6 @@ impl Checker {
         args: &[Arc<crate::ast::Node>],
         context: &mut InferenceContext,
     ) -> Vec<Arc<Type>> {
-        
-
         // TODO: contextual typing from return type
         // For now, infer types from each argument against the parameter types
         let param_count = signature.parameters.len().min(args.len());
@@ -648,22 +664,34 @@ impl Checker {
                     (Some(cov), None) => true,
                     (None, Some(_)) => false,
                     (Some(cov), Some(contra)) => {
-                        let cov_not_never_or_any = !cov.flags.intersects(TypeFlags::Never | TypeFlags::Any);
-                        let cov_assignable_to_contra = inference.contra_candidates.iter()
+                        let cov_not_never_or_any =
+                            !cov.flags.intersects(TypeFlags::Never | TypeFlags::Any);
+                        let cov_assignable_to_contra = inference
+                            .contra_candidates
+                            .iter()
                             .any(|t| self.is_type_assignable_to(cov, t));
                         let no_conflicting_constraints = context.inferences.iter().all(|other| {
                             let other_tp = &other.type_parameter;
                             let constraint = self.get_constraint_of_type_parameter(other_tp);
                             let is_constrained = constraint.as_ref().map_or(false, |c| {
                                 if let Some(c_cons) = c.as_union_or_intersection() {
-                                    c_cons.types.iter().any(|ct| ct.id == inference.type_parameter.id)
+                                    c_cons
+                                        .types
+                                        .iter()
+                                        .any(|ct| ct.id == inference.type_parameter.id)
                                 } else {
                                     false
                                 }
                             });
-                            !is_constrained || other.candidates.iter().all(|t| self.is_type_assignable_to(t, cov))
+                            !is_constrained
+                                || other
+                                    .candidates
+                                    .iter()
+                                    .all(|t| self.is_type_assignable_to(t, cov))
                         });
-                        cov_not_never_or_any && cov_assignable_to_contra && no_conflicting_constraints
+                        cov_not_never_or_any
+                            && cov_assignable_to_contra
+                            && no_conflicting_constraints
                     }
                     (None, None) => false,
                 };
@@ -698,7 +726,8 @@ impl Checker {
                         let inferred = inferred_type.as_ref().unwrap();
                         let filtered = if inferred.flags.contains(TypeFlags::Union) {
                             if let Some(types) = inferred.types() {
-                                let filtered: Vec<Arc<Type>> = types.iter()
+                                let filtered: Vec<Arc<Type>> = types
+                                    .iter()
                                     .filter(|u| self.is_type_assignable_to(u, &constraint))
                                     .cloned()
                                     .collect();
@@ -749,13 +778,13 @@ impl Checker {
         }
 
         // Ensure we always have a result
-        inferred_type.unwrap_or_else(||
+        inferred_type.unwrap_or_else(|| {
             if context.flags.contains(InferenceFlags::AnyDefault) {
                 self.any_type()
             } else {
                 self.unknown_type()
             }
-        )
+        })
     }
 
     /// Get the contextual type for an expression node.
@@ -765,8 +794,6 @@ impl Checker {
         node: &Arc<crate::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
-        
-
         let parent = match &node.parent {
             Some(p) => Arc::clone(p),
             None => return None,
@@ -816,10 +843,22 @@ impl Checker {
         let declaration = node.parent.as_ref()?;
         // Check that node is indeed the initializer
         let is_initializer = match &declaration.data {
-            NodeData::VariableDeclaration(data) => data.initializer.as_ref().map_or(false, |init| Arc::ptr_eq(init, node)),
-            NodeData::ParameterDeclaration(data) => data.initializer.as_ref().map_or(false, |init| Arc::ptr_eq(init, node)),
-            NodeData::PropertyDeclaration(data) => data.initializer.as_ref().map_or(false, |init| Arc::ptr_eq(init, node)),
-            NodeData::BindingElement(data) => data.initializer.as_ref().map_or(false, |init| Arc::ptr_eq(init, node)),
+            NodeData::VariableDeclaration(data) => data
+                .initializer
+                .as_ref()
+                .map_or(false, |init| Arc::ptr_eq(init, node)),
+            NodeData::ParameterDeclaration(data) => data
+                .initializer
+                .as_ref()
+                .map_or(false, |init| Arc::ptr_eq(init, node)),
+            NodeData::PropertyDeclaration(data) => data
+                .initializer
+                .as_ref()
+                .map_or(false, |init| Arc::ptr_eq(init, node)),
+            NodeData::BindingElement(data) => data
+                .initializer
+                .as_ref()
+                .map_or(false, |init| Arc::ptr_eq(init, node)),
             _ => false,
         };
         if !is_initializer {
@@ -1074,16 +1113,28 @@ impl Checker {
             || self.is_const_type_variable(&inference.type_parameter, 0);
         let widen_literal_types = !primitive_constraint
             && inference.top_level
-            && (inference.is_fixed || !self.is_type_parameter_at_top_level_in_return_type(
-                _signature, &inference.type_parameter));
+            && (inference.is_fixed
+                || !self.is_type_parameter_at_top_level_in_return_type(
+                    _signature,
+                    &inference.type_parameter,
+                ));
         let base_candidates: Vec<Arc<Type>> = if primitive_constraint {
-            candidates.iter().map(|t| self.get_regular_type_of_literal_type(t)).collect()
+            candidates
+                .iter()
+                .map(|t| self.get_regular_type_of_literal_type(t))
+                .collect()
         } else if widen_literal_types {
-            candidates.iter().map(|t| self.get_widened_literal_type(t)).collect()
+            candidates
+                .iter()
+                .map(|t| self.get_widened_literal_type(t))
+                .collect()
         } else {
             candidates
         };
-        let unwidened_type = if inference.priority.contains(InferencePriority::PriorityImpliesCombination) {
+        let unwidened_type = if inference
+            .priority
+            .contains(InferencePriority::PriorityImpliesCombination)
+        {
             self.get_union_type(base_candidates)
         } else {
             self.get_common_supertype(&base_candidates)
@@ -1092,14 +1143,14 @@ impl Checker {
     }
 
     /// Get the contravariant inference from contra-candidates.
-    fn get_contravariant_inference(
-        &mut self,
-        inference: &InferenceInfo,
-    ) -> Option<Arc<Type>> {
+    fn get_contravariant_inference(&mut self, inference: &InferenceInfo) -> Option<Arc<Type>> {
         if inference.contra_candidates.is_empty() {
             return None;
         }
-        if inference.priority.contains(InferencePriority::PriorityImpliesCombination) {
+        if inference
+            .priority
+            .contains(InferencePriority::PriorityImpliesCombination)
+        {
             Some(self.get_intersection_type(inference.contra_candidates.clone()))
         } else {
             Some(self.get_common_subtype(&inference.contra_candidates))
@@ -1112,13 +1163,15 @@ impl Checker {
         candidates: &[Arc<Type>],
     ) -> Vec<Arc<Type>> {
         if candidates.len() > 1 {
-            let object_literals: Vec<Arc<Type>> = candidates.iter()
+            let object_literals: Vec<Arc<Type>> = candidates
+                .iter()
                 .filter(|t| self.is_object_or_array_literal_type(t))
                 .cloned()
                 .collect();
             if !object_literals.is_empty() {
                 let literals_type = self.create_union_type(object_literals);
-                let non_literal_types: Vec<Arc<Type>> = candidates.iter()
+                let non_literal_types: Vec<Arc<Type>> = candidates
+                    .iter()
                     .filter(|t| !self.is_object_or_array_literal_type(t))
                     .cloned()
                     .collect();
@@ -1140,10 +1193,18 @@ impl Checker {
                 Some(constraint)
             };
             if let Some(c) = c {
-                return self.maybe_type_of_kind(&c,
-                    TypeFlags::String | TypeFlags::Number | TypeFlags::BigInt |
-                    TypeFlags::Boolean | TypeFlags::ESSymbol | TypeFlags::Enum |
-                    TypeFlags::Index | TypeFlags::TemplateLiteral | TypeFlags::StringMapping);
+                return self.maybe_type_of_kind(
+                    &c,
+                    TypeFlags::String
+                        | TypeFlags::Number
+                        | TypeFlags::BigInt
+                        | TypeFlags::Boolean
+                        | TypeFlags::ESSymbol
+                        | TypeFlags::Enum
+                        | TypeFlags::Index
+                        | TypeFlags::TemplateLiteral
+                        | TypeFlags::StringMapping,
+                );
             }
         }
         false
@@ -1156,7 +1217,9 @@ impl Checker {
         }
         if t.flags.contains(TypeFlags::Union | TypeFlags::Intersection) {
             if let Some(types) = t.types() {
-                return types.iter().any(|tt| self.is_type_parameter_at_top_level(tt, tp, depth));
+                return types
+                    .iter()
+                    .any(|tt| self.is_type_parameter_at_top_level(tt, tp, depth));
             }
         }
         false
@@ -1207,9 +1270,9 @@ impl Checker {
     fn get_single_common_supertype(&mut self, types: &[Arc<Type>]) -> Arc<Type> {
         let candidate = self.find_leftmost_type(types);
         // Check if all types are subtypes of the candidate
-        let all_are_strict_subtypes = types.iter().all(|t| {
-            Arc::ptr_eq(t, &candidate) || self.is_type_strict_subtype_of(t, &candidate)
-        });
+        let all_are_strict_subtypes = types
+            .iter()
+            .all(|t| Arc::ptr_eq(t, &candidate) || self.is_type_strict_subtype_of(t, &candidate));
         if all_are_strict_subtypes {
             return candidate;
         }
@@ -1313,7 +1376,8 @@ impl Checker {
 
     /// Create a union type (simplified wrapper).
     fn create_union_type(&self, types: Vec<Arc<Type>>) -> Arc<Type> {
-        let filtered: Vec<Arc<Type>> = types.into_iter()
+        let filtered: Vec<Arc<Type>> = types
+            .into_iter()
             .filter(|t| !t.flags.contains(TypeFlags::Never))
             .collect();
         if filtered.is_empty() {
@@ -1398,13 +1462,11 @@ impl Checker {
     /// Check if a type is an object or array literal type.
     fn is_object_or_array_literal_type(&self, t: &Type) -> bool {
         t.flags.contains(TypeFlags::Object)
-            && t.object_flags.intersects(
-                ObjectFlags::ObjectLiteral | ObjectFlags::ArrayLiteral
-            )
+            && t.object_flags
+                .intersects(ObjectFlags::ObjectLiteral | ObjectFlags::ArrayLiteral)
     }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
 // Helper functions
 // ────────────────────────────────────────────────────────────────────────────
-

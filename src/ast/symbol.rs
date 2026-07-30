@@ -106,21 +106,35 @@ impl SymbolFlags {
 
     // Excludes flags — which flags cannot merge with a symbol of a given kind.
     // Ported from `internal/ast/symbolflags.go`.
-    pub const FunctionScopedVariableExcludes: Self = Self::VALUE.difference(Self::FunctionScopedVariable);
+    pub const FunctionScopedVariableExcludes: Self =
+        Self::VALUE.difference(Self::FunctionScopedVariable);
     pub const BlockScopedVariableExcludes: Self = Self::VALUE;
     pub const ParameterExcludes: Self = Self::VALUE;
     pub const PropertyExcludes: Self = Self::VALUE.difference(Self::Property.union(Self::ACCESSOR));
     pub const EnumMemberExcludes: Self = Self::VALUE.union(Self::TYPE);
-    pub const FunctionExcludes: Self = Self::VALUE.difference(Self::Function.union(Self::ValueModule).union(Self::Class));
-    pub const ClassExcludes: Self = (Self::VALUE.union(Self::TYPE)).difference(Self::ValueModule.union(Self::Interface).union(Self::Function));
+    pub const FunctionExcludes: Self =
+        Self::VALUE.difference(Self::Function.union(Self::ValueModule).union(Self::Class));
+    pub const ClassExcludes: Self = (Self::VALUE.union(Self::TYPE)).difference(
+        Self::ValueModule
+            .union(Self::Interface)
+            .union(Self::Function),
+    );
     pub const InterfaceExcludes: Self = Self::TYPE.difference(Self::Interface.union(Self::Class));
-    pub const RegularEnumExcludes: Self = (Self::VALUE.union(Self::TYPE)).difference(Self::RegularEnum.union(Self::ValueModule));
+    pub const RegularEnumExcludes: Self =
+        (Self::VALUE.union(Self::TYPE)).difference(Self::RegularEnum.union(Self::ValueModule));
     pub const ConstEnumExcludes: Self = (Self::VALUE.union(Self::TYPE)).difference(Self::ConstEnum);
-    pub const ValueModuleExcludes: Self = Self::VALUE.difference(Self::Function.union(Self::Class).union(Self::RegularEnum).union(Self::ValueModule));
+    pub const ValueModuleExcludes: Self = Self::VALUE.difference(
+        Self::Function
+            .union(Self::Class)
+            .union(Self::RegularEnum)
+            .union(Self::ValueModule),
+    );
     pub const NamespaceModuleExcludes: Self = Self::None;
     pub const MethodExcludes: Self = Self::VALUE.difference(Self::Method);
-    pub const GetAccessorExcludes: Self = Self::VALUE.difference(Self::SetAccessor.union(Self::Property));
-    pub const SetAccessorExcludes: Self = Self::VALUE.difference(Self::GetAccessor.union(Self::Property));
+    pub const GetAccessorExcludes: Self =
+        Self::VALUE.difference(Self::SetAccessor.union(Self::Property));
+    pub const SetAccessorExcludes: Self =
+        Self::VALUE.difference(Self::GetAccessor.union(Self::Property));
     pub const AccessorExcludes: Self = Self::VALUE.difference(Self::Property);
     pub const TypeParameterExcludes: Self = Self::TYPE.difference(Self::TypeParameter);
     pub const TypeAliasExcludes: Self = Self::TYPE;

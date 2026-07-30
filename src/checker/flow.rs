@@ -160,9 +160,28 @@ impl Checker {
             return self.narrow_by_switch_clause(&antecedent_type, flow, symbol);
         }
 
-        // ARRAY_MUTATION → recurse into the antecedent (array mutations
-        // invalidate element-type narrowing, but we don't track that yet).
+        // ARRAY_MUTATION → evolve the element type of an evolving array.
+        // Mirrors Go's `getTypeAtFlowArrayMutation` (flow.go ~L1383). Only
+        // applies when the declared type is `autoType`/`autoArrayType` (an
+        // evolving array). If the mutated array (`arr` in `arr.push(1)`)
+        // is the same reference as our symbol, the element type is evolved
+        // by unioning each argument's type. The antecedent's type is
+        // fetched recursively and then evolved.
         if flow.flags.contains(FlowFlags::ARRAY_MUTATION) {
+            if let Some(node) = &flow.node {
+                // Check if the declared type is an evolving array or the
+                // auto-array marker.
+                let is_evolving = type_.object_flags.contains(ObjectFlags::EvolvingArray)
+                    || self.is_auto_array_type(type_);
+                if is_evolving {
+                    if let Some(evolved) =
+                        self.evolve_array_at_mutation(node, type_, symbol, flow, depth)
+                    {
+                        return evolved;
+                    }
+                }
+            }
+            // Not an evolving array or not our symbol; recurse.
             if let Some(antecedent) = &flow.antecedent {
                 return self.narrow_type(type_, antecedent, symbol, depth + 1);
             }
@@ -232,20 +251,10 @@ impl Checker {
             if let NodeData::BinaryExpression(bin) = &expr.data {
                 if bin.operator_token.kind == SyntaxKind::AmpersandAmpersandToken {
                     if kind == NarrowKind::TrueBranch {
-                        let narrowed = self.narrow_by_expression(
-                            type_,
-                            &bin.left,
-                            symbol,
-                            kind,
-                            depth,
-                        );
-                        return self.narrow_by_expression(
-                            &narrowed,
-                            &bin.right,
-                            symbol,
-                            kind,
-                            depth,
-                        );
+                        let narrowed =
+                            self.narrow_by_expression(type_, &bin.left, symbol, kind, depth);
+                        return self
+                            .narrow_by_expression(&narrowed, &bin.right, symbol, kind, depth);
                     }
                     // False branch of `a && b`: either `a` is false OR
                     // (`a` is true AND `b` is false). We can't narrow
@@ -261,20 +270,10 @@ impl Checker {
                 if bin.operator_token.kind == SyntaxKind::BarBarToken {
                     if kind == NarrowKind::FalseBranch {
                         // False branch of `a || b`: both `a` and `b` are false.
-                        let narrowed = self.narrow_by_expression(
-                            type_,
-                            &bin.left,
-                            symbol,
-                            kind,
-                            depth,
-                        );
-                        return self.narrow_by_expression(
-                            &narrowed,
-                            &bin.right,
-                            symbol,
-                            kind,
-                            depth,
-                        );
+                        let narrowed =
+                            self.narrow_by_expression(type_, &bin.left, symbol, kind, depth);
+                        return self
+                            .narrow_by_expression(&narrowed, &bin.right, symbol, kind, depth);
                     }
                     // True branch of `a || b`: at least one is true. Check left.
                     return self.narrow_by_expression(
@@ -369,14 +368,14 @@ impl Checker {
         // Equality/inequality: `===`, `!==`, `==`, `!=`
         let is_strict = op == SyntaxKind::EqualsEqualsEqualsToken
             || op == SyntaxKind::ExclamationEqualsEqualsToken;
-        let is_loose = op == SyntaxKind::EqualsEqualsToken
-            || op == SyntaxKind::ExclamationEqualsToken;
+        let is_loose =
+            op == SyntaxKind::EqualsEqualsToken || op == SyntaxKind::ExclamationEqualsToken;
         if !is_strict && !is_loose {
             return Arc::clone(type_);
         }
 
-        let is_equality = op == SyntaxKind::EqualsEqualsEqualsToken
-            || op == SyntaxKind::EqualsEqualsToken;
+        let is_equality =
+            op == SyntaxKind::EqualsEqualsEqualsToken || op == SyntaxKind::EqualsEqualsToken;
         // For `x === value`:
         //   true branch  → narrow to `value` type
         //   false branch → remove `value` type from union
@@ -403,9 +402,8 @@ impl Checker {
 
         // Discriminated union narrowing: `obj.kind === "value"` narrows
         // `obj` to the union constituent whose `kind` property matches.
-        if let Some(narrowed) = self.try_narrow_by_discriminant_property(
-            type_, expr, symbol, kind,
-        ) {
+        if let Some(narrowed) = self.try_narrow_by_discriminant_property(type_, expr, symbol, kind)
+        {
             return narrowed;
         }
 
@@ -414,14 +412,10 @@ impl Checker {
         // Mirrors Go's `narrowTypeByOptionalChainContainment` (flow.go
         // ~L1019).
         if self.optional_chain_contains_reference(&bin.left, symbol) {
-            return self.narrow_by_optional_chain_containment(
-                type_, op, &bin.right, kind,
-            );
+            return self.narrow_by_optional_chain_containment(type_, op, &bin.right, kind);
         }
         if self.optional_chain_contains_reference(&bin.right, symbol) {
-            return self.narrow_by_optional_chain_containment(
-                type_, op, &bin.left, kind,
-            );
+            return self.narrow_by_optional_chain_containment(type_, op, &bin.left, kind);
         }
 
         // Simple `x === value` or `value === x` patterns.
@@ -546,11 +540,7 @@ impl Checker {
     /// and comparable to `value_type`.
     ///
     /// Mirrors Go's `filterType` call in `narrowTypeByEquality` (flow.go ~L595).
-    fn remove_comparable_units(
-        &mut self,
-        type_: &Arc<Type>,
-        value_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    fn remove_comparable_units(&mut self, type_: &Arc<Type>, value_type: &Arc<Type>) -> Arc<Type> {
         let constituents = self.constituent_types(type_);
         let value_constituents = self.constituent_types(value_type);
         let remaining: Vec<Arc<Type>> = constituents
@@ -581,8 +571,9 @@ impl Checker {
         value_type: &Arc<Type>,
     ) -> Arc<Type> {
         // Only replace if the type has primitives and the value has literals.
-        let has_primitives =
-            type_.flags.intersects(TypeFlags::String | TypeFlags::Number | TypeFlags::BigInt);
+        let has_primitives = type_
+            .flags
+            .intersects(TypeFlags::String | TypeFlags::Number | TypeFlags::BigInt);
         let has_literals = value_type
             .flags
             .intersects(TYPE_FLAGS_LITERAL | TypeFlags::TemplateLiteral | TypeFlags::StringMapping);
@@ -595,7 +586,9 @@ impl Checker {
             .iter()
             .filter(|t| {
                 t.flags.intersects(
-                    TypeFlags::StringLiteral | TypeFlags::TemplateLiteral | TypeFlags::StringMapping,
+                    TypeFlags::StringLiteral
+                        | TypeFlags::TemplateLiteral
+                        | TypeFlags::StringMapping,
                 )
             })
             .cloned()
@@ -746,14 +739,13 @@ impl Checker {
             return None;
         }
         // Find which side is the property access on `symbol`.
-        let (access_node, value_node) =
-            if self.is_property_access_on_symbol(&bin.left, symbol) {
-                (&bin.left, &bin.right)
-            } else if self.is_property_access_on_symbol(&bin.right, symbol) {
-                (&bin.right, &bin.left)
-            } else {
-                return None;
-            };
+        let (access_node, value_node) = if self.is_property_access_on_symbol(&bin.left, symbol) {
+            (&bin.left, &bin.right)
+        } else if self.is_property_access_on_symbol(&bin.right, symbol) {
+            (&bin.right, &bin.left)
+        } else {
+            return None;
+        };
         let prop_name = Self::get_accessed_property_name_from_node(access_node)?;
         // For non-union types, narrowing by discriminant is a no-op.
         if !type_.is_union() {
@@ -774,11 +766,7 @@ impl Checker {
                 let matches = prop_type
                     .map(|pt| self.types_overlap(&pt, &value_type))
                     .unwrap_or(false);
-                if keep_matching {
-                    matches
-                } else {
-                    !matches
-                }
+                if keep_matching { matches } else { !matches }
             })
             .collect();
         Some(self.rebuild_union_or_never(type_, filtered))
@@ -819,7 +807,10 @@ impl Checker {
         // `switch (obj.kind) { ... }`
         if self.is_property_access_on_symbol(discriminant, symbol) {
             return self.narrow_by_switch_on_discriminant_property(
-                type_, clause, switch_stmt, discriminant,
+                type_,
+                clause,
+                switch_stmt,
+                discriminant,
             );
         }
 
@@ -920,13 +911,7 @@ impl Checker {
 
         // CaseClause: narrow with the condition being true.
         if let NodeData::CaseOrDefaultClause(cd) = &clause.data {
-            t = self.narrow_by_expression(
-                &t,
-                &cd.expression,
-                symbol,
-                NarrowKind::TrueBranch,
-                0,
-            );
+            t = self.narrow_by_expression(&t, &cd.expression, symbol, NarrowKind::TrueBranch, 0);
         }
         t
     }
@@ -1121,11 +1106,7 @@ impl Checker {
             let constituents = self.constituent_types(type_);
             let remaining: Vec<Arc<Type>> = constituents
                 .into_iter()
-                .filter(|t| {
-                    !case_types
-                        .iter()
-                        .any(|ct| self.types_overlap(t, ct))
-                })
+                .filter(|t| !case_types.iter().any(|ct| self.types_overlap(t, ct)))
                 .collect();
             return self.rebuild_union_or_never(type_, remaining);
         }
@@ -1234,11 +1215,7 @@ impl Checker {
     ///
     /// Mirrors Go's `optionalChainContainsReference` (flow.go ~L1830).
     /// Walks down the optional chain: `x?.a?.b` → checks if `x` is `symbol`.
-    fn optional_chain_contains_reference(
-        &self,
-        source: &Arc<Node>,
-        symbol: &Arc<Symbol>,
-    ) -> bool {
+    fn optional_chain_contains_reference(&self, source: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
         let mut current = Arc::clone(source);
         loop {
             let (inner, is_optional) = match &current.data {
@@ -1248,9 +1225,7 @@ impl Checker {
                 NodeData::ElementAccessExpression(ea) => {
                     (&ea.expression, ea.question_dot_token.is_some())
                 }
-                NodeData::CallExpression(ce) => {
-                    (&ce.expression, ce.question_dot_token.is_some())
-                }
+                NodeData::CallExpression(ce) => (&ce.expression, ce.question_dot_token.is_some()),
                 NodeData::NonNullExpression(ne) => (&ne.expression, false),
                 NodeData::ParenthesizedExpression(pe) => (&pe.expression, false),
                 _ => return false,
@@ -1283,10 +1258,10 @@ impl Checker {
         value_node: &Arc<Node>,
         kind: NarrowKind,
     ) -> Arc<Type> {
-        let is_equality = op == SyntaxKind::EqualsEqualsEqualsToken
-            || op == SyntaxKind::EqualsEqualsToken;
-        let is_loose = op == SyntaxKind::EqualsEqualsToken
-            || op == SyntaxKind::ExclamationEqualsToken;
+        let is_equality =
+            op == SyntaxKind::EqualsEqualsEqualsToken || op == SyntaxKind::EqualsEqualsToken;
+        let is_loose =
+            op == SyntaxKind::EqualsEqualsToken || op == SyntaxKind::ExclamationEqualsToken;
         // For loose equality (==/!=), nullable = null | undefined.
         // For strict equality (===/!==), nullable = undefined only.
         let nullable_flags = if is_loose {
@@ -1673,9 +1648,7 @@ impl Checker {
         let constituents = self.constituent_types(type_);
         let remaining: Vec<Arc<Type>> = constituents
             .into_iter()
-            .filter(|t| {
-                !t.flags.contains(TypeFlags::Object) && !t.flags.contains(TypeFlags::Null)
-            })
+            .filter(|t| !t.flags.contains(TypeFlags::Object) && !t.flags.contains(TypeFlags::Null))
             .collect();
         if remaining.is_empty() {
             return self.never_type();
@@ -1845,7 +1818,8 @@ impl Checker {
     /// Check if two types overlap (share at least one constituent).
     fn types_overlap(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool {
         // If either is a union/intersection, compare constituents pairwise.
-        if a.flags.contains(TypeFlags::Union) || b.flags.contains(TypeFlags::Union)
+        if a.flags.contains(TypeFlags::Union)
+            || b.flags.contains(TypeFlags::Union)
             || a.flags.contains(TypeFlags::Intersection)
             || b.flags.contains(TypeFlags::Intersection)
         {
@@ -1887,9 +1861,7 @@ impl Checker {
         if a_is_literal && b_is_literal {
             // Both literals: compare values directly.
             return match (&a.data, &b.data) {
-                (TypeData::Literal(a_lit), TypeData::Literal(b_lit)) => {
-                    a_lit.value == b_lit.value
-                }
+                (TypeData::Literal(a_lit), TypeData::Literal(b_lit)) => a_lit.value == b_lit.value,
                 _ => false,
             };
         }
@@ -1931,6 +1903,87 @@ impl Checker {
         };
         let eq = node_name == &symbol.name;
         eq
+    }
+
+    /// Evolve an evolving array type at an ARRAY_MUTATION flow node.
+    ///
+    /// Mirrors Go's `getTypeAtFlowArrayMutation` (flow.go ~L1383). If the
+    /// mutated array (`arr` in `arr.push(1)`) is the same reference as
+    /// `symbol`, recurse into the antecedent to get the pre-mutation type,
+    /// then evolve the element type by adding each argument's (widened)
+    /// type. Returns `None` if the mutation doesn't target our symbol.
+    fn evolve_array_at_mutation(
+        &mut self,
+        node: &Arc<Node>,
+        type_: &Arc<Type>,
+        symbol: &Arc<Symbol>,
+        flow: &Arc<FlowNode>,
+        depth: u32,
+    ) -> Option<Arc<Type>> {
+        // Extract the mutated array reference: `arr.push(1)` → `arr`.
+        let receiver = self.get_array_mutation_receiver(node)?;
+        if !self.is_symbol_identifier(&receiver, symbol) {
+            return None;
+        }
+        // Recurse into the antecedent to get the pre-mutation type.
+        let antecedent = flow.antecedent.clone()?;
+        let pre_type = self.narrow_type(type_, &antecedent, symbol, depth + 1);
+        // If the pre-mutation type is the auto-array marker, convert it
+        // to an evolving array with element `never`.
+        let evolving = if pre_type.object_flags.contains(ObjectFlags::EvolvingArray) {
+            pre_type
+        } else if self.is_auto_array_type(&pre_type) {
+            self.get_evolving_array_type(self.never_type())
+        } else {
+            // Not an evolving array; nothing to evolve.
+            return Some(pre_type);
+        };
+        // Collect argument nodes first (to release the borrow on self),
+        // then resolve each type.
+        let args = self.get_call_arguments(node);
+        let mut arg_types: Vec<Arc<Type>> = Vec::with_capacity(args.len());
+        for arg in &args {
+            let t = self.get_type_of_node(arg);
+            arg_types.push(self.get_widened_type_of_literal(&t));
+        }
+        // Evolve: add each argument's type to the element type.
+        let mut evolved = evolving;
+        for arg_type in arg_types {
+            evolved = self.add_evolving_array_element_type(&evolved, arg_type);
+        }
+        Some(evolved)
+    }
+
+    /// Extract the receiver of an array-mutation call (`arr.push(x)` → `arr`).
+    /// The flow node is either a CallExpression (`arr.push(x)`) or a
+    /// BinaryExpression (`arr[i] = x`). Mirrors Go's
+    /// `getTypeAtFlowArrayMutation` node extraction.
+    fn get_array_mutation_receiver(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+        match &node.data {
+            NodeData::CallExpression(call) => {
+                // `arr.push(x)` → call.expression is PropertyAccessExpression.
+                if let NodeData::PropertyAccessExpression(prop) = &call.expression.data {
+                    return Some(Arc::clone(&prop.expression));
+                }
+                None
+            }
+            NodeData::BinaryExpression(bin) => {
+                // `arr[i] = x` → bin.left is ElementAccessExpression.
+                if let NodeData::ElementAccessExpression(ea) = &bin.left.data {
+                    return Some(Arc::clone(&ea.expression));
+                }
+                None
+            }
+            _ => None,
+        }
+    }
+
+    /// Get the arguments of a call expression node.
+    fn get_call_arguments(&self, node: &Arc<Node>) -> Vec<Arc<Node>> {
+        match &node.data {
+            NodeData::CallExpression(call) => call.arguments.iter().cloned().collect(),
+            _ => Vec::new(),
+        }
     }
 
     /// If `expr` is an assignment to `symbol`, return the type of the RHS.
@@ -1984,7 +2037,11 @@ impl Checker {
     }
 
     /// Get the type of a named property on a type, if the property exists.
-    pub(super) fn get_property_type_of_type(&mut self, t: &Arc<Type>, name: &str) -> Option<Arc<Type>> {
+    pub(super) fn get_property_type_of_type(
+        &mut self,
+        t: &Arc<Type>,
+        name: &str,
+    ) -> Option<Arc<Type>> {
         let sym = self.get_property_of_type(t, name)?;
         Some(self.get_type_of_symbol(&sym))
     }
@@ -2020,10 +2077,7 @@ impl Checker {
     ///   3. `None` to signal "no instance type available".
     ///
     /// Mirrors Go's `getInstanceType` (flow.go ~L953).
-    fn get_instance_type_of_constructor(
-        &mut self,
-        ctor_type: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    fn get_instance_type_of_constructor(&mut self, ctor_type: &Arc<Type>) -> Option<Arc<Type>> {
         // 1. Try the `prototype` property.
         if let Some(prop_sym) = self.get_property_of_type(ctor_type, "prototype") {
             let prop_type = self.get_type_of_symbol(&prop_sym);
@@ -2032,8 +2086,7 @@ impl Checker {
             }
         }
         // 2. Fall back to construct signatures' return types.
-        let construct_sigs =
-            self.get_signatures_of_type(ctor_type, SignatureKind::Construct);
+        let construct_sigs = self.get_signatures_of_type(ctor_type, SignatureKind::Construct);
         if !construct_sigs.is_empty() {
             let mut return_types: Vec<Arc<Type>> = Vec::new();
             for sig in &construct_sigs {
@@ -2061,9 +2114,7 @@ impl Checker {
             NodeData::StringLiteral(s) => Some(s.text.clone()),
             NodeData::NumericLiteral(n) => Some(n.text.clone()),
             NodeData::Identifier(id) => Some(id.text.clone()),
-            NodeData::PropertyAccessExpression(pa) => {
-                Some(pa.name.text().to_string())
-            }
+            NodeData::PropertyAccessExpression(pa) => Some(pa.name.text().to_string()),
             NodeData::ElementAccessExpression(ea) => {
                 Self::get_accessed_property_name_from_node(&ea.argument_expression)
             }
@@ -2073,23 +2124,17 @@ impl Checker {
 
     /// Whether `node` is a property access on `symbol`, e.g.
     /// `symbol.kind` or `symbol["kind"]`.
-    fn is_property_access_on_symbol(
-        &self,
-        node: &Arc<Node>,
-        symbol: &Arc<Symbol>,
-    ) -> bool {
+    fn is_property_access_on_symbol(&self, node: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
         match &node.data {
             NodeData::PropertyAccessExpression(pa) => {
                 // Optional chains (`x?.a`) must NOT be treated as discriminant
                 // property accesses: the value may be `undefined` regardless of
                 // the property type. They're handled by the optional-chain
                 // containment narrowing instead.
-                pa.question_dot_token.is_none()
-                    && self.is_symbol_identifier(&pa.expression, symbol)
+                pa.question_dot_token.is_none() && self.is_symbol_identifier(&pa.expression, symbol)
             }
             NodeData::ElementAccessExpression(ea) => {
-                ea.question_dot_token.is_none()
-                    && self.is_symbol_identifier(&ea.expression, symbol)
+                ea.question_dot_token.is_none() && self.is_symbol_identifier(&ea.expression, symbol)
             }
             _ => false,
         }
@@ -2098,11 +2143,7 @@ impl Checker {
     /// Filter `type_` (a union) to keep only constituents assignable to
     /// `candidate`. For non-union types, return `candidate` if the
     /// current type is assignable to it, otherwise the original type.
-    fn narrow_to_subtype(
-        &mut self,
-        type_: &Arc<Type>,
-        candidate: &Arc<Type>,
-    ) -> Arc<Type> {
+    fn narrow_to_subtype(&mut self, type_: &Arc<Type>, candidate: &Arc<Type>) -> Arc<Type> {
         // `any` → candidate (matches Go's getNarrowedTypeWorker).
         if type_.flags.contains(TypeFlags::Any) {
             return Arc::clone(candidate);
@@ -2127,11 +2168,7 @@ impl Checker {
     /// Remove from a union all constituents assignable to `candidate`.
     /// For non-union types, return `never` if the type is assignable to
     /// `candidate`, otherwise the original type.
-    fn remove_subtype_from_union(
-        &mut self,
-        type_: &Arc<Type>,
-        candidate: &Arc<Type>,
-    ) -> Arc<Type> {
+    fn remove_subtype_from_union(&mut self, type_: &Arc<Type>, candidate: &Arc<Type>) -> Arc<Type> {
         if type_.is_union() {
             let constituents = self.constituent_types(type_);
             let remaining: Vec<Arc<Type>> = constituents
@@ -2165,8 +2202,7 @@ impl Checker {
         // the original to preserve caching.
         if let TypeData::Union(u) = &original.data {
             if u.union_or_intersection.types.len() == constituents.len()
-                && u
-                    .union_or_intersection
+                && u.union_or_intersection
                     .types
                     .iter()
                     .zip(constituents.iter())

@@ -6,7 +6,7 @@
 use crate::ast::*;
 use crate::core::text::TextRange;
 use crate::diagnostics::{self, Message};
-use crate::scanner::{token_to_string, Scanner};
+use crate::scanner::{Scanner, token_to_string};
 use std::sync::Arc;
 
 /// Parsing context, tracking what kind of list we're currently parsing.
@@ -148,9 +148,7 @@ impl Parser {
         let scanner_errors = parser.scanner.take_errors();
         for err in &scanner_errors {
             let message = match err.kind {
-                crate::scanner::DiagnosticKind::InvalidCharacter => {
-                    diagnostics::INVALID_CHARACTER
-                }
+                crate::scanner::DiagnosticKind::InvalidCharacter => diagnostics::INVALID_CHARACTER,
                 crate::scanner::DiagnosticKind::UnterminatedStringLiteral => {
                     diagnostics::UNTERMINATED_STRING_LITERAL
                 }
@@ -515,7 +513,9 @@ impl Parser {
                     self.parse_error_at_current_token(diagnostics::IDENTIFIER_EXPECTED, &[]);
                 }
             }
-            ParsingContext::JsxAttributes | ParsingContext::JsxChildren | ParsingContext::JSDocComment => {
+            ParsingContext::JsxAttributes
+            | ParsingContext::JsxChildren
+            | ParsingContext::JSDocComment => {
                 self.parse_error_at_current_token(diagnostics::IDENTIFIER_EXPECTED, &[]);
             }
             ParsingContext::ImportAttributes => {
@@ -1717,9 +1717,7 @@ impl Parser {
         } else {
             None
         };
-        let end = type_arguments
-            .as_ref()
-            .map_or(expr_name.end(), |a| a.end());
+        let end = type_arguments.as_ref().map_or(expr_name.end(), |a| a.end());
         Arc::new(Node::with_loc(
             SyntaxKind::TypeQuery,
             NodeData::TypeQueryNode(TypeQueryNodeData {
@@ -1746,12 +1744,10 @@ impl Parser {
             None
         };
         let type_arguments = self.parse_optional_type_arguments();
-        let end = type_arguments
-            .as_ref()
-            .map_or_else(
-                || qualifier.as_ref().map_or(argument.end(), |q| q.end()),
-                |a: &Arc<NodeList>| a.end(),
-            );
+        let end = type_arguments.as_ref().map_or_else(
+            || qualifier.as_ref().map_or(argument.end(), |q| q.end()),
+            |a: &Arc<NodeList>| a.end(),
+        );
         Arc::new(Node::with_loc(
             SyntaxKind::ImportType,
             NodeData::ImportTypeNode(ImportTypeNodeData {
@@ -1811,8 +1807,7 @@ impl Parser {
         // After the type, expect `}` then reScan template token
         let literal = if self.token == SyntaxKind::CloseBraceToken {
             self.next_template_token();
-            self.last_template_literal_was_middle =
-                self.token == SyntaxKind::TemplateMiddle;
+            self.last_template_literal_was_middle = self.token == SyntaxKind::TemplateMiddle;
             let lit = self.create_token_node();
             self.next_token();
             lit
@@ -1824,10 +1819,7 @@ impl Parser {
         let end = literal.end();
         Arc::new(Node::with_loc(
             SyntaxKind::TemplateLiteralTypeSpan,
-            NodeData::TemplateLiteralTypeSpan(TemplateLiteralTypeSpanData {
-                type_node,
-                literal,
-            }),
+            NodeData::TemplateLiteralTypeSpan(TemplateLiteralTypeSpanData { type_node, literal }),
             TextRange::new(pos, end),
         ))
     }
@@ -1880,9 +1872,7 @@ impl Parser {
 
         // readonly modifier: `readonly`, `+readonly`, `-readonly`
         let readonly_token = match self.token {
-            SyntaxKind::ReadonlyKeyword
-            | SyntaxKind::PlusToken
-            | SyntaxKind::MinusToken => {
+            SyntaxKind::ReadonlyKeyword | SyntaxKind::PlusToken | SyntaxKind::MinusToken => {
                 let token = self.create_token_node();
                 self.next_token();
                 if token.kind != SyntaxKind::ReadonlyKeyword {
@@ -1904,9 +1894,7 @@ impl Parser {
 
         // optional modifier: `?`, `+?`, `-?`
         let question_token = match self.token {
-            SyntaxKind::QuestionToken
-            | SyntaxKind::PlusToken
-            | SyntaxKind::MinusToken => {
+            SyntaxKind::QuestionToken | SyntaxKind::PlusToken | SyntaxKind::MinusToken => {
                 let token = self.create_token_node();
                 self.next_token();
                 if token.kind != SyntaxKind::QuestionToken {
@@ -2884,22 +2872,21 @@ impl Parser {
     fn parse_yield_expression(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.next_token(); // consume 'yield'
-        let (asterisk_token, expression) =
-            if !self.has_preceding_line_break()
-                && (self.token == SyntaxKind::AsteriskToken || self.is_start_of_expression())
-            {
-                let asterisk = if self.token == SyntaxKind::AsteriskToken {
-                    let node = self.create_token_node();
-                    self.next_token();
-                    Some(node)
-                } else {
-                    None
-                };
-                let expr = self.parse_assignment_expression();
-                (asterisk, Some(expr))
+        let (asterisk_token, expression) = if !self.has_preceding_line_break()
+            && (self.token == SyntaxKind::AsteriskToken || self.is_start_of_expression())
+        {
+            let asterisk = if self.token == SyntaxKind::AsteriskToken {
+                let node = self.create_token_node();
+                self.next_token();
+                Some(node)
             } else {
-                (None, None)
+                None
             };
+            let expr = self.parse_assignment_expression();
+            (asterisk, Some(expr))
+        } else {
+            (None, None)
+        };
         let end = expression.as_ref().map_or(self.token_pos(), |e| e.end());
         Arc::new(Node::with_loc(
             SyntaxKind::YieldExpression,
@@ -3176,7 +3163,10 @@ impl Parser {
         let end = expression.end();
         Arc::new(Node::with_loc(
             SyntaxKind::TypeAssertionExpression,
-            NodeData::TypeAssertion(TypeAssertionData { type_node, expression }),
+            NodeData::TypeAssertion(TypeAssertionData {
+                type_node,
+                expression,
+            }),
             TextRange::new(pos, end),
         ))
     }
@@ -3239,16 +3229,15 @@ impl Parser {
         // its callee becomes the `new` target, and its arguments become the
         // `new` arguments. This matches Go tsc's behavior where the
         // argument list belongs to the `new`, not to a call on the target.
-        let (expression, extracted_args) =
-            if expression.kind == SyntaxKind::CallExpression {
-                if let NodeData::CallExpression(data) = &expression.data {
-                    (Arc::clone(&data.expression), Some(data.arguments.clone()))
-                } else {
-                    (expression, None)
-                }
+        let (expression, extracted_args) = if expression.kind == SyntaxKind::CallExpression {
+            if let NodeData::CallExpression(data) = &expression.data {
+                (Arc::clone(&data.expression), Some(data.arguments.clone()))
             } else {
                 (expression, None)
-            };
+            }
+        } else {
+            (expression, None)
+        };
         let type_arguments = self.parse_optional_type_arguments();
         let arguments = extracted_args.or_else(|| {
             if self.token == SyntaxKind::OpenParenToken {
@@ -3900,13 +3889,12 @@ impl Parser {
     fn parse_jsx_expression(&mut self, in_expression_context: bool) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
-        let dot_dot_dot_token = if !in_expression_context
-            && self.token == SyntaxKind::DotDotDotToken
-        {
-            self.parse_optional_token(SyntaxKind::DotDotDotToken)
-        } else {
-            None
-        };
+        let dot_dot_dot_token =
+            if !in_expression_context && self.token == SyntaxKind::DotDotDotToken {
+                self.parse_optional_token(SyntaxKind::DotDotDotToken)
+            } else {
+                None
+            };
         let expression = if self.token == SyntaxKind::CloseBraceToken {
             None
         } else {
@@ -4369,7 +4357,8 @@ impl Parser {
         self.next_token(); // consume 'enum'
         let name = self.parse_identifier();
         self.expect(SyntaxKind::OpenBraceToken);
-        let members = self.parse_delimited_list(ParsingContext::EnumMembers, Self::parse_enum_member);
+        let members =
+            self.parse_delimited_list(ParsingContext::EnumMembers, Self::parse_enum_member);
         self.expect(SyntaxKind::CloseBraceToken);
         let end = self.token_pos();
         Arc::new(Node::with_loc(
@@ -4492,7 +4481,10 @@ impl Parser {
         self.next_token();
         Arc::new(Node::with_loc(
             SyntaxKind::StringLiteral,
-            NodeData::StringLiteral(StringLiteralData { text, token_flags: 0 }),
+            NodeData::StringLiteral(StringLiteralData {
+                text,
+                token_flags: 0,
+            }),
             TextRange::new(pos, end),
         ))
     }
@@ -5038,9 +5030,7 @@ impl Parser {
             None
         };
         // Go: no parseSemicolon — comma separator handled by parseDelimitedList.
-        let end = initializer
-            .as_ref()
-            .map_or(name.end(), |i| i.end());
+        let end = initializer.as_ref().map_or(name.end(), |i| i.end());
         Arc::new(Node::with_loc(
             SyntaxKind::EnumMember,
             NodeData::EnumMember(EnumMemberData { name, initializer }),
@@ -5579,8 +5569,8 @@ impl Parser {
 
         if self.token == SyntaxKind::OpenParenToken {
             // Check if this is a constructor (`constructor(...) {}`).
-            let is_constructor = name.kind == SyntaxKind::Identifier
-                && name.text() == "constructor";
+            let is_constructor =
+                name.kind == SyntaxKind::Identifier && name.text() == "constructor";
             let type_parameters = self.parse_optional_type_parameters();
             let parameters = self.parse_parameter_list();
             let type_node = self.parse_optional_return_type();
@@ -6214,19 +6204,12 @@ mod tests {
         ] {
             let mut p = Parser::new(src);
             let node = p.parse_statement();
-            assert_eq!(
-                node.kind,
-                SyntaxKind::TypeAliasDeclaration,
-                "source: {src}"
-            );
+            assert_eq!(node.kind, SyntaxKind::TypeAliasDeclaration, "source: {src}");
             let alias = match &node.data {
                 NodeData::TypeAliasDeclaration(data) => data,
                 other => panic!("expected type alias, got {other:?} for {src}"),
             };
-            assert_eq!(
-                alias.type_node.kind, expected_kind,
-                "source: {src}"
-            );
+            assert_eq!(alias.type_node.kind, expected_kind, "source: {src}");
             assert!(
                 matches!(alias.type_node.data, NodeData::KeywordTypeNode),
                 "expected KeywordTypeNode for {src}"
@@ -6613,7 +6596,8 @@ mod tests {
     #[test]
     fn parse_declare_class_full_body() {
         // `declare class C { ... }` — full class body without implementation
-        let mut p = Parser::new("declare class C extends Base { constructor(x: number); foo(): void; }");
+        let mut p =
+            Parser::new("declare class C extends Base { constructor(x: number); foo(): void; }");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(node.kind, SyntaxKind::ClassDeclaration);
@@ -6642,7 +6626,10 @@ mod tests {
             NodeData::FunctionDeclaration(d) => d,
             other => panic!("expected function decl, got {other:?}"),
         };
-        assert!(fn_decl.body.is_none(), "declare function should have no body");
+        assert!(
+            fn_decl.body.is_none(),
+            "declare function should have no body"
+        );
     }
 
     #[test]
@@ -6723,7 +6710,11 @@ mod tests {
             NodeData::Identifier(d) => d,
             other => panic!("expected identifier, got {other:?}"),
         };
-        assert!(id.text.is_empty(), "expected missing identifier, got {:?}", id.text);
+        assert!(
+            id.text.is_empty(),
+            "expected missing identifier, got {:?}",
+            id.text
+        );
     }
 
     #[test]
@@ -6739,8 +6730,10 @@ mod tests {
         assert_eq!(file.node.kind, SyntaxKind::SourceFile);
 
         // Unterminated string literal should also be reported.
-        let (_file, diags) =
-            Parser::parse_source_file_text_with_diagnostics("test.ts", "\"unterminated".to_string());
+        let (_file, diags) = Parser::parse_source_file_text_with_diagnostics(
+            "test.ts",
+            "\"unterminated".to_string(),
+        );
         assert!(
             diags.iter().any(|d| d.message.code == 1002),
             "expected Unterminated string literal diagnostic (TS1002), got: {diags:?}"
@@ -6807,9 +6800,15 @@ mod tests {
             NodeData::ClassDeclaration(d) => d,
             other => panic!("expected class, got {other:?}"),
         };
-        let mods = class.modifiers.as_ref().expect("expected modifiers with decorator");
+        let mods = class
+            .modifiers
+            .as_ref()
+            .expect("expected modifiers with decorator");
         assert!(mods.modifier_flags.contains(ModifierFlags::Decorator));
-        let decorators: Vec<_> = mods.iter().filter(|n| n.kind == SyntaxKind::Decorator).collect();
+        let decorators: Vec<_> = mods
+            .iter()
+            .filter(|n| n.kind == SyntaxKind::Decorator)
+            .collect();
         assert_eq!(decorators.len(), 1);
 
         // @decorator on class method
@@ -6829,7 +6828,10 @@ mod tests {
             NodeData::MethodDeclaration(d) => d,
             other => panic!("expected method, got {other:?}"),
         };
-        let mods = method_data.modifiers.as_ref().expect("method should have decorator modifiers");
+        let mods = method_data
+            .modifiers
+            .as_ref()
+            .expect("method should have decorator modifiers");
         assert!(mods.modifier_flags.contains(ModifierFlags::Decorator));
 
         // @decorator on class property
@@ -6858,7 +6860,10 @@ mod tests {
             other => panic!("expected class, got {other:?}"),
         };
         let mods = class.modifiers.as_ref().unwrap();
-        let decorators: Vec<_> = mods.iter().filter(|n| n.kind == SyntaxKind::Decorator).collect();
+        let decorators: Vec<_> = mods
+            .iter()
+            .filter(|n| n.kind == SyntaxKind::Decorator)
+            .collect();
         assert_eq!(decorators.len(), 2);
 
         // Decorator with member expression: @Namespace.Dec class Foo {}
@@ -6920,8 +6925,14 @@ mod tests {
             "// @ts-ignore\nlet x = 1;\n// @ts-expect-error\n".to_string(),
         );
         assert_eq!(file.comment_directives.len(), 2);
-        assert_eq!(file.comment_directives[0].kind, CommentDirectiveKind::Ignore);
-        assert_eq!(file.comment_directives[1].kind, CommentDirectiveKind::ExpectError);
+        assert_eq!(
+            file.comment_directives[0].kind,
+            CommentDirectiveKind::Ignore
+        );
+        assert_eq!(
+            file.comment_directives[1].kind,
+            CommentDirectiveKind::ExpectError
+        );
     }
 
     #[test]
@@ -7056,7 +7067,8 @@ mod tests {
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
         // `public: CryptoKey` — `public` is a property name (no preceding modifier).
-        let mut p = Parser::new("interface EcdhKeyDeriveParams extends Algorithm { public: CryptoKey; }");
+        let mut p =
+            Parser::new("interface EcdhKeyDeriveParams extends Algorithm { public: CryptoKey; }");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
@@ -7170,7 +7182,9 @@ mod tests {
 
     #[test]
     fn parse_for_await_of() {
-        let mut p = Parser::new("async function process(stream) { for await (const chunk of stream) { console.log(chunk); } }");
+        let mut p = Parser::new(
+            "async function process(stream) { for await (const chunk of stream) { console.log(chunk); } }",
+        );
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
     }

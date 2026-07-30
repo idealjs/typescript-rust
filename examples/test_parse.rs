@@ -2,7 +2,9 @@ use tsox::parser::Parser;
 
 fn main() {
     let sources = [
-        ("test1.ts", r#"
+        (
+            "test1.ts",
+            r#"
 // Decorators
 function log(target: any, key: string, desc: PropertyDescriptor) {}
 class MyService {
@@ -61,8 +63,11 @@ type GetReturn<T> = T extends (...args: any[]) => infer R ? R : never;
 
 // Satisfaction
 const config = { a: 1 } satisfies Record<string, number>;
-"#),
-        ("test3.ts", r#"
+"#,
+        ),
+        (
+            "test3.ts",
+            r#"
 // Async/await
 async function fetchData(url: string): Promise<Response> {
   const response = await fetch(url);
@@ -116,7 +121,8 @@ type Getter<T> = {
 interface Box<out T> {
   value: T;
 }
-"#),
+"#,
+        ),
     ];
 
     for (name, source) in &sources {
@@ -126,11 +132,8 @@ interface Box<out T> {
         for d in &diagnostics {
             let pos = d.range.pos as usize;
             let end = d.range.end as usize;
-            let (line, col) = tsox::diagnosticwriter::line_and_character(
-                &file.line_map,
-                &file.text,
-                pos,
-            );
+            let (line, col) =
+                tsox::diagnosticwriter::line_and_character(&file.line_map, &file.text, pos);
             println!(
                 "  [{}:{}] {} args={:?}",
                 line + 1,

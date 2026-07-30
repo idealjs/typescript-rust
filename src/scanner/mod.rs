@@ -206,30 +206,37 @@ static TOKEN_TO_TEXT: OnceLock<HashMap<SyntaxKind, &'static str>> = OnceLock::ne
 /// `ClassKeyword` → `"class"`); for `Identifier` it returns `"identifier"`.
 /// Tokens not in the keyword/punctuation tables return `""`.
 pub fn token_to_string(token: SyntaxKind) -> &'static str {
-    TOKEN_TO_TEXT.get_or_init(|| {
-        let mut m = HashMap::new();
-        for (&text, &kind) in keywords().iter() {
-            m.insert(kind, text);
-        }
-        for (&text, &kind) in punctuation().iter() {
-            m.insert(kind, text);
-        }
-        m.insert(SyntaxKind::Identifier, "identifier");
-        m.insert(SyntaxKind::EndOfFile, "end of file");
-        m.insert(SyntaxKind::NumericLiteral, "numeric literal");
-        m.insert(SyntaxKind::StringLiteral, "string literal");
-        m.insert(SyntaxKind::BigIntLiteral, "bigint literal");
-        m.insert(SyntaxKind::RegularExpressionLiteral, "regular expression literal");
-        m.insert(SyntaxKind::TemplateHead, "template literal");
-        m.insert(SyntaxKind::TemplateMiddle, "template literal");
-        m.insert(SyntaxKind::TemplateTail, "template literal");
-        m.insert(SyntaxKind::NoSubstitutionTemplateLiteral, "template literal");
-        m.insert(SyntaxKind::Unknown, "unknown");
-        m
-    })
-    .get(&token)
-    .copied()
-    .unwrap_or("")
+    TOKEN_TO_TEXT
+        .get_or_init(|| {
+            let mut m = HashMap::new();
+            for (&text, &kind) in keywords().iter() {
+                m.insert(kind, text);
+            }
+            for (&text, &kind) in punctuation().iter() {
+                m.insert(kind, text);
+            }
+            m.insert(SyntaxKind::Identifier, "identifier");
+            m.insert(SyntaxKind::EndOfFile, "end of file");
+            m.insert(SyntaxKind::NumericLiteral, "numeric literal");
+            m.insert(SyntaxKind::StringLiteral, "string literal");
+            m.insert(SyntaxKind::BigIntLiteral, "bigint literal");
+            m.insert(
+                SyntaxKind::RegularExpressionLiteral,
+                "regular expression literal",
+            );
+            m.insert(SyntaxKind::TemplateHead, "template literal");
+            m.insert(SyntaxKind::TemplateMiddle, "template literal");
+            m.insert(SyntaxKind::TemplateTail, "template literal");
+            m.insert(
+                SyntaxKind::NoSubstitutionTemplateLiteral,
+                "template literal",
+            );
+            m.insert(SyntaxKind::Unknown, "unknown");
+            m
+        })
+        .get(&token)
+        .copied()
+        .unwrap_or("")
 }
 
 /// The lexical scanner.
@@ -752,7 +759,9 @@ impl Scanner {
                 } else {
                     // \uHHHH — skip up to 4 hex digits
                     for _ in 0..4 {
-                        if self.pos < self.end && is_hex_digit(self.text.as_bytes()[self.pos] as char) {
+                        if self.pos < self.end
+                            && is_hex_digit(self.text.as_bytes()[self.pos] as char)
+                        {
                             self.pos += 1;
                         } else {
                             break;
@@ -1159,10 +1168,7 @@ fn is_jsx_line_break(c: char) -> bool {
 fn is_jsx_whitespace_like(c: char) -> bool {
     // TypeScript's isWhiteSpaceLike: tab, vtab, formFeed, space, non-breaking space,
     // BOM, and any Unicode "White_Space" property character.
-    matches!(
-        c,
-        '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}'
-    ) || c.is_whitespace()
+    matches!(c, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}') || c.is_whitespace()
 }
 
 fn is_identifier_or_keyword_token(token: SyntaxKind) -> bool {
@@ -1483,7 +1489,10 @@ mod tests {
         assert_eq!(s.token(), SyntaxKind::RegularExpressionLiteral);
         let errors = s.take_errors();
         assert_eq!(errors.len(), 1);
-        assert_eq!(errors[0].kind, DiagnosticKind::UnterminatedRegularExpression);
+        assert_eq!(
+            errors[0].kind,
+            DiagnosticKind::UnterminatedRegularExpression
+        );
     }
 
     #[test]
@@ -1494,7 +1503,10 @@ mod tests {
         assert_eq!(s.token(), SyntaxKind::RegularExpressionLiteral);
         let errors = s.take_errors();
         assert_eq!(errors.len(), 1);
-        assert_eq!(errors[0].kind, DiagnosticKind::UnterminatedRegularExpression);
+        assert_eq!(
+            errors[0].kind,
+            DiagnosticKind::UnterminatedRegularExpression
+        );
     }
 
     #[test]

@@ -291,6 +291,14 @@ pub struct Checker {
     pub error_type: OnceLock<Arc<Type>>,
     pub unresolved_type: OnceLock<Arc<Type>>,
 
+    // Special "auto" types used for evolving array flow analysis.
+    // `auto_type` is a special `any` used as a marker for uninitialized
+    // variables (mirrors Go's `autoType`). `auto_array_type` is `any[]`
+    // used as a marker for empty-array initializers (mirrors Go's
+    // `autoArrayType`). Both are replaced by concrete types during flow
+    // analysis.
+    pub auto_type: OnceLock<Arc<Type>>,
+
     // Object types
     pub empty_object_type: OnceLock<Arc<Type>>,
     pub empty_generic_type: OnceLock<Arc<Type>>,
@@ -433,10 +441,7 @@ impl Checker {
             can_collect_symbol_alias_accessibility_data,
 
             globals: SymbolTable::default(),
-            undefined_symbol: Some(Arc::new(Symbol::new(
-                SymbolFlags::Property,
-                "undefined",
-            ))),
+            undefined_symbol: Some(Arc::new(Symbol::new(SymbolFlags::Property, "undefined"))),
             arguments_symbol: Some(Arc::new(Symbol::new(
                 SymbolFlags::Property.union(SymbolFlags::Transient),
                 "arguments",
@@ -513,6 +518,8 @@ impl Checker {
             error_type: OnceLock::new(),
             unresolved_type: OnceLock::new(),
 
+            auto_type: OnceLock::new(),
+
             empty_object_type: OnceLock::new(),
             empty_generic_type: OnceLock::new(),
             any_function_type: OnceLock::new(),
@@ -559,24 +566,23 @@ impl Checker {
 
             tracer,
             mu: Mutex::new(()),
-    };
+        };
 
         // Initialize global_this_symbol and add built-in symbols to globals
         {
             // Create globalThis symbol
-            let mut global_this = Symbol::new(
-                SymbolFlags::ValueModule,
-                "globalThis",
-            );
+            let mut global_this = Symbol::new(SymbolFlags::ValueModule, "globalThis");
             global_this.check_flags = CheckFlags::Readonly;
             let global_this = Arc::new(global_this);
-            checker.globals
+            checker
+                .globals
                 .insert("globalThis".to_string(), Arc::clone(&global_this));
             checker.global_this_symbol = Some(global_this);
 
             // Add undefined to globals
             if let Some(ref undef) = checker.undefined_symbol {
-                checker.globals
+                checker
+                    .globals
                     .insert("undefined".to_string(), Arc::clone(undef));
             }
         }
@@ -760,6 +766,145 @@ impl Checker {
                 ))
             })
             .clone()
+    }
+
+    /// Get the `auto` type — a special `any` with `NonInferrableType` flag,
+    /// used as a marker for evolving-array analysis. Mirrors Go's `autoType`
+    /// (`c.autoType = c.newIntrinsicTypeEx(TypeFlagsAny, "any", ObjectFlagsNonInferrableType)`).
+    pub fn auto_type(&self) -> Arc<Type> {
+        self.auto_type
+            .get_or_init(|| {
+                Arc::new(Type {
+                    flags: TypeFlags::Any,
+                    object_flags: ObjectFlags::NonInferrableType,
+                    id: 0,
+                    symbol: None,
+                    alias: None,
+                    data: TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "any".to_string(),
+                    }),
+                })
+            })
+            .clone()
+    }
+
+    /// Get the `auto array type` — `any[]` used as a marker for empty array
+    /// literal initializers (`let x = []`). Mirrors Go's `autoArrayType`
+    /// (`c.createArrayType(c.autoType)`).
+    pub fn auto_array_type(&mut self) -> Arc<Type> {
+        if let Some(t) = self.auto_array_type.get() {
+            return Arc::clone(t);
+        }
+        let auto = self.auto_type();
+        let arr = self.create_array_type(auto);
+        // Race-safe set: if another thread won, use its value.
+        self.auto_array_type
+            .set(arr.clone())
+            .ok()
+            .map(|()| arr.clone())
+            .unwrap_or_else(|| {
+                self.auto_array_type.get().cloned().unwrap_or(arr)
+            })
+    }
+
+    /// Create an evolving array type with the given element type.
+    ///
+    /// Mirrors Go's `getEvolvingArrayType` (flow.go ~L1488). Evolving array
+    /// types are used in flow analysis to track arrays whose element type
+    /// is being inferred from `push`/`unshift` calls (e.g.
+    /// `let x = []; x.push(1)` → `x: number[]`).
+    pub fn get_evolving_array_type(&mut self, element_type: Arc<Type>) -> Arc<Type> {
+        Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::EvolvingArray,
+            id: 0,
+            symbol: None,
+            alias: None,
+            data: TypeData::EvolvingArray(EvolvingArrayTypeData {
+                object: ObjectTypeData::default(),
+                element_type: Some(element_type),
+                final_array_type: OnceLock::new(),
+            }),
+        })
+    }
+
+    /// Evolve an evolving array type by adding a new element type.
+    ///
+    /// Mirrors Go's `addEvolvingArrayElementType` (flow.go ~L1536). If the
+    /// new element type is already a subset of the current element type,
+    /// returns the original type unchanged. Otherwise, unions the new
+    /// element type with the existing one.
+    pub fn add_evolving_array_element_type(
+        &mut self,
+        evolving_type: &Arc<Type>,
+        new_element_type: Arc<Type>,
+    ) -> Arc<Type> {
+        let current_element = match &evolving_type.data {
+            TypeData::EvolvingArray(ea) => ea.element_type.clone(),
+            _ => return Arc::clone(evolving_type),
+        };
+        match current_element {
+            Some(current) => {
+                // If the new type is a subset of the current type, no change.
+                if self.is_type_subset_of(&new_element_type, &current) {
+                    return Arc::clone(evolving_type);
+                }
+                let union = self.get_union_type(vec![current, new_element_type]);
+                self.get_evolving_array_type(union)
+            }
+            None => self.get_evolving_array_type(new_element_type),
+        }
+    }
+
+    /// Finalize an evolving array type into a concrete array type.
+    ///
+    /// Mirrors Go's `finalizeEvolvingArrayType` (flow.go ~L1545). If the
+    /// type is not an evolving array, returns it unchanged. If it is,
+    /// converts it to `T[]` where `T` is the element type (or `any[]` if
+    /// the element type is `never`).
+    pub fn finalize_evolving_array_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        if !t.object_flags.contains(ObjectFlags::EvolvingArray) {
+            return Arc::clone(t);
+        }
+        match &t.data {
+            TypeData::EvolvingArray(ea) => {
+                if let Some(final_t) = ea.final_array_type.get() {
+                    return Arc::clone(final_t);
+                }
+                let element = ea.element_type.clone().unwrap_or_else(|| self.never_type());
+                let result = if element.flags.contains(TypeFlags::Never) {
+                    self.auto_array_type()
+                } else if element.flags.contains(TypeFlags::Union) {
+                    // For union element types, use subtype reduction.
+                    self.create_array_type(element)
+                } else {
+                    self.create_array_type(element)
+                };
+                // Cache on the evolving type via interior mutability.
+                if let TypeData::EvolvingArray(ea) = &t.data {
+                    let _ = ea.final_array_type.set(Arc::clone(&result));
+                }
+                result
+            }
+            _ => Arc::clone(t),
+        }
+    }
+
+    /// Check if `a` is a subset of `b` (all members of `a` are assignable to
+    /// `b`). Mirrors Go's `isTypeSubsetOf`. Used by evolving-array element
+    /// evolution to avoid adding redundant types.
+    pub fn is_type_subset_of(&mut self, a: &Arc<Type>, b: &Arc<Type>) -> bool {
+        if Arc::ptr_eq(a, b) || self.types_are_equal(a, b) {
+            return true;
+        }
+        if a.flags.contains(TypeFlags::Never) {
+            return true;
+        }
+        if b.flags.contains(TypeFlags::Any) || b.flags.contains(TypeFlags::Unknown) {
+            return true;
+        }
+        // Simple subset check: a is assignable to b.
+        self.is_type_assignable_to(a, b)
     }
 
     /// Get the `(...args: any) => any` "top function" wildcard type.
@@ -1134,9 +1279,36 @@ impl Checker {
         if t.object_flags.contains(ObjectFlags::EvolvingArray) {
             return Arc::clone(t);
         }
+        // Auto array marker (from `let x = []`): convert to an evolving
+        // array type with element `never`. Flow analysis will evolve the
+        // element type from subsequent `push`/`unshift` calls. Mirrors
+        // Go's flow.go L232-234 (`getEvolvingArrayType(c.neverType)`).
+        if self.is_auto_array_type(t) {
+            return self.get_evolving_array_type(self.never_type());
+        }
         // All other types: defer to the standard widening (handles
         // literals, unique symbols, and unions of literals).
         self.get_widened_type(t)
+    }
+
+    /// Check if a type is the auto-array marker (`any[]` whose element
+    /// type is the `auto` type with `NonInferrableType` flag, used for
+    /// `let x = []`).
+    pub fn is_auto_array_type(&self, t: &Arc<Type>) -> bool {
+        if !t.flags.contains(TypeFlags::Object) || !t.object_flags.contains(ObjectFlags::Reference)
+        {
+            return false;
+        }
+        // The auto-array marker is `Array<autoType>` where `autoType` has
+        // the `NonInferrableType` flag. Check the element type.
+        match &t.data {
+            TypeData::Object(obj) => obj
+                .type_arguments
+                .first()
+                .map(|elem| elem.object_flags.contains(ObjectFlags::NonInferrableType))
+                .unwrap_or(false),
+            _ => false,
+        }
     }
 
     /// Build a widened copy of a fresh object literal type: each
@@ -1555,24 +1727,12 @@ impl Checker {
                 }
                 self.string_type()
             }
-            SyntaxKind::NoSubstitutionTemplateLiteral => {
-                self.string_type()
-            }
-            SyntaxKind::TrueKeyword => {
-                self.true_type()
-            }
-            SyntaxKind::FalseKeyword => {
-                self.false_type()
-            }
-            SyntaxKind::NullKeyword => {
-                self.null_type()
-            }
-            SyntaxKind::UndefinedKeyword => {
-                self.undefined_type()
-            }
-            SyntaxKind::BigIntLiteral => {
-                self.bigint_type()
-            }
+            SyntaxKind::NoSubstitutionTemplateLiteral => self.string_type(),
+            SyntaxKind::TrueKeyword => self.true_type(),
+            SyntaxKind::FalseKeyword => self.false_type(),
+            SyntaxKind::NullKeyword => self.null_type(),
+            SyntaxKind::UndefinedKeyword => self.undefined_type(),
+            SyntaxKind::BigIntLiteral => self.bigint_type(),
             SyntaxKind::ArrayLiteralExpression => {
                 return self.get_type_of_array_literal(node);
             }
@@ -1582,16 +1742,10 @@ impl Checker {
             SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
                 self.get_type_of_function_like(node)
             }
-            SyntaxKind::FunctionDeclaration => {
-                self.get_type_of_function_like(node)
-            }
-            SyntaxKind::Identifier => {
-                self.get_type_of_identifier(node)
-            }
+            SyntaxKind::FunctionDeclaration => self.get_type_of_function_like(node),
+            SyntaxKind::Identifier => self.get_type_of_identifier(node),
             // Binary expressions
-            SyntaxKind::BinaryExpression => {
-                self.get_type_of_binary_expression(node)
-            }
+            SyntaxKind::BinaryExpression => self.get_type_of_binary_expression(node),
             SyntaxKind::PrefixUnaryExpression => {
                 if let crate::ast::NodeData::PrefixUnaryExpression(data) = &node.data {
                     // The parser currently represents `delete x` and
@@ -1616,18 +1770,10 @@ impl Checker {
                 // `x++` / `x--` → number.
                 self.number_type()
             }
-            SyntaxKind::CallExpression => {
-                self.get_return_type_of_call_expression(node)
-            }
-            SyntaxKind::NewExpression => {
-                self.get_return_type_of_new_expression(node)
-            }
-            SyntaxKind::PropertyAccessExpression => {
-                self.get_type_of_property_access(node)
-            }
-            SyntaxKind::ElementAccessExpression => {
-                self.get_type_of_element_access(node)
-            }
+            SyntaxKind::CallExpression => self.get_return_type_of_call_expression(node),
+            SyntaxKind::NewExpression => self.get_return_type_of_new_expression(node),
+            SyntaxKind::PropertyAccessExpression => self.get_type_of_property_access(node),
+            SyntaxKind::ElementAccessExpression => self.get_type_of_element_access(node),
             SyntaxKind::ParenthesizedExpression => {
                 if let crate::ast::NodeData::ParenthesizedExpression(data) = &node.data {
                     return self.get_type_of_node(&data.expression);
@@ -1715,9 +1861,7 @@ impl Checker {
                 }
                 self.get_any_type()
             }
-            _ => {
-                self.get_any_type()
-            }
+            _ => self.get_any_type(),
         }
     }
 
@@ -1728,14 +1872,99 @@ impl Checker {
     /// (e.g. `if (x !== null)` narrows `x` in the then-branch).
     fn get_type_of_identifier(&mut self, node: &Arc<Node>) -> Arc<Type> {
         if let Some(symbol) = self.resolve_identifier(node) {
-            let flow = self
-                .program
-                .symbol_map()
-                .flow_node_of(node)
-                .map(Arc::clone);
-            self.get_narrowed_type_of_symbol(&symbol, flow.as_ref())
+            let flow = self.program.symbol_map().flow_node_of(node).map(Arc::clone);
+            let narrowed = self.get_narrowed_type_of_symbol(&symbol, flow.as_ref());
+            // When the reference is `x` in `x.length`, `x.push(value)`,
+            // `x.unshift(value)` or `x[n] = value`, we give the type
+            // `autoArrayType` (instead of finalizing the evolving array)
+            // so that operations on empty arrays are possible without
+            // implicit any errors and new element types can be inferred
+            // without type mismatch errors. Mirrors Go's
+            // `getFlowTypeOfReference` (flow.go ~L106-110).
+            if narrowed.object_flags.contains(ObjectFlags::EvolvingArray)
+                && self.is_evolving_array_operation_target(node)
+            {
+                return self.auto_array_type();
+            }
+            // Finalize evolving array types when they are read as a value
+            // (i.e. they "escape" the flow context). Mirrors Go's
+            // `finalizeEvolvingArrayType` call in `getFlowTypeOfReference`.
+            self.finalize_evolving_array_type(&narrowed)
         } else {
             self.get_any_type()
+        }
+    }
+
+    /// Check if `node` is the receiver of an evolving-array operation:
+    /// `node.length`, `node.push(value)`, `node.unshift(value)`, or
+    /// `node[i] = value`. Mirrors Go's `isEvolvingArrayOperationTarget`
+    /// (flow.go ~L1521).
+    fn is_evolving_array_operation_target(&self, node: &Arc<Node>) -> bool {
+        let root = self.get_reference_root(node);
+        let Some(parent) = &root.parent else {
+            return false;
+        };
+        // `root.length` or `root.push(...)` / `root.unshift(...)`.
+        if let NodeData::PropertyAccessExpression(pa) = &parent.data {
+            if Arc::ptr_eq(&pa.expression, root) {
+                let name = pa.name.text();
+                if name == "length" {
+                    return true;
+                }
+                if name == "push" || name == "unshift" {
+                    // parent.parent must be a CallExpression for this to be a
+                    // mutation (e.g. `arr.push(1)`). Bare `arr.push` (without
+                    // a call) is not a mutation.
+                    if let Some(grandparent) = &parent.parent {
+                        if matches!(grandparent.kind, SyntaxKind::CallExpression) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        // `root[i] = value` — element access assignment. Mirrors Go's
+        // `isElementAssignment` branch.
+        if let NodeData::ElementAccessExpression(ea) = &parent.data {
+            if Arc::ptr_eq(&ea.expression, root) {
+                if let Some(grandparent) = &parent.parent {
+                    if let NodeData::BinaryExpression(bin) = &grandparent.data {
+                        if bin.operator_token.kind == SyntaxKind::EqualsToken
+                            && Arc::ptr_eq(&bin.left, parent)
+                        {
+                            // Go additionally requires the index type to be
+                            // number-like. We approximate by always allowing
+                            // (avoiding a recursive type computation here).
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        false
+    }
+
+    /// Find the root of a reference chain, unwrapping parenthesized
+    /// expressions, `=` assignment LHS, and comma-operator RHS. Mirrors
+    /// Go's `getReferenceRoot` (flow.go ~L1855).
+    fn get_reference_root<'a>(&self, node: &'a Arc<Node>) -> &'a Arc<Node> {
+        let Some(parent) = &node.parent else {
+            return node;
+        };
+        let recurse = match &parent.data {
+            NodeData::ParenthesizedExpression(_) => true,
+            NodeData::BinaryExpression(bin) => {
+                (bin.operator_token.kind == SyntaxKind::EqualsToken
+                    && Arc::ptr_eq(&bin.left, node))
+                    || (bin.operator_token.kind == SyntaxKind::CommaToken
+                        && Arc::ptr_eq(&bin.right, node))
+            }
+            _ => false,
+        };
+        if recurse {
+            self.get_reference_root(parent)
+        } else {
+            node
         }
     }
 
@@ -1802,9 +2031,17 @@ impl Checker {
     /// type for the final signature. The first pass's signature is discarded.
     fn get_type_of_function_like(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let (parameters, body, type_node) = match &node.data {
-            crate::ast::NodeData::FunctionExpression(data) => (&data.parameters, Some(&data.body), data.type_node.as_ref()),
-            crate::ast::NodeData::ArrowFunction(data) => (&data.parameters, Some(&data.body), data.type_node.as_ref()),
-            crate::ast::NodeData::FunctionDeclaration(data) => (&data.parameters, data.body.as_ref(), data.type_node.as_ref()),
+            crate::ast::NodeData::FunctionExpression(data) => {
+                (&data.parameters, Some(&data.body), data.type_node.as_ref())
+            }
+            crate::ast::NodeData::ArrowFunction(data) => {
+                (&data.parameters, Some(&data.body), data.type_node.as_ref())
+            }
+            crate::ast::NodeData::FunctionDeclaration(data) => (
+                &data.parameters,
+                data.body.as_ref(),
+                data.type_node.as_ref(),
+            ),
             _ => return self.get_any_type(),
         };
         // Fetch the contextual function type (e.g. the annotation on the
@@ -1961,35 +2198,50 @@ impl Checker {
         if let crate::ast::NodeData::BinaryExpression(data) = &node.data {
             match data.operator_token.kind {
                 // Arithmetic operators return number
-                PlusToken | MinusToken | AsteriskToken | SlashToken | PercentToken
-                | AsteriskAsteriskToken | LessThanLessThanToken
-                | GreaterThanGreaterThanToken | GreaterThanGreaterThanGreaterThanToken
-                | AmpersandToken | BarToken | CaretToken => {
-                    self.number_type()
-                }
+                PlusToken
+                | MinusToken
+                | AsteriskToken
+                | SlashToken
+                | PercentToken
+                | AsteriskAsteriskToken
+                | LessThanLessThanToken
+                | GreaterThanGreaterThanToken
+                | GreaterThanGreaterThanGreaterThanToken
+                | AmpersandToken
+                | BarToken
+                | CaretToken => self.number_type(),
                 // Comparison operators return boolean
-                LessThanToken | GreaterThanToken | LessThanEqualsToken
-                | GreaterThanEqualsToken | EqualsEqualsToken
-                | ExclamationEqualsToken | EqualsEqualsEqualsToken
-                | ExclamationEqualsEqualsToken | InKeyword | InstanceOfKeyword => {
-                    self.boolean_type()
-                }
+                LessThanToken
+                | GreaterThanToken
+                | LessThanEqualsToken
+                | GreaterThanEqualsToken
+                | EqualsEqualsToken
+                | ExclamationEqualsToken
+                | EqualsEqualsEqualsToken
+                | ExclamationEqualsEqualsToken
+                | InKeyword
+                | InstanceOfKeyword => self.boolean_type(),
                 // Logical operators return union of operands (simplified)
                 AmpersandAmpersandToken | BarBarToken | QuestionQuestionToken => {
                     self.get_type_of_node(&data.left)
                 }
                 // Assignment operators return the right-hand side type
-                EqualsToken | PlusEqualsToken | MinusEqualsToken
-                | AsteriskEqualsToken | SlashEqualsToken | PercentEqualsToken
+                EqualsToken
+                | PlusEqualsToken
+                | MinusEqualsToken
+                | AsteriskEqualsToken
+                | SlashEqualsToken
+                | PercentEqualsToken
                 | AsteriskAsteriskEqualsToken
                 | LessThanLessThanEqualsToken
                 | GreaterThanGreaterThanEqualsToken
                 | GreaterThanGreaterThanGreaterThanEqualsToken
-                | AmpersandEqualsToken | BarEqualsToken | CaretEqualsToken
-                | BarBarEqualsToken | AmpersandAmpersandEqualsToken
-                | QuestionQuestionEqualsToken => {
-                    self.get_type_of_node(&data.right)
-                }
+                | AmpersandEqualsToken
+                | BarEqualsToken
+                | CaretEqualsToken
+                | BarBarEqualsToken
+                | AmpersandAmpersandEqualsToken
+                | QuestionQuestionEqualsToken => self.get_type_of_node(&data.right),
                 _ => self.get_any_type(),
             }
         } else {
@@ -2004,9 +2256,7 @@ impl Checker {
     /// the property is not found or the object type is unknown.
     fn get_type_of_property_access(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let (obj_expr, name) = match &node.data {
-            crate::ast::NodeData::PropertyAccessExpression(data) => {
-                (&data.expression, &data.name)
-            }
+            crate::ast::NodeData::PropertyAccessExpression(data) => (&data.expression, &data.name),
             _ => return self.get_any_type(),
         };
         let obj_type = self.get_type_of_node(obj_expr);
@@ -2097,11 +2347,30 @@ impl Checker {
             return true;
         }
 
-        // Array types (`Array<T>` reference): only `length` is hardcoded
-        // (see `get_type_of_property_access`). Without lib.d.ts, tsc would
-        // report TS2339 for any other property.
+        // Array types (`Array<T>` reference). Without lib.d.ts, tsc would
+        // report TS2339 for any property (including `push`/`unshift`) on a
+        // fully-typed array. We allow `length` intrinsically. For the special
+        // `autoArrayType` marker (the inferred type of `let x = []`), we
+        // also allow array mutation methods (`push`/`unshift`) so that
+        // evolving-array flow analysis can run without lib.d.ts — matching
+        // the form of `let x = []; x.push(1)` that the ARRAY_MUTATION flow
+        // node is designed to handle.
         if self.is_array_type(t) {
-            return name == "length";
+            if name == "length" {
+                return true;
+            }
+            if self.is_auto_array_type(t) && self.is_array_mutation_method(name) {
+                return true;
+            }
+            return false;
+        }
+
+        // Evolving array types (created by flow analysis from `autoArrayType`):
+        // these are not `Reference`-flagged, so `is_array_type` doesn't match.
+        // Allow `length` and the array mutation methods so that subsequent
+        // `x.push(2)` after `x.push(1)` continues to evolve the element type.
+        if t.object_flags.contains(ObjectFlags::EvolvingArray) {
+            return name == "length" || self.is_array_mutation_method(name);
         }
 
         // Tuple types: `length` is intrinsically available.
@@ -2137,6 +2406,12 @@ impl Checker {
         true
     }
 
+    /// Check if a method name is an array mutation method (push, unshift,
+    /// etc.) that the binder creates ARRAY_MUTATION flow nodes for.
+    pub fn is_array_mutation_method(&self, name: &str) -> bool {
+        matches!(name, "push" | "unshift")
+    }
+
     /// Check a `PropertyAccessExpression` (`x.prop`) and emit TS2339 when
     /// `prop` does not exist on the type of `x`.
     ///
@@ -2147,9 +2422,7 @@ impl Checker {
     /// permissive types skip the check.
     fn check_property_access(&mut self, node: &Arc<Node>) {
         let (obj_expr, name) = match &node.data {
-            crate::ast::NodeData::PropertyAccessExpression(data) => {
-                (&data.expression, &data.name)
-            }
+            crate::ast::NodeData::PropertyAccessExpression(data) => (&data.expression, &data.name),
             _ => return,
         };
         let obj_type = self.get_type_of_node(obj_expr);
@@ -2293,9 +2566,10 @@ impl Checker {
                 }
                 self.get_any_type()
             }
-            crate::checker::TypeData::EvolvingArray(ea) => {
-                ea.element_type.clone().unwrap_or_else(|| self.get_any_type())
-            }
+            crate::checker::TypeData::EvolvingArray(ea) => ea
+                .element_type
+                .clone()
+                .unwrap_or_else(|| self.get_any_type()),
             _ => self.get_any_type(),
         }
     }
@@ -2303,9 +2577,7 @@ impl Checker {
     /// Try to extract a constant numeric value from a literal expression.
     fn get_constant_numeric_value(&self, node: &Arc<Node>) -> Option<f64> {
         match &node.data {
-            crate::ast::NodeData::NumericLiteral(data) => {
-                data.text.parse::<f64>().ok()
-            }
+            crate::ast::NodeData::NumericLiteral(data) => data.text.parse::<f64>().ok(),
             _ => None,
         }
     }
@@ -2323,7 +2595,12 @@ impl Checker {
             _ => return self.get_any_type(),
         };
         if elements.is_empty() {
-            return self.create_array_type(self.get_any_type());
+            // Empty array literal `[]`: return the auto-array marker.
+            // `widen_initializer_type` converts this to an evolving array
+            // type with element `never`, which flow analysis evolves from
+            // subsequent `push`/`unshift` calls. Mirrors Go's
+            // `getWidenedType` returning `autoArrayType` for `[]`.
+            return self.auto_array_type();
         }
         // Get the widened type of each element.
         let mut element_types: Vec<Arc<Type>> = Vec::new();
@@ -2415,10 +2692,7 @@ impl Checker {
         let mut members = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::with_capacity(prop_pairs.len());
         for (name, t) in prop_pairs {
-            let symbol = Arc::new(Symbol::new(
-                SymbolFlags::Property,
-                name.clone(),
-            ));
+            let symbol = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
             members.insert(name, Arc::clone(&symbol));
             self.value_symbol_links.insert(
                 &symbol,
@@ -2460,7 +2734,7 @@ impl Checker {
     }
 
     /// Widen a literal type to its base type (e.g. `3` → `number`).
-    fn get_widened_type_of_literal(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_widened_type_of_literal(&self, t: &Arc<Type>) -> Arc<Type> {
         if t.flags.contains(crate::checker::TypeFlags::StringLiteral)
             || t.flags.contains(crate::checker::TypeFlags::NumberLiteral)
             || t.flags.contains(crate::checker::TypeFlags::BigIntLiteral)
@@ -2535,22 +2809,24 @@ impl Checker {
             SyntaxKind::WhileStatement => {
                 if let crate::ast::NodeData::WhileStatement(data) = &node.data {
                     self.check_expression(&data.expression);
-                    self.break_continue_context_stack.push(BreakContinueContext {
-                        kind: BreakContinueContextKind::Loop,
-                        label: None,
-                        is_iteration: true,
-                    });
+                    self.break_continue_context_stack
+                        .push(BreakContinueContext {
+                            kind: BreakContinueContextKind::Loop,
+                            label: None,
+                            is_iteration: true,
+                        });
                     self.check_statement(&data.statement);
                     self.break_continue_context_stack.pop();
                 }
             }
             SyntaxKind::DoStatement => {
                 if let crate::ast::NodeData::DoStatement(data) = &node.data {
-                    self.break_continue_context_stack.push(BreakContinueContext {
-                        kind: BreakContinueContextKind::Loop,
-                        label: None,
-                        is_iteration: true,
-                    });
+                    self.break_continue_context_stack
+                        .push(BreakContinueContext {
+                            kind: BreakContinueContextKind::Loop,
+                            label: None,
+                            is_iteration: true,
+                        });
                     self.check_statement(&data.statement);
                     self.break_continue_context_stack.pop();
                     self.check_expression(&data.expression);
@@ -2568,11 +2844,12 @@ impl Checker {
                     if let Some(incr) = &data.incrementor {
                         self.check_expression(incr);
                     }
-                    self.break_continue_context_stack.push(BreakContinueContext {
-                        kind: BreakContinueContextKind::Loop,
-                        label: None,
-                        is_iteration: true,
-                    });
+                    self.break_continue_context_stack
+                        .push(BreakContinueContext {
+                            kind: BreakContinueContextKind::Loop,
+                            label: None,
+                            is_iteration: true,
+                        });
                     self.check_statement(&data.statement);
                     self.break_continue_context_stack.pop();
                 }
@@ -2583,11 +2860,12 @@ impl Checker {
                 if let crate::ast::NodeData::ForInOrOfStatement(data) = &node.data {
                     self.check_for_initializer(&data.initializer);
                     self.check_expression(&data.expression);
-                    self.break_continue_context_stack.push(BreakContinueContext {
-                        kind: BreakContinueContextKind::Loop,
-                        label: None,
-                        is_iteration: true,
-                    });
+                    self.break_continue_context_stack
+                        .push(BreakContinueContext {
+                            kind: BreakContinueContextKind::Loop,
+                            label: None,
+                            is_iteration: true,
+                        });
                     self.check_statement(&data.statement);
                     self.break_continue_context_stack.pop();
                 }
@@ -2617,11 +2895,12 @@ impl Checker {
             SyntaxKind::SwitchStatement => {
                 if let crate::ast::NodeData::SwitchStatement(data) = &node.data {
                     self.check_expression(&data.expression);
-                    self.break_continue_context_stack.push(BreakContinueContext {
-                        kind: BreakContinueContextKind::Switch,
-                        label: None,
-                        is_iteration: false,
-                    });
+                    self.break_continue_context_stack
+                        .push(BreakContinueContext {
+                            kind: BreakContinueContextKind::Switch,
+                            label: None,
+                            is_iteration: false,
+                        });
                     // case_block is a CaseBlock node; walk its clauses.
                     if let crate::ast::NodeData::CaseBlock(case_block) = &data.case_block.data {
                         for case in case_block.clauses.iter() {
@@ -2656,28 +2935,25 @@ impl Checker {
                 // references inside the body returns `any`. Mirrors Go's
                 // `getSymbolLinks(symbol).type = getWidenedTypeOfFunction`.
                 let fn_type = self.get_type_of_function_like(node);
-                self.type_node_links
-                    .get_or_default(node)
-                    .resolved_type = Some(fn_type.clone());
+                self.type_node_links.get_or_default(node).resolved_type = Some(fn_type.clone());
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(name) = &data.name {
                         if let Some(symbol) = self.resolve_identifier(name) {
                             self.value_symbol_links
                                 .get_or_default(&symbol)
                                 .resolved_type = Some(fn_type.clone());
-                            self.type_node_links
-                                .get_or_default(name)
-                                .resolved_type = Some(fn_type);
+                            self.type_node_links.get_or_default(name).resolved_type = Some(fn_type);
                         }
                     }
                 }
                 // Check the function body with parameter types primed.
                 self.push_function_scope(node);
-                self.break_continue_context_stack.push(BreakContinueContext {
-                    kind: BreakContinueContextKind::Function,
-                    label: None,
-                    is_iteration: false,
-                });
+                self.break_continue_context_stack
+                    .push(BreakContinueContext {
+                        kind: BreakContinueContextKind::Function,
+                        label: None,
+                        is_iteration: false,
+                    });
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(body) = &data.body {
                         self.check_statement(body);
@@ -2707,9 +2983,7 @@ impl Checker {
                 // constructor) and cache it on the declaration node + symbol
                 // so `new Foo(arg)` can resolve the callee and check args.
                 let class_type = self.get_type_of_class_declaration(node);
-                self.type_node_links
-                    .get_or_default(node)
-                    .resolved_type = Some(class_type.clone());
+                self.type_node_links.get_or_default(node).resolved_type = Some(class_type.clone());
                 if let crate::ast::NodeData::ClassDeclaration(data) = &node.data {
                     if let Some(name) = &data.name {
                         if let Some(symbol) = self.resolve_identifier(name) {
@@ -2840,9 +3114,7 @@ impl Checker {
             // `get_type_of_symbol` can recover the type via `type_node_links`.
             // (Previously this was stored on `data.name`, the Identifier
             // child node, which `get_type_of_symbol` never inspects.)
-            self.type_node_links
-                .get_or_default(node)
-                .resolved_type = Some(resolved_type.clone());
+            self.type_node_links.get_or_default(node).resolved_type = Some(resolved_type.clone());
             // Also cache on the Identifier so direct `get_type_of_node(name)`
             // callers (e.g. hover on the name) hit the cache without
             // recursing through the symbol.
@@ -3104,7 +3376,9 @@ impl Checker {
                     self.check_expression(&data.template);
                 }
             }
-            SyntaxKind::JsxElement | SyntaxKind::JsxSelfClosingElement | SyntaxKind::JsxFragment => {
+            SyntaxKind::JsxElement
+            | SyntaxKind::JsxSelfClosingElement
+            | SyntaxKind::JsxFragment => {
                 // JSX tag names, attribute names, and closing-element tag
                 // names are not identifier references. Only walk:
                 //   - JsxExpression children (and recursively, nested JSX)
@@ -3118,7 +3392,9 @@ impl Checker {
                     },
                     SyntaxKind::JsxSelfClosingElement => Some(Arc::clone(node)),
                     SyntaxKind::JsxFragment => match &node.data {
-                        crate::ast::NodeData::JsxFragment(d) => Some(Arc::clone(&d.opening_fragment)),
+                        crate::ast::NodeData::JsxFragment(d) => {
+                            Some(Arc::clone(&d.opening_fragment))
+                        }
                         _ => None,
                     },
                     _ => None,
@@ -3244,21 +3520,15 @@ impl Checker {
             _ => None,
         };
         let children: Vec<Arc<Node>> = match &node.data {
-            crate::ast::NodeData::JsxElement(data) => {
-                data.children.iter().cloned().collect()
-            }
-            crate::ast::NodeData::JsxFragment(data) => {
-                data.children.iter().cloned().collect()
-            }
+            crate::ast::NodeData::JsxElement(data) => data.children.iter().cloned().collect(),
+            crate::ast::NodeData::JsxFragment(data) => data.children.iter().cloned().collect(),
             _ => Vec::new(),
         };
 
         // Walk attributes (skip tag_name and closing tag_name).
         if let Some(opening) = opening_element {
             let attributes: Option<Arc<Node>> = match &opening.data {
-                crate::ast::NodeData::JsxOpeningElement(data) => {
-                    Some(Arc::clone(&data.attributes))
-                }
+                crate::ast::NodeData::JsxOpeningElement(data) => Some(Arc::clone(&data.attributes)),
                 crate::ast::NodeData::JsxSelfClosingElement(data) => {
                     Some(Arc::clone(&data.attributes))
                 }
@@ -3340,12 +3610,8 @@ impl Checker {
 
         // Emit TS2304 "Cannot find name '{0}'."
         let file = self.current_file.clone();
-        let diagnostic = crate::ast::Diagnostic::new(
-            file,
-            node.loc,
-            CANNOT_FIND_NAME_0,
-            vec![name.to_string()],
-        );
+        let diagnostic =
+            crate::ast::Diagnostic::new(file, node.loc, CANNOT_FIND_NAME_0, vec![name.to_string()]);
         self.diagnostics.add(diagnostic);
     }
 
@@ -3442,7 +3708,10 @@ impl Checker {
                     if let Some(sym) = container_sym.exports.get(name) {
                         // Skip pure alias export specifiers (e.g. `export { X }`).
                         let is_export_specifier = sym.flags == SymbolFlags::Alias
-                            && sym.declarations.iter().any(|d| d.kind == SyntaxKind::ExportSpecifier);
+                            && sym
+                                .declarations
+                                .iter()
+                                .any(|d| d.kind == SyntaxKind::ExportSpecifier);
                         if !is_export_specifier {
                             return self.follow_alias(sym);
                         }
@@ -3489,7 +3758,10 @@ impl Checker {
 
         // 3. Check globals (lib.d.ts symbols).
         if let Some(sym) = self.globals.get(name) {
-            if sym.flags.intersects(meaning.union(SymbolFlags::GlobalLookup)) {
+            if sym
+                .flags
+                .intersects(meaning.union(SymbolFlags::GlobalLookup))
+            {
                 return Some(Arc::clone(sym));
             }
         }
@@ -3580,7 +3852,10 @@ impl Checker {
         for &container_id in self.scope_stack.iter().rev() {
             let symbol_map = self.program.symbol_map();
             if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
-                if container_sym.flags.intersects(SymbolFlags::MODULE | SymbolFlags::ENUM) {
+                if container_sym
+                    .flags
+                    .intersects(SymbolFlags::MODULE | SymbolFlags::ENUM)
+                {
                     return Some(container_id);
                 }
             }
@@ -3591,15 +3866,12 @@ impl Checker {
     /// Get the export container for a referenced value.
     ///
     /// Go: `referenceResolver.GetReferencedExportContainer`
-    pub fn get_referenced_export_container(
-        &self,
-        node: &Node,
-        prefix_locals: bool,
-    ) -> Option<u64> {
+    pub fn get_referenced_export_container(&self, node: &Node, prefix_locals: bool) -> Option<u64> {
         // If the node is the name of a module/enum declaration, start in
         // the declaration container.
         let start_in_declaration_container = is_module_or_enum_name(node);
-        if let Some(symbol) = self.get_referenced_value_symbol(node, start_in_declaration_container) {
+        if let Some(symbol) = self.get_referenced_value_symbol(node, start_in_declaration_container)
+        {
             if symbol.flags.intersects(SymbolFlags::ExportValue) {
                 if let Some(ref export_symbol) = symbol.export_symbol {
                     if let Some(merged) = self.get_merged_symbol(export_symbol) {
@@ -3761,7 +4033,9 @@ impl Checker {
         let mut result = Arc::clone(symbol);
         if symbol.flags.intersects(SymbolFlags::ExportValue) {
             if let Some(ref export_sym) = symbol.export_symbol {
-                result = self.get_merged_symbol(export_sym).unwrap_or(Arc::clone(export_sym));
+                result = self
+                    .get_merged_symbol(export_sym)
+                    .unwrap_or(Arc::clone(export_sym));
             }
         }
         result
@@ -3800,7 +4074,9 @@ impl Checker {
     /// Go: `referenceResolver.getDeclarationOfAliasSymbol`
     fn get_declaration_of_alias_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
         // Find the last alias symbol declaration.
-        symbol.declarations.iter()
+        symbol
+            .declarations
+            .iter()
             .filter(|d| is_alias_symbol_declaration(d))
             .last()
             .cloned()
@@ -3837,7 +4113,10 @@ impl Checker {
                 if container_sym.flags.intersects(SymbolFlags::MODULE) {
                     if let Some(sym) = container_sym.exports.get(name) {
                         let is_export_specifier = sym.flags == SymbolFlags::Alias
-                            && sym.declarations.iter().any(|d| d.kind == SyntaxKind::ExportSpecifier);
+                            && sym
+                                .declarations
+                                .iter()
+                                .any(|d| d.kind == SyntaxKind::ExportSpecifier);
                         if !is_export_specifier {
                             return self.follow_alias(sym);
                         }
@@ -3856,7 +4135,10 @@ impl Checker {
 
         // Check globals.
         if let Some(sym) = self.globals.get(name) {
-            if sym.flags.intersects(meaning.union(SymbolFlags::GlobalLookup)) {
+            if sym
+                .flags
+                .intersects(meaning.union(SymbolFlags::GlobalLookup))
+            {
                 return Some(Arc::clone(sym));
             }
         }
@@ -3879,7 +4161,10 @@ impl Checker {
         merged_parent: Option<u64>,
     ) {
         // Collect entries to merge to avoid borrow issues
-        let entries: Vec<(String, Arc<Symbol>)> = source.iter().map(|(k, v)| (k.clone(), Arc::clone(v))).collect();
+        let entries: Vec<(String, Arc<Symbol>)> = source
+            .iter()
+            .map(|(k, v)| (k.clone(), Arc::clone(v)))
+            .collect();
         for (name, source_symbol) in entries {
             if let Some(target_symbol) = target.entries.get_mut(&name) {
                 // Merge the existing target symbol with the source
@@ -3920,7 +4205,10 @@ impl Checker {
             // Determine the effective target (clone if not transient)
             let effective_target = if !target.flags.intersects(SymbolFlags::Transient) {
                 let resolved_target = self.resolve_symbol(target);
-                if resolved_target.flags.intersects(get_excluded_symbol_flags(source.flags)) == false
+                if resolved_target
+                    .flags
+                    .intersects(get_excluded_symbol_flags(source.flags))
+                    == false
                     || (source.flags | resolved_target.flags).intersects(SymbolFlags::Assignment)
                 {
                     if let Some(cloned) = self.clone_symbol(&resolved_target) {
@@ -3938,18 +4226,25 @@ impl Checker {
 
             // Build the merged symbol by creating a new one
             let mut source_flags = source.flags;
-            if !effective_target.flags.intersects(SymbolFlags::ConstEnumOnlyModule) {
+            if !effective_target
+                .flags
+                .intersects(SymbolFlags::ConstEnumOnlyModule)
+            {
                 source_flags.remove(SymbolFlags::ConstEnumOnlyModule);
             }
             let merged_flags = effective_target.flags | source_flags;
 
             let mut merged = Symbol::new(merged_flags, &effective_target.name);
             // Copy value declaration (source takes priority)
-            merged.value_declaration = source.value_declaration.clone()
+            merged.value_declaration = source
+                .value_declaration
+                .clone()
                 .or_else(|| effective_target.value_declaration.clone());
             // Merge declarations
             merged.declarations = effective_target.declarations.clone();
-            merged.declarations.extend(source.declarations.iter().cloned());
+            merged
+                .declarations
+                .extend(source.declarations.iter().cloned());
             // Copy parent
             merged.parent = effective_target.parent.clone();
             // Copy members and exports
@@ -3966,10 +4261,7 @@ impl Checker {
             // We need to mutate the result's members and exports
             // Since result is behind Arc, we use a workaround:
             // Create a mutable temporary, merge, then create new Arc
-            let mut result_mut = Symbol::new(
-                result.flags,
-                &result.name,
-            );
+            let mut result_mut = Symbol::new(result.flags, &result.name);
             result_mut.value_declaration = result.value_declaration.clone();
             result_mut.declarations = result.declarations.clone();
             result_mut.parent = result.parent.clone();
@@ -3981,7 +4273,9 @@ impl Checker {
             };
 
             // Merge source members into target members
-            let source_members: Vec<(String, Arc<Symbol>)> = source.members.iter()
+            let source_members: Vec<(String, Arc<Symbol>)> = source
+                .members
+                .iter()
                 .map(|(k, v)| (k.clone(), Arc::clone(v)))
                 .collect();
             for (name, source_sym) in source_members {
@@ -3990,12 +4284,16 @@ impl Checker {
                     *target_sym = merged;
                 } else {
                     let merged = self.get_merged_symbol(&source_sym);
-                    result_mut.members.insert(name, merged.unwrap_or_else(|| Arc::clone(&source_sym)));
+                    result_mut
+                        .members
+                        .insert(name, merged.unwrap_or_else(|| Arc::clone(&source_sym)));
                 }
             }
 
             // Merge source exports into target exports
-            let source_exports: Vec<(String, Arc<Symbol>)> = source.exports.iter()
+            let source_exports: Vec<(String, Arc<Symbol>)> = source
+                .exports
+                .iter()
                 .map(|(k, v)| (k.clone(), Arc::clone(v)))
                 .collect();
             for (name, source_sym) in source_exports {
@@ -4004,7 +4302,9 @@ impl Checker {
                     *target_sym = merged;
                 } else {
                     let merged = self.get_merged_symbol(&source_sym);
-                    result_mut.exports.insert(name, merged.unwrap_or_else(|| Arc::clone(&source_sym)));
+                    result_mut
+                        .exports
+                        .insert(name, merged.unwrap_or_else(|| Arc::clone(&source_sym)));
                 }
             }
 
@@ -4329,7 +4629,10 @@ fn is_property_access_name(node: &Arc<Node>) -> bool {
     let Some(name_field) = crate::ast::node_data_generated::node_name(parent) else {
         return false;
     };
-    std::ptr::eq(name_field.as_ref() as *const Node, node.as_ref() as *const Node)
+    std::ptr::eq(
+        name_field.as_ref() as *const Node,
+        node.as_ref() as *const Node,
+    )
 }
 
 impl std::fmt::Debug for Checker {

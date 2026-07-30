@@ -9,7 +9,7 @@ use std::io::Write;
 use std::sync::Arc;
 
 use crate::ast::diagnostic::Diagnostic;
-use crate::ast::{utf16_len, LineMap, SourceFile};
+use crate::ast::{LineMap, SourceFile, utf16_len};
 use crate::diagnostics::Category;
 
 /// Convert a byte offset into a 0-based (line, character) pair within a source

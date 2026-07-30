@@ -20,7 +20,7 @@
 
 use std::sync::Arc;
 
-use crate::ast::{is_binding_pattern, is_identifier, Node, NodeData, SyntaxKind};
+use crate::ast::{Node, NodeData, SyntaxKind, is_binding_pattern, is_identifier};
 
 use super::checker::Checker;
 
@@ -86,9 +86,7 @@ impl Checker {
                 let last_idx = jsdoc_parameters.len() - 1;
                 let last_tag = &jsdoc_parameters[last_idx];
                 let (last_name, last_type_expr) = match &last_tag.data {
-                    NodeData::JSDocParameterOrPropertyTag(d) => {
-                        (&d.name, &d.type_expression)
-                    }
+                    NodeData::JSDocParameterOrPropertyTag(d) => (&d.name, &d.type_expression),
                     _ => return,
                 };
                 if !is_identifier(last_name) {
@@ -97,7 +95,9 @@ impl Checker {
                 if excluded.contains(&last_idx) || param_names.contains(last_name.text()) {
                     return;
                 }
-                let Some(type_expr) = last_type_expr else { return };
+                let Some(type_expr) = last_type_expr else {
+                    return;
+                };
                 let type_node = match &type_expr.data {
                     NodeData::JSDocTypeExpression(d) => &d.type_node,
                     _ => return,

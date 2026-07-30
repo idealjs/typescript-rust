@@ -338,8 +338,7 @@ impl Checker {
             // Falls back to structural comparison when the variance-based
             // check is inconclusive (Ternary::Maybe) or not applicable
             // (None — e.g. tuples, marker types).
-            if let Some(result) = self.generic_type_reference_related_to(source, target, relation)
-            {
+            if let Some(result) = self.generic_type_reference_related_to(source, target, relation) {
                 if result.is_true() {
                     return true;
                 }
@@ -482,7 +481,10 @@ impl Checker {
         };
 
         // Compare element-by-element
-        let min_len = source_tuple.element_infos.len().min(target_tuple.element_infos.len());
+        let min_len = source_tuple
+            .element_infos
+            .len()
+            .min(target_tuple.element_infos.len());
         for i in 0..min_len {
             let source_elem = &source_tuple.element_infos[i];
             let target_elem = &target_tuple.element_infos[i];
@@ -507,7 +509,10 @@ impl Checker {
         if source_tuple.element_infos.len() < target_tuple.element_infos.len() {
             for i in source_tuple.element_infos.len()..target_tuple.element_infos.len() {
                 let flags = target_tuple.element_infos[i].flags;
-                if !flags.contains(ElementFlags::Optional) && !flags.contains(ElementFlags::Rest) && !flags.contains(ElementFlags::Variadic) {
+                if !flags.contains(ElementFlags::Optional)
+                    && !flags.contains(ElementFlags::Rest)
+                    && !flags.contains(ElementFlags::Variadic)
+                {
                     return false;
                 }
             }
@@ -533,7 +538,12 @@ impl Checker {
     }
 
     /// Check if element flags are compatible between source and target.
-    fn is_element_flags_compatible(&self, source: ElementFlags, target: ElementFlags, _relation: RelationKind) -> bool {
+    fn is_element_flags_compatible(
+        &self,
+        source: ElementFlags,
+        target: ElementFlags,
+        _relation: RelationKind,
+    ) -> bool {
         // Required can be assigned to Required or Optional
         // Optional can be assigned to Optional
         // Rest can be assigned to Rest
@@ -1077,15 +1087,19 @@ impl Checker {
         //    signature when there are no type parameters, which is the
         //    common case for our current parity fixtures.
         let source = if !source.type_parameters.is_empty()
-            && !type_parameters_same(source.type_parameters.as_slice(), target.type_parameters.as_slice())
-        {
+            && !type_parameters_same(
+                source.type_parameters.as_slice(),
+                target.type_parameters.as_slice(),
+            ) {
             self.get_erased_signature(source)
         } else {
             Arc::clone(source)
         };
         let target = if !source.type_parameters.is_empty()
-            && !type_parameters_same(source.type_parameters.as_slice(), target.type_parameters.as_slice())
-        {
+            && !type_parameters_same(
+                source.type_parameters.as_slice(),
+                target.type_parameters.as_slice(),
+            ) {
             self.get_erased_signature(target)
         } else {
             Arc::clone(target)
@@ -1113,7 +1127,12 @@ impl Checker {
                 if let Some(target_this) = target_this {
                     let mut related = Ternary::False;
                     if !strict_variance {
-                        related = self.compare_types(source_this.clone(), target_this.clone(), relation, false);
+                        related = self.compare_types(
+                            source_this.clone(),
+                            target_this.clone(),
+                            relation,
+                            false,
+                        );
                     }
                     if related.is_false() {
                         related = self.compare_types(target_this, source_this, relation, false);
@@ -1162,10 +1181,12 @@ impl Checker {
             // Default: bivariant — try source→target first, fall back to target→source.
             let mut related = Ternary::False;
             if !check_mode.contains(SignatureCheckMode::Callback) && !strict_variance {
-                related = self.compare_types(source_type.clone(), target_type.clone(), relation, false);
+                related =
+                    self.compare_types(source_type.clone(), target_type.clone(), relation, false);
             }
             if related.is_false() {
-                related = self.compare_types(target_type.clone(), source_type.clone(), relation, false);
+                related =
+                    self.compare_types(target_type.clone(), source_type.clone(), relation, false);
             }
             if related.is_false() {
                 return Ternary::False;
@@ -1187,9 +1208,7 @@ impl Checker {
                     match source_tp {
                         Some(source_tp) => {
                             result = result.and(self.compare_type_predicate_related_to(
-                                &source_tp,
-                                &target_tp,
-                                relation,
+                                &source_tp, &target_tp, relation,
                             ));
                         }
                         None => {
@@ -1242,8 +1261,10 @@ impl Checker {
         if source.kind != target.kind {
             return Ternary::False;
         }
-        if matches!(source.kind, TypePredicateKind::Identifier | TypePredicateKind::AssertsIdentifier)
-            && source.parameter_index != target.parameter_index
+        if matches!(
+            source.kind,
+            TypePredicateKind::Identifier | TypePredicateKind::AssertsIdentifier
+        ) && source.parameter_index != target.parameter_index
         {
             return Ternary::False;
         }
@@ -1281,9 +1302,7 @@ impl Checker {
         };
         matches!(
             decl.kind,
-            SyntaxKind::MethodDeclaration
-                | SyntaxKind::MethodSignature
-                | SyntaxKind::Constructor
+            SyntaxKind::MethodDeclaration | SyntaxKind::MethodSignature | SyntaxKind::Constructor
         )
     }
 
@@ -1311,10 +1330,7 @@ impl Checker {
 
         // Construct-signature abstractness check (skipped: we don't yet
         // populate SignatureFlagsAbstract on signatures in the Rust port).
-        if kind == SignatureKind::Construct
-            && !source_sigs.is_empty()
-            && !target_sigs.is_empty()
-        {
+        if kind == SignatureKind::Construct && !source_sigs.is_empty() && !target_sigs.is_empty() {
             // Future: mirror Go's constructorVisibilitiesAreCompatible.
         }
 
@@ -1326,7 +1342,8 @@ impl Checker {
         let check_mode = match relation {
             RelationKind::Subtype => SignatureCheckMode::StrictTopSignature,
             RelationKind::StrictSubtype => SignatureCheckMode::from_bits_truncate(
-                SignatureCheckMode::StrictTopSignature.bits() | SignatureCheckMode::StrictArity.bits(),
+                SignatureCheckMode::StrictTopSignature.bits()
+                    | SignatureCheckMode::StrictArity.bits(),
             ),
             _ => SignatureCheckMode::None,
         };
@@ -1366,8 +1383,7 @@ impl Checker {
                 for t in &target_sigs[min_len..] {
                     let mut found = false;
                     for s in &source_sigs[min_len..] {
-                        let related =
-                            self.compare_signatures_related(s, t, check_mode, relation);
+                        let related = self.compare_signatures_related(s, t, check_mode, relation);
                         if !related.is_false() {
                             result = result.and(related);
                             found = true;
@@ -1383,8 +1399,16 @@ impl Checker {
             // Single-signature fast path. For non-comparable relations we
             // erase generics; for `Comparable` we always erase (Go behavior).
             let erase = relation == RelationKind::Comparable;
-            let s = if erase { self.get_erased_signature(&source_sigs[0]) } else { Arc::clone(&source_sigs[0]) };
-            let t = if erase { self.get_erased_signature(&target_sigs[0]) } else { Arc::clone(&target_sigs[0]) };
+            let s = if erase {
+                self.get_erased_signature(&source_sigs[0])
+            } else {
+                Arc::clone(&source_sigs[0])
+            };
+            let t = if erase {
+                self.get_erased_signature(&target_sigs[0])
+            } else {
+                Arc::clone(&target_sigs[0])
+            };
             result = self.compare_signatures_related(&s, &t, check_mode, relation);
         } else {
             // N×M fallback: every target signature must be matched by some
@@ -1393,12 +1417,7 @@ impl Checker {
             for t in &target_sigs {
                 let mut found = false;
                 for s in &source_sigs {
-                    let related = self.compare_signatures_related(
-                        s,
-                        t,
-                        check_mode,
-                        relation,
-                    );
+                    let related = self.compare_signatures_related(s, t, check_mode, relation);
                     if !related.is_false() {
                         result = result.and(related);
                         found = true;
@@ -1725,10 +1744,7 @@ impl Checker {
     /// the return type is itself computed from the signature.
     /// Mirrors Go's `getNonCircularReturnTypeOfSignature`. Currently we just
     /// return the resolved return type.
-    pub fn get_non_circular_return_type_of_signature(
-        &self,
-        sig: &Arc<Signature>,
-    ) -> Arc<Type> {
+    pub fn get_non_circular_return_type_of_signature(&self, sig: &Arc<Signature>) -> Arc<Type> {
         self.get_return_type_of_signature(sig)
             .unwrap_or_else(|| self.any_type())
     }
@@ -1894,7 +1910,10 @@ impl Checker {
                 let template = self.get_template_type_from_mapped_type(source);
                 match template {
                     Some(template) => {
-                        let target_value = target_info.value_type.clone().unwrap_or_else(|| self.any_type());
+                        let target_value = target_info
+                            .value_type
+                            .clone()
+                            .unwrap_or_else(|| self.any_type());
                         self.compare_types(template, target_value, relation, false)
                     }
                     None => Ternary::False,
@@ -1950,8 +1969,14 @@ impl Checker {
         target_info: &IndexInfo,
         relation: RelationKind,
     ) -> Ternary {
-        let source_value = source_info.value_type.clone().unwrap_or_else(|| self.any_type());
-        let target_value = target_info.value_type.clone().unwrap_or_else(|| self.any_type());
+        let source_value = source_info
+            .value_type
+            .clone()
+            .unwrap_or_else(|| self.any_type());
+        let target_value = target_info
+            .value_type
+            .clone()
+            .unwrap_or_else(|| self.any_type());
         self.compare_types(source_value, target_value, relation, false)
     }
 
@@ -1976,9 +2001,11 @@ impl Checker {
             let related = match source_info {
                 Some(si) => {
                     let sv = si.value_type.clone().unwrap_or_else(|| self.any_type());
-                    let tv = target_info.value_type.clone().unwrap_or_else(|| self.any_type());
-                    let type_related =
-                        self.compare_types(sv, tv, RelationKind::Identity, false);
+                    let tv = target_info
+                        .value_type
+                        .clone()
+                        .unwrap_or_else(|| self.any_type());
+                    let type_related = self.compare_types(sv, tv, RelationKind::Identity, false);
                     let readonly_match = si.is_readonly == target_info.is_readonly;
                     if type_related.is_true() && readonly_match {
                         Ternary::True
@@ -2012,9 +2039,7 @@ impl Checker {
         let infos = self.get_index_infos_of_type(t);
         for info in infos {
             if let Some(info_key) = &info.key_type {
-                if Arc::ptr_eq(info_key, key_type)
-                    || info_key.flags == key_type.flags
-                {
+                if Arc::ptr_eq(info_key, key_type) || info_key.flags == key_type.flags {
                     return Some(info);
                 }
             }
@@ -2106,7 +2131,10 @@ impl Checker {
         if t.flags.contains(TypeFlags::Intersection) {
             // Every constituent must be inferable.
             if let Some(ui) = t.as_union_or_intersection() {
-                return ui.types.iter().all(|c| self.is_object_type_with_inferable_index(c));
+                return ui
+                    .types
+                    .iter()
+                    .all(|c| self.is_object_type_with_inferable_index(c));
             }
             return false;
         }
@@ -2119,12 +2147,17 @@ impl Checker {
                     | SymbolFlags::EnumMember
                     | SymbolFlags::ValueModule,
             );
-            if inferable_symbol_kinds && !sf.contains(SymbolFlags::Class) && !self.type_has_call_or_construct_signatures(t) {
+            if inferable_symbol_kinds
+                && !sf.contains(SymbolFlags::Class)
+                && !self.type_has_call_or_construct_signatures(t)
+            {
                 return true;
             }
         }
         // JS expando / object-rest case.
-        if t.object_flags.intersects(ObjectFlags::JSLiteral | ObjectFlags::ObjectRestType) {
+        if t.object_flags
+            .intersects(ObjectFlags::JSLiteral | ObjectFlags::ObjectRestType)
+        {
             return true;
         }
         // Reverse-mapped case: recurse into the source.
@@ -2155,7 +2188,10 @@ impl Checker {
         let Some(target_key) = target_info.key_type.as_ref() else {
             return Ternary::True;
         };
-        let target_value = target_info.value_type.clone().unwrap_or_else(|| self.any_type());
+        let target_value = target_info
+            .value_type
+            .clone()
+            .unwrap_or_else(|| self.any_type());
 
         let props = self.get_properties_of_type(source);
         let mut result = Ternary::True;
@@ -2170,8 +2206,7 @@ impl Checker {
                 continue;
             }
             let prop_type = self.get_type_of_symbol(&prop);
-            let related =
-                self.compare_types(prop_type, Arc::clone(&target_value), relation, false);
+            let related = self.compare_types(prop_type, Arc::clone(&target_value), relation, false);
             if related.is_false() {
                 return Ternary::False;
             }
@@ -2203,11 +2238,15 @@ impl Checker {
             return true;
         }
         // String literal -> string index
-        if key.flags.contains(TypeFlags::StringLiteral) && target_key.flags.contains(TypeFlags::String) {
+        if key.flags.contains(TypeFlags::StringLiteral)
+            && target_key.flags.contains(TypeFlags::String)
+        {
             return true;
         }
         // Number literal -> number index
-        if key.flags.contains(TypeFlags::NumberLiteral) && target_key.flags.contains(TypeFlags::Number) {
+        if key.flags.contains(TypeFlags::NumberLiteral)
+            && target_key.flags.contains(TypeFlags::Number)
+        {
             return true;
         }
         // A number key is applicable to a string index (numbers index
@@ -2227,7 +2266,11 @@ impl Checker {
     /// common case for `{ [key: string]: T }` targets) and a number
     /// literal when the name parses as a number. Full implementation
     /// would also handle unique symbols and `SymbolFlags::EnumMember`.
-    pub fn get_literal_type_from_property(&mut self, prop: &Arc<Symbol>, target_key: &Arc<Type>) -> Arc<Type> {
+    pub fn get_literal_type_from_property(
+        &mut self,
+        prop: &Arc<Symbol>,
+        target_key: &Arc<Type>,
+    ) -> Arc<Type> {
         if target_key.flags.contains(TypeFlags::Number) {
             if let Ok(n) = prop.name.parse::<i64>() {
                 return self.get_number_literal_type(jsnum::Number::from(n));
@@ -2347,34 +2390,20 @@ impl Checker {
                         // and contravariant bits both unset), and our
                         // `VARIANCE_FLAGS_BIVARIANT` is both bits set, we
                         // disambiguate by checking the bits explicitly.
-                        let is_bivariant = variance_flags
-                            .intersects(VARIANCE_FLAGS_BIVARIANT)
+                        let is_bivariant = variance_flags.intersects(VARIANCE_FLAGS_BIVARIANT)
                             && variance != VarianceFlags::None;
-                        let contra = self.compare_types(
-                            Arc::clone(t),
-                            Arc::clone(s),
-                            relation,
-                            false,
-                        );
+                        let contra =
+                            self.compare_types(Arc::clone(t), Arc::clone(s), relation, false);
                         if is_bivariant {
                             if !contra.is_false() {
                                 contra
                             } else {
-                                self.compare_types(
-                                    Arc::clone(s),
-                                    Arc::clone(t),
-                                    relation,
-                                    false,
-                                )
+                                self.compare_types(Arc::clone(s), Arc::clone(t), relation, false)
                             }
                         } else {
                             // Invariant: require both directions to hold.
-                            let co = self.compare_types(
-                                Arc::clone(s),
-                                Arc::clone(t),
-                                relation,
-                                false,
-                            );
+                            let co =
+                                self.compare_types(Arc::clone(s), Arc::clone(t), relation, false);
                             if co.is_false() {
                                 Ternary::False
                             } else {
@@ -2464,9 +2493,7 @@ impl Checker {
         relation: RelationKind,
     ) -> Option<Ternary> {
         // Both must be object-typed references with the same target.
-        if !source.flags.contains(TypeFlags::Object)
-            || !target.flags.contains(TypeFlags::Object)
-        {
+        if !source.flags.contains(TypeFlags::Object) || !target.flags.contains(TypeFlags::Object) {
             return None;
         }
         if !source.object_flags.contains(ObjectFlags::Reference)
@@ -2503,12 +2530,7 @@ impl Checker {
         }
         let source_args = self.get_type_arguments(source);
         let target_args = self.get_type_arguments(target);
-        Some(self.type_arguments_related_to(
-            &source_args,
-            &target_args,
-            &variances,
-            relation,
-        ))
+        Some(self.type_arguments_related_to(&source_args, &target_args, &variances, relation))
     }
 
     /// Simplified port of Go's `getVariances`. The full implementation
@@ -2571,8 +2593,7 @@ impl Checker {
         // `object_flags` carries `FreshLiteral` and whose target is the
         // global `Array` type with an empty (or `undefined`) element type.
         // We approximate this by checking the fresh-literal flag.
-        t.object_flags.contains(ObjectFlags::FreshLiteral)
-            && self.is_array_type(t)
+        t.object_flags.contains(ObjectFlags::FreshLiteral) && self.is_array_type(t)
     }
 }
 
@@ -2663,9 +2684,7 @@ impl Checker {
             false
         } else {
             match (ct.check_type.as_ref(), ct.extends_type.as_ref()) {
-                (Some(check), Some(extends)) => {
-                    self.is_type_assignable_to(check, extends)
-                }
+                (Some(check), Some(extends)) => self.is_type_assignable_to(check, extends),
                 _ => false,
             }
         };
@@ -2737,8 +2756,12 @@ impl Checker {
         // assignable to source's constraint.
         let source_constraint = self.get_constraint_type_from_mapped_type(source)?;
         let target_constraint = self.get_constraint_type_from_mapped_type(target)?;
-        let constraint_related =
-            self.compare_types(Arc::clone(&target_constraint), Arc::clone(&source_constraint), relation, false);
+        let constraint_related = self.compare_types(
+            Arc::clone(&target_constraint),
+            Arc::clone(&source_constraint),
+            relation,
+            false,
+        );
         if constraint_related.is_false() {
             return Some(Ternary::False);
         }
@@ -2883,8 +2906,7 @@ impl Checker {
         let extends_type = ct.extends_type.clone()?;
 
         // Error type short-circuit (matches Go).
-        if check_type.flags.contains(TypeFlags::Any)
-            && check_type.intrinsic_name() == Some("error")
+        if check_type.flags.contains(TypeFlags::Any) && check_type.intrinsic_name() == Some("error")
         {
             return Some(Arc::clone(&check_type));
         }
@@ -2922,9 +2944,7 @@ impl Checker {
             // didn't, we can't safely resolve the conditional.
             let inferred = self.get_inferred_types(&context);
             for inf in &inferred {
-                if inf.flags.contains(TypeFlags::Any)
-                    && inf.intrinsic_name() == Some("error")
-                {
+                if inf.flags.contains(TypeFlags::Any) && inf.intrinsic_name() == Some("error") {
                     return None;
                 }
             }
@@ -3026,7 +3046,9 @@ impl Checker {
                     .union_or_intersection
                     .types
                     .iter()
-                    .map(|inner| self.substitute_infer_type_parameters(inner, params, substitutions))
+                    .map(|inner| {
+                        self.substitute_infer_type_parameters(inner, params, substitutions)
+                    })
                     .collect();
                 self.get_union_type(new_types)
             }
@@ -3035,7 +3057,9 @@ impl Checker {
                     .union_or_intersection
                     .types
                     .iter()
-                    .map(|inner| self.substitute_infer_type_parameters(inner, params, substitutions))
+                    .map(|inner| {
+                        self.substitute_infer_type_parameters(inner, params, substitutions)
+                    })
                     .collect();
                 self.get_intersection_type(new_types)
             }
@@ -3069,17 +3093,21 @@ impl Checker {
                     .element_infos
                     .iter()
                     .map(|ei| match &ei.type_ {
-                        Some(ty) => self.substitute_infer_type_parameters(ty, params, substitutions),
+                        Some(ty) => {
+                            self.substitute_infer_type_parameters(ty, params, substitutions)
+                        }
                         None => self.error_type(),
                     })
                     .collect();
                 // If nothing changed, avoid rebuilding.
-                let changed = tup.element_infos.iter().zip(new_elems.iter()).any(
-                    |(ei, new_t)| match &ei.type_ {
+                let changed = tup
+                    .element_infos
+                    .iter()
+                    .zip(new_elems.iter())
+                    .any(|(ei, new_t)| match &ei.type_ {
                         Some(old_t) => !Arc::ptr_eq(old_t, new_t),
                         None => true,
-                    },
-                );
+                    });
                 if !changed {
                     return Arc::clone(t);
                 }
@@ -3113,32 +3141,56 @@ fn type_contains_type_parameter(t: &Arc<Type>) -> bool {
             .types
             .iter()
             .any(type_contains_type_parameter),
-        TypeData::Object(o) => o
-            .type_arguments
-            .iter()
-            .any(type_contains_type_parameter)
-            || o
-                .target
+        TypeData::Object(o) => {
+            o.type_arguments.iter().any(type_contains_type_parameter)
+                || o.target
+                    .as_ref()
+                    .map(type_contains_type_parameter)
+                    .unwrap_or(false)
+        }
+        TypeData::Conditional(ct) => {
+            ct.check_type
                 .as_ref()
                 .map(type_contains_type_parameter)
-                .unwrap_or(false),
-        TypeData::Conditional(ct) => {
-            ct.check_type.as_ref().map(type_contains_type_parameter).unwrap_or(false)
-                || ct.extends_type.as_ref().map(type_contains_type_parameter).unwrap_or(false)
-                || ct.resolved_true_type.get().map(type_contains_type_parameter).unwrap_or(false)
-                || ct.resolved_false_type.get().map(type_contains_type_parameter).unwrap_or(false)
+                .unwrap_or(false)
+                || ct
+                    .extends_type
+                    .as_ref()
+                    .map(type_contains_type_parameter)
+                    .unwrap_or(false)
+                || ct
+                    .resolved_true_type
+                    .get()
+                    .map(type_contains_type_parameter)
+                    .unwrap_or(false)
+                || ct
+                    .resolved_false_type
+                    .get()
+                    .map(type_contains_type_parameter)
+                    .unwrap_or(false)
         }
         TypeData::Mapped(m) => {
-            m.constraint_type.as_ref().map(type_contains_type_parameter).unwrap_or(false)
-                || m.template_type.as_ref().map(type_contains_type_parameter).unwrap_or(false)
-                || m.name_type.as_ref().map(type_contains_type_parameter).unwrap_or(false)
-                || m.type_parameter.as_ref().map(type_contains_type_parameter).unwrap_or(false)
+            m.constraint_type
+                .as_ref()
+                .map(type_contains_type_parameter)
+                .unwrap_or(false)
+                || m.template_type
+                    .as_ref()
+                    .map(type_contains_type_parameter)
+                    .unwrap_or(false)
+                || m.name_type
+                    .as_ref()
+                    .map(type_contains_type_parameter)
+                    .unwrap_or(false)
+                || m.type_parameter
+                    .as_ref()
+                    .map(type_contains_type_parameter)
+                    .unwrap_or(false)
         }
         TypeData::TypeParameter(_) => true,
         _ => false,
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -3226,10 +3278,7 @@ mod tests {
         // StrictCallback, matching Go's `SignatureCheckModeCallback`.
         assert!(SignatureCheckMode::Callback.contains(SignatureCheckMode::BivariantCallback));
         assert!(SignatureCheckMode::Callback.contains(SignatureCheckMode::StrictCallback));
-        assert_eq!(
-            SignatureCheckMode::Callback,
-            SIGNATURE_CHECK_MODE_CALLBACK
-        );
+        assert_eq!(SignatureCheckMode::Callback, SIGNATURE_CHECK_MODE_CALLBACK);
     }
 
     #[test]
@@ -3256,7 +3305,8 @@ mod tests {
         // Sanity-check the ObjectFlags we rely on for the index-signature
         // structural fallback (P3.7f) are distinct bits — guards against
         // accidental renumbering of the ObjectFlags bitfield.
-        let inferable = ObjectFlags::JSLiteral | ObjectFlags::ObjectRestType | ObjectFlags::ReverseMapped;
+        let inferable =
+            ObjectFlags::JSLiteral | ObjectFlags::ObjectRestType | ObjectFlags::ReverseMapped;
         assert!(inferable.contains(ObjectFlags::JSLiteral));
         assert!(inferable.contains(ObjectFlags::ObjectRestType));
         assert!(inferable.contains(ObjectFlags::ReverseMapped));

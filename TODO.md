@@ -290,7 +290,17 @@ do-while/for/for-in/for-of/switch 控制流、return/throw/break/continue、
 
 - [x] try/catch/finally 异常流（已验证：`bind_try_statement` 正确处理
   normal/exception/return 路径 + finally 合并；narrowing 不从 try 内泄漏）。
-- [ ] `ARRAY_MUTATION`：方法调用副作用。
+- [x] `ARRAY_MUTATION`：方法调用副作用。binder 在 `bind_call_expression` 中
+  通过 `is_narrowable_operand` + `is_push_or_unshift_identifier` 检测
+  `arr.push(x)` / `arr.unshift(x)` 形式并生成 ARRAY_MUTATION flow node；
+  checker `narrow_type` 在 ARRAY_MUTATION 节点调用 `evolve_array_at_mutation`
+  将 `autoArrayType` / `EvolvingArray` 的元素类型与新参数类型联合，得到
+  evolving array 类型；`get_type_of_identifier` 在 evolving-array 操作目标
+  位置（`x.length`/`x.push(v)`/`x.unshift(v)`/`x[i] = v`）返回 `autoArrayType`
+  而非 finalize 后的数组类型，避免假 TS2339/TS2322；`has_property_of_type`
+  对 `autoArrayType` 与 `EvolvingArray` 类型豁免 `push`/`unshift` 属性检查
+  （无 lib.d.ts 时仍允许 evolving-array 链路）；`finalize_evolving_array_type`
+  在最终读取时退化为普通 `Array<T>`。6 条 evolving array parity 测试通过。
 - [ ] `ReduceLabel`/`Shared`/`Referenced` 后处理。
 - [ ] labeled statement 标签支持。
 

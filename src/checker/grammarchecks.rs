@@ -12,11 +12,11 @@
 use std::sync::Arc;
 
 use crate::ast::{
-    is_class_declaration, is_class_expression, is_jsx_namespaced_name, is_module_block,
-    is_source_file, ModifierFlags, Node, NodeData, NodeFlags, SyntaxKind,
+    ModifierFlags, Node, NodeData, NodeFlags, SyntaxKind, is_class_declaration,
+    is_class_expression, is_jsx_namespaced_name, is_module_block, is_source_file,
 };
-use crate::diagnostics::messages_generated::*;
 use crate::diagnostics::Message;
+use crate::diagnostics::messages_generated::*;
 use crate::scanner::token_to_string;
 
 use super::checker::Checker;
@@ -58,8 +58,7 @@ impl Checker {
     ) -> bool {
         let file = self.current_file.clone();
         let loc = crate::core::text::TextRange::new(start, start + length);
-        let diagnostic =
-            crate::ast::Diagnostic::new(file, loc, *message, Vec::new());
+        let diagnostic = crate::ast::Diagnostic::new(file, loc, *message, Vec::new());
         self.diagnostics.add(diagnostic);
         true
     }
@@ -223,10 +222,8 @@ impl Checker {
                 | SyntaxKind::PrivateKeyword => {
                     let text = visibility_to_string(modifier.kind);
                     if flags.contains(ModifierFlags::AccessibilityModifier) {
-                        return self.grammar_error_on_node(
-                            modifier,
-                            &ACCESSIBILITY_MODIFIER_ALREADY_SEEN,
-                        );
+                        return self
+                            .grammar_error_on_node(modifier, &ACCESSIBILITY_MODIFIER_ALREADY_SEEN);
                     } else if flags.contains(ModifierFlags::Override)
                         && !modifier.flags.contains(NodeFlags::Reparsed)
                     {
@@ -619,8 +616,7 @@ impl Checker {
                             &[in_out_text.to_string()],
                         );
                     }
-                    if in_out_flag.contains(ModifierFlags::In)
-                        && flags.contains(ModifierFlags::Out)
+                    if in_out_flag.contains(ModifierFlags::In) && flags.contains(ModifierFlags::Out)
                     {
                         return self.grammar_error_on_node_with_args(
                             modifier,
@@ -732,10 +728,8 @@ impl Checker {
             match ctx.kind {
                 super::checker::BreakContinueContextKind::Function => {
                     // Cannot cross function boundary.
-                    return self.grammar_error_on_node(
-                        node,
-                        &JUMP_TARGET_CANNOT_CROSS_FUNCTION_BOUNDARY,
-                    );
+                    return self
+                        .grammar_error_on_node(node, &JUMP_TARGET_CANNOT_CROSS_FUNCTION_BOUNDARY);
                 }
                 super::checker::BreakContinueContextKind::Labeled => {
                     if let Some(label_text) = &target_label_text {
@@ -1187,12 +1181,14 @@ impl Checker {
 
         // Type arguments are not allowed on JSX elements.
         let type_args: Option<Vec<Arc<Node>>> = match &node.data {
-            NodeData::JsxOpeningElement(data) => {
-                data.type_arguments.as_ref().map(|l| l.iter().cloned().collect())
-            }
-            NodeData::JsxSelfClosingElement(data) => {
-                data.type_arguments.as_ref().map(|l| l.iter().cloned().collect())
-            }
+            NodeData::JsxOpeningElement(data) => data
+                .type_arguments
+                .as_ref()
+                .map(|l| l.iter().cloned().collect()),
+            NodeData::JsxSelfClosingElement(data) => data
+                .type_arguments
+                .as_ref()
+                .map(|l| l.iter().cloned().collect()),
             _ => None,
         };
         if let Some(args) = type_args {
@@ -1230,7 +1226,10 @@ impl Checker {
             };
             let text = name_node.text().to_string();
             if !seen.insert(text.clone()) {
-                return self.grammar_error_on_node(&name_node, &JSX_ELEMENTS_CANNOT_HAVE_MULTIPLE_ATTRIBUTES_WITH_THE_SAME_NAME);
+                return self.grammar_error_on_node(
+                    &name_node,
+                    &JSX_ELEMENTS_CANNOT_HAVE_MULTIPLE_ATTRIBUTES_WITH_THE_SAME_NAME,
+                );
             }
             if let Some(init) = initializer {
                 if init.kind == SyntaxKind::JsxExpression {
@@ -1273,9 +1272,7 @@ impl Checker {
         }
         // JSX namespaced name used as a React component when JSX
         // transform is enabled and the namespace isn't an intrinsic.
-        if is_jsx_namespaced_name(node)
-            && self.is_jsx_transform_enabled()
-        {
+        if is_jsx_namespaced_name(node) && self.is_jsx_transform_enabled() {
             let namespace_text = match &node.data {
                 NodeData::JsxNamespacedName(data) => data.namespace.text().to_string(),
                 _ => String::new(),

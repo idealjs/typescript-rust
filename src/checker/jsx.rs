@@ -22,9 +22,9 @@
 
 use std::sync::Arc;
 
-use crate::ast::{is_identifier, is_jsx_namespaced_name, Node, NodeData, SyntaxKind};
-use crate::diagnostics::messages_generated::*;
+use crate::ast::{Node, NodeData, SyntaxKind, is_identifier, is_jsx_namespaced_name};
 use crate::diagnostics::Message;
+use crate::diagnostics::messages_generated::*;
 
 use super::checker::Checker;
 
@@ -49,7 +49,8 @@ bitflags::bitflags! {
 
 impl JsxFlags {
     /// Combination of both intrinsic element kinds.
-    pub const INTRINSIC_ELEMENT: Self = Self::INTRINSIC_NAMED_ELEMENT.union(Self::INTRINSIC_INDEXED_ELEMENT);
+    pub const INTRINSIC_ELEMENT: Self =
+        Self::INTRINSIC_NAMED_ELEMENT.union(Self::INTRINSIC_INDEXED_ELEMENT);
 }
 
 /// How a JSX tag name resolves to a callable/constructable entity.
@@ -71,7 +72,8 @@ impl JsxNames {
     pub const JSX: &'static str = "JSX";
     pub const INTRINSIC_ELEMENTS: &'static str = "IntrinsicElements";
     pub const ELEMENT_CLASS: &'static str = "ElementClass";
-    pub const ELEMENT_ATTRIBUTES_PROPERTY_NAME_CONTAINER: &'static str = "ElementAttributesProperty";
+    pub const ELEMENT_ATTRIBUTES_PROPERTY_NAME_CONTAINER: &'static str =
+        "ElementAttributesProperty";
     pub const ELEMENT_CHILDREN_ATTRIBUTE_NAME_CONTAINER: &'static str = "ElementChildrenAttribute";
     pub const ELEMENT: &'static str = "Element";
     pub const ELEMENT_TYPE: &'static str = "ElementType";
@@ -91,8 +93,7 @@ impl ReactNames {
 /// Mirrors Go's `scanner.IsIntrinsicJsxName`: a name is intrinsic if it
 /// starts with a lowercase ASCII letter or contains a hyphen.
 pub fn is_intrinsic_jsx_name(name: &str) -> bool {
-    !name.is_empty()
-        && (name.as_bytes()[0].is_ascii_lowercase() || name.contains('-'))
+    !name.is_empty() && (name.as_bytes()[0].is_ascii_lowercase() || name.contains('-'))
 }
 
 /// Whether a JSX tag name node refers to an intrinsic element.
@@ -127,7 +128,10 @@ pub fn jsx_attributes(node: &Arc<Node>) -> Option<Arc<Node>> {
 /// Whether `node` is a JSX opening-like element (opening element or
 /// self-closing element), as opposed to a fragment.
 pub fn is_jsx_opening_like_element(node: &Arc<Node>) -> bool {
-    matches!(node.kind, SyntaxKind::JsxOpeningElement | SyntaxKind::JsxSelfClosingElement)
+    matches!(
+        node.kind,
+        SyntaxKind::JsxOpeningElement | SyntaxKind::JsxSelfClosingElement
+    )
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -148,7 +152,10 @@ impl Checker {
     /// Mirrors Go's `getJsxType`.
     pub fn get_jsx_type(&self, name: &str) -> Option<Arc<crate::ast::Symbol>> {
         let ns = self.get_jsx_namespace()?;
-        ns.members.get(name).or_else(|| ns.exports.get(name)).cloned()
+        ns.members
+            .get(name)
+            .or_else(|| ns.exports.get(name))
+            .cloned()
     }
 
     /// Look up the `JSX.Element` symbol.
@@ -270,7 +277,9 @@ impl Checker {
         // Look up the resolved type to check signatures.
         let tag_type = self.get_type_of_node(&tag_name);
 
-        let has_call_sigs = !self.get_signatures_of_type(&tag_type, crate::checker::SignatureKind::Call).is_empty();
+        let has_call_sigs = !self
+            .get_signatures_of_type(&tag_type, crate::checker::SignatureKind::Call)
+            .is_empty();
         let has_construct_sigs = !self
             .get_signatures_of_type(&tag_type, crate::checker::SignatureKind::Construct)
             .is_empty();

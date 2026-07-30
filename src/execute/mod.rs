@@ -24,8 +24,8 @@ use std::io::{IsTerminal, Write};
 use std::sync::Arc;
 use std::time::Instant;
 
-use crate::bundled::{self, BundledFS};
 use crate::ast::diagnostic::Diagnostic;
+use crate::bundled::{self, BundledFS};
 use crate::compiler::{CompilerHost, CompilerHostImpl, Program, ProgramOptions};
 use crate::core::compiler_options::CompilerOptions;
 use crate::core::tristate::Tristate;
