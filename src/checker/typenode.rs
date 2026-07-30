@@ -8,7 +8,7 @@
 //! corresponding `Type` used by the checker.
 
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 
 use crate::ast::node_data_generated::NodeData;
 use crate::ast::{Node, NodeList, Symbol, SymbolFlags, SymbolTable, SyntaxKind};
@@ -238,6 +238,11 @@ impl Checker {
             Some(s) => s,
             None => return self.error_type(),
         };
+        // Type parameter: build a TypeParameter type with the constraint
+        // resolved from the declaration (`<T extends Constraint>`).
+        if symbol.flags.contains(SymbolFlags::TypeParameter) {
+            return self.get_type_parameter_from_symbol(&symbol);
+        }
         if !symbol.flags.contains(SymbolFlags::TypeAlias) {
             // Interface/class/enum/etc.: defer to error_type (any) for now.
             return self.error_type();
@@ -269,6 +274,45 @@ impl Checker {
         });
         self.resolving_type_aliases.remove(&key);
         resolved
+    }
+
+    /// Build a `TypeParameter` type from a `TypeParameter` symbol, resolving
+    /// its constraint (if any) from the declaration.
+    fn get_type_parameter_from_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+        // Cached parameter type stored on the symbol's links.
+        if let Some(links) = self.type_alias_links.get(symbol) {
+            if let Some(ref t) = links.declared_type {
+                return Arc::clone(t);
+            }
+        }
+        let mut constraint: Option<Arc<Type>> = None;
+        for decl in &symbol.declarations {
+            if let NodeData::TypeParameterDeclaration(data) = &decl.data {
+                if let Some(constraint_node) = &data.constraint {
+                    constraint = Some(self.get_type_from_type_node(constraint_node));
+                }
+                break;
+            }
+        }
+        let tp = Arc::new(Type {
+            flags: TypeFlags::TypeParameter,
+            object_flags: ObjectFlags::None,
+            id: 0,
+            symbol: Some(Arc::clone(symbol)),
+            alias: None,
+            data: TypeData::TypeParameter(TypeParameterData {
+                constrained: ConstrainedTypeData::default(),
+                constraint,
+                target: None,
+                mapper: None,
+                is_this_type: false,
+                resolved_default_type: OnceLock::new(),
+            }),
+        });
+        self.type_alias_links
+            .get_or_default(symbol)
+            .declared_type = Some(Arc::clone(&tp));
+        tp
     }
 
     fn get_type_from_type_query_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
@@ -375,32 +419,55 @@ impl Checker {
     /// Build an anonymous object type from a `TypeLiteral`'s member list
     /// (e.g. `{ a: number; b: string }`).
     ///
-    /// Currently handles `PropertySignature` members; other member kinds
-    /// (MethodSignature, IndexSignature, CallSignature, ConstructSignature)
-    /// are skipped — their support requires signature/index-info
-    /// construction which is part of P3.7.
+    /// Handles `PropertySignature` and `IndexSignature` members. Other
+    /// member kinds (MethodSignature, CallSignature, ConstructSignature)
+    /// are skipped — their support requires signature construction which is
+    /// part of P3.7.
     fn get_type_from_type_literal_members(&mut self, members: &Arc<NodeList>) -> Arc<Type> {
         let mut symbol_table = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::new();
+        let mut index_infos: Vec<Arc<crate::checker::IndexInfo>> = Vec::new();
         for member in members.iter() {
-            if let NodeData::PropertySignatureDeclaration(data) = &member.data {
-                // `node.text()` returns the name for identifier/string/
-                // numeric literal names, and "" for computed property names.
-                let name = data.name.text().to_string();
-                if name.is_empty() {
-                    continue;
+            match &member.data {
+                NodeData::PropertySignatureDeclaration(data) => {
+                    // `node.text()` returns the name for identifier/string/
+                    // numeric literal names, and "" for computed property names.
+                    let name = data.name.text().to_string();
+                    if name.is_empty() {
+                        continue;
+                    }
+                    let prop_type = self.get_type_from_type_node(&data.type_node);
+                    let symbol = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
+                    self.value_symbol_links.insert(
+                        &symbol,
+                        ValueSymbolLinks {
+                            resolved_type: Some(prop_type),
+                            ..Default::default()
+                        },
+                    );
+                    symbol_table.insert(name, Arc::clone(&symbol));
+                    props.push(symbol);
                 }
-                let prop_type = self.get_type_from_type_node(&data.type_node);
-                let symbol = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
-                self.value_symbol_links.insert(
-                    &symbol,
-                    ValueSymbolLinks {
-                        resolved_type: Some(prop_type),
-                        ..Default::default()
-                    },
-                );
-                symbol_table.insert(name, Arc::clone(&symbol));
-                props.push(symbol);
+                NodeData::IndexSignatureDeclaration(data) => {
+                    // `[key: string]: number` — extract key and value types.
+                    let mut key_type = None;
+                    let mut value_type = None;
+                    if let Some(param) = data.parameters.iter().next() {
+                        if let NodeData::ParameterDeclaration(pd) = &param.data {
+                            key_type = pd.type_node.as_ref().map(|t| self.get_type_from_type_node(t));
+                        }
+                    }
+                    value_type = Some(self.get_type_from_type_node(&data.type_node));
+                    index_infos.push(Arc::new(crate::checker::IndexInfo {
+                        key_type,
+                        value_type,
+                        is_readonly: false,
+                        declaration: Some(Arc::clone(member)),
+                        index_symbol: None,
+                        components: Vec::new(),
+                    }));
+                }
+                _ => {}
             }
         }
         Arc::new(Type {
@@ -413,6 +480,7 @@ impl Checker {
                 structured: StructuredTypeData {
                     members: symbol_table,
                     properties: props,
+                    index_infos,
                     ..Default::default()
                 },
                 ..Default::default()

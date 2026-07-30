@@ -297,6 +297,7 @@ impl Binder {
             NodeData::EnumMember(data) => self.node_text(&data.name),
             NodeData::GetAccessorDeclaration(data) => self.node_text(&data.name),
             NodeData::SetAccessorDeclaration(data) => self.node_text(&data.name),
+            NodeData::TypeParameterDeclaration(data) => self.node_text(&data.name),
             NodeData::Identifier(data) => data.text.clone(),
             _ => String::new(),
         }
@@ -1206,6 +1207,9 @@ impl Binder {
             }
             SyntaxKind::BindingElement => {
                 self.declare_symbol(node, SymbolFlags::BlockScopedVariable, SymbolFlags::VALUE);
+            }
+            SyntaxKind::TypeParameter => {
+                self.declare_symbol(node, SymbolFlags::TypeParameter, SymbolFlags::TYPE);
             }
             SyntaxKind::ObjectLiteralExpression => {
                 self.bind_anonymous_declaration(

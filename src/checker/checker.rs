@@ -16,7 +16,9 @@ use crate::ast::{
 use crate::core::compiler_options::{
     CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget,
 };
-use crate::diagnostics::messages_generated::{CANNOT_FIND_NAME_0, TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1};
+use crate::diagnostics::messages_generated::{
+    CANNOT_FIND_NAME_0, PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1, TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+};
 use crate::jsnum;
 
 use super::tracer::Tracer;
@@ -1702,6 +1704,18 @@ impl Checker {
             .as_ref()
             .and_then(|t| t.as_structured())
             .and_then(|s| s.call_signatures().first());
+        // Push the function/arrow scope BEFORE priming parameter types so
+        // that type-parameter references in parameter annotations (e.g.
+        // `x: T` inside `function f<T>(x: T)`) can be resolved via the scope
+        // stack. The scope stays pushed through return-type inference so
+        // `get_type_of_node` on body expressions finds the parameters and
+        // type parameters.
+        let is_arrow = matches!(node.data, crate::ast::NodeData::ArrowFunction(_));
+        if is_arrow {
+            self.push_arrow_function_scope(node);
+        } else {
+            self.push_function_scope(node);
+        }
         // Pass 1: prime parameter-symbol types (annotated/contextual/any)
         // so that return-type inference below can resolve parameter
         // references inside the body. The placeholder return type is
@@ -1715,15 +1729,6 @@ impl Checker {
         );
         // Now infer the return type — the body sees the contextual param
         // types set above. An explicit return-type annotation always wins.
-        // Push the function/arrow scope so `resolve_identifier` (used by
-        // `get_type_of_node` on body expressions) can find this function's
-        // parameters and locals on the scope stack.
-        let is_arrow = matches!(node.data, crate::ast::NodeData::ArrowFunction(_));
-        if is_arrow {
-            self.push_arrow_function_scope(node);
-        } else {
-            self.push_function_scope(node);
-        }
         let return_type = self.infer_function_return_type(body, type_node);
         if is_arrow {
             self.pop_arrow_function_scope();
@@ -1853,6 +1858,151 @@ impl Checker {
             return self.number_type();
         }
         self.get_any_type()
+    }
+
+    /// Whether a property named `name` exists on `t`, handling unions,
+    /// intersections, type parameters, arrays, and primitives.
+    ///
+    /// Used by `check_property_access` to decide whether to emit TS2339.
+    /// Conservative in the face of unknown type kinds (returns `true` to
+    /// avoid false positives).
+    pub(super) fn has_property_of_type(&mut self, t: &Arc<Type>, name: &str) -> bool {
+        // `any`/`unknown`/`never`/`undefined`/`null` allow any property; never
+        // emit TS2339 for them.
+        if t.flags.intersects(
+            TypeFlags::Any
+                | TypeFlags::Unknown
+                | TypeFlags::Never
+                | TypeFlags::Undefined
+                | TypeFlags::Null,
+        ) {
+            return true;
+        }
+
+        // Direct hit on structured members, or applicable index signature.
+        if let Some(structured) = t.as_structured() {
+            if structured.members.get(name).is_some() {
+                return true;
+            }
+            if !structured.index_infos.is_empty() {
+                return true;
+            }
+            // Structured object type with no matching member and no index
+            // signature: fall through to `false` for plain object types.
+            // However, Object flag without structured members (e.g. a
+            // reference like `Array<T>`) is handled below.
+            if t.flags.contains(TypeFlags::Object)
+                && !t.object_flags.contains(ObjectFlags::Reference)
+            {
+                return false;
+            }
+        }
+
+        // Union: property must exist on every non-nullable constituent.
+        if t.flags.contains(TypeFlags::Union) {
+            if let TypeData::Union(u) = &t.data {
+                for ct in &u.union_or_intersection.types {
+                    if ct.flags.intersects(TypeFlags::Undefined | TypeFlags::Null) {
+                        continue;
+                    }
+                    if !self.has_property_of_type(ct, name) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        // Intersection: property exists if any constituent has it.
+        if t.flags.contains(TypeFlags::Intersection) {
+            if let TypeData::Intersection(i) = &t.data {
+                for ct in &i.union_or_intersection.types {
+                    if self.has_property_of_type(ct, name) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        // Type parameter: defer to constraint.
+        if t.flags.contains(TypeFlags::TypeParameter) {
+            if let Some(constraint) = self.get_constraint_of_type_parameter(t) {
+                return self.has_property_of_type(&constraint, name);
+            }
+            // No constraint: allow any property (matches tsc behavior for
+            // unconstrained `T`).
+            return true;
+        }
+
+        // Array types (`Array<T>` reference): only `length` is hardcoded
+        // (see `get_type_of_property_access`). Without lib.d.ts, tsc would
+        // report TS2339 for any other property.
+        if self.is_array_type(t) {
+            return name == "length";
+        }
+
+        // Tuple types: `length` is intrinsically available.
+        if self.is_tuple_type(t) {
+            return name == "length";
+        }
+
+        // Primitive types and their literals: without lib.d.ts, no
+        // properties are available — any access is TS2339.
+        if t.flags.intersects(
+            TypeFlags::Number
+                | TypeFlags::String
+                | TypeFlags::Boolean
+                | TypeFlags::BigInt
+                | TypeFlags::ESSymbol
+                | TypeFlags::Void
+                | TypeFlags::StringLiteral
+                | TypeFlags::NumberLiteral
+                | TypeFlags::BigIntLiteral
+                | TypeFlags::BooleanLiteral
+                | TypeFlags::UniqueESSymbol,
+        ) {
+            return false;
+        }
+
+        // Enum types and other object types without structured data: be
+        // conservative and don't error.
+        if t.flags.contains(TypeFlags::Object | TypeFlags::Enum) {
+            return true;
+        }
+
+        // Default: don't emit error for unknown type kinds.
+        true
+    }
+
+    /// Check a `PropertyAccessExpression` (`x.prop`) and emit TS2339 when
+    /// `prop` does not exist on the type of `x`.
+    ///
+    /// Mirrors tsc behavior: when the object type is known and structured
+    /// (object literal, type reference with members, intersection, union of
+    /// compatible constituents, type parameter with a constraint, etc.), a
+    /// missing property is reported. `any`/`unknown`/`never` and other
+    /// permissive types skip the check.
+    fn check_property_access(&mut self, node: &Arc<Node>) {
+        let (obj_expr, name) = match &node.data {
+            crate::ast::NodeData::PropertyAccessExpression(data) => {
+                (&data.expression, &data.name)
+            }
+            _ => return,
+        };
+        let obj_type = self.get_type_of_node(obj_expr);
+        let name_text = name.text();
+        if self.has_property_of_type(&obj_type, name_text) {
+            return;
+        }
+        let file = self.current_file.clone();
+        let type_str = self.type_to_string(&obj_type);
+        self.diagnostics.add(crate::ast::Diagnostic::new(
+            file,
+            name.loc,
+            PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+            vec![name_text.to_string(), type_str],
+        ));
     }
 
     /// Get the type of an `ElementAccessExpression` (`x[key]`).
@@ -2269,25 +2419,14 @@ impl Checker {
                 // JSDoc check: validate @param tags against actual
                 // parameters. No-op until JSDoc parsing (P2.7) lands.
                 self.check_unmatched_jsdoc_parameters(node);
-                // Only check the function body; the name, parameters,
-                // type parameters, and return type are declarations/types.
-                self.push_function_scope(node);
-                self.break_continue_context_stack.push(BreakContinueContext {
-                    kind: BreakContinueContextKind::Function,
-                    label: None,
-                    is_iteration: false,
-                });
-                if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
-                    if let Some(body) = &data.body {
-                        self.check_statement(body);
-                    }
-                }
-                self.break_continue_context_stack.pop();
-                self.pop_function_scope();
                 // Compute the function's type (with inferred return type)
                 // and cache it on the declaration node + symbol so later
-                // references (e.g. `let y = f()`) can recover it. Mirrors
-                // Go's `getSymbolLinks(symbol).type = getWidenedTypeOfFunction`.
+                // references (e.g. `let y = f()`) can recover it. This must
+                // run BEFORE checking the body so that parameter-symbol
+                // types are primed (including type-parameter annotations
+                // like `x: T`) — otherwise `get_type_of_node` on parameter
+                // references inside the body returns `any`. Mirrors Go's
+                // `getSymbolLinks(symbol).type = getWidenedTypeOfFunction`.
                 let fn_type = self.get_type_of_function_like(node);
                 self.type_node_links
                     .get_or_default(node)
@@ -2304,6 +2443,20 @@ impl Checker {
                         }
                     }
                 }
+                // Check the function body with parameter types primed.
+                self.push_function_scope(node);
+                self.break_continue_context_stack.push(BreakContinueContext {
+                    kind: BreakContinueContextKind::Function,
+                    label: None,
+                    is_iteration: false,
+                });
+                if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
+                    if let Some(body) = &data.body {
+                        self.check_statement(body);
+                    }
+                }
+                self.break_continue_context_stack.pop();
+                self.pop_function_scope();
             }
             SyntaxKind::ClassDeclaration => {
                 // Grammar check: validate modifiers.
@@ -2588,10 +2741,12 @@ impl Checker {
             }
             SyntaxKind::PropertyAccessExpression => {
                 // Only check the left side; the right side is a property name,
-                // not an identifier reference.
+                // not an identifier reference. Then verify the property exists
+                // on the object type (TS2339).
                 if let crate::ast::NodeData::PropertyAccessExpression(data) = &node.data {
                     self.check_expression(&data.expression);
                 }
+                self.check_property_access(node);
             }
             SyntaxKind::ElementAccessExpression => {
                 if let crate::ast::NodeData::ElementAccessExpression(data) = &node.data {
@@ -3037,10 +3192,17 @@ impl Checker {
                         }
                     }
                 }
-                // Class/Interface type parameter lookup.
-                if container_sym.flags.intersects(SymbolFlags::Class)
-                    || container_sym.flags.intersects(SymbolFlags::Interface)
-                {
+                // Class/Interface/Function/Constructor type parameter lookup.
+                // Type parameters declared by the container (e.g.
+                // `<T extends U>` on a class, interface, function, or
+                // constructor) are accessible in the container's scope.
+                if container_sym.flags.intersects(
+                    SymbolFlags::Class
+                        | SymbolFlags::Interface
+                        | SymbolFlags::Function
+                        | SymbolFlags::Constructor
+                        | SymbolFlags::ValueModule,
+                ) {
                     if let Some(sym) = container_sym.members.get(name) {
                         if sym.flags.intersects(meaning & SymbolFlags::TYPE) {
                             return self.follow_alias(sym);

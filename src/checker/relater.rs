@@ -935,9 +935,15 @@ impl Checker {
             }
 
             if !found_match {
-                // If target has a string index signature, check if source has a number index
-                // signature that could serve as a string index (in practice, this doesn't work)
-                return false;
+                // No matching source index signature: fall back to checking
+                // that every source property is assignable to the target
+                // index's value type (mirrors Go's `membersRelatedToIndexInfo`
+                // fallback in `typeRelatedToIndexInfo`). This makes
+                // `{ a: 1 }` assignable to `{ [key: string]: number }`.
+                let result = self.members_related_to_index_info(source, target_index, relation);
+                if result.is_false() {
+                    return false;
+                }
             }
         }
 

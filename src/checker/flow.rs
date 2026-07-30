@@ -1158,8 +1158,23 @@ impl Checker {
         if !type_.is_union() {
             return Arc::clone(type_);
         }
-        let case_types = self.get_switch_clause_types(switch_stmt);
         let is_default = clause.kind == SyntaxKind::DefaultClause;
+        // For `case "foo":`, narrow to constituents whose discriminant
+        // property matches the *current* clause's type. For `default:`,
+        // keep constituents whose discriminant property doesn't match any
+        // case type.
+        let current_case_type = if is_default {
+            None
+        } else if let NodeData::CaseOrDefaultClause(cd) = &clause.data {
+            Some(self.get_type_of_node(&cd.expression))
+        } else {
+            None
+        };
+        let all_case_types = if is_default {
+            self.get_switch_clause_types(switch_stmt)
+        } else {
+            Vec::new()
+        };
         let constituents = self.constituent_types(type_);
         let filtered: Vec<Arc<Type>> = constituents
             .into_iter()
@@ -1172,15 +1187,16 @@ impl Checker {
                 if is_default {
                     // Default: keep constituents whose property doesn't
                     // match any case type.
-                    !case_types
+                    !all_case_types
                         .iter()
                         .any(|ct| self.types_overlap(&prop_type, ct))
                 } else {
-                    // Case: keep constituents whose property matches at
-                    // least one case type.
-                    case_types
-                        .iter()
-                        .any(|ct| self.types_overlap(&prop_type, ct))
+                    // Case: keep constituents whose property matches the
+                    // current clause's case type.
+                    current_case_type
+                        .as_ref()
+                        .map(|ct| self.types_overlap(&prop_type, ct))
+                        .unwrap_or(false)
                 }
             })
             .collect();
@@ -1827,24 +1843,65 @@ impl Checker {
 
     /// Check if two types overlap (share at least one constituent).
     fn types_overlap(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool {
-        // Direct flag comparison for primitives.
-        if a.flags.intersects(b.flags) {
-            return true;
-        }
-        // If either is a union, check all pairs.
-        let a_types = self.constituent_types(a);
-        let b_types = self.constituent_types(b);
-        for at in &a_types {
-            for bt in &b_types {
-                if at.flags == bt.flags {
-                    // Same primitive type.
-                    if !at.flags.contains(TypeFlags::Union) {
+        // If either is a union/intersection, compare constituents pairwise.
+        if a.flags.contains(TypeFlags::Union) || b.flags.contains(TypeFlags::Union)
+            || a.flags.contains(TypeFlags::Intersection)
+            || b.flags.contains(TypeFlags::Intersection)
+        {
+            let a_types = self.constituent_types(a);
+            let b_types = self.constituent_types(b);
+            for at in &a_types {
+                for bt in &b_types {
+                    if self.literals_overlap(at, bt) {
                         return true;
                     }
                 }
             }
+            return false;
         }
-        false
+        self.literals_overlap(a, b)
+    }
+
+    /// Check if two non-union types overlap, with literal-aware comparison.
+    ///
+    /// `string` and `"foo"` overlap; `"foo"` and `"bar"` do not; `"foo"` and
+    /// `"foo"` do.
+    fn literals_overlap(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool {
+        // If either is a literal type, we must compare literal values
+        // (not just flags), because two string-literal types share the
+        // `StringLiteral` flag but are distinct types when their values
+        // differ.
+        let a_is_literal = a.flags.intersects(
+            TypeFlags::StringLiteral
+                | TypeFlags::NumberLiteral
+                | TypeFlags::BigIntLiteral
+                | TypeFlags::BooleanLiteral,
+        );
+        let b_is_literal = b.flags.intersects(
+            TypeFlags::StringLiteral
+                | TypeFlags::NumberLiteral
+                | TypeFlags::BigIntLiteral
+                | TypeFlags::BooleanLiteral,
+        );
+        if a_is_literal && b_is_literal {
+            // Both literals: compare values directly.
+            return match (&a.data, &b.data) {
+                (TypeData::Literal(a_lit), TypeData::Literal(b_lit)) => {
+                    a_lit.value == b_lit.value
+                }
+                _ => false,
+            };
+        }
+        if a_is_literal {
+            // `a` is literal, `b` is not: overlap if `b` is the literal's
+            // primitive base (e.g. `"foo"` overlaps with `string`).
+            return a.flags.intersects(b.flags);
+        }
+        if b_is_literal {
+            return a.flags.intersects(b.flags);
+        }
+        // Neither is a literal: fall back to flag intersection.
+        a.flags.intersects(b.flags)
     }
 
     // ─────────────────────────────────────────────────────────────────

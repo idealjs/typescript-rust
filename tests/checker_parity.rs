@@ -2151,6 +2151,133 @@ fn checker_array_length_property_returns_number_ts2322() {
     assert_diagnostic_code(&diags, 2322);
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Property access TS2339: "Property '{0}' does not exist on type '{1}'."
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_property_access_existing_property_no_error() {
+    // `obj.a` exists on `{ a: number; b: string }` → no error.
+    let diags = check_source("let obj = { a: 1, b: 'hi' }; let x = obj.a; let y = obj.b;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_property_access_missing_property_on_object_ts2339() {
+    // `obj.c` doesn't exist on `{ a: number; b: string }` → TS2339.
+    let diags = check_source("let obj = { a: 1, b: 'hi' }; let x = obj.c;");
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_property_access_on_number_ts2339() {
+    // `x.toUpperCase` doesn't exist on `number` (without lib, primitives
+    // have no properties) → TS2339.
+    let diags = check_source("let x: number = 1; x.toUpperCase();");
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_property_access_on_string_literal_ts2339() {
+    // `"hi".toUpperCase` doesn't exist on the string literal type `"hi"`
+    // (no lib) → TS2339.
+    let diags = check_source("let x = 'hi'; x.toUpperCase();");
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_property_access_on_any_no_error() {
+    // `any` allows any property → no error.
+    let diags = check_source("let x: any = 1; x.toUpperCase();");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_property_access_on_type_parameter_constraint_no_error() {
+    // `x.a` exists because `T extends { a: number }` → no error.
+    let diags = check_source("function f<T extends { a: number }>(x: T) { return x.a; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_property_access_on_type_parameter_missing_ts2339() {
+    // `x.b` doesn't exist on the constraint `{ a: number }` → TS2339.
+    let diags = check_source("function f<T extends { a: number }>(x: T) { return x.b; }");
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_property_access_on_union_present_in_all_no_error() {
+    // Both constituents have `a` → no error.
+    let diags = check_source(
+        "let x: { a: number } | { a: string } = { a: 1 };\
+         let y = x.a;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_property_access_on_union_missing_in_one_ts2339() {
+    // `{ a: number }` has `a`, `{ b: string }` doesn't → TS2339.
+    let diags = check_source(
+        "let x: { a: number } | { b: string } = { a: 1 };\
+         let y = x.a;",
+    );
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_property_access_on_intersection_no_error() {
+    // `{ a: number } & { b: string }` has both `a` and `b`.
+    let diags = check_source(
+        "let x: { a: number } & { b: string } = { a: 1, b: 'hi' };\
+         let y = x.a;\
+         let z = x.b;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_property_access_on_intersection_missing_ts2339() {
+    // Neither `{ a: number }` nor `{ b: string }` has `c` → TS2339.
+    let diags = check_source(
+        "let x: { a: number } & { b: string } = { a: 1, b: 'hi' };\
+         let y = x.c;",
+    );
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_property_access_array_length_no_error() {
+    // `arr.length` on `number[]` is hardcoded to `number` → no error.
+    let diags = check_source("let arr: number[] = [1, 2, 3]; let x = arr.length;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_property_access_array_unknown_method_ts2339() {
+    // `arr.push` is not hardcoded; without lib, tsc reports TS2339.
+    let diags = check_source("let arr: number[] = [1, 2, 3]; arr.push(4);");
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_property_access_optional_chain_no_error() {
+    // Optional chaining on `any`-typed variable → no error.
+    let diags = check_source("let x: any = null; let y = x?.foo;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_property_access_index_signature_no_error() {
+    // Index signature allows any property access.
+    let diags = check_source(
+        "let x: { [key: string]: number } = { a: 1 };\
+         let y = x.foo;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
 #[test]
 fn checker_array_element_access_returns_element_type_no_error() {
     // `arr[0]` on `number[]` has type `number`.

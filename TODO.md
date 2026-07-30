@@ -388,7 +388,15 @@ contextual function type 的 call signature，无注解参数继承对应位置�
   literal 属性，目前保留 literal 以兼容 discriminated union 赋值）。
 - [ ] contextual typing 扩展到 CallExpression 参数（`get_contextual_type_for_argument`
   已具备，需把推断结果落回；当前仅变量声明初始化器走通）。
-- [ ] 成员访问类型检查（`x.toUpperCase()` 在 `x: number` 上应报 TS2339）。
+- [x] 成员访问类型检查（`x.toUpperCase()` 在 `x: number` 上应报 TS2339）。已实现
+  `check_property_access`/`has_property_of_type`，覆盖对象字面量、原始类型、联合/
+  交叉类型、类型参数约束、数组/元组 `length`、索引签名；binder 增补 `TypeParameter`
+  符号声明；`get_type_of_function_like` 在 prime 参数前 push 作用域使类型参数注解
+  可解析；`FunctionDeclaration` 处理改为先 `get_type_of_function_like` 再检查 body；
+  relater `is_index_signatures_related_to` 在源无索引签名时回退到
+  `members_related_to_index_info`（使 `{ a: 1 }` 可赋值给 `{ [key: string]: number }`）；
+  flow 修复 `types_overlap`/`narrow_by_switch_on_discriminant_property` 支持 literal
+  比较。16 条 TS2339 parity 测试全部通过。
 
 ### P3.9 Checker 控制流 narrowing
 
