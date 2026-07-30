@@ -1328,6 +1328,14 @@ impl Checker {
         let file_id = file_node.id();
         let source_file_symbol = self.program.symbol_map().symbol_of(&file_node).cloned();
 
+        // Populate `parent` pointers on every node in this file's AST. The
+        // parser builds nodes bottom-up into `Arc`s without setting parent
+        // pointers, but contextual typing (`get_contextual_type`) and several
+        // grammar checks walk `node.parent` to find the enclosing context.
+        // This is safe because the checker runs single-threaded and the AST
+        // is a tree (each node has exactly one parent).
+        self.set_parent_pointers(&file_node);
+
         // Save file context for diagnostics.
         let file_arc = Arc::clone(file);
         self.current_file = Some(Arc::clone(&file_arc));
@@ -1350,6 +1358,43 @@ impl Checker {
         self.current_file = None;
         self.current_file_id = 0;
         self.current_file_symbol = None;
+    }
+
+    /// Recursively populate `parent` pointers on every node in the AST
+    /// rooted at `node`. The parser builds nodes bottom-up into `Arc`s
+    /// without setting parent pointers; this walk fixes them up so that
+    /// `get_contextual_type` (and grammar checks that inspect `node.parent`)
+    /// can locate the enclosing context. Children are collected first and
+    /// the parent pointer is set via the same `Arc::as_ptr` mutation pattern
+    /// the binder uses for `Symbol` mutation — safe because the checker
+    /// runs single-threaded and the AST is a tree (one parent per node).
+    fn set_parent_pointers(&mut self, node: &Arc<Node>) {
+        use crate::ast::node_data_generated::for_each_child;
+        // Collect direct children first so the recursive call below doesn't
+        // hold a borrow on `self` through the `for_each_child` closure.
+        let mut children: Vec<Arc<Node>> = Vec::new();
+        for_each_child(node, |child| {
+            children.push(Arc::clone(child));
+            false
+        });
+        let parent_clone = Arc::clone(node);
+        for child in &children {
+            let child_mut = Arc::as_ptr(child) as *mut Node;
+            // Skip if already pointing at this parent (idempotent on
+            // re-checks — avoids churn and redundant Arc clones).
+            let already = unsafe {
+                (*child_mut)
+                    .parent
+                    .as_ref()
+                    .map_or(false, |p| Arc::ptr_eq(p, &parent_clone))
+            };
+            if !already {
+                unsafe {
+                    (*child_mut).parent = Some(Arc::clone(&parent_clone));
+                }
+            }
+            self.set_parent_pointers(child);
+        }
     }
 
     /// Return the semantic diagnostics collected during type checking.
@@ -1625,12 +1670,22 @@ impl Checker {
     /// ArrowFunction / FunctionDeclaration). Returns an anonymous object
     /// type whose single call signature carries the inferred (or annotated)
     /// return type *and* the parameter types resolved from each parameter's
-    /// type annotation. Parameters without an annotation fall back to `any`
-    /// (or the contextual type when one is available — not yet wired up
-    /// here). Building the signature with real parameter symbols lets the
-    /// relater detect parameter-type mismatches when assigning a function
-    /// expression to a function-type annotation (e.g.
-    /// `let f: (x: number) => number = (x: string) => x.length;` → TS2322).
+    /// type annotation.
+    ///
+    /// Parameters without an annotation inherit the corresponding parameter
+    /// type from the contextual function type (the annotation on the
+    /// variable/parameter/property this function is assigned to). This
+    /// contextual typing flows into the function body too: because parameter
+    /// types are stored on the binder's actual parameter symbols (shared
+    /// with the body's scope resolution), `infer_function_return_type` sees
+    /// the contextual types when it walks `return` expressions. This is what
+    /// makes `let f: (x: string) => number = (x) => x;` report TS2322 (the
+    /// body returns `string`, not the expected `number`).
+    ///
+    /// To make contextual typing available to return-type inference, the
+    /// signature is built in two passes: first with a placeholder return
+    /// type to prime parameter-symbol types, then with the inferred return
+    /// type for the final signature. The first pass's signature is discarded.
     fn get_type_of_function_like(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let (parameters, body, type_node) = match &node.data {
             crate::ast::NodeData::FunctionExpression(data) => (&data.parameters, Some(&data.body), data.type_node.as_ref()),
@@ -1638,11 +1693,51 @@ impl Checker {
             crate::ast::NodeData::FunctionDeclaration(data) => (&data.parameters, data.body.as_ref(), data.type_node.as_ref()),
             _ => return self.get_any_type(),
         };
+        // Fetch the contextual function type (e.g. the annotation on the
+        // variable this function expression initializes). When present,
+        // unannotated parameters inherit the corresponding parameter type
+        // from its first call signature.
+        let contextual_type = self.get_contextual_type(node, ContextFlags::None);
+        let contextual_signature: Option<&Arc<Signature>> = contextual_type
+            .as_ref()
+            .and_then(|t| t.as_structured())
+            .and_then(|s| s.call_signatures().first());
+        // Pass 1: prime parameter-symbol types (annotated/contextual/any)
+        // so that return-type inference below can resolve parameter
+        // references inside the body. The placeholder return type is
+        // discarded along with this signature.
+        let placeholder = self.get_any_type();
+        let _primed = self.build_signature_from_function_like_type_node(
+            parameters,
+            placeholder,
+            /* is_construct */ false,
+            contextual_signature,
+        );
+        // Now infer the return type — the body sees the contextual param
+        // types set above. An explicit return-type annotation always wins.
+        // Push the function/arrow scope so `resolve_identifier` (used by
+        // `get_type_of_node` on body expressions) can find this function's
+        // parameters and locals on the scope stack.
+        let is_arrow = matches!(node.data, crate::ast::NodeData::ArrowFunction(_));
+        if is_arrow {
+            self.push_arrow_function_scope(node);
+        } else {
+            self.push_function_scope(node);
+        }
         let return_type = self.infer_function_return_type(body, type_node);
+        if is_arrow {
+            self.pop_arrow_function_scope();
+        } else {
+            self.pop_function_scope();
+        }
+        // Pass 2: build the final signature with the inferred return type.
+        // Parameter types are re-resolved (idempotent overwrite of the
+        // symbols' resolved types set in pass 1).
         let sig = self.build_signature_from_function_like_type_node(
             parameters,
             return_type,
             /* is_construct */ false,
+            contextual_signature,
         );
         self.create_function_or_constructor_type(vec![sig], false)
     }
@@ -3756,6 +3851,10 @@ fn is_declaration_name(node: &Arc<Node>) -> bool {
     let parent_kind = parent.kind;
     // For declaration nodes whose `name` field is an identifier, the
     // identifier is a declaration name, not a reference.
+    // NOTE: `ShorthandPropertyAssignment` is intentionally excluded — its
+    // name is *also* a reference to an outer-scope variable (`{ x }`
+    // references `x`), so it must be checked as a reference (and emit
+    // TS2304 when the name is unresolvable).
     let name_field = crate::ast::node_data_generated::node_name(parent);
     if let Some(name) = name_field {
         if std::ptr::eq(name.as_ref() as *const Node, node.as_ref() as *const Node) {
@@ -3783,7 +3882,6 @@ fn is_declaration_name(node: &Arc<Node>) -> bool {
                     | SyntaxKind::GetAccessor
                     | SyntaxKind::SetAccessor
                     | SyntaxKind::PropertyAssignment
-                    | SyntaxKind::ShorthandPropertyAssignment
                     | SyntaxKind::NamespaceExportDeclaration
                     | SyntaxKind::NamespaceExport
                     | SyntaxKind::LabeledStatement

@@ -440,6 +440,7 @@ impl Checker {
                     &data.parameters,
                     return_type,
                     /* is_construct */ false,
+                    /* contextual_signature */ None,
                 );
                 self.create_function_or_constructor_type(vec![sig], false)
             }
@@ -461,6 +462,7 @@ impl Checker {
                     &data.parameters,
                     return_type,
                     /* is_construct */ true,
+                    /* contextual_signature */ None,
                 );
                 self.create_function_or_constructor_type(vec![sig], true)
             }
@@ -479,11 +481,22 @@ impl Checker {
     /// resolution (where the return type comes from a `TypeNode`) and
     /// function-expression type inference (where the return type is inferred
     /// from the body via `infer_function_return_type`).
+    ///
+    /// `contextual_signature` carries the contextual function type's call
+    /// signature (when the function expression is the initializer of a
+    /// variable/parameter/property with a function-type annotation). When a
+    /// parameter lacks an explicit type annotation, its type is taken from
+    /// the corresponding position in the contextual signature — this is what
+    /// makes `let f: (x: number) => number = (x) => x + 1;` type-check `x`
+    /// as `number` inside the body. Parameters beyond the contextual
+    /// signature's length (or with no contextual signature) fall back to
+    /// `any`.
     pub fn build_signature_from_function_like_type_node(
         &mut self,
         parameters: &Arc<NodeList>,
         return_type: Arc<Type>,
         is_construct: bool,
+        contextual_signature: Option<&Arc<Signature>>,
     ) -> Arc<Signature> {
         let mut param_symbols: Vec<Arc<Symbol>> = Vec::with_capacity(parameters.len());
         let mut flags = SignatureFlags::None;
@@ -500,10 +513,21 @@ impl Checker {
             };
             let is_rest = pd.dot_dot_dot_token.is_some();
             let is_optional = pd.question_token.is_some();
-            // Resolve the parameter's type annotation (default to `any`).
+            // Resolve the parameter's type annotation. When no annotation is
+            // present, fall back to the contextual signature's parameter
+            // type at the same position (contextual typing for arrow/function
+            // expression parameters), then to `any`.
             let param_type = match pd.type_node.as_ref() {
                 Some(tn) => self.get_type_from_type_node(tn),
-                None => self.get_any_type(),
+                None => {
+                    let mut t = None;
+                    if let Some(ctx_sig) = contextual_signature {
+                        if i < ctx_sig.parameters.len() {
+                            t = Some(self.get_type_of_symbol(&ctx_sig.parameters[i]));
+                        }
+                    }
+                    t.unwrap_or_else(|| self.get_any_type())
+                }
             };
             // Use the parameter name when it's an identifier; otherwise
             // synthesize a positional name.
@@ -513,7 +537,19 @@ impl Checker {
             } else {
                 name
             };
-            let sym = Arc::new(Symbol::new(SymbolFlags::Property, name));
+            // Prefer the binder's actual parameter symbol when present, so
+            // that both the call signature and the function body share the
+            // same symbol. The body resolves parameters via the scope stack
+            // (which finds the binder's symbol), so storing the resolved
+            // parameter type on that symbol makes `get_type_of_symbol` return
+            // it from within the body too — this is what lets contextual
+            // typing flow into the function body. For synthetic type-annotation
+            // nodes (FunctionType/ConstructorType) that have no binder symbol,
+            // fall back to a fresh `Property` symbol.
+            let sym = match self.program.symbol_map().symbol_of(param) {
+                Some(s) => Arc::clone(s),
+                None => Arc::new(Symbol::new(SymbolFlags::Property, name)),
+            };
             self.value_symbol_links.insert(
                 &sym,
                 ValueSymbolLinks {

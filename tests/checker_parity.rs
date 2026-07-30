@@ -2524,3 +2524,84 @@ fn checker_arrow_unannotated_param_no_error() {
     );
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Contextual typing for arrow/function-expression parameters (P3.8):
+// unannotated parameters inherit the corresponding parameter type from the
+// contextual function-type annotation. This flows into the function body, so
+// return-type inference sees the real (contextual) parameter types rather
+// than `any`.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_contextual_param_return_type_mismatch_ts2322() {
+    // `x` inherits `string` from the annotation; the arrow body returns
+    // `x` (a `string`), which is not assignable to the expected `number`
+    // return type → TS2322. Without contextual typing `x` would be `any`
+    // and this would silently pass.
+    let diags = check_source(
+        "let f: (x: string) => number = (x) => x;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_contextual_param_return_type_match_no_error() {
+    // `x` inherits `number`; returning `x` (a `number`) matches the
+    // expected `number` return type.
+    let diags = check_source(
+        "let f: (x: number) => number = (x) => x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_contextual_param_arithmetic_no_error() {
+    // `x` inherits `number`; `x + 1` is `number`, matching the expected
+    // `number` return type.
+    let diags = check_source(
+        "let f: (x: number) => number = (x) => x + 1;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_contextual_param_block_body_return_ts2322() {
+    // Block-bodied arrow: `x` inherits `number`; `return x;` yields
+    // `number`, but the annotation expects `string` → TS2322.
+    let diags = check_source(
+        "let f: (x: number) => string = (x) => { return x; };",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_contextual_param_two_params_return_ts2322() {
+    // `a`/`b` inherit `number`/`string` respectively; returning `b` (a
+    // `string`) doesn't match the expected `number` return type.
+    let diags = check_source(
+        "let f: (a: number, b: string) => number = (a, b) => b;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_contextual_param_function_expression_ts2322() {
+    // Same contextual-typing behavior for `function` expressions: `x`
+    // inherits `string`; returning `x` doesn't match the expected `number`.
+    let diags = check_source(
+        "let f: (x: string) => number = function (x) { return x; };",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_contextual_param_fewer_params_no_error() {
+    // A function expression with FEWER params than the contextual signature
+    // is allowed (extra params are ignored by the callee). The single param
+    // `x` inherits `number`; returning `x` matches the expected `number`.
+    let diags = check_source(
+        "let f: (x: number, y: number) => number = (x) => x;",
+    );
+    assert_no_diagnostics(&diags);
+}

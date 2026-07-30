@@ -375,15 +375,20 @@ signature 的对象类型（`get_type_from_function_type_node`/
 含参数/rest/optional 处理）；`get_type_of_symbol` 扩展支持 `Property` flag 符号；
 函数表达式/箭头函数参数类型推断（`get_type_of_function_like` 改用
 `build_signature_from_function_like_type_node` 构建带参数符号的签名，relater
-可检测参数类型不匹配 TS2322，如 `(x: string) => 1` 不可赋值给 `(x: number) => number`）。
+可检测参数类型不匹配 TS2322，如 `(x: string) => 1` 不可赋值给 `(x: number) => number`）；
+contextual typing 注入箭头函数/函数表达式参数类型（`get_type_of_function_like` 获取
+contextual function type 的 call signature，无注解参数继承对应位置的上下文参数类型；
+两遍构建签名让返回值推断能看到 contextual 参数类型；推断时 push/pop 函数作用域使 body
+可解析参数引用）；`set_parent_pointers` 后处理填充 AST `parent` 指针（激活 contextual typing
+与 grammar checks 中所有 `node.parent` 访问，单线程 + 树形 AST 安全）。
 
 - [ ] 条件类型 `infer R` 解析。（已部分完成，conditional branch 推断待补）
 - [ ] 类型推断缓存（`node_links.resolved_type`）。（已通过 `type_node_links` 完成）
 - [ ] Fresh literal type widening（对象字面量在无 contextual type 时应 widening
   literal 属性，目前保留 literal 以兼容 discriminated union 赋值）。
-- [ ] contextual typing 注入箭头函数参数类型（当前无注解参数回退 `any`，
-  应从 contextual function type 推断参数类型，如 `(x) => x + 1` 在
-  `let f: (x: number) => number = ...` 上下文中 `x` 应为 `number`）。
+- [ ] contextual typing 扩展到 CallExpression 参数（`get_contextual_type_for_argument`
+  已具备，需把推断结果落回；当前仅变量声明初始化器走通）。
+- [ ] 成员访问类型检查（`x.toUpperCase()` 在 `x: number` 上应报 TS2339）。
 
 ### P3.9 Checker 控制流 narrowing
 
