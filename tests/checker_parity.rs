@@ -3711,6 +3711,44 @@ fn checker_interface_merge_missing_first_member_ts2322() {
 }
 
 #[test]
+fn checker_function_overload_no_error() {
+    // Multiple `function f` declarations merge into one symbol. The
+    // implementation signature (`(x: any): any`) is the last declaration.
+    // Calling with a string matches the first overload.
+    let diags = check_source(
+        "function f(x: string): string;\n\
+         function f(x: number): number;\n\
+         function f(x: any): any { return x; }\n\
+         const s: string = f(\"hi\");\n\
+         const n: number = f(42);",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_namespace_merge_no_error() {
+    // Two `namespace N` declarations merge; members from both are visible.
+    let diags = check_source(
+        "namespace N { export const a: number = 1; }\n\
+         namespace N { export const b: string = \"hi\"; }\n\
+         const a: number = N.a;\n\
+         const b: string = N.b;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_namespace_merge_missing_member_ts2339() {
+    // After merging, accessing a non-existent member of `N` should fail.
+    let diags = check_source(
+        "namespace N { export const a: number = 1; }\n\
+         namespace N { export const b: string = \"hi\"; }\n\
+         const x = N.c;",
+    );
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
 fn hover_arrow_function_variable() {
     let info = hover_info_for("let f = (a: number): string => \"hi\";", "f").expect("hover");
     // Arrow-function type is `(a: number) => string`.

@@ -2004,6 +2004,10 @@ impl Checker {
                 }
             }
             self.get_any_type()
+        } else if symbol.flags.contains(SymbolFlags::ValueModule) {
+            // Namespace: build an anonymous object type from the namespace's
+            // exported members. `resolve_namespace_type` caches the result.
+            self.resolve_namespace_type(symbol)
         } else {
             self.get_any_type()
         }

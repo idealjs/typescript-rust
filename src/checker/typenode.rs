@@ -725,6 +725,74 @@ impl Checker {
         tp
     }
 
+    /// Resolve a namespace (`namespace N { ... }`) symbol to an anonymous
+    /// object type whose properties are the namespace's exported members.
+    /// Mirrors the namespace slice of Go's `getDeclaredTypeOfSymbol`.
+    ///
+    /// Each entry in the namespace symbol's `members` table becomes a
+    /// property on the resulting anonymous object type; the property type
+    /// is resolved from the member symbol via `get_type_of_symbol` (which
+    /// handles variables, functions, classes, etc.). Merged namespaces
+    /// already share a single symbol (see `can_merge_symbols`), so all
+    /// members from every merged declaration are visible here.
+    pub fn resolve_namespace_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+        // Reuse a cached declared type if present.
+        if let Some(cached) = self
+            .type_alias_links
+            .get(symbol)
+            .and_then(|l| l.declared_type.clone())
+        {
+            return cached;
+        }
+        // Collect member symbols first to avoid borrowing `self.members`
+        // while calling `get_type_of_symbol` (which needs `&mut self`).
+        let members: Vec<(String, Arc<Symbol>)> = symbol
+            .members
+            .iter()
+            .map(|(k, v)| (k.clone(), Arc::clone(v)))
+            .collect();
+        let mut symbol_table = SymbolTable::new();
+        let mut props: Vec<Arc<Symbol>> = Vec::new();
+        for (name, member_sym) in &members {
+            // Skip internal symbols (e.g. `__function` anonymous names).
+            if name.starts_with("__") {
+                continue;
+            }
+            let member_type = self.get_type_of_symbol(member_sym);
+            // Build a property symbol carrying the resolved member type so
+            // `has_property_of_type` can find it by name.
+            let prop_sym = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
+            self.value_symbol_links.insert(
+                &prop_sym,
+                ValueSymbolLinks {
+                    resolved_type: Some(member_type),
+                    ..Default::default()
+                },
+            );
+            symbol_table.insert(name.clone(), Arc::clone(&prop_sym));
+            props.push(prop_sym);
+        }
+        let result = Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Anonymous,
+            id: 0,
+            symbol: Some(Arc::clone(symbol)),
+            alias: None,
+            data: TypeData::Object(ObjectTypeData {
+                structured: StructuredTypeData {
+                    members: symbol_table,
+                    properties: props,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        });
+        self.type_alias_links
+            .get_or_default(symbol)
+            .declared_type = Some(Arc::clone(&result));
+        result
+    }
+
     fn get_type_from_type_query_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
         if let Some(t) = self.get_cached_type(node) {
             return t;

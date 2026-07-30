@@ -329,7 +329,17 @@ do-while/for/for-in/for-of/switch 控制流、return/throw/break/continue、
 
 ### P3.4 Binder 声明合并与 export/import binding
 
-- [ ] declaration merge：namespace + function + interface + class 合并规则。
+已完成：interface + interface 声明合并。`declare_symbol` 在创建新符号前先查
+target scope 是否已有同名符号，若 `can_merge_symbols` 判定可合并（interface+
+interface、namespace+namespace、namespace+function/class/enum、function+
+function overload、enum+enum），则将新 declaration 追加到既有 symbol 的
+`declarations` 列表并 union flags，而非覆盖 scope 条目。`resolve_interface_type`
+改为遍历 symbol 的全部 `InterfaceDeclaration` 节点，将 members 拼接为单一
+匿名对象类型，对齐 Go 的 `getDeclaredTypeOfInterface`。
+
+- [x] declaration merge：interface + interface（namespace/function/class/enum
+  的 binder 合并规则已写入 `can_merge_symbols`，但 checker 侧的 namespace
+  类型解析、function overload 签名合并、enum 成员合并仍待落地）。
 - [ ] export binding：`export { A }` 的 `exportSymbol` → local symbol 链。
 - [ ] import binding：`import { A }` 的 `aliasSymbol` → resolved symbol。
 - [ ] `delayedSymbol`/`aliasSymbol` 特殊符号处理。
@@ -473,10 +483,18 @@ asserts x is T narrowing（assertion 函数，`asserts x` truthy 收窄、
 （intrinsic/literal/union/intersection/type parameter/indexed access/template
 literal/tuple/array/reference/function/object literal/enum/symbol 类型）；
 parenthesization for function types in unions/arrays；serialization level 递归保护；
-5 个 type display parity fixtures（通过 TS2322 message_args 验证）。
+5 个 type display parity fixtures（通过 TS2322 message_args 验证）；
+`symbol_to_string`/`symbol_to_string_ex`（含 SymbolFormatFlags 与 type-parameter
+渲染）；`get_quick_info_text` + `format_quick_info_for_symbol` 按 symbol kind 分发
+（function/method/class/interface/enum/type-alias/type-parameter/enum-member/
+variable/alias）；`variable_decl_prefix` 区分 let/const/var；
+`try_get_type_alias_declared_type` 在 cache miss 时触发解析并加 cycle 保护，
+使未引用的 alias 在 hover 时也能显示 body；10 个 hover parity 测试通过
+（变量/函数/类/接口/枚举/类型别名 with/without type params）。
 
-- [ ] `symbol_to_type_node`/`symbol_to_display_parts`。
-- [ ] hover 信息生成。
+- [ ] `symbol_to_type_node`/`symbol_to_display_parts`（declaration emit 需要，
+  无 declaration emit 暂不阻塞）。
+- [x] hover 信息生成。
 
 ### P3.11 Checker emitresolver
 
