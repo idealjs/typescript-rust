@@ -984,6 +984,96 @@ fn checker_class_extends_no_error() {
 }
 
 #[test]
+fn checker_class_extends_inherited_method_no_error() {
+    // `this.greet()` resolves to the inherited `greet` method.
+    let diags = check_source(
+        "class Base { greet(): string { return 'hi'; } }\n\
+         class Derived extends Base { test() { return this.greet(); } }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_class_extends_inherited_property_no_error() {
+    // `this.x` resolves to the inherited property `x`.
+    let diags = check_source(
+        "class Base { x: number = 1; }\n\
+         class Derived extends Base { test() { return this.x + 1; } }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_class_extends_property_not_on_this_ts2339() {
+    // `this.missing` does not exist on the class or its base.
+    let diags = check_source(
+        "class Base { x: number = 1; }\n\
+         class Derived extends Base { test() { return this.missing; } }",
+    );
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_class_extends_override_method_no_error() {
+    // Derived class overrides a base method; `this` type uses the override.
+    let diags = check_source(
+        "class Base { greet(): string { return 'base'; } }\n\
+         class Derived extends Base { greet(): string { return 'derived'; } }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_class_extends_super_call_no_error() {
+    // `super.greet()` accesses the base class method.
+    let diags = check_source(
+        "class Base { greet(): string { return 'base'; } }\n\
+         class Derived extends Base { greet(): string { return super.greet(); } }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_class_extends_implements_via_base_no_error() {
+    // If the base class satisfies the interface, the derived class does too.
+    let diags = check_source(
+        "interface I { greet(): string; }\n\
+         class Base implements I { greet(): string { return 'base'; } }\n\
+         class Derived extends Base {}",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_class_extends_multilevel_no_error() {
+    // Multi-level inheritance: C inherits from B inherits from A.
+    let diags = check_source(
+        "class A { a(): number { return 1; } }\n\
+         class B extends A { b(): number { return 2; } }\n\
+         class C extends B { test() { return this.a() + this.b(); } }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_class_this_property_access_ts2339() {
+    // `this` inside a class resolves to the instance type.
+    let diags = check_source(
+        "class C { x: number = 1; test() { return this.missing; } }",
+    );
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_class_this_property_access_no_error() {
+    // `this` inside a class resolves to the instance type.
+    let diags = check_source(
+        "class C { x: number = 1; test() { return this.x; } }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
 fn checker_class_implements_interface_no_error() {
     let diags = check_source(
         "interface Named { name: string; }\nclass Person implements Named { name: string = 'Alice'; }",

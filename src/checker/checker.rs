@@ -355,6 +355,13 @@ pub struct Checker {
     /// pointers are not set on nodes.
     pub break_continue_context_stack: Vec<BreakContinueContext>,
 
+    /// Stack of `this` types for class member checking. When checking a
+    /// class declaration's members, the class's instance type (including
+    /// inherited members from `extends`) is pushed here so that `this.prop`
+    /// inside a method body resolves correctly. Mirrors Go's
+    /// `getThisTypeOfObjectLiteral`/`getThisType` infrastructure.
+    pub this_type_stack: Vec<Arc<Type>>,
+
     // Flow analysis
     pub flow_analysis_disabled: bool,
     pub flow_invocation_count: i32,
@@ -556,6 +563,7 @@ impl Checker {
             arrow_function_scope_count: 0,
             globals_populated: false,
             break_continue_context_stack: Vec::new(),
+            this_type_stack: Vec::new(),
 
             flow_analysis_disabled: false,
             flow_invocation_count: 0,
@@ -1861,6 +1869,14 @@ impl Checker {
                 }
                 self.get_any_type()
             }
+            SyntaxKind::ThisKeyword | SyntaxKind::SuperKeyword => {
+                // `this` / `super` → the enclosing class's instance type.
+                // Mirrors Go's `getThisType` / `getThisTypeOfObjectLiteral`.
+                // When not inside a class (e.g. top-level `this` in a
+                // module), falls back to `any` (or `globalThis` in
+                // script-mode — simplified to `any` here).
+                self.this_type_stack.last().cloned().unwrap_or_else(|| self.get_any_type())
+            }
             _ => self.get_any_type(),
         }
     }
@@ -2969,7 +2985,12 @@ impl Checker {
             SyntaxKind::ClassDeclaration => {
                 // Grammar check: validate modifiers.
                 self.check_grammar_modifiers(node);
-                // Check heritage clauses (e.g. `extends Foo`).
+                // Build the instance type (including inherited members from
+                // `extends`) and push it as the `this` type so that method
+                // bodies can resolve `this.prop` and `super.prop`.
+                let this_type = self.build_class_instance_type_with_base(node);
+                self.this_type_stack.push(this_type);
+                // Check heritage clauses (e.g. `extends Foo`, `implements I`).
                 self.push_scope(node);
                 if let crate::ast::NodeData::ClassDeclaration(data) = &node.data {
                     if let Some(heritage) = &data.heritage_clauses {
@@ -2977,12 +2998,13 @@ impl Checker {
                             self.check_heritage_clause(clause);
                         }
                     }
-                    // Check member initializers.
+                    // Check member initializers / method bodies.
                     for member in data.members.iter() {
                         self.check_class_member(member);
                     }
                 }
                 self.pop_scope();
+                self.this_type_stack.pop();
                 // Build the class type (with construct signatures from the
                 // constructor) and cache it on the declaration node + symbol
                 // so `new Foo(arg)` can resolve the callee and check args.
@@ -3175,11 +3197,11 @@ impl Checker {
             .as_ref()
             .map(|n| n.text().to_string())
             .unwrap_or_default();
-        // Build the class's instance type (an anonymous object type from
-        // its members). This reuses the interface-member builder because
-        // the relevant member kinds (MethodDeclaration, PropertyDeclaration)
-        // carry the same name/type-node shape.
-        let instance_type = self.build_class_instance_type(&class_data.members);
+        // Build the class's instance type including inherited members
+        // from `extends`, so that base-class members also satisfy the
+        // `implements` check. Mirrors Go's `getBaseTypes` integration in
+        // `checkTypeImplementsList`.
+        let instance_type = self.build_class_instance_type_with_base(class_node);
         // Check each implemented interface.
         for type_ref in data.types.iter() {
             let interface_type = self.get_type_from_heritage_type_reference(type_ref);
@@ -3200,15 +3222,174 @@ impl Checker {
     }
 
     /// Build an anonymous object type representing the class's instance type
-    /// (the public property/method surface used by `implements` checks).
+    /// (the public property/method surface used by `implements` checks and
+    /// `this` type resolution inside method bodies).
     ///
     /// Mirrors the Go checker's `build_classInstanceType` / instance-type
     /// construction. Constructor bodies and static members are excluded —
     /// only instance `PropertyDeclaration`/`MethodDeclaration`/accessor
     /// members contribute. Reuses the interface-member builder because the
     /// relevant member kinds share the same name/type-node/parameter shape.
+    ///
+    /// When the class has an `extends` heritage clause, the base class's
+    /// instance type is resolved recursively and its properties are merged
+    /// in (underneath the derived class's own properties, so overrides win).
+    /// Mirrors Go's `getBaseTypes`/property inheritance in
+    /// `getPropertiesOfTypeOfObjectLiteral`/`getPropertiesOfObjectType`.
     fn build_class_instance_type(&mut self, members: &Arc<NodeList>) -> Arc<Type> {
         self.build_interface_type_from_members(members)
+    }
+
+    /// Build the class instance type including inherited members from the
+    /// `extends` clause. The derived class's own members take precedence
+    /// (override) over the base class's members with the same name.
+    ///
+    /// Mirrors Go's `getBaseTypeNodeTypes`/property inheritance:
+    /// `class D extends B {}` gives D's instance type all of B's properties
+    /// plus D's own.
+    fn build_class_instance_type_with_base(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let (members, heritage_clauses) = match &node.data {
+            crate::ast::NodeData::ClassDeclaration(data) => {
+                (&data.members, data.heritage_clauses.clone())
+            }
+            _ => return self.build_interface_type_from_members(&Arc::new(NodeList::default())),
+        };
+        // Build the derived class's own instance type.
+        let own_type = self.build_interface_type_from_members(members);
+        // Find the `extends` clause and resolve the base class.
+        let mut base_type: Option<Arc<Type>> = None;
+        if let Some(ref heritage) = heritage_clauses {
+            for clause in heritage.iter() {
+                if let crate::ast::NodeData::HeritageClause(hc) = &clause.data {
+                    if hc.token == SyntaxKind::ExtendsKeyword {
+                        if let Some(type_ref) = hc.types.iter().next() {
+                            base_type = Some(self.resolve_base_class_instance_type(type_ref));
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        match base_type {
+            Some(base) => self.merge_instance_types(&own_type, &base),
+            None => own_type,
+        }
+    }
+
+    /// Resolve a base class reference from an `extends` heritage clause to
+    /// its instance type (recursively including the base's own base class).
+    /// Returns `any` if the base class cannot be resolved (e.g. unknown
+    /// identifier — TS2304 is emitted elsewhere).
+    fn resolve_base_class_instance_type(&mut self, type_ref: &Arc<Node>) -> Arc<Type> {
+        // The heritage-clause entry is an `ExpressionWithTypeArguments`.
+        // Get its type, which for a class reference resolves to the class's
+        // constructor type (an object with construct signatures). We need
+        // the instance type instead.
+        // First, try to resolve the class symbol and build its instance
+        // type directly (including the base class's own base).
+        if let crate::ast::NodeData::ExpressionWithTypeArguments(data) = &type_ref.data {
+            if data.expression.kind == SyntaxKind::Identifier {
+                if let Some(symbol) = self.resolve_identifier(&data.expression) {
+                    if symbol.flags.contains(SymbolFlags::Class) {
+                        // Find the ClassDeclaration node and build its
+                        // instance type with base.
+                        if let Some(class_node) = symbol
+                            .declarations
+                            .iter()
+                            .find(|d| d.kind == SyntaxKind::ClassDeclaration)
+                            .cloned()
+                        {
+                            // Avoid infinite recursion for self-referential
+                            // extends (shouldn't happen, but be safe).
+                            let key = Arc::as_ptr(&symbol) as *const crate::ast::Symbol;
+                            if !self.resolving_type_aliases.insert(key) {
+                                return self.get_any_type();
+                            }
+                            let instance = self.build_class_instance_type_with_base(&class_node);
+                            self.resolving_type_aliases.remove(&key);
+                            return instance;
+                        }
+                    }
+                }
+            }
+        }
+        // Fallback: resolve the type reference directly. For interfaces
+        // or other types, this gives the object type. For classes, it gives
+        // the constructor type — extract its properties (construct
+        // signatures' return type would be ideal, but we don't track that
+        // yet). Fall back to `any` to avoid false positives.
+        let t = self.get_type_from_type_node(type_ref);
+        if t.flags.contains(TypeFlags::Any) {
+            return self.get_any_type();
+        }
+        // If it's an object type (e.g. from an interface), use it directly.
+        if t.flags.contains(TypeFlags::Object) {
+            return t;
+        }
+        self.get_any_type()
+    }
+
+    /// Merge two instance types: `derived` properties override `base`
+    /// properties with the same name. Returns a new anonymous object type
+    /// containing all properties from both, with derived taking precedence.
+    fn merge_instance_types(&mut self, derived: &Arc<Type>, base: &Arc<Type>) -> Arc<Type> {
+        if base.flags.contains(TypeFlags::Any) {
+            return Arc::clone(derived);
+        }
+        let derived_data = match &derived.data {
+            TypeData::Object(o) => &o.structured,
+            _ => return Arc::clone(derived),
+        };
+        let base_data = match &base.data {
+            TypeData::Object(o) => &o.structured,
+            _ => return Arc::clone(derived),
+        };
+        // Start with base properties, then overlay derived (so derived
+        // overrides win). Preserve declaration order: base first, then
+        // derived-only.
+        let mut symbol_table = SymbolTable::new();
+        let mut props: Vec<Arc<Symbol>> = Vec::new();
+        // Base properties first.
+        for prop in &base_data.properties {
+            symbol_table.insert(prop.name.clone(), Arc::clone(prop));
+            props.push(Arc::clone(prop));
+        }
+        // Derived properties: override if already present, append if new.
+        for prop in &derived_data.properties {
+            if symbol_table.get(&prop.name).is_some() {
+                symbol_table.insert(prop.name.clone(), Arc::clone(prop));
+                // Replace in props list (preserve position for base members).
+                if let Some(slot) = props.iter_mut().find(|p| p.name == prop.name) {
+                    *slot = Arc::clone(prop);
+                }
+            } else {
+                symbol_table.insert(prop.name.clone(), Arc::clone(prop));
+                props.push(Arc::clone(prop));
+            }
+        }
+        // Merge index infos (base first, then derived).
+        let mut index_infos = base_data.index_infos.clone();
+        index_infos.extend(derived_data.index_infos.iter().cloned());
+        let signatures = base_data.signatures.clone();
+        let call_signature_count = base_data.call_signature_count;
+        Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Anonymous,
+            id: 0,
+            symbol: None,
+            alias: None,
+            data: TypeData::Object(ObjectTypeData {
+                structured: StructuredTypeData {
+                    members: symbol_table,
+                    properties: props,
+                    index_infos,
+                    signatures,
+                    call_signature_count,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        })
     }
 
     /// Resolve a heritage-clause type reference (`implements Foo` /
