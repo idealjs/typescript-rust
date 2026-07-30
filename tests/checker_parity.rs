@@ -3198,6 +3198,78 @@ fn checker_template_literal_type_via_alias_no_error() {
     assert_no_diagnostics(&diags);
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Mapped types: { [K in C]: V }, { [K in keyof T]: V }
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_mapped_type_literal_union_no_error() {
+    // `{ [K in "a" | "b"]: number }` → `{ a: number; b: number }`.
+    let diags = check_source(
+        "type M = { [K in \"a\" | \"b\"]: number };\nlet x: M = { a: 1, b: 2 };",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_mapped_type_literal_union_mismatch_ts2322() {
+    // `{ [K in "a" | "b"]: number }` → `{ a: number; b: number }`.
+    // Assigning a string to `a` fails.
+    let diags = check_source(
+        "type M = { [K in \"a\" | \"b\"]: number };\nlet x: M = { a: \"hi\", b: 2 };",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_mapped_type_keyof_no_error() {
+    // `{ [K in keyof T]: number }` where T = { a: 1; b: "x" }
+    // → { a: number; b: number }.
+    let diags = check_source(
+        "type T = { a: 1; b: \"x\" };\ntype M = { [K in keyof T]: number };\nlet x: M = { a: 1, b: 2 };",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_mapped_type_keyof_mismatch_ts2322() {
+    // `{ [K in keyof T]: number }` → { a: number; b: number }.
+    // Missing `b` should fail.
+    let diags = check_source(
+        "type T = { a: 1; b: \"x\" };\ntype M = { [K in keyof T]: number };\nlet x: M = { a: 1 };",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_mapped_type_optional_no_error() {
+    // `{ [K in keyof T]?: number }` → { a?: number; b?: number }.
+    // Missing properties are OK because they're optional.
+    let diags = check_source(
+        "type T = { a: 1; b: \"x\" };\ntype M = { [K in keyof T]?: number };\nlet x: M = { };",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_mapped_type_identity_no_error() {
+    // `{ [K in keyof T]: T[K] }` → same shape as T.
+    let diags = check_source(
+        "type T = { a: number; b: string };\ntype M = { [K in keyof T]: T[K] };\nlet x: M = { a: 1, b: \"hi\" };",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_mapped_type_identity_mismatch_ts2322() {
+    // `{ [K in keyof T]: T[K] }` → same shape as T.
+    // Wrong types should fail.
+    let diags = check_source(
+        "type T = { a: number; b: string };\ntype M = { [K in keyof T]: T[K] };\nlet x: M = { a: \"hi\", b: \"hi\" };",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
 #[test]
 fn checker_keyof_constrained_type_parameter_no_error() {
     // `keyof T` where T extends { a: number; b: string } → "a" | "b".

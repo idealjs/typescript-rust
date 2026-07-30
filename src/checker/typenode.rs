@@ -153,14 +153,30 @@ impl Checker {
     // ────────────────────────────────────────────────────────────────────────
 
     /// Check if a type node has already been resolved.
+    ///
+    /// When a type-argument substitution is active (the
+    /// `type_argument_stack` is non-empty), the resolved type depends on
+    /// the substitution context (e.g. the mapped-type key `K` being
+    /// substituted with `"a"` vs `"b"`), so the per-node cache must be
+    /// bypassed to avoid returning a result computed under a different
+    /// substitution.
     fn get_cached_type(&self, node: &Arc<Node>) -> Option<Arc<Type>> {
+        if !self.type_argument_stack.is_empty() {
+            return None;
+        }
         self.type_node_links
             .get(node)
             .and_then(|l| l.resolved_type.clone())
     }
 
     /// Store a resolved type for a type node.
+    ///
+    /// See `get_cached_type`: caching is skipped while a type-argument
+    /// substitution is active.
     fn cache_type(&mut self, node: &Arc<Node>, t: Arc<Type>) {
+        if !self.type_argument_stack.is_empty() {
+            return;
+        }
         self.type_node_links.get_or_default(node).resolved_type = Some(t);
     }
 
@@ -1345,7 +1361,7 @@ impl Checker {
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
-        let result = self.error_type();
+        let result = self.build_mapped_type(node);
         self.cache_type(node, result.clone());
         result
     }
@@ -1892,6 +1908,114 @@ impl Checker {
             return "undefined".into();
         }
         String::new()
+    }
+
+    /// Build the result of a mapped type `{ [K in C]: V }`.
+    ///
+    /// Mirrors a simplified subset of Go's `getMappedType`/`instantiateMappedType`.
+    /// When the constraint `C` resolves to a concrete union of string
+    /// literals (i.e. `keyof T` for a concrete `T`, or `"a" | "b"`), the
+    /// mapped type is eagerly resolved: for each key, the type parameter
+    /// `K` is substituted with the key's string-literal type and the value
+    /// type `V` is resolved, producing an anonymous object type with those
+    /// properties. Optional (`?`) and readonly modifiers are applied.
+    ///
+    /// When the constraint is generic (`keyof T` where `T` is a type
+    /// parameter) or not a union of string literals, the mapped type
+    /// cannot be eagerly resolved and `any` is returned (no false
+    /// positives).
+    fn build_mapped_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let data = match &node.data {
+            NodeData::MappedTypeNode(data) => data,
+            _ => return self.error_type(),
+        };
+        // Resolve the constraint type (the `in` clause).
+        let constraint_node = match &data.type_parameter.data {
+            NodeData::TypeParameterDeclaration(tp) => match &tp.constraint {
+                Some(c) => Arc::clone(c),
+                None => return self.error_type(),
+            },
+            _ => return self.error_type(),
+        };
+        let constraint_type = self.get_type_from_type_node(&constraint_node);
+        // Get the set of key names from the constraint. Only concrete
+        // unions of string literals (or a single string literal) can be
+        // eagerly resolved.
+        let keys = self.string_literal_values(&constraint_type);
+        if keys.is_empty() {
+            // Generic constraint (e.g. `keyof T` where T is a type
+            // parameter) or `string` — can't eagerly resolve.
+            return self.any_type();
+        }
+        // Find the type-parameter symbol so we can substitute it.
+        let tp_symbol = self
+            .program
+            .symbol_map()
+            .symbol_of(&data.type_parameter)
+            .map(Arc::clone);
+        let tp_key = tp_symbol.as_ref().map(|s| Arc::as_ptr(s) as *const crate::ast::Symbol);
+        // Optional (`?`) modifier.
+        let is_optional = data
+            .question_token
+            .as_ref()
+            .map(|t| t.kind == SyntaxKind::QuestionToken)
+            .unwrap_or(false);
+        // Build the properties.
+        let mut symbol_table = SymbolTable::new();
+        let mut props: Vec<Arc<Symbol>> = Vec::new();
+        for key in &keys {
+            let mut prop_type = match &data.type_node {
+                Some(tn) => {
+                    // Push the type-parameter substitution.
+                    if let Some(k) = tp_key {
+                        let mut mapping = HashMap::new();
+                        mapping.insert(k, self.get_string_literal_type(key));
+                        self.type_argument_stack.push(mapping);
+                    }
+                    let t = self.get_type_from_type_node(tn);
+                    if tp_key.is_some() {
+                        self.type_argument_stack.pop();
+                    }
+                    t
+                }
+                None => self.get_any_type(),
+            };
+            if is_optional {
+                prop_type = self.get_optional_type(prop_type);
+            }
+            let mut flags = SymbolFlags::Property;
+            if is_optional {
+                flags |= SymbolFlags::Optional;
+            }
+            let symbol = Arc::new(Symbol::new(flags, key.clone()));
+            self.value_symbol_links.insert(
+                &symbol,
+                ValueSymbolLinks {
+                    resolved_type: Some(prop_type),
+                    ..Default::default()
+                },
+            );
+            symbol_table.insert(key.clone(), Arc::clone(&symbol));
+            props.push(symbol);
+        }
+        Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Anonymous,
+            id: 0,
+            symbol: None,
+            alias: None,
+            data: TypeData::Object(ObjectTypeData {
+                structured: StructuredTypeData {
+                    members: symbol_table,
+                    properties: props,
+                    index_infos: Vec::new(),
+                    signatures: Vec::new(),
+                    call_signature_count: 0,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        })
     }
 
     /// Flatten a type into its string-literal values.
