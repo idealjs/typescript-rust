@@ -382,7 +382,17 @@ contextual function type 的 call signature，无注解参数继承对应位置�
 可解析参数引用）；`set_parent_pointers` 后处理填充 AST `parent` 指针（激活 contextual typing
 与 grammar checks 中所有 `node.parent` 访问，单线程 + 树形 AST 安全）。
 
-- [ ] 条件类型 `infer R` 解析。（已部分完成，conditional branch 推断待补）
+- [x] 条件类型 `infer R` 解析。已完成：binder 将 infer 类型参数声明为
+  ConditionalType 的 locals（`set_parent_pointers` 预处理 + `bind_type_parameter`
+  检测 InferType 父节点 + `get_infer_type_container`/`declare_local_symbol`）；
+  `get_type_from_infer_type_node` 解析为 TypeParameter 类型；`build_conditional_type`
+  构建 ConditionalRoot 含 check/extends 类型和 infer 参数；`resolve_type_reference`
+  支持 generic type alias 实例化（`type_argument_stack` 替换映射）；
+  `resolve_conditional_type` 运行 `infer_types` 推断 infer 参数、替换 extends 与
+  branch、push ConditionalType 到 scope stack 使 branch 可解析 infer 符号；
+  `substitute_infer_type_parameters` 扩展支持 Object（数组）与 Tuple 类型（之前
+  仅处理 union/intersection，导致 `(infer R)[]` extends 不被替换、条件恒走 false 分支）。
+  18 个 conditional type parity 测试通过。
 - [ ] 类型推断缓存（`node_links.resolved_type`）。（已通过 `type_node_links` 完成）
 - [ ] Fresh literal type widening（对象字面量在无 contextual type 时应 widening
   literal 属性，目前保留 literal 以兼容 discriminated union 赋值）。
