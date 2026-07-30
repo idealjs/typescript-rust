@@ -32,7 +32,7 @@ use super::types::*;
 const FLOW_MAX_DEPTH: u32 = 200;
 
 /// The kind of narrowing to apply for a condition.
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 enum NarrowKind {
     /// The condition is true; narrow to types satisfying the constraint.
     /// E.g. `x !== null` (true) → remove `null`.
@@ -329,10 +329,11 @@ impl Checker {
         // branch, `x` cannot be null/undefined (otherwise `x?.a` would be
         // `undefined`, which is falsy). Mirrors Go's `narrowTypeByTruthiness`
         // optional chain containment check (flow.go ~L432).
-        if kind == NarrowKind::TrueBranch
-            && self.optional_chain_contains_reference(expr, symbol)
-        {
-            return self.remove_nullable_from_union(type_);
+        if kind == NarrowKind::TrueBranch {
+            let contains = self.optional_chain_contains_reference(expr, symbol);
+            if contains {
+                return self.remove_nullable_from_union(type_);
+            }
         }
 
         // `typeof x === "string"` is a BinaryExpression, handled above.
@@ -1576,7 +1577,7 @@ impl Checker {
     }
 
     /// Remove all types from `type_` whose flags intersect `flags`.
-    fn remove_flags_from_union(&self, type_: &Arc<Type>, flags: TypeFlags) -> Arc<Type> {
+    pub fn remove_flags_from_union(&self, type_: &Arc<Type>, flags: TypeFlags) -> Arc<Type> {
         let constituents = self.constituent_types(type_);
         let remaining: Vec<Arc<Type>> = constituents
             .into_iter()
@@ -1919,7 +1920,8 @@ impl Checker {
         // to name-based matching.
         let symbol_map = self.program.symbol_map();
         if let Some(sym) = symbol_map.symbol_of(node) {
-            return Arc::ptr_eq(sym, symbol);
+            let eq = Arc::ptr_eq(sym, symbol);
+            return eq;
         }
         // Fallback: compare by name. The identifier's text must match the
         // symbol's name (set by the binder when the declaration was bound).
@@ -1927,7 +1929,8 @@ impl Checker {
             NodeData::Identifier(data) => &data.text,
             _ => return false,
         };
-        node_name == &symbol.name
+        let eq = node_name == &symbol.name;
+        eq
     }
 
     /// If `expr` is an assignment to `symbol`, return the type of the RHS.
@@ -2077,10 +2080,16 @@ impl Checker {
     ) -> bool {
         match &node.data {
             NodeData::PropertyAccessExpression(pa) => {
-                self.is_symbol_identifier(&pa.expression, symbol)
+                // Optional chains (`x?.a`) must NOT be treated as discriminant
+                // property accesses: the value may be `undefined` regardless of
+                // the property type. They're handled by the optional-chain
+                // containment narrowing instead.
+                pa.question_dot_token.is_none()
+                    && self.is_symbol_identifier(&pa.expression, symbol)
             }
             NodeData::ElementAccessExpression(ea) => {
-                self.is_symbol_identifier(&ea.expression, symbol)
+                ea.question_dot_token.is_none()
+                    && self.is_symbol_identifier(&ea.expression, symbol)
             }
             _ => false,
         }

@@ -573,6 +573,7 @@ impl Checker {
                     return_type,
                     /* is_construct */ false,
                     /* contextual_signature */ None,
+                    /* declaration */ Some(Arc::clone(node)),
                 );
                 self.create_function_or_constructor_type(vec![sig], false)
             }
@@ -595,6 +596,7 @@ impl Checker {
                     return_type,
                     /* is_construct */ true,
                     /* contextual_signature */ None,
+                    /* declaration */ Some(Arc::clone(node)),
                 );
                 self.create_function_or_constructor_type(vec![sig], true)
             }
@@ -629,6 +631,7 @@ impl Checker {
         return_type: Arc<Type>,
         is_construct: bool,
         contextual_signature: Option<&Arc<Signature>>,
+        declaration: Option<Arc<Node>>,
     ) -> Arc<Signature> {
         let mut param_symbols: Vec<Arc<Symbol>> = Vec::with_capacity(parameters.len());
         let mut flags = SignatureFlags::None;
@@ -705,7 +708,7 @@ impl Checker {
             flags,
             min_argument_count,
             resolved_min_argument_count: -1,
-            declaration: None,
+            declaration,
             type_parameters: Vec::new(),
             parameters: param_symbols,
             this_parameter: None,
@@ -1024,8 +1027,128 @@ impl Checker {
         })
     }
 
-    pub fn get_index_type(&mut self, _type: &Arc<Type>) -> Arc<Type> {
-        self.error_type()
+    /// Compute `keyof T` — the union of string-literal property names of `T`.
+    ///
+    /// Mirrors Go's `getIndexType`. Currently handles:
+    /// - Object/Interface/Tuple/Mapped types: union of `properties[*].name`
+    ///   as string-literal types. If there are no properties, returns `never`.
+    /// - Union types: `keyof (A | B)` = `keyof A & keyof B` (common keys).
+    /// - Intersection types: `keyof (A & B)` = `keyof A | keyof B`.
+    /// - Type parameters: `keyof T` = `keyof Constraint<T>` (if constrained).
+    /// - `never`: returns `never`.
+    /// - `any`/`error`: returns `string` (simplified — Go returns
+    ///   `string | number | symbol`).
+    /// - Other types: `never`.
+    pub fn get_index_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        // `keyof never` is `never`; `keyof any` is `string | number | symbol`
+        // (approximated as `string` here).
+        if t.flags.contains(TypeFlags::Never) {
+            return self.never_type();
+        }
+        if t.flags.contains(TypeFlags::Any) {
+            // `keyof any` = string | number | symbol. We approximate with
+            // `string` since number/symbol literal keys are rare in tests.
+            return self.string_type();
+        }
+        // Union: `keyof (A | B)` = `keyof A & keyof B` — only keys present in
+        // ALL constituents are valid. Since keyof of an object type yields a
+        // union of string-literal types, the intersection reduces to the set
+        // of common literal names. We compute this directly to avoid leaving
+        // an unsimplified `Union & Union` intersection type.
+        if t.flags.contains(TypeFlags::Union) {
+            let types = match &t.data {
+                TypeData::Union(u) => &u.union_or_intersection.types,
+                _ => return self.never_type(),
+            };
+            let mut common: Option<Vec<String>> = None;
+            for constituent in types {
+                let k = self.get_index_type(constituent);
+                let names = self.string_literal_values(&k);
+                common = Some(match common.take() {
+                    None => names,
+                    Some(acc) => acc
+                        .into_iter()
+                        .filter(|n| names.contains(n))
+                        .collect(),
+                });
+            }
+            let names = common.unwrap_or_default();
+            if names.is_empty() {
+                return self.never_type();
+            }
+            let literals: Vec<Arc<Type>> = names
+                .into_iter()
+                .map(|n| self.get_string_literal_type(&n))
+                .collect();
+            return self.get_union_type(literals);
+        }
+        // Intersection: `keyof (A & B)` = `keyof A | keyof B` — keys present
+        // in ANY constituent are valid.
+        if t.flags.contains(TypeFlags::Intersection) {
+            let types = match &t.data {
+                TypeData::Intersection(i) => &i.union_or_intersection.types,
+                _ => return self.never_type(),
+            };
+            let keys: Vec<Arc<Type>> =
+                types.iter().map(|c| self.get_index_type(c)).collect();
+            return self.get_union_type(keys);
+        }
+        // Type parameter: resolve through the constraint.
+        if t.flags.contains(TypeFlags::TypeParameter) {
+            if let Some(constraint) = self.get_constraint_of_type_parameter(t) {
+                return self.get_index_type(&constraint);
+            }
+            // Unconstrained type parameter: `keyof T` = `string | number | symbol`,
+            // approximated as `string`.
+            return self.string_type();
+        }
+        // Object-like types: collect property names as string-literal types.
+        if let Some(structured) = t.as_structured() {
+            if structured.properties.is_empty() {
+                return self.never_type();
+            }
+            // Collect names first to avoid borrowing `self` while iterating.
+            let names: Vec<String> =
+                structured.properties.iter().map(|p| p.name.clone()).collect();
+            let literals: Vec<Arc<Type>> = names
+                .into_iter()
+                .map(|n| self.get_string_literal_type(&n))
+                .collect();
+            return self.get_union_type(literals);
+        }
+        // Other types (literals, etc.): `keyof` is `never`.
+        self.never_type()
+    }
+
+    /// Flatten a type into its string-literal values.
+    ///
+    /// Used by `get_index_type` to compute common keys across union
+    /// constituents: `keyof (A | B)` collects the keyof of each arm (a
+    /// union of string-literal types, or `never`) and intersects the name
+    /// sets. This helper extracts those names.
+    fn string_literal_values(&self, t: &Arc<Type>) -> Vec<String> {
+        if t.flags.contains(TypeFlags::Never) {
+            return Vec::new();
+        }
+        if t.flags.contains(TypeFlags::StringLiteral) {
+            if let TypeData::Literal(lit) = &t.data {
+                if let LiteralValue::String(s) = &lit.value {
+                    return vec![s.clone()];
+                }
+            }
+            return Vec::new();
+        }
+        if t.flags.contains(TypeFlags::Union) {
+            if let TypeData::Union(u) = &t.data {
+                return u
+                    .union_or_intersection
+                    .types
+                    .iter()
+                    .flat_map(|c| self.string_literal_values(c))
+                    .collect();
+            }
+        }
+        Vec::new()
     }
 
     pub fn add_optionality(&self, t: &Arc<Type>) -> Arc<Type> {

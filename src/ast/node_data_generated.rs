@@ -3801,6 +3801,20 @@ pub fn node_type(node: &Node) -> Option<&Arc<Node>> {
         NodeData::JSDocNullableType(d) => Some(&d.type_node),
         NodeData::JSDocVariadicType(d) => Some(&d.type_node),
         NodeData::JSDocOptionalType(d) => Some(&d.type_node),
+        // Function-like declarations: the `type_node` field holds the
+        // return-type annotation (e.g. `: x is string` in a type guard).
+        // Mirrors Go's `Node.Type()`, which returns the type annotation
+        // for signature declarations.
+        NodeData::FunctionDeclaration(d) => d.type_node.as_ref(),
+        NodeData::FunctionExpression(d) => d.type_node.as_ref(),
+        NodeData::ArrowFunction(d) => d.type_node.as_ref(),
+        NodeData::MethodDeclaration(d) => d.type_node.as_ref(),
+        NodeData::MethodSignatureDeclaration(d) => d.type_node.as_ref(),
+        NodeData::ConstructorDeclaration(d) => d.type_node.as_ref(),
+        NodeData::ConstructSignatureDeclaration(d) => d.type_node.as_ref(),
+        NodeData::CallSignatureDeclaration(d) => d.type_node.as_ref(),
+        NodeData::GetAccessorDeclaration(d) => d.type_node.as_ref(),
+        NodeData::SetAccessorDeclaration(d) => d.type_node.as_ref(),
         _ => None,
     }
 }

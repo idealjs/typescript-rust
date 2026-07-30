@@ -3290,6 +3290,7 @@ impl Parser {
                 }
                 SyntaxKind::QuestionDotToken => {
                     let pos = expr.pos();
+                    let question_dot = self.create_token_node();
                     self.next_token();
                     if self.token == SyntaxKind::OpenParenToken {
                         let arguments = self.parse_argument_list();
@@ -3298,7 +3299,7 @@ impl Parser {
                             SyntaxKind::CallExpression,
                             NodeData::CallExpression(CallExpressionData {
                                 expression: expr,
-                                question_dot_token: None,
+                                question_dot_token: Some(question_dot),
                                 type_arguments: None,
                                 arguments,
                             }),
@@ -3311,7 +3312,7 @@ impl Parser {
                             SyntaxKind::PropertyAccessExpression,
                             NodeData::PropertyAccessExpression(PropertyAccessExpressionData {
                                 expression: expr,
-                                question_dot_token: None,
+                                question_dot_token: Some(question_dot),
                                 name,
                             }),
                             TextRange::new(pos, end),
@@ -3531,16 +3532,36 @@ impl Parser {
                 ))
             }
             _ => {
-                // Error recovery
-                let pos = self.token_pos();
-                let end = self.token_end();
-                self.parse_error_at(pos, end, diagnostics::UNEXPECTED_TOKEN, &[]);
-                self.next_token();
-                Arc::new(Node::with_loc(
-                    SyntaxKind::Unknown,
-                    NodeData::Token,
-                    TextRange::new(pos, end),
-                ))
+                // Contextual keywords (e.g. `assert`, `type`, `keyof`) can be
+                // used as identifiers in expression context. If the current
+                // token is a keyword that is valid as an identifier name,
+                // treat it as an identifier reference. Mirrors Go's
+                // `parseIdentifierName` fallback in expression context.
+                if is_identifier_or_keyword(self.token)
+                    && self.token != SyntaxKind::InKeyword
+                    && self.token != SyntaxKind::InstanceOfKeyword
+                {
+                    let text = self.scanner.token_text().to_string();
+                    let pos = self.token_pos();
+                    let end = self.token_end();
+                    self.next_token();
+                    Arc::new(Node::with_loc(
+                        SyntaxKind::Identifier,
+                        NodeData::Identifier(IdentifierData { text }),
+                        TextRange::new(pos, end),
+                    ))
+                } else {
+                    // Error recovery
+                    let pos = self.token_pos();
+                    let end = self.token_end();
+                    self.parse_error_at(pos, end, diagnostics::UNEXPECTED_TOKEN, &[]);
+                    self.next_token();
+                    Arc::new(Node::with_loc(
+                        SyntaxKind::Unknown,
+                        NodeData::Token,
+                        TextRange::new(pos, end),
+                    ))
+                }
             }
         }
     }

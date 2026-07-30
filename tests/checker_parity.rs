@@ -2980,3 +2980,99 @@ fn checker_conditional_infer_r_in_function_return_no_error() {
     );
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// P3.7: keyof T — union of string-literal property names
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_keyof_object_type_no_error() {
+    // `keyof { a: number; b: string }` = "a" | "b".
+    let diags = check_source(
+        "type K = keyof { a: number; b: string };\nlet x: \"a\" | \"b\" = null as any as K;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_keyof_object_type_single_key_no_error() {
+    // `keyof { x: 1 }` = "x".
+    let diags = check_source(
+        "type K = keyof { x: 1 };\nlet x: \"x\" = null as any as K;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_keyof_object_type_subset_assignable_no_error() {
+    // `keyof { a: number }` = "a". "a" IS assignable to "a" | "b" (subset).
+    let diags = check_source(
+        "type K = keyof { a: number };\nlet x: \"a\" | \"b\" = null as any as K;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_keyof_object_type_missing_key_ts2322() {
+    // `keyof { a: number; b: string }` = "a" | "b", but target expects only "a".
+    let diags = check_source(
+        "type K = keyof { a: number; b: string };\nlet x: \"a\" = null as any as K;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_keyof_via_type_alias_no_error() {
+    // `keyof T` where T is a type alias for an object literal type.
+    let diags = check_source(
+        "type Obj = { a: number; b: string };\ntype K = keyof Obj;\nlet x: \"a\" | \"b\" = null as any as K;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_keyof_never_type() {
+    // `keyof never` = never. Assigning never to a string-literal type is OK.
+    let diags = check_source(
+        "type K = keyof never;\nlet x: \"a\" = null as any as K;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_keyof_empty_object_is_never() {
+    // `keyof {}` = never (no keys). Assigning never is OK.
+    let diags = check_source(
+        "type K = keyof {};\nlet x: \"a\" = null as any as K;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_keyof_union_common_keys_no_error() {
+    // `keyof (A | B)` = `keyof A & keyof B` = common keys only.
+    // A has "a"|"b", B has "b"|"c" → keyof (A|B) = "b".
+    let diags = check_source(
+        "type A = { a: number; b: string };\ntype B = { b: string; c: number };\ntype K = keyof (A | B);\nlet x: \"b\" = null as any as K;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_keyof_intersection_all_keys_no_error() {
+    // `keyof (A & B)` = `keyof A | keyof B` = all keys.
+    // A has "a", B has "b" → keyof (A&B) = "a" | "b".
+    let diags = check_source(
+        "type A = { a: number };\ntype B = { b: string };\ntype K = keyof (A & B);\nlet x: \"a\" | \"b\" = null as any as K;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_keyof_constrained_type_parameter_no_error() {
+    // `keyof T` where T extends { a: number; b: string } → "a" | "b".
+    let diags = check_source(
+        "type K<T extends { a: number; b: string }> = keyof T;\nlet x: \"a\" | \"b\" = null as any as K<{ a: 1; b: 2 }>;",
+    );
+    assert_no_diagnostics(&diags);
+}

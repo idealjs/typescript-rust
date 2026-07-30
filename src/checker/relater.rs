@@ -520,11 +520,15 @@ impl Checker {
         let s = source.flags;
 
         if s.contains(TypeFlags::Union) {
-            if relation == RelationKind::Assignable || relation == RelationKind::Comparable {
+            // For Comparable: a union source is comparable to target if ANY
+            // constituent is comparable (loose check for error-reporting).
+            // For all other relations (Subtype/StrictSubtype/Assignable): ALL
+            // constituents must be related. E.g. `"a" | "b"` is NOT assignable
+            // to `"a"` because `"b"` isn't.
+            if relation == RelationKind::Comparable {
                 return self.some_type_related_to_type(source, target, relation);
-            } else {
-                return self.each_type_related_to_type(source, target, relation);
             }
+            return self.each_type_related_to_type(source, target, relation);
         }
 
         if s.contains(TypeFlags::Intersection) {

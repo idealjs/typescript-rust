@@ -1226,8 +1226,12 @@ impl Checker {
             return Some(pred.clone());
         }
         // Compute from declaration.
-        let decl = sig.declaration.as_ref()?;
-        let type_node = decl.type_node()?;
+        let Some(decl) = sig.declaration.as_ref() else {
+            return None;
+        };
+        let Some(type_node) = decl.type_node() else {
+            return None;
+        };
         if type_node.kind != SyntaxKind::TypePredicate {
             return None;
         }
@@ -1559,10 +1563,15 @@ impl Checker {
                 self.get_any_type()
             }
             SyntaxKind::NonNullExpression => {
-                // `x!` has the type of `x` (ideally with null/undefined
-                // removed, but for now we return the expression type).
+                // `x!` asserts that `x` is non-null: the type of `x` with
+                // `null` and `undefined` removed. Mirrors Go's
+                // `getNonNullableType`.
                 if let crate::ast::NodeData::NonNullExpression(data) = &node.data {
-                    return self.get_type_of_node(&data.expression);
+                    let operand_type = self.get_type_of_node(&data.expression);
+                    return self.remove_flags_from_union(
+                        &operand_type,
+                        TypeFlags::Undefined | TypeFlags::Null,
+                    );
                 }
                 self.get_any_type()
             }
@@ -1735,6 +1744,7 @@ impl Checker {
             placeholder,
             /* is_construct */ false,
             contextual_signature,
+            /* declaration */ None, // primed signature is discarded
         );
         // Now infer the return type — the body sees the contextual param
         // types set above. An explicit return-type annotation always wins.
@@ -1752,6 +1762,7 @@ impl Checker {
             return_type,
             /* is_construct */ false,
             contextual_signature,
+            /* declaration */ Some(Arc::clone(node)),
         );
         self.create_function_or_constructor_type(vec![sig], false)
     }
@@ -1784,6 +1795,7 @@ impl Checker {
                 return_type,
                 /* is_construct */ true,
                 /* contextual_signature */ None,
+                /* declaration */ Some(Arc::clone(member)),
             );
             construct_sigs.push(sig);
         }
@@ -1796,6 +1808,7 @@ impl Checker {
                 self.get_any_type(),
                 /* is_construct */ true,
                 None,
+                /* declaration */ None,
             );
             construct_sigs.push(sig);
         }
