@@ -1592,6 +1592,50 @@ pub struct ContainingSymbolLinks {
     pub extended_containers: Vec<Arc<Symbol>>,
 }
 
+/// Per-declaration links used by the emit resolver to track visibility.
+///
+/// Mirrors Go's `DeclarationLinks` (emitresolver.go). `is_visible` is a
+/// `Tristate` cached result of `isDeclarationVisible`.
+#[derive(Debug, Default)]
+pub struct DeclarationLinks {
+    pub is_visible: Tristate,
+}
+
+/// Per-source-file links used by the emit resolver.
+///
+/// Mirrors Go's `DeclarationFileLinks` (emitresolver.go). `aliases_marked`
+/// records whether `PrecalculateDeclarationEmitVisibility` has already run
+/// the alias marking visitor over this file.
+#[derive(Debug, Default)]
+pub struct DeclarationFileLinks {
+    pub aliases_marked: bool,
+}
+
+/// Result of a symbol accessibility / entity-name visibility query.
+///
+/// Mirrors Go's `printer.SymbolAccessibilityResult`. Only the fields needed
+/// by the emit resolver are ported. `PartialEq` is intentionally not derived
+/// because `Node` is not `Eq` (it carries interior-mutable state).
+#[derive(Debug, Clone, Default)]
+pub struct SymbolAccessibilityResult {
+    pub accessibility: SymbolAccessibility,
+    /// Aliases that must be marked visible for the reference to serialize.
+    pub aliases_to_make_visible: Vec<Arc<crate::ast::Node>>,
+    pub error_symbol_name: String,
+    pub error_node: Option<Arc<crate::ast::Node>>,
+}
+
+/// The accessibility of a symbol relative to an enclosing declaration.
+///
+/// Mirrors Go's `printer.SymbolAccessibility`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SymbolAccessibility {
+    #[default]
+    Accessible,
+    NotAccessible,
+    NotResolved,
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // CheckMode
 // ────────────────────────────────────────────────────────────────────────────

@@ -276,6 +276,14 @@ pub struct Checker {
     pub marked_assignment_symbol_links: LinkStore<Symbol, MarkedAssignmentSymbolLinks>,
     pub symbol_container_links: LinkStore<Symbol, ContainingSymbolLinks>,
     pub source_file_links: LinkStore<SourceFile, SourceFileLinks>,
+    /// Per-declaration emit-resolver links (caches `isDeclarationVisible`).
+    pub declaration_links: LinkStore<Node, DeclarationLinks>,
+    /// Per-source-file emit-resolver links (tracks `aliasesMarked`).
+    pub declaration_file_links: LinkStore<SourceFile, DeclarationFileLinks>,
+    /// Single-entry cache for `get_combined_modifier_flags`, mirroring Go's
+    /// `lastGetCombinedModifierFlagsNode`/`Result`.
+    last_combined_modifier_flags_node: Option<Arc<Node>>,
+    last_combined_modifier_flags_result: ModifierFlags,
 
     // Built-in types
     pub any_type: OnceLock<Arc<Type>>,
@@ -519,6 +527,10 @@ impl Checker {
             marked_assignment_symbol_links: LinkStore::new(),
             symbol_container_links: LinkStore::new(),
             source_file_links: LinkStore::new(),
+            declaration_links: LinkStore::new(),
+            declaration_file_links: LinkStore::new(),
+            last_combined_modifier_flags_node: None,
+            last_combined_modifier_flags_result: ModifierFlags::empty(),
 
             any_type: OnceLock::new(),
             unknown_type: OnceLock::new(),
@@ -1083,14 +1095,221 @@ impl Checker {
     }
 
     /// Get combined modifier flags (caching the result).
+    ///
+    /// Mirrors Go's `Checker.getCombinedModifierFlagsCached` →
+    /// `ast.GetCombinedModifierFlags`. Walks from the root declaration up
+    /// through `VariableDeclaration` → `VariableDeclarationList` →
+    /// `VariableStatement`, OR-ing the syntactic modifier flags of each.
     pub fn get_combined_modifier_flags(&mut self, node: &Arc<Node>) -> ModifierFlags {
-        let flags = ModifierFlags::empty();
-        let mut current = Some(Arc::clone(node));
-        while let Some(n) = current {
-            current = n.parent.clone();
+        // Single-entry cache mirroring Go's `lastGetCombinedModifierFlagsNode`.
+        if let Some(cached) = &self.last_combined_modifier_flags_node {
+            if Arc::ptr_eq(cached, node) {
+                return self.last_combined_modifier_flags_result;
+            }
         }
+        let flags = ast_get_combined_modifier_flags(node);
+        self.last_combined_modifier_flags_node = Some(Arc::clone(node));
+        self.last_combined_modifier_flags_result = flags;
         flags
     }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Declaration-container / module helpers (used by the emit resolver)
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Walk up `BindingElement` chains to the root declaration.
+    /// Mirrors Go's `ast.GetRootDeclaration`.
+    pub fn get_root_declaration(node: &Arc<Node>) -> Arc<Node> {
+        let mut current = Arc::clone(node);
+        while current.kind == SyntaxKind::BindingElement {
+            // BindingElement → BindingPattern (parent) → VariableDeclaration (grandparent)
+            let parent = match &current.parent {
+                Some(p) => Arc::clone(p),
+                None => break,
+            };
+            let grandparent = match &parent.parent {
+                Some(gp) => Arc::clone(gp),
+                None => break,
+            };
+            current = grandparent;
+        }
+        current
+    }
+
+    /// The declaration container (SourceFile/ModuleDeclaration/EnumDeclaration)
+    /// that holds `node`. Mirrors Go's `ast.GetDeclarationContainer`.
+    pub fn get_declaration_container(node: &Arc<Node>) -> Option<Arc<Node>> {
+        let root = Self::get_root_declaration(node);
+        // FindAncestor: walk up from root, returning the first node whose kind
+        // is NOT in the skip set; return that node's parent.
+        let skip = |kind: SyntaxKind| {
+            matches!(
+                kind,
+                SyntaxKind::VariableDeclaration
+                    | SyntaxKind::VariableDeclarationList
+                    | SyntaxKind::ImportSpecifier
+                    | SyntaxKind::NamedImports
+                    | SyntaxKind::NamespaceImport
+                    | SyntaxKind::ImportClause
+            )
+        };
+        let mut current = Some(root);
+        while let Some(n) = current {
+            if skip(n.kind) {
+                current = n.parent.clone();
+                continue;
+            }
+            return n.parent.clone();
+        }
+        None
+    }
+
+    /// Whether `node` is a SourceFile that is a global (non-module) script.
+    /// Mirrors Go's `ast.IsGlobalSourceFile`.
+    pub fn is_global_source_file(node: &Arc<Node>) -> bool {
+        if node.kind != SyntaxKind::SourceFile {
+            return false;
+        }
+        !Self::is_external_or_common_js_module(node)
+    }
+
+    /// Whether `node` (a SourceFile) is an external or CommonJS module.
+    /// Mirrors Go's `ast.IsExternalOrCommonJSModule`: a file is a module if
+    /// it has a top-level `import`/`export` declaration (ES module) or a
+    /// CommonJS indicator. The Rust SourceFile does not yet track CommonJS
+    /// indicators, so only the ES-module heuristic is used.
+    pub fn is_external_or_common_js_module(node: &Arc<Node>) -> bool {
+        if node.kind != SyntaxKind::SourceFile {
+            return false;
+        }
+        let NodeData::SourceFile(data) = &node.data else {
+            return false;
+        };
+        for stmt in data.statements.nodes.iter() {
+            // Mirrors Go's `IsExternalModuleIndicator`: any import/re-export,
+            // export assignment, or statement with the `export` modifier marks
+            // the file as an ES module.
+            match stmt.kind {
+                SyntaxKind::ImportDeclaration
+                | SyntaxKind::ExportDeclaration
+                | SyntaxKind::ExportAssignment
+                | SyntaxKind::NamespaceExportDeclaration
+                | SyntaxKind::ImportEqualsDeclaration => return true,
+                _ => {
+                    if stmt.has_syntactic_modifier(crate::ast::ModifierFlags::Export) {
+                        return true;
+                    }
+                }
+            }
+        }
+        false
+    }
+
+    /// Whether `node` is an ambient module that augments an external module.
+    /// Mirrors Go's `ast.IsExternalModuleAugmentation`. A `declare module
+    /// "foo"` augmentation is external when its parent is a SourceFile that
+    /// is itself an external module.
+    pub fn is_external_module_augmentation(node: &Arc<Node>) -> bool {
+        if !Self::is_ambient_module(node) {
+            return false;
+        }
+        Self::is_module_augmentation_external(node)
+    }
+
+    fn is_ambient_module(node: &Arc<Node>) -> bool {
+        if node.kind != SyntaxKind::ModuleDeclaration {
+            return false;
+        }
+        if let NodeData::ModuleDeclaration(d) = &node.data {
+            // `declare module "foo"` (StringLiteral name) or `declare global`
+            d.keyword == SyntaxKind::ModuleKeyword || d.keyword == SyntaxKind::NamespaceKeyword
+        } else {
+            false
+        }
+    }
+
+    fn is_module_augmentation_external(node: &Arc<Node>) -> bool {
+        let parent = match &node.parent {
+            Some(p) => p,
+            None => return false,
+        };
+        match parent.kind {
+            SyntaxKind::SourceFile => Self::is_external_or_common_js_module(parent),
+            SyntaxKind::ModuleBlock => {
+                let grandparent = match &parent.parent {
+                    Some(gp) => gp,
+                    None => return false,
+                };
+                Self::is_ambient_module(grandparent)
+                    && matches!(&grandparent.parent, Some(ggp) if ggp.kind == SyntaxKind::SourceFile)
+                    && !Self::is_external_or_common_js_module(
+                        grandparent.parent.as_ref().unwrap(),
+                    )
+            }
+            _ => false,
+        }
+    }
+
+    /// Whether `node` is a top-level statement kind whose visibility is
+    /// "painted" late via the alias marking visitor.
+    /// Mirrors Go's `ast.IsLateVisibilityPaintedStatement`.
+    pub fn is_late_visibility_painted_statement(node: &Arc<Node>) -> bool {
+        matches!(
+            node.kind,
+            SyntaxKind::ImportDeclaration
+                | SyntaxKind::ImportEqualsDeclaration
+                | SyntaxKind::VariableStatement
+                | SyntaxKind::ClassDeclaration
+                | SyntaxKind::FunctionDeclaration
+                | SyntaxKind::ModuleDeclaration
+                | SyntaxKind::TypeAliasDeclaration
+                | SyntaxKind::InterfaceDeclaration
+                | SyntaxKind::EnumDeclaration
+        )
+    }
+
+    /// The enclosing import syntax node for an alias declaration, if any.
+    /// Mirrors Go's `getAnyImportSyntax`.
+    pub fn get_any_import_syntax(node: &Arc<Node>) -> Option<Arc<Node>> {
+        match node.kind {
+            SyntaxKind::ImportEqualsDeclaration => Some(Arc::clone(node)),
+            SyntaxKind::ImportClause => node.parent.clone(),
+            SyntaxKind::NamespaceImport => node
+                .parent
+                .clone()
+                .and_then(|p| p.parent.clone()),
+            SyntaxKind::ImportSpecifier => node
+                .parent
+                .clone()
+                .and_then(|p| p.parent.clone())
+                .and_then(|gp| gp.parent.clone()),
+            _ => None,
+        }
+    }
+}
+
+/// Free function mirroring Go's `ast.GetCombinedModifierFlags`.
+///
+/// Walks from the root declaration up through the variable-declaration chain
+/// (VariableDeclaration → VariableDeclarationList → VariableStatement),
+/// OR-ing the syntactic modifier flags of each level. Non-variable
+/// declarations return their own modifier flags.
+fn ast_get_combined_modifier_flags(node: &Arc<Node>) -> ModifierFlags {
+    let current = Checker::get_root_declaration(node);
+    let mut flags = current.syntactic_modifier_flags();
+    if current.kind == SyntaxKind::VariableDeclaration {
+        if let Some(parent) = current.parent.clone() {
+            if parent.kind == SyntaxKind::VariableDeclarationList {
+                flags |= parent.syntactic_modifier_flags();
+                if let Some(gp) = parent.parent.clone() {
+                    if gp.kind == SyntaxKind::VariableStatement {
+                        flags |= gp.syntactic_modifier_flags();
+                    }
+                }
+            }
+        }
+    }
+    flags
 }
 
 // ────────────────────────────────────────────────────────────────────────────

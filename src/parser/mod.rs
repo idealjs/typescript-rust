@@ -4963,14 +4963,21 @@ impl Parser {
         }
 
         // export function/class/interface/type/enum/namespace declarations
+        // Route through `parse_declaration_with_modifiers` so the `export`
+        // keyword is attached as a modifier (mirrors Go's `parseDeclaration`).
         match self.token {
-            SyntaxKind::FunctionKeyword => return self.parse_function_declaration(),
-            SyntaxKind::ClassKeyword => return self.parse_class_declaration(),
-            SyntaxKind::InterfaceKeyword => return self.parse_interface_declaration(),
-            SyntaxKind::TypeKeyword => return self.parse_type_alias_declaration(),
-            SyntaxKind::EnumKeyword => return self.parse_enum_declaration(),
-            SyntaxKind::NamespaceKeyword | SyntaxKind::ModuleKeyword => {
-                return self.parse_namespace_declaration();
+            SyntaxKind::FunctionKeyword
+            | SyntaxKind::ClassKeyword
+            | SyntaxKind::InterfaceKeyword
+            | SyntaxKind::TypeKeyword
+            | SyntaxKind::EnumKeyword
+            | SyntaxKind::NamespaceKeyword
+            | SyntaxKind::ModuleKeyword => {
+                return self.parse_declaration_with_modifiers(vec![(
+                    SyntaxKind::ExportKeyword,
+                    pos,
+                    export_end,
+                )]);
             }
             SyntaxKind::ConstKeyword | SyntaxKind::LetKeyword | SyntaxKind::VarKeyword => {
                 // export const/let/var x = ...

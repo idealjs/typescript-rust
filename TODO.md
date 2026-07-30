@@ -57,15 +57,15 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-31）
 
-测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 480 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 374 个）。
+测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 489 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 383 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
 | Scanner | 1558 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 完成；缺 trivia 节点、完整 regex 校验 |
 | Parser | 7115 | 9251 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；缺 reparser/jsdoc |
 | Binder | 1640 | ~4000 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 + EnumDeclaration 容器化 完成；缺完整 flow graph、ARRAY_MUTATION、try/catch/finally、labeled statement |
-| Checker | 9600 | ~50K+ | ~19% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查 + 比较无重叠检查 TS2367 + 不可调用/不可构造检查 TS2349/TS2351 + 只读属性赋值检查 TS2540 + declaration merge checker 侧（namespace+function/class 合并 + enum+enum 合并 + enum 成员值类型解析）；480 parity fixtures 通过；缺 emitresolver visibility tracking |
+| Checker | 9600 | ~50K+ | ~19% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查 + 比较无重叠检查 TS2367 + 不可调用/不可构造检查 TS2349/TS2351 + 只读属性赋值检查 TS2540 + declaration merge checker 侧（namespace+function/class 合并 + enum+enum 合并 + enum 成员值类型解析）；emitresolver visibility tracking（is_declaration_visible + alias marking visitor + is_entity_name_visible 基础版）完成；489 parity fixtures 通过 |
 | Compiler | 759 | — | 基础 | Program 创建/解析/绑定/emit pipeline 通；checker 已接入 |
 | Emitter | 774 | — | 基础 | JS emit 基础；缺 transformer 体系 |
 | Printer | 1578 | — | 基础 | 节点→文本基础 |
@@ -561,8 +561,38 @@ variable/alias）；`variable_decl_prefix` 区分 let/const/var；
 `get_effective_declaration_flags`、`get_symbol_of_declaration`、
 `is_const_enum_member`。
 
-- [ ] 完整的 visibility tracking（alias marking visitor）。
-- [ ] `isEntityNameVisible`/`isSymbolAccessible`（declaration emit 需要）。
+- [x] 完整的 visibility tracking（alias marking visitor）。已完成：
+  `determine_if_declaration_is_visible` 覆盖 VariableDeclaration/ModuleDeclaration/
+  ClassDeclaration/InterfaceDeclaration/TypeAliasDeclaration/FunctionDeclaration/
+  EnumDeclaration/ImportEqualsDeclaration（exported 或 ambient element 时
+  递归检查容器可见性，否则回退到 `is_global_source_file`）；PropertyDeclaration/
+  PropertySignature/GetAccessor/SetAccessor/MethodDeclaration/MethodSignature
+  （private/protected 不可见，否则递归检查父声明）；ImportClause/NamespaceImport/
+  ImportSpecifier 默认不可见（由 alias marking visitor 按需标记）；TypeParameter
+  与 SourceFile/NamespaceExportDeclaration 永远可见；ExportAssignment 不可见；
+  ExportSpecifier（无 module specifier 时）回溯到 ExportDeclaration 的父容器。
+  `precalculate_declaration_emit_visibility` 保存/恢复 file context（current_file/
+  current_file_id/current_file_symbol/scope_stack）后运行 `alias_marking_visitor`，
+  遍历 BinaryExpression（CommonJS `module.exports = id`）/ExportAssignment
+  （`export = id`）/ExportSpecifier（`export { X }`），调用 `mark_linked_aliases`
+  在 file symbol 的 members / scope_stack locals 中解析名字，follow_alias 后
+  将 symbol 的全部 declarations 标记为 visible，并沿 `import d = a.b.c` 链继续
+  解析。9 条 visibility parity 测试通过（exported/non-exported/global script/
+  import clause/alias marking export specifier/export assignment/private property/
+  type parameter/export specifier re-export）。
+- [x] `isEntityNameVisible`/`isSymbolAccessible`（基础版）。已完成：
+  `is_entity_name_visible` 解析 entity name 的首个 identifier，区分
+  TypeParameter（直接 Accessible）/未解析（NotResolved）/调用
+  `has_visible_declarations` 返回 `SymbolAccessibilityResult`。完整
+  `isSymbolAccessible`（含 `aliases_to_make_visible` 完整计算、export specifier
+  target 解析、private/protected 跨文件可见性）依赖 binder export/import binding
+  与完整 scope chain，待 P3.4 落地后补齐。
+- [x] Parser 修复：`export function/class/interface/type/enum/namespace` 现在路由
+  到 `parse_declaration_with_modifiers`，将 `ExportKeyword` 作为 modifier 附加到
+  声明节点（之前 `export` 关键字被消费但未附加为 modifier，导致
+  `is_external_or_common_js_module` 无法检测 ES module）。`is_external_or_common_js_module`
+  同步增加 `has_syntactic_modifier(Export)` 检查，对齐 Go 的 `IsExternalModuleIndicator`。
+- [x] `Program::build_checker` 暴露给测试使用，返回完全初始化的 Checker。
 
 ### P3.12 Checker JSX / JSDoc / Grammar checks（已完成）
 

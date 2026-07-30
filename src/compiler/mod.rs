@@ -210,13 +210,22 @@ impl Program {
     /// but it wires up the full pipeline so future checker work is automatically
     /// picked up.
     pub fn get_semantic_diagnostics(self: &Arc<Self>) -> Vec<Diagnostic> {
+        let mut checker = self.build_checker();
+        checker.get_semantic_diagnostics()
+    }
+
+    /// Build a fully-initialized `Checker` for this program, with all source
+    /// files already checked. Exposed so tests and advanced callers can
+    /// inspect checker state (e.g. emit-resolver visibility) after the
+    /// type-check pass. Mirrors the setup done by `get_semantic_diagnostics`.
+    pub fn build_checker(self: &Arc<Self>) -> crate::checker::Checker {
         let tracer = Arc::new(crate::checker::Tracer::new());
         let program: Arc<dyn crate::checker::Program> = Arc::clone(self) as _;
         let mut checker = crate::checker::Checker::new(program, tracer);
         for file in &self.source_files {
             checker.check_source_file(file);
         }
-        checker.get_semantic_diagnostics()
+        checker
     }
 
     pub fn config_file_name(&self) -> &str {

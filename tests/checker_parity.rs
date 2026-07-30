@@ -4799,3 +4799,332 @@ fn checker_merged_enum_string_not_assignable_ts2322() {
     );
     assert_diagnostic_code(&diags, 2322);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Emit-resolver visibility tracking (P3.11)
+//
+// These tests build a fully-initialized `Checker` via `Program::build_checker`
+// and exercise `is_declaration_visible` / `precalculate_declaration_emit_visibility`
+// directly, since declaration emit is not yet wired into the emit pipeline.
+// ────────────────────────────────────────────────────────────────────────────
+
+/// Build a checker for a single source file and return it, with all files
+/// already type-checked. Mirrors `check_source` but exposes the checker.
+fn build_checker(source: &str) -> Checker {
+    let fs = Arc::new(InMemoryFS::new());
+    fs.insert_dir("/proj");
+    fs.insert_file("/proj/entry.ts", source);
+
+    let args = vec!["--noLib".to_string(), "/proj/entry.ts".to_string()];
+    let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
+    let host: Arc<dyn tsox::compiler::CompilerHost> =
+        Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
+    let program = Arc::new(Program::new(ProgramOptions {
+        config: parsed,
+        host,
+    }));
+    program.build_checker()
+}
+
+/// Find the first top-level statement of `kind` in the entry source file.
+fn first_statement<'a>(checker: &'a Checker, kind: SyntaxKind) -> Option<std::sync::Arc<tsox::ast::Node>> {
+    let file = checker
+        .files
+        .iter()
+        .find(|f| f.file_name == "/proj/entry.ts")
+        .expect("entry source file");
+    let NodeData::SourceFile(data) = &file.node.data else {
+        return None;
+    };
+    for stmt in data.statements.nodes.iter() {
+        if stmt.kind == kind {
+            return Some(std::sync::Arc::clone(stmt));
+        }
+    }
+    None
+}
+
+#[test]
+fn visibility_exported_function_in_module_is_visible() {
+    // An exported declaration in a module file is visible (its container,
+    // the source file, is always visible).
+    let mut checker = build_checker("export function f(): void {}");
+    let stmt = first_statement(&checker, SyntaxKind::FunctionDeclaration).unwrap();
+    assert!(checker.is_declaration_visible(&stmt));
+}
+
+#[test]
+fn visibility_non_exported_function_in_module_not_visible() {
+    // A non-exported declaration in a module (external module) file is NOT
+    // visible — the file is a module because of the `export` on `f`, so `g`
+    // is not globally reachable.
+    let mut checker = build_checker("export function f(): void {}\nfunction g(): void {}");
+    let g_stmt = checker
+        .files
+        .iter()
+        .find(|f| f.file_name == "/proj/entry.ts")
+        .unwrap();
+    let NodeData::SourceFile(data) = &g_stmt.node.data else {
+        panic!("not a source file");
+    };
+    let g = data
+        .statements
+        .nodes
+        .iter()
+        .find(|n| {
+            n.kind == SyntaxKind::FunctionDeclaration
+                && n.name().map(|nm| nm.text()) == Some("g")
+        })
+        .cloned()
+        .expect("g function");
+    assert!(
+        !checker.is_declaration_visible(&g),
+        "non-exported function in a module should not be visible"
+    );
+}
+
+#[test]
+fn visibility_global_script_declaration_is_visible() {
+    // In a global (non-module) script, top-level declarations are visible
+    // even without `export`.
+    let mut checker = build_checker("function g(): void {}");
+    let stmt = first_statement(&checker, SyntaxKind::FunctionDeclaration).unwrap();
+    assert!(
+        checker.is_declaration_visible(&stmt),
+        "top-level function in a global script should be visible"
+    );
+}
+
+#[test]
+fn visibility_import_clause_not_visible_by_default() {
+    // Import clauses / namespace imports are not visible until the alias
+    // marking visitor marks them.
+    let mut checker = build_checker("import x from \"./other\";\nexport function f(): void {}");
+    let file = checker
+        .files
+        .iter()
+        .find(|f| f.file_name == "/proj/entry.ts")
+        .unwrap();
+    let NodeData::SourceFile(data) = &file.node.data else {
+        panic!("not a source file");
+    };
+    let import = data
+        .statements
+        .nodes
+        .iter()
+        .find(|n| n.kind == SyntaxKind::ImportDeclaration)
+        .cloned()
+        .expect("import declaration");
+    // The ImportClause is the child we care about.
+    let clause = {
+        let mut found: Option<std::sync::Arc<tsox::ast::Node>> = None;
+        tsox::ast::node_data_generated::for_each_child(&import, |child| {
+            if child.kind == SyntaxKind::ImportClause {
+                found = Some(std::sync::Arc::clone(child));
+                true
+            } else {
+                false
+            }
+        });
+        found.expect("import clause")
+    };
+    assert!(
+        !checker.is_declaration_visible(&clause),
+        "import clause should not be visible until marked"
+    );
+}
+
+#[test]
+fn visibility_alias_marking_marks_export_specifier_target() {
+    // `export { g }` should mark `g`'s declaration visible via the alias
+    // marking visitor.
+    let mut checker = build_checker(
+        "function g(): void {}\n\
+         export { g };",
+    );
+    let file = checker
+        .files
+        .iter()
+        .find(|f| f.file_name == "/proj/entry.ts")
+        .expect("entry file")
+        .clone();
+    checker.precalculate_declaration_emit_visibility(&file);
+    // After precalculation, the `function g` declaration (which was not
+    // visible because it's an unexported statement in a module file with
+    // `export { g }`) should now be marked visible by the visitor.
+    let NodeData::SourceFile(data) = &file.node.data else {
+        panic!("not a source file");
+    };
+    let g = data
+        .statements
+        .nodes
+        .iter()
+        .find(|n| n.kind == SyntaxKind::FunctionDeclaration)
+        .cloned()
+        .expect("g function");
+    assert!(
+        checker.is_declaration_visible(&g),
+        "export {{ g }} should mark g visible via the alias marking visitor"
+    );
+}
+
+#[test]
+fn visibility_export_assignment_marks_target() {
+    // `export = x` should mark `x`'s declaration visible.
+    let mut checker = build_checker(
+        "function x(): void {}\n\
+         export = x;",
+    );
+    let file = checker
+        .files
+        .iter()
+        .find(|f| f.file_name == "/proj/entry.ts")
+        .expect("entry file")
+        .clone();
+    checker.precalculate_declaration_emit_visibility(&file);
+    let NodeData::SourceFile(data) = &file.node.data else {
+        panic!("not a source file");
+    };
+    let x = data
+        .statements
+        .nodes
+        .iter()
+        .find(|n| n.kind == SyntaxKind::FunctionDeclaration)
+        .cloned()
+        .expect("x function");
+    assert!(
+        checker.is_declaration_visible(&x),
+        "export = x should mark x visible"
+    );
+}
+
+#[test]
+fn visibility_private_property_not_visible() {
+    // Private class members are not visible.
+    let mut checker = build_checker(
+        "export class C {\n\
+         private p: number = 1;\n\
+         public q: number = 2;\n\
+         }",
+    );
+    let file = checker
+        .files
+        .iter()
+        .find(|f| f.file_name == "/proj/entry.ts")
+        .expect("entry file");
+    let NodeData::SourceFile(data) = &file.node.data else {
+        panic!("not a source file");
+    };
+    let class = data
+        .statements
+        .nodes
+        .iter()
+        .find(|n| n.kind == SyntaxKind::ClassDeclaration)
+        .cloned()
+        .expect("class C");
+    let mut members: Vec<std::sync::Arc<tsox::ast::Node>> = Vec::new();
+    tsox::ast::node_data_generated::for_each_child(&class, |child| {
+        members.push(std::sync::Arc::clone(child));
+        false
+    });
+    let private_p = members
+        .iter()
+        .find(|m| {
+            m.kind == SyntaxKind::PropertyDeclaration && m.name().map(|n| n.text()) == Some("p")
+        })
+        .cloned()
+        .expect("private property p");
+    let public_q = members
+        .iter()
+        .find(|m| {
+            m.kind == SyntaxKind::PropertyDeclaration && m.name().map(|n| n.text()) == Some("q")
+        })
+        .cloned()
+        .expect("public property q");
+    assert!(
+        !checker.is_declaration_visible(&private_p),
+        "private property should not be visible"
+    );
+    assert!(
+        checker.is_declaration_visible(&public_q),
+        "public property should be visible"
+    );
+}
+
+#[test]
+fn visibility_type_parameter_always_visible() {
+    // Type parameters are always visible.
+    let mut checker = build_checker("export function f<T>(): void {}");
+    let file = checker
+        .files
+        .iter()
+        .find(|f| f.file_name == "/proj/entry.ts")
+        .expect("entry file");
+    let NodeData::SourceFile(data) = &file.node.data else {
+        panic!("not a source file");
+    };
+    let f = data
+        .statements
+        .nodes
+        .iter()
+        .find(|n| n.kind == SyntaxKind::FunctionDeclaration)
+        .cloned()
+        .expect("function f");
+    let mut tp: Option<std::sync::Arc<tsox::ast::Node>> = None;
+    tsox::ast::node_data_generated::for_each_child(&f, |child| {
+        if child.kind == SyntaxKind::TypeParameter {
+            tp = Some(std::sync::Arc::clone(child));
+            true
+        } else {
+            false
+        }
+    });
+    let tp = tp.expect("type parameter");
+    assert!(
+        checker.is_declaration_visible(&tp),
+        "type parameter should always be visible"
+    );
+}
+
+#[test]
+fn visibility_export_specifier_reexport_visible() {
+    // An `export { X }` (no module specifier) is a visible re-export when
+    // its parent (the source file) is visible.
+    let mut checker = build_checker("export { x };");
+    let file = checker
+        .files
+        .iter()
+        .find(|f| f.file_name == "/proj/entry.ts")
+        .expect("entry file");
+    let NodeData::SourceFile(data) = &file.node.data else {
+        panic!("not a source file");
+    };
+    let export_decl = data
+        .statements
+        .nodes
+        .iter()
+        .find(|n| n.kind == SyntaxKind::ExportDeclaration)
+        .cloned()
+        .expect("export declaration");
+    let mut spec: Option<std::sync::Arc<tsox::ast::Node>> = None;
+    tsox::ast::node_data_generated::for_each_child(&export_decl, |child| {
+        // NamedExports wraps the specifiers; descend one level.
+        if child.kind == SyntaxKind::NamedExports {
+            tsox::ast::node_data_generated::for_each_child(child, |spec_child| {
+                if spec_child.kind == SyntaxKind::ExportSpecifier {
+                    spec = Some(std::sync::Arc::clone(spec_child));
+                    true
+                } else {
+                    false
+                }
+            });
+        }
+        false
+    });
+    let spec = spec.expect("export specifier");
+    assert!(
+        checker.is_declaration_visible(&spec),
+        "export {{ x }} (no module specifier) should be visible"
+    );
+}
+
