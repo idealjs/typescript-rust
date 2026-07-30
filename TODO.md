@@ -57,15 +57,15 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-30）
 
-测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 443 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 337 个）。
+测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 453 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 347 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
 | Scanner | 1558 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 完成；缺 trivia 节点、完整 regex 校验 |
 | Parser | 7115 | 9251 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；缺 reparser/jsdoc |
 | Binder | 1639 | ~4000 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 完成；缺完整 flow graph、ARRAY_MUTATION、try/catch/finally、labeled statement、完整 declaration merge |
-| Checker | 9400 | ~50K+ | ~19% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查；443 parity fixtures 通过；缺 emitresolver visibility tracking、完整 declaration merge checker 侧 |
+| Checker | 9400 | ~50K+ | ~19% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查 + 比较无重叠检查 TS2367；453 parity fixtures 通过；缺 emitresolver visibility tracking、完整 declaration merge checker 侧 |
 | Compiler | 759 | — | 基础 | Program 创建/解析/绑定/emit pipeline 通；checker 已接入 |
 | Emitter | 774 | — | 基础 | JS emit 基础；缺 transformer 体系 |
 | Printer | 1578 | — | 基础 | 节点→文本基础 |
@@ -415,6 +415,11 @@ reference 协变/逆变推断（`generic_type_reference_related_to`）。
   设为类实例类型（含 `extends` 继承成员），使 `new Foo()` 返回有类型的实例，
   `instance.prop` 触发 TS2339、类型赋值触发 TS2322、构造参数检查触发 TS2345。
   7 条 new 表达式 parity 测试通过。
+- [x] 比较运算符类型重叠检查（TS2367）：`BinaryExpression` 处理器对
+  `===`/`!==`/`==`/`!=` 调用 `are_types_comparable` 检测左右类型是否完全不
+  可比；当两者都非 `any`/`unknown`/`never`/`null`/`undefined` 且不可比时报
+  TS2367。10 条 parity 测试通过（number/string、boolean/string、`!==`/`==`、
+  literal union no-overlap、同类型/字面量/any/null/union 过 negative 用例）。
 
 ### P3.8 Checker 类型推断
 

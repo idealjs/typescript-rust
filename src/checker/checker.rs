@@ -19,6 +19,7 @@ use crate::core::compiler_options::{
 use crate::diagnostics::messages_generated::{
     ARGUMENT_EXPRESSION_EXPECTED, ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1,
     CANNOT_FIND_NAME_0, PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+    THIS_COMPARISON_APPEARS_TO_BE_UNINTENTIONAL_BECAUSE_THE_TYPES_0_AND_1_HAVE_NO_OVERLAP,
     TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
 };
 use crate::jsnum;
@@ -3723,6 +3724,46 @@ impl Checker {
                 if let crate::ast::NodeData::BinaryExpression(data) = &node.data {
                     self.check_expression(&data.left);
                     self.check_expression(&data.right);
+                    // TS2367: For equality/relational comparisons between
+                    // types with no overlap, the comparison is always
+                    // `false` (or `true` for `!=`/`!==`). Mirrors Go's
+                    // `checkBinaryExpression` comparison-overlap check
+                    // (checker.go ~L13800). Skipped for `any`/`unknown`/
+                    // `never`/`null`/`undefined` operands (per Go's
+                    // `isTypeRelatedTo` short-circuits).
+                    use crate::ast::SyntaxKind::*;
+                    let is_equality_op = matches!(
+                        data.operator_token.kind,
+                        EqualsEqualsToken
+                            | ExclamationEqualsToken
+                            | EqualsEqualsEqualsToken
+                            | ExclamationEqualsEqualsToken
+                    );
+                    if is_equality_op {
+                        let left_type = self.get_type_of_node(&data.left);
+                        let right_type = self.get_type_of_node(&data.right);
+                        // Skip the overlap check when either operand is
+                        // `any`/`unknown`/`never`/`null`/`undefined` — those
+                        // types are comparable to everything in TS.
+                        let skip_flags = TypeFlags::Any
+                            .union(TypeFlags::Unknown)
+                            .union(TypeFlags::Never)
+                            .union(TypeFlags::Null)
+                            .union(TypeFlags::Undefined);
+                        if !left_type.flags.intersects(skip_flags)
+                            && !right_type.flags.intersects(skip_flags)
+                            && !self.are_types_comparable(&left_type, &right_type)
+                        {
+                            let left_str = self.type_to_string(&left_type);
+                            let right_str = self.type_to_string(&right_type);
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                node.loc,
+                                THIS_COMPARISON_APPEARS_TO_BE_UNINTENTIONAL_BECAUSE_THE_TYPES_0_AND_1_HAVE_NO_OVERLAP,
+                                vec![left_str, right_str],
+                            ));
+                        }
+                    }
                 }
             }
             SyntaxKind::PrefixUnaryExpression => {

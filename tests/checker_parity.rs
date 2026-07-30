@@ -525,6 +525,123 @@ fn checker_nested_function_return_type_check_ts2322() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Comparison overlap check (TS2367)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_comparison_no_overlap_number_string_ts2367() {
+    // `number === string` always returns false — TS2367.
+    let diags = check_source(
+        "function f(x: number) {\
+             if (x === \"hi\") {}\
+         }",
+    );
+    assert_diagnostic_code(&diags, 2367);
+}
+
+#[test]
+fn checker_comparison_no_overlap_boolean_string_ts2367() {
+    // `boolean === "hi"` always returns false — TS2367.
+    let diags = check_source(
+        "function f(x: boolean) {\
+             if (x === \"hi\") {}\
+         }",
+    );
+    assert_diagnostic_code(&diags, 2367);
+}
+
+#[test]
+fn checker_comparison_no_overlap_inequality_ts2367() {
+    // `!==` triggers TS2367 too (same as `===` for unrelated types).
+    let diags = check_source(
+        "function f(x: number) {\
+             if (x !== \"hi\") {}\
+         }",
+    );
+    assert_diagnostic_code(&diags, 2367);
+}
+
+#[test]
+fn checker_comparison_loose_equals_no_overlap_ts2367() {
+    // `==` triggers TS2367 for unrelated types.
+    let diags = check_source(
+        "function f(x: number) {\
+             if (x == \"hi\") {}\
+         }",
+    );
+    assert_diagnostic_code(&diags, 2367);
+}
+
+#[test]
+fn checker_comparison_same_type_no_error() {
+    // `number === number` — no diagnostic.
+    let diags = check_source(
+        "function f(x: number, y: number) {\
+             if (x === y) {}\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_comparison_with_literal_no_error() {
+    // `number === 42` — `42` is a literal of `number`, comparable.
+    let diags = check_source(
+        "function f(x: number) {\
+             if (x === 42) {}\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_comparison_with_any_no_error() {
+    // `any === number` — `any` is always comparable.
+    let diags = check_source(
+        "function f(x: any, y: number) {\
+             if (x === y) {}\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_comparison_with_null_no_error() {
+    // `number === null` — comparisons with `null`/`undefined` are allowed.
+    let diags = check_source(
+        "function f(x: number) {\
+             if (x === null) {}\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_comparison_union_literal_no_error() {
+    // `string | number === "hi"` — `string` part of union overlaps.
+    let diags = check_source(
+        "type S = string | number;\
+         function f(x: S) {\
+             if (x === \"hi\") {}\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_comparison_distinct_union_members_ts2367() {
+    // `"a" | "b" === "c"` — `"c"` is not assignable to either literal.
+    // (TS narrows the union; the comparison with `"c"` has no overlap.)
+    let diags = check_source(
+        "function f(x: \"a\" | \"b\") {\
+             if (x === \"c\") {}\
+         }",
+    );
+    assert_diagnostic_code(&diags, 2367);
+}
+
+
+// ────────────────────────────────────────────────────────────────────────────
 // Function declarations (no diagnostics expected)
 // ────────────────────────────────────────────────────────────────────────────
 
