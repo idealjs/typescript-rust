@@ -381,6 +381,11 @@ reference 协变/逆变推断（`generic_type_reference_related_to`）。
   以 `Arc::as_ptr` 指针身份 + `RelationKind` 为键（因 `Type::id` 尚未
   全量赋值），`relation_cache` 按 top-level call 清空，
   `relation_in_progress` 做循环检测，`relater_depth` 做深度兜底。
+- [x] `implements` 子句校验（TS2420）：`check_heritage_clause` 对
+  `implements` 关键字构建类实例类型（复用 `build_interface_type_from_members`，
+  扩展支持 `PropertyDeclaration`/`MethodDeclaration`，跳过 static 成员与
+  构造函数），与每个接口类型做 `is_type_assignable_to`，失败时报 TS2420。
+  4 条 implements parity 测试通过（缺失成员/匹配方法/返回类型不匹配/属性匹配）。
 
 ### P3.8 Checker 类型推断
 
