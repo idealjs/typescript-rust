@@ -3149,8 +3149,78 @@ impl Checker {
 
     fn check_heritage_clause(&mut self, node: &Arc<Node>) {
         // Heritage clauses contain type references (e.g., `extends Foo`).
-        // These are type references, not expression references, so we skip
-        // them for now. Full checking will resolve the type later.
+        // For `implements` clauses, verify that the class's instance type
+        // is assignable to each implemented interface; otherwise emit
+        // TS2420. `extends` clauses are type-level and skipped here (the
+        // base-class members are merged separately).
+        let data = match &node.data {
+            crate::ast::NodeData::HeritageClause(d) => d,
+            _ => return,
+        };
+        if data.token != SyntaxKind::ImplementsKeyword {
+            return;
+        }
+        // Locate the enclosing ClassDeclaration to recover the class name
+        // and member list.
+        let class_node = match node.parent.as_ref() {
+            Some(p) => p,
+            None => return,
+        };
+        let class_data = match &class_node.data {
+            crate::ast::NodeData::ClassDeclaration(d) => d,
+            _ => return,
+        };
+        let class_name = class_data
+            .name
+            .as_ref()
+            .map(|n| n.text().to_string())
+            .unwrap_or_default();
+        // Build the class's instance type (an anonymous object type from
+        // its members). This reuses the interface-member builder because
+        // the relevant member kinds (MethodDeclaration, PropertyDeclaration)
+        // carry the same name/type-node shape.
+        let instance_type = self.build_class_instance_type(&class_data.members);
+        // Check each implemented interface.
+        for type_ref in data.types.iter() {
+            let interface_type = self.get_type_from_heritage_type_reference(type_ref);
+            if interface_type.flags.contains(TypeFlags::Any) {
+                // Couldn't resolve the interface (e.g. TS2304 already
+                // reported). Skip the assignability check.
+                continue;
+            }
+            if !self.is_type_assignable_to(&instance_type, &interface_type) {
+                let iface_name = self.type_to_string(&interface_type);
+                self.grammar_error_on_node_with_args(
+                    class_node,
+                    &crate::diagnostics::messages_generated::CLASS_0_INCORRECTLY_IMPLEMENTS_INTERFACE_1,
+                    &[class_name.clone(), iface_name],
+                );
+            }
+        }
+    }
+
+    /// Build an anonymous object type representing the class's instance type
+    /// (the public property/method surface used by `implements` checks).
+    ///
+    /// Mirrors the Go checker's `build_classInstanceType` / instance-type
+    /// construction. Constructor bodies and static members are excluded —
+    /// only instance `PropertyDeclaration`/`MethodDeclaration`/accessor
+    /// members contribute. Reuses the interface-member builder because the
+    /// relevant member kinds share the same name/type-node/parameter shape.
+    fn build_class_instance_type(&mut self, members: &Arc<NodeList>) -> Arc<Type> {
+        self.build_interface_type_from_members(members)
+    }
+
+    /// Resolve a heritage-clause type reference (`implements Foo` /
+    /// `extends Bar<T>`) to its underlying `Type`.
+    ///
+    /// The node kind for heritage-clause entries is
+    /// `ExpressionWithTypeArguments`, which `get_type_from_type_node` already
+    /// dispatches to `get_type_from_type_reference`. Returns `error_type`
+    /// (any) when the reference cannot be resolved — in that case TS2304 is
+    /// emitted elsewhere, so the `implements` check is skipped by the caller.
+    fn get_type_from_heritage_type_reference(&mut self, type_ref: &Arc<Node>) -> Arc<Type> {
+        self.get_type_from_type_node(type_ref)
     }
 
     fn check_class_member(&mut self, node: &Arc<Node>) {

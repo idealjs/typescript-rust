@@ -11,11 +11,22 @@ use std::collections::HashMap;
 use std::sync::{Arc, OnceLock};
 
 use crate::ast::node_data_generated::NodeData;
-use crate::ast::{Node, NodeList, Symbol, SymbolFlags, SymbolTable, SyntaxKind};
+use crate::ast::{ModifierFlags, ModifierList, Node, NodeList, Symbol, SymbolFlags, SymbolTable, SyntaxKind};
 use crate::jsnum;
 
 use super::checker::Checker;
 use super::types::*;
+
+/// Whether the given modifier list contains the `static` modifier.
+/// Used to skip static members when building a class's instance type for
+/// `implements` checks. Mirrors `ast.HasStaticModifier` / the
+/// `ModifierFlagsStatic` test in Go's `utilities.go`.
+fn is_static_modifier(modifiers: &Option<Arc<ModifierList>>) -> bool {
+    modifiers
+        .as_ref()
+        .map(|m| m.modifier_flags.contains(ModifierFlags::Static))
+        .unwrap_or(false)
+}
 
 impl Checker {
     /// Convert an AST type node into a `Type`.
@@ -482,7 +493,10 @@ impl Checker {
 
     /// Build an anonymous object type from an interface's member list.
     /// Handles PropertySignature, MethodSignature, and IndexSignature.
-    fn build_interface_type_from_members(&mut self, members: &Arc<NodeList>) -> Arc<Type> {
+    pub(crate) fn build_interface_type_from_members(
+        &mut self,
+        members: &Arc<NodeList>,
+    ) -> Arc<Type> {
         let mut symbol_table = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::new();
         let mut index_infos: Vec<Arc<crate::checker::IndexInfo>> = Vec::new();
@@ -570,6 +584,82 @@ impl Checker {
                         index_symbol: None,
                         components: Vec::new(),
                     }));
+                }
+                // Class instance members. `PropertyDeclaration` and
+                // `MethodDeclaration` carry the same name/postfix/parameters/
+                // type_node shape as their `*SignatureDeclaration` counterparts
+                // but the type_node is `Option` (a class property may be
+                // initialized without an explicit annotation). Constructors and
+                // static members are skipped here — they don't contribute to
+                // the instance type used by `implements` checks.
+                NodeData::PropertyDeclaration(data) => {
+                    if is_static_modifier(&data.modifiers) {
+                        continue;
+                    }
+                    let name = data.name.text().to_string();
+                    if name.is_empty() {
+                        continue;
+                    }
+                    let mut prop_type = match data.type_node.as_ref() {
+                        Some(tn) => self.get_type_from_type_node(tn),
+                        None => match data.initializer.as_ref() {
+                            Some(init) => self.get_type_of_node(init),
+                            None => self.get_any_type(),
+                        },
+                    };
+                    let is_optional = data
+                        .postfix_token
+                        .as_ref()
+                        .map(|t| t.kind == SyntaxKind::QuestionToken)
+                        .unwrap_or(false);
+                    if is_optional {
+                        prop_type = self.get_optional_type(prop_type);
+                    }
+                    let mut flags = SymbolFlags::Property;
+                    if is_optional {
+                        flags |= SymbolFlags::Optional;
+                    }
+                    let symbol = Arc::new(Symbol::new(flags, name.clone()));
+                    self.value_symbol_links.insert(
+                        &symbol,
+                        ValueSymbolLinks {
+                            resolved_type: Some(prop_type),
+                            ..Default::default()
+                        },
+                    );
+                    symbol_table.insert(name, Arc::clone(&symbol));
+                    props.push(symbol);
+                }
+                NodeData::MethodDeclaration(data) => {
+                    if is_static_modifier(&data.modifiers) {
+                        continue;
+                    }
+                    let name = data.name.text().to_string();
+                    if name.is_empty() {
+                        continue;
+                    }
+                    let return_type = match data.type_node.as_ref() {
+                        Some(tn) => self.get_type_from_type_node(tn),
+                        None => self.get_any_type(),
+                    };
+                    let sig = self.build_signature_from_function_like_type_node(
+                        &data.parameters,
+                        return_type,
+                        /* is_construct */ false,
+                        /* contextual_signature */ None,
+                        /* declaration */ Some(Arc::clone(member)),
+                    );
+                    let fn_type = self.create_function_or_constructor_type(vec![sig], false);
+                    let symbol = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
+                    self.value_symbol_links.insert(
+                        &symbol,
+                        ValueSymbolLinks {
+                            resolved_type: Some(fn_type),
+                            ..Default::default()
+                        },
+                    );
+                    symbol_table.insert(name, Arc::clone(&symbol));
+                    props.push(symbol);
                 }
                 _ => {}
             }

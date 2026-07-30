@@ -991,6 +991,26 @@ fn checker_class_implements_interface_no_error() {
     assert_no_diagnostics(&diags);
 }
 
+#[test]
+fn checker_class_implements_interface_with_method_no_error() {
+    // A class that provides a matching method should satisfy the interface.
+    let diags = check_source(
+        "interface IFoo { bar(): number; }\n\
+         class C implements IFoo { bar() { return 42; } }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_class_implements_interface_wrong_method_return_ts2420() {
+    // The class method's return type must be assignable to the interface's.
+    let diags = check_source(
+        "interface IFoo { bar(): number; }\n\
+         class C implements IFoo { bar(): string { return 'hi'; } }",
+    );
+    assert_diagnostic_code(&diags, 2420);
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Export declarations
 // ────────────────────────────────────────────────────────────────────────────
@@ -3783,7 +3803,6 @@ fn checker_class_inherits_method_no_error() {
 }
 
 #[test]
-#[ignore = "TODO: implement `implements` heritage-clause checking (TS2420)"]
 fn checker_class_implements_interface_missing_member_ts2420() {
     // `implements` without the required member should report TS2420.
     let diags = check_source(
