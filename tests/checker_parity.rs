@@ -3668,6 +3668,48 @@ fn hover_var_keyword_variable() {
     assert_eq!(info, "var v: string");
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Declaration merge parity (P3.4)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_interface_merge_no_error() {
+    // Two `interface Foo` declarations should merge into a single type with
+    // all members; `{ a: 1, b: "hi" }` is assignable to the merged type.
+    let diags = check_source(
+        "interface Foo { a: number; }\n\
+         interface Foo { b: string; }\n\
+         const x: Foo = { a: 1, b: \"hi\" };",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_interface_merge_missing_member_ts2322() {
+    // After merging, `Foo` requires both `a` and `b`; missing `b` is TS2322.
+    let diags = check_source(
+        "interface Foo { a: number; }\n\
+         interface Foo { b: string; }\n\
+         const x: Foo = { a: 1 };",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_interface_merge_missing_first_member_ts2322() {
+    // Verifies true merging: a member from the FIRST declaration (`a`)
+    // must still be required even though only the second `interface Foo`
+    // symbol survives in the binder's member table. If merging were broken
+    // (only the second interface's members were seen), `{ b: \"hi\" }`
+    // would be assignable and this test would expect no diagnostics.
+    let diags = check_source(
+        "interface Foo { a: number; }\n\
+         interface Foo { b: string; }\n\
+         const x: Foo = { b: \"hi\" };",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
 #[test]
 fn hover_arrow_function_variable() {
     let info = hover_info_for("let f = (a: number): string => \"hi\";", "f").expect("hover");

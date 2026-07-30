@@ -205,7 +205,12 @@ impl Binder {
 
     /// Declare a symbol for a node, adding it to the appropriate symbol table.
     ///
-    /// Mirrors `binder.declareSymbol` in Go.
+    /// Mirrors `binder.declareSymbol` in Go, including declaration merging
+    /// for mergeable kinds (interface+interface, namespace+namespace,
+    /// namespace+function/class, function+function overloads, enum+enum).
+    /// Non-mergeable kinds (TypeAlias, Class, block-scoped variables)
+    /// overwrite the previous symbol on redeclaration — matching the
+    /// previous behavior.
     fn declare_symbol(
         &mut self,
         node: &Arc<Node>,
@@ -213,6 +218,47 @@ impl Binder {
         _excludes: SymbolFlags,
     ) -> Arc<Symbol> {
         let name = self.get_declaration_name(node);
+
+        // Look up an existing symbol with the same name in the target scope.
+        // If it exists and the kinds are mergeable, fold this declaration
+        // into the existing symbol instead of creating a new one.
+        let existing: Option<Arc<Symbol>> = if let Some(parent_sym) = &self.parent_symbol {
+            parent_sym.members.get(&name).cloned()
+        } else if let Some(block_container) = &self.block_scope_container {
+            let container_id = block_container.id();
+            self.symbol_map
+                .locals
+                .get(&container_id)
+                .and_then(|locals| locals.get(&name).cloned())
+        } else {
+            None
+        };
+
+        if let Some(existing) = existing {
+            if self.can_merge_symbols(existing.flags, includes) {
+                // Merge: add this declaration to the existing symbol, union
+                // the flags, and map the node to the existing symbol.
+                let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
+                unsafe {
+                    (*existing_mut).declarations.push(Arc::clone(node));
+                    (*existing_mut).flags |= includes;
+                    // For function overloads, only the first declaration
+                    // carries the VALUE flag (already set). For other
+                    // merges (interface/namespace), VALUE isn't involved.
+                    if (*existing_mut).value_declaration.is_none()
+                        && includes.contains(SymbolFlags::VALUE)
+                    {
+                        (*existing_mut).value_declaration = Some(Arc::clone(node));
+                    }
+                }
+                self.symbol_map.set_symbol(node, Arc::clone(&existing));
+                return existing;
+            }
+            // Non-mergeable redeclaration: fall through to create a new
+            // symbol (overwrites the previous entry). Real TS would emit a
+            // TS2300/TS2640 duplicate-identifier error here.
+        }
+
         let symbol = self.new_symbol(includes, name.clone());
 
         // Record this declaration node on the symbol. `Symbol` is behind an
@@ -267,6 +313,65 @@ impl Binder {
         // (in the full Go implementation, this is more nuanced)
 
         symbol
+    }
+
+    /// Whether a new declaration with `new_flags` can be merged into an
+    /// existing symbol with `existing_flags`. Mirrors the merge rules in
+    /// Go's `binder.declareSymbol` (`canMergeSymbol`).
+    ///
+    /// Mergeable combinations:
+    /// - interface + interface
+    /// - namespace + namespace (ValueModule + ValueModule)
+    /// - namespace + function/class (ValueModule + Function/Class) and vice
+    ///   versa
+    /// - function + function (overloads)
+    /// - enum + enum
+    /// - namespace + enum (ValueModule + RegularEnum/ConstEnum)
+    ///
+    /// Non-mergeable: TypeAlias (redefinition error), Class + Class
+    /// (duplicate), block-scoped variable redeclarations.
+    fn can_merge_symbols(&self, existing_flags: SymbolFlags, new_flags: SymbolFlags) -> bool {
+        // Interface + Interface (and interface + class, which is allowed in
+        // TS but not yet fully handled by the checker — still merge so the
+        // interface members are visible).
+        if existing_flags.contains(SymbolFlags::Interface)
+            && new_flags.contains(SymbolFlags::Interface)
+        {
+            return true;
+        }
+        // Namespace merging: a ValueModule can merge with another ValueModule,
+        // a Function, a Class, or an Enum.
+        let existing_ns = existing_flags.contains(SymbolFlags::ValueModule);
+        let new_ns = new_flags.contains(SymbolFlags::ValueModule);
+        if existing_ns || new_ns {
+            let other_existing = if existing_ns { new_flags } else { existing_flags };
+            let _other_new = if existing_ns { existing_flags } else { new_flags };
+            // The non-namespace side must be one of: ValueModule, Function,
+            // Class, RegularEnum, ConstEnum.
+            let can_merge_with_ns = other_existing.contains(SymbolFlags::ValueModule)
+                || other_existing.contains(SymbolFlags::Function)
+                || other_existing.contains(SymbolFlags::Class)
+                || other_existing.contains(SymbolFlags::RegularEnum)
+                || other_existing.contains(SymbolFlags::ConstEnum);
+            if can_merge_with_ns {
+                return true;
+            }
+        }
+        // Function overloads: Function + Function.
+        if existing_flags.contains(SymbolFlags::Function)
+            && new_flags.contains(SymbolFlags::Function)
+        {
+            return true;
+        }
+        // Enum + Enum.
+        if (existing_flags.contains(SymbolFlags::RegularEnum)
+            || existing_flags.contains(SymbolFlags::ConstEnum))
+            && (new_flags.contains(SymbolFlags::RegularEnum)
+                || new_flags.contains(SymbolFlags::ConstEnum))
+        {
+            return true;
+        }
+        false
     }
 
     /// Get the name of a declaration node.

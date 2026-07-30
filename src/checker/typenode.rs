@@ -393,14 +393,25 @@ impl Checker {
         if !self.resolving_type_aliases.insert(key) {
             return self.error_type();
         }
-        // Find the InterfaceDeclaration node.
-        let decl = symbol
+        // Collect ALL InterfaceDeclaration nodes so declaration merging
+        // (`interface Foo { a }; interface Foo { b }`) produces a single
+        // type with the union of members. Mirrors Go's
+        // `getDeclaredTypeOfInterface` which walks every declaration.
+        let interface_decls: Vec<Arc<Node>> = symbol
             .declarations
             .iter()
-            .find(|d| matches!(d.data, NodeData::InterfaceDeclaration(_)));
-        let result = match decl.map(|d| &d.data) {
-            Some(NodeData::InterfaceDeclaration(data)) => {
-                // Collect type-parameter symbols for substitution.
+            .filter(|d| matches!(d.data, NodeData::InterfaceDeclaration(_)))
+            .cloned()
+            .collect();
+        let result = match interface_decls.first() {
+            Some(first) => {
+                let data = match &first.data {
+                    NodeData::InterfaceDeclaration(d) => d,
+                    _ => unreachable!(),
+                };
+                // Collect type-parameter symbols for substitution (from the
+                // first declaration — merged interfaces must have identical
+                // type parameter lists).
                 let tp_symbols = match &data.type_parameters {
                     Some(tps) => {
                         let sym_map = self.program.symbol_map();
@@ -439,14 +450,28 @@ impl Checker {
                         .next()
                         .expect("interface has a declaration"),
                 );
-                let result = self.build_interface_type_from_members(&data.members);
+                // Build a merged member list from all interface declarations.
+                // Members are processed in declaration order so later
+                // declarations can't shadow earlier ones with a conflicting
+                // type (real TS would report TS2717 here).
+                let merged_members: Vec<Arc<Node>> = interface_decls
+                    .iter()
+                    .flat_map(|decl| {
+                        match &decl.data {
+                            NodeData::InterfaceDeclaration(d) => d.members.iter().cloned(),
+                            _ => unreachable!(),
+                        }
+                    })
+                    .collect();
+                let merged_list = Arc::new(NodeList::new(merged_members));
+                let result = self.build_interface_type_from_members(&merged_list);
                 self.pop_scope();
                 if has_type_args {
                     self.type_argument_stack.pop();
                 }
                 result
             }
-            _ => self.error_type(),
+            None => self.error_type(),
         };
         self.resolving_type_aliases.remove(&key);
         if !has_type_args {
