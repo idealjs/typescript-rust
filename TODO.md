@@ -57,15 +57,15 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-30）
 
-测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 453 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 347 个）。
+测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 466 个
+checker parity，checker parity 自 2026-07-13 的 106 增长 360 个）。
 
 | 模块 | Rust 行数 | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
 | Scanner | 1558 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 完成；缺 trivia 节点、完整 regex 校验 |
 | Parser | 7115 | 9251 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；缺 reparser/jsdoc |
 | Binder | 1639 | ~4000 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 完成；缺完整 flow graph、ARRAY_MUTATION、try/catch/finally、labeled statement、完整 declaration merge |
-| Checker | 9400 | ~50K+ | ~19% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查 + 比较无重叠检查 TS2367；453 parity fixtures 通过；缺 emitresolver visibility tracking、完整 declaration merge checker 侧 |
+| Checker | 9400 | ~50K+ | ~19% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查 + 比较无重叠检查 TS2367 + 不可调用/不可构造检查 TS2349/TS2351；466 parity fixtures 通过；缺 emitresolver visibility tracking、完整 declaration merge checker 侧 |
 | Compiler | 759 | — | 基础 | Program 创建/解析/绑定/emit pipeline 通；checker 已接入 |
 | Emitter | 774 | — | 基础 | JS emit 基础；缺 transformer 体系 |
 | Printer | 1578 | — | 基础 | 节点→文本基础 |
@@ -420,6 +420,12 @@ reference 协变/逆变推断（`generic_type_reference_related_to`）。
   可比；当两者都非 `any`/`unknown`/`never`/`null`/`undefined` 且不可比时报
   TS2367。10 条 parity 测试通过（number/string、boolean/string、`!==`/`==`、
   literal union no-overlap、同类型/字面量/any/null/union 过 negative 用例）。
+- [x] 不可调用/不可构造检查（TS2349/TS2351）：`check_call_arguments` 在
+  callee 类型为非 `any` 且（a）非结构化类型（如 `number`/`string`/`boolean`
+  primitive）或（b）结构化但无 call/construct 签名（如对象字面量、class 实例）
+  时报 TS2349（CallExpression）或 TS2351（NewExpression）。13 条 parity 测试
+  通过（number/string/boolean/object literal/class instance 不可调用、number/
+  object literal 不可构造；function/arrow/method/class/`any` 不报错）。
 
 ### P3.8 Checker 类型推断
 

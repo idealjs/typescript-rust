@@ -640,6 +640,141 @@ fn checker_comparison_distinct_union_members_ts2367() {
     assert_diagnostic_code(&diags, 2367);
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Invocation errors: TS2349 (not callable) / TS2351 (not constructable)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_call_number_ts2349() {
+    // `number` is not callable.
+    let diags = check_source(
+        "const x: number = 1;\
+         x();",
+    );
+    assert_diagnostic_code(&diags, 2349);
+}
+
+#[test]
+fn checker_call_string_ts2349() {
+    // `string` is not callable.
+    let diags = check_source(
+        "const x: string = \"hi\";\
+         x();",
+    );
+    assert_diagnostic_code(&diags, 2349);
+}
+
+#[test]
+fn checker_call_boolean_ts2349() {
+    // `boolean` is not callable.
+    let diags = check_source(
+        "const x: boolean = true;\
+         x();",
+    );
+    assert_diagnostic_code(&diags, 2349);
+}
+
+#[test]
+fn checker_call_object_literal_ts2349() {
+    // Object literal with no call signatures.
+    let diags = check_source(
+        "const x = { a: 1 };\
+         x();",
+    );
+    assert_diagnostic_code(&diags, 2349);
+}
+
+#[test]
+fn checker_call_class_instance_ts2349() {
+    // Class instance (no call signature) is not callable.
+    let diags = check_source(
+        "class C { m() {} }\
+         const c = new C();\
+         c();",
+    );
+    assert_diagnostic_code(&diags, 2349);
+}
+
+#[test]
+fn checker_call_function_no_error() {
+    // Calling a function should not emit TS2349.
+    let diags = check_source(
+        "function f() {}\
+         f();",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_arrow_no_error() {
+    // Calling an arrow function should not emit TS2349.
+    let diags = check_source(
+        "const f = () => 1;\
+         f();",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_method_no_error() {
+    // Calling a method should not emit TS2349.
+    let diags = check_source(
+        "class C { m() { return 1; } }\
+         const c = new C();\
+         c.m();",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_new_number_ts2351() {
+    // `new` on a `number` is not constructable.
+    let diags = check_source(
+        "const x: number = 1;\
+         new x();",
+    );
+    assert_diagnostic_code(&diags, 2351);
+}
+
+#[test]
+fn checker_new_object_literal_ts2351() {
+    // `new` on an object literal is not constructable.
+    let diags = check_source(
+        "const x = { a: 1 };\
+         new x();",
+    );
+    assert_diagnostic_code(&diags, 2351);
+}
+
+#[test]
+fn checker_new_class_no_error() {
+    // `new` on a class should not emit TS2351.
+    let diags = check_source(
+        "class C {}\
+         const c = new C();",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_any_no_error() {
+    // Calling `any` should not emit TS2349.
+    let diags = check_source(
+        "const x: any = 1;\
+         x();",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_new_any_no_error() {
+    // `new` on `any` should not emit TS2351.
+    let diags = check_source(
+        "const x: any = 1;\
+         new x();",
+    );
+    assert_no_diagnostics(&diags);
+}
 
 // ────────────────────────────────────────────────────────────────────────────
 // Function declarations (no diagnostics expected)

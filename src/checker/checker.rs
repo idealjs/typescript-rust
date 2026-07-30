@@ -20,6 +20,7 @@ use crate::diagnostics::messages_generated::{
     ARGUMENT_EXPRESSION_EXPECTED, ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1,
     CANNOT_FIND_NAME_0, PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
     THIS_COMPARISON_APPEARS_TO_BE_UNINTENTIONAL_BECAUSE_THE_TYPES_0_AND_1_HAVE_NO_OVERLAP,
+    THIS_EXPRESSION_IS_NOT_CALLABLE, THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE,
     TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
 };
 use crate::jsnum;
@@ -2581,7 +2582,23 @@ impl Checker {
         }
         let structured = match callee_type.as_structured() {
             Some(s) => s,
-            None => return,
+            None => {
+                // Non-structured callee (primitive like `number`, `string`,
+                // etc.) is never callable/constructable. Mirrors Go's
+                // `invocationError` for types with no signatures.
+                let file = self.current_file.clone();
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    callee_expr.loc,
+                    if is_new {
+                        THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE
+                    } else {
+                        THIS_EXPRESSION_IS_NOT_CALLABLE
+                    },
+                    vec![],
+                ));
+                return;
+            }
         };
         let signatures = if is_new {
             structured.construct_signatures()
@@ -2589,6 +2606,21 @@ impl Checker {
             structured.call_signatures()
         };
         if signatures.is_empty() {
+            // Structured type but no call/construct signatures — e.g.
+            // calling a plain object literal or a number. Mirrors Go's
+            // `invocationError` head message ("This expression is not
+            // callable" / "This expression is not constructable").
+            let file = self.current_file.clone();
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file,
+                callee_expr.loc,
+                if is_new {
+                    THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE
+                } else {
+                    THIS_EXPRESSION_IS_NOT_CALLABLE
+                },
+                vec![],
+            ));
             return;
         }
         // Overload resolution: if multiple signatures exist, find the first
