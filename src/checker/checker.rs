@@ -2561,7 +2561,7 @@ impl Checker {
     }
 
     /// Get the element type of an array type (`Array<T>` → `T`).
-    fn get_array_element_type(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn get_array_element_type(&self, t: &Arc<Type>) -> Arc<Type> {
         match &t.data {
             crate::checker::TypeData::Object(obj) => {
                 // `Array<T>` is a reference type with one type argument.

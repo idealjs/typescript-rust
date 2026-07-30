@@ -3072,6 +3072,82 @@ fn checker_keyof_intersection_all_keys_no_error() {
     assert_no_diagnostics(&diags);
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Indexed access types: `T["a"]`, `T[K]`, `T[number]`, `T[keyof T]`
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_indexed_access_string_literal_no_error() {
+    // `T["a"]` resolves to the type of property `a`.
+    let diags = check_source(
+        "type T = { a: number; b: string };\ntype A = T[\"a\"];\nlet x: number = null as any as A;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_indexed_access_string_literal_mismatch_ts2322() {
+    // `T["a"]` is `number`; assigning to `string` must fail.
+    let diags = check_source(
+        "type T = { a: number; b: string };\ntype A = T[\"a\"];\nlet x: string = null as any as A;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_indexed_access_keyof_no_error() {
+    // `T[keyof T]` = union of all property types = `number | string`.
+    let diags = check_source(
+        "type T = { a: number; b: string };\ntype V = T[keyof T];\nlet x: number | string = null as any as V;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_indexed_access_keyof_missing_member_ts2322() {
+    // `T[keyof T]` = `number | string`; assigning to `boolean` fails.
+    let diags = check_source(
+        "type T = { a: number; b: string };\ntype V = T[keyof T];\nlet x: boolean = null as any as V;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_indexed_access_union_of_keys_no_error() {
+    // `T["a" | "b"]` = `T["a"] | T["b"]` = `number | string`.
+    let diags = check_source(
+        "type T = { a: number; b: string };\ntype K = \"a\" | \"b\";\ntype V = T[K];\nlet x: number | string = null as any as V;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_indexed_access_array_number_no_error() {
+    // `number[]` indexed by `number` → `number`.
+    let diags = check_source(
+        "type Arr = number[];\ntype Elem = Arr[number];\nlet x: number = null as any as Elem;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_indexed_access_array_number_mismatch_ts2322() {
+    // `number[]` indexed by `number` → `number`; assigning to `string` fails.
+    let diags = check_source(
+        "type Arr = number[];\ntype Elem = Arr[number];\nlet x: string = null as any as Elem;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_indexed_access_via_alias_no_error() {
+    // Indexed access through a type alias.
+    let diags = check_source(
+        "type Obj = { value: boolean };\ntype V = Obj[\"value\"];\nlet x: boolean = null as any as V;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
 #[test]
 fn checker_keyof_constrained_type_parameter_no_error() {
     // `keyof T` where T extends { a: number; b: string } → "a" | "b".

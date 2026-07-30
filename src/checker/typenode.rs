@@ -1305,7 +1305,17 @@ impl Checker {
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
-        let result = self.error_type();
+        let result = {
+            let (object_type_node, index_type_node) = match &node.data {
+                NodeData::IndexedAccessTypeNode(data) => {
+                    (Arc::clone(&data.object_type), Arc::clone(&data.index_type))
+                }
+                _ => return self.error_type(),
+            };
+            let object_type = self.get_type_from_type_node(&object_type_node);
+            let index_type = self.get_type_from_type_node(&index_type_node);
+            self.get_indexed_access_type(&object_type, &index_type)
+        };
         self.cache_type(node, result.clone());
         result
     }
@@ -1640,6 +1650,135 @@ impl Checker {
         }
         // Other types (literals, etc.): `keyof` is `never`.
         self.never_type()
+    }
+
+    /// Resolve an indexed access type `objectType[indexType]`.
+    ///
+    /// Mirrors a simplified subset of Go's `getIndexedAccessTypeOrUndefined`:
+    ///   - `any`/`unknown` object → `any`/`unknown`
+    ///   - string-literal index → named property type
+    ///   - union index → union of property types (e.g. `keyof T` result)
+    ///   - `number` index on array/tuple → element type
+    ///   - index signature match → index signature value type
+    ///   - type parameter object → resolve through constraint
+    ///   - otherwise → `any` (no error node here, so callers see `any`)
+    pub fn get_indexed_access_type(
+        &mut self,
+        object_type: &Arc<Type>,
+        index_type: &Arc<Type>,
+    ) -> Arc<Type> {
+        // `any`/`unknown` propagate.
+        if object_type.flags.contains(TypeFlags::Any) {
+            return self.any_type();
+        }
+        if object_type.flags.contains(TypeFlags::Unknown) {
+            return self.unknown_type();
+        }
+        if index_type.flags.contains(TypeFlags::Any) {
+            return self.any_type();
+        }
+        // Union index: `T[A | B]` = `T[A] | T[B]`.
+        if index_type.flags.contains(TypeFlags::Union) {
+            if let TypeData::Union(u) = &index_type.data {
+                let prop_types: Vec<Arc<Type>> = u
+                    .union_or_intersection
+                    .types
+                    .iter()
+                    .map(|c| self.get_indexed_access_type(object_type, c))
+                    .collect();
+                if prop_types.is_empty() {
+                    return self.any_type();
+                }
+                return self.get_union_type(prop_types);
+            }
+        }
+        // Type-parameter object: resolve through the constraint.
+        if object_type.flags.contains(TypeFlags::TypeParameter) {
+            if let Some(constraint) = self.get_constraint_of_type_parameter(object_type) {
+                return self.get_indexed_access_type(&constraint, index_type);
+            }
+            return self.any_type();
+        }
+        // String-literal index: `T["prop"]`.
+        if index_type.flags.contains(TypeFlags::StringLiteral) {
+            if let TypeData::Literal(lit) = &index_type.data {
+                if let LiteralValue::String(name) = &lit.value {
+                    if let Some(structured) = object_type.as_structured() {
+                        if let Some(sym) = structured.members.get(name) {
+                            return self.get_type_of_symbol(sym);
+                        }
+                        // Fall back to index signature.
+                        if let Some(value_type) = self.lookup_index_signature_value(
+                            structured,
+                            index_type,
+                        ) {
+                            return value_type;
+                        }
+                    }
+                    return self.any_type();
+                }
+            }
+        }
+        // `number` index on array/tuple → element type.
+        if index_type.flags.contains(TypeFlags::Number)
+            || index_type.flags.contains(TypeFlags::NumberLiteral)
+        {
+            if self.is_array_type(object_type) {
+                return self.get_array_element_type(object_type);
+            }
+            // Tuple: `T[number]` → union of element types.
+            if self.is_tuple_type(object_type) {
+                if let Some(structured) = object_type.as_structured() {
+                    let elem_types: Vec<Arc<Type>> = structured
+                        .properties
+                        .iter()
+                        .map(|p| self.get_type_of_symbol(p))
+                        .collect();
+                    if !elem_types.is_empty() {
+                        return self.get_union_type(elem_types);
+                    }
+                }
+            }
+        }
+        // Index signature lookup.
+        if let Some(structured) = object_type.as_structured() {
+            if let Some(value_type) = self.lookup_index_signature_value(structured, index_type) {
+                return value_type;
+            }
+        }
+        self.any_type()
+    }
+
+    /// Look up an index signature whose key type is compatible with
+    /// `index_type` and return its value type. Mirrors the index-signature
+    /// fallback in Go's `getPropertyTypeForIndexType`.
+    fn lookup_index_signature_value(
+        &mut self,
+        structured: &StructuredTypeData,
+        index_type: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        for info in &structured.index_infos {
+            let key_matches = match info.key_type.as_ref() {
+                Some(key) => {
+                    // `string` index signature matches string-like indices;
+                    // `number` index signature matches number-like indices.
+                    if key.flags.contains(TypeFlags::String) {
+                        index_type.flags.contains(TypeFlags::String)
+                            || index_type.flags.contains(TypeFlags::StringLiteral)
+                    } else if key.flags.contains(TypeFlags::Number) {
+                        index_type.flags.contains(TypeFlags::Number)
+                            || index_type.flags.contains(TypeFlags::NumberLiteral)
+                    } else {
+                        false
+                    }
+                }
+                None => true,
+            };
+            if key_matches {
+                return info.value_type.clone();
+            }
+        }
+        None
     }
 
     /// Flatten a type into its string-literal values.
