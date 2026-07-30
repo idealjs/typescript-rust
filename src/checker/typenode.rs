@@ -224,9 +224,11 @@ impl Checker {
     /// fall back to `error_type` (= `any`) so no false positives are produced
     /// until their object-type construction is ported.
     fn resolve_type_reference(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        let type_name = match &node.data {
-            NodeData::TypeReferenceNode(data) => &data.type_name,
-            NodeData::ExpressionWithTypeArguments(data) => &data.expression,
+        let (type_name, type_arguments) = match &node.data {
+            NodeData::TypeReferenceNode(data) => (&data.type_name, data.type_arguments.clone()),
+            NodeData::ExpressionWithTypeArguments(data) => {
+                (&data.expression, data.type_arguments.clone())
+            }
             _ => return self.error_type(),
         };
         // Only Identifier names are handled for now; QualifiedName
@@ -241,6 +243,15 @@ impl Checker {
         // Type parameter: build a TypeParameter type with the constraint
         // resolved from the declaration (`<T extends Constraint>`).
         if symbol.flags.contains(SymbolFlags::TypeParameter) {
+            // Check the type-argument substitution stack first — if this
+            // type parameter is being instantiated with a concrete type,
+            // return the substitution instead of the TypeParameter type.
+            let key = Arc::as_ptr(&symbol) as *const crate::ast::Symbol;
+            for map in self.type_argument_stack.iter().rev() {
+                if let Some(t) = map.get(&key) {
+                    return Arc::clone(t);
+                }
+            }
             return self.get_type_parameter_from_symbol(&symbol);
         }
         if !symbol.flags.contains(SymbolFlags::TypeAlias) {
@@ -253,27 +264,80 @@ impl Checker {
         if !self.resolving_type_aliases.insert(key) {
             return self.error_type();
         }
-        // Reuse a previously-computed declared type if present.
-        let cached = self
-            .type_alias_links
-            .get(&symbol)
-            .and_then(|l| l.declared_type.clone());
-        let resolved = cached.unwrap_or_else(|| {
-            // Find the TypeAliasDeclaration and resolve its type_node.
-            let mut found = self.error_type();
-            for decl in &symbol.declarations {
-                if let NodeData::TypeAliasDeclaration(data) = &decl.data {
-                    found = self.get_type_from_type_node(&data.type_node);
-                    break;
+        // For non-generic aliases (no type arguments on the reference), use
+        // the cached declared type. For generic references (type arguments
+        // present), we must re-resolve the alias body with the type
+        // parameters substituted by the type arguments, bypassing the cache.
+        let has_type_args = type_arguments.is_some();
+        let resolved = if !has_type_args {
+            // Reuse a previously-computed declared type if present.
+            let cached = self
+                .type_alias_links
+                .get(&symbol)
+                .and_then(|l| l.declared_type.clone());
+            cached.unwrap_or_else(|| {
+                let found = self.resolve_alias_body(&symbol);
+                self.type_alias_links
+                    .get_or_default(&symbol)
+                    .declared_type = Some(Arc::clone(&found));
+                found
+            })
+        } else {
+            // Generic type alias instantiation: collect the alias's type
+            // parameters, resolve the type arguments, push the mapping,
+            // resolve the body, and pop.
+            let (tp_symbols, type_node) = self.collect_alias_type_params_and_body(&symbol);
+            let arg_types: Vec<Arc<Type>> = match &type_arguments {
+                Some(args) => args.iter().map(|a| self.get_type_from_type_node(a)).collect(),
+                None => Vec::new(),
+            };
+            let mut mapping = HashMap::new();
+            for (i, tp_sym) in tp_symbols.iter().enumerate() {
+                if i < arg_types.len() {
+                    let tp_key = Arc::as_ptr(tp_sym) as *const crate::ast::Symbol;
+                    mapping.insert(tp_key, Arc::clone(&arg_types[i]));
                 }
             }
-            self.type_alias_links
-                .get_or_default(&symbol)
-                .declared_type = Some(Arc::clone(&found));
+            self.type_argument_stack.push(mapping);
+            let found = self.get_type_from_type_node(&type_node);
+            self.type_argument_stack.pop();
             found
-        });
+        };
         self.resolving_type_aliases.remove(&key);
         resolved
+    }
+
+    /// Resolve the declared type of a type alias symbol (the alias body).
+    fn resolve_alias_body(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+        for decl in &symbol.declarations {
+            if let NodeData::TypeAliasDeclaration(data) = &decl.data {
+                return self.get_type_from_type_node(&data.type_node);
+            }
+        }
+        self.error_type()
+    }
+
+    /// Collect a type alias's type-parameter symbols and its body type node.
+    fn collect_alias_type_params_and_body(
+        &mut self,
+        symbol: &Arc<Symbol>,
+    ) -> (Vec<Arc<Symbol>>, Arc<Node>) {
+        let mut tp_symbols = Vec::new();
+        let mut type_node = None;
+        for decl in &symbol.declarations {
+            if let NodeData::TypeAliasDeclaration(data) = &decl.data {
+                type_node = Some(Arc::clone(&data.type_node));
+                if let Some(tps) = &data.type_parameters {
+                    for tp in tps.iter() {
+                        if let Some(tp_sym) = self.program.symbol_map().symbol_of(tp) {
+                            tp_symbols.push(Arc::clone(tp_sym));
+                        }
+                    }
+                }
+                break;
+            }
+        }
+        (tp_symbols, type_node.unwrap_or_else(|| Arc::clone(&symbol.declarations[0])))
     }
 
     /// Build a `TypeParameter` type from a `TypeParameter` symbol, resolving
@@ -743,7 +807,7 @@ impl Checker {
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
-        let result = self.error_type();
+        let result = self.build_conditional_type(node);
         self.cache_type(node, result.clone());
         result
     }
@@ -752,9 +816,113 @@ impl Checker {
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
-        let result = self.error_type();
+        // Mirrors Go's `getTypeFromInferTypeNode`: resolve to the declared
+        // type of the infer type parameter's symbol.
+        let result = {
+            let tp_node = match &node.data {
+                NodeData::InferTypeNode(data) => &data.type_parameter,
+                _ => return self.error_type(),
+            };
+            let symbol = self
+                .program
+                .symbol_map()
+                .symbol_of(tp_node)
+                .map(Arc::clone);
+            match symbol {
+                Some(sym) => self.get_type_parameter_from_symbol(&sym),
+                None => self.error_type(),
+            }
+        };
         self.cache_type(node, result.clone());
         result
+    }
+
+    /// Build a `Conditional` type from a `ConditionalTypeNode` and attempt to
+    /// resolve it. Mirrors Go's `getTypeFromConditionalTypeNode` +
+    /// `getConditionalType`.
+    ///
+    /// When the check type is concrete (no remaining type parameters), the
+    /// conditional is resolved immediately to the true or false branch. When
+    /// the check type is generic (deferred), the unresolved `Conditional`
+    /// type is returned — it will be resolved later when the type
+    /// parameters are substituted (e.g. during `is_type_assignable_to`).
+    fn build_conditional_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let (check_type_node, extends_type_node) = match &node.data {
+            NodeData::ConditionalTypeNode(data) => (
+                Arc::clone(&data.check_type),
+                Arc::clone(&data.extends_type),
+            ),
+            _ => return self.error_type(),
+        };
+
+        let check_type = self.get_type_from_type_node(&check_type_node);
+        let extends_type = self.get_type_from_type_node(&extends_type_node);
+
+        // Collect `infer R` type parameters from the ConditionalType node's
+        // locals. The binder declares them there (see `bind_type_parameter`).
+        let infer_type_parameters = self.collect_infer_type_parameters(node);
+
+        let is_distributive = check_type.flags.contains(TypeFlags::TypeParameter);
+
+        let root = Box::new(ConditionalRoot {
+            node: Some(Arc::clone(node)),
+            check_type: Some(Arc::clone(&check_type)),
+            extends_type: Some(Arc::clone(&extends_type)),
+            is_distributive,
+            infer_type_parameters: infer_type_parameters.clone(),
+            outer_type_parameters: Vec::new(),
+            alias: None,
+        });
+
+        let cond_type = Arc::new(Type::new(
+            TypeFlags::Conditional,
+            TypeData::Conditional(ConditionalTypeData {
+                constrained: ConstrainedTypeData::default(),
+                root: Some(root),
+                check_type: Some(Arc::clone(&check_type)),
+                extends_type: Some(Arc::clone(&extends_type)),
+                resolved_true_type: OnceLock::new(),
+                resolved_false_type: OnceLock::new(),
+                resolved_inferred_true_type: OnceLock::new(),
+                resolved_default_constraint: OnceLock::new(),
+                resolved_constraint_of_distributive: OnceLock::new(),
+                mapper: None,
+                combined_mapper: None,
+            }),
+        ));
+
+        // Try to resolve the conditional immediately. If the check type is
+        // still generic, `resolve_conditional_type` returns `None` and we
+        // return the unresolved conditional type.
+        if let Some(resolved) = self.resolve_conditional_type(&cond_type) {
+            resolved
+        } else {
+            cond_type
+        }
+    }
+
+    /// Collect the `infer R` type parameters declared as locals of a
+    /// `ConditionalType` node. Mirrors Go's `getInferTypeParameters`.
+    fn collect_infer_type_parameters(&mut self, node: &Arc<Node>) -> Vec<Arc<Type>> {
+        // Collect the type-parameter symbols first to avoid holding an
+        // immutable borrow of `self.program.symbol_map()` across the
+        // mutable `get_type_parameter_from_symbol` call.
+        let symbols: Vec<Arc<Symbol>> = self
+            .program
+            .symbol_map()
+            .locals_of(node)
+            .map(|locals| {
+                locals
+                    .iter()
+                    .filter(|(_, sym)| sym.flags.contains(SymbolFlags::TypeParameter))
+                    .map(|(_, sym)| Arc::clone(sym))
+                    .collect()
+            })
+            .unwrap_or_default();
+        symbols
+            .into_iter()
+            .map(|sym| self.get_type_parameter_from_symbol(&sym))
+            .collect()
     }
 
     fn get_type_from_import_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {

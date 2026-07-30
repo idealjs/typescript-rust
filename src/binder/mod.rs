@@ -136,6 +136,12 @@ impl Binder {
     ///
     /// Mirrors `binder.BindSourceFile` in Go.
     pub fn bind_source_file(&mut self, file: &SourceFile) -> &NodeSymbolMap {
+        // Populate parent pointers before binding so the binder can locate
+        // enclosing containers (e.g. the `ConditionalType` that owns an
+        // `infer R` type parameter). Mirrors Go's parser, which sets
+        // `Node.Parent` during parsing.
+        self.set_parent_pointers(&file.node);
+
         let start_flow = Arc::new(FlowNode::new(FlowFlags::START));
         self.current_flow = Some(Arc::clone(&start_flow));
         self.unreachable_flow = Some(Arc::new(FlowNode::new(FlowFlags::UNREACHABLE)));
@@ -168,6 +174,26 @@ impl Binder {
         self.parent_symbol = prev_parent;
 
         &self.symbol_map
+    }
+
+    /// Walk the AST and set `parent` pointers on every child node.
+    /// Mirrors the parent-pointer population done by Go's parser. Safe
+    /// because the binder runs single-threaded and the AST is a tree.
+    fn set_parent_pointers(&mut self, node: &Arc<Node>) {
+        use crate::ast::node_data_generated::for_each_child;
+        let mut children: Vec<Arc<Node>> = Vec::new();
+        for_each_child(node, |child| {
+            children.push(Arc::clone(child));
+            false
+        });
+        let parent_clone = Arc::clone(node);
+        for child in &children {
+            let child_mut = Arc::as_ptr(child) as *mut Node;
+            unsafe {
+                (*child_mut).parent = Some(Arc::clone(&parent_clone));
+            }
+            self.set_parent_pointers(child);
+        }
     }
 
     /// Create a new symbol.
@@ -1209,7 +1235,7 @@ impl Binder {
                 self.declare_symbol(node, SymbolFlags::BlockScopedVariable, SymbolFlags::VALUE);
             }
             SyntaxKind::TypeParameter => {
-                self.declare_symbol(node, SymbolFlags::TypeParameter, SymbolFlags::TYPE);
+                self.bind_type_parameter(node);
             }
             SyntaxKind::ObjectLiteralExpression => {
                 self.bind_anonymous_declaration(
@@ -1394,6 +1420,103 @@ impl Binder {
     /// Get the number of symbols created.
     pub fn symbol_count(&self) -> usize {
         self.symbol_count
+    }
+
+    /// Bind a `TypeParameter` node. Mirrors Go's `bindTypeParameter`.
+    ///
+    /// When the type parameter is the child of an `InferType` (i.e.
+    /// `infer R`), it is declared as a local of the enclosing
+    /// `ConditionalType` (found via `get_infer_type_container`), so that
+    /// `getInferTypeParameters` can later collect the infer type
+    /// parameters. Otherwise it falls through to the normal
+    /// `declare_symbol` path.
+    fn bind_type_parameter(&mut self, node: &Arc<Node>) {
+        let parent_is_infer = node
+            .parent
+            .as_ref()
+            .map_or(false, |p| p.kind == SyntaxKind::InferType);
+        if parent_is_infer {
+            if let Some(container) = node
+                .parent
+                .as_ref()
+                .and_then(|infer| self.get_infer_type_container(infer))
+            {
+                self.declare_local_symbol(
+                    &container,
+                    node,
+                    SymbolFlags::TypeParameter,
+                    SymbolFlags::TYPE,
+                );
+                return;
+            }
+            // No enclosing ConditionalType — fall back to anonymous declaration.
+            let name = self.get_declaration_name(node);
+            self.bind_anonymous_declaration(node, SymbolFlags::TypeParameter, &name);
+            return;
+        }
+        self.declare_symbol(node, SymbolFlags::TypeParameter, SymbolFlags::TYPE);
+    }
+
+    /// Find the `ConditionalType` node whose `extends_type` clause contains
+    /// the given `InferType` node. Mirrors Go's `getInferTypeContainer`.
+    /// Requires parent pointers to be populated (see `set_parent_pointers`).
+    fn get_infer_type_container(&self, infer_node: &Arc<Node>) -> Option<Arc<Node>> {
+        let mut current = Arc::clone(infer_node);
+        loop {
+            let parent = match &current.parent {
+                Some(p) => Arc::clone(p),
+                None => return None,
+            };
+            if parent.kind == SyntaxKind::ConditionalType {
+                // Check that `current` is the extends_type of the conditional.
+                let is_extends = match &parent.data {
+                    NodeData::ConditionalTypeNode(data) => {
+                        Arc::ptr_eq(&data.extends_type, &current)
+                    }
+                    _ => false,
+                };
+                if is_extends {
+                    return Some(parent);
+                }
+                return None;
+            }
+            current = parent;
+        }
+    }
+
+    /// Declare a symbol as a local of a specific container node, bypassing
+    /// the normal `container`/`block_scope_container` state. Used for
+    /// `infer R` type parameters which belong to the `ConditionalType`
+    /// even though it is not the active container.
+    fn declare_local_symbol(
+        &mut self,
+        container: &Arc<Node>,
+        node: &Arc<Node>,
+        flags: SymbolFlags,
+        _excludes: SymbolFlags,
+    ) -> Arc<Symbol> {
+        let name = self.get_declaration_name(node);
+        let symbol = self.new_symbol(flags, name.clone());
+        {
+            let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+            unsafe {
+                (*symbol_mut).declarations.push(Arc::clone(node));
+                if (*symbol_mut).value_declaration.is_none()
+                    && flags.contains(SymbolFlags::VALUE)
+                {
+                    (*symbol_mut).value_declaration = Some(Arc::clone(node));
+                }
+            }
+        }
+        let container_id = container.id();
+        let locals = self
+            .symbol_map
+            .locals
+            .entry(container_id)
+            .or_insert_with(SymbolTable::new);
+        locals.insert(name, Arc::clone(&symbol));
+        self.symbol_map.set_symbol(node, Arc::clone(&symbol));
+        symbol
     }
 }
 

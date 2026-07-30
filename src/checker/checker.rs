@@ -238,6 +238,13 @@ pub struct Checker {
     /// being resolved, to break cycles in recursive type aliases
     /// (e.g. `type A = B; type B = A`).
     pub resolving_type_aliases: HashSet<*const Symbol>,
+    /// Stack of type-parameter → type-argument substitutions, used when
+    /// instantiating a generic type alias (e.g. `T<number[]>` where
+    /// `type T<U> = ...`). Each frame maps type-parameter symbol pointers
+    /// to their concrete type arguments. When `resolve_type_reference`
+    /// encounters a type parameter that's in the current frame, it returns
+    /// the mapped type argument instead of the `TypeParameter` type.
+    pub type_argument_stack: Vec<HashMap<*const crate::ast::Symbol, Arc<Type>>>,
     /// Recursion depth of `is_type_related_to`. Capped at
     /// `RELATER_MAX_DEPTH` to prevent stack overflow on recursive
     /// structural types such as `type Box<T> = { next: Box<T> | null }`.
@@ -462,6 +469,7 @@ impl Checker {
             type_alias_links: LinkStore::new(),
             declared_type_links: LinkStore::new(),
             resolving_type_aliases: HashSet::new(),
+            type_argument_stack: Vec::new(),
             relater_depth: 0,
             spread_links: LinkStore::new(),
             variance_links: LinkStore::new(),
@@ -3218,7 +3226,7 @@ impl Checker {
 
     /// Push a container node onto the scope stack, making its symbol members
     /// and locals visible for identifier resolution.
-    fn push_scope(&mut self, node: &Arc<Node>) {
+    pub(crate) fn push_scope(&mut self, node: &Arc<Node>) {
         self.scope_stack.push(node.id());
     }
 
@@ -3248,7 +3256,7 @@ impl Checker {
     }
 
     /// Pop the innermost scope from the scope stack.
-    fn pop_scope(&mut self) {
+    pub(crate) fn pop_scope(&mut self) {
         self.scope_stack.pop();
     }
 

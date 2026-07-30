@@ -2848,3 +2848,135 @@ fn checker_contextual_param_fewer_params_no_error() {
     );
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// P3.8: Conditional types + `infer R` (TS2322 for branch mismatches)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_conditional_true_branch_no_error() {
+    // `number extends number` is true → T = "yes".
+    let diags = check_source("type T = number extends number ? \"yes\" : \"no\";\nlet x: T = \"yes\";");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_conditional_true_branch_mismatch_ts2322() {
+    // T = "yes" but we assign "no".
+    let diags = check_source("type T = number extends number ? \"yes\" : \"no\";\nlet x: T = \"no\";");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_conditional_false_branch_no_error() {
+    // `number extends string` is false → T = "no".
+    let diags = check_source("type T = number extends string ? \"yes\" : \"no\";\nlet x: T = \"no\";");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_conditional_false_branch_mismatch_ts2322() {
+    // T = "no" but we assign "yes".
+    let diags = check_source("type T = number extends string ? \"yes\" : \"no\";\nlet x: T = \"yes\";");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_conditional_literal_check_type_true_no_error() {
+    // `1 extends number` is true → T = "a".
+    let diags = check_source("type T = 1 extends number ? \"a\" : \"b\";\nlet x: T = \"a\";");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_conditional_literal_check_type_false_no_error() {
+    // `1 extends string` is false → T = "b".
+    let diags = check_source("type T = 1 extends string ? \"a\" : \"b\";\nlet x: T = \"b\";");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_conditional_infer_r_array_element_no_error() {
+    // `number[] extends (infer R)[] ? R : never` → R = number.
+    let diags = check_source(
+        "type T<U> = U extends (infer R)[] ? R : never;\nlet x: number = null as any as T<number[]>;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_conditional_infer_r_array_element_mismatch_ts2322() {
+    // R = number but we assign to string.
+    let diags = check_source(
+        "type T<U> = U extends (infer R)[] ? R : never;\nlet x: string = null as any as T<number[]>;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_conditional_infer_r_string_no_error() {
+    // `string extends infer R ? R : never` → R = string.
+    let diags = check_source(
+        "type T<U> = U extends infer R ? R : never;\nlet x: string = null as any as T<string>;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_conditional_infer_r_number_mismatch_ts2322() {
+    // R = number but we assign to string.
+    let diags = check_source(
+        "type T<U> = U extends infer R ? R : never;\nlet x: string = null as any as T<number>;",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_conditional_infer_r_never_branch_no_error() {
+    // `string extends number ? "yes" : never` → never. Assigning never is OK.
+    let diags = check_source(
+        "type T = string extends number ? \"yes\" : never;\nlet x: \"yes\" = null as any as T;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_conditional_nested_true_no_error() {
+    // Nested conditional: number extends number ? (1 extends number ? "a" : "b") : "c" → "a".
+    let diags = check_source(
+        "type T = number extends number ? (1 extends number ? \"a\" : \"b\") : \"c\";\nlet x: T = \"a\";",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_conditional_nested_false_mismatch_ts2322() {
+    // number extends string → false branch → "c". Assigning "a" fails.
+    let diags = check_source(
+        "type T = number extends string ? (1 extends number ? \"a\" : \"b\") : \"c\";\nlet x: T = \"a\";",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_conditional_boolean_check_true_no_error() {
+    // `true extends boolean` → true → T = 1.
+    let diags = check_source("type T = true extends boolean ? 1 : 0;\nlet x: T = 1;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_conditional_boolean_check_false_no_error() {
+    // `true extends string` → false → T = 0.
+    let diags = check_source("type T = true extends string ? 1 : 0;\nlet x: T = 0;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_conditional_infer_r_in_function_return_no_error() {
+    // `(...) => infer R ? R : never` → R = number.
+    let diags = check_source(
+        "type Ret<F> = F extends (...args: any[]) => infer R ? R : never;\nlet x: number = null as any as Ret<() => number>;",
+    );
+    assert_no_diagnostics(&diags);
+}

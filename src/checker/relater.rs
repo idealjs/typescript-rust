@@ -9,6 +9,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use crate::ast::node_data_generated::NodeData;
 use crate::ast::{Symbol, SymbolFlags, SyntaxKind};
 use crate::checker::is_tuple_type;
 use crate::jsnum;
@@ -2884,41 +2885,67 @@ impl Checker {
             }
         }
 
-        // Decide which branch to take. Go uses permissive/restrictive
-        // instantiations to handle distribution; we use the direct
-        // assignability check.
-        let take_true = self.is_type_assignable_to(&check_type, &extends_type);
-
-        // Choose the branch and (if there were infer params) instantiate
-        // it with the inferred types. Without a full `instantiateType`,
-        // we substitute directly via `substitute_infer_type_parameters`.
-        let branch = if take_true {
-            self.get_true_type_from_conditional_type(t)
+        // Decide which branch to take. Go instantiates the extends type
+        // with the inferred types before checking assignability. We
+        // substitute the infer type parameters into the extends type, then
+        // check if `check_type` is assignable to the substituted extends.
+        let inferred_extends = if !infer_params.is_empty() {
+            let inferred = self.get_inferred_types(&context);
+            self.substitute_infer_type_parameters(&extends_type, &infer_params, &inferred)
         } else {
-            self.get_false_type_from_conditional_type(t)
+            Arc::clone(&extends_type)
+        };
+        let take_true = self.is_type_assignable_to(&check_type, &inferred_extends);
+
+        // Resolve the chosen branch type node from the AST. The
+        // `get_true_type_from_conditional_type` /
+        // `get_false_type_from_conditional_type` helpers only return cached
+        // results, so for first-time resolution we must resolve the branch
+        // type node directly.
+        let (cond_node, branch_node) = match ct
+            .root
+            .as_ref()
+            .and_then(|r| r.node.as_ref())
+            .and_then(|n| match &n.data {
+                NodeData::ConditionalTypeNode(data) => {
+                    let branch = if take_true {
+                        Arc::clone(&data.true_type)
+                    } else {
+                        Arc::clone(&data.false_type)
+                    };
+                    Some((Arc::clone(n), branch))
+                }
+                _ => None,
+            }) {
+            Some(pair) => pair,
+            None => return None,
         };
 
-        branch.map(|branch| {
-            let resolved = if !infer_params.is_empty() {
-                let inferred = self.get_inferred_types(&context);
-                self.substitute_infer_type_parameters(&branch, &infer_params, &inferred)
+        // Push the ConditionalType onto the scope stack so that
+        // `resolve_identifier` can find the `infer R` type
+        // parameters (declared as locals of the ConditionalType).
+        self.push_scope(&cond_node);
+        let branch = self.get_type_from_type_node(&branch_node);
+        self.pop_scope();
+        let resolved = if !infer_params.is_empty() {
+            let inferred = self.get_inferred_types(&context);
+            self.substitute_infer_type_parameters(&branch, &infer_params, &inferred)
+        } else {
+            Arc::clone(&branch)
+        };
+        // Cache the result so subsequent lookups don't re-run.
+        // SAFETY: `resolved_true_type` / `resolved_false_type` are
+        // `OnceLock` and we just verified they're unset. `set` returns
+        // `Result<(), _>`; we ignore the error in the rare race case.
+        if let TypeData::Conditional(ct2) = &t.data {
+            let cell = if take_true {
+                &ct2.resolved_true_type
             } else {
-                Arc::clone(&branch)
+                &ct2.resolved_false_type
             };
-            // Cache the result so subsequent lookups don't re-run.
-            // SAFETY: `resolved_true_type` / `resolved_false_type` are
-            // `OnceLock` and we just verified they're unset. `set` returns
-            // `Result<(), _>`; we ignore the error in the rare race case.
-            if let TypeData::Conditional(ct2) = &t.data {
-                let cell = if take_true {
-                    &ct2.resolved_true_type
-                } else {
-                    &ct2.resolved_false_type
-                };
-                let _ = cell.set(Arc::clone(&resolved));
-            }
-            resolved
-        })
+            let _ = cell.set(Arc::clone(&resolved));
+        }
+        Some(resolved)
     }
 
     /// Substitute occurrences of `infer_params[i]` in `t` with
@@ -2942,12 +2969,12 @@ impl Checker {
                 return Arc::clone(&substitutions[i.min(substitutions.len() - 1)]);
             }
         }
-        // Recursive substitution into structured types. We only handle
-        // the cases that show up in conditional branches: unions,
-        // intersections, and other type references. Object types with
-        // type arguments require a full `create_type_reference` which is
-        // not yet ported; we return them as-is. Other kinds (mapped,
-        // indexed access, etc.) are likewise returned as-is.
+        // Recursive substitution into structured types. We handle the
+        // cases that show up in conditional extends types and branches:
+        // unions, intersections, arrays (Object with a single type
+        // argument), and tuples. Other kinds (mapped, indexed access,
+        // nested conditionals, etc.) are returned as-is — a full
+        // `instantiateType` port would be needed for those.
         match &t.data {
             TypeData::Union(u) => {
                 let new_types: Vec<Arc<Type>> = u
@@ -2967,12 +2994,56 @@ impl Checker {
                     .collect();
                 self.get_intersection_type(new_types)
             }
-            // For nested conditional types, object type references with
-            // type arguments, mapped types, etc., we don't recursively
-            // substitute (that would risk re-resolution or require a full
-            // `instantiateType`); return as-is. Go handles these via
-            // `instantiateType`, which walks the type and substitutes
-            // there.
+            TypeData::Object(o) => {
+                // Array type: `T[]` is represented as an Object with
+                // `object_flags: Reference`, no `target`, and a single
+                // type argument (the element type). Substitute the
+                // element type and rebuild via `create_array_type`.
+                if t.object_flags.contains(ObjectFlags::Reference)
+                    && o.target.is_none()
+                    && o.type_arguments.len() == 1
+                {
+                    let new_elem = self.substitute_infer_type_parameters(
+                        &o.type_arguments[0],
+                        params,
+                        substitutions,
+                    );
+                    // If nothing changed, avoid creating a new array type.
+                    if Arc::ptr_eq(&new_elem, &o.type_arguments[0]) {
+                        return Arc::clone(t);
+                    }
+                    return self.create_array_type(new_elem);
+                }
+                // Other object types (interfaces, type references with a
+                // target, etc.) are not handled — return as-is.
+                Arc::clone(t)
+            }
+            TypeData::Tuple(tup) => {
+                // Substitute each tuple element's type and rebuild.
+                let new_elems: Vec<Arc<Type>> = tup
+                    .element_infos
+                    .iter()
+                    .map(|ei| match &ei.type_ {
+                        Some(ty) => self.substitute_infer_type_parameters(ty, params, substitutions),
+                        None => self.error_type(),
+                    })
+                    .collect();
+                // If nothing changed, avoid rebuilding.
+                let changed = tup.element_infos.iter().zip(new_elems.iter()).any(
+                    |(ei, new_t)| match &ei.type_ {
+                        Some(old_t) => !Arc::ptr_eq(old_t, new_t),
+                        None => true,
+                    },
+                );
+                if !changed {
+                    return Arc::clone(t);
+                }
+                self.create_tuple_type(new_elems)
+            }
+            // For nested conditional types, mapped types, indexed access
+            // types, etc., we don't recursively substitute (that would
+            // risk re-resolution or require a full `instantiateType`);
+            // return as-is. Go handles these via `instantiateType`.
             _ => Arc::clone(t),
         }
     }
