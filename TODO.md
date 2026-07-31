@@ -77,8 +77,8 @@ arity）+ 12 个 parity fixtures。
 | Compiler | 768 | — | 基础 | Program 创建/解析/绑定/emit pipeline 通；checker 已接入 |
 | Emitter | 774 | — | 基础 | JS emit 基础（源文本切片式）；缺 transformer 体系、declaration emit |
 | Printer | 1578 | — | 基础 | 仅 NameGenerator；完整 AST→文本未迁移 |
-| AST | 7476 | 21671 | 基础 | generated 节点 + symbol/flow 类型；**生成脚本缺失**（`_scripts/generate-rust-ast.ts` 未入库） |
-| Diagnostics | 24260 | 9568 | 完成 | 2154 条消息；**生成脚本缺失**（`_scripts/generate-rust-diagnostics.ts` 未入库）；本地化未实现 |
+| AST | 7476 | 21671 | 基础 | generated 节点 + symbol/flow 类型；生成脚本已入库（`_scripts/generate-rust-ast.ts`） |
+| Diagnostics | 24260 | 9568 | 完成 | 2154 条消息；生成脚本已入库（`_scripts/generate-rust-diagnostics.ts`）；本地化未实现 |
 
 `--lsp` 和 `--api` 当前为 stub。`cargo fmt --check` 仍未对齐全仓；触碰文件时
 顺手格式化，整仓格式化单独排期。剩余 warning 约 77 个，归类为迁移期可接受
@@ -122,9 +122,9 @@ arity）+ 12 个 parity fixtures。
 6. **P3.2 Binder NameResolver 收尾**：箭头函数参数作用域、enum/namespace
    成员查找、export default 别名、类型参数作用域限制、`infer T`、装饰器
    位置调整。
-7. **P2.0 AST/diagnostics 生成链路**：补齐 `_scripts/generate-rust-ast.ts`
-   与 `_scripts/generate-rust-diagnostics.ts`（或建立 Rust 自有 schema），
-   使 `node_data_generated.rs`/`messages_generated.rs` 可重复生成。
+7. **P2.0 AST/diagnostics 生成链路**（已完成）：补齐 `_scripts/generate-rust-ast.ts`
+   与 `_scripts/generate-rust-diagnostics.ts`，复用 Go 侧 `_scripts/ast.json`
+   via `schema.ts`；两个生成器输出与现有文件字节级一致（`git diff` 干净）。
 8. **P1 CLI/tsconfig 收尾**：declaration-driven option parser（NameMap/
    did-you-mean/alternate-mode）、watch options 独立建模、`extends` package
    resolution、typed project references、no-input diagnostics、`vfsmatch`。
@@ -209,12 +209,20 @@ unicodeproperties.go 162 + utilities.go 100）、`internal/parser`（parser.go
 6827 + jsdoc.go 1355 + reparser.go 748）、`internal/ast`、`_scripts/ast.json`。
 Rust 现状：`src/scanner/mod.rs`、`src/parser/mod.rs`、`src/ast/*`、`build.rs`。
 
-### P2.0 AST 生成链路
+### P2.0 AST 生成链路（已完成）
 
-- [ ] 明确 Rust AST 生成链路是否继续读 Go 侧 `_scripts/ast.json`，还是维护
-  Rust 自有 schema。
-- [ ] 对齐 generated enum/node 数据的生成命令和检查方式。
-- [ ] 生成文件可重复生成，`git diff` 干净。
+已完成：补齐 `_scripts/generate-rust-ast.ts`（694 行，读 `_scripts/ast.json`
+via `schema.ts`，生成 `syntax_kind_generated.rs` + `node_data_generated.rs`）
+与 `_scripts/generate-rust-diagnostics.ts`（读 Go 侧
+`diagnostics_generated.go`，生成 `messages_generated.rs`）。两个生成器输出与
+现有文件字节级一致（`git diff` 干净）。
+
+- [x] Rust AST 生成链路继续读 Go 侧 `_scripts/ast.json`，复用 `schema.ts`
+  的 `SchemaAPI`（与 Go/TS 生成器共享 schema 定义）。
+- [x] 对齐 generated enum/node 数据的生成命令和检查方式：
+  `node --experimental-strip-types _scripts/generate-rust-ast.ts` /
+  `node --experimental-strip-types _scripts/generate-rust-diagnostics.ts`。
+- [x] 生成文件可重复生成，`git diff` 干净。
 
 ### P2.1 Scanner 基础能力补齐
 
