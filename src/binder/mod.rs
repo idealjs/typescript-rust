@@ -111,6 +111,22 @@ impl Default for Binder {
     }
 }
 
+/// Target symbol table for [`Binder::declare_symbol_into`].
+///
+/// Mirrors the explicit `table` argument Go passes to
+/// `b.declareSymbol(table, parent, node, ...)` in the export/import bind
+/// arms (`bindImportClause`, `bindExportAssignment`,
+/// `bindExportDeclaration`, `bindNamespaceExportDeclaration`).
+enum DeclareTarget {
+    /// `container.Symbol().exports` — holds an owned clone of the container
+    /// symbol so we can mutate its `exports` field through the raw pointer
+    /// without borrowing `self`.
+    Exports(Arc<Symbol>),
+    /// `ast.GetLocals(container)` — the container node whose
+    /// `symbol_map.locals` entry should receive the symbol.
+    Locals(Arc<Node>),
+}
+
 impl Binder {
     /// Create a new binder.
     pub fn new() -> Self {
@@ -347,12 +363,122 @@ impl Binder {
             }
         }
 
+        // Exported module/namespace members get an `export_symbol` link so
+        // the checker's `follow_alias` / `get_export_symbol_of_value_symbol_if_exported`
+        // can recover the export face of the symbol. Mirrors Go's
+        // `declareModuleMember` two-symbol pattern, using the safer
+        // self-reference approach: the same symbol is registered in both
+        // the locals/members and exports tables, and `export_symbol` points
+        // back to itself. (The full Go pattern uses two distinct symbols —
+        // a local with `ExportValue` and an export with full flags — but
+        // that risks breaking existing tests, so we keep a single symbol
+        // and just establish the link.)
+        if let Some(container) = &self.container {
+            let is_module_container = container.kind == SyntaxKind::SourceFile
+                || container.kind == SyntaxKind::ModuleDeclaration;
+            if is_module_container
+                && self
+                    .get_combined_modifier_flags(node)
+                    .contains(ModifierFlags::Export)
+            {
+                let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+                unsafe {
+                    (*symbol_mut).export_symbol = Some(Arc::clone(&symbol));
+                }
+            }
+        }
+
         // Associate the symbol with the node
         self.symbol_map.set_symbol(node, Arc::clone(&symbol));
 
         // Set the value declaration if this is a value declaration
         // (in the full Go implementation, this is more nuanced)
 
+        symbol
+    }
+
+    /// Declare a symbol and add it to an explicit target symbol table,
+    /// applying the same merge semantics as [`Binder::declare_symbol`].
+    ///
+    /// Used by the export/import bind arms that must target a specific table
+    /// (the container's `exports` or `locals`) rather than the table
+    /// [`Binder::declare_symbol`] routes to based on container kind.
+    ///
+    /// Mirrors Go's `b.declareSymbol(table, parent, node, flags, excludes)`.
+    fn declare_symbol_into(
+        &mut self,
+        node: &Arc<Node>,
+        includes: SymbolFlags,
+        _excludes: SymbolFlags,
+        target: DeclareTarget,
+    ) -> Arc<Symbol> {
+        let name = self.get_declaration_name(node);
+
+        // Look up an existing symbol with the same name in the target table.
+        let existing: Option<Arc<Symbol>> = match &target {
+            DeclareTarget::Exports(parent_sym) => parent_sym.exports.get(&name).cloned(),
+            DeclareTarget::Locals(container) => self
+                .symbol_map
+                .locals
+                .get(&container.id())
+                .and_then(|locals| locals.get(&name).cloned()),
+        };
+
+        if let Some(existing) = existing {
+            if self.can_merge_symbols(existing.flags, includes) {
+                let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
+                unsafe {
+                    (*existing_mut).declarations.push(Arc::clone(node));
+                    (*existing_mut).flags |= includes;
+                    if (*existing_mut).value_declaration.is_none()
+                        && includes.intersects(SymbolFlags::VALUE)
+                    {
+                        (*existing_mut).value_declaration = Some(Arc::clone(node));
+                    }
+                }
+                self.symbol_map.set_symbol(node, Arc::clone(&existing));
+                return existing;
+            }
+            // Non-mergeable redeclaration: fall through to create a new
+            // symbol (overwrites the previous entry).
+        }
+
+        let symbol = self.new_symbol(includes, name.clone());
+        {
+            let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+            unsafe {
+                (*symbol_mut).declarations.push(Arc::clone(node));
+                if (*symbol_mut).value_declaration.is_none()
+                    && includes.intersects(SymbolFlags::VALUE)
+                {
+                    (*symbol_mut).value_declaration = Some(Arc::clone(node));
+                }
+            }
+        }
+
+        match &target {
+            DeclareTarget::Exports(parent_sym) => {
+                let parent_mut = Arc::as_ptr(parent_sym) as *mut Symbol;
+                unsafe {
+                    (*parent_mut).exports.insert(name.clone(), Arc::clone(&symbol));
+                    // Set the export symbol's parent to the container symbol,
+                    // mirroring Go which passes `container.Symbol()` as the
+                    // parent argument to `declareSymbol`.
+                    let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+                    (*symbol_mut).parent = Some(Arc::clone(parent_sym));
+                }
+            }
+            DeclareTarget::Locals(container) => {
+                let locals = self
+                    .symbol_map
+                    .locals
+                    .entry(container.id())
+                    .or_insert_with(SymbolTable::new);
+                locals.insert(name.clone(), Arc::clone(&symbol));
+            }
+        }
+
+        self.symbol_map.set_symbol(node, Arc::clone(&symbol));
         symbol
     }
 
@@ -503,6 +629,23 @@ impl Binder {
             NodeData::SetAccessorDeclaration(data) => self.node_text(&data.name),
             NodeData::TypeParameterDeclaration(data) => self.node_text(&data.name),
             NodeData::Identifier(data) => data.text.clone(),
+            // `export default <expr>` → "default"; `export = <expr>` → "export=".
+            // Mirrors Go's `getDeclarationName` for `KindExportAssignment`.
+            NodeData::ExportAssignment(data) => {
+                if data.is_export_equals {
+                    INTERNAL_SYMBOL_NAME_EXPORT_EQUALS.to_string()
+                } else {
+                    INTERNAL_SYMBOL_NAME_DEFAULT.to_string()
+                }
+            }
+            // `export * from "mod"` — the export star declaration node is
+            // named with the internal `export-star` marker.
+            NodeData::ExportDeclaration(_) => INTERNAL_SYMBOL_NAME_EXPORT_STAR.to_string(),
+            // `export * as ns from "mod"` — the `* as ns` clause (and the
+            // standalone `NamespaceExportDeclaration` form) are named after
+            // their identifier.
+            NodeData::NamespaceExport(data) => self.node_text(&data.name),
+            NodeData::NamespaceExportDeclaration(data) => self.node_text(&data.name),
             _ => String::new(),
         }
     }
@@ -1590,6 +1733,28 @@ impl Binder {
             | SyntaxKind::ExportSpecifier => {
                 self.declare_symbol(node, SymbolFlags::Alias, SymbolFlags::Alias);
             }
+            // `import D from "mod"` — the default import `D` is an alias
+            // declared in the container's locals. Mirrors Go's
+            // `bindImportClause`.
+            SyntaxKind::ImportClause => {
+                self.bind_import_clause(node);
+            }
+            // `export default <expr>` / `export = <expr>`. Mirrors Go's
+            // `bindExportAssignment`.
+            SyntaxKind::ExportAssignment => {
+                self.bind_export_assignment(node);
+            }
+            // `export * from "mod"` / `export * as ns from "mod"` /
+            // `export { a, b }`. Mirrors Go's `bindExportDeclaration`.
+            SyntaxKind::ExportDeclaration => {
+                self.bind_export_declaration(node);
+            }
+            // Standalone `export * as ns from "mod"` (the
+            // `NamespaceExportDeclaration` form used in global declaration
+            // files). Mirrors Go's `bindNamespaceExportDeclaration`.
+            SyntaxKind::NamespaceExportDeclaration => {
+                self.bind_namespace_export_declaration(node);
+            }
             SyntaxKind::BindingElement => {
                 self.declare_symbol(node, SymbolFlags::BlockScopedVariable, SymbolFlags::VALUE);
             }
@@ -1692,6 +1857,169 @@ impl Binder {
     fn bind_anonymous_declaration(&mut self, node: &Arc<Node>, flags: SymbolFlags, name: &str) {
         let symbol = self.new_symbol(flags, name.to_string());
         self.symbol_map.set_symbol(node, symbol);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Import / export binding — ported from `internal/binder/binder.go`
+    // ─────────────────────────────────────────────────────────────────────
+
+    /// Bind an `ImportClause` (`import D from "mod"`). Only the default
+    /// import name `D` is declared here; named bindings and namespace
+    /// imports are handled by their own dispatch arms (`ImportSpecifier`,
+    /// `NamespaceImport`).
+    ///
+    /// The default import alias goes to the container's locals (not
+    /// exports), matching Go's `declareModuleMember` alias branch which
+    /// calls `declareSymbol(GetLocals(container), nil, node, Alias, ...)`.
+    ///
+    /// Mirrors Go's `binder.bindImportClause`.
+    fn bind_import_clause(&mut self, node: &Arc<Node>) {
+        let has_name = matches!(&node.data, NodeData::ImportClause(data) if data.name.is_some());
+        if !has_name {
+            return;
+        }
+        if let Some(container) = &self.container {
+            self.declare_symbol_into(
+                node,
+                SymbolFlags::Alias,
+                SymbolFlags::AliasExcludes,
+                DeclareTarget::Locals(Arc::clone(container)),
+            );
+        }
+    }
+
+    /// Bind an `ExportAssignment` (`export default <expr>` /
+    /// `export = <expr>`).
+    ///
+    /// The symbol is declared in the container's exports, named "default"
+    /// (for `export default`) or "export=" (for `export =`). If the
+    /// expression is an entity name or a class expression the symbol is an
+    /// `Alias`; otherwise (e.g. `export default 42`) it is a `Property`.
+    ///
+    /// Mirrors Go's `binder.bindExportAssignment`.
+    fn bind_export_assignment(&mut self, node: &Arc<Node>) {
+        let (is_export_equals, expr_kind) = match &node.data {
+            NodeData::ExportAssignment(data) => {
+                (data.is_export_equals, data.expression.kind)
+            }
+            _ => return,
+        };
+        let parent_sym = match self.parent_symbol.clone() {
+            Some(s) => s,
+            None => {
+                // Export assignment inside a block construct without a
+                // container symbol — emit an anonymous declaration so the
+                // node still gets a symbol. Mirrors Go's fallback branch.
+                self.bind_anonymous_declaration(
+                    node,
+                    SymbolFlags::VALUE,
+                    &self.get_declaration_name(node),
+                );
+                return;
+            }
+        };
+        // `ExpressionIsAlias(expr)` = `IsEntityNameExpression || IsClassExpression`.
+        let is_alias = matches!(
+            expr_kind,
+            SyntaxKind::Identifier | SyntaxKind::QualifiedName | SyntaxKind::ClassExpression
+        );
+        let flags = if is_alias {
+            SymbolFlags::Alias
+        } else {
+            SymbolFlags::Property
+        };
+        let symbol = self.declare_symbol_into(
+            node,
+            flags,
+            SymbolFlags::all(),
+            DeclareTarget::Exports(parent_sym),
+        );
+        if is_export_equals {
+            // Ensure export assignments have a ValueDeclaration set.
+            // Mirrors Go's `SetValueDeclaration(symbol, node)`.
+            let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+            unsafe {
+                (*symbol_mut).value_declaration = Some(Arc::clone(node));
+            }
+        }
+    }
+
+    /// Bind an `ExportDeclaration` (`export * from "mod"` /
+    /// `export * as ns from "mod"` / `export { a, b }`).
+    ///
+    /// - `export * from "mod"`: record an `ExportStar` symbol in the
+    ///   container's exports.
+    /// - `export * as ns from "mod"`: declare an `Alias` for `ns` in the
+    ///   container's exports (the aliased node is the `NamespaceExport`
+    ///   clause, so its name `ns` is used).
+    /// - `export { a, b }`: nothing to do here — the individual
+    ///   `ExportSpecifier`s already declare their own alias symbols via
+    ///   the shared dispatch arm.
+    ///
+    /// Mirrors Go's `binder.bindExportDeclaration`.
+    fn bind_export_declaration(&mut self, node: &Arc<Node>) {
+        let export_clause: Option<Arc<Node>> = match &node.data {
+            NodeData::ExportDeclaration(data) => data.export_clause.clone(),
+            _ => return,
+        };
+        let parent_sym = match self.parent_symbol.clone() {
+            Some(s) => s,
+            None => {
+                // `export *` in a block construct without a container
+                // symbol — anonymous declaration. Mirrors Go's fallback.
+                self.bind_anonymous_declaration(
+                    node,
+                    SymbolFlags::ExportStar,
+                    &self.get_declaration_name(node),
+                );
+                return;
+            }
+        };
+        match &export_clause {
+            None => {
+                // `export * from "mod"`.
+                self.declare_symbol_into(
+                    node,
+                    SymbolFlags::ExportStar,
+                    SymbolFlags::None,
+                    DeclareTarget::Exports(parent_sym),
+                );
+            }
+            Some(clause) if clause.kind == SyntaxKind::NamespaceExport => {
+                // `export * as ns from "mod"`.
+                self.declare_symbol_into(
+                    clause,
+                    SymbolFlags::Alias,
+                    SymbolFlags::AliasExcludes,
+                    DeclareTarget::Exports(parent_sym),
+                );
+            }
+            _ => {
+                // `export { a, b }` — handled by ExportSpecifier arms.
+            }
+        }
+    }
+
+    /// Bind a standalone `NamespaceExportDeclaration` (`export * as ns from
+    /// "mod"` in global declaration files).
+    ///
+    /// Go places this in the file's `GlobalExports` table. The Rust
+    /// `NodeSymbolMap` has no separate global-exports table, so the symbol
+    /// is declared in the container symbol's `exports`, which is where
+    /// downstream lookups search.
+    ///
+    /// Mirrors Go's `binder.bindNamespaceExportDeclaration`.
+    fn bind_namespace_export_declaration(&mut self, node: &Arc<Node>) {
+        let parent_sym = match self.parent_symbol.clone() {
+            Some(s) => s,
+            None => return,
+        };
+        self.declare_symbol_into(
+            node,
+            SymbolFlags::Alias,
+            SymbolFlags::AliasExcludes,
+            DeclareTarget::Exports(parent_sym),
+        );
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -2258,5 +2586,253 @@ mod tests {
         let mut binder = Binder::new();
         binder.bind_source_file(&file);
         assert!(binder.has_flow_effects);
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    // Import / export binding — P3.4
+    // ───────────────────────────────────────────────────────────────
+
+    fn file_symbol<'a>(file: &'a SourceFile, map: &'a NodeSymbolMap) -> &'a Arc<Symbol> {
+        map.symbols
+            .get(&file.node.id())
+            .expect("source file should have a symbol")
+    }
+
+    fn find_statement(file: &SourceFile, kind: SyntaxKind) -> Option<Arc<Node>> {
+        let NodeData::SourceFile(data) = &file.node.data else {
+            return None;
+        };
+        data.statements
+            .nodes
+            .iter()
+            .find(|n| n.kind == kind)
+            .cloned()
+    }
+
+    fn find_child(node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> {
+        let mut found: Option<Arc<Node>> = None;
+        crate::ast::node_data_generated::for_each_child(node, |child| {
+            if child.kind == kind {
+                found = Some(Arc::clone(child));
+                true
+            } else {
+                false
+            }
+        });
+        found
+    }
+
+    #[test]
+    fn bind_export_default_expression_creates_default_export_symbol() {
+        // `export default 42` → a Property symbol named "default" in the
+        // file's exports (the expression is a literal, not an alias).
+        let (file, map) = parse_and_bind("export default 42;");
+        let export_assignment =
+            find_statement(&file, SyntaxKind::ExportAssignment).expect("export assignment");
+        let sym = map.symbol_of(&export_assignment).expect("symbol");
+        assert!(
+            sym.flags.contains(SymbolFlags::Property),
+            "expected Property flags, got {:?}",
+            sym.flags
+        );
+        assert_eq!(sym.name, INTERNAL_SYMBOL_NAME_DEFAULT);
+        let file_sym = file_symbol(&file, &map);
+        let default_export = file_sym
+            .exports
+            .get(INTERNAL_SYMBOL_NAME_DEFAULT)
+            .expect("default export in file exports");
+        assert!(Arc::ptr_eq(default_export, sym));
+    }
+
+    #[test]
+    fn bind_export_default_identifier_creates_alias() {
+        // `export default foo` → an Alias symbol named "default" (the
+        // expression is an entity name).
+        let (file, map) = parse_and_bind("const foo = 1; export default foo;");
+        let export_assignment =
+            find_statement(&file, SyntaxKind::ExportAssignment).expect("export assignment");
+        let sym = map.symbol_of(&export_assignment).expect("symbol");
+        assert!(
+            sym.flags.contains(SymbolFlags::Alias),
+            "expected Alias flags, got {:?}",
+            sym.flags
+        );
+        assert_eq!(sym.name, INTERNAL_SYMBOL_NAME_DEFAULT);
+    }
+
+    #[test]
+    fn bind_export_equals_creates_export_equals_symbol() {
+        // `export = x` → an Alias symbol named "export=" with a value
+        // declaration set.
+        let (file, map) = parse_and_bind("function x() {} export = x;");
+        let export_assignment =
+            find_statement(&file, SyntaxKind::ExportAssignment).expect("export assignment");
+        let sym = map.symbol_of(&export_assignment).expect("symbol");
+        assert!(sym.flags.contains(SymbolFlags::Alias));
+        assert_eq!(sym.name, INTERNAL_SYMBOL_NAME_EXPORT_EQUALS);
+        assert!(
+            sym.value_declaration.is_some(),
+            "export = should have a value declaration set"
+        );
+        let file_sym = file_symbol(&file, &map);
+        assert!(file_sym
+            .exports
+            .get(INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
+            .is_some());
+    }
+
+    #[test]
+    fn bind_export_star_creates_export_star_symbol() {
+        // `export * from "mod"` → an ExportStar symbol in the file's exports.
+        let (file, map) = parse_and_bind("export * from \"mod\";");
+        let export_decl =
+            find_statement(&file, SyntaxKind::ExportDeclaration).expect("export declaration");
+        let sym = map.symbol_of(&export_decl).expect("symbol");
+        assert!(
+            sym.flags.contains(SymbolFlags::ExportStar),
+            "expected ExportStar flags, got {:?}",
+            sym.flags
+        );
+        assert_eq!(sym.name, INTERNAL_SYMBOL_NAME_EXPORT_STAR);
+        let file_sym = file_symbol(&file, &map);
+        assert!(file_sym
+            .exports
+            .get(INTERNAL_SYMBOL_NAME_EXPORT_STAR)
+            .is_some());
+    }
+
+    #[test]
+    fn bind_export_star_as_ns_creates_alias() {
+        // `export * as ns from "mod"` → an Alias symbol named "ns" in the
+        // file's exports, attached to the NamespaceExport clause node.
+        let (file, map) = parse_and_bind("export * as ns from \"mod\";");
+        let export_decl =
+            find_statement(&file, SyntaxKind::ExportDeclaration).expect("export declaration");
+        let ns_clause = find_child(&export_decl, SyntaxKind::NamespaceExport)
+            .expect("NamespaceExport clause");
+        let sym = map.symbol_of(&ns_clause).expect("symbol on NamespaceExport clause");
+        assert!(sym.flags.contains(SymbolFlags::Alias));
+        assert_eq!(sym.name, "ns");
+        let file_sym = file_symbol(&file, &map);
+        let ns_export = file_sym.exports.get("ns").expect("ns export");
+        assert!(Arc::ptr_eq(ns_export, sym));
+    }
+
+    #[test]
+    fn bind_export_named_specifiers_does_not_duplicate() {
+        // `export { a, b }` is handled by the ExportSpecifier arms; the
+        // ExportDeclaration itself should not declare an extra symbol.
+        let (file, map) = parse_and_bind("const a = 1; const b = 2; export { a, b };");
+        let export_decl =
+            find_statement(&file, SyntaxKind::ExportDeclaration).expect("export declaration");
+        // No symbol should be created directly on the ExportDeclaration for
+        // `export { ... }` (only on the individual ExportSpecifiers).
+        assert!(
+            map.symbol_of(&export_decl).is_none(),
+            "export {{ a, b }} should not create a symbol on the ExportDeclaration"
+        );
+    }
+
+    #[test]
+    fn bind_import_clause_default_import_creates_local_alias() {
+        // `import D from "mod"` → an Alias symbol named "D" in the file's
+        // locals (not exports).
+        let (file, map) = parse_and_bind("import D from \"mod\";");
+        let import_decl =
+            find_statement(&file, SyntaxKind::ImportDeclaration).expect("import declaration");
+        let clause = find_child(&import_decl, SyntaxKind::ImportClause).expect("import clause");
+        let sym = map.symbol_of(&clause).expect("symbol on ImportClause");
+        assert!(sym.flags.contains(SymbolFlags::Alias));
+        assert_eq!(sym.name, "D");
+        let locals = map
+            .locals
+            .get(&file.node.id())
+            .expect("file locals table");
+        let local_sym = locals.get("D").expect("D in file locals");
+        assert!(Arc::ptr_eq(local_sym, sym));
+        let file_sym = file_symbol(&file, &map);
+        assert!(
+            file_sym.exports.get("D").is_none(),
+            "default import should not be in exports"
+        );
+    }
+
+    #[test]
+    fn bind_import_clause_without_name_is_noop() {
+        // `import { x } from "mod"` has no default import name; the
+        // ImportClause should declare no symbol itself.
+        let (file, map) = parse_and_bind("import { x } from \"mod\";");
+        let import_decl =
+            find_statement(&file, SyntaxKind::ImportDeclaration).expect("import declaration");
+        let clause = find_child(&import_decl, SyntaxKind::ImportClause).expect("import clause");
+        assert!(
+            map.symbol_of(&clause).is_none(),
+            "ImportClause without a name should not get a symbol"
+        );
+    }
+
+    #[test]
+    fn bind_exported_namespace_member_has_export_symbol_link() {
+        // `namespace N { export const x = 1; }` — the exported member `x`
+        // should have its `export_symbol` link set (self-reference).
+        let (file, map) = parse_and_bind("namespace N { export const x = 1; }");
+        // Find the ModuleDeclaration N, then its symbol's exports.
+        let ns = find_statement(&file, SyntaxKind::ModuleDeclaration).expect("namespace N");
+        let ns_sym = map.symbol_of(&ns).expect("namespace symbol");
+        let x_export = ns_sym.exports.get("x").expect("x in N's exports");
+        assert!(
+            x_export.export_symbol.is_some(),
+            "exported namespace member should have export_symbol set"
+        );
+        assert!(Arc::ptr_eq(
+            x_export.export_symbol.as_ref().unwrap(),
+            x_export
+        ));
+    }
+
+    #[test]
+    fn bind_non_exported_namespace_member_has_no_export_symbol() {
+        // `namespace N { const x = 1; }` — non-exported member `x` should
+        // NOT have an `export_symbol` link and should be in locals, not
+        // exports.
+        let (file, map) = parse_and_bind("namespace N { const x = 1; }");
+        let ns = find_statement(&file, SyntaxKind::ModuleDeclaration).expect("namespace N");
+        let ns_sym = map.symbol_of(&ns).expect("namespace symbol");
+        assert!(
+            ns_sym.exports.get("x").is_none(),
+            "non-exported member should not be in exports"
+        );
+        // Non-exported namespace members live in the ModuleDeclaration
+        // container's locals (the binder keys locals on the container node,
+        // which is the ModuleDeclaration, not the ModuleBlock).
+        let locals = map
+            .locals
+            .get(&ns.id())
+            .expect("namespace locals table");
+        let x_local = locals.get("x").expect("x in locals");
+        assert!(
+            x_local.export_symbol.is_none(),
+            "non-exported member should not have export_symbol"
+        );
+    }
+
+    #[test]
+    fn bind_exported_top_level_member_has_export_symbol_link() {
+        // `export const x = 1;` at the top level — `x` should have its
+        // `export_symbol` link set (self-reference).
+        let (file, map) = parse_and_bind("export const x = 1;");
+        let var_stmt =
+            find_statement(&file, SyntaxKind::VariableStatement).expect("variable statement");
+        // The VariableDeclaration is the first child of the declaration list.
+        let decl_list = find_child(&var_stmt, SyntaxKind::VariableDeclarationList)
+            .expect("declaration list");
+        let var_decl = find_child(&decl_list, SyntaxKind::VariableDeclaration)
+            .expect("variable declaration");
+        let sym = map.symbol_of(&var_decl).expect("symbol for x");
+        assert!(
+            sym.export_symbol.is_some(),
+            "exported top-level member should have export_symbol set"
+        );
+        assert!(Arc::ptr_eq(sym.export_symbol.as_ref().unwrap(), sym));
     }
 }

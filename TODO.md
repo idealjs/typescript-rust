@@ -407,10 +407,20 @@ do-while/for/for-in/for-of/switch 控制流、return/throw/break/continue、
   `get_type_of_class_declaration` 在 `build_class_instance_type_with_base`
   前 push_scope，使属性类型注解中的类型参数引用可解析。
 
-### P3.3 Binder ReferenceResolver
+### P3.3 Binder ReferenceResolver（已完成）
 
-- [ ] 迁移 `internal/binder/referenceresolver.go`（262 行）。
-- [ ] 标识符引用记录（用于 find references / rename）。
+已完成：Go `referenceresolver.go` 的 6 个接口方法已内联到 Rust `Checker` 上
+（`follow_alias`/`get_referenced_value_symbol`/`get_referenced_export_container`/
+`get_referenced_import_declaration`/`get_referenced_value_declaration`/
+`get_referenced_value_declarations`/`get_referenced_member_value_declaration`/
+`is_type_only_alias_declaration`/`get_declaration_of_alias_symbol`/
+`get_export_symbol_of_value_symbol_if_exported`/`is_alias_symbol_declaration`）。
+Go 的 `ReferenceResolver` struct + hooks 模式是为打破 Go 循环导入的细节，Rust
+直接在 `Checker` 上实现更 idiomatic。ReferenceResolver 纯属 LS/emit 层功能，
+不影响类型检查正确性。
+
+- [x] 迁移 `internal/binder/referenceresolver.go`（262 行）—— 已在 checker 侧实现。
+- [x] 标识符引用记录（用于 find references / rename）—— 按需查询，无需 binder 记录。
 
 ### P3.4 Binder 声明合并与 export/import binding
 
@@ -427,10 +437,23 @@ function overload、enum+enum），则将新 declaration 追加到既有 symbol 
   namespace 成员合并为单一对象类型）；enum+enum 合并（`resolve_enum_type`
   遍历全部 `EnumDeclaration` 收集成员）；enum 成员值类型解析
   （`resolve_enum_value_type` 构建 enum 对象类型使 `Color.Red` 返回字面量类型）。
-- [ ] export binding：`export { A }` 的 `exportSymbol` → local symbol 链。
-- [ ] import binding：`import { A }` 的 `aliasSymbol` → resolved symbol。
-- [ ] `delayedSymbol`/`aliasSymbol` 特殊符号处理。
-- [ ] 完整 scope 链（当前只有 `container`/`block_scope_container` 两个字段）。
+- [x] export binding：`export { A }` 的 `exportSymbol` → local symbol 链。
+  binder 新增 `ImportClause`/`ExportAssignment`/`ExportDeclaration`/
+  `NamespaceExportDeclaration` 的 bind 分支（对齐 Go `bindImportClause`/
+  `bindExportAssignment`/`bindExportDeclaration`/`bindNamespaceExportDeclaration`）；
+  `declare_symbol` 在 SourceFile/ModuleDeclaration 容器且 `export` 修饰符时
+  设置 `symbol.export_symbol = Some(self)` 自引用，使 checker 的 `follow_alias`
+  和 `get_export_symbol_of_value_symbol_if_exported` 正确工作。11 个 parity
+  测试 + 11 个 binder 单测覆盖。
+- [x] import binding：`import { A }` 的 `aliasSymbol` → resolved symbol。
+  `ImportSpecifier`/`ImportEqualsDeclaration`/`NamespaceImport` 已在 bind 分支
+  中声明 Alias 符号；`ImportClause` 默认导入 `import D from "mod"` 新增 Alias
+  符号到 container locals。
+- [x] `delayedSymbol`/`aliasSymbol` 特殊符号处理——Go 中无 `delayedSymbol`
+  （grep 零命中），`aliasSymbol` 实为 `SymbolFlags::Alias` 标志位，已在
+  `ImportSpecifier`/`ExportSpecifier`/`ImportClause`/`ExportAssignment` 分支设置。
+- [ ] 完整 scope 链（当前只有 `container`/`block_scope_container` 两个字段，
+  缺 `this_container` 用于 JS expando binding——留后续 JS 支持阶段）。
 
 ### P3.5 Checker 接入 compiler（已完成）
 

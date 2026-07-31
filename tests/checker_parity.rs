@@ -1744,6 +1744,107 @@ fn checker_export_default_expression_no_error() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// P3.4: Export/import binding gaps — parity tests for the new bind arms.
+// These exercise the `ImportClause`, `ExportAssignment`,
+// `ExportDeclaration`, and `NamespaceExportDeclaration` bind dispatch arms
+// added to the Rust binder. They are single-file tests (no cross-module
+// resolution) verifying that the new symbols are created without producing
+// spurious diagnostics.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_export_default_class_named_is_accessible() {
+    // `export default class Foo {}` parses as a ClassDeclaration with the
+    // `default` modifier; `Foo` must remain accessible by its local name.
+    let diags = check_source(
+        "export default class Foo {}\n\
+         let x: Foo | null = null;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_export_default_function_named_is_accessible() {
+    // `export default function foo()` parses as a FunctionDeclaration with
+    // the `default` modifier; `foo` must remain accessible by its local name.
+    let diags = check_source(
+        "export default function foo(): number { return 1; }\n\
+         let x: number = foo();",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_export_default_identifier_expression_no_error() {
+    // `export default <identifier>` creates an Alias symbol named "default".
+    // The identifier `foo` resolves to the local `const foo`.
+    let diags = check_source("const foo = 1;\nexport default foo;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_export_default_object_literal_no_error() {
+    // `export default <object literal>` creates a Property symbol named
+    // "default" (the expression is neither an entity name nor a class).
+    let diags = check_source("export default { a: 1, b: 2 };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_export_equals_no_error() {
+    // `export = x` creates an Alias symbol named "export=" in the module's
+    // exports, with a value declaration set.
+    let diags = check_source("function x(): void {}\nexport = x;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_export_star_no_error() {
+    // `export * from "mod"` records an ExportStar symbol in the file's
+    // exports. No reference to the star is made, so no diagnostics.
+    let diags = check_source("export * from \"mod\";");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_export_star_as_ns_no_error() {
+    // `export * as ns from "mod"` declares an Alias symbol for `ns`.
+    let diags = check_source("export * as ns from \"mod\";");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_export_named_reexport_no_error() {
+    // `const x = 1; export { x }` — the ExportSpecifier arm already creates
+    // the alias; the ExportDeclaration arm must not duplicate or error.
+    let diags = check_source("const x = 1;\nexport { x };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_export_named_reexport_renamed_no_error() {
+    // `export { x as y }` with a local `x`.
+    let diags = check_source("const x = 1;\nexport { x as y };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_import_default_no_error() {
+    // `import D from "mod"` creates an Alias symbol for `D` in the file's
+    // locals. `D` is not referenced, so no diagnostics. (Cross-module
+    // resolution of `D`'s target is not exercised by single-file tests.)
+    let diags = check_source("import D from \"mod\";\nexport function f(): void {}");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_import_named_and_default_no_error() {
+    // `import D, { x } from "mod"` — default import `D` plus a named import.
+    let diags = check_source("import D, { x } from \"mod\";\nexport function f(): void {}");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Multiple undefined references in complex expressions
 // ────────────────────────────────────────────────────────────────────────────
 
