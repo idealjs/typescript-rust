@@ -252,8 +252,20 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   **对齐 Go 当前状态**：tsconfig.json `watchOptions` key 解析未实现（Go 侧
   `tsconfigparsing.go` 相关代码注释掉）；`--showConfig` 不输出 watchOptions
   （Go 侧 `showconfig.go` 的 `TSConfig` 结构无该字段）。
-- [ ] 对齐 tsconfig 查找、`extends`、`files/include/exclude`、`compilerOptions`
-  覆盖规则。
+- [x] 对齐 tsconfig 查找、`extends`、`files/include/exclude`、`compilerOptions`
+  覆盖规则（已完成核心 precedence 与 extends 解析）：修复 `compilerOptions`
+  merge precedence 倒置 bug（原来 extended > own，现改为 own > extended，对齐
+  Go `mergeCompilerOptions` source-wins 语义）；修复 extends 数组 last-entry-wins
+  （原来 first wins，现改为 last wins，对齐 Go `applyExtendedConfig` 顺序合并）；
+  修复 `include`/`exclude`/`files` 继承顺序（原来 last extended 覆盖，现改为
+  first extended wins，对齐 Go `applyExtendedConfig` 仅在 own 未声明时继承）；
+  新增 extends `.json` suffix 解析（`extends: "./base"` → `./base.json`，对齐
+  Go `getExtendsConfigPath`）+ path normalization（`./base` 不再残留 `./`）。
+  5 个回归测试覆盖 own-overrides-extended / array-last-wins / cmd-overrides-own /
+  include-first-extended-wins / json-suffix。**遗留**：package/Node-style
+  resolution（`module.ResolveConfig`）、inherited include/exclude/files 的
+  path-rewriting（相对 extended config 目录改写）、explicit `null` 清除继承字段、
+  extended config cache、`${configDir}` substitution。
 - [x] 将 raw `references` 升级为 typed project references：新增
   `core::project_reference::ProjectReference { path, original_path, circular }`
   （对齐 Go `core.ProjectReference`）；`ParsedCommandLine.references` 由

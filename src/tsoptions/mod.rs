@@ -2240,40 +2240,61 @@ fn get_parsed_command_line_of_config_file_with_stack(
     };
 
     // `extends` — may be a single string or an array of strings. Each target
-    // is resolved and merged in order; earlier targets have lower priority.
+    // is resolved and merged in order; later targets have higher priority
+    // among extended configs (Go: last-entry-wins for options, via
+    // `mergeCompilerOptions` source-wins semantics in `applyExtendedConfig`).
+    // The own config (parsed below) overrides extended options; command-line
+    // base options override own. Effective precedence:
+    //   command-line > own > last-extended > ... > first-extended > defaults.
+    //
+    // `include`/`exclude`/`files` specs follow a different rule: the first
+    // extended config that declares a spec wins (later extended configs do
+    // not override it), and the own config overrides inherited specs.
+    //
     // The current config's path is pushed onto the resolution stack before
     // recursing so cycles are detected.
+    let mut extended_opts = CompilerOptions::default();
     if let Some(extends) = root_obj.get("extends") {
         let extends_paths = extends_as_paths(extends, config_file_name, current_dir, fs);
         if !extends_paths.is_empty() {
             let mut new_stack: Vec<String> = resolution_stack.to_vec();
             new_stack.push(resolved_path.clone());
-            for ext_path in extends_paths {
+            // Parse all extended configs first so we can merge options in
+            // reverse order (last wins) while inheriting include/exclude/files
+            // in forward order (first wins).
+            let mut extended_configs: Vec<ParsedCommandLine> = Vec::new();
+            for ext_path in &extends_paths {
                 let parent = get_parsed_command_line_of_config_file_with_stack(
-                    &ext_path,
+                    ext_path,
                     &CompilerOptions::default(),
                     current_dir,
                     fs,
                     &new_stack,
                 );
-                // Merge parent options first (lower priority).
-                merge_compiler_options(&mut result.compiler_options, &parent.compiler_options);
-                // Inherit include/exclude/files specs from the first extended
-                // config that declares them; the own config (parsed below)
-                // overrides these when present.
-                if parent.has_include_spec {
-                    result.include = parent.include;
+                extended_configs.push(parent);
+            }
+            // Options: merge in reverse so the last extends entry wins
+            // (dst-wins merge: last iterated first sets fields, earlier
+            // entries only fill gaps the last didn't set).
+            for parent in extended_configs.iter().rev() {
+                merge_compiler_options(&mut extended_opts, &parent.compiler_options);
+            }
+            // include/exclude/files: first extended config that declares a
+            // spec wins (only inherit if result doesn't already have it).
+            for parent in &extended_configs {
+                if !result.has_include_spec && parent.has_include_spec {
+                    result.include = parent.include.clone();
                     result.has_include_spec = true;
                 }
-                if parent.has_exclude_spec {
-                    result.exclude = parent.exclude;
+                if !result.has_exclude_spec && parent.has_exclude_spec {
+                    result.exclude = parent.exclude.clone();
                     result.has_exclude_spec = true;
                 }
-                if parent.has_files_spec {
-                    result.files_spec = parent.files_spec;
+                if !result.has_files_spec && parent.has_files_spec {
+                    result.files_spec = parent.files_spec.clone();
                     result.has_files_spec = true;
                 }
-                result.errors.extend(parent.errors);
+                result.errors.extend(parent.errors.clone());
             }
         }
     }
@@ -2333,9 +2354,7 @@ fn get_parsed_command_line_of_config_file_with_stack(
         result.raw_options = Some(crate::json::Value::Object(co.clone()));
         let (opts, opts_errors) = json_object_to_options(co);
         result.errors.extend(opts_errors);
-        // Command-line base options take precedence over config-file options
-        // for values explicitly set on the command line; here we apply config
-        // options first, then re-apply base options on top.
+        // Build the own config's compiler options in isolation.
         let mut config_opts = CompilerOptions::default();
         apply_options(&opts, &mut config_opts);
         // Handle `paths` specially — it's an object map, not handled by apply_options.
@@ -2357,9 +2376,17 @@ fn get_parsed_command_line_of_config_file_with_stack(
         // `normalizeNonListOptionValue`.
         let config_dir_for_opts = tspath::get_directory_path(config_file_name);
         resolve_file_path_options(&mut config_opts, &config_dir_for_opts);
+        // Apply precedence: command-line (base) > own (config_opts) > extended.
+        // `result.compiler_options` currently holds base_options (command-line).
+        // merge_compiler_options is dst-wins (src fills gaps), so:
+        //   1. merge own into base → own fills gaps of command-line (cmd wins)
+        //   2. merge extended into result → extended fills gaps of own (own wins)
         merge_compiler_options(&mut result.compiler_options, &config_opts);
-        // Re-apply base (command-line) options so they win.
-        merge_compiler_options(&mut result.compiler_options, base_options);
+        merge_compiler_options(&mut result.compiler_options, &extended_opts);
+    } else {
+        // No own compilerOptions; merge extended into base (command-line
+        // wins, extended fills gaps). No-op when no extends was present.
+        merge_compiler_options(&mut result.compiler_options, &extended_opts);
     }
 
     // Resolve file names from specs.
@@ -2430,13 +2457,27 @@ fn resolve_single_extends_path(
     fs: &dyn FS,
 ) -> Option<String> {
     let config_dir = tspath::get_directory_path(config_file_name);
-    let base = tspath::combine_paths(&config_dir, &[s]);
-    // Try as-is, then with /tsconfig.json appended.
-    let candidates = [base.clone(), tspath::combine_paths(&base, &["tsconfig.json"])];
-    for c in &candidates {
-        if fs.file_exists(c) {
-            return Some(c.clone());
+    // Combine and normalize so that `./base` doesn't leave a stray `./` in
+    // the path (which would cause `.json` suffix checks to miss the file).
+    let base = tspath::normalize_path(&tspath::combine_paths(&config_dir, &[s]));
+    // Try as-is first (mirrors Go's `fs.FileExists(extendedConfigPath)`).
+    if fs.file_exists(&base) {
+        return Some(base);
+    }
+    // If the spec doesn't already end in `.json`, try appending `.json`
+    // (mirrors Go's `extendedConfigPath + ".json"` fallback for relative specs).
+    if !base.ends_with(".json") {
+        let with_json = format!("{base}.json");
+        if fs.file_exists(&with_json) {
+            return Some(with_json);
         }
+    }
+    // Try the directory form (`spec/tsconfig.json`). Go only does this via
+    // Node-style resolution for module specs, but the TS docs document
+    // directory extends and this form is widely used in monorepos.
+    let dir_form = tspath::combine_paths(&base, &["tsconfig.json"]);
+    if fs.file_exists(&dir_form) {
+        return Some(dir_form);
     }
     // Fall back to the raw string resolved against current_dir.
     let abs = tspath::get_normalized_absolute_path(s, current_dir);
@@ -3733,6 +3774,168 @@ mod tests {
         assert!(parsed.compiler_options.declaration.is_true());
         // Own config contributes its own (non-conflicting) option.
         assert_eq!(parsed.compiler_options.out_dir, "/proj/dist");
+    }
+
+    #[test]
+    fn test_parse_tsconfig_extends_own_overrides_extended() {
+        // Go precedence: own > extended. When both the own config and the
+        // extended base set the same option, the own config's value must win.
+        // Previously the Rust port had inverted precedence (extended won).
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/base.json",
+            r#"{ "compilerOptions": { "strict": true } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
+            "extends": "base.json",
+            "compilerOptions": { "strict": false }
+        }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // Own `strict: false` must override extended `strict: true`.
+        assert!(
+            parsed.compiler_options.strict.is_false(),
+            "expected own strict=false to override extended strict=true, got {:?}",
+            parsed.compiler_options.strict
+        );
+    }
+
+    #[test]
+    fn test_parse_tsconfig_extends_array_last_wins() {
+        // Go precedence for extends array: later entries override earlier
+        // entries for the same option (last-entry-wins, via source-wins
+        // `mergeCompilerOptions` in `applyExtendedConfig`).
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/base1.json",
+            r#"{ "compilerOptions": { "target": "ES2020" } }"#,
+        );
+        fs.insert_file(
+            "/proj/base2.json",
+            r#"{ "compilerOptions": { "target": "ES2015" } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": ["base1.json", "base2.json"] }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // base2 (last) wins.
+        assert_eq!(
+            parsed.compiler_options.target,
+            ScriptTarget::ES2015,
+            "expected last extends entry (base2/ES2015) to win, got {:?}",
+            parsed.compiler_options.target
+        );
+    }
+
+    #[test]
+    fn test_parse_tsconfig_extends_command_line_overrides_own() {
+        // Command-line base options must override own config options.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "compilerOptions": { "strict": true } }"#,
+        );
+        let mut base = CompilerOptions::default();
+        base.strict = Tristate::False;
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &base,
+            "/proj",
+            &fs,
+        );
+        // Command-line `--strict false` overrides config `strict: true`.
+        assert!(
+            parsed.compiler_options.strict.is_false(),
+            "expected command-line strict=false to override config strict=true, got {:?}",
+            parsed.compiler_options.strict
+        );
+    }
+
+    #[test]
+    fn test_parse_tsconfig_extends_include_first_extended_wins() {
+        // For `include`/`exclude`/`files`, the first extended config that
+        // declares a spec wins (later extended configs do not override).
+        // The own config overrides inherited specs when present.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/src1");
+        fs.insert_dir("/proj/src2");
+        fs.insert_file("/proj/src1/a.ts", "export const a = 1;");
+        fs.insert_file("/proj/src2/b.ts", "export const b = 2;");
+        fs.insert_file(
+            "/proj/base1.json",
+            r#"{ "include": ["src1/**/*"] }"#,
+        );
+        fs.insert_file(
+            "/proj/base2.json",
+            r#"{ "include": ["src2/**/*"] }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": ["base1.json", "base2.json"] }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // base1 (first) wins for include.
+        assert!(
+            parsed.file_names.contains(&"/proj/src1/a.ts".to_string()),
+            "expected first extended include (src1) to win, got {:?}",
+            parsed.file_names
+        );
+        assert!(
+            !parsed.file_names.contains(&"/proj/src2/b.ts".to_string()),
+            "expected second extended include (src2) to be suppressed, got {:?}",
+            parsed.file_names
+        );
+    }
+
+    #[test]
+    fn test_parse_tsconfig_extends_resolves_json_suffix() {
+        // `extends: "./base"` (without `.json` extension) should resolve to
+        // `./base.json` when the file exists, mirroring Go's
+        // `getExtendsConfigPath` `.json` suffix fallback.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/base.json",
+            r#"{ "compilerOptions": { "strict": true } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "./base" }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // The extends resolved to base.json and strict was inherited.
+        assert!(
+            parsed.compiler_options.strict.is_true(),
+            "expected extends ./base to resolve to ./base.json and inherit strict=true, got {:?}",
+            parsed.compiler_options.strict
+        );
     }
 
     #[test]
