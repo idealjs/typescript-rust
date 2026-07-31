@@ -6,7 +6,7 @@
 //! comments, `extends`, `files`/`include`/`exclude` glob expansion). It does
 //! not yet mirror the full `NameMap`/did-you-mean machinery of the Go port.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use crate::ast::diagnostic::Diagnostic;
 use crate::core::compiler_options::{
@@ -2370,6 +2370,21 @@ fn get_parsed_command_line_of_config_file_with_stack(
         }
     }
 
+    // Collect explicit-`null` field names from the own config's
+    // `compilerOptions`. In TS 5.5+, `"strict": null` means "do not inherit
+    // this field from extended configs" — the field is cleared to its default
+    // rather than receiving the extended value. Mirrors Go's
+    // `mergeCompilerOptions` collecting `explicitNullFields` from the raw
+    // `compilerOptions` map (`parsinghelpers.go:575-590`).
+    let mut explicit_null_fields: HashSet<String> = HashSet::new();
+    if let Some(co) = root_obj.get("compilerOptions").and_then(|v| v.as_object()) {
+        for (key, value) in co {
+            if value.is_null() {
+                explicit_null_fields.insert(key.clone());
+            }
+        }
+    }
+
     // `compilerOptions`
     if let Some(co) = root_obj.get("compilerOptions").and_then(|v| v.as_object()) {
         result.raw_options = Some(crate::json::Value::Object(co.clone()));
@@ -2402,8 +2417,15 @@ fn get_parsed_command_line_of_config_file_with_stack(
         // merge_compiler_options is dst-wins (src fills gaps), so:
         //   1. merge own into base → own fills gaps of command-line (cmd wins)
         //   2. merge extended into result → extended fills gaps of own (own wins)
+        // For step 2, pass `explicit_null_fields` as the skip set so that
+        // fields the own config explicitly set to `null` are NOT filled from
+        // extended configs (they stay at their default/cleared value).
         merge_compiler_options(&mut result.compiler_options, &config_opts);
-        merge_compiler_options(&mut result.compiler_options, &extended_opts);
+        merge_compiler_options_with_skip(
+            &mut result.compiler_options,
+            &extended_opts,
+            &explicit_null_fields,
+        );
     } else {
         // No own compilerOptions; merge extended into base (command-line
         // wins, extended fills gaps). No-op when no extends was present.
@@ -2756,109 +2778,125 @@ fn resolve_file_path_options(options: &mut CompilerOptions, base_path: &str) {
 
 /// Merge `src` into `dst`, where `dst` values take precedence (already set).
 fn merge_compiler_options(dst: &mut CompilerOptions, src: &CompilerOptions) {
-    // Apply src fields only where dst is at its default/unset.
+    let empty = HashSet::new();
+    merge_compiler_options_with_skip(dst, src, &empty);
+}
+
+/// Merge `src` into `dst`, applying dst-wins semantics (src fills gaps).
+/// Fields whose JSON name appears in `skip_fields` are never filled from
+/// `src` — this implements the explicit-`null` clearing behavior (TS 5.5+):
+/// when the own config sets a field to `null`, the inherited extended value
+/// must not fill in. Mirrors Go's `mergeCompilerOptions` with its
+/// `explicitNullFields` set (`parsinghelpers.go:570`).
+fn merge_compiler_options_with_skip(
+    dst: &mut CompilerOptions,
+    src: &CompilerOptions,
+    skip_fields: &HashSet<String>,
+) {
+    // Apply src fields only where dst is at its default/unset AND the field
+    // is not in the skip set (explicit null).
     macro_rules! merge_tri {
-        ($field:ident) => {
-            if dst.$field.is_unknown() {
+        ($field:ident, $json_name:literal) => {
+            if dst.$field.is_unknown() && !skip_fields.contains($json_name) {
                 dst.$field = src.$field;
             }
         };
     }
-    merge_tri!(no_emit);
-    merge_tri!(no_check);
-    merge_tri!(no_lib);
-    merge_tri!(skip_lib_check);
-    merge_tri!(skip_default_lib_check);
-    merge_tri!(strict);
-    merge_tri!(strict_null_checks);
-    merge_tri!(strict_function_types);
-    merge_tri!(strict_bind_call_apply);
-    merge_tri!(strict_property_initialization);
-    merge_tri!(strict_builtin_iterator_return);
-    merge_tri!(no_implicit_any);
-    merge_tri!(no_implicit_this);
-    merge_tri!(no_implicit_override);
-    merge_tri!(no_unused_locals);
-    merge_tri!(no_unused_parameters);
-    merge_tri!(no_fallthrough_cases_in_switch);
-    merge_tri!(no_unchecked_indexed_access);
-    merge_tri!(exact_optional_property_types);
-    merge_tri!(es_module_interop);
-    merge_tri!(allow_js);
-    merge_tri!(check_js);
-    merge_tri!(composite);
-    merge_tri!(declaration);
-    merge_tri!(source_map);
-    merge_tri!(remove_comments);
-    merge_tri!(isolated_modules);
-    merge_tri!(verbatim_module_syntax);
-    merge_tri!(experimental_decorators);
-    merge_tri!(force_consistent_casing_in_file_names);
-    merge_tri!(use_unknown_in_catch_variables);
-    merge_tri!(pretty);
-    merge_tri!(incremental);
-    merge_tri!(watch);
-    if dst.target == ScriptTarget::None {
+    merge_tri!(no_emit, "noEmit");
+    merge_tri!(no_check, "noCheck");
+    merge_tri!(no_lib, "noLib");
+    merge_tri!(skip_lib_check, "skipLibCheck");
+    merge_tri!(skip_default_lib_check, "skipDefaultLibCheck");
+    merge_tri!(strict, "strict");
+    merge_tri!(strict_null_checks, "strictNullChecks");
+    merge_tri!(strict_function_types, "strictFunctionTypes");
+    merge_tri!(strict_bind_call_apply, "strictBindCallApply");
+    merge_tri!(strict_property_initialization, "strictPropertyInitialization");
+    merge_tri!(strict_builtin_iterator_return, "strictBuiltinIteratorReturn");
+    merge_tri!(no_implicit_any, "noImplicitAny");
+    merge_tri!(no_implicit_this, "noImplicitThis");
+    merge_tri!(no_implicit_override, "noImplicitOverride");
+    merge_tri!(no_unused_locals, "noUnusedLocals");
+    merge_tri!(no_unused_parameters, "noUnusedParameters");
+    merge_tri!(no_fallthrough_cases_in_switch, "noFallthroughCasesInSwitch");
+    merge_tri!(no_unchecked_indexed_access, "noUncheckedIndexedAccess");
+    merge_tri!(exact_optional_property_types, "exactOptionalPropertyTypes");
+    merge_tri!(es_module_interop, "esModuleInterop");
+    merge_tri!(allow_js, "allowJs");
+    merge_tri!(check_js, "checkJs");
+    merge_tri!(composite, "composite");
+    merge_tri!(declaration, "declaration");
+    merge_tri!(source_map, "sourceMap");
+    merge_tri!(remove_comments, "removeComments");
+    merge_tri!(isolated_modules, "isolatedModules");
+    merge_tri!(verbatim_module_syntax, "verbatimModuleSyntax");
+    merge_tri!(experimental_decorators, "experimentalDecorators");
+    merge_tri!(force_consistent_casing_in_file_names, "forceConsistentCasingInFileNames");
+    merge_tri!(use_unknown_in_catch_variables, "useUnknownInCatchVariables");
+    merge_tri!(pretty, "pretty");
+    merge_tri!(incremental, "incremental");
+    merge_tri!(watch, "watch");
+    if dst.target == ScriptTarget::None && !skip_fields.contains("target") {
         dst.target = src.target;
     }
-    if dst.module == ModuleKind::None {
+    if dst.module == ModuleKind::None && !skip_fields.contains("module") {
         dst.module = src.module;
     }
-    if dst.module_resolution == ModuleResolutionKind::Unknown {
+    if dst.module_resolution == ModuleResolutionKind::Unknown && !skip_fields.contains("moduleResolution") {
         dst.module_resolution = src.module_resolution;
     }
-    if dst.jsx == JsxEmit::None {
+    if dst.jsx == JsxEmit::None && !skip_fields.contains("jsx") {
         dst.jsx = src.jsx;
     }
-    if dst.out_dir.is_empty() {
+    if dst.out_dir.is_empty() && !skip_fields.contains("outDir") {
         dst.out_dir = src.out_dir.clone();
     }
-    if dst.root_dir.is_empty() {
+    if dst.root_dir.is_empty() && !skip_fields.contains("rootDir") {
         dst.root_dir = src.root_dir.clone();
     }
-    if dst.base_url.is_empty() {
+    if dst.base_url.is_empty() && !skip_fields.contains("baseUrl") {
         dst.base_url = src.base_url.clone();
     }
-    if dst.lib.is_empty() {
+    if dst.lib.is_empty() && !skip_fields.contains("lib") {
         dst.lib = src.lib.clone();
     }
-    if dst.types.is_empty() {
+    if dst.types.is_empty() && !skip_fields.contains("types") {
         dst.types = src.types.clone();
     }
-    if dst.type_roots.is_empty() {
+    if dst.type_roots.is_empty() && !skip_fields.contains("typeRoots") {
         dst.type_roots = src.type_roots.clone();
     }
-    if dst.paths.is_none() {
+    if dst.paths.is_none() && !skip_fields.contains("paths") {
         dst.paths = src.paths.clone();
     }
-    if dst.declaration_dir.is_empty() {
+    if dst.declaration_dir.is_empty() && !skip_fields.contains("declarationDir") {
         dst.declaration_dir = src.declaration_dir.clone();
     }
-    if dst.source_root.is_empty() {
+    if dst.source_root.is_empty() && !skip_fields.contains("sourceRoot") {
         dst.source_root = src.source_root.clone();
     }
-    if dst.map_root.is_empty() {
+    if dst.map_root.is_empty() && !skip_fields.contains("mapRoot") {
         dst.map_root = src.map_root.clone();
     }
-    if dst.ts_build_info_file.is_empty() {
+    if dst.ts_build_info_file.is_empty() && !skip_fields.contains("tsBuildInfoFile") {
         dst.ts_build_info_file = src.ts_build_info_file.clone();
     }
-    if dst.root_dirs.is_empty() {
+    if dst.root_dirs.is_empty() && !skip_fields.contains("rootDirs") {
         dst.root_dirs = src.root_dirs.clone();
     }
-    if dst.module_suffixes.is_empty() {
+    if dst.module_suffixes.is_empty() && !skip_fields.contains("moduleSuffixes") {
         dst.module_suffixes = src.module_suffixes.clone();
     }
-    if dst.custom_conditions.is_empty() {
+    if dst.custom_conditions.is_empty() && !skip_fields.contains("customConditions") {
         dst.custom_conditions = src.custom_conditions.clone();
     }
-    if dst.out_file.is_empty() {
+    if dst.out_file.is_empty() && !skip_fields.contains("outFile") {
         dst.out_file = src.out_file.clone();
     }
-    if dst.module_detection == ModuleDetectionKind::None {
+    if dst.module_detection == ModuleDetectionKind::None && !skip_fields.contains("moduleDetection") {
         dst.module_detection = src.module_detection;
     }
-    if dst.new_line == NewLineKind::None {
+    if dst.new_line == NewLineKind::None && !skip_fields.contains("newLine") {
         dst.new_line = src.new_line;
     }
 }
@@ -5488,6 +5526,191 @@ mod tests {
             !parsed.file_names.iter().any(|f| f == "/proj/base/src/b.ts"),
             "expected /proj/base/src/b.ts NOT in file_names (own include overrides), got {:?}",
             parsed.file_names
+        );
+    }
+
+    // ── explicit `null` clearing (TS 5.5+) ────────────────────────────────
+    // Mirrors Go's `mergeCompilerOptions` `explicitNullFields` logic
+    // (`parsinghelpers.go:575-590`): setting a compiler option to `null` in
+    // the own config clears any inherited value from extended configs.
+
+    #[test]
+    fn test_extends_null_clears_inherited_tristate() {
+        // `"strict": null` in own config clears the inherited `strict: true`
+        // from the extended base. The result should be `Unknown` (default),
+        // NOT `true` (inherited).
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/base.json",
+            r#"{ "compilerOptions": { "strict": true } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "base.json", "compilerOptions": { "strict": null } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(
+            parsed.compiler_options.strict.is_unknown(),
+            "expected strict=null to clear inherited strict=true, got {:?}",
+            parsed.compiler_options.strict
+        );
+    }
+
+    #[test]
+    fn test_extends_null_clears_inherited_string_field() {
+        // `"outDir": null` clears the inherited outDir from the extended base.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/base.json",
+            r#"{ "compilerOptions": { "outDir": "./dist" } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "base.json", "compilerOptions": { "outDir": null } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(
+            parsed.compiler_options.out_dir.is_empty(),
+            "expected outDir=null to clear inherited outDir, got {:?}",
+            parsed.compiler_options.out_dir
+        );
+    }
+
+    #[test]
+    fn test_extends_null_clears_inherited_enum_field() {
+        // `"target": null` clears the inherited target from the extended base.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/base.json",
+            r#"{ "compilerOptions": { "target": "ES2020" } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "base.json", "compilerOptions": { "target": null } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert_eq!(
+            parsed.compiler_options.target,
+            ScriptTarget::None,
+            "expected target=null to clear inherited target=ES2020, got {:?}",
+            parsed.compiler_options.target
+        );
+    }
+
+    #[test]
+    fn test_extends_null_does_not_override_command_line() {
+        // Command-line options take precedence over own config's `null`.
+        // If the command-line sets `strict: true` and the own config sets
+        // `strict: null`, the command-line value must win.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/base.json",
+            r#"{ "compilerOptions": { "strict": true } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "base.json", "compilerOptions": { "strict": null } }"#,
+        );
+        let mut base = CompilerOptions::default();
+        base.strict = crate::core::tristate::Tristate::True;
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &base,
+            "/proj",
+            &fs,
+        );
+        assert!(
+            parsed.compiler_options.strict.is_true(),
+            "expected command-line strict=true to survive own strict=null, got {:?}",
+            parsed.compiler_options.strict
+        );
+    }
+
+    #[test]
+    fn test_extends_null_only_clears_specified_field() {
+        // Setting one field to `null` should not affect other inherited
+        // fields. Here `strict` is nulled but `noImplicitAny` is inherited.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/base.json",
+            r#"{ "compilerOptions": { "strict": true, "noImplicitAny": true } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "base.json", "compilerOptions": { "strict": null } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(
+            parsed.compiler_options.strict.is_unknown(),
+            "expected strict=null to clear inherited strict, got {:?}",
+            parsed.compiler_options.strict
+        );
+        assert!(
+            parsed.compiler_options.no_implicit_any.is_true(),
+            "expected noImplicitAny to be inherited (not nulled), got {:?}",
+            parsed.compiler_options.no_implicit_any
+        );
+    }
+
+    #[test]
+    fn test_extends_null_with_multiple_fields() {
+        // Multiple fields can be nulled simultaneously.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/base.json",
+            r#"{ "compilerOptions": { "strict": true, "outDir": "./dist", "target": "ES2020" } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "base.json", "compilerOptions": { "strict": null, "outDir": null, "target": null } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(
+            parsed.compiler_options.strict.is_unknown(),
+            "expected strict=null to clear, got {:?}",
+            parsed.compiler_options.strict
+        );
+        assert!(
+            parsed.compiler_options.out_dir.is_empty(),
+            "expected outDir=null to clear, got {:?}",
+            parsed.compiler_options.out_dir
+        );
+        assert_eq!(
+            parsed.compiler_options.target,
+            ScriptTarget::None,
+            "expected target=null to clear, got {:?}",
+            parsed.compiler_options.target
         );
     }
 }

@@ -263,9 +263,7 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   Go `getExtendsConfigPath`）+ path normalization（`./base` 不再残留 `./`）。
   5 个回归测试覆盖 own-overrides-extended / array-last-wins / cmd-overrides-own /
   include-first-extended-wins / json-suffix。**遗留**：package/Node-style
-  resolution（`module.ResolveConfig`）、inherited include/exclude/files 的
-  path-rewriting（相对 extended config 目录改写）、explicit `null` 清除继承字段、
-  extended config cache。
+  resolution（`module.ResolveConfig`）、extended config cache。
 - [x] `${configDir}` 模板替换（TS 5.5+，已完成）：新增
   `starts_with_config_dir_template`（大小写不敏感前缀检测，对齐 Go
   `startsWithConfigDirTemplate`）、`get_substituted_path_with_config_dir_template`
@@ -283,7 +281,7 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   files 的 `${configDir}` 也在 `expand_file_names` 之前替换。11 个单测覆盖
   outDir/rootDir/declarationDir/tsBuildInfoFile/rootDirs/paths/include/exclude/
   files/extends/非前缀场景。**遗留**：package/Node-style resolution、
-  explicit `null` 清除继承字段、extended config cache。
+  extended config cache。
 - [x] inherited include/exclude/files 的 path-rewriting（已完成）：当 extended
   config 声明了 `include`/`exclude`/`files` 而 own config 未声明时，继承的相对
   路径需改写为相对于 own config 目录的路径（而非 extended config 目录），对齐
@@ -296,6 +294,19 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   从 raw extended config 读取 include/exclude/files 而非已替换的 parsed 值）。
   6 个单测覆盖 include 相对路径重写 / include 绝对路径不重写 / include `${configDir}`
   不重写 / exclude 重写 / files 重写 / own include 覆盖继承。
+- [x] explicit `null` 清除继承字段（TS 5.5+，已完成）：当 own config 的
+  `compilerOptions` 中某字段显式设为 `null` 时，该字段不从 extended config
+  继承，保持默认值（清除继承值），对齐 Go `mergeCompilerOptions` 的
+  `explicitNullFields` 逻辑（`parsinghelpers.go:575-590`）。新增
+  `merge_compiler_options_with_skip` 函数，接受 `skip_fields: &HashSet<String>`
+  参数，在 dst-wins merge 中跳过 skip set 内的字段（不让 extended 填充）。
+  `merge_compiler_options` 保留为无 skip 的 wrapper。调用点在 own config
+  的 `compilerOptions` 解析后收集 null 字段名，传入 step 2（merge extended
+  into result）的 skip set。command-line 选项优先于 own 的 null（cmd > null）：
+  若 cmd 已设置该字段（非默认值），null 不影响结果。覆盖 tristate/string/enum
+  三类字段的 null 清除、cmd 优先级、单字段隔离、多字段同时 null。6 个单测。
+  **遗留**：package/Node-style resolution（`module.ResolveConfig`）、
+  extended config cache。
 - [x] 将 raw `references` 升级为 typed project references：新增
   `core::project_reference::ProjectReference { path, original_path, circular }`
   （对齐 Go `core.ProjectReference`）；`ParsedCommandLine.references` 由
@@ -307,7 +318,7 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   （`resolution_stack` + `Circularity_detected_while_resolving_configuration_Colon_0`
   TS18000）+ `extends` 数组支持（`"extends": ["a","b"]` 多路合并）。
   **遗留**：package/Node-style resolution（`module.ResolveConfig`）和
-  extended config cache 待后续。
+  extended config cache。
 - [x] CLI 错误诊断对齐：`execute/mod.rs` + `tsoptions/mod.rs` 中 ad-hoc
   `writeln!("error TSxxxx: ...")` 全部替换为 `Diagnostic::new` + 消息常量
   （TS6369 build-first / TS6370 options-cannot-combine / TS5042 project-mixed /
