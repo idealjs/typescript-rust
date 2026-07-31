@@ -321,12 +321,8 @@ fn resolve_project_references(config: &ParsedCommandLine) -> Vec<String> {
     config
         .references
         .iter()
-        .filter_map(|reference| {
-            let path = reference.as_object()?.get("path")?.as_str()?;
-            Some(resolve_config_file_name_of_project_reference(
-                &config_dir,
-                path,
-            ))
+        .map(|reference| {
+            resolve_config_file_name_of_project_reference(&config_dir, &reference.path)
         })
         .collect()
 }
@@ -807,10 +803,19 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
         );
     }
     if !config.references.is_empty() {
-        top.insert(
-            "references".to_string(),
-            Value::Array(config.references.clone()),
-        );
+        let refs: Vec<Value> = config
+            .references
+            .iter()
+            .map(|r| {
+                let mut obj = crate::json::Map::new();
+                obj.insert("path".to_string(), Value::String(r.original_path.clone()));
+                if r.circular {
+                    obj.insert("circular".to_string(), Value::Bool(true));
+                }
+                Value::Object(obj)
+            })
+            .collect();
+        top.insert("references".to_string(), Value::Array(refs));
     }
     if config.compile_on_save == Some(true) {
         top.insert("compileOnSave".to_string(), Value::Bool(true));

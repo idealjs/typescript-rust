@@ -230,8 +230,13 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
 - [ ] 独立建模 watch options，在普通/build parser 中与 compiler/build options 分离。
 - [ ] 对齐 tsconfig 查找、`extends`、`files/include/exclude`、`compilerOptions`
   覆盖规则。
-- [ ] 将 raw `references` 升级为 typed project references：normalized path、
-  original path、circular。
+- [x] 将 raw `references` 升级为 typed project references：新增
+  `core::project_reference::ProjectReference { path, original_path, circular }`
+  （对齐 Go `core.ProjectReference`）；`ParsedCommandLine.references` 由
+  `Vec<json::Value>` 改为 `Vec<ProjectReference>`，解析时 `path` 取 normalized
+  absolute、`original_path` 取原始字符串；`resolve_project_references` 直接用
+  `path`；`--showConfig` 按 Go `showconfig.go` 输出 `{"path": original_path}` +
+  可选 `circular`。1 个单测验证解析。
 - [x] 对齐 `extends` 的 cycle diagnostics：`extends` 循环检测
   （`resolution_stack` + `Circularity_detected_while_resolving_configuration_Colon_0`
   TS18000）+ `extends` 数组支持（`"extends": ["a","b"]` 多路合并）。

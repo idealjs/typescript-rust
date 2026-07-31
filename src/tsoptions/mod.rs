@@ -918,7 +918,7 @@ pub struct ParsedCommandLine {
     pub has_include_spec: bool,
     pub has_exclude_spec: bool,
     pub has_files_spec: bool,
-    pub references: Vec<crate::json::Value>,
+    pub references: Vec<crate::core::project_reference::ProjectReference>,
     pub compile_on_save: Option<bool>,
     pub watch: bool,
 }
@@ -1958,7 +1958,18 @@ fn get_parsed_command_line_of_config_file_with_stack(
     }
 
     if let Some(references) = root_obj.get("references").and_then(|v| v.as_array()) {
-        result.references = references.clone();
+        let config_dir_for_refs = tspath::get_directory_path(config_file_name);
+        result.references = references
+            .iter()
+            .filter_map(|entry| {
+                let raw_path = entry.as_object()?.get("path")?.as_str()?;
+                Some(crate::core::project_reference::ProjectReference {
+                    path: tspath::get_normalized_absolute_path(raw_path, &config_dir_for_refs),
+                    original_path: raw_path.to_string(),
+                    circular: false,
+                })
+            })
+            .collect();
     }
 
     // `files`
@@ -3483,6 +3494,31 @@ mod tests {
             "did not expect TS18003, got errors: {:?}",
             parsed.errors
         );
+    }
+
+    #[test]
+    fn test_tsconfig_references_parsed_as_typed_project_reference() {
+        // `references` entries are parsed into typed `ProjectReference` structs
+        // with a normalized absolute `path` and the raw `original_path`.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/test");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "references": [{ "path": "./test" }, { "path": "./other.json" }] }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert_eq!(parsed.references.len(), 2);
+        assert_eq!(parsed.references[0].original_path, "./test");
+        assert_eq!(parsed.references[0].path, "/proj/test");
+        assert!(!parsed.references[0].circular);
+        assert_eq!(parsed.references[1].original_path, "./other.json");
+        assert_eq!(parsed.references[1].path, "/proj/other.json");
     }
 
     #[test]
