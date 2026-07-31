@@ -41,8 +41,9 @@ use crate::diagnostics::{
     X_TSCONFIG_JSON_IS_PRESENT_BUT_WILL_NOT_BE_LOADED_IF_FILES_ARE_SPECIFIED_ON_COMMANDLINE_USE_IGNORECONFIG_TO_SKIP_THIS_ERROR,
 };
 use crate::tsoptions::{
-    ParsedBuildCommandLine, ParsedCommandLine, get_parsed_command_line_of_config_file,
-    parse_build_command_line, parse_command_line,
+    BUILD_OPTIONS, OPTIONS, OPTIONS_FOR_WATCH, OptionDecl, ParsedBuildCommandLine,
+    ParsedCommandLine, get_parsed_command_line_of_config_file, parse_build_command_line,
+    parse_command_line,
 };
 use crate::tspath;
 use crate::vfs::{FS, OsFS};
@@ -217,7 +218,7 @@ fn tsc_build_compilation(
     }
 
     if command_line.compiler_options.help.is_true() || command_line.compiler_options.all.is_true() {
-        print_help(sys);
+        print_help(sys, command_line.compiler_options.all.is_true());
         return CommandLineResult {
             status: ExitStatus::Success,
         };
@@ -372,7 +373,7 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
 
     // --help / --all
     if options.help.is_true() || options.all.is_true() {
-        print_help(sys);
+        print_help(sys, options.all.is_true());
         return CommandLineResult {
             status: ExitStatus::Success,
         };
@@ -461,7 +462,7 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
             );
             let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
             let _ = writeln!(writer, "  Searching for: tsconfig.json");
-            print_help(sys);
+            print_help(sys, false);
             return CommandLineResult {
                 status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
             };
@@ -983,7 +984,17 @@ fn default_is_pretty(sys: &dyn System) -> bool {
     sys.write_output_is_tty()
 }
 
-fn print_help(sys: &dyn System) {
+/// Print the compiler help, dynamically generated from the `OptionDecl`
+/// tables. Mirrors Go's `PrintHelp` / `printEasyHelp` / `printAllHelp`
+/// (`internal/execute/tsc/help.go`).
+///
+/// When `show_all` is false (the default `--help` view), only options with
+/// `show_in_simplified_help == true` are listed, split into "COMMAND LINE
+/// FLAGS" and "COMMON COMPILER OPTIONS" sections. When `show_all` is true
+/// (the `--all` view), every option with a non-empty description is listed
+/// under "ALL COMPILER OPTIONS", "WATCH OPTIONS", and "BUILD OPTIONS"
+/// sections, sorted alphabetically within each section.
+fn print_help(sys: &dyn System, show_all: bool) {
     let mut writer = sys.writer();
     let _ = writeln!(
         writer,
@@ -991,75 +1002,119 @@ fn print_help(sys: &dyn System) {
         VERSION
     );
     let _ = writeln!(writer);
-    let _ = writeln!(writer, "Common options:");
-    let _ = writeln!(
-        writer,
-        "  -p, --project <file>   Compile the project given the path to its configuration file,"
-    );
-    let _ = writeln!(
-        writer,
-        "                         or to a folder with a 'tsconfig.json'."
-    );
-    let _ = writeln!(
-        writer,
-        "  -b, --build            Build one or more projects and their dependencies, if out of date."
-    );
-    let _ = writeln!(writer, "  -w, --watch            Watch input files.");
-    let _ = writeln!(
-        writer,
-        "  -t, --target <ver>     Specify ECMAScript target version."
-    );
-    let _ = writeln!(
-        writer,
-        "  -m, --module <kind>    Specify module code generation."
-    );
-    let _ = writeln!(
-        writer,
-        "      --moduleResolution <kind>  Specify module resolution strategy."
-    );
-    let _ = writeln!(
-        writer,
-        "      --lib <lib,...>    Specify library files to be included in the compilation."
-    );
-    let _ = writeln!(
-        writer,
-        "      --outDir <dir>     Redirect output structure to the directory."
-    );
-    let _ = writeln!(
-        writer,
-        "      --outFile <file>   Concatenate and emit output to single file."
-    );
-    let _ = writeln!(
-        writer,
-        "      --sourceMap        Generates corresponding '.map' file."
-    );
-    let _ = writeln!(
-        writer,
-        "      --declaration, -d  Generates corresponding '.d.ts' file."
-    );
-    let _ = writeln!(
-        writer,
-        "      --strict           Enable all strict type-checking options."
-    );
-    let _ = writeln!(writer, "      --noEmit           Do not emit outputs.");
-    let _ = writeln!(
-        writer,
-        "      --skipLibCheck     Skip type checking of declaration files."
-    );
-    let _ = writeln!(writer, "      --help, -h         Print this message.");
-    let _ = writeln!(
-        writer,
-        "      --version, -v      Print the compiler's version."
-    );
-    let _ = writeln!(
-        writer,
-        "      --all              Show all compiler options."
-    );
+
+    if show_all {
+        print_all_options_section(&mut writer);
+    } else {
+        print_simplified_help(&mut writer);
+    }
+}
+
+/// The simplified `--help` view: only `show_in_simplified_help` options,
+/// split into CLI-only flags and common compiler options. Mirrors Go's
+/// `printEasyHelp`.
+fn print_simplified_help(writer: &mut dyn Write) {
+    let _ = writeln!(writer, "COMMON COMMANDS:");
+    let _ = writeln!(writer);
+    let commands = [
+        ("tsc", "Compile the current project (tsconfig.json in the working directory)."),
+        ("tsc app.ts util.ts", "Compile a set of .ts files."),
+        ("tsc -b", "Build a composite project in build mode."),
+        ("tsc --init", "Create a tsconfig.json in the current directory."),
+        ("tsc -p ./path/to/tsconfig.json", "Compile a project at the given path."),
+        ("tsc --help --all", "Show all compiler options."),
+        ("tsc --noEmit", "Type-check without emitting output."),
+        ("tsc --target esnext", "Compile to the latest ECMAScript target."),
+    ];
+    for (cmd, desc) in &commands {
+        let _ = writeln!(writer, "  {cmd}");
+        let _ = writeln!(writer, "    {desc}");
+        let _ = writeln!(writer);
+    }
+
+    // Split simplified-help options into CLI-only vs the rest, mirroring Go's
+    // `cliCommands` / `configOpts` split in `printEasyHelp`.
+    let mut cli_commands: Vec<&OptionDecl> = Vec::new();
+    let mut config_opts: Vec<&OptionDecl> = Vec::new();
+    for opt in OPTIONS.iter().filter(|o| o.show_in_simplified_help) {
+        if opt.is_command_line_only {
+            cli_commands.push(opt);
+        } else {
+            config_opts.push(opt);
+        }
+    }
+
+    print_option_section(writer, "COMMAND LINE FLAGS:", &cli_commands);
+    let _ = writeln!(writer);
+    print_option_section(writer, "COMMON COMPILER OPTIONS:", &config_opts);
     let _ = writeln!(writer);
     let _ = writeln!(
         writer,
-        "For more information, see https://www.typescriptlang.org/tsconfig"
+        "You can learn about all of the compiler options at https://aka.ms/tsc"
     );
+}
+
+/// The `--all` view: every option with a description, grouped into compiler
+/// / watch / build sections. Mirrors Go's `printAllHelp`.
+fn print_all_options_section(writer: &mut dyn Write) {
+    // All compiler options with descriptions, sorted alphabetically by
+    // lowercased name (mirrors Go's `getOptionsForHelp` `--all` branch).
+    let mut compiler_opts: Vec<&OptionDecl> = OPTIONS
+        .iter()
+        .filter(|o| !o.description.is_empty())
+        .collect();
+    compiler_opts.sort_by_key(|o| o.name.to_lowercase());
+    print_option_section(writer, "ALL COMPILER OPTIONS:", &compiler_opts);
+    let _ = writeln!(writer);
+    let _ = writeln!(
+        writer,
+        "You can learn about all of the compiler options at https://aka.ms/tsc"
+    );
+    let _ = writeln!(writer);
+
+    let watch_opts: Vec<&OptionDecl> =
+        OPTIONS_FOR_WATCH.iter().filter(|o| !o.description.is_empty()).collect();
+    print_option_section(writer, "WATCH OPTIONS:", &watch_opts);
+    let _ = writeln!(writer);
+
+    let build_opts: Vec<&OptionDecl> = BUILD_OPTIONS
+        .iter()
+        .filter(|o| o.name != "build" && !o.description.is_empty())
+        .collect();
+    print_option_section(writer, "BUILD OPTIONS:", &build_opts);
+}
+
+/// Render a section header followed by the option list in a two-column
+/// layout: `  --name, -short    description`. The name column is padded to
+/// the longest name in the section so descriptions align. Mirrors the
+/// column alignment in Go's `generateGroupOptionOutput` (without the
+/// terminal-width-aware wrapping or color).
+fn print_option_section(writer: &mut dyn Write, header: &str, opts: &[&OptionDecl]) {
+    let _ = writeln!(writer, "{header}");
+    let _ = writeln!(writer);
+    if opts.is_empty() {
+        return;
+    }
+    // Compute the name column width (2-space left margin + longest name).
+    let name_strings: Vec<String> = opts.iter().map(|o| display_name_of_option(o)).collect();
+    let max_name = name_strings.iter().map(|s| s.len()).max().unwrap_or(0);
+    let col_width = max_name + 2;
+    for (opt, name) in opts.iter().zip(name_strings.iter()) {
+        if opt.description.is_empty() {
+            let _ = writeln!(writer, "  {name}");
+        } else {
+            let _ = writeln!(writer, "  {name:<col_width$}{}", opt.description);
+        }
+    }
+}
+
+/// Build the display name for an option: `--name` or `--name, -short`.
+/// Mirrors Go's `getDisplayNameTextOfOption`.
+fn display_name_of_option(opt: &OptionDecl) -> String {
+    match opt.short_name {
+        Some(short) => format!("--{}, -{}", opt.name, short),
+        None => format!("--{}", opt.name),
+    }
 }
 
 fn write_config_file(sys: &dyn System, options: &CompilerOptions) -> CommandLineResult {
@@ -1248,7 +1303,13 @@ mod tests {
         let args = vec!["--help".to_string()];
         let result = command_line(&sys, &args);
         assert_eq!(result.status, ExitStatus::Success);
-        assert!(sys.output_string().contains("Common options"));
+        let out = sys.output_string();
+        assert!(out.contains("tsc: The TypeScript Compiler"), "header missing:\n{out}");
+        // Dynamic content from OptionDecl descriptions.
+        assert!(out.contains("Print this message."), "help option desc missing:\n{out}");
+        assert!(out.contains("Do not emit outputs."), "noEmit option desc missing:\n{out}");
+        assert!(out.contains("COMMAND LINE FLAGS"), "section missing:\n{out}");
+        assert!(out.contains("COMMON COMPILER OPTIONS"), "section missing:\n{out}");
     }
 
     #[test]
@@ -2244,6 +2305,13 @@ mod tests {
         let args = vec!["--all".to_string()];
         let result = command_line(&sys, &args);
         assert_eq!(result.status, ExitStatus::Success);
-        assert!(sys.output_string().contains("Common options"));
+        let out = sys.output_string();
+        assert!(out.contains("tsc: The TypeScript Compiler"), "header missing:\n{out}");
+        // --all lists every option with a description under "ALL COMPILER OPTIONS".
+        assert!(out.contains("ALL COMPILER OPTIONS"), "section missing:\n{out}");
+        assert!(out.contains("WATCH OPTIONS"), "watch section missing:\n{out}");
+        assert!(out.contains("BUILD OPTIONS"), "build section missing:\n{out}");
+        // A representative compiler option description must appear.
+        assert!(out.contains("Do not emit outputs."), "noEmit desc missing:\n{out}");
     }
 }

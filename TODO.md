@@ -205,10 +205,22 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
 
 剩余任务：
 
-- [ ] 对齐 `--help`、`--version`、无输入、未知选项、响应文件等 CLI 行为。
-  部分完成：`--version` 输出 `Version 7.1.0-dev`（对齐 Go `core.Version()`），
-  `--help` 头部对齐为 `tsc: The TypeScript Compiler - Version {VERSION}`；
-  剩余：完整动态选项列表生成（从 OptionDecl）、无输入/未知选项/响应文件。
+- [x] 对齐 `--help`/`--all` 动态选项列表生成（已完成）：`OptionDecl`
+  新增 `description`/`show_in_simplified_help` 字段（对齐 Go
+  `OptionDeclaration.Name`/`Description`/`ShowInSimplifiedHelpView`），
+  为常用 compiler/build/watch 选项填充描述（`help`/`all`/`version`/`init`/
+  `project`/`build`/`watch`/`noEmit`/`skipLibCheck`/`strict`/`target`/`module`/
+  `moduleResolution`/`lib`/`outDir`/`outFile`/`sourceMap`/`declaration`/…）；
+  `execute::print_help` 重写为从 `OptionDecl` 表动态生成，对齐 Go
+  `internal/execute/tsc/help.go` 的 `PrintHelp`/`printEasyHelp`/`printAllHelp`：
+  `--help` 走 simplified view（COMMON COMMANDS 示例 + COMMAND LINE FLAGS +
+  COMMON COMPILER OPTIONS 两栏分节，按 `is_command_line_only` 分流）；
+  `--all` 走 full view（ALL COMPILER OPTIONS 按名字小写排序 + WATCH OPTIONS
+  + BUILD OPTIONS）。`print_option_section` 实现 `--name, -short    description`
+  两栏对齐布局（对齐 Go `generateGroupOptionOutput`，不含终端宽度折行与颜色）。
+  `display_name_of_option` 对齐 Go `getDisplayNameTextOfOption`。2 个单测覆盖
+  `--help`/`--all` 头部/分节/动态描述内容。**剩余**：响应文件（`@args.txt`）
+  解析、终端宽度感知折行。
 - [x] 对齐 `--init` 生成的完整 `tsconfig.json` 模板：含 File Layout/Environment
   Settings/Other Outputs/Stricter Typechecking/Style Options/Recommended Options
   分节注释与 nodejs 示例块，对齐 Go `writeConfigFile` 模板结构。同时将

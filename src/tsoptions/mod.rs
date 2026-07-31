@@ -74,6 +74,13 @@ pub struct OptionDecl {
     /// Valid enum values (for `target`, `module`, `moduleResolution`, `jsx`,
     /// `newLine`, `moduleDetection`).
     pub enum_values: Option<&'static [&'static str]>,
+    /// Help text for the option, shown by `--help` / `--all`. Empty string
+    /// means the option is omitted from the simplified help view.
+    pub description: &'static str,
+    /// Whether the option appears in the simplified `--help` view (mirrors
+    /// Go's `ShowInSimplifiedHelpView`). When false, the option only appears
+    /// under `--all`.
+    pub show_in_simplified_help: bool,
 }
 
 /// Const default used to fill in the declaration-driven fields via struct
@@ -89,6 +96,8 @@ const DEFAULT_DECL: OptionDecl = OptionDecl {
     extra_validation: ExtraValidation::None,
     min_value: None,
     enum_values: None,
+    description: "",
+    show_in_simplified_help: false,
 };
 
 /// The set of compiler options accepted on the command line.
@@ -153,6 +162,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: Some("h"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Print this message.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -160,6 +171,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Show all compiler options.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -167,6 +180,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: Some("v"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Print the compiler's version.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -174,6 +189,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Initializes a TypeScript project and creates a tsconfig.json file.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -181,6 +198,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: Some("p"),
         kind: OptionKind::String,
         is_file_path: true,
+        description: "Compile the project given the path to its configuration file, or to a folder with a 'tsconfig.json'.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -188,6 +207,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: Some("b"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Build one or more projects and their dependencies, if out of date.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -195,6 +216,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: Some("w"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Watch input files.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -209,6 +232,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Do not emit outputs.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -216,6 +241,7 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Disable type checking.",
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -230,6 +256,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Skip type checking of declaration files.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -244,6 +272,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Enable all strict type-checking options.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -413,6 +443,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: Some("d"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Generates corresponding '.d.ts' file.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -441,6 +473,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Generates corresponding '.map' file.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -598,6 +632,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         kind: OptionKind::Enum,
         is_file_path: false,
         enum_values: Some(TARGET_ENUM_VALUES),
+        description: "Specify ECMAScript target version.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -606,6 +642,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         kind: OptionKind::Enum,
         is_file_path: false,
         enum_values: Some(MODULE_ENUM_VALUES),
+        description: "Specify module code generation.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -614,6 +652,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         kind: OptionKind::Enum,
         is_file_path: false,
         enum_values: Some(MODULE_RESOLUTION_ENUM_VALUES),
+        description: "Specify module resolution strategy.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -622,6 +662,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         kind: OptionKind::Enum,
         is_file_path: false,
         enum_values: Some(JSX_ENUM_VALUES),
+        description: "Specify JSX code generation.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -645,6 +687,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::List,
         is_file_path: false,
+        description: "Specify library files to be included in the compilation.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -682,6 +726,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::String,
         is_file_path: true,
+        description: "Redirect output structure to the directory.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -689,6 +735,8 @@ pub const OPTIONS: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::String,
         is_file_path: true,
+        description: "Concatenate and emit output to single file.",
+        show_in_simplified_help: true,
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -790,6 +838,7 @@ pub const BUILD_OPTIONS: &[OptionDecl] = &[
         short_name: Some("v"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Enable verbose logging in build mode.",
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -797,6 +846,7 @@ pub const BUILD_OPTIONS: &[OptionDecl] = &[
         short_name: Some("d"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Show what would be built (dry run) in build mode.",
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -804,6 +854,7 @@ pub const BUILD_OPTIONS: &[OptionDecl] = &[
         short_name: Some("f"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Build all projects, including those that are up to date.",
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -811,6 +862,7 @@ pub const BUILD_OPTIONS: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Delete the outputs of all projects in build mode.",
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -820,6 +872,7 @@ pub const BUILD_OPTIONS: &[OptionDecl] = &[
         is_file_path: false,
         min_value: Some(1),
         extra_validation: ExtraValidation::MinValue,
+        description: "Number of concurrent build workers in build mode.",
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -827,6 +880,7 @@ pub const BUILD_OPTIONS: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        description: "Stop building projects immediately after an error is reported in build mode.",
         ..DEFAULT_DECL
     },
 ];
@@ -876,6 +930,7 @@ pub const OPTIONS_FOR_WATCH: &[OptionDecl] = &[
         name: "watchInterval",
         short_name: None,
         kind: OptionKind::Number,
+        description: "Specify the polling interval for watch mode (milliseconds).",
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -883,6 +938,7 @@ pub const OPTIONS_FOR_WATCH: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::Enum,
         enum_values: Some(WATCH_FILE_ENUM_VALUES),
+        description: "Specify how the TypeScript watch mode works.",
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -890,6 +946,7 @@ pub const OPTIONS_FOR_WATCH: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::Enum,
         enum_values: Some(WATCH_DIRECTORY_ENUM_VALUES),
+        description: "Specify how directories are watched on systems that lack recursive file watching functionality.",
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -897,12 +954,14 @@ pub const OPTIONS_FOR_WATCH: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::Enum,
         enum_values: Some(FALLBACK_POLLING_ENUM_VALUES),
+        description: "Specify what approach the watcher should use if the system runs out of native file watchers.",
         ..DEFAULT_DECL
     },
     OptionDecl {
         name: "synchronousWatchDirectory",
         short_name: None,
         kind: OptionKind::Boolean,
+        description: "Synchronously call callbacks and update the state of directory watchers on platforms that don't support recursive watching natively.",
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -910,6 +969,7 @@ pub const OPTIONS_FOR_WATCH: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::List,
         is_file_path: true,
+        description: "Remove a list of directories from the watch process.",
         ..DEFAULT_DECL
     },
     OptionDecl {
@@ -917,6 +977,7 @@ pub const OPTIONS_FOR_WATCH: &[OptionDecl] = &[
         short_name: None,
         kind: OptionKind::List,
         is_file_path: true,
+        description: "Remove a list of files from the watch mode's processing.",
         ..DEFAULT_DECL
     },
 ];
