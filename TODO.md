@@ -167,7 +167,10 @@ arity）+ 12 个 parity fixtures。
   fmt/clippy 为 `continue-on-error`（迁移期 ~75 warning + 整仓 fmt 待排期），
   test（`cargo test --lib`）与 parity smoke（`cargo test --test parity`，
   无 oracle 时优雅跳过）为 gating 步骤。
-- [ ] 新人只看 Rust worktree 文档即可跑通测试（验收）。
+- [x] 新人只看 Rust worktree 文档即可跑通测试（验收）：新增 `README.md`
+  作为入口（quick start build/test/parity 命令、worktree 布局、文档索引、
+  CI 说明）；修正 `MIGRATION.md` 过期 worktree 路径与 oracle 搜索路径
+  （`/home/cqh/...` → `/Users/cqh/...`）与状态摘要测试计数。
 - [x] parity 测试能自动发现可用 Go oracle，或给出明确跳过原因（验收）：
   `go_oracle()` 按 `TSGO_ORACLE` → `typescript-go/built/local/tsgo` →
   `_packages/native-preview/bin/tsgo` 顺序查找；找不到时打印明确跳过原因

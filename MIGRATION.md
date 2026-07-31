@@ -7,15 +7,14 @@ enough to stand alone.
 > **规划文档**：迁移目标、阶段任务、进度快照、下阶段优先级统一记录在
 > [`TODO.md`](./TODO.md)。本文档只保留流程审计与行为差异细节，按阶段查阅。
 >
-> 2026-07-29 状态摘要：`cargo test` 通过（599 lib + 2 emit parity + 126
-> checker parity）。Parser ~77%、Binder ~41%、Checker ~18%。当前焦点为
-> P3.7/P3.8/P3.1/P3.9（类型关系补齐 → 推断收尾 → flow graph 收尾 →
-> narrowing），详见 TODO.md “下阶段优先级”。
+> 2026-07-31 状态摘要：`cargo test` 通过（609 lib + 2 emit parity + 501
+> checker parity）。Parser ~77%、Binder ~41%、Checker ~20%。当前焦点为
+> P1 CLI/tsconfig 收尾与 P0 CI/文档基线，详见 TODO.md “下阶段优先级”。
 
 ## Worktrees
 
-- Go oracle worktree: `/home/cqh/workspace/typescript-rust`
-- Rust migration worktree: `/home/cqh/workspace/typescript-rust-rust`
+- Rust migration worktree (primary): `/Users/cqh/workspace/typescript-rust`, branch `rust`
+- Go oracle worktree: `/Users/cqh/workspace/typescript-go`, branch `main`
 
 ## Rust Commands
 
@@ -34,14 +33,14 @@ cargo test --test parity
 Run parity against an explicit Go oracle binary:
 
 ```sh
-TSGO_ORACLE=/home/cqh/workspace/typescript-rust/built/local/tsgo cargo test --test parity
+TSGO_ORACLE=/Users/cqh/workspace/typescript-go/built/local/tsgo cargo test --test parity
 ```
 
 If `TSGO_ORACLE` is not set, the parity test searches for a runnable Go binary
 in the adjacent Go worktree:
 
-1. `/home/cqh/workspace/typescript-rust/built/local/tsgo`
-2. `/home/cqh/workspace/typescript-rust/_packages/native-preview/bin/tsgo`
+1. `/Users/cqh/workspace/typescript-go/built/local/tsgo`
+2. `/Users/cqh/workspace/typescript-rust/_packages/native-preview/bin/tsgo`
 
 If no oracle is found, the oracle comparison test is skipped and prints the
 reason to stderr.
@@ -58,7 +57,7 @@ npm run build
 The expected local binary is:
 
 ```sh
-/home/cqh/workspace/typescript-rust/built/local/tsgo
+/Users/cqh/workspace/typescript-go/built/local/tsgo
 ```
 
 ## Current Status
