@@ -16,8 +16,13 @@ use crate::core::compiler_options::{
 use crate::core::text::TextRange;
 use crate::core::tristate::Tristate;
 use crate::diagnostics::{
-    CANNOT_READ_FILE_0, CIRCULARITY_DETECTED_WHILE_RESOLVING_CONFIGURATION_COLON_0,
-    OPTIONS_0_AND_1_CANNOT_BE_COMBINED, UNKNOWN_COMPILER_OPTION_0, new_ad_hoc_message,
+    ARGUMENT_FOR_0_OPTION_MUST_BE_COLON_1, CANNOT_READ_FILE_0,
+    CIRCULARITY_DETECTED_WHILE_RESOLVING_CONFIGURATION_COLON_0,
+    COMPILER_OPTION_0_MAY_ONLY_BE_USED_WITH_BUILD, OPTIONS_0_AND_1_CANNOT_BE_COMBINED,
+    OPTION_0_CAN_ONLY_BE_SPECIFIED_IN_TSCONFIG_JSON_FILE_OR_SET_TO_FALSE_OR_NULL_ON_COMMAND_LINE,
+    OPTION_0_CAN_ONLY_BE_SPECIFIED_IN_TSCONFIG_JSON_FILE_OR_SET_TO_NULL_ON_COMMAND_LINE,
+    OPTION_0_REQUIRES_VALUE_TO_BE_GREATER_THAN_1, UNKNOWN_COMPILER_OPTION_0,
+    UNKNOWN_COMPILER_OPTION_0_DID_YOU_MEAN_1, new_ad_hoc_message,
 };
 use crate::glob::Glob;
 use crate::tspath;
@@ -36,545 +41,734 @@ pub enum OptionKind {
     Enum,
 }
 
+/// Extra validation that `parse_option_value` / `validate_json_option_value`
+/// should perform beyond the basic kind check. Mirrors Go's `extraValidation`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ExtraValidation {
+    None,
+    Locale,
+    /// Numeric option must satisfy `min_value`.
+    MinValue,
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct OptionDecl {
     pub name: &'static str,
     pub short_name: Option<&'static str>,
     pub kind: OptionKind,
     pub is_file_path: bool,
+    /// Option can only be used in `tsconfig.json`, not on the command line
+    /// (e.g. `composite`, `paths`).
+    pub is_tsconfig_only: bool,
+    /// Option can only be used on the command line, not in `tsconfig.json`.
+    pub is_command_line_only: bool,
+    /// Special validation category (locale, min-value, etc.).
+    pub extra_validation: ExtraValidation,
+    /// Minimum numeric value (for `builders`, `checkers`).
+    pub min_value: Option<i64>,
+    /// Valid enum values (for `target`, `module`, `moduleResolution`, `jsx`,
+    /// `newLine`, `moduleDetection`).
+    pub enum_values: Option<&'static [&'static str]>,
 }
+
+/// Const default used to fill in the declaration-driven fields via struct
+/// update syntax (`..DEFAULT_DECL`) so that each `OptionDecl` literal only
+/// needs to set the fields it cares about.
+const DEFAULT_DECL: OptionDecl = OptionDecl {
+    name: "",
+    short_name: None,
+    kind: OptionKind::Boolean,
+    is_file_path: false,
+    is_tsconfig_only: false,
+    is_command_line_only: false,
+    extra_validation: ExtraValidation::None,
+    min_value: None,
+    enum_values: None,
+};
 
 /// The set of compiler options accepted on the command line.
 ///
 /// Mirrors a subset of `tsoptions.CommandLineCompilerOptions`.
+
+// Valid enum values for the declaration-driven enum options. These mirror the
+// keys of Go's `commandLineOptionEnumMap` (see `internal/tsoptions/enummaps.go`).
+static TARGET_ENUM_VALUES: &[&str] = &[
+    "es3",
+    "es5",
+    "es6",
+    "es2015",
+    "es2016",
+    "es2017",
+    "es2018",
+    "es2019",
+    "es2020",
+    "es2021",
+    "es2022",
+    "es2023",
+    "es2024",
+    "es2025",
+    "esnext",
+];
+static MODULE_ENUM_VALUES: &[&str] = &[
+    "commonjs",
+    "amd",
+    "system",
+    "umd",
+    "es6",
+    "es2015",
+    "es2020",
+    "es2022",
+    "esnext",
+    "node16",
+    "node18",
+    "node20",
+    "nodenext",
+    "preserve",
+];
+static MODULE_RESOLUTION_ENUM_VALUES: &[&str] = &[
+    "node16",
+    "nodenext",
+    "bundler",
+    "classic",
+    "node",
+    "node10",
+];
+static JSX_ENUM_VALUES: &[&str] = &[
+    "preserve",
+    "react-native",
+    "react-jsx",
+    "react-jsxdev",
+    "react",
+];
+static NEW_LINE_ENUM_VALUES: &[&str] = &["crlf", "lf"];
+static MODULE_DETECTION_ENUM_VALUES: &[&str] = &["auto", "legacy", "force"];
 pub const OPTIONS: &[OptionDecl] = &[
     OptionDecl {
         name: "help",
         short_name: Some("h"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "all",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "version",
         short_name: Some("v"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "init",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "project",
         short_name: Some("p"),
         kind: OptionKind::String,
         is_file_path: true,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "build",
         short_name: Some("b"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "watch",
         short_name: Some("w"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "incremental",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "noEmit",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "noCheck",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "noLib",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "skipLibCheck",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "skipDefaultLibCheck",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "strict",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "strictNullChecks",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "strictFunctionTypes",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "strictBindCallApply",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "strictPropertyInitialization",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "strictBuiltinIteratorReturn",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "noImplicitAny",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "noImplicitThis",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "noImplicitOverride",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "noUnusedLocals",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "noUnusedParameters",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "noFallthroughCasesInSwitch",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "noUncheckedIndexedAccess",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "noPropertyAccessFromIndexSignature",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "noErrorTruncation",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "noEmitOnError",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "noResolve",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "useUnknownInCatchVariables",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "exactOptionalPropertyTypes",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "esModuleInterop",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "allowSyntheticDefaultImports",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "allowJs",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "checkJs",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "composite",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        is_tsconfig_only: true,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "declaration",
         short_name: Some("d"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "declarationMap",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "declarationDir",
         short_name: None,
         kind: OptionKind::String,
         is_file_path: true,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "emitDeclarationOnly",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "sourceMap",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "inlineSourceMap",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "inlineSources",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "removeComments",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "isolatedModules",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "isolatedDeclarations",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "verbatimModuleSyntax",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "preserveConstEnums",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "importHelpers",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "experimentalDecorators",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "emitDecoratorMetadata",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "forceConsistentCasingInFileNames",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "listFiles",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "listFilesOnly",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "listEmittedFiles",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "explainFiles",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "extendedDiagnostics",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "diagnostics",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "pretty",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "showConfig",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "ignoreConfig",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "locale",
         short_name: None,
         kind: OptionKind::String,
         is_file_path: false,
+        is_command_line_only: true,
+        extra_validation: ExtraValidation::Locale,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "target",
         short_name: Some("t"),
         kind: OptionKind::Enum,
         is_file_path: false,
+        enum_values: Some(TARGET_ENUM_VALUES),
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "module",
         short_name: Some("m"),
         kind: OptionKind::Enum,
         is_file_path: false,
+        enum_values: Some(MODULE_ENUM_VALUES),
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "moduleResolution",
         short_name: None,
         kind: OptionKind::Enum,
         is_file_path: false,
+        enum_values: Some(MODULE_RESOLUTION_ENUM_VALUES),
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "jsx",
         short_name: None,
         kind: OptionKind::Enum,
         is_file_path: false,
+        enum_values: Some(JSX_ENUM_VALUES),
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "newLine",
         short_name: None,
         kind: OptionKind::Enum,
         is_file_path: false,
+        enum_values: Some(NEW_LINE_ENUM_VALUES),
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "moduleDetection",
         short_name: None,
         kind: OptionKind::Enum,
         is_file_path: false,
+        enum_values: Some(MODULE_DETECTION_ENUM_VALUES),
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "lib",
         short_name: None,
         kind: OptionKind::List,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "types",
         short_name: None,
         kind: OptionKind::List,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "typeRoots",
         short_name: None,
         kind: OptionKind::List,
         is_file_path: true,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "rootDirs",
         short_name: None,
         kind: OptionKind::List,
         is_file_path: true,
+        is_tsconfig_only: true,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "paths",
         short_name: None,
         kind: OptionKind::List,
         is_file_path: false,
+        is_tsconfig_only: true,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "outDir",
         short_name: None,
         kind: OptionKind::String,
         is_file_path: true,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "outFile",
         short_name: None,
         kind: OptionKind::String,
         is_file_path: true,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "rootDir",
         short_name: None,
         kind: OptionKind::String,
         is_file_path: true,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "baseUrl",
         short_name: None,
         kind: OptionKind::String,
         is_file_path: true,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "tsBuildInfoFile",
         short_name: None,
         kind: OptionKind::String,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "sourceRoot",
         short_name: None,
         kind: OptionKind::String,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "mapRoot",
         short_name: None,
         kind: OptionKind::String,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "jsxFactory",
         short_name: None,
         kind: OptionKind::String,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "jsxFragmentFactory",
         short_name: None,
         kind: OptionKind::String,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "jsxImportSource",
         short_name: None,
         kind: OptionKind::String,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "reactNamespace",
         short_name: None,
         kind: OptionKind::String,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "generateTrace",
         short_name: None,
         kind: OptionKind::String,
         is_file_path: true,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "singleThreaded",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "quiet",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
 ];
 
@@ -584,56 +778,90 @@ pub const BUILD_OPTIONS: &[OptionDecl] = &[
         short_name: Some("b"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "verbose",
         short_name: Some("v"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "dry",
         short_name: Some("d"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "force",
         short_name: Some("f"),
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "clean",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "builders",
         short_name: None,
         kind: OptionKind::Number,
         is_file_path: false,
+        min_value: Some(1),
+        extra_validation: ExtraValidation::MinValue,
+        ..DEFAULT_DECL
     },
     OptionDecl {
         name: "stopBuildOnErrors",
         short_name: None,
         kind: OptionKind::Boolean,
         is_file_path: false,
+        ..DEFAULT_DECL
     },
 ];
 
-fn find_option(name: &str) -> Option<&'static OptionDecl> {
-    OPTIONS
-        .iter()
-        .find(|o| o.name == name || o.short_name == Some(name))
+/// Distinguishes compiler-mode parsing from build-mode parsing, mirroring
+/// Go's `AlternateModeDiagnostics` selection.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ParseMode {
+    Compiler,
+    Build,
 }
 
+/// Case-insensitive match on an option's name or short name. Mirrors Go's
+/// `NameMap.GetOptionDeclarationFromName`, which lowercases the lookup key.
+fn decl_matches(o: &OptionDecl, name: &str) -> bool {
+    o.name.eq_ignore_ascii_case(name)
+        || o.short_name
+            .map(|s| s.eq_ignore_ascii_case(name))
+            .unwrap_or(false)
+}
+
+/// Case-insensitive lookup over the compiler option declarations (the
+/// `NameMap` for compiler mode). Replaces the previous case-sensitive scan.
+fn find_option(name: &str) -> Option<&'static OptionDecl> {
+    OPTIONS.iter().find(|o| decl_matches(o, name))
+}
+
+/// Case-insensitive lookup over build-only declarations (used for
+/// alternate-mode detection in compiler mode).
+fn find_build_only_option(name: &str) -> Option<&'static OptionDecl> {
+    BUILD_OPTIONS.iter().find(|o| decl_matches(o, name))
+}
+
+/// Case-insensitive lookup over the build option declarations, chaining the
+/// compiler declarations so that shared options (e.g. `watch`) resolve.
 fn find_build_option(name: &str) -> Option<&'static OptionDecl> {
     BUILD_OPTIONS
         .iter()
         .chain(OPTIONS.iter())
-        .find(|o| o.name == name || o.short_name == Some(name))
+        .find(|o| decl_matches(o, name))
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -761,7 +989,7 @@ pub fn parse_command_line(
     fs: Option<&dyn FS>,
 ) -> ParsedCommandLine {
     let (options, file_names, errors) =
-        parse_command_line_worker(args, current_dir, fs, find_option);
+        parse_command_line_worker(args, current_dir, fs, find_option, ParseMode::Compiler);
 
     let mut compiler_options = CompilerOptions::default();
     apply_options(&options, &mut compiler_options);
@@ -796,7 +1024,7 @@ pub fn parse_build_command_line(
     fs: Option<&dyn FS>,
 ) -> ParsedBuildCommandLine {
     let (options, mut projects, mut errors) =
-        parse_command_line_worker(args, current_dir, fs, find_build_option);
+        parse_command_line_worker(args, current_dir, fs, find_build_option, ParseMode::Build);
 
     if projects.is_empty() {
         projects.push(".".to_string());
@@ -855,6 +1083,7 @@ fn parse_command_line_worker(
     current_dir: &str,
     fs: Option<&dyn FS>,
     find: fn(&str) -> Option<&'static OptionDecl>,
+    mode: ParseMode,
 ) -> (HashMap<String, OptValue>, Vec<String>, Vec<Diagnostic>) {
     let mut options: HashMap<String, OptValue> = HashMap::new();
     let mut file_names: Vec<String> = Vec::new();
@@ -876,8 +1105,13 @@ fn parse_command_line_worker(
                 if let Some(fs) = fs {
                     if let Some(content) = fs.read_file(&abs) {
                         let response_args = split_response_file(&content);
-                        let (sub_options, sub_files, sub_errors) =
-                            parse_command_line_worker(&response_args, current_dir, Some(fs), find);
+                        let (sub_options, sub_files, sub_errors) = parse_command_line_worker(
+                            &response_args,
+                            current_dir,
+                            Some(fs),
+                            find,
+                            mode,
+                        );
                         file_names.extend(sub_files);
                         for (k, v) in sub_options {
                             options.insert(k, v);
@@ -911,6 +1145,19 @@ fn parse_command_line_worker(
                 let opt = match find(name) {
                     Some(o) => o,
                     None => {
+                        // Alternate-mode: if the option exists in the *other*
+                        // name map, emit the appropriate diagnostic instead of
+                        // the generic "unknown" error. Mirrors Go's
+                        // `createUnknownOptionError` / `AlternateModeDiagnostics`.
+                        if mode == ParseMode::Compiler && find_build_only_option(name).is_some() {
+                            errors.push(Diagnostic::new(
+                                None,
+                                TextRange::undefined(),
+                                COMPILER_OPTION_0_MAY_ONLY_BE_USED_WITH_BUILD,
+                                vec![name.to_string()],
+                            ));
+                            continue;
+                        }
                         errors.push(Diagnostic::new(
                             None,
                             TextRange::undefined(),
@@ -938,6 +1185,56 @@ fn parse_option_value(
     options: &mut HashMap<String, OptValue>,
     errors: &mut Vec<Diagnostic>,
 ) -> usize {
+    // TSConfigOnly options can only appear in tsconfig.json; on the command
+    // line only `false`/`null` (booleans) or `null` (others) are accepted.
+    // Mirrors Go's `parseOptionValue` `IsTSConfigOnly` branch.
+    if opt.is_tsconfig_only {
+        let (opt_value, from_args) = match &inline_value {
+            Some(v) => (v.clone(), false),
+            None => {
+                if i < args.len() {
+                    (args[i].clone(), true)
+                } else {
+                    (String::new(), false)
+                }
+            }
+        };
+        if opt_value == "null" {
+            options.insert(opt.name.to_string(), OptValue::Null);
+            if from_args {
+                i += 1;
+            }
+        } else if opt.kind == OptionKind::Boolean {
+            if opt_value == "false" {
+                options.insert(opt.name.to_string(), OptValue::Bool(false));
+                if from_args {
+                    i += 1;
+                }
+            } else {
+                errors.push(Diagnostic::new(
+                    None,
+                    TextRange::undefined(),
+                    OPTION_0_CAN_ONLY_BE_SPECIFIED_IN_TSCONFIG_JSON_FILE_OR_SET_TO_FALSE_OR_NULL_ON_COMMAND_LINE,
+                    vec![opt.name.to_string()],
+                ));
+                if from_args && opt_value == "true" {
+                    i += 1;
+                }
+            }
+        } else {
+            errors.push(Diagnostic::new(
+                None,
+                TextRange::undefined(),
+                OPTION_0_CAN_ONLY_BE_SPECIFIED_IN_TSCONFIG_JSON_FILE_OR_SET_TO_NULL_ON_COMMAND_LINE,
+                vec![opt.name.to_string()],
+            ));
+            if from_args && !opt_value.is_empty() && !opt_value.starts_with('-') {
+                i += 1;
+            }
+        }
+        return i;
+    }
+
     match opt.kind {
         OptionKind::Boolean => {
             if let Some(v) = inline_value {
@@ -950,7 +1247,7 @@ fn parse_option_value(
                 options.insert(opt.name.to_string(), OptValue::Bool(true));
             }
         }
-        OptionKind::String | OptionKind::Enum => {
+        OptionKind::String => {
             let val = match inline_value {
                 Some(v) => Some(v),
                 None => {
@@ -975,6 +1272,54 @@ fn parse_option_value(
                 }
             }
         }
+        OptionKind::Enum => {
+            let val = match inline_value {
+                Some(v) => Some(v),
+                None => {
+                    if i < args.len() {
+                        let v = args[i].clone();
+                        i += 1;
+                        Some(v)
+                    } else {
+                        None
+                    }
+                }
+            };
+            match val {
+                Some(v) if v == "null" => {
+                    options.insert(opt.name.to_string(), OptValue::Null);
+                }
+                Some(v) => {
+                    // Declaration-driven enum validation: if the option declares
+                    // `enum_values`, the (case-insensitive) value must be in that
+                    // list, otherwise emit `ARGUMENT_FOR_0_OPTION_MUST_BE_COLON_1`
+                    // listing the valid values. Mirrors Go's
+                    // `convertJsonOptionOfEnumType` / `createDiagnosticForInvalidEnumType`.
+                    if let Some(enum_vals) = opt.enum_values {
+                        if enum_vals.iter().any(|e| e.eq_ignore_ascii_case(&v)) {
+                            options.insert(opt.name.to_string(), OptValue::Str(v));
+                        } else {
+                            let valid = enum_vals
+                                .iter()
+                                .map(|e| format!("'{}'", e))
+                                .collect::<Vec<_>>()
+                                .join(", ");
+                            errors.push(Diagnostic::new(
+                                None,
+                                TextRange::undefined(),
+                                ARGUMENT_FOR_0_OPTION_MUST_BE_COLON_1,
+                                vec![format!("--{}", opt.name), valid],
+                            ));
+                        }
+                    } else {
+                        options.insert(opt.name.to_string(), OptValue::Str(v));
+                    }
+                }
+                None => {
+                    errors.push(err(format!("Option '{}' requires a value.", opt.name)));
+                }
+            }
+        }
         OptionKind::Number => {
             let val = inline_value.or_else(|| {
                 if i < args.len() {
@@ -988,7 +1333,23 @@ fn parse_option_value(
             match val {
                 Some(v) => match v.parse::<i64>() {
                     Ok(n) => {
-                        options.insert(opt.name.to_string(), OptValue::Num(n));
+                        // Declaration-driven min-value validation (e.g.
+                        // `builders` must be >= 1). Mirrors Go's
+                        // `parseOptionValue` number branch.
+                        if let Some(min) = opt.min_value {
+                            if n < min {
+                                errors.push(Diagnostic::new(
+                                    None,
+                                    TextRange::undefined(),
+                                    OPTION_0_REQUIRES_VALUE_TO_BE_GREATER_THAN_1,
+                                    vec![opt.name.to_string(), min.to_string()],
+                                ));
+                            } else {
+                                options.insert(opt.name.to_string(), OptValue::Num(n));
+                            }
+                        } else {
+                            options.insert(opt.name.to_string(), OptValue::Num(n));
+                        }
                     }
                     Err(_) => {
                         errors.push(err(format!("Option '{}' requires a number.", opt.name)));
@@ -1634,7 +1995,8 @@ fn get_parsed_command_line_of_config_file_with_stack(
     // `compilerOptions`
     if let Some(co) = root_obj.get("compilerOptions").and_then(|v| v.as_object()) {
         result.raw_options = Some(crate::json::Value::Object(co.clone()));
-        let opts = json_object_to_options(co);
+        let (opts, opts_errors) = json_object_to_options(co);
+        result.errors.extend(opts_errors);
         // Command-line base options take precedence over config-file options
         // for values explicitly set on the command line; here we apply config
         // options first, then re-apply base options on top.
@@ -1728,13 +2090,29 @@ fn resolve_single_extends_path(
 
 fn json_object_to_options(
     obj: &crate::json::Map<String, crate::json::Value>,
-) -> HashMap<String, OptValue> {
+) -> (HashMap<String, OptValue>, Vec<Diagnostic>) {
     let mut out = HashMap::new();
+    let mut errors = Vec::new();
     for (k, v) in obj {
+        // Declaration-driven case-mismatch detection: look up the key
+        // case-insensitively; if a declaration exists but its canonical name
+        // does not exactly match the key, emit a "did you mean" diagnostic and
+        // skip the key (mirrors Go's `convertOptionsFromJson`).
+        if let Some(opt) = find_option(k) {
+            if opt.name != k {
+                errors.push(Diagnostic::new(
+                    None,
+                    TextRange::undefined(),
+                    UNKNOWN_COMPILER_OPTION_0_DID_YOU_MEAN_1,
+                    vec![k.clone(), opt.name.to_string()],
+                ));
+                continue;
+            }
+        }
         let val = json_to_opt_value(v);
         out.insert(k.clone(), val);
     }
-    out
+    (out, errors)
 }
 
 fn json_to_opt_value(v: &crate::json::Value) -> OptValue {
@@ -3365,5 +3743,214 @@ mod tests {
         assert_eq!(find_option("t").map(|o| o.name), Some("target"));
         assert_eq!(find_option("m").map(|o| o.name), Some("module"));
         assert_eq!(find_option("d").map(|o| o.name), Some("declaration"));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Declaration-driven option parser tests (NameMap, did-you-mean,
+    // alternate-mode, TSConfigOnly, enum/min-value validation).
+    // ──────────────────────────────────────────────────────────────────────
+
+    /// Like `has_error_containing` but operates on a slice of diagnostics, so
+    /// it can be used with `ParsedBuildCommandLine.errors` too.
+    fn diag_contains(errors: &[Diagnostic], needle: &str) -> bool {
+        errors.iter().any(|e| {
+            e.message_args.iter().any(|a| a.contains(needle))
+                || e.message.map(|m| m.text.contains(needle)).unwrap_or(false)
+        })
+    }
+
+    #[test]
+    fn test_case_insensitive_option_lookup_cli() {
+        // `--Target` (wrong case) resolves case-insensitively to `target`,
+        // matching Go's NameMap behaviour on the command line.
+        let parsed = parse_command_line(&args(&["--Target", "ES2020", "0.ts"]), "/proj", None);
+        assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
+        assert!(!has_error_containing(&parsed, "Unknown compiler option"));
+
+        // `--Module` and `--Jsx` likewise.
+        let parsed = parse_command_line(
+            &args(&["--Module", "commonjs", "--Jsx", "react", "0.ts"]),
+            "/proj",
+            None,
+        );
+        assert_eq!(parsed.compiler_options.module, ModuleKind::CommonJS);
+        assert_eq!(parsed.compiler_options.jsx, JsxEmit::React);
+    }
+
+    #[test]
+    fn test_case_insensitive_short_name_lookup() {
+        // Short names are also matched case-insensitively.
+        let parsed = parse_command_line(&args(&["-P", "tsconfig.json"]), "/proj", None);
+        assert_eq!(parsed.compiler_options.project, "tsconfig.json");
+    }
+
+    #[test]
+    fn test_alternate_mode_build_option_in_compiler_mode() {
+        // `--dry` is a build-only option; using it in compiler mode emits the
+        // "may only be used with --build" diagnostic (TS5093) instead of the
+        // generic unknown-option error.
+        let parsed = parse_command_line(&args(&["--dry", "0.ts"]), "/proj", None);
+        assert!(diag_contains(&parsed.errors, "may only be used with '--build'"));
+        assert!(!diag_contains(&parsed.errors, "Unknown compiler option"));
+    }
+
+    #[test]
+    fn test_alternate_mode_verbose_in_compiler_mode() {
+        // `--verbose` is build-only; in compiler mode it triggers TS5093.
+        let parsed = parse_command_line(&args(&["--verbose"]), "/proj", None);
+        assert!(diag_contains(&parsed.errors, "may only be used with '--build'"));
+    }
+
+    #[test]
+    fn test_tsconfig_only_option_on_cli_emits_diagnostic() {
+        // `composite` is TSConfigOnly; on the CLI it must emit the
+        // "can only be specified in tsconfig.json ... set to false or null"
+        // diagnostic (TS6230) and must NOT enable composite.
+        let parsed = parse_command_line(&args(&["--composite", "0.ts"]), "/proj", None);
+        assert!(has_error_containing(&parsed, "tsconfig.json"));
+        assert!(has_error_containing(&parsed, "composite"));
+        assert!(!parsed.compiler_options.composite.is_true());
+    }
+
+    #[test]
+    fn test_tsconfig_only_boolean_accepts_false() {
+        // `--composite false` is allowed (no error) and sets composite to false.
+        let parsed = parse_command_line(&args(&["--composite", "false", "0.ts"]), "/proj", None);
+        assert!(!has_error_containing(&parsed, "tsconfig.json"));
+        assert!(parsed.compiler_options.composite.is_false());
+    }
+
+    #[test]
+    fn test_tsconfig_only_boolean_accepts_null() {
+        // `--composite null` is allowed (no error).
+        let parsed = parse_command_line(&args(&["--composite", "null", "0.ts"]), "/proj", None);
+        assert!(!has_error_containing(&parsed, "tsconfig.json"));
+    }
+
+    #[test]
+    fn test_invalid_enum_value_target() {
+        // `--target es99` is not a valid target enum value; emit
+        // "Argument for '--target' option must be: ..." (TS6046) listing the
+        // valid values, and leave target unset.
+        let parsed = parse_command_line(&args(&["--target", "es99", "0.ts"]), "/proj", None);
+        assert!(has_error_containing(&parsed, "Argument for"));
+        assert!(has_error_containing(&parsed, "--target"));
+        assert!(has_error_containing(&parsed, "es5"));
+        assert_eq!(parsed.compiler_options.target, ScriptTarget::None);
+    }
+
+    #[test]
+    fn test_invalid_enum_value_module() {
+        let parsed = parse_command_line(&args(&["--module", "nonsense", "0.ts"]), "/proj", None);
+        assert!(has_error_containing(&parsed, "Argument for"));
+        assert!(has_error_containing(&parsed, "commonjs"));
+        assert_eq!(parsed.compiler_options.module, ModuleKind::None);
+    }
+
+    #[test]
+    fn test_valid_enum_value_case_insensitive() {
+        // Enum values are matched case-insensitively (Go lowercases the key).
+        let parsed = parse_command_line(&args(&["--target", "ES2020", "0.ts"]), "/proj", None);
+        assert!(!has_error_containing(&parsed, "Argument for"));
+        assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
+    }
+
+    #[test]
+    fn test_min_value_violation_builders() {
+        // `--builders 0` violates the min-value (1) constraint → TS5002.
+        let parsed =
+            parse_build_command_line(&args(&["--build", "--builders", "0"]), "/proj", None);
+        assert!(diag_contains(&parsed.errors, "requires value to be greater"));
+        assert!(diag_contains(&parsed.errors, "builders"));
+        assert!(diag_contains(&parsed.errors, "1"));
+    }
+
+    #[test]
+    fn test_min_value_accepted_builders() {
+        // `--builders 1` satisfies the min-value constraint.
+        let parsed =
+            parse_build_command_line(&args(&["--build", "--builders", "2"]), "/proj", None);
+        assert!(!diag_contains(&parsed.errors, "requires value to be greater"));
+        assert_eq!(parsed.build_options.builders, Some(2));
+    }
+
+    #[test]
+    fn test_case_mismatch_in_tsconfig_json_emits_did_you_mean() {
+        // A `compilerOptions` key whose case does not exactly match the
+        // canonical declaration emits a "Did you mean" diagnostic (TS5025) and
+        // skips the key.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/src");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
+            "compilerOptions": { "Target": "es2020", "noEmit": true },
+            "files": ["src/a.ts"]
+        }"#,
+        );
+        fs.insert_file("/proj/src/a.ts", "export const x = 1;");
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(has_error_containing(&parsed, "Did you mean"));
+        assert!(has_error_containing(&parsed, "Target"));
+        assert!(has_error_containing(&parsed, "target"));
+        // The miscased key is skipped, so target stays unset.
+        assert_eq!(parsed.compiler_options.target, ScriptTarget::None);
+        // The correctly-cased key is still applied.
+        assert!(parsed.compiler_options.no_emit.is_true());
+    }
+
+    #[test]
+    fn test_tsconfig_json_correct_case_no_did_you_mean() {
+        // Correctly-cased keys must not trigger the did-you-mean diagnostic.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/src");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
+            "compilerOptions": { "target": "es2020", "noEmit": true },
+            "files": ["src/a.ts"]
+        }"#,
+        );
+        fs.insert_file("/proj/src/a.ts", "export const x = 1;");
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(!has_error_containing(&parsed, "Did you mean"));
+        assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
+    }
+
+    #[test]
+    fn test_enum_values_declared_on_all_enum_options() {
+        // Every Enum-kind declaration must carry enum_values.
+        for o in OPTIONS.iter().chain(BUILD_OPTIONS.iter()) {
+            if o.kind == OptionKind::Enum {
+                assert!(
+                    o.enum_values.is_some(),
+                    "enum option '{}' must declare enum_values",
+                    o.name
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_tsconfig_only_and_min_value_flags_set() {
+        // Spot-check that the declaration-driven flags are wired up.
+        let composite = find_option("composite").expect("composite must exist");
+        assert!(composite.is_tsconfig_only);
+        let paths = find_option("paths").expect("paths must exist");
+        assert!(paths.is_tsconfig_only);
+        let builders = find_build_only_option("builders").expect("builders must exist");
+        assert_eq!(builders.min_value, Some(1));
     }
 }

@@ -187,8 +187,16 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
 - [x] 对齐退出码：`Success`、`DiagnosticsPresent_*`、`InvalidProject_*`、
   `ProjectReferenceCycle_*`（已对齐：`ExitStatus` enum + `perform_compilation`
   状态映射与 Go `tsc.ExitStatus` 完全一致）。
-- [ ] 迁移 Go declaration-driven option parser：NameMap、did-you-mean、
-  alternate-mode diagnostics、TSConfigOnly 规则、enum/list/min-value 校验。
+- [x] 迁移 Go declaration-driven option parser：NameMap、did-you-mean、
+  alternate-mode diagnostics、TSConfigOnly 规则、enum/min-value 校验（已落地）：
+  `OptionDecl` 扩展 `is_tsconfig_only`/`is_command_line_only`/`extra_validation`/
+  `min_value`/`enum_values`；`find_option`/`find_build_option` 改为大小写不敏感
+  （对齐 Go `GetOptionDeclarationFromName`）；CLI 未知选项在 build map 中报
+  TS5093 alternate-mode；TSConfigOnly 选项在 CLI 上报 TS6230/TS6064；enum
+  非法值报 TS6046（列出合法值）；min-value 违规报 TS5002；tsconfig JSON
+  大小写不匹配报 TS5025 did-you-mean。16 个单测覆盖。**遗留**：build-mode
+  TS5094（common/build/compiler 三分拆分）、watch options 独立建模、
+  `DeprecatedKeys` 过滤。
 - [ ] 独立建模 watch options，在普通/build parser 中与 compiler/build options 分离。
 - [ ] 对齐 tsconfig 查找、`extends`、`files/include/exclude`、`compilerOptions`
   覆盖规则。
