@@ -162,7 +162,11 @@ arity）+ 12 个 parity fixtures。
 
 剩余任务：
 
-- [ ] 给 CI 设计最小 Rust job：fmt、clippy、test、parity smoke。
+- [x] 给 CI 设计最小 Rust job：fmt、clippy、test、parity smoke：
+  `.github/workflows/rust.yml` 在 push/PR 到 `rust`/`main` 时触发；
+  fmt/clippy 为 `continue-on-error`（迁移期 ~75 warning + 整仓 fmt 待排期），
+  test（`cargo test --lib`）与 parity smoke（`cargo test --test parity`，
+  无 oracle 时优雅跳过）为 gating 步骤。
 - [ ] 新人只看 Rust worktree 文档即可跑通测试（验收）。
 - [x] parity 测试能自动发现可用 Go oracle，或给出明确跳过原因（验收）：
   `go_oracle()` 按 `TSGO_ORACLE` → `typescript-go/built/local/tsgo` →

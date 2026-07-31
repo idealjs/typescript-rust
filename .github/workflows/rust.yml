@@ -1,0 +1,48 @@
+name: Rust CI
+
+on:
+  push:
+    branches: [rust, main]
+  pull_request:
+    branches: [rust, main]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+# Minimal Rust CI for the tsox (TypeScript Go → Rust port) crate.
+# During migration fmt/clippy are informational (continue-on-error) because
+# the repo still carries ~75 accepted migration warnings and repo-wide fmt
+# is tracked separately in TODO.md. test and parity smoke are gating.
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo build
+        uses: Swatinem/rust-cache@v2
+
+      - name: Format check
+        run: cargo fmt --check
+        continue-on-error: true # TODO.md: repo-wide fmt pending
+
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+        continue-on-error: true # TODO.md: ~75 accepted migration warnings
+
+      - name: Test
+        run: cargo test --lib
+
+      - name: Parity smoke
+        # Runs without the Go oracle; parity tests skip the oracle
+        # comparison gracefully and still exercise the Rust smoke cases.
+        run: cargo test --test parity
