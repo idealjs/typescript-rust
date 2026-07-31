@@ -219,8 +219,7 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   + BUILD OPTIONS）。`print_option_section` 实现 `--name, -short    description`
   两栏对齐布局（对齐 Go `generateGroupOptionOutput`，不含终端宽度折行与颜色）。
   `display_name_of_option` 对齐 Go `getDisplayNameTextOfOption`。2 个单测覆盖
-  `--help`/`--all` 头部/分节/动态描述内容。**剩余**：响应文件（`@args.txt`）
-  解析、终端宽度感知折行。
+  `--help`/`--all` 头部/分节/动态描述内容。**剩余**：终端宽度感知折行。
 - [x] 对齐 `--init` 生成的完整 `tsconfig.json` 模板：含 File Layout/Environment
   Settings/Other Outputs/Stricter Typechecking/Style Options/Recommended Options
   分节注释与 nodejs 示例块，对齐 Go `writeConfigFile` 模板结构。同时将
@@ -283,7 +282,9 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   （`single_file`/`project_dir`/`project_file`/`jsonc_config`/`show_config`/
   `invalid_json`）+ `Case` 结构扩展 `expect_success`/`stdout_contains` 字段，
   `rust_smoke_cases_emit_expected_outputs` 单测覆盖全部 9 个场景。
-  **遗留**：response file（`@args.txt`）解析。
+  **遗留**：response file（`@args.txt`）解析已落地（含 TS6045 unterminated
+  quoted string 诊断，对齐 Go `parseResponseFile`）；3 个 response-file 单测
+  覆盖 missing/empty/normal/unterminated 场景。
 - [x] 修复 `rootDir/outDir` 输出路径差异：emitter 新增
   `compute_program_common_source_directory`（对齐 Go
   `outputpaths.GetCommonSourceDirectory`）+ `get_source_file_path_in_new_dir`

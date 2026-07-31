@@ -26,7 +26,8 @@ use crate::diagnostics::{
     OPTION_0_CAN_ONLY_BE_SPECIFIED_IN_TSCONFIG_JSON_FILE_OR_SET_TO_FALSE_OR_NULL_ON_COMMAND_LINE,
     OPTION_0_CAN_ONLY_BE_SPECIFIED_IN_TSCONFIG_JSON_FILE_OR_SET_TO_NULL_ON_COMMAND_LINE,
     OPTION_0_REQUIRES_VALUE_TO_BE_GREATER_THAN_1, UNKNOWN_COMPILER_OPTION_0,
-    UNKNOWN_COMPILER_OPTION_0_DID_YOU_MEAN_1, WATCH_OPTION_0_REQUIRES_A_VALUE_OF_TYPE_1,
+    UNKNOWN_COMPILER_OPTION_0_DID_YOU_MEAN_1,
+    UNTERMINATED_QUOTED_STRING_IN_RESPONSE_FILE_0, WATCH_OPTION_0_REQUIRES_A_VALUE_OF_TYPE_1,
     new_ad_hoc_message,
 };
 use crate::glob::Glob;
@@ -1283,7 +1284,9 @@ fn parse_command_line_worker(
                 let abs = tspath::get_normalized_absolute_path(response_path, current_dir);
                 if let Some(fs) = fs {
                     if let Some(content) = fs.read_file(&abs) {
-                        let response_args = split_response_file(&content);
+                        let (response_args, split_errors) =
+                            split_response_file(&content, &abs);
+                        errors.extend(split_errors);
                         let (sub_options, sub_watch_options, sub_files, sub_errors) =
                             parse_command_line_worker(
                                 &response_args,
@@ -1626,8 +1629,15 @@ fn parse_option_value(
     i
 }
 
-fn split_response_file(content: &str) -> Vec<String> {
+/// Tokenize a response file's contents into arguments, mirroring Go's
+/// `parseResponseFile` (`commandlineparser.go:183-213`). Whitespace separates
+/// arguments; double-quoted spans are captured literally (without the quotes).
+/// An unterminated quoted string emits a TS6045 diagnostic and consumes the
+/// remainder of the file as the argument (matching Go's behavior of still
+/// pushing `text[start+1:pos]` before reporting the error).
+fn split_response_file(content: &str, file_name: &str) -> (Vec<String>, Vec<Diagnostic>) {
     let mut args = Vec::new();
+    let mut errors: Vec<Diagnostic> = Vec::new();
     let chars: Vec<char> = content.chars().collect();
     let mut pos = 0usize;
     while pos < chars.len() {
@@ -1646,6 +1656,15 @@ fn split_response_file(content: &str) -> Vec<String> {
             args.push(chars[start..pos].iter().collect());
             if pos < chars.len() {
                 pos += 1;
+            } else {
+                // Reached end of file inside a quoted string: emit TS6045,
+                // aligned with Go's `Unterminated_quoted_string_in_response_file_0`.
+                errors.push(Diagnostic::new(
+                    None,
+                    TextRange::undefined(),
+                    UNTERMINATED_QUOTED_STRING_IN_RESPONSE_FILE_0,
+                    vec![file_name.to_string()],
+                ));
             }
         } else {
             let start = pos;
@@ -1655,7 +1674,7 @@ fn split_response_file(content: &str) -> Vec<String> {
             args.push(chars[start..pos].iter().collect());
         }
     }
-    args
+    (args, errors)
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -3454,6 +3473,34 @@ mod tests {
         assert_eq!(parsed.file_names, vec!["/proj/0.ts"]);
         // No errors reading the response file.
         assert!(!has_error_containing(&parsed, "Cannot read file"));
+    }
+
+    #[test]
+    fn test_response_file_unterminated_quoted_string() {
+        // An unterminated quoted string in a response file emits TS6045
+        // (`Unterminated quoted string in response file '{0}'.`), aligned with
+        // Go's `parseResponseFile`. The unterminated token is still captured
+        // as an argument (matching Go's behavior).
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file("/proj/args.rsp", "--outDir \"unterminated path");
+        let parsed = parse_command_line(&args(&["@args.rsp"]), "/proj", Some(&fs));
+        // TS6045 diagnostic should be present.
+        let has_ts6045 = parsed.errors.iter().any(|e| e.code == 6045);
+        assert!(
+            has_ts6045,
+            "expected TS6045 for unterminated quoted string, got errors: {:?}",
+            parsed
+                .errors
+                .iter()
+                .map(|e| (e.code, e.message_args.clone()))
+                .collect::<Vec<_>>()
+        );
+        // The unterminated content is still captured as the --outDir value.
+        assert_eq!(
+            parsed.compiler_options.out_dir, "unterminated path",
+            "unterminated token should still be captured as the option value"
+        );
     }
 
     // ──────────────────────────────────────────────────────────────────────
