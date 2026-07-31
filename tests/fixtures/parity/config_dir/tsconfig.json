@@ -1,0 +1,1 @@
+{ "compilerOptions": { "outDir": "${configDir}/dist", "rootDir": "${configDir}/src", "strict": true } }

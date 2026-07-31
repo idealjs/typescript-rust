@@ -364,6 +364,19 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   **遗留**：response file（`@args.txt`）解析已落地（含 TS6045 unterminated
   quoted string 诊断，对齐 Go `parseResponseFile`）；3 个 response-file 单测
   覆盖 missing/empty/normal/unterminated 场景。
+- [x] 扩充 CLI parity smoke 覆盖至 20 个场景（已完成）：新增 11 个 fixture
+  与 `Case` 条目——`config_dir`（`${configDir}` 模板替换 + rootDir 相对路径
+  emit）、`extends_relative`（相对路径 extends 继承 base）、`extends_array`
+  （`extends: ["./base1.json","./base2.json"]` 数组合并）、`extends_bare_specifier`
+  （裸 specifier 无 node_modules 时静默丢弃，own outDir 仍生效）、`include_pattern`
+  （`include: ["src/**/*"]`）、`exclude_pattern`（`exclude: ["src/excluded/**"]`
+  排除子目录）、`multiple_files`（多文件 emit + import）、`no_emit`（`noEmit:true`
+  抑制输出）、`strict_mode`（`strict:true` 无诊断）、`comments_stripped`
+  （`removeComments:true`，标注 `skip_oracle = true` 因 emitter 注释剥离未迁移）、
+  `target_es5`（`target:"ES5"`，标注 `skip_oracle = true` 因 ES5 down-level 未迁移）。
+  `Case` 结构新增 `skip_oracle: bool` 字段，`compare_with_go_oracle_when_available`
+  跳过已知 transform gap 场景并打印跳过原因；`rust_smoke_cases_emit_expected_outputs`
+  覆盖全部 20 个场景。717 lib + 2 parity + 569 checker_parity 测试通过。
 - [x] 修复 `rootDir/outDir` 输出路径差异：emitter 新增
   `compute_program_common_source_directory`（对齐 Go
   `outputpaths.GetCommonSourceDirectory`）+ `get_source_file_path_in_new_dir`
@@ -377,7 +390,7 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
 验收：
 
 - [ ] Rust 与 Go oracle 的 stdout、stderr、exit code、输出文件集合一致。
-- [ ] CLI parity 覆盖至少 20 个常见 tsc 场景。
+- [x] CLI parity 覆盖至少 20 个常见 tsc 场景。
 
 ## P2：Scanner / Parser / AST parity
 

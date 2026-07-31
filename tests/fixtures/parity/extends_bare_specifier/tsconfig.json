@@ -1,0 +1,1 @@
+{ "extends": "shared-tsconfig", "compilerOptions": { "outDir": "dist" } }
