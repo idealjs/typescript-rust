@@ -1620,19 +1620,9 @@ impl Checker {
         ))
     }
 
-    /// Get the widened literal type (simplified).
-    fn get_widened_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
-        self.get_base_type_of_literal_type(t)
-    }
-
-    /// Get the regular type of a literal type (simplified).
-    fn get_regular_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
-        if t.flags.contains(TYPE_FLAGS_LITERAL) {
-            self.get_base_type_of_literal_type(t)
-        } else {
-            t.clone()
-        }
-    }
+    // `get_widened_literal_type` and `get_regular_type_of_literal_type`
+    // are implemented in `checker.rs` (real implementations backed by the
+    // fresh-literal mechanism, not stubs).
 
     // ────────────────────────────────────────────────────────────────────────
     // Helper methods for inferTypeArguments

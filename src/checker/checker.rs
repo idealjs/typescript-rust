@@ -1071,6 +1071,172 @@ impl Checker {
     }
 
     // ────────────────────────────────────────────────────────────────────────
+    // Fresh literal types
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Get the fresh variant of a literal type. Mirrors Go's
+    /// `getFreshTypeOfLiteralType` (checker.go:25195).
+    ///
+    /// For freshable literals (`TYPE_FLAGS_FRESHABLE = Enum | Literal`),
+    /// lazily creates and caches a fresh variant on the regular type:
+    ///
+    /// - Regular literal type: `fresh_type` = Some(fresh variant),
+    ///   `regular_type` = None.
+    /// - Fresh literal type: `fresh_type` = None (empty),
+    ///   `regular_type` = Some(regular type).
+    ///
+    /// This inverted representation avoids the need for a self-referential
+    /// `Arc` on the fresh variant. `is_fresh_literal_type` checks
+    /// `regular_type.is_some()`.
+    ///
+    /// For non-freshable types, returns the input unchanged.
+    pub fn get_fresh_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
+        // Only freshable types (literals and enums) get fresh variants.
+        if !t.flags.intersects(TYPE_FLAGS_FRESHABLE) {
+            return Arc::clone(t);
+        }
+        let lit = match &t.data {
+            TypeData::Literal(lit) => lit,
+            _ => {
+                // Enums and other freshable non-literal types are not
+                // handled in Phase 1.
+                return Arc::clone(t);
+            }
+        };
+        // If `regular_type` is set, this IS already a fresh variant.
+        if lit.regular_type.get().is_some() {
+            return Arc::clone(t);
+        }
+        // Extract the value up front so the closure can be `move` and
+        // avoid borrowing `lit` (which would conflict with the
+        // `&lit.fresh_type` borrow held by `get_or_init`).
+        let value = lit.value.clone();
+        let flags = t.flags;
+        let regular = Arc::clone(t);
+        let fresh = lit.fresh_type.get_or_init(move || {
+            Arc::new(Type::new(
+                flags,
+                TypeData::Literal(LiteralTypeData {
+                    value,
+                    // Fresh variant has no fresh_type of its own.
+                    fresh_type: OnceLock::new(),
+                    // Points back to the regular type.
+                    regular_type: OnceLock::from(regular),
+                }),
+            ))
+        });
+        Arc::clone(fresh)
+    }
+
+    /// Get the widened type of a fresh literal type. Mirrors Go's
+    /// `getWidenedLiteralType` (checker.go:25395).
+    ///
+    /// Widens ONLY fresh literals to their primitive base:
+    /// - StringLiteral + fresh → `string`
+    /// - NumberLiteral + fresh → `number`
+    /// - BigIntLiteral + fresh → `bigint`
+    /// - BooleanLiteral + fresh → `boolean`
+    /// - Enum + fresh → enum base type (skipped in Phase 1)
+    /// - Union → widen each constituent
+    /// - Otherwise → return t unchanged
+    pub fn get_widened_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
+        // Fresh literals widen to their primitive base.
+        if crate::checker::is_fresh_literal_type(t) {
+            if t.flags.contains(TypeFlags::StringLiteral) {
+                return self.string_type();
+            }
+            if t.flags.contains(TypeFlags::NumberLiteral) {
+                return self.number_type();
+            }
+            if t.flags.contains(TypeFlags::BigIntLiteral) {
+                return self.bigint_type();
+            }
+            if t.flags.contains(TypeFlags::BooleanLiteral) {
+                return self.boolean_type();
+            }
+            // Enum widening is skipped for Phase 1. Fall through.
+        }
+        // Unions: widen each constituent recursively.
+        if let TypeData::Union(union_data) = &t.data {
+            let widened: Vec<Arc<Type>> = union_data
+                .union_or_intersection
+                .types
+                .iter()
+                .map(|member| self.get_widened_literal_type(member))
+                .collect();
+            // Avoid allocating a new union if nothing changed.
+            if widened
+                .iter()
+                .zip(union_data.union_or_intersection.types.iter())
+                .all(|(w, o)| Arc::ptr_eq(w, o))
+            {
+                return Arc::clone(t);
+            }
+            return self.build_union_from_types(widened);
+        }
+        Arc::clone(t)
+    }
+
+    /// Get the regular (non-fresh) type of a literal type. Mirrors Go's
+    /// `getRegularTypeOfLiteralType` (checker.go:25181).
+    ///
+    /// For freshable literals, returns the `regular_type` field if set
+    /// (i.e. if `t` is a fresh variant). For unions, maps over
+    /// constituents. Otherwise returns `t` unchanged.
+    pub fn get_regular_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
+        if t.flags.intersects(TYPE_FLAGS_FRESHABLE) {
+            if let TypeData::Literal(lit) = &t.data {
+                if let Some(regular) = lit.regular_type.get() {
+                    return Arc::clone(regular);
+                }
+            }
+        }
+        // Unions: map over constituents.
+        if let TypeData::Union(union_data) = &t.data {
+            let regularized: Vec<Arc<Type>> = union_data
+                .union_or_intersection
+                .types
+                .iter()
+                .map(|member| self.get_regular_type_of_literal_type(member))
+                .collect();
+            if regularized
+                .iter()
+                .zip(union_data.union_or_intersection.types.iter())
+                .all(|(w, o)| Arc::ptr_eq(w, o))
+            {
+                return Arc::clone(t);
+            }
+            return self.build_union_from_types(regularized);
+        }
+        Arc::clone(t)
+    }
+
+    /// Get the widened literal type for a variable initializer, gated on
+    /// whether the declaration is `const`. Mirrors Go's
+    /// `getWidenedLiteralTypeForInitializer` (checker.go:16810).
+    ///
+    /// For `const` declarations (NodeFlags::Constant), fresh literals are
+    /// preserved (no widening). For `let`/`var`, fresh literals widen to
+    /// their primitive base via `get_widened_literal_type`.
+    pub fn get_widened_literal_type_for_initializer(
+        &mut self,
+        declaration: &Arc<Node>,
+        t: &Arc<Type>,
+    ) -> Arc<Type> {
+        // `NodeFlags::Constant = Const | Using` is a composite flag, so use
+        // `intersects` (any bit set) rather than `contains` (all bits set) —
+        // a plain `const` declaration only carries `Const`, not `Using`.
+        // Mirrors Go's `flags & NodeFlagsConstant != 0`.
+        if self
+            .get_combined_node_flags(declaration)
+            .intersects(NodeFlags::Constant)
+        {
+            return Arc::clone(t);
+        }
+        self.get_widened_literal_type(t)
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
     // Diagnostics
     // ────────────────────────────────────────────────────────────────────────
 
@@ -1448,27 +1614,32 @@ impl Checker {
     }
 
     /// Widen a type by replacing fresh literal types with their primitive
-    /// base types. Mirrors Go's `getWidenedType`/`getWidenedLiteralType`
-    /// (checker.go ~L18268/L25395) for the function-return-type use case.
+    /// base types. Mirrors Go's `getWidenedType` (checker.go ~L18268) for
+    /// the function-return-type use case.
     ///
-    /// - Literal types (string/number/bigint/boolean) → their primitive base.
+    /// - Fresh literal types (string/number/bigint/boolean) → their
+    ///   primitive base. Regular (non-fresh) literals are preserved.
     /// - Unique `symbol` literals → `symbol`.
     /// - Unions → a new union with each constituent widened (nullable
     ///   constituents are preserved as-is, matching Go).
     /// - All other types are returned unchanged.
     ///
-    /// Freshness tracking (`freshType`) is not yet implemented in the Rust
-    /// port, so this widens *all* literal types. This matches TypeScript's
-    /// observable behavior for the common cases (e.g. `function f() { return
-    /// 42; }` infers `number`).
+    /// Only fresh literals are widened: a fresh literal is one produced by
+    /// a literal expression (e.g. `42`, `"hi"`) that has not yet been
+    /// "decided" by a declaration context. Regular literals (e.g. the
+    /// preserved type of `const x = "hello"`) are not widened here.
     pub fn get_widened_type(&self, t: &Arc<Type>) -> Arc<Type> {
         // Nullable types are not widened (Go skips them in union widening).
         if t.flags.intersects(TYPE_FLAGS_NULLABLE) {
             return Arc::clone(t);
         }
-        // Literal types → primitive base.
+        // Fresh literal types → primitive base. Regular literals are
+        // preserved (Go's `getWidenedType` only widens fresh literals).
         if t.flags.intersects(TYPE_FLAGS_LITERAL) {
-            return self.get_base_type_of_literal_type(t);
+            if crate::checker::is_fresh_literal_type(t) {
+                return self.get_base_type_of_literal_type(t);
+            }
+            return Arc::clone(t);
         }
         // Unique symbol → symbol.
         if t.flags.contains(TypeFlags::UniqueESSymbol) {
@@ -1957,25 +2128,37 @@ impl Checker {
     /// Compute the type of a node (without caching).
     fn compute_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
         match node.kind {
-            // Literal types
+            // Literal types — wrap with `get_fresh_type_of_literal_type`
+            // so that literal expressions produce a *fresh* literal type.
+            // Fresh literals widen to their primitive base only at
+            // `let`/`var` declaration sites (not `const`), mirroring Go's
+            // freshness mechanism.
             SyntaxKind::NumericLiteral => {
                 if let crate::ast::NodeData::NumericLiteral(data) = &node.data {
-                    return self.infer_number_literal_type(&data.text);
+                    let lit = self.infer_number_literal_type(&data.text);
+                    return self.get_fresh_type_of_literal_type(&lit);
                 }
                 self.number_type()
             }
             SyntaxKind::StringLiteral => {
                 if let crate::ast::NodeData::StringLiteral(data) = &node.data {
-                    return self.infer_string_literal_type(&data.text);
+                    let lit = self.infer_string_literal_type(&data.text);
+                    return self.get_fresh_type_of_literal_type(&lit);
                 }
                 self.string_type()
             }
             SyntaxKind::NoSubstitutionTemplateLiteral => self.string_type(),
-            SyntaxKind::TrueKeyword => self.true_type(),
-            SyntaxKind::FalseKeyword => self.false_type(),
+            SyntaxKind::TrueKeyword => {
+                self.get_fresh_type_of_literal_type(&self.true_type())
+            }
+            SyntaxKind::FalseKeyword => {
+                self.get_fresh_type_of_literal_type(&self.false_type())
+            }
             SyntaxKind::NullKeyword => self.null_type(),
             SyntaxKind::UndefinedKeyword => self.undefined_type(),
-            SyntaxKind::BigIntLiteral => self.bigint_type(),
+            SyntaxKind::BigIntLiteral => {
+                self.get_fresh_type_of_literal_type(&self.bigint_type())
+            }
             SyntaxKind::ArrayLiteralExpression => {
                 return self.get_type_of_array_literal(node);
             }
@@ -4041,14 +4224,30 @@ impl Checker {
                 (Some(type_node), None) => self.get_type_from_type_node(type_node),
                 (None, Some(init)) => {
                     // No type annotation: infer from the initializer, then
-                    // widen fresh literal types (e.g. `{ a: 1 }` →
-                    // `{ a: number }`, `1` → `number`). This mirrors Go's
-                    // `getWidenTypeOfLiteralType` call at the variable-
-                    // declaration site. Widening is skipped when a type
-                    // annotation is present (the annotation guides the
-                    // contextual typing and preserves literal types).
+                    // apply freshness-gated widening. This mirrors Go's
+                    // `getWidenedLiteralTypeForInitializer` +
+                    // `getWidenTypeOfLiteralType` plumbing at the
+                    // variable-declaration site.
+                    //
+                    // Step 1: `get_widened_literal_type_for_initializer`
+                    // decides the const-vs-let fate of fresh literals:
+                    //   - `const x = "hello"` preserves the fresh literal
+                    //     `"hello"` (no widening).
+                    //   - `let x = "hello"` widens to `string`.
+                    // Step 2: `get_regular_type_of_literal_type` converts
+                    // any preserved fresh literal to its regular form so
+                    // that step 3 doesn't re-widen it (a fresh literal
+                    // passed to `widen_initializer_type`/`get_widened_type`
+                    // would otherwise be widened).
+                    // Step 3: `widen_initializer_type` performs structural
+                    // widening for object/array literals (e.g. `{ a: 1 }`
+                    // → `{ a: number }`), recursing into properties whose
+                    // types are still fresh.
                     let init_type = self.get_type_of_node(init);
-                    self.widen_initializer_type(&init_type)
+                    let widened_literal =
+                        self.get_widened_literal_type_for_initializer(node, &init_type);
+                    let regularized = self.get_regular_type_of_literal_type(&widened_literal);
+                    self.widen_initializer_type(&regularized)
                 }
                 (None, None) => self.get_any_type(),
             };

@@ -5485,3 +5485,82 @@ fn checker_unlabeled_break_in_labeled_loop_no_error() {
     assert_no_diagnostics(&diags);
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// P3.9: Freshness tracking / literal widening. `const` declarations preserve
+// the literal type (`const x = "hello"` → `"hello"`), while `let`/`var`
+// widen to the primitive base (`let x = "hello"` → `string`). This mirrors
+// Go's "freshness" mechanism: literal expressions produce a fresh literal
+// type that widens ONLY for `let`/`var`, not `const`.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_const_string_literal_preserved_no_error() {
+    // `const x = "hello"` preserves the literal type `"hello"` (not widened
+    // to `string`), so it is assignable to a union containing `"hello"`.
+    let diags = check_source(
+        "const x = \"hello\";\n\
+         const y: \"hello\" | \"world\" = x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_const_number_literal_preserved_no_error() {
+    // `const x = 42` preserves the literal type `42` (not widened to
+    // `number`), so it is assignable to a union containing `42`.
+    let diags = check_source("const x = 42;\nconst y: 42 | 99 = x;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_const_literal_assignable_to_union_no_error() {
+    // `const x = "a"` preserves `"a"`; assigning to `"a" | "b"` is valid.
+    let diags = check_source("const x = \"a\";\nconst y: \"a\" | \"b\" = x;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_let_string_literal_widens_no_error() {
+    // `let x = "hello"` widens to `string`, so reassigning `x = "bye"` is
+    // valid (both are `string`).
+    let diags = check_source("let x = \"hello\";\nx = \"bye\";");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_const_literal_assignable_to_primitive_no_error() {
+    // `const x = "hello"` preserves the literal `"hello"`, which is
+    // assignable to `string` (a fresh/regular literal is assignable to its
+    // primitive base).
+    let diags = check_source("const x = \"hello\";\nlet y: string = x;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_let_widened_not_assignable_to_literal_ts2322() {
+    // `let x = "hello"` widens to `string`, which is NOT assignable to the
+    // literal type `"hello"` (string is wider than the literal). This
+    // should error TS2322.
+    let diags = check_source("let x = \"hello\";\nconst y: \"hello\" = x;");
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_const_literal_callable_with_union_param_no_error() {
+    // `const kind = "foo"` preserves `"foo"`, so calling a function whose
+    // parameter type is `"foo" | "bar"` with `kind` is valid.
+    let diags = check_source(
+        "function f(k: \"foo\" | \"bar\"): void {}\n\
+         const kind = \"foo\";\n\
+         f(kind);",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_let_number_literal_widens_no_error() {
+    // `let x = 1` widens to `number`, so reassigning `x = 2` is valid.
+    let diags = check_source("let x = 1;\nx = 2;");
+    assert_no_diagnostics(&diags);
+}
+

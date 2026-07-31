@@ -468,9 +468,15 @@ pub fn is_type_error(t: &Type) -> bool {
 }
 
 /// Whether a type is a fresh literal type.
+///
+/// Uses the inverted-representation convention: a fresh literal type has
+/// its `regular_type` field set (pointing back to the regular type),
+/// whereas a regular literal type has its `fresh_type` field set
+/// (pointing to the fresh variant) and `regular_type` empty. Mirrors Go's
+/// `isFreshLiteralType` (utilities.go).
 pub fn is_fresh_literal_type(t: &Type) -> bool {
     if let TypeData::Literal(lit) = &t.data {
-        lit.fresh_type.get().is_some()
+        lit.regular_type.get().is_some()
     } else {
         false
     }

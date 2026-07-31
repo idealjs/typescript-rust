@@ -261,6 +261,23 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
     ) -> bool {
+        // Fresh-literal substitution: a fresh literal (produced by a literal
+        // expression) is comparable to both its primitive base (`string`) and
+        // the regular literal (`"hello"`). Substitute the regular type so the
+        // existing literal/primitive relation logic applies uniformly. This
+        // mirrors Go's relater which treats fresh literals as their regular
+        // form for assignability. Done at the very top so recursive
+        // sub-comparisons and the cache key see the regular types.
+        let source = if crate::checker::is_fresh_literal_type(source) {
+            self.get_regular_type_of_literal_type(source)
+        } else {
+            Arc::clone(source)
+        };
+        let target = if crate::checker::is_fresh_literal_type(target) {
+            self.get_regular_type_of_literal_type(target)
+        } else {
+            Arc::clone(target)
+        };
         // Recursion guard: structural comparisons on recursive types
         // (e.g. `type Box<T> = { next: Box<T> | null }`) can blow the native
         // stack. Once we exceed `RELATER_MAX_DEPTH`, optimistically assume
@@ -276,8 +293,8 @@ impl Checker {
             self.relation_in_progress.clear();
         }
         let key = RelationCacheKey {
-            source_ptr: Arc::as_ptr(source) as usize,
-            target_ptr: Arc::as_ptr(target) as usize,
+            source_ptr: Arc::as_ptr(&source) as usize,
+            target_ptr: Arc::as_ptr(&target) as usize,
             relation,
         };
         // Cycle break: if this triple is already being computed higher up
@@ -292,7 +309,7 @@ impl Checker {
         }
         self.relation_in_progress.insert(key);
         self.relater_depth += 1;
-        let result = self.is_type_related_to_inner(source, target, relation);
+        let result = self.is_type_related_to_inner(&source, &target, relation);
         self.relater_depth -= 1;
         self.relation_in_progress.remove(&key);
         self.relation_cache.insert(key, result);

@@ -98,15 +98,22 @@ arity）+ 12 个 parity fixtures。
    `MapFn` 签名从 `Fn(&Type)` 改为 `Fn(&Arc<Type>)`，使不匹配时返回输入
    类型而非错误目标。**遗留**：`isEnumTypeRelatedTo` 的 enum member 值比较
    （需 `getEnumMemberValue` + `enumRelation` 缓存）待后续补齐。
-2. **P3.8 Checker 推断收尾**（部分完成）：`inference.rs` 两处 TODO 已落地
+2. **P3.8 Checker 推断收尾**（已完成）：`inference.rs` 两处 TODO 已落地
    ——contextual typing from return type（`infer_type_arguments` 中从调用
    表达式的上下文类型推断返回类型，覆盖 `let x: T = genericFn(...)` 与
    `return genericFn(...)` 模式）、parameter contextual typing + binding
    patterns（`get_contextual_type_for_initializer_expression` 中 BindingElement
    分支，回溯到 VariableDeclaration initializer 类型并按 array/object pattern
-   提取元素/属性类型）。**遗留**：freshness tracking（`checker.rs:1460`
-   freshType，影响 literal widening 精度）需要 `OBJECT_FLAGS_REQUIRES_WIDENING`
-   在创建类型时设置 + `getWidenedTypeOfObjectLiteral` 完整移植，留后续。
+   提取元素/属性类型）。freshness tracking Phase 1 已落地：`get_fresh_type_of_literal_type`
+   为字面量创建 fresh 变体（反向表示：regular→fresh_type 缓存，fresh→regular_type
+   指向原类型，避免自引用 Arc）；`get_widened_literal_type` 仅对 fresh literal
+   扩宽；`get_widened_literal_type_for_initializer` 按 `NodeFlags::Constant`
+   决定 `const` 保留 / `let` 扩宽；relater `is_type_related_to` 顶部对 fresh
+   literal 替换为 regularType 使其同时可比较 string 与 literal。8 个 parity
+   测试覆盖 const/let 字面量保留与扩宽场景。**遗留**：object literal freshness
+   （`ContainsObjectOrArrayLiteral` flag 设置 + `getWidenedType` gate +
+   `OBJECT_FLAGS_REQUIRES_WIDENING` 结构化扩宽）+ `is_declaration_readonly`
+   留 Phase 2。
 3. **P3.1 Binder flow graph 收尾**（已完成）：`ReduceLabel`/`Shared`/`Referenced`
    后处理（`set_flow_node_referenced` 在 `add_antecedent_to_flow`/
    `create_flow_mutation` 中标记 REFERENCED→SHARED；`create_reduce_label`
