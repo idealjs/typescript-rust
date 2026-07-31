@@ -135,11 +135,11 @@ fn go_oracle() -> Option<PathBuf> {
     let go_worktree = manifest_dir
         .parent()
         .unwrap_or(&manifest_dir)
-        .join("typescript-rust");
+        .join("typescript-go");
 
     for candidate in [
         go_worktree.join("built/local/tsgo"),
-        go_worktree.join("_packages/native-preview/bin/tsgo"),
+        manifest_dir.join("_packages/native-preview/bin/tsgo"),
     ] {
         if is_runnable_tsgo(&candidate) {
             return Some(candidate);
