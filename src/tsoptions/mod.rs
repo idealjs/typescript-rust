@@ -2389,8 +2389,39 @@ fn get_parsed_command_line_of_config_file_with_stack(
         merge_compiler_options(&mut result.compiler_options, &extended_opts);
     }
 
-    // Resolve file names from specs.
+    // Apply `${configDir}` template substitution to the merged compiler
+    // options. This must happen AFTER the merge so that `${configDir}`-prefixed
+    // values from the own config (which survived `resolve_file_path_options`
+    // because they were skipped) are resolved against this config's directory.
+    // Extended config `${configDir}` values were already substituted during
+    // their recursive parse, so only own-config values remain. Mirrors Go's
+    // `handleOptionConfigDirTemplateSubstitution` (tsconfigparsing.go:1210).
     let config_dir = tspath::get_directory_path(config_file_name);
+    handle_config_dir_template_substitution(&mut result.compiler_options, &config_dir);
+
+    // Apply `${configDir}` substitution to include/exclude/files specs.
+    // Mirrors Go's `getSubstitutedStringArrayWithConfigDirTemplate` calls at
+    // tsconfigparsing.go:1290/1298/1309. Inherited specs from extended configs
+    // that contain `${configDir}` are resolved against THIS config's directory
+    // (matching Go's behavior where the inherited placeholder is re-interpreted
+    // in the own config's context).
+    if let Some(substituted) =
+        get_substituted_string_array_with_config_dir_template(&result.include, &config_dir)
+    {
+        result.include = substituted;
+    }
+    if let Some(substituted) =
+        get_substituted_string_array_with_config_dir_template(&result.exclude, &config_dir)
+    {
+        result.exclude = substituted;
+    }
+    if let Some(substituted) =
+        get_substituted_string_array_with_config_dir_template(&result.files_spec, &config_dir)
+    {
+        result.files_spec = substituted;
+    }
+
+    // Resolve file names from specs.
     result.file_names = expand_file_names(
         &result.files_spec,
         result.has_files_spec,
@@ -2538,6 +2569,120 @@ fn json_to_opt_value(v: &crate::json::Value) -> OptValue {
     }
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// `${configDir}` template substitution (TS 5.5+)
+// ────────────────────────────────────────────────────────────────────────────
+
+/// The `${configDir}` template variable (TS 5.5+). When a tsconfig.json value
+/// starts with this prefix, it is resolved relative to the config file's
+/// directory rather than the usual basePath. Mirrors Go's
+/// `configDirTemplate` (`tsconfigparsing.go:428`).
+const CONFIG_DIR_TEMPLATE: &str = "${configDir}";
+
+/// Whether `value` starts with the `${configDir}` template prefix
+/// (case-insensitive). Mirrors Go's `startsWithConfigDirTemplate`.
+fn starts_with_config_dir_template(value: &str) -> bool {
+    value.to_ascii_lowercase().starts_with(&CONFIG_DIR_TEMPLATE.to_ascii_lowercase())
+}
+
+/// Replace the first `${configDir}` in `value` with `./` and resolve the
+/// result as a normalized absolute path against `base_path`. Mirrors Go's
+/// `getSubstitutedPathWithConfigDirTemplate`.
+fn get_substituted_path_with_config_dir_template(value: &str, base_path: &str) -> String {
+    let replaced = value.replacen(CONFIG_DIR_TEMPLATE, "./", 1);
+    tspath::get_normalized_absolute_path(&replaced, base_path)
+}
+
+/// Apply `${configDir}` substitution to a string array. Returns `Some(new_vec)`
+/// if any element was substituted, or `None` if no element needed substitution
+/// (mirrors Go's nil-return convention so callers can skip clone).
+/// Mirrors Go's `getSubstitutedStringArrayWithConfigDirTemplate`.
+fn get_substituted_string_array_with_config_dir_template(
+    list: &[String],
+    base_path: &str,
+) -> Option<Vec<String>> {
+    let mut result: Option<Vec<String>> = None;
+    for (i, element) in list.iter().enumerate() {
+        if starts_with_config_dir_template(element) {
+            let arr = result.get_or_insert_with(|| list.to_vec());
+            arr[i] = get_substituted_path_with_config_dir_template(element, base_path);
+        }
+    }
+    result
+}
+
+/// Apply `${configDir}` substitution to all relevant compiler options after
+/// the merge step. Mirrors Go's `handleOptionConfigDirTemplateSubstitution`.
+///
+/// Affected options: `paths` (each target), `rootDirs`, `typeRoots`,
+/// `generateCpuProfile`, `generateTrace`, `outFile`, `outDir`, `rootDir`,
+/// `tsBuildInfoFile`, `baseUrl`, `declarationDir`.
+fn handle_config_dir_template_substitution(options: &mut CompilerOptions, base_path: &str) {
+    // `paths` — substitute each target list, keyed by pattern.
+    if let Some(paths) = options.paths.as_mut() {
+        let mut changed = false;
+        for (_, targets) in paths.iter_mut() {
+            if let Some(substituted) =
+                get_substituted_string_array_with_config_dir_template(targets, base_path)
+            {
+                *targets = substituted;
+                changed = true;
+            }
+        }
+        if !changed {
+            // No substitution needed; nothing to do.
+        }
+    }
+
+    // `rootDirs`
+    if let Some(root_dirs) =
+        get_substituted_string_array_with_config_dir_template(&options.root_dirs, base_path)
+    {
+        options.root_dirs = root_dirs;
+    }
+
+    // `typeRoots`
+    if let Some(type_roots) =
+        get_substituted_string_array_with_config_dir_template(&options.type_roots, base_path)
+    {
+        options.type_roots = type_roots;
+    }
+
+    // String-valued file-path options.
+    if starts_with_config_dir_template(&options.generate_cpu_profile) {
+        options.generate_cpu_profile =
+            get_substituted_path_with_config_dir_template(&options.generate_cpu_profile, base_path);
+    }
+    if starts_with_config_dir_template(&options.generate_trace) {
+        options.generate_trace =
+            get_substituted_path_with_config_dir_template(&options.generate_trace, base_path);
+    }
+    if starts_with_config_dir_template(&options.out_file) {
+        options.out_file =
+            get_substituted_path_with_config_dir_template(&options.out_file, base_path);
+    }
+    if starts_with_config_dir_template(&options.out_dir) {
+        options.out_dir =
+            get_substituted_path_with_config_dir_template(&options.out_dir, base_path);
+    }
+    if starts_with_config_dir_template(&options.root_dir) {
+        options.root_dir =
+            get_substituted_path_with_config_dir_template(&options.root_dir, base_path);
+    }
+    if starts_with_config_dir_template(&options.ts_build_info_file) {
+        options.ts_build_info_file =
+            get_substituted_path_with_config_dir_template(&options.ts_build_info_file, base_path);
+    }
+    if starts_with_config_dir_template(&options.base_url) {
+        options.base_url =
+            get_substituted_path_with_config_dir_template(&options.base_url, base_path);
+    }
+    if starts_with_config_dir_template(&options.declaration_dir) {
+        options.declaration_dir =
+            get_substituted_path_with_config_dir_template(&options.declaration_dir, base_path);
+    }
+}
+
 /// Resolve `IsFilePath` compiler options to absolute paths relative to
 /// `base_path`, mirroring Go's `normalizeNonListOptionValue`.
 ///
@@ -2547,14 +2692,20 @@ fn json_to_opt_value(v: &crate::json::Value) -> OptValue {
 /// paths during JSON option parsing so that downstream code (emitter, program)
 /// can compare them against absolute source file paths without needing to
 /// track the config directory separately.
+///
+/// `${configDir}`-prefixed values are skipped here and substituted later via
+/// `handle_config_dir_template_substitution` (mirrors Go's
+/// `normalizeNonListOptionValue` which also skips `${configDir}` values).
 fn resolve_file_path_options(options: &mut CompilerOptions, base_path: &str) {
     let resolve = |s: &str| -> String {
         if s.is_empty() {
             return s.to_string();
         }
-        // `${configDir}` templates are already handled elsewhere (substitution
-        // happens before this step); skip them to avoid double resolution.
-        if s.starts_with("${configDir}") || s.starts_with("${configdir}") {
+        // `${configDir}` templates are substituted after the merge step via
+        // `handle_config_dir_template_substitution`; skip them here to avoid
+        // resolving against the wrong base_path (mirrors Go's
+        // `normalizeNonListOptionValue` which checks `startsWithConfigDirTemplate`).
+        if starts_with_config_dir_template(s) {
             return s.to_string();
         }
         tspath::get_normalized_absolute_path(s, base_path)
@@ -4806,5 +4957,291 @@ mod tests {
         assert!(paths.is_tsconfig_only);
         let builders = find_build_only_option("builders").expect("builders must exist");
         assert_eq!(builders.min_value, Some(1));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // `${configDir}` template substitution tests (TS 5.5+)
+    // ──────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn test_config_dir_substitution_out_dir() {
+        // `${configDir}/out` in outDir should resolve to
+        // <config_dir>/out as an absolute path.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "compilerOptions": { "outDir": "${configDir}/out" } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert_eq!(
+            parsed.compiler_options.out_dir,
+            "/proj/out",
+            "expected ${{configDir}}/out to resolve to /proj/out, got {}",
+            parsed.compiler_options.out_dir
+        );
+    }
+
+    #[test]
+    fn test_config_dir_substitution_root_dir() {
+        // `${configDir}/src` in rootDir should resolve to <config_dir>/src.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "compilerOptions": { "rootDir": "${configDir}/src" } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert_eq!(parsed.compiler_options.root_dir, "/proj/src");
+    }
+
+    #[test]
+    fn test_config_dir_substitution_case_insensitive_detection() {
+        // Go's `startsWithConfigDirTemplate` is case-insensitive, but
+        // `getSubstitutedPathWithConfigDirTemplate` uses `strings.Replace`
+        // which is case-sensitive. This means `${configdir}` (all lowercase)
+        // is detected as a configDir template (so `normalizeNonListOptionValue`
+        // skips normal path resolution) but the actual replacement doesn't
+        // match, leaving the literal text in place. This matches Go's behavior.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "compilerOptions": { "outDir": "${configDir}/out" } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // Exact case ${configDir} is substituted correctly.
+        assert_eq!(parsed.compiler_options.out_dir, "/proj/out");
+    }
+
+    #[test]
+    fn test_config_dir_substitution_declaration_dir_and_ts_build_info() {
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "compilerOptions": {
+                "declarationDir": "${configDir}/decls",
+                "tsBuildInfoFile": "${configDir}/build.tsbuildinfo"
+            } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert_eq!(parsed.compiler_options.declaration_dir, "/proj/decls");
+        assert_eq!(parsed.compiler_options.ts_build_info_file, "/proj/build.tsbuildinfo");
+    }
+
+    #[test]
+    fn test_config_dir_substitution_root_dirs_array() {
+        // `${configDir}` in rootDirs array elements should be substituted.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "compilerOptions": {
+                "rootDirs": ["${configDir}/src", "${configDir}/lib"]
+            } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert_eq!(
+            parsed.compiler_options.root_dirs,
+            vec!["/proj/src".to_string(), "/proj/lib".to_string()]
+        );
+    }
+
+    #[test]
+    fn test_config_dir_substitution_paths() {
+        // `${configDir}` in `paths` target values should be substituted.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "compilerOptions": {
+                "baseUrl": ".",
+                "paths": {
+                    "@/*": ["${configDir}/src/*"],
+                    "lib/*": ["${configDir}/lib/*"]
+                }
+            } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        let paths = parsed.compiler_options.paths.expect("paths should be set");
+        assert_eq!(
+            paths.get("@/*").unwrap(),
+            &vec!["/proj/src/*".to_string()]
+        );
+        assert_eq!(
+            paths.get("lib/*").unwrap(),
+            &vec!["/proj/lib/*".to_string()]
+        );
+    }
+
+    #[test]
+    fn test_config_dir_substitution_include() {
+        // `${configDir}/src` in include should resolve and match files.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/src");
+        fs.insert_file("/proj/src/index.ts", "");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "include": ["${configDir}/src"] }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(
+            parsed.file_names.iter().any(|f| f == "/proj/src/index.ts"),
+            "expected /proj/src/index.ts in file_names, got {:?}",
+            parsed.file_names
+        );
+    }
+
+    #[test]
+    fn test_config_dir_substitution_files() {
+        // `${configDir}/main.ts` in files should resolve to the absolute path.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file("/proj/main.ts", "");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "files": ["${configDir}/main.ts"] }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(
+            parsed.file_names.iter().any(|f| f == "/proj/main.ts"),
+            "expected /proj/main.ts in file_names, got {:?}",
+            parsed.file_names
+        );
+    }
+
+    #[test]
+    fn test_config_dir_substitution_exclude() {
+        // `${configDir}/dist` in exclude should resolve and exclude files.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/src");
+        fs.insert_dir("/proj/dist");
+        fs.insert_file("/proj/src/index.ts", "");
+        fs.insert_file("/proj/dist/output.js", "");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "include": ["${configDir}/src/**/*"], "exclude": ["${configDir}/dist"] }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(
+            parsed.file_names.iter().any(|f| f == "/proj/src/index.ts"),
+            "expected /proj/src/index.ts in file_names, got {:?}",
+            parsed.file_names
+        );
+        assert!(
+            !parsed.file_names.iter().any(|f| f.contains("dist")),
+            "expected dist/ files to be excluded, got {:?}",
+            parsed.file_names
+        );
+    }
+
+    #[test]
+    fn test_config_dir_substitution_with_extends() {
+        // `${configDir}` in an extended config's outDir should resolve to
+        // the EXTENDED config's directory, not the own config's directory.
+        // `${configDir}` in the own config should resolve to the own config's
+        // directory.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/base");
+        fs.insert_file(
+            "/proj/base/tsconfig.json",
+            r#"{ "compilerOptions": { "outDir": "${configDir}/out" } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "./base/tsconfig.json", "compilerOptions": { "rootDir": "${configDir}/src" } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // Extended config's outDir resolves to /proj/base/out (extended dir).
+        assert_eq!(
+            parsed.compiler_options.out_dir, "/proj/base/out",
+            "extended config's ${{configDir}} should resolve to extended config's dir"
+        );
+        // Own config's rootDir resolves to /proj/src (own dir).
+        assert_eq!(
+            parsed.compiler_options.root_dir, "/proj/src",
+            "own config's ${{configDir}} should resolve to own config's dir"
+        );
+    }
+
+    #[test]
+    fn test_config_dir_not_substituted_for_non_prefix() {
+        // `${configDir}` must appear at the START of the value; embedded
+        // occurrences are NOT substituted (mirrors Go's
+        // `startsWithConfigDirTemplate`).
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "compilerOptions": { "outDir": "prefix/${configDir}/out" } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // The value does NOT start with ${configDir}, so it's resolved as a
+        // relative path "prefix/${configDir}/out" → absolute path with that
+        // literal text.
+        assert!(
+            parsed.compiler_options.out_dir.contains("configDir"),
+            "embedded ${{configDir}} should not be substituted, got {}",
+            parsed.compiler_options.out_dir
+        );
     }
 }

@@ -265,7 +265,26 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   include-first-extended-wins / json-suffix。**遗留**：package/Node-style
   resolution（`module.ResolveConfig`）、inherited include/exclude/files 的
   path-rewriting（相对 extended config 目录改写）、explicit `null` 清除继承字段、
-  extended config cache、`${configDir}` substitution。
+  extended config cache。
+- [x] `${configDir}` 模板替换（TS 5.5+，已完成）：新增
+  `starts_with_config_dir_template`（大小写不敏感前缀检测，对齐 Go
+  `startsWithConfigDirTemplate`）、`get_substituted_path_with_config_dir_template`
+  （将 `${configDir}` 替换为 `./` 后解析为绝对路径，对齐 Go
+  `getSubstitutedPathWithConfigDirTemplate`）、
+  `get_substituted_string_array_with_config_dir_template`（数组替换，返回
+  `Option<Vec>` 对齐 Go nil-return convention）、
+  `handle_config_dir_template_substitution`（对合并后的 compiler options 执行
+  替换，覆盖 `paths`/`rootDirs`/`typeRoots`/`generateCpuProfile`/`generateTrace`/
+  `outFile`/`outDir`/`rootDir`/`tsBuildInfoFile`/`baseUrl`/`declarationDir`，对齐
+  Go `handleOptionConfigDirTemplateSubstitution`）。在 `resolve_file_path_options`
+  中跳过 `${configDir}` 前缀值（对齐 Go `normalizeNonListOptionValue`），替换在
+  merge 之后执行（确保 own config 的 `${configDir}` 用 own 目录解析，extended
+  config 的 `${configDir}` 已在递归解析时用 extended 目录解析）。include/exclude/
+  files 的 `${configDir}` 也在 `expand_file_names` 之前替换。11 个单测覆盖
+  outDir/rootDir/declarationDir/tsBuildInfoFile/rootDirs/paths/include/exclude/
+  files/extends/非前缀场景。**遗留**：package/Node-style resolution、inherited
+  include/exclude/files 的 path-rewriting、explicit `null` 清除继承字段、
+  extended config cache。
 - [x] 将 raw `references` 升级为 typed project references：新增
   `core::project_reference::ProjectReference { path, original_path, circular }`
   （对齐 Go `core.ProjectReference`）；`ParsedCommandLine.references` 由
