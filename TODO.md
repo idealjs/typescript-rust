@@ -177,8 +177,9 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
 
 - [ ] 对齐 `--help`、`--version`、无输入、未知选项、响应文件等 CLI 行为。
 - [ ] 对齐 `--init` 生成的完整 `tsconfig.json` 模板。
-- [ ] 对齐退出码：`Success`、`DiagnosticsPresent_*`、`InvalidProject_*`、
-  `ProjectReferenceCycle_*`。
+- [x] 对齐退出码：`Success`、`DiagnosticsPresent_*`、`InvalidProject_*`、
+  `ProjectReferenceCycle_*`（已对齐：`ExitStatus` enum + `perform_compilation`
+  状态映射与 Go `tsc.ExitStatus` 完全一致）。
 - [ ] 迁移 Go declaration-driven option parser：NameMap、did-you-mean、
   alternate-mode diagnostics、TSConfigOnly 规则、enum/list/min-value 校验。
 - [ ] 独立建模 watch options，在普通/build parser 中与 compiler/build options 分离。
@@ -186,8 +187,16 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   覆盖规则。
 - [ ] 将 raw `references` 升级为 typed project references：normalized path、
   original path、circular。
-- [ ] 对齐 `extends` 的 package/Node-style resolution、cycle diagnostics 和
-  extended config cache。
+- [x] 对齐 `extends` 的 cycle diagnostics：`extends` 循环检测
+  （`resolution_stack` + `Circularity_detected_while_resolving_configuration_Colon_0`
+  TS18000）+ `extends` 数组支持（`"extends": ["a","b"]` 多路合并）。
+  **遗留**：package/Node-style resolution（`module.ResolveConfig`）和
+  extended config cache 待后续。
+- [x] CLI 错误诊断对齐：`execute/mod.rs` + `tsoptions/mod.rs` 中 ad-hoc
+  `writeln!("error TSxxxx: ...")` 全部替换为 `Diagnostic::new` + 消息常量
+  （TS6369 build-first / TS6370 options-cannot-combine / TS5042 project-mixed /
+  TS5057/TS5081 cannot-find-tsconfig / TS5112 tsconfig-not-loaded / TS5023
+  unknown-compiler-option / TS5083 cannot-read-file）。
 - [ ] 对齐 no-input diagnostics、config source span diagnostics 和 `vfsmatch`
   root-file expansion。
 - [ ] 扩充 parity fixtures：无 tsconfig 且无文件 / 单文件输入 / `-p` 指向目录 /

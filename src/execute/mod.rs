@@ -28,8 +28,17 @@ use crate::ast::diagnostic::Diagnostic;
 use crate::bundled::{self, BundledFS};
 use crate::compiler::{CompilerHost, CompilerHostImpl, Program, ProgramOptions};
 use crate::core::compiler_options::CompilerOptions;
+use crate::core::text::TextRange;
 use crate::core::tristate::Tristate;
 use crate::diagnosticwriter::{format_diagnostic, report_diagnostics};
+use crate::diagnostics::{
+    CANNOT_FIND_A_TSCONFIG_JSON_FILE_AT_THE_CURRENT_DIRECTORY_COLON_0,
+    CANNOT_FIND_A_TSCONFIG_JSON_FILE_AT_THE_SPECIFIED_DIRECTORY_COLON_0, CANNOT_READ_FILE_0,
+    OPTION_BUILD_MUST_BE_THE_FIRST_COMMAND_LINE_ARGUMENT,
+    OPTION_PROJECT_CANNOT_BE_MIXED_WITH_SOURCE_FILES_ON_A_COMMAND_LINE,
+    OPTIONS_0_AND_1_CANNOT_BE_COMBINED, THE_SPECIFIED_PATH_DOES_NOT_EXIST_COLON_0,
+    X_TSCONFIG_JSON_IS_PRESENT_BUT_WILL_NOT_BE_LOADED_IF_FILES_ARE_SPECIFIED_ON_COMMANDLINE_USE_IGNORECONFIG_TO_SKIP_THIS_ERROR,
+};
 use crate::tsoptions::{
     ParsedBuildCommandLine, ParsedCommandLine, get_parsed_command_line_of_config_file,
     parse_build_command_line, parse_command_line,
@@ -145,6 +154,12 @@ impl System for OsSystem {
 // CommandLine entry point
 // ────────────────────────────────────────────────────────────────────────────
 
+/// Build a compiler-level diagnostic (no source file) from a `Message`
+/// constant and its arguments, mirroring `ast.NewCompilerDiagnostic` in Go.
+fn compiler_diagnostic(message: crate::diagnostics::Message, args: Vec<String>) -> Diagnostic {
+    Diagnostic::new(None, TextRange::undefined(), message, args)
+}
+
 /// The main entry point for the `tsc` command line.
 ///
 /// Mirrors `execute.CommandLine` in Go. Dispatches build mode (`-b`) or runs a
@@ -160,10 +175,11 @@ pub fn command_line(sys: &dyn System, args: &[String]) -> CommandLineResult {
 
     if args.iter().skip(1).any(|arg| is_build_mode_arg(arg)) {
         let mut writer = sys.writer();
-        let _ = writeln!(
-            writer,
-            "error TS6369: Option '--build' must be the first command line argument."
+        let diag = compiler_diagnostic(
+            OPTION_BUILD_MUST_BE_THE_FIRST_COMMAND_LINE_ARGUMENT,
+            vec![],
         );
+        let _ = writeln!(writer, "{}", format_diagnostic(&diag, false));
         return CommandLineResult {
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
         };
@@ -230,9 +246,9 @@ fn build_project(
 ) -> CommandLineResult {
     let config_file_name = match resolve_project_config(sys, project) {
         Ok(config) => config,
-        Err(message) => {
+        Err(diag) => {
             let mut writer = sys.writer();
-            let _ = writeln!(writer, "{message}");
+            let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
             return CommandLineResult {
                 status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
             };
@@ -276,19 +292,23 @@ fn build_project(
     CommandLineResult { status }
 }
 
-fn resolve_project_config(sys: &dyn System, project: &str) -> Result<String, String> {
+fn resolve_project_config(sys: &dyn System, project: &str) -> Result<String, Diagnostic> {
     if sys.fs().directory_exists(project) {
         let config = tspath::combine_paths(project, &["tsconfig.json"]);
         if !sys.fs().file_exists(&config) {
-            return Err(format!(
-                "error TS5057: Cannot find a tsconfig.json file at the specified directory: '{config}'."
+            return Err(compiler_diagnostic(
+                CANNOT_FIND_A_TSCONFIG_JSON_FILE_AT_THE_SPECIFIED_DIRECTORY_COLON_0,
+                vec![config],
             ));
         }
         Ok(config)
     } else if sys.fs().file_exists(project) {
         Ok(project.to_string())
     } else {
-        Err(format!("error TS5083: Cannot read file '{project}'."))
+        Err(compiler_diagnostic(
+            CANNOT_READ_FILE_0,
+            vec![project.to_string()],
+        ))
     }
 }
 
@@ -361,10 +381,11 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
     // --watch + --listFilesOnly is invalid.
     if options.watch.is_true() && options.list_files_only.is_true() {
         let mut writer = sys.writer();
-        let _ = writeln!(
-            writer,
-            "error TS5099: Options 'watch' and 'listFilesOnly' cannot be combined."
+        let diag = compiler_diagnostic(
+            OPTIONS_0_AND_1_CANNOT_BE_COMBINED,
+            vec!["watch".to_string(), "listFilesOnly".to_string()],
         );
+        let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
         return CommandLineResult {
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
         };
@@ -376,10 +397,11 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
     if !options.project.is_empty() {
         if !command_line.file_names.is_empty() {
             let mut writer = sys.writer();
-            let _ = writeln!(
-                writer,
-                "error TS5099: Option 'project' cannot be mixed with source files on a command line."
+            let diag = compiler_diagnostic(
+                OPTION_PROJECT_CANNOT_BE_MIXED_WITH_SOURCE_FILES_ON_A_COMMAND_LINE,
+                vec![],
             );
+            let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
             return CommandLineResult {
                 status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
             };
@@ -392,10 +414,11 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
             config_file_name = tspath::combine_paths(&file_or_directory, &["tsconfig.json"]);
             if !sys.fs().file_exists(&config_file_name) {
                 let mut writer = sys.writer();
-                let _ = writeln!(
-                    writer,
-                    "error TS5057: Cannot find a tsconfig.json file at the specified directory: '{config_file_name}'."
+                let diag = compiler_diagnostic(
+                    CANNOT_FIND_A_TSCONFIG_JSON_FILE_AT_THE_SPECIFIED_DIRECTORY_COLON_0,
+                    vec![config_file_name.clone()],
                 );
+                let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
                 return CommandLineResult {
                     status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
                 };
@@ -404,10 +427,11 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
             config_file_name = file_or_directory.clone();
             if !sys.fs().file_exists(&config_file_name) {
                 let mut writer = sys.writer();
-                let _ = writeln!(
-                    writer,
-                    "error TS5058: The specified path does not exist: '{file_or_directory}'."
+                let diag = compiler_diagnostic(
+                    THE_SPECIFIED_PATH_DOES_NOT_EXIST_COLON_0,
+                    vec![file_or_directory.clone()],
                 );
+                let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
                 return CommandLineResult {
                     status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
                 };
@@ -420,20 +444,22 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
         if !command_line.file_names.is_empty() {
             if !config_file_name.is_empty() {
                 let mut writer = sys.writer();
-                let _ = writeln!(
-                    writer,
-                    "error TS5068: Option 'ignoreConfig' must be specified if files are specified on the command line."
+                let diag = compiler_diagnostic(
+                    X_TSCONFIG_JSON_IS_PRESENT_BUT_WILL_NOT_BE_LOADED_IF_FILES_ARE_SPECIFIED_ON_COMMANDLINE_USE_IGNORECONFIG_TO_SKIP_THIS_ERROR,
+                    vec![],
                 );
+                let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
                 return CommandLineResult {
                     status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
                 };
             }
         } else if config_file_name.is_empty() {
             let mut writer = sys.writer();
-            let _ = writeln!(
-                writer,
-                "error TS5057: Cannot find a tsconfig.json file at the current directory."
+            let diag = compiler_diagnostic(
+                CANNOT_FIND_A_TSCONFIG_JSON_FILE_AT_THE_CURRENT_DIRECTORY_COLON_0,
+                vec![search_path],
             );
+            let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
             let _ = writeln!(writer, "  Searching for: tsconfig.json");
             print_help(sys);
             return CommandLineResult {

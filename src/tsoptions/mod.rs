@@ -15,7 +15,10 @@ use crate::core::compiler_options::{
 };
 use crate::core::text::TextRange;
 use crate::core::tristate::Tristate;
-use crate::diagnostics::new_ad_hoc_message;
+use crate::diagnostics::{
+    CANNOT_READ_FILE_0, CIRCULARITY_DETECTED_WHILE_RESOLVING_CONFIGURATION_COLON_0,
+    OPTIONS_0_AND_1_CANNOT_BE_COMBINED, UNKNOWN_COMPILER_OPTION_0, new_ad_hoc_message,
+};
 use crate::glob::Glob;
 use crate::tspath;
 use crate::vfs::FS;
@@ -806,16 +809,36 @@ pub fn parse_build_command_line(
     apply_build_options(&options, &mut build_options);
 
     if build_options.clean.is_true() && build_options.force.is_true() {
-        errors.push(err("Options 'clean' and 'force' cannot be combined."));
+        errors.push(Diagnostic::new(
+            None,
+            TextRange::undefined(),
+            OPTIONS_0_AND_1_CANNOT_BE_COMBINED,
+            vec!["clean".to_string(), "force".to_string()],
+        ));
     }
     if build_options.clean.is_true() && build_options.verbose.is_true() {
-        errors.push(err("Options 'clean' and 'verbose' cannot be combined."));
+        errors.push(Diagnostic::new(
+            None,
+            TextRange::undefined(),
+            OPTIONS_0_AND_1_CANNOT_BE_COMBINED,
+            vec!["clean".to_string(), "verbose".to_string()],
+        ));
     }
     if build_options.clean.is_true() && compiler_options.watch.is_true() {
-        errors.push(err("Options 'clean' and 'watch' cannot be combined."));
+        errors.push(Diagnostic::new(
+            None,
+            TextRange::undefined(),
+            OPTIONS_0_AND_1_CANNOT_BE_COMBINED,
+            vec!["clean".to_string(), "watch".to_string()],
+        ));
     }
     if compiler_options.watch.is_true() && build_options.dry.is_true() {
-        errors.push(err("Options 'watch' and 'dry' cannot be combined."));
+        errors.push(Diagnostic::new(
+            None,
+            TextRange::undefined(),
+            OPTIONS_0_AND_1_CANNOT_BE_COMBINED,
+            vec!["watch".to_string(), "dry".to_string()],
+        ));
     }
 
     ParsedBuildCommandLine {
@@ -861,10 +884,20 @@ fn parse_command_line_worker(
                         }
                         errors.extend(sub_errors);
                     } else {
-                        errors.push(err(format!("Cannot read response file '{response_path}'.")));
+                        errors.push(Diagnostic::new(
+                            None,
+                            TextRange::undefined(),
+                            CANNOT_READ_FILE_0,
+                            vec![response_path.to_string()],
+                        ));
                     }
                 } else {
-                    errors.push(err(format!("Cannot read response file '{response_path}'.")));
+                    errors.push(Diagnostic::new(
+                        None,
+                        TextRange::undefined(),
+                        CANNOT_READ_FILE_0,
+                        vec![response_path.to_string()],
+                    ));
                 }
             }
             '-' => {
@@ -878,7 +911,12 @@ fn parse_command_line_worker(
                 let opt = match find(name) {
                     Some(o) => o,
                     None => {
-                        errors.push(err(format!("Unknown option '{name}'.")));
+                        errors.push(Diagnostic::new(
+                            None,
+                            TextRange::undefined(),
+                            UNKNOWN_COMPILER_OPTION_0,
+                            vec![name.to_string()],
+                        ));
                         continue;
                     }
                 };
@@ -1437,15 +1475,49 @@ pub fn new_line_name(n: NewLineKind) -> Option<&'static str> {
 
 /// Parse a `tsconfig.json` file into a `ParsedCommandLine`, merging `base_options`
 /// (from the command line) and expanding `files`/`include`/`exclude`.
+///
+/// This is the public entry point; it begins `extends` resolution with an empty
+/// resolution stack. Cycle detection and `extends`-as-array handling are
+/// implemented in the internal worker.
 pub fn get_parsed_command_line_of_config_file(
     config_file_name: &str,
     base_options: &CompilerOptions,
     current_dir: &str,
     fs: &dyn FS,
 ) -> ParsedCommandLine {
+    get_parsed_command_line_of_config_file_with_stack(
+        config_file_name,
+        base_options,
+        current_dir,
+        fs,
+        &[],
+    )
+}
+
+fn get_parsed_command_line_of_config_file_with_stack(
+    config_file_name: &str,
+    base_options: &CompilerOptions,
+    current_dir: &str,
+    fs: &dyn FS,
+    resolution_stack: &[String],
+) -> ParsedCommandLine {
     let mut result = ParsedCommandLine::default();
     result.compiler_options = base_options.clone();
     result.config_file_name = config_file_name.to_string();
+
+    // Cycle detection: normalize the config path and check the resolution
+    // stack. A repeat means an `extends` cycle (a -> b -> a); emit the
+    // circularity diagnostic and bail out to avoid infinite recursion.
+    let resolved_path = tspath::get_normalized_absolute_path(config_file_name, current_dir);
+    if resolution_stack.iter().any(|p| p == &resolved_path) {
+        result.errors.push(Diagnostic::new(
+            None,
+            TextRange::undefined(),
+            CIRCULARITY_DETECTED_WHILE_RESOLVING_CONFIGURATION_COLON_0,
+            vec![resolved_path],
+        ));
+        return result;
+    }
 
     let config_text = match fs.read_file(config_file_name) {
         Some(t) => t,
@@ -1481,25 +1553,42 @@ pub fn get_parsed_command_line_of_config_file(
         }
     };
 
-    // `extends`
+    // `extends` — may be a single string or an array of strings. Each target
+    // is resolved and merged in order; earlier targets have lower priority.
+    // The current config's path is pushed onto the resolution stack before
+    // recursing so cycles are detected.
     if let Some(extends) = root_obj.get("extends") {
-        let extends_path = extends_as_path(extends, config_file_name, current_dir, fs);
-        if let Some(ext_path) = extends_path {
-            let parent = get_parsed_command_line_of_config_file(
-                &ext_path,
-                &CompilerOptions::default(),
-                current_dir,
-                fs,
-            );
-            // Merge parent options first (lower priority).
-            merge_compiler_options(&mut result.compiler_options, &parent.compiler_options);
-            result.include = parent.include;
-            result.exclude = parent.exclude;
-            result.files_spec = parent.files_spec;
-            result.has_include_spec = parent.has_include_spec;
-            result.has_exclude_spec = parent.has_exclude_spec;
-            result.has_files_spec = parent.has_files_spec;
-            result.errors.extend(parent.errors);
+        let extends_paths = extends_as_paths(extends, config_file_name, current_dir, fs);
+        if !extends_paths.is_empty() {
+            let mut new_stack: Vec<String> = resolution_stack.to_vec();
+            new_stack.push(resolved_path.clone());
+            for ext_path in extends_paths {
+                let parent = get_parsed_command_line_of_config_file_with_stack(
+                    &ext_path,
+                    &CompilerOptions::default(),
+                    current_dir,
+                    fs,
+                    &new_stack,
+                );
+                // Merge parent options first (lower priority).
+                merge_compiler_options(&mut result.compiler_options, &parent.compiler_options);
+                // Inherit include/exclude/files specs from the first extended
+                // config that declares them; the own config (parsed below)
+                // overrides these when present.
+                if parent.has_include_spec {
+                    result.include = parent.include;
+                    result.has_include_spec = true;
+                }
+                if parent.has_exclude_spec {
+                    result.exclude = parent.exclude;
+                    result.has_exclude_spec = true;
+                }
+                if parent.has_files_spec {
+                    result.files_spec = parent.files_spec;
+                    result.has_files_spec = true;
+                }
+                result.errors.extend(parent.errors);
+            }
         }
     }
 
@@ -1587,20 +1676,42 @@ pub fn get_parsed_command_line_of_config_file(
     result
 }
 
-fn extends_as_path(
+/// Resolve the `extends` field of a tsconfig into a list of concrete config
+/// file paths. `extends` may be a single string or an array of strings (TS 5.0+);
+/// each entry is resolved relative to the extending config's directory, then
+/// relative to `current_dir`. Non-string entries are ignored. Returns an empty
+/// vec when no valid extends target can be produced.
+fn extends_as_paths(
     extends: &crate::json::Value,
     config_file_name: &str,
     current_dir: &str,
     fs: &dyn FS,
+) -> Vec<String> {
+    // Accept either a single string or an array of strings.
+    let specs: Vec<String> = match extends {
+        crate::json::Value::String(s) => vec![s.clone()],
+        crate::json::Value::Array(arr) => arr
+            .iter()
+            .filter_map(|v| v.as_str().map(|s| s.to_string()))
+            .collect(),
+        _ => return Vec::new(),
+    };
+    specs
+        .into_iter()
+        .filter_map(|s| resolve_single_extends_path(&s, config_file_name, current_dir, fs))
+        .collect()
+}
+
+fn resolve_single_extends_path(
+    s: &str,
+    config_file_name: &str,
+    current_dir: &str,
+    fs: &dyn FS,
 ) -> Option<String> {
-    let s = extends.as_str()?;
     let config_dir = tspath::get_directory_path(config_file_name);
     let base = tspath::combine_paths(&config_dir, &[s]);
-    // Try as-is, then with /tsconfig.json, then as node_modules path.
-    let candidates = [
-        base.clone(),
-        tspath::combine_paths(&base, &["tsconfig.json"]),
-    ];
+    // Try as-is, then with /tsconfig.json appended.
+    let candidates = [base.clone(), tspath::combine_paths(&base, &["tsconfig.json"])];
     for c in &candidates {
         if fs.file_exists(c) {
             return Some(c.clone());
@@ -2118,13 +2229,14 @@ mod tests {
     // ──────────────────────────────────────────────────────────────────────
 
     /// Returns true if any diagnostic on `parsed` carries a message argument
-    /// containing `needle`. The Rust port stores ad-hoc error text in
-    /// `Diagnostic.message_args[0]`.
+    /// or message text containing `needle`. Ad-hoc errors store their text in
+    /// `Diagnostic.message_args[0]`; diagnostics built from a `Message`
+    /// constant store their template text in `Diagnostic.message`.
     fn has_error_containing(parsed: &ParsedCommandLine, needle: &str) -> bool {
-        parsed
-            .errors
-            .iter()
-            .any(|e| e.message_args.iter().any(|a| a.contains(needle)))
+        parsed.errors.iter().any(|e| {
+            e.message_args.iter().any(|a| a.contains(needle))
+                || e.message.map(|m| m.text.contains(needle)).unwrap_or(false)
+        })
     }
 
     fn args(items: &[&str]) -> Vec<String> {
@@ -2294,7 +2406,7 @@ mod tests {
     #[test]
     fn test_parse_command_line_unknown_option_error() {
         let parsed = parse_command_line(&args(&["--unknownOpt", "0.ts"]), "/proj", None);
-        assert!(has_error_containing(&parsed, "Unknown option"));
+        assert!(has_error_containing(&parsed, "Unknown compiler option"));
         assert!(has_error_containing(&parsed, "unknownOpt"));
     }
 
@@ -2426,11 +2538,11 @@ mod tests {
         // TestResponseFileDoesNotPanic).
         let parsed = parse_command_line(&args(&["@"]), "/proj", None);
         assert!(!parsed.errors.is_empty());
-        assert!(has_error_containing(&parsed, "response file"));
+        assert!(has_error_containing(&parsed, "Cannot read file"));
 
         let parsed = parse_command_line(&args(&["@blah"]), "/proj", None);
         assert!(!parsed.errors.is_empty());
-        assert!(has_error_containing(&parsed, "response file"));
+        assert!(has_error_containing(&parsed, "Cannot read file"));
         assert!(has_error_containing(&parsed, "blah"));
     }
 
@@ -2441,7 +2553,7 @@ mod tests {
         fs.insert_dir("/proj");
         let parsed = parse_command_line(&args(&["@missing.rsp"]), "/proj", Some(&fs));
         assert!(!parsed.errors.is_empty());
-        assert!(has_error_containing(&parsed, "response file"));
+        assert!(has_error_containing(&parsed, "Cannot read file"));
     }
 
     #[test]
@@ -2456,7 +2568,7 @@ mod tests {
         let parsed = parse_command_line(&args(&["@args.rsp"]), "/proj", Some(&fs));
         assert_eq!(parsed.file_names, vec!["/proj/0.ts"]);
         // No errors reading the response file.
-        assert!(!has_error_containing(&parsed, "response file"));
+        assert!(!has_error_containing(&parsed, "Cannot read file"));
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -2612,6 +2724,82 @@ mod tests {
         assert_eq!(parsed.compiler_options.out_dir, "./dist");
         assert!(parsed.file_names.contains(&"/proj/src/a.ts".to_string()));
         assert!(parsed.file_names.contains(&"/proj/src/b.ts".to_string()));
+    }
+
+    #[test]
+    fn test_parse_tsconfig_extends_circular_is_detected() {
+        // A circular `extends` chain (a -> b -> a) must terminate and emit the
+        // circularity diagnostic (code 18000) instead of stack-overflowing.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/a.tsconfig.json",
+            r#"{ "extends": "b.tsconfig.json", "compilerOptions": { "target": "ES2020" } }"#,
+        );
+        fs.insert_file(
+            "/proj/b.tsconfig.json",
+            r#"{ "extends": "a.tsconfig.json", "compilerOptions": { "strict": true } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/a.tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // The circularity diagnostic must be present with code 18000.
+        assert!(
+            parsed
+                .errors
+                .iter()
+                .any(|e| e.code == CIRCULARITY_DETECTED_WHILE_RESOLVING_CONFIGURATION_COLON_0.code),
+            "expected a circularity diagnostic, got errors: {:?}",
+            parsed
+                .errors
+                .iter()
+                .map(|e| e.code)
+                .collect::<Vec<_>>()
+        );
+        // Resolution terminated without stack overflow; own options still apply.
+        assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
+    }
+
+    #[test]
+    fn test_parse_tsconfig_extends_as_array_merges_all() {
+        // `extends` may be an array of strings (TS 5.0+); each target is merged
+        // in order, and the own config is applied on top. Here both bases
+        // contribute distinct options and the own config contributes its own.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/base1.json",
+            r#"{ "compilerOptions": { "target": "ES2020", "strict": true } }"#,
+        );
+        fs.insert_file(
+            "/proj/base2.json",
+            r#"{ "compilerOptions": { "module": "CommonJS", "declaration": true } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{
+            "extends": ["base1.json", "base2.json"],
+            "compilerOptions": { "outDir": "./dist" }
+        }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(parsed.errors.is_empty(), "unexpected errors: {:?}", parsed.errors);
+        // From base1.
+        assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
+        assert!(parsed.compiler_options.strict.is_true());
+        // From base2.
+        assert_eq!(parsed.compiler_options.module, ModuleKind::CommonJS);
+        assert!(parsed.compiler_options.declaration.is_true());
+        // Own config contributes its own (non-conflicting) option.
+        assert_eq!(parsed.compiler_options.out_dir, "./dist");
     }
 
     #[test]
