@@ -1034,7 +1034,11 @@ variable/alias）；`variable_decl_prefix` 区分 let/const/var；
 已完成：Go diagnostic message 表迁移（2154 条，`messages_generated.rs`）；
 主要 code/category/message 对齐；`key_to_message`/`format_message` 占位符插值。
 
-- [ ] `format_message` 行为完全对齐 Go（UTF-8 校验、无效索引 panic）。
+- [x] `format_message` 行为完全对齐 Go（已完成）：改用 `regex` crate 的
+  `{(\d+)}` 正则匹配占位符（对齐 Go `placeholderRegexp`）；越界索引 panic
+  `"Invalid formatting placeholder"`（对齐 Go `diagnostics.go:128-129`）；
+  UTF-8 校验在 Rust 中由 `&str` 类型保证（Go 的 `strings.ToValidUTF8` 为
+  no-op）。2 个新单测覆盖非占位符花括号保留 + 越界 panic。
 - [ ] 本地化支持（locale/loc_generated）。
 
 ### P3.14 Checker parity fixtures（已完成）

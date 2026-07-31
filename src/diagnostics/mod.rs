@@ -109,47 +109,36 @@ pub fn new_ad_hoc_message(text: &'static str) -> Message {
 
 /// Format a text template by replacing `{N}` placeholders with args.
 ///
-/// Mirrors `diagnostics.Format` in Go.
+/// Mirrors `diagnostics.Format` in Go (`diagnostics.go:117-133`):
+/// - Returns `text` unchanged when `args` is empty.
+/// - Replaces invalid UTF-8 in args with U+FFFD (Rust `&str` is always
+///   valid UTF-8, so this is a no-op here, but the sanitization step is
+///   documented for parity).
+/// - Uses the regex `{(\d+)}` to locate placeholders; for each match,
+///   parses the index and panics with `"Invalid formatting placeholder"`
+///   when the index is out of range — matching Go's panic on programming
+///   errors (a diagnostic text referencing `{N}` must supply enough args).
 pub fn format_message(text: &str, args: &[&str]) -> String {
     if args.is_empty() {
         return text.to_string();
     }
 
-    let mut result = String::with_capacity(text.len());
-    let mut chars = text.chars().peekable();
-
-    while let Some(c) = chars.next() {
-        if c == '{' {
-            let mut num_str = String::new();
-            while let Some(&d) = chars.peek() {
-                if d.is_ascii_digit() {
-                    num_str.push(d);
-                    chars.next();
-                } else {
-                    break;
-                }
-            }
-            if chars.peek() == Some(&'}') {
-                chars.next();
-                if let Ok(index) = num_str.parse::<usize>() {
-                    if index < args.len() {
-                        result.push_str(args[index]);
-                        continue;
-                    }
-                }
-            }
-            result.push('{');
-            result.push_str(&num_str);
-            if chars.peek() == Some(&'}') {
-                result.push('}');
-                chars.next();
-            }
-        } else {
-            result.push(c);
+    // Rust `&str` is always valid UTF-8, so the `strings.ToValidUTF8`
+    // sanitization in Go is a no-op here. Args are used as-is.
+    let re = regex::Regex::new(r"\{(\d+)\}").expect("valid regex");
+    re.replace_all(text, |caps: &regex::Captures| {
+        let index: usize = caps
+            .get(1)
+            .expect("capture group 1")
+            .as_str()
+            .parse()
+            .expect("Invalid formatting placeholder");
+        if index >= args.len() {
+            panic!("Invalid formatting placeholder");
         }
-    }
-
-    result
+        args[index]
+    })
+    .into_owned()
 }
 
 #[cfg(test)]
@@ -188,5 +177,20 @@ mod tests {
         assert_eq!(msg.code, -1);
         assert_eq!(msg.category, Category::Error);
         assert_eq!(msg.text, "something went wrong");
+    }
+
+    #[test]
+    fn format_non_placeholder_braces_left_untouched() {
+        // `{abc}` is not a valid `{N}` placeholder and is left as-is,
+        // matching Go's regex `{(\d+)}` which does not match it.
+        assert_eq!(format_message("{abc}", &["x"]), "{abc}");
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid formatting placeholder")]
+    fn format_panics_on_out_of_range_index() {
+        // Go panics when a `{N}` placeholder references an arg index that
+        // does not exist; Rust aligns with this behavior.
+        format_message("{5}", &["a", "b", "c"]);
     }
 }
