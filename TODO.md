@@ -546,7 +546,16 @@ parser 侧映射到 `UNKNOWN_REGULAR_EXPRESSION_FLAG`/`DUPLICATE_REGULAR_EXPRESS
 已完成：`ScanJsxToken`/`ScanJsxIdentifier`/`ScanJsxAttributeValue` 全套迁移
 与 JSX parser 重写（8 个测试通过）。
 
-- [ ] 迁移 `ScanJSDocToken` + `scanJSDocCommentForTags`（依赖 P2.7 JSDoc parser）。
+- [x] 迁移 `ScanJSDocToken` + `scanJSDocCommentForTags`（已完成）：`scanJSDocCommentForTags`
+  在 P2.1 JSDoc TokenFlags 阶段已落地（扫描 `@deprecated`/`@see`/`@link` 标签设置
+  token flags）。本轮新增 `scan_jsdoc_token`（对齐 Go `ScanJSDocToken`
+  `scanner.go:1418-1525`：`@`/`*`/`{`/`}`/`[`/`]`/`(`/`)`/`<`/`>`/`=`/`,`/`.`/`` ` ``/`#`/
+  空白/换行/标识符（含 `-`），产生对应 SyntaxKind）、`scan_jsdoc_comment_text_token`
+  （对齐 Go `ScanJSDocCommentTextToken` `scanner.go:1374-1405`：累积 prose 文本直到
+  换行/`` ` ``/`{`/`@tag` 边界，`in_backticks` 模式仅换行/`` ` `` 终止）、
+  `can_follow_jsdoc_at`（对齐 Go `CanFollowJSDocAt`：标识符起始/空白/换行/EOF 为 true）。
+  新增 `is_whitespace_single_line` 辅助。17 个新单测覆盖。**剩余**：`@` 后 Unicode
+  escape 标识符处理（罕见，延后）。
 
 ### P2.4 Parser 类型语法补齐（已全部完成）
 

@@ -1786,6 +1786,150 @@ impl Scanner {
         // Fall back to regular scan for `{` or anything else
         self.scan()
     }
+
+    // ────────────────────────────────────────────────────────────────────
+    // JSDoc interior scanning
+    //
+    // Mirrors Go's `ScanJSDocToken` / `ScanJSDocCommentTextToken` /
+    // `CanFollowJSDocAt` (`scanner.go:1374-1525`). These operate on the
+    // scanner's `text` bounded by `end`; the JSDoc parser temporarily
+    // re-points the scanner at the comment body before calling them.
+    // ────────────────────────────────────────────────────────────────────
+
+    /// Peek at the character at the current position (expected to be right
+    /// after `@`) and return `true` if a JSDoc tag can follow. Identifier
+    /// starts indicate a tag name; whitespace, newlines, and EOF are also
+    /// accepted to support incomplete tags for code completion. Mirrors Go's
+    /// `CanFollowJSDocAt` (`scanner.go:1410-1416`).
+    pub fn can_follow_jsdoc_at(&self) -> bool {
+        if self.pos >= self.end {
+            return true;
+        }
+        let (ch, _) = decode_char(&self.text, self.pos);
+        is_identifier_start(ch) || is_whitespace_single_line(ch) || is_line_break(ch)
+    }
+
+    /// Scan a single JSDoc interior token. Produces `WhitespaceTrivia`,
+    /// `NewLineTrivia`, `AtToken`, `AsteriskToken`, braces, brackets, parens,
+    /// angle brackets, `=`, `,`, `.`, `` ` ``, `#`, identifiers (including
+    /// `-`), or `Unknown`. Mirrors Go's `ScanJSDocToken`
+    /// (`scanner.go:1418-1525`). Unicode-escape identifier handling is
+    /// deferred (rare in JSDoc; can be added when needed).
+    pub fn scan_jsdoc_token(&mut self) -> SyntaxKind {
+        self.full_start_pos = self.pos;
+        self.token_flags = TOKEN_FLAGS_NONE;
+        if self.pos >= self.end {
+            self.token = SyntaxKind::EndOfFile;
+            return self.token;
+        }
+        self.token_pos = self.pos;
+        let (ch, size) = decode_char(&self.text, self.pos);
+        self.pos += size;
+        self.token = match ch {
+            '\t' | '\x0B' | '\x0C' | ' ' => {
+                while self.pos < self.end {
+                    let (ch2, size2) = decode_char(&self.text, self.pos);
+                    if size2 == 0 || !is_whitespace_single_line(ch2) {
+                        break;
+                    }
+                    self.pos += size2;
+                }
+                SyntaxKind::WhitespaceTrivia
+            }
+            '@' => SyntaxKind::AtToken,
+            '\r' => {
+                if self.pos < self.end && self.text.as_bytes()[self.pos] == b'\n' {
+                    self.pos += 1;
+                }
+                self.token_flags |= TOKEN_FLAGS_PRECEDING_LINE_BREAK;
+                SyntaxKind::NewLineTrivia
+            }
+            '\n' => {
+                self.token_flags |= TOKEN_FLAGS_PRECEDING_LINE_BREAK;
+                SyntaxKind::NewLineTrivia
+            }
+            '*' => SyntaxKind::AsteriskToken,
+            '{' => SyntaxKind::OpenBraceToken,
+            '}' => SyntaxKind::CloseBraceToken,
+            '[' => SyntaxKind::OpenBracketToken,
+            ']' => SyntaxKind::CloseBracketToken,
+            '(' => SyntaxKind::OpenParenToken,
+            ')' => SyntaxKind::CloseParenToken,
+            '<' => SyntaxKind::LessThanToken,
+            '>' => SyntaxKind::GreaterThanToken,
+            '=' => SyntaxKind::EqualsToken,
+            ',' => SyntaxKind::CommaToken,
+            '.' => SyntaxKind::DotToken,
+            '`' => SyntaxKind::BacktickToken,
+            '#' => SyntaxKind::HashToken,
+            '\\' => SyntaxKind::Unknown,
+            _ if is_identifier_start(ch) => {
+                while self.pos < self.end {
+                    let (next_ch, next_size) = decode_char(&self.text, self.pos);
+                    if !is_identifier_part(next_ch) && next_ch != '-' {
+                        break;
+                    }
+                    self.pos += next_size;
+                }
+                let text = &self.text[self.token_pos..self.pos];
+                string_to_keyword(text).unwrap_or(SyntaxKind::Identifier)
+            }
+            _ => SyntaxKind::Unknown,
+        };
+        self.token_end = self.pos;
+        self.token
+    }
+
+    /// Scan a JSDoc comment text token — a run of prose until a line break,
+    /// `` ` ``, `{`, or a valid `@tag` boundary. When `in_backticks` is true
+    /// (inside a fenced code block), only line breaks and `` ` `` terminate
+    /// the run. If the run is empty (immediately at a special char), falls
+    /// through to `scan_jsdoc_token`. Mirrors Go's
+    /// `ScanJSDocCommentTextToken` (`scanner.go:1374-1405`).
+    pub fn scan_jsdoc_comment_text_token(&mut self, in_backticks: bool) -> SyntaxKind {
+        self.full_start_pos = self.pos;
+        self.token_flags = TOKEN_FLAGS_NONE;
+        if self.pos >= self.end {
+            self.token = SyntaxKind::EndOfFile;
+            return self.token;
+        }
+        self.token_pos = self.pos;
+        while self.pos < self.end {
+            let (ch, size) = decode_char(&self.text, self.pos);
+            if is_line_break(ch) || ch == '`' {
+                break;
+            }
+            if !in_backticks {
+                if ch == '{' {
+                    break;
+                } else if ch == '@' {
+                    let prev = if self.pos > 0 {
+                        decode_char(&self.text, self.pos - size).0
+                    } else {
+                        '\0'
+                    };
+                    if is_whitespace_single_line(prev) {
+                        let next_pos = self.pos + size;
+                        let next = if next_pos < self.end {
+                            decode_char(&self.text, next_pos).0
+                        } else {
+                            '\0'
+                        };
+                        if is_identifier_start(next) {
+                            break;
+                        }
+                    }
+                }
+            }
+            self.pos += size;
+        }
+        if self.pos == self.token_pos {
+            return self.scan_jsdoc_token();
+        }
+        self.token = SyntaxKind::JSDocCommentTextToken;
+        self.token_end = self.pos;
+        self.token
+    }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -1989,6 +2133,12 @@ fn decode_char(text: &str, pos: usize) -> (char, usize) {
 /// `stringutil.IsWhiteSpaceLike`.
 fn is_whitespace_like(c: char) -> bool {
     matches!(c, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}') || c.is_whitespace()
+}
+
+/// Whether `c` is single-line whitespace (not a line break). Mirrors Go's
+/// `stringutil.IsWhiteSpaceSingleLine`.
+fn is_whitespace_single_line(c: char) -> bool {
+    matches!(c, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}')
 }
 
 /// Whether `text` starts with one of the given JSDoc tag `names` followed by
@@ -3909,5 +4059,175 @@ mod tests {
         // Error should start at `-` (pos 0) with length 5.
         assert_eq!(errors[0].pos, 0);
         assert_eq!(errors[0].length, 5);
+    }
+
+    // ────────────────────────────────────────────────────────────────
+    // JSDoc scanner tests
+    // ────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn jsdoc_token_at_sign() {
+        let mut s = Scanner::new("@param");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::AtToken);
+    }
+
+    #[test]
+    fn jsdoc_token_asterisk() {
+        let mut s = Scanner::new("*");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::AsteriskToken);
+    }
+
+    #[test]
+    fn jsdoc_token_identifier_and_keyword() {
+        let mut s = Scanner::new("param");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::Identifier);
+        let mut s = Scanner::new("return");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::ReturnKeyword);
+    }
+
+    #[test]
+    fn jsdoc_token_identifier_with_dash() {
+        // JSDoc tag names may contain `-` (e.g. `@custom-tag`).
+        let mut s = Scanner::new("custom-tag");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::Identifier);
+        assert_eq!(s.token_text(), "custom-tag");
+    }
+
+    #[test]
+    fn jsdoc_token_whitespace() {
+        let mut s = Scanner::new("   \t  ");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::WhitespaceTrivia);
+    }
+
+    #[test]
+    fn jsdoc_token_newline() {
+        let mut s = Scanner::new("\n");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::NewLineTrivia);
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_PRECEDING_LINE_BREAK
+        ));
+    }
+
+    #[test]
+    fn jsdoc_token_crlf_newline() {
+        let mut s = Scanner::new("\r\n");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::NewLineTrivia);
+    }
+
+    #[test]
+    fn jsdoc_token_braces_and_brackets() {
+        let mut s = Scanner::new("{");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::OpenBraceToken);
+        let mut s = Scanner::new("}");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::CloseBraceToken);
+        let mut s = Scanner::new("[");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::OpenBracketToken);
+        let mut s = Scanner::new("]");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::CloseBracketToken);
+    }
+
+    #[test]
+    fn jsdoc_token_punctuation() {
+        let mut s = Scanner::new("(");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::OpenParenToken);
+        let mut s = Scanner::new("`");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::BacktickToken);
+        let mut s = Scanner::new("#");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::HashToken);
+    }
+
+    #[test]
+    fn jsdoc_token_eof() {
+        let mut s = Scanner::new("");
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::EndOfFile);
+    }
+
+    #[test]
+    fn jsdoc_can_follow_at_identifier() {
+        let s = Scanner::new("param");
+        assert!(s.can_follow_jsdoc_at());
+    }
+
+    #[test]
+    fn jsdoc_can_follow_at_whitespace() {
+        let s = Scanner::new(" ");
+        assert!(s.can_follow_jsdoc_at());
+    }
+
+    #[test]
+    fn jsdoc_can_follow_at_eof() {
+        let s = Scanner::new("");
+        assert!(s.can_follow_jsdoc_at());
+    }
+
+    #[test]
+    fn jsdoc_can_follow_at_digit_false() {
+        let s = Scanner::new("1abc");
+        assert!(!s.can_follow_jsdoc_at());
+    }
+
+    #[test]
+    fn jsdoc_comment_text_token_prose() {
+        let mut s = Scanner::new("This is a description. ");
+        assert_eq!(
+            s.scan_jsdoc_comment_text_token(false),
+            SyntaxKind::JSDocCommentTextToken
+        );
+        assert_eq!(s.token_text(), "This is a description. ");
+    }
+
+    #[test]
+    fn jsdoc_comment_text_token_stops_at_brace() {
+        let mut s = Scanner::new("before {type} after");
+        assert_eq!(
+            s.scan_jsdoc_comment_text_token(false),
+            SyntaxKind::JSDocCommentTextToken
+        );
+        assert_eq!(s.token_text(), "before ");
+        // Next token should be the brace.
+        assert_eq!(s.scan_jsdoc_token(), SyntaxKind::OpenBraceToken);
+    }
+
+    #[test]
+    fn jsdoc_comment_text_token_stops_at_newline() {
+        let mut s = Scanner::new("line1\nline2");
+        assert_eq!(
+            s.scan_jsdoc_comment_text_token(false),
+            SyntaxKind::JSDocCommentTextToken
+        );
+        assert_eq!(s.token_text(), "line1");
+    }
+
+    #[test]
+    fn jsdoc_comment_text_token_at_tag_boundary() {
+        // ` @param` — the `@` after whitespace starts a new tag.
+        let mut s = Scanner::new("text @param");
+        assert_eq!(
+            s.scan_jsdoc_comment_text_token(false),
+            SyntaxKind::JSDocCommentTextToken
+        );
+        assert_eq!(s.token_text(), "text ");
+    }
+
+    #[test]
+    fn jsdoc_comment_text_token_in_backticks_ignores_at_and_brace() {
+        let mut s = Scanner::new("code {@code x} more");
+        assert_eq!(
+            s.scan_jsdoc_comment_text_token(true),
+            SyntaxKind::JSDocCommentTextToken
+        );
+        // In backticks mode, `{` does not terminate; only `` ` `` or newline.
+        assert_eq!(s.token_text(), "code {@code x} more");
+    }
+
+    #[test]
+    fn jsdoc_comment_text_token_empty_falls_through() {
+        // Immediately at `{` — text run is empty, falls through to scan_jsdoc_token.
+        let mut s = Scanner::new("{");
+        assert_eq!(
+            s.scan_jsdoc_comment_text_token(false),
+            SyntaxKind::OpenBraceToken
+        );
     }
 }
