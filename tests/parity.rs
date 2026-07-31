@@ -8,31 +8,91 @@ use std::time::{SystemTime, UNIX_EPOCH};
 struct Case {
     name: &'static str,
     args: &'static [&'static str],
+    /// Whether the command is expected to exit with code 0.
+    expect_success: bool,
+    /// Expected emitted files (relative path → expected content).
     expected_files: &'static [(&'static str, &'static str)],
+    /// Substrings that stdout must contain (checked when non-empty).
+    stdout_contains: &'static [&'static str],
 }
 
 const CASES: &[Case] = &[
     Case {
         name: "simple_emit",
         args: &[],
+        expect_success: true,
         // No rootDir: the config file's directory is the common source dir,
         // so src/main.ts emits to dist/src/main.js (mirrors Go oracle).
         expected_files: &[("dist/src/main.js", "let answer = 42;\n")],
+        stdout_contains: &[],
     },
     Case {
         name: "type_only_declarations",
         args: &[],
+        expect_success: true,
         expected_files: &[("dist/src/main.js", "const value = { name: \"Ada\" };\n")],
+        stdout_contains: &[],
     },
     Case {
         name: "nested_out_dir",
         args: &[],
+        expect_success: true,
         // rootDir: "src" + outDir: "dist" preserves the relative directory
         // structure, so src/lib/main.ts emits to dist/lib/main.js.
         expected_files: &[(
             "dist/lib/main.js",
             "export function square(x) { return x * x; }\n",
         )],
+        stdout_contains: &[],
+    },
+    Case {
+        name: "single_file",
+        // No tsconfig: compile a single .ts file directly.
+        // Without outDir, output is emitted alongside the source.
+        args: &["main.ts"],
+        expect_success: true,
+        expected_files: &[("main.js", "const greeting = \"hello\";\nconsole.log(greeting);\n")],
+        stdout_contains: &[],
+    },
+    Case {
+        name: "project_dir",
+        // -p . points to a directory containing tsconfig.json.
+        args: &["-p", "."],
+        expect_success: true,
+        expected_files: &[("dist/src/main.js", "function add(a, b) { return a + b; }\nexport { add };\n")],
+        stdout_contains: &[],
+    },
+    Case {
+        name: "project_file",
+        // -p tsconfig.json points to the config file directly.
+        args: &["-p", "tsconfig.json"],
+        expect_success: true,
+        expected_files: &[("dist/src/main.js", "const x = 42;\nexport { x };\n")],
+        stdout_contains: &[],
+    },
+    Case {
+        name: "jsonc_config",
+        // tsconfig.json with JSONC comments should be parsed correctly.
+        args: &[],
+        expect_success: true,
+        expected_files: &[("dist/src/main.js", "const y = 99;\nexport { y };\n")],
+        stdout_contains: &[],
+    },
+    Case {
+        name: "show_config",
+        // --showConfig outputs the resolved config as JSON; no files emitted.
+        args: &["--showConfig"],
+        expect_success: true,
+        expected_files: &[],
+        stdout_contains: &["\"compilerOptions\"", "\"outDir\"", "\"strict\""],
+    },
+    Case {
+        name: "invalid_json",
+        // Invalid JSON in tsconfig should report an error and exit non-zero.
+        args: &[],
+        expect_success: false,
+        expected_files: &[],
+        stdout_contains: &[],
     },
 ];
 
@@ -42,15 +102,40 @@ fn rust_smoke_cases_emit_expected_outputs() {
     for case in CASES {
         let work_dir = copy_case_to_temp(case.name);
         let output = run(&tsox, case.args, &work_dir);
-        assert!(
-            output.status.success(),
-            "Rust tsox failed for case '{}'\nstatus: {:?}\nstdout:\n{}\nstderr:\n{}",
-            case.name,
-            output.status.code(),
-            String::from_utf8_lossy(&output.stdout),
-            String::from_utf8_lossy(&output.stderr)
-        );
 
+        if case.expect_success {
+            assert!(
+                output.status.success(),
+                "Rust tsox failed for case '{}'\nstatus: {:?}\nstdout:\n{}\nstderr:\n{}",
+                case.name,
+                output.status.code(),
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr)
+            );
+        } else {
+            assert!(
+                !output.status.success(),
+                "Rust tsox unexpectedly succeeded for case '{}'\nstatus: {:?}\nstdout:\n{}\nstderr:\n{}",
+                case.name,
+                output.status.code(),
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+
+        // Check stdout contains expected substrings.
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        for needle in case.stdout_contains {
+            assert!(
+                stdout.contains(needle),
+                "case '{}' stdout missing '{}'\nstdout:\n{}",
+                case.name,
+                needle,
+                stdout
+            );
+        }
+
+        // Check emitted files.
         for (path, expected) in case.expected_files {
             let actual_path = work_dir.join(path);
             let actual = fs::read_to_string(&actual_path).unwrap_or_else(|e| {

@@ -253,8 +253,12 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   `shouldReportNoInputFiles` + `canJsonReportNoInputFiles`。3 个单测覆盖
   emit / `files:[]` 抑制 / `references` 抑制。**剩余**：config source span
   diagnostics（带 file/range 的诊断）和 `vfsmatch` root-file expansion。
-- [ ] 扩充 parity fixtures：无 tsconfig 且无文件 / 单文件输入 / `-p` 指向目录 /
-  `-p` 指向文件 / `--showConfig` / response file / invalid JSON / JSONC。
+- [x] 扩充 parity fixtures：无 tsconfig 且无文件 / 单文件输入 / `-p` 指向目录 /
+  `-p` 指向文件 / `--showConfig` / invalid JSON / JSONC。新增 6 个 fixture
+  （`single_file`/`project_dir`/`project_file`/`jsonc_config`/`show_config`/
+  `invalid_json`）+ `Case` 结构扩展 `expect_success`/`stdout_contains` 字段，
+  `rust_smoke_cases_emit_expected_outputs` 单测覆盖全部 9 个场景。
+  **遗留**：response file（`@args.txt`）解析。
 - [x] 修复 `rootDir/outDir` 输出路径差异：emitter 新增
   `compute_program_common_source_directory`（对齐 Go
   `outputpaths.GetCommonSourceDirectory`）+ `get_source_file_path_in_new_dir`

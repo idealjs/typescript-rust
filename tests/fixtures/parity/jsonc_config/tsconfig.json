@@ -1,0 +1,9 @@
+{
+  // This is a JSONC config with comments
+  "compilerOptions": {
+    "noLib": true, // no lib files
+    "outDir": "dist",
+    "pretty": false
+  },
+  "files": ["src/main.ts"]
+}
