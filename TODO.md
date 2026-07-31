@@ -134,11 +134,14 @@ arity）+ 12 个 parity fixtures。
    narrowing、typeof on discriminant property、typeof === "function" callable
    narrowing、const variable alias inlining）。修复 binder `value_declaration`
    bug（`contains` → `intersects` for `SymbolFlags::VALUE`）。
-5. **P3.10 Checker nodebuilder**：`symbol_to_type_node`/`symbol_to_display_parts`
-   （declaration emit 前置）。
-6. **P3.2 Binder NameResolver 收尾**：箭头函数参数作用域、enum/namespace
-   成员查找、export default 别名、类型参数作用域限制、`infer T`、装饰器
-   位置调整。
+5. **P3.10 Checker nodebuilder**（已完成 foundation）：`type_to_type_node` +
+   `symbol_to_type_node` 覆盖 primitive/literal/union/intersection/tuple/
+   array/function/type literal/symbol-bearing；剩余 gap（conditional/mapped/
+   indexed access/template literal/keyof/typeof/import().T/qualified chain/
+   `symbol_to_display_parts`）标 TODO 待 P4/P7 按需补齐。
+6. **P3.2 Binder NameResolver 收尾**（已完成）：箭头函数参数作用域、
+   enum/namespace 成员查找、export default 别名、类型参数作用域限制、
+   `infer T`、装饰器位置调整——详见 P3.2 节。
 7. **P2.0 AST/diagnostics 生成链路**（已完成）：补齐 `_scripts/generate-rust-ast.ts`
    与 `_scripts/generate-rust-diagnostics.ts`，复用 Go 侧 `_scripts/ast.json`
    via `schema.ts`；两个生成器输出与现有文件字节级一致（`git diff` 干净）。
