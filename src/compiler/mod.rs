@@ -298,6 +298,24 @@ impl crate::checker::Program for Program {
     fn symbol_map(&self) -> &NodeSymbolMap {
         Program::symbol_map(self)
     }
+    fn current_directory(&self) -> &str {
+        self.host.current_directory()
+    }
+    fn use_case_sensitive_file_names(&self) -> bool {
+        self.host.use_case_sensitive_file_names()
+    }
+    fn common_source_directory(&self) -> String {
+        // Delegate to the emitter's computation, which mirrors Go's
+        // `outputpaths.GetCommonSourceDirectory`. Only non-lib source files
+        // are considered (lib files don't affect the common source dir).
+        let source_files: Vec<_> = self
+            .source_files
+            .iter()
+            .filter(|sf| !self.default_library_file_names.contains(&sf.file_name))
+            .cloned()
+            .collect();
+        crate::emitter::compute_program_common_source_directory(&source_files, &self.options)
+    }
 }
 
 // ────────────────────────────────────────────────────────────────────────────

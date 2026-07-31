@@ -544,8 +544,19 @@ function overload、enum+enum），则将新 declaration 追加到既有 symbol 
 
 - [x] `Program::new` 后调用 `Checker::new` + `check_source_file`；
   `get_semantic_diagnostics` 返回 `Vec<Diagnostic>` 并接入 execute 输出管线。
-- [ ] `Program` trait 补全 checker 所需方法（`getCommonSourceDirectory`、
-  `getCanonicalFileName` 等）。
+- [x] `Program` trait 补全 checker 所需方法（`getCommonSourceDirectory`、
+  `getCanonicalFileName` 等）：新增 `current_directory` /
+  `use_case_sensitive_file_names` / `common_source_directory` 三个 Host 方法
+  （对齐 Go `modulespecifiers.Host` + `Program.CommonSourceDirectory`），在
+  `Program` struct 委托给 `host.current_directory()` /
+  `host.use_case_sensitive_file_names()` / `emitter::compute_program_common_source_directory`
+  （后者由 `fn` 改为 `pub fn` 供 trait 实现复用）。新增 4 个带默认实现的 stub
+  方法 `get_resolved_module` / `get_source_file_for_resolved_module` /
+  `get_emit_module_format_of_file` / `source_file_may_be_emitted`（对齐 Go
+  `Program` 接口的 module resolution / emit format / project reference cluster，
+  返回 `None` / `ModuleKind::None` / `true` 默认值并标记 `/// STUB:` 待后续接入）。
+  **遗留**：module resolution 状态尚未接入 Program（`resolved_module` 表 +
+  `module_resolution_cache`）、`get_canonical_file_name`、`get_source_file_from_path`。
 
 ### P3.6 Checker 核心入口（已完成）
 

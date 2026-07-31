@@ -511,7 +511,7 @@ pub fn emit_program(
 /// - If `root_dir` is set, use it.
 /// - Else if `config_file_path` is set, use its directory.
 /// - Else compute the longest common directory prefix of all source file names.
-fn compute_program_common_source_directory(
+pub fn compute_program_common_source_directory(
     source_files: &[Arc<SourceFile>],
     options: &CompilerOptions,
 ) -> String {

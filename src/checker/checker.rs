@@ -39,8 +39,11 @@ use super::types::*;
 
 /// A simplified version of the Go `checker.Program` interface.
 ///
-/// The full interface has many more methods; this provides the minimum
-/// needed by the checker.
+/// The Go interface embeds `modulespecifiers.Host` and exposes ~24 methods
+/// spanning module resolution, emit-format inference, and project-reference
+/// redirect. This trait provides the subset currently needed by the Rust
+/// checker; methods are added as the checker grows. Stubs return defaults
+/// and are marked with `/// STUB:` for future wiring.
 pub trait Program: Send + Sync {
     fn options(&self) -> &CompilerOptions;
     fn source_files(&self) -> &[Arc<SourceFile>];
@@ -51,6 +54,56 @@ pub trait Program: Send + Sync {
     /// Side table from the binder (symbols, locals, flow nodes), shared
     /// across all source files in the program.
     fn symbol_map(&self) -> &NodeSymbolMap;
+
+    // ── Host methods (embedded `modulespecifiers.Host` in Go) ──
+
+    /// The current working directory of the host, used for path normalization
+    /// during module resolution. Mirrors Go's `Host.GetCurrentDirectory()`.
+    fn current_directory(&self) -> &str;
+
+    /// Whether the host file system is case-sensitive, used for path key
+    /// normalization. Mirrors Go's `Host.UseCaseSensitiveFileNames()`.
+    fn use_case_sensitive_file_names(&self) -> bool;
+
+    // ── Source directory ──
+
+    /// The common source directory of all input files, with a trailing
+    /// separator. Used for redirect root-dir normalization in composite
+    /// project scenarios. Mirrors Go's `Program.CommonSourceDirectory()`.
+    fn common_source_directory(&self) -> String;
+
+    // ── Module resolution cluster (stubs — return defaults until module
+    //    resolution state is wired into Program) ──
+
+    /// STUB: Returns `None`. Go's `GetResolvedModule` maps an import specifier
+    /// to a resolved module file. Needed for cross-file import type resolution.
+    fn get_resolved_module(&self, _file_name: &str, _module_name: &str) -> Option<String> {
+        None
+    }
+
+    /// STUB: Returns `None`. Go's `GetSourceFileForResolvedModule` fetches the
+    /// parsed `SourceFile` for a resolved module path.
+    fn get_source_file_for_resolved_module(&self, _resolved_path: &str) -> Option<Arc<SourceFile>> {
+        None
+    }
+
+    // ── Emit format cluster (stubs) ──
+
+    /// STUB: Returns `ModuleKind::None`. Go's `GetEmitModuleFormatOfFile`
+    /// determines CJS vs ESM for a file, driving import/export elision and
+    /// `VerbatimModuleSyntax` decisions.
+    fn get_emit_module_format_of_file(&self, _file_name: &str) -> crate::core::compiler_options::ModuleKind {
+        crate::core::compiler_options::ModuleKind::None
+    }
+
+    // ── Project reference cluster (stubs) ──
+
+    /// STUB: Returns `false`. Go's `SourceFileMayBeEmitted` determines whether
+    /// a source file will be emitted (affects module resolution extension
+    /// rewriting).
+    fn source_file_may_be_emitted(&self, _file_name: &str) -> bool {
+        true
+    }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
