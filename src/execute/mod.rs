@@ -542,22 +542,49 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
     }
 
     // String-valued options
-    for (name, val) in [
-        ("outDir", &options.out_dir),
-        ("outFile", &options.out_file),
-        ("rootDir", &options.root_dir),
-        ("declarationDir", &options.declaration_dir),
-        ("sourceRoot", &options.source_root),
-        ("mapRoot", &options.map_root),
-        ("tsBuildInfoFile", &options.ts_build_info_file),
-        ("jsxFactory", &options.jsx_factory),
-        ("jsxFragmentFactory", &options.jsx_fragment_factory),
-        ("jsxImportSource", &options.jsx_import_source),
-        ("baseUrl", &options.base_url),
-        ("locale", &options.locale),
+    // `IsFilePath` options (outDir, rootDir, …) are stored as absolute paths
+    // internally (mirroring Go's `normalizeNonListOptionValue`); for
+    // `--showConfig` output we convert them back to paths relative to the
+    // config file directory, matching Go's `serializeCompilerOptions`.
+    let config_dir = tspath::get_directory_path(&config.config_file_name);
+    let to_relative = |val: &str| -> String {
+        if val.is_empty() {
+            return val.to_string();
+        }
+        // If the value is already relative, keep it as-is (e.g. CLI-provided).
+        if !tspath::path_is_absolute(val) {
+            return val.to_string();
+        }
+        // Convert absolute → relative from config dir.
+        let abs_val = tspath::get_normalized_absolute_path(val, "");
+        let abs_config_dir = tspath::get_normalized_absolute_path(&config_dir, "");
+        let abs_config_dir_with_sep = tspath::ensure_trailing_directory_separator(&abs_config_dir);
+        if abs_val == abs_config_dir {
+            // Value is the config directory itself.
+            return ".".to_string();
+        }
+        if let Some(stripped) = abs_val.strip_prefix(&abs_config_dir_with_sep) {
+            return stripped.to_string();
+        }
+        val.to_string()
+    };
+    for (name, val, is_path) in [
+        ("outDir", &options.out_dir, true),
+        ("outFile", &options.out_file, true),
+        ("rootDir", &options.root_dir, true),
+        ("declarationDir", &options.declaration_dir, true),
+        ("sourceRoot", &options.source_root, true),
+        ("mapRoot", &options.map_root, true),
+        ("tsBuildInfoFile", &options.ts_build_info_file, true),
+        ("jsxFactory", &options.jsx_factory, false),
+        ("jsxFragmentFactory", &options.jsx_fragment_factory, false),
+        ("jsxImportSource", &options.jsx_import_source, false),
+        ("baseUrl", &options.base_url, true),
+        ("locale", &options.locale, false),
     ] {
         if !val.is_empty() {
-            map.insert(name.to_string(), Value::String(val.clone()));
+            let display = if is_path { to_relative(val) } else { val.clone() };
+            map.insert(name.to_string(), Value::String(display));
         }
     }
 
@@ -1514,8 +1541,8 @@ mod tests {
             "output:\n{}",
             sys.output_string()
         );
-        assert!(sys.fs().file_exists("/proj/dist/i.js"));
-        let js = sys.fs().read_file("/proj/dist/i.js").unwrap();
+        assert!(sys.fs().file_exists("/proj/dist/src/i.js"));
+        let js = sys.fs().read_file("/proj/dist/src/i.js").unwrap();
         assert!(js.contains("let value = 1;"));
         assert!(!js.contains(": number"));
     }
@@ -1543,7 +1570,7 @@ mod tests {
             "output:\n{}",
             sys.output_string()
         );
-        assert!(sys.fs().file_exists("/proj/dist/app.js"));
+        assert!(sys.fs().file_exists("/proj/dist/src/app.js"));
     }
 
     // ───────────────────────────────────────────────────────────────────────

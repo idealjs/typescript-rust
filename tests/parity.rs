@@ -15,20 +15,22 @@ const CASES: &[Case] = &[
     Case {
         name: "simple_emit",
         args: &[],
-        expected_files: &[("dist/main.js", "let answer = 42;\n")],
+        // No rootDir: the config file's directory is the common source dir,
+        // so src/main.ts emits to dist/src/main.js (mirrors Go oracle).
+        expected_files: &[("dist/src/main.js", "let answer = 42;\n")],
     },
     Case {
         name: "type_only_declarations",
         args: &[],
-        expected_files: &[("dist/main.js", "const value = { name: \"Ada\" };\n")],
+        expected_files: &[("dist/src/main.js", "const value = { name: \"Ada\" };\n")],
     },
     Case {
         name: "nested_out_dir",
         args: &[],
-        // This documents the current Rust behavior. The Go oracle comparison
-        // will expose that outputpaths still need proper rootDir/outDir parity.
+        // rootDir: "src" + outDir: "dist" preserves the relative directory
+        // structure, so src/lib/main.ts emits to dist/lib/main.js.
         expected_files: &[(
-            "dist/main.js",
+            "dist/lib/main.js",
             "export function square(x) { return x * x; }\n",
         )],
     },

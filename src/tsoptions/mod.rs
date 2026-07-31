@@ -2027,6 +2027,11 @@ fn get_parsed_command_line_of_config_file_with_stack(
             }
             config_opts.paths = Some(paths_map);
         }
+        // Resolve `IsFilePath` options (rootDir, outDir, declarationDir, …) to
+        // absolute paths relative to the config file directory, mirroring Go's
+        // `normalizeNonListOptionValue`.
+        let config_dir_for_opts = tspath::get_directory_path(config_file_name);
+        resolve_file_path_options(&mut config_opts, &config_dir_for_opts);
         merge_compiler_options(&mut result.compiler_options, &config_opts);
         // Re-apply base (command-line) options so they win.
         merge_compiler_options(&mut result.compiler_options, base_options);
@@ -2164,6 +2169,43 @@ fn json_to_opt_value(v: &crate::json::Value) -> OptValue {
         }
         crate::json::Value::Null => OptValue::Null,
         crate::json::Value::Object(_) => OptValue::Null,
+    }
+}
+
+/// Resolve `IsFilePath` compiler options to absolute paths relative to
+/// `base_path`, mirroring Go's `normalizeNonListOptionValue`.
+///
+/// Options with `IsFilePath: true` (rootDir, outDir, declarationDir, outFile,
+/// baseUrl, tsBuildInfoFile, sourceRoot, mapRoot, project, …) are stored as
+/// written in the tsconfig (often relative). Go resolves them to absolute
+/// paths during JSON option parsing so that downstream code (emitter, program)
+/// can compare them against absolute source file paths without needing to
+/// track the config directory separately.
+fn resolve_file_path_options(options: &mut CompilerOptions, base_path: &str) {
+    let resolve = |s: &str| -> String {
+        if s.is_empty() {
+            return s.to_string();
+        }
+        // `${configDir}` templates are already handled elsewhere (substitution
+        // happens before this step); skip them to avoid double resolution.
+        if s.starts_with("${configDir}") || s.starts_with("${configdir}") {
+            return s.to_string();
+        }
+        tspath::get_normalized_absolute_path(s, base_path)
+    };
+    options.root_dir = resolve(&options.root_dir);
+    options.out_dir = resolve(&options.out_dir);
+    options.out_file = resolve(&options.out_file);
+    options.declaration_dir = resolve(&options.declaration_dir);
+    options.base_url = resolve(&options.base_url);
+    options.ts_build_info_file = resolve(&options.ts_build_info_file);
+    options.source_root = resolve(&options.source_root);
+    options.map_root = resolve(&options.map_root);
+    options.project = resolve(&options.project);
+    options.generate_cpu_profile = resolve(&options.generate_cpu_profile);
+    options.generate_trace = resolve(&options.generate_trace);
+    if !options.root_dirs.is_empty() {
+        options.root_dirs = options.root_dirs.iter().map(|s| resolve(s)).collect();
     }
 }
 
@@ -3094,8 +3136,8 @@ mod tests {
         // Parent options are inherited.
         assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
         assert!(parsed.compiler_options.strict.is_true());
-        // Child option is applied.
-        assert_eq!(parsed.compiler_options.out_dir, "./dist");
+        // Child option is applied (resolved to absolute, mirroring Go's IsFilePath).
+        assert_eq!(parsed.compiler_options.out_dir, "/proj/dist");
         // `strict` from the base enables the strict family.
         assert!(parsed.compiler_options.strict_null_checks.is_true());
     }
@@ -3128,7 +3170,7 @@ mod tests {
             &fs,
         );
         assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
-        assert_eq!(parsed.compiler_options.out_dir, "./dist");
+        assert_eq!(parsed.compiler_options.out_dir, "/proj/dist");
         assert!(parsed.file_names.contains(&"/proj/src/a.ts".to_string()));
         assert!(parsed.file_names.contains(&"/proj/src/b.ts".to_string()));
     }
@@ -3207,7 +3249,7 @@ mod tests {
         assert_eq!(parsed.compiler_options.module, ModuleKind::CommonJS);
         assert!(parsed.compiler_options.declaration.is_true());
         // Own config contributes its own (non-conflicting) option.
-        assert_eq!(parsed.compiler_options.out_dir, "./dist");
+        assert_eq!(parsed.compiler_options.out_dir, "/proj/dist");
     }
 
     #[test]
@@ -3255,7 +3297,7 @@ mod tests {
         assert_eq!(parsed.compiler_options.jsx, JsxEmit::React);
         assert!(parsed.compiler_options.strict.is_true());
         assert!(parsed.compiler_options.no_implicit_any.is_true());
-        assert_eq!(parsed.compiler_options.out_dir, "./dist");
+        assert_eq!(parsed.compiler_options.out_dir, "/apath/dist");
         // Explicit `files` are included.
         assert!(
             parsed

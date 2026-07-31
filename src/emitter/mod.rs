@@ -41,6 +41,23 @@ pub fn emit_source_file(
     fs: &dyn FS,
     write_file: &dyn Fn(&str, &str) -> std::io::Result<()>,
 ) -> EmitResult {
+    emit_source_file_with_common_dir(source_file, options, fs, "", write_file)
+}
+
+/// Emit a single source file with a precomputed `common_source_directory`.
+///
+/// `common_source_directory` mirrors Go's `host.CommonSourceDirectory()` and is
+/// used to preserve the relative directory structure under `outDir`. When empty,
+/// it is inferred from `options` (rootDir / config_file_path) — but for the
+/// "computed from all source files" case the caller should pass the program-wide
+/// value via [`emit_program`].
+pub fn emit_source_file_with_common_dir(
+    source_file: &SourceFile,
+    options: &CompilerOptions,
+    _fs: &dyn FS,
+    common_source_directory: &str,
+    write_file: &dyn Fn(&str, &str) -> std::io::Result<()>,
+) -> EmitResult {
     let mut result = EmitResult::default();
 
     // Skip JSON files — they emit to the same location.
@@ -56,7 +73,7 @@ pub fn emit_source_file(
     }
 
     // Compute output path.
-    let js_path = get_js_output_path(source_file, options, fs);
+    let js_path = get_js_output_path(source_file, options, common_source_directory);
     if js_path.is_empty() {
         return result;
     }
@@ -82,31 +99,82 @@ pub fn emit_source_file(
 
 /// Compute the output `.js` file path for a source file.
 ///
-/// Mirrors a simplified version of `outputpaths.GetOutputPathsFor` / `getOwnEmitOutputFilePath`.
-fn get_js_output_path(source_file: &SourceFile, options: &CompilerOptions, _fs: &dyn FS) -> String {
+/// Mirrors Go's `outputpaths.GetOutputPathsFor` / `getOwnEmitOutputFilePath`:
+/// when `outDir` is set, the source file's path relative to the common source
+/// directory is preserved under `outDir`, so `src/lib/main.ts` with
+/// `rootDir: "src"` + `outDir: "dist"` emits to `dist/lib/main.js`.
+fn get_js_output_path(
+    source_file: &SourceFile,
+    options: &CompilerOptions,
+    common_source_directory: &str,
+) -> String {
     let file_name = &source_file.file_name;
     let extension = get_output_extension(file_name);
 
     if !options.out_dir.is_empty() {
-        // Place output in outDir, preserving relative directory structure.
-        // For simplicity, use the source file's directory relative to the
-        // common source directory (or current directory).
-        let abs = tspath::get_normalized_absolute_path(file_name, "");
-        let _dir = tspath::get_directory_path(&abs);
-        let base = tspath::get_base_file_name(file_name);
-        let base_without_ext = tspath::remove_file_extension(&base);
-        // Simple approach: strip the common prefix between source dir and outDir
-        // For now, just put the file in outDir with the base name.
-        // A more correct implementation would compute commonSourceDirectory.
-        tspath::combine_paths(
-            &options.out_dir,
-            &[&format!("{base_without_ext}{extension}")],
-        )
+        let common_dir = if common_source_directory.is_empty() {
+            compute_common_source_directory(options)
+        } else {
+            common_source_directory.to_string()
+        };
+        let path_in_new_dir = get_source_file_path_in_new_dir(file_name, &options.out_dir, &common_dir);
+        let without_ext = tspath::remove_file_extension(&path_in_new_dir);
+        format!("{without_ext}{extension}")
     } else {
         // Output alongside source file.
         let without_ext = tspath::remove_file_extension(file_name);
         format!("{without_ext}{extension}")
     }
+}
+
+/// Compute the common source directory, mirroring Go's
+/// `outputpaths.GetCommonSourceDirectory`.
+///
+/// - If `root_dir` is set, use it.
+/// - Else if `config_file_path` is set, use its directory.
+/// - Else return empty (caller should pass the program-wide value).
+fn compute_common_source_directory(options: &CompilerOptions) -> String {
+    let common_dir = if !options.root_dir.is_empty() {
+        options.root_dir.clone()
+    } else if !options.config_file_path.is_empty() {
+        tspath::get_directory_path(&options.config_file_path)
+    } else {
+        return String::new();
+    };
+    tspath::ensure_trailing_directory_separator(&common_dir)
+}
+
+/// Place `file_name` under `new_dir_path`, stripping the common source
+/// directory prefix to preserve the relative directory structure.
+///
+/// Mirrors Go's `outputpaths.GetSourceFilePathInNewDir`.
+fn get_source_file_path_in_new_dir(file_name: &str, new_dir_path: &str, common_source_directory: &str) -> String {
+    if common_source_directory.is_empty() {
+        // No common source directory — fall back to base name in new dir.
+        return tspath::combine_paths(new_dir_path, &[tspath::get_base_file_name(file_name).as_str()]);
+    }
+    // Try a direct relative-prefix strip first (common case: both relative).
+    let common_with_sep = tspath::ensure_trailing_directory_separator(common_source_directory);
+    let normalized_file = tspath::normalize_slashes(file_name);
+    if let Some(stripped) = normalized_file.strip_prefix(&common_with_sep) {
+        return tspath::combine_paths(new_dir_path, &[stripped]);
+    }
+    // Also handle the case where common_dir has no trailing separator match
+    // but the file is directly under it (e.g. file == "src/main.ts", dir == "src").
+    if normalized_file == common_with_sep.trim_end_matches('/') {
+        return new_dir_path.to_string();
+    }
+    // Fall back: normalize both to absolute and retry the prefix strip.
+    // This handles mixed relative/absolute forms (e.g. rootDir relative but
+    // source file absolute, or vice versa).
+    let abs_file = tspath::get_normalized_absolute_path(file_name, "");
+    let abs_common = tspath::get_normalized_absolute_path(&common_with_sep, "");
+    let abs_common_with_sep = tspath::ensure_trailing_directory_separator(&abs_common);
+    if let Some(stripped) = abs_file.strip_prefix(&abs_common_with_sep) {
+        return tspath::combine_paths(new_dir_path, &[stripped]);
+    }
+    // Cannot determine relative path — emit with base name only.
+    tspath::combine_paths(new_dir_path, &[tspath::get_base_file_name(file_name).as_str()])
 }
 
 /// Determine the output file extension based on the input file name.
@@ -418,9 +486,16 @@ pub fn emit_program(
     fs: &dyn FS,
     write_file: &dyn Fn(&str, &str) -> std::io::Result<()>,
 ) -> EmitResult {
+    let common_source_directory = compute_program_common_source_directory(source_files, options);
     let mut result = EmitResult::default();
     for source_file in source_files {
-        let file_result = emit_source_file(source_file, options, fs, write_file);
+        let file_result = emit_source_file_with_common_dir(
+            source_file,
+            options,
+            fs,
+            &common_source_directory,
+            write_file,
+        );
         result.emitted_files.extend(file_result.emitted_files);
         result.diagnostics.extend(file_result.diagnostics);
         if file_result.emit_skipped {
@@ -428,6 +503,63 @@ pub fn emit_program(
         }
     }
     result
+}
+
+/// Compute the program-wide common source directory, mirroring Go's
+/// `Program.CommonSourceDirectory()` / `outputpaths.GetCommonSourceDirectory`.
+///
+/// - If `root_dir` is set, use it.
+/// - Else if `config_file_path` is set, use its directory.
+/// - Else compute the longest common directory prefix of all source file names.
+fn compute_program_common_source_directory(
+    source_files: &[Arc<SourceFile>],
+    options: &CompilerOptions,
+) -> String {
+    let common_dir = if !options.root_dir.is_empty() {
+        options.root_dir.clone()
+    } else if !options.config_file_path.is_empty() {
+        tspath::get_directory_path(&options.config_file_path)
+    } else {
+        compute_common_source_directory_of_filenames(
+            &source_files.iter().map(|sf| sf.file_name.clone()).collect::<Vec<_>>(),
+        )
+    };
+    if common_dir.is_empty() {
+        common_dir
+    } else {
+        tspath::ensure_trailing_directory_separator(&common_dir)
+    }
+}
+
+/// Compute the longest common directory prefix of a list of file names,
+/// mirroring Go's `computeCommonSourceDirectoryOfFilenames`.
+fn compute_common_source_directory_of_filenames(file_names: &[String]) -> String {
+    let mut common_components: Option<Vec<String>> = None;
+    for file_name in file_names {
+        let mut components = tspath::get_path_components(file_name, "");
+        // The base file name is not part of the common directory path.
+        components.pop();
+        match &mut common_components {
+            None => {
+                common_components = Some(components);
+            }
+            Some(common) => {
+                let n = std::cmp::min(common.len(), components.len());
+                let mut last_match = 0;
+                for i in 0..n {
+                    if common[i] != components[i] {
+                        break;
+                    }
+                    last_match = i + 1;
+                }
+                common.truncate(last_match);
+            }
+        }
+    }
+    match common_components {
+        Some(c) if !c.is_empty() => tspath::get_path_from_path_components(&c),
+        _ => String::new(),
+    }
 }
 
 #[cfg(test)]

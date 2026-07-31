@@ -101,8 +101,14 @@ impl Program {
     /// Create a new program: load lib files and input files, parse, and bind.
     pub fn new(opts: ProgramOptions) -> Self {
         let host = opts.host;
-        let options = opts.config.compiler_options.clone();
+        let mut options = opts.config.compiler_options.clone();
         let config_file_name = opts.config.config_file_name.clone();
+        // Propagate the config file path onto the options so downstream
+        // consumers (e.g. the emitter's common-source-directory computation)
+        // can mirror Go's `options.ConfigFilePath`.
+        if !config_file_name.is_empty() && options.config_file_path.is_empty() {
+            options.config_file_path = config_file_name.clone();
+        }
 
         let mut source_files: Vec<Arc<SourceFile>> = Vec::new();
         let mut by_name: HashMap<String, Arc<SourceFile>> = HashMap::new();

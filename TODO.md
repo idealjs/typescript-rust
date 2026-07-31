@@ -255,7 +255,15 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   diagnostics（带 file/range 的诊断）和 `vfsmatch` root-file expansion。
 - [ ] 扩充 parity fixtures：无 tsconfig 且无文件 / 单文件输入 / `-p` 指向目录 /
   `-p` 指向文件 / `--showConfig` / response file / invalid JSON / JSONC。
-- [ ] 修复当前 parity 注释中提到的 `rootDir/outDir` 差异。
+- [x] 修复 `rootDir/outDir` 输出路径差异：emitter 新增
+  `compute_program_common_source_directory`（对齐 Go
+  `outputpaths.GetCommonSourceDirectory`）+ `get_source_file_path_in_new_dir`
+  （对齐 Go `GetSourceFilePathInNewDir`），按 rootDir → config_file_path →
+  文件名公共前缀顺序确定 common source directory，保留 outDir 下的相对目录
+  结构。同时 tsconfig 解析新增 `resolve_file_path_options`（对齐 Go
+  `normalizeNonListOptionValue`），将 `IsFilePath` 选项（rootDir/outDir/
+  declarationDir/baseUrl/…）解析为绝对路径；`--showConfig` 输出时通过
+  `to_relative` 转回相对路径。664 lib + 2 parity 测试通过。
 
 验收：
 
