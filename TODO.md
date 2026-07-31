@@ -63,14 +63,13 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-31）
 
-测试基线：`cargo test` 通过（609 个 lib 单测 + 2 个 emit parity + 501 个
+测试基线：`cargo test` 通过（804 个 lib 单测 + 2 个 emit parity + 501 个
 checker parity，checker parity 自 2026-07-13 的 106 增长 395 个）。本轮新增
-TS2554/TS2555 参数数量检查（含 spread TS2556、rest 元素类型检查、overload
-arity）+ 12 个 parity fixtures。
+OCTAL TokenFlag 迁移（legacy 0777 → TS1121 诊断 + leading-zero TS1489 + 0_ separator TS6188）。
 
 | 模块 | Rust 行数（实测） | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
-| Scanner | 3222 | 4277 | ~75% | 转义/JSX/正则/CommentDirectives/ASI 完成；trivia 基础设施（fullStartPos + skip_trivia + comment ranges + shebang）完成；TokenFlags 完整位集（19 flag + 7 mask）+ SkipTriviaEx + conflict-marker trivia + JSDoc 相关 4 flag（PRECEDING_JSDOC_COMMENT/LEADING_ASTERISKS/WITH_DEPRECATED/WITH_SEE_OR_LINK）完成；缺 escape-sequence 5 flag + OCTAL flag + 完整 regex body 校验 |
+| Scanner | 3850 | 4277 | ~90% | 转义/JSX/正则/CommentDirectives/ASI 完成；trivia 基础设施（fullStartPos + skip_trivia + comment ranges + shebang）完成；TokenFlags 完整位集（19 flag + 7 mask）+ SkipTriviaEx + conflict-marker trivia + JSDoc 4 flag + escape-sequence 6 flag（UNICODE_ESCAPE/EXTENDED_UNICODE_ESCAPE/HEX_ESCAPE/CONTAINS_INVALID_ESCAPE/CONTAINS_SEPARATOR/CONTAINS_INVALID_SEPARATOR）+ numeric separator 完整支持 + OCTAL flag（legacy 0777 + TS1121 诊断 + leading-zero TS1489 + 0_ separator TS6188）完成；缺完整 regex body 校验 |
 | Parser | 7282 | 9275 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；缺 reparser/jsdoc |
 | Binder | 2104 | ~3601 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 + EnumDeclaration 容器化 完成；缺 ReduceLabel/Shared/Referenced 后处理、labeled statement、完整 scope chain、ReferenceResolver |
 | Checker | 22527 | ~59975 | ~20% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查 + 比较无重叠检查 TS2367 + 不可调用/不可构造检查 TS2349/TS2351 + 只读属性赋值检查 TS2540 + declaration merge checker 侧 + 参数数量检查 TS2554/TS2555/TS2556 + rest 元素类型检查；emitresolver visibility tracking 完成；501 parity fixtures 通过。**已知 stub**：mapper placeholder（3 处闭包回退）、freshness tracking、isEnumTypeRelatedTo/isUnknownLikeUnionType 未迁移、nodebuilder symbol_to_type_node |
@@ -453,9 +452,35 @@ via `schema.ts`，生成 `syntax_kind_generated.rs` + `node_data_generated.rs`�
   `UNTERMINATED`（string/template/regex）、`SINGLE_QUOTE`（`'` string）、
   `HEX_SPECIFIER`/`BINARY_SPECIFIER`/`OCTAL_SPECIFIER`（numeric）、
   `SCIENTIFIC`（`e`/`E` exponent）、`CONTAINS_LEADING_ZERO`（`0` 后跟数字）。
-  12 个新单测覆盖。**遗留**：escape-sequence 5 flag（`UNICODE_ESCAPE`/`EXTENDED_UNICODE_ESCAPE`/`HEX_ESCAPE`/
-  `CONTAINS_INVALID_ESCAPE`/`CONTAINS_SEPARATOR`/`CONTAINS_INVALID_SEPARATOR`，
-  需迁移 Go `scanEscapeSequence` 完整诊断路径）、`OCTAL`（legacy `0o` 前的 `0777` 形式）。
+  12 个新单测覆盖。
+- [x] 迁移 `OCTAL` TokenFlag（legacy `0777` 形式，已完成）：`scan_number`
+  重写 `0` 前缀分支对齐 Go `scanNumber`（`scanner.go:1944-1971`）：`0` 后跟
+  全八进制数字（0-7）→ 设 `OCTAL` flag + 报 TS1121 `Octal_literals_are_not_allowed`
+  + early return；`0` 后跟非八进制数字（8/9）→ 设 `CONTAINS_LEADING_ZERO` +
+  全 literal 扫完后报 TS1489 `Decimals_with_leading_zeros_are_not_allowed`；
+  `0_` → 设 `CONTAINS_SEPARATOR | CONTAINS_INVALID_SEPARATOR` + 报 TS6188 +
+  reset + re-scan。`DiagnosticKind` 新增 3 variant（`OctalLiteralNotAllowed`/
+  `DecimalWithLeadingZero`/`NumericSeparatorNotAllowed`），parser 侧映射到
+  `OCTAL_LITERALS_ARE_NOT_ALLOWED_USE_THE_SYNTAX_0`/
+  `DECIMALS_WITH_LEADING_ZEROS_ARE_NOT_ALLOWED`/
+  `NUMERIC_SEPARATORS_ARE_NOT_ALLOWED_HERE`。minus 前缀（`-0777`）error range
+  回退 1 包含 `-`。9 个新单测覆盖 0777/00/0888/0/0.5/0e5/0n/0_123/-0777。
+- [x] 迁移 escape-sequence TokenFlags（`UNICODE_ESCAPE`/`EXTENDED_UNICODE_ESCAPE`/
+  `HEX_ESCAPE`/`CONTAINS_INVALID_ESCAPE`/`CONTAINS_SEPARATOR`/`CONTAINS_INVALID_SEPARATOR`，
+  已完成）：`scan_escape_sequence` 重写为对齐 Go `scanner.go:1690-1851` 的 match
+  分支：`\xHH` → `HEX_ESCAPE`（2 位 hex）或 `CONTAINS_INVALID_ESCAPE`（不足 2 位）；
+  `\uHHHH` → `UNICODE_ESCAPE`（4 位 hex）或 `CONTAINS_INVALID_ESCAPE`（不足 4 位）；
+  `\u{...}` → `EXTENDED_UNICODE_ESCAPE`（至少 1 位 hex + `}`）或
+  `CONTAINS_INVALID_ESCAPE`（空/未闭合）；`\0`+digit / `\1`-`\7` → `CONTAINS_INVALID_ESCAPE`
+  （legacy octal，消耗 1-2 位额外八进制数字）；`\8`/`\9` → `CONTAINS_INVALID_ESCAPE`。
+  numeric separator 支持新增 3 个 helper：`scan_number_fragment_with_sep`（decimal/hex，
+  对齐 Go `scanNumberFragment` `scanner.go:2044-2088`）、`scan_binary_fragment_with_sep`、
+  `scan_octal_specifier_fragment_with_sep`——`_` 在数字间设 `CONTAINS_SEPARATOR`，
+  在开头/结尾/连续位置设 `CONTAINS_INVALID_SEPARATOR`。`scan_number` 的 hex/binary/
+  octal/decimal/fractional/exponent 路径全部改用新 helper。新增 `is_octal_digit` 辅助。
+  17 个新单测覆盖 unicode-escape/extended-unicode/hex/invalid-hex/invalid-unicode/
+  invalid-extended/octal-escape/8-9-escape/nul-escape/separator-decimal/hex/binary/
+  consecutive/trailing/plain/STRING_LITERAL_FLAGS-mask/NUMERIC_LITERAL_FLAGS-mask。
 - [x] 迁移 JSDoc 相关 TokenFlags（`PRECEDING_JSDOC_COMMENT`/`_LEADING_ASTERISKS`/
   `_WITH_DEPRECATED`/`_WITH_SEE_OR_LINK`，已完成）：`scan_multi_line_comment`
   检测 JSDoc 注释（`/**` 且非 `/**/`，对齐 Go `scanner.go:642` `isJSDoc`），

@@ -167,6 +167,15 @@ impl Parser {
                 crate::scanner::DiagnosticKind::UnicodeUAndVFlagsMutuallyExclusive => {
                     diagnostics::THE_UNICODE_U_FLAG_AND_THE_UNICODE_SETS_V_FLAG_CANNOT_BE_SET_SIMULTANEOUSLY
                 }
+                crate::scanner::DiagnosticKind::OctalLiteralNotAllowed => {
+                    diagnostics::OCTAL_LITERALS_ARE_NOT_ALLOWED_USE_THE_SYNTAX_0
+                }
+                crate::scanner::DiagnosticKind::DecimalWithLeadingZero => {
+                    diagnostics::DECIMALS_WITH_LEADING_ZEROS_ARE_NOT_ALLOWED
+                }
+                crate::scanner::DiagnosticKind::NumericSeparatorNotAllowed => {
+                    diagnostics::NUMERIC_SEPARATORS_ARE_NOT_ALLOWED_HERE
+                }
             };
             parser.diagnostics.push(ParserDiagnostic {
                 message,

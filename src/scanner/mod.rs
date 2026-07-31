@@ -25,6 +25,12 @@ pub enum DiagnosticKind {
     DuplicateRegularExpressionFlag,
     /// The `u` and `v` flags cannot be set simultaneously (TS1502).
     UnicodeUAndVFlagsMutuallyExclusive,
+    /// Octal literals are not allowed. Use the syntax '0o...' (TS1121).
+    OctalLiteralNotAllowed,
+    /// Decimals with leading zeros are not allowed (TS1489).
+    DecimalWithLeadingZero,
+    /// Numeric separators are not allowed here (TS6188).
+    NumericSeparatorNotAllowed,
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -865,9 +871,7 @@ impl Scanner {
             if next == 'x' || next == 'X' {
                 // Hex
                 self.pos += 2;
-                while self.pos < self.end && is_hex_digit(self.text.as_bytes()[self.pos] as char) {
-                    self.pos += 1;
-                }
+                self.scan_number_fragment_with_sep(true, true);
                 self.token_end = self.pos;
                 self.token = SyntaxKind::NumericLiteral;
                 self.token_flags |= TOKEN_FLAGS_HEX_SPECIFIER;
@@ -876,12 +880,7 @@ impl Scanner {
             if next == 'b' || next == 'B' {
                 // Binary
                 self.pos += 2;
-                while self.pos < self.end
-                    && (self.text.as_bytes()[self.pos] as char == '0'
-                        || self.text.as_bytes()[self.pos] as char == '1')
-                {
-                    self.pos += 1;
-                }
+                self.scan_binary_fragment_with_sep();
                 self.token_end = self.pos;
                 self.token = SyntaxKind::NumericLiteral;
                 self.token_flags |= TOKEN_FLAGS_BINARY_SPECIFIER;
@@ -890,12 +889,7 @@ impl Scanner {
             if next == 'o' || next == 'O' {
                 // Octal
                 self.pos += 2;
-                while self.pos < self.end
-                    && (self.text.as_bytes()[self.pos] as char >= '0'
-                        && self.text.as_bytes()[self.pos] as char <= '7')
-                {
-                    self.pos += 1;
-                }
+                self.scan_octal_specifier_fragment_with_sep();
                 self.token_end = self.pos;
                 self.token = SyntaxKind::NumericLiteral;
                 self.token_flags |= TOKEN_FLAGS_OCTAL_SPECIFIER;
@@ -903,25 +897,75 @@ impl Scanner {
             }
         }
 
-        // Decimal
-        // Track whether the literal has a leading zero (e.g. `0777`, `0888`),
-        // which Go marks with `TokenFlagsContainsLeadingZero` for legacy octal
-        // detection (`scanner.go:745-758`).
-        if self.text.as_bytes()[self.pos] as char == '0'
-            && self.pos + 1 < self.end
-            && is_digit(self.text.as_bytes()[self.pos + 1] as char)
-        {
-            self.token_flags |= TOKEN_FLAGS_CONTAINS_LEADING_ZERO;
-        }
-        while self.pos < self.end && is_digit(self.text.as_bytes()[self.pos] as char) {
-            self.pos += 1;
+        // Decimal / legacy octal / leading-zero handling. Mirrors Go's
+        // `scanNumber` (`scanner.go:1944-2042`): when the literal starts with
+        // `0` (without an `x`/`b`/`o` specifier), scan the following digits to
+        // distinguish three cases:
+        //   1. `0_...` — separator not allowed after leading zero; report
+        //      error, reset, re-scan as plain fragment.
+        //   2. `0` + all-octal digits (e.g. `0777`) — legacy octal literal;
+        //      set `OCTAL` flag, report TS1121, return early.
+        //   3. `0` + non-octal digits (e.g. `0888`) — invalid leading zero;
+        //      set `CONTAINS_LEADING_ZERO`, report TS1489 after full scan.
+        if self.text.as_bytes()[self.pos] as char == '0' {
+            self.pos += 1; // skip the leading `0`
+            if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '_' {
+                // `0_...` — separator not allowed here. Mirrors Go
+                // `scanner.go:1949-1953`: set both separator flags, report
+                // TS6188, reset to start, re-scan as plain number fragment.
+                self.token_flags |=
+                    TOKEN_FLAGS_CONTAINS_SEPARATOR | TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR;
+                self.report_error(DiagnosticKind::NumericSeparatorNotAllowed, self.pos, 1);
+                self.pos = start;
+                self.scan_number_fragment_with_sep(false, false);
+            } else {
+                // Scan following digits (no separators) to determine octal vs
+                // leading-zero. Mirrors Go's `scanDigits`
+                // (`scanner.go:2090-2100`).
+                let digits_start = self.pos;
+                let mut is_octal = true;
+                while self.pos < self.end {
+                    let c = self.text.as_bytes()[self.pos] as char;
+                    if is_digit(c) {
+                        if !is_octal_digit(c) {
+                            is_octal = false;
+                        }
+                        self.pos += 1;
+                    } else {
+                        break;
+                    }
+                }
+                if self.pos > digits_start && is_octal {
+                    // Legacy octal literal (e.g. `0777`). Set `OCTAL` flag and
+                    // report TS1121. Mirrors Go `scanner.go:1961-1971`. The
+                    // error range includes the `-` sign if the previous token
+                    // was a minus (so `-0777` points at the full `-0777`).
+                    self.token_flags |= TOKEN_FLAGS_OCTAL;
+                    let with_minus = self.token == SyntaxKind::MinusToken;
+                    let err_start = if with_minus { start - 1 } else { start };
+                    self.report_error(
+                        DiagnosticKind::OctalLiteralNotAllowed,
+                        err_start,
+                        self.pos - err_start,
+                    );
+                    self.token_end = self.pos;
+                    self.token = SyntaxKind::NumericLiteral;
+                    return self.token;
+                } else if self.pos > digits_start {
+                    // Leading zero with non-octal digits (e.g. `0888`).
+                    self.token_flags |= TOKEN_FLAGS_CONTAINS_LEADING_ZERO;
+                }
+                // else: just `0` with no following digits — fall through to
+                // fractional/exponent handling.
+            }
+        } else {
+            // Non-zero start (1-9): scan the integer part.
+            self.scan_number_fragment_with_sep(false, false);
         }
         // Fractional part
         if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '.' {
             self.pos += 1;
-            while self.pos < self.end && is_digit(self.text.as_bytes()[self.pos] as char) {
-                self.pos += 1;
-            }
+            self.scan_number_fragment_with_sep(false, false);
         }
         // Exponent
         if self.pos < self.end {
@@ -934,11 +978,15 @@ impl Scanner {
                         self.pos += 1;
                     }
                 }
-                while self.pos < self.end && is_digit(self.text.as_bytes()[self.pos] as char) {
-                    self.pos += 1;
-                }
+                self.scan_number_fragment_with_sep(false, false);
                 self.token_flags |= TOKEN_FLAGS_SCIENTIFIC;
             }
+        }
+
+        // Report leading-zero error after the full literal is scanned.
+        // Mirrors Go `scanner.go:2012-2016`.
+        if token_flags_contains(self.token_flags, TOKEN_FLAGS_CONTAINS_LEADING_ZERO) {
+            self.report_error(DiagnosticKind::DecimalWithLeadingZero, start, self.pos - start);
         }
 
         // BigInt suffix
@@ -953,6 +1001,124 @@ impl Scanner {
         self.token_end = self.pos;
         self.token = SyntaxKind::NumericLiteral;
         self.token
+    }
+
+    /// Scan a decimal number fragment (digits and optional `_` separators),
+    /// setting `CONTAINS_SEPARATOR` for valid `_` and `CONTAINS_INVALID_SEPARATOR`
+    /// for invalid `_` (at start, end, or consecutive). Mirrors Go's
+    /// `scanNumberFragment` (`scanner.go:2044-2088`). `is_hex` controls whether
+    /// hex digits (A-F) are accepted; `can_have_sep` is always true for numeric
+    /// literals in Go (separators are allowed in all numeric forms).
+    fn scan_number_fragment_with_sep(&mut self, is_hex: bool, _can_have_sep: bool) {
+        let mut allow_separator = false;
+        let mut is_prev_separator = false;
+        loop {
+            let before = self.pos;
+            // Scan consecutive digits
+            while self.pos < self.end {
+                let c = self.text.as_bytes()[self.pos] as char;
+                if is_digit(c) || (is_hex && c.is_ascii_hexdigit()) {
+                    self.pos += 1;
+                } else {
+                    break;
+                }
+            }
+            if self.pos > before {
+                allow_separator = true;
+                is_prev_separator = false;
+            }
+            // Check for separator
+            if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '_' {
+                self.token_flags |= TOKEN_FLAGS_CONTAINS_SEPARATOR;
+                if allow_separator {
+                    allow_separator = false;
+                    is_prev_separator = true;
+                } else {
+                    self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR;
+                }
+                self.pos += 1;
+                continue;
+            }
+            break;
+        }
+        if is_prev_separator {
+            self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR;
+        }
+    }
+
+    /// Scan a binary number fragment (`0`/`1` with `_` separators), setting
+    /// separator flags. Mirrors Go's `scanNumberFragment` for binary.
+    fn scan_binary_fragment_with_sep(&mut self) {
+        let mut allow_separator = false;
+        let mut is_prev_separator = false;
+        loop {
+            let before = self.pos;
+            while self.pos < self.end {
+                let c = self.text.as_bytes()[self.pos] as char;
+                if c == '0' || c == '1' {
+                    self.pos += 1;
+                } else {
+                    break;
+                }
+            }
+            if self.pos > before {
+                allow_separator = true;
+                is_prev_separator = false;
+            }
+            if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '_' {
+                self.token_flags |= TOKEN_FLAGS_CONTAINS_SEPARATOR;
+                if allow_separator {
+                    allow_separator = false;
+                    is_prev_separator = true;
+                } else {
+                    self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR;
+                }
+                self.pos += 1;
+                continue;
+            }
+            break;
+        }
+        if is_prev_separator {
+            self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR;
+        }
+    }
+
+    /// Scan an octal-specifier fragment (`0o` prefix, digits 0-7 with `_`
+    /// separators), setting separator flags. Mirrors Go's `scanNumberFragment`
+    /// for octal specifier form.
+    fn scan_octal_specifier_fragment_with_sep(&mut self) {
+        let mut allow_separator = false;
+        let mut is_prev_separator = false;
+        loop {
+            let before = self.pos;
+            while self.pos < self.end {
+                let c = self.text.as_bytes()[self.pos] as char;
+                if is_octal_digit(c) {
+                    self.pos += 1;
+                } else {
+                    break;
+                }
+            }
+            if self.pos > before {
+                allow_separator = true;
+                is_prev_separator = false;
+            }
+            if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '_' {
+                self.token_flags |= TOKEN_FLAGS_CONTAINS_SEPARATOR;
+                if allow_separator {
+                    allow_separator = false;
+                    is_prev_separator = true;
+                } else {
+                    self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR;
+                }
+                self.pos += 1;
+                continue;
+            }
+            break;
+        }
+        if is_prev_separator {
+            self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR;
+        }
     }
 
     fn scan_string(&mut self, quote: char) -> SyntaxKind {
@@ -993,7 +1159,12 @@ impl Scanner {
 
     /// Advance `pos` past a `\`-escape sequence. Called when `self.pos` is at
     /// the backslash. Handles `\xHH`, `\uHHHH`, `\u{...}`, octal escapes, line
-    /// continuations, and single-character escapes.
+    /// continuations, and single-character escapes. Sets the appropriate
+    /// `TokenFlags` bits mirroring Go's `scanEscapeSequence`
+    /// (`scanner.go:1690-1851`): `HEX_ESCAPE` for valid `\xHH`,
+    /// `UNICODE_ESCAPE` for valid `\uHHHH`, `EXTENDED_UNICODE_ESCAPE` for
+    /// valid `\u{...}`, `CONTAINS_INVALID_ESCAPE` for octal/`\8`/`\9`/invalid
+    /// `\x`/invalid `\u`.
     fn scan_escape_sequence(&mut self) {
         // pos is at '\'
         self.pos += 1; // skip backslash
@@ -1003,35 +1174,111 @@ impl Scanner {
         let c = self.text.as_bytes()[self.pos] as char;
         self.pos += 1; // skip the escaped char
         match c {
-            'x' => {
-                // \xHH — skip up to 2 hex digits
+            '0' => {
+                // '\0' is valid (NUL), but '\0' followed by a digit is a legacy
+                // octal escape ('\01', '\011'). Go falls through to the octal
+                // path for `\0` + digit. Set `CONTAINS_INVALID_ESCAPE` for the
+                // octal case (mirrors Go scanner.go:1721).
+                if self.pos < self.end && is_digit(self.text.as_bytes()[self.pos] as char) {
+                    self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                    // Consume up to 2 more octal digits
+                    for _ in 0..2 {
+                        if self.pos < self.end
+                            && is_octal_digit(self.text.as_bytes()[self.pos] as char)
+                        {
+                            self.pos += 1;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+            '1'..='3' => {
+                // Legacy octal escape: up to 2 more octal digits
+                self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
                 for _ in 0..2 {
-                    if self.pos < self.end && is_hex_digit(self.text.as_bytes()[self.pos] as char) {
+                    if self.pos < self.end
+                        && is_octal_digit(self.text.as_bytes()[self.pos] as char)
+                    {
                         self.pos += 1;
                     } else {
                         break;
                     }
                 }
             }
+            '4'..='7' => {
+                // Legacy octal escape: up to 1 more octal digit
+                self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                if self.pos < self.end && is_octal_digit(self.text.as_bytes()[self.pos] as char) {
+                    self.pos += 1;
+                }
+            }
+            '8' | '9' => {
+                // Invalid escape `\8` / `\9`
+                self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+            }
+            'x' => {
+                // \xHH — skip up to 2 hex digits. Set HEX_ESCAPE if both digits
+                // are present, CONTAINS_INVALID_ESCAPE otherwise (mirrors Go
+                // scanner.go:1811-1822).
+                let mut digit_count = 0;
+                for _ in 0..2 {
+                    if self.pos < self.end && is_hex_digit(self.text.as_bytes()[self.pos] as char)
+                    {
+                        self.pos += 1;
+                        digit_count += 1;
+                    } else {
+                        break;
+                    }
+                }
+                if digit_count == 2 {
+                    self.token_flags |= TOKEN_FLAGS_HEX_ESCAPE;
+                } else {
+                    self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                }
+            }
             'u' => {
                 if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '{' {
-                    // \u{...} — skip until '}'
-                    while self.pos < self.end && self.text.as_bytes()[self.pos] as char != '}' {
+                    // \u{...} — extended unicode escape. Set
+                    // EXTENDED_UNICODE_ESCAPE if valid, CONTAINS_INVALID_ESCAPE
+                    // otherwise (mirrors Go scanner.go:1860-1900).
+                    self.pos += 1; // skip '{'
+                    let hex_start = self.pos;
+                    while self.pos < self.end
+                        && is_hex_digit(self.text.as_bytes()[self.pos] as char)
+                    {
                         self.pos += 1;
                     }
-                    if self.pos < self.end {
+                    let has_hex = self.pos > hex_start;
+                    let closed = self.pos < self.end
+                        && self.text.as_bytes()[self.pos] as char == '}';
+                    if closed {
                         self.pos += 1; // skip '}'
                     }
+                    if has_hex && closed {
+                        self.token_flags |= TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE;
+                    } else {
+                        self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                    }
                 } else {
-                    // \uHHHH — skip up to 4 hex digits
+                    // \uHHHH — skip up to 4 hex digits. Set UNICODE_ESCAPE if
+                    // all 4 digits present, CONTAINS_INVALID_ESCAPE otherwise
+                    // (mirrors Go scanner.go:1864-1868).
+                    let mut digit_count = 0;
                     for _ in 0..4 {
                         if self.pos < self.end
                             && is_hex_digit(self.text.as_bytes()[self.pos] as char)
                         {
                             self.pos += 1;
+                            digit_count += 1;
                         } else {
                             break;
                         }
+                    }
+                    if digit_count == 4 {
+                        self.token_flags |= TOKEN_FLAGS_UNICODE_ESCAPE;
+                    } else {
+                        self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
                     }
                 }
             }
@@ -1041,7 +1288,7 @@ impl Scanner {
                     self.pos += 1;
                 }
             }
-            // Single-char escapes (\n, \t, \b, \f, \v, \0, \\, \', \", \`, and
+            // Single-char escapes (\n, \t, \b, \f, \v, \\, \', \", \`, and
             // any non-recognized char) need no extra advancement — we already
             // skipped the char after the backslash.
             _ => {}
@@ -1552,6 +1799,10 @@ fn is_digit(c: char) -> bool {
 
 fn is_hex_digit(c: char) -> bool {
     c.is_ascii_hexdigit()
+}
+
+fn is_octal_digit(c: char) -> bool {
+    ('0'..='7').contains(&c)
 }
 
 fn is_identifier_start(c: char) -> bool {
@@ -3218,5 +3469,380 @@ mod tests {
             scan_jsdoc_comment_for_tags("/** {@link foo} */"),
             TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK
         ));
+    }
+
+    // ────────────────────────────────────────────────────────────────────
+    // Escape-sequence & numeric-separator TokenFlags (P2.1)
+    // ────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn token_flags_unicode_escape() {
+        // `\u00a0` sets UNICODE_ESCAPE.
+        let mut s = Scanner::new("\"\\u00a0\"");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_UNICODE_ESCAPE
+        ));
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE
+        ));
+    }
+
+    #[test]
+    fn token_flags_extended_unicode_escape() {
+        // `\u{10ffff}` sets EXTENDED_UNICODE_ESCAPE.
+        let mut s = Scanner::new("\"\\u{10ffff}\"");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE
+        ));
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE
+        ));
+    }
+
+    #[test]
+    fn token_flags_hex_escape() {
+        // `\xa0` sets HEX_ESCAPE.
+        let mut s = Scanner::new("\"\\xa0\"");
+        s.scan();
+        assert!(token_flags_contains(s.token_flags(), TOKEN_FLAGS_HEX_ESCAPE));
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE
+        ));
+    }
+
+    #[test]
+    fn token_flags_invalid_hex_escape() {
+        // `\xz` (no hex digits) sets CONTAINS_INVALID_ESCAPE.
+        let mut s = Scanner::new("\"\\xz\"");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE
+        ));
+        assert!(!token_flags_contains(s.token_flags(), TOKEN_FLAGS_HEX_ESCAPE));
+    }
+
+    #[test]
+    fn token_flags_invalid_unicode_escape() {
+        // `\u00` (only 2 hex digits) sets CONTAINS_INVALID_ESCAPE.
+        let mut s = Scanner::new("\"\\u00\"");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE
+        ));
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_UNICODE_ESCAPE
+        ));
+    }
+
+    #[test]
+    fn token_flags_invalid_extended_unicode_escape() {
+        // `\u{}` (empty) sets CONTAINS_INVALID_ESCAPE.
+        let mut s = Scanner::new("\"\\u{}\"");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE
+        ));
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE
+        ));
+    }
+
+    #[test]
+    fn token_flags_octal_escape_invalid() {
+        // `\01` (legacy octal) sets CONTAINS_INVALID_ESCAPE.
+        let mut s = Scanner::new("\"\\01\"");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE
+        ));
+    }
+
+    #[test]
+    fn token_flags_escape_eight_nine_invalid() {
+        // `\8` and `\9` set CONTAINS_INVALID_ESCAPE.
+        let mut s = Scanner::new("\"\\8\"");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE
+        ));
+    }
+
+    #[test]
+    fn token_flags_nul_escape_not_invalid() {
+        // `\0` (NUL, not followed by digit) does NOT set
+        // CONTAINS_INVALID_ESCAPE.
+        let mut s = Scanner::new("\"\\0\"");
+        s.scan();
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE
+        ));
+    }
+
+    #[test]
+    fn token_flags_contains_separator_decimal() {
+        // `1_000` sets CONTAINS_SEPARATOR (valid separator).
+        let mut s = Scanner::new("1_000");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_SEPARATOR
+        ));
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR
+        ));
+    }
+
+    #[test]
+    fn token_flags_contains_separator_hex() {
+        // `0xFF_FF` sets CONTAINS_SEPARATOR (valid separator in hex).
+        let mut s = Scanner::new("0xFF_FF");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_SEPARATOR
+        ));
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR
+        ));
+    }
+
+    #[test]
+    fn token_flags_contains_separator_binary() {
+        // `0b1010_0101` sets CONTAINS_SEPARATOR (valid separator in binary).
+        let mut s = Scanner::new("0b1010_0101");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_SEPARATOR
+        ));
+    }
+
+    #[test]
+    fn token_flags_invalid_separator_consecutive() {
+        // `1__000` (consecutive separators) sets both
+        // CONTAINS_SEPARATOR and CONTAINS_INVALID_SEPARATOR.
+        let mut s = Scanner::new("1__000");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_SEPARATOR
+        ));
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR
+        ));
+    }
+
+    #[test]
+    fn token_flags_invalid_separator_trailing() {
+        // `1000_` (trailing separator) sets both flags.
+        let mut s = Scanner::new("1000_");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_SEPARATOR
+        ));
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR
+        ));
+    }
+
+    #[test]
+    fn token_flags_no_separator_plain_number() {
+        // `12345` sets no separator flags.
+        let mut s = Scanner::new("12345");
+        s.scan();
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_SEPARATOR
+        ));
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR
+        ));
+    }
+
+    #[test]
+    fn token_flags_string_literal_flags_mask() {
+        // A string with `\x41\u0041'` should have all three flags set:
+        // HEX_ESCAPE + UNICODE_ESCAPE + SINGLE_QUOTE.
+        let mut s = Scanner::new("'\\x41\\u0041'");
+        s.scan();
+        let flags = s.token_flags();
+        assert!(token_flags_contains(flags, TOKEN_FLAGS_HEX_ESCAPE));
+        assert!(token_flags_contains(flags, TOKEN_FLAGS_UNICODE_ESCAPE));
+        assert!(token_flags_contains(flags, TOKEN_FLAGS_SINGLE_QUOTE));
+        // STRING_LITERAL_FLAGS mask should intersect.
+        assert!(token_flags_intersects(
+            flags,
+            TOKEN_FLAGS_STRING_LITERAL_FLAGS
+        ));
+    }
+
+    #[test]
+    fn token_flags_numeric_literal_flags_mask() {
+        // `0xFF_FF` should have HEX_SPECIFIER + CONTAINS_SEPARATOR.
+        let mut s = Scanner::new("0xFF_FF");
+        s.scan();
+        let flags = s.token_flags();
+        assert!(token_flags_contains(flags, TOKEN_FLAGS_HEX_SPECIFIER));
+        assert!(token_flags_contains(flags, TOKEN_FLAGS_CONTAINS_SEPARATOR));
+        // NUMERIC_LITERAL_FLAGS mask should intersect.
+        assert!(token_flags_intersects(
+            flags,
+            TOKEN_FLAGS_NUMERIC_LITERAL_FLAGS
+        ));
+    }
+
+    // ── Legacy octal (OCTAL flag) tests ──
+
+    #[test]
+    fn legacy_octal_literal_sets_octal_flag() {
+        // `0777` is a legacy octal literal — should set OCTAL flag and report
+        // TS1121. Mirrors Go `scanner.go:1961-1971`.
+        let mut s = Scanner::new("0777");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::NumericLiteral);
+        assert!(token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
+        let errors = s.take_errors();
+        assert_eq!(errors.len(), 1);
+        assert_eq!(errors[0].kind, DiagnosticKind::OctalLiteralNotAllowed);
+        assert_eq!(errors[0].pos, 0);
+        assert_eq!(errors[0].length, 4);
+    }
+
+    #[test]
+    fn legacy_octal_literal_single_digit() {
+        // `00` — `0` followed by octal digit `0` → legacy octal.
+        let mut s = Scanner::new("00");
+        s.scan();
+        assert!(token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
+        let errors = s.take_errors();
+        assert_eq!(errors.len(), 1);
+        assert_eq!(errors[0].kind, DiagnosticKind::OctalLiteralNotAllowed);
+    }
+
+    #[test]
+    fn leading_zero_non_octal_sets_leading_zero_flag() {
+        // `0888` has a leading zero with non-octal digits — should set
+        // CONTAINS_LEADING_ZERO and report TS1489, NOT OCTAL.
+        let mut s = Scanner::new("0888");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_LEADING_ZERO
+        ));
+        assert!(!token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
+        let errors = s.take_errors();
+        assert_eq!(errors.len(), 1);
+        assert_eq!(errors[0].kind, DiagnosticKind::DecimalWithLeadingZero);
+        assert_eq!(errors[0].pos, 0);
+        assert_eq!(errors[0].length, 4);
+    }
+
+    #[test]
+    fn plain_zero_no_flags() {
+        // `0` alone — no OCTAL, no CONTAINS_LEADING_ZERO, no error.
+        let mut s = Scanner::new("0");
+        s.scan();
+        assert!(!token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_LEADING_ZERO
+        ));
+        assert!(s.take_errors().is_empty());
+    }
+
+    #[test]
+    fn zero_with_fraction_no_flags() {
+        // `0.5` — no leading-zero flag (no digit after `0`).
+        let mut s = Scanner::new("0.5");
+        s.scan();
+        assert!(!token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_LEADING_ZERO
+        ));
+        assert!(s.take_errors().is_empty());
+    }
+
+    #[test]
+    fn zero_with_exponent_no_flags() {
+        // `0e5` — no leading-zero flag (no digit after `0`).
+        let mut s = Scanner::new("0e5");
+        s.scan();
+        assert!(!token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_LEADING_ZERO
+        ));
+        assert!(s.take_errors().is_empty());
+    }
+
+    #[test]
+    fn zero_bigint_no_flags() {
+        // `0n` — BigInt, no leading-zero flag.
+        let mut s = Scanner::new("0n");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::BigIntLiteral);
+        assert!(!token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
+        assert!(s.take_errors().is_empty());
+    }
+
+    #[test]
+    fn zero_separator_after_leading_zero() {
+        // `0_123` — separator not allowed after leading `0`. Mirrors Go
+        // `scanner.go:1949-1953`: set both separator flags, report TS6188,
+        // reset, re-scan as plain fragment.
+        let mut s = Scanner::new("0_123");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_SEPARATOR
+        ));
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR
+        ));
+        let errors = s.take_errors();
+        assert_eq!(errors.len(), 1);
+        assert_eq!(errors[0].kind, DiagnosticKind::NumericSeparatorNotAllowed);
+        assert_eq!(errors[0].pos, 1); // at the `_`
+    }
+
+    #[test]
+    fn legacy_octal_with_minus_prefix() {
+        // `-0777` — the error range should include the minus sign.
+        // Scanner sees `0777` as the numeric token; `self.token` is
+        // `MinusToken` at that point.
+        let mut s = Scanner::new("-0777");
+        s.scan(); // `-`
+        assert_eq!(s.token(), SyntaxKind::MinusToken);
+        s.scan(); // `0777`
+        assert!(token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
+        let errors = s.take_errors();
+        assert_eq!(errors.len(), 1);
+        assert_eq!(errors[0].kind, DiagnosticKind::OctalLiteralNotAllowed);
+        // Error should start at `-` (pos 0) with length 5.
+        assert_eq!(errors[0].pos, 0);
+        assert_eq!(errors[0].length, 5);
     }
 }
