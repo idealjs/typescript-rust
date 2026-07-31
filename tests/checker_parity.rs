@@ -2036,6 +2036,100 @@ fn checker_arguments_in_method() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// NameResolver: scope gaps (P3.2)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_arrow_param_initializer_references_outer_var() {
+    // Arrow function parameter initializer can reference outer variables.
+    // `useOuterVariableScopeInParameter` in Go's NameResolver.
+    let diags = check_source(
+        "let outer = 10;\
+         \x20let f = (x = outer) => x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_infer_type_not_visible_in_false_branch() {
+    // `infer T` should only be visible in the true (extends) branch of a
+    // conditional type, not in the false branch. Use `Test<number>` so the
+    // extends check is false and the false branch is actually evaluated
+    // (where `R` should be unresolved → TS2304).
+    let diags = check_source(
+        "type Test<T> = T extends Array<infer R> ? R : R;\
+         \x20let x: Test<number> = 5;",
+    );
+    // R is not visible in the false branch → TS2304.
+    let count = diags.iter().filter(|d| d.code == 2304).count();
+    assert_eq!(count, 1, "Expected TS2304 for R in false branch, got {}", count);
+}
+
+#[test]
+fn checker_static_member_cannot_reference_type_param() {
+    // Static members cannot reference class type parameters.
+    // Go's NameResolver emits TS2322/TS2526 for this.
+    let diags = check_source(
+        "class Foo<T> {\
+         \x20   static x: T;\
+         \x20}",
+    );
+    // Go reports TS2322 "Static members cannot reference class type parameters"
+    // or the type 'T' is simply unresolved. We expect at least one diagnostic.
+    assert!(
+        !diags.is_empty(),
+        "Expected diagnostics for static member referencing type parameter"
+    );
+}
+
+#[test]
+fn checker_export_default_alias_resolution() {
+    // `export default` should be usable as an alias within the module.
+    let diags = check_source(
+        "export default function foo() {}\
+         \x20let x = foo();",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_function_expression_self_name() {
+    // A named function expression can reference its own name inside.
+    let diags = check_source(
+        "let fact = function f(n: number): number {\
+         \x20   return n <= 1 ? 1 : n * f(n - 1);\
+         \x20};",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_namespace_member_access_from_outside() {
+    // Namespace members should be accessible via qualified name.
+    let diags = check_source(
+        "namespace N {\
+         \x20   export const x: number = 1;\
+         \x20}\
+         \x20let y: number = N.x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_namespace_non_exported_member_not_accessible() {
+    // Non-exported namespace members should not be accessible.
+    let diags = check_source(
+        "namespace N {\
+         \x20   const x: number = 1;\
+         \x20}\
+         \x20let y: number = N.x;",
+    );
+    let count = diags.iter().filter(|d| d.code == 2339).count();
+    assert_eq!(count, 1, "Expected TS2339 for non-exported member, got {}", count);
+}
+
+
+// ────────────────────────────────────────────────────────────────────────────
 // NameResolver: global symbol resolution
 // ────────────────────────────────────────────────────────────────────────────
 

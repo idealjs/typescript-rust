@@ -347,10 +347,29 @@ do-while/for/for-in/for-of/switch 控制流、return/throw/break/continue、
 `undefinedSymbol`/`globalThisSymbol`、`populate_globals`（lib.d.ts 全局符号）、
 `follow_alias`（import/export alias 链）。
 
-- [ ] 迁移 `internal/binder/nameresolver.go` 完整逻辑到
-  `src/binder/nameresolver.rs`（剩余：箭头函数参数作用域、enum/namespace
-  成员查找、export default 别名、类型参数作用域限制、`infer T` 类型参数、
-  装饰器位置调整、alias 符号解析）。
+- [x] 命名函数表达式自引用（`let f = function g() { g(); }`）：binder
+  `bind_anonymous_declaration` 对具名 FunctionExpression 使用真实名称而非
+  `__function`；`bind_container` 在创建 locals 后将函数符号加入自身 locals
+  使名称在函数体内可见（但对 enclosing scope 不可见）。对齐 Go
+  NameResolver `KindFunctionExpression` 特例。
+- [x] namespace 成员导出/非导出区分：binder `declare_symbol` 对
+  ModuleDeclaration 容器使用 `get_combined_modifier_flags` 检测 `export`
+  修饰符，导出成员加入 `parent_sym.exports` + locals，非导出成员仅加入
+  locals；checker `resolve_namespace_type` 改用 `exports` 构建命名空间对象
+  类型，使非导出成员从外部不可访问（TS2339）。对齐 Go
+  `declareModuleMember`。
+- [x] `infer T` 仅在 conditional type true 分支可见：`resolve_conditional_type`
+  仅在 `take_true` 时 push ConditionalType 作用域，false 分支不 push 使
+  `R` 不可解析。`resolve_type_reference` 在符号未找到时报 TS2304。对齐 Go
+  NameResolver `useResult = lastLocation == TrueType`。
+- [x] 静态成员不可引用类类型参数（TS2302）：checker 新增
+  `in_static_member_type` 标志，`check_class_member` 对 static
+  PropertyDeclaration 的类型注解 force-resolve 时置位，
+  `resolve_type_reference` 解析到 TypeParameter 时报 TS2302。对齐 Go
+  NameResolver `ast.IsStatic(lastLocation)` 检查。
+- [x] class 作用域提前 push：`check_statement` ClassDeclaration 与
+  `get_type_of_class_declaration` 在 `build_class_instance_type_with_base`
+  前 push_scope，使属性类型注解中的类型参数引用可解析。
 
 ### P3.3 Binder ReferenceResolver
 
@@ -579,7 +598,11 @@ variable/alias）；`variable_decl_prefix` 区分 let/const/var；
 （变量/函数/类/接口/枚举/类型别名 with/without type params）。
 
 - [ ] `symbol_to_type_node`/`symbol_to_display_parts`（declaration emit 需要，
-  无 declaration emit 暂不阻塞）。
+  无 declaration emit 暂不阻塞）。**延期**：`symbol_to_type_node` 需构建 AST
+  TypeNode（与 Rust 直接转字符串策略冲突），依赖 printer + module resolution
+  + AST factory；`symbol_to_display_parts` 在 Go 中已从 checker 迁出至
+  `internal/ls/hover.go`（displayPartsWriter + classification），属 LS 层。
+  待 P4 declaration emit / P7 LS 启动时再补。
 - [x] hover 信息生成。
 
 ### P3.11 Checker emitresolver

@@ -223,7 +223,11 @@ impl Binder {
         // If it exists and the kinds are mergeable, fold this declaration
         // into the existing symbol instead of creating a new one.
         let existing: Option<Arc<Symbol>> = if let Some(parent_sym) = &self.parent_symbol {
-            parent_sym.members.get(&name).cloned()
+            parent_sym
+                .members
+                .get(&name)
+                .cloned()
+                .or_else(|| parent_sym.exports.get(&name).cloned())
         } else if let Some(block_container) = &self.block_scope_container {
             let container_id = block_container.id();
             self.symbol_map
@@ -279,15 +283,52 @@ impl Binder {
             }
         }
 
-        // Add to appropriate symbol table
-        // 1) container's exports (if in a module/namespace)
-        // 2) container's members (if in a class/interface/object)
-        // 3) block-scope container's locals
-        if let Some(_container) = &self.container {
-            if let Some(parent_sym) = &self.parent_symbol {
-                // For now, add to parent symbol's members
-                // In a full implementation, this would distinguish between
-                // members, exports, and locals based on container flags
+        // Add to appropriate symbol table based on container kind.
+        // Mirrors Go's `declareSymbolAndAddToSymbolTable`:
+        // - ModuleDeclaration: exported members go to `exports`, non-exported
+        //   to `locals` (so they're visible inside the namespace but not via
+        //   `N.x` from outside).
+        // - ClassDeclaration/InterfaceDeclaration/etc.: members go to
+        //   `members`.
+        // - Block-scoped containers: locals.
+        if let Some(container) = &self.container {
+            if container.kind == SyntaxKind::ModuleDeclaration {
+                // Namespace member: exported → exports, non-exported → locals.
+                // Use combined modifier flags to handle `export const x`
+                // where the `Export` modifier is on the parent
+                // VariableStatement, not the VariableDeclaration itself.
+                let has_export = self
+                    .get_combined_modifier_flags(node)
+                    .contains(ModifierFlags::Export);
+                if has_export {
+                    if let Some(parent_sym) = &self.parent_symbol {
+                        let parent_sym_mut = Arc::as_ptr(parent_sym) as *mut Symbol;
+                        unsafe {
+                            (*parent_sym_mut)
+                                .exports
+                                .insert(name.clone(), Arc::clone(&symbol));
+                        }
+                    }
+                    // Also add to locals so the member is visible inside
+                    // the namespace body by its local name.
+                    if has_locals(container.kind) {
+                        let locals = self
+                            .symbol_map
+                            .locals
+                            .entry(container.id())
+                            .or_insert_with(SymbolTable::new);
+                        locals.insert(name.clone(), Arc::clone(&symbol));
+                    }
+                } else if has_locals(container.kind) {
+                    let locals = self
+                        .symbol_map
+                        .locals
+                        .entry(container.id())
+                        .or_insert_with(SymbolTable::new);
+                    locals.insert(name.clone(), Arc::clone(&symbol));
+                }
+            } else if let Some(parent_sym) = &self.parent_symbol {
+                // Class/Interface/Object members.
                 let parent_sym_mut = Arc::as_ptr(parent_sym) as *mut Symbol;
                 unsafe {
                     (*parent_sym_mut)
@@ -380,6 +421,29 @@ impl Binder {
             return true;
         }
         false
+    }
+
+    /// Get the combined modifier flags for a node, walking up the
+    /// variable-declaration chain (VariableDeclaration →
+    /// VariableDeclarationList → VariableStatement) to collect `export`
+    /// and other modifiers from parent nodes. Mirrors Go's
+    /// `ast.GetCombinedModifierFlags`. Requires parent pointers to be
+    /// populated (see `set_parent_pointers`).
+    fn get_combined_modifier_flags(&self, node: &Arc<Node>) -> ModifierFlags {
+        let mut flags = node.syntactic_modifier_flags();
+        if node.kind == SyntaxKind::VariableDeclaration {
+            if let Some(parent) = &node.parent {
+                if parent.kind == SyntaxKind::VariableDeclarationList {
+                    flags |= parent.syntactic_modifier_flags();
+                    if let Some(gp) = &parent.parent {
+                        if gp.kind == SyntaxKind::VariableStatement {
+                            flags |= gp.syntactic_modifier_flags();
+                        }
+                    }
+                }
+            }
+        }
+        flags
     }
 
     /// Get the name of a declaration node.
@@ -1435,11 +1499,21 @@ impl Binder {
                 self.declare_symbol(node, SymbolFlags::Function, SymbolFlags::VALUE);
             }
             SyntaxKind::FunctionExpression => {
-                self.bind_anonymous_declaration(
-                    node,
-                    SymbolFlags::Function,
-                    INTERNAL_SYMBOL_NAME_FUNCTION,
-                );
+                // Use the actual name for named function expressions so the
+                // name is self-referenceable inside the body. Mirrors Go's
+                // `bindFunctionExpression` which uses `node.Name().Text()`
+                // when a name is present. The symbol is added to the
+                // function expression's own locals in `bind_container` so it
+                // is visible inside the body but not in the enclosing scope.
+                let name = match &node.data {
+                    NodeData::FunctionExpression(data) => data
+                        .name
+                        .as_ref()
+                        .map(|n| self.node_text(n)),
+                    _ => None,
+                }
+                .unwrap_or_else(|| INTERNAL_SYMBOL_NAME_FUNCTION.to_string());
+                self.bind_anonymous_declaration(node, SymbolFlags::Function, &name);
             }
             SyntaxKind::ArrowFunction => {
                 self.bind_anonymous_declaration(
@@ -1670,6 +1744,25 @@ impl Binder {
         };
         if is_function_like {
             self.current_flow = Some(Arc::new(FlowNode::new(FlowFlags::START)));
+        }
+
+        // Named function expressions can reference their own name inside the
+        // body. Add the function's symbol to its own locals table so the
+        // name is visible during binding/checking of the body. Mirrors Go's
+        // NameResolver special case for `KindFunctionExpression` which
+        // returns `location.Symbol()` when the name matches.
+        if node.kind == SyntaxKind::FunctionExpression {
+            let sym_and_name = self
+                .symbol_map
+                .symbol_of(node)
+                .map(|sym| (Arc::clone(&sym), sym.name.clone()));
+            if let Some((sym, sym_name)) = sym_and_name {
+                if sym_name != INTERNAL_SYMBOL_NAME_FUNCTION {
+                    if let Some(locals) = self.symbol_map.locals.get_mut(&node.id()) {
+                        locals.insert(sym_name, sym);
+                    }
+                }
+            }
         }
 
         self.bind_children(node);

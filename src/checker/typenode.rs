@@ -281,11 +281,39 @@ impl Checker {
         }
         let symbol = match self.resolve_identifier(type_name) {
             Some(s) => s,
-            None => return self.error_type(),
+            None => {
+                // Report TS2304 "Cannot find name '{0}'." for unresolved type
+                // references. Mirrors Go's NameResolver which is called with
+                // `nameNotFoundMessage = Cannot_find_name_0` for type nodes.
+                use crate::diagnostics::messages_generated::CANNOT_FIND_NAME_0;
+                let name_text = type_name.text();
+                let file = self.current_file.clone();
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    type_name.loc,
+                    CANNOT_FIND_NAME_0,
+                    vec![name_text.to_string()],
+                ));
+                return self.error_type();
+            }
         };
         // Type parameter: build a TypeParameter type with the constraint
         // resolved from the declaration (`<T extends Constraint>`).
         if symbol.flags.contains(SymbolFlags::TypeParameter) {
+            // Static members cannot reference class type parameters
+            // (TS2322). Mirrors Go's NameResolver check for
+            // `ast.IsStatic(lastLocation)` when resolving a type parameter
+            // declared in a class container.
+            if self.in_static_member_type {
+                use crate::diagnostics::messages_generated::STATIC_MEMBERS_CANNOT_REFERENCE_CLASS_TYPE_PARAMETERS;
+                let file = self.current_file.clone();
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    type_name.loc,
+                    STATIC_MEMBERS_CANNOT_REFERENCE_CLASS_TYPE_PARAMETERS,
+                    Vec::new(),
+                ));
+            }
             // Check the type-argument substitution stack first — if this
             // type parameter is being instantiated with a concrete type,
             // return the substitution instead of the TypeParameter type.
@@ -882,12 +910,15 @@ impl Checker {
     /// object type whose properties are the namespace's exported members.
     /// Mirrors the namespace slice of Go's `getDeclaredTypeOfSymbol`.
     ///
-    /// Each entry in the namespace symbol's `members` table becomes a
+    /// Each entry in the namespace symbol's `exports` table becomes a
     /// property on the resulting anonymous object type; the property type
     /// is resolved from the member symbol via `get_type_of_symbol` (which
     /// handles variables, functions, classes, etc.). Merged namespaces
     /// already share a single symbol (see `can_merge_symbols`), so all
-    /// members from every merged declaration are visible here.
+    /// exported members from every merged declaration are visible here.
+    /// Only exported members are accessible via `N.x` from outside the
+    /// namespace — non-exported members live in the namespace's `locals`
+    /// and are visible only inside the namespace body.
     pub fn resolve_namespace_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
         // Reuse a cached declared type if present.
         if let Some(cached) = self
@@ -897,10 +928,11 @@ impl Checker {
         {
             return cached;
         }
-        // Collect member symbols first to avoid borrowing `self.members`
-        // while calling `get_type_of_symbol` (which needs `&mut self`).
+        // Collect exported member symbols first to avoid borrowing
+        // `self.exports` while calling `get_type_of_symbol` (which needs
+        // `&mut self`).
         let members: Vec<(String, Arc<Symbol>)> = symbol
-            .members
+            .exports
             .iter()
             .map(|(k, v)| (k.clone(), Arc::clone(v)))
             .collect();

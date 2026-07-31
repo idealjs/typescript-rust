@@ -391,6 +391,12 @@ pub struct Checker {
     pub flow_type_cache: HashMap<u64, Arc<Type>>,
     pub flow_node_reachable: HashMap<u64, bool>,
 
+    // Set while resolving the type annotation of a static class member.
+    // When true, resolving a class type parameter reports TS2322, mirroring
+    // Go's NameResolver check `ast.IsStatic(lastLocation)` →
+    // `Static_members_cannot_reference_class_type_parameters`.
+    pub in_static_member_type: bool,
+
     // Tracer
     pub tracer: Arc<Tracer>,
 
@@ -597,6 +603,7 @@ impl Checker {
             flow_invocation_count: 0,
             flow_type_cache: HashMap::new(),
             flow_node_reachable: HashMap::new(),
+            in_static_member_type: false,
 
             merged_symbols: HashMap::new(),
 
@@ -2643,15 +2650,15 @@ impl Checker {
             }
             _ => return self.get_any_type(),
         };
+        // Push the class scope before building the instance type so that
+        // type-parameter references in property annotations resolve.
+        self.push_scope(node);
         // Build the class's instance type (including inherited members from
         // `extends`) to use as the construct signature's return type. This
         // makes `new Foo()` return the instance type, so `instance.prop`
         // is properly checked. Mirrors Go's `createClassType` →
         // `getInstanceTypeFromClassType`.
         let instance_type = self.build_class_instance_type_with_base(node);
-        // Push the class scope so type-parameter references in constructor
-        // parameter annotations resolve.
-        self.push_scope(node);
         let mut construct_sigs: Vec<Arc<Signature>> = Vec::new();
         for member in members.0.iter() {
             if member.kind != SyntaxKind::Constructor {
@@ -3865,13 +3872,16 @@ impl Checker {
             SyntaxKind::ClassDeclaration => {
                 // Grammar check: validate modifiers.
                 self.check_grammar_modifiers(node);
+                // Push the class scope before building the instance type so
+                // that type-parameter references in property annotations
+                // (e.g. `value: T`) resolve correctly.
+                self.push_scope(node);
                 // Build the instance type (including inherited members from
                 // `extends`) and push it as the `this` type so that method
                 // bodies can resolve `this.prop` and `super.prop`.
                 let this_type = self.build_class_instance_type_with_base(node);
                 self.this_type_stack.push(this_type);
                 // Check heritage clauses (e.g. `extends Foo`, `implements I`).
-                self.push_scope(node);
                 if let crate::ast::NodeData::ClassDeclaration(data) = &node.data {
                     if let Some(heritage) = &data.heritage_clauses {
                         for clause in heritage.iter() {
@@ -4355,6 +4365,19 @@ impl Checker {
                 // Only check the initializer; the name and type are
                 // declarations/types.
                 if let crate::ast::NodeData::PropertyDeclaration(data) = &node.data {
+                    // Static members cannot reference class type parameters
+                    // (TS2322). Force-resolve the type annotation with the
+                    // `in_static_member_type` flag set so any TypeParameter
+                    // reference in the type tree is reported. Mirrors Go's
+                    // NameResolver `ast.IsStatic(lastLocation)` check.
+                    if node.has_syntactic_modifier(ModifierFlags::Static) {
+                        if let Some(type_node) = &data.type_node {
+                            let prev = self.in_static_member_type;
+                            self.in_static_member_type = true;
+                            let _ = self.get_type_from_type_node(type_node);
+                            self.in_static_member_type = prev;
+                        }
+                    }
                     if let Some(init) = &data.initializer {
                         self.check_expression(init);
                     }

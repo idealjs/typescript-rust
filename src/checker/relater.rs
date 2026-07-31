@@ -3128,9 +3128,17 @@ impl Checker {
         // Push the ConditionalType onto the scope stack so that
         // `resolve_identifier` can find the `infer R` type
         // parameters (declared as locals of the ConditionalType).
-        self.push_scope(&cond_node);
+        // Infer type parameters are only visible in the true (extends)
+        // branch of a conditional type — mirroring Go's NameResolver check
+        // `useResult = lastLocation == location.TrueType`. In the false
+        // branch we skip pushing the scope so `R` is unresolved (TS2304).
+        if take_true {
+            self.push_scope(&cond_node);
+        }
         let branch = self.get_type_from_type_node(&branch_node);
-        self.pop_scope();
+        if take_true {
+            self.pop_scope();
+        }
         let resolved = if !infer_params.is_empty() {
             let inferred = self.get_inferred_types(&context);
             self.substitute_infer_type_parameters(&branch, &infer_params, &inferred)
