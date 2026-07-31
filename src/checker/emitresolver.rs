@@ -671,7 +671,7 @@ impl Checker {
     /// Mirrors Go's `EmitResolver.GetEnumMemberValue` (emitresolver.go ~L89).
     /// Returns the enum member's value as a string (for numeric enums) or
     /// the string literal (for string enums).
-    pub fn get_enum_member_value(&mut self, node: &Arc<Node>) -> Option<String> {
+    pub fn get_enum_member_value_string(&mut self, node: &Arc<Node>) -> Option<String> {
         // Look for the enum member's initializer expression.
         let NodeData::EnumMember(data) = &node.data else {
             return None;
@@ -775,7 +775,7 @@ impl Checker {
     /// Mirrors Go's `EmitResolver.GetConstantValue` (emitresolver.go ~L1157).
     pub fn get_constant_value(&mut self, node: &Arc<Node>) -> Option<String> {
         if node.kind == SyntaxKind::EnumMember {
-            return self.get_enum_member_value(node);
+            return self.get_enum_member_value_string(node);
         }
         match node.kind {
             SyntaxKind::StringLiteral => {

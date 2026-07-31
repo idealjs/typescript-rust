@@ -5935,3 +5935,181 @@ fn checker_let_number_literal_widens_no_error() {
     assert_no_diagnostics(&diags);
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Enum member value computation (P3.7 Phase 1: `isEnumTypeRelatedTo`)
+//
+// `is_enum_type_related_to` compares the member values of two same-named
+// `RegularEnum`s to decide assignability. The value computation lives in
+// `Checker::get_enum_member_value` / `compute_enum_member_values` (ported from
+// Go's checker.go:23820-23901). These tests exercise that computation directly
+// via `build_checker` + `get_enum_member_value`, since the Enum→Enum relater
+// branch is only reached for types carrying `TypeFlags::Enum` (not yet produced
+// by the Rust port's enum type resolver, which currently emits literal unions).
+//
+// Phase 1 limitation: member initializers that reference other enum members
+// (e.g. `B = A`) resolve to `None` because the evaluator uses a no-op entity
+// resolver. Such members are treated as opaque/assumed-numeric by the relater,
+// matching Go's handling of ambient (opaque) enum members.
+//
+// Constructing two *distinct* same-named `RegularEnum` symbols in a single
+// file is not possible (the binder merges `enum E {} enum E {}` into one
+// symbol), so the full cross-enum value comparison is not exercised here; the
+// unit tests below cover the value-computation primitive that drives it.
+// ────────────────────────────────────────────────────────────────────────────
+
+use tsox::evaluator::EvalValue;
+use tsox::jsnum::Number;
+
+/// Build a checker for `source`, find the first `EnumDeclaration`, and return
+/// its members' names paired with their computed `EvalResult` values.
+fn enum_member_values(source: &str) -> Vec<(String, tsox::evaluator::EvalResult)> {
+    let mut checker = build_checker(source);
+    let decl = first_statement(&checker, SyntaxKind::EnumDeclaration).expect("enum declaration");
+    let members: Vec<std::sync::Arc<tsox::ast::Node>> = match &decl.data {
+        NodeData::EnumDeclaration(d) => d.members.iter().cloned().collect(),
+        _ => panic!("not an enum declaration"),
+    };
+    let mut out = Vec::new();
+    for m in members {
+        let name = match &m.data {
+            NodeData::EnumMember(d) => d.name.text().to_string(),
+            _ => continue,
+        };
+        let value = checker.get_enum_member_value(&m);
+        out.push((name, value));
+    }
+    out
+}
+
+/// Look up a member's computed value by name, panicking if absent.
+fn value_of(
+    values: &[(String, tsox::evaluator::EvalResult)],
+    name: &str,
+) -> tsox::evaluator::EvalResult {
+    values
+        .iter()
+        .find(|(n, _)| n == name)
+        .map(|(_, v)| v.clone())
+        .unwrap_or_else(|| panic!("enum member {name} not found"))
+}
+
+#[test]
+fn checker_enum_member_value_numeric_literal() {
+    let v = enum_member_values("enum E { A = 1, B = 2 }");
+    assert_eq!(value_of(&v, "A").value, Some(EvalValue::Number(Number(1.0))));
+    assert_eq!(value_of(&v, "B").value, Some(EvalValue::Number(Number(2.0))));
+}
+
+#[test]
+fn checker_enum_member_value_auto_increment_from_zero() {
+    let v = enum_member_values("enum E { A, B, C }");
+    assert_eq!(value_of(&v, "A").value, Some(EvalValue::Number(Number(0.0))));
+    assert_eq!(value_of(&v, "B").value, Some(EvalValue::Number(Number(1.0))));
+    assert_eq!(value_of(&v, "C").value, Some(EvalValue::Number(Number(2.0))));
+}
+
+#[test]
+fn checker_enum_member_value_auto_increment_from_explicit() {
+    let v = enum_member_values("enum E { A = 5, B }");
+    assert_eq!(value_of(&v, "A").value, Some(EvalValue::Number(Number(5.0))));
+    assert_eq!(value_of(&v, "B").value, Some(EvalValue::Number(Number(6.0))));
+}
+
+#[test]
+fn checker_enum_member_value_string_literal() {
+    let v = enum_member_values("enum E { A = 'x', B = 'y' }");
+    assert_eq!(value_of(&v, "A").value, Some(EvalValue::String("x".to_string())));
+    assert_eq!(value_of(&v, "B").value, Some(EvalValue::String("y".to_string())));
+}
+
+#[test]
+fn checker_enum_member_value_string_resets_auto_increment() {
+    // A string member resets the auto-increment counter; a subsequent
+    // initializer-less member has no computable value (None), mirroring Go's
+    // TS1062 case (the error itself is suppressed in Phase 1).
+    let v = enum_member_values("enum E { A = 1, B = 's', C }");
+    assert_eq!(value_of(&v, "A").value, Some(EvalValue::Number(Number(1.0))));
+    assert_eq!(value_of(&v, "B").value, Some(EvalValue::String("s".to_string())));
+    assert_eq!(value_of(&v, "C").value, None);
+}
+
+#[test]
+fn checker_enum_member_value_unary_minus() {
+    let v = enum_member_values("enum E { A = -1, B }");
+    assert_eq!(value_of(&v, "A").value, Some(EvalValue::Number(Number(-1.0))));
+    assert_eq!(value_of(&v, "B").value, Some(EvalValue::Number(Number(0.0))));
+}
+
+#[test]
+fn checker_enum_member_value_binary_arithmetic() {
+    let v = enum_member_values("enum E { A = 1 + 2, B = 3 * 4 }");
+    assert_eq!(value_of(&v, "A").value, Some(EvalValue::Number(Number(3.0))));
+    assert_eq!(value_of(&v, "B").value, Some(EvalValue::Number(Number(12.0))));
+}
+
+#[test]
+fn checker_enum_member_value_bitwise_shift() {
+    let v = enum_member_values("enum E { A = 1 << 2 }");
+    assert_eq!(value_of(&v, "A").value, Some(EvalValue::Number(Number(4.0))));
+}
+
+#[test]
+fn checker_enum_member_value_computation_is_idempotent() {
+    // Calling `get_enum_member_value` twice must yield the same value; the
+    // `EnumValuesComputed` node flag guards re-computation.
+    let mut checker = build_checker("enum E { A = 7, B }");
+    let decl = first_statement(&checker, SyntaxKind::EnumDeclaration).expect("enum");
+    let members: Vec<std::sync::Arc<tsox::ast::Node>> = match &decl.data {
+        NodeData::EnumDeclaration(d) => d.members.iter().cloned().collect(),
+        _ => panic!(),
+    };
+    let a = &members[0];
+    let first = checker.get_enum_member_value(a);
+    let second = checker.get_enum_member_value(a);
+    assert_eq!(first.value, second.value);
+    assert_eq!(first.value, Some(EvalValue::Number(Number(7.0))));
+}
+
+// ── Regression: merged enum declarations (same-symbol path) ──
+
+#[test]
+fn checker_is_enum_type_related_merged_symbol_no_error() {
+    // Two `enum E` declarations merge into a single symbol, so
+    // `is_enum_type_related_to` short-circuits via `Arc::ptr_eq` without
+    // comparing member values. Members from both decls remain assignable to
+    // the enum type.
+    let diags = check_source(
+        "enum E { A = 1 }\n\
+         enum E { B = 2 }\n\
+         const a: E = E.A;\n\
+         const b: E = E.B;\n\
+         const c: E.A = E.A;\n\
+         const d: E.B = E.B;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_is_enum_type_related_enum_literal_regression_no_error() {
+    // Enum-literal → enum-literal assignment (same enum) must keep working
+    // after the EnumLiteral relater branch was taught to also call
+    // `is_enum_type_related_to`.
+    let diags = check_source(
+        "enum Color { Red = 0, Green = 1 }\n\
+         const r: Color.Red = Color.Red;\n\
+         const g: Color.Green = Color.Green;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_is_enum_type_related_enum_to_enum_regression_no_error() {
+    // `let x: Color = Color.Red` (enum-literal → enum type) must keep working.
+    let diags = check_source(
+        "enum Color { Red = 0, Green = 1 }\n\
+         let x: Color = Color.Red;\n\
+         let y: Color = Color.Green;",
+    );
+    assert_no_diagnostics(&diags);
+}
+

@@ -28,6 +28,7 @@ use crate::diagnostics::messages_generated::{
     TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
 };
 use crate::jsnum;
+use crate::evaluator::{EvalResult, EvalValue};
 
 use super::tracer::Tracer;
 use super::types::*;
@@ -120,6 +121,16 @@ impl HasId for SourceFile {
     fn id(&self) -> u64 {
         self.id()
     }
+}
+
+/// No-op entity resolver for `evaluate_expression`. Returns `EvalResult::none()`
+/// for every entity reference, which means enum member initializers that
+/// reference other enum members or computed names won't resolve to a constant
+/// value (they are treated as opaque/numeric in `isEnumTypeRelatedTo`).
+/// This is a Phase 1 limitation; a full checker-backed entity resolver is a
+/// follow-up.
+fn noop_entity_fn(_: &Arc<Node>, _: Option<&Arc<Node>>) -> EvalResult {
+    EvalResult::none()
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -265,6 +276,10 @@ pub struct Checker {
     /// optimistic cycle-broken results across calls.
     /// Mirrors Go's `Relation.results` (relater.go).
     pub relation_cache: HashMap<crate::checker::relater::RelationCacheKey, bool>,
+    /// Cache for `is_enum_type_related_to`, mapping a `(source, target)`
+    /// enum-symbol pair to a `RelationComparisonResult`. Mirrors Go's
+    /// `Checker.enumRelation` (relater.go).
+    pub enum_relation: HashMap<EnumRelationKey, crate::checker::relater::RelationComparisonResult>,
     /// Set of `(source, target, relation)` triples currently being
     /// computed higher up the relater call stack. When a triple is
     /// already in this set, we've hit a recursive cycle (e.g.
@@ -533,6 +548,7 @@ impl Checker {
             type_argument_stack: Vec::new(),
             relater_depth: 0,
             relation_cache: HashMap::new(),
+            enum_relation: HashMap::new(),
             relation_in_progress: std::collections::HashSet::new(),
             spread_links: LinkStore::new(),
             variance_links: LinkStore::new(),
@@ -4607,6 +4623,101 @@ impl Checker {
                 self.check_expression(init);
             }
         }
+    }
+
+    // ────────────────────────────────────────────────────────────────────
+    // Enum member value computation (ported from Go's checker.go:23820-23901)
+    // ────────────────────────────────────────────────────────────────────
+
+    /// Get the first declaration of `kind` for a symbol.
+    /// Mirrors Go's `ast.GetDeclarationOfKind`.
+    pub fn get_declaration_of_kind(
+        &self,
+        symbol: &Arc<Symbol>,
+        kind: SyntaxKind,
+    ) -> Option<Arc<Node>> {
+        symbol.declarations.iter().find(|d| d.kind == kind).cloned()
+    }
+
+    /// Get the constant value of an enum member node.
+    /// Mirrors Go's `Checker.getEnumMemberValue` (checker.go:23820).
+    pub fn get_enum_member_value(&mut self, node: &Arc<Node>) -> EvalResult {
+        if let Some(parent) = node.parent.as_ref() {
+            self.compute_enum_member_values(parent);
+        }
+        self.enum_member_links
+            .get(node)
+            .map(|l| l.value.clone())
+            .unwrap_or_else(EvalResult::none)
+    }
+
+    /// Compute and cache the values of all members of an `EnumDeclaration`.
+    /// Idempotent (guarded by `NodeCheckFlags::EnumValuesComputed`).
+    /// Mirrors Go's `Checker.computeEnumMemberValues` (checker.go:23846).
+    fn compute_enum_member_values(&mut self, node: &Arc<Node>) {
+        let already = self
+            .node_links
+            .get(node)
+            .map(|l| l.flags.contains(NodeCheckFlags::EnumValuesComputed))
+            .unwrap_or(false);
+        if already {
+            return;
+        }
+        self.node_links.get_or_default(node).flags |= NodeCheckFlags::EnumValuesComputed;
+
+        let members: Vec<Arc<Node>> = match &node.data {
+            NodeData::EnumDeclaration(data) => data.members.iter().cloned().collect(),
+            _ => return,
+        };
+
+        let mut auto_value: Option<f64> = Some(0.0);
+        let mut previous: Option<Arc<Node>> = None;
+        for member in &members {
+            let result = self.compute_enum_member_value(member, auto_value, previous.as_ref());
+            self.enum_member_links.get_or_default(member).value = result.clone();
+            if let Some(EvalValue::Number(n)) = &result.value {
+                auto_value = Some(n.0 + 1.0);
+            } else {
+                auto_value = None;
+            }
+            previous = Some(Arc::clone(member));
+        }
+    }
+
+    /// Compute the value of a single enum member.
+    /// Mirrors Go's `Checker.computeEnumMemberValue` (checker.go:23866).
+    /// Phase 1: omits the TS1062 "enum member must have initializer" error
+    /// and the isolated-modules checks, returning `EvalResult::none()` for
+    /// members without a computable value.
+    fn compute_enum_member_value(
+        &mut self,
+        member: &Arc<Node>,
+        auto_value: Option<f64>,
+        _previous: Option<&Arc<Node>>,
+    ) -> EvalResult {
+        let has_initializer = matches!(&member.data, NodeData::EnumMember(d) if d.initializer.is_some());
+        if has_initializer {
+            return self.compute_constant_enum_member_value(member);
+        }
+        match auto_value {
+            Some(v) => EvalResult::new(Some(EvalValue::Number(jsnum::Number(v))), false, false, false),
+            None => EvalResult::none(),
+        }
+    }
+
+    /// Evaluate the initializer of a constant enum member.
+    /// Mirrors Go's `Checker.computeConstantEnumMemberValue` (checker.go:23903).
+    /// Phase 1: skips NaN/Infinity (const enum) and string-syntax
+    /// (isolatedModules) error checks.
+    fn compute_constant_enum_member_value(&mut self, member: &Arc<Node>) -> EvalResult {
+        let initializer = match &member.data {
+            NodeData::EnumMember(d) => match &d.initializer {
+                Some(init) => Arc::clone(init),
+                None => return EvalResult::none(),
+            },
+            _ => return EvalResult::none(),
+        };
+        crate::evaluator::evaluate_expression(&initializer, Some(member), noop_entity_fn)
     }
 
     /// Check an expression node: resolve identifier references and recurse

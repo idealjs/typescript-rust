@@ -1737,6 +1737,14 @@ pub struct CachedTypeKey {
 
 pub type RelationComparisonResult = u32;
 
+/// Cache key for `isEnumTypeRelatedTo`, indexing a `(source, target)` enum
+/// symbol pair. Mirrors Go's `EnumRelationKey` (relater.go).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct EnumRelationKey {
+    pub source_id: u64,
+    pub target_id: u64,
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // CacheHashKey
 // ────────────────────────────────────────────────────────────────────────────

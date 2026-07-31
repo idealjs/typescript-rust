@@ -96,8 +96,14 @@ arity）+ 12 个 parity fixtures。
    修复 mapper.rs 三处 placeholder 闭包回退（`new_simple_type_mapper`/
    `new_array_type_mapper`/`new_array_to_single_type_mapper`）——将
    `MapFn` 签名从 `Fn(&Type)` 改为 `Fn(&Arc<Type>)`，使不匹配时返回输入
-   类型而非错误目标。**遗留**：`isEnumTypeRelatedTo` 的 enum member 值比较
-   （需 `getEnumMemberValue` + `enumRelation` 缓存）待后续补齐。
+   类型而非错误目标。`isEnumTypeRelatedTo` 的 enum member 值比较已落地
+   （Phase 1：布尔正确性，无诊断）：`get_enum_member_value`/`compute_enum_member_values`/
+   `compute_enum_member_value`/`compute_constant_enum_member_value`（对齐 Go
+   checker.go:23820-23901）+ `enum_relation` 缓存（`EnumRelationKey` +
+   `Symbol::id()`）+ `get_declaration_of_kind`。**遗留**：Phase 2 诊断
+   （TS2324/TS4125/TS4126 需 errorReporter plumbing）、TS1062 未初始化成员错误、
+   ambient 非 const 计算成员规则、NaN/Infinity const-enum 检查、isolatedModules
+   字符串语法检查、`evaluate_entity` 跨文件枚举成员引用解析（当前 noop）。
 2. **P3.8 Checker 推断收尾**（已完成）：`inference.rs` 两处 TODO 已落地
    ——contextual typing from return type（`infer_type_arguments` 中从调用
    表达式的上下文类型推断返回类型，覆盖 `let x: T = genericFn(...)` 与

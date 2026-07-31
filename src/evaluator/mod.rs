@@ -43,7 +43,7 @@ impl EvalResult {
 }
 
 /// A evaluated constant value.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum EvalValue {
     Number(Number),
     String(String),

@@ -12,6 +12,7 @@ use std::sync::Arc;
 use crate::ast::node_data_generated::NodeData;
 use crate::ast::{Symbol, SymbolFlags, SyntaxKind};
 use crate::checker::is_tuple_type;
+use crate::evaluator::EvalValue;
 use crate::jsnum;
 
 use super::checker::Checker;
@@ -870,13 +871,8 @@ impl Checker {
             return true;
         }
 
-        // Enum → Enum (same enum type or same-named regular enum).
-        // Ported from Go's `isEnumTypeRelatedTo`. The full Go implementation
-        // also compares enum member values across two same-named regular
-        // enums; that requires `getEnumMemberValue` infrastructure which is
-        // not yet ported, so we restrict the check here to the symbol-level
-        // relation (same symbol, or same name + both RegularEnum). Member
-        // value comparison is left as a follow-up.
+        // Enum → Enum (same enum type or same-named regular enum with
+        // matching member values). Ported from Go's `isEnumTypeRelatedTo`.
         if s.contains(TypeFlags::Enum)
             && t.contains(TypeFlags::Enum)
             && self.is_enum_type_related_to(source, target)
@@ -884,12 +880,16 @@ impl Checker {
             return true;
         }
 
-        // EnumLiteral → EnumLiteral: simplified
+        // EnumLiteral → EnumLiteral: require matching literal values AND
+        // that the underlying enum types are related. Mirrors Go's
+        // `isSimpleTypeRelatedTo` enum-literal branch, which additionally
+        // calls `isEnumTypeRelatedTo` on the symbols.
         if s.contains(TypeFlags::EnumLiteral)
             && t.contains(TypeFlags::EnumLiteral)
             && s.intersects(TYPE_FLAGS_LITERAL)
             && t.intersects(TYPE_FLAGS_LITERAL)
             && self.literal_values_equal(source, target)
+            && self.is_enum_type_related_to(source, target)
         {
             return true;
         }
@@ -968,16 +968,15 @@ impl Checker {
     /// Whether two enum types are related (assignable).
     ///
     /// Ported from Go's `isEnumTypeRelatedTo` (`internal/checker/relater.go`).
-    /// The Go implementation additionally compares enum member values when two
-    /// same-named regular enums are distinct symbols; that requires
-    /// `getEnumMemberValue` and the `enumRelation` cache, neither of which is
-    /// ported yet. This implementation handles the two common cases:
+    /// Two enum types are related when they share the same symbol (merged
+    /// declarations), or when they are same-named `RegularEnum`s whose members
+    /// all have matching values. The result is memoized in `enum_relation`.
     ///
-    /// 1. Same enum symbol (after unwrapping `EnumMember` → parent enum).
-    /// 2. Same name and both `RegularEnum` (deferred member-value check).
-    ///
-    /// The deferred full check is tracked in TODO.md P3.7 follow-up.
-    fn is_enum_type_related_to(&self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    /// Phase 1: reports no diagnostics (boolean correctness only). Member
+    /// values are computed via `get_enum_member_value`, which uses a no-op
+    /// entity resolver — members whose initializers reference other enum
+    /// members resolve to `None` and are treated as opaque/assumed-numeric.
+    fn is_enum_type_related_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
         let Some(source_symbol) = source.symbol.as_ref() else {
             return false;
         };
@@ -986,38 +985,94 @@ impl Checker {
         };
 
         // Unwrap EnumMember → parent enum symbol (Go: getParentOfSymbol).
-        let source_symbol = if source_symbol.flags.contains(SymbolFlags::EnumMember) {
+        let source_parent = if source_symbol.flags.contains(SymbolFlags::EnumMember) {
             source_symbol.parent.as_ref().unwrap_or(source_symbol)
         } else {
             source_symbol
         };
-        let target_symbol = if target_symbol.flags.contains(SymbolFlags::EnumMember) {
+        let target_parent = if target_symbol.flags.contains(SymbolFlags::EnumMember) {
             target_symbol.parent.as_ref().unwrap_or(target_symbol)
         } else {
             target_symbol
         };
 
-        // Same symbol → related.
-        if Arc::ptr_eq(source_symbol, target_symbol) {
+        // Same symbol → related (merged declarations).
+        if Arc::ptr_eq(source_parent, target_parent) {
             return true;
         }
 
         // Different names, or not both RegularEnum → not related.
-        // (Go also short-circuits when either side is not RegularEnum.)
-        if source_symbol.name != target_symbol.name
-            || !source_symbol
+        if source_parent.name != target_parent.name
+            || !source_parent
                 .flags
                 .contains(SymbolFlags::RegularEnum)
-            || !target_symbol.flags.contains(SymbolFlags::RegularEnum)
+            || !target_parent.flags.contains(SymbolFlags::RegularEnum)
         {
             return false;
         }
 
-        // Same name + both RegularEnum: Go would now compare each enum member's
-        // value via `getEnumMemberValue`. Without that infrastructure we
-        // conservatively return `true` (the common case where same-named
-        // regular enums in merged declarations are related). This is a known
-        // precision gap — see TODO.md P3.7 follow-up.
+        let key = EnumRelationKey {
+            source_id: source_parent.id(),
+            target_id: target_parent.id(),
+        };
+        // Cache lookup. Phase 1 has no error reporter, so any cached
+        // (non-`None`) result is returned directly.
+        if let Some(entry) = self.enum_relation.get(&key).copied() {
+            if entry != RelationComparisonResult::None {
+                return entry.contains(RelationComparisonResult::Succeeded);
+            }
+        }
+
+        // Compare each source enum member's value against the like-named
+        // target member. `get_type_of_symbol` resolves the enum's value type
+        // (an anonymous object whose members are the enum members).
+        let source_type = self.get_type_of_symbol(source_parent);
+        let target_type = self.get_type_of_symbol(target_parent);
+        let source_properties = self.get_properties_of_type(&source_type);
+
+        for source_prop in source_properties {
+            if !source_prop.flags.contains(SymbolFlags::EnumMember) {
+                continue;
+            }
+            let Some(target_prop) = self.get_property_of_type(&target_type, &source_prop.name)
+            else {
+                // TS2324: property missing in target.
+                self.enum_relation.insert(key, RelationComparisonResult::Failed);
+                return false;
+            };
+            if !target_prop.flags.contains(SymbolFlags::EnumMember) {
+                self.enum_relation.insert(key, RelationComparisonResult::Failed);
+                return false;
+            }
+
+            let source_decl = self.get_declaration_of_kind(&source_prop, SyntaxKind::EnumMember);
+            let target_decl = self.get_declaration_of_kind(&target_prop, SyntaxKind::EnumMember);
+            if let (Some(sd), Some(td)) = (source_decl, target_decl) {
+                let source_value = self.get_enum_member_value(&sd);
+                let target_value = self.get_enum_member_value(&td);
+                let sv = source_value.value.as_ref();
+                let tv = target_value.value.as_ref();
+                if sv != tv {
+                    // Two *known* values that differ → incompatible (TS4125).
+                    if sv.is_some() && tv.is_some() {
+                        self.enum_relation.insert(key, RelationComparisonResult::Failed);
+                        return false;
+                    }
+                    // At least one value is `None` (opaque/ambient) — assume
+                    // numeric. If the other is a string, that's a type
+                    // mismatch (TS4126).
+                    let source_is_string = matches!(sv, Some(EvalValue::String(_)));
+                    let target_is_string = matches!(tv, Some(EvalValue::String(_)));
+                    if source_is_string || target_is_string {
+                        self.enum_relation.insert(key, RelationComparisonResult::Failed);
+                        return false;
+                    }
+                    // Both assumed numeric → compatible; continue.
+                }
+            }
+        }
+
+        self.enum_relation.insert(key, RelationComparisonResult::Succeeded);
         true
     }
 
