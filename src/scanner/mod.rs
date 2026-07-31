@@ -1607,14 +1607,117 @@ pub fn get_shebang(text: &str) -> &str {
     &text[..end]
 }
 
+/// Options controlling how `skip_trivia_ex` consumes trivia. Mirrors Go's
+/// `SkipTriviaOptions` (`scanner.go:2301-2305`).
+#[derive(Debug, Clone, Copy, Default)]
+pub struct SkipTriviaOptions {
+    /// If true, stop (return the position of the line break) after the first
+    /// line break is consumed.
+    pub stop_after_line_break: bool,
+    /// If true, do not consume comments (return the position of the `/`).
+    pub stop_at_comments: bool,
+    /// If true, consume a leading `*` after a line break (JSDoc leading
+    /// asterisk handling).
+    pub in_jsdoc: bool,
+}
+
+/// Length of a Git merge-conflict marker (`<<<<<<<`, `=======`, `>>>>>>>`,
+/// `|||||||`), all 7 bytes. Mirrors Go's `mergeConflictMarkerLength`.
+const MERGE_CONFLICT_MARKER_LENGTH: usize = 7;
+
+/// Whether `text[pos..]` starts with a Git merge-conflict marker. Mirrors
+/// Go's `isConflictMarkerTrivia` (`scanner.go:2409-2442`). A conflict marker
+/// is the same byte repeated seven times at the start of a line; `<<<<<<<`
+/// and `>>>>>>>` must additionally be followed by a space, while `=======`
+/// and `|||||||` do not require a trailing space.
+fn is_conflict_marker_trivia(text: &str, pos: usize) -> bool {
+    let bytes = text.as_bytes();
+    let text_len = bytes.len();
+    if pos + 1 >= text_len || bytes[pos + 1] != bytes[pos] {
+        return false;
+    }
+    // Conflict markers must be at the start of a line.
+    let mut at_line_start = pos == 0 || is_line_break(bytes[pos - 1] as char);
+    if !at_line_start && pos >= 2 {
+        // Go also allows a single trailing whitespace byte before the marker
+        // (e.g. `\r` from a CRLF). Check the byte two positions back.
+        at_line_start = is_line_break(bytes[pos - 2] as char);
+    }
+    if at_line_start && pos + MERGE_CONFLICT_MARKER_LENGTH < text_len {
+        let ch = bytes[pos];
+        for i in 0..MERGE_CONFLICT_MARKER_LENGTH {
+            if bytes[pos + i] != ch {
+                return false;
+            }
+        }
+        // `=======` (and `|||||||`) don't need a trailing space; `<<<<<<<`
+        // and `>>>>>>>` do.
+        return ch == b'=' || bytes[pos + MERGE_CONFLICT_MARKER_LENGTH] == b' ';
+    }
+    false
+}
+
+/// Advance past a conflict marker at `pos`, returning the new position.
+/// Mirrors Go's `scanConflictMarkerTrivia` (`scanner.go:2444-2473`). The
+/// `report_error` callback (if set) is invoked once at the marker start with
+/// `MERGE_CONFLICT_MARKER_LENGTH` as the length.
+fn scan_conflict_marker_trivia(
+    text: &str,
+    pos: usize,
+    report_error: Option<&dyn Fn(usize, usize)>,
+) -> usize {
+    if let Some(report) = report_error {
+        report(pos, MERGE_CONFLICT_MARKER_LENGTH);
+    }
+    let bytes = text.as_bytes();
+    let text_len = bytes.len();
+    let (ch, _size) = decode_char(text, pos);
+    let mut pos = pos;
+    if ch == '<' || ch == '>' {
+        // Consume to end of line.
+        while pos < text_len && !is_line_break(bytes[pos] as char) {
+            pos += 1;
+        }
+    } else {
+        // `|` or `=`: consume until the start of the next `=======` or
+        // `>>>>>>>` marker (which begins a new conflict section).
+        while pos < text_len {
+            let current = bytes[pos];
+            if (current == b'=' || current == b'>') && current as char != ch
+                && is_conflict_marker_trivia(text, pos)
+            {
+                break;
+            }
+            pos += 1;
+        }
+    }
+    pos
+}
+
 /// Advance `pos` past trivia (whitespace and comments) in `text`, returning
 /// the position of the next non-trivia character. Mirrors Go's `SkipTrivia`
 /// (`scanner.go:2307-2400`, without options). Conflict-marker trivia and
-/// JSDoc `*` consumption are not yet handled (deferred).
+/// JSDoc `*` consumption are handled by `skip_trivia_ex` with options.
 pub fn skip_trivia(text: &str, pos: usize) -> usize {
+    skip_trivia_ex(text, pos, &SkipTriviaOptions::default(), None)
+}
+
+/// Extended `skip_trivia` with options. Mirrors Go's `SkipTriviaEx`
+/// (`scanner.go:2311-2400`). The `report_error` callback is invoked for
+/// conflict-marker trivia (mirroring Go's `reportError` parameter to
+/// `scanConflictMarkerTrivia`); pass `None` to suppress.
+pub fn skip_trivia_ex(
+    text: &str,
+    pos: usize,
+    options: &SkipTriviaOptions,
+    report_error: Option<&dyn Fn(usize, usize)>,
+) -> usize {
     let bytes = text.as_bytes();
     let text_len = bytes.len();
     let mut pos = pos;
+    // Tracks whether the next `*` (after a line break) should be consumed as
+    // a JSDoc leading asterisk. Only meaningful when `options.in_jsdoc` is set.
+    let mut can_consume_star = false;
     loop {
         if pos >= text_len {
             return pos;
@@ -1626,10 +1729,18 @@ pub fn skip_trivia(text: &str, pos: usize) -> usize {
                     pos += 1;
                 }
                 pos += 1;
+                if options.stop_after_line_break {
+                    return pos;
+                }
+                can_consume_star = options.in_jsdoc;
                 continue;
             }
             '\n' => {
                 pos += 1;
+                if options.stop_after_line_break {
+                    return pos;
+                }
+                can_consume_star = options.in_jsdoc;
                 continue;
             }
             '\t' | '\x0B' | '\x0C' | ' ' => {
@@ -1637,6 +1748,9 @@ pub fn skip_trivia(text: &str, pos: usize) -> usize {
                 continue;
             }
             '/' => {
+                if options.stop_at_comments {
+                    return pos;
+                }
                 if pos + 1 < text_len {
                     if bytes[pos + 1] == b'/' {
                         pos += 2;
@@ -1647,6 +1761,7 @@ pub fn skip_trivia(text: &str, pos: usize) -> usize {
                             }
                             pos += size;
                         }
+                        can_consume_star = false;
                         continue;
                     }
                     if bytes[pos + 1] == b'*' {
@@ -1662,14 +1777,31 @@ pub fn skip_trivia(text: &str, pos: usize) -> usize {
                             let (_, size) = decode_char(text, pos);
                             pos += size;
                         }
+                        can_consume_star = false;
                         continue;
                     }
+                }
+                return pos;
+            }
+            '<' | '|' | '=' | '>' => {
+                if is_conflict_marker_trivia(text, pos) {
+                    pos = scan_conflict_marker_trivia(text, pos, report_error);
+                    can_consume_star = false;
+                    continue;
                 }
                 return pos;
             }
             '#' => {
                 if pos == 0 && is_shebang_trivia(text, pos) {
                     pos = scan_shebang_trivia(text, pos);
+                    continue;
+                }
+                return pos;
+            }
+            '*' => {
+                if can_consume_star {
+                    pos += 1;
+                    can_consume_star = false;
                     continue;
                 }
                 return pos;
@@ -2569,5 +2701,130 @@ mod tests {
             s.token_flags(),
             TOKEN_FLAGS_UNTERMINATED
         ));
+    }
+
+    // ────────────────────────────────────────────────────────────────────
+    // SkipTriviaEx options + conflict-marker trivia (P2.1)
+    // ────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn skip_trivia_ex_stop_after_line_break() {
+        // With `stop_after_line_break`, skip_trivia should return the position
+        // right after the first line break (not skip subsequent trivia).
+        // Input: `  \n  x` → `\n` at pos 2, after consuming it pos=3, stop.
+        let text = "  \n  x";
+        let opts = SkipTriviaOptions {
+            stop_after_line_break: true,
+            ..Default::default()
+        };
+        assert_eq!(skip_trivia_ex(text, 0, &opts, None), 3);
+        // Without the option: skip all trivia, `x` is at pos 5.
+        assert_eq!(skip_trivia(text, 0), 5);
+    }
+
+    #[test]
+    fn skip_trivia_ex_stop_at_comments() {
+        // With `stop_at_comments`, return the position of the `/` instead of
+        // consuming the comment.
+        let text = "  // c\nx";
+        let opts = SkipTriviaOptions {
+            stop_at_comments: true,
+            ..Default::default()
+        };
+        // `/` is at pos 2.
+        assert_eq!(skip_trivia_ex(text, 0, &opts, None), 2);
+        // Without the option: `  ` (2) + `// c` (4) + `\n` (1) = 7, `x` at 7.
+        assert_eq!(skip_trivia(text, 0), 7);
+    }
+
+    #[test]
+    fn skip_trivia_ex_in_jsdoc_consumes_leading_asterisk() {
+        // JSDoc-style `*` after a line break should be consumed as trivia.
+        // Input: `\n * @param` → `\n`=0, ` `=1, `*`=2, ` `=3, `@`=4.
+        // With in_jsdoc: consume `\n`(→1), ` `(→2), `*`(→3), ` `(→4), stop at `@`.
+        let text = "\n * @param";
+        let opts = SkipTriviaOptions {
+            in_jsdoc: true,
+            ..Default::default()
+        };
+        assert_eq!(skip_trivia_ex(text, 0, &opts, None), 4);
+        // Without in_jsdoc: consume `\n`(→1), ` `(→2), stop at `*` (pos 2).
+        assert_eq!(skip_trivia(text, 0), 2);
+    }
+
+    #[test]
+    fn skip_trivia_ex_jsdoc_star_only_after_line_break() {
+        // `*` not preceded by a line break should NOT be consumed even in JSDoc.
+        let text = " * foo";
+        let opts = SkipTriviaOptions {
+            in_jsdoc: true,
+            ..Default::default()
+        };
+        // No leading line break → `*` is not consumed; stop at pos 1 (the `*`).
+        assert_eq!(skip_trivia_ex(text, 0, &opts, None), 1);
+    }
+
+    #[test]
+    fn is_conflict_marker_trivia_detects_markers() {
+        // `<<<<<<<` at start of file, followed by space → marker.
+        assert!(is_conflict_marker_trivia("<<<<<<< head\n", 0));
+        // `>>>>>>>` at start of line, followed by space → marker.
+        assert!(is_conflict_marker_trivia("x\n>>>>>>> branch\n", 2));
+        // `=======` at start of line (no trailing space needed) → marker.
+        assert!(is_conflict_marker_trivia("x\n=======\n", 2));
+        // `|||||||` at start of line, followed by space (diff3 style) → marker.
+        assert!(is_conflict_marker_trivia("x\n||||||| base\n", 2));
+        // Only 6 `<` (not 7) → not a marker.
+        assert!(!is_conflict_marker_trivia("<<<<<< \n", 0));
+        // `<<<<<<<` not followed by space → not a marker (Go requires space for `<`/`>`/`|`).
+        assert!(!is_conflict_marker_trivia("<<<<<<<x\n", 0));
+        // `|||||||` not followed by space → not a marker.
+        assert!(!is_conflict_marker_trivia("x\n|||||||\n", 2));
+        // Not at start of line → not a marker.
+        assert!(!is_conflict_marker_trivia("a <<<<<<< \n", 2));
+        // Second byte differs → fast reject.
+        assert!(!is_conflict_marker_trivia("<x\n", 0));
+    }
+
+    #[test]
+    fn skip_trivia_ex_consumes_conflict_marker() {
+        // `<<<<<<< a\n` is a conflict marker line; skip_trivia_ex consumes
+        // the marker line and the trailing newline, then stops at the next
+        // non-trivia character (the `s` of `shared`). The content between
+        // markers is *not* consumed as trivia (mirrors Go's behavior: only
+        // the marker lines themselves are trivia).
+        let text = "<<<<<<< a\nshared\n=======\n>>>>>>> b\nx";
+        let pos = skip_trivia_ex(text, 0, &SkipTriviaOptions::default(), None);
+        assert_eq!(&text[pos..], "shared\n=======\n>>>>>>> b\nx");
+    }
+
+    #[test]
+    fn skip_trivia_ex_reports_conflict_marker_error() {
+        // The report_error callback should be invoked for conflict markers.
+        use std::cell::RefCell;
+        let text = "<<<<<<< a\nx";
+        let reported: RefCell<Vec<(usize, usize)>> = RefCell::new(Vec::new());
+        let opts = SkipTriviaOptions::default();
+        skip_trivia_ex(
+            text,
+            0,
+            &opts,
+            Some(&|p, l| reported.borrow_mut().push((p, l))),
+        );
+        assert_eq!(
+            reported.borrow().as_slice(),
+            &[(0, MERGE_CONFLICT_MARKER_LENGTH)]
+        );
+    }
+
+    #[test]
+    fn skip_trivia_ex_pipe_divider_marker() {
+        // `<<<<<<< a\n` is consumed as a conflict marker; the following
+        // `local` line is non-trivia and stops skip_trivia_ex (mirrors Go:
+        // only marker lines are trivia, content between them is parsed as
+        // code, which then produces its own diagnostics).
+        let text = "<<<<<<< a\nlocal\n||||||| base\nshared\n=======\nremote\n>>>>>>> b\nx";
+        let pos = skip_trivia_ex(text, 0, &SkipTriviaOptions::default(), None);
+        assert_eq!(&text[pos..], "local\n||||||| base\nshared\n=======\nremote\n>>>>>>> b\nx");
     }
 }

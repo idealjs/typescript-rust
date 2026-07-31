@@ -457,8 +457,21 @@ via `schema.ts`，生成 `syntax_kind_generated.rs` + `node_data_generated.rs`�
   escape-sequence 5 flag（`UNICODE_ESCAPE`/`EXTENDED_UNICODE_ESCAPE`/`HEX_ESCAPE`/
   `CONTAINS_INVALID_ESCAPE`/`CONTAINS_SEPARATOR`/`CONTAINS_INVALID_SEPARATOR`，
   需迁移 Go `scanEscapeSequence` 完整诊断路径）、`OCTAL`（legacy `0o` 前的 `0777` 形式）。
-- [ ] 支持 `SkipTriviaEx` options（`StopAfterLineBreak`/`StopAtComments`/`InJSDoc`）。
-- [ ] 迁移 conflict-marker trivia（`isConflictMarkerTrivia`/`scanConflictMarkerTrivia`）。
+- [x] 支持 `SkipTriviaEx` options（`StopAfterLineBreak`/`StopAtComments`/`InJSDoc`，已完成）：
+  新增 `SkipTriviaOptions` struct + `skip_trivia_ex` 函数（对齐 Go
+  `SkipTriviaEx` `scanner.go:2311-2400`），`skip_trivia` 改为调用
+  `skip_trivia_ex` 传默认 options。`stop_after_line_break` 在消耗首个换行后
+  返回；`stop_at_comments` 在 `/` 处返回（不消耗注释）；`in_jsdoc` 在换行后
+  消耗 JSDoc 前导 `*`（`can_consume_star` 状态机，只在换行后置位、消耗后重置）。
+  `report_error` 回调用于 conflict-marker 报错。
+- [x] 迁移 conflict-marker trivia（`isConflictMarkerTrivia`/`scanConflictMarkerTrivia`，
+  已完成）：`is_conflict_marker_trivia` 对齐 Go `scanner.go:2409-2442`（7 字节
+  重复 + 行首检测 + `<<<<<<<`/`>>>>>>>`/`|||||||` 需尾随空格、`=======` 不需要）；
+  `scan_conflict_marker_trivia` 对齐 Go `scanner.go:2444-2473`（`<`/`>` 分支
+  消耗到行尾；`|`/`=` 分支消耗到下一个 `=======`/`>>>>>>>` marker）。`skip_trivia_ex`
+  在 `<`/`|`/`=`/`>` 字符处检测 conflict marker 并跳过。8 个新单测覆盖 options
+  + marker 检测 + skip 行为 + error 回调。**注**：Go 行为是只跳过 marker 行本身，
+  marker 之间的内容作为代码解析（产生自己的诊断），Rust 对齐此行为。
 
 ### P2.2 Scanner 正则字面量
 
