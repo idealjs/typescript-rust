@@ -250,7 +250,7 @@ impl Binder {
                     // carries the VALUE flag (already set). For other
                     // merges (interface/namespace), VALUE isn't involved.
                     if (*existing_mut).value_declaration.is_none()
-                        && includes.contains(SymbolFlags::VALUE)
+                        && includes.intersects(SymbolFlags::VALUE)
                     {
                         (*existing_mut).value_declaration = Some(Arc::clone(node));
                     }
@@ -276,7 +276,7 @@ impl Binder {
                 (*symbol_mut).declarations.push(Arc::clone(node));
                 // The first declaration is also the value declaration.
                 if (*symbol_mut).value_declaration.is_none()
-                    && includes.contains(SymbolFlags::VALUE)
+                    && includes.intersects(SymbolFlags::VALUE)
                 {
                     (*symbol_mut).value_declaration = Some(Arc::clone(node));
                 }
@@ -1879,7 +1879,7 @@ impl Binder {
             let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
             unsafe {
                 (*symbol_mut).declarations.push(Arc::clone(node));
-                if (*symbol_mut).value_declaration.is_none() && flags.contains(SymbolFlags::VALUE) {
+                if (*symbol_mut).value_declaration.is_none() && flags.intersects(SymbolFlags::VALUE) {
                     (*symbol_mut).value_declaration = Some(Arc::clone(node));
                 }
             }

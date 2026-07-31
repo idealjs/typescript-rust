@@ -390,6 +390,10 @@ pub struct Checker {
     pub flow_invocation_count: i32,
     pub flow_type_cache: HashMap<u64, Arc<Type>>,
     pub flow_node_reachable: HashMap<u64, bool>,
+    /// Inlining depth for const-variable alias narrowing. Mirrors Go's
+    /// `Checker.inlineLevel` (capped at 5). Incremented while narrowing
+    /// through a `const` alias's initializer to prevent infinite recursion.
+    pub flow_inline_level: u32,
 
     // Set while resolving the type annotation of a static class member.
     // When true, resolving a class type parameter reports TS2322, mirroring
@@ -603,6 +607,7 @@ impl Checker {
             flow_invocation_count: 0,
             flow_type_cache: HashMap::new(),
             flow_node_reachable: HashMap::new(),
+            flow_inline_level: 0,
             in_static_member_type: false,
 
             merged_symbols: HashMap::new(),

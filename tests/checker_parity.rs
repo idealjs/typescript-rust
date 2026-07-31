@@ -2939,6 +2939,276 @@ fn checker_narrowing_or_branch_union() {
     assert_no_diagnostics(&diags);
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// P3.9 Part A: Fixture tests for already-working narrowing patterns
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_narrowing_loose_equality_eq_null() {
+    // `x == null` (loose equality) narrows to null | undefined in the true
+    // branch (both null and undefined match under `==`).
+    let diags = check_source(
+        "let x: string | null | undefined = null;\
+         if (x == null) {\
+             let y: null | undefined = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_loose_equality_ne_null() {
+    // `x != null` (loose inequality) narrows to string in the true branch
+    // (removes both null and undefined).
+    let diags = check_source(
+        "let x: string | null | undefined = null;\
+         if (x != null) {\
+             let y: string = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_typeof_false_branch() {
+    // `typeof x !== "string"` (false branch of typeof) narrows to number.
+    let diags = check_source(
+        "let x: string | number = 0;\
+         if (typeof x !== \"string\") {\
+             let y: number = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_typeof_object_includes_null() {
+    // `typeof x === "object"` narrows to null | {} (typeof null is "object").
+    let diags = check_source(
+        "let x: string | null | {} = null;\
+         if (typeof x === \"object\") {\
+             let y: null | {} = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_typeof_bigint() {
+    // `typeof x === "bigint"` narrows to bigint.
+    let diags = check_source(
+        "let x: bigint | string = 0n;\
+         if (typeof x === \"bigint\") {\
+             let y: bigint = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_typeof_symbol() {
+    // `typeof x === "symbol"` narrows to symbol. Uses `declare const` to
+    // avoid needing the `Symbol()` global (unavailable with --noLib).
+    let diags = check_source(
+        "declare const sym: symbol;\
+         let x: symbol | string = sym;\
+         if (typeof x === \"symbol\") {\
+             let y: symbol = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// P3.9 Gap 14: Const variable alias inlining
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_narrowing_const_alias_truthiness() {
+    // `const alias = x; if (alias)` — the const alias is inlined to `x`,
+    // so the true branch narrows `x` to string (truthy).
+    let diags = check_source(
+        "let x: string | null = null;\
+         const alias = x;\
+         if (alias) {\
+             let y: string = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_const_alias_not_narrowed_with_type_annotation() {
+    // A const variable with an explicit type annotation is NOT inlined
+    // (mirrors Go's `declaration.Type() == nil` check). The alias keeps
+    // its declared type, so `if (alias)` does not narrow `x`.
+    let diags = check_source(
+        "let x: string | null = null;\
+         const alias: string | null = x;\
+         if (alias) {\
+             let y: string | null = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_const_alias_let_not_inlined() {
+    // `let` variables are not inlined (only `const`). The condition
+    // `if (alias)` does not narrow `x`.
+    let diags = check_source(
+        "let x: string | null = null;\
+         let alias = x;\
+         if (alias) {\
+             let y: string | null = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// P3.9 Gap 4: typeof === "function" narrows to callable types only
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_narrowing_typeof_function_keeps_callable() {
+    // `typeof x === "function"` narrows to the function type only,
+    // removing plain object types (without call signatures).
+    let diags = check_source(
+        "type T = (() => void) | { a: string };\
+         let x: T = { a: \"\" };\
+         if (typeof x === \"function\") {\
+             let y: () => void = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_typeof_function_false_branch_keeps_object() {
+    // `typeof x !== "function"` narrows to the plain object type (the
+    // function type is removed in the false branch).
+    let diags = check_source(
+        "type T = (() => void) | { a: string };\
+         let x: T = { a: \"\" };\
+         if (typeof x !== \"function\") {\
+             let y: { a: string } = x;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// P3.9 Gap 2: typeof on discriminant property
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_narrowing_typeof_discriminant_property_string() {
+    // `typeof obj.kind === "string"` narrows `obj` to the constituent
+    // whose `kind` property is a string-like type.
+    let diags = check_source(
+        "type T = { kind: \"foo\", value: string } | { kind: 42, count: number };\
+         let obj: T = { kind: \"foo\", value: \"x\" };\
+         if (typeof obj.kind === \"string\") {\
+             let v: string = obj.value;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_typeof_discriminant_property_number() {
+    // `typeof obj.kind === "number"` narrows `obj` to the constituent
+    // whose `kind` property is a number-like type.
+    let diags = check_source(
+        "type T = { kind: \"foo\", value: string } | { kind: 42, count: number };\
+         let obj: T = { kind: \"foo\", value: \"x\" };\
+         if (typeof obj.kind === \"number\") {\
+             let c: number = obj.count;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_typeof_discriminant_property_false_branch() {
+    // `typeof obj.kind !== "string"` narrows `obj` to the constituent
+    // whose `kind` property is NOT string-like (the number constituent).
+    let diags = check_source(
+        "type T = { kind: \"foo\", value: string } | { kind: 42, count: number };\
+         let obj: T = { kind: \"foo\", value: \"x\" };\
+         if (typeof obj.kind !== \"string\") {\
+             let c: number = obj.count;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+
+// ────────────────────────────────────────────────────────────────────────────
+// P3.9 Gap 1: Nullish coalescing (??) narrowing
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_narrowing_nullish_coalescing_false_branch_narrows_left_to_null() {
+    // In the false branch of `if (a ?? b)`, `a` is narrowed to
+    // null | undefined (since `a` must be null/undefined for `b` to be
+    // evaluated, and `b` must be falsy for the result to be falsy).
+    let diags = check_source(
+        "let a: string | null = \"hello\";\
+         let b: string = \"world\";\
+         if (a ?? b) {\
+         } else {\
+             let y: null | undefined = a;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_nullish_coalescing_true_branch_no_narrow() {
+    // In the true branch of `if (a ?? b)`, `a` is NOT narrowed
+    // (it could be null/undefined if `b` is truthy).
+    let diags = check_source(
+        "let a: string | null = null;\
+         let b: string = \"world\";\
+         if (a ?? b) {\
+             let y: string | null = a;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_nullish_coalescing_false_branch_narrows_right_to_falsy() {
+    // In the false branch, `b` is narrowed to falsy types.
+    let diags = check_source(
+        "let a: string | null = null;\
+         let b: string | 0 = 0;\
+         if (a ?? b) {\
+         } else {\
+             let y: 0 = b;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_narrowing_nullish_coalescing_with_const_alias() {
+    // `const alias = a; if (alias ?? b)` — const alias inlining
+    // applies optionality narrowing in the false branch.
+    let diags = check_source(
+        "let a: string | null = null;\
+         const alias = a;\
+         let b: string = \"world\";\
+         if (alias ?? b) {\
+         } else {\
+             let y: null | undefined = a;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
 
 // ────────────────────────────────────────────────────────────────────────────
 // Type display (type_to_string) via diagnostic message args

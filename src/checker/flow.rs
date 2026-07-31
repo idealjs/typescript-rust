@@ -21,7 +21,7 @@
 
 use std::sync::Arc;
 
-use crate::ast::{FlowFlags, FlowNode, Node, NodeData, Symbol, SymbolFlags, SyntaxKind};
+use crate::ast::{FlowFlags, FlowNode, Node, NodeData, NodeFlags, Symbol, SymbolFlags, SyntaxKind};
 
 use super::checker::Checker;
 use super::types::*;
@@ -290,6 +290,27 @@ impl Checker {
                         depth,
                     );
                 }
+                if bin.operator_token.kind == SyntaxKind::QuestionQuestionToken {
+                    // Nullish coalescing: `a ?? b`. Mirrors Go's
+                    // `bindLogicalLikeExpression` (binder.go ~L2261) combined
+                    // with `narrowType`'s `??` parent check (flow.go ~L379).
+                    if kind == NarrowKind::TrueBranch {
+                        // True branch: the result is truthy. We can't narrow
+                        // `a` (it could be null/undefined if `b` is truthy)
+                        // or `b` (only evaluated when `a` is null/undefined).
+                        // Go's flow analysis unions (a non-null) with
+                        // (a null/undefined, b truthy), which cancels out to
+                        // the original type.
+                        return Arc::clone(type_);
+                    }
+                    // False branch: `a` is null/undefined and `b` is falsy.
+                    // Narrow left by optionality (keep only null/undefined),
+                    // then narrow right by truthiness (falsy).
+                    let narrowed =
+                        self.narrow_by_optionality(type_, &bin.left, symbol, kind, depth);
+                    return self
+                        .narrow_by_expression(&narrowed, &bin.right, symbol, kind, depth);
+                }
             }
         }
 
@@ -323,6 +344,24 @@ impl Checker {
         // its argument in the true/false branches.
         if expr.kind == SyntaxKind::CallExpression {
             return self.narrow_by_call_expression(type_, expr, symbol, kind);
+        }
+
+        // Const alias inlining: if `expr` is an Identifier that resolves to
+        // a `const` variable with a simple initializer (no type annotation),
+        // and the identifier is NOT the symbol being narrowed, narrow by
+        // the initializer expression instead. Mirrors Go's `narrowType`
+        // KindIdentifier case (flow.go ~L383). Capped at 5 levels to
+        // prevent infinite recursion.
+        if expr.kind == SyntaxKind::Identifier
+            && !self.is_symbol_identifier(expr, symbol)
+            && self.flow_inline_level < 5
+        {
+            if let Some(init_expr) = self.const_alias_initializer(expr) {
+                self.flow_inline_level += 1;
+                let result = self.narrow_by_expression(type_, &init_expr, symbol, kind, depth);
+                self.flow_inline_level -= 1;
+                return result;
+            }
         }
 
         // Bare identifier: `if (x)` — truthiness narrowing.
@@ -404,6 +443,34 @@ impl Checker {
             && self.typeof_expr_matches_symbol(&bin.right, symbol)
         {
             return self.narrow_by_typeof(type_, &bin.left, narrow_to_value, is_loose);
+        }
+
+        // Handle `typeof obj.prop === "string"` patterns — typeof on a
+        // discriminant property access. Mirrors Go's `narrowTypeByTypeof`
+        // (flow.go ~L612) which calls `getDiscriminantPropertyAccess` when
+        // the typeof target isn't the symbol directly but a property
+        // access on it.
+        if bin.left.kind == SyntaxKind::TypeOfExpression {
+            if let Some(narrowed) = self.try_narrow_by_typeof_discriminant(
+                type_,
+                &bin.left,
+                &bin.right,
+                symbol,
+                narrow_to_value,
+            ) {
+                return narrowed;
+            }
+        }
+        if bin.right.kind == SyntaxKind::TypeOfExpression {
+            if let Some(narrowed) = self.try_narrow_by_typeof_discriminant(
+                type_,
+                &bin.right,
+                &bin.left,
+                symbol,
+                narrow_to_value,
+            ) {
+                return narrowed;
+            }
         }
 
         // Discriminated union narrowing: `obj.kind === "value"` narrows
@@ -810,6 +877,98 @@ impl Checker {
             })
             .collect();
         Some(self.rebuild_union_or_never(type_, filtered))
+    }
+
+    /// Try to narrow a union by a `typeof obj.prop === "typename"` comparison.
+    ///
+    /// Mirrors Go's `narrowTypeByTypeof` (flow.go ~L602) when the typeof
+    /// target is a discriminant property access on `symbol` (e.g.,
+    /// `typeof obj.kind === "string"`). Returns `Some(narrowed)` when the
+    /// pattern matches, or `None` to fall through.
+    fn try_narrow_by_typeof_discriminant(
+        &mut self,
+        type_: &Arc<Type>,
+        typeof_expr: &Arc<Node>,
+        type_name_node: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+        narrow_to_value: bool,
+    ) -> Option<Arc<Type>> {
+        let NodeData::TypeOfExpression(typeof_data) = &typeof_expr.data else {
+            return None;
+        };
+        let target = &typeof_data.expression;
+        // Check if target is `obj.prop` (a property access on symbol).
+        if !self.is_property_access_on_symbol(target, symbol) {
+            return None;
+        }
+        let prop_name = Self::get_accessed_property_name_from_node(target)?;
+        // For non-union types, narrowing by discriminant is a no-op.
+        if !type_.is_union() {
+            return Some(Arc::clone(type_));
+        }
+        let type_name = match &type_name_node.data {
+            NodeData::StringLiteral(data) => data.text.as_str(),
+            _ => return None,
+        };
+        let constituents = self.constituent_types(type_);
+        let filtered: Vec<Arc<Type>> = constituents
+            .into_iter()
+            .filter(|t| {
+                let prop_type = self.get_property_type_of_type(t, &prop_name);
+                let Some(prop_type) = prop_type else {
+                    return false;
+                };
+                if narrow_to_value {
+                    // True branch: keep constituents whose property type
+                    // could match the typeof string (any constituent).
+                    self.type_matches_typeof_any(&prop_type, type_name)
+                } else {
+                    // False branch: keep constituents whose property type
+                    // could NOT match (i.e., not all constituents match).
+                    !self.type_matches_typeof_all(&prop_type, type_name)
+                }
+            })
+            .collect();
+        Some(self.rebuild_union_or_never(type_, filtered))
+    }
+
+    /// Check if ANY constituent of `t` matches the typeof string.
+    /// Used for the true branch of `typeof obj.prop === "typename"`.
+    fn type_matches_typeof_any(&self, t: &Arc<Type>, type_name: &str) -> bool {
+        let constituents = self.constituent_types(t);
+        constituents
+            .iter()
+            .any(|c| self.constituent_matches_typeof(c, type_name))
+    }
+
+    /// Check if ALL constituents of `t` match the typeof string.
+    /// Used for the false branch of `typeof obj.prop === "typename"`.
+    fn type_matches_typeof_all(&self, t: &Arc<Type>, type_name: &str) -> bool {
+        let constituents = self.constituent_types(t);
+        !constituents.is_empty()
+            && constituents
+                .iter()
+                .all(|c| self.constituent_matches_typeof(c, type_name))
+    }
+
+    /// Check if a single (non-union) type matches a typeof string.
+    /// Mirrors the flag mappings in `narrow_by_typeof`.
+    fn constituent_matches_typeof(&self, t: &Arc<Type>, type_name: &str) -> bool {
+        match type_name {
+            "string" => t.flags.intersects(TYPE_FLAGS_STRING_LIKE),
+            "number" => t.flags.intersects(TYPE_FLAGS_NUMBER_LIKE),
+            "boolean" => t.flags.intersects(TYPE_FLAGS_BOOLEAN_LIKE),
+            "bigint" => t.flags.intersects(TYPE_FLAGS_BIG_INT_LIKE),
+            "symbol" => t.flags.intersects(TYPE_FLAGS_ES_SYMBOL_LIKE),
+            "undefined" => t.flags.contains(TypeFlags::Undefined),
+            "function" => !self
+                .get_signatures_of_type(t, SignatureKind::Call)
+                .is_empty(),
+            "object" => {
+                t.flags.contains(TypeFlags::Object) || t.flags.contains(TypeFlags::Null)
+            }
+            _ => false,
+        }
     }
 
     /// Narrow `type_` based on a switch clause.
@@ -1487,7 +1646,7 @@ impl Checker {
     /// `narrow_to_value` = true means the typeof check passed (e.g.
     /// `typeof x === "string"` is true), so we narrow to the matching type.
     fn narrow_by_typeof(
-        &self,
+        &mut self,
         type_: &Arc<Type>,
         type_name_node: &Arc<Node>,
         narrow_to_value: bool,
@@ -1504,7 +1663,14 @@ impl Checker {
             "bigint" => TYPE_FLAGS_BIG_INT_LIKE,
             "symbol" => TYPE_FLAGS_ES_SYMBOL_LIKE,
             "undefined" => TypeFlags::Undefined,
-            "function" => TypeFlags::Object,
+            "function" => {
+                // `typeof x === "function"` narrows to callable types (types
+                // with call signatures), not all object types. Mirrors Go's
+                // `narrowTypeByTypeName` "function" case (flow.go ~L662)
+                // which narrows to `globalFunctionType` via
+                // `TypeFactsTypeofEQFunction`.
+                return self.filter_type_by_callable(type_, narrow_to_value);
+            }
             "object" => {
                 // "object" matches object types, null, and arrays but not
                 // primitives. For loose equality also matches undefined.
@@ -1541,6 +1707,43 @@ impl Checker {
                 self.filter_to_falsy(type_)
             }
         }
+    }
+
+    /// Narrow by optionality: used for `??` (nullish coalescing) narrowing.
+    /// Mirrors Go's `narrowTypeByOptionality` (flow.go ~L415).
+    ///
+    /// - True branch (assume present): remove null and undefined.
+    /// - False branch (assume absent): keep only null and undefined.
+    fn narrow_by_optionality(
+        &mut self,
+        type_: &Arc<Type>,
+        expr: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+        kind: NarrowKind,
+        _depth: u32,
+    ) -> Arc<Type> {
+        // If the expression is a direct reference to our symbol, apply
+        // optionality narrowing (remove/keep null/undefined).
+        if self.is_symbol_identifier(expr, symbol) {
+            return match kind {
+                NarrowKind::TrueBranch => self.remove_nullable_from_union(type_),
+                NarrowKind::FalseBranch => {
+                    self.filter_type_by_flags(type_, TypeFlags::Undefined | TypeFlags::Null)
+                }
+            };
+        }
+        // Const alias inlining: if expr is a const variable alias of the
+        // symbol, recurse through the initializer.
+        if expr.kind == SyntaxKind::Identifier && self.flow_inline_level < 5 {
+            if let Some(init_expr) = self.const_alias_initializer(expr) {
+                self.flow_inline_level += 1;
+                let result = self.narrow_by_optionality(type_, &init_expr, symbol, kind, _depth);
+                self.flow_inline_level -= 1;
+                return result;
+            }
+        }
+        // Expression doesn't reference our symbol; no narrowing.
+        Arc::clone(type_)
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -1673,6 +1876,48 @@ impl Checker {
                 union_or_intersection: UnionOrIntersectionTypeData {
                     structured: StructuredTypeData::default(),
                     types: matching.drain(..).collect(),
+                },
+                resolved_reduced_type: std::sync::OnceLock::new(),
+                regular_type: std::sync::OnceLock::new(),
+                origin: None,
+                key_property_name: None,
+                constituent_map: std::collections::HashMap::new(),
+            }),
+        ))
+    }
+
+    /// Filter `type_` to keep only callable constituents (types with call
+    /// signatures) when `keep_callable` is true, or only non-callable
+    /// constituents when false. Used for `typeof x === "function"` and
+    /// `typeof x !== "function"` narrowing.
+    ///
+    /// Mirrors Go's `TypeFactsTypeofEQFunction` / `TypeFactsTypeofNEFunction`
+    /// handling in `narrowTypeByTypeFacts` (flow.go ~L673). A type is
+    /// callable if it has call signatures (i.e., `structured.call_signatures()`
+    /// is non-empty).
+    fn filter_type_by_callable(&self, type_: &Arc<Type>, keep_callable: bool) -> Arc<Type> {
+        let constituents = self.constituent_types(type_);
+        let filtered: Vec<Arc<Type>> = constituents
+            .into_iter()
+            .filter(|t| {
+                let is_callable = !self
+                    .get_signatures_of_type(t, SignatureKind::Call)
+                    .is_empty();
+                if keep_callable { is_callable } else { !is_callable }
+            })
+            .collect();
+        if filtered.is_empty() {
+            return self.never_type();
+        }
+        if filtered.len() == 1 {
+            return filtered.into_iter().next().expect("exactly one");
+        }
+        Arc::new(Type::new(
+            TypeFlags::Union,
+            TypeData::Union(UnionTypeData {
+                union_or_intersection: UnionOrIntersectionTypeData {
+                    structured: StructuredTypeData::default(),
+                    types: filtered,
                 },
                 resolved_reduced_type: std::sync::OnceLock::new(),
                 regular_type: std::sync::OnceLock::new(),
@@ -1943,6 +2188,69 @@ impl Checker {
         };
         let eq = node_name == &symbol.name;
         eq
+    }
+
+    /// If `expr` is an Identifier referring to a `const` variable with a
+    /// simple initializer (no type annotation), return the initializer
+    /// expression (with parentheses unwrapped). Mirrors Go's
+    /// `getCandidateVariableDeclarationInitializer` (flow.go ~L1475)
+    /// combined with the `isConstantVariable` check in `narrowType`
+    /// (flow.go ~L388).
+    fn const_alias_initializer(&self, expr: &Arc<Node>) -> Option<Arc<Node>> {
+        if expr.kind != SyntaxKind::Identifier {
+            return None;
+        }
+        // Resolve the identifier reference to its symbol. The symbol_map
+        // only stores symbols for declaration nodes, so we use
+        // `resolve_identifier` which walks the scope stack (available
+        // during narrowing, since narrowing happens while checking
+        // expressions in the current scope context).
+        let sym = self.resolve_identifier(expr)?;
+        if !self.symbol_is_const_variable(&sym) {
+            return None;
+        }
+        let decl = sym.value_declaration.as_ref()?;
+        if decl.kind != SyntaxKind::VariableDeclaration {
+            return None;
+        }
+        let NodeData::VariableDeclaration(var_data) = &decl.data else {
+            return None;
+        };
+        // Go requires `declaration.Type() == nil` — a const variable with
+        // an explicit type annotation is not inlined.
+        if var_data.type_node.is_some() {
+            return None;
+        }
+        let init = var_data.initializer.as_ref()?;
+        Some(Self::skip_parentheses(init))
+    }
+
+    /// Check if a symbol represents a `const` variable declaration.
+    /// Mirrors Go's `isConstantVariable`. The `const`/`let` keyword is
+    /// carried on the parent `VariableDeclarationList`'s `NodeFlags`.
+    fn symbol_is_const_variable(&self, symbol: &Arc<Symbol>) -> bool {
+        for decl in &symbol.declarations {
+            if let Some(parent) = &decl.parent {
+                if parent.kind == SyntaxKind::VariableDeclarationList
+                    && parent.flags.contains(NodeFlags::Const)
+                {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    /// Unwrap parenthesized expressions: `((x))` → `x`.
+    fn skip_parentheses(node: &Arc<Node>) -> Arc<Node> {
+        let mut current = Arc::clone(node);
+        loop {
+            if let NodeData::ParenthesizedExpression(p) = &current.data {
+                current = Arc::clone(&p.expression);
+                continue;
+            }
+            return current;
+        }
     }
 
     /// Evolve an evolving array type at an ARRAY_MUTATION flow node.

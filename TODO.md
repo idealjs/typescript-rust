@@ -123,7 +123,11 @@ arity）+ 12 个 parity fixtures。
    `NodeFlags::Unreachable`；checker `check_statement` 推送 `Labeled`
    break/continue context 使 `break label`/`continue label` 通过 grammar
    校验）。3 个 labeled statement parity 测试通过。
-4. **P3.9 Checker 控制流 narrowing**：已大体完成，按 fixture 缺口补齐。
+4. **P3.9 Checker 控制流 narrowing**：已完成。补齐 fixture 缺口（loose equality
+   `==`、typeof false-branch、typeof bigint/symbol、nullish coalescing `??`
+   narrowing、typeof on discriminant property、typeof === "function" callable
+   narrowing、const variable alias inlining）。修复 binder `value_declaration`
+   bug（`contains` → `intersects` for `SymbolFlags::VALUE`）。
 5. **P3.10 Checker nodebuilder**：`symbol_to_type_node`/`symbol_to_display_parts`
    （declaration emit 前置）。
 6. **P3.2 Binder NameResolver 收尾**：箭头函数参数作用域、enum/namespace
@@ -612,7 +616,17 @@ switch (true) narrowing（`switch (true) { case cond: ... }`，含 default 子�
 排除全部 case 条件、前序 case 条件取反）、
 asserts x is T narrowing（assertion 函数，`asserts x` truthy 收窄、
 `asserts x is T` 类型收窄、多参数支持、CALL flow 节点收窄）、
-7+4+3+3+7+6+5+5 个 parity fixtures。
+nullish coalescing `??` narrowing（false-branch 左值收窄为 null|undefined、
+右值收窄为 falsy；true-branch 不收窄，mirrors Go `narrowTypeByOptionality`）、
+typeof on discriminant property（`typeof obj.kind === "string"` 收窄 union
+constituent，`try_narrow_by_typeof_discriminant`）、typeof === "function"
+callable narrowing（`filter_type_by_callable` 仅保留含 call signature 的类型）、
+const variable alias inlining（`const_alias_initializer` + `flow_inline_level`
+深度保护，mirrors Go `inlineLevel` capped at 5）、
+binder `value_declaration` bug 修复（`contains` → `intersects` for
+`SymbolFlags::VALUE`，使 BlockScopedVariable 等子集 flag 正确设置
+`value_declaration`）、
+7+4+3+3+7+6+5+5+6+3+3+4 个 parity fixtures。
 
 ### P3.10 Checker nodebuilder
 
