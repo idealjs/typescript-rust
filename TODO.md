@@ -262,8 +262,7 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   新增 extends `.json` suffix 解析（`extends: "./base"` → `./base.json`，对齐
   Go `getExtendsConfigPath`）+ path normalization（`./base` 不再残留 `./`）。
   5 个回归测试覆盖 own-overrides-extended / array-last-wins / cmd-overrides-own /
-  include-first-extended-wins / json-suffix。**遗留**：package/Node-style
-  resolution（`module.ResolveConfig`）。
+  include-first-extended-wins / json-suffix。
 - [x] `${configDir}` 模板替换（TS 5.5+，已完成）：新增
   `starts_with_config_dir_template`（大小写不敏感前缀检测，对齐 Go
   `startsWithConfigDirTemplate`）、`get_substituted_path_with_config_dir_template`
@@ -280,8 +279,7 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   config 的 `${configDir}` 已在递归解析时用 extended 目录解析）。include/exclude/
   files 的 `${configDir}` 也在 `expand_file_names` 之前替换。11 个单测覆盖
   outDir/rootDir/declarationDir/tsBuildInfoFile/rootDirs/paths/include/exclude/
-  files/extends/非前缀场景。**遗留**：package/Node-style resolution
-  （`module.ResolveConfig`）。
+  files/extends/非前缀场景。
 - [x] inherited include/exclude/files 的 path-rewriting（已完成）：当 extended
   config 声明了 `include`/`exclude`/`files` 而 own config 未声明时，继承的相对
   路径需改写为相对于 own config 目录的路径（而非 extended config 目录），对齐
@@ -305,7 +303,6 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   into result）的 skip set。command-line 选项优先于 own 的 null（cmd > null）：
   若 cmd 已设置该字段（非默认值），null 不影响结果。覆盖 tristate/string/enum
   三类字段的 null 清除、cmd 优先级、单字段隔离、多字段同时 null。6 个单测。
-  **遗留**：package/Node-style resolution（`module.ResolveConfig`）。
 - [x] extended config cache（已完成）：为 tsconfig extends 实现缓存，在菱形
   继承场景（A extends B 和 C，B 和 C 都 extends D）中 D 只解析一次并复用，
   对齐 Go `ExtendedConfigCache`（`tsconfigparsing.go:154`）+
@@ -318,8 +315,26 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   缓存的 errors 仍按引用次数传播（B 和 C 各 append 一次 D 的 errors，对齐
   Go `getExtendedConfig` 返回 cached errors 的行为）。3 个单测覆盖菱形继承
   （strict/noImplicitAny 正确传播）、错误不重复（TS5025 出现 2 次：D via B
-  和 C）、循环不缓存（A↔B 循环报告 TS18000）。**遗留**：package/Node-style
-  resolution（`module.ResolveConfig`）。
+  和 C）、循环不缓存（A↔B 循环报告 TS18000）。
+- [x] package/Node-style resolution for `extends` bare specifiers（已完成）：
+  当 `extends` 的值不是相对路径（不以 `./` 或 `../` 开头）且不是 rooted path
+  时，按 Node 模块解析方式在 `node_modules` 目录中查找，对齐 Go
+  `getExtendsConfigPath` 的 module 分支（`tsconfigparsing.go:571-575`）调用
+  `module.ResolveConfig`（`resolver.go:371`）。实现 `resolve_config_via_node_modules`
+  函数：从 config 目录开始向上遍历祖先目录（跳过名为 `node_modules` 的目录
+  本身），在每个祖先的 `node_modules/<spec>` 中查找配置文件。查找顺序对齐
+  Go `loadModuleFromSpecificNodeModulesDirectory` + `loadNodeModuleFromDirectoryWorker`
+  （`isConfigLookup = true`, `extensions = extensionsJson`）：① 文件形式
+  `<spec>.json`；② 目录形式 `<spec>/tsconfig.json`（对齐 Go `indexPath = tsconfig`）；
+  ③ `package.json` 的 `tsconfig` 字段（对齐 Go `getPackageFile` 读取 `tsconfig`
+  field，`resolver.go:1744`），通过 `packagejson::parse` 解析后取
+  `path_fields.tsconfig`。支持 scoped package（`@scope/pkg`）和祖先目录遍历
+  （`loadModuleFromNearestNodeModulesDirectory` 的 ancestor walk）。解析失败
+  时返回 `None`（spec 被静默丢弃，own config 选项仍生效）。同时修正所有现有
+  extends 测试 fixture：将裸文件名（`"d.json"` → `"./d.json"` 等）改为显式
+  相对路径，对齐 Go 行为（裸 specifier 走 node_modules 而非当前目录）。
+  6 个新单测覆盖文件形式、目录形式、package.json tsconfig 字段、scoped
+  package、祖先遍历、未找到静默丢弃。
 - [x] 将 raw `references` 升级为 typed project references：新增
   `core::project_reference::ProjectReference { path, original_path, circular }`
   （对齐 Go `core.ProjectReference`）；`ParsedCommandLine.references` 由
@@ -330,7 +345,6 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
 - [x] 对齐 `extends` 的 cycle diagnostics：`extends` 循环检测
   （`resolution_stack` + `Circularity_detected_while_resolving_configuration_Colon_0`
   TS18000）+ `extends` 数组支持（`"extends": ["a","b"]` 多路合并）。
-  **遗留**：package/Node-style resolution（`module.ResolveConfig`）。
 - [x] CLI 错误诊断对齐：`execute/mod.rs` + `tsoptions/mod.rs` 中 ad-hoc
   `writeln!("error TSxxxx: ...")` 全部替换为 `Diagnostic::new` + 消息常量
   （TS6369 build-first / TS6370 options-cannot-combine / TS5042 project-mixed /

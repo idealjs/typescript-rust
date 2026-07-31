@@ -2608,6 +2608,14 @@ fn extends_as_paths(
         .collect()
 }
 
+/// Resolve a single `extends` spec to an absolute config file path.
+///
+/// Mirrors Go's `getExtendsConfigPath` (`tsconfigparsing.go:547`):
+/// - If the spec is rooted or starts with `./` / `../` → resolve as a
+///   relative/absolute path with `.json` suffix fallback.
+/// - Otherwise (bare specifier like `tsconfig-base` or `@scope/base`) →
+///   resolve via Node-style `node_modules` walk using
+///   `module.ResolveConfig` semantics (`resolver.go:371`).
 fn resolve_single_extends_path(
     s: &str,
     config_file_name: &str,
@@ -2615,6 +2623,22 @@ fn resolve_single_extends_path(
     fs: &dyn FS,
 ) -> Option<String> {
     let config_dir = tspath::get_directory_path(config_file_name);
+
+    if tspath::is_external_module_name_relative(s) {
+        resolve_relative_extends_path(s, &config_dir, current_dir, fs)
+    } else {
+        resolve_config_via_node_modules(s, &config_dir, fs)
+    }
+}
+
+/// Resolve a relative or rooted `extends` spec (mirrors Go's
+/// `getExtendsConfigPath` relative-path branch, `tsconfigparsing.go:560`).
+fn resolve_relative_extends_path(
+    s: &str,
+    config_dir: &str,
+    current_dir: &str,
+    fs: &dyn FS,
+) -> Option<String> {
     // Combine and normalize so that `./base` doesn't leave a stray `./` in
     // the path (which would cause `.json` suffix checks to miss the file).
     let base = tspath::normalize_path(&tspath::combine_paths(&config_dir, &[s]));
@@ -2644,6 +2668,115 @@ fn resolve_single_extends_path(
     } else {
         Some(tspath::combine_paths(&abs, &["tsconfig.json"]))
     }
+}
+
+/// Resolve a bare module specifier (e.g. `tsconfig-base`, `@scope/base`)
+/// via Node-style `node_modules` directory walk.
+///
+/// Mirrors Go's `module.ResolveConfig` → `resolveNodeLike` →
+/// `loadModuleFromNearestNodeModulesDirectory` pipeline (`resolver.go:371`,
+/// `resolver.go:569`, `resolver.go:981`) with `isConfigLookup = true` and
+/// `extensions = extensionsJson`:
+///
+/// 1. Walk ancestor directories from `containing_directory` upward.
+/// 2. At each ancestor `D` (whose basename isn't `node_modules`), check
+///    `D/node_modules/<spec>`.
+/// 3. Return the first match; if none found, return `None`.
+fn resolve_config_via_node_modules(
+    module_name: &str,
+    containing_directory: &str,
+    fs: &dyn FS,
+) -> Option<String> {
+    let mut result: Option<String> = None;
+    tspath::for_each_ancestor_directory(containing_directory, |ancestor| {
+        // Skip `node_modules` directories themselves — we look *inside*
+        // them, not at them (mirrors Go's check in
+        // `loadModuleFromNearestNodeModulesDirectoryWorker`,
+        // `resolver.go:1018`).
+        if tspath::get_base_file_name(ancestor) == "node_modules" {
+            return false;
+        }
+        let node_modules = tspath::combine_paths(ancestor, &["node_modules"]);
+        if !fs.directory_exists(&node_modules) {
+            return false;
+        }
+        if let Some(resolved) = load_config_from_node_modules(module_name, &node_modules, fs) {
+            result = Some(resolved);
+            return true; // stop walking
+        }
+        false
+    });
+    result
+}
+
+/// Try to load a config file from a specific `node_modules` directory.
+///
+/// Mirrors Go's `loadModuleFromImmediateNodeModulesDirectory` →
+/// `loadModuleFromSpecificNodeModulesDirectory` →
+/// `loadModuleFromFile` + `loadNodeModuleFromDirectoryWorker` pipeline
+/// (`resolver.go:1028`, `resolver.go:1057`) for the `isConfigLookup` case
+/// with `extensionsJson`.
+fn load_config_from_node_modules(
+    module_name: &str,
+    node_modules_dir: &str,
+    fs: &dyn FS,
+) -> Option<String> {
+    // Parse the package name: `@scope/pkg/sub` → (`@scope/pkg`, `sub`).
+    // The package name determines which directory contains `package.json`.
+    let (package_name, _rest) = crate::module::parse_package_name(module_name);
+
+    let candidate = tspath::normalize_path(&tspath::combine_paths(
+        node_modules_dir,
+        &[module_name],
+    ));
+
+    // 1. File form: try `<candidate>.json` (or `<candidate>` if it already
+    //    ends in `.json`). Mirrors Go's `loadModuleFromFile` with
+    //    `extensionsJson`.
+    if candidate.ends_with(".json") {
+        if fs.file_exists(&candidate) {
+            return Some(candidate);
+        }
+    } else {
+        let with_json = format!("{candidate}.json");
+        if fs.file_exists(&with_json) {
+            return Some(with_json);
+        }
+    }
+
+    // 2. Directory form: try `<candidate>/tsconfig.json`. Mirrors Go's
+    //    `loadNodeModuleFromDirectoryWorker` with `isConfigLookup = true`
+    //    where `indexPath = <candidate>/tsconfig` and
+    //    `loadModuleFromFile(extensionsJson, indexPath)` tries
+    //    `<candidate>/tsconfig.json` (`resolver.go:1659-1700`).
+    let tsconfig_in_dir = tspath::combine_paths(&candidate, &["tsconfig.json"]);
+    if fs.file_exists(&tsconfig_in_dir) {
+        return Some(tsconfig_in_dir);
+    }
+
+    // 3. package.json `tsconfig` field: read the package's `package.json`
+    //    and check for a `"tsconfig"` string field. If present, resolve it
+    //    relative to the package directory. Mirrors Go's `getPackageFile`
+    //    with `isConfigLookup` (`resolver.go:1744`).
+    let package_dir = tspath::combine_paths(node_modules_dir, &[&package_name]);
+    let package_json_path = tspath::combine_paths(&package_dir, &["package.json"]);
+    if fs.file_exists(&package_json_path) {
+        if let Some(content) = fs.read_file(&package_json_path) {
+            if let Ok(fields) = crate::packagejson::parse(&content) {
+                if let Some(tsconfig_field) = fields.path_fields.tsconfig.get_value() {
+                    let resolved = tspath::get_normalized_absolute_path(
+                        tsconfig_field,
+                        &package_dir,
+                    );
+                    if fs.file_exists(&resolved) {
+                        return Some(resolved);
+                    }
+                }
+            }
+        }
+    }
+
+    None
 }
 
 fn json_object_to_options(
@@ -3941,7 +4074,7 @@ mod tests {
         fs.insert_file(
             "/proj/tsconfig.json",
             r#"{
-            "extends": "base.json",
+            "extends": "./base.json",
             "compilerOptions": { "outDir": "./dist" }
         }"#,
         );
@@ -3974,7 +4107,7 @@ mod tests {
         fs.insert_file(
             "/proj/tsconfig.json",
             r#"{
-            "extends": "base.json",
+            "extends": "./base.json",
             "compilerOptions": { "outDir": "./dist" },
             "include": ["src/**/*"]
         }"#,
@@ -4001,11 +4134,11 @@ mod tests {
         fs.insert_dir("/proj");
         fs.insert_file(
             "/proj/a.tsconfig.json",
-            r#"{ "extends": "b.tsconfig.json", "compilerOptions": { "target": "ES2020" } }"#,
+            r#"{ "extends": "./b.tsconfig.json", "compilerOptions": { "target": "ES2020" } }"#,
         );
         fs.insert_file(
             "/proj/b.tsconfig.json",
-            r#"{ "extends": "a.tsconfig.json", "compilerOptions": { "strict": true } }"#,
+            r#"{ "extends": "./a.tsconfig.json", "compilerOptions": { "strict": true } }"#,
         );
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/a.tsconfig.json",
@@ -4048,7 +4181,7 @@ mod tests {
         fs.insert_file(
             "/proj/tsconfig.json",
             r#"{
-            "extends": ["base1.json", "base2.json"],
+            "extends": ["./base1.json", "./base2.json"],
             "compilerOptions": { "outDir": "./dist" },
             "files": []
         }"#,
@@ -4084,7 +4217,7 @@ mod tests {
         fs.insert_file(
             "/proj/tsconfig.json",
             r#"{
-            "extends": "base.json",
+            "extends": "./base.json",
             "compilerOptions": { "strict": false }
         }"#,
         );
@@ -4119,7 +4252,7 @@ mod tests {
         );
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{ "extends": ["base1.json", "base2.json"] }"#,
+            r#"{ "extends": ["./base1.json", "./base2.json"] }"#,
         );
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
@@ -4182,7 +4315,7 @@ mod tests {
         );
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{ "extends": ["base1.json", "base2.json"] }"#,
+            r#"{ "extends": ["./base1.json", "./base2.json"] }"#,
         );
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
@@ -5624,7 +5757,7 @@ mod tests {
         );
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{ "extends": "base.json", "compilerOptions": { "strict": null } }"#,
+            r#"{ "extends": "./base.json", "compilerOptions": { "strict": null } }"#,
         );
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
@@ -5650,7 +5783,7 @@ mod tests {
         );
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{ "extends": "base.json", "compilerOptions": { "outDir": null } }"#,
+            r#"{ "extends": "./base.json", "compilerOptions": { "outDir": null } }"#,
         );
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
@@ -5676,7 +5809,7 @@ mod tests {
         );
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{ "extends": "base.json", "compilerOptions": { "target": null } }"#,
+            r#"{ "extends": "./base.json", "compilerOptions": { "target": null } }"#,
         );
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
@@ -5705,7 +5838,7 @@ mod tests {
         );
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{ "extends": "base.json", "compilerOptions": { "strict": null } }"#,
+            r#"{ "extends": "./base.json", "compilerOptions": { "strict": null } }"#,
         );
         let mut base = CompilerOptions::default();
         base.strict = crate::core::tristate::Tristate::True;
@@ -5734,7 +5867,7 @@ mod tests {
         );
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{ "extends": "base.json", "compilerOptions": { "strict": null } }"#,
+            r#"{ "extends": "./base.json", "compilerOptions": { "strict": null } }"#,
         );
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
@@ -5765,7 +5898,7 @@ mod tests {
         );
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{ "extends": "base.json", "compilerOptions": { "strict": null, "outDir": null, "target": null } }"#,
+            r#"{ "extends": "./base.json", "compilerOptions": { "strict": null, "outDir": null, "target": null } }"#,
         );
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
@@ -5810,15 +5943,15 @@ mod tests {
         );
         fs.insert_file(
             "/proj/b.json",
-            r#"{ "extends": "d.json" }"#,
+            r#"{ "extends": "./d.json" }"#,
         );
         fs.insert_file(
             "/proj/c.json",
-            r#"{ "extends": "d.json" }"#,
+            r#"{ "extends": "./d.json" }"#,
         );
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{ "extends": ["b.json", "c.json"] }"#,
+            r#"{ "extends": ["./b.json", "./c.json"] }"#,
         );
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
@@ -5857,15 +5990,15 @@ mod tests {
         );
         fs.insert_file(
             "/proj/b.json",
-            r#"{ "extends": "d.json" }"#,
+            r#"{ "extends": "./d.json" }"#,
         );
         fs.insert_file(
             "/proj/c.json",
-            r#"{ "extends": "d.json" }"#,
+            r#"{ "extends": "./d.json" }"#,
         );
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{ "extends": ["b.json", "c.json"] }"#,
+            r#"{ "extends": ["./b.json", "./c.json"] }"#,
         );
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
@@ -5898,15 +6031,15 @@ mod tests {
         fs.insert_dir("/proj");
         fs.insert_file(
             "/proj/a.json",
-            r#"{ "extends": "b.json" }"#,
+            r#"{ "extends": "./b.json" }"#,
         );
         fs.insert_file(
             "/proj/b.json",
-            r#"{ "extends": "a.json" }"#,
+            r#"{ "extends": "./a.json" }"#,
         );
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{ "extends": "a.json" }"#,
+            r#"{ "extends": "./a.json" }"#,
         );
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
@@ -5923,6 +6056,200 @@ mod tests {
             has_cycle,
             "expected TS18000 circularity error, got errors: {:?}",
             parsed.errors
+        );
+    }
+
+    // ── bare specifier extends (Node-style node_modules resolution) ──────
+    // Mirrors Go's `module.ResolveConfig` (`resolver.go:371`): bare
+    // specifiers (not starting with `./` or `../`) are resolved by walking
+    // `node_modules` directories.
+
+    #[test]
+    fn test_extends_bare_specifier_file_form() {
+        // `extends: "tsconfig-base"` resolves to
+        // `node_modules/tsconfig-base.json` (file form).
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/node_modules");
+        fs.insert_file(
+            "/proj/node_modules/tsconfig-base.json",
+            r#"{ "compilerOptions": { "strict": true } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "tsconfig-base" }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(
+            parsed.compiler_options.strict.is_true(),
+            "expected strict=true from node_modules/tsconfig-base.json, got {:?}",
+            parsed.compiler_options.strict
+        );
+    }
+
+    #[test]
+    fn test_extends_bare_specifier_directory_form() {
+        // `extends: "tsconfig-base"` resolves to
+        // `node_modules/tsconfig-base/tsconfig.json` (directory form).
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/node_modules");
+        fs.insert_dir("/proj/node_modules/tsconfig-base");
+        fs.insert_file(
+            "/proj/node_modules/tsconfig-base/tsconfig.json",
+            r#"{ "compilerOptions": { "noImplicitAny": true } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "tsconfig-base" }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(
+            parsed.compiler_options.no_implicit_any.is_true(),
+            "expected noImplicitAny=true from node_modules/tsconfig-base/tsconfig.json, got {:?}",
+            parsed.compiler_options.no_implicit_any
+        );
+    }
+
+    #[test]
+    fn test_extends_bare_specifier_package_json_tsconfig_field() {
+        // `extends: "tsconfig-base"` resolves via the `tsconfig` field in
+        // `node_modules/tsconfig-base/package.json` (mirrors Go's
+        // `getPackageFile` with `isConfigLookup`, `resolver.go:1744`).
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/node_modules");
+        fs.insert_dir("/proj/node_modules/tsconfig-base");
+        fs.insert_file(
+            "/proj/node_modules/tsconfig-base/package.json",
+            r#"{ "name": "tsconfig-base", "tsconfig": "my-base.json" }"#,
+        );
+        fs.insert_file(
+            "/proj/node_modules/tsconfig-base/my-base.json",
+            r#"{ "compilerOptions": { "strict": true, "noImplicitThis": true } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "tsconfig-base" }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(
+            parsed.compiler_options.strict.is_true(),
+            "expected strict=true from package.json tsconfig field, got {:?}",
+            parsed.compiler_options.strict
+        );
+        assert!(
+            parsed.compiler_options.no_implicit_this.is_true(),
+            "expected noImplicitThis=true from package.json tsconfig field, got {:?}",
+            parsed.compiler_options.no_implicit_this
+        );
+    }
+
+    #[test]
+    fn test_extends_bare_specifier_scoped_package() {
+        // `extends: "@scope/tsconfig-base"` resolves to
+        // `node_modules/@scope/tsconfig-base/tsconfig.json`.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/node_modules");
+        fs.insert_dir("/proj/node_modules/@scope");
+        fs.insert_dir("/proj/node_modules/@scope/tsconfig-base");
+        fs.insert_file(
+            "/proj/node_modules/@scope/tsconfig-base/tsconfig.json",
+            r#"{ "compilerOptions": { "strictNullChecks": true } }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "@scope/tsconfig-base" }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(
+            parsed.compiler_options.strict_null_checks.is_true(),
+            "expected strictNullChecks=true from @scope/tsconfig-base, got {:?}",
+            parsed.compiler_options.strict_null_checks
+        );
+    }
+
+    #[test]
+    fn test_extends_bare_specifier_ancestor_walk() {
+        // `extends: "tsconfig-base"` where node_modules is in a parent
+        // directory (not the config's own directory). Mirrors Go's
+        // `loadModuleFromNearestNodeModulesDirectory` ancestor walk.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/node_modules");
+        fs.insert_dir("/proj/node_modules/tsconfig-base");
+        fs.insert_file(
+            "/proj/node_modules/tsconfig-base/tsconfig.json",
+            r#"{ "compilerOptions": { "strict": true } }"#,
+        );
+        fs.insert_dir("/proj/packages");
+        fs.insert_dir("/proj/packages/foo");
+        fs.insert_file(
+            "/proj/packages/foo/tsconfig.json",
+            r#"{ "extends": "tsconfig-base" }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/packages/foo/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj/packages/foo",
+            &fs,
+        );
+        assert!(
+            parsed.compiler_options.strict.is_true(),
+            "expected strict=true from ancestor node_modules, got {:?}",
+            parsed.compiler_options.strict
+        );
+    }
+
+    #[test]
+    fn test_extends_bare_specifier_not_found() {
+        // `extends: "nonexistent-config"` with no matching node_modules
+        // entry. The spec is silently dropped (resolution returns None).
+        // Own config options are still applied.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "nonexistent-config", "compilerOptions": { "target": "ES2020" } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // Own config options are still applied.
+        assert_eq!(
+            parsed.compiler_options.target,
+            ScriptTarget::ES2020,
+            "expected own config target to be applied"
+        );
+        // Strict should NOT be inherited (no extended config was found).
+        assert!(
+            !parsed.compiler_options.strict.is_true(),
+            "expected strict=false (no extended config found), got {:?}",
+            parsed.compiler_options.strict
         );
     }
 }
