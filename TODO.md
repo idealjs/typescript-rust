@@ -689,12 +689,31 @@ variable/alias）；`variable_decl_prefix` 区分 let/const/var；
 使未引用的 alias 在 hover 时也能显示 body；10 个 hover parity 测试通过
 （变量/函数/类/接口/枚举/类型别名 with/without type params）。
 
-- [ ] `symbol_to_type_node`/`symbol_to_display_parts`（declaration emit 需要，
-  无 declaration emit 暂不阻塞）。**延期**：`symbol_to_type_node` 需构建 AST
-  TypeNode（与 Rust 直接转字符串策略冲突），依赖 printer + module resolution
-  + AST factory；`symbol_to_display_parts` 在 Go 中已从 checker 迁出至
-  `internal/ls/hover.go`（displayPartsWriter + classification），属 LS 层。
-  待 P4 declaration emit / P7 LS 启动时再补。
+- [x] `type_to_type_node`（Type → TypeNode AST）foundation — `typenode.rs` 的
+  逆操作。覆盖常见 Type 变体：primitive/intrinsic、literal（string/number/
+  bigint/boolean/null）、union、intersection、type parameter（含 `this`）、
+  tuple（含 rest element）、array/reference（含 `Array<T>` → `T[]`、
+  parenthesization for function-typed elements）、function type
+  （`(params) => ret`）、type literal（properties + call signatures）、
+  symbol-bearing type（class/interface/enum/type alias）。recursion guard 复用
+  `serialization_level`（cap 300）。20 个 unit test 通过 round-trip
+  （`type_to_string` ↔ `type_node_to_string`）验证 primitive/array/tuple/
+  union/intersection/generic reference/function/object literal/literal types。
+  **剩余 gap（已在 `nodebuilder.rs` 标 TODO 注释）**：indexed access
+  （`T[K]`）、template literal、string mapping、conditional、substitution、
+  index（`keyof T`）、type predicate、rest type in union、named tuple member、
+  JSDoc types、`readonly T[]` for ReadonlyArray、construct signature in type
+  literal、index signature in type literal、qualified name chain（`A.B.C`）、
+  `import("mod").T`、`typeof` for value-meaning symbols。待 P4 declaration
+  emit / P7 LS 启动时按需补齐。
+- [x] `symbol_to_type_node(symbol, mask, type_arguments)` entry point — emit
+  flat `TypeReferenceNode` with symbol's local name；type arguments 缺省时
+  从 symbol declared type 恢复（覆盖 `type T<X> = ...;` referenced as
+  `T<number>`）。**剩余 gap**：qualified name chain、`import("mod").T`、
+  `typeof` for value-meaning symbols（mask == SymbolFlags::VALUE）— 标 TODO。
+- [ ] `symbol_to_display_parts`（declaration emit 需要）。**延期**：在 Go 中
+  已从 checker 迁出至 `internal/ls/hover.go`（displayPartsWriter +
+  classification），属 LS 层。待 P7 LS 启动时再补。
 - [x] hover 信息生成。
 
 ### P3.11 Checker emitresolver

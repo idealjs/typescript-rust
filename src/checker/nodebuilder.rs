@@ -10,7 +10,14 @@
 
 use std::sync::Arc;
 
-use crate::ast::{Node, NodeData, Symbol, SymbolFlags, SyntaxKind};
+use crate::ast::{
+    ArrayTypeNodeData, BigIntLiteralData, FunctionTypeNodeData, IdentifierData,
+    IntersectionTypeNodeData, LiteralTypeNodeData, MissingDeclarationData, Node, NodeData, NodeList,
+    NumericLiteralData, ParameterDeclarationData, ParenthesizedTypeNodeData,
+    PropertySignatureDeclarationData, RestTypeNodeData, StringLiteralData, Symbol, SymbolFlags,
+    SyntaxKind, TupleTypeNodeData, TypeLiteralNodeData, TypeOperatorNodeData, TypeReferenceNodeData,
+    UnionTypeNodeData,
+};
 
 use super::checker::Checker;
 use super::types::*;
@@ -294,12 +301,14 @@ impl Checker {
         };
 
         // Array type: if there's exactly one type argument and the symbol
-        // name is `Array`, format as `T[]` (or `Array<T>` if flagged).
+        // name is `Array`/`ReadonlyArray`, format as `T[]` (or `Array<T>`
+        // if flagged). A synthetic array created by `create_array_type`
+        // (no symbol) is also detected here, matching `reference_to_type_node`.
+        let symbol_name = t.symbol.as_ref().map(|s| s.name.as_str()).unwrap_or("");
         let is_array = obj_data.type_arguments.len() == 1
-            && t.symbol
-                .as_ref()
-                .map(|s| s.name == "Array" || s.name == "ReadonlyArray")
-                .unwrap_or(false);
+            && (symbol_name == "Array"
+                || symbol_name == "ReadonlyArray"
+                || t.symbol.is_none());
 
         if is_array {
             let elem = &obj_data.type_arguments[0];
@@ -483,6 +492,648 @@ impl Checker {
         } else {
             s
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Type-to-TypeNode (AST construction)
+    //
+    // Ported from `internal/checker/nodebuilderimpl.go`'s `typeToTypeNode`.
+    // The Go implementation builds an AST `TypeNode` and then prints it with
+    // the printer; this is the reverse of `get_type_from_type_node` in
+    // `typenode.rs`. The result is used by declaration emit and hover
+    // display.
+    //
+    // This is a FOUNDATION implementation covering the common Type variants.
+    // Remaining cases (conditional, mapped, indexed access, template literal,
+    // type predicates, rest types, named tuple members, JSDoc types) are
+    // marked with TODO comments.
+    // ─────────────────────────────────────────────────────────────────────
+
+    /// Serialize a `Type` into an AST `TypeNode`.
+    ///
+    /// Mirrors Go's `NodeBuilderImpl.typeToTypeNode`. This is the reverse of
+    /// `get_type_from_type_node`: it builds a `TypeNode` AST that, when
+    /// printed, renders the type as it would appear in source. Used by
+    /// declaration emit and hover display.
+    ///
+    /// Reuses the `serialization_level` recursion guard from
+    /// `type_to_string_ex` to prevent stack overflow on recursive types.
+    pub fn type_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
+        if self.serialization_level >= MAX_SERIALIZATION_LEVEL {
+            return self.keyword_node(SyntaxKind::AnyKeyword);
+        }
+        self.serialization_level += 1;
+        let result = self.type_to_type_node_worker(t);
+        self.serialization_level -= 1;
+        result
+    }
+
+    fn type_to_type_node_worker(&mut self, t: &Arc<Type>) -> Arc<Node> {
+        // Intrinsic types (any, string, number, etc.)
+        if let Some(name) = t.intrinsic_name() {
+            return self.intrinsic_to_type_node(name);
+        }
+
+        // Literal types
+        if let Some(val) = t.literal_value() {
+            return self.literal_value_to_type_node(val);
+        }
+
+        // Unique ESSymbol type
+        if t.flags.contains(TypeFlags::UniqueESSymbol) {
+            // TODO: full `unique symbol` / `typeof sym` rendering per
+            // FlagsAllowUniqueESSymbolType; currently approximated as
+            // `unique symbol`.
+            return self.type_operator_node(SyntaxKind::UniqueKeyword, self.keyword_node(SyntaxKind::SymbolKeyword));
+        }
+
+        // Never
+        if t.flags.contains(TypeFlags::Never) {
+            return self.keyword_node(SyntaxKind::NeverKeyword);
+        }
+
+        // Union types
+        if t.is_union() {
+            return self.union_to_type_node(t);
+        }
+
+        // Intersection types
+        if t.is_intersection() {
+            return self.intersection_to_type_node(t);
+        }
+
+        // Type parameters
+        if t.is_type_parameter() {
+            return self.type_parameter_to_type_node(t);
+        }
+
+        // TODO: Indexed access types (`T[K]`) — TypeData::IndexedAccess
+        // TODO: Template literal types — TypeData::TemplateLiteral
+        // TODO: String mapping types — TypeData::StringMapping
+        // TODO: Conditional types — TypeData::Conditional
+        // TODO: Substitution types — TypeData::Substitution
+        // TODO: Index types (`keyof T`) — TypeFlags::Index
+        // TODO: Type predicates
+        // TODO: Rest types
+        // TODO: Named tuple members
+
+        // Tuple types
+        if t.object_flags.contains(ObjectFlags::Tuple) {
+            return self.tuple_to_type_node(t);
+        }
+
+        // Array / reference types
+        if t.object_flags.contains(ObjectFlags::Reference) {
+            return self.reference_to_type_node(t);
+        }
+
+        // Function types (object types with call signatures and no symbol)
+        if let Some(structured) = t.as_structured() {
+            if structured.call_signature_count > 0 && t.symbol.is_none() {
+                return self.function_type_to_type_node(structured);
+            }
+        }
+
+        // Object types with a symbol (class, interface, enum, type alias)
+        if let Some(sym) = &t.symbol {
+            return self.symbol_to_type_node(sym, SymbolFlags::TYPE, None);
+        }
+
+        // Anonymous object literal types
+        if let Some(structured) = t.as_structured() {
+            if !structured.properties.is_empty()
+                || !structured.call_signatures().is_empty()
+                || !structured.index_infos.is_empty()
+            {
+                return self.type_literal_to_type_node(structured);
+            }
+        }
+
+        // Fallbacks
+        if t.flags.contains(TypeFlags::Object) {
+            return self.keyword_node(SyntaxKind::ObjectKeyword);
+        }
+        if t.flags.contains(TypeFlags::Unknown) {
+            return self.keyword_node(SyntaxKind::UnknownKeyword);
+        }
+
+        self.keyword_node(SyntaxKind::AnyKeyword)
+    }
+
+    /// Map an intrinsic type name to its keyword `TypeNode`.
+    fn intrinsic_to_type_node(&mut self, name: &str) -> Arc<Node> {
+        let kind = match name {
+            "any" => SyntaxKind::AnyKeyword,
+            "unknown" => SyntaxKind::UnknownKeyword,
+            "string" => SyntaxKind::StringKeyword,
+            "number" => SyntaxKind::NumberKeyword,
+            "bigint" => SyntaxKind::BigIntKeyword,
+            "boolean" => SyntaxKind::BooleanKeyword,
+            "symbol" => SyntaxKind::SymbolKeyword,
+            "void" => SyntaxKind::VoidKeyword,
+            "undefined" => SyntaxKind::UndefinedKeyword,
+            "null" => SyntaxKind::NullKeyword,
+            "object" => SyntaxKind::ObjectKeyword,
+            "never" => SyntaxKind::NeverKeyword,
+            // `error` and other internal intrinsic names render as `any`.
+            _ => SyntaxKind::AnyKeyword,
+        };
+        self.keyword_node(kind)
+    }
+
+    /// Build a `LiteralTypeNode` from a `LiteralValue`.
+    fn literal_value_to_type_node(&mut self, val: &LiteralValue) -> Arc<Node> {
+        let literal = match val {
+            LiteralValue::String(s) => self.string_literal_node(s),
+            LiteralValue::Number(n) => self.numeric_literal_node(&n.to_string()),
+            LiteralValue::BigInt(b) => self.bigint_literal_node(&b.to_string()),
+            LiteralValue::Boolean(true) => self.keyword_node(SyntaxKind::TrueKeyword),
+            LiteralValue::Boolean(false) => self.keyword_node(SyntaxKind::FalseKeyword),
+            // NullKeyword is wrapped in a LiteralTypeNode in the Go impl;
+            // for simplicity we emit the keyword directly.
+            LiteralValue::None => return self.keyword_node(SyntaxKind::NullKeyword),
+        };
+        self.literal_type_node(literal)
+    }
+
+    /// Build a `UnionTypeNode` from a union type, parenthesizing members
+    /// that need it (function types).
+    fn union_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
+        let types = t.types().unwrap_or(&[]);
+        if types.is_empty() {
+            return self.keyword_node(SyntaxKind::NeverKeyword);
+        }
+        if types.len() == 1 {
+            return self.type_to_type_node(&types[0]);
+        }
+        let nodes: Vec<Arc<Node>> = types
+            .iter()
+            .map(|ty| {
+                let node = self.type_to_type_node(ty);
+                if self.needs_parens_in_union(ty) {
+                    self.parenthesized_type_node(node)
+                } else {
+                    node
+                }
+            })
+            .collect();
+        self.union_type_node(nodes)
+    }
+
+    /// Build an `IntersectionTypeNode` from an intersection type.
+    fn intersection_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
+        let types = t.types().unwrap_or(&[]);
+        if types.is_empty() {
+            return self.keyword_node(SyntaxKind::UnknownKeyword);
+        }
+        if types.len() == 1 {
+            return self.type_to_type_node(&types[0]);
+        }
+        let nodes: Vec<Arc<Node>> = types
+            .iter()
+            .map(|ty| {
+                let node = self.type_to_type_node(ty);
+                if self.needs_parens_in_union(ty) {
+                    self.parenthesized_type_node(node)
+                } else {
+                    node
+                }
+            })
+            .collect();
+        self.intersection_type_node(nodes)
+    }
+
+    /// Build a `TypeReferenceNode` for a type parameter.
+    fn type_parameter_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
+        if let TypeData::TypeParameter(tp) = &t.data {
+            if tp.is_this_type {
+                // TODO: ThisTypeNode (SyntaxKind::ThisType) — currently
+                // approximated as a type reference to "this".
+                let name = self.identifier("this");
+                return self.type_reference_node(name, None);
+            }
+        }
+        if let Some(sym) = &t.symbol {
+            let name = self.identifier(&sym.name);
+            return self.type_reference_node(name, None);
+        }
+        let name = self.identifier("T");
+        self.type_reference_node(name, None)
+    }
+
+    /// Build a `TupleTypeNode` from a tuple type.
+    fn tuple_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
+        let TypeData::Tuple(tuple) = &t.data else {
+            return self.tuple_type_node(Vec::new());
+        };
+        let elements: Vec<Arc<Node>> = tuple
+            .element_infos
+            .iter()
+            .map(|elem| {
+                let ty = elem
+                    .type_
+                    .as_ref()
+                    .map(|ty| self.type_to_type_node(ty))
+                    .unwrap_or_else(|| self.keyword_node(SyntaxKind::AnyKeyword));
+                // TODO: named tuple members (`name: type`),
+                // `...rest`/`optional` markers.
+                if elem.flags.contains(ElementFlags::Rest)
+                    || elem.flags.contains(ElementFlags::Variadic)
+                {
+                    self.rest_type_node(ty)
+                } else {
+                    ty
+                }
+            })
+            .collect();
+        self.tuple_type_node(elements)
+    }
+
+    /// Build an `ArrayTypeNode` or `TypeReferenceNode` from a reference type.
+    fn reference_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
+        let obj_data = match &t.data {
+            TypeData::Object(o) => o,
+            TypeData::Interface(i) => &i.object,
+            _ => return self.keyword_node(SyntaxKind::ObjectKeyword),
+        };
+
+        // Array type: `T[]` (single type argument with Array/ReadonlyArray
+        // symbol). When no symbol is present (synthetic array from
+        // `create_array_type`), we still detect the array shape: exactly one
+        // type argument and no symbol (or an `Array` symbol).
+        let symbol_name = t.symbol.as_ref().map(|s| s.name.as_str()).unwrap_or("");
+        let is_array = obj_data.type_arguments.len() == 1
+            && (symbol_name == "Array" || symbol_name == "ReadonlyArray" || t.symbol.is_none());
+
+        if is_array {
+            let elem = &obj_data.type_arguments[0];
+            let elem_node = self.type_to_type_node(elem);
+            if self.needs_parens_in_union(elem) {
+                return self.array_type_node(self.parenthesized_type_node(elem_node));
+            }
+            // TODO: `readonly T[]` for ReadonlyArray symbol.
+            return self.array_type_node(elem_node);
+        }
+
+        // Generic type reference: `Foo<T, U>`
+        let name = if symbol_name.is_empty() {
+            self.identifier("object")
+        } else {
+            self.identifier(symbol_name)
+        };
+        let type_args = if obj_data.type_arguments.is_empty() {
+            None
+        } else {
+            let arg_nodes: Vec<Arc<Node>> = obj_data
+                .type_arguments
+                .iter()
+                .map(|ty| self.type_to_type_node(ty))
+                .collect();
+            Some(Arc::new(NodeList::new(arg_nodes)))
+        };
+        self.type_reference_node(name, type_args)
+    }
+
+    /// Build a `FunctionTypeNode` from an object type with call signatures.
+    fn function_type_to_type_node(&mut self, structured: &StructuredTypeData) -> Arc<Node> {
+        let sigs = structured.call_signatures();
+        if sigs.is_empty() {
+            let ret = self.keyword_node(SyntaxKind::UnknownKeyword);
+            return self.function_type_node(Vec::new(), ret);
+        }
+        let sig = &sigs[0];
+        let params = self.signature_to_parameter_nodes(sig);
+        let ret_type = sig
+            .resolved_return_type
+            .get()
+            .cloned()
+            .unwrap_or_else(|| self.any_type());
+        let ret_node = self.type_to_type_node(&ret_type);
+        self.function_type_node(params, ret_node)
+    }
+
+    /// Build a `TypeLiteralNode` from an anonymous object type's structured
+    /// data (properties + call signatures + index signatures).
+    fn type_literal_to_type_node(&mut self, structured: &StructuredTypeData) -> Arc<Node> {
+        let mut members: Vec<Arc<Node>> = Vec::new();
+
+        // Call signatures: `(params) => ret`
+        for sig in structured.call_signatures() {
+            members.push(self.call_signature_to_node(sig));
+        }
+        // TODO: construct signatures (`new (params) => ret`).
+
+        // Properties
+        for prop in &structured.properties {
+            let name = self.identifier(&prop.name);
+            let prop_type = self.get_type_of_symbol(prop);
+            let type_node = self.type_to_type_node(&prop_type);
+            let optional = prop.flags.contains(SymbolFlags::Optional);
+            members.push(self.property_signature_node(name, optional, type_node));
+        }
+
+        // TODO: index signatures (`[key: string]: T`).
+
+        self.type_literal_node(members)
+    }
+
+    /// Convert a `Signature` to a list of `ParameterDeclaration` nodes.
+    fn signature_to_parameter_nodes(&mut self, sig: &Signature) -> Vec<Arc<Node>> {
+        sig.parameters
+            .iter()
+            .map(|param| {
+                let name = self.identifier(&param.name);
+                let param_type = self.get_type_of_symbol(param);
+                let type_node = self.type_to_type_node(&param_type);
+                let optional = param.flags.contains(SymbolFlags::Optional);
+                self.parameter_node(name, optional, type_node)
+            })
+            .collect()
+    }
+
+    /// Build a `CallSignatureDeclaration`-shaped node for type literals.
+    /// For simplicity we emit a `FunctionTypeNode` without the
+    /// `function` keyword; in a type literal context, call signatures are
+    /// rendered as `(params) => ret`.
+    fn call_signature_to_node(&mut self, sig: &Signature) -> Arc<Node> {
+        let params = self.signature_to_parameter_nodes(sig);
+        let ret_type = sig
+            .resolved_return_type
+            .get()
+            .cloned()
+            .unwrap_or_else(|| self.any_type());
+        let ret_node = self.type_to_type_node(&ret_type);
+        self.function_type_node(params, ret_node)
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // symbol_to_type_node entry point
+    // ─────────────────────────────────────────────────────────────────────
+
+    /// Serialize a `Symbol` into an AST `TypeNode`.
+    ///
+    /// Mirrors Go's `NodeBuilderImpl.symbolToTypeNode`. Resolves the
+    /// symbol's declared type and delegates to `type_to_type_node` for
+    /// structural rendering. When the symbol has a simple name and the
+    /// type carries the symbol (class/interface/enum/type alias), a
+    /// `TypeReferenceNode` with the symbol's name and the provided type
+    /// arguments is produced.
+    ///
+    /// `mask` filters which symbol aspect to use (currently only
+    /// `SymbolFlags::TYPE` is meaningfully handled; `SymbolFlags::VALUE`
+    /// would produce a `typeof` query, which is a TODO).
+    /// `type_arguments` overrides the type arguments written on the
+    /// reference (used when serializing an alias's type arguments).
+    pub fn symbol_to_type_node(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        mask: SymbolFlags,
+        type_arguments: Option<Arc<NodeList>>,
+    ) -> Arc<Node> {
+        // TODO: full symbol-chain resolution (qualified names like `A.B.C`,
+        // import types like `import("mod").T`). Currently we emit a flat
+        // `TypeReferenceNode` with the symbol's local name.
+        // TODO: `typeof` for value-meaning symbols (mask == SymbolFlags::VALUE).
+        let _ = mask;
+
+        let name = self.identifier(&symbol.name);
+        // If type arguments are not provided and the symbol's declared type
+        // is a generic reference, recover them from the type. This covers
+        // the common case of `type T<X> = ...;` referenced as `T<number>`.
+        let type_args = type_arguments.or_else(|| {
+            let t = self.get_type_of_symbol(symbol);
+            if let Some(obj) = t.as_object() {
+                if !obj.type_arguments.is_empty() {
+                    let arg_nodes: Vec<Arc<Node>> = obj
+                        .type_arguments
+                        .iter()
+                        .map(|ty| self.type_to_type_node(ty))
+                        .collect();
+                    return Some(Arc::new(NodeList::new(arg_nodes)));
+                }
+            }
+            None
+        });
+        self.type_reference_node(name, type_args)
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Minimal TypeNode AST factory helpers
+    //
+    // These build `Arc<Node>` values for type-node SyntaxKinds. They use
+    // `Node::new` (no source location) so the resulting nodes are
+    // synthetic — suitable for declaration emit and hover display but not
+    // for diagnostics that require a source span.
+    // ─────────────────────────────────────────────────────────────────────
+
+    /// Build a keyword type node (e.g. `string`, `number`).
+    fn keyword_node(&self, kind: SyntaxKind) -> Arc<Node> {
+        Arc::new(Node::new(kind, NodeData::Token))
+    }
+
+    /// Build an `Identifier` node.
+    fn identifier(&self, text: &str) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::Identifier,
+            NodeData::Identifier(IdentifierData {
+                text: text.to_string(),
+            }),
+        ))
+    }
+
+    /// Build a `StringLiteral` node.
+    fn string_literal_node(&self, text: &str) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::StringLiteral,
+            NodeData::StringLiteral(StringLiteralData {
+                text: text.to_string(),
+                token_flags: 0,
+            }),
+        ))
+    }
+
+    /// Build a `NumericLiteral` node.
+    fn numeric_literal_node(&self, text: &str) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::NumericLiteral,
+            NodeData::NumericLiteral(NumericLiteralData {
+                text: text.to_string(),
+                token_flags: 0,
+            }),
+        ))
+    }
+
+    /// Build a `BigIntLiteral` node (text includes trailing `n`).
+    fn bigint_literal_node(&self, text: &str) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::BigIntLiteral,
+            NodeData::BigIntLiteral(BigIntLiteralData {
+                text: format!("{}n", text),
+                token_flags: 0,
+            }),
+        ))
+    }
+
+    /// Build a `LiteralTypeNode` wrapping a literal node.
+    fn literal_type_node(&self, literal: Arc<Node>) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::LiteralType,
+            NodeData::LiteralTypeNode(LiteralTypeNodeData { literal }),
+        ))
+    }
+
+    /// Build a `TypeReferenceNode` with optional type arguments.
+    fn type_reference_node(
+        &self,
+        type_name: Arc<Node>,
+        type_arguments: Option<Arc<NodeList>>,
+    ) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::TypeReference,
+            NodeData::TypeReferenceNode(TypeReferenceNodeData {
+                type_name,
+                type_arguments,
+            }),
+        ))
+    }
+
+    /// Build an `ArrayTypeNode` (`T[]`).
+    fn array_type_node(&self, element_type: Arc<Node>) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::ArrayType,
+            NodeData::ArrayTypeNode(ArrayTypeNodeData { element_type }),
+        ))
+    }
+
+    /// Build a `TupleTypeNode` (`[A, B, C]`).
+    fn tuple_type_node(&self, elements: Vec<Arc<Node>>) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::TupleType,
+            NodeData::TupleTypeNode(TupleTypeNodeData {
+                elements: Arc::new(NodeList::new(elements)),
+            }),
+        ))
+    }
+
+    /// Build a `UnionTypeNode` (`A | B`).
+    fn union_type_node(&self, types: Vec<Arc<Node>>) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::UnionType,
+            NodeData::UnionTypeNode(UnionTypeNodeData {
+                types: Arc::new(NodeList::new(types)),
+            }),
+        ))
+    }
+
+    /// Build an `IntersectionTypeNode` (`A & B`).
+    fn intersection_type_node(&self, types: Vec<Arc<Node>>) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::IntersectionType,
+            NodeData::IntersectionTypeNode(IntersectionTypeNodeData {
+                types: Arc::new(NodeList::new(types)),
+            }),
+        ))
+    }
+
+    /// Build a `ParenthesizedTypeNode` (`(T)`).
+    fn parenthesized_type_node(&self, type_node: Arc<Node>) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::ParenthesizedType,
+            NodeData::ParenthesizedTypeNode(ParenthesizedTypeNodeData { type_node }),
+        ))
+    }
+
+    /// Build a `FunctionTypeNode` (`(params) => ret`).
+    fn function_type_node(&self, params: Vec<Arc<Node>>, ret: Arc<Node>) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::FunctionType,
+            NodeData::FunctionTypeNode(FunctionTypeNodeData {
+                type_parameters: None,
+                parameters: Arc::new(NodeList::new(params)),
+                type_node: Some(ret),
+            }),
+        ))
+    }
+
+    /// Build a `TypeLiteralNode` (`{ a: T; b: U }`).
+    fn type_literal_node(&self, members: Vec<Arc<Node>>) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::TypeLiteral,
+            NodeData::TypeLiteralNode(TypeLiteralNodeData {
+                members: Arc::new(NodeList::new(members)),
+            }),
+        ))
+    }
+
+    /// Build a `PropertySignatureDeclaration` (`name?: type`).
+    fn property_signature_node(
+        &self,
+        name: Arc<Node>,
+        optional: bool,
+        type_node: Arc<Node>,
+    ) -> Arc<Node> {
+        let postfix_token = if optional {
+            Some(self.keyword_node(SyntaxKind::QuestionToken))
+        } else {
+            None
+        };
+        // initializer is required by the data struct but not used for
+        // synthetic signatures; we pass a synthetic `MissingDeclaration`.
+        let initializer = Arc::new(Node::new(SyntaxKind::MissingDeclaration, NodeData::MissingDeclaration(MissingDeclarationData { modifiers: None })));
+        Arc::new(Node::new(
+            SyntaxKind::PropertySignature,
+            NodeData::PropertySignatureDeclaration(PropertySignatureDeclarationData {
+                modifiers: None,
+                name,
+                postfix_token,
+                type_node,
+                initializer,
+            }),
+        ))
+    }
+
+    /// Build a `ParameterDeclaration` (`name: type` or `name?: type`).
+    fn parameter_node(
+        &self,
+        name: Arc<Node>,
+        optional: bool,
+        type_node: Arc<Node>,
+    ) -> Arc<Node> {
+        let question_token = if optional {
+            Some(self.keyword_node(SyntaxKind::QuestionToken))
+        } else {
+            None
+        };
+        Arc::new(Node::new(
+            SyntaxKind::Parameter,
+            NodeData::ParameterDeclaration(ParameterDeclarationData {
+                modifiers: None,
+                dot_dot_dot_token: None,
+                name,
+                question_token,
+                type_node: Some(type_node),
+                initializer: None,
+            }),
+        ))
+    }
+
+    /// Build a `RestTypeNode` (`...T`).
+    fn rest_type_node(&self, type_node: Arc<Node>) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::RestType,
+            NodeData::RestTypeNode(RestTypeNodeData { type_node }),
+        ))
+    }
+
+    /// Build a `TypeOperatorNode` (`keyof T`, `readonly T`, `unique symbol`).
+    fn type_operator_node(&self, operator: SyntaxKind, type_node: Arc<Node>) -> Arc<Node> {
+        Arc::new(Node::new(
+            SyntaxKind::TypeOperator,
+            NodeData::TypeOperatorNode(TypeOperatorNodeData {
+                operator,
+                type_node,
+            }),
+        ))
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -886,3 +1537,392 @@ impl Checker {
 /// Maximum recursion depth for type serialization. Prevents stack overflow
 /// on recursive types. Mirrors Go's `maxSerializationLevel`.
 const MAX_SERIALIZATION_LEVEL: i32 = 300;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::bundled::lib_path;
+    use crate::compiler::{CompilerHost, CompilerHostImpl, Program, ProgramOptions};
+    use crate::tsoptions::parse_command_line;
+    use crate::vfs::InMemoryFS;
+
+    /// Build a checker for a single source file (with `--noLib`), mimicking
+    /// `build_checker` in `tests/checker_parity.rs`. Exposed so tests can
+    /// exercise checker APIs directly after type-checking completes.
+    fn build_checker(source: &str) -> Checker {
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/proj");
+        fs.insert_file("/proj/entry.ts", source);
+        let args = vec!["--noLib".to_string(), "/proj/entry.ts".to_string()];
+        let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
+        let host: Arc<dyn CompilerHost> =
+            Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
+        let program = Arc::new(Program::new(ProgramOptions {
+            config: parsed,
+            host,
+        }));
+        program.build_checker()
+    }
+
+    /// Find the first `VariableDeclaration` in the entry source file and
+    /// return its type annotation node (the `: T` part of `let x: T = ...`).
+    fn first_var_type_node(checker: &Checker) -> Arc<Node> {
+        let file = checker
+            .files
+            .iter()
+            .find(|f| f.file_name == "/proj/entry.ts")
+            .expect("entry source file");
+        let NodeData::SourceFile(sf) = &file.node.data else {
+            panic!("not a source file");
+        };
+        for stmt in sf.statements.nodes.iter() {
+            if stmt.kind != SyntaxKind::VariableStatement {
+                continue;
+            }
+            let NodeData::VariableStatement(vs) = &stmt.data else {
+                continue;
+            };
+            let NodeData::VariableDeclarationList(vdl) = &vs.declaration_list.data else {
+                continue;
+            };
+            for decl in vdl.declarations.nodes.iter() {
+                let NodeData::VariableDeclaration(vd) = &decl.data else {
+                    continue;
+                };
+                if let Some(tn) = &vd.type_node {
+                    return Arc::clone(tn);
+                }
+            }
+        }
+        panic!("no variable declaration with type annotation found");
+    }
+
+    /// Render a synthetic TypeNode AST to a string. This is a minimal printer
+    /// covering the node kinds produced by `type_to_type_node`. Used to
+    /// verify that the AST built by `type_to_type_node` matches the type's
+    /// string representation from `type_to_string`.
+    fn type_node_to_string(node: &Arc<Node>) -> String {
+        match node.kind {
+            SyntaxKind::AnyKeyword => "any".into(),
+            SyntaxKind::UnknownKeyword => "unknown".into(),
+            SyntaxKind::StringKeyword => "string".into(),
+            SyntaxKind::NumberKeyword => "number".into(),
+            SyntaxKind::BigIntKeyword => "bigint".into(),
+            SyntaxKind::BooleanKeyword => "boolean".into(),
+            SyntaxKind::SymbolKeyword => "symbol".into(),
+            SyntaxKind::VoidKeyword => "void".into(),
+            SyntaxKind::UndefinedKeyword => "undefined".into(),
+            SyntaxKind::NullKeyword => "null".into(),
+            SyntaxKind::ObjectKeyword => "object".into(),
+            SyntaxKind::NeverKeyword => "never".into(),
+            SyntaxKind::TrueKeyword => "true".into(),
+            SyntaxKind::FalseKeyword => "false".into(),
+            SyntaxKind::UniqueKeyword => "unique".into(),
+            SyntaxKind::ReadonlyKeyword => "readonly".into(),
+            SyntaxKind::KeyOfKeyword => "keyof".into(),
+            SyntaxKind::Identifier => node.text().to_string(),
+            SyntaxKind::StringLiteral => {
+                if let NodeData::StringLiteral(d) = &node.data {
+                    format!("\"{}\"", d.text)
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::NumericLiteral => {
+                if let NodeData::NumericLiteral(d) = &node.data {
+                    d.text.clone()
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::BigIntLiteral => {
+                if let NodeData::BigIntLiteral(d) = &node.data {
+                    d.text.clone()
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::LiteralType => {
+                if let NodeData::LiteralTypeNode(d) = &node.data {
+                    type_node_to_string(&d.literal)
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::TypeReference => {
+                if let NodeData::TypeReferenceNode(d) = &node.data {
+                    let name = type_node_to_string(&d.type_name);
+                    if let Some(args) = &d.type_arguments {
+                        let parts: Vec<String> =
+                            args.nodes.iter().map(type_node_to_string).collect();
+                        format!("{}<{}>", name, parts.join(", "))
+                    } else {
+                        name
+                    }
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::ArrayType => {
+                if let NodeData::ArrayTypeNode(d) = &node.data {
+                    format!("{}[]", type_node_to_string(&d.element_type))
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::TupleType => {
+                if let NodeData::TupleTypeNode(d) = &node.data {
+                    let parts: Vec<String> =
+                        d.elements.nodes.iter().map(type_node_to_string).collect();
+                    format!("[{}]", parts.join(", "))
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::UnionType => {
+                if let NodeData::UnionTypeNode(d) = &node.data {
+                    let parts: Vec<String> =
+                        d.types.nodes.iter().map(type_node_to_string).collect();
+                    parts.join(" | ")
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::IntersectionType => {
+                if let NodeData::IntersectionTypeNode(d) = &node.data {
+                    let parts: Vec<String> =
+                        d.types.nodes.iter().map(type_node_to_string).collect();
+                    parts.join(" & ")
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::ParenthesizedType => {
+                if let NodeData::ParenthesizedTypeNode(d) = &node.data {
+                    format!("({})", type_node_to_string(&d.type_node))
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::FunctionType => {
+                if let NodeData::FunctionTypeNode(d) = &node.data {
+                    let params: Vec<String> =
+                        d.parameters.nodes.iter().map(type_node_to_string).collect();
+                    let ret = d
+                        .type_node
+                        .as_ref()
+                        .map(type_node_to_string)
+                        .unwrap_or_else(|| "unknown".into());
+                    format!("({}) => {}", params.join(", "), ret)
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::Parameter => {
+                if let NodeData::ParameterDeclaration(d) = &node.data {
+                    let name = type_node_to_string(&d.name);
+                    let ty = d
+                        .type_node
+                        .as_ref()
+                        .map(type_node_to_string)
+                        .unwrap_or_else(|| "any".into());
+                    if d.question_token.is_some() {
+                        format!("{}?: {}", name, ty)
+                    } else {
+                        format!("{}: {}", name, ty)
+                    }
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::TypeLiteral => {
+                if let NodeData::TypeLiteralNode(d) = &node.data {
+                    let members: Vec<String> =
+                        d.members.nodes.iter().map(type_node_to_string).collect();
+                    if members.is_empty() {
+                        "{}".into()
+                    } else {
+                        format!("{{ {} }}", members.join("; "))
+                    }
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::PropertySignature => {
+                if let NodeData::PropertySignatureDeclaration(d) = &node.data {
+                    let name = type_node_to_string(&d.name);
+                    let ty = type_node_to_string(&d.type_node);
+                    if d.postfix_token.is_some() {
+                        format!("{}?: {}", name, ty)
+                    } else {
+                        format!("{}: {}", name, ty)
+                    }
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::RestType => {
+                if let NodeData::RestTypeNode(d) = &node.data {
+                    format!("...{}", type_node_to_string(&d.type_node))
+                } else {
+                    "?".into()
+                }
+            }
+            SyntaxKind::TypeOperator => {
+                if let NodeData::TypeOperatorNode(d) = &node.data {
+                    let op = match d.operator {
+                        SyntaxKind::UniqueKeyword => "unique ",
+                        SyntaxKind::ReadonlyKeyword => "readonly ",
+                        SyntaxKind::KeyOfKeyword => "keyof ",
+                        _ => "",
+                    };
+                    format!("{}{}", op, type_node_to_string(&d.type_node))
+                } else {
+                    "?".into()
+                }
+            }
+            _ => "?".into(),
+        }
+    }
+
+    /// Build a checker for `source`, find the first variable's type
+    /// annotation, resolve it to a `Type`, serialize it back to a TypeNode,
+    /// and assert that the rendered TypeNode matches the type's string.
+    fn assert_var_type_round_trips(source: &str) {
+        let mut checker = build_checker(source);
+        let type_node = first_var_type_node(&checker);
+        let t = checker.get_type_from_type_node(&type_node);
+        let expected = checker.type_to_string(&t);
+        let built = checker.type_to_type_node(&t);
+        let actual = type_node_to_string(&built);
+        assert_eq!(
+            actual, expected,
+            "type_to_type_node round-trip mismatch for source: {source}\n\
+             type_to_string: {expected:?}\n\
+             type_node_to_string: {actual:?}"
+        );
+    }
+
+    // ── Primitive / intrinsic types ──────────────────────────────────
+
+    #[test]
+    fn type_to_type_node_number() {
+        assert_var_type_round_trips("let x: number = 0;");
+    }
+
+    #[test]
+    fn type_to_type_node_string() {
+        assert_var_type_round_trips("let x: string = \"\";");
+    }
+
+    #[test]
+    fn type_to_type_node_boolean() {
+        assert_var_type_round_trips("let x: boolean = true;");
+    }
+
+    #[test]
+    fn type_to_type_node_void() {
+        assert_var_type_round_trips("let x: void = undefined;");
+    }
+
+    #[test]
+    fn type_to_type_node_any() {
+        assert_var_type_round_trips("let x: any = 0;");
+    }
+
+    #[test]
+    fn type_to_type_node_unknown() {
+        assert_var_type_round_trips("let x: unknown = 0;");
+    }
+
+    #[test]
+    fn type_to_type_node_never() {
+        // No initializer: the checker still resolves the type annotation.
+        assert_var_type_round_trips("let x: never;");
+    }
+
+    #[test]
+    fn type_to_type_node_null() {
+        assert_var_type_round_trips("let x: null = null;");
+    }
+
+    #[test]
+    fn type_to_type_node_undefined() {
+        assert_var_type_round_trips("let x: undefined = undefined;");
+    }
+
+    // ── Array & Tuple ────────────────────────────────────────────────
+
+    #[test]
+    fn type_to_type_node_array_of_number() {
+        assert_var_type_round_trips("let x: number[] = [];");
+    }
+
+    #[test]
+    fn type_to_type_node_array_of_string() {
+        assert_var_type_round_trips("let x: string[] = [\"\"];");
+    }
+
+    #[test]
+    fn type_to_type_node_tuple() {
+        assert_var_type_round_trips("let x: [number, string] = [0, \"\"];");
+    }
+
+    // ── Union & Intersection ─────────────────────────────────────────
+
+    #[test]
+    fn type_to_type_node_union_number_string() {
+        assert_var_type_round_trips("let x: number | string = 0;");
+    }
+
+    #[test]
+    fn type_to_type_node_union_string_null() {
+        assert_var_type_round_trips("let x: string | null = null;");
+    }
+
+    #[test]
+    fn type_to_type_node_intersection() {
+        assert_var_type_round_trips(
+            "interface A { a: number }\n\
+             interface B { b: string }\n\
+             let x: A & B = { a: 1, b: \"\" };",
+        );
+    }
+
+    // ── Type reference with arguments ────────────────────────────────
+
+    #[test]
+    fn type_to_type_node_generic_interface_reference() {
+        assert_var_type_round_trips(
+            "interface Foo<T> { value: T }\n\
+             let x: Foo<number> = { value: 1 };",
+        );
+    }
+
+    // ── Function type ────────────────────────────────────────────────
+
+    #[test]
+    fn type_to_type_node_function_type() {
+        assert_var_type_round_trips("let x: (a: number) => string = (a) => \"\";");
+    }
+
+    // ── Object literal type ──────────────────────────────────────────
+
+    #[test]
+    fn type_to_type_node_object_literal() {
+        assert_var_type_round_trips("let x: { a: number; b: string } = { a: 1, b: \"\" };");
+    }
+
+    // ── Literal types ────────────────────────────────────────────────
+
+    #[test]
+    fn type_to_type_node_string_literal_type() {
+        assert_var_type_round_trips("let x: \"hello\" = \"hello\";");
+    }
+
+    #[test]
+    fn type_to_type_node_numeric_literal_type() {
+        assert_var_type_round_trips("let x: 42 = 42;");
+    }
+}
+
