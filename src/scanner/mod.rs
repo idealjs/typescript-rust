@@ -617,9 +617,46 @@ impl Scanner {
         self.pos
     }
 
+    /// The end of the scanner's current text range. When the scanner is
+    /// re-pointed via `set_range`, this is the end of the sub-range.
+    /// Mirrors Go's `scanner.end`. Used by the JSDoc parser to know where
+    /// the comment body ends.
+    pub fn end(&self) -> usize {
+        self.end
+    }
+
+    /// The current value of the `skip_jsdoc_leading_asterisks` counter.
+    /// Mirrors Go's `scanner.skipJsdocLeadingAsterisks` field access.
+    pub fn skip_jsdoc_leading_asterisks_raw(&self) -> i32 {
+        self.skip_jsdoc_leading_asterisks
+    }
+
+    /// Directly set the `skip_jsdoc_leading_asterisks` counter. Used by
+    /// the JSDoc type expression parser to save/restore the skip state.
+    pub fn set_skip_jsdoc_leading_asterisks_raw(&mut self, value: i32) {
+        self.skip_jsdoc_leading_asterisks = value;
+    }
+
     /// The full source text.
     pub fn text(&self) -> &str {
         &self.text
+    }
+
+    /// Re-point the scanner at a range within the current text, resetting
+    /// token state. Used by the JSDoc parser to scan within a comment body
+    /// (between `/**` and `*/`) without creating a new scanner. Mirrors
+    /// Go's `scanner.SetText` + `scanner.ResetPos` pattern in
+    /// `parseJSDocComment` (`jsdoc.go:163-166`).
+    pub fn set_range(&mut self, pos: usize, end: usize) {
+        self.pos = pos;
+        self.end = end;
+        self.full_start_pos = pos;
+        self.token_pos = pos;
+        self.token_end = pos;
+        self.token = SyntaxKind::Unknown;
+        self.token_flags = TOKEN_FLAGS_NONE;
+        self.preceding_line_break = false;
+        self.has_preceding_line_break = false;
     }
 
     /// Scan the next token and return its kind.

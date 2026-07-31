@@ -135,6 +135,24 @@ impl Node {
     pub fn has_syntactic_modifier(&self, flags: ModifierFlags) -> bool {
         self.syntactic_modifier_flags().intersects(flags)
     }
+
+    /// JSDoc comments preceding this node, lazily parsed on first access
+    /// for TS/TSX files. Returns `None` if the node has no JSDoc (per
+    /// `NodeFlags::HasJSDoc`). Mirrors Go's `Node.JSDoc(file)`
+    /// (`ast.go:1560-1574`).
+    ///
+    /// Pass `None` to walk to the root source file — not yet supported in
+    /// Rust (requires parent links); always pass the owning `SourceFile`.
+    pub fn jsdoc(&self, file: &SourceFile) -> Vec<Arc<Node>> {
+        if !self.flags.contains(NodeFlags::HasJSDoc) {
+            return Vec::new();
+        }
+        if file.has_lazy_jsdoc() {
+            file.resolve_jsdoc(self)
+        } else {
+            file.eager_jsdoc(self)
+        }
+    }
 }
 
 /// Get the modifier list of a node, if any.
@@ -276,12 +294,67 @@ pub struct SourceFile {
     pub script_kind: ScriptKind,
     /// `@ts-expect-error` / `@ts-ignore` directives collected by the scanner.
     pub comment_directives: Vec<crate::scanner::CommentDirective>,
+    /// Lazily-parsed JSDoc nodes, keyed by node ID. Mirrors Go's
+    /// `SourceFile.jsdocCache`. Populated on first `Node::jsdoc()` access
+    /// when `has_lazy_jsdoc` is set.
+    pub(crate) jsdoc_cache: std::sync::RwLock<std::collections::HashMap<u64, Vec<Arc<Node>>>>,
+    /// Whether JSDoc is parsed lazily on first access (TS/TSX files).
+    /// Mirrors Go's `SourceFile.hasLazyJSDoc`.
+    pub(crate) has_lazy_jsdoc: bool,
 }
 
 impl SourceFile {
     /// A unique numeric ID for this source file (delegates to its node).
     pub fn id(&self) -> u64 {
         self.node.id()
+    }
+
+    /// Set the JSDoc cache (pre-populated during eager parsing for JS files
+    /// or `@see`/`@link`-containing comments). Mirrors Go's
+    /// `SourceFile.SetJSDocCache`.
+    pub fn set_jsdoc_cache(&self, cache: std::collections::HashMap<u64, Vec<Arc<Node>>>) {
+        *self.jsdoc_cache.write().unwrap() = cache;
+    }
+
+    /// Enable or disable lazy JSDoc parsing. Mirrors Go's
+    /// `SourceFile.SetHasLazyJSDoc`.
+    pub fn set_has_lazy_jsdoc(&mut self, lazy: bool) {
+        self.has_lazy_jsdoc = lazy;
+    }
+
+    /// Whether lazy JSDoc parsing is enabled.
+    pub fn has_lazy_jsdoc(&self) -> bool {
+        self.has_lazy_jsdoc
+    }
+
+    /// Resolve JSDoc for `node`: return cached value if present, otherwise
+    /// invoke `parse_jsdoc_for_node`, cache, and return. Mirrors Go's
+    /// `SourceFile.resolveJSDoc` (`ast.go:2612-2637`) with double-checked
+    /// locking.
+    pub fn resolve_jsdoc(&self, node: &Node) -> Vec<Arc<Node>> {
+        let node_id = node.id();
+        // Fast path: read lock
+        {
+            let cache = self.jsdoc_cache.read().unwrap();
+            if let Some(jsdocs) = cache.get(&node_id) {
+                return jsdocs.clone();
+            }
+        }
+        // Slow path: write lock with double-check
+        let mut cache = self.jsdoc_cache.write().unwrap();
+        if let Some(jsdocs) = cache.get(&node_id) {
+            return jsdocs.clone();
+        }
+        let jsdocs = crate::parser::parse_jsdoc_for_node(self, node);
+        cache.insert(node_id, jsdocs.clone());
+        jsdocs
+    }
+
+    /// Return eagerly-cached JSDoc for `node` without triggering lazy parse.
+    /// Mirrors Go's `Node.EagerJSDoc`.
+    pub fn eager_jsdoc(&self, node: &Node) -> Vec<Arc<Node>> {
+        let cache = self.jsdoc_cache.read().unwrap();
+        cache.get(&node.id()).cloned().unwrap_or_default()
     }
 }
 

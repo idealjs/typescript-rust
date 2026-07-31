@@ -3,6 +3,10 @@
 //! This port covers statements, declarations, and expressions.
 //! The full parser (6800+ lines in Go) is being ported incrementally.
 
+mod jsdoc;
+
+pub use jsdoc::parse_jsdoc_for_node;
+
 use crate::ast::*;
 use crate::core::text::TextRange;
 use crate::diagnostics::{self, Message};
@@ -201,6 +205,8 @@ impl Parser {
             language_variant,
             script_kind,
             comment_directives: parser.scanner.comment_directives().to_vec(),
+            jsdoc_cache: std::sync::RwLock::new(std::collections::HashMap::new()),
+            has_lazy_jsdoc: !matches!(script_kind, ScriptKind::Js | ScriptKind::Jsx),
         };
         (file, parser.diagnostics)
     }

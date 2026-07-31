@@ -170,6 +170,8 @@ mod tests {
             language_variant: crate::ast::LanguageVariant::Standard,
             script_kind: crate::ast::ScriptKind::Ts,
             comment_directives: Vec::new(),
+            jsdoc_cache: std::sync::RwLock::new(std::collections::HashMap::new()),
+            has_lazy_jsdoc: true,
         })
     }
 

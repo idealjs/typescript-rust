@@ -63,14 +63,15 @@ npm install && npm run build
 
 ## 当前进度快照（2026-07-31）
 
-测试基线：`cargo test` 通过（804 个 lib 单测 + 2 个 emit parity + 501 个
+测试基线：`cargo test` 通过（862 个 lib 单测 + 2 个 emit parity + 501 个
 checker parity，checker parity 自 2026-07-13 的 106 增长 395 个）。本轮完成
-P2.2 regex body 校验（regexp.rs ~1602 行 + unicode_properties.rs，TS1501–TS1538 诊断）。
+P2.7 JSDoc parser（jsdoc.rs ~2500 行：state machine + tag parsing + type expression +
+lazy cache + `parse_jsdoc_for_node` + 36 个单测）。
 
 | 模块 | Rust 行数（实测） | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
 | Scanner | 5500 | 4277 | ~95% | 转义/JSX/正则/CommentDirectives/ASI 完成；trivia 基础设施（fullStartPos + skip_trivia + comment ranges + shebang）完成；TokenFlags 完整位集（19 flag + 7 mask）+ SkipTriviaEx + conflict-marker trivia + JSDoc 4 flag + escape-sequence 6 flag + numeric separator 完整支持 + OCTAL flag（legacy 0777 + TS1121 + TS1489 + TS6188）完成；**regex body 校验完成**（regexp.rs 递归下降 parser + unicode_properties.rs，TS1501–TS1538 含 `\p{}`/v-mode class-set algebra/named-capture/backreference 校验，script_target plumbing） |
-| Parser | 7282 | 9275 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；缺 reparser/jsdoc |
+| Parser | 9500 | 9275 | ~90% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；**JSDoc parser 完成**（jsdoc.rs ~2500 行：state machine + tag parsing + type expression + lazy cache + `parse_jsdoc_for_node`）；缺 reparser |
 | Binder | 2104 | ~3601 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 + EnumDeclaration 容器化 完成；缺 ReduceLabel/Shared/Referenced 后处理、labeled statement、完整 scope chain、ReferenceResolver |
 | Checker | 22527 | ~59975 | ~20% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查 + 比较无重叠检查 TS2367 + 不可调用/不可构造检查 TS2349/TS2351 + 只读属性赋值检查 TS2540 + declaration merge checker 侧 + 参数数量检查 TS2554/TS2555/TS2556 + rest 元素类型检查；emitresolver visibility tracking 完成；501 parity fixtures 通过。**已知 stub**：mapper placeholder（3 处闭包回退）、freshness tracking、isEnumTypeRelatedTo/isUnknownLikeUnionType 未迁移、nodebuilder symbol_to_type_node |
 | Compiler | 768 | — | 基础 | Program 创建/解析/绑定/emit pipeline 通；checker 已接入 |
@@ -580,13 +581,29 @@ parser 侧映射到 `UNKNOWN_REGULAR_EXPRESSION_FLAG`/`DUPLICATE_REGULAR_EXPRESS
 - [ ] `reparseTopLevelAwait`：外部模块 + `possibleAwaitSpans` 重解析。
 - [ ] `collectExternalModuleReferences`。
 
-### P2.7 Parser JSDoc
+### P2.7 Parser JSDoc（已完成）
 
-- [ ] 迁移 `internal/parser/jsdoc.go`（1355 行）到 `src/parser/jsdoc.rs`。
-- [ ] `parseJSDocComment`：tag 类型、`@param`、`@returns`、`@typedef`、
-  `@callback`、`@template`。
-- [ ] JSDoc type expression：`@type {string}`、`@param {string} name`。
-- [ ] 节点附加 `jsDoc` 字段。
+- [x] 迁移 `internal/parser/jsdoc.go`（1355 行）到 `src/parser/jsdoc.rs`：
+  `parse_jsdoc_comment` 入口（scanner save/restore + `set_range` 重指向注释体）；
+  `parse_jsdoc_comment_worker` 状态机（comment accumulation + `@tag` 边界检测 +
+  fenced code block ```` ``` ```` 跟踪 + `{@link}` inline link 解析）。
+- [x] `parseJSDocComment`：tag 类型、`@param`、`@returns`、`@typedef`、
+  `@callback`、`@template`、`@type`、`@implements`、`@augments`/`@extends`、
+  `@public`/`@private`/`@protected`/`@readonly`/`@override`、`@deprecated`、
+  `@this`、`@overload`、`@satisfies`、`@see`、`@throws`/`@exception`、`@import`、
+  `@property`、未知 tag 回退。
+- [x] JSDoc type expression：`@type {string}`、`@param {string} name`、
+  nullable `?`、non-nullable `!`、variadic `...`、optional `[name]`、
+  type arguments `<T>`、qualified name `a.b.c`、`#private`、property access
+  entity name。
+- [x] 节点附加 `jsDoc` 字段：`SourceFile` 新增 `jsdoc_cache`（`RwLock<HashMap<u64, Vec<Arc<Node>>>>`）
+  + `has_lazy_jsdoc` flag（TS/TSX 文件启用 lazy 解析）；`Node::jsdoc(&SourceFile)`
+  accessor（`HasJSDoc` flag 快速路径 + lazy `resolve_jsdoc` + eager `eager_jsdoc`）；
+  `resolve_jsdoc` 双检锁缓存；`get_jsdoc_comment_ranges`（含 `find_full_start`
+  反向扫描补偿 Rust `node.pos()` 为 token position 而非 full start 的差异）；
+  `parse_jsdoc_for_node` 懒解析入口（对齐 Go `parseJSDocForNode`）。
+  Scanner 新增 `end()`/`skip_jsdoc_leading_asterisks_raw()`/
+  `set_skip_jsdoc_leading_asterisks_raw()` 访问器。36 个 JSDoc 单测通过。
 
 ### P2.8 Parser diagnostic parity（已全部完成）
 
