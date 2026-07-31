@@ -32,6 +32,7 @@ use crate::core::text::TextRange;
 use crate::core::tristate::Tristate;
 use crate::diagnosticwriter::{format_diagnostic, report_diagnostics};
 use crate::diagnostics::{
+    A_TSCONFIG_JSON_FILE_IS_ALREADY_DEFINED_AT_COLON_0,
     CANNOT_FIND_A_TSCONFIG_JSON_FILE_AT_THE_CURRENT_DIRECTORY_COLON_0,
     CANNOT_FIND_A_TSCONFIG_JSON_FILE_AT_THE_SPECIFIED_DIRECTORY_COLON_0, CANNOT_READ_FILE_0,
     OPTION_BUILD_MUST_BE_THE_FIRST_COMMAND_LINE_ARGUMENT,
@@ -45,6 +46,9 @@ use crate::tsoptions::{
 };
 use crate::tspath;
 use crate::vfs::{FS, OsFS};
+
+/// Compiler version string, matching Go's `core.Version()`.
+pub const VERSION: &str = "7.1.0-dev";
 
 // ────────────────────────────────────────────────────────────────────────────
 // ExitStatus
@@ -364,7 +368,7 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
     // --version
     if options.version.is_true() {
         let mut writer = sys.writer();
-        let _ = writeln!(writer, "Version 5.2 (tsox, Rust port)");
+        let _ = writeln!(writer, "Version {}", VERSION);
         return CommandLineResult {
             status: ExitStatus::Success,
         };
@@ -949,7 +953,11 @@ fn default_is_pretty(sys: &dyn System) -> bool {
 
 fn print_help(sys: &dyn System) {
     let mut writer = sys.writer();
-    let _ = writeln!(writer, "Version 5.2 (tsox, Rust port)");
+    let _ = writeln!(
+        writer,
+        "tsc: The TypeScript Compiler - Version {}",
+        VERSION
+    );
     let _ = writeln!(writer);
     let _ = writeln!(writer, "Common options:");
     let _ = writeln!(
@@ -1026,10 +1034,11 @@ fn write_config_file(sys: &dyn System, options: &CompilerOptions) -> CommandLine
     let config_file_name = tspath::combine_paths(sys.current_directory(), &["tsconfig.json"]);
     if sys.fs().file_exists(&config_file_name) {
         let mut writer = sys.writer();
-        let _ = writeln!(
-            writer,
-            "error TS5054: A 'tsconfig.json' file is already defined at: '{config_file_name}'."
+        let diag = compiler_diagnostic(
+            A_TSCONFIG_JSON_FILE_IS_ALREADY_DEFINED_AT_COLON_0,
+            vec![config_file_name.clone()],
         );
+        let _ = writeln!(writer, "{}", format_diagnostic(&diag, false));
         return CommandLineResult {
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
         };
@@ -1068,14 +1077,38 @@ fn generate_tsconfig(options: &CompilerOptions) -> String {
             "{{\n",
             "  // Visit https://aka.ms/tsconfig to read more about this file\n",
             "  \"compilerOptions\": {{\n",
+            "    // File Layout\n",
+            "    //\"rootDir\": \"./src\",\n",
+            "    //\"outDir\": \"./dist\",\n",
+            "\n",
+            "    // Environment Settings\n",
+            "    // See also https://aka.ms/tsconfig/module\n",
             "    \"module\": \"{module}\",\n",
             "    \"target\": \"{target}\",\n",
             "    \"types\": [],\n",
+            "    // For nodejs:\n",
+            "    // \"lib\": [\"esnext\"],\n",
+            "    // \"types\": [\"node\"],\n",
+            "    // and npm install -D @types/node\n",
+            "\n",
+            "    // Other Outputs\n",
             "    \"sourceMap\": true,\n",
             "    \"declaration\": true,\n",
             "    \"declarationMap\": true,\n",
+            "\n",
+            "    // Stricter Typechecking Options\n",
             "    \"noUncheckedIndexedAccess\": true,\n",
             "    \"exactOptionalPropertyTypes\": true,\n",
+            "\n",
+            "    // Style Options\n",
+            "    //\"noImplicitReturns\": true,\n",
+            "    //\"noImplicitOverride\": true,\n",
+            "    //\"noUnusedLocals\": true,\n",
+            "    //\"noUnusedParameters\": true,\n",
+            "    //\"noFallthroughCasesInSwitch\": true,\n",
+            "    //\"noPropertyAccessFromIndexSignature\": true,\n",
+            "\n",
+            "    // Recommended Options\n",
             "    \"strict\": true,\n",
             "    \"jsx\": \"{jsx}\",\n",
             "    \"verbatimModuleSyntax\": true,\n",
@@ -1173,7 +1206,7 @@ mod tests {
         let args = vec!["--version".to_string()];
         let result = command_line(&sys, &args);
         assert_eq!(result.status, ExitStatus::Success);
-        assert!(sys.output_string().contains("Version 5.2"));
+        assert!(sys.output_string().contains("Version 7.1.0-dev"));
     }
 
     #[test]

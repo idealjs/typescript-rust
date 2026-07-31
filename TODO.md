@@ -164,7 +164,10 @@ arity）+ 12 个 parity fixtures。
 
 - [ ] 给 CI 设计最小 Rust job：fmt、clippy、test、parity smoke。
 - [ ] 新人只看 Rust worktree 文档即可跑通测试（验收）。
-- [ ] parity 测试能自动发现可用 Go oracle，或给出明确跳过原因（验收）。
+- [x] parity 测试能自动发现可用 Go oracle，或给出明确跳过原因（验收）：
+  `go_oracle()` 按 `TSGO_ORACLE` → `typescript-go/built/local/tsgo` →
+  `_packages/native-preview/bin/tsgo` 顺序查找；找不到时打印明确跳过原因
+  指向 Go worktree 构建路径。
 
 ## P1：CLI 和 tsconfig 行为对齐
 
@@ -193,7 +196,14 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
 剩余任务：
 
 - [ ] 对齐 `--help`、`--version`、无输入、未知选项、响应文件等 CLI 行为。
-- [ ] 对齐 `--init` 生成的完整 `tsconfig.json` 模板。
+  部分完成：`--version` 输出 `Version 7.1.0-dev`（对齐 Go `core.Version()`），
+  `--help` 头部对齐为 `tsc: The TypeScript Compiler - Version {VERSION}`；
+  剩余：完整动态选项列表生成（从 OptionDecl）、无输入/未知选项/响应文件。
+- [x] 对齐 `--init` 生成的完整 `tsconfig.json` 模板：含 File Layout/Environment
+  Settings/Other Outputs/Stricter Typechecking/Style Options/Recommended Options
+  分节注释与 nodejs 示例块，对齐 Go `writeConfigFile` 模板结构。同时将
+  TS5054 错误从 ad-hoc 字符串改为 `Diagnostic::new` +
+  `A_TSCONFIG_JSON_FILE_IS_ALREADY_DEFINED_AT_COLON_0`。
 - [x] 对齐退出码：`Success`、`DiagnosticsPresent_*`、`InvalidProject_*`、
   `ProjectReferenceCycle_*`（已对齐：`ExitStatus` enum + `perform_compilation`
   状态映射与 Go `tsc.ExitStatus` 完全一致）。
