@@ -429,10 +429,19 @@ via `schema.ts`，生成 `syntax_kind_generated.rs` + `node_data_generated.rs`�
 
 ### P2.2 Scanner 正则字面量
 
-已完成：`reScanSlashToken` 基础（pattern body + 字符类 + 转义 + flags + 未终止诊断）。
+已完成：`reScanSlashToken` 基础（pattern body + 字符类 + 转义 + flags + 未终止诊断）+
+flag 校验（TS1499 unknown flag / TS1500 duplicate flag / TS1502 u+v 互斥，
+对齐 Go `scanner.go:1171-1191` flag scan；`reg_exp_flag_bit` + 8 位 bitmask
+对齐 Go `charCodeToRegExpFlag`）。`DiagnosticKind` 新增 3 个 regex flag variant，
+parser 侧映射到 `UNKNOWN_REGULAR_EXPRESSION_FLAG`/`DUPLICATE_REGULAR_EXPRESSION_FLAG`/
+`THE_UNICODE_U_FLAG_AND_THE_UNICODE_SETS_V_FLAG_CANNOT_BE_SET_SIMULTANEOUSLY`。
+5 个 scanner 单测 + 1 个 parser 端到端单测覆盖。
 
 - [ ] 迁移 `internal/scanner/regexp.go` 完整 regex body 校验（`regExpParser`：
-  命名捕获组、`u`/`v` flag 模式、invalid flag 诊断）。
+  命名捕获组、`u`/`v` flag 模式、quantifier/character-class range/escape 诊断）。
+  **剩余**：TS1501 target-gated flag availability（需 `script_target` plumbing）、
+  TS1503–TS1534 body 校验（递归下降 ~920 行）、`\p{...}` Unicode property、
+  v-mode class-set algebra、未终止 regex 的 nested-bracket recovery。
 - [ ] 支持 `lastIndex`、命名捕获组、`d` flag 等现代正则特性。
 
 ### P2.3 Scanner JSX / JSDoc

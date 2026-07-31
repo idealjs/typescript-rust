@@ -19,6 +19,12 @@ pub enum DiagnosticKind {
     UnterminatedStringLiteral,
     UnterminatedTemplateLiteral,
     UnterminatedRegularExpression,
+    /// Unknown regular expression flag (TS1499).
+    UnknownRegularExpressionFlag,
+    /// Duplicate regular expression flag (TS1500).
+    DuplicateRegularExpressionFlag,
+    /// The `u` and `v` flags cannot be set simultaneously (TS1502).
+    UnicodeUAndVFlagsMutuallyExclusive,
 }
 
 /// Keywords mapping (text → SyntaxKind).
@@ -933,10 +939,14 @@ impl Scanner {
     /// character of the regex pattern (e.g. `/=/` is a regex matching `=`).
     ///
     /// This implementation scans the pattern body (handling `[...]` character
-    /// classes and `\` escapes), consumes the closing `/`, then consumes flags
-    /// (identifier-part characters). It reports `UnterminatedRegularExpression`
-    /// on EOF/newline before a closing `/`. Full regex body validation (the
-    /// `regExpParser` in Go's `regexp.go`) is deferred to a later task.
+    /// classes and `\` escapes), consumes the closing `/`, then consumes and
+    /// validates flags (identifier-part characters). It reports
+    /// `UnterminatedRegularExpression` on EOF/newline before a closing `/`.
+    /// Flag validation mirrors Go's `ReScanSlashToken` flag scan
+    /// (`scanner.go:1171-1191`): unknown flags (TS1499), duplicate flags
+    /// (TS1500), and simultaneous `u`+`v` (TS1502). Full regex body validation
+    /// (the `regExpParser` recursive descent in Go's `regexp.go`) and
+    /// target-gated flag availability (TS1501) are deferred to a later task.
     pub fn re_scan_slash_token(&mut self) -> SyntaxKind {
         if self.token != SyntaxKind::SlashToken && self.token != SyntaxKind::SlashEqualsToken {
             return self.token;
@@ -988,14 +998,51 @@ impl Scanner {
         } else {
             // Consume the closing `/`
             p += 1;
-            // Consume flags (identifier-part characters)
+            // Consume and validate flags (identifier-part characters).
+            // Mirrors Go's `ReScanSlashToken` flag scan (`scanner.go:1171-1191`):
+            // each flag must be a known flag (`d g i m s u v y`), must not
+            // repeat, and `u` + `v` are mutually exclusive. Target-gated
+            // availability (TS1501 for `d`/`s`/`v`) requires `script_target`
+            // plumbing and is deferred.
+            let flags_start = p;
+            let mut seen_flags: u16 = 0;
             while p < self.end {
                 let c = self.text.as_bytes()[p] as char;
                 if !is_identifier_part(c) {
                     break;
                 }
+                if let Some(bit) = reg_exp_flag_bit(c) {
+                    if seen_flags & bit != 0 {
+                        // Duplicate flag — report at this char.
+                        self.report_error(
+                            DiagnosticKind::DuplicateRegularExpressionFlag,
+                            p,
+                            1,
+                        );
+                    } else {
+                        seen_flags |= bit;
+                        // `u` and `v` are mutually exclusive (TS1502). Report
+                        // at the second of the two flags, mirroring Go.
+                        if (bit == REG_EXP_FLAG_U && seen_flags & REG_EXP_FLAG_V != 0)
+                            || (bit == REG_EXP_FLAG_V && seen_flags & REG_EXP_FLAG_U != 0)
+                        {
+                            self.report_error(
+                                DiagnosticKind::UnicodeUAndVFlagsMutuallyExclusive,
+                                p,
+                                1,
+                            );
+                        }
+                    }
+                } else {
+                    // Unknown flag — report at this char.
+                    self.report_error(DiagnosticKind::UnknownRegularExpressionFlag, p, 1);
+                }
                 p += 1;
             }
+            // Ensure at least one flag char is consumed even if all are
+            // invalid (keeps `token_end` consistent with Go, which advances
+            // past the flag run unconditionally).
+            let _ = flags_start;
             self.pos = p;
         }
 
@@ -1192,6 +1239,39 @@ fn is_whitespace(c: char) -> bool {
 
 fn is_line_break(c: char) -> bool {
     c == '\n' || c == '\r'
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Regular-expression flag bits
+//
+// Mirrors Go's `regularExpressionFlags` bitmask (`regexp.go:17-28`). Used by
+// `re_scan_slash_token` to detect duplicate flags and the `u`/`v` mutual
+// exclusion (TS1500/TS1502). Target-gated availability (TS1501) is deferred
+// until `script_target` is plumbed into the scanner.
+const REG_EXP_FLAG_G: u16 = 1 << 0;
+const REG_EXP_FLAG_I: u16 = 1 << 1;
+const REG_EXP_FLAG_M: u16 = 1 << 2;
+const REG_EXP_FLAG_S: u16 = 1 << 3;
+const REG_EXP_FLAG_U: u16 = 1 << 4;
+const REG_EXP_FLAG_Y: u16 = 1 << 5;
+const REG_EXP_FLAG_D: u16 = 1 << 6;
+const REG_EXP_FLAG_V: u16 = 1 << 7;
+
+/// Map a flag character to its bitmask bit, or `None` if it isn't a known
+/// regular-expression flag. Mirrors Go's `charCodeToRegExpFlag`
+/// (`regexp.go:33-42`).
+fn reg_exp_flag_bit(c: char) -> Option<u16> {
+    match c {
+        'g' => Some(REG_EXP_FLAG_G),
+        'i' => Some(REG_EXP_FLAG_I),
+        'm' => Some(REG_EXP_FLAG_M),
+        's' => Some(REG_EXP_FLAG_S),
+        'u' => Some(REG_EXP_FLAG_U),
+        'y' => Some(REG_EXP_FLAG_Y),
+        'd' => Some(REG_EXP_FLAG_D),
+        'v' => Some(REG_EXP_FLAG_V),
+        _ => None,
+    }
 }
 
 fn is_digit(c: char) -> bool {
@@ -1507,6 +1587,91 @@ mod tests {
             errors[0].kind,
             DiagnosticKind::UnterminatedRegularExpression
         );
+    }
+
+    #[test]
+    fn re_scan_slash_token_valid_flags_no_errors() {
+        // Known flags without the `u`+`v` conflict (`d g i m s y`) — no
+        // diagnostics.
+        let mut s = Scanner::new("/pattern/dgimsy");
+        s.scan();
+        s.re_scan_slash_token();
+        assert_eq!(s.token(), SyntaxKind::RegularExpressionLiteral);
+        assert_eq!(s.token_text(), "/pattern/dgimsy");
+        assert!(s.take_errors().is_empty());
+    }
+
+    #[test]
+    fn re_scan_slash_token_unknown_flag_reports_ts1499() {
+        // `z` is not a valid regex flag → TS1499 at each `z` position.
+        let mut s = Scanner::new("/foo/zz");
+        s.scan();
+        s.re_scan_slash_token();
+        assert_eq!(s.token(), SyntaxKind::RegularExpressionLiteral);
+        assert_eq!(s.token_text(), "/foo/zz");
+        let errors = s.take_errors();
+        assert_eq!(errors.len(), 2, "expected two TS1499 errors for 'zz'");
+        assert_eq!(errors[0].kind, DiagnosticKind::UnknownRegularExpressionFlag);
+        assert_eq!(errors[0].pos, "/foo/".len()); // first z
+        assert_eq!(errors[0].length, 1);
+        assert_eq!(errors[1].kind, DiagnosticKind::UnknownRegularExpressionFlag);
+        assert_eq!(errors[1].pos, "/foo/z".len()); // second z
+    }
+
+    #[test]
+    fn re_scan_slash_token_duplicate_flag_reports_ts1500() {
+        // `gg` → TS1500 at the second `g`.
+        let mut s = Scanner::new("/foo/gg");
+        s.scan();
+        s.re_scan_slash_token();
+        assert_eq!(s.token(), SyntaxKind::RegularExpressionLiteral);
+        assert_eq!(s.token_text(), "/foo/gg");
+        let errors = s.take_errors();
+        assert_eq!(errors.len(), 1);
+        assert_eq!(errors[0].kind, DiagnosticKind::DuplicateRegularExpressionFlag);
+        assert_eq!(errors[0].pos, "/foo/g".len()); // second g
+        assert_eq!(errors[0].length, 1);
+    }
+
+    #[test]
+    fn re_scan_slash_token_u_and_v_mutually_exclusive_reports_ts1502() {
+        // `uv` and `vu` both → TS1502 at the second flag.
+        let mut s = Scanner::new("/foo/uv");
+        s.scan();
+        s.re_scan_slash_token();
+        assert_eq!(s.token(), SyntaxKind::RegularExpressionLiteral);
+        let errors = s.take_errors();
+        assert_eq!(errors.len(), 1);
+        assert_eq!(
+            errors[0].kind,
+            DiagnosticKind::UnicodeUAndVFlagsMutuallyExclusive
+        );
+        assert_eq!(errors[0].pos, "/foo/u".len()); // the v
+        assert_eq!(errors[0].length, 1);
+
+        // Reverse order: `vu` → TS1502 at the `u`.
+        let mut s = Scanner::new("/foo/vu");
+        s.scan();
+        s.re_scan_slash_token();
+        let errors = s.take_errors();
+        assert_eq!(errors.len(), 1);
+        assert_eq!(
+            errors[0].kind,
+            DiagnosticKind::UnicodeUAndVFlagsMutuallyExclusive
+        );
+        assert_eq!(errors[0].pos, "/foo/v".len()); // the u
+    }
+
+    #[test]
+    fn re_scan_slash_token_mixed_flag_errors() {
+        // `guz`: `g` ok, `u` ok, `z` unknown → one TS1499.
+        let mut s = Scanner::new("/foo/guz");
+        s.scan();
+        s.re_scan_slash_token();
+        let errors = s.take_errors();
+        assert_eq!(errors.len(), 1);
+        assert_eq!(errors[0].kind, DiagnosticKind::UnknownRegularExpressionFlag);
+        assert_eq!(errors[0].pos, "/foo/gu".len()); // the z
     }
 
     #[test]

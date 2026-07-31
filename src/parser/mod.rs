@@ -158,6 +158,15 @@ impl Parser {
                 crate::scanner::DiagnosticKind::UnterminatedRegularExpression => {
                     diagnostics::UNTERMINATED_REGULAR_EXPRESSION_LITERAL
                 }
+                crate::scanner::DiagnosticKind::UnknownRegularExpressionFlag => {
+                    diagnostics::UNKNOWN_REGULAR_EXPRESSION_FLAG
+                }
+                crate::scanner::DiagnosticKind::DuplicateRegularExpressionFlag => {
+                    diagnostics::DUPLICATE_REGULAR_EXPRESSION_FLAG
+                }
+                crate::scanner::DiagnosticKind::UnicodeUAndVFlagsMutuallyExclusive => {
+                    diagnostics::THE_UNICODE_U_FLAG_AND_THE_UNICODE_SETS_V_FLAG_CANNOT_BE_SET_SIMULTANEOUSLY
+                }
             };
             parser.diagnostics.push(ParserDiagnostic {
                 message,
@@ -6811,6 +6820,41 @@ mod tests {
         assert!(
             diags.iter().any(|d| d.message.code == 1002),
             "expected Unterminated string literal diagnostic (TS1002), got: {diags:?}"
+        );
+    }
+
+    #[test]
+    fn parse_regex_flag_diagnostics_reach_parser() {
+        // Unknown flag `z` → TS1499.
+        let (_file, diags) =
+            Parser::parse_source_file_text_with_diagnostics("test.ts", "let x = /foo/z;".to_string());
+        assert!(
+            diags.iter().any(|d| d.message.code == 1499),
+            "expected TS1499 for unknown regex flag, got: {diags:?}"
+        );
+
+        // Duplicate flag `gg` → TS1500.
+        let (_file, diags) =
+            Parser::parse_source_file_text_with_diagnostics("test.ts", "let x = /foo/gg;".to_string());
+        assert!(
+            diags.iter().any(|d| d.message.code == 1500),
+            "expected TS1500 for duplicate regex flag, got: {diags:?}"
+        );
+
+        // `u` and `v` together → TS1502.
+        let (_file, diags) =
+            Parser::parse_source_file_text_with_diagnostics("test.ts", "let x = /foo/uv;".to_string());
+        assert!(
+            diags.iter().any(|d| d.message.code == 1502),
+            "expected TS1502 for u+v flags, got: {diags:?}"
+        );
+
+        // Valid flags → no regex diagnostics.
+        let (_file, diags) =
+            Parser::parse_source_file_text_with_diagnostics("test.ts", "let x = /foo/gim;".to_string());
+        assert!(
+            !diags.iter().any(|d| matches!(d.message.code, 1499 | 1500 | 1501 | 1502)),
+            "expected no regex flag diagnostics for valid flags, got: {diags:?}"
         );
     }
 
