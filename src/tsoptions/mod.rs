@@ -18,7 +18,7 @@ use crate::core::tristate::Tristate;
 use crate::diagnostics::{
     ARGUMENT_FOR_0_OPTION_MUST_BE_COLON_1, CANNOT_READ_FILE_0,
     CIRCULARITY_DETECTED_WHILE_RESOLVING_CONFIGURATION_COLON_0,
-    COMPILER_OPTION_0_MAY_ONLY_BE_USED_WITH_BUILD, OPTIONS_0_AND_1_CANNOT_BE_COMBINED,
+    COMPILER_OPTION_0_MAY_ONLY_BE_USED_WITH_BUILD, NO_INPUTS_WERE_FOUND_IN_CONFIG_FILE_0_SPECIFIED_INCLUDE_PATHS_WERE_1_AND_EXCLUDE_PATHS_WERE_2, OPTIONS_0_AND_1_CANNOT_BE_COMBINED,
     OPTION_0_CAN_ONLY_BE_SPECIFIED_IN_TSCONFIG_JSON_FILE_OR_SET_TO_FALSE_OR_NULL_ON_COMMAND_LINE,
     OPTION_0_CAN_ONLY_BE_SPECIFIED_IN_TSCONFIG_JSON_FILE_OR_SET_TO_NULL_ON_COMMAND_LINE,
     OPTION_0_REQUIRES_VALUE_TO_BE_GREATER_THAN_1, UNKNOWN_COMPILER_OPTION_0,
@@ -2035,6 +2035,24 @@ fn get_parsed_command_line_of_config_file_with_stack(
         fs,
     );
 
+    // TS18003: report when a config yields no input files, unless the config
+    // explicitly opts out by declaring `files` or `references`, or this config
+    // is being parsed as part of an `extends` chain (resolution_stack non-empty).
+    // Mirrors Go's `shouldReportNoInputFiles` + `canJsonReportNoInputFiles`.
+    if result.file_names.is_empty() && resolution_stack.is_empty() {
+        let can_report = !root_obj.contains_key("files") && !root_obj.contains_key("references");
+        if can_report {
+            let include_json = serde_json::to_string(&result.include).unwrap_or_else(|_| "[]".into());
+            let exclude_json = serde_json::to_string(&result.exclude).unwrap_or_else(|_| "[]".into());
+            result.errors.push(Diagnostic::new(
+                None,
+                TextRange::undefined(),
+                NO_INPUTS_WERE_FOUND_IN_CONFIG_FILE_0_SPECIFIED_INCLUDE_PATHS_WERE_1_AND_EXCLUDE_PATHS_WERE_2,
+                vec![config_file_name.to_string(), include_json, exclude_json],
+            ));
+        }
+    }
+
     result
 }
 
@@ -3160,7 +3178,8 @@ mod tests {
             "/proj/tsconfig.json",
             r#"{
             "extends": ["base1.json", "base2.json"],
-            "compilerOptions": { "outDir": "./dist" }
+            "compilerOptions": { "outDir": "./dist" },
+            "files": []
         }"#,
         );
         let parsed = get_parsed_command_line_of_config_file(
@@ -3393,6 +3412,77 @@ mod tests {
         );
         assert!(parsed.has_files_spec);
         assert!(parsed.file_names.is_empty());
+    }
+
+    #[test]
+    fn test_tsconfig_no_inputs_emits_ts18003() {
+        // A config with no `files`/`references` and no matched files reports
+        // TS18003 (mirrors Go `shouldReportNoInputFiles`).
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "compilerOptions": { "outDir": "./dist" } }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(parsed.file_names.is_empty());
+        assert!(
+            parsed.errors.iter().any(|d| d.code == 18003),
+            "expected TS18003, got errors: {:?}",
+            parsed.errors
+        );
+    }
+
+    #[test]
+    fn test_tsconfig_no_inputs_suppressed_by_files_key() {
+        // `files: []` opts out of TS18003 even when no files match.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file("/proj/src/a.ts", "");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "files": [] }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(parsed.file_names.is_empty());
+        assert!(
+            !parsed.errors.iter().any(|d| d.code == 18003),
+            "did not expect TS18003, got errors: {:?}",
+            parsed.errors
+        );
+    }
+
+    #[test]
+    fn test_tsconfig_no_inputs_suppressed_by_references_key() {
+        // `references` opts out of TS18003 even when no files match.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "references": [{ "path": "./other.json" }] }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(parsed.file_names.is_empty());
+        assert!(
+            !parsed.errors.iter().any(|d| d.code == 18003),
+            "did not expect TS18003, got errors: {:?}",
+            parsed.errors
+        );
     }
 
     #[test]

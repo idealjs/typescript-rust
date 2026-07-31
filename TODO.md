@@ -242,8 +242,12 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   （TS6369 build-first / TS6370 options-cannot-combine / TS5042 project-mixed /
   TS5057/TS5081 cannot-find-tsconfig / TS5112 tsconfig-not-loaded / TS5023
   unknown-compiler-option / TS5083 cannot-read-file）。
-- [ ] 对齐 no-input diagnostics、config source span diagnostics 和 `vfsmatch`
-  root-file expansion。
+- [x] 对齐 no-input diagnostics：TS18003（`No inputs were found in config file`）
+  在 `expand_file_names` 后当 `file_names` 为空、当前 config 无 `files`/`references`
+  key、且非 `extends` 链（`resolution_stack` 为空）时发出，对齐 Go
+  `shouldReportNoInputFiles` + `canJsonReportNoInputFiles`。3 个单测覆盖
+  emit / `files:[]` 抑制 / `references` 抑制。**剩余**：config source span
+  diagnostics（带 file/range 的诊断）和 `vfsmatch` root-file expansion。
 - [ ] 扩充 parity fixtures：无 tsconfig 且无文件 / 单文件输入 / `-p` 指向目录 /
   `-p` 指向文件 / `--showConfig` / response file / invalid JSON / JSONC。
 - [ ] 修复当前 parity 注释中提到的 `rootDir/outDir` 差异。

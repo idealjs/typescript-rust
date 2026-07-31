@@ -1237,6 +1237,7 @@ mod tests {
     fn init_flag_errors_when_tsconfig_exists() {
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
+        fs.insert_file("/proj/index.ts", "");
         fs.insert_file("/proj/tsconfig.json", "{}");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec!["--init".to_string()];
@@ -1548,6 +1549,7 @@ mod tests {
     fn show_config_with_boolean_option() {
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
+        fs.insert_file("/proj/index.ts", "");
         fs.insert_file("/proj/tsconfig.json", "{}");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec!["--showConfig".to_string(), "--noUnusedLocals".to_string()];
@@ -1562,6 +1564,7 @@ mod tests {
     fn show_config_with_enum_options() {
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
+        fs.insert_file("/proj/index.ts", "");
         fs.insert_file("/proj/tsconfig.json", "{}");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
@@ -1582,6 +1585,7 @@ mod tests {
     fn show_config_with_list_options() {
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
+        fs.insert_file("/proj/index.ts", "");
         fs.insert_file("/proj/tsconfig.json", "{}");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
@@ -1697,6 +1701,7 @@ mod tests {
     fn show_config_with_advanced_options() {
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
+        fs.insert_file("/proj/index.ts", "");
         fs.insert_file("/proj/tsconfig.json", "{}");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
@@ -1980,6 +1985,7 @@ mod tests {
     fn show_config_with_module_and_target() {
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
+        fs.insert_file("/proj/index.ts", "");
         fs.insert_file("/proj/tsconfig.json", "{}");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
