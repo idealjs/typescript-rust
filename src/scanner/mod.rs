@@ -6,8 +6,12 @@
 //! scanning will be added incrementally.
 
 use crate::ast::SyntaxKind;
+use crate::core::compiler_options::ScriptTarget;
 use std::collections::HashMap;
 use std::sync::OnceLock;
+
+mod regexp;
+mod unicode_properties;
 
 /// Callback for reporting scan errors.
 pub type ErrorCallback = fn(kind: DiagnosticKind, start: usize, length: usize);
@@ -31,6 +35,10 @@ pub enum DiagnosticKind {
     DecimalWithLeadingZero,
     /// Numeric separators are not allowed here (TS6188).
     NumericSeparatorNotAllowed,
+    /// A regex body validation diagnostic carrying the specific `Message`.
+    /// Used for the ~30 TS1501–TS1534 regex body diagnostics produced by
+    /// `RegExpParser`. Avoids adding 30+ individual enum variants.
+    RegexMessage(crate::diagnostics::Message),
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -368,6 +376,9 @@ pub struct Scanner {
     errors: Vec<ScannerError>,
     /// `@ts-expect-error` / `@ts-ignore` directives collected from comments.
     comment_directives: Vec<CommentDirective>,
+    /// Script target for regex flag availability checks (TS1501). Defaults to
+    /// `ESNext` (no restrictions). Mirrors Go's `Scanner.scriptTarget`.
+    script_target: crate::core::compiler_options::ScriptTarget,
 }
 
 /// A scanner error: kind + position + length.
@@ -421,12 +432,18 @@ impl Scanner {
             error_callback: None,
             errors: Vec::new(),
             comment_directives: Vec::new(),
+            script_target: crate::core::compiler_options::ScriptTarget::ESNext,
         }
     }
 
     pub fn with_error_callback(mut self, cb: ErrorCallback) -> Self {
         self.error_callback = Some(cb);
         self
+    }
+
+    /// Set the script target for regex flag availability checks (TS1501).
+    pub fn set_script_target(&mut self, target: crate::core::compiler_options::ScriptTarget) {
+        self.script_target = target;
     }
 
     /// Report a scanner error. Calls the error callback if set, and always
@@ -1462,9 +1479,9 @@ impl Scanner {
     /// `UnterminatedRegularExpression` on EOF/newline before a closing `/`.
     /// Flag validation mirrors Go's `ReScanSlashToken` flag scan
     /// (`scanner.go:1171-1191`): unknown flags (TS1499), duplicate flags
-    /// (TS1500), and simultaneous `u`+`v` (TS1502). Full regex body validation
-    /// (the `regExpParser` recursive descent in Go's `regexp.go`) and
-    /// target-gated flag availability (TS1501) are deferred to a later task.
+    /// (TS1500), simultaneous `u`+`v` (TS1502), and target-gated availability
+    /// (TS1501). Full regex body validation (TS1503–TS1538) is performed by
+    /// `RegExpParser` (`scanner/regexp.rs`), mirroring Go's `regexp.go`.
     pub fn re_scan_slash_token(&mut self) -> SyntaxKind {
         if self.token != SyntaxKind::SlashToken && self.token != SyntaxKind::SlashEqualsToken {
             return self.token;
@@ -1475,6 +1492,10 @@ impl Scanner {
         let mut in_escape = false;
         let mut in_character_class = false;
         let mut unterminated = false;
+        // Detect `(?<` named-capture groups during the first pass, mirroring
+        // Go's `reScanSlashToken` (`scanner.go:1112-1116`). Used to gate the
+        // `\k<name>` reference diagnostic in `RegExpParser`.
+        let mut named_capture_groups = false;
 
         while p < self.end {
             let c = self.text.as_bytes()[p] as char;
@@ -1500,10 +1521,21 @@ impl Scanner {
                 ']' if in_character_class => {
                     in_character_class = false;
                 }
+                '(' if !in_character_class
+                    && p + 3 < self.end
+                    && self.text.as_bytes()[p + 1] as char == '?'
+                    && self.text.as_bytes()[p + 2] as char == '<'
+                    && self.text.as_bytes()[p + 3] as char != '='
+                    && self.text.as_bytes()[p + 3] as char != '!' =>
+                {
+                    named_capture_groups = true;
+                }
                 _ => {}
             }
             p += 1;
         }
+
+        let end_of_regex_body = p;
 
         if unterminated || p >= self.end {
             // Unterminated regex — report error and consume what we have
@@ -1520,10 +1552,8 @@ impl Scanner {
             // Consume and validate flags (identifier-part characters).
             // Mirrors Go's `ReScanSlashToken` flag scan (`scanner.go:1171-1191`):
             // each flag must be a known flag (`d g i m s u v y`), must not
-            // repeat, and `u` + `v` are mutually exclusive. Target-gated
-            // availability (TS1501 for `d`/`s`/`v`) requires `script_target`
-            // plumbing and is deferred.
-            let flags_start = p;
+            // repeat, `u` + `v` are mutually exclusive (TS1502), and target-
+            // gated availability is checked (TS1501).
             let mut seen_flags: u16 = 0;
             while p < self.end {
                 let c = self.text.as_bytes()[p] as char;
@@ -1538,19 +1568,19 @@ impl Scanner {
                             p,
                             1,
                         );
+                    } else if (seen_flags | bit) & (REG_EXP_FLAG_U | REG_EXP_FLAG_V)
+                        == (REG_EXP_FLAG_U | REG_EXP_FLAG_V)
+                    {
+                        // `u` and `v` are mutually exclusive (TS1502).
+                        self.report_error(
+                            DiagnosticKind::UnicodeUAndVFlagsMutuallyExclusive,
+                            p,
+                            1,
+                        );
                     } else {
                         seen_flags |= bit;
-                        // `u` and `v` are mutually exclusive (TS1502). Report
-                        // at the second of the two flags, mirroring Go.
-                        if (bit == REG_EXP_FLAG_U && seen_flags & REG_EXP_FLAG_V != 0)
-                            || (bit == REG_EXP_FLAG_V && seen_flags & REG_EXP_FLAG_U != 0)
-                        {
-                            self.report_error(
-                                DiagnosticKind::UnicodeUAndVFlagsMutuallyExclusive,
-                                p,
-                                1,
-                            );
-                        }
+                        // Target-gated flag availability (TS1501).
+                        self.check_reg_exp_flag_availability(bit, p);
                     }
                 } else {
                     // Unknown flag — report at this char.
@@ -1558,16 +1588,51 @@ impl Scanner {
                 }
                 p += 1;
             }
-            // Ensure at least one flag char is consumed even if all are
-            // invalid (keeps `token_end` consistent with Go, which advances
-            // past the flag run unconditionally).
-            let _ = flags_start;
             self.pos = p;
+
+            // Run the full regex body validator. Mirrors Go's
+            // `reScanSlashToken` (`scanner.go:1192-1210`): construct a
+            // `regExpParser` over the body region and call `run()`.
+            let mut parser = regexp::RegExpParser::new(
+                &self.text,
+                start_of_regex_body,
+                end_of_regex_body,
+                seen_flags,
+                named_capture_groups,
+                self.script_target,
+            );
+            parser.run();
+            for err in parser.errors() {
+                self.errors.push(*err);
+            }
         }
 
         self.token_end = self.pos;
         self.token = SyntaxKind::RegularExpressionLiteral;
         self.token
+    }
+
+    /// Check target-gated regex flag availability (TS1501). Mirrors Go's
+    /// `checkRegularExpressionFlagAvailability` (`scanner.go:50-54`):
+    /// `d` → ES2022, `s` → ES2018, `v` → ES2024.
+    fn check_reg_exp_flag_availability(&mut self, flag: u16, pos: usize) {
+        let available_from = match flag {
+            REG_EXP_FLAG_D => Some(ScriptTarget::ES2022),
+            REG_EXP_FLAG_S => Some(ScriptTarget::ES2018),
+            REG_EXP_FLAG_V => Some(ScriptTarget::ES2024),
+            _ => None,
+        };
+        if let Some(target) = available_from {
+            if self.script_target < target {
+                self.report_error(
+                    DiagnosticKind::RegexMessage(
+                        crate::diagnostics::THIS_REGULAR_EXPRESSION_FLAG_IS_ONLY_AVAILABLE_WHEN_TARGETING_0_OR_LATER,
+                    ),
+                    pos,
+                    1,
+                );
+            }
+        }
     }
 
     /// Scan a JSX token. Mirrors Go's `ScanJsxToken`/`ScanJsxTokenEx`.
@@ -1812,7 +1877,7 @@ fn is_identifier_start(c: char) -> bool {
         || (!c.is_ascii() && is_unicode_identifier_start(c))
 }
 
-fn is_identifier_part(c: char) -> bool {
+pub fn is_identifier_part(c: char) -> bool {
     c.is_ascii_alphanumeric()
         || c == '_'
         || c == '$'

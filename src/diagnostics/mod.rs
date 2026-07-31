@@ -47,7 +47,7 @@ pub type Key = &'static str;
 /// A localizable diagnostic message.
 ///
 /// Mirrors `diagnostics.Message` in Go.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Message {
     pub code: i32,
     pub category: Category,

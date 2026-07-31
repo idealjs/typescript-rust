@@ -64,12 +64,12 @@ npm install && npm run build
 ## 当前进度快照（2026-07-31）
 
 测试基线：`cargo test` 通过（804 个 lib 单测 + 2 个 emit parity + 501 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 395 个）。本轮新增
-OCTAL TokenFlag 迁移（legacy 0777 → TS1121 诊断 + leading-zero TS1489 + 0_ separator TS6188）。
+checker parity，checker parity 自 2026-07-13 的 106 增长 395 个）。本轮完成
+P2.2 regex body 校验（regexp.rs ~1602 行 + unicode_properties.rs，TS1501–TS1538 诊断）。
 
 | 模块 | Rust 行数（实测） | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
-| Scanner | 3850 | 4277 | ~90% | 转义/JSX/正则/CommentDirectives/ASI 完成；trivia 基础设施（fullStartPos + skip_trivia + comment ranges + shebang）完成；TokenFlags 完整位集（19 flag + 7 mask）+ SkipTriviaEx + conflict-marker trivia + JSDoc 4 flag + escape-sequence 6 flag（UNICODE_ESCAPE/EXTENDED_UNICODE_ESCAPE/HEX_ESCAPE/CONTAINS_INVALID_ESCAPE/CONTAINS_SEPARATOR/CONTAINS_INVALID_SEPARATOR）+ numeric separator 完整支持 + OCTAL flag（legacy 0777 + TS1121 诊断 + leading-zero TS1489 + 0_ separator TS6188）完成；缺完整 regex body 校验 |
+| Scanner | 5500 | 4277 | ~95% | 转义/JSX/正则/CommentDirectives/ASI 完成；trivia 基础设施（fullStartPos + skip_trivia + comment ranges + shebang）完成；TokenFlags 完整位集（19 flag + 7 mask）+ SkipTriviaEx + conflict-marker trivia + JSDoc 4 flag + escape-sequence 6 flag + numeric separator 完整支持 + OCTAL flag（legacy 0777 + TS1121 + TS1489 + TS6188）完成；**regex body 校验完成**（regexp.rs 递归下降 parser + unicode_properties.rs，TS1501–TS1538 含 `\p{}`/v-mode class-set algebra/named-capture/backreference 校验，script_target plumbing） |
 | Parser | 7282 | 9275 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；缺 reparser/jsdoc |
 | Binder | 2104 | ~3601 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 + EnumDeclaration 容器化 完成；缺 ReduceLabel/Shared/Referenced 后处理、labeled statement、完整 scope chain、ReferenceResolver |
 | Checker | 22527 | ~59975 | ~20% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查 + 比较无重叠检查 TS2367 + 不可调用/不可构造检查 TS2349/TS2351 + 只读属性赋值检查 TS2540 + declaration merge checker 侧 + 参数数量检查 TS2554/TS2555/TS2556 + rest 元素类型检查；emitresolver visibility tracking 完成；501 parity fixtures 通过。**已知 stub**：mapper placeholder（3 处闭包回退）、freshness tracking、isEnumTypeRelatedTo/isUnknownLikeUnionType 未迁移、nodebuilder symbol_to_type_node |
@@ -523,12 +523,23 @@ parser 侧映射到 `UNKNOWN_REGULAR_EXPRESSION_FLAG`/`DUPLICATE_REGULAR_EXPRESS
 `THE_UNICODE_U_FLAG_AND_THE_UNICODE_SETS_V_FLAG_CANNOT_BE_SET_SIMULTANEOUSLY`。
 5 个 scanner 单测 + 1 个 parser 端到端单测覆盖。
 
-- [ ] 迁移 `internal/scanner/regexp.go` 完整 regex body 校验（`regExpParser`：
-  命名捕获组、`u`/`v` flag 模式、quantifier/character-class range/escape 诊断）。
-  **剩余**：TS1501 target-gated flag availability（需 `script_target` plumbing）、
-  TS1503–TS1534 body 校验（递归下降 ~920 行）、`\p{...}` Unicode property、
-  v-mode class-set algebra、未终止 regex 的 nested-bracket recovery。
-- [ ] 支持 `lastIndex`、命名捕获组、`d` flag 等现代正则特性。
+- [x] 迁移 `internal/scanner/regexp.go` 完整 regex body 校验（已完成）：新增
+  `src/scanner/regexp.rs`（~1602 行递归下降 parser，对齐 Go `regExpParser`）+
+  `src/scanner/unicode_properties.rs`（Unicode 15.1 属性数据，对齐 Go
+  `unicodeproperties.go`）。`RegExpParser` 校验 regex body（`/.../` 之间文本）
+  并报告 TS1501–TS1538 诊断：disjunction/alternative/sequence/quantifier/
+  atom/atom-escape/character-class/class-set-expression（v-mode `&&`/`--`/`[a--b]`）
+  /named-capture-group（`(?<name>)` + `\k<name>` 引用校验）/decimal-escape
+  backreference 校验/`\p{...}`/`\P{...}` Unicode property（binary + non-binary
+  General_Category/Script/Script_Extensions + 值校验）/unicodeSets mode（may-
+  contain-strings、class-set algebra 递归）。`Scanner` 新增 `script_target` 字段
+  + `set_script_target` 方法，`re_scan_slash_token` 在定位 body 边界 + 解析 flag
+  run 后构造 `RegExpParser` 并消费其 errors；`check_reg_exp_flag_availability`
+  对齐 Go `checkRegularExpressionFlagAvailability`（`d`→ES2022/`s`→ES2018/
+  `v`→ES2024 target gating，TS1501）。`DiagnosticKind::RegexMessage(Message)`
+  按值携带 `Message`（`Message` 为 `Copy`），parser 侧映射回 `Message`。
+- [ ] 支持 `lastIndex`、命名捕获组、`d` flag 等现代正则特性（命名捕获组 body
+  校验已落地，runtime 行为不属 scanner 范畴）。
 
 ### P2.3 Scanner JSX / JSDoc
 

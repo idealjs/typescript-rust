@@ -176,6 +176,7 @@ impl Parser {
                 crate::scanner::DiagnosticKind::NumericSeparatorNotAllowed => {
                     diagnostics::NUMERIC_SEPARATORS_ARE_NOT_ALLOWED_HERE
                 }
+                crate::scanner::DiagnosticKind::RegexMessage(msg) => msg,
             };
             parser.diagnostics.push(ParserDiagnostic {
                 message,
