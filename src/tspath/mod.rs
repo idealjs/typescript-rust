@@ -890,6 +890,22 @@ pub fn get_relative_path_to_directory_or_url(
     get_path_from_path_components(&path_components)
 }
 
+/// Convert an absolute path to a path relative to `options.current_directory`.
+/// If the path is already relative, it is returned as-is.
+///
+/// Mirrors `tspath.ConvertToRelativePath` in Go (path.go:785).
+pub fn convert_to_relative_path(path: &str, options: &ComparePathsOptions) -> String {
+    if !is_rooted_disk_path(path) {
+        return path.to_string();
+    }
+    get_relative_path_to_directory_or_url(
+        &options.current_directory,
+        path,
+        false, // is_absolute_path_an_url
+        options,
+    )
+}
+
 /// Find the common parent directories for a set of paths.
 ///
 /// Mirrors `tspath.GetCommonParents` in Go. Returns `(parents, ignored)` where

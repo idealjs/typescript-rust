@@ -282,9 +282,20 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   config 的 `${configDir}` 已在递归解析时用 extended 目录解析）。include/exclude/
   files 的 `${configDir}` 也在 `expand_file_names` 之前替换。11 个单测覆盖
   outDir/rootDir/declarationDir/tsBuildInfoFile/rootDirs/paths/include/exclude/
-  files/extends/非前缀场景。**遗留**：package/Node-style resolution、inherited
-  include/exclude/files 的 path-rewriting、explicit `null` 清除继承字段、
-  extended config cache。
+  files/extends/非前缀场景。**遗留**：package/Node-style resolution、
+  explicit `null` 清除继承字段、extended config cache。
+- [x] inherited include/exclude/files 的 path-rewriting（已完成）：当 extended
+  config 声明了 `include`/`exclude`/`files` 而 own config 未声明时，继承的相对
+  路径需改写为相对于 own config 目录的路径（而非 extended config 目录），对齐
+  Go `applyExtendedConfig` 的 `ConvertToRelativePath(GetDirectoryPath(extendedConfigPath), …)`
+  + `CombinePaths(relativeDifference, pathStr)` 逻辑。新增 `tspath::convert_to_relative_path`
+  （对齐 Go `tspath.ConvertToRelativePath`）。绝对路径和 `${configDir}` 前缀路径
+  直接传递（不重写）。同时修改 `${configDir}` include/exclude/files 替换逻辑：
+  仅在 own config（`resolution_stack` 为空）时执行替换，extended config 的
+  `${configDir}` 前缀保留以便继承时传递给 own config 用 own 目录解析（对齐 Go
+  从 raw extended config 读取 include/exclude/files 而非已替换的 parsed 值）。
+  6 个单测覆盖 include 相对路径重写 / include 绝对路径不重写 / include `${configDir}`
+  不重写 / exclude 重写 / files 重写 / own include 覆盖继承。
 - [x] 将 raw `references` 升级为 typed project references：新增
   `core::project_reference::ProjectReference { path, original_path, circular }`
   （对齐 Go `core.ProjectReference`）；`ParsedCommandLine.references` 由

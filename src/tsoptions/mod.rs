@@ -2262,7 +2262,7 @@ fn get_parsed_command_line_of_config_file_with_stack(
             // Parse all extended configs first so we can merge options in
             // reverse order (last wins) while inheriting include/exclude/files
             // in forward order (first wins).
-            let mut extended_configs: Vec<ParsedCommandLine> = Vec::new();
+            let mut extended_configs: Vec<(String, ParsedCommandLine)> = Vec::new();
             for ext_path in &extends_paths {
                 let parent = get_parsed_command_line_of_config_file_with_stack(
                     ext_path,
@@ -2271,27 +2271,48 @@ fn get_parsed_command_line_of_config_file_with_stack(
                     fs,
                     &new_stack,
                 );
-                extended_configs.push(parent);
+                extended_configs.push((ext_path.clone(), parent));
             }
             // Options: merge in reverse so the last extends entry wins
             // (dst-wins merge: last iterated first sets fields, earlier
             // entries only fill gaps the last didn't set).
-            for parent in extended_configs.iter().rev() {
+            for (_, parent) in extended_configs.iter().rev() {
                 merge_compiler_options(&mut extended_opts, &parent.compiler_options);
             }
             // include/exclude/files: first extended config that declares a
             // spec wins (only inherit if result doesn't already have it).
-            for parent in &extended_configs {
+            // Relative paths in inherited specs are rewritten to be relative
+            // to the OWN config's directory (not the extended config's
+            // directory), mirroring Go's `applyExtendedConfig` which calls
+            // `tspath.ConvertToRelativePath(GetDirectoryPath(extendedConfigPath), …)`
+            // and prefixes each relative spec with the result. Absolute paths
+            // and `${configDir}`-prefixed paths are passed through as-is.
+            let own_config_dir = tspath::get_directory_path(config_file_name);
+            let compare_opts = tspath::ComparePathsOptions {
+                use_case_sensitive_file_names: fs.use_case_sensitive_file_names(),
+                current_directory: own_config_dir.clone(),
+            };
+            for (ext_path, parent) in &extended_configs {
+                let ext_dir = tspath::get_directory_path(ext_path);
+                let relative_difference =
+                    tspath::convert_to_relative_path(&ext_dir, &compare_opts);
+                let rewrite = |spec: &str| -> String {
+                    if starts_with_config_dir_template(spec) || tspath::is_rooted_disk_path(spec) {
+                        spec.to_string()
+                    } else {
+                        tspath::combine_paths(&relative_difference, &[spec])
+                    }
+                };
                 if !result.has_include_spec && parent.has_include_spec {
-                    result.include = parent.include.clone();
+                    result.include = parent.include.iter().map(|s| rewrite(s)).collect();
                     result.has_include_spec = true;
                 }
                 if !result.has_exclude_spec && parent.has_exclude_spec {
-                    result.exclude = parent.exclude.clone();
+                    result.exclude = parent.exclude.iter().map(|s| rewrite(s)).collect();
                     result.has_exclude_spec = true;
                 }
                 if !result.has_files_spec && parent.has_files_spec {
-                    result.files_spec = parent.files_spec.clone();
+                    result.files_spec = parent.files_spec.iter().map(|s| rewrite(s)).collect();
                     result.has_files_spec = true;
                 }
                 result.errors.extend(parent.errors.clone());
@@ -2401,24 +2422,31 @@ fn get_parsed_command_line_of_config_file_with_stack(
 
     // Apply `${configDir}` substitution to include/exclude/files specs.
     // Mirrors Go's `getSubstitutedStringArrayWithConfigDirTemplate` calls at
-    // tsconfigparsing.go:1290/1298/1309. Inherited specs from extended configs
-    // that contain `${configDir}` are resolved against THIS config's directory
-    // (matching Go's behavior where the inherited placeholder is re-interpreted
-    // in the own config's context).
-    if let Some(substituted) =
-        get_substituted_string_array_with_config_dir_template(&result.include, &config_dir)
-    {
-        result.include = substituted;
-    }
-    if let Some(substituted) =
-        get_substituted_string_array_with_config_dir_template(&result.exclude, &config_dir)
-    {
-        result.exclude = substituted;
-    }
-    if let Some(substituted) =
-        get_substituted_string_array_with_config_dir_template(&result.files_spec, &config_dir)
-    {
-        result.files_spec = substituted;
+    // tsconfigparsing.go:1290/1298/1309.
+    //
+    // IMPORTANT: Only apply this substitution for the OWN config (when
+    // `resolution_stack` is empty). For extended configs, the `${configDir}`
+    // prefixes must be preserved so they can be passed through during
+    // inheritance and resolved against the OWN config's directory later.
+    // This matches Go's behavior where `applyExtendedConfig` reads the RAW
+    // extended config's include/exclude/files (not the substituted ones) and
+    // passes `${configDir}`-prefixed paths through as-is.
+    if resolution_stack.is_empty() {
+        if let Some(substituted) =
+            get_substituted_string_array_with_config_dir_template(&result.include, &config_dir)
+        {
+            result.include = substituted;
+        }
+        if let Some(substituted) =
+            get_substituted_string_array_with_config_dir_template(&result.exclude, &config_dir)
+        {
+            result.exclude = substituted;
+        }
+        if let Some(substituted) =
+            get_substituted_string_array_with_config_dir_template(&result.files_spec, &config_dir)
+        {
+            result.files_spec = substituted;
+        }
     }
 
     // Resolve file names from specs.
@@ -5242,6 +5270,224 @@ mod tests {
             parsed.compiler_options.out_dir.contains("configDir"),
             "embedded ${{configDir}} should not be substituted, got {}",
             parsed.compiler_options.out_dir
+        );
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Inherited include/exclude/files path-rewriting tests
+    // ──────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn test_extends_inherited_include_path_rewriting() {
+        // When an extended config has a relative `include` spec, it should be
+        // rewritten to be relative to the OWN config's directory, not the
+        // extended config's directory. Mirrors Go's `applyExtendedConfig`
+        // which calls `ConvertToRelativePath(GetDirectoryPath(extendedConfigPath), …)`.
+        //
+        // Setup:
+        //   /proj/tsconfig.json          (own, extends ./base/tsconfig.json)
+        //   /proj/base/tsconfig.json     (extended, include: ["src/**/*"])
+        //   /proj/base/src/a.ts          (file under extended dir)
+        //
+        // Expected: the inherited "src/**/*" is rewritten to "base/src/**/*"
+        // and resolved against /proj, so /proj/base/src/a.ts is included.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/base");
+        fs.insert_dir("/proj/base/src");
+        fs.insert_file("/proj/base/src/a.ts", "");
+        fs.insert_file(
+            "/proj/base/tsconfig.json",
+            r#"{ "include": ["src/**/*"] }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "./base/tsconfig.json" }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(
+            parsed.file_names.iter().any(|f| f == "/proj/base/src/a.ts"),
+            "expected /proj/base/src/a.ts in file_names (relative include rewritten), got {:?}",
+            parsed.file_names
+        );
+    }
+
+    #[test]
+    fn test_extends_inherited_include_absolute_not_rewritten() {
+        // Absolute paths in inherited include specs are passed through as-is
+        // (not rewritten). Mirrors Go's `IsRootedDiskPath` check in
+        // `applyExtendedConfig`.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/base");
+        fs.insert_dir("/shared");
+        fs.insert_file("/shared/a.ts", "");
+        fs.insert_file(
+            "/proj/base/tsconfig.json",
+            r#"{ "include": ["/shared/**/*"] }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "./base/tsconfig.json" }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        assert!(
+            parsed.file_names.iter().any(|f| f == "/shared/a.ts"),
+            "expected /shared/a.ts in file_names (absolute include not rewritten), got {:?}",
+            parsed.file_names
+        );
+    }
+
+    #[test]
+    fn test_extends_inherited_include_config_dir_not_rewritten() {
+        // `${configDir}`-prefixed paths in inherited include specs are passed
+        // through as-is (not rewritten relative to the extended config dir),
+        // and then substituted with the OWN config's directory. Mirrors Go's
+        // `startsWithConfigDirTemplate` check in `applyExtendedConfig`.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/base");
+        fs.insert_dir("/proj/src");
+        fs.insert_file("/proj/src/a.ts", "");
+        fs.insert_file(
+            "/proj/base/tsconfig.json",
+            r#"{ "include": ["${configDir}/src"] }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "./base/tsconfig.json" }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // `${configDir}` in inherited include is resolved against the OWN
+        // config's directory (/proj), so /proj/src/a.ts is included.
+        assert!(
+            parsed.file_names.iter().any(|f| f == "/proj/src/a.ts"),
+            "expected /proj/src/a.ts in file_names (${{configDir}} resolved against own dir), got {:?}",
+            parsed.file_names
+        );
+    }
+
+    #[test]
+    fn test_extends_inherited_exclude_path_rewriting() {
+        // Inherited exclude specs are also rewritten relative to the own
+        // config's directory.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/base");
+        fs.insert_dir("/proj/base/src");
+        fs.insert_dir("/proj/base/excluded");
+        fs.insert_file("/proj/base/src/a.ts", "");
+        fs.insert_file("/proj/base/excluded/b.ts", "");
+        fs.insert_file(
+            "/proj/base/tsconfig.json",
+            r#"{ "include": ["src/**/*"], "exclude": ["excluded"] }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "./base/tsconfig.json" }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // src/a.ts should be included (rewritten to base/src/**/*).
+        assert!(
+            parsed.file_names.iter().any(|f| f == "/proj/base/src/a.ts"),
+            "expected /proj/base/src/a.ts in file_names, got {:?}",
+            parsed.file_names
+        );
+        // excluded/b.ts should be excluded (rewritten to base/excluded).
+        assert!(
+            !parsed.file_names.iter().any(|f| f.contains("excluded")),
+            "expected excluded/ files to be excluded, got {:?}",
+            parsed.file_names
+        );
+    }
+
+    #[test]
+    fn test_extends_inherited_files_path_rewriting() {
+        // Inherited files specs are also rewritten relative to the own
+        // config's directory.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/base");
+        fs.insert_dir("/proj/base/src");
+        fs.insert_file("/proj/base/src/main.ts", "");
+        fs.insert_file(
+            "/proj/base/tsconfig.json",
+            r#"{ "files": ["src/main.ts"] }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "./base/tsconfig.json" }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // "src/main.ts" is rewritten to "base/src/main.ts" and resolved
+        // against /proj → /proj/base/src/main.ts.
+        assert!(
+            parsed.file_names.iter().any(|f| f == "/proj/base/src/main.ts"),
+            "expected /proj/base/src/main.ts in file_names, got {:?}",
+            parsed.file_names
+        );
+    }
+
+    #[test]
+    fn test_extends_own_include_overrides_inherited() {
+        // The own config's include overrides inherited include (first-wins
+        // among extended, but own always wins).
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/base");
+        fs.insert_dir("/proj/own_src");
+        fs.insert_file("/proj/own_src/a.ts", "");
+        fs.insert_dir("/proj/base/src");
+        fs.insert_file("/proj/base/src/b.ts", "");
+        fs.insert_file(
+            "/proj/base/tsconfig.json",
+            r#"{ "include": ["src/**/*"] }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "./base/tsconfig.json", "include": ["own_src/**/*"] }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // Own include wins: own_src/a.ts is included, base/src/b.ts is NOT.
+        assert!(
+            parsed.file_names.iter().any(|f| f == "/proj/own_src/a.ts"),
+            "expected /proj/own_src/a.ts in file_names, got {:?}",
+            parsed.file_names
+        );
+        assert!(
+            !parsed.file_names.iter().any(|f| f == "/proj/base/src/b.ts"),
+            "expected /proj/base/src/b.ts NOT in file_names (own include overrides), got {:?}",
+            parsed.file_names
         );
     }
 }
