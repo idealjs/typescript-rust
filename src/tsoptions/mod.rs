@@ -15,6 +15,10 @@ use crate::core::compiler_options::{
 };
 use crate::core::text::TextRange;
 use crate::core::tristate::Tristate;
+use crate::core::watch_options::{
+    PollingKind, WatchDirectoryKind, WatchFileKind, WatchOptions, parse_polling_kind,
+    parse_watch_directory_kind, parse_watch_file_kind,
+};
 use crate::diagnostics::{
     ARGUMENT_FOR_0_OPTION_MUST_BE_COLON_1, CANNOT_READ_FILE_0,
     CIRCULARITY_DETECTED_WHILE_RESOLVING_CONFIGURATION_COLON_0,
@@ -22,7 +26,8 @@ use crate::diagnostics::{
     OPTION_0_CAN_ONLY_BE_SPECIFIED_IN_TSCONFIG_JSON_FILE_OR_SET_TO_FALSE_OR_NULL_ON_COMMAND_LINE,
     OPTION_0_CAN_ONLY_BE_SPECIFIED_IN_TSCONFIG_JSON_FILE_OR_SET_TO_NULL_ON_COMMAND_LINE,
     OPTION_0_REQUIRES_VALUE_TO_BE_GREATER_THAN_1, UNKNOWN_COMPILER_OPTION_0,
-    UNKNOWN_COMPILER_OPTION_0_DID_YOU_MEAN_1, new_ad_hoc_message,
+    UNKNOWN_COMPILER_OPTION_0_DID_YOU_MEAN_1, WATCH_OPTION_0_REQUIRES_A_VALUE_OF_TYPE_1,
+    new_ad_hoc_message,
 };
 use crate::glob::Glob;
 use crate::tspath;
@@ -834,6 +839,88 @@ enum ParseMode {
     Build,
 }
 
+// Valid enum values for the watch-option declarations. These mirror the keys
+// of Go's `watchFileEnumMap` / `watchDirectoryEnumMap` / `fallbackEnumMap`
+// (`internal/tsoptions/enummaps.go:234-255`).
+static WATCH_FILE_ENUM_VALUES: &[&str] = &[
+    "fixedpollinginterval",
+    "prioritypollinginterval",
+    "dynamicprioritypolling",
+    "fixedchunksizepolling",
+    "usefsevents",
+    "usefseventsonparentdirectory",
+];
+static WATCH_DIRECTORY_ENUM_VALUES: &[&str] = &[
+    "usefsevents",
+    "fixedpollinginterval",
+    "dynamicprioritypolling",
+    "fixedchunksizepolling",
+];
+static FALLBACK_POLLING_ENUM_VALUES: &[&str] = &[
+    "fixedinterval",
+    "priorityinterval",
+    "dynamicpriority",
+    "fixedchunksize",
+];
+
+/// The set of watch options, mirroring Go's `OptionsForWatch`
+/// (`internal/tsoptions/declswatch.go:8-88`).
+///
+/// These are modeled as an independent axis from `OPTIONS` (compiler) and
+/// `BUILD_OPTIONS` (build): a separate declarations list, a separate name
+/// map (`find_watch_option`), and a separate parser pass (`apply_watch_options`).
+/// On the CLI, watch flags are accepted as a fallback when the compiler/build
+/// map misses, mirroring Go's `WatchNameMap` fallback in `parseStrings`.
+pub const OPTIONS_FOR_WATCH: &[OptionDecl] = &[
+    OptionDecl {
+        name: "watchInterval",
+        short_name: None,
+        kind: OptionKind::Number,
+        ..DEFAULT_DECL
+    },
+    OptionDecl {
+        name: "watchFile",
+        short_name: None,
+        kind: OptionKind::Enum,
+        enum_values: Some(WATCH_FILE_ENUM_VALUES),
+        ..DEFAULT_DECL
+    },
+    OptionDecl {
+        name: "watchDirectory",
+        short_name: None,
+        kind: OptionKind::Enum,
+        enum_values: Some(WATCH_DIRECTORY_ENUM_VALUES),
+        ..DEFAULT_DECL
+    },
+    OptionDecl {
+        name: "fallbackPolling",
+        short_name: None,
+        kind: OptionKind::Enum,
+        enum_values: Some(FALLBACK_POLLING_ENUM_VALUES),
+        ..DEFAULT_DECL
+    },
+    OptionDecl {
+        name: "synchronousWatchDirectory",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        ..DEFAULT_DECL
+    },
+    OptionDecl {
+        name: "excludeDirectories",
+        short_name: None,
+        kind: OptionKind::List,
+        is_file_path: true,
+        ..DEFAULT_DECL
+    },
+    OptionDecl {
+        name: "excludeFiles",
+        short_name: None,
+        kind: OptionKind::List,
+        is_file_path: true,
+        ..DEFAULT_DECL
+    },
+];
+
 /// Case-insensitive match on an option's name or short name. Mirrors Go's
 /// `NameMap.GetOptionDeclarationFromName`, which lowercases the lookup key.
 fn decl_matches(o: &OptionDecl, name: &str) -> bool {
@@ -862,6 +949,15 @@ fn find_build_option(name: &str) -> Option<&'static OptionDecl> {
         .iter()
         .chain(OPTIONS.iter())
         .find(|o| decl_matches(o, name))
+}
+
+/// Case-insensitive lookup over the watch option declarations, mirroring Go's
+/// `WatchNameMap` (`internal/tsoptions/namemap.go:12`). Used as a fallback in
+/// `parse_command_line_worker` when the compiler/build map misses, so that
+/// `--watchFile usefsevents` etc. are accepted on the CLI alongside compiler
+/// flags but routed into a separate `WatchOptions` value.
+fn find_watch_option(name: &str) -> Option<&'static OptionDecl> {
+    OPTIONS_FOR_WATCH.iter().find(|o| decl_matches(o, name))
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -921,6 +1017,12 @@ pub struct ParsedCommandLine {
     pub references: Vec<crate::core::project_reference::ProjectReference>,
     pub compile_on_save: Option<bool>,
     pub watch: bool,
+    /// Watch options parsed from the command line, mirroring Go's
+    /// `ParsedOptions.WatchOptions`. Modeled independently from
+    /// `compiler_options` (separate declarations, name map, and parser pass).
+    /// A `watchOptions` key inside `tsconfig.json` is not yet parsed, matching
+    /// the current Go state.
+    pub watch_options: WatchOptions,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -939,6 +1041,9 @@ pub struct ParsedBuildCommandLine {
     pub compiler_options: CompilerOptions,
     pub projects: Vec<String>,
     pub errors: Vec<Diagnostic>,
+    /// Watch options parsed from the command line, mirroring Go's
+    /// `ParsedBuildCommandLine.WatchOptions`.
+    pub watch_options: WatchOptions,
     current_dir: String,
 }
 
@@ -988,12 +1093,14 @@ pub fn parse_command_line(
     current_dir: &str,
     fs: Option<&dyn FS>,
 ) -> ParsedCommandLine {
-    let (options, file_names, errors) =
+    let (options, watch_options_map, file_names, errors) =
         parse_command_line_worker(args, current_dir, fs, find_option, ParseMode::Compiler);
 
     let mut compiler_options = CompilerOptions::default();
     apply_options(&options, &mut compiler_options);
     let watch = compiler_options.watch.is_true();
+    let mut watch_options = WatchOptions::default();
+    apply_watch_options(&watch_options_map, &mut watch_options);
     // Resolve relative file names to absolute paths.
     let file_names = file_names
         .iter()
@@ -1015,6 +1122,7 @@ pub fn parse_command_line(
         references: Vec::new(),
         compile_on_save: None,
         watch,
+        watch_options,
     }
 }
 
@@ -1023,7 +1131,7 @@ pub fn parse_build_command_line(
     current_dir: &str,
     fs: Option<&dyn FS>,
 ) -> ParsedBuildCommandLine {
-    let (options, mut projects, mut errors) =
+    let (options, watch_options_map, mut projects, mut errors) =
         parse_command_line_worker(args, current_dir, fs, find_build_option, ParseMode::Build);
 
     if projects.is_empty() {
@@ -1035,6 +1143,9 @@ pub fn parse_build_command_line(
 
     let mut build_options = BuildOptions::default();
     apply_build_options(&options, &mut build_options);
+
+    let mut watch_options = WatchOptions::default();
+    apply_watch_options(&watch_options_map, &mut watch_options);
 
     if build_options.clean.is_true() && build_options.force.is_true() {
         errors.push(Diagnostic::new(
@@ -1074,6 +1185,7 @@ pub fn parse_build_command_line(
         compiler_options,
         projects,
         errors,
+        watch_options,
         current_dir: current_dir.to_string(),
     }
 }
@@ -1084,8 +1196,14 @@ fn parse_command_line_worker(
     fs: Option<&dyn FS>,
     find: fn(&str) -> Option<&'static OptionDecl>,
     mode: ParseMode,
-) -> (HashMap<String, OptValue>, Vec<String>, Vec<Diagnostic>) {
+) -> (
+    HashMap<String, OptValue>,
+    HashMap<String, OptValue>,
+    Vec<String>,
+    Vec<Diagnostic>,
+) {
     let mut options: HashMap<String, OptValue> = HashMap::new();
+    let mut watch_options: HashMap<String, OptValue> = HashMap::new();
     let mut file_names: Vec<String> = Vec::new();
     let mut errors: Vec<Diagnostic> = Vec::new();
 
@@ -1105,16 +1223,20 @@ fn parse_command_line_worker(
                 if let Some(fs) = fs {
                     if let Some(content) = fs.read_file(&abs) {
                         let response_args = split_response_file(&content);
-                        let (sub_options, sub_files, sub_errors) = parse_command_line_worker(
-                            &response_args,
-                            current_dir,
-                            Some(fs),
-                            find,
-                            mode,
-                        );
+                        let (sub_options, sub_watch_options, sub_files, sub_errors) =
+                            parse_command_line_worker(
+                                &response_args,
+                                current_dir,
+                                Some(fs),
+                                find,
+                                mode,
+                            );
                         file_names.extend(sub_files);
                         for (k, v) in sub_options {
                             options.insert(k, v);
+                        }
+                        for (k, v) in sub_watch_options {
+                            watch_options.insert(k, v);
                         }
                         errors.extend(sub_errors);
                     } else {
@@ -1142,9 +1264,35 @@ fn parse_command_line_worker(
                     Some((n, v)) => (n, Some(v.to_string())),
                     None => (name_part, None),
                 };
-                let opt = match find(name) {
-                    Some(o) => o,
+                match find(name) {
+                    Some(opt) => {
+                        i = parse_option_value(
+                            args,
+                            i,
+                            opt,
+                            inline_value,
+                            &mut options,
+                            &mut errors,
+                            false,
+                        );
+                    }
                     None => {
+                        // Watch-option fallback: if the option exists in the
+                        // watch name map, route it into the separate
+                        // `watch_options` map. Mirrors Go's `WatchNameMap`
+                        // fallback in `parseStrings` (`commandlineparser.go:150`).
+                        if let Some(opt) = find_watch_option(name) {
+                            i = parse_option_value(
+                                args,
+                                i,
+                                opt,
+                                inline_value,
+                                &mut watch_options,
+                                &mut errors,
+                                true,
+                            );
+                            continue;
+                        }
                         // Alternate-mode: if the option exists in the *other*
                         // name map, emit the appropriate diagnostic instead of
                         // the generic "unknown" error. Mirrors Go's
@@ -1166,15 +1314,14 @@ fn parse_command_line_worker(
                         ));
                         continue;
                     }
-                };
-                i = parse_option_value(args, i, opt, inline_value, &mut options, &mut errors);
+                }
             }
             _ => {
                 file_names.push(s.clone());
             }
         }
     }
-    (options, file_names, errors)
+    (options, watch_options, file_names, errors)
 }
 
 fn parse_option_value(
@@ -1184,7 +1331,33 @@ fn parse_option_value(
     inline_value: Option<String>,
     options: &mut HashMap<String, OptValue>,
     errors: &mut Vec<Diagnostic>,
+    watch: bool,
 ) -> usize {
+    // For watch options, type-mismatch / missing-value diagnostics use
+    // `Watch_option_0_requires_a_value_of_type_1` (TS5080) instead of the
+    // generic ad-hoc message, mirroring Go's `watchOptionsDidYouMeanDiagnostics.
+    // OptionTypeMismatchDiagnostic` (`tsoptions/diagnostics.go:46-54`).
+    let type_name = |kind: OptionKind| -> &'static str {
+        match kind {
+            OptionKind::Boolean => "boolean",
+            OptionKind::String => "string",
+            OptionKind::Number => "number",
+            OptionKind::List => "list",
+            OptionKind::Enum => "string",
+        }
+    };
+    let missing_value_error = |errors: &mut Vec<Diagnostic>| {
+        if watch {
+            errors.push(Diagnostic::new(
+                None,
+                TextRange::undefined(),
+                WATCH_OPTION_0_REQUIRES_A_VALUE_OF_TYPE_1,
+                vec![opt.name.to_string(), type_name(opt.kind).to_string()],
+            ));
+        } else {
+            errors.push(err(format!("Option '{}' requires a value.", opt.name)));
+        }
+    };
     // TSConfigOnly options can only appear in tsconfig.json; on the command
     // line only `false`/`null` (booleans) or `null` (others) are accepted.
     // Mirrors Go's `parseOptionValue` `IsTSConfigOnly` branch.
@@ -1268,7 +1441,7 @@ fn parse_option_value(
                     options.insert(opt.name.to_string(), OptValue::Str(v));
                 }
                 None => {
-                    errors.push(err(format!("Option '{}' requires a value.", opt.name)));
+                    missing_value_error(errors);
                 }
             }
         }
@@ -1316,7 +1489,7 @@ fn parse_option_value(
                     }
                 }
                 None => {
-                    errors.push(err(format!("Option '{}' requires a value.", opt.name)));
+                    missing_value_error(errors);
                 }
             }
         }
@@ -1352,11 +1525,23 @@ fn parse_option_value(
                         }
                     }
                     Err(_) => {
-                        errors.push(err(format!("Option '{}' requires a number.", opt.name)));
+                        if watch {
+                            errors.push(Diagnostic::new(
+                                None,
+                                TextRange::undefined(),
+                                WATCH_OPTION_0_REQUIRES_A_VALUE_OF_TYPE_1,
+                                vec![
+                                    opt.name.to_string(),
+                                    type_name(opt.kind).to_string(),
+                                ],
+                            ));
+                        } else {
+                            errors.push(err(format!("Option '{}' requires a number.", opt.name)));
+                        }
                     }
                 },
                 None => {
-                    errors.push(err(format!("Option '{}' requires a value.", opt.name)));
+                    missing_value_error(errors);
                 }
             }
         }
@@ -1674,6 +1859,66 @@ fn apply_build_options(options: &HashMap<String, OptValue>, out: &mut BuildOptio
             "builders" => {
                 if let OptValue::Num(n) = value {
                     out.builders = Some(*n as i32);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+/// Apply parsed watch-option values to a `WatchOptions`, mirroring Go's
+/// `ParseWatchOptions` (`internal/tsoptions/parsinghelpers.go:489-516`).
+///
+/// Enum values are validated case-insensitively against the declaration's
+/// `enum_values` during CLI extraction, so here we just convert the accepted
+/// string to the typed enum. `Null` clears the field (mirrors Go's JSON
+/// `null` semantics).
+fn apply_watch_options(options: &HashMap<String, OptValue>, out: &mut WatchOptions) {
+    for (name, value) in options {
+        match name.as_str() {
+            "watchInterval" => {
+                if let OptValue::Num(n) = value {
+                    out.interval = Some(*n as i32);
+                } else if matches!(value, OptValue::Null) {
+                    out.interval = None;
+                }
+            }
+            "watchFile" => {
+                if let Some(s) = value.as_str() {
+                    out.file_kind = parse_watch_file_kind(s).unwrap_or(WatchFileKind::None);
+                } else if matches!(value, OptValue::Null) {
+                    out.file_kind = WatchFileKind::None;
+                }
+            }
+            "watchDirectory" => {
+                if let Some(s) = value.as_str() {
+                    out.directory_kind = parse_watch_directory_kind(s).unwrap_or(WatchDirectoryKind::None);
+                } else if matches!(value, OptValue::Null) {
+                    out.directory_kind = WatchDirectoryKind::None;
+                }
+            }
+            "fallbackPolling" => {
+                if let Some(s) = value.as_str() {
+                    out.fallback_polling = parse_polling_kind(s).unwrap_or(PollingKind::None);
+                } else if matches!(value, OptValue::Null) {
+                    out.fallback_polling = PollingKind::None;
+                }
+            }
+            "synchronousWatchDirectory" => {
+                if let Some(b) = value.as_bool() {
+                    out.sync_watch_dir = Tristate::from(b);
+                } else if matches!(value, OptValue::Null) {
+                    out.sync_watch_dir = Tristate::Unknown;
+                }
+            }
+            "excludeDirectories" => {
+                if let Some(list) = value.as_list() {
+                    out.exclude_dir = list.to_vec();
+                }
+            }
+            "excludeFiles" => {
+                if let Some(list) = value.as_list() {
+                    out.exclude_files = list.to_vec();
                 }
             }
             _ => {}
@@ -2784,6 +3029,136 @@ mod tests {
         let parsed_short = parse_command_line(&args(&["-w", "0.ts"]), "/proj", None);
         assert!(parsed_short.compiler_options.watch.is_true());
         assert!(parsed_short.watch);
+    }
+
+    #[test]
+    fn watch_options_empty_by_default() {
+        // No watch flags → default WatchOptions (all None/empty).
+        let parsed = parse_command_line(&args(&["--noEmit", "0.ts"]), "/proj", None);
+        assert!(parsed.watch_options.is_empty());
+    }
+
+    #[test]
+    fn watch_options_parse_enum_flags() {
+        // `--watchFile usefsevents` etc. are routed into the separate
+        // watch_options map via the WatchNameMap fallback.
+        let parsed = parse_command_line(
+            &args(&[
+                "--watchFile",
+                "UseFsEvents",
+                "--watchDirectory",
+                "fixedpollinginterval",
+                "--fallbackPolling",
+                "priorityinterval",
+                "0.ts",
+            ]),
+            "/proj",
+            None,
+        );
+        assert_eq!(parsed.watch_options.file_kind, WatchFileKind::UseFsEvents);
+        assert_eq!(
+            parsed.watch_options.directory_kind,
+            WatchDirectoryKind::FixedPollingInterval
+        );
+        assert_eq!(parsed.watch_options.fallback_polling, PollingKind::PriorityInterval);
+    }
+
+    #[test]
+    fn watch_options_parse_interval_and_boolean() {
+        let parsed = parse_command_line(
+            &args(&["--watchInterval", "250", "--synchronousWatchDirectory", "0.ts"]),
+            "/proj",
+            None,
+        );
+        assert_eq!(parsed.watch_options.interval, Some(250));
+        assert_eq!(parsed.watch_options.watch_interval_ms(), 250);
+        assert!(parsed.watch_options.sync_watch_dir.is_true());
+    }
+
+    #[test]
+    fn watch_options_parse_list_flags() {
+        let parsed = parse_command_line(
+            &args(&[
+                "--excludeDirectories",
+                "tmp,build",
+                "--excludeFiles",
+                "a.ts,b.ts",
+                "0.ts",
+            ]),
+            "/proj",
+            None,
+        );
+        assert_eq!(parsed.watch_options.exclude_dir, vec!["tmp", "build"]);
+        assert_eq!(parsed.watch_options.exclude_files, vec!["a.ts", "b.ts"]);
+    }
+
+    #[test]
+    fn watch_options_invalid_enum_reports_ts6046() {
+        // Invalid enum value emits ARGUMENT_FOR_0_OPTION_MUST_BE_COLON_1 (TS6046)
+        // listing the valid values, mirroring compiler-option enum validation.
+        let parsed = parse_command_line(&args(&["--watchFile", "bogus", "0.ts"]), "/proj", None);
+        assert!(parsed
+            .errors
+            .iter()
+            .any(|d| d.code == 6046 && d.message_args.iter().any(|a| a.contains("--watchFile"))));
+        // The invalid value is not stored.
+        assert_eq!(parsed.watch_options.file_kind, WatchFileKind::None);
+    }
+
+    #[test]
+    fn watch_options_missing_number_value_reports_ts5080() {
+        // `--watchInterval` with no value emits TS5080
+        // "Watch option 'watchInterval' requires a value of type number."
+        let parsed = parse_command_line(&args(&["--watchInterval"]), "/proj", None);
+        assert!(parsed
+            .errors
+            .iter()
+            .any(|d| d.code == 5080
+                && d.message_args.first().map(|s| s.as_str()) == Some("watchInterval")
+                && d.message_args.get(1).map(|s| s.as_str()) == Some("number")));
+    }
+
+    #[test]
+    fn watch_options_non_numeric_interval_reports_ts5080() {
+        let parsed = parse_command_line(&args(&["--watchInterval", "abc", "0.ts"]), "/proj", None);
+        assert!(parsed.errors.iter().any(|d| d.code == 5080));
+        assert_eq!(parsed.watch_options.interval, None);
+    }
+
+    #[test]
+    fn watch_options_build_mode_also_accepts_watch_flags() {
+        // In build mode, watch flags are accepted via the same WatchNameMap
+        // fallback and routed into ParsedBuildCommandLine.watch_options.
+        let parsed = parse_build_command_line(
+            &args(&["--build", "--watchFile", "usefsevents", "."]),
+            "/proj",
+            None,
+        );
+        assert_eq!(parsed.watch_options.file_kind, WatchFileKind::UseFsEvents);
+    }
+
+    #[test]
+    fn watch_options_case_insensitive_lookup() {
+        // Watch option names are matched case-insensitively, mirroring Go's
+        // `NameMap.GetOptionDeclarationFromName`.
+        let parsed = parse_command_line(
+            &args(&["--WATCHFILE", "usefsevents", "0.ts"]),
+            "/proj",
+            None,
+        );
+        assert_eq!(parsed.watch_options.file_kind, WatchFileKind::UseFsEvents);
+    }
+
+    #[test]
+    fn watch_options_do_not_leak_into_compiler_options() {
+        // `--watchFile` is a watch option, not a compiler option; it must not
+        // appear in the compiler_options map (which would trigger TS5023).
+        let parsed = parse_command_line(&args(&["--watchFile", "usefsevents", "0.ts"]), "/proj", None);
+        assert!(!parsed
+            .errors
+            .iter()
+            .any(|d| d.code == 5023 && d.message_args.iter().any(|a| a == "watchFile")));
+        assert_eq!(parsed.watch_options.file_kind, WatchFileKind::UseFsEvents);
     }
 
     #[test]

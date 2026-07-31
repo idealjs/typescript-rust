@@ -225,9 +225,22 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   TS5093 alternate-mode；TSConfigOnly 选项在 CLI 上报 TS6230/TS6064；enum
   非法值报 TS6046（列出合法值）；min-value 违规报 TS5002；tsconfig JSON
   大小写不匹配报 TS5025 did-you-mean。16 个单测覆盖。**遗留**：build-mode
-  TS5094（common/build/compiler 三分拆分）、watch options 独立建模、
-  `DeprecatedKeys` 过滤。
-- [ ] 独立建模 watch options，在普通/build parser 中与 compiler/build options 分离。
+  TS5094（common/build/compiler 三分拆分）、`DeprecatedKeys` 过滤。
+- [x] 独立建模 watch options，在普通/build parser 中与 compiler/build options 分离。
+  新增 `core::watch_options` 模块（`WatchOptions` struct + `WatchFileKind`/
+  `WatchDirectoryKind`/`PollingKind` enums + 解析函数，对齐 Go
+  `internal/core/watchoptions.go`）；`tsoptions` 新增 `OPTIONS_FOR_WATCH`
+  声明表（7 条，对齐 Go `declswatch.go`）+ `find_watch_option` 名字映射
+  （对齐 Go `WatchNameMap`）+ `apply_watch_options` 解析器（对齐 Go
+  `ParseWatchOptions`）；`parse_command_line_worker` 在 compiler/build 名字映射
+  miss 时回退到 `WatchNameMap` 并路由到独立的 `watch_options` map；类型不匹配/
+  缺值诊断用 TS5080（对齐 Go `watchOptionsDidYouMeanDiagnostics`）。
+  `ParsedCommandLine`/`ParsedBuildCommandLine` 新增 `watch_options: WatchOptions`
+  字段。10 个单测覆盖 enum/number/boolean/list 解析、大小写不敏感、build 模式、
+  不泄露到 compiler_options、TS6046 enum 校验、TS5080 缺值/非数字。
+  **对齐 Go 当前状态**：tsconfig.json `watchOptions` key 解析未实现（Go 侧
+  `tsconfigparsing.go` 相关代码注释掉）；`--showConfig` 不输出 watchOptions
+  （Go 侧 `showconfig.go` 的 `TSConfig` 结构无该字段）。
 - [ ] 对齐 tsconfig 查找、`extends`、`files/include/exclude`、`compilerOptions`
   覆盖规则。
 - [x] 将 raw `references` 升级为 typed project references：新增

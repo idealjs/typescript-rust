@@ -13,4 +13,5 @@ pub mod stack;
 pub mod text;
 pub mod text_change;
 pub mod tristate;
+pub mod watch_options;
 pub mod work_group;

@@ -666,6 +666,7 @@ mod tests {
             references: vec![],
             compile_on_save: None,
             watch: false,
+            watch_options: Default::default(),
         };
         let host = Arc::new(CompilerHostImpl::new(
             fs,
@@ -735,6 +736,7 @@ mod tests {
             references: vec![],
             compile_on_save: None,
             watch: false,
+            watch_options: Default::default(),
         };
         let host = Arc::new(CompilerHostImpl::new(fs, "/".to_string(), lib_path()));
         let program = Program::new(ProgramOptions {
