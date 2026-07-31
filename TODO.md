@@ -436,11 +436,27 @@ via `schema.ts`，生成 `syntax_kind_generated.rs` + `node_data_generated.rs`�
   full_start_pos（标识符间 trivia 保留、跨注释保留）、leading/trailing comment ranges
   （单行/多行/中间位置/shebang 跳过/无注释/行尾停止）。
 
-- [ ] 迁移 `TokenFlags` 完整位集（对齐 Go `ast.TokenFlags`）：当前仅有
-  `PrecedingLineBreak`；还需 `PrecedingJSDocComment`/`PrecedingJSDocLeadingAsterisks`/
-  `PrecedingJSDocWithDeprecated`/`PrecedingJSDocWithSeeOrLink`/`Unterminated`/
-  `UnicodeEscape`/`ExtendedUnicodeEscape`/`HexSpecifier`/`BinarySpecifier`/
-  `OctalSpecifier`，在 scanner 内 OR 累积并在 parser/binder 消费。
+- [x] 迁移 `TokenFlags` 完整位集（对齐 Go `ast.TokenFlags`，已完成）：
+  `Scanner` 新增 `token_flags: TokenFlags` 字段 + `token_flags()` 访问器，
+  在 `scan()` 顶部重置并在扫描过程中 OR 累积；`has_preceding_line_break`
+  改为从 `preceding_line_break` + `token_flags` 同步。常量表覆盖全部 19 个
+  Go flag（`TOKEN_FLAGS_PRECEDING_LINE_BREAK`/`_JSDOC_COMMENT`/`_UNTERMINATED`/
+  `_EXTENDED_UNICODE_ESCAPE`/`_SCIENTIFIC`/`_OCTAL`/`_HEX_SPECIFIER`/
+  `_BINARY_SPECIFIER`/`_OCTAL_SPECIFIER`/`_CONTAINS_SEPARATOR`/`_UNICODE_ESCAPE`/
+  `_CONTAINS_INVALID_ESCAPE`/`_HEX_ESCAPE`/`_CONTAINS_LEADING_ZERO`/
+  `_CONTAINS_INVALID_SEPARATOR`/`_JSDOC_LEADING_ASTERISKS`/`_SINGLE_QUOTE`/
+  `_JSDOC_WITH_DEPRECATED`/`_JSDOC_WITH_SEE_OR_LINK`）+ 7 个组合 mask
+  （`WITH_SPECIFIER`/`BINARY_OR_OCTAL_SPECIFIER`/`STRING_LITERAL_FLAGS`/
+  `NUMERIC_LITERAL_FLAGS`/`TEMPLATE_LITERAL_LIKE_FLAGS`/
+  `REGULAR_EXPRESSION_LITERAL_FLAGS`/`IS_INVALID`）+ `token_flags_contains`/
+  `token_flags_intersects` 辅助。scanner 设置：`PRECEDING_LINE_BREAK`（trivia）、
+  `UNTERMINATED`（string/template/regex）、`SINGLE_QUOTE`（`'` string）、
+  `HEX_SPECIFIER`/`BINARY_SPECIFIER`/`OCTAL_SPECIFIER`（numeric）、
+  `SCIENTIFIC`（`e`/`E` exponent）、`CONTAINS_LEADING_ZERO`（`0` 后跟数字）。
+  12 个新单测覆盖。**遗留**：JSDoc 相关 4 flag（需 JSDoc comment 识别）、
+  escape-sequence 5 flag（`UNICODE_ESCAPE`/`EXTENDED_UNICODE_ESCAPE`/`HEX_ESCAPE`/
+  `CONTAINS_INVALID_ESCAPE`/`CONTAINS_SEPARATOR`/`CONTAINS_INVALID_SEPARATOR`，
+  需迁移 Go `scanEscapeSequence` 完整诊断路径）、`OCTAL`（legacy `0o` 前的 `0777` 形式）。
 - [ ] 支持 `SkipTriviaEx` options（`StopAfterLineBreak`/`StopAtComments`/`InJSDoc`）。
 - [ ] 迁移 conflict-marker trivia（`isConflictMarkerTrivia`/`scanConflictMarkerTrivia`）。
 

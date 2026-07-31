@@ -27,6 +27,86 @@ pub enum DiagnosticKind {
     UnicodeUAndVFlagsMutuallyExclusive,
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// TokenFlags
+//
+// Mirrors Go's `ast.TokenFlags` bitset (`internal/ast/tokenflags.go`). The
+// scanner accumulates these during `scan()` and exposes them via
+// `Scanner::token_flags()`. Callers (parser/binder) can test individual bits
+// with the `contains` helper. Currently the scanner sets:
+//   - `PRECEDING_LINE_BREAK` (during trivia skipping)
+//   - `UNTERMINATED` (string/template/regex)
+//   - `SINGLE_QUOTE` (string literals with `'`)
+//   - `HEX_SPECIFIER` / `BINARY_SPECIFIER` / `OCTAL_SPECIFIER` (numeric literals)
+//   - `SCIENTIFIC` / `OCTAL` / `CONTAINS_LEADING_ZERO` (numeric literals)
+// JSDoc-related flags and escape-sequence flags are deferred until those
+// scanner paths are migrated.
+// ────────────────────────────────────────────────────────────────────────────
+
+pub type TokenFlags = u32;
+
+pub const TOKEN_FLAGS_NONE: TokenFlags = 0;
+pub const TOKEN_FLAGS_PRECEDING_LINE_BREAK: TokenFlags = 1 << 0;
+pub const TOKEN_FLAGS_PRECEDING_JSDOC_COMMENT: TokenFlags = 1 << 1;
+pub const TOKEN_FLAGS_UNTERMINATED: TokenFlags = 1 << 2;
+pub const TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE: TokenFlags = 1 << 3;
+pub const TOKEN_FLAGS_SCIENTIFIC: TokenFlags = 1 << 4;
+pub const TOKEN_FLAGS_OCTAL: TokenFlags = 1 << 5;
+pub const TOKEN_FLAGS_HEX_SPECIFIER: TokenFlags = 1 << 6;
+pub const TOKEN_FLAGS_BINARY_SPECIFIER: TokenFlags = 1 << 7;
+pub const TOKEN_FLAGS_OCTAL_SPECIFIER: TokenFlags = 1 << 8;
+pub const TOKEN_FLAGS_CONTAINS_SEPARATOR: TokenFlags = 1 << 9;
+pub const TOKEN_FLAGS_UNICODE_ESCAPE: TokenFlags = 1 << 10;
+pub const TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE: TokenFlags = 1 << 11;
+pub const TOKEN_FLAGS_HEX_ESCAPE: TokenFlags = 1 << 12;
+pub const TOKEN_FLAGS_CONTAINS_LEADING_ZERO: TokenFlags = 1 << 13;
+pub const TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR: TokenFlags = 1 << 14;
+pub const TOKEN_FLAGS_PRECEDING_JSDOC_LEADING_ASTERISKS: TokenFlags = 1 << 15;
+pub const TOKEN_FLAGS_SINGLE_QUOTE: TokenFlags = 1 << 16;
+pub const TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED: TokenFlags = 1 << 17;
+pub const TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK: TokenFlags = 1 << 18;
+
+pub const TOKEN_FLAGS_BINARY_OR_OCTAL_SPECIFIER: TokenFlags =
+    TOKEN_FLAGS_BINARY_SPECIFIER | TOKEN_FLAGS_OCTAL_SPECIFIER;
+pub const TOKEN_FLAGS_WITH_SPECIFIER: TokenFlags =
+    TOKEN_FLAGS_HEX_SPECIFIER | TOKEN_FLAGS_BINARY_OR_OCTAL_SPECIFIER;
+pub const TOKEN_FLAGS_STRING_LITERAL_FLAGS: TokenFlags = TOKEN_FLAGS_UNTERMINATED
+    | TOKEN_FLAGS_HEX_ESCAPE
+    | TOKEN_FLAGS_UNICODE_ESCAPE
+    | TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE
+    | TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE
+    | TOKEN_FLAGS_SINGLE_QUOTE;
+pub const TOKEN_FLAGS_NUMERIC_LITERAL_FLAGS: TokenFlags = TOKEN_FLAGS_SCIENTIFIC
+    | TOKEN_FLAGS_OCTAL
+    | TOKEN_FLAGS_CONTAINS_LEADING_ZERO
+    | TOKEN_FLAGS_WITH_SPECIFIER
+    | TOKEN_FLAGS_CONTAINS_SEPARATOR
+    | TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR;
+pub const TOKEN_FLAGS_TEMPLATE_LITERAL_LIKE_FLAGS: TokenFlags = TOKEN_FLAGS_UNTERMINATED
+    | TOKEN_FLAGS_HEX_ESCAPE
+    | TOKEN_FLAGS_UNICODE_ESCAPE
+    | TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE
+    | TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+pub const TOKEN_FLAGS_REGULAR_EXPRESSION_LITERAL_FLAGS: TokenFlags = TOKEN_FLAGS_UNTERMINATED;
+pub const TOKEN_FLAGS_IS_INVALID: TokenFlags = TOKEN_FLAGS_OCTAL
+    | TOKEN_FLAGS_CONTAINS_LEADING_ZERO
+    | TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR
+    | TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+
+/// Test whether `flags` contains all bits in `bit`. For single-flag checks
+/// this is equivalent to `(flags & bit) != 0`; for combined masks like
+/// `TOKEN_FLAGS_WITH_SPECIFIER` use `token_flags_intersects` if you want
+/// "any of these bits set".
+pub fn token_flags_contains(flags: TokenFlags, bit: TokenFlags) -> bool {
+    (flags & bit) == bit
+}
+
+/// Test whether `flags` has *any* of the bits in `mask` set. Use this for
+/// combined masks like `TOKEN_FLAGS_WITH_SPECIFIER` (HEX | BINARY | OCTAL).
+pub fn token_flags_intersects(flags: TokenFlags, mask: TokenFlags) -> bool {
+    (flags & mask) != 0
+}
+
 /// Keywords mapping (text → SyntaxKind).
 static TEXT_TO_KEYWORD: OnceLock<HashMap<&'static str, SyntaxKind>> = OnceLock::new();
 
@@ -264,6 +344,12 @@ pub struct Scanner {
     full_start_pos: usize,
     preceding_line_break: bool,
     has_preceding_line_break: bool,
+    /// Bitset of `TOKEN_FLAGS_*` for the current token, mirroring Go's
+    /// `Scanner.tokenFlags` (`scanner.go:198`). Accumulated during `scan()`
+    /// and exposed via `token_flags()`. `has_preceding_line_break` is kept
+    /// in sync with `TOKEN_FLAGS_PRECEDING_LINE_BREAK` for backwards
+    /// compatibility with existing parser call sites.
+    token_flags: TokenFlags,
     error_callback: Option<ErrorCallback>,
     /// Errors collected when no `error_callback` is set (or always, for
     /// retrieval via `take_errors`).
@@ -318,6 +404,7 @@ impl Scanner {
             full_start_pos: 0,
             preceding_line_break: false,
             has_preceding_line_break: false,
+            token_flags: TOKEN_FLAGS_NONE,
             error_callback: None,
             errors: Vec::new(),
             comment_directives: Vec::new(),
@@ -442,6 +529,13 @@ impl Scanner {
         self.has_preceding_line_break
     }
 
+    /// Bitset of `TOKEN_FLAGS_*` for the current token, mirroring Go's
+    /// `Scanner.TokenFlags()`. Use `token_flags_contains(flags, bit)` to test
+    /// individual bits, or compare with the `TOKEN_FLAGS_*` constants directly.
+    pub fn token_flags(&self) -> TokenFlags {
+        self.token_flags
+    }
+
     /// Current scan position.
     pub fn pos(&self) -> usize {
         self.pos
@@ -454,12 +548,14 @@ impl Scanner {
 
     /// Scan the next token and return its kind.
     pub fn scan(&mut self) -> SyntaxKind {
-        // Reset the line-break accumulator; it is set to `true` during trivia
-        // skipping below. `has_preceding_line_break` is snapshotted from it
-        // *after* the loop exits (mirrors Go's `tokenFlags` accumulation in
-        // `scanner.go:469-491`), so line breaks encountered while skipping
-        // trivia are correctly reflected on the returned token.
+        // Reset the line-break accumulator and the token flags; both are set
+        // during trivia skipping / token scanning below. `has_preceding_line_break`
+        // and `token_flags` are snapshotted *after* the loop exits (mirrors
+        // Go's `tokenFlags` accumulation in `scanner.go:469-491`), so line
+        // breaks encountered while skipping trivia are correctly reflected on
+        // the returned token.
         self.preceding_line_break = false;
+        self.token_flags = TOKEN_FLAGS_NONE;
 
         // `full_start_pos` marks where the current token's leading trivia
         // began. It is set once on entry and preserved across trivia-skipping
@@ -534,7 +630,14 @@ impl Scanner {
             // Punctuation
             break self.scan_punctuation();
         };
+        // Snapshot the accumulated state into the per-token fields. Keep
+        // `has_preceding_line_break` and `token_flags` in sync so existing
+        // parser call sites can keep using `has_preceding_line_break()` while
+        // new call sites use `token_flags()` directly.
         self.has_preceding_line_break = self.preceding_line_break;
+        if self.preceding_line_break {
+            self.token_flags |= TOKEN_FLAGS_PRECEDING_LINE_BREAK;
+        }
         token
     }
 
@@ -544,8 +647,8 @@ impl Scanner {
     /// the parser consumes the `}` for the embedded expression, then asks the
     /// scanner for the following template chunk without skipping trivia.
     pub fn scan_template_continuation(&mut self) -> SyntaxKind {
-        self.has_preceding_line_break = self.preceding_line_break;
         self.preceding_line_break = false;
+        self.token_flags = TOKEN_FLAGS_NONE;
         self.token_pos = self.pos;
         // Template continuation does not skip trivia, so the full start equals
         // the token start.
@@ -582,6 +685,10 @@ impl Scanner {
         } else {
             SyntaxKind::TemplateTail
         };
+        self.has_preceding_line_break = self.preceding_line_break;
+        if self.preceding_line_break {
+            self.token_flags |= TOKEN_FLAGS_PRECEDING_LINE_BREAK;
+        }
         self.token
     }
 
@@ -660,6 +767,7 @@ impl Scanner {
                 }
                 self.token_end = self.pos;
                 self.token = SyntaxKind::NumericLiteral;
+                self.token_flags |= TOKEN_FLAGS_HEX_SPECIFIER;
                 return self.token;
             }
             if next == 'b' || next == 'B' {
@@ -673,6 +781,7 @@ impl Scanner {
                 }
                 self.token_end = self.pos;
                 self.token = SyntaxKind::NumericLiteral;
+                self.token_flags |= TOKEN_FLAGS_BINARY_SPECIFIER;
                 return self.token;
             }
             if next == 'o' || next == 'O' {
@@ -686,11 +795,21 @@ impl Scanner {
                 }
                 self.token_end = self.pos;
                 self.token = SyntaxKind::NumericLiteral;
+                self.token_flags |= TOKEN_FLAGS_OCTAL_SPECIFIER;
                 return self.token;
             }
         }
 
         // Decimal
+        // Track whether the literal has a leading zero (e.g. `0777`, `0888`),
+        // which Go marks with `TokenFlagsContainsLeadingZero` for legacy octal
+        // detection (`scanner.go:745-758`).
+        if self.text.as_bytes()[self.pos] as char == '0'
+            && self.pos + 1 < self.end
+            && is_digit(self.text.as_bytes()[self.pos + 1] as char)
+        {
+            self.token_flags |= TOKEN_FLAGS_CONTAINS_LEADING_ZERO;
+        }
         while self.pos < self.end && is_digit(self.text.as_bytes()[self.pos] as char) {
             self.pos += 1;
         }
@@ -715,6 +834,7 @@ impl Scanner {
                 while self.pos < self.end && is_digit(self.text.as_bytes()[self.pos] as char) {
                     self.pos += 1;
                 }
+                self.token_flags |= TOKEN_FLAGS_SCIENTIFIC;
             }
         }
 
@@ -733,6 +853,9 @@ impl Scanner {
     }
 
     fn scan_string(&mut self, quote: char) -> SyntaxKind {
+        if quote == '\'' {
+            self.token_flags |= TOKEN_FLAGS_SINGLE_QUOTE;
+        }
         self.pos += 1; // skip opening quote
         let mut terminated = false;
         while self.pos < self.end {
@@ -753,6 +876,7 @@ impl Scanner {
             self.pos += 1;
         }
         if !terminated {
+            self.token_flags |= TOKEN_FLAGS_UNTERMINATED;
             self.report_error(
                 DiagnosticKind::UnterminatedStringLiteral,
                 self.token_pos,
@@ -825,10 +949,12 @@ impl Scanner {
         // Simplified: scan until ` or ${
         self.pos += 1; // skip opening `
         let mut has_substitution = false;
+        let mut terminated = false;
         while self.pos < self.end {
             let c = self.text.as_bytes()[self.pos] as char;
             if c == '`' {
                 self.pos += 1;
+                terminated = true;
                 break;
             }
             if c == '$'
@@ -837,6 +963,7 @@ impl Scanner {
             {
                 self.pos += 2;
                 has_substitution = true;
+                terminated = true; // `${` opens a substitution; not unterminated.
                 break;
             }
             if c == '\\' {
@@ -844,6 +971,14 @@ impl Scanner {
                 continue;
             }
             self.pos += 1;
+        }
+        if !terminated {
+            self.token_flags |= TOKEN_FLAGS_UNTERMINATED;
+            self.report_error(
+                DiagnosticKind::UnterminatedTemplateLiteral,
+                self.token_pos,
+                self.pos - self.token_pos,
+            );
         }
         self.token_end = self.pos;
         self.token = if has_substitution {
@@ -1022,6 +1157,7 @@ impl Scanner {
 
         if unterminated || p >= self.end {
             // Unterminated regex — report error and consume what we have
+            self.token_flags |= TOKEN_FLAGS_UNTERMINATED;
             self.report_error(
                 DiagnosticKind::UnterminatedRegularExpression,
                 self.token_pos,
@@ -2259,5 +2395,179 @@ mod tests {
         assert_eq!(ranges[0].end, 35);
         assert_eq!(ranges[0].kind, CommentRangeKind::SingleLine);
         assert!(ranges[0].has_trailing_new_line);
+    }
+
+    // ────────────────────────────────────────────────────────────────────
+    // TokenFlags (P2.1)
+    // ────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn token_flags_preceding_line_break_set() {
+        let mut s = Scanner::new("foo\nbar");
+        s.scan(); // foo
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_PRECEDING_LINE_BREAK
+        ));
+        s.scan(); // bar (preceded by \n)
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_PRECEDING_LINE_BREAK
+        ));
+        assert!(s.has_preceding_line_break()); // kept in sync
+    }
+
+    #[test]
+    fn token_flags_single_quote_string() {
+        let mut s = Scanner::new("'abc'");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::StringLiteral);
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_SINGLE_QUOTE
+        ));
+        // Double-quoted strings do NOT set SINGLE_QUOTE.
+        let mut s = Scanner::new("\"abc\"");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::StringLiteral);
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_SINGLE_QUOTE
+        ));
+    }
+
+    #[test]
+    fn token_flags_unterminated_string() {
+        // Unterminated string (hits newline before closing quote).
+        let mut s = Scanner::new("'abc\ndef'");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::StringLiteral);
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_UNTERMINATED
+        ));
+    }
+
+    #[test]
+    fn token_flags_terminated_string_no_unterminated() {
+        let mut s = Scanner::new("'abc'");
+        s.scan();
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_UNTERMINATED
+        ));
+    }
+
+    #[test]
+    fn token_flags_hex_numeric_literal() {
+        let mut s = Scanner::new("0x1F");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::NumericLiteral);
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_HEX_SPECIFIER
+        ));
+        // `WITH_SPECIFIER` is a combined mask (HEX | BINARY | OCTAL); use
+        // `intersects` to check any-of.
+        assert!(token_flags_intersects(
+            s.token_flags(),
+            TOKEN_FLAGS_WITH_SPECIFIER
+        ));
+    }
+
+    #[test]
+    fn token_flags_binary_numeric_literal() {
+        let mut s = Scanner::new("0b1010");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::NumericLiteral);
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_BINARY_SPECIFIER
+        ));
+    }
+
+    #[test]
+    fn token_flags_octal_numeric_literal() {
+        let mut s = Scanner::new("0o777");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::NumericLiteral);
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_OCTAL_SPECIFIER
+        ));
+    }
+
+    #[test]
+    fn token_flags_scientific_numeric_literal() {
+        let mut s = Scanner::new("10e2");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::NumericLiteral);
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_SCIENTIFIC
+        ));
+    }
+
+    #[test]
+    fn token_flags_contains_leading_zero() {
+        // `0888` has a leading zero followed by another digit (legacy octal
+        // detection). `0x1F` does NOT set CONTAINS_LEADING_ZERO.
+        let mut s = Scanner::new("0888");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_LEADING_ZERO
+        ));
+        let mut s = Scanner::new("0x1F");
+        s.scan();
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_CONTAINS_LEADING_ZERO
+        ));
+    }
+
+    #[test]
+    fn token_flags_plain_decimal_none() {
+        // A plain decimal like `123` should not set any specifier/scientific/
+        // leading-zero flags.
+        let mut s = Scanner::new("123");
+        s.scan();
+        let flags = s.token_flags();
+        assert_eq!(
+            flags & TOKEN_FLAGS_NUMERIC_LITERAL_FLAGS,
+            TOKEN_FLAGS_NONE
+        );
+    }
+
+    #[test]
+    fn token_flags_reset_between_tokens() {
+        // `0x1F 'str'`: hex specifier should not leak to the string token.
+        let mut s = Scanner::new("0x1F 'str'");
+        s.scan(); // 0x1F
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_HEX_SPECIFIER
+        ));
+        s.scan(); // 'str'
+        assert_eq!(s.token(), SyntaxKind::StringLiteral);
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_HEX_SPECIFIER
+        ));
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_SINGLE_QUOTE
+        ));
+    }
+
+    #[test]
+    fn token_flags_unterminated_template() {
+        // Unterminated template literal (no closing backtick).
+        let mut s = Scanner::new("`abc");
+        s.scan();
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_UNTERMINATED
+        ));
     }
 }
