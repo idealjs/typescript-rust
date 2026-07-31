@@ -256,6 +256,12 @@ pub struct Scanner {
     token: SyntaxKind,
     token_pos: usize,
     token_end: usize,
+    /// Start of the current token *including* any leading trivia, preserved
+    /// across trivia-skipping iterations. Mirrors Go's `fullStartPos`
+    /// (`scanner.go:195,469`): set once at the top of `scan()` and not reset
+    /// while trivia is skipped, so callers can reconstruct leading
+    /// comments/whitespace via `get_leading_comment_ranges`.
+    full_start_pos: usize,
     preceding_line_break: bool,
     has_preceding_line_break: bool,
     error_callback: Option<ErrorCallback>,
@@ -309,6 +315,7 @@ impl Scanner {
             token: SyntaxKind::Unknown,
             token_pos: 0,
             token_end: 0,
+            full_start_pos: 0,
             preceding_line_break: false,
             has_preceding_line_break: false,
             error_callback: None,
@@ -397,6 +404,12 @@ impl Scanner {
         self.token_pos
     }
 
+    /// The start position of the current token *including* any leading
+    /// trivia (whitespace/comments). Mirrors Go's `TokenFullStart`.
+    pub fn full_start_pos(&self) -> usize {
+        self.full_start_pos
+    }
+
     /// The end position of the current token.
     pub fn token_end(&self) -> usize {
         self.token_end
@@ -441,71 +454,88 @@ impl Scanner {
 
     /// Scan the next token and return its kind.
     pub fn scan(&mut self) -> SyntaxKind {
-        self.has_preceding_line_break = self.preceding_line_break;
+        // Reset the line-break accumulator; it is set to `true` during trivia
+        // skipping below. `has_preceding_line_break` is snapshotted from it
+        // *after* the loop exits (mirrors Go's `tokenFlags` accumulation in
+        // `scanner.go:469-491`), so line breaks encountered while skipping
+        // trivia are correctly reflected on the returned token.
         self.preceding_line_break = false;
 
-        self.token_pos = self.pos;
+        // `full_start_pos` marks where the current token's leading trivia
+        // began. It is set once on entry and preserved across trivia-skipping
+        // iterations (mirrors Go's `fullStartPos`, `scanner.go:469`). The
+        // post-trivia `token_pos` is reset each iteration below (mirrors Go's
+        // `tokenStart`, `scanner.go:473`).
+        self.full_start_pos = self.pos;
 
-        if self.pos >= self.end {
-            self.token = SyntaxKind::EndOfFile;
-            self.token_end = self.pos;
-            return self.token;
-        }
+        let token = loop {
+            self.token_pos = self.pos;
 
-        // Decode the actual UTF-8 character at the current position.
-        // For ASCII bytes, this is equivalent to `as_bytes()[pos] as char`,
-        // but for multi-byte characters (e.g., CJK), it correctly decodes
-        // the full codepoint instead of just the first byte.
-        let c = self.text[self.pos..].chars().next().unwrap();
-
-        // Skip trivia (whitespace, comments) if applicable
-        if is_whitespace(c) {
-            self.scan_whitespace();
-            return self.scan();
-        }
-
-        if c == '/' && self.pos + 1 < self.end {
-            let next = self.text.as_bytes()[self.pos + 1] as char;
-            if next == '/' {
-                let comment_start = self.pos;
-                self.scan_single_line_comment();
-                self.process_comment_directive(comment_start, self.pos, false);
-                return self.scan();
+            if self.pos >= self.end {
+                self.token = SyntaxKind::EndOfFile;
+                self.token_end = self.pos;
+                break self.token;
             }
-            if next == '*' {
-                let comment_start = self.pos;
-                self.scan_multi_line_comment();
-                self.process_comment_directive(comment_start, self.pos, true);
-                return self.scan();
+
+            // Decode the actual UTF-8 character at the current position.
+            // For ASCII bytes, this is equivalent to `as_bytes()[pos] as char`,
+            // but for multi-byte characters (e.g., CJK), it correctly decodes
+            // the full codepoint instead of just the first byte.
+            let c = self.text[self.pos..].chars().next().unwrap();
+
+            // Skip trivia (whitespace, comments) by `continue`-ing the loop so
+            // `full_start_pos` is preserved while `token_pos` advances past
+            // the trivia on the next iteration.
+            if is_whitespace(c) {
+                self.scan_whitespace();
+                continue;
             }
-        }
 
-        // Identifier or keyword
-        if is_identifier_start(c) {
-            return self.scan_identifier();
-        }
+            if c == '/' && self.pos + 1 < self.end {
+                let next = self.text.as_bytes()[self.pos + 1] as char;
+                if next == '/' {
+                    let comment_start = self.pos;
+                    self.scan_single_line_comment();
+                    self.process_comment_directive(comment_start, self.pos, false);
+                    continue;
+                }
+                if next == '*' {
+                    let comment_start = self.pos;
+                    self.scan_multi_line_comment();
+                    self.process_comment_directive(comment_start, self.pos, true);
+                    continue;
+                }
+            }
 
-        // Number
-        if is_digit(c)
-            || (c == '.'
-                && self.pos + 1 < self.end
-                && is_digit(self.text.as_bytes()[self.pos + 1] as char))
-        {
-            return self.scan_number();
-        }
+            // Identifier or keyword
+            if is_identifier_start(c) {
+                break self.scan_identifier();
+            }
 
-        // String
-        if c == '"' || c == '\'' {
-            return self.scan_string(c);
-        }
+            // Number
+            if is_digit(c)
+                || (c == '.'
+                    && self.pos + 1 < self.end
+                    && is_digit(self.text.as_bytes()[self.pos + 1] as char))
+            {
+                break self.scan_number();
+            }
 
-        // Template literal start
-        if c == '`' {
-            return self.scan_template();
-        }
+            // String
+            if c == '"' || c == '\'' {
+                break self.scan_string(c);
+            }
 
-        // Punctuation
-        self.scan_punctuation()
+            // Template literal start
+            if c == '`' {
+                break self.scan_template();
+            }
+
+            // Punctuation
+            break self.scan_punctuation();
+        };
+        self.has_preceding_line_break = self.preceding_line_break;
+        token
     }
 
     /// Continue scanning a template literal after a `${...}` expression.
@@ -517,6 +547,9 @@ impl Scanner {
         self.has_preceding_line_break = self.preceding_line_break;
         self.preceding_line_break = false;
         self.token_pos = self.pos;
+        // Template continuation does not skip trivia, so the full start equals
+        // the token start.
+        self.full_start_pos = self.pos;
 
         let mut has_substitution = false;
         while self.pos < self.end {
@@ -1362,6 +1395,307 @@ fn unescape_string(s: &str) -> String {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Trivia helpers (free functions over source text)
+//
+// Mirror Go's `scanner.SkipTrivia` / `GetLeadingCommentRanges` /
+// `GetTrailingCommentRanges` / `iterateCommentRanges` / shebang helpers
+// (`scanner.go:2307-2504, 2800-2917`). These reconstruct comment ranges and
+// advance past trivia from raw source text without holding a `Scanner`.
+// ────────────────────────────────────────────────────────────────────────────
+
+/// Kind of comment range, mirroring Go's `ast.KindSingleLineCommentTrivia` /
+/// `ast.KindMultiLineCommentTrivia`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CommentRangeKind {
+    SingleLine,
+    MultiLine,
+}
+
+/// A comment range reconstructed from source text. Mirrors Go's
+/// `ast.CommentRange` (`ast.go:2979-2983`): a text range plus the comment
+/// kind and whether a line break follows it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CommentRange {
+    pub pos: usize,
+    pub end: usize,
+    pub kind: CommentRangeKind,
+    pub has_trailing_new_line: bool,
+}
+
+/// Decode the UTF-8 rune at `pos` in `text`, returning `(char, byte_size)`.
+/// Mirrors Go's `utf8.DecodeRuneInString`. Assumes `pos < text.len()`.
+fn decode_char(text: &str, pos: usize) -> (char, usize) {
+    let c = text[pos..].chars().next().unwrap();
+    (c, c.len_utf8())
+}
+
+/// Whether `c` is "whitespace-like" (tab, vtab, formFeed, space, non-breaking
+/// space, BOM, or any Unicode `White_Space` property character). Mirrors Go's
+/// `stringutil.IsWhiteSpaceLike`.
+fn is_whitespace_like(c: char) -> bool {
+    matches!(c, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}') || c.is_whitespace()
+}
+
+/// Whether `text` starts with a shebang (`#!`) at `pos == 0`. Mirrors Go's
+/// `isShebangTrivia` (`scanner.go:2475-2483`).
+fn is_shebang_trivia(text: &str, pos: usize) -> bool {
+    if text.len() < 2 {
+        return false;
+    }
+    debug_assert_eq!(pos, 0, "shebangs check must only be done at the start of the file");
+    text.as_bytes()[0] == b'#' && text.as_bytes()[1] == b'!'
+}
+
+/// Advance past a shebang at `pos == 0`, returning the new position. Mirrors
+/// Go's `scanShebangTrivia` (`scanner.go:2485-2495`).
+fn scan_shebang_trivia(text: &str, pos: usize) -> usize {
+    let text_len = text.len();
+    let mut pos = pos + 2;
+    while pos < text_len {
+        let (ch, size) = decode_char(text, pos);
+        if is_line_break(ch) {
+            break;
+        }
+        pos += size;
+    }
+    pos
+}
+
+/// Return the shebang text (including `#!`) if the file starts with one, else
+/// empty string. Mirrors Go's `GetShebang` (`scanner.go:2497-2504`).
+pub fn get_shebang(text: &str) -> &str {
+    if !is_shebang_trivia(text, 0) {
+        return "";
+    }
+    let end = scan_shebang_trivia(text, 0);
+    &text[..end]
+}
+
+/// Advance `pos` past trivia (whitespace and comments) in `text`, returning
+/// the position of the next non-trivia character. Mirrors Go's `SkipTrivia`
+/// (`scanner.go:2307-2400`, without options). Conflict-marker trivia and
+/// JSDoc `*` consumption are not yet handled (deferred).
+pub fn skip_trivia(text: &str, pos: usize) -> usize {
+    let bytes = text.as_bytes();
+    let text_len = bytes.len();
+    let mut pos = pos;
+    loop {
+        if pos >= text_len {
+            return pos;
+        }
+        let c = bytes[pos] as char;
+        match c {
+            '\r' => {
+                if pos + 1 < text_len && bytes[pos + 1] == b'\n' {
+                    pos += 1;
+                }
+                pos += 1;
+                continue;
+            }
+            '\n' => {
+                pos += 1;
+                continue;
+            }
+            '\t' | '\x0B' | '\x0C' | ' ' => {
+                pos += 1;
+                continue;
+            }
+            '/' => {
+                if pos + 1 < text_len {
+                    if bytes[pos + 1] == b'/' {
+                        pos += 2;
+                        while pos < text_len {
+                            let (ch, size) = decode_char(text, pos);
+                            if is_line_break(ch) {
+                                break;
+                            }
+                            pos += size;
+                        }
+                        continue;
+                    }
+                    if bytes[pos + 1] == b'*' {
+                        pos += 2;
+                        while pos < text_len {
+                            if bytes[pos] == b'*'
+                                && pos + 1 < text_len
+                                && bytes[pos + 1] == b'/'
+                            {
+                                pos += 2;
+                                break;
+                            }
+                            let (_, size) = decode_char(text, pos);
+                            pos += size;
+                        }
+                        continue;
+                    }
+                }
+                return pos;
+            }
+            '#' => {
+                if pos == 0 && is_shebang_trivia(text, pos) {
+                    pos = scan_shebang_trivia(text, pos);
+                    continue;
+                }
+                return pos;
+            }
+            _ => {
+                let (ch, size) = decode_char(text, pos);
+                if ch > '\u{7F}' && is_whitespace_like(ch) {
+                    pos += size;
+                    continue;
+                }
+                return pos;
+            }
+        }
+    }
+}
+
+/// Reconstruct leading comment ranges preceding `pos` in `text`. Mirrors Go's
+/// `GetLeadingCommentRanges` (`scanner.go:2800-2802`).
+pub fn get_leading_comment_ranges(text: &str, pos: usize) -> Vec<CommentRange> {
+    iterate_comment_ranges(text, pos, false)
+}
+
+/// Reconstruct trailing comment ranges following `pos` in `text` (up to the
+/// next line break). Mirrors Go's `GetTrailingCommentRanges`
+/// (`scanner.go:2804-2806`).
+pub fn get_trailing_comment_ranges(text: &str, pos: usize) -> Vec<CommentRange> {
+    iterate_comment_ranges(text, pos, true)
+}
+
+/// Shared implementation for leading/trailing comment-range reconstruction.
+/// Mirrors Go's `iterateCommentRanges` (`scanner.go:2814-2917`). `trailing`
+/// means "stop at the first line break"; otherwise collect comments that
+/// follow the position, including those separated by line breaks.
+fn iterate_comment_ranges(text: &str, pos: usize, trailing: bool) -> Vec<CommentRange> {
+    let bytes = text.as_bytes();
+    let text_len = bytes.len();
+    let mut pos = pos;
+    let mut result: Vec<CommentRange> = Vec::new();
+
+    // Pending comment range (emitted when the next range arrives, so trailing
+    // new-line info is known). Mirrors Go's pending* locals.
+    let mut pending_pos: usize = 0;
+    let mut pending_end: usize = 0;
+    let mut pending_kind: CommentRangeKind = CommentRangeKind::SingleLine;
+    let mut pending_has_trailing_new_line = false;
+    let mut has_pending = false;
+
+    let mut collecting = trailing;
+    if pos == 0 {
+        // At file start, leading comment collection starts immediately.
+        collecting = true;
+        if is_shebang_trivia(text, pos) {
+            pos = scan_shebang_trivia(text, pos);
+        }
+    }
+
+    while pos < text_len {
+        let (ch, size) = decode_char(text, pos);
+        match ch {
+            '\r' => {
+                if pos + 1 < text_len && bytes[pos + 1] == b'\n' {
+                    pos += 1;
+                }
+                pos += 1;
+                if trailing {
+                    break;
+                }
+                collecting = true;
+                if has_pending {
+                    pending_has_trailing_new_line = true;
+                }
+                continue;
+            }
+            '\n' => {
+                pos += 1;
+                if trailing {
+                    break;
+                }
+                collecting = true;
+                if has_pending {
+                    pending_has_trailing_new_line = true;
+                }
+                continue;
+            }
+            '\t' | '\x0B' | '\x0C' | ' ' => {
+                pos += 1;
+                continue;
+            }
+            '/' => {
+                let mut next_char = b'\0';
+                if pos + 1 < text_len {
+                    next_char = bytes[pos + 1];
+                }
+                let mut has_trailing_new_line = false;
+                if next_char == b'/' || next_char == b'*' {
+                    let kind = if next_char == b'/' {
+                        CommentRangeKind::SingleLine
+                    } else {
+                        CommentRangeKind::MultiLine
+                    };
+                    let start_pos = pos;
+                    pos += 2;
+                    if next_char == b'/' {
+                        while pos < text_len {
+                            let (c, s) = decode_char(text, pos);
+                            if is_line_break(c) {
+                                has_trailing_new_line = true;
+                                break;
+                            }
+                            pos += s;
+                        }
+                    } else {
+                        // Multi-line: search for `*/`.
+                        if let Some(i) = text[pos..].find("*/") {
+                            pos += i + 2;
+                        } else {
+                            pos = text_len;
+                        }
+                    }
+                    if collecting {
+                        if has_pending {
+                            result.push(CommentRange {
+                                pos: pending_pos,
+                                end: pending_end,
+                                kind: pending_kind,
+                                has_trailing_new_line: pending_has_trailing_new_line,
+                            });
+                        }
+                        pending_pos = start_pos;
+                        pending_end = pos;
+                        pending_kind = kind;
+                        pending_has_trailing_new_line = has_trailing_new_line;
+                        has_pending = true;
+                    }
+                    continue;
+                }
+                break;
+            }
+            _ => {
+                if ch > '\u{7F}' && is_whitespace_like(ch) {
+                    if has_pending && is_line_break(ch) {
+                        pending_has_trailing_new_line = true;
+                    }
+                    pos += size;
+                    continue;
+                }
+                break;
+            }
+        }
+    }
+    if has_pending {
+        result.push(CommentRange {
+            pos: pending_pos,
+            end: pending_end,
+            kind: pending_kind,
+            has_trailing_new_line: pending_has_trailing_new_line,
+        });
+    }
+    result
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Tests
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -1731,5 +2065,199 @@ mod tests {
         assert_eq!(directives.len(), 2);
         assert_eq!(directives[0].kind, CommentDirectiveKind::Ignore);
         assert_eq!(directives[1].kind, CommentDirectiveKind::ExpectError);
+    }
+
+    // ────────────────────────────────────────────────────────────────────
+    // Trivia helpers (P2.1)
+    // ────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn skip_trivia_whitespace_and_newlines() {
+        // Spaces, tabs, newlines should all be skipped.
+        assert_eq!(skip_trivia("  \t\n  x", 0), 6);
+        assert_eq!(skip_trivia("\n\n\nx", 0), 3);
+        assert_eq!(skip_trivia("x", 0), 0);
+        // Empty string -> pos 0.
+        assert_eq!(skip_trivia("", 0), 0);
+    }
+
+    #[test]
+    fn skip_trivia_single_line_comment() {
+        // `//` consumes up to (but not including) the line break.
+        assert_eq!(skip_trivia("// comment\nx", 0), 11);
+        // `//` at EOF.
+        assert_eq!(skip_trivia("// eof", 0), 6);
+    }
+
+    #[test]
+    fn skip_trivia_multi_line_comment() {
+        // `/* comment */` is 13 bytes; `x` is at pos 13.
+        assert_eq!(skip_trivia("/* comment */x", 0), 13);
+        // Unterminated multi-line comment consumes to EOF.
+        assert_eq!(skip_trivia("/* unterminated", 0), 15);
+        // Multi-line comment that doesn't start at `/` should not be skipped.
+        assert_eq!(skip_trivia("abc", 0), 0);
+    }
+
+    #[test]
+    fn skip_trivia_shebang_at_start() {
+        assert_eq!(skip_trivia("#!/usr/bin/env node\nlet x;", 0), 20);
+        // `#!` not at start of file should not be treated as trivia.
+        assert_eq!(skip_trivia(" #!/foo", 1), 1);
+    }
+
+    #[test]
+    fn skip_trivia_combined() {
+        assert_eq!(skip_trivia("#!/usr/bin/env node\n// hello\n/* world */\nlet x;", 0), 41);
+    }
+
+    #[test]
+    fn get_shebang_returns_text() {
+        assert_eq!(get_shebang("#!/usr/bin/env node\nlet x;"), "#!/usr/bin/env node");
+        assert_eq!(get_shebang("let x;"), "");
+        assert_eq!(get_shebang("#!only\nmore"), "#!only");
+    }
+
+    #[test]
+    fn full_start_pos_tracks_leading_trivia() {
+        // `let x = 1;`: `let`=0-2, ` `=3, `x`=4, ` `=5, `=`=6, ` `=7, `1`=8, `;`=9.
+        let mut s = Scanner::new("let x = 1;");
+        s.scan();
+        assert_eq!(s.full_start_pos(), 0);
+        assert_eq!(s.token_pos(), 0);
+        assert_eq!(s.token(), SyntaxKind::LetKeyword);
+
+        // After `let`, scanner skips trivia (` `) before `x`. The full start
+        // of `x` should be 3 (start of the space), while token_pos is 4 (the `x`).
+        s.scan();
+        assert_eq!(s.full_start_pos(), 3);
+        assert_eq!(s.token_pos(), 4);
+        assert_eq!(s.token(), SyntaxKind::Identifier);
+
+        // After `x`, scanner skips ` ` (trivia) before `=`. full_start_pos
+        // should be 5 (after `x`), token_pos 6 (the `=`).
+        s.scan();
+        assert_eq!(s.full_start_pos(), 5);
+        assert_eq!(s.token_pos(), 6);
+        assert_eq!(s.token(), SyntaxKind::EqualsToken);
+    }
+
+    #[test]
+    fn full_start_pos_preserved_across_comments() {
+        // Leading single-line comment, then `let`. full_start_pos should be 0
+        // (where the comment starts), token_pos should be 11 (after `\n`).
+        let mut s = Scanner::new("// hi\nlet x;");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::LetKeyword);
+        assert_eq!(s.full_start_pos(), 0);
+        assert_eq!(s.token_pos(), 6);
+
+        // Multi-line comment between two tokens.
+        let mut s = Scanner::new("a /* c */ b");
+        s.scan(); // a
+        assert_eq!(s.token(), SyntaxKind::Identifier);
+        assert_eq!(s.token_pos(), 0);
+        s.scan(); // b
+        assert_eq!(s.token(), SyntaxKind::Identifier);
+        // full_start_pos should be 1 (start of the space/comment trivia).
+        assert_eq!(s.full_start_pos(), 1);
+        assert_eq!(s.token_pos(), 10);
+    }
+
+    #[test]
+    fn get_leading_comment_ranges_basic() {
+        // Two leading single-line comments, then code.
+        // `// first` = 8 bytes (0-7), `\n` = 1 (8), `// second` = 9 bytes (9-17), end=18.
+        let text = "// first\n// second\nlet x;";
+        let ranges = get_leading_comment_ranges(text, 0);
+        assert_eq!(ranges.len(), 2);
+        assert_eq!(ranges[0].kind, CommentRangeKind::SingleLine);
+        assert_eq!(ranges[0].pos, 0);
+        assert_eq!(ranges[0].end, 8);
+        assert!(ranges[0].has_trailing_new_line);
+        assert_eq!(ranges[1].pos, 9);
+        assert_eq!(ranges[1].end, 18);
+        assert!(ranges[1].has_trailing_new_line);
+    }
+
+    #[test]
+    fn get_leading_comment_ranges_multi_line() {
+        let text = "/* hello */let x;";
+        let ranges = get_leading_comment_ranges(text, 0);
+        assert_eq!(ranges.len(), 1);
+        assert_eq!(ranges[0].kind, CommentRangeKind::MultiLine);
+        assert_eq!(ranges[0].pos, 0);
+        assert_eq!(ranges[0].end, 11);
+        assert!(!ranges[0].has_trailing_new_line);
+    }
+
+    #[test]
+    fn get_leading_comment_ranges_from_middle() {
+        // `let x; // trailing\n// leading for next\nlet y;`
+        //  pos: 0-5=`let x;`, 6=` `, 7-17=`// trailing`, 18=`\n`,
+        //  19-37=`// leading for next` (19 bytes), 38=`\n`, 39+=`let y;`
+        let text = "let x; // trailing\n// leading for next\nlet y;";
+        // Start at pos 18 (the `\n` after the trailing comment). Leading mode
+        // treats this newline as a separator and collects the next comment.
+        let ranges = get_leading_comment_ranges(text, 18);
+        assert_eq!(ranges.len(), 1);
+        assert_eq!(ranges[0].kind, CommentRangeKind::SingleLine);
+        assert_eq!(ranges[0].pos, 19);
+        assert_eq!(ranges[0].end, 38);
+        assert!(ranges[0].has_trailing_new_line);
+    }
+
+    #[test]
+    fn get_leading_comment_ranges_none() {
+        let ranges = get_leading_comment_ranges("let x;", 0);
+        assert!(ranges.is_empty());
+    }
+
+    #[test]
+    fn get_trailing_comment_ranges_basic() {
+        // `let x; // trailing\nlet y;`
+        //  pos: 0-5=`let x;`, 6=` `, 7-17=`// trailing`, 18=`\n`
+        // Trailing comment starts at pos 7 (after the space).
+        let text = "let x; // trailing\nlet y;";
+        let ranges = get_trailing_comment_ranges(text, 6);
+        assert_eq!(ranges.len(), 1);
+        assert_eq!(ranges[0].kind, CommentRangeKind::SingleLine);
+        assert_eq!(ranges[0].pos, 7);
+        assert_eq!(ranges[0].end, 18);
+        assert!(ranges[0].has_trailing_new_line);
+    }
+
+    #[test]
+    fn get_trailing_comment_ranges_stops_at_line_break() {
+        // When `pos` is on a line with no trailing comment, return nothing.
+        let text = "let x;\nlet y; // c\n";
+        let ranges = get_trailing_comment_ranges(text, 0);
+        assert!(ranges.is_empty());
+    }
+
+    #[test]
+    fn get_trailing_comment_ranges_multi_line() {
+        // `let x; /* c */ let y;`
+        //  pos: 0-5=`let x;`, 6=` `, 7-13=`/* c */`, 14=` `, 15+=`let y;`
+        let text = "let x; /* c */ let y;";
+        let ranges = get_trailing_comment_ranges(text, 6);
+        assert_eq!(ranges.len(), 1);
+        assert_eq!(ranges[0].kind, CommentRangeKind::MultiLine);
+        assert_eq!(ranges[0].pos, 7);
+        assert_eq!(ranges[0].end, 14);
+        assert!(!ranges[0].has_trailing_new_line);
+    }
+
+    #[test]
+    fn get_leading_comment_ranges_shebang_skipped() {
+        // `#!/usr/bin/env node` = 19 bytes (0-18), `\n` = 1 (19),
+        // `// real comment` = 15 bytes (20-34), end=35.
+        let text = "#!/usr/bin/env node\n// real comment\nlet x;";
+        let ranges = get_leading_comment_ranges(text, 0);
+        assert_eq!(ranges.len(), 1);
+        assert_eq!(ranges[0].pos, 20);
+        assert_eq!(ranges[0].end, 35);
+        assert_eq!(ranges[0].kind, CommentRangeKind::SingleLine);
+        assert!(ranges[0].has_trailing_new_line);
     }
 }

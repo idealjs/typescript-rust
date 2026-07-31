@@ -70,7 +70,7 @@ arity）+ 12 个 parity fixtures。
 
 | 模块 | Rust 行数（实测） | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
-| Scanner | 1570 | 4277 | 36% | 转义/JSX/正则/CommentDirectives/ASI 完成；缺 trivia 节点、完整 regex 校验 |
+| Scanner | 2263 | 4277 | ~53% | 转义/JSX/正则/CommentDirectives/ASI 完成；trivia 基础设施（fullStartPos + skip_trivia + comment ranges + shebang）完成；缺 TokenFlags 完整位集、conflict-marker trivia、完整 regex body 校验 |
 | Parser | 7282 | 9275 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；缺 reparser/jsdoc |
 | Binder | 2104 | ~3601 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 + EnumDeclaration 容器化 完成；缺 ReduceLabel/Shared/Referenced 后处理、labeled statement、完整 scope chain、ReferenceResolver |
 | Checker | 22527 | ~59975 | ~20% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查 + 比较无重叠检查 TS2367 + 不可调用/不可构造检查 TS2349/TS2351 + 只读属性赋值检查 TS2540 + declaration merge checker 侧 + 参数数量检查 TS2554/TS2555/TS2556 + rest 元素类型检查；emitresolver visibility tracking 完成；501 parity fixtures 通过。**已知 stub**：mapper placeholder（3 处闭包回退）、freshness tracking、isEnumTypeRelatedTo/isUnknownLikeUnionType 未迁移、nodebuilder symbol_to_type_node |
@@ -424,8 +424,25 @@ via `schema.ts`，生成 `syntax_kind_generated.rs` + `node_data_generated.rs`�
 `unicode-ident` 替换、`CommentDirectives` 收集、`PrecedingLineBreak` 在 ASI
 路径完整接入。
 
-- [ ] 保留 trivia 节点（`WhitespaceTrivia`/`NewLineTrivia`/`CommentTrivia`），
-  对齐 Go 的 `trivia` 输出。
+已完成（trivia 基础设施，对齐 Go `scanner.go:2307-2504, 2800-2917`）：
+- `Scanner` 新增 `full_start_pos` 字段（对齐 Go `fullStartPos`），`scan()` 重构
+  为 loop 跳过 trivia 时保留 `full_start_pos` 而 `token_pos` 前进；`has_preceding_line_break`
+  改为 loop 退出后从 `preceding_line_break` 快照（修复了 trivia 中遇到的换行未反映到返回 token 的 bug）。
+- 新增 free function `skip_trivia`（对齐 Go `SkipTrivia`，不含 conflict-marker/JSDoc 选项）、
+  `get_leading_comment_ranges`/`get_trailing_comment_ranges`/`iterate_comment_ranges`
+  （对齐 Go 同名函数，pending-range 策略一致）、`CommentRange`/`CommentRangeKind`、
+  `get_shebang`/`is_shebang_trivia`/`scan_shebang_trivia`、`decode_char`/`is_whitespace_like`
+  辅助。13 个新单测覆盖 skip_trivia（空白/单行注释/多行注释/shebang/组合）、
+  full_start_pos（标识符间 trivia 保留、跨注释保留）、leading/trailing comment ranges
+  （单行/多行/中间位置/shebang 跳过/无注释/行尾停止）。
+
+- [ ] 迁移 `TokenFlags` 完整位集（对齐 Go `ast.TokenFlags`）：当前仅有
+  `PrecedingLineBreak`；还需 `PrecedingJSDocComment`/`PrecedingJSDocLeadingAsterisks`/
+  `PrecedingJSDocWithDeprecated`/`PrecedingJSDocWithSeeOrLink`/`Unterminated`/
+  `UnicodeEscape`/`ExtendedUnicodeEscape`/`HexSpecifier`/`BinarySpecifier`/
+  `OctalSpecifier`，在 scanner 内 OR 累积并在 parser/binder 消费。
+- [ ] 支持 `SkipTriviaEx` options（`StopAfterLineBreak`/`StopAtComments`/`InJSDoc`）。
+- [ ] 迁移 conflict-marker trivia（`isConflictMarkerTrivia`/`scanConflictMarkerTrivia`）。
 
 ### P2.2 Scanner 正则字面量
 
