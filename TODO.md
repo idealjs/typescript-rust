@@ -263,7 +263,7 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   Go `getExtendsConfigPath`）+ path normalization（`./base` 不再残留 `./`）。
   5 个回归测试覆盖 own-overrides-extended / array-last-wins / cmd-overrides-own /
   include-first-extended-wins / json-suffix。**遗留**：package/Node-style
-  resolution（`module.ResolveConfig`）、extended config cache。
+  resolution（`module.ResolveConfig`）。
 - [x] `${configDir}` 模板替换（TS 5.5+，已完成）：新增
   `starts_with_config_dir_template`（大小写不敏感前缀检测，对齐 Go
   `startsWithConfigDirTemplate`）、`get_substituted_path_with_config_dir_template`
@@ -280,8 +280,8 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   config 的 `${configDir}` 已在递归解析时用 extended 目录解析）。include/exclude/
   files 的 `${configDir}` 也在 `expand_file_names` 之前替换。11 个单测覆盖
   outDir/rootDir/declarationDir/tsBuildInfoFile/rootDirs/paths/include/exclude/
-  files/extends/非前缀场景。**遗留**：package/Node-style resolution、
-  extended config cache。
+  files/extends/非前缀场景。**遗留**：package/Node-style resolution
+  （`module.ResolveConfig`）。
 - [x] inherited include/exclude/files 的 path-rewriting（已完成）：当 extended
   config 声明了 `include`/`exclude`/`files` 而 own config 未声明时，继承的相对
   路径需改写为相对于 own config 目录的路径（而非 extended config 目录），对齐
@@ -305,8 +305,21 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
   into result）的 skip set。command-line 选项优先于 own 的 null（cmd > null）：
   若 cmd 已设置该字段（非默认值），null 不影响结果。覆盖 tristate/string/enum
   三类字段的 null 清除、cmd 优先级、单字段隔离、多字段同时 null。6 个单测。
-  **遗留**：package/Node-style resolution（`module.ResolveConfig`）、
-  extended config cache。
+  **遗留**：package/Node-style resolution（`module.ResolveConfig`）。
+- [x] extended config cache（已完成）：为 tsconfig extends 实现缓存，在菱形
+  继承场景（A extends B 和 C，B 和 C 都 extends D）中 D 只解析一次并复用，
+  对齐 Go `ExtendedConfigCache`（`tsconfigparsing.go:154`）+
+  `getExtendedConfig` 的 cycle-bypass 逻辑（`tsconfigparsing.go:972`）。
+  新增 `ExtendedConfigCache` 结构体，包含 `entries: HashMap<String,
+  ParsedCommandLine>` 和 `get_or_parse` 方法：循环条目（在 resolution_stack
+  中）bypass 缓存（避免不同继承分支的错误结果），未缓存则递归解析后存入。
+  修改 `get_parsed_command_line_of_config_file` 创建缓存并传给内部
+  `_with_stack` 函数；extends 循环中用 `cache.get_or_parse` 替代直接递归。
+  缓存的 errors 仍按引用次数传播（B 和 C 各 append 一次 D 的 errors，对齐
+  Go `getExtendedConfig` 返回 cached errors 的行为）。3 个单测覆盖菱形继承
+  （strict/noImplicitAny 正确传播）、错误不重复（TS5025 出现 2 次：D via B
+  和 C）、循环不缓存（A↔B 循环报告 TS18000）。**遗留**：package/Node-style
+  resolution（`module.ResolveConfig`）。
 - [x] 将 raw `references` 升级为 typed project references：新增
   `core::project_reference::ProjectReference { path, original_path, circular }`
   （对齐 Go `core.ProjectReference`）；`ParsedCommandLine.references` 由
@@ -317,8 +330,7 @@ Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
 - [x] 对齐 `extends` 的 cycle diagnostics：`extends` 循环检测
   （`resolution_stack` + `Circularity_detected_while_resolving_configuration_Colon_0`
   TS18000）+ `extends` 数组支持（`"extends": ["a","b"]` 多路合并）。
-  **遗留**：package/Node-style resolution（`module.ResolveConfig`）和
-  extended config cache。
+  **遗留**：package/Node-style resolution（`module.ResolveConfig`）。
 - [x] CLI 错误诊断对齐：`execute/mod.rs` + `tsoptions/mod.rs` 中 ad-hoc
   `writeln!("error TSxxxx: ...")` 全部替换为 `Diagnostic::new` + 消息常量
   （TS6369 build-first / TS6370 options-cannot-combine / TS5042 project-mixed /

@@ -1087,6 +1087,74 @@ pub struct ParsedCommandLine {
     pub watch_options: WatchOptions,
 }
 
+/// Cache for parsed extended tsconfig files, mirroring Go's
+/// `ExtendedConfigCache` (`tsconfigparsing.go:154`). In diamond inheritance
+/// scenarios (A extends B and C; both B and C extend D), D is parsed once and
+/// reused. The cache is keyed by the normalized absolute path of the config
+/// file. Cycle entries are bypassed (not cached) to avoid incorrect results
+/// across different branches of the extends graph.
+#[derive(Default)]
+pub struct ExtendedConfigCache {
+    entries: HashMap<String, ParsedCommandLine>,
+}
+
+impl ExtendedConfigCache {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Returns the number of cached entries (for testing/diagnostics).
+    pub fn len(&self) -> usize {
+        self.entries.len()
+    }
+
+    /// Whether the cache is empty.
+    pub fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
+
+    /// Get a cached extended config or parse and cache it. Bypasses the cache
+    /// when the config is in the resolution stack (cycle), mirroring Go's
+    /// `getExtendedConfig` cycle-bypass logic (`tsconfigparsing.go:988`).
+    fn get_or_parse(
+        &mut self,
+        resolved_path: &str,
+        config_file_name: &str,
+        current_dir: &str,
+        fs: &dyn FS,
+        resolution_stack: &[String],
+    ) -> ParsedCommandLine {
+        // Bypass cache when in a cycle — the recursive call will detect the
+        // cycle and return a circularity error. Caching cycle results would
+        // be incorrect since the same config might be valid in a different
+        // branch of the extends graph.
+        if resolution_stack.iter().any(|p| p == resolved_path) {
+            return get_parsed_command_line_of_config_file_with_stack(
+                config_file_name,
+                &CompilerOptions::default(),
+                current_dir,
+                fs,
+                resolution_stack,
+                self,
+            );
+        }
+        if let Some(cached) = self.entries.get(resolved_path) {
+            return cached.clone();
+        }
+        let parsed = get_parsed_command_line_of_config_file_with_stack(
+            config_file_name,
+            &CompilerOptions::default(),
+            current_dir,
+            fs,
+            resolution_stack,
+            self,
+        );
+        self.entries
+            .insert(resolved_path.to_string(), parsed.clone());
+        parsed
+    }
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct BuildOptions {
     pub clean: Tristate,
@@ -2171,12 +2239,14 @@ pub fn get_parsed_command_line_of_config_file(
     current_dir: &str,
     fs: &dyn FS,
 ) -> ParsedCommandLine {
+    let mut cache = ExtendedConfigCache::new();
     get_parsed_command_line_of_config_file_with_stack(
         config_file_name,
         base_options,
         current_dir,
         fs,
         &[],
+        &mut cache,
     )
 }
 
@@ -2186,6 +2256,7 @@ fn get_parsed_command_line_of_config_file_with_stack(
     current_dir: &str,
     fs: &dyn FS,
     resolution_stack: &[String],
+    cache: &mut ExtendedConfigCache,
 ) -> ParsedCommandLine {
     let mut result = ParsedCommandLine::default();
     result.compiler_options = base_options.clone();
@@ -2264,9 +2335,15 @@ fn get_parsed_command_line_of_config_file_with_stack(
             // in forward order (first wins).
             let mut extended_configs: Vec<(String, ParsedCommandLine)> = Vec::new();
             for ext_path in &extends_paths {
-                let parent = get_parsed_command_line_of_config_file_with_stack(
+                // Use the extended config cache to avoid re-parsing the same
+                // config in diamond inheritance scenarios (A extends B and C;
+                // both B and C extend D → D parsed once, reused). Mirrors
+                // Go's `getExtendedConfig` (`tsconfigparsing.go:972`).
+                let ext_resolved =
+                    tspath::get_normalized_absolute_path(ext_path, current_dir);
+                let parent = cache.get_or_parse(
+                    &ext_resolved,
                     ext_path,
-                    &CompilerOptions::default(),
                     current_dir,
                     fs,
                     &new_stack,
@@ -5711,6 +5788,141 @@ mod tests {
             ScriptTarget::None,
             "expected target=null to clear, got {:?}",
             parsed.compiler_options.target
+        );
+    }
+
+    // ── extended config cache (diamond inheritance) ───────────────────────
+    // Mirrors Go's `ExtendedConfigCache` (`tsconfigparsing.go:154`): in
+    // diamond scenarios (A extends B and C; both B and C extend D), D is
+    // parsed once and reused from the cache.
+
+    #[test]
+    fn test_extends_diamond_inheritance() {
+        // Diamond: A extends [B, C]; B extends D; C extends D.
+        // D sets strict=true. Both B and C inherit it. A inherits from
+        // B (first in extends array, but options use last-wins so C wins
+        // for options D sets). The cache should parse D once and reuse.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/d.json",
+            r#"{ "compilerOptions": { "strict": true, "noImplicitAny": true } }"#,
+        );
+        fs.insert_file(
+            "/proj/b.json",
+            r#"{ "extends": "d.json" }"#,
+        );
+        fs.insert_file(
+            "/proj/c.json",
+            r#"{ "extends": "d.json" }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": ["b.json", "c.json"] }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // D's strict=true and noImplicitAny=true are inherited via B and C.
+        assert!(
+            parsed.compiler_options.strict.is_true(),
+            "expected strict=true from diamond D, got {:?}",
+            parsed.compiler_options.strict
+        );
+        assert!(
+            parsed.compiler_options.no_implicit_any.is_true(),
+            "expected noImplicitAny=true from diamond D, got {:?}",
+            parsed.compiler_options.no_implicit_any
+        );
+    }
+
+    #[test]
+    fn test_extends_diamond_no_duplicate_errors() {
+        // In a diamond, D's errors should appear in the result. Without
+        // the cache, D would be parsed twice and its errors duplicated.
+        // With the cache, D is parsed once, but its errors are still
+        // appended once per reference (B and C each append D's errors).
+        // This matches Go behavior where getExtendedConfig returns the
+        // cached errors each time.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        // D has a case-mismatch option which generates a TS5025 diagnostic
+        // (Unknown compiler option 'Strict'. Did you mean 'strict'?).
+        fs.insert_file(
+            "/proj/d.json",
+            r#"{ "compilerOptions": { "strict": true, "Strict": true } }"#,
+        );
+        fs.insert_file(
+            "/proj/b.json",
+            r#"{ "extends": "d.json" }"#,
+        );
+        fs.insert_file(
+            "/proj/c.json",
+            r#"{ "extends": "d.json" }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": ["b.json", "c.json"] }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // D's TS5025 error is propagated through both B and C — the cache
+        // parses D once but returns the cached errors each time, so the
+        // error appears twice (once per reference). This matches Go's
+        // `getExtendedConfig` behavior.
+        let ts5025_count = parsed
+            .errors
+            .iter()
+            .filter(|d| d.code == 5025)
+            .count();
+        assert_eq!(
+            ts5025_count, 2,
+            "expected exactly 2 TS5025 errors (D via B and C), got {}: {:?}",
+            ts5025_count, parsed.errors
+        );
+    }
+
+    #[test]
+    fn test_extends_cache_cycle_not_cached() {
+        // Cycle: A extends B, B extends A. The cache should bypass
+        // entries in the resolution stack to avoid incorrect caching.
+        // The cycle should be detected and reported as TS18000.
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/proj");
+        fs.insert_file(
+            "/proj/a.json",
+            r#"{ "extends": "b.json" }"#,
+        );
+        fs.insert_file(
+            "/proj/b.json",
+            r#"{ "extends": "a.json" }"#,
+        );
+        fs.insert_file(
+            "/proj/tsconfig.json",
+            r#"{ "extends": "a.json" }"#,
+        );
+        let parsed = get_parsed_command_line_of_config_file(
+            "/proj/tsconfig.json",
+            &CompilerOptions::default(),
+            "/proj",
+            &fs,
+        );
+        // Should detect the cycle and report TS18000.
+        let has_cycle = parsed
+            .errors
+            .iter()
+            .any(|d| d.code == 18000);
+        assert!(
+            has_cycle,
+            "expected TS18000 circularity error, got errors: {:?}",
+            parsed.errors
         );
     }
 }
