@@ -350,6 +350,12 @@ pub struct Scanner {
     /// in sync with `TOKEN_FLAGS_PRECEDING_LINE_BREAK` for backwards
     /// compatibility with existing parser call sites.
     token_flags: TokenFlags,
+    /// Leading-asterisk skip depth for JSDoc type scanning. When non-zero,
+    /// a single `*` at line start is consumed as trivia and sets
+    /// `TOKEN_FLAGS_PRECEDING_JSDOC_LEADING_ASTERISKS`. Mirrors Go's
+    /// `Scanner.skipJSDocLeadingAsterisks` (`scanner.go:200`), which is a
+    /// counter to support nested JSDoc contexts.
+    skip_jsdoc_leading_asterisks: i32,
     error_callback: Option<ErrorCallback>,
     /// Errors collected when no `error_callback` is set (or always, for
     /// retrieval via `take_errors`).
@@ -405,6 +411,7 @@ impl Scanner {
             preceding_line_break: false,
             has_preceding_line_break: false,
             token_flags: TOKEN_FLAGS_NONE,
+            skip_jsdoc_leading_asterisks: 0,
             error_callback: None,
             errors: Vec::new(),
             comment_directives: Vec::new(),
@@ -536,6 +543,52 @@ impl Scanner {
         self.token_flags
     }
 
+    /// Whether the current token is preceded by a JSDoc comment (`/** ... */`).
+    /// Mirrors Go's `Scanner.HasPrecedingJSDocComment`.
+    pub fn has_preceding_jsdoc_comment(&self) -> bool {
+        token_flags_contains(self.token_flags, TOKEN_FLAGS_PRECEDING_JSDOC_COMMENT)
+    }
+
+    /// Whether the current token is preceded by a consumed JSDoc leading
+    /// asterisk. Mirrors Go's `Scanner.HasPrecedingJSDocLeadingAsterisks`.
+    pub fn has_preceding_jsdoc_leading_asterisks(&self) -> bool {
+        token_flags_contains(
+            self.token_flags,
+            TOKEN_FLAGS_PRECEDING_JSDOC_LEADING_ASTERISKS,
+        )
+    }
+
+    /// Whether the preceding JSDoc comment contains a `@deprecated` tag.
+    /// Mirrors Go's `Scanner.HasPrecedingJSDocWithDeprecatedTag`.
+    pub fn has_preceding_jsdoc_with_deprecated_tag(&self) -> bool {
+        token_flags_contains(
+            self.token_flags,
+            TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED,
+        )
+    }
+
+    /// Whether the preceding JSDoc comment contains a `@see` or `@link` tag.
+    /// Mirrors Go's `Scanner.HasPrecedingJSDocWithSeeOrLink`.
+    pub fn has_preceding_jsdoc_with_see_or_link(&self) -> bool {
+        token_flags_contains(
+            self.token_flags,
+            TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK,
+        )
+    }
+
+    /// Enable/disable skipping JSDoc leading asterisks. When enabled, a
+    /// single `*` at line start is consumed as trivia (setting
+    /// `TOKEN_FLAGS_PRECEDING_JSDOC_LEADING_ASTERISKS`) instead of producing
+    /// an `AsteriskToken`. This is a counter to support nested JSDoc
+    /// contexts. Mirrors Go's `Scanner.SetSkipJSDocLeadingAsterisks`.
+    pub fn set_skip_jsdoc_leading_asterisks(&mut self, skip: bool) {
+        if skip {
+            self.skip_jsdoc_leading_asterisks += 1;
+        } else {
+            self.skip_jsdoc_leading_asterisks -= 1;
+        }
+    }
+
     /// Current scan position.
     pub fn pos(&self) -> usize {
         self.pos
@@ -625,6 +678,33 @@ impl Scanner {
             // Template literal start
             if c == '`' {
                 break self.scan_template();
+            }
+
+            // JSDoc leading asterisk: when `skip_jsdoc_leading_asterisks` is
+            // active, consume a single `*` at line start as trivia (mirrors
+            // Go `scanner.go:569-575`). Only applies to `*` NOT followed by
+            // `*` or `=` (those form `**` / `*=` tokens). The flag is set
+            // once per token so only the first leading `*` is consumed; the
+            // `continue` preserves `full_start_pos` while `token_pos`
+            // advances past the asterisk on the next iteration.
+            if c == '*'
+                && self.skip_jsdoc_leading_asterisks != 0
+                && self.preceding_line_break
+                && !token_flags_contains(
+                    self.token_flags,
+                    TOKEN_FLAGS_PRECEDING_JSDOC_LEADING_ASTERISKS,
+                )
+            {
+                let next = if self.pos + 1 < self.end {
+                    self.text.as_bytes()[self.pos + 1] as char
+                } else {
+                    '\0'
+                };
+                if next != '*' && next != '=' {
+                    self.pos += 1;
+                    self.token_flags |= TOKEN_FLAGS_PRECEDING_JSDOC_LEADING_ASTERISKS;
+                    continue;
+                }
             }
 
             // Punctuation
@@ -720,6 +800,15 @@ impl Scanner {
     fn scan_multi_line_comment(&mut self) {
         // Skip /*
         self.pos += 2;
+        // Detect JSDoc: `/**` but not `/**/` (empty comment). Mirrors Go's
+        // `isJSDoc := s.char() == '*' && s.charAt(1) != '/'`
+        // (`scanner.go:642`). `token_pos` points at the opening `/` of the
+        // comment, used later to extract the full comment text for tag
+        // scanning (mirrors Go's `s.text[s.tokenStart:s.pos]`).
+        let is_jsdoc = self.pos < self.end
+            && self.text.as_bytes()[self.pos] as char == '*'
+            && (self.pos + 1 >= self.end || self.text.as_bytes()[self.pos + 1] as char != '/');
+        let comment_start = self.token_pos;
         while self.pos < self.end {
             let c = self.text.as_bytes()[self.pos] as char;
             if c == '*'
@@ -727,12 +816,26 @@ impl Scanner {
                 && self.text.as_bytes()[self.pos + 1] as char == '/'
             {
                 self.pos += 2;
-                break;
+                if is_jsdoc {
+                    self.token_flags |= TOKEN_FLAGS_PRECEDING_JSDOC_COMMENT;
+                    let comment_text = &self.text[comment_start..self.pos];
+                    self.token_flags |= scan_jsdoc_comment_for_tags(comment_text);
+                }
+                return;
             }
             if c == '\n' || c == '\r' {
                 self.preceding_line_break = true;
             }
             self.pos += 1;
+        }
+        // Unterminated comment: reached end of file without `*/`. Go reports
+        // `Asterisk_Slash_expected` here; the Rust scanner does not currently
+        // surface that diagnostic (a pre-existing gap). JSDoc flags are still
+        // set so callers can detect the preceding JSDoc comment.
+        if is_jsdoc {
+            self.token_flags |= TOKEN_FLAGS_PRECEDING_JSDOC_COMMENT;
+            let comment_text = &self.text[comment_start..self.pos];
+            self.token_flags |= scan_jsdoc_comment_for_tags(comment_text);
         }
     }
 
@@ -1570,6 +1673,63 @@ fn decode_char(text: &str, pos: usize) -> (char, usize) {
 /// `stringutil.IsWhiteSpaceLike`.
 fn is_whitespace_like(c: char) -> bool {
     matches!(c, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}') || c.is_whitespace()
+}
+
+/// Whether `text` starts with one of the given JSDoc tag `names` followed by
+/// a valid tag terminator (whitespace, `}`, `*`, or end-of-string). Mirrors
+/// Go's `hasJSDocTag` (`scanner.go:372-386`).
+fn has_jsdoc_tag(text: &str, names: &[&str]) -> bool {
+    for &name in names {
+        if !text.starts_with(name) {
+            continue;
+        }
+        if text.len() == name.len() {
+            return true;
+        }
+        let ch = text.as_bytes()[name.len()] as char;
+        if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '}' || ch == '*' {
+            return true;
+        }
+    }
+    false
+}
+
+/// Scan a JSDoc comment's text for `@deprecated`, `@see`, and `@link` tags
+/// and return the OR'd token flags to set. Mirrors Go's
+/// `Scanner.scanJSDocCommentForTags` (`scanner.go:350-368`).
+///
+/// Iterates over `@` occurrences in `comment_text`, checking each one against
+/// the tag name sets. Stops early once both flags are set. Returns
+/// `TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED` and/or
+/// `TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK` as appropriate (or
+/// `TOKEN_FLAGS_NONE` if no matching tags were found).
+fn scan_jsdoc_comment_for_tags(comment_text: &str) -> TokenFlags {
+    let mut flags = TOKEN_FLAGS_NONE;
+    let mut rest = comment_text;
+    loop {
+        let i = match rest.find('@') {
+            Some(i) => i,
+            None => return flags,
+        };
+        rest = &rest[i + 1..];
+        if !token_flags_contains(flags, TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED)
+            && has_jsdoc_tag(rest, &["deprecated"])
+        {
+            flags |= TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED;
+        }
+        if !token_flags_contains(flags, TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK)
+            && has_jsdoc_tag(rest, &["see", "link", "linkcode", "linkplain"])
+        {
+            flags |= TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK;
+        }
+        if token_flags_contains(
+            flags,
+            TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED
+                | TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK,
+        ) {
+            return flags;
+        }
+    }
 }
 
 /// Whether `text` starts with a shebang (`#!`) at `pos == 0`. Mirrors Go's
@@ -2826,5 +2986,237 @@ mod tests {
         let text = "<<<<<<< a\nlocal\n||||||| base\nshared\n=======\nremote\n>>>>>>> b\nx";
         let pos = skip_trivia_ex(text, 0, &SkipTriviaOptions::default(), None);
         assert_eq!(&text[pos..], "local\n||||||| base\nshared\n=======\nremote\n>>>>>>> b\nx");
+    }
+
+    // ────────────────────────────────────────────────────────────────────
+    // JSDoc TokenFlags (P2.1)
+    // ────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn token_flags_preceding_jsdoc_comment() {
+        // `/** ... */` is a JSDoc comment; the following token should have
+        // `PRECEDING_JSDOC_COMMENT` set.
+        let mut s = Scanner::new("/** doc */\nlet x");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::LetKeyword);
+        assert!(s.has_preceding_jsdoc_comment());
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_PRECEDING_JSDOC_COMMENT
+        ));
+    }
+
+    #[test]
+    fn token_flags_non_jsdoc_multi_line_comment() {
+        // `/* ... */` (single asterisk) is NOT a JSDoc comment.
+        let mut s = Scanner::new("/* not jsdoc */\nlet x");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::LetKeyword);
+        assert!(!s.has_preceding_jsdoc_comment());
+    }
+
+    #[test]
+    fn token_flags_empty_jsdoc_comment_not_flagged() {
+        // `/**/` is an empty multi-line comment, NOT a JSDoc comment (Go:
+        // `isJSDoc := s.char() == '*' && s.charAt(1) != '/'`).
+        let mut s = Scanner::new("/**/\nlet x");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::LetKeyword);
+        assert!(!s.has_preceding_jsdoc_comment());
+    }
+
+    #[test]
+    fn token_flags_jsdoc_deprecated_tag() {
+        // `@deprecated` tag sets `PRECEDING_JSDOC_WITH_DEPRECATED`.
+        let mut s = Scanner::new("/**\n * @deprecated\n */\nlet x");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::LetKeyword);
+        assert!(s.has_preceding_jsdoc_comment());
+        assert!(s.has_preceding_jsdoc_with_deprecated_tag());
+        assert!(!s.has_preceding_jsdoc_with_see_or_link());
+    }
+
+    #[test]
+    fn token_flags_jsdoc_see_tag() {
+        // `@see` tag sets `PRECEDING_JSDOC_WITH_SEE_OR_LINK`.
+        let mut s = Scanner::new("/**\n * @see foo\n */\nlet x");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::LetKeyword);
+        assert!(s.has_preceding_jsdoc_with_see_or_link());
+        assert!(!s.has_preceding_jsdoc_with_deprecated_tag());
+    }
+
+    #[test]
+    fn token_flags_jsdoc_link_tag() {
+        // `@link` tag also sets `PRECEDING_JSDOC_WITH_SEE_OR_LINK`.
+        let mut s = Scanner::new("/**\n * {@link foo}\n */\nlet x");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::LetKeyword);
+        assert!(s.has_preceding_jsdoc_with_see_or_link());
+    }
+
+    #[test]
+    fn token_flags_jsdoc_both_tags() {
+        // Both `@deprecated` and `@see` tags set both flags.
+        let mut s = Scanner::new("/**\n * @deprecated\n * @see foo\n */\nlet x");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::LetKeyword);
+        assert!(s.has_preceding_jsdoc_with_deprecated_tag());
+        assert!(s.has_preceding_jsdoc_with_see_or_link());
+    }
+
+    #[test]
+    fn token_flags_jsdoc_tag_invalid_terminator() {
+        // `@deprecatedX` (tag followed by non-terminator) should NOT match.
+        let mut s = Scanner::new("/**\n * @deprecatedX\n */\nlet x");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::LetKeyword);
+        assert!(!s.has_preceding_jsdoc_with_deprecated_tag());
+    }
+
+    #[test]
+    fn token_flags_jsdoc_tag_at_end_of_string() {
+        // `@deprecated` at end of comment text (no terminator char) matches.
+        let mut s = Scanner::new("/**@deprecated*/\nlet x");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::LetKeyword);
+        assert!(s.has_preceding_jsdoc_with_deprecated_tag());
+    }
+
+    #[test]
+    fn token_flags_jsdoc_flags_reset_between_tokens() {
+        // JSDoc flags should NOT leak from one token to the next.
+        let mut s = Scanner::new("/** @deprecated */\nlet x\nlet y");
+        s.scan(); // let x
+        assert!(s.has_preceding_jsdoc_with_deprecated_tag());
+        s.scan(); // x
+        s.scan(); // let y — no preceding JSDoc
+        assert!(!s.has_preceding_jsdoc_comment());
+        assert!(!s.has_preceding_jsdoc_with_deprecated_tag());
+    }
+
+    #[test]
+    fn token_flags_jsdoc_leading_asterisk_consumed() {
+        // When `skip_jsdoc_leading_asterisks` is active, a `*` at line start
+        // is consumed as trivia and sets `PRECEDING_JSDOC_LEADING_ASTERISKS`.
+        // The `*` must be preceded by a line break.
+        let mut s = Scanner::new("\n* x");
+        s.set_skip_jsdoc_leading_asterisks(true);
+        s.scan();
+        // The `*` is consumed; next token is `x` (Identifier).
+        assert_eq!(s.token(), SyntaxKind::Identifier);
+        assert_eq!(s.token_text(), "x");
+        assert!(s.has_preceding_jsdoc_leading_asterisks());
+    }
+
+    #[test]
+    fn token_flags_jsdoc_leading_asterisk_no_line_break() {
+        // Without a preceding line break, `*` is NOT consumed as JSDoc
+        // asterisk — it produces a normal `AsteriskToken`.
+        let mut s = Scanner::new("* x");
+        s.set_skip_jsdoc_leading_asterisks(true);
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::AsteriskToken);
+        assert!(!s.has_preceding_jsdoc_leading_asterisks());
+    }
+
+    #[test]
+    fn token_flags_jsdoc_leading_asterisk_not_active() {
+        // When `skip_jsdoc_leading_asterisks` is NOT active, `*` at line
+        // start produces a normal `AsteriskToken`.
+        let mut s = Scanner::new("\n* x");
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::AsteriskToken);
+        assert!(!s.has_preceding_jsdoc_leading_asterisks());
+    }
+
+    #[test]
+    fn token_flags_jsdoc_leading_asterisk_double_star_not_consumed() {
+        // `**` is NOT consumed as JSDoc asterisk (it would form
+        // `AsteriskAsteriskToken`).
+        let mut s = Scanner::new("\n** x");
+        s.set_skip_jsdoc_leading_asterisks(true);
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::AsteriskAsteriskToken);
+        assert!(!s.has_preceding_jsdoc_leading_asterisks());
+    }
+
+    #[test]
+    fn token_flags_jsdoc_leading_asterisk_star_equals_not_consumed() {
+        // `*=` is NOT consumed as JSDoc asterisk (it forms
+        // `AsteriskEqualsToken`).
+        let mut s = Scanner::new("\n*= x");
+        s.set_skip_jsdoc_leading_asterisks(true);
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::AsteriskEqualsToken);
+        assert!(!s.has_preceding_jsdoc_leading_asterisks());
+    }
+
+    #[test]
+    fn token_flags_jsdoc_leading_asterisk_only_first_consumed() {
+        // Only the FIRST `*` at line start is consumed; subsequent `*` on
+        // the same line produce `AsteriskToken`.
+        let mut s = Scanner::new("\n* * x");
+        s.set_skip_jsdoc_leading_asterisks(true);
+        s.scan(); // first `*` consumed, second `*` is AsteriskToken
+        assert_eq!(s.token(), SyntaxKind::AsteriskToken);
+        assert!(s.has_preceding_jsdoc_leading_asterisks());
+    }
+
+    #[test]
+    fn token_flags_jsdoc_leading_asterisk_counter_nesting() {
+        // `set_skip_jsdoc_leading_asterisks(false)` decrements the counter;
+        // after balanced enable/disable, `*` is no longer consumed.
+        let mut s = Scanner::new("\n* x");
+        s.set_skip_jsdoc_leading_asterisks(true);
+        s.set_skip_jsdoc_leading_asterisks(false);
+        s.scan();
+        assert_eq!(s.token(), SyntaxKind::AsteriskToken);
+        assert!(!s.has_preceding_jsdoc_leading_asterisks());
+    }
+
+    #[test]
+    fn has_jsdoc_tag_helper() {
+        // Direct unit tests for the `has_jsdoc_tag` helper.
+        assert!(has_jsdoc_tag("deprecated", &["deprecated"]));
+        assert!(has_jsdoc_tag("deprecated foo", &["deprecated"]));
+        assert!(has_jsdoc_tag("deprecated\tfoo", &["deprecated"]));
+        assert!(has_jsdoc_tag("deprecated\nfoo", &["deprecated"]));
+        assert!(has_jsdoc_tag("deprecated*foo", &["deprecated"]));
+        assert!(has_jsdoc_tag("deprecated}foo", &["deprecated"]));
+        assert!(has_jsdoc_tag("see", &["see", "link"]));
+        assert!(has_jsdoc_tag("link foo", &["see", "link"]));
+        assert!(has_jsdoc_tag("linkcode foo", &["see", "link", "linkcode", "linkplain"]));
+        // Non-matching
+        assert!(!has_jsdoc_tag("deprecatedX", &["deprecated"]));
+        assert!(!has_jsdoc_tag("dep", &["deprecated"]));
+        assert!(!has_jsdoc_tag("foo", &["deprecated"]));
+    }
+
+    #[test]
+    fn scan_jsdoc_comment_for_tags_helper() {
+        // Direct unit tests for the `scan_jsdoc_comment_for_tags` helper.
+        assert_eq!(
+            scan_jsdoc_comment_for_tags("/** @deprecated */"),
+            TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED
+        );
+        assert_eq!(
+            scan_jsdoc_comment_for_tags("/** @see foo */"),
+            TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK
+        );
+        assert_eq!(
+            scan_jsdoc_comment_for_tags("/** @deprecated @see foo */"),
+            TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED
+                | TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK
+        );
+        assert_eq!(
+            scan_jsdoc_comment_for_tags("/** no tags */"),
+            TOKEN_FLAGS_NONE
+        );
+        // `@link` inside `{...}` also matches.
+        assert!(token_flags_contains(
+            scan_jsdoc_comment_for_tags("/** {@link foo} */"),
+            TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK
+        ));
     }
 }

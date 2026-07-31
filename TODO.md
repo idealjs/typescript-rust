@@ -70,7 +70,7 @@ arity）+ 12 个 parity fixtures。
 
 | 模块 | Rust 行数（实测） | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
-| Scanner | 2263 | 4277 | ~53% | 转义/JSX/正则/CommentDirectives/ASI 完成；trivia 基础设施（fullStartPos + skip_trivia + comment ranges + shebang）完成；缺 TokenFlags 完整位集、conflict-marker trivia、完整 regex body 校验 |
+| Scanner | 3222 | 4277 | ~75% | 转义/JSX/正则/CommentDirectives/ASI 完成；trivia 基础设施（fullStartPos + skip_trivia + comment ranges + shebang）完成；TokenFlags 完整位集（19 flag + 7 mask）+ SkipTriviaEx + conflict-marker trivia + JSDoc 相关 4 flag（PRECEDING_JSDOC_COMMENT/LEADING_ASTERISKS/WITH_DEPRECATED/WITH_SEE_OR_LINK）完成；缺 escape-sequence 5 flag + OCTAL flag + 完整 regex body 校验 |
 | Parser | 7282 | 9275 | 77% | TS6/7 语法、类型语法、JSX、装饰器、import attributes 完成；缺 reparser/jsdoc |
 | Binder | 2104 | ~3601 | ~41% | 容器递归绑定 + FlowNode + NameResolver 基础 + alias + 全局符号 + EnumDeclaration 容器化 完成；缺 ReduceLabel/Shared/Referenced 后处理、labeled statement、完整 scope chain、ReferenceResolver |
 | Checker | 22527 | ~59975 | ~20% | 类型结构完整；check_source_file + 标识符解析 + TS2304；relater 含 union/intersection/对象/数组/tuple/signature/index signature/generic/条件/映射类型关系 + 缓存与循环检测；inference 含泛型推断 + contextual typing + infer R；class extends 继承 + this 类型解析；函数重载解析 + `new` 表达式实例类型 + 返回语句类型检查 + 比较无重叠检查 TS2367 + 不可调用/不可构造检查 TS2349/TS2351 + 只读属性赋值检查 TS2540 + declaration merge checker 侧 + 参数数量检查 TS2554/TS2555/TS2556 + rest 元素类型检查；emitresolver visibility tracking 完成；501 parity fixtures 通过。**已知 stub**：mapper placeholder（3 处闭包回退）、freshness tracking、isEnumTypeRelatedTo/isUnknownLikeUnionType 未迁移、nodebuilder symbol_to_type_node |
@@ -453,10 +453,25 @@ via `schema.ts`，生成 `syntax_kind_generated.rs` + `node_data_generated.rs`�
   `UNTERMINATED`（string/template/regex）、`SINGLE_QUOTE`（`'` string）、
   `HEX_SPECIFIER`/`BINARY_SPECIFIER`/`OCTAL_SPECIFIER`（numeric）、
   `SCIENTIFIC`（`e`/`E` exponent）、`CONTAINS_LEADING_ZERO`（`0` 后跟数字）。
-  12 个新单测覆盖。**遗留**：JSDoc 相关 4 flag（需 JSDoc comment 识别）、
-  escape-sequence 5 flag（`UNICODE_ESCAPE`/`EXTENDED_UNICODE_ESCAPE`/`HEX_ESCAPE`/
+  12 个新单测覆盖。**遗留**：escape-sequence 5 flag（`UNICODE_ESCAPE`/`EXTENDED_UNICODE_ESCAPE`/`HEX_ESCAPE`/
   `CONTAINS_INVALID_ESCAPE`/`CONTAINS_SEPARATOR`/`CONTAINS_INVALID_SEPARATOR`，
   需迁移 Go `scanEscapeSequence` 完整诊断路径）、`OCTAL`（legacy `0o` 前的 `0777` 形式）。
+- [x] 迁移 JSDoc 相关 TokenFlags（`PRECEDING_JSDOC_COMMENT`/`_LEADING_ASTERISKS`/
+  `_WITH_DEPRECATED`/`_WITH_SEE_OR_LINK`，已完成）：`scan_multi_line_comment`
+  检测 JSDoc 注释（`/**` 且非 `/**/`，对齐 Go `scanner.go:642` `isJSDoc`），
+  设置 `PRECEDING_JSDOC_COMMENT` 并调用 `scan_jsdoc_comment_for_tags` 扫描
+  `@deprecated`/`@see`/`@link`/`@linkcode`/`@linkplain` 标签设置对应 flag
+  （对齐 Go `scanner.go:350-368`，返回 OR'd flags 避免借冲突）；`has_jsdoc_tag`
+  辅助函数检查标签名后跟合法终止符（空格/tab/换行/`}`/`*`/EOF，对齐 Go
+  `scanner.go:372-386`）。`Scanner` 新增 `skip_jsdoc_leading_asterisks: i32`
+  字段（计数器，支持嵌套 JSDoc，对齐 Go `scanner.go:200`）+ `set_skip_jsdoc_leading_asterisks`
+  方法；`scan()` 在遇到 `*`（非 `**`/`*=`）且有换行前导时，若 `skip_jsdoc_leading_asterisks != 0`
+  且未设 `PRECEDING_JSDOC_LEADING_ASTERISKS`，消耗 `*` 为 trivia 并置 flag
+  （对齐 Go `scanner.go:569-575`）。4 个访问器方法：`has_preceding_jsdoc_comment`/
+  `has_preceding_jsdoc_leading_asterisks`/`has_preceding_jsdoc_with_deprecated_tag`/
+  `has_preceding_jsdoc_with_see_or_link`。19 个新单测覆盖 JSDoc 检测/标签扫描/
+  flag 重置/leading asterisk 消耗（有/无换行/未激活/`**`/`*=`/仅首个/计数器嵌套）/
+  helper 函数。
 - [x] 支持 `SkipTriviaEx` options（`StopAfterLineBreak`/`StopAtComments`/`InJSDoc`，已完成）：
   新增 `SkipTriviaOptions` struct + `skip_trivia_ex` 函数（对齐 Go
   `SkipTriviaEx` `scanner.go:2311-2400`），`skip_trivia` 改为调用
