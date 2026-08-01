@@ -89,32 +89,37 @@ diagnostics/hover + API server + .tsbuildinfo 增量构建已接入。
 lifecycle）。`cargo fmt --check` 全仓通过。`cargo clippy` 零 warning。剩余
 compiler warning 约 90 个（dead code in stub implementations），归类为迁移期可接受。
 
-## 下阶段计划（3 阶段）
+## 下阶段待办清单
 
-当前基线：P0-P9 基础设施完成，P10 测试 parity 推进中（1,105 lib + 572 checker
-parity = 1,679 通过，99 ignored）。剩余 13 个 `[ ]` 条目分 3 阶段推进：
+当前基线：1,105 lib + 636 checker parity + 2 emit = **1,743 通过**，99 ignored。
 
-### 阶段 1：Checker 深度提升（最高优先级）
+### 阶段 1：Checker 深度提升 ✅ 首批已完成
 
-Checker 当前 ~25%，是真实项目可用性的核心瓶颈。具体目标：
-1. 修复 array literal 类型推断（`T[]` 被误推为 `error[]` → TS2339 false positive）
-2. 补齐 object literal 必填属性检查（TS2741）
-3. 补齐常见诊断码（TS2304 used before defined、TS2358 const enum 主体检查、
-   TS2740 missing properties in assignment、TS2561 object assign 等）
-4. 扩充 checker parity fixtures 到 200+
+已完成：Array 方法解析、TS2741/TS2739/TS2353/TS2448/TS2454/TS18048/TS2451。
+checker parity 从 572→636。
 
-### 阶段 2：Watch mode + Incremental（中优先级）
+- [ ] 继续补齐 checker 诊断码（TS2300 duplicate、TS2561 readonly array assign 等）
+- [ ] 扩充 checker parity fixtures 到 200+（当前 636 条，含 fixture 和 case）
 
-1. 引入 `notify` crate 实现文件监听
-2. `--watch` 模式：文件变更 → 增量重编译 → 诊断输出
-3. project reference cycle 精细化处理
-4. watch 测试设计
+### 阶段 2：Watch mode + Incremental
 
-### 阶段 3：LSP features（中优先级）
+- [ ] 引入 `notify` crate 实现文件监听
+- [ ] `--watch` 模式：文件变更 → 增量重编译 → 诊断输出
+- [ ] project reference cycle 精细化处理
+- [ ] watch 测试设计
 
-1. project service（多文件 open/close/change 管理）
-2. references / rename / document symbols / formatting
-3. fourslash 测试 smoke
+### 阶段 3：LSP features
+
+- [ ] project service（多文件 open/close/change 管理）
+- [ ] references / rename / document symbols / formatting
+- [ ] fourslash 测试 smoke
+
+### 其他待办
+
+- [ ] `symbol_to_display_parts`（LS 层功能）
+- [ ] 本地化支持（locale/loc_generated）
+- [ ] 正则 `lastIndex`/`d` flag runtime 特性
+- [ ] 保留 Go oracle 构建路径
 
 ## P0：建立迁移工作基线 ✅ 已完成
 
@@ -134,13 +139,15 @@ Scanner ~95%（转义/JSX/正则/CommentDirectives/ASI/trivia/TokenFlags 完整�
 
 ## P3：Binder / Checker / Diagnostics parity — 进行中
 
-Binder ~60%（容器递归绑定/FlowNode/NameResolver/alias/全局符号/声明合并/export-import binding/this_container）。Checker ~25%（类型结构/relater 完整规则/inference/contextual typing/narrowing/nodebuilder/emitresolver/JSX-JSDoc-Grammar checks）。572 个 checker parity fixtures 通过。
+Binder ~60%。Checker ~30%（类型结构/relater 完整规则/inference/contextual typing/
+narrowing/nodebuilder/emitresolver/Array 方法解析/TS2741/TS2739/TS2353/TS2448/
+TS2454/TS18048/TS2451）。636 个 checker parity fixtures 通过。
 
 剩余：
 - [ ] `symbol_to_display_parts`（LS 层功能，待 P7 LS 启动时补齐）
 - [ ] 本地化支持（locale/loc_generated）
-- [ ] 真实项目诊断集合与 Go oracle 一致（checker 深度需提升：array literal 类型推断 TS2339 false positive、TS2741 必填属性检查缺失等）
-- [ ] Checker 深度提升（当前 ~25%，需补齐更多类型关系规则和诊断）
+- [ ] 真实项目诊断集合与 Go oracle 完全一致（checker 深度需继续提升）
+- [ ] 继续补齐诊断码（TS2300/TS2561/TS2358 等）
 
 ## P4：Emit / Transformer / SourceMap / Declaration emit ✅ 已完成
 
@@ -152,91 +159,32 @@ Module resolution 全链路（relative/node_modules/paths/rootDirs/exports/impor
 
 ## P6：Build / Watch / Incremental
 
-目标：小型 project references fixture 与 Go oracle 行为一致；incremental
-第二次构建能跳过未变更项目。
+已完成：`--build` dispatch、typed project reference graph（DFS）、build-specific
+did-you-mean、`.tsbuildinfo` 读写 + up-to-date check、incremental rebuild 基础。
 
-Go 参考：`internal/execute/build`、`internal/execute/incremental`、
-`internal/execute/watchmanager`、`internal/fswatch`、`internal/project`。
-流程审计见 `MIGRATION.md` 的 “Build Mode Flow Audit”。
-
-已完成：`--build`/`-b` 外层 dispatch 对齐；`parse_build_command_line` +
-`ParsedBuildCommandLine` + `BuildOptions`；build mode 中 `-v` 解析为 `verbose`；
-空 project 默认 `"."`；非法组合（`clean+force`/`clean+verbose`/`clean+watch`/
-`watch+dry`）拒绝；raw `references` DFS 桥接。`build_project` 递归解析 project
-references、加载 tsconfig、调用 `perform_compilation`。
-
-- [x] 支持 Go 等价的 typed project reference graph（已完成）：`build_project`
-  递归 DFS 遍历 `references`，`seen_projects` HashSet 防止循环，每个 project 独立
-  加载 tsconfig + 编译。`resolve_project_config` 对齐 Go directory/file 分发。
-- [x] 补齐 build parser 的 build-specific did-you-mean（已完成）：Build 模式下
-  对未知选项使用 TS5094（compiler option may not be used with build）、
-  TS5072（Unknown build option）、TS5077（did-you-mean）。Levenshtein 距离
-  用于拼写建议。watch options 解析已通过 `apply_watch_options` 接入。
-- [x] 支持 `.tsbuildinfo` 读写（已完成）：`incremental/mod.rs` 的 `BuildInfo` struct +
-  文件内容哈希 + 选项哈希 + `is_up_to_date` 检查。集成到 `build_project`：跳过
-  未变更项目，编译成功后写入 `.tsbuildinfo`。
-- [x] 支持 incremental rebuild（已完成基础）：`build_project` 在编译前检查
-  `.tsbuildinfo`，如果文件哈希和选项哈希都匹配则跳过编译。
-- [ ] 支持 watch mode，明确文件监听库选择。
-- [x] 对齐 up-to-date 判断（已完成基础）：基于文件内容哈希 + 选项签名的
-  up-to-date 判断，verbose 模式输出 "Project is up to date"。
-- [ ] 对齐 project reference cycle（DFS 已有基础 cycle 检测）、输出跳过逻辑。
-- [ ] 设计 watch 测试，避免 flaky。
+剩余：
+- [ ] 支持 watch mode，明确文件监听库选择
+- [ ] 对齐 project reference cycle、输出跳过逻辑
+- [ ] 设计 watch 测试，避免 flaky
 
 ## P7：Language Service / LSP
 
-目标：VS Code extension 能指向 Rust binary 并完成 initialize；至少
-hover/completion/diagnostics 三项通过 parity smoke。
+已完成：自研 JSON-RPC 协议层、`--lsp` 启动、initialize/shutdown、didChange/didClose
+文档同步、diagnostics 推送（接入 checker）、hover（接入 checker nodebuilder）、
+completion（global symbols + keywords）、definition（checker symbol resolution）。
 
-Go 参考：`cmd/tsgo/lsp.go`、`internal/ls`、`internal/lsp`、`internal/project`、
-`internal/fourslash`。
-Rust 现状：`src/lsp/mod.rs` 实现了最小 LSP server（JSON-RPC 2.0 over stdio）。
-
-- [x] 选择 Rust LSP 栈：自研最小协议层（直接 JSON-RPC，不依赖 `tower-lsp`）。
-- [x] 实现 `--lsp` 启动、stdio transport、initialize/shutdown（已完成）：`LspServer`
-  结构体 + `Content-Length` header framing + `initialize`（返回 capabilities）+
-  `didChange`/`didClose`（文档存储 + full sync）+ `textDocument/hover`（接入 checker）+
-  `textDocument/definition`（接入 checker symbol resolution）+ `textDocument/completion`
-  （global symbols + keywords）+ unknown method error。
-- [x] LSP diagnostics 推送（已完成）：`compute_diagnostics` 方法创建 InMemoryFS +
-  Program + checker，收集 parse/bind/semantic 诊断，转换为 LSP 格式并推送
-  `textDocument/publishDiagnostics` notification。`diagnostic_to_lsp` 转换器处理
-  range/severity/code/source/message。
-- [x] LSP hover 接入 checker（已完成）：`handle_hover` 构建临时 Program，通过
-  `find_deepest_node` 定位 AST 节点，调用 `checker.get_quick_info_text` 获取类型信息，
-  返回 markdown 格式的 hover 内容。
-- [ ] 迁移 project service 基础：open/close/change watched files + 多文件管理。
-- [x] LSP completion + definition（已完成基础）：`handle_definition` 通过 checker
-  symbol resolution → value_declaration → LSP location；`handle_completion` 从
-  checker globals table 收集符号 + TS 关键字补全。completionProvider 加入 capabilities。
-- [ ] 逐步迁移 LS features：references / rename / document symbols / formatting。
-- [ ] 迁移 fourslash 测试策略，先只保留关键 smoke。
+剩余：
+- [ ] 迁移 project service 基础：open/close/change watched files + 多文件管理
+- [ ] 逐步迁移 LS features：references / rename / document symbols / formatting
+- [ ] 迁移 fourslash 测试策略，先只保留关键 smoke
 
 ## P8：API / npm package / VS Code extension
 
-目标：`npm run build` 或新 Rust build task 能产出可运行 binary；native-preview
-包内 binary 可执行 `--version`；extension 能启动 Rust LSP smoke。
+已完成：`--api` JSON-RPC server、`tsgo` binary 名 + JS shim、npm build 脚本、
+native-preview package（bin/postinstall/README）、VS Code extension 兼容。
 
-Go 参考：`cmd/tsgo/api.go`、`internal/api`、`_packages/native-preview`、
-`_extension`、`_extension-nightly`、`Herebyfile.mjs`。
-Rust 现状：`src/api/mod.rs` 实现了最小 API server（JSON-RPC 2.0 over stdio）。
-
-- [x] 实现或替代 `--api` transport（已完成）：`ApiServer` 结构体 +
-  JSON-RPC 2.0 over stdio + `Content-Length` framing + `configure`/`createProject`/
-  `updateProject`/`getDiagnostics`/`closeProject`/`getQuickInfo`/`shutdown`/`exit`
-  方法（当前返回 stub 结果，待接入 Program pipeline）。
-- [x] 决定 Rust binary 名称（已完成）：使用 `tsgo` 兼容 Go oracle。npm 包
-  `npm/bin/tsgo` 为 Node.js shim，查找并执行 Rust 编译的 `tsox` binary。
-- [x] 为 npm package 增加 Rust binary 构建/拷贝流程（已完成）：`npm/scripts/build.sh`
-  执行 `cargo build --release` 并将 `target/release/tsox` 复制到 `npm/bin/tsgo`。
-- [x] 更新 native-preview package 的 bin、postinstall、README（已完成）：
-  `npm/package.json` 声明 `bin: { "tsgo": "./bin/tsgo" }`；`npm/README.md` 记录
-  安装与 CLI/API 使用方式；`npm/lib/getExePath.js` 提供路径解析。
-- [x] 更新 VS Code extension 查找 binary 的逻辑（已完成）：Go extension 已
-  支持 `tsgo` binary 名查找（`util.ts` 中 `packagedExeBaseNames = ["tsc", "tsgo"]`）。
-  Rust npm 包使用 `tsgo` 作为 binary 名（通过 JS shim），与 extension 逻辑兼容。
-  无需额外修改 extension 代码。
-- [ ] 保留 Go oracle 构建路径，直到 Rust parity 足够。
+剩余：
+- [ ] 保留 Go oracle 构建路径，直到 Rust parity 足够
 
 ## P9：工具链、代码质量和发布 ✅ 已完成
 
@@ -253,43 +201,12 @@ rustfmt.toml、clippy 零 warning、codegen 命令、CI workflow、benchmark 脚
 - Go 仓库的生成脚本、baselines、native-preview 包装较多，迁移期间要避免同时
   改太多构建路径。
 
-## record.warn 基线
+## 历史基线
 
-2026-07-11 对 `/home/cqh/workspace/typescript-rust/record.warn` 聚合分析：
-
-- 文件规模：3347 行，约 346 KiB；全是 `TS1003` parser syntax errors；96 文件。
-- 来源分布：bundled libs 2895 条（86.5%）、项目源码 365 条（10.9%）、项目
-  dist declaration 87 条（2.6%）。
-- 最集中 bundled lib：`lib.es2015.iterable.d.ts` 1024、`lib.dom.d.ts` 947、
-  `lib.es2015.collection.d.ts` 206、`lib.es5.d.ts` 113、`lib.es2015.core.d.ts`
-  112、`lib.decorators.d.ts` 94。
-- 最集中项目文件：`src/types.ts` 108、`src/OverlayComponents.tsx` 44、
-  `src/ComposerPage.tsx` 34、`src/AiTestControls.tsx` 27、
-  `src/AiTestControls.test.tsx` 23、`src/AiModelField.test.tsx` 22。
-- 高频 token：`<`/`>` 泛型/JSX、`|`/`&` union/intersection、`[`/`]` 数组/
-  tuple/indexed/mapped、`=>`/`(`/`)` arrow/function、`declare` ambient、
-  `import { } from`、keyword type nodes。
-
-结论：根因是 parser 对 TypeScript declaration/type 语法支持不足，非单点 panic。
-P2.4/P2.5/P2.9 完成后 bundled libs 已零错误解析（3347 → 0）。`record.warn-1`
-流程逻辑追踪：已修复 `files: []` 不触发默认 include、未显式 exclude 时默认排除
-`outDir`/`declarationDir`、wildcard include 跳过常见 package dirs、literal
-directory include 递归展开、`declare` modifier 前缀正确分派。
-
-## Warning 状态
-
-2026-07-11 已完成一轮低风险 warning 清理：清理明显未使用 import、未使用
-变量、重复 match arm、无意义 iterator 赋值。剩余 lib warning 约 31 个，归类
-为迁移期可接受：
-
-- Go/TypeScript 命名对齐：`DiagnosticsPresent_OutputsSkipped`、
-  `BlockScoped`、`parse_bracketedList` 等。
-- 暂未接入的迁移占位 API：`expected_json_type`、`next_auto_generate_id`、
-  `compiler_diagnostic` 等。
-- 需要单独设计的公开 re-export 冲突：`checker::RelationComparisonResult`。
-
-`cargo fmt --check` 仍会因仓库既有未格式化文件失败；只格式化触碰的 Rust 文件，
-整仓格式化单独排期。
+- record.warn：2026-07-11 分析 3347 行 parser syntax errors，P2.4/P2.5/P2.9
+  完成后 bundled libs 零错误解析（3347 → 0）。
+- Warning 清理：剩余 lib warning ~31 个（Go 命名对齐/迁移占位 API/re-export 冲突），
+  归类为迁移期可接受。
 
 ## P10：Go 测试用例 1:1 迁移（测试 parity）
 
