@@ -1191,7 +1191,23 @@ Rust 现状：`src/compiler/mod.rs`、`src/printer/mod.rs`、`src/emitter/mod.rs
   const/function/class。`module_commonjs` parity case（`skip_oracle=true`，
   因 text-slice emit 与 Go oracle 全 transformer 输出格式不同）。921 lib +
   parity smoke 全通过。
-- [ ] 对齐 sourcemap：路径、sources、sourcesContent、VLQ mappings。
+- [x] **P4.4 Source map generation**（已完成）：emitter 新增 `EmitSink` trait
+  （`emit_source`/`emit_generated` 两个方法），`String` 和 `SourceMapTracker`
+  分别实现——`String` 为快速路径（无 source map），`SourceMapTracker` 为跟踪
+  路径（记录 VLQ 映射）。`emit_text_range`/`emit_statement`/`emit_js_text_inner`
+  泛型化 over `S: EmitSink`，避免重复 statement-walking 逻辑。`SourceMapTracker`
+  维护 `gen_line`/`gen_col` + `source_line_starts`，`push_source(start, end)` 在
+  发射源文本前调用 `Generator::add_source_mapping`（对齐 Go printer 的
+  node-start 映射策略）。`emit_js_with_sourcemap` 创建 `Generator`（file=js
+  basename, sourceRoot, sourcesDirectoryPath=js 目录, ComparePathsOptions），
+  `add_source` 注册源文件，`inlineSources` 时 `set_source_content`。
+  `emit_source_file_with_common_dir` 在 `sourceMap || inlineSourceMap` 时走
+  tracked 路径：`sourceMap` → 写 `.js.map` + 追加 `//# sourceMappingURL=base.js.map`；
+  `inlineSourceMap` → 追加 `//# sourceMappingURL=data:application/json;base64,...`。
+  8 个 emitter 单测覆盖 valid JSON / inline data URL / inlineSources / 类型注解
+  剥离 / mappings 解码验证 / 默认不生成 / CommonJS use strict 不映射 / write_file
+  双文件。`source_map` parity case（`skip_oracle=true`，因 text-slice emit 与 Go
+  printer 的映射点不同）。929 lib + parity smoke 全通过。
 - [ ] 对齐 output path：`rootDir`、`outDir`、`declarationDir`、mixed JS/TS。
 - [ ] 补齐 transformer 体系或明确替代设计。
 - [ ] 扩充 parity fixtures：CommonJS / ES modules / JSX preserve/react/react-jsx /

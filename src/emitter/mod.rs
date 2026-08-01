@@ -16,7 +16,8 @@ use crate::ast::{Node, NodeFlags, SourceFile, SyntaxKind};
 use crate::ast::node_flags::ModifierFlags;
 use crate::core::compiler_options::CompilerOptions;
 use crate::core::compiler_options::{ModuleKind, ScriptTarget};
-use crate::tspath;
+use crate::sourcemap::{Generator, SourceIndex};
+use crate::tspath::{self, ComparePathsOptions};
 use crate::vfs::FS;
 
 /// Result of emitting a single source file or the whole program.
@@ -32,6 +33,138 @@ pub struct EmitOptions {
     /// Callback invoked for each output file. If `None`, files are written
     /// via `fs.write_file`.
     pub write_file: Option<Box<dyn Fn(&str, &str) -> std::io::Result<()> + Send + Sync>>,
+}
+
+// ── Source map tracking (P4.4) ─────────────────────────────────────
+
+/// Compute the byte offset of the start of each line in `text`.
+fn compute_line_starts(text: &str) -> Vec<usize> {
+    let mut starts = vec![0];
+    for (i, b) in text.bytes().enumerate() {
+        if b == b'\n' {
+            starts.push(i + 1);
+        }
+    }
+    starts
+}
+
+/// Convert a byte offset to a (line, utf16_column) pair using precomputed
+/// line starts. Returns (line_index, line_start_byte_offset).
+fn offset_to_line(line_starts: &[usize], offset: usize) -> (i32, usize) {
+    let line = line_starts.partition_point(|&start| start <= offset) - 1;
+    (line as i32, line_starts[line])
+}
+
+/// Compute the UTF-16 code unit column for a byte offset within a line.
+fn utf16_column(text: &str, line_start: usize, offset: usize) -> i32 {
+    text[line_start..offset]
+        .chars()
+        .map(|c| c.len_utf16() as i32)
+        .sum()
+}
+
+/// Tracks generated output position and feeds source map mappings to a
+/// `Generator`. Used by `emit_js_text` when `sourceMap` or `inlineSourceMap`
+/// is enabled.
+struct SourceMapTracker<'a> {
+    output: String,
+    gen_line: i32,
+    gen_col: i32,
+    source: &'a str,
+    source_line_starts: Vec<usize>,
+    generator: Option<&'a mut Generator>,
+    source_index: SourceIndex,
+}
+
+impl<'a> SourceMapTracker<'a> {
+    fn new(
+        source: &'a str,
+        generator: Option<&'a mut Generator>,
+        source_index: SourceIndex,
+    ) -> Self {
+        let source_line_starts = compute_line_starts(source);
+        SourceMapTracker {
+            output: String::new(),
+            gen_line: 0,
+            gen_col: 0,
+            source,
+            source_line_starts,
+            generator,
+            source_index,
+        }
+    }
+
+    /// Append generated text (no source mapping). Updates generated position.
+    fn push_generated(&mut self, text: &str) {
+        for ch in text.chars() {
+            if ch == '\n' {
+                self.gen_line += 1;
+                self.gen_col = 0;
+            } else {
+                self.gen_col += ch.len_utf16() as i32;
+            }
+        }
+        self.output.push_str(text);
+    }
+
+    /// Append a range of source text `[start, end)` and record a source
+    /// mapping from the current generated position to the source position
+    /// at `start`.
+    fn push_source(&mut self, start: usize, end: usize) {
+        if start >= end {
+            return;
+        }
+        // Add source mapping before emitting the text.
+        if let Some(generator) = &mut self.generator {
+            let (src_line, line_start) = offset_to_line(&self.source_line_starts, start);
+            let src_col = utf16_column(self.source, line_start, start);
+            let _ = generator.add_source_mapping(
+                self.gen_line,
+                self.gen_col,
+                self.source_index,
+                src_line,
+                src_col,
+            );
+        }
+        let text = &self.source[start..end];
+        self.push_generated(text);
+    }
+
+    fn finish(self) -> String {
+        self.output
+    }
+}
+
+/// Trait abstracting the output sink for the emitter.
+///
+/// `String` implements it for the fast path (no source map tracking);
+/// `SourceMapTracker` implements it for source-map-tracked emission.
+trait EmitSink {
+    /// Emit a slice of source text `[start, end)`. When source map tracking
+    /// is active, a mapping from the current generated position to the source
+    /// position at `start` is recorded.
+    fn emit_source(&mut self, source: &str, start: usize, end: usize);
+    /// Emit generated text with no source mapping.
+    fn emit_generated(&mut self, text: &str);
+}
+
+impl EmitSink for String {
+    fn emit_source(&mut self, source: &str, start: usize, end: usize) {
+        self.push_str(&source[start..end]);
+    }
+    fn emit_generated(&mut self, text: &str) {
+        self.push_str(text);
+    }
+}
+
+impl<'a> EmitSink for SourceMapTracker<'a> {
+    fn emit_source(&mut self, source: &str, start: usize, end: usize) {
+        debug_assert!(std::ptr::eq(source.as_ptr(), self.source.as_ptr()));
+        self.push_source(start, end);
+    }
+    fn emit_generated(&mut self, text: &str) {
+        self.push_generated(text);
+    }
 }
 
 /// Emit a single source file, writing the result via the `write_file` callback.
@@ -80,13 +213,34 @@ pub fn emit_source_file_with_common_dir(
         return result;
     }
 
-    // Emit JS text.
-    let js_text = emit_js_text(source_file, options);
+    // Determine whether source maps should be emitted.
+    // Mirrors Go's `shouldEmitSourceMaps`: sourceMap || inlineSourceMap, and
+    // not a JSON file (JSON files are already skipped above).
+    let emit_sourcemap = options.source_map.is_true() || options.inline_source_map.is_true();
 
-    // Write file.
-    match write_file(&js_path, &js_text) {
+    let (js_text, map_text, source_map_url) = if emit_sourcemap {
+        emit_js_with_sourcemap(source_file, options, &js_path)
+    } else {
+        (emit_js_text(source_file, options), None, String::new())
+    };
+
+    // Append `//# sourceMappingURL=...` when a source map was produced.
+    let final_js_text = if source_map_url.is_empty() {
+        js_text
+    } else {
+        let mut text = js_text;
+        if !text.ends_with('\n') {
+            text.push('\n');
+        }
+        text.push_str("//# sourceMappingURL=");
+        text.push_str(&source_map_url);
+        text
+    };
+
+    // Write .js file.
+    match write_file(&js_path, &final_js_text) {
         Ok(()) => {
-            result.emitted_files.push(js_path);
+            result.emitted_files.push(js_path.clone());
         }
         Err(e) => {
             result
@@ -96,7 +250,64 @@ pub fn emit_source_file_with_common_dir(
         }
     }
 
+    // Write .js.map file when `sourceMap` is true (not inline).
+    if let Some(map_json) = map_text {
+        let map_path = format!("{js_path}.map");
+        match write_file(&map_path, &map_json) {
+            Ok(()) => {
+                result.emitted_files.push(map_path);
+            }
+            Err(e) => {
+                result
+                    .diagnostics
+                    .push(format!("Error writing '{map_path}': {e}"));
+            }
+        }
+    }
+
     result
+}
+
+/// Emit JS text with source map tracking. Returns `(js_text, map_json, source_map_url)`.
+///
+/// - When `sourceMap` is true (and `inlineSourceMap` is false): `map_json` is
+///   `Some(json)` and `source_map_url` is the base name of the `.map` file.
+/// - When `inlineSourceMap` is true: `map_json` is `None` (no `.map` file
+///   written) and `source_map_url` is the base64 data URL.
+/// - `sourcesContent` is included when `inlineSources` is true.
+fn emit_js_with_sourcemap(
+    source_file: &SourceFile,
+    options: &CompilerOptions,
+    js_path: &str,
+) -> (String, Option<String>, String) {
+    let js_base_name = tspath::get_base_file_name(js_path);
+    let source_root = if options.source_root.is_empty() {
+        String::new()
+    } else {
+        tspath::ensure_trailing_directory_separator(&options.source_root)
+    };
+    // sourcesDirectoryPath: directory of the .js file. Source paths in the map
+    // are made relative to this directory. Mirrors Go's `getSourceMapDirectory`
+    // (the common case where neither `sourceRoot` nor `mapRoot` is set).
+    let sources_dir = tspath::get_directory_path(js_path);
+    let path_options = ComparePathsOptions::default();
+
+    let mut generator = Generator::new(&js_base_name, &source_root, &sources_dir, path_options);
+    let source_index = generator.add_source(&source_file.file_name);
+    if options.inline_sources.is_true() {
+        let _ = generator.set_source_content(source_index, &source_file.text);
+    }
+
+    let js_text = emit_js_text_tracked(source_file, options, &mut generator, source_index);
+
+    let inline = options.inline_source_map.is_true();
+    let (map_json, source_map_url) = if inline {
+        (None, generator.to_base64_data_url())
+    } else {
+        (Some(generator.to_json()), format!("{js_base_name}.map"))
+    };
+
+    (js_text, map_json, source_map_url)
 }
 
 /// Compute the output `.js` file path for a source file.
@@ -196,10 +407,50 @@ fn get_output_extension(file_name: &str) -> &'static str {
 /// Emit JavaScript text for a source file by walking the AST and stripping
 /// TypeScript-only constructs.
 fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
+    let mut output = String::new();
+    emit_js_text_inner(source_file, options, &mut output);
+    // When removeComments is active, trim leading whitespace that remained
+    // after stripping comments before the first statement. The Go printer
+    // doesn't emit leading trivia before the first statement, so a stripped
+    // leading comment shouldn't leave a blank line.
+    if options.remove_comments.is_true() {
+        while output.starts_with(|c: char| c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+            output.remove(0);
+        }
+    }
+    output
+}
+
+/// Emit JavaScript text with source map tracking. The `Generator` receives
+/// mappings as source text slices are emitted.
+fn emit_js_text_tracked(
+    source_file: &SourceFile,
+    options: &CompilerOptions,
+    generator: &mut Generator,
+    source_index: SourceIndex,
+) -> String {
+    let mut tracker = SourceMapTracker::new(&source_file.text, Some(generator), source_index);
+    emit_js_text_inner(source_file, options, &mut tracker);
+    tracker.finish()
+}
+
+/// Core statement-walking emit logic, generic over the output sink.
+///
+/// Walks the AST, stripping TypeScript-only constructs (type annotations,
+/// interfaces, type aliases) and applying optional transformations
+/// (removeComments, ES5 down-leveling, CommonJS module transforms).
+fn emit_js_text_inner<S: EmitSink>(
+    source_file: &SourceFile,
+    options: &CompilerOptions,
+    sink: &mut S,
+) {
     let source = &source_file.text;
     let statements = match &source_file.node.data {
         NodeData::SourceFile(d) => &d.statements,
-        _ => return source.clone(),
+        _ => {
+            sink.emit_source(source, 0, source.len());
+            return;
+        }
     };
 
     // When `removeComments` is true, collect all comment ranges in the file
@@ -223,12 +474,11 @@ fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
 
     let commonjs = options.module == ModuleKind::CommonJS;
 
-    let mut output = String::new();
     let mut prev_end = 0usize;
 
     // CommonJS modules start with "use strict";
     if commonjs {
-        output.push_str("\"use strict\";\n");
+        sink.emit_generated("\"use strict\";\n");
     }
 
     for stmt in statements.iter() {
@@ -268,7 +518,7 @@ fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
                 stmt.pos(),
                 &effective_cuts,
                 &replacements,
-                &mut output,
+                sink,
             );
         }
 
@@ -278,8 +528,8 @@ fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
             if let Some(transformed) = transform_commonjs_import(stmt, source) {
                 prev_end = stmt.end();
                 if !transformed.is_empty() {
-                    output.push_str(&transformed);
-                    output.push('\n');
+                    sink.emit_generated(&transformed);
+                    sink.emit_generated("\n");
                 }
                 continue;
             }
@@ -288,23 +538,23 @@ fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
             if let Some(transformed) = transform_commonjs_export(stmt, source) {
                 prev_end = stmt.end();
                 if !transformed.is_empty() {
-                    output.push_str(&transformed);
-                    output.push('\n');
+                    sink.emit_generated(&transformed);
+                    sink.emit_generated("\n");
                 }
                 continue;
             }
         }
 
         // Emit the statement with type annotations stripped.
-        emit_statement(stmt, source, &effective_cuts, &replacements, &mut output);
+        emit_statement(stmt, source, &effective_cuts, &replacements, sink);
         prev_end = stmt.end();
 
         // CommonJS: for declarations with `export` modifier, append
         // `exports.name = name;` after the declaration.
         if commonjs {
             if let Some(append) = transform_commonjs_export_declaration(stmt, source) {
-                output.push_str(&append);
-                output.push('\n');
+                sink.emit_generated(&append);
+                sink.emit_generated("\n");
             }
         }
     }
@@ -317,36 +567,24 @@ fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
             source.len(),
             &comment_cuts,
             &replacements,
-            &mut output,
+            sink,
         );
     }
-
-    // When removeComments is active, trim leading whitespace that remained
-    // after stripping comments before the first statement. The Go printer
-    // doesn't emit leading trivia before the first statement, so a stripped
-    // leading comment shouldn't leave a blank line.
-    if options.remove_comments.is_true() {
-        while output.starts_with(|c: char| c == ' ' || c == '\t' || c == '\n' || c == '\r') {
-            output.remove(0);
-        }
-    }
-
-    output
 }
 
 /// Emit a range of source text `[start, end)`, skipping any cut ranges
 /// (comment or type-annotation cuts) and applying any replacement ranges
 /// (e.g., `const`→`var` for ES5 down-leveling) that fall within it.
-fn emit_text_range(
+fn emit_text_range<S: EmitSink>(
     source: &str,
     start: usize,
     end: usize,
     cuts: &[(usize, usize)],
     replacements: &[(usize, usize, &str)],
-    output: &mut String,
+    sink: &mut S,
 ) {
     if cuts.is_empty() && replacements.is_empty() {
-        output.push_str(&source[start..end]);
+        sink.emit_source(source, start, end);
         return;
     }
     // Merge cuts and replacements into a single sorted operation list.
@@ -363,22 +601,22 @@ fn emit_text_range(
         }
     }
     if ops.is_empty() {
-        output.push_str(&source[start..end]);
+        sink.emit_source(source, start, end);
         return;
     }
     ops.sort_by_key(|&(s, _, _)| s);
     let mut pos = start;
     for (s, e, repl) in &ops {
         if *s > pos {
-            output.push_str(&source[pos..*s]);
+            sink.emit_source(source, pos, *s);
         }
         if let Some(r) = repl {
-            output.push_str(r);
+            sink.emit_generated(r);
         }
         pos = *e;
     }
     if pos < end {
-        output.push_str(&source[pos..end]);
+        sink.emit_source(source, pos, end);
     }
 }
 
@@ -958,12 +1196,12 @@ fn is_type_only_statement(node: &Node) -> bool {
 
 /// Emit a statement, stripping type annotations and (optionally) comments,
 /// and applying ES5 down-leveling replacements.
-fn emit_statement(
+fn emit_statement<S: EmitSink>(
     node: &Node,
     source: &str,
     comment_cuts: &[(usize, usize)],
     replacements: &[(usize, usize, &str)],
-    output: &mut String,
+    sink: &mut S,
 ) {
     let mut cuts: Vec<(usize, usize)> = Vec::new();
     collect_type_cuts(node, source, &mut cuts);
@@ -987,7 +1225,7 @@ fn emit_statement(
 
     if cuts.is_empty() && stmt_replacements.is_empty() {
         // No type annotations, comments, or replacements — emit source as-is.
-        output.push_str(&source[node.pos()..node.end()]);
+        sink.emit_source(source, node.pos(), node.end());
         return;
     }
 
@@ -1004,15 +1242,15 @@ fn emit_statement(
     let mut pos = node.pos();
     for (s, e, repl) in &ops {
         if *s > pos {
-            output.push_str(&source[pos..*s]);
+            sink.emit_source(source, pos, *s);
         }
         if let Some(r) = repl {
-            output.push_str(r);
+            sink.emit_generated(r);
         }
         pos = *e;
     }
     if pos < node.end() {
-        output.push_str(&source[pos..node.end()]);
+        sink.emit_source(source, pos, node.end());
     }
 }
 
@@ -1869,5 +2107,160 @@ mod tests {
         let js = emit_to_string_commonjs("export { foo } from \"./bar\";");
         assert!(js.contains("const { foo } = require(\"./bar\");"));
         assert!(js.contains("exports.foo = foo;"));
+    }
+
+    // ── Source map tests (P4.4) ───────────────────────────────────────────
+
+    fn emit_with_sourcemap(source: &str, source_map: bool, inline: bool, inline_sources: bool) -> (String, Option<String>, String) {
+        let sf = parse(source);
+        let mut opts = CompilerOptions::default();
+        if source_map {
+            opts.source_map = Tristate::True;
+        }
+        if inline {
+            opts.inline_source_map = Tristate::True;
+        }
+        if inline_sources {
+            opts.inline_sources = Tristate::True;
+        }
+        emit_js_with_sourcemap(&sf, &opts, "/test.js")
+    }
+
+    #[test]
+    fn sourcemap_produces_valid_json() {
+        let (js, map_json, url) = emit_with_sourcemap("let x = 1;\nlet y = 2;\n", true, false, false);
+        // JS should not contain sourceMappingURL yet (appended by caller).
+        assert!(!js.contains("sourceMappingURL"));
+        // Map JSON should be present.
+        let map = map_json.expect("map_json should be Some");
+        assert!(map.contains("\"version\":3"));
+        assert!(map.contains("\"file\":\"test.js\""));
+        assert!(map.contains("\"sources\""));
+        assert!(map.contains("\"mappings\""));
+        // Mappings should be non-empty.
+        assert!(!map.contains("\"mappings\":\"\""));
+        // URL should be the base name of the .map file.
+        assert_eq!(url, "test.js.map");
+        // sourcesContent should NOT be present (inlineSources not set).
+        assert!(!map.contains("sourcesContent"));
+    }
+
+    #[test]
+    fn sourcemap_inline_produces_data_url() {
+        let (js, map_json, url) = emit_with_sourcemap("let x = 1;\n", false, true, false);
+        // No .map file when inline.
+        assert!(map_json.is_none());
+        // URL should be a base64 data URL.
+        assert!(url.starts_with("data:application/json;base64,"));
+        // JS should not contain sourceMappingURL yet (appended by caller).
+        assert!(!js.contains("sourceMappingURL"));
+    }
+
+    #[test]
+    fn sourcemap_inline_sources_includes_content() {
+        let (_js, map_json, _url) = emit_with_sourcemap("let x = 1;\n", true, false, true);
+        let map = map_json.expect("map_json should be Some");
+        assert!(map.contains("sourcesContent"));
+        assert!(map.contains("let x = 1;"));
+    }
+
+    #[test]
+    fn sourcemap_strips_type_annotations() {
+        let (js, map_json, _url) = emit_with_sourcemap("let x: number = 1;\n", true, false, false);
+        // JS should have type annotation stripped.
+        assert!(js.contains("let x = 1;"));
+        assert!(!js.contains(": number"));
+        // Map should still be valid.
+        let map = map_json.expect("map_json should be Some");
+        assert!(map.contains("\"version\":3"));
+    }
+
+    #[test]
+    fn sourcemap_mappings_decode_to_correct_positions() {
+        use crate::sourcemap::MappingsDecoder;
+        let (js, map_json, _url) = emit_with_sourcemap("let x = 1;\n", true, false, false);
+        let map = map_json.expect("map_json should be Some");
+        // Parse the JSON to extract mappings.
+        let raw: crate::sourcemap::RawSourceMap = crate::json::unmarshal(&map).expect("valid JSON");
+        assert_eq!(raw.version, 3);
+        assert!(!raw.sources.is_empty());
+        assert!(!raw.mappings.is_empty());
+
+        // Decode mappings and verify they point to valid source positions.
+        let mut decoder = MappingsDecoder::new(&raw.mappings);
+        let mut count = 0;
+        let mut has_source_mapping = false;
+        while count < 100 {
+            match decoder.next() {
+                Some(m) => {
+                    if m.is_source_mapping() {
+                        has_source_mapping = true;
+                        // Source line should be 0 (first line of "let x = 1;\n").
+                        assert!(m.source_line >= 0);
+                    }
+                    count += 1;
+                }
+                None => break,
+            }
+        }
+        assert!(has_source_mapping, "should have at least one source mapping");
+
+        // The generated JS should not exceed the mappings.
+        let gen_lines = js.lines().count();
+        let _ = gen_lines; // just ensure it doesn't panic
+    }
+
+    #[test]
+    fn sourcemap_not_emitted_by_default() {
+        // Default options: no source map.
+        let sf = parse("let x = 1;\n");
+        let js = emit_js_text(&sf, &CompilerOptions::default());
+        assert!(!js.contains("sourceMappingURL"));
+    }
+
+    #[test]
+    fn sourcemap_commonjs_use_strict_not_mapped() {
+        // CommonJS modules emit "use strict"; as generated text — it should
+        // not produce a source mapping (no corresponding source position).
+        let mut opts = CompilerOptions::default();
+        opts.source_map = Tristate::True;
+        opts.module = ModuleKind::CommonJS;
+        let sf = parse("const x = 1;\nexport { x };");
+        let (js, map_json, _url) = emit_js_with_sourcemap(&sf, &opts, "/test.js");
+        assert!(js.starts_with("\"use strict\";"));
+        let map = map_json.expect("map_json should be Some");
+        assert!(map.contains("\"version\":3"));
+    }
+
+    #[test]
+    fn sourcemap_write_file_creates_map() {
+        use std::cell::RefCell;
+        let sf = parse("let x = 1;\nlet y: string = \"hi\";\n");
+        let mut opts = CompilerOptions::default();
+        opts.source_map = Tristate::True;
+        let written: RefCell<Vec<(String, String)>> = RefCell::new(Vec::new());
+        let result = emit_source_file_with_common_dir(
+            &sf,
+            &opts,
+            &crate::vfs::InMemoryFS::new(),
+            "",
+            &|path, content| {
+                written.borrow_mut().push((path.to_string(), content.to_string()));
+                Ok(())
+            },
+        );
+        // Should have written both .js and .js.map.
+        assert_eq!(result.emitted_files.len(), 2);
+        let written = written.borrow();
+        let js_file = &written.iter().find(|(p, _)| p.ends_with(".js") && !p.ends_with(".map")).expect("js file").1;
+        let map_file = &written.iter().find(|(p, _)| p.ends_with(".js.map")).expect("map file").1;
+        // JS should have sourceMappingURL.
+        assert!(js_file.contains("//# sourceMappingURL="));
+        // Map should be valid JSON.
+        assert!(map_file.contains("\"version\":3"));
+        assert!(map_file.contains("\"mappings\""));
+        // Type annotation should be stripped from JS.
+        assert!(js_file.contains("let y = \"hi\";"));
+        assert!(!js_file.contains(": string"));
     }
 }

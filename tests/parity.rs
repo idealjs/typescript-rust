@@ -235,6 +235,21 @@ const CASES: &[Case] = &[
         stdout_contains: &[],
         skip_oracle: true,
     },
+    Case {
+        name: "source_map",
+        // `sourceMap: true` — generates .js.map file and appends
+        // `//# sourceMappingURL=main.js.map` to the .js output.
+        // Oracle comparison skipped: our text-slice emitter produces
+        // different VLQ mapping points than Go's printer-based emitter.
+        args: &[],
+        expect_success: true,
+        expected_files: &[(
+            "dist/src/main.js",
+            "let x = 1;\nlet y = 2;\n//# sourceMappingURL=main.js.map",
+        )],
+        stdout_contains: &[],
+        skip_oracle: true,
+    },
     // ── Parser parity smoke cases ───────────────────────────────────────
     Case {
         name: "parser_syntax_error",
