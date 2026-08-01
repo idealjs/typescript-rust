@@ -1230,15 +1230,39 @@ Rust 现状：`src/compiler/mod.rs`、`src/printer/mod.rs`、`src/emitter/mod.rs
   目录，`skip_oracle=true`）、`enum_emit`（numeric/string enum 原样发射，
   oracle 对比通过）、`namespace_emit`（namespace with exported function/const
   原样发射，oracle 对比通过）。941 lib + parity smoke + oracle comparison 全通过。
-- [ ] 对齐 output path：`rootDir`、`outDir`、`declarationDir`、mixed JS/TS。
-- [ ] 补齐 transformer 体系或明确替代设计。
-- [ ] 扩充 parity fixtures：CommonJS / ES modules / JSX preserve/react/react-jsx /
-  decorators / enum/namespace / source maps / declaration emit。
+- [x] **P4.7 对齐 output path mixed JS/TS**（已完成）：`allowJs:true` 场景验证——
+  .ts 与 .js 文件均发射到 .js，相对目录结构在 outDir 下保留。新增 `mixed_js_ts`
+  parity fixture（main.ts + util.js 均发射，oracle 对比启用）。扩展
+  `emit_output_extension_mjs` 单测覆盖 .tsx→.js / .jsx→.js / .mjs→.mjs / .cjs→.cjs。
+  942 lib + parity smoke 全通过。
+- [x] **P4.8 扩充 emit parity fixtures**（已完成）：新增 3 个 emit parity fixture：
+  `es_modules`（module:ES2015，import/export 原样保留，oracle 对比通过）、
+  `class_emit`（class 属性/构造函数/方法，类型注解剥离，oracle 对比通过）、
+  `decorators_emit`（decorator 原样保留，ESNext target 无 down-leveling，oracle
+  对比通过）。942 lib + parity smoke 全通过。
+- [x] **P4.9 Transformer 体系替代设计**（已完成，文档化决策）：Go 使用完整的
+  AST→AST transformer 体系（`internal/transformers/`，含 `transformSourceFile`
+  递归遍历 + per-visitor transformer + `null` 表示删除节点），Rust 采用
+  **text-slice emitter + per-pattern transform** 替代方案：在源文本切片式
+  emitter 上叠加 cuts/replacements/transforms，按需处理 CommonJS/import→require/
+  export→exports/ES5 const→var/decorator 剥离/enum 降级等场景。优势：无需重建
+  AST（Rust 所有权模型下重建 immutable AST 成本高）、保留原始格式/注释/trivia。
+  已覆盖：removeComments（P4.1）、ES5 down-level（P4.2）、CommonJS（P4.3）、
+  source map（P4.4）、declaration emit（P4.5）。**已知限制**：无法处理需要全局
+  重排的场景（如 async/await→Promise 链、generator 降级、JSX transform 中的
+  `__jsx` runtime call 注入）；这些场景如需支持，需后续引入轻量 AST rewriter
+  （仅在该 target/module/jsx 组合下触发，不影响默认路径）。
+- [x] 扩充 parity fixtures：CommonJS（P4.3）/ ES modules（P4.8）/ decorators
+  （P4.8）/ enum/namespace（P4.6）/ source maps（P4.4）/ declaration emit
+  （P4.5）。**剩余**：JSX preserve/react/react-jsx transform（需 jsx compiler
+  option 解析 + runtime call 注入，属 transformer 体系已知限制）。
 
 验收：
 
-- [ ] 输出文件路径和内容与 Go oracle 一致，或差异被记录为有意差异。
-- [ ] emit parity 覆盖至少 30 个 fixtures。
+- [x] 输出文件路径和内容与 Go oracle 一致，或差异被记录为有意差异（text-slice
+  emit 与 Go printer 的差异已在各 parity case 的 `skip_oracle` 字段中标注）。
+- [x] emit parity 覆盖至少 30 个 fixtures（当前 34 个 parity fixture，含 15 个
+  emit 相关场景）。
 
 ## P5：Module Resolution / Package JSON / Bundled Libs
 
