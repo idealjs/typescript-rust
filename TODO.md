@@ -63,8 +63,8 @@ npm install && npm run build
 
 ## 当前进度快照（2026-08-01）
 
-测试基线：`cargo test` 通过（**1,024** 个 lib 单测 + **572** 个 checker parity
-+ **2** 个 emit parity，共 **1,598** 个测试通过；169 个 ignored 标注 TODO）。CLI parity 对齐 Go oracle
+测试基线：`cargo test` 通过（**1,059** 个 lib 单测 + **572** 个 checker parity
++ **2** 个 emit parity，共 **1,633** 个测试通过；145 个 ignored 标注 TODO）。CLI parity 对齐 Go oracle
 （TS2322 诊断位置 + 类型扩宽、TS6053 消息格式、exit code 逻辑）已完成。LSP
 diagnostics/hover + API server + .tsbuildinfo 增量构建已接入。
 

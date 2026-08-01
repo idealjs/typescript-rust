@@ -162,14 +162,66 @@ impl InMemoryFS {
     }
 
     pub fn insert_file(&self, path: &str, content: &str) {
-        self.files
-            .write()
-            .unwrap()
-            .insert(path.to_string(), content.to_string());
+        let mut files = self.files.write().unwrap();
+        let key = if self.case_sensitive {
+            path.to_string()
+        } else {
+            let target = path.to_ascii_lowercase();
+            files
+                .keys()
+                .find(|k| k.to_ascii_lowercase() == target)
+                .cloned()
+                .unwrap_or_else(|| path.to_string())
+        };
+        files.insert(key, content.to_string());
     }
 
     pub fn insert_dir(&self, path: &str) {
-        self.dirs.write().unwrap().insert(path.to_string());
+        let mut dirs = self.dirs.write().unwrap();
+        if !self.case_sensitive {
+            let target = path.to_ascii_lowercase();
+            if let Some(existing) = dirs
+                .iter()
+                .find(|d| d.to_ascii_lowercase() == target)
+                .cloned()
+            {
+                dirs.remove(&existing);
+            }
+        }
+        dirs.insert(path.to_string());
+    }
+
+    /// Finds the stored file key matching `path`, performing a case-insensitive
+    /// match when the FS is not case-sensitive.
+    fn lookup_file_key(&self, path: &str) -> Option<String> {
+        let files = self.files.read().unwrap();
+        if files.contains_key(path) {
+            return Some(path.to_string());
+        }
+        if self.case_sensitive {
+            return None;
+        }
+        let target = path.to_ascii_lowercase();
+        files
+            .keys()
+            .find(|k| k.to_ascii_lowercase() == target)
+            .cloned()
+    }
+
+    /// Finds the stored directory key matching `path`, performing a
+    /// case-insensitive match when the FS is not case-sensitive.
+    fn lookup_dir_key(&self, path: &str) -> Option<String> {
+        let dirs = self.dirs.read().unwrap();
+        if dirs.contains(path) {
+            return Some(path.to_string());
+        }
+        if self.case_sensitive {
+            return None;
+        }
+        let target = path.to_ascii_lowercase();
+        dirs.iter()
+            .find(|d| d.to_ascii_lowercase() == target)
+            .cloned()
     }
 }
 
@@ -179,42 +231,101 @@ impl Default for InMemoryFS {
     }
 }
 
+/// Strips a UTF-8 BOM (`U+FEFF`) from the start of `content` if present.
+fn decode_with_bom(content: &str) -> String {
+    content
+        .strip_prefix('\u{FEFF}')
+        .map(|s| s.to_string())
+        .unwrap_or_else(|| content.to_string())
+}
+
+/// Returns the remainder of `haystack` after `prefix`, comparing
+/// case-insensitively when `case_sensitive` is false. Preserves the original
+/// casing of the remainder.
+fn strip_path_prefix<'a>(haystack: &'a str, prefix: &str, case_sensitive: bool) -> Option<&'a str> {
+    if case_sensitive {
+        haystack.strip_prefix(prefix)
+    } else {
+        let h = haystack.as_bytes();
+        let p = prefix.as_bytes();
+        if h.len() >= p.len() && h[..p.len()].eq_ignore_ascii_case(p) {
+            Some(&haystack[p.len()..])
+        } else {
+            None
+        }
+    }
+}
+
 impl FS for InMemoryFS {
     fn use_case_sensitive_file_names(&self) -> bool {
         self.case_sensitive
     }
 
     fn file_exists(&self, path: &str) -> bool {
-        self.files.read().unwrap().contains_key(path)
+        self.lookup_file_key(path).is_some()
     }
 
     fn read_file(&self, path: &str) -> Option<String> {
-        self.files.read().unwrap().get(path).cloned()
+        let files = self.files.read().unwrap();
+        let content = if let Some(c) = files.get(path) {
+            c
+        } else if !self.case_sensitive {
+            let target = path.to_ascii_lowercase();
+            files
+                .iter()
+                .find(|(k, _)| k.to_ascii_lowercase() == target)
+                .map(|(_, v)| v.as_str())?
+        } else {
+            return None;
+        };
+        Some(decode_with_bom(content))
     }
 
     fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
-        self.files
-            .write()
-            .unwrap()
-            .insert(path.to_string(), data.to_string());
+        let mut files = self.files.write().unwrap();
+        let key = if self.case_sensitive {
+            path.to_string()
+        } else {
+            let target = path.to_ascii_lowercase();
+            files
+                .keys()
+                .find(|k| k.to_ascii_lowercase() == target)
+                .cloned()
+                .unwrap_or_else(|| path.to_string())
+        };
+        files.insert(key, data.to_string());
         Ok(())
     }
 
     fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> {
         let mut files = self.files.write().unwrap();
-        let entry = files.entry(path.to_string()).or_default();
+        let key = if self.case_sensitive {
+            path.to_string()
+        } else {
+            let target = path.to_ascii_lowercase();
+            files
+                .keys()
+                .find(|k| k.to_ascii_lowercase() == target)
+                .cloned()
+                .unwrap_or_else(|| path.to_string())
+        };
+        let entry = files.entry(key).or_default();
         entry.push_str(data);
         Ok(())
     }
 
     fn remove(&self, path: &str) -> std::io::Result<()> {
-        self.files.write().unwrap().remove(path);
-        self.dirs.write().unwrap().remove(path);
+        if let Some(key) = self.lookup_file_key(path) {
+            self.files.write().unwrap().remove(&key);
+        }
+        if let Some(key) = self.lookup_dir_key(path) {
+            self.dirs.write().unwrap().remove(&key);
+        }
         Ok(())
     }
 
     fn directory_exists(&self, path: &str) -> bool {
-        self.dirs.read().unwrap().contains(path)
+        self.lookup_dir_key(path).is_some()
     }
 
     fn get_accessible_entries(&self, path: &str) -> Entries {
@@ -226,7 +337,7 @@ impl FS for InMemoryFS {
         };
 
         for key in self.files.read().unwrap().keys() {
-            if let Some(rest) = key.strip_prefix(&prefix) {
+            if let Some(rest) = strip_path_prefix(key, &prefix, self.case_sensitive) {
                 if !rest.contains('/') {
                     entries.files.push(rest.to_string());
                 }
@@ -234,7 +345,7 @@ impl FS for InMemoryFS {
         }
 
         for dir in self.dirs.read().unwrap().iter() {
-            if let Some(rest) = dir.strip_prefix(&prefix) {
+            if let Some(rest) = strip_path_prefix(dir, &prefix, self.case_sensitive) {
                 if !rest.contains('/') {
                     entries.directories.push(rest.to_string());
                 }
@@ -247,30 +358,34 @@ impl FS for InMemoryFS {
     }
 
     fn stat(&self, path: &str) -> Option<FileInfo> {
-        let files = self.files.read().unwrap();
-        if let Some(content) = files.get(path) {
+        if let Some(key) = self.lookup_file_key(path) {
+            let files = self.files.read().unwrap();
+            let content = files.get(&key)?;
             return Some(FileInfo {
-                name: path.rsplit('/').next()?.to_string(),
+                name: key.rsplit('/').next()?.to_string(),
                 size: content.len() as u64,
                 is_dir: false,
                 is_symlink: false,
                 modified: std::time::SystemTime::now(),
             });
         }
-        let dirs = self.dirs.read().unwrap();
-        if dirs.contains(path) {
-            return Some(FileInfo {
-                name: path.rsplit('/').next()?.to_string(),
-                size: 0,
-                is_dir: true,
-                is_symlink: false,
-                modified: std::time::SystemTime::now(),
-            });
-        }
-        None
+        let key = self.lookup_dir_key(path)?;
+        Some(FileInfo {
+            name: key.rsplit('/').next()?.to_string(),
+            size: 0,
+            is_dir: true,
+            is_symlink: false,
+            modified: std::time::SystemTime::now(),
+        })
     }
 
     fn realpath(&self, path: &str) -> String {
+        if let Some(key) = self.lookup_file_key(path) {
+            return key;
+        }
+        if let Some(key) = self.lookup_dir_key(path) {
+            return key;
+        }
         path.to_string()
     }
 }
@@ -423,10 +538,10 @@ mod tests {
     fn in_memory_fs_case_insensitive_read() {
         let fs = InMemoryFS::with_case_sensitivity(false);
         assert!(!fs.use_case_sensitive_file_names());
-        // Note: our simple InMemoryFS doesn't do case-insensitive lookup,
-        // but the flag is stored correctly
         fs.insert_file("/foo.ts", "hello");
         assert!(fs.file_exists("/foo.ts"));
+        assert!(fs.file_exists("/Foo.ts"));
+        assert_eq!(fs.read_file("/FOO.ts"), Some("hello".to_string()));
     }
 
     #[test]

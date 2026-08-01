@@ -225,12 +225,8 @@ mod tests {
     use super::*;
 
     // --- Tests ported from internal/symlinks/knownsymlinks_test.go ---
-    // All tests are #[ignore] because the symlinks module is newly created
-    // and not yet integrated into the compiler pipeline.
 
     #[test]
-    #[ignore]
-    // TODO: Requires symlinks module integration; verify KnownSymlinks::new
     fn test_new_known_symlink() {
         let cache = KnownSymlinks::new("/test/dir", true);
         assert_eq!(cache.cwd, "/test/dir");
@@ -238,9 +234,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
-    // TODO: Requires symlinks module integration; verify set_directory stores
-    // directory links and creates realpath mappings
     fn test_set_directory() {
         let cache = KnownSymlinks::new("/test/dir", true);
         let symlink_path = tspath::to_path("/test/symlink", "/test/dir", true)
@@ -277,9 +270,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
-    // TODO: Requires symlinks module integration; verify set_file stores
-    // file symlinks
     fn test_set_file() {
         let cache = KnownSymlinks::new("/test/dir", true);
         let symlink = "/test/symlink/file.ts";
@@ -294,9 +284,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
-    // TODO: Requires symlinks module integration; verify process_resolution
-    // handles empty paths and stores valid resolutions
     fn test_process_resolution() {
         let cache = KnownSymlinks::new("/test/dir", true);
 
@@ -317,8 +304,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
-    // TODO: Requires symlinks module integration; verify guess_directory_symlink
     fn test_guess_directory_symlink() {
         let cache = KnownSymlinks::new("/test/dir", true);
 
@@ -380,9 +365,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
-    // TODO: Requires symlinks module integration; verify
-    // is_node_modules_or_scoped_package_directory
     fn test_is_node_modules_or_scoped_package_directory() {
         let cache = KnownSymlinks::new("/test/dir", true);
 
@@ -405,9 +387,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
-    // TODO: Requires symlinks module integration and module::ResolvedModule types;
-    // verify set_symlinks_from_resolutions stores file symlinks from mock resolutions
     fn test_set_symlinks_from_resolutions() {
         let cache = KnownSymlinks::new("/test/dir", true);
 
@@ -435,9 +414,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
-    // TODO: Requires symlinks module integration; verify concurrent access
-    // to KnownSymlinks from multiple threads
     fn test_known_symlinks_thread_safety() {
         use std::thread;
 

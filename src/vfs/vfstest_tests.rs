@@ -12,6 +12,43 @@ use std::sync::Arc;
 /// intermediate directories from file paths (matching Go's `FromMap`).
 fn from_map(files: &[(&str, &str)], case_sensitive: bool) -> InMemoryFS {
     let fs = InMemoryFS::with_case_sensitivity(case_sensitive);
+
+    // Detect duplicate canonical paths on a case-insensitive FS.
+    if !case_sensitive {
+        let mut seen: std::collections::HashMap<String, &str> = std::collections::HashMap::new();
+        for (path, _) in files {
+            let canonical = path.to_ascii_lowercase();
+            if let Some(existing) = seen.get(&canonical) {
+                if *existing != *path {
+                    panic!(
+                        "duplicate path: {:?} and {:?} have the same canonical path",
+                        path, existing
+                    );
+                }
+            }
+            seen.insert(canonical, path);
+        }
+    }
+
+    // Detect parent-is-file conflicts: a file path cannot be used as a
+    // directory prefix of another file path.
+    let file_paths: HashSet<&str> = files.iter().map(|(p, _)| *p).collect();
+    for (path, _) in files {
+        let mut current = *path;
+        while let Some(idx) = current.rfind('/') {
+            current = &current[..idx];
+            if current.is_empty() {
+                break;
+            }
+            if file_paths.contains(current) {
+                panic!(
+                    "failed to create intermediate directories for {:?}: mkdir {:?}: path exists but is not a directory",
+                    path, current
+                );
+            }
+        }
+    }
+
     let mut dirs = HashSet::new();
     for (path, _) in files {
         let mut current = *path;
@@ -32,16 +69,13 @@ fn from_map(files: &[(&str, &str)], case_sensitive: bool) -> InMemoryFS {
 }
 
 // ---------------------------------------------------------------------------
-// TestInsensitive / TestInsensitiveUpper — case-insensitive lookup not implemented
+// TestInsensitive / TestInsensitiveUpper — case-insensitive lookup
 // ---------------------------------------------------------------------------
 
-#[ignore = "TODO: case-insensitive file lookup not implemented in InMemoryFS"]
 #[test]
 fn test_insensitive() {
     // Port of Go TestInsensitive.
     // On a case-insensitive FS, reading "Foo/Bar/Baz" should resolve to "foo/bar/baz".
-    // The InMemoryFS stores the case_sensitive flag but does not perform
-    // case-insensitive key lookups yet.
     let contents = "bar";
     let fs = from_map(
         &[
@@ -60,11 +94,11 @@ fn test_insensitive() {
     let entries = fs.get_accessible_entries("/foo");
     assert_eq!(entries.directories, vec!["bar", "bar2", "bar3"]);
 
-    // Case-insensitive lookups — would fail without case-insensitive lookup.
+    // Case-insensitive lookups resolve to the stored (canonical) path.
     assert_eq!(fs.read_file("/Foo/Bar/Baz"), Some(contents.to_string()));
+    assert_eq!(fs.realpath("/Foo/Bar/Baz"), "/foo/bar/baz");
 }
 
-#[ignore = "TODO: case-insensitive file lookup not implemented in InMemoryFS"]
 #[test]
 fn test_insensitive_upper() {
     // Port of Go TestInsensitiveUpper.
@@ -121,14 +155,13 @@ fn test_sensitive() {
 // Duplicate path detection (not implemented in Rust InMemoryFS)
 // ---------------------------------------------------------------------------
 
-#[ignore = "TODO: duplicate canonical-path detection not implemented in InMemoryFS construction"]
 #[test]
+#[should_panic(expected = "duplicate path")]
 fn test_sensitive_duplicate_path() {
     // Port of Go TestSensitiveDuplicatePath.
     // On a case-insensitive FS, "foo" and "Foo" have the same canonical path
     // and construction should panic.
     let _fs = from_map(&[("/foo", "bar"), ("/Foo", "baz")], false);
-    // Expected: panic with 'duplicate path: "Foo" and "foo" have the same canonical path'
 }
 
 #[test]
@@ -259,15 +292,16 @@ fn test_stress() {
 }
 
 // ---------------------------------------------------------------------------
-// TestParentDirFile — parent-is-file validation (not implemented)
+// TestParentDirFile — parent-is-file validation
 // ---------------------------------------------------------------------------
 
-#[ignore = "TODO: InMemoryFS construction does not validate parent-directory types"]
 #[test]
+#[should_panic(expected = "not a directory")]
 fn test_parent_dir_file() {
     // Port of Go TestParentDirFile.
     // "foo" is a file but "foo/oops" tries to use it as a directory.
     // Go panics: failed to create intermediate directories for "foo/oops"
+    let _fs = from_map(&[("/foo", "bar"), ("/foo/oops", "baz")], false);
 }
 
 // ---------------------------------------------------------------------------
@@ -388,14 +422,18 @@ fn test_vfs_test_map_fs_windows() {
 }
 
 // ---------------------------------------------------------------------------
-// TestBOM — BOM stripping not implemented
+// TestBOM — BOM stripping
 // ---------------------------------------------------------------------------
 
-#[ignore = "TODO: InMemoryFS::read_file does not strip BOM (UTF-8/UTF-16)"]
 #[test]
 fn test_bom() {
-    // Port of Go TestBOM.
-    // UTF-16 BE/LE and UTF-8 BOMs should be stripped and decoded to "hello, world".
+    // Port of Go TestBOM (UTF-8 sub-test).
+    // A UTF-8 BOM (U+FEFF) prefix should be stripped on read.
+    // (UTF-16 BOMs are not exercised here because `InMemoryFS` stores UTF-8
+    // `String`s and cannot hold the non-UTF-8 bytes of a UTF-16 BE BOM.)
+    let expected = "hello, world";
+    let fs = from_map(&[("/foo.ts", "\u{FEFF}hello, world")], true);
+    assert_eq!(fs.read_file("/foo.ts"), Some(expected.to_string()));
 }
 
 // ---------------------------------------------------------------------------
