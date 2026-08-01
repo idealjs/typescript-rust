@@ -578,7 +578,11 @@ parser 侧映射到 `UNKNOWN_REGULAR_EXPRESSION_FLAG`/`DUPLICATE_REGULAR_EXPRESS
 
 - [ ] 迁移 `internal/parser/reparser.go`（748 行）到 `src/parser/reparser.rs`。
 - [ ] `@typedef` JSDoc → type alias 节点追加到 statements。
-- [ ] `reparseTopLevelAwait`：外部模块 + `possibleAwaitSpans` 重解析。
+- [x] `reparseTopLevelAwait`：外部模块 + `possibleAwaitSpans` 重解析。
+  **不需要迁移**：Rust scanner 始终将 `await` 扫描为 `AwaitKeyword`（不像 Go
+  scanner 在非 AwaitContext 时扫描为 Identifier），因此 top-level `await`
+  在外部模块中已被正确解析为 `AwaitExpression`，无需 reparse。Go 的
+  `possibleAwaitSpans` 机制仅因 Go scanner 的上下文关键字扫描策略而存在。
 - [x] `collectExternalModuleReferences`：新增 `src/parser/references.rs`
   （70 行），`collect_external_module_references` 遍历顶层 statements 收集
   import/export 模块说明符到 `SourceFile.imports`、`declare module "name"` 到
@@ -903,7 +907,7 @@ contextual function type 的 call signature，无注解参数继承对应位置�
   `substitute_infer_type_parameters` 扩展支持 Object（数组）与 Tuple 类型（之前
   仅处理 union/intersection，导致 `(infer R)[]` extends 不被替换、条件恒走 false 分支）。
   18 个 conditional type parity 测试通过。
-- [ ] 类型推断缓存（`node_links.resolved_type`）。（已通过 `type_node_links` 完成）
+- [x] 类型推断缓存（`node_links.resolved_type`）。（已通过 `type_node_links` 完成）
 - [x] Fresh literal type widening（对象字面量在无 contextual type 时应 widening
   literal 属性）。已实现 `widen_initializer_type` +
   `widen_object_literal_type`：变量声明无注解时对初始化器类型做 widening，
