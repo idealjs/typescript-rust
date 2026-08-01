@@ -6316,3 +6316,193 @@ fn module_resolution_node_modules_nested() {
             .collect::<Vec<_>>()
     );
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// TS2448: Block-scoped variable used before its declaration (temporal dead zone)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_ts2448_let_used_before_declaration() {
+    // `let` variable referenced before its declaration → TS2448.
+    let diags = check_source("let y = later;\nlet later = 42;");
+    assert_diagnostic_code(&diags, 2448);
+}
+
+#[test]
+fn checker_ts2448_const_used_before_declaration() {
+    // `const` variable referenced before its declaration → TS2448.
+    let diags = check_source("let y = later;\nconst later = 42;");
+    assert_diagnostic_code(&diags, 2448);
+}
+
+#[test]
+fn checker_ts2448_let_used_after_declaration_no_error() {
+    // `let` variable referenced after its declaration → no error.
+    let diags = check_source("let later = 42;\nlet y = later;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ts2448_var_used_before_declaration_no_error() {
+    // `var` is function-scoped and hoisted — no TS2448.
+    let diags = check_source("let y = later;\nvar later = 42;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ts2448_function_declaration_used_before_no_error() {
+    // Function declarations are hoisted — no TS2448.
+    let diags = check_source("f();\nfunction f() { return 1; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ts2448_block_scoped_used_before_in_block() {
+    // TDZ applies within block scopes too.
+    let diags = check_source("{\n  let y = later;\n  let later = 42;\n}");
+    assert_diagnostic_code(&diags, 2448);
+}
+
+#[test]
+fn checker_ts2448_deferred_in_function_no_error() {
+    // A reference inside a function body is deferred — no TS2448 even if
+    // the declaration comes after the function textually.
+    let diags = check_source("function f() { return later; }\nlet later = 42;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ts2448_deferred_in_arrow_no_error() {
+    // A reference inside an arrow function body is deferred — no TS2448.
+    let diags = check_source("const f = () => later;\nlet later = 42;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ts2448_class_used_before_declaration() {
+    // Class referenced before its declaration → TS2448.
+    let diags = check_source("const c = new C();\nclass C {}");
+    assert_diagnostic_code(&diags, 2448);
+}
+
+#[test]
+fn checker_ts2448_class_used_after_declaration_no_error() {
+    // Class referenced after its declaration → no error.
+    let diags = check_source("class C {}\nconst c = new C();");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// TS2454: Variable used before being assigned (definite assignment)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_ts2454_let_uninitialized_used_before_assignment() {
+    // `let v: number;` then read before assignment → TS2454.
+    let diags = check_source("let v: number;\nlet y = v;\nv = 1;");
+    assert_diagnostic_code(&diags, 2454);
+}
+
+#[test]
+fn checker_ts2454_let_assigned_before_use_no_error() {
+    // `let v: number; v = 1;` then read → no error.
+    let diags = check_source("let v: number;\nv = 1;\nlet y = v;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ts2454_let_with_initializer_no_error() {
+    // `let v: number = 0;` — has initializer → no TS2454.
+    let diags = check_source("let v: number = 0;\nlet y = v;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ts2454_let_no_type_annotation_no_error() {
+    // `let v;` — no type annotation → no TS2454.
+    let diags = check_source("let v;\nlet y = v;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ts2454_let_type_includes_undefined_no_error() {
+    // `let v: number | undefined;` — declared type includes undefined →
+    // no TS2454 (reading undefined is valid for this type).
+    let diags = check_source("let v: number | undefined;\nlet y = v;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ts2454_let_definite_assignment_assertion_no_error() {
+    // `let v!: number;` — definite assignment assertion → no TS2454.
+    let diags = check_source("let v!: number;\nlet y = v;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ts2454_declare_let_no_error() {
+    // `declare let v: number;` — ambient → no TS2454.
+    let diags = check_source("declare let v: number;\nlet y = v;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ts2454_let_string_uninitialized_used_before_assignment() {
+    // Non-number type: `let s: string;` read before assignment → TS2454.
+    let diags = check_source("let s: string;\nlet y = s;\ns = \"hi\";");
+    assert_diagnostic_code(&diags, 2454);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// TS18048: 'X' is possibly 'undefined'
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_ts18048_property_access_on_possibly_undefined() {
+    // Accessing `.a` on `{ a: number } | undefined` → TS18048.
+    let diags = check_source("let x: { a: number } | undefined = { a: 1 };\nx.a;");
+    assert_diagnostic_code(&diags, 18048);
+}
+
+#[test]
+fn checker_ts18048_optional_chain_suppresses_error() {
+    // Optional chaining `x?.a` suppresses TS18048.
+    let diags = check_source("let x: { a: number } | undefined = { a: 1 };\nx?.a;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ts18048_property_access_on_non_undefined_no_error() {
+    // Accessing `.a` on `{ a: number }` (not possibly undefined) → no error.
+    let diags = check_source("let x: { a: number } = { a: 1 };\nlet y: number = x.a;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ts18048_property_does_not_exist_at_all_ts2339() {
+    // Property `.b` doesn't exist on `{ a: number } | undefined` → TS2339
+    // (not TS18048, because the property doesn't exist on the non-undefined
+    // part either).
+    let diags = check_source("let x: { a: number } | undefined = { a: 1 };\nx.b;");
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_ts18048_property_access_after_narrowing_no_error() {
+    // After narrowing away undefined (via `if (x !== undefined)`), accessing
+    // `.a` is safe → no error.
+    let diags = check_source(
+        "let x: { a: number } | undefined = { a: 1 };\
+         if (x !== undefined) {\
+             let y: number = x.a;\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ts18048_property_access_on_possibly_null_union() {
+    // `{ a: number } | null` — accessing `.a` → TS18048.
+    let diags = check_source("let x: { a: number } | null = { a: 1 };\nx.a;");
+    assert_diagnostic_code(&diags, 18048);
+}

@@ -10,8 +10,8 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::ast::{
-    CheckFlags, DiagnosticsCollection, ModifierFlags, Node, NodeData, NodeFlags, NodeList,
-    NodeSymbolMap, SourceFile, Symbol, SymbolFlags, SymbolTable, SyntaxKind,
+    CheckFlags, DiagnosticsCollection, FlowFlags, FlowNode, ModifierFlags, Node, NodeData,
+    NodeFlags, NodeList, NodeSymbolMap, SourceFile, Symbol, SymbolFlags, SymbolTable, SyntaxKind,
 };
 use crate::core::compiler_options::{
     CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget,
@@ -20,6 +20,7 @@ use crate::core::text::TextRange;
 use crate::diagnostics::messages_generated::{
     A_SPREAD_ARGUMENT_MUST_EITHER_HAVE_A_TUPLE_TYPE_OR_BE_PASSED_TO_A_REST_PARAMETER,
     ARGUMENT_EXPRESSION_EXPECTED, ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1,
+    BLOCK_SCOPED_VARIABLE_0_USED_BEFORE_ITS_DECLARATION,
     CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_READ_ONLY_PROPERTY, CANNOT_FIND_NAME_0,
     EXPECTED_0_ARGUMENTS_BUT_GOT_1, EXPECTED_AT_LEAST_0_ARGUMENTS_BUT_GOT_1,
     OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
@@ -27,7 +28,8 @@ use crate::diagnostics::messages_generated::{
     THIS_COMPARISON_APPEARS_TO_BE_UNINTENTIONAL_BECAUSE_THE_TYPES_0_AND_1_HAVE_NO_OVERLAP,
     THIS_EXPRESSION_IS_NOT_CALLABLE, THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE,
     TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
-    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1, VARIABLE_0_IS_USED_BEFORE_BEING_ASSIGNED,
+    X_0_IS_POSSIBLY_UNDEFINED,
 };
 use crate::evaluator::{EvalResult, EvalValue};
 use crate::jsnum;
@@ -3355,12 +3357,36 @@ impl Checker {
     /// missing property is reported. `any`/`unknown`/`never` and other
     /// permissive types skip the check.
     fn check_property_access(&mut self, node: &Arc<Node>) {
-        let (obj_expr, name) = match &node.data {
-            crate::ast::NodeData::PropertyAccessExpression(data) => (&data.expression, &data.name),
+        let (obj_expr, question_dot, name) = match &node.data {
+            crate::ast::NodeData::PropertyAccessExpression(data) => (
+                &data.expression,
+                data.question_dot_token.is_some(),
+                &data.name,
+            ),
             _ => return,
         };
         let obj_type = self.get_type_of_node(obj_expr);
         let name_text = name.text();
+        // TS18048: When the object type is possibly `undefined` (or `null`)
+        // and the property exists on the non-nullable part of the union,
+        // report TS18048 ("'x' is possibly 'undefined'") even though the
+        // property itself exists. Optional chaining (`?.`) suppresses this —
+        // the `?.` already handles the undefined case. Mirrors Go's error
+        // selection in `checkPropertyAccess`.
+        if !question_dot
+            && self.strict_null_checks
+            && type_is_possibly_undefined(&obj_type)
+            && self.property_exists_on_non_nullable_part(&obj_type, name_text)
+        {
+            let file = self.current_file.clone();
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file,
+                name.loc,
+                X_0_IS_POSSIBLY_UNDEFINED,
+                vec![obj_expr.text().to_string()],
+            ));
+            return;
+        }
         if self.has_property_of_type(&obj_type, name_text) {
             return;
         }
@@ -3372,6 +3398,28 @@ impl Checker {
             PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
             vec![name_text.to_string(), type_str],
         ));
+    }
+
+    /// Whether `name` exists as a property on the non-nullable constituents of
+    /// a union type. Used to distinguish TS18048 (possibly undefined) from
+    /// TS2339 (property doesn't exist). Mirrors Go's check that looks up the
+    /// property on the non-undefined part of the union.
+    fn property_exists_on_non_nullable_part(&mut self, t: &Arc<Type>, name: &str) -> bool {
+        if t.flags.contains(TypeFlags::Union) {
+            if let TypeData::Union(u) = &t.data {
+                for ct in &u.union_or_intersection.types {
+                    if ct.flags.intersects(TypeFlags::Undefined | TypeFlags::Null) {
+                        continue;
+                    }
+                    if self.has_property_of_type(ct, name) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+        // Non-union: check the type itself (excluding the nullable flags).
+        self.has_property_of_type(t, name)
     }
 
     /// Check that call/new-expression arguments are assignable to the
@@ -5525,7 +5573,18 @@ impl Checker {
             return;
         }
 
-        if self.resolve_identifier(node).is_some() {
+        if let Some(symbol) = self.resolve_identifier(node) {
+            // TS2448: Block-scoped variable used before its declaration
+            // (temporal dead zone). When a `let`/`const`/`class` variable is
+            // referenced before its declaration position, report TS2448.
+            // Mirrors Go's `checkResolvedBlockScopedVariable`.
+            self.check_block_scoped_variable_used_before_declaration(node, &symbol, name);
+            // TS2454: Variable used before being assigned. A `let` variable
+            // with a non-undefined type annotation, no initializer, and no
+            // assignment before the usage point reports TS2454. Only checked
+            // under strictNullChecks. Mirrors Go's definite-assignment check
+            // in `getFlowTypeOfReference`.
+            self.check_variable_used_before_assigned(node, &symbol, name);
             return;
         }
 
@@ -5534,6 +5593,258 @@ impl Checker {
         let diagnostic =
             crate::ast::Diagnostic::new(file, node.loc, CANNOT_FIND_NAME_0, vec![name.to_string()]);
         self.diagnostics.add(diagnostic);
+    }
+
+    /// TS2448: Check if a block-scoped variable (`let`/`const`/`class`) is
+    /// used before its declaration. Mirrors Go's
+    /// `checkResolvedBlockScopedVariable` + `isBlockScopedNameDeclaredBeforeUse`.
+    ///
+    /// Reports TS2448 when the resolved symbol is block-scoped (or a class)
+    /// and the reference's source position precedes the declaration's
+    /// source position.
+    fn check_block_scoped_variable_used_before_declaration(
+        &mut self,
+        node: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+        name: &str,
+    ) {
+        // Only block-scoped variables and classes are subject to the TDZ
+        // check. `var` (function-scoped) and `function` declarations are
+        // hoisted.
+        if !symbol
+            .flags
+            .intersects(SymbolFlags::BlockScopedVariable | SymbolFlags::Class)
+        {
+            return;
+        }
+        // Skip references inside function/arrow-function bodies — those are
+        // deferred (the body runs later, by which point the variable is
+        // initialized). Mirrors Go's `isUsedInFunctionOrInstanceProperty`.
+        if self.function_scope_count > 0 || self.arrow_function_scope_count > 0 {
+            return;
+        }
+        // Find the relevant declaration node (block-scoped or class-like).
+        let declaration = symbol.declarations.iter().find(|d| {
+            matches!(
+                d.kind,
+                SyntaxKind::VariableDeclaration | SyntaxKind::ClassDeclaration
+            )
+        });
+        let Some(declaration) = declaration else {
+            return;
+        };
+        // Skip `var` declarations — they are function-scoped and hoisted.
+        // The binder assigns BlockScopedVariable to all variable declarations,
+        // so we must verify the keyword is actually `let`/`const`.
+        if declaration.kind == SyntaxKind::VariableDeclaration
+            && !is_let_or_const_declaration(declaration)
+        {
+            return;
+        }
+        // Skip ambient declarations (`declare let x`).
+        if self
+            .get_combined_modifier_flags(declaration)
+            .contains(ModifierFlags::Ambient)
+        {
+            return;
+        }
+        // If the declaration position is at or before the usage position,
+        // the variable is declared before use — no error.
+        if declaration.pos() <= node.pos() {
+            return;
+        }
+        let file = self.current_file.clone();
+        self.diagnostics.add(crate::ast::Diagnostic::new(
+            file,
+            node.loc,
+            BLOCK_SCOPED_VARIABLE_0_USED_BEFORE_ITS_DECLARATION,
+            vec![name.to_string()],
+        ));
+    }
+
+    /// TS2454: Check if a `let` variable is used before being assigned a
+    /// value. Mirrors (as a simplified heuristic) Go's definite-assignment
+    /// check in `getFlowTypeOfReference`.
+    ///
+    /// Reports TS2454 when, under strictNullChecks, a `let` variable has a
+    /// non-undefined type annotation, no initializer, and no assignment to
+    /// it in the flow graph between its declaration and the usage point.
+    fn check_variable_used_before_assigned(
+        &mut self,
+        node: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+        name: &str,
+    ) {
+        // Skip assignment targets (e.g., the `v` in `v = 1`). TS2454 applies
+        // to reads, not writes.
+        if is_assignment_target(node) {
+            return;
+        }
+        // Only check under strictNullChecks (matches Go's `containsUndefinedType` guard).
+        if !self.strict_null_checks {
+            return;
+        }
+        // Only block-scoped variables (let/const). `const` without an
+        // initializer is a syntax error, so in practice this is `let`.
+        if !symbol.flags.contains(SymbolFlags::BlockScopedVariable) {
+            return;
+        }
+        // Find the variable declaration.
+        let declaration = symbol.value_declaration.as_ref().or_else(|| {
+            symbol
+                .declarations
+                .iter()
+                .find(|d| d.kind == SyntaxKind::VariableDeclaration)
+        });
+        let Some(declaration) = declaration else {
+            return;
+        };
+        // Skip `var` declarations — only `let`/`const` are subject to
+        // definite-assignment analysis.
+        if !is_let_or_const_declaration(declaration) {
+            return;
+        }
+        let crate::ast::NodeData::VariableDeclaration(vd) = &declaration.data else {
+            return;
+        };
+        // Must have a type annotation and no initializer. A variable with an
+        // initializer is already assigned; a variable without a type
+        // annotation has type `any` (or is auto-typed) and is not subject to
+        // the definite-assignment check.
+        if vd.initializer.is_some() || vd.type_node.is_none() {
+            return;
+        }
+        // Skip ambient declarations (`declare let x`) and definite-assignment
+        // assertions (`let x!: number`). Mirrors Go's `assumeInitialized`.
+        if self
+            .get_combined_modifier_flags(declaration)
+            .contains(ModifierFlags::Ambient)
+            || vd.exclamation_token.is_some()
+        {
+            return;
+        }
+        // The declared type must not include `undefined`.
+        let declared_type = self.get_type_of_symbol(symbol);
+        if type_contains_undefined(&declared_type) {
+            return;
+        }
+        // Check the flow graph: has the variable been definitely assigned
+        // between its declaration and this usage?
+        if self.is_symbol_definitely_assigned_at(node, symbol) {
+            return;
+        }
+        let file = self.current_file.clone();
+        self.diagnostics.add(crate::ast::Diagnostic::new(
+            file,
+            node.loc,
+            VARIABLE_0_IS_USED_BEFORE_BEING_ASSIGNED,
+            vec![name.to_string()],
+        ));
+    }
+
+    /// Whether `symbol` has been definitely assigned a value at the flow
+    /// point of `node`. Walks the flow graph backwards from the reference's
+    /// flow node, looking for an ASSIGNMENT flow node that targets `symbol`.
+    ///
+    /// This is a simplified version of Go's definite-assignment analysis.
+    /// It follows the linear antecedent chain (and label antecedents) without
+    /// handling branch joins — sufficient for the common single-assignment-
+    /// before-use pattern.
+    fn is_symbol_definitely_assigned_at(&mut self, node: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
+        let flow = match self.program.symbol_map().flow_node_of(node) {
+            Some(f) => Arc::clone(f),
+            None => return true, // no flow info → assume assigned (no false positive)
+        };
+        self.flow_has_assignment_to_symbol(&flow, symbol, &mut HashSet::new(), 0)
+    }
+
+    /// Recursive helper: walk the flow graph backwards looking for an
+    /// ASSIGNMENT to `symbol`. Uses a visited set keyed by flow-node pointer
+    /// to avoid infinite loops on cyclic flow graphs (loops, labels).
+    fn flow_has_assignment_to_symbol(
+        &mut self,
+        flow: &Arc<FlowNode>,
+        symbol: &Arc<Symbol>,
+        visited: &mut HashSet<usize>,
+        depth: u32,
+    ) -> bool {
+        if depth >= 64 {
+            return true; // depth guard → assume assigned (conservative)
+        }
+        let key = Arc::as_ptr(flow) as *const FlowNode as usize;
+        if !visited.insert(key) {
+            return true; // already visited → assume assigned (break cycle)
+        }
+        // START / UNREACHABLE → end of the flow graph; no assignment found.
+        if flow
+            .flags
+            .intersects(FlowFlags::START | FlowFlags::UNREACHABLE)
+        {
+            return false;
+        }
+        // ASSIGNMENT → check if the assignment targets our symbol.
+        if flow.flags.contains(FlowFlags::ASSIGNMENT) {
+            if let Some(expr) = &flow.node {
+                if self.assignment_targets_symbol(expr, symbol) {
+                    return true;
+                }
+            }
+        }
+        // Recurse into the antecedent.
+        if let Some(antecedent) = &flow.antecedent {
+            return self.flow_has_assignment_to_symbol(antecedent, symbol, visited, depth + 1);
+        }
+        // Branch joins: all antecedents must have an assignment for it to be
+        // "definite". For the heuristic, we return true if any antecedent has
+        // one (conservative — avoids false TS2454 positives).
+        if !flow.antecedents.is_empty() {
+            return flow
+                .antecedents
+                .iter()
+                .any(|a| self.flow_has_assignment_to_symbol(a, symbol, visited, depth + 1));
+        }
+        false
+    }
+
+    /// Whether the flow-node expression `expr` is an assignment (including
+    /// compound assignment and ++/--) whose left-hand side resolves to
+    /// `symbol`.
+    fn assignment_targets_symbol(&self, expr: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
+        use crate::ast::NodeData::*;
+        match &expr.data {
+            BinaryExpression(bin) => {
+                if is_compound_or_simple_assignment(bin.operator_token.kind) {
+                    return self.identifier_is_symbol(&bin.left, symbol);
+                }
+                false
+            }
+            PostfixUnaryExpression(unary) => {
+                (unary.operator == SyntaxKind::PlusPlusToken
+                    || unary.operator == SyntaxKind::MinusMinusToken)
+                    && self.identifier_is_symbol(&unary.operand, symbol)
+            }
+            PrefixUnaryExpression(unary) => {
+                (unary.operator == SyntaxKind::PlusPlusToken
+                    || unary.operator == SyntaxKind::MinusMinusToken)
+                    && self.identifier_is_symbol(&unary.operand, symbol)
+            }
+            _ => false,
+        }
+    }
+
+    /// Whether `node` is an identifier that resolves to `symbol`. A name-based
+    /// fallback is used when the binder hasn't set a symbol on the node.
+    fn identifier_is_symbol(&self, node: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
+        if node.kind != SyntaxKind::Identifier {
+            return false;
+        }
+        if let Some(sym) = self.program.symbol_map().symbol_of(node) {
+            return Arc::ptr_eq(sym, symbol);
+        }
+        match &node.data {
+            NodeData::Identifier(data) => data.text == symbol.name,
+            _ => false,
+        }
     }
 
     /// Push a container node onto the scope stack, making its symbol members
@@ -6597,6 +6908,103 @@ fn is_property_access_name(node: &Arc<Node>) -> bool {
     std::ptr::eq(
         name_field.as_ref() as *const Node,
         node.as_ref() as *const Node,
+    )
+}
+
+/// Whether an identifier node is the left-hand side of an assignment (e.g.,
+/// the `v` in `v = 1` or `v += 1`). Used to skip TS2454 for write targets.
+fn is_assignment_target(node: &Arc<Node>) -> bool {
+    let Some(parent) = node.parent.as_ref() else {
+        return false;
+    };
+    if parent.kind != SyntaxKind::BinaryExpression {
+        return false;
+    }
+    let crate::ast::NodeData::BinaryExpression(bin) = &parent.data else {
+        return false;
+    };
+    if !is_compound_or_simple_assignment(bin.operator_token.kind) {
+        return false;
+    }
+    // The node must be the left operand.
+    std::ptr::eq(
+        bin.left.as_ref() as *const Node,
+        node.as_ref() as *const Node,
+    )
+}
+
+/// Whether a `VariableDeclaration` node is declared with `let` or `const`
+/// (as opposed to `var`). The parser sets `NodeFlags::Let` or `NodeFlags::Const`
+/// on the parent `VariableDeclarationList`; `var` has neither.
+fn is_let_or_const_declaration(declaration: &Arc<Node>) -> bool {
+    if let Some(parent) = declaration.parent.as_ref() {
+        if parent.kind == SyntaxKind::VariableDeclarationList {
+            return parent.flags.intersects(NodeFlags::Let | NodeFlags::Const);
+        }
+    }
+    // No parent info — assume block-scoped (conservative).
+    true
+}
+
+/// Whether a type includes `undefined` (directly or as a union constituent).
+/// Mirrors Go's `containsUndefinedType`.
+fn type_contains_undefined(t: &Arc<Type>) -> bool {
+    if t.flags.contains(TypeFlags::Undefined) {
+        return true;
+    }
+    if t.flags.contains(TypeFlags::Union) {
+        if let TypeData::Union(u) = &t.data {
+            return u
+                .union_or_intersection
+                .types
+                .iter()
+                .any(type_contains_undefined);
+        }
+    }
+    false
+}
+
+/// Whether a type is possibly `undefined` or `null` (directly or as a union
+/// constituent). Mirrors Go's `(type.flags & TypeFlagsNullable) != 0` plus
+/// union-constituent check.
+fn type_is_possibly_undefined(t: &Arc<Type>) -> bool {
+    if t.flags.intersects(TypeFlags::Undefined | TypeFlags::Null) {
+        return true;
+    }
+    if t.flags.contains(TypeFlags::Union) {
+        if let TypeData::Union(u) = &t.data {
+            return u
+                .union_or_intersection
+                .types
+                .iter()
+                .any(|ct| ct.flags.intersects(TypeFlags::Undefined | TypeFlags::Null));
+        }
+    }
+    false
+}
+
+/// Whether a `SyntaxKind` is `=` or any compound-assignment operator
+/// (`+=`, `-=`, etc.). Mirrors Go's `isAssignmentOperator`.
+fn is_compound_or_simple_assignment(kind: SyntaxKind) -> bool {
+    use SyntaxKind::*;
+    matches!(
+        kind,
+        EqualsToken
+            | PlusEqualsToken
+            | MinusEqualsToken
+            | AsteriskEqualsToken
+            | AsteriskAsteriskEqualsToken
+            | SlashEqualsToken
+            | PercentEqualsToken
+            | LessThanLessThanEqualsToken
+            | GreaterThanGreaterThanEqualsToken
+            | GreaterThanGreaterThanGreaterThanEqualsToken
+            | AmpersandEqualsToken
+            | BarEqualsToken
+            | CaretEqualsToken
+            | BarBarEqualsToken
+            | AmpersandAmpersandEqualsToken
+            | QuestionQuestionEqualsToken
     )
 }
 
