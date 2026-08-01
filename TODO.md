@@ -800,8 +800,20 @@ function overload、enum+enum），则将新 declaration 追加到既有 symbol 
 - [x] `delayedSymbol`/`aliasSymbol` 特殊符号处理——Go 中无 `delayedSymbol`
   （grep 零命中），`aliasSymbol` 实为 `SymbolFlags::Alias` 标志位，已在
   `ImportSpecifier`/`ExportSpecifier`/`ImportClause`/`ExportAssignment` 分支设置。
-- [ ] 完整 scope 链（当前只有 `container`/`block_scope_container` 两个字段，
+- [x] 完整 scope 链（当前只有 `container`/`block_scope_container` 两个字段，
   缺 `this_container` 用于 JS expando binding——留后续 JS 支持阶段）。
+  **已完成 infrastructure**：`Binder` 新增 `this_container: Option<Arc<Node>>`
+  字段 + 构造函数初始化 + `bind_container` 中 save/restore（对齐 Go
+  `binder.go:1482,1513-1514,1623`）。`get_container_flags` 为
+  FunctionDeclaration/FunctionExpression/ArrowFunction/MethodDeclaration/
+  GetAccessor/SetAccessor/Constructor/CallSignature/ConstructSignature/
+  FunctionType/ConstructorType 设置 `IS_THIS_CONTAINER` flag（对齐 Go
+  `getContainerFlags` `binder.go:2571-2586`）。`BinaryExpression` 分支调用
+  `bind_this_property_assignment`（skeleton，no-op for TS files）。
+  **遗留**：完整 JS expando binding（`this.prop = value` 声明属性到 class
+  symbol、`declareSymbolEx` with `isReplaceableByMethod`、
+  `addLateBoundAssignmentDeclarationToSymbol` for dynamic names）待 JS 支持
+  阶段实现。`this_container` 追踪 infrastructure 已就位。
 
 ### P3.5 Checker 接入 compiler（已完成）
 

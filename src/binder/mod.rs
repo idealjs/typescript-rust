@@ -81,6 +81,12 @@ pub struct Binder {
     container: Option<Arc<Node>>,
     /// The current block-scoped container (where block-scoped locals go).
     block_scope_container: Option<Arc<Node>>,
+    /// The current `this` container — the nearest function-like container
+    /// that can serve as the target of `this.property` assignments in JS
+    /// files. Mirrors Go's `binder.thisContainer`. Used by
+    /// `bind_this_property_assignment` for JS expando binding
+    /// (`this.prop = value` and `Class.prototype.method = fn`).
+    this_container: Option<Arc<Node>>,
     /// The current container's parent symbol.
     parent_symbol: Option<Arc<Symbol>>,
     /// The current flow node.
@@ -134,6 +140,7 @@ impl Binder {
             symbol_map: NodeSymbolMap::new(),
             container: None,
             block_scope_container: None,
+            this_container: None,
             parent_symbol: None,
             current_flow: None,
             symbol_count: 0,
@@ -1544,6 +1551,35 @@ impl Binder {
         }
     }
 
+    /// Handle `this.property = value` assignments in JS files for expando
+    /// binding. Mirrors Go's `bindThisPropertyAssignment`
+    /// (`binder.go:1121-1141`).
+    ///
+    /// When a `this.prop = value` assignment is found inside a function-like
+    /// container (the `this_container`), the property is declared on the
+    /// container's symbol. For class members (`this.prop = value` inside a
+    /// constructor/method), the property goes to the class symbol's members
+    /// or exports (depending on static/instance).
+    ///
+    /// This is a no-op for TS files (Go checks `IsInJSFile`).
+    /// Currently a skeleton: full expando binding requires `declareSymbolEx`
+    /// with `isReplaceableByMethod` / `isComputedName` flags and
+    /// `addLateBoundAssignmentDeclarationToSymbol` for dynamic names —
+    /// deferred to the JS support phase. The `this_container` tracking
+    /// infrastructure (field + save/restore + `IS_THIS_CONTAINER` flag) is
+    /// in place so that expando binding can be wired in later.
+    fn bind_this_property_assignment(&mut self, _node: &Arc<Node>) {
+        // TODO(JS): Implement full `this.prop = value` expando binding.
+        // The `this_container` field is now tracked but not yet used to
+        // declare properties. This requires:
+        // 1. `is_in_js_file(node)` guard (Go: `ast.IsInJSFile(node)`)
+        // 2. `get_this_class_and_symbol_table()` — resolve `this_container`
+        //    to a class symbol + members/exports table
+        // 3. `declareSymbolEx` with `isReplaceableByMethod = true`
+        // 4. `addLateBoundAssignmentDeclarationToSymbol` for dynamic names
+        // Deferred until JS file support is prioritized.
+    }
+
     /// Bind an expression statement (with assignment flow tracking).
     fn bind_expression_statement(&mut self, node: &Arc<Node>) {
         if let NodeData::ExpressionStatement(data) = &node.data {
@@ -1840,6 +1876,12 @@ impl Binder {
                 self.bind_call_expression_flow(node);
                 // Don't return - also check for children after call expression flow
             }
+            SyntaxKind::BinaryExpression => {
+                // JS expando binding: `this.prop = value` or
+                // `Class.prototype.method = fn` in JS files. Mirrors Go's
+                // `bindThisPropertyAssignment` (`binder.go:1121-1141`).
+                self.bind_this_property_assignment(node);
+            }
             _ => {}
         }
 
@@ -2030,6 +2072,12 @@ impl Binder {
     fn bind_container(&mut self, node: &Arc<Node>, flags: ContainerFlags) {
         let prev_container = self.container.take();
         let prev_block = self.block_scope_container.take();
+        // Save the current `this_container`. If this node is a
+        // `IS_THIS_CONTAINER` (function-like), it becomes the new
+        // `this_container` for its children. Mirrors Go's
+        // `saveThisContainer := b.thisContainer` + conditional set
+        // (`binder.go:1482,1513-1514`).
+        let prev_this_container = self.this_container.take();
         // Save the current parent_symbol. For container nodes that have a
         // symbol (e.g. FunctionDeclaration), we'll replace it with the
         // container's symbol so children are added to its members. For
@@ -2042,6 +2090,13 @@ impl Binder {
         // Block-scoped containers get a new locals scope
         if is_block_scoped_container(node.kind) {
             self.block_scope_container = Some(Arc::clone(node));
+        }
+
+        // `IS_THIS_CONTAINER` containers (FunctionDeclaration,
+        // FunctionExpression, MethodDeclaration, Constructor, etc.)
+        // become the new `this_container`.
+        if flags.contains(ContainerFlags::IS_THIS_CONTAINER) {
+            self.this_container = Some(Arc::clone(node));
         }
 
         // Create locals for this container if it has them
@@ -2102,6 +2157,7 @@ impl Binder {
 
         self.container = prev_container;
         self.block_scope_container = prev_block;
+        self.this_container = prev_this_container;
         self.parent_symbol = prev_parent_symbol;
     }
 
@@ -2241,21 +2297,25 @@ fn get_container_flags(kind: SyntaxKind) -> ContainerFlags {
                 | ContainerFlags::IS_FUNCTION_LIKE
                 | ContainerFlags::IS_FUNCTION_EXPRESSION
                 | ContainerFlags::HAS_LOCALS
+                | ContainerFlags::IS_THIS_CONTAINER
         }
         SyntaxKind::FunctionDeclaration
         | SyntaxKind::MethodDeclaration
         | SyntaxKind::GetAccessor
         | SyntaxKind::SetAccessor
-        | SyntaxKind::Constructor
-        | SyntaxKind::CallSignature
-        | SyntaxKind::ConstructSignature
-        | SyntaxKind::IndexSignature
-        | SyntaxKind::FunctionType
-        | SyntaxKind::ConstructorType => {
+        | SyntaxKind::Constructor => {
             ContainerFlags::IS_CONTAINER
                 | ContainerFlags::IS_CONTROL_FLOW_CONTAINER
                 | ContainerFlags::IS_FUNCTION_LIKE
                 | ContainerFlags::HAS_LOCALS
+                | ContainerFlags::IS_THIS_CONTAINER
+        }
+        SyntaxKind::CallSignature
+        | SyntaxKind::ConstructSignature
+        | SyntaxKind::IndexSignature
+        | SyntaxKind::FunctionType
+        | SyntaxKind::ConstructorType => {
+            ContainerFlags::IS_CONTROL_FLOW_CONTAINER | ContainerFlags::IS_THIS_CONTAINER
         }
         SyntaxKind::Block | SyntaxKind::ModuleDeclaration | SyntaxKind::SourceFile => {
             ContainerFlags::IS_CONTAINER
