@@ -325,6 +325,19 @@ const CASES: &[Case] = &[
         stdout_contains: &[],
         skip_oracle: false,
     },
+    Case {
+        name: "mixed_js_ts",
+        // `allowJs: true` — both .ts and .js files emit to .js with
+        // correct output paths preserving the relative directory structure.
+        args: &[],
+        expect_success: true,
+        expected_files: &[
+            ("dist/src/main.js", "export function add(a, b) { return a + b; }\n"),
+            ("dist/src/util.js", "export function double(x) { return x * 2; }\n"),
+        ],
+        stdout_contains: &[],
+        skip_oracle: false,
+    },
     // ── Parser parity smoke cases ───────────────────────────────────────
     Case {
         name: "parser_syntax_error",

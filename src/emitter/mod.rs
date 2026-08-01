@@ -2024,6 +2024,10 @@ mod tests {
         assert_eq!(get_output_extension("/test.cts"), ".cjs");
         assert_eq!(get_output_extension("/test.ts"), ".js");
         assert_eq!(get_output_extension("/test.json"), ".json");
+        assert_eq!(get_output_extension("/test.tsx"), ".js");
+        assert_eq!(get_output_extension("/test.jsx"), ".js");
+        assert_eq!(get_output_extension("/test.mjs"), ".mjs");
+        assert_eq!(get_output_extension("/test.cjs"), ".cjs");
     }
 
     #[test]
