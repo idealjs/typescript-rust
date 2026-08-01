@@ -250,6 +250,29 @@ const CASES: &[Case] = &[
         stdout_contains: &[],
         skip_oracle: true,
     },
+    Case {
+        name: "declaration_emit",
+        // `declaration: true` — generates .d.ts alongside .js.
+        // Oracle comparison skipped: our text-slice declaration emitter
+        // produces different formatting than Go's printer-based emitter.
+        args: &[],
+        expect_success: true,
+        expected_files: &[
+            (
+                "dist/src/main.js",
+                "export function add(a, b) { return a + b; }\nexport const PI = 3.14;\n",
+            ),
+            (
+                "dist/src/main.d.ts",
+                "export declare function add(a: number, b: number): number;\n\
+                 export declare const PI: number;\n\
+                 export interface User { id: number; name: string; }\n\
+                 export type ID = string | number;\n",
+            ),
+        ],
+        stdout_contains: &[],
+        skip_oracle: true,
+    },
     // ── Parser parity smoke cases ───────────────────────────────────────
     Case {
         name: "parser_syntax_error",

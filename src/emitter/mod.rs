@@ -218,49 +218,72 @@ pub fn emit_source_file_with_common_dir(
     // not a JSON file (JSON files are already skipped above).
     let emit_sourcemap = options.source_map.is_true() || options.inline_source_map.is_true();
 
-    let (js_text, map_text, source_map_url) = if emit_sourcemap {
-        emit_js_with_sourcemap(source_file, options, &js_path)
-    } else {
-        (emit_js_text(source_file, options), None, String::new())
-    };
+    // `emitDeclarationOnly` suppresses JS emit.
+    let emit_js = !options.emit_declaration_only.is_true();
 
-    // Append `//# sourceMappingURL=...` when a source map was produced.
-    let final_js_text = if source_map_url.is_empty() {
-        js_text
-    } else {
-        let mut text = js_text;
-        if !text.ends_with('\n') {
-            text.push('\n');
-        }
-        text.push_str("//# sourceMappingURL=");
-        text.push_str(&source_map_url);
-        text
-    };
+    if emit_js {
+        let (js_text, map_text, source_map_url) = if emit_sourcemap {
+            emit_js_with_sourcemap(source_file, options, &js_path)
+        } else {
+            (emit_js_text(source_file, options), None, String::new())
+        };
 
-    // Write .js file.
-    match write_file(&js_path, &final_js_text) {
-        Ok(()) => {
-            result.emitted_files.push(js_path.clone());
-        }
-        Err(e) => {
-            result
-                .diagnostics
-                .push(format!("Error writing '{js_path}': {e}"));
-            result.emit_skipped = true;
-        }
-    }
+        // Append `//# sourceMappingURL=...` when a source map was produced.
+        let final_js_text = if source_map_url.is_empty() {
+            js_text
+        } else {
+            let mut text = js_text;
+            if !text.ends_with('\n') {
+                text.push('\n');
+            }
+            text.push_str("//# sourceMappingURL=");
+            text.push_str(&source_map_url);
+            text
+        };
 
-    // Write .js.map file when `sourceMap` is true (not inline).
-    if let Some(map_json) = map_text {
-        let map_path = format!("{js_path}.map");
-        match write_file(&map_path, &map_json) {
+        // Write .js file.
+        match write_file(&js_path, &final_js_text) {
             Ok(()) => {
-                result.emitted_files.push(map_path);
+                result.emitted_files.push(js_path.clone());
             }
             Err(e) => {
                 result
                     .diagnostics
-                    .push(format!("Error writing '{map_path}': {e}"));
+                    .push(format!("Error writing '{js_path}': {e}"));
+                result.emit_skipped = true;
+            }
+        }
+
+        // Write .js.map file when `sourceMap` is true (not inline).
+        if let Some(map_json) = map_text {
+            let map_path = format!("{js_path}.map");
+            match write_file(&map_path, &map_json) {
+                Ok(()) => {
+                    result.emitted_files.push(map_path);
+                }
+                Err(e) => {
+                    result
+                        .diagnostics
+                        .push(format!("Error writing '{map_path}': {e}"));
+                }
+            }
+        }
+    }
+
+    // Emit declaration (.d.ts) file when `declaration` or `composite` is true.
+    if options.get_emit_declarations() {
+        let dts_path = get_dts_output_path(source_file, options, common_source_directory);
+        if !dts_path.is_empty() {
+            let dts_text = emit_declaration_text(source_file, options);
+            match write_file(&dts_path, &dts_text) {
+                Ok(()) => {
+                    result.emitted_files.push(dts_path);
+                }
+                Err(e) => {
+                    result
+                        .diagnostics
+                        .push(format!("Error writing '{dts_path}': {e}"));
+                }
             }
         }
     }
@@ -570,6 +593,263 @@ fn emit_js_text_inner<S: EmitSink>(
             sink,
         );
     }
+}
+
+// ── Declaration emit (P4.5) ────────────────────────────────────────
+
+/// Emit a `.d.ts` declaration file for a source file.
+///
+/// Walks the AST, keeping only declaration statements (functions, variables,
+/// classes, interfaces, type aliases, enums, imports/exports) and stripping
+/// implementation details (function bodies, variable initializers).
+/// `declare` is inserted before non-type-only top-level declarations.
+fn emit_declaration_text(source_file: &SourceFile, _options: &CompilerOptions) -> String {
+    let source = &source_file.text;
+    let statements = match &source_file.node.data {
+        NodeData::SourceFile(d) => &d.statements,
+        _ => return source.clone(),
+    };
+
+    let mut output = String::new();
+    let mut prev_end = 0usize;
+
+    for stmt in statements.iter() {
+        // Skip runtime statements entirely.
+        if !is_declaration_statement(stmt) {
+            prev_end = stmt.end();
+            continue;
+        }
+
+        // Collect export/default modifier ranges. The parser may or may not
+        // include the `export` keyword in `stmt.pos()` depending on the
+        // statement kind, so we handle modifiers explicitly here.
+        let export_cuts = collect_export_modifier_cuts(stmt, source);
+        let has_export = export_cuts
+            .iter()
+            .any(|(s, e)| *e > *s);
+        let has_default = stmt
+            .modifiers()
+            .map(|m| m.modifier_flags.contains(ModifierFlags::Default))
+            .unwrap_or(false);
+
+        // The position where inter-statement text ends: either the first
+        // modifier position, or `stmt.pos()` if no modifiers precede it.
+        let mod_start = export_cuts
+            .first()
+            .map(|&(s, _)| s)
+            .unwrap_or(stmt.pos());
+
+        // The content start: after the last export/default modifier and its
+        // trailing whitespace.
+        let content_start = if !export_cuts.is_empty() {
+            export_cuts.last().map(|&(_, e)| e).unwrap_or(stmt.pos())
+        } else {
+            stmt.pos()
+        };
+
+        // Emit inter-statement text (whitespace, comments) up to the first
+        // modifier or statement start.
+        if mod_start > prev_end {
+            output.push_str(&source[prev_end..mod_start]);
+        }
+
+        // Re-emit export/default keywords before `declare` so the order is
+        // `export declare function ...` (not `declare export function ...`).
+        if has_export {
+            output.push_str("export ");
+        }
+        if has_default {
+            output.push_str("default ");
+        }
+
+        // Insert `declare ` for declarations that need it (functions,
+        // variables, classes, enums — but NOT interfaces/type aliases).
+        if needs_declare_keyword(stmt) {
+            output.push_str("declare ");
+        }
+
+        // Emit the statement with declaration-specific transformations,
+        // starting from `content_start` (after export/default modifiers).
+        emit_declaration_statement(stmt, source, content_start, &mut output);
+        prev_end = stmt.end();
+    }
+
+    // Emit trailing whitespace.
+    if prev_end < source.len() {
+        output.push_str(&source[prev_end..]);
+    }
+
+    output
+}
+
+/// Whether a statement should be included in the `.d.ts` output.
+/// Runtime statements (if/for/while/return/expression/etc.) are excluded.
+fn is_declaration_statement(node: &Node) -> bool {
+    matches!(
+        node.kind,
+        SyntaxKind::FunctionDeclaration
+            | SyntaxKind::VariableStatement
+            | SyntaxKind::ClassDeclaration
+            | SyntaxKind::InterfaceDeclaration
+            | SyntaxKind::TypeAliasDeclaration
+            | SyntaxKind::EnumDeclaration
+            | SyntaxKind::ImportDeclaration
+            | SyntaxKind::ImportEqualsDeclaration
+            | SyntaxKind::ExportDeclaration
+            | SyntaxKind::ExportAssignment
+            | SyntaxKind::ModuleDeclaration
+    )
+}
+
+/// Whether a `declare` keyword should be inserted before this statement.
+/// Interfaces and type aliases are already type-only, so they don't need `declare`.
+fn needs_declare_keyword(node: &Node) -> bool {
+    matches!(
+        node.kind,
+        SyntaxKind::FunctionDeclaration
+            | SyntaxKind::VariableStatement
+            | SyntaxKind::ClassDeclaration
+            | SyntaxKind::EnumDeclaration
+            | SyntaxKind::ModuleDeclaration
+    )
+}
+
+/// Emit a single declaration statement with implementation details stripped.
+/// `start` is the position after any export/default modifiers.
+fn emit_declaration_statement(node: &Node, source: &str, start: usize, output: &mut String) {
+    match &node.data {
+        // Function: strip body, replace with ';'.
+        NodeData::FunctionDeclaration(d) => {
+            if let Some(body) = &d.body {
+                // Emit signature (up to body start), trim trailing space, add ';'.
+                let sig = &source[start..body.pos()];
+                output.push_str(sig.trim_end());
+                output.push(';');
+                // Emit trailing whitespace after the body's closing `}`.
+                // The parser may include trailing trivia in body.end(),
+                // so scan backward to find the actual `}` and emit the
+                // whitespace between it and body.end().
+                let bytes = source.as_bytes();
+                let mut brace_end = body.end();
+                while brace_end > body.pos() && bytes[brace_end - 1].is_ascii_whitespace() {
+                    brace_end -= 1;
+                }
+                if brace_end < body.end() {
+                    output.push_str(&source[brace_end..body.end()]);
+                }
+            } else {
+                // Ambient function (no body) — emit as-is.
+                output.push_str(&source[start..node.end()]);
+            }
+        }
+        // Variable statement: strip initializers (when type annotation exists).
+        NodeData::VariableStatement(d) => {
+            let mut cuts: Vec<(usize, usize)> = Vec::new();
+            collect_variable_initializer_cuts(&d.declaration_list, &mut cuts);
+            if cuts.is_empty() {
+                output.push_str(&source[start..node.end()]);
+            } else {
+                emit_with_cuts(source, start, node.end(), &cuts, output);
+            }
+        }
+        // Class: strip method bodies, keep signatures.
+        NodeData::ClassDeclaration(d) => {
+            // For now, emit the class as-is. Full body stripping (removing
+            // method bodies while keeping type annotations on members)
+            // requires recursive AST walking — left as a future enhancement.
+            let _ = d;
+            output.push_str(&source[start..node.end()]);
+        }
+        // All other declarations: emit source as-is.
+        _ => {
+            output.push_str(&source[start..node.end()]);
+        }
+    }
+}
+
+/// Collect cut ranges for variable initializers. Only strips the initializer
+/// when a type annotation is present (so the declaration remains valid).
+fn collect_variable_initializer_cuts(list: &Arc<Node>, cuts: &mut Vec<(usize, usize)>) {
+    if let NodeData::VariableDeclarationList(d) = &list.data {
+        for decl in d.declarations.iter() {
+            if let NodeData::VariableDeclaration(vd) = &decl.data {
+                if let (Some(type_node), Some(init)) = (&vd.type_node, &vd.initializer) {
+                    // Cut from end of type annotation to end of initializer.
+                    // This removes ` = value` while keeping `: Type`.
+                    cuts.push((type_node.end(), init.end()));
+                }
+                // Recurse into binding patterns (array/object destructuring).
+                collect_variable_initializer_cuts(&vd.name, cuts);
+            }
+        }
+    }
+}
+
+/// Emit source text `[start, end)` with cut ranges removed.
+fn emit_with_cuts(source: &str, start: usize, end: usize, cuts: &[(usize, usize)], output: &mut String) {
+    if cuts.is_empty() {
+        output.push_str(&source[start..end]);
+        return;
+    }
+    let mut sorted: Vec<(usize, usize)> = cuts
+        .iter()
+        .filter(|&&(cs, ce)| ce > start && cs < end)
+        .map(|&(cs, ce)| (cs.max(start), ce.min(end)))
+        .collect();
+    sorted.sort_by_key(|&(s, _)| s);
+    let mut pos = start;
+    for (cs, ce) in &sorted {
+        if *cs > pos {
+            output.push_str(&source[pos..*cs]);
+        }
+        pos = *ce;
+    }
+    if pos < end {
+        output.push_str(&source[pos..end]);
+    }
+}
+
+/// Compute the `.d.ts` output file path.
+/// `declarationDir` takes priority over `outDir`; if neither is set, the
+/// `.d.ts` lands alongside the source file.
+fn get_dts_output_path(
+    source_file: &SourceFile,
+    options: &CompilerOptions,
+    common_source_directory: &str,
+) -> String {
+    let file_name = &source_file.file_name;
+    let dts_ext = get_declaration_extension(file_name);
+
+    if !options.declaration_dir.is_empty() {
+        let common_dir = if common_source_directory.is_empty() {
+            compute_common_source_directory(options)
+        } else {
+            common_source_directory.to_string()
+        };
+        let path_in_new_dir =
+            get_source_file_path_in_new_dir(file_name, &options.declaration_dir, &common_dir);
+        let without_ext = tspath::remove_file_extension(&path_in_new_dir);
+        format!("{without_ext}{dts_ext}")
+    } else if !options.out_dir.is_empty() {
+        // Reuse the JS path computation, then swap extension.
+        let js_path = get_js_output_path(source_file, options, common_source_directory);
+        let without_ext = tspath::remove_file_extension(&js_path);
+        format!("{without_ext}{dts_ext}")
+    } else {
+        let without_ext = tspath::remove_file_extension(file_name);
+        format!("{without_ext}{dts_ext}")
+    }
+}
+
+/// Determine the declaration file extension based on the input file name.
+fn get_declaration_extension(file_name: &str) -> &'static str {
+    if tspath::file_extension_is_one_of(file_name, &[".mts", ".mjs"]) {
+        return ".d.mts";
+    }
+    if tspath::file_extension_is_one_of(file_name, &[".cts", ".cjs"]) {
+        return ".d.cts";
+    }
+    ".d.ts"
 }
 
 /// Emit a range of source text `[start, end)`, skipping any cut ranges
@@ -2262,5 +2542,145 @@ mod tests {
         // Type annotation should be stripped from JS.
         assert!(js_file.contains("let y = \"hi\";"));
         assert!(!js_file.contains(": string"));
+    }
+
+    // ── Declaration emit tests (P4.5) ────────────────────────────────────
+
+    fn emit_dts(source: &str) -> String {
+        let sf = parse(source);
+        let opts = CompilerOptions::default();
+        emit_declaration_text(&sf, &opts)
+    }
+
+    #[test]
+    fn dts_function_strips_body() {
+        let dts = emit_dts("function add(a: number, b: number): number { return a + b; }");
+        assert!(dts.contains("declare function add(a: number, b: number): number;"));
+        assert!(!dts.contains("return"));
+        assert!(!dts.contains("{"));
+    }
+
+    #[test]
+    fn dts_export_function_adds_declare() {
+        let dts = emit_dts("export function foo(): void { console.log(1); }");
+        assert!(dts.contains("export declare function foo(): void;"));
+        assert!(!dts.contains("console"));
+    }
+
+    #[test]
+    fn dts_variable_strips_initializer() {
+        let dts = emit_dts("const x: number = 42;");
+        assert!(dts.contains("declare const x: number;"));
+        assert!(!dts.contains("42"));
+    }
+
+    #[test]
+    fn dts_export_variable_strips_initializer() {
+        let dts = emit_dts("export const PI: number = 3.14;");
+        assert!(dts.contains("export declare const PI: number;"));
+        assert!(!dts.contains("3.14"));
+    }
+
+    #[test]
+    fn dts_interface_emitted_as_is() {
+        let dts = emit_dts("interface User { id: number; name: string; }");
+        assert!(dts.contains("interface User {"));
+        assert!(dts.contains("id: number;"));
+        assert!(!dts.contains("declare"));
+    }
+
+    #[test]
+    fn dts_type_alias_emitted_as_is() {
+        let dts = emit_dts("type ID = string | number;");
+        assert!(dts.contains("type ID = string | number;"));
+        assert!(!dts.contains("declare"));
+    }
+
+    #[test]
+    fn dts_enum_adds_declare() {
+        let dts = emit_dts("enum Color { Red, Green, Blue }");
+        assert!(dts.contains("declare enum Color {"));
+        assert!(dts.contains("Red"));
+    }
+
+    #[test]
+    fn dts_runtime_statements_skipped() {
+        let dts = emit_dts("console.log(\"hello\");\nlet x: number = 1;");
+        assert!(!dts.contains("console"));
+        assert!(!dts.contains("hello"));
+        assert!(dts.contains("declare let x: number;"));
+    }
+
+    #[test]
+    fn dts_multiple_declarations() {
+        let src = "export function add(a: number, b: number): number { return a + b; }\n\
+                   export const PI: number = 3.14;\n\
+                   export interface User { id: number; }\n\
+                   export type ID = string | number;\n";
+        let dts = emit_dts(src);
+        assert!(dts.contains("export declare function add(a: number, b: number): number;"));
+        assert!(dts.contains("export declare const PI: number;"));
+        assert!(dts.contains("export interface User {"));
+        assert!(dts.contains("export type ID = string | number;"));
+        assert!(!dts.contains("return"));
+        assert!(!dts.contains("3.14"));
+    }
+
+    #[test]
+    fn dts_class_adds_declare() {
+        let dts = emit_dts("export class Point { x: number; constructor(x: number) { this.x = x; } }");
+        assert!(dts.contains("export declare class Point"));
+    }
+
+    #[test]
+    fn dts_write_file_creates_dts() {
+        use std::cell::RefCell;
+        let sf = parse("export function foo(): number { return 1; }\nexport const x: number = 42;\n");
+        let mut opts = CompilerOptions::default();
+        opts.declaration = Tristate::True;
+        let written: RefCell<Vec<(String, String)>> = RefCell::new(Vec::new());
+        let result = emit_source_file_with_common_dir(
+            &sf,
+            &opts,
+            &crate::vfs::InMemoryFS::new(),
+            "",
+            &|path, content| {
+                written.borrow_mut().push((path.to_string(), content.to_string()));
+                Ok(())
+            },
+        );
+        // Should have written both .js and .d.ts.
+        assert!(result.emitted_files.iter().any(|p| p.ends_with(".js")));
+        assert!(result.emitted_files.iter().any(|p| p.ends_with(".d.ts")));
+        let written = written.borrow();
+        let dts_file = &written.iter().find(|(p, _)| p.ends_with(".d.ts")).expect("dts file").1;
+        // .d.ts should have declare and no implementation.
+        assert!(dts_file.contains("export declare function foo(): number;"));
+        assert!(dts_file.contains("export declare const x: number;"));
+        assert!(!dts_file.contains("return"));
+        assert!(!dts_file.contains("42"));
+    }
+
+    #[test]
+    fn dts_emit_declaration_only_suppresses_js() {
+        use std::cell::RefCell;
+        let sf = parse("export function foo(): number { return 1; }\n");
+        let mut opts = CompilerOptions::default();
+        opts.declaration = Tristate::True;
+        opts.emit_declaration_only = Tristate::True;
+        let written: RefCell<Vec<(String, String)>> = RefCell::new(Vec::new());
+        let result = emit_source_file_with_common_dir(
+            &sf,
+            &opts,
+            &crate::vfs::InMemoryFS::new(),
+            "",
+            &|path, content| {
+                written.borrow_mut().push((path.to_string(), content.to_string()));
+                Ok(())
+            },
+        );
+        // Should only have .d.ts, no .js.
+        assert!(!result.emitted_files.iter().any(|p| p.ends_with(".js")));
+        assert!(result.emitted_files.iter().any(|p| p.ends_with(".d.ts")));
     }
 }
