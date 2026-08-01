@@ -2906,7 +2906,12 @@ impl Parser {
         if self.token == SyntaxKind::CommaToken {
             let pos = expr.pos();
             let mut left = expr;
-            while self.parse_optional(SyntaxKind::CommaToken) {
+            loop {
+                let comma_pos = self.token_pos();
+                let comma_end = self.token_end();
+                if !self.parse_optional(SyntaxKind::CommaToken) {
+                    break;
+                }
                 let right = self.parse_assignment_expression();
                 let end = right.end();
                 left = Arc::new(Node::with_loc(
@@ -2918,7 +2923,7 @@ impl Parser {
                         operator_token: Arc::new(Node::with_loc(
                             SyntaxKind::CommaToken,
                             NodeData::Token,
-                            TextRange::new(0, 0),
+                            TextRange::new(comma_pos, comma_end),
                         )),
                         right,
                     }),

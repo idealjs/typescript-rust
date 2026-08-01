@@ -6036,6 +6036,50 @@ impl Checker {
             Arc::clone(symbol)
         }
     }
+
+    /// Get the symbol associated with a given AST node.
+    ///
+    /// A deliberately "fuzzy" lookup intended for language-service and
+    /// external-tool use (not for type-checking internals). Mirrors Go's
+    /// `Checker.GetSymbolAtLocation` / `getSymbolAtLocation` (reduced form).
+    ///
+    /// Handles three cases:
+    /// 1. Declaration nodes with a direct symbol in the symbol map.
+    /// 2. Declaration-name identifiers — walks the parent chain to find the
+    ///    enclosing declaration and returns its symbol.
+    /// 3. Property-access expressions — resolves the property symbol from
+    ///    the cached type of the left-hand expression.
+    pub fn get_symbol_at_location(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+        // 1. Direct symbol lookup (declaration nodes).
+        if let Some(sym) = self.program.symbol_map().symbol_of(node) {
+            return Some(Arc::clone(sym));
+        }
+
+        // 2. Declaration-name identifiers: walk up the parent chain.
+        if node.kind == crate::ast::SyntaxKind::Identifier {
+            let mut current = node.parent.as_ref();
+            while let Some(parent) = current {
+                if let Some(sym) = self.program.symbol_map().symbol_of(parent) {
+                    return Some(Arc::clone(sym));
+                }
+                current = parent.parent.as_ref();
+            }
+        }
+
+        // 3. Property-access expressions: resolve the property from the
+        //    cached type of the left-hand expression.
+        if node.kind == crate::ast::SyntaxKind::PropertyAccessExpression {
+            if let crate::ast::NodeData::PropertyAccessExpression(data) = &node.data {
+                if let Some(links) = self.type_node_links.get(&data.expression) {
+                    if let Some(ref t) = links.resolved_type {
+                        return self.get_property_of_type(t, data.name.text());
+                    }
+                }
+            }
+        }
+
+        None
+    }
 }
 
 /// Get the excluded symbol flags for a given set of flags.
@@ -6352,19 +6396,13 @@ mod tests {
     /// access expression, builds a type checker, then asserts that
     /// `checker.GetSymbolAtLocation` returns a non-nil symbol for the interface
     /// name, the variable name, and the property access expression.
-    ///
-    /// TODO: The Rust checker does not yet implement `get_symbol_at_location`.
-    /// The emit resolver has `get_symbol_of_declaration`, but the full
-    /// symbol-at-location lookup (which walks parent nodes for imported symbols)
-    /// is not ported. Enable this test once the method is implemented.
     #[test]
-    #[ignore = "TODO: Checker::get_symbol_at_location is not yet implemented"]
     fn get_symbol_at_location() {
+        use crate::astnav::get_token_at_position;
         use crate::bundled::{BundledFS, lib_path};
         use crate::compiler::{CompilerHostImpl, Program, ProgramOptions};
         use crate::tsoptions::ParsedCommandLine;
         use crate::vfs::InMemoryFS;
-        use std::sync::Arc;
 
         let content = "interface Foo {\n  bar: string;\n}\ndeclare const foo: Foo;\nfoo.bar;";
         let inner = Arc::new(InMemoryFS::new());
@@ -6389,9 +6427,24 @@ mod tests {
         let file = program.get_source_file("/foo.ts").expect("foo.ts");
         checker.check_source_file(&file);
 
-        // TODO: once get_symbol_at_location is implemented, look up symbols for
-        // the interface name ("Foo"), the variable name ("foo"), and the
-        // property access ("foo.bar") and assert each is Some.
+        // Position 10 = 'F' in "interface Foo" (interface name identifier).
+        let interface_name = get_token_at_position(&file.node, 10).expect("interface name");
+        let sym = checker.get_symbol_at_location(&interface_name);
+        assert!(sym.is_some(), "Expected symbol for interface name 'Foo'");
+
+        // Position 47 = 'f' in "declare const foo" (variable name identifier).
+        let var_name = get_token_at_position(&file.node, 47).expect("variable name");
+        let sym = checker.get_symbol_at_location(&var_name);
+        assert!(sym.is_some(), "Expected symbol for variable name 'foo'");
+
+        // Position 60 = '.' in "foo.bar" (inside the PropertyAccessExpression,
+        // between its children, so get_token_at_position returns the PAE itself).
+        let prop_access = get_token_at_position(&file.node, 60).expect("property access");
+        let sym = checker.get_symbol_at_location(&prop_access);
+        assert!(
+            sym.is_some(),
+            "Expected symbol for property access 'foo.bar'"
+        );
     }
 
     /// Port of Go's `TestTracerPushPreservesEndArgMutations`.
