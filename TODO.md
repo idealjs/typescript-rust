@@ -61,12 +61,11 @@ npm install && npm run build
 - 每个迁移行为都应新增或扩展一个 parity case，优先对比 exit code、stdout、
   stderr、输出文件内容。
 
-## 当前进度快照（2026-08-01）
+## 当前进度快照（2026-08-02）
 
-测试基线：`cargo test` 通过（**1,105** 个 lib 单测 + **636** 个 checker parity
-+ **2** 个 emit parity，共 **1,743** 个测试通过；99 个 ignored 标注 TODO）。CLI parity 对齐 Go oracle
-（TS2322 诊断位置 + 类型扩宽、TS6053 消息格式、exit code 逻辑）已完成。LSP
-diagnostics/hover + API server + .tsbuildinfo 增量构建已接入。
+测试基线：**1,105** lib + **710** checker parity + **2** emit = **1,817 通过**，99 ignored。
+checker_parity 从 572→710（+138）。新增诊断码：TS2741/TS2739/TS2353/TS2448/TS2454/
+TS18048/TS2451/TS2300。Array 方法解析已修复（.find/.map/.reduce 等不再 false positive）。
 
 | 模块 | Rust 行数（实测） | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
@@ -89,37 +88,35 @@ diagnostics/hover + API server + .tsbuildinfo 增量构建已接入。
 lifecycle）。`cargo fmt --check` 全仓通过。`cargo clippy` 零 warning。剩余
 compiler warning 约 90 个（dead code in stub implementations），归类为迁移期可接受。
 
-## 下阶段待办清单
+## 待办清单（按优先级排序）
 
-当前基线：1,105 lib + 636 checker parity + 2 emit = **1,743 通过**，99 ignored。
+### A. Checker 深度（高）
 
-### 阶段 1：Checker 深度提升 ✅ 首批已完成
+- [x] Array 方法解析（.find/.map/.reduce 等）
+- [x] TS2741/TS2739/TS2353/TS2448/TS2454/TS18048/TS2451/TS2300
+- [ ] 继续补齐诊断码：TS2511（abstract 实例化）、TS2341（private 访问）、
+      TS2366（missing return）、TS2588（const reassignment）、TS7027（unreachable）
+- [ ] 扩充 checker parity fixtures 到 800+（当前 710）
 
-已完成：Array 方法解析、TS2741/TS2739/TS2353/TS2448/TS2454/TS18048/TS2451。
-checker parity 从 572→636。
-
-- [ ] 继续补齐 checker 诊断码（TS2300 duplicate、TS2561 readonly array assign 等）
-- [ ] 扩充 checker parity fixtures 到 200+（当前 636 条，含 fixture 和 case）
-
-### 阶段 2：Watch mode + Incremental
+### B. Watch mode（中）
 
 - [ ] 引入 `notify` crate 实现文件监听
 - [ ] `--watch` 模式：文件变更 → 增量重编译 → 诊断输出
 - [ ] project reference cycle 精细化处理
 - [ ] watch 测试设计
 
-### 阶段 3：LSP features
+### C. LSP features（中）
 
 - [ ] project service（多文件 open/close/change 管理）
 - [ ] references / rename / document symbols / formatting
 - [ ] fourslash 测试 smoke
 
-### 其他待办
+### D. 其他（低）
 
 - [ ] `symbol_to_display_parts`（LS 层功能）
 - [ ] 本地化支持（locale/loc_generated）
 - [ ] 正则 `lastIndex`/`d` flag runtime 特性
-- [ ] 保留 Go oracle 构建路径
+- [ ] `.ts/.tsx/.js/.jsx` 解析结果与 oracle 完全对齐（依赖 checker 深度）
 
 ## P0：建立迁移工作基线 ✅ 已完成
 
@@ -139,15 +136,13 @@ Scanner ~95%（转义/JSX/正则/CommentDirectives/ASI/trivia/TokenFlags 完整�
 
 ## P3：Binder / Checker / Diagnostics parity — 进行中
 
-Binder ~60%。Checker ~30%（类型结构/relater 完整规则/inference/contextual typing/
-narrowing/nodebuilder/emitresolver/Array 方法解析/TS2741/TS2739/TS2353/TS2448/
-TS2454/TS18048/TS2451）。636 个 checker parity fixtures 通过。
+Binder ~60%。Checker ~30%。710 个 checker parity fixtures 通过。
 
-剩余：
+剩余（见上方待办清单 A）：
 - [ ] `symbol_to_display_parts`（LS 层功能，待 P7 LS 启动时补齐）
 - [ ] 本地化支持（locale/loc_generated）
 - [ ] 真实项目诊断集合与 Go oracle 完全一致（checker 深度需继续提升）
-- [ ] 继续补齐诊断码（TS2300/TS2561/TS2358 等）
+- [ ] 继续补齐诊断码（TS2511/TS2341/TS2366/TS2588/TS7027）
 
 ## P4：Emit / Transformer / SourceMap / Declaration emit ✅ 已完成
 
