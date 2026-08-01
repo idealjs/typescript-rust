@@ -576,7 +576,18 @@ parser 侧映射到 `UNKNOWN_REGULAR_EXPRESSION_FLAG`/`DUPLICATE_REGULAR_EXPRESS
 
 ### P2.6 Parser reparser
 
-- [ ] 迁移 `internal/parser/reparser.go`（748 行）到 `src/parser/reparser.rs`。
+- [x] 迁移 `internal/parser/reparser.go`（748 行）到 `src/parser/reparser.rs`。
+  实现 `reparse_tags` 入口 + `reparse_unhosted` 分发（`@typedef`/`@callback`/
+  `@import`/`@overload`）+ `reparse_jsdoc_signature`（参数/返回类型提取）+
+  `reparse_jsdoc_type_literal`（JSDocTypeLiteral → TypeLiteralNode）+
+  `gather_type_parameters`（`@template` 收集）+ `wrap_in_jsdoc_namespace`
+  （命名空间包裹）+ `get_innermost_name_of_jsdoc_namespace` + helper 函数。
+  `Node` 新增 `with_loc_flags` 构造器支持带 flags 的节点创建。10 个单测覆盖
+  typedef（simple/object literal/namespace）、callback、import、overload、
+  无 unhosted tag、innermost name（simple/namespace）、namespace wrap。
+  **遗留**：hosted tag mutation（`@type`/`@param`/`@return`/`@readonly` 等
+  修改宿主节点）需 mutable AST 重建，延后；JSDoc parser 的 `@typedef {Object}`
+  + `@property` → JSDocTypeLiteral 与 `@import` 完整解析为 P2.7 scope。
 - [ ] `@typedef` JSDoc → type alias 节点追加到 statements。
 - [x] `reparseTopLevelAwait`：外部模块 + `possibleAwaitSpans` 重解析。
   **不需要迁移**：Rust scanner 始终将 `await` 扫描为 `AwaitKeyword`（不像 Go

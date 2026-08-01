@@ -5,9 +5,11 @@
 
 mod jsdoc;
 mod references;
+mod reparser;
 
 pub use jsdoc::parse_jsdoc_for_node;
 pub use references::{collect_external_module_references, set_external_module_indicator};
+pub use reparser::reparse_tags;
 
 use crate::ast::*;
 use crate::core::text::TextRange;
