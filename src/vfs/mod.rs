@@ -393,6 +393,8 @@ impl FS for InMemoryFS {
 /// A shared file system handle.
 pub type SharedFS = Arc<dyn FS>;
 
+pub mod vfsmatch;
+
 #[cfg(test)]
 mod cachedvfs_tests;
 #[cfg(test)]
