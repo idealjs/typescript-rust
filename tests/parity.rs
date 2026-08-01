@@ -213,14 +213,12 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "target_es5",
-        // `target: "ES5"`. NOTE: ES5 down-leveling (const→var) is not yet
-        // migrated in the Rust emitter, so `const` is retained; oracle
-        // comparison is skipped until the transformer lands.
+        // `target: "ES5"` — const/let are down-leveled to var.
         args: &[],
         expect_success: true,
-        expected_files: &[("dist/src/main.js", "const f = 6;\nexport { f };\n")],
+        expected_files: &[("dist/src/main.js", "var f = 6;\nexport { f };\n")],
         stdout_contains: &[],
-        skip_oracle: true,
+        skip_oracle: false,
     },
     // ── Parser parity smoke cases ───────────────────────────────────────
     Case {

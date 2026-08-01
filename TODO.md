@@ -1162,7 +1162,16 @@ Rust 现状：`src/compiler/mod.rs`、`src/printer/mod.rs`、`src/emitter/mod.rs
   `skip_oracle=false`，期望输出无注释。8 个 emitter 单测覆盖单行/多行/
   JSDoc 注释剥离、字符串/模板内注释保留、除法不受影响、尾部注释剥离、
   默认关闭。901 lib + parity smoke 全通过。
-- [ ] 对齐 JS emit：target、module、jsx、imports/exports、helpers。
+- [x] **P4.2 ES5 down-leveling**（已完成）：emitter 新增 replacement 机制
+  （`emit_text_range`/`emit_statement` 合并 cuts + replacements 为统一
+  operation list，`Option<&str>` 区分 cut vs replace）。`collect_es5_replacements`
+  递归遍历 AST，对 `VariableDeclarationList` 节点检测 `NodeFlags::Const`/
+  `NodeFlags::Let`，将关键字位置（`const`=5 字符 / `let`=3 字符）替换为
+  `var`。`needs_es5_downlevel` 仅在 `target == ES5` 时触发（`None` 默认不
+  下放，对齐现代 TS 默认 target ≥ ES2015）。`target_es5` parity case 从
+  `skip_oracle=true` 改为 `skip_oracle=false`，期望输出 `var f = 6;`。
+  6 个 emitter 单测覆盖 const/let→var、export 保留、var 不变、for 循环内
+  let、ES2015 不下放。907 lib + parity smoke 全通过。
 - [ ] 对齐 declaration emit：`.d.ts`、`.d.ts.map`、strip internal、declaration maps。
 - [ ] 对齐 sourcemap：路径、sources、sourcesContent、VLQ mappings。
 - [ ] 对齐 output path：`rootDir`、`outDir`、`declarationDir`、mixed JS/TS。

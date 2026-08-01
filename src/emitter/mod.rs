@@ -12,8 +12,9 @@
 use std::sync::Arc;
 
 use crate::ast::node_data_generated::NodeData;
-use crate::ast::{Node, SourceFile};
+use crate::ast::{Node, NodeFlags, SourceFile};
 use crate::core::compiler_options::CompilerOptions;
+use crate::core::compiler_options::ScriptTarget;
 use crate::tspath;
 use crate::vfs::FS;
 
@@ -209,6 +210,16 @@ fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
         Vec::new()
     };
 
+    // When `target` is ES5 or lower, collect `const`/`let` → `var` keyword
+    // replacements. Mirrors Go's ES5 down-leveling transformer
+    // (`transformers/es5.go` `visitVariableStatement`).
+    let replacements: Vec<(usize, usize, &'static str)> =
+        if needs_es5_downlevel(options) {
+            collect_es5_replacements(&statements.nodes)
+        } else {
+            Vec::new()
+        };
+
     let mut output = String::new();
     let mut prev_end = 0usize;
 
@@ -225,17 +236,31 @@ fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
         // Emit source text between the previous statement and this one
         // (handles leading whitespace, comments, etc.).
         if stmt.pos() > prev_end {
-            emit_text_range(source, prev_end, stmt.pos(), &comment_cuts, &mut output);
+            emit_text_range(
+                source,
+                prev_end,
+                stmt.pos(),
+                &comment_cuts,
+                &replacements,
+                &mut output,
+            );
         }
 
         // Emit the statement with type annotations stripped.
-        emit_statement(stmt, source, &comment_cuts, &mut output);
+        emit_statement(stmt, source, &comment_cuts, &replacements, &mut output);
         prev_end = stmt.end();
     }
 
     // Emit trailing source text (e.g., trailing whitespace).
     if prev_end < source.len() {
-        emit_text_range(source, prev_end, source.len(), &comment_cuts, &mut output);
+        emit_text_range(
+            source,
+            prev_end,
+            source.len(),
+            &comment_cuts,
+            &replacements,
+            &mut output,
+        );
     }
 
     // When removeComments is active, trim leading whitespace that remained
@@ -252,29 +277,47 @@ fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
 }
 
 /// Emit a range of source text `[start, end)`, skipping any cut ranges
-/// (comment or type-annotation cuts) that fall within it.
+/// (comment or type-annotation cuts) and applying any replacement ranges
+/// (e.g., `const`→`var` for ES5 down-leveling) that fall within it.
 fn emit_text_range(
     source: &str,
     start: usize,
     end: usize,
     cuts: &[(usize, usize)],
+    replacements: &[(usize, usize, &str)],
     output: &mut String,
 ) {
-    if cuts.is_empty() {
+    if cuts.is_empty() && replacements.is_empty() {
         output.push_str(&source[start..end]);
         return;
     }
+    // Merge cuts and replacements into a single sorted operation list.
+    // Each operation is (start, end, Option<replacement>).
+    let mut ops: Vec<(usize, usize, Option<&str>)> = Vec::new();
+    for &(cs, ce) in cuts {
+        if ce > start && cs < end {
+            ops.push((cs.max(start), ce.min(end), None));
+        }
+    }
+    for &(rs, re, repl) in replacements {
+        if re > start && rs < end {
+            ops.push((rs.max(start), re.min(end), Some(repl)));
+        }
+    }
+    if ops.is_empty() {
+        output.push_str(&source[start..end]);
+        return;
+    }
+    ops.sort_by_key(|&(s, _, _)| s);
     let mut pos = start;
-    for &(c_start, c_end) in cuts {
-        if c_start >= end || c_end <= start {
-            continue;
+    for (s, e, repl) in &ops {
+        if *s > pos {
+            output.push_str(&source[pos..*s]);
         }
-        let s = c_start.max(start);
-        let e = c_end.min(end);
-        if s > pos {
-            output.push_str(&source[pos..s]);
+        if let Some(r) = repl {
+            output.push_str(r);
         }
-        pos = e;
+        pos = *e;
     }
     if pos < end {
         output.push_str(&source[pos..end]);
@@ -485,6 +528,53 @@ fn is_regex_flag_char(b: u8) -> bool {
     matches!(b, b'g' | b'i' | b'm' | b's' | b'u' | b'y' | b'd' | b'v')
 }
 
+/// Whether the emit target requires ES5 down-leveling (const/let → var).
+/// Mirrors Go's transformer pipeline which runs the ES5 transformer when
+/// `target` is explicitly set to `ES5` (or lower). When `target` is `None`
+/// (unspecified), no down-leveling is applied — the default target in
+/// modern TypeScript is ES2015+, so `const`/`let` are preserved.
+fn needs_es5_downlevel(options: &CompilerOptions) -> bool {
+    options.target == ScriptTarget::ES5
+}
+
+/// Walk the AST and collect all `const`/`let` keyword positions that need
+/// to be replaced with `var` for ES5 down-leveling.
+///
+/// The VariableDeclarationList node's `flags` field stores `NodeFlags::Const`
+/// or `NodeFlags::Let`. The keyword starts at `node.pos()` and is 5 chars
+/// for `const` or 3 chars for `let`.
+fn collect_es5_replacements(statements: &[Arc<Node>]) -> Vec<(usize, usize, &'static str)> {
+    let mut replacements = Vec::new();
+    for stmt in statements {
+        collect_es5_replacements_recursive(stmt, &mut replacements);
+    }
+    replacements
+}
+
+fn collect_es5_replacements_recursive(
+    node: &Node,
+    replacements: &mut Vec<(usize, usize, &'static str)>,
+) {
+    if node.kind == crate::ast::SyntaxKind::VariableDeclarationList {
+        let flags = node.flags;
+        if flags.contains(NodeFlags::Const) {
+            // `const` is 5 characters
+            let pos = node.pos();
+            replacements.push((pos, pos + 5, "var"));
+        } else if flags.contains(NodeFlags::Let) {
+            // `let` is 3 characters
+            let pos = node.pos();
+            replacements.push((pos, pos + 3, "var"));
+        }
+    }
+    // Recurse into children to find nested variable declarations
+    // (e.g., inside for loops, function bodies, etc.)
+    crate::ast::node_data_generated::for_each_child(node, |child| {
+        collect_es5_replacements_recursive(child, replacements);
+        false
+    });
+}
+
 /// Whether a statement is type-only and should be skipped during emit.
 fn is_type_only_statement(node: &Node) -> bool {
     match &node.data {
@@ -497,14 +587,13 @@ fn is_type_only_statement(node: &Node) -> bool {
     }
 }
 
-/// Emit a statement, stripping type annotations and (optionally) comments.
-///
-/// For most statements, this collects "cut ranges" (byte ranges to remove)
-/// and then emits the source text with those ranges removed.
+/// Emit a statement, stripping type annotations and (optionally) comments,
+/// and applying ES5 down-leveling replacements.
 fn emit_statement(
     node: &Node,
     source: &str,
     comment_cuts: &[(usize, usize)],
+    replacements: &[(usize, usize, &str)],
     output: &mut String,
 ) {
     let mut cuts: Vec<(usize, usize)> = Vec::new();
@@ -519,20 +608,39 @@ fn emit_statement(
         }
     }
 
-    if cuts.is_empty() {
-        // No type annotations or comments to strip — emit source text as-is.
+    // Collect replacements that fall within this statement's range.
+    let mut stmt_replacements: Vec<(usize, usize, &str)> = Vec::new();
+    for &(rs, re, repl) in replacements {
+        if re > node.pos() && rs < node.end() {
+            stmt_replacements.push((rs, re, repl));
+        }
+    }
+
+    if cuts.is_empty() && stmt_replacements.is_empty() {
+        // No type annotations, comments, or replacements — emit source as-is.
         output.push_str(&source[node.pos()..node.end()]);
         return;
     }
 
-    // Apply cuts: emit source text, skipping the cut ranges.
-    cuts.sort();
+    // Merge cuts and replacements into a single sorted operation list.
+    let mut ops: Vec<(usize, usize, Option<&str>)> = Vec::new();
+    for (cs, ce) in &cuts {
+        ops.push((*cs, *ce, None));
+    }
+    for (rs, re, repl) in &stmt_replacements {
+        ops.push((*rs, *re, Some(*repl)));
+    }
+    ops.sort_by_key(|&(s, _, _)| s);
+
     let mut pos = node.pos();
-    for (start, end) in &cuts {
-        if *start > pos {
-            output.push_str(&source[pos..*start]);
+    for (s, e, repl) in &ops {
+        if *s > pos {
+            output.push_str(&source[pos..*s]);
         }
-        pos = *end;
+        if let Some(r) = repl {
+            output.push_str(r);
+        }
+        pos = *e;
     }
     if pos < node.end() {
         output.push_str(&source[pos..node.end()]);
@@ -851,6 +959,13 @@ mod tests {
         let sf = parse(source);
         let mut opts = CompilerOptions::default();
         opts.remove_comments = Tristate::True;
+        emit_js_text(&sf, &opts)
+    }
+
+    fn emit_to_string_es5(source: &str) -> String {
+        let sf = parse(source);
+        let mut opts = CompilerOptions::default();
+        opts.target = ScriptTarget::ES5;
         emit_js_text(&sf, &opts)
     }
 
@@ -1233,5 +1348,51 @@ mod tests {
     fn remove_comments_off_by_default() {
         let js = emit_to_string("// comment\nconst x = 1;");
         assert!(js.contains("// comment"));
+    }
+
+    // ── ES5 down-leveling tests (P4.2) ──────────────────────────────────
+
+    #[test]
+    fn es5_downlevels_const_to_var() {
+        let js = emit_to_string_es5("const f: number = 6;");
+        assert!(js.contains("var f = 6;"));
+        assert!(!js.contains("const"));
+        assert!(!js.contains(": number"));
+    }
+
+    #[test]
+    fn es5_downlevels_let_to_var() {
+        let js = emit_to_string_es5("let x: number = 1;");
+        assert!(js.contains("var x = 1;"));
+        assert!(!js.contains("let"));
+    }
+
+    #[test]
+    fn es5_downlevels_const_with_export() {
+        let js = emit_to_string_es5("const f: number = 6;\nexport { f };");
+        assert!(js.contains("var f = 6;"));
+        assert!(js.contains("export { f };"));
+    }
+
+    #[test]
+    fn es5_preserves_var() {
+        let js = emit_to_string_es5("var x = 1;");
+        assert!(js.contains("var x = 1;"));
+    }
+
+    #[test]
+    fn es5_downlevels_nested_let_in_for_loop() {
+        let js = emit_to_string_es5("for (let i = 0; i < 10; i++) { console.log(i); }");
+        assert!(js.contains("for (var i = 0;"));
+    }
+
+    #[test]
+    fn es5_no_downlevel_when_target_es2015() {
+        let sf = parse("const x = 1;");
+        let mut opts = CompilerOptions::default();
+        opts.target = ScriptTarget::ES2015;
+        let js = emit_js_text(&sf, &opts);
+        assert!(js.contains("const x = 1;"));
+        assert!(!js.contains("var x"));
     }
 }
