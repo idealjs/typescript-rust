@@ -2382,7 +2382,20 @@ impl Checker {
     /// Look up a property symbol by name on a structured type.
     /// Returns `None` for non-structured types or missing properties.
     pub(super) fn get_property_of_type(&self, t: &Arc<Type>, name: &str) -> Option<Arc<Symbol>> {
-        t.as_structured()?.members.get(name).cloned()
+        if let Some(sym) = t.as_structured()?.members.get(name).cloned() {
+            return Some(sym);
+        }
+        // Fallback for array types: array types created by `create_array_type`
+        // carry no members, so resolve the property against the global
+        // `Array<T>` interface symbol.
+        if self.is_array_type(t) {
+            if let Some(array_sym) = self.globals.get("Array") {
+                if let Some(member) = array_sym.members.get(name) {
+                    return Some(Arc::clone(member));
+                }
+            }
+        }
+        None
     }
 
     /// Get the type of a named property on a type, if the property exists.

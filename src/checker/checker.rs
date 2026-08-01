@@ -22,9 +22,11 @@ use crate::diagnostics::messages_generated::{
     ARGUMENT_EXPRESSION_EXPECTED, ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1,
     CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_READ_ONLY_PROPERTY, CANNOT_FIND_NAME_0,
     EXPECTED_0_ARGUMENTS_BUT_GOT_1, EXPECTED_AT_LEAST_0_ARGUMENTS_BUT_GOT_1,
-    PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+    OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
+    PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1, PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
     THIS_COMPARISON_APPEARS_TO_BE_UNINTENTIONAL_BECAUSE_THE_TYPES_0_AND_1_HAVE_NO_OVERLAP,
     THIS_EXPRESSION_IS_NOT_CALLABLE, THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE,
+    TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
     TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
 };
 use crate::evaluator::{EvalResult, EvalValue};
@@ -281,6 +283,13 @@ pub struct Checker {
     pub intersection_types: HashMap<CacheHashKey, Arc<Type>>,
     pub tuple_types: HashMap<CacheHashKey, Arc<Type>>,
     pub error_types: HashMap<CacheHashKey, Arc<Type>>,
+
+    /// Lazily-computed cache of member names declared by global interfaces,
+    /// keyed by interface name (e.g. `"Array"`). Built by scanning every
+    /// loaded file's top-level `interface` declarations so it is robust to
+    /// cross-file declaration-merging gaps in the binder. Used as a fallback
+    /// to resolve methods like `find`/`map`/`reduce` on `T[]` array types.
+    pub global_interface_members: HashMap<String, Vec<String>>,
 
     // Diagnostics
     pub diagnostics: DiagnosticsCollection,
@@ -575,6 +584,8 @@ impl Checker {
             intersection_types: HashMap::new(),
             tuple_types: HashMap::new(),
             error_types: HashMap::new(),
+
+            global_interface_members: HashMap::new(),
 
             diagnostics: DiagnosticsCollection::default(),
             suggestion_diagnostics: DiagnosticsCollection::default(),
@@ -3217,6 +3228,16 @@ impl Checker {
             if self.is_auto_array_type(t) && self.is_array_mutation_method(name) {
                 return true;
             }
+            // Fallback: look up the global `Array<T>` interface for methods
+            // like find/map/reduce. Array types created by `create_array_type`
+            // carry no members of their own, so resolve property existence
+            // against the global `Array` interface symbol. The interface
+            // symbol's own `members` table may be incomplete in this port, so
+            // we resolve its declared type (which walks all declaration AST
+            // nodes) for an accurate member set.
+            if self.global_interface_has_property("Array", name) {
+                return true;
+            }
             return false;
         }
 
@@ -3265,6 +3286,64 @@ impl Checker {
     /// etc.) that the binder creates ARRAY_MUTATION flow nodes for.
     pub fn is_array_mutation_method(&self, name: &str) -> bool {
         matches!(name, "push" | "unshift")
+    }
+
+    /// Resolve a named global interface symbol (e.g. `Array`) and check whether
+    /// its declared type has a property or method named `prop_name`.
+    ///
+    /// The global interface symbol may not carry all of its cross-file
+    /// declarations in this port (the binder doesn't fully merge `interface`
+    /// augmentations spread across the bundled lib files), so we scan every
+    /// loaded file's top-level `interface` declarations directly and cache the
+    /// resulting member-name set. Used as a fallback to resolve methods like
+    /// `find`/`map`/`reduce` on array types whose own members are empty.
+    fn global_interface_has_property(&mut self, symbol_name: &str, prop_name: &str) -> bool {
+        if !self.global_interface_members.contains_key(symbol_name) {
+            let names = self.collect_global_interface_member_names(symbol_name);
+            self.global_interface_members
+                .insert(symbol_name.to_string(), names);
+        }
+        self.global_interface_members
+            .get(symbol_name)
+            .map(|names| names.iter().any(|n| n == prop_name))
+            .unwrap_or(false)
+    }
+
+    /// Scan every loaded file's top-level statements for `interface <name>`
+    /// declarations and collect the names of all property/method members
+    /// across all matching declarations (declaration merging). Robust to
+    /// cross-file merging gaps in the binder.
+    fn collect_global_interface_member_names(&self, interface_name: &str) -> Vec<String> {
+        let mut names: Vec<String> = Vec::new();
+        for file in &self.files {
+            let statements: Vec<Arc<Node>> = match &file.node.data {
+                NodeData::SourceFile(data) => data.statements.iter().cloned().collect(),
+                _ => continue,
+            };
+            for stmt in &statements {
+                let members = match &stmt.data {
+                    NodeData::InterfaceDeclaration(d) if d.name.text() == interface_name => {
+                        &d.members
+                    }
+                    _ => continue,
+                };
+                for member in members.iter() {
+                    let member_name = match &member.data {
+                        NodeData::PropertySignatureDeclaration(d) => {
+                            self.get_property_name_from_node(&d.name)
+                        }
+                        NodeData::MethodSignatureDeclaration(d) => {
+                            self.get_property_name_from_node(&d.name)
+                        }
+                        _ => continue,
+                    };
+                    if !member_name.is_empty() && !names.iter().any(|n| n == &member_name) {
+                        names.push(member_name);
+                    }
+                }
+            }
+        }
+        names
     }
 
     /// Check a `PropertyAccessExpression` (`x.prop`) and emit TS2339 when
@@ -3810,6 +3889,123 @@ impl Checker {
         })
     }
 
+    /// For an object-literal `source` being assigned to `target`, return the
+    /// name of the first source property that does not exist on the target
+    /// (an "excess" property). Returns `None` when the source isn't an object
+    /// literal, or when the target has an index signature (which permits
+    /// arbitrary properties). Mirrors the fresh-object-literal branch of Go's
+    /// `hasExcessProperties`.
+    fn get_excess_property_name(&self, source: &Arc<Type>, target: &Arc<Type>) -> Option<String> {
+        // Only object-literal sources undergo excess property checking.
+        if !crate::checker::is_object_literal_type(source) {
+            return None;
+        }
+        let source_struct = source.as_structured()?;
+        let target_struct = target.as_structured()?;
+        // An index signature on the target permits any property name.
+        if !target_struct.index_infos.is_empty() {
+            return None;
+        }
+        for prop in &source_struct.properties {
+            // `target_has_property` descends into union/intersection
+            // constituents: a property is excess only if it exists on NONE
+            // of the constituents. (Union and intersection structured
+            // `members` tables are not pre-merged in this port.)
+            if !self.target_has_property(target, &prop.name) {
+                return Some(prop.name.clone());
+            }
+        }
+        None
+    }
+
+    /// Read-only check whether a property named `name` exists on `t`,
+    /// descending into union and intersection constituents. Unlike
+    /// `has_property_of_type`, this does not fall back to the global
+    /// `Array<T>` interface (not needed for excess-property checking, which
+    /// only runs against object-literal sources assigned to object-like
+    /// targets).
+    fn target_has_property(&self, t: &Arc<Type>, name: &str) -> bool {
+        if let Some(structured) = t.as_structured() {
+            if structured.members.get(name).is_some() {
+                return true;
+            }
+            // An index signature on any constituent permits the property.
+            if !structured.index_infos.is_empty() {
+                return true;
+            }
+        }
+        // Union: property exists if present on any constituent.
+        if t.flags.contains(TypeFlags::Union) {
+            if let TypeData::Union(u) = &t.data {
+                return u
+                    .union_or_intersection
+                    .types
+                    .iter()
+                    .any(|ct| self.target_has_property(ct, name));
+            }
+        }
+        // Intersection: property exists if present on any constituent.
+        if t.flags.contains(TypeFlags::Intersection) {
+            if let TypeData::Intersection(i) = &t.data {
+                return i
+                    .union_or_intersection
+                    .types
+                    .iter()
+                    .any(|ct| self.target_has_property(ct, name));
+            }
+        }
+        false
+    }
+
+    /// Return the names of `target` properties that are required (non-optional)
+    /// but absent from `source`. Mirrors Go's `getUnmatchedProperties` for the
+    /// missing-required-property case.
+    fn get_missing_required_properties(
+        &self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> Vec<String> {
+        let Some(source_struct) = source.as_structured() else {
+            return Vec::new();
+        };
+        let Some(target_struct) = target.as_structured() else {
+            return Vec::new();
+        };
+        let mut missing = Vec::new();
+        for target_prop in &target_struct.properties {
+            if target_prop.flags.contains(SymbolFlags::Optional) {
+                continue;
+            }
+            if source_struct.members.get(&target_prop.name).is_none() {
+                missing.push(target_prop.name.clone());
+            }
+        }
+        missing
+    }
+
+    /// Locate the name node of an object-literal property by name, so excess
+    /// property errors (TS2353) can be reported at the offending property.
+    fn find_object_literal_property_name_node(
+        &self,
+        init: &Arc<Node>,
+        prop_name: &str,
+    ) -> Option<TextRange> {
+        let crate::ast::NodeData::ObjectLiteralExpression(data) = &init.data else {
+            return None;
+        };
+        for prop in data.properties.iter() {
+            let name = match &prop.data {
+                NodeData::PropertyAssignment(p) => &p.name,
+                NodeData::ShorthandPropertyAssignment(p) => &p.name,
+                _ => continue,
+            };
+            if self.get_property_name_from_node(name) == prop_name {
+                return Some(name.loc);
+            }
+        }
+        None
+    }
+
     /// Extract the property name string from a name node (identifier,
     /// string literal, numeric literal). Returns an empty string for
     /// computed property names (caller should skip those).
@@ -4279,7 +4475,33 @@ impl Checker {
                 (Some(type_node), Some(init)) => {
                     let annotation_type = self.get_type_from_type_node(type_node);
                     let init_type = self.get_type_of_node(init);
-                    if !self.is_type_assignable_to(&init_type, &annotation_type) {
+                    let assignable = self.is_type_assignable_to(&init_type, &annotation_type);
+                    let mut reported_error = false;
+
+                    // Excess property check for object-literal initializers.
+                    // An object literal with properties not present on the
+                    // target type is an error even when all required target
+                    // properties are present. Mirrors Go's `hasExcessProperties`
+                    // performed inside `isRelatedToEx` for fresh literals.
+                    if let Some(excess_name) =
+                        self.get_excess_property_name(&init_type, &annotation_type)
+                    {
+                        let file = self.current_file.clone();
+                        let annot_str = self.type_to_string(&annotation_type);
+                        // Report at the offending property name when locatable.
+                        let loc = self
+                            .find_object_literal_property_name_node(init, &excess_name)
+                            .unwrap_or(node.loc);
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            file,
+                            loc,
+                            OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
+                            vec![excess_name, annot_str],
+                        ));
+                        reported_error = true;
+                    }
+
+                    if !assignable && !reported_error {
                         let file = self.current_file.clone();
                         // Generalize literal types for error display (mirrors Go's
                         // reportRelationError: when source is a literal type and
@@ -4293,12 +4515,31 @@ impl Checker {
                         let annot_str = self.type_to_string(&annotation_type);
                         // Report at the variable declaration (name), not the
                         // initializer — mirrors Go's checkVariableLikeDeclaration.
-                        self.diagnostics.add(crate::ast::Diagnostic::new(
-                            file,
-                            node.loc,
-                            TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                            vec![init_str, annot_str],
-                        ));
+                        let missing =
+                            self.get_missing_required_properties(&init_type, &annotation_type);
+                        let message = if missing.len() == 1 {
+                            crate::ast::Diagnostic::new(
+                                file,
+                                node.loc,
+                                PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
+                                vec![missing[0].clone(), init_str, annot_str],
+                            )
+                        } else if missing.len() > 1 {
+                            crate::ast::Diagnostic::new(
+                                file,
+                                node.loc,
+                                TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
+                                vec![init_str, annot_str, missing.join(", ")],
+                            )
+                        } else {
+                            crate::ast::Diagnostic::new(
+                                file,
+                                node.loc,
+                                TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                                vec![init_str, annot_str],
+                            )
+                        };
+                        self.diagnostics.add(message);
                     }
                     annotation_type
                 }

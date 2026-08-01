@@ -89,20 +89,32 @@ diagnostics/hover + API server + .tsbuildinfo 增量构建已接入。
 lifecycle）。`cargo fmt --check` 全仓通过。`cargo clippy` 零 warning。剩余
 compiler warning 约 90 个（dead code in stub implementations），归类为迁移期可接受。
 
-## 下阶段优先级
+## 下阶段计划（3 阶段）
 
-P1-P9 基础设施已全部完成（CLI/tsconfig/parser/scanner/binder/checker/emit/
-module resolution/build mode/LSP/API/tooling 全栈对齐 Go oracle 行为，1,550 个
-测试通过）。剩余 27 个 TODO 项为深度功能迁移（LSP features 逐项、watch mode、
-incremental build、npm 打包、fourslash 测试），需较大工作量逐项推进。按价值排序：
+当前基线：P0-P9 基础设施完成，P10 测试 parity 推进中（1,105 lib + 572 checker
+parity = 1,679 通过，99 ignored）。剩余 13 个 `[ ]` 条目分 3 阶段推进：
 
-1. **P7 LSP features**：diagnostics/hover/completion/definition/references/rename —
-   逐项迁移 `internal/ls/`（~35k 行 Go 代码）。
-2. **P6 Watch/Incremental**：`.tsbuildinfo` 读写、incremental rebuild、watch mode —
-   需文件监听库选择（`notify` crate）。
-3. **P8 npm/extension**：Rust binary 构建/拷贝到 native-preview、VS Code extension
-   binary 查找逻辑。
-4. **P9 收尾**：clippy 策略收紧、benchmark、安全检查。
+### 阶段 1：Checker 深度提升（最高优先级）
+
+Checker 当前 ~25%，是真实项目可用性的核心瓶颈。具体目标：
+1. 修复 array literal 类型推断（`T[]` 被误推为 `error[]` → TS2339 false positive）
+2. 补齐 object literal 必填属性检查（TS2741）
+3. 补齐常见诊断码（TS2304 used before defined、TS2358 const enum 主体检查、
+   TS2740 missing properties in assignment、TS2561 object assign 等）
+4. 扩充 checker parity fixtures 到 200+
+
+### 阶段 2：Watch mode + Incremental（中优先级）
+
+1. 引入 `notify` crate 实现文件监听
+2. `--watch` 模式：文件变更 → 增量重编译 → 诊断输出
+3. project reference cycle 精细化处理
+4. watch 测试设计
+
+### 阶段 3：LSP features（中优先级）
+
+1. project service（多文件 open/close/change 管理）
+2. references / rename / document symbols / formatting
+3. fourslash 测试 smoke
 
 ## P0：建立迁移工作基线 ✅ 已完成
 

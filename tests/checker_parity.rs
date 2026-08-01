@@ -3997,12 +3997,14 @@ fn checker_object_literal_infer_multiple_properties_no_error() {
 #[test]
 fn checker_object_literal_infer_missing_property_ts2322() {
     // `{ a: 1 }` infers `{ a: number }`; assigning to `{ a: number; b: string }`
-    // must fail because `b` is missing in the source.
+    // must fail because `b` is missing in the source. The checker reports the
+    // specific TS2741 ("Property 'b' is missing...") rather than the generic
+    // TS2322.
     let diags = check_source(
         "let obj = { a: 1 };\
          let y: { a: number; b: string } = obj;",
     );
-    assert_diagnostic_code(&diags, 2322);
+    assert_diagnostic_code(&diags, 2741);
 }
 
 #[test]
@@ -4601,11 +4603,12 @@ fn checker_mapped_type_keyof_no_error() {
 #[test]
 fn checker_mapped_type_keyof_mismatch_ts2322() {
     // `{ [K in keyof T]: number }` → { a: number; b: number }.
-    // Missing `b` should fail.
+    // Missing `b` should fail. The checker reports the specific TS2741
+    // ("Property 'b' is missing...") rather than the generic TS2322.
     let diags = check_source(
         "type T = { a: 1; b: \"x\" };\ntype M = { [K in keyof T]: number };\nlet x: M = { a: 1 };",
     );
-    assert_diagnostic_code(&diags, 2322);
+    assert_diagnostic_code(&diags, 2741);
 }
 
 #[test]
@@ -5274,13 +5277,15 @@ fn checker_interface_merge_no_error() {
 
 #[test]
 fn checker_interface_merge_missing_member_ts2322() {
-    // After merging, `Foo` requires both `a` and `b`; missing `b` is TS2322.
+    // After merging, `Foo` requires both `a` and `b`; missing `b` is an error.
+    // The checker reports the specific TS2741 ("Property 'b' is missing...")
+    // rather than the generic TS2322.
     let diags = check_source(
         "interface Foo { a: number; }\n\
          interface Foo { b: string; }\n\
          const x: Foo = { a: 1 };",
     );
-    assert_diagnostic_code(&diags, 2322);
+    assert_diagnostic_code(&diags, 2741);
 }
 
 #[test]
@@ -5295,7 +5300,7 @@ fn checker_interface_merge_missing_first_member_ts2322() {
          interface Foo { b: string; }\n\
          const x: Foo = { b: \"hi\" };",
     );
-    assert_diagnostic_code(&diags, 2322);
+    assert_diagnostic_code(&diags, 2741);
 }
 
 #[test]
