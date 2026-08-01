@@ -49,6 +49,20 @@ pub trait FS: Send + Sync {
     fn get_accessible_entries(&self, path: &str) -> Entries;
     fn stat(&self, path: &str) -> Option<FileInfo>;
     fn realpath(&self, path: &str) -> String;
+
+    /// Walk the file tree rooted at `root`, invoking `walk_fn` once for each
+    /// file or directory entry. Mirrors Go's `WalkDir`.
+    ///
+    /// The default implementation is a no-op; concrete implementations may
+    /// override it. The callback receives `(path, info)` for every entry.
+    fn walk_dir(
+        &self,
+        root: &str,
+        walk_fn: &mut dyn FnMut(&str, &FileInfo),
+    ) -> std::io::Result<()> {
+        let _ = (root, walk_fn);
+        Ok(())
+    }
 }
 
 /// OS-backed file system implementation.
@@ -393,6 +407,7 @@ impl FS for InMemoryFS {
 /// A shared file system handle.
 pub type SharedFS = Arc<dyn FS>;
 
+pub mod cachedvfs;
 pub mod vfsmatch;
 
 #[cfg(test)]
