@@ -8,7 +8,9 @@
 //! we use side tables (`NodeSymbolMap`) keyed by node ID.
 
 use crate::ast::*;
-use crate::diagnostics::messages_generated::CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0;
+use crate::diagnostics::messages_generated::{
+    CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0, DUPLICATE_IDENTIFIER_0,
+};
 use std::sync::Arc;
 
 /// The binder.
@@ -283,24 +285,86 @@ impl Binder {
                 return existing;
             }
             // Non-mergeable redeclaration: fall through to create a new
-            // symbol (overwrites the previous entry). When both the existing
-            // symbol and the new declaration are block-scoped variables
-            // (let/const), report TS2451 ("Cannot redeclare block-scoped
-            // variable"). Mirrors Go's `declareSymbol` BlockScoped collision
-            // check. The binder assigns `BlockScopedVariable` to all variable
-            // declarations (including `var`), so we additionally verify the
-            // new declaration's keyword is `let`/`const` to avoid a false
-            // positive on `var x; var x;`.
-            if existing.flags.contains(SymbolFlags::BlockScopedVariable)
-                && includes.contains(SymbolFlags::BlockScopedVariable)
-                && Self::is_let_or_const_declaration(node)
-            {
-                self.symbol_map.binder_diagnostics.push(Diagnostic::new(
-                    None,
-                    node.loc,
-                    CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0,
-                    vec![name.clone()],
-                ));
+            // symbol (overwrites the previous entry). Determine the kind of
+            // conflict and report the appropriate diagnostic.
+            //
+            // Skip anonymous (empty-name) declarations: they are internal
+            // symbols (e.g. interface/object members whose names are resolved
+            // structurally by the checker) and must not trigger duplicate
+            // diagnostics. Mirrors Go, whose `getDeclarationName` always
+            // produces a real name for user-named declarations.
+            //
+            // TS2451 "Cannot redeclare block-scoped variable" fires when a
+            // block-scoped variable (let/const) collides with another
+            // block-scoped variable. The binder assigns `BlockScopedVariable`
+            // to every variable declaration (including `var`), so we
+            // additionally verify the new declaration's keyword is `let`/`const`
+            // to avoid a false positive on `var x; var x;`. A plain `var`
+            // redeclaration is legal (function-scoped, may be redeclared).
+            //
+            // TS2300 "Duplicate identifier" fires for any other non-mergeable
+            // redeclaration: e.g. two imports of the same name, a class and a
+            // function with the same name, two classes, two type aliases, etc.
+            // A function-scoped `var` may coexist with a function or class
+            // declaration (e.g. `var x; function x() {}` is allowed), so
+            // TS2300 is suppressed in that case. Mirrors Go's `declareSymbol`.
+            let both_block_scoped_var = existing.flags.contains(SymbolFlags::BlockScopedVariable)
+                && includes.contains(SymbolFlags::BlockScopedVariable);
+            if !name.is_empty() {
+                if both_block_scoped_var {
+                    if Self::is_let_or_const_declaration(node) {
+                        self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                            None,
+                            node.loc,
+                            CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0,
+                            vec![name.clone()],
+                        ));
+                    }
+                    // else: `var` + `var` — redeclaration is legal, no error.
+                } else {
+                    // TS2300 is a *scope-level* duplicate-identifier check.
+                    // Member-level declarations (parameters, properties,
+                    // accessors, enum members, type parameters) live in their
+                    // container's symbol table and — for merged declarations
+                    // such as function overloads — legitimately reuse a name
+                    // across distinct declarations. Exclude those kinds so we
+                    // only report genuine scope-level duplicates (two imports,
+                    // a class and a function, two classes, etc.).
+                    let member_flags = SymbolFlags::Property
+                        .union(SymbolFlags::Method)
+                        .union(SymbolFlags::GetAccessor)
+                        .union(SymbolFlags::SetAccessor)
+                        .union(SymbolFlags::EnumMember)
+                        .union(SymbolFlags::FunctionScopedVariable)
+                        .union(SymbolFlags::TypeParameter)
+                        .union(SymbolFlags::Constructor)
+                        .union(SymbolFlags::Signature);
+                    if existing.flags.intersects(member_flags) || includes.intersects(member_flags)
+                    {
+                        // Member-level collision — not a scope-level duplicate.
+                    } else {
+                        let new_is_var = includes.contains(SymbolFlags::BlockScopedVariable)
+                            && Self::is_var_declaration(node);
+                        let existing_is_var =
+                            existing.flags.contains(SymbolFlags::BlockScopedVariable)
+                                && Self::symbol_is_var_declaration(&existing);
+                        let other_is_fn_or_class = |flags: SymbolFlags| {
+                            flags.contains(SymbolFlags::Function)
+                                || flags.contains(SymbolFlags::Class)
+                        };
+                        let var_with_fn_or_class = (new_is_var
+                            && other_is_fn_or_class(existing.flags))
+                            || (existing_is_var && other_is_fn_or_class(includes));
+                        if !var_with_fn_or_class {
+                            self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                                None,
+                                node.loc,
+                                DUPLICATE_IDENTIFIER_0,
+                                vec![name.clone()],
+                            ));
+                        }
+                    }
+                }
             }
         }
 
@@ -591,6 +655,36 @@ impl Binder {
             }
         }
         true
+    }
+
+    /// Whether `node` is a function-scoped `var` declaration (as opposed to a
+    /// block-scoped `let`/`const`). The inverse of
+    /// [`Self::is_let_or_const_declaration`] for actual variable declarations;
+    /// returns `false` for non-variable nodes. Used by the TS2300 check to
+    /// allow a `var` to coexist with a function/class declaration.
+    fn is_var_declaration(node: &Arc<Node>) -> bool {
+        if node.kind == SyntaxKind::VariableDeclaration {
+            if let Some(parent) = node.parent.as_ref() {
+                if parent.kind == SyntaxKind::VariableDeclarationList {
+                    return !parent.flags.intersects(NodeFlags::Let | NodeFlags::Const);
+                }
+            }
+        }
+        false
+    }
+
+    /// Whether an existing symbol was declared as a function-scoped `var`.
+    /// Inspects the symbol's value declaration (falling back to its first
+    /// declaration) to recover the variable keyword.
+    fn symbol_is_var_declaration(symbol: &Arc<Symbol>) -> bool {
+        let decl: Option<&Arc<Node>> = symbol
+            .value_declaration
+            .as_ref()
+            .or_else(|| symbol.declarations.first());
+        match decl {
+            Some(node) => Self::is_var_declaration(node),
+            None => false,
+        }
     }
 
     /// Get the combined modifier flags for a node, walking up the

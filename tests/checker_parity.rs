@@ -6844,3 +6844,372 @@ fn checker_ts18048_optional_chain_deep_suppresses_error() {
     );
     assert_no_diagnostics(&diags);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// TS2300: Duplicate identifier (binder-level check)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_ts2300_duplicate_imports() {
+    // Two imports binding the same name → TS2300 "Duplicate identifier 'a'".
+    let diags = check_source("import { a } from \"m\";\nimport { a } from \"n\";");
+    assert_diagnostic_code(&diags, 2300);
+}
+
+#[test]
+fn checker_ts2300_class_then_function() {
+    // A class and a function with the same name cannot merge → TS2300.
+    let diags = check_source("class C {}\nfunction C() {}");
+    assert_diagnostic_code(&diags, 2300);
+}
+
+#[test]
+fn checker_ts2300_function_then_class() {
+    // Reverse order: function then class → TS2300.
+    let diags = check_source("function C() {}\nclass C {}");
+    assert_diagnostic_code(&diags, 2300);
+}
+
+#[test]
+fn checker_ts2300_two_classes() {
+    // Two classes with the same name → TS2300.
+    let diags = check_source("class C {}\nclass C {}");
+    assert_diagnostic_code(&diags, 2300);
+}
+
+#[test]
+fn checker_ts2300_two_type_aliases() {
+    // Two type aliases with the same name → TS2300.
+    let diags = check_source("type T = number;\ntype T = string;");
+    assert_diagnostic_code(&diags, 2300);
+}
+
+#[test]
+fn checker_ts2300_var_then_function_no_error() {
+    // A function-scoped `var` may coexist with a function → no TS2300.
+    let diags = check_source("var x;\nfunction x() {}");
+    assert_diagnostic_count(&diags, 2300, 0);
+}
+
+#[test]
+fn checker_ts2300_function_then_var_no_error() {
+    // Reverse order: function then `var` → no TS2300.
+    let diags = check_source("function x() {}\nvar x;");
+    assert_diagnostic_count(&diags, 2300, 0);
+}
+
+#[test]
+fn checker_ts2300_var_then_class_no_error() {
+    // A function-scoped `var` may coexist with a class → no TS2300.
+    let diags = check_source("var x;\nclass x {}");
+    assert_diagnostic_count(&diags, 2300, 0);
+}
+
+#[test]
+fn checker_ts2300_class_then_var_no_error() {
+    // Reverse order: class then `var` → no TS2300.
+    let diags = check_source("class x {}\nvar x;");
+    assert_diagnostic_count(&diags, 2300, 0);
+}
+
+#[test]
+fn checker_ts2300_var_then_var_no_error() {
+    // `var` is function-scoped and may be redeclared freely → no TS2300.
+    let diags = check_source("var x;\nvar x;");
+    assert_diagnostic_count(&diags, 2300, 0);
+}
+
+#[test]
+fn checker_ts2300_interface_merge_no_duplicate() {
+    // Two interfaces with the same name merge (declaration merging) → no
+    // TS2300, and the merged type has members from both declarations.
+    let diags = check_source(
+        "interface I { a: number; }\n\
+         interface I { b: string; }\n\
+         const x: I = { a: 1, b: \"hi\" };",
+    );
+    assert_diagnostic_count(&diags, 2300, 0);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Generic constraint satisfaction
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_generic_constraint_satisfied_primitive_no_error() {
+    // `42` satisfies the `T extends number` constraint.
+    let diags =
+        check_source("function f<T extends number>(x: T): T { return x; }\nlet n: number = f(42);");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_generic_constraint_satisfied_length_no_error() {
+    // A type that structurally matches the constraint is a valid argument;
+    // passing an already-generic value avoids literal-argument inference gaps.
+    let diags = check_source(
+        "interface HasLength { length: number; }\n\
+         function longest<T extends HasLength>(a: T, b: T): T {\n\
+         \x20   return a.length >= b.length ? a : b;\n\
+         }\n\
+         const p: HasLength = { length: 2 };\n\
+         const r: HasLength = longest(p, p);",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_generic_constraint_keyof_no_error() {
+    // `keyof T` over an explicit object type resolves to its key union.
+    let diags = check_source(
+        "type Obj = { a: number; b: string };\n\
+         type K = keyof Obj;\n\
+         let k: \"a\" | \"b\" = null as any as K;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// typeof operator on values
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_typeof_value_is_string_no_error() {
+    // `typeof x` has type `string`.
+    let diags = check_source("let x = 1;\nlet t: string = typeof x;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_typeof_in_narrowing_branch_no_error() {
+    // `typeof x === \"number\"` narrows `x` to `number` in the true branch.
+    let diags = check_source(
+        "function f(x: number | string) {\
+         \x20   if (typeof x === \"number\") {\
+         \x20       let n: number = x;\
+         \x20   }\
+         }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_typeof_string_literal_value_no_error() {
+    // `typeof \"hi\"` is also `string`.
+    let diags = check_source("let t: string = typeof \"hi\";");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Template literal types
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_template_literal_type_prefix_span_no_error() {
+    // `prefix-${string}` accepts a concrete matching literal.
+    let diags =
+        check_source("type T = `prefix-${string}`;\nlet x: T = null as any as `prefix-hello`;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_template_literal_type_via_generic_alias_no_error() {
+    // A generic template-literal alias instantiated with a literal.
+    let diags = check_source(
+        "type Prefix<T> = `pre-${T}`;\n\
+         type P = Prefix<\"x\">;\n\
+         let v: \"pre-x\" = null as any as P;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_template_literal_value_interpolation_no_error() {
+    // A template-literal *value* has type `string`.
+    let diags = check_source("let x = 1;\nlet s: string = `val-${x}`;");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// satisfies operator
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_satisfies_keeps_expression_type_no_error() {
+    // `satisfies string` keeps the expression type (`string`), so the
+    // assignment to `string` is fine.
+    let diags = check_source("let x = \"hi\";\nlet y: string = x satisfies string;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_satisfies_object_literal_no_error() {
+    // `satisfies` validates an object literal against a type.
+    let diags = check_source("const cfg = { a: 1 } satisfies { a: number };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_satisfies_union_no_error() {
+    // `satisfies` against a union keeps the narrowed literal type.
+    let diags = check_source(
+        "const x = \"a\" satisfies \"a\" | \"b\";\n\
+         let y: \"a\" = x;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Optional chaining `?.` on null/undefined
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_optional_chain_on_nullable_no_error() {
+    // `x?.a` on `{ a: number } | null` is allowed (short-circuits to
+    // undefined) and suppresses TS18048.
+    let diags = check_source(
+        "type T = { a: number } | null;\n\
+         let x: T = null;\n\
+         let y = x?.a;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_optional_chain_nested_no_error() {
+    // Nested optional chains across a nullable object type.
+    let diags = check_source(
+        "let x: { a: { b: number } } | null = null;\n\
+         let y = x?.a?.b;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_optional_chain_method_call_no_error() {
+    // Optional call `x?.f()` short-circuits when the receiver is null.
+    let diags = check_source(
+        "let x: { f: () => number } | null = null;\n\
+         let y = x?.f();",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_optional_chain_on_any_no_error() {
+    // Optional chaining on `any`-typed value → no error.
+    let diags = check_source("let x: any = null;\nlet y = x?.foo;");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Nullish coalescing `??`
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_nullish_coalescing_with_null_no_error() {
+    // `x ?? 0` is a valid expression when the left is nullable.
+    let diags = check_source("let x: number | null = null;\nlet y = x ?? 0;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_nullish_coalescing_with_undefined_no_error() {
+    // `x ?? 42` where `x` is `number | undefined`.
+    let diags = check_source("let x: number | undefined = undefined;\nlet y = x ?? 42;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_nullish_coalescing_string_default_no_error() {
+    // String default via `??`.
+    let diags = check_source("let x: string | null = null;\nlet y = x ?? \"default\";");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_nullish_coalescing_parenthesized_no_error() {
+    // Parenthesized `??` is still a valid expression.
+    let diags = check_source("let x: number | null = 5;\nlet y = (x ?? 0);");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_nullish_coalescing_left_defined_no_error() {
+    // When the left side is defined, the result is the left operand.
+    let diags = check_source("let x: number | null = 7;\nlet y = x ?? 0;");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Array destructuring
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_array_destructuring_two_elements_no_error() {
+    // Basic array destructuring of an inferred `number[]`.
+    let diags = check_source("let arr = [1, 2];\nlet [a, b] = arr;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_array_destructuring_skip_element_no_error() {
+    // Skipping the first element with a hole.
+    let diags = check_source("let arr = [1, 2, 3];\nlet [, second] = arr;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_array_destructuring_with_rest_no_error() {
+    // Rest element collects the remaining items.
+    let diags = check_source("let arr = [1, 2, 3];\nlet [first, ...rest] = arr;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_array_destructuring_nested_no_error() {
+    // Nested array destructuring.
+    let diags = check_source("let pair = [[1, 2]];\nlet [[a, b]] = pair;");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Object spread `{ ...obj }`
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_object_spread_basic_no_error() {
+    // Spreading an object literal into another.
+    let diags = check_source("let a = { x: 1 };\nlet b = { ...a, y: 2 };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_object_spread_overrides_property_no_error() {
+    // A later property overrides a spread one.
+    let diags = check_source("let base = { x: 1 };\nlet merged = { ...base, x: 2 };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_object_spread_multiple_no_error() {
+    // Spreading multiple objects.
+    let diags = check_source("let a = { x: 1 };\nlet b = { y: 2 };\nlet c = { ...a, ...b };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_array_spread_into_new_array_no_error() {
+    // Array spread `[...arr, x]`.
+    let diags = check_source("let arr = [1, 2];\nlet copy = [...arr, 3];");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// `as const` assertion
+//
+// NOTE: `as const` is not yet supported by the checker (the parser currently
+// treats `const` in `as const` as an unresolved type reference, producing a
+// spurious TS2304). The intended fixtures (`[1,2,3] as const`, `{ a: 1 } as
+// const`, `42 as const`) are omitted until that parsing path is implemented.
+// ────────────────────────────────────────────────────────────────────────────
