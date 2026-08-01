@@ -7476,49 +7476,132 @@ fn checker_circular_import_no_crash() {
     assert_no_diagnostics(&diags);
 }
 
-// === Common error patterns / known checker gaps =============================
+// === Targeted diagnostic checks =============================================
 //
-// Characterization tests for diagnostics the upstream Go checker emits but
-// this Rust checker does NOT yet report. They lock in the current (no-error)
-// behaviour so future work that implements the check surfaces here as a
-// failing test to update. The corresponding TS codes are noted in comments.
+// These diagnostics are now reported by the Rust checker, mirroring the
+// upstream Go checker. Each fixture has a positive case (the error is
+// reported) and a negative case (valid code produces no such error).
+
+// ── TS2588: Cannot assign to 'x' because it is a constant. ──
 
 #[test]
-fn checker_const_reassignment_not_reported_no_error() {
-    // TS2588 "Cannot assign to 'x' because it is a constant." is not yet
-    // emitted for reassigning a `const` binding.
+fn checker_const_reassignment_ts2588() {
+    // Reassigning a `const` binding after declaration → TS2588.
     let diags = check_source("const x = 1;\nx = 2;");
-    assert_no_diagnostics(&diags);
+    assert_diagnostic_code(&diags, 2588);
 }
 
 #[test]
-fn checker_missing_return_not_reported_no_error() {
-    // TS2366 (function lacks a return statement; return type does not include
-    // undefined) is not yet reported.
-    let diags = check_source("function f(): number { if (false) { return 1; } }");
-    assert_no_diagnostics(&diags);
+fn checker_const_compound_assignment_ts2588() {
+    // Compound assignment to a `const` binding is also TS2588.
+    let diags = check_source("const x = 1;\nx += 2;");
+    assert_diagnostic_code(&diags, 2588);
 }
 
 #[test]
-fn checker_unreachable_code_not_reported_no_error() {
-    // TS7027 "Unreachable code detected." is not yet reported.
+fn checker_let_reassignment_no_ts2588() {
+    // `let` bindings may be reassigned — no TS2588.
+    let diags = check_source("let x = 1;\nx = 2;");
+    assert!(!diags.iter().any(|d| d.code == 2588));
+}
+
+#[test]
+fn checker_const_read_no_ts2588() {
+    // Reading a `const` binding is fine — no TS2588.
+    let diags = check_source("const x = 1;\nlet y = x;");
+    assert!(!diags.iter().any(|d| d.code == 2588));
+}
+
+// ── TS7027: Unreachable code detected. ──
+
+#[test]
+fn checker_unreachable_code_after_return_ts7027() {
+    // Code after an unconditional `return` is unreachable.
     let diags = check_source("function f(): void { return; let x = 1; }");
-    assert_no_diagnostics(&diags);
+    assert_diagnostic_code(&diags, 7027);
 }
 
 #[test]
-fn checker_abstract_instantiation_not_reported_no_error() {
-    // TS2511 "Cannot create an instance of an abstract class." is not yet
-    // reported.
+fn checker_unreachable_code_after_throw_ts7027() {
+    let diags = check_source("function f(): void { throw 1; let x = 1; }");
+    assert_diagnostic_code(&diags, 7027);
+}
+
+#[test]
+fn checker_reachable_code_no_ts7027() {
+    // An `if` body containing a `return` does not make later code unreachable.
+    let diags = check_source("function f(): number { if (false) { return 1; } return 2; }");
+    assert!(!diags.iter().any(|d| d.code == 7027));
+}
+
+// ── TS2511: Cannot create an instance of an abstract class. ──
+
+#[test]
+fn checker_abstract_instantiation_ts2511() {
+    // `new AbstractClass()` where the class is declared `abstract` → TS2511.
     let diags = check_source("abstract class A {}\nconst a = new A();");
-    assert_no_diagnostics(&diags);
+    assert_diagnostic_code(&diags, 2511);
 }
 
 #[test]
-fn checker_private_access_not_reported_no_error() {
-    // TS2341 "Property 'x' is private and only accessible within class 'C'."
-    // is not yet reported for outside-the-class access.
+fn checker_concrete_instantiation_no_ts2511() {
+    // Instantiating a concrete class is fine — no TS2511.
+    let diags = check_source("class A {}\nconst a = new A();");
+    assert!(!diags.iter().any(|d| d.code == 2511));
+}
+
+// ── TS2341: Property 'x' is private and only accessible within class 'C'. ──
+
+#[test]
+fn checker_private_access_outside_class_ts2341() {
+    // Accessing a `private` member from outside the class → TS2341.
     let diags =
         check_source("class C { private x: number = 1; }\nconst c = new C();\nlet y = c.x;");
-    assert_no_diagnostics(&diags);
+    assert_diagnostic_code(&diags, 2341);
+}
+
+#[test]
+fn checker_private_access_inside_class_no_ts2341() {
+    // Accessing a `private` member from within the class body is allowed.
+    let diags =
+        check_source("class C {\n  private x: number = 1;\n  m(): number { return this.x; }\n}");
+    assert!(!diags.iter().any(|d| d.code == 2341));
+}
+
+#[test]
+fn checker_public_access_outside_class_no_ts2341() {
+    // Public members are freely accessible — no TS2341.
+    let diags = check_source("class C { x: number = 1; }\nconst c = new C();\nlet y = c.x;");
+    assert!(!diags.iter().any(|d| d.code == 2341));
+}
+
+// ── TS2366: Function lacks ending return statement and return type ──
+//           does not include 'undefined'.
+
+#[test]
+fn checker_missing_return_ts2366() {
+    // A conditional return that may fall through → TS2366.
+    let diags = check_source("function f(): number { if (false) { return 1; } }");
+    assert_diagnostic_code(&diags, 2366);
+}
+
+#[test]
+fn checker_missing_return_conditional_ts2366() {
+    // `if` without `else` does not guarantee a return → TS2366.
+    let diags = check_source("function f(): number { if (Math.random() > 0.5) { return 1; } }");
+    assert_diagnostic_code(&diags, 2366);
+}
+
+#[test]
+fn checker_complete_return_no_ts2366() {
+    // A function that always returns at the end is fine — no TS2366.
+    let diags = check_source("function f(): number { return 1; }");
+    assert!(!diags.iter().any(|d| d.code == 2366));
+}
+
+#[test]
+fn checker_void_return_type_no_ts2366() {
+    // A `void` return type allows falling through — no TS2366.
+    let diags = check_source("function f(): void { if (false) { return; } }");
+    assert!(!diags.iter().any(|d| d.code == 2366));
 }

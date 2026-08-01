@@ -21,15 +21,19 @@ use crate::diagnostics::messages_generated::{
     A_SPREAD_ARGUMENT_MUST_EITHER_HAVE_A_TUPLE_TYPE_OR_BE_PASSED_TO_A_REST_PARAMETER,
     ARGUMENT_EXPRESSION_EXPECTED, ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1,
     BLOCK_SCOPED_VARIABLE_0_USED_BEFORE_ITS_DECLARATION,
-    CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_READ_ONLY_PROPERTY, CANNOT_FIND_NAME_0,
+    CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_CONSTANT,
+    CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_READ_ONLY_PROPERTY,
+    CANNOT_CREATE_AN_INSTANCE_OF_AN_ABSTRACT_CLASS, CANNOT_FIND_NAME_0,
     EXPECTED_0_ARGUMENTS_BUT_GOT_1, EXPECTED_AT_LEAST_0_ARGUMENTS_BUT_GOT_1,
+    FUNCTION_LACKS_ENDING_RETURN_STATEMENT_AND_RETURN_TYPE_DOES_NOT_INCLUDE_UNDEFINED,
     OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
     PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1, PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
+    PROPERTY_0_IS_PRIVATE_AND_ONLY_ACCESSIBLE_WITHIN_CLASS_1,
     THIS_COMPARISON_APPEARS_TO_BE_UNINTENTIONAL_BECAUSE_THE_TYPES_0_AND_1_HAVE_NO_OVERLAP,
     THIS_EXPRESSION_IS_NOT_CALLABLE, THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE,
     TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
-    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1, VARIABLE_0_IS_USED_BEFORE_BEING_ASSIGNED,
-    X_0_IS_POSSIBLY_UNDEFINED,
+    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1, UNREACHABLE_CODE_DETECTED,
+    VARIABLE_0_IS_USED_BEFORE_BEING_ASSIGNED, X_0_IS_POSSIBLY_UNDEFINED,
 };
 use crate::evaluator::{EvalResult, EvalValue};
 use crate::jsnum;
@@ -459,6 +463,12 @@ pub struct Checker {
     /// `getThisTypeOfObjectLiteral`/`getThisType` infrastructure.
     pub this_type_stack: Vec<Arc<Type>>,
 
+    /// Stack of enclosing class declaration nodes (the `ClassDeclaration`
+    /// whose members are currently being checked). Used by the TS2341
+    /// private-member check to decide whether a `private` member is accessed
+    /// from within its declaring class. Empty outside any class body.
+    pub enclosing_class_stack: Vec<Arc<Node>>,
+
     /// Stack of declared return types for the enclosing function. When
     /// checking a `return expr;` statement, `expr`'s type is compared
     /// against the top of this stack (the function's declared return
@@ -686,6 +696,7 @@ impl Checker {
             globals_populated: false,
             break_continue_context_stack: Vec::new(),
             this_type_stack: Vec::new(),
+            enclosing_class_stack: Vec::new(),
             return_type_stack: Vec::new(),
 
             flow_analysis_disabled: false,
@@ -3098,6 +3109,141 @@ impl Checker {
         self.get_any_type()
     }
 
+    /// Whether a syntax kind is an assignment operator (`=`, `+=`, `-=`, …),
+    /// i.e. one that writes to its left-hand operand. Used by the TS2588
+    /// const-reassignment check to distinguish assignments from equality
+    /// tests (`==`) and plain binary operators.
+    fn is_assignment_operator(kind: crate::ast::SyntaxKind) -> bool {
+        use crate::ast::SyntaxKind::*;
+        matches!(
+            kind,
+            EqualsToken
+                | PlusEqualsToken
+                | MinusEqualsToken
+                | AsteriskEqualsToken
+                | SlashEqualsToken
+                | PercentEqualsToken
+                | AsteriskAsteriskEqualsToken
+                | LessThanLessThanEqualsToken
+                | GreaterThanGreaterThanEqualsToken
+                | GreaterThanGreaterThanGreaterThanEqualsToken
+                | AmpersandEqualsToken
+                | BarEqualsToken
+                | CaretEqualsToken
+                | BarBarEqualsToken
+                | AmpersandAmpersandEqualsToken
+                | QuestionQuestionEqualsToken
+        )
+    }
+
+    /// Whether a statement unconditionally terminates the enclosing block:
+    /// `return`, `throw`, `break`, or `continue`. Used by the TS7027
+    /// unreachable-code check. A statement that *contains* one of these
+    /// (e.g. an `if` with a `return` body, a loop) does not terminate the
+    /// block, because control may still flow past it — matching the simple
+    /// heuristic used by tsc's reachability analysis.
+    fn is_block_terminating_statement(stmt: &Arc<Node>) -> bool {
+        matches!(
+            stmt.kind,
+            SyntaxKind::ReturnStatement
+                | SyntaxKind::ThrowStatement
+                | SyntaxKind::BreakStatement
+                | SyntaxKind::ContinueStatement
+        )
+    }
+
+    /// Whether a symbol is a class declared `abstract`. Used by the TS2511
+    /// check for `new AbstractClass()`. Mirrors Go's
+    /// `getDeclarationModifierFlagsFromDeclarations` abstract check in
+    /// `checkNewExpression`.
+    fn symbol_is_abstract_class(&self, symbol: &Arc<Symbol>) -> bool {
+        for decl in &symbol.declarations {
+            if decl.kind == SyntaxKind::ClassDeclaration
+                && decl.has_syntactic_modifier(ModifierFlags::Abstract)
+            {
+                return true;
+            }
+        }
+        false
+    }
+
+    /// The `ClassDeclaration` that declares a given class member symbol, found
+    /// by walking the member declaration's parent pointer. Returns `None` for
+    /// non-class members (e.g. interface signatures, which carry no parent
+    /// class). Used by the TS2341 private-member accessibility check.
+    fn declaring_class_of_member(&self, member_symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+        for decl in &member_symbol.declarations {
+            if matches!(
+                decl.kind,
+                SyntaxKind::PropertyDeclaration | SyntaxKind::MethodDeclaration
+            ) {
+                if let Some(parent) = &decl.parent {
+                    if parent.kind == SyntaxKind::ClassDeclaration {
+                        return Some(Arc::clone(parent));
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    /// Whether the checker is currently inside the body of `class_node` (i.e.
+    /// `class_node` is on the enclosing-class stack). Used by the TS2341
+    /// check to allow private-member access from within the declaring class.
+    fn is_within_declaring_class(&self, class_node: &Arc<Node>) -> bool {
+        self.enclosing_class_stack
+            .iter()
+            .any(|c| Arc::ptr_eq(c, class_node))
+    }
+
+    /// Whether a function body unconditionally returns (or throws) on every
+    /// path, for the TS2366 heuristic. A block returns if its last statement
+    /// always returns. This is a conservative approximation (it does not model
+    /// loops or short-circuiting) that mirrors the simple last-statement check
+    /// described for tsc's reachability analysis.
+    fn function_body_definitely_returns(&self, body: &Arc<Node>) -> bool {
+        if body.kind != SyntaxKind::Block {
+            return false;
+        }
+        if let crate::ast::NodeData::Block(data) = &body.data {
+            if let Some(last) = data.statements.nodes.last() {
+                return self.statement_always_returns(last);
+            }
+        }
+        false
+    }
+
+    /// Whether a single statement always completes abruptly via `return` or
+    /// `throw` (so control cannot fall through). Recognizes direct
+    /// `return`/`throw`, a trailing `return`/`throw` in a nested block, and an
+    /// `if/else` where *both* branches always return.
+    fn statement_always_returns(&self, stmt: &Arc<Node>) -> bool {
+        match stmt.kind {
+            SyntaxKind::ReturnStatement | SyntaxKind::ThrowStatement => true,
+            SyntaxKind::Block => {
+                if let crate::ast::NodeData::Block(data) = &stmt.data {
+                    if let Some(last) = data.statements.nodes.last() {
+                        return self.statement_always_returns(last);
+                    }
+                }
+                false
+            }
+            SyntaxKind::IfStatement => {
+                if let crate::ast::NodeData::IfStatement(data) = &stmt.data {
+                    let then_returns = self.statement_always_returns(&data.then_statement);
+                    let else_returns = data
+                        .else_statement
+                        .as_ref()
+                        .map_or(false, |e| self.statement_always_returns(e));
+                    then_returns && else_returns
+                } else {
+                    false
+                }
+            }
+            _ => false,
+        }
+    }
+
     /// Whether a property named `name` on type `t` is declared `readonly`.
     ///
     /// Walks the structured type's `members` symbol table to find the
@@ -3386,6 +3532,36 @@ impl Checker {
                 vec![obj_expr.text().to_string()],
             ));
             return;
+        }
+        // TS2341: a `private` class member accessed from outside its
+        // declaring class. Mirrors Go's accessibility check in
+        // `checkPropertyAccess` (`getSymbolModifierFlags` → `private`).
+        if let Some(structured) = obj_type.as_structured() {
+            if let Some(member_symbol) = structured.members.get(name_text) {
+                if let Some(declaring_class) = self.declaring_class_of_member(member_symbol) {
+                    let is_private = member_symbol
+                        .declarations
+                        .iter()
+                        .any(|d| d.has_syntactic_modifier(ModifierFlags::Private));
+                    if is_private && !self.is_within_declaring_class(&declaring_class) {
+                        let class_name = match &declaring_class.data {
+                            crate::ast::NodeData::ClassDeclaration(d) => d
+                                .name
+                                .as_ref()
+                                .map(|n| n.text().to_string())
+                                .unwrap_or_default(),
+                            _ => String::new(),
+                        };
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            name.loc,
+                            PROPERTY_0_IS_PRIVATE_AND_ONLY_ACCESSIBLE_WITHIN_CLASS_1,
+                            vec![name_text.to_string(), class_name],
+                        ));
+                        return;
+                    }
+                }
+            }
         }
         if self.has_property_of_type(&obj_type, name_text) {
             return;
@@ -4259,8 +4435,25 @@ impl Checker {
             SyntaxKind::Block => {
                 self.push_scope(node);
                 if let crate::ast::NodeData::Block(data) = &node.data {
+                    // TS7027: code following an unconditional `return`,
+                    // `throw`, `break`, or `continue` is unreachable. Track a
+                    // flag while walking the block's statements; once a
+                    // terminating statement is seen, every subsequent
+                    // statement is reported and (per tsc) still checked.
+                    let mut after_terminator = false;
                     for stmt in data.statements.iter() {
+                        if after_terminator {
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                stmt.loc,
+                                UNREACHABLE_CODE_DETECTED,
+                                vec![],
+                            ));
+                        }
                         self.check_statement(stmt);
+                        if Self::is_block_terminating_statement(stmt) {
+                            after_terminator = true;
+                        }
                     }
                 }
                 self.pop_scope();
@@ -4357,10 +4550,35 @@ impl Checker {
                         .map(|tn| self.get_type_from_type_node(tn)),
                     _ => None,
                 };
-                self.return_type_stack.push(declared_return);
+                self.return_type_stack.push(declared_return.clone());
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(body) = &data.body {
                         self.check_statement(body);
+                    }
+                }
+                // TS2366: a function whose declared return type excludes
+                // `undefined`/`void`/`any` must return a value on every code
+                // path. This uses a simple reachability heuristic — if the
+                // body's last statement does not unconditionally return (or
+                // throw), emit TS2366. Mirrors Go's `checkFunctionDeclaration`
+                // implicit-return check.
+                if let Some(ret_type) = &declared_return {
+                    if !ret_type.flags.contains(TypeFlags::Void)
+                        && !ret_type.flags.contains(TypeFlags::Undefined)
+                        && !ret_type.flags.contains(TypeFlags::Any)
+                    {
+                        if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
+                            if let Some(body) = &data.body {
+                                if !self.function_body_definitely_returns(body) {
+                                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                                        self.current_file.clone(),
+                                        node.loc,
+                                        FUNCTION_LACKS_ENDING_RETURN_STATEMENT_AND_RETURN_TYPE_DOES_NOT_INCLUDE_UNDEFINED,
+                                        vec![],
+                                    ));
+                                }
+                            }
+                        }
                     }
                 }
                 self.return_type_stack.pop();
@@ -4379,6 +4597,10 @@ impl Checker {
                 // bodies can resolve `this.prop` and `super.prop`.
                 let this_type = self.build_class_instance_type_with_base(node);
                 self.this_type_stack.push(this_type);
+                // Track the enclosing class declaration so the TS2341
+                // private-member check knows when access is within the
+                // declaring class.
+                self.enclosing_class_stack.push(Arc::clone(node));
                 // Check heritage clauses (e.g. `extends Foo`, `implements I`).
                 if let crate::ast::NodeData::ClassDeclaration(data) = &node.data {
                     if let Some(heritage) = &data.heritage_clauses {
@@ -4393,6 +4615,7 @@ impl Checker {
                 }
                 self.pop_scope();
                 self.this_type_stack.pop();
+                self.enclosing_class_stack.pop();
                 // Build the class type (with construct signatures from the
                 // constructor) and cache it on the declaration node + symbol
                 // so `new Foo(arg)` can resolve the callee and check args.
@@ -5124,6 +5347,26 @@ impl Checker {
                             }
                         }
                     }
+                    // TS2588: Assigning to a `const` variable after its
+                    // declaration. Mirrors Go's `checkAssignmentStatement`
+                    // const-target check. Fires for every assignment operator
+                    // (`=`, `+=`, …) whose left-hand side is an identifier
+                    // resolving to a `const` binding.
+                    if Self::is_assignment_operator(data.operator_token.kind)
+                        && data.left.kind == SyntaxKind::Identifier
+                    {
+                        if let Some(symbol) = self.resolve_identifier(&data.left) {
+                            if self.symbol_is_const_variable(&symbol) {
+                                let name_text = data.left.text();
+                                self.diagnostics.add(crate::ast::Diagnostic::new(
+                                    self.current_file.clone(),
+                                    data.left.loc,
+                                    CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_CONSTANT,
+                                    vec![name_text.to_string()],
+                                ));
+                            }
+                        }
+                    }
                     // TS2367: For equality/relational comparisons between
                     // types with no overlap, the comparison is always
                     // `false` (or `true` for `!=`/`!==`). Mirrors Go's
@@ -5195,6 +5438,21 @@ impl Checker {
                     if let Some(args) = &data.arguments {
                         for arg in args.iter() {
                             self.check_expression(arg);
+                        }
+                    }
+                    // TS2511: `new AbstractClass()` where the resolved class
+                    // declaration carries the `abstract` modifier. Mirrors
+                    // Go's `checkNewExpression` abstract-class guard.
+                    if data.expression.kind == SyntaxKind::Identifier {
+                        if let Some(symbol) = self.resolve_identifier(&data.expression) {
+                            if self.symbol_is_abstract_class(&symbol) {
+                                self.diagnostics.add(crate::ast::Diagnostic::new(
+                                    self.current_file.clone(),
+                                    data.expression.loc,
+                                    CANNOT_CREATE_AN_INSTANCE_OF_AN_ABSTRACT_CLASS,
+                                    vec![],
+                                ));
+                            }
                         }
                     }
                 }

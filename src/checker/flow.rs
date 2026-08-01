@@ -2229,7 +2229,7 @@ impl Checker {
     /// Check if a symbol represents a `const` variable declaration.
     /// Mirrors Go's `isConstantVariable`. The `const`/`let` keyword is
     /// carried on the parent `VariableDeclarationList`'s `NodeFlags`.
-    fn symbol_is_const_variable(&self, symbol: &Arc<Symbol>) -> bool {
+    pub(super) fn symbol_is_const_variable(&self, symbol: &Arc<Symbol>) -> bool {
         for decl in &symbol.declarations {
             if let Some(parent) = &decl.parent {
                 if parent.kind == SyntaxKind::VariableDeclarationList

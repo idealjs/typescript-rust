@@ -688,6 +688,11 @@ impl Checker {
                         flags |= SymbolFlags::Optional;
                     }
                     let mut symbol = Symbol::new(flags, name.clone());
+                    // Attach the declaring member node so the checker can
+                    // inspect its modifiers (e.g. `readonly` for TS2540,
+                    // `private` for TS2341) — mirroring Go's
+                    // `getDeclarationModifierFlagsFromDeclarations`.
+                    symbol.declarations.push(Arc::clone(member));
                     // Propagate the `readonly` modifier so the checker can
                     // emit TS2540 for assignments to readonly class properties
                     // outside the constructor. Mirrors Go's
@@ -729,7 +734,12 @@ impl Checker {
                         /* declaration */ Some(Arc::clone(member)),
                     );
                     let fn_type = self.create_function_or_constructor_type(vec![sig], false);
-                    let symbol = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
+                    let mut symbol = Symbol::new(SymbolFlags::Property, name.clone());
+                    // Attach the declaring member node so the checker can
+                    // inspect its modifiers (`private`/`protected` for
+                    // TS2341/TS2411).
+                    symbol.declarations.push(Arc::clone(member));
+                    let symbol = Arc::new(symbol);
                     self.value_symbol_links.insert(
                         &symbol,
                         ValueSymbolLinks {
