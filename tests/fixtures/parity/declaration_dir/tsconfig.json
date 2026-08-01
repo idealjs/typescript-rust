@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "noLib": true,
+    "outDir": "dist/js",
+    "declarationDir": "dist/types",
+    "pretty": false,
+    "declaration": true
+  },
+  "files": ["src/main.ts"]
+}

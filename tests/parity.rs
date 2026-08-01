@@ -273,6 +273,58 @@ const CASES: &[Case] = &[
         stdout_contains: &[],
         skip_oracle: true,
     },
+    Case {
+        name: "declaration_dir",
+        // `declaration: true` + `declarationDir: "dist/types"` — .d.ts files
+        // go to a separate directory from .js files.
+        // Oracle comparison skipped: text-slice declaration emitter differs.
+        args: &[],
+        expect_success: true,
+        expected_files: &[
+            (
+                "dist/js/src/main.js",
+                "export function add(a, b) { return a + b; }\nexport const VERSION = 1;\n",
+            ),
+            (
+                "dist/types/src/main.d.ts",
+                "export declare function add(a: number, b: number): number;\n\
+                 export declare const VERSION: number;\n",
+            ),
+        ],
+        stdout_contains: &[],
+        skip_oracle: true,
+    },
+    Case {
+        name: "enum_emit",
+        // Numeric, string enums emitted as-is (ESNext target, no transform).
+        args: &[],
+        expect_success: true,
+        expected_files: &[(
+            "dist/src/main.js",
+            "enum Color { Red, Green, Blue }\n\
+             enum Status { Active = 1, Inactive = 2 }\n\
+             enum Direction { Up = \"UP\", Down = \"DOWN\" }\n\
+             export { Color, Status, Direction };\n",
+        )],
+        stdout_contains: &[],
+        skip_oracle: false,
+    },
+    Case {
+        name: "namespace_emit",
+        // Namespace with exported function and const — emitted as-is.
+        args: &[],
+        expect_success: true,
+        expected_files: &[(
+            "dist/src/main.js",
+            "namespace Utils {\n\
+             \x20   export function helper(x) { return x * 2; }\n\
+             \x20   export const PI = 3.14;\n\
+             }\n\
+             export { Utils };\n",
+        )],
+        stdout_contains: &[],
+        skip_oracle: false,
+    },
     // ── Parser parity smoke cases ───────────────────────────────────────
     Case {
         name: "parser_syntax_error",
