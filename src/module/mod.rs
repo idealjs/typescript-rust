@@ -1,8 +1,15 @@
 //! Module resolution, ported from `internal/module/`.
 //!
 //! This module provides the core types and utility functions for module
-//! resolution. The full resolver implementation depends on compiler options
-//! and VFS, and is being ported incrementally.
+//! resolution, plus the `Resolver` struct and resolution infrastructure.
+
+pub mod resolver;
+
+// Re-export key types from the resolver submodule.
+pub use resolver::{
+    get_effective_type_roots, DiagAndArgs, Extensions as ExtensionsBitfield, ResolutionHost,
+    Resolver,
+};
 
 use crate::tspath;
 use bitflags::bitflags;
