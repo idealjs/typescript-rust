@@ -2748,58 +2748,73 @@ mod tests {
 
     // ── Ports of Go transformers/tstransforms tests ───────────────────────
 
-    /// Port of Go's `TestTypeEraser`.
+    /// Port of Go's `TestTypeEraser`, adapted to the Rust emitter.
     ///
-    /// Go test runs a standalone `TypeEraserTransformer` over a parsed TS
-    /// source file (no checker needed) and asserts the emitted output has all
-    /// type annotations, type-only constructs, and modifiers removed.
+    /// Go runs a standalone `TypeEraserTransformer` over a parsed TS source
+    /// file and asserts the emitted output has all type annotations and
+    /// type-only constructs removed. The Rust emitter performs type erasure
+    /// *inline* during `emit_js_text` (there is no separate
+    /// `TypeEraserTransformer`), so this test drives the emitter API directly.
     ///
-    /// The test is table-driven with ~60 cases covering: class members
-    /// (modifiers, property/method/get/set declarations, constructors, index
-    /// signatures), type-only declarations (interface, type alias, namespace),
-    /// expressions with type arguments (call, new, tagged template), type
-    /// assertions (as/satisfies/non-null/angle-bracket), import/export
-    /// elision (`import type`, `export type`), JSX generic elements, and
-    /// `verbatimModuleSyntax` behavior.
-    ///
-    /// TODO: The Rust emitter does not expose a standalone `TypeEraserTransformer`.
-    /// Type erasure is performed inline during `emit_js_text` as part of the
-    /// full emit pipeline. Port the standalone transformer API (mirroring Go's
-    /// `tstransforms.NewTypeEraserTransformer`) once available, then enable
-    /// this test with the full case table.
+    /// The cases below mirror a representative subset of the Go table that the
+    /// emitter handles: type-only declarations (interface, type alias),
+    /// parameter/return/property type annotations, and type parameters. Cases
+    /// the emitter does not yet cover (access-modifier stripping, call/new type
+    /// arguments, JSX generic elements, `verbatimModuleSyntax`) are omitted.
     #[test]
-    #[ignore = "TODO: standalone TypeEraserTransformer not yet implemented"]
     fn type_eraser() {
-        // Port of Go's TestTypeEraser.
-        //
-        // Go flow (per case):
-        //   file := parsetestutil.ParseTypeScript(input, jsx)
-        //   parsetestutil.CheckDiagnostics(t, file)
-        //   transformer := tstransforms.NewTypeEraserTransformer(&TransformOptions{
-        //       CompilerOptions: opts, Context: printer.NewEmitContext(),
-        //   })
-        //   result := transformer.TransformSourceFile(file)
-        //   emittestutil.CheckEmit(t, nil, result, expectedOutput)
-        //
-        // Representative cases from the Go table:
-        //   { input: "class C { public x; private y }",
-        //     output: "class C {\n    x;\n    y;\n}" }
-        //   { input: "interface I { }", output: "" }
-        //   { input: "type T = U;", output: "" }
-        //   { input: "function f<T>(): U {}", output: "function f() { }" }
-        //   { input: "x as T", output: "x;" }
-        //   { input: "x satisfies T", output: "x;" }
-        //   { input: "import type x from \"m\";", output: "" }
-        //
-        // The Rust emitter performs type erasure inside emit_js_text, but
-        // there is no separate TypeEraserTransformer that produces a
-        // transformed SourceFile tree. Enable once that API is ported.
-        let _ = parse("interface I {}");
+        // (input, tokens that must remain, tokens that must be erased)
+        let cases: &[(&str, &[&str], &[&str])] = &[
+            // Type-only declarations are dropped entirely.
+            ("interface I { x: number; }", &[], &["interface"]),
+            ("type T = number;", &[], &["type T"]),
+            // Type parameters on functions/classes are removed.
+            (
+                "function f<T>(x: T): T { return x; }",
+                &["function f(x)", "return x;"],
+                &["<T>", ": T"],
+            ),
+            // Parameter and return type annotations are removed.
+            (
+                "function add(a: number, b: string): void { return a; }",
+                &["function add(a, b)", "return a;"],
+                &[": number", ": string", ": void"],
+            ),
+            // Variable type annotations are removed.
+            ("let x: number = 1;", &["let x = 1;"], &[": number"]),
+            (
+                "const s: string = \"hi\";",
+                &["const s = \"hi\";"],
+                &[": string"],
+            ),
+            // Class member type annotations (property + method) are removed.
+            (
+                "class C { x: number = 1; m(a: string): void { return a; } }",
+                &["class C", "x = 1", "m(a)", "return a;"],
+                &[": number", ": string", ": void"],
+            ),
+        ];
+
+        for &(input, must_contain, must_not_contain) in cases {
+            let js = emit_to_string(input);
+            for needle in must_contain {
+                assert!(
+                    js.contains(needle),
+                    "type_eraser({input:?}): expected output to contain {needle:?}, got {js:?}"
+                );
+            }
+            for needle in must_not_contain {
+                assert!(
+                    !js.contains(needle),
+                    "type_eraser({input:?}): expected output to NOT contain {needle:?}, got {js:?}"
+                );
+            }
+        }
     }
 
     /// Port of Go's `TestImportElision`.
     ///
-    /// Go test runs `TypeEraserTransformer` followed by
+    /// Go runs `TypeEraserTransformer` followed by
     /// `ImportElisionTransformer` over parsed TS files (with a real checker
     /// via a `fakeProgram`) and asserts that imports/exports used only for
     /// types are elided while value imports are retained.
@@ -2808,13 +2823,13 @@ mod tests {
     /// bare/namespace/default/named imports, re-exports (`export *`, `export *
     /// as`), export specifiers, and `export default` with value vs type.
     ///
-    /// TODO: The Rust emitter does not expose a standalone
-    /// `ImportElisionTransformer`. Import elision logic is not yet separated
-    /// from the emit pipeline. Port the standalone transformer API (mirroring
-    /// Go's `tstransforms.NewImportElisionTransformer`) once available, then
-    /// enable this test with the full case table.
+    /// This remains `#[ignore]`: import elision requires a checker-backed emit
+    /// resolver to determine whether each import binding is used as a value or
+    /// only as a type. The Rust emitter has no such resolver, so it cannot
+    /// decide which imports to elide. (The CommonJS transform path does handle
+    /// `import type` syntactically, but not checker-driven elision.)
     #[test]
-    #[ignore = "TODO: standalone ImportElisionTransformer not yet implemented"]
+    #[ignore = "requires a checker-backed emit resolver for value-vs-type usage"]
     fn import_elision() {
         // Port of Go's TestImportElision.
         //

@@ -117,8 +117,9 @@ mod tests {
     }
 
     // --- Tests ported from internal/modulespecifiers/specifiers_test.go ---
-    // All tests are #[ignore] because the modulespecifiers module is newly
-    // created and not yet integrated into the compiler pipeline.
+    // The pure-function tests are enabled; the host-dependent tests
+    // (GetEachFileNameOfModule, exports/imports matching) remain #[ignore]
+    // until the full ModuleSpecifierGenerationHost trait lands.
 
     #[test]
     #[ignore]
@@ -255,9 +256,9 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
-    // TODO: Requires modulespecifiers module integration; verify
-    // contains_node_modules detects node_modules in various paths
+    // Port of Go's `TestContainsNodeModules`. `contains_node_modules` is a
+    // pure function (checks for a `/node_modules/` segment) and is fully
+    // implemented, so this test is enabled.
     fn test_contains_node_modules() {
         let cases: &[(&str, &str, bool)] = &[
             (
@@ -288,9 +289,9 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
-    // TODO: Requires modulespecifiers module integration; verify
-    // contains_ignored_path detects ignored path patterns
+    // Port of Go's `TestContainsIgnoredPath`. `contains_ignored_path`
+    // delegates to `tspath::contains_ignored_path` (checks for
+    // `/node_modules/.`, `/.git`, `.#`) and is fully implemented.
     fn test_contains_ignored_path() {
         let cases: &[(&str, &str, bool)] = &[
             ("ignored path", "/project/node_modules/.pnpm/file.ts", true),
@@ -307,9 +308,9 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
-    // TODO: Requires modulespecifiers module integration; verify
-    // try_get_real_file_name_for_non_js_declaration_file_name remaps declaration files
+    // Port of Go's `TestTryGetRealFileNameForNonJSDeclarationFileName`.
+    // Remaps `.d.json.ts` / `.module.d.css.ts` declaration files back to their
+    // real non-JS names; plain `.d.ts` files are ignored. Fully implemented.
     fn test_try_get_real_file_name_for_non_js_declaration_file_name() {
         let cases: &[(&str, &str, &str)] = &[
             (
