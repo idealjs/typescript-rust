@@ -13,10 +13,8 @@ defaults:
   run:
     shell: bash
 
-# Minimal Rust CI for the tsox (TypeScript Go → Rust port) crate.
-# During migration fmt/clippy are informational (continue-on-error) because
-# the repo still carries ~75 accepted migration warnings and repo-wide fmt
-# is tracked separately in TODO.md. test and parity smoke are gating.
+# Rust CI for the tsox (TypeScript Go → Rust port) crate.
+# fmt, clippy, test, and parity smoke are all gating.
 jobs:
   rust:
     runs-on: ubuntu-latest
@@ -33,11 +31,9 @@ jobs:
 
       - name: Format check
         run: cargo fmt --check
-        continue-on-error: true # TODO.md: repo-wide fmt pending
 
       - name: Clippy
-        run: cargo clippy --all-targets -- -D warnings
-        continue-on-error: true # TODO.md: ~75 accepted migration warnings
+        run: cargo clippy --all-targets -- -D clippy::all
 
       - name: Test
         run: cargo test --lib

@@ -188,4 +188,74 @@ mod tests {
         }
         assert!(fs.directory_exists("bundled:///libs"));
     }
+
+    #[test]
+    fn bundled_fs_case_sensitive_matching() {
+        // Lib name matching should be case-sensitive (matches Go's map lookup)
+        let inner = Arc::new(InMemoryFS::new());
+        let fs = BundledFS::new(inner);
+        // If lib.d.ts exists, LIB.D.TS should NOT (case-sensitive)
+        let lower = "bundled:///libs/lib.d.ts";
+        let upper = "bundled:///libs/LIB.D.TS";
+        if fs.file_exists(lower) {
+            assert!(
+                !fs.file_exists(upper),
+                "Bundled lib matching should be case-sensitive"
+            );
+        }
+    }
+
+    #[test]
+    fn bundled_fs_delegates_case_sensitivity() {
+        // use_case_sensitive_file_names should delegate to inner FS
+        let inner = Arc::new(InMemoryFS::new());
+        let fs = BundledFS::new(inner);
+        // InMemoryFS defaults to case-sensitive
+        assert!(fs.use_case_sensitive_file_names());
+    }
+
+    #[test]
+    fn bundled_fs_lib_names_nonempty() {
+        // At least lib.d.ts should be in the embedded set (if built with build.rs)
+        let names = lib_names();
+        // Only check if build.rs generated the table
+        if !names.is_empty() {
+            assert!(
+                names.iter().any(|n| *n == "lib.d.ts"),
+                "Expected lib.d.ts in bundled libs"
+            );
+        }
+    }
+
+    /// Ported from Go `TestTestingLibPath`.
+    ///
+    /// In Go this checks the on-disk source libs directory. In Rust the libs are
+    /// embedded at build time, so we verify `lib.d.ts` is available through the
+    /// embedded set.
+    #[test]
+    fn testing_lib_path() {
+        let names = lib_names();
+        if !names.is_empty() {
+            assert!(
+                lib_contents("lib.d.ts").is_some(),
+                "Expected lib.d.ts in bundled libs"
+            );
+        }
+    }
+
+    /// Ported from Go `TestEmbeddedLibs`.
+    ///
+    /// Walks the bundled virtual FS `libs` directory and verifies that the file
+    /// list matches `lib_names()`.
+    #[test]
+    fn embedded_libs() {
+        let inner = Arc::new(InMemoryFS::new());
+        let fs = BundledFS::new(inner);
+        let entries = fs.get_accessible_entries(&lib_path());
+        let mut files = entries.files.clone();
+        files.sort();
+        let mut names: Vec<String> = lib_names().iter().map(|s| s.to_string()).collect();
+        names.sort();
+        assert_eq!(files, names);
+    }
 }

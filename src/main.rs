@@ -6,7 +6,7 @@
 
 use std::process::ExitCode;
 
-use tsox::execute::{ExitStatus, OsSystem, command_line};
+use tsox::execute::{OsSystem, command_line};
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -15,12 +15,12 @@ fn main() -> ExitCode {
     if let Some(first) = args.first() {
         match first.as_str() {
             "--lsp" => {
-                eprintln!("tsox: --lsp mode is not yet implemented.");
-                return ExitCode::from(ExitStatus::NotImplemented.as_i32() as u8);
+                let code = tsox::lsp::run_lsp();
+                return ExitCode::from(code as u8);
             }
             "--api" => {
-                eprintln!("tsox: --api mode is not yet implemented.");
-                return ExitCode::from(ExitStatus::NotImplemented.as_i32() as u8);
+                let code = tsox::api::run_api();
+                return ExitCode::from(code as u8);
             }
             _ => {}
         }

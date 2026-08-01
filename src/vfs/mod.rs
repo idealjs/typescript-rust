@@ -102,7 +102,9 @@ impl FS for OsFS {
                     entries.directories.push(name);
                 } else if file_type.as_ref().map(|t| t.is_symlink()).unwrap_or(false) {
                     entries.symlinks.push(name.clone());
-                    if let Ok(meta) = entry.metadata() {
+                    // Use std::fs::metadata (not entry.metadata()) to follow symlinks.
+                    // On macOS, DirEntry::metadata() does not follow symlinks.
+                    if let Ok(meta) = std::fs::metadata(entry.path()) {
                         if meta.is_dir() {
                             entries.directories.push(name);
                         } else {
@@ -275,6 +277,19 @@ impl FS for InMemoryFS {
 
 /// A shared file system handle.
 pub type SharedFS = Arc<dyn FS>;
+
+#[cfg(test)]
+mod cachedvfs_tests;
+#[cfg(test)]
+mod iovfs_tests;
+#[cfg(test)]
+mod osvfs_tests;
+#[cfg(test)]
+mod vfsmatch_tests;
+#[cfg(test)]
+mod vfsmock_tests;
+#[cfg(test)]
+mod vfstest_tests;
 
 #[cfg(test)]
 mod tests {

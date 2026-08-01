@@ -58,7 +58,10 @@ const CASES: &[Case] = &[
         // Without outDir, output is emitted alongside the source.
         args: &["main.ts"],
         expect_success: true,
-        expected_files: &[("main.js", "const greeting = \"hello\";\nconsole.log(greeting);\n")],
+        expected_files: &[(
+            "main.js",
+            "const greeting = \"hello\";\nconsole.log(greeting);\n",
+        )],
         stdout_contains: &[],
         skip_oracle: false,
     },
@@ -67,7 +70,10 @@ const CASES: &[Case] = &[
         // -p . points to a directory containing tsconfig.json.
         args: &["-p", "."],
         expect_success: true,
-        expected_files: &[("dist/src/main.js", "function add(a, b) { return a + b; }\nexport { add };\n")],
+        expected_files: &[(
+            "dist/src/main.js",
+            "function add(a, b) { return a + b; }\nexport { add };\n",
+        )],
         stdout_contains: &[],
         skip_oracle: false,
     },
@@ -175,7 +181,10 @@ const CASES: &[Case] = &[
         args: &[],
         expect_success: true,
         expected_files: &[
-            ("dist/src/helper.js", "export function helper(x) { return x * 2; }\n"),
+            (
+                "dist/src/helper.js",
+                "export function helper(x) { return x * 2; }\n",
+            ),
             (
                 "dist/src/main.js",
                 "import { helper } from \"./helper\";\nconst result = helper(10);\nexport { result };\n",
@@ -332,8 +341,14 @@ const CASES: &[Case] = &[
         args: &[],
         expect_success: true,
         expected_files: &[
-            ("dist/src/main.js", "export function add(a, b) { return a + b; }\n"),
-            ("dist/src/util.js", "export function double(x) { return x * 2; }\n"),
+            (
+                "dist/src/main.js",
+                "export function add(a, b) { return a + b; }\n",
+            ),
+            (
+                "dist/src/util.js",
+                "export function double(x) { return x * 2; }\n",
+            ),
         ],
         stdout_contains: &[],
         skip_oracle: false,
@@ -349,7 +364,10 @@ const CASES: &[Case] = &[
                 "dist/src/main.js",
                 "import { helper } from \"./helper\";\nconst result = helper(10);\nexport { result };\n",
             ),
-            ("dist/src/helper.js", "export function helper(x) { return x * 2; }\n"),
+            (
+                "dist/src/helper.js",
+                "export function helper(x) { return x * 2; }\n",
+            ),
         ],
         stdout_contains: &[],
         skip_oracle: false,

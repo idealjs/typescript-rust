@@ -1475,17 +1475,105 @@ mod tests {
         assert_ne!(get_encoded_root_length("^"), 2);
     }
 
-    // ── ContainsIgnoredPath ──
+    // ── ContainsIgnoredPath (ported 1:1 from Go TestContainsIgnoredPath) ──
 
     #[test]
     fn test_contains_ignored_path() {
-        assert!(contains_ignored_path(
-            "/home/user/node_modules/.cache/file.ts"
-        ));
-        assert!(contains_ignored_path("/project/.git/config"));
-        assert!(contains_ignored_path("/project/.#file.ts"));
-        assert!(!contains_ignored_path("/project/src/file.ts"));
-        assert!(!contains_ignored_path("/node_modules./file.ts"));
+        let tests: &[(&str, &str, bool)] = &[
+            // (name, path, expected)
+            (
+                "node_modules dot path",
+                "/project/node_modules/.pnpm/file.ts",
+                true,
+            ),
+            ("git directory", "/project/.git/hooks/pre-commit", true),
+            ("emacs lock file", "/project/src/file.ts.#", true),
+            ("regular file path", "/project/src/file.ts", false),
+            (
+                "node_modules without dot",
+                "/project/node_modules/lodash/index.js",
+                false,
+            ),
+            ("empty path", "", false),
+            (
+                "path with multiple ignored patterns",
+                "/project/node_modules/.pnpm/.git/.#file.ts",
+                true,
+            ),
+            (
+                "case sensitive test",
+                "/project/NODE_MODULES/.PNPM/file.ts",
+                false, // Should be case sensitive
+            ),
+            (
+                "path with ignored pattern in middle",
+                "/project/src/node_modules/.pnpm/dist/file.js",
+                true,
+            ),
+            (
+                "path with ignored pattern at end",
+                "/project/src/file.ts.#",
+                true,
+            ),
+        ];
+
+        for &(name, path, expected) in tests {
+            let result = contains_ignored_path(path);
+            assert_eq!(
+                result, expected,
+                "ContainsIgnoredPath({:?}) = {}, expected {} ({})",
+                path, result, expected, name
+            );
+        }
+    }
+
+    // ── IgnoredPaths patterns (ported 1:1 from Go TestIgnoredPathsPatterns) ──
+
+    #[test]
+    fn test_ignored_paths_patterns() {
+        // Test that all expected patterns are present
+        let expected_patterns = ["/node_modules/.", "/.git", ".#"];
+
+        for pattern in expected_patterns {
+            let test_path = format!("/test{}/file.ts", pattern);
+            assert!(
+                contains_ignored_path(&test_path),
+                "Expected pattern '{}' to be detected in path '{}'",
+                pattern,
+                test_path
+            );
+        }
+    }
+
+    // ── IgnoredPaths edge cases (ported 1:1 from Go TestIgnoredPathsEdgeCases) ──
+
+    #[test]
+    fn test_ignored_paths_edge_cases() {
+        let tests: &[(&str, &str, bool)] = &[
+            // (name, path, expected)
+            (
+                "pattern at start",
+                "/node_modules./file.ts",
+                false, // Pattern is "/node_modules/." not "/node_modules."
+            ),
+            ("pattern at end", "/project/file.ts.#", true),
+            (
+                "multiple occurrences",
+                "/project/.git/node_modules./.git/file.ts",
+                true,
+            ),
+            ("no slashes", "node_modules.file.ts", false),
+            ("single slash", "/file.ts", false),
+        ];
+
+        for &(name, path, expected) in tests {
+            let result = contains_ignored_path(path);
+            assert_eq!(
+                result, expected,
+                "ContainsIgnoredPath({:?}) = {}, expected {} ({})",
+                path, result, expected, name
+            );
+        }
     }
 
     // ── BaseFileName / Extension functions ──
@@ -1809,5 +1897,251 @@ mod tests {
         let (got, ignored) = get_common_parents(&paths, 1, &opts);
         assert!(ignored.is_empty());
         assert_eq!(got, vec!["/a/b"]);
+    }
+
+    // ── Untitled path handling (ported 1:1 from Go TestUntitledPathHandling) ──
+
+    #[test]
+    fn test_untitled_path_handling() {
+        // Test that untitled paths are treated as rooted
+        let untitled_path = "^/untitled/ts-nul-authority/Untitled-2";
+
+        // GetEncodedRootLength should return 2 for "^/"
+        let root_length = get_encoded_root_length(untitled_path);
+        assert_eq!(
+            root_length, 2,
+            "GetEncodedRootLength should return 2 for untitled paths"
+        );
+
+        // IsRootedDiskPath should return true
+        let is_rooted = is_rooted_disk_path(untitled_path);
+        assert!(
+            is_rooted,
+            "IsRootedDiskPath should return true for untitled paths"
+        );
+
+        // ToPath should not resolve untitled paths against current directory
+        let current_dir = "/home/user/project";
+        let path = to_path(untitled_path, current_dir, true);
+        // The path should be the original untitled path
+        assert_eq!(
+            path.as_str(),
+            "^/untitled/ts-nul-authority/Untitled-2",
+            "ToPath should not resolve untitled paths against current directory"
+        );
+
+        // Test GetNormalizedAbsolutePath doesn't resolve untitled paths
+        let normalized = get_normalized_absolute_path(untitled_path, current_dir);
+        assert_eq!(
+            normalized, "^/untitled/ts-nul-authority/Untitled-2",
+            "GetNormalizedAbsolutePath should not resolve untitled paths"
+        );
+    }
+
+    // ── Untitled path edge cases (ported 1:1 from Go TestUntitledPathEdgeCases) ──
+
+    #[test]
+    fn test_untitled_path_edge_cases() {
+        // (path, expected root length, is rooted)
+        let test_cases: &[(&str, i32, bool)] = &[
+            ("^/", 2, true),                               // Minimal untitled path
+            ("^/untitled/ts-nul-authority/test", 2, true), // Normal untitled path
+            ("^", 0, false),                               // Just ^ is not rooted
+            ("^x", 0, false),                              // ^x is not untitled
+            ("^^/", 0, false),                             // ^^/ is not untitled
+            ("x^/", 0, false), // x^/ is not untitled (doesn't start with ^)
+            (
+                "^/untitled/ts-nul-authority/path/with/deeper/structure",
+                2,
+                true,
+            ), // Deeper path
+        ];
+
+        for &(path, expected, is_rooted) in test_cases {
+            let root_length = get_encoded_root_length(path);
+            assert_eq!(
+                root_length, expected,
+                "GetEncodedRootLength for path {}",
+                path
+            );
+
+            let result = is_rooted_disk_path(path);
+            assert_eq!(result, is_rooted, "IsRootedDiskPath for path {}", path);
+        }
+    }
+
+    // ── StartsWithDirectory (ported 1:1 from Go TestStartsWithDirectory) ──
+    //
+    // TODO: `starts_with_directory` is not yet implemented in Rust. The test
+    // data below is a 1:1 port of the Go `TestStartsWithDirectory`. Enable this
+    // test once `starts_with_directory(file_name, directory_name,
+    // use_case_sensitive)` is ported from `internal/tspath/path.go`
+    // (StartsWithDirectory).
+    #[test]
+    #[ignore = "starts_with_directory not yet implemented in Rust"]
+    #[allow(unused)]
+    fn test_starts_with_directory() {
+        let tests: &[(&str, &str, &str, bool, bool)] = &[
+            // (name, file_name, directory_name, use_case_sensitive, expected)
+            (
+                "exact match case sensitive",
+                "/project/src/file.ts",
+                "/project/src",
+                true,
+                true,
+            ),
+            (
+                "exact match case insensitive",
+                "/project/src/file.ts",
+                "/PROJECT/SRC",
+                false,
+                true,
+            ),
+            (
+                "case sensitive mismatch",
+                "/project/src/file.ts",
+                "/PROJECT/SRC",
+                true,
+                false,
+            ),
+            (
+                "file not in directory",
+                "/project/lib/file.ts",
+                "/project/src",
+                true,
+                false,
+            ),
+            (
+                "file in subdirectory",
+                "/project/src/components/Button.tsx",
+                "/project/src",
+                true,
+                true,
+            ),
+            (
+                "file in parent directory",
+                "/project/file.ts",
+                "/project/src",
+                true,
+                false,
+            ),
+            (
+                "windows style separators",
+                "C:\\project\\src\\file.ts",
+                "C:\\project\\src",
+                true,
+                true,
+            ),
+            (
+                "mixed separators",
+                "/project/src/file.ts",
+                "\\project\\src",
+                true,
+                false,
+            ),
+            (
+                "empty directory name",
+                "/project/src/file.ts",
+                "",
+                true,
+                false,
+            ),
+            ("empty file name", "", "/project/src", true, false),
+            (
+                "identical paths",
+                "/project/src",
+                "/project/src",
+                true,
+                false, // File name doesn't start with directory + separator
+            ),
+            (
+                "directory with trailing separator",
+                "/project/src/file.ts",
+                "/project/src/",
+                true,
+                true,
+            ),
+            (
+                "unicode characters",
+                "/project/测试/file.ts",
+                "/project/测试",
+                true,
+                true,
+            ),
+            (
+                "unicode case insensitive",
+                "/project/测试/file.ts",
+                "/PROJECT/测试",
+                false,
+                true,
+            ),
+        ];
+
+        for &(name, file_name, directory_name, use_case_sensitive, expected) in tests {
+            // let result = starts_with_directory(file_name, directory_name, use_case_sensitive);
+            // assert_eq!(
+            //     result, expected,
+            //     "StartsWithDirectory({:?}, {:?}, {}) = {}, expected {} ({})",
+            //     file_name, directory_name, use_case_sensitive, result, expected, name
+            // );
+            let _ = (
+                name,
+                file_name,
+                directory_name,
+                use_case_sensitive,
+                expected,
+            );
+        }
+    }
+
+    // ── StartsWithDirectory edge cases (ported 1:1 from Go TestStartsWithDirectoryEdgeCases) ──
+    //
+    // TODO: `starts_with_directory` is not yet implemented in Rust. See
+    // `test_starts_with_directory` above.
+    #[test]
+    #[ignore = "starts_with_directory not yet implemented in Rust"]
+    #[allow(unused)]
+    fn test_starts_with_directory_edge_cases() {
+        let tests: &[(&str, &str, &str, bool, bool)] = &[
+            // (name, file_name, directory_name, use_case_sensitive, expected)
+            (
+                "file name shorter than directory",
+                "/proj",
+                "/project",
+                true,
+                false,
+            ),
+            (
+                "file name starts with directory but no separator",
+                "/projectsrc/file.ts",
+                "/project",
+                true,
+                false,
+            ),
+            ("relative paths", "src/file.ts", "src", true, true),
+            (
+                "absolute vs relative",
+                "/project/src/file.ts",
+                "project/src",
+                true,
+                false,
+            ),
+        ];
+
+        for &(name, file_name, directory_name, use_case_sensitive, expected) in tests {
+            // let result = starts_with_directory(file_name, directory_name, use_case_sensitive);
+            // assert_eq!(
+            //     result, expected,
+            //     "StartsWithDirectory({:?}, {:?}, {}) = {}, expected {} ({})",
+            //     file_name, directory_name, use_case_sensitive, result, expected, name
+            // );
+            let _ = (
+                name,
+                file_name,
+                directory_name,
+                use_case_sensitive,
+                expected,
+            );
+        }
     }
 }

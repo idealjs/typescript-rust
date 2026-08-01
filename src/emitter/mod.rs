@@ -12,8 +12,8 @@
 use std::sync::Arc;
 
 use crate::ast::node_data_generated::NodeData;
-use crate::ast::{Node, NodeFlags, SourceFile, SyntaxKind};
 use crate::ast::node_flags::ModifierFlags;
+use crate::ast::{Node, NodeFlags, SourceFile, SyntaxKind};
 use crate::core::compiler_options::CompilerOptions;
 use crate::core::compiler_options::{ModuleKind, ScriptTarget};
 use crate::sourcemap::{Generator, SourceIndex};
@@ -353,7 +353,8 @@ fn get_js_output_path(
         } else {
             common_source_directory.to_string()
         };
-        let path_in_new_dir = get_source_file_path_in_new_dir(file_name, &options.out_dir, &common_dir);
+        let path_in_new_dir =
+            get_source_file_path_in_new_dir(file_name, &options.out_dir, &common_dir);
         let without_ext = tspath::remove_file_extension(&path_in_new_dir);
         format!("{without_ext}{extension}")
     } else {
@@ -384,10 +385,17 @@ fn compute_common_source_directory(options: &CompilerOptions) -> String {
 /// directory prefix to preserve the relative directory structure.
 ///
 /// Mirrors Go's `outputpaths.GetSourceFilePathInNewDir`.
-fn get_source_file_path_in_new_dir(file_name: &str, new_dir_path: &str, common_source_directory: &str) -> String {
+fn get_source_file_path_in_new_dir(
+    file_name: &str,
+    new_dir_path: &str,
+    common_source_directory: &str,
+) -> String {
     if common_source_directory.is_empty() {
         // No common source directory — fall back to base name in new dir.
-        return tspath::combine_paths(new_dir_path, &[tspath::get_base_file_name(file_name).as_str()]);
+        return tspath::combine_paths(
+            new_dir_path,
+            &[tspath::get_base_file_name(file_name).as_str()],
+        );
     }
     // Try a direct relative-prefix strip first (common case: both relative).
     let common_with_sep = tspath::ensure_trailing_directory_separator(common_source_directory);
@@ -410,7 +418,10 @@ fn get_source_file_path_in_new_dir(file_name: &str, new_dir_path: &str, common_s
         return tspath::combine_paths(new_dir_path, &[stripped]);
     }
     // Cannot determine relative path — emit with base name only.
-    tspath::combine_paths(new_dir_path, &[tspath::get_base_file_name(file_name).as_str()])
+    tspath::combine_paths(
+        new_dir_path,
+        &[tspath::get_base_file_name(file_name).as_str()],
+    )
 }
 
 /// Determine the output file extension based on the input file name.
@@ -488,12 +499,11 @@ fn emit_js_text_inner<S: EmitSink>(
     // When `target` is ES5 or lower, collect `const`/`let` → `var` keyword
     // replacements. Mirrors Go's ES5 down-leveling transformer
     // (`transformers/es5.go` `visitVariableStatement`).
-    let replacements: Vec<(usize, usize, &'static str)> =
-        if needs_es5_downlevel(options) {
-            collect_es5_replacements(&statements.nodes)
-        } else {
-            Vec::new()
-        };
+    let replacements: Vec<(usize, usize, &'static str)> = if needs_es5_downlevel(options) {
+        collect_es5_replacements(&statements.nodes)
+    } else {
+        Vec::new()
+    };
 
     let commonjs = options.module == ModuleKind::CommonJS;
 
@@ -624,9 +634,7 @@ fn emit_declaration_text(source_file: &SourceFile, _options: &CompilerOptions) -
         // include the `export` keyword in `stmt.pos()` depending on the
         // statement kind, so we handle modifiers explicitly here.
         let export_cuts = collect_export_modifier_cuts(stmt, source);
-        let has_export = export_cuts
-            .iter()
-            .any(|(s, e)| *e > *s);
+        let has_export = export_cuts.iter().any(|(s, e)| *e > *s);
         let has_default = stmt
             .modifiers()
             .map(|m| m.modifier_flags.contains(ModifierFlags::Default))
@@ -634,10 +642,7 @@ fn emit_declaration_text(source_file: &SourceFile, _options: &CompilerOptions) -
 
         // The position where inter-statement text ends: either the first
         // modifier position, or `stmt.pos()` if no modifiers precede it.
-        let mod_start = export_cuts
-            .first()
-            .map(|&(s, _)| s)
-            .unwrap_or(stmt.pos());
+        let mod_start = export_cuts.first().map(|&(s, _)| s).unwrap_or(stmt.pos());
 
         // The content start: after the last export/default modifier and its
         // trailing whitespace.
@@ -786,7 +791,13 @@ fn collect_variable_initializer_cuts(list: &Arc<Node>, cuts: &mut Vec<(usize, us
 }
 
 /// Emit source text `[start, end)` with cut ranges removed.
-fn emit_with_cuts(source: &str, start: usize, end: usize, cuts: &[(usize, usize)], output: &mut String) {
+fn emit_with_cuts(
+    source: &str,
+    start: usize,
+    end: usize,
+    cuts: &[(usize, usize)],
+    output: &mut String,
+) {
     if cuts.is_empty() {
         output.push_str(&source[start..end]);
         return;
@@ -1093,10 +1104,28 @@ fn skip_template_literal(text: &str, pos: &mut usize) {
 fn is_regex_context(prev: char) -> bool {
     matches!(
         prev,
-        '(' | ',' | '=' | ':' | '[' | '!'
-            | '&' | '|' | '?' | '{' | '}' | ';'
-            | '<' | '>' | '+' | '-' | '*' | '/' | '%'
-            | '~' | '^' | '\n' | '\0'
+        '(' | ','
+            | '='
+            | ':'
+            | '['
+            | '!'
+            | '&'
+            | '|'
+            | '?'
+            | '{'
+            | '}'
+            | ';'
+            | '<'
+            | '>'
+            | '+'
+            | '-'
+            | '*'
+            | '/'
+            | '%'
+            | '~'
+            | '^'
+            | '\n'
+            | '\0'
     )
 }
 
@@ -1173,8 +1202,7 @@ fn collect_export_modifier_cuts(stmt: &Node, source: &str) -> Vec<(usize, usize)
     let mut cuts = Vec::new();
     let bytes = source.as_bytes();
     for mod_node in modifiers.list.iter() {
-        if mod_node.kind == SyntaxKind::ExportKeyword
-            || mod_node.kind == SyntaxKind::DefaultKeyword
+        if mod_node.kind == SyntaxKind::ExportKeyword || mod_node.kind == SyntaxKind::DefaultKeyword
         {
             let start = mod_node.pos();
             let mut end = mod_node.end();
@@ -1255,8 +1283,10 @@ fn transform_commonjs_import(stmt: &Node, source: &str) -> Option<String> {
                         continue;
                     }
                     if let Some(prop_name) = &spec_data.property_name {
-                        if let (NodeData::Identifier(prop_ident), NodeData::Identifier(name_ident)) =
-                            (&prop_name.data, &spec_data.name.data)
+                        if let (
+                            NodeData::Identifier(prop_ident),
+                            NodeData::Identifier(name_ident),
+                        ) = (&prop_name.data, &spec_data.name.data)
                         {
                             parts.push(format!("{}: {}", prop_ident.text, name_ident.text));
                         }
@@ -1306,9 +1336,7 @@ fn transform_commonjs_export(stmt: &Node, source: &str) -> Option<String> {
                             let mut import_parts: Vec<String> = Vec::new();
                             for spec_node in named.elements.iter() {
                                 if let NodeData::ExportSpecifier(spec_data) = &spec_node.data {
-                                    if let NodeData::Identifier(name_ident) =
-                                        &spec_data.name.data
-                                    {
+                                    if let NodeData::Identifier(name_ident) = &spec_data.name.data {
                                         import_parts.push(name_ident.text.clone());
                                     }
                                 }
@@ -1325,22 +1353,21 @@ fn transform_commonjs_export(stmt: &Node, source: &str) -> Option<String> {
                         // Generate export assignments.
                         for spec_node in named.elements.iter() {
                             if let NodeData::ExportSpecifier(spec_data) = &spec_node.data {
-                                let (local_name, export_name) = if let Some(prop_name) =
-                                    &spec_data.property_name
-                                {
-                                    match (&prop_name.data, &spec_data.name.data) {
-                                        (NodeData::Identifier(p), NodeData::Identifier(n)) => {
-                                            (p.text.clone(), n.text.clone())
+                                let (local_name, export_name) =
+                                    if let Some(prop_name) = &spec_data.property_name {
+                                        match (&prop_name.data, &spec_data.name.data) {
+                                            (NodeData::Identifier(p), NodeData::Identifier(n)) => {
+                                                (p.text.clone(), n.text.clone())
+                                            }
+                                            _ => continue,
                                         }
-                                        _ => continue,
-                                    }
-                                } else if let NodeData::Identifier(name_ident) =
-                                    &spec_data.name.data
-                                {
-                                    (name_ident.text.clone(), name_ident.text.clone())
-                                } else {
-                                    continue;
-                                };
+                                    } else if let NodeData::Identifier(name_ident) =
+                                        &spec_data.name.data
+                                    {
+                                        (name_ident.text.clone(), name_ident.text.clone())
+                                    } else {
+                                        continue;
+                                    };
                                 lines.push(format!("exports.{export_name} = {local_name};"));
                             }
                         }
@@ -1783,7 +1810,10 @@ pub fn compute_program_common_source_directory(
         tspath::get_directory_path(&options.config_file_path)
     } else {
         compute_common_source_directory_of_filenames(
-            &source_files.iter().map(|sf| sf.file_name.clone()).collect::<Vec<_>>(),
+            &source_files
+                .iter()
+                .map(|sf| sf.file_name.clone())
+                .collect::<Vec<_>>(),
         )
     };
     if common_dir.is_empty() {
@@ -2216,8 +2246,7 @@ mod tests {
 
     #[test]
     fn remove_comments_preserves_comments_in_template_literals() {
-        let js =
-            emit_to_string_no_comments("// real comment\nconst s = `// not a comment ${1}`;");
+        let js = emit_to_string_no_comments("// real comment\nconst s = `// not a comment ${1}`;");
         assert!(!js.contains("real comment"));
         assert!(js.contains("`// not a comment"));
     }
@@ -2395,7 +2424,12 @@ mod tests {
 
     // ── Source map tests (P4.4) ───────────────────────────────────────────
 
-    fn emit_with_sourcemap(source: &str, source_map: bool, inline: bool, inline_sources: bool) -> (String, Option<String>, String) {
+    fn emit_with_sourcemap(
+        source: &str,
+        source_map: bool,
+        inline: bool,
+        inline_sources: bool,
+    ) -> (String, Option<String>, String) {
         let sf = parse(source);
         let mut opts = CompilerOptions::default();
         if source_map {
@@ -2412,7 +2446,8 @@ mod tests {
 
     #[test]
     fn sourcemap_produces_valid_json() {
-        let (js, map_json, url) = emit_with_sourcemap("let x = 1;\nlet y = 2;\n", true, false, false);
+        let (js, map_json, url) =
+            emit_with_sourcemap("let x = 1;\nlet y = 2;\n", true, false, false);
         // JS should not contain sourceMappingURL yet (appended by caller).
         assert!(!js.contains("sourceMappingURL"));
         // Map JSON should be present.
@@ -2487,7 +2522,10 @@ mod tests {
                 None => break,
             }
         }
-        assert!(has_source_mapping, "should have at least one source mapping");
+        assert!(
+            has_source_mapping,
+            "should have at least one source mapping"
+        );
 
         // The generated JS should not exceed the mappings.
         let gen_lines = js.lines().count();
@@ -2529,15 +2567,25 @@ mod tests {
             &crate::vfs::InMemoryFS::new(),
             "",
             &|path, content| {
-                written.borrow_mut().push((path.to_string(), content.to_string()));
+                written
+                    .borrow_mut()
+                    .push((path.to_string(), content.to_string()));
                 Ok(())
             },
         );
         // Should have written both .js and .js.map.
         assert_eq!(result.emitted_files.len(), 2);
         let written = written.borrow();
-        let js_file = &written.iter().find(|(p, _)| p.ends_with(".js") && !p.ends_with(".map")).expect("js file").1;
-        let map_file = &written.iter().find(|(p, _)| p.ends_with(".js.map")).expect("map file").1;
+        let js_file = &written
+            .iter()
+            .find(|(p, _)| p.ends_with(".js") && !p.ends_with(".map"))
+            .expect("js file")
+            .1;
+        let map_file = &written
+            .iter()
+            .find(|(p, _)| p.ends_with(".js.map"))
+            .expect("map file")
+            .1;
         // JS should have sourceMappingURL.
         assert!(js_file.contains("//# sourceMappingURL="));
         // Map should be valid JSON.
@@ -2632,14 +2680,16 @@ mod tests {
 
     #[test]
     fn dts_class_adds_declare() {
-        let dts = emit_dts("export class Point { x: number; constructor(x: number) { this.x = x; } }");
+        let dts =
+            emit_dts("export class Point { x: number; constructor(x: number) { this.x = x; } }");
         assert!(dts.contains("export declare class Point"));
     }
 
     #[test]
     fn dts_write_file_creates_dts() {
         use std::cell::RefCell;
-        let sf = parse("export function foo(): number { return 1; }\nexport const x: number = 42;\n");
+        let sf =
+            parse("export function foo(): number { return 1; }\nexport const x: number = 42;\n");
         let mut opts = CompilerOptions::default();
         opts.declaration = Tristate::True;
         let written: RefCell<Vec<(String, String)>> = RefCell::new(Vec::new());
@@ -2649,7 +2699,9 @@ mod tests {
             &crate::vfs::InMemoryFS::new(),
             "",
             &|path, content| {
-                written.borrow_mut().push((path.to_string(), content.to_string()));
+                written
+                    .borrow_mut()
+                    .push((path.to_string(), content.to_string()));
                 Ok(())
             },
         );
@@ -2657,7 +2709,11 @@ mod tests {
         assert!(result.emitted_files.iter().any(|p| p.ends_with(".js")));
         assert!(result.emitted_files.iter().any(|p| p.ends_with(".d.ts")));
         let written = written.borrow();
-        let dts_file = &written.iter().find(|(p, _)| p.ends_with(".d.ts")).expect("dts file").1;
+        let dts_file = &written
+            .iter()
+            .find(|(p, _)| p.ends_with(".d.ts"))
+            .expect("dts file")
+            .1;
         // .d.ts should have declare and no implementation.
         assert!(dts_file.contains("export declare function foo(): number;"));
         assert!(dts_file.contains("export declare const x: number;"));
@@ -2679,12 +2735,109 @@ mod tests {
             &crate::vfs::InMemoryFS::new(),
             "",
             &|path, content| {
-                written.borrow_mut().push((path.to_string(), content.to_string()));
+                written
+                    .borrow_mut()
+                    .push((path.to_string(), content.to_string()));
                 Ok(())
             },
         );
         // Should only have .d.ts, no .js.
         assert!(!result.emitted_files.iter().any(|p| p.ends_with(".js")));
         assert!(result.emitted_files.iter().any(|p| p.ends_with(".d.ts")));
+    }
+
+    // ── Ports of Go transformers/tstransforms tests ───────────────────────
+
+    /// Port of Go's `TestTypeEraser`.
+    ///
+    /// Go test runs a standalone `TypeEraserTransformer` over a parsed TS
+    /// source file (no checker needed) and asserts the emitted output has all
+    /// type annotations, type-only constructs, and modifiers removed.
+    ///
+    /// The test is table-driven with ~60 cases covering: class members
+    /// (modifiers, property/method/get/set declarations, constructors, index
+    /// signatures), type-only declarations (interface, type alias, namespace),
+    /// expressions with type arguments (call, new, tagged template), type
+    /// assertions (as/satisfies/non-null/angle-bracket), import/export
+    /// elision (`import type`, `export type`), JSX generic elements, and
+    /// `verbatimModuleSyntax` behavior.
+    ///
+    /// TODO: The Rust emitter does not expose a standalone `TypeEraserTransformer`.
+    /// Type erasure is performed inline during `emit_js_text` as part of the
+    /// full emit pipeline. Port the standalone transformer API (mirroring Go's
+    /// `tstransforms.NewTypeEraserTransformer`) once available, then enable
+    /// this test with the full case table.
+    #[test]
+    #[ignore = "TODO: standalone TypeEraserTransformer not yet implemented"]
+    fn type_eraser() {
+        // Port of Go's TestTypeEraser.
+        //
+        // Go flow (per case):
+        //   file := parsetestutil.ParseTypeScript(input, jsx)
+        //   parsetestutil.CheckDiagnostics(t, file)
+        //   transformer := tstransforms.NewTypeEraserTransformer(&TransformOptions{
+        //       CompilerOptions: opts, Context: printer.NewEmitContext(),
+        //   })
+        //   result := transformer.TransformSourceFile(file)
+        //   emittestutil.CheckEmit(t, nil, result, expectedOutput)
+        //
+        // Representative cases from the Go table:
+        //   { input: "class C { public x; private y }",
+        //     output: "class C {\n    x;\n    y;\n}" }
+        //   { input: "interface I { }", output: "" }
+        //   { input: "type T = U;", output: "" }
+        //   { input: "function f<T>(): U {}", output: "function f() { }" }
+        //   { input: "x as T", output: "x;" }
+        //   { input: "x satisfies T", output: "x;" }
+        //   { input: "import type x from \"m\";", output: "" }
+        //
+        // The Rust emitter performs type erasure inside emit_js_text, but
+        // there is no separate TypeEraserTransformer that produces a
+        // transformed SourceFile tree. Enable once that API is ported.
+        let _ = parse("interface I {}");
+    }
+
+    /// Port of Go's `TestImportElision`.
+    ///
+    /// Go test runs `TypeEraserTransformer` followed by
+    /// `ImportElisionTransformer` over parsed TS files (with a real checker
+    /// via a `fakeProgram`) and asserts that imports/exports used only for
+    /// types are elided while value imports are retained.
+    ///
+    /// The test is table-driven with ~20 cases covering: `import = require`,
+    /// bare/namespace/default/named imports, re-exports (`export *`, `export *
+    /// as`), export specifiers, and `export default` with value vs type.
+    ///
+    /// TODO: The Rust emitter does not expose a standalone
+    /// `ImportElisionTransformer`. Import elision logic is not yet separated
+    /// from the emit pipeline. Port the standalone transformer API (mirroring
+    /// Go's `tstransforms.NewImportElisionTransformer`) once available, then
+    /// enable this test with the full case table.
+    #[test]
+    #[ignore = "TODO: standalone ImportElisionTransformer not yet implemented"]
+    fn import_elision() {
+        // Port of Go's TestImportElision.
+        //
+        // Go flow (per case):
+        //   file := parsetestutil.ParseTypeScript(input, jsx)
+        //   c, _ := checker.NewChecker(&fakeProgram{...}, nil)
+        //   emitResolver := c.GetEmitResolver()
+        //   opts := &TransformOptions{..., EmitResolver: emitResolver}
+        //   file = tstransforms.NewTypeEraserTransformer(opts).TransformSourceFile(file)
+        //   file = tstransforms.NewImportElisionTransformer(opts).TransformSourceFile(file)
+        //   emittestutil.CheckEmit(t, nil, file, expectedOutput)
+        //
+        // Representative cases from the Go table:
+        //   { input: "import x = require(\"other\"); x;",
+        //     output: "import x = require(\"other\");\nx;" }
+        //   { input: "import x from \"other\";", output: "" }
+        //   { input: "import { x } from \"other\"; x;",
+        //     output: "import { x } from \"other\";\nx;" }
+        //   { input: "export { x }; type x = any;", output: "" }
+        //
+        // The Rust emitter does not yet have a separate ImportElisionTransformer
+        // or a checker-backed emit resolver for determining value vs type usage.
+        // Enable once that API is ported.
+        let _ = parse("import { x } from \"other\";");
     }
 }

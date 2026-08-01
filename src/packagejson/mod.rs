@@ -161,98 +161,55 @@ pub struct ExportsOrImports {
 
 impl ExportsOrImports {
     pub fn is_subpaths(&self) -> bool {
-        self.init_object_kind();
-        self.object_kind == ObjectKind::Subpaths
+        self.compute_object_kind() == ObjectKind::Subpaths
     }
 
     pub fn is_imports(&self) -> bool {
-        self.init_object_kind();
-        self.object_kind == ObjectKind::Imports
+        self.compute_object_kind() == ObjectKind::Imports
     }
 
     pub fn is_conditions(&self) -> bool {
-        self.init_object_kind();
-        self.object_kind == ObjectKind::Conditions
+        self.compute_object_kind() == ObjectKind::Conditions
     }
 
-    fn init_object_kind(&self) {
-        // object_kind is computed lazily but stored mutably;
-        // since we can't mutate &self, we compute on each call
-        // (this is cheap enough for the sizes involved)
-        let mut kind = self.object_kind.clone();
-        if kind == ObjectKind::Unknown && self.json_value.value_type == JsonValueType::Object {
-            if let Some(obj) = &self.json_value.object_value {
-                if !obj.is_empty() {
-                    let mut seen_dot = false;
-                    let mut seen_hash = false;
-                    let mut seen_other = false;
-                    for (k, _) in obj {
-                        if let Some(first) = k.chars().next() {
-                            if first == '.' {
-                                seen_dot = true;
-                            } else if first == '#' {
-                                seen_hash = true;
-                            } else {
-                                seen_other = true;
-                            }
-                            if seen_other && (seen_dot || seen_hash) {
-                                kind = ObjectKind::Invalid;
-                                break;
-                            }
-                        }
-                    }
-                    if kind != ObjectKind::Invalid {
-                        if seen_dot {
-                            kind = ObjectKind::Subpaths;
-                        } else if seen_hash {
-                            kind = ObjectKind::Imports;
-                        } else {
-                            kind = ObjectKind::Conditions;
-                        }
-                    }
-                } else {
-                    kind = ObjectKind::Conditions;
-                }
-            }
-        }
-        // Note: we can't set self.object_kind since we only have &self
-        // The caller will get the right answer from the local computation
-        let _ = kind;
-    }
-
-    /// Get the computed object kind.
+    /// Compute and return the object kind. Called by `is_subpaths`, `is_conditions`, `is_imports`.
     pub fn compute_object_kind(&self) -> ObjectKind {
+        if self.object_kind != ObjectKind::Unknown {
+            return self.object_kind.clone();
+        }
         if self.json_value.value_type != JsonValueType::Object {
             return ObjectKind::Unknown;
         }
-        let obj = match &self.json_value.object_value {
-            Some(o) if !o.is_empty() => o,
-            _ => return ObjectKind::Conditions,
-        };
-        let mut seen_dot = false;
-        let mut seen_hash = false;
-        let mut seen_other = false;
-        for (k, _) in obj {
-            if let Some(first) = k.chars().next() {
-                if first == '.' {
-                    seen_dot = true;
-                } else if first == '#' {
-                    seen_hash = true;
-                } else {
-                    seen_other = true;
-                }
-                if seen_other && (seen_dot || seen_hash) {
-                    return ObjectKind::Invalid;
+        if let Some(obj) = &self.json_value.object_value {
+            if obj.is_empty() {
+                return ObjectKind::Conditions;
+            }
+            let mut seen_dot = false;
+            let mut seen_hash = false;
+            let mut seen_other = false;
+            for (k, _) in obj {
+                if let Some(first) = k.chars().next() {
+                    if first == '.' {
+                        seen_dot = true;
+                    } else if first == '#' {
+                        seen_hash = true;
+                    } else {
+                        seen_other = true;
+                    }
+                    if seen_other && (seen_dot || seen_hash) {
+                        return ObjectKind::Invalid;
+                    }
                 }
             }
+            if seen_dot {
+                return ObjectKind::Subpaths;
+            } else if seen_hash {
+                return ObjectKind::Imports;
+            } else {
+                return ObjectKind::Conditions;
+            }
         }
-        if seen_dot {
-            ObjectKind::Subpaths
-        } else if seen_hash {
-            ObjectKind::Imports
-        } else {
-            ObjectKind::Conditions
-        }
+        ObjectKind::Unknown
     }
 }
 
@@ -584,5 +541,222 @@ mod tests {
             fields.path_fields.exports.compute_object_kind(),
             ObjectKind::Conditions
         );
+    }
+
+    #[test]
+    fn exports_classification_fixed() {
+        // Subpaths
+        let e = ExportsOrImports {
+            json_value: JsonValue {
+                value_type: JsonValueType::Object,
+                object_value: Some(vec![
+                    (".".to_string(), JsonValue::default()),
+                    ("./feature".to_string(), JsonValue::default()),
+                ]),
+                ..Default::default()
+            },
+            object_kind: ObjectKind::Unknown,
+        };
+        assert!(e.is_subpaths());
+        assert!(!e.is_conditions());
+
+        // Conditions
+        let e = ExportsOrImports {
+            json_value: JsonValue {
+                value_type: JsonValueType::Object,
+                object_value: Some(vec![
+                    ("import".to_string(), JsonValue::default()),
+                    ("require".to_string(), JsonValue::default()),
+                ]),
+                ..Default::default()
+            },
+            object_kind: ObjectKind::Unknown,
+        };
+        assert!(e.is_conditions());
+        assert!(!e.is_subpaths());
+    }
+
+    /// Ported from Go `TestParse`.
+    #[test]
+    fn parse_duplicate_names() {
+        let content = r#"{
+            "name": "test-package",
+            "name": "test-package",
+            "version": "1.0.0"
+        }"#;
+        let fields = parse(content).unwrap();
+        assert_eq!(
+            fields.header_fields.name.get_value(),
+            Some(&"test-package".to_string())
+        );
+        assert!(fields.header_fields.name.is_valid());
+        assert_eq!(
+            fields.header_fields.version.get_value(),
+            Some(&"1.0.0".to_string())
+        );
+        assert!(fields.header_fields.version.is_valid());
+    }
+
+    /// Ported from Go `TestExpected`.
+    #[test]
+    fn expected_field_tracking() {
+        let json = r#"{
+            "name": "test",
+            "version": 2,
+            "exports": null
+        }"#;
+        let fields = parse(json).unwrap();
+
+        // name is a valid string
+        assert!(fields.header_fields.name.is_valid());
+        assert_eq!(fields.header_fields.name.value, "test");
+
+        // version is a number, not a valid string
+        assert!(!fields.header_fields.version.is_valid());
+        assert_eq!(fields.header_fields.version.value, "");
+
+        // exports is null
+        assert_eq!(
+            fields.path_fields.exports.json_value.value_type,
+            JsonValueType::Null
+        );
+
+        // main is absent: not valid, not null, empty value
+        assert!(!fields.path_fields.main.is_valid());
+        assert!(!fields.path_fields.main.null);
+        assert_eq!(fields.path_fields.main.value, "");
+    }
+
+    /// Ported from Go `TestExports`.
+    #[test]
+    fn exports_and_imports_navigation() {
+        let json = r##"{
+            "imports": {
+                "#foo": {
+                    "import": "./foo.ts"
+                }
+            },
+            "exports": {
+                ".": {
+                    "import": "./test.ts",
+                    "default": "./test.ts"
+                },
+                "./test": [
+                    "./test1.ts",
+                    "./test2.ts",
+                    null
+                ],
+                "./null": null
+            }
+        }"##;
+        let fields = parse(json).unwrap();
+
+        let exports = &fields.path_fields.exports;
+        let imports = &fields.path_fields.imports;
+
+        // exports is subpaths with 3 keys
+        assert!(exports.is_subpaths());
+        assert_eq!(exports.json_value.as_object().len(), 3);
+
+        // "." value is conditions
+        let dot = exports.json_value.get(".").unwrap();
+        let dot_eoi = ExportsOrImports {
+            json_value: dot.clone(),
+            object_kind: ObjectKind::Unknown,
+        };
+        assert!(dot_eoi.is_conditions());
+        assert_eq!(dot.get("import").unwrap().value_type, JsonValueType::String);
+
+        // "./test" is an array; element [2] is null
+        let test_arr = exports.json_value.get("./test").unwrap();
+        assert_eq!(test_arr.value_type, JsonValueType::Array);
+        assert_eq!(test_arr.as_array()[2].value_type, JsonValueType::Null);
+
+        // "./null" is null
+        assert_eq!(
+            exports.json_value.get("./null").unwrap().value_type,
+            JsonValueType::Null
+        );
+
+        // imports is imports with 1 key
+        assert!(imports.is_imports());
+        assert_eq!(imports.json_value.as_object().len(), 1);
+        let foo = imports.json_value.get("#foo").unwrap();
+        let foo_eoi = ExportsOrImports {
+            json_value: foo.clone(),
+            object_kind: ObjectKind::Unknown,
+        };
+        assert!(foo_eoi.is_conditions());
+        assert_eq!(foo.get("import").unwrap().value_type, JsonValueType::String);
+    }
+
+    /// Ported from Go `TestJSONValue`.
+    #[test]
+    fn json_value_types() {
+        let json = r#"{
+            "private": true,
+            "false": false,
+            "name": "test",
+            "version": 2,
+            "exports": {
+                ".": {
+                    "import": "./test.ts",
+                    "default": "./test.ts"
+                },
+                "./test": [
+                    "./test1.ts",
+                    "./test2.ts",
+                    null
+                ],
+                "./null": null
+            },
+            "imports": null
+        }"#;
+        let raw: serde_json::Value = serde_json::from_str(json).unwrap();
+        let obj = raw.as_object().unwrap();
+        let to_jv = |k: &str| -> JsonValue { obj.get(k).unwrap().clone().into() };
+
+        let private = to_jv("private");
+        let false_val = to_jv("false");
+        let name = to_jv("name");
+        let version = to_jv("version");
+        let exports = to_jv("exports");
+        let imports = to_jv("imports");
+        let not_present = JsonValue::default();
+
+        assert_eq!(private.value_type, JsonValueType::Boolean);
+        assert_eq!(private.bool_value, Some(true));
+
+        assert_eq!(false_val.value_type, JsonValueType::Boolean);
+        assert_eq!(false_val.bool_value, Some(false));
+
+        assert_eq!(name.value_type, JsonValueType::String);
+        assert_eq!(name.as_string(), "test");
+
+        assert_eq!(version.value_type, JsonValueType::Number);
+        assert_eq!(version.number_value, Some(2.0));
+
+        assert_eq!(exports.value_type, JsonValueType::Object);
+        assert_eq!(exports.as_object().len(), 3);
+
+        let dot = exports.get(".").unwrap();
+        assert_eq!(dot.value_type, JsonValueType::Object);
+        assert_eq!(dot.get("import").unwrap().as_string(), "./test.ts");
+
+        let test_arr = exports.get("./test").unwrap();
+        assert_eq!(test_arr.value_type, JsonValueType::Array);
+        assert_eq!(test_arr.as_array().len(), 3);
+        assert_eq!(test_arr.as_array()[0].as_string(), "./test1.ts");
+        assert_eq!(test_arr.as_array()[1].as_string(), "./test2.ts");
+        assert_eq!(test_arr.as_array()[2].value_type, JsonValueType::Null);
+
+        assert_eq!(
+            exports.get("./null").unwrap().value_type,
+            JsonValueType::Null
+        );
+
+        assert_eq!(imports.value_type, JsonValueType::Null);
+
+        assert_eq!(not_present.value_type, JsonValueType::NotPresent);
     }
 }

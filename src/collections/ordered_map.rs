@@ -285,4 +285,146 @@ mod tests {
         assert_eq!(removed, vec![("c".to_string(), 3)]);
         assert_eq!(modified, vec![("b".to_string(), 2, 20)]);
     }
+
+    // ── Ported from Go internal/collections/ordered_map_test.go ──
+
+    fn pad_int(n: i32) -> String {
+        format!("{:>10}", n)
+    }
+
+    #[test]
+    fn test_ordered_map() {
+        let mut m: OrderedMap<i32, String> = OrderedMap::new();
+
+        assert!(!m.has(&1));
+
+        const N: i32 = 1000;
+        const START: i32 = 1;
+        const END: i32 = START + N;
+
+        // Seed the map with ascending keys and values for easier testing.
+        for i in START..END {
+            m.set(i, pad_int(i));
+        }
+
+        assert_eq!(m.len(), N as usize);
+
+        // Attempt to overwrite existing keys in reverse order.
+        for i in (START..END).rev() {
+            m.set(i, pad_int(i));
+        }
+
+        assert_eq!(m.len(), N as usize);
+
+        for i in START..END {
+            let v = m.get(&i);
+            assert!(v.is_some());
+            assert_eq!(v.unwrap(), &pad_int(i));
+        }
+
+        for (k, v) in m.iter() {
+            assert_eq!(v, &pad_int(*k));
+        }
+
+        let keys: Vec<i32> = m.keys().copied().collect();
+        assert_eq!(keys.len(), N as usize);
+        assert!(keys.windows(2).all(|w| w[0] <= w[1]));
+
+        let values: Vec<String> = m.values().cloned().collect();
+        assert_eq!(values.len(), N as usize);
+        assert!(values.windows(2).all(|w| w[0] <= w[1]));
+
+        let first_key = *m.keys().next().unwrap();
+        assert_eq!(first_key, START);
+
+        let first_value = m.values().next().unwrap().clone();
+        assert_eq!(first_value, pad_int(START));
+
+        let (fk, fv) = m.iter().next().unwrap();
+        assert_eq!(*fk, START);
+        assert_eq!(*fv, pad_int(START));
+
+        for i in (START + 1)..END {
+            let v = m.delete(&i);
+            assert!(v.is_some());
+            assert_eq!(v.unwrap(), pad_int(i));
+            assert!(!m.has(&i));
+
+            assert!(m.get(&i).is_none());
+
+            assert!(m.delete(&i).is_none());
+        }
+
+        assert_eq!(m.len(), 1);
+        assert!(m.has(&START));
+
+        let v = m.delete(&START);
+        assert!(v.is_some());
+        assert_eq!(v.unwrap(), pad_int(START));
+
+        assert_eq!(m.len(), 0);
+    }
+
+    #[test]
+    fn test_ordered_map_clone() {
+        let mut m: OrderedMap<i32, String> = OrderedMap::new();
+        m.set(1, "one".to_string());
+        m.set(2, "two".to_string());
+
+        let clone = m.clone();
+
+        // In Go: assert.Assert(t, clone != m) -- clone is a separate object.
+        assert_eq!(clone.len(), 2);
+        let clone_keys: Vec<i32> = clone.keys().copied().collect();
+        assert_eq!(clone_keys, vec![1, 2]);
+        let clone_values: Vec<String> = clone.values().cloned().collect();
+        assert_eq!(clone_values, vec!["one".to_string(), "two".to_string()]);
+
+        let v = clone.get(&1);
+        assert!(v.is_some());
+        assert_eq!(v.unwrap(), "one");
+
+        m.delete(&1);
+
+        assert_eq!(m.len(), 1);
+        assert_eq!(clone.len(), 2);
+        let clone_keys: Vec<i32> = clone.keys().copied().collect();
+        assert_eq!(clone_keys, vec![1, 2]);
+        let clone_values: Vec<String> = clone.values().cloned().collect();
+        assert_eq!(clone_values, vec!["one".to_string(), "two".to_string()]);
+    }
+
+    #[test]
+    fn test_ordered_map_clear() {
+        let mut m: OrderedMap<i32, String> = OrderedMap::new();
+        m.set(1, "one".to_string());
+        m.set(2, "two".to_string());
+
+        m.clear();
+
+        assert_eq!(m.len(), 0);
+    }
+
+    #[test]
+    #[ignore = "TODO: Go's testing.AllocsPerRun has no Rust equivalent for allocation counting"]
+    fn test_ordered_map_with_size_hint() {
+        // Ported from TestOrderedMapWithSizeHint:
+        // const N: usize = 1024;
+        // let mut m = OrderedMap::with_capacity(N);
+        // for i in 0..N { m.set(i, i); }
+        // Go verifies allocs < 10; no direct Rust equivalent without a custom allocator.
+    }
+
+    #[test]
+    #[ignore = "TODO: OrderedMap serde Deserialize uses Vec of pairs, not a JSON object; \
+                JSON object unmarshal into OrderedMap is not supported"]
+    fn test_ordered_map_unmarshal_json() {
+        // Ported from TestOrderedMapUnmarshalJSON:
+        // let mut m: OrderedMap<String, serde_json::Value> = OrderedMap::new();
+        // serde_json::from_str(r#"{"a": 1, "b": "two", "c": { "d": 4 } }"#) -> m
+        //   assert size == 3, get_or_zero("a") == 1.0
+        // serde_json::from_str("null") -> m  (no error)
+        // serde_json::from_str(r#""foo""#) -> error "cannot unmarshal non-object JSON value into Map"
+        // serde_json::from_str(r#"{"a": 1, "b": "two"}"#) into OrderedMap<i32, _> -> error "unmarshal"
+    }
 }

@@ -228,4 +228,60 @@ mod tests {
     fn test_split_lines_mixed() {
         assert_eq!(split_lines("a\r\nb\nc\r\nd"), vec!["a", "b", "c", "d"]);
     }
+
+    // ── Ported from Go internal/stringutil/util_test.go ──
+
+    #[test]
+    #[ignore = "TODO: EncodeURI does not exist in Rust yet"]
+    fn test_encode_uri() {
+        // TODO: EncodeURI does not exist in Rust yet.
+        // Ported test data from TestEncodeURI:
+        //   ("a b", "a%20b")
+        //   (";/?:@&=+$,#", ";/?:@&=+$,#")
+        //   ("①Ⅻㄨㄩ U1[abc]", "%E2%91%A0%E2%85%AB%E3%84%A8%E3%84%A9%20U1%5Babc%5D")
+    }
+
+    #[test]
+    fn test_contains_non_ascii_go_port() {
+        // Ported from TestContainsNonASCII (portable cases).
+        assert!(!contains_non_ascii("abc"));
+        assert!(contains_non_ascii("é"));
+        // The Go test also checks EncodeJSStringRune(0xD800) -> true, but that
+        // sentinel is invalid UTF-8 (lone surrogate) and cannot be represented
+        // as a Rust &str. Skipped pending EncodeJSStringRune.
+    }
+
+    // ── Ported from Go internal/stringutil/js_case_test.go ──
+
+    #[test]
+    #[ignore = "TODO: ToLowerJS / ToUpperJS / EncodeJSStringRune do not exist in Rust yet"]
+    fn test_js_casing() {
+        // Ported test data from TestJSCasing (ToLowerJS / ToUpperJS):
+        //   ("ascii lowercase", ToLowerJS("HELLO"), "hello")
+        //   ("ascii uppercase", ToUpperJS("hello"), "HELLO")
+        //   ("lowercase dotted i", ToLowerJS("İSPANYOL"), "i̇spanyol")
+        //   ("lowercase lone sigma", ToLowerJS("Σ"), "σ")
+        //   ("lowercase final sigma", ToLowerJS("ΟΣ"), "ος")
+        //   ("lowercase non-sigma greek", ToLowerJS("Ω"), "ω")
+        //   ("uppercase sharp s", ToUpperJS("ßfoo"), "SSFOO")
+        //   ("uppercase non-ascii simple mapping", ToUpperJS("ω"), "Ω")
+        //   ("uppercase ligature", ToUpperJS("ﬁoo"), "FIOO")
+        //   ("capitalize-style uppercase", ToUpperJS("ß") + "foo", "SSfoo")
+        //   ("uncapitalize-style lowercase", ToLowerJS("İ") + "foo", "i̇foo")
+        //   ("lowercase final sigma after lowercase letter without uppercase mapping", ToLowerJS("ʕΣ"), "ʕς")
+        //   ("lowercase sigma after modifier letter", ToLowerJS("ʰΣ"), "ʰσ")
+        //   ("lowercase sigma after case ignorable ypogegrammeni", ToLowerJS("ͅΣ"), "ͅσ")
+        //   ("lowercase final sigma after feminine ordinal indicator", ToLowerJS("ªΣ"), "ªς")
+        //   ("lowercase final sigma after masculine ordinal indicator", ToLowerJS("ºΣ"), "ºς")
+        //   ("lowercase final sigma after roman numeral", ToLowerJS("ⅠΣ"), "ⅰς")
+        //   ("lowercase sigma after uppercase property added after unicode 15", ToLowerJS("\u{1C89}Σ"), "\u{1C89}σ")
+        //   ("lowercase sigma after uppercase property skewed from local v8 unicode data", ToLowerJS("\u{A7CB}Σ"), "\u{A7CB}σ")
+        //   ("lowercase sigma before immediate latin letter", ToLowerJS("ΣA"), "σa")
+        //   ("lowercase sigma before immediate roman numeral letter", ToLowerJS("ΣⅠ"), "σⅰ")
+        //   ("lowercase sigma before case ignorable then latin letter", ToLowerJS("ΣͅA"), "σͅa")
+        //   ("uppercase lone surrogate", ToUpperJS(EncodeJSStringRune(0xD800)), EncodeJSStringRune(0xD800))
+        //   ("lowercase lone surrogate", ToLowerJS("A" + EncodeJSStringRune(0xD800) + "B"), "a" + EncodeJSStringRune(0xD800) + "b")
+        //   ("uppercase lone low surrogate with text", ToUpperJS(EncodeJSStringRune(0xDC00) + "x"), EncodeJSStringRune(0xDC00) + "X")
+        //   ("lowercase lone surrogate before sigma", ToLowerJS(EncodeJSStringRune(0xD800) + "Σ"), EncodeJSStringRune(0xD800) + "σ")
+    }
 }

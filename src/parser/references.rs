@@ -92,11 +92,7 @@ pub fn collect_external_module_references(file: &mut SourceFile) {
 /// Collect module references from a single statement.
 ///
 /// Mirrors Go's `collectModuleReferences` (`references.go:24-70`).
-fn collect_module_references(
-    file: &mut SourceFile,
-    node: &Arc<Node>,
-    in_ambient_module: bool,
-) {
+fn collect_module_references(file: &mut SourceFile, node: &Arc<Node>, in_ambient_module: bool) {
     // Check if this is an import or re-export statement
     if let Some(module_name_expr) = get_external_module_name(node) {
         if is_string_literal(&module_name_expr) {
@@ -148,7 +144,9 @@ fn collect_module_references(
                 };
 
                 // Module augmentation vs ambient module name
-                if is_external_module(file) || (in_ambient_module && !is_external_module_name_relative(name_text)) {
+                if is_external_module(file)
+                    || (in_ambient_module && !is_external_module_name_relative(name_text))
+                {
                     file.module_augmentations.push(d.name.clone());
                 } else if !in_ambient_module {
                     file.ambient_module_names.push(name_text.to_string());
@@ -258,7 +256,9 @@ fn is_external_module_indicator_node(node: &Arc<Node>) -> bool {
         return true;
     }
     match &node.data {
-        NodeData::ImportDeclaration(_) | NodeData::ExportAssignment(_) | NodeData::ExportDeclaration(_) => true,
+        NodeData::ImportDeclaration(_)
+        | NodeData::ExportAssignment(_)
+        | NodeData::ExportDeclaration(_) => true,
         NodeData::ImportEqualsDeclaration(d) => {
             // `import x = require("mod")` — only if it's an external module reference
             d.module_reference.kind == SyntaxKind::ExternalModuleReference

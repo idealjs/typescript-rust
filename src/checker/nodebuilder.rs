@@ -12,11 +12,11 @@ use std::sync::Arc;
 
 use crate::ast::{
     ArrayTypeNodeData, BigIntLiteralData, FunctionTypeNodeData, IdentifierData,
-    IntersectionTypeNodeData, LiteralTypeNodeData, MissingDeclarationData, Node, NodeData, NodeList,
-    NumericLiteralData, ParameterDeclarationData, ParenthesizedTypeNodeData,
+    IntersectionTypeNodeData, LiteralTypeNodeData, MissingDeclarationData, Node, NodeData,
+    NodeList, NumericLiteralData, ParameterDeclarationData, ParenthesizedTypeNodeData,
     PropertySignatureDeclarationData, RestTypeNodeData, StringLiteralData, Symbol, SymbolFlags,
-    SyntaxKind, TupleTypeNodeData, TypeLiteralNodeData, TypeOperatorNodeData, TypeReferenceNodeData,
-    UnionTypeNodeData,
+    SyntaxKind, TupleTypeNodeData, TypeLiteralNodeData, TypeOperatorNodeData,
+    TypeReferenceNodeData, UnionTypeNodeData,
 };
 
 use super::checker::Checker;
@@ -306,9 +306,7 @@ impl Checker {
         // (no symbol) is also detected here, matching `reference_to_type_node`.
         let symbol_name = t.symbol.as_ref().map(|s| s.name.as_str()).unwrap_or("");
         let is_array = obj_data.type_arguments.len() == 1
-            && (symbol_name == "Array"
-                || symbol_name == "ReadonlyArray"
-                || t.symbol.is_none());
+            && (symbol_name == "Array" || symbol_name == "ReadonlyArray" || t.symbol.is_none());
 
         if is_array {
             let elem = &obj_data.type_arguments[0];
@@ -544,7 +542,10 @@ impl Checker {
             // TODO: full `unique symbol` / `typeof sym` rendering per
             // FlagsAllowUniqueESSymbolType; currently approximated as
             // `unique symbol`.
-            return self.type_operator_node(SyntaxKind::UniqueKeyword, self.keyword_node(SyntaxKind::SymbolKeyword));
+            return self.type_operator_node(
+                SyntaxKind::UniqueKeyword,
+                self.keyword_node(SyntaxKind::SymbolKeyword),
+            );
         }
 
         // Never
@@ -1079,7 +1080,10 @@ impl Checker {
         };
         // initializer is required by the data struct but not used for
         // synthetic signatures; we pass a synthetic `MissingDeclaration`.
-        let initializer = Arc::new(Node::new(SyntaxKind::MissingDeclaration, NodeData::MissingDeclaration(MissingDeclarationData { modifiers: None })));
+        let initializer = Arc::new(Node::new(
+            SyntaxKind::MissingDeclaration,
+            NodeData::MissingDeclaration(MissingDeclarationData { modifiers: None }),
+        ));
         Arc::new(Node::new(
             SyntaxKind::PropertySignature,
             NodeData::PropertySignatureDeclaration(PropertySignatureDeclarationData {
@@ -1093,12 +1097,7 @@ impl Checker {
     }
 
     /// Build a `ParameterDeclaration` (`name: type` or `name?: type`).
-    fn parameter_node(
-        &self,
-        name: Arc<Node>,
-        optional: bool,
-        type_node: Arc<Node>,
-    ) -> Arc<Node> {
+    fn parameter_node(&self, name: Arc<Node>, optional: bool, type_node: Arc<Node>) -> Arc<Node> {
         let question_token = if optional {
             Some(self.keyword_node(SyntaxKind::QuestionToken))
         } else {
@@ -1925,4 +1924,3 @@ mod tests {
         assert_var_type_round_trips("let x: 42 = 42;");
     }
 }
-

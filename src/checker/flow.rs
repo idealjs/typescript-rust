@@ -308,8 +308,7 @@ impl Checker {
                     // then narrow right by truthiness (falsy).
                     let narrowed =
                         self.narrow_by_optionality(type_, &bin.left, symbol, kind, depth);
-                    return self
-                        .narrow_by_expression(&narrowed, &bin.right, symbol, kind, depth);
+                    return self.narrow_by_expression(&narrowed, &bin.right, symbol, kind, depth);
                 }
             }
         }
@@ -964,9 +963,7 @@ impl Checker {
             "function" => !self
                 .get_signatures_of_type(t, SignatureKind::Call)
                 .is_empty(),
-            "object" => {
-                t.flags.contains(TypeFlags::Object) || t.flags.contains(TypeFlags::Null)
-            }
+            "object" => t.flags.contains(TypeFlags::Object) || t.flags.contains(TypeFlags::Null),
             _ => false,
         }
     }
@@ -1903,7 +1900,11 @@ impl Checker {
                 let is_callable = !self
                     .get_signatures_of_type(t, SignatureKind::Call)
                     .is_empty();
-                if keep_callable { is_callable } else { !is_callable }
+                if keep_callable {
+                    is_callable
+                } else {
+                    !is_callable
+                }
             })
             .collect();
         if filtered.is_empty() {

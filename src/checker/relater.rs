@@ -1003,9 +1003,7 @@ impl Checker {
 
         // Different names, or not both RegularEnum → not related.
         if source_parent.name != target_parent.name
-            || !source_parent
-                .flags
-                .contains(SymbolFlags::RegularEnum)
+            || !source_parent.flags.contains(SymbolFlags::RegularEnum)
             || !target_parent.flags.contains(SymbolFlags::RegularEnum)
         {
             return false;
@@ -1037,11 +1035,13 @@ impl Checker {
             let Some(target_prop) = self.get_property_of_type(&target_type, &source_prop.name)
             else {
                 // TS2324: property missing in target.
-                self.enum_relation.insert(key, RelationComparisonResult::Failed);
+                self.enum_relation
+                    .insert(key, RelationComparisonResult::Failed);
                 return false;
             };
             if !target_prop.flags.contains(SymbolFlags::EnumMember) {
-                self.enum_relation.insert(key, RelationComparisonResult::Failed);
+                self.enum_relation
+                    .insert(key, RelationComparisonResult::Failed);
                 return false;
             }
 
@@ -1055,7 +1055,8 @@ impl Checker {
                 if sv != tv {
                     // Two *known* values that differ → incompatible (TS4125).
                     if sv.is_some() && tv.is_some() {
-                        self.enum_relation.insert(key, RelationComparisonResult::Failed);
+                        self.enum_relation
+                            .insert(key, RelationComparisonResult::Failed);
                         return false;
                     }
                     // At least one value is `None` (opaque/ambient) — assume
@@ -1064,7 +1065,8 @@ impl Checker {
                     let source_is_string = matches!(sv, Some(EvalValue::String(_)));
                     let target_is_string = matches!(tv, Some(EvalValue::String(_)));
                     if source_is_string || target_is_string {
-                        self.enum_relation.insert(key, RelationComparisonResult::Failed);
+                        self.enum_relation
+                            .insert(key, RelationComparisonResult::Failed);
                         return false;
                     }
                     // Both assumed numeric → compatible; continue.
@@ -1072,7 +1074,8 @@ impl Checker {
             }
         }
 
-        self.enum_relation.insert(key, RelationComparisonResult::Succeeded);
+        self.enum_relation
+            .insert(key, RelationComparisonResult::Succeeded);
         true
     }
 

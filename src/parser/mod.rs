@@ -6926,34 +6926,44 @@ mod tests {
     #[test]
     fn parse_regex_flag_diagnostics_reach_parser() {
         // Unknown flag `z` → TS1499.
-        let (_file, diags) =
-            Parser::parse_source_file_text_with_diagnostics("test.ts", "let x = /foo/z;".to_string());
+        let (_file, diags) = Parser::parse_source_file_text_with_diagnostics(
+            "test.ts",
+            "let x = /foo/z;".to_string(),
+        );
         assert!(
             diags.iter().any(|d| d.message.code == 1499),
             "expected TS1499 for unknown regex flag, got: {diags:?}"
         );
 
         // Duplicate flag `gg` → TS1500.
-        let (_file, diags) =
-            Parser::parse_source_file_text_with_diagnostics("test.ts", "let x = /foo/gg;".to_string());
+        let (_file, diags) = Parser::parse_source_file_text_with_diagnostics(
+            "test.ts",
+            "let x = /foo/gg;".to_string(),
+        );
         assert!(
             diags.iter().any(|d| d.message.code == 1500),
             "expected TS1500 for duplicate regex flag, got: {diags:?}"
         );
 
         // `u` and `v` together → TS1502.
-        let (_file, diags) =
-            Parser::parse_source_file_text_with_diagnostics("test.ts", "let x = /foo/uv;".to_string());
+        let (_file, diags) = Parser::parse_source_file_text_with_diagnostics(
+            "test.ts",
+            "let x = /foo/uv;".to_string(),
+        );
         assert!(
             diags.iter().any(|d| d.message.code == 1502),
             "expected TS1502 for u+v flags, got: {diags:?}"
         );
 
         // Valid flags → no regex diagnostics.
-        let (_file, diags) =
-            Parser::parse_source_file_text_with_diagnostics("test.ts", "let x = /foo/gim;".to_string());
+        let (_file, diags) = Parser::parse_source_file_text_with_diagnostics(
+            "test.ts",
+            "let x = /foo/gim;".to_string(),
+        );
         assert!(
-            !diags.iter().any(|d| matches!(d.message.code, 1499 | 1500 | 1501 | 1502)),
+            !diags
+                .iter()
+                .any(|d| matches!(d.message.code, 1499 | 1500 | 1501 | 1502)),
             "expected no regex flag diagnostics for valid flags, got: {diags:?}"
         );
     }

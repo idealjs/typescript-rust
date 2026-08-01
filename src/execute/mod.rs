@@ -30,7 +30,6 @@ use crate::compiler::{CompilerHost, CompilerHostImpl, Program, ProgramOptions};
 use crate::core::compiler_options::CompilerOptions;
 use crate::core::text::TextRange;
 use crate::core::tristate::Tristate;
-use crate::diagnosticwriter::{format_diagnostic, report_diagnostics};
 use crate::diagnostics::{
     A_TSCONFIG_JSON_FILE_IS_ALREADY_DEFINED_AT_COLON_0,
     CANNOT_FIND_A_TSCONFIG_JSON_FILE_AT_THE_CURRENT_DIRECTORY_COLON_0,
@@ -40,8 +39,10 @@ use crate::diagnostics::{
     OPTIONS_0_AND_1_CANNOT_BE_COMBINED, THE_SPECIFIED_PATH_DOES_NOT_EXIST_COLON_0,
     X_TSCONFIG_JSON_IS_PRESENT_BUT_WILL_NOT_BE_LOADED_IF_FILES_ARE_SPECIFIED_ON_COMMANDLINE_USE_IGNORECONFIG_TO_SKIP_THIS_ERROR,
 };
+use crate::diagnosticwriter::{format_diagnostic, report_diagnostics};
+use crate::incremental::{BuildInfo, compute_options_hash};
 use crate::tsoptions::{
-    BUILD_OPTIONS, OPTIONS, OPTIONS_FOR_WATCH, OptionDecl, ParsedBuildCommandLine,
+    BUILD_OPTIONS, BuildOptions, OPTIONS, OPTIONS_FOR_WATCH, OptionDecl, ParsedBuildCommandLine,
     ParsedCommandLine, get_parsed_command_line_of_config_file, parse_build_command_line,
     parse_command_line,
 };
@@ -180,10 +181,8 @@ pub fn command_line(sys: &dyn System, args: &[String]) -> CommandLineResult {
 
     if args.iter().skip(1).any(|arg| is_build_mode_arg(arg)) {
         let mut writer = sys.writer();
-        let diag = compiler_diagnostic(
-            OPTION_BUILD_MUST_BE_THE_FIRST_COMMAND_LINE_ARGUMENT,
-            vec![],
-        );
+        let diag =
+            compiler_diagnostic(OPTION_BUILD_MUST_BE_THE_FIRST_COMMAND_LINE_ARGUMENT, vec![]);
         let _ = writeln!(writer, "{}", format_diagnostic(&diag, false));
         return CommandLineResult {
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
@@ -233,6 +232,7 @@ fn tsc_build_compilation(
             sys,
             &project,
             &command_line.compiler_options,
+            &command_line.build_options,
             pretty,
             &mut seen_projects,
         );
@@ -242,10 +242,154 @@ fn tsc_build_compilation(
     CommandLineResult { status }
 }
 
+/// Compute a hash over the compiler options that affect output, mirroring (in a
+/// simplified form) the option-signature portion of Go's .tsbuildinfo.
+///
+/// `CompilerOptions` does not implement `Serialize`, so we hash the key fields
+/// that influence emitted output: target/module/moduleResolution/jsx, the path
+/// options (outDir/rootDir/declarationDir), and the strict/emit booleans. A
+/// change in any of these invalidates the cached build info.
+fn compute_options_signature(options: &CompilerOptions) -> String {
+    let mut parts: Vec<String> = Vec::new();
+    parts.push(format!("target={:?}", options.target));
+    parts.push(format!("module={:?}", options.module));
+    parts.push(format!("moduleResolution={:?}", options.module_resolution));
+    parts.push(format!("jsx={:?}", options.jsx));
+    parts.push(format!("moduleDetection={:?}", options.module_detection));
+    parts.push(format!("newLine={:?}", options.new_line));
+    parts.push(format!("outDir={}", options.out_dir));
+    parts.push(format!("rootDir={}", options.root_dir));
+    parts.push(format!("outFile={}", options.out_file));
+    parts.push(format!("declarationDir={}", options.declaration_dir));
+    parts.push(format!("sourceRoot={}", options.source_root));
+    parts.push(format!("mapRoot={}", options.map_root));
+    parts.push(format!("tsBuildInfoFile={}", options.ts_build_info_file));
+    parts.push(format!("lib={:?}", options.lib));
+    parts.push(format!("types={:?}", options.types));
+    parts.push(format!("noEmit={:?}", options.no_emit));
+    parts.push(format!("noEmitOnError={:?}", options.no_emit_on_error));
+    parts.push(format!("declaration={:?}", options.declaration));
+    parts.push(format!("declarationMap={:?}", options.declaration_map));
+    parts.push(format!(
+        "emitDeclarationOnly={:?}",
+        options.emit_declaration_only
+    ));
+    parts.push(format!("sourceMap={:?}", options.source_map));
+    parts.push(format!("inlineSourceMap={:?}", options.inline_source_map));
+    parts.push(format!("removeComments={:?}", options.remove_comments));
+    parts.push(format!("importHelpers={:?}", options.import_helpers));
+    parts.push(format!("noResolve={:?}", options.no_resolve));
+    parts.push(format!("composite={:?}", options.composite));
+    parts.push(format!("incremental={:?}", options.incremental));
+    parts.push(format!("isolatedModules={:?}", options.isolated_modules));
+    parts.push(format!(
+        "isolatedDeclarations={:?}",
+        options.isolated_declarations
+    ));
+    parts.push(format!(
+        "verbatimModuleSyntax={:?}",
+        options.verbatim_module_syntax
+    ));
+    parts.push(format!("esModuleInterop={:?}", options.es_module_interop));
+    parts.push(format!("allowJs={:?}", options.allow_js));
+    parts.push(format!("checkJs={:?}", options.check_js));
+    parts.push(format!("skipLibCheck={:?}", options.skip_lib_check));
+    parts.push(format!("strict={:?}", options.strict));
+    parts.push(format!("noImplicitAny={:?}", options.no_implicit_any));
+    parts.push(format!("strictNullChecks={:?}", options.strict_null_checks));
+    parts.push(format!(
+        "strictFunctionTypes={:?}",
+        options.strict_function_types
+    ));
+    parts.push(format!(
+        "strictBindCallApply={:?}",
+        options.strict_bind_call_apply
+    ));
+    parts.push(format!(
+        "strictPropertyInitialization={:?}",
+        options.strict_property_initialization
+    ));
+    parts.push(format!("noImplicitThis={:?}", options.no_implicit_this));
+    parts.push(format!("alwaysStrict={:?}", options.always_strict));
+    parts.push(format!(
+        "exactOptionalPropertyTypes={:?}",
+        options.exact_optional_property_types
+    ));
+    parts.push(format!(
+        "noUncheckedIndexedAccess={:?}",
+        options.no_unchecked_indexed_access
+    ));
+    parts.push(format!(
+        "noFallthroughCasesInSwitch={:?}",
+        options.no_fallthrough_cases_in_switch
+    ));
+    parts.push(format!(
+        "noImplicitReturns={:?}",
+        options.no_implicit_returns
+    ));
+    parts.push(format!(
+        "noImplicitOverride={:?}",
+        options.no_implicit_override
+    ));
+    parts.push(format!("noUnusedLocals={:?}", options.no_unused_locals));
+    parts.push(format!(
+        "noUnusedParameters={:?}",
+        options.no_unused_parameters
+    ));
+    parts.push(format!(
+        "forceConsistentCasingInFileNames={:?}",
+        options.force_consistent_casing_in_file_names
+    ));
+    parts.push(format!(
+        "useDefineForClassFields={:?}",
+        options.use_define_for_class_fields
+    ));
+    parts.push(format!("jsxFactory={}", options.jsx_factory));
+    parts.push(format!(
+        "jsxFragmentFactory={}",
+        options.jsx_fragment_factory
+    ));
+    parts.push(format!("jsxImportSource={}", options.jsx_import_source));
+    parts.push(format!("moduleSuffixes={:?}", options.module_suffixes));
+    parts.push(format!("customConditions={:?}", options.custom_conditions));
+    parts.push(format!(
+        "resolveJsonModule={:?}",
+        options.resolve_json_module
+    ));
+    parts.push(format!(
+        "allowSyntheticDefaultImports={:?}",
+        options.allow_synthetic_default_imports
+    ));
+    parts.push(format!(
+        "downlevelIteration={:?}",
+        options.downlevel_iteration
+    ));
+    parts.push(format!("emitBOM={:?}", options.emit_bom));
+    parts.push(format!(
+        "emitDecoratorMetadata={:?}",
+        options.emit_decorator_metadata
+    ));
+    parts.push(format!(
+        "experimentalDecorators={:?}",
+        options.experimental_decorators
+    ));
+    parts.push(format!(
+        "preserveConstEnums={:?}",
+        options.preserve_const_enums
+    ));
+    parts.push(format!("stripInternal={:?}", options.strip_internal));
+    parts.push(format!(
+        "erasableSyntaxOnly={:?}",
+        options.erasable_syntax_only
+    ));
+    compute_options_hash(&parts.join("\n"))
+}
+
 fn build_project(
     sys: &dyn System,
     project: &str,
     compiler_options: &CompilerOptions,
+    build_options: &BuildOptions,
     pretty: bool,
     seen_projects: &mut HashSet<String>,
 ) -> CommandLineResult {
@@ -285,13 +429,72 @@ fn build_project(
 
     let mut status = ExitStatus::Success;
     for reference in resolve_project_references(&config) {
-        let result = build_project(sys, &reference, compiler_options, pretty, seen_projects);
+        let result = build_project(
+            sys,
+            &reference,
+            compiler_options,
+            build_options,
+            pretty,
+            seen_projects,
+        );
         status = status.max(result.status);
     }
 
     if !config.file_names.is_empty() {
+        // Check if project is up-to-date via .tsbuildinfo.
+        let ts_build_info_file = BuildInfo::get_ts_build_info_file_path(
+            &normalized_config,
+            &config.compiler_options.out_dir,
+            &config.compiler_options.ts_build_info_file,
+        );
+
+        let fs = sys.fs();
+
+        // Read all file contents for hash comparison (before perform_compilation
+        // takes ownership of config).
+        let files_with_content: Vec<(String, String)> = config
+            .file_names
+            .iter()
+            .filter_map(|f| fs.read_file(f).map(|content| (f.clone(), content)))
+            .collect();
+
+        let options_hash = compute_options_signature(&config.compiler_options);
+
+        // Skip the up-to-date check when --clean is requested.
+        if !build_options.clean.is_true() {
+            if let Some(json) = fs.read_file(&ts_build_info_file) {
+                if let Ok(build_info) = serde_json::from_str::<BuildInfo>(&json) {
+                    if build_info.is_up_to_date(&files_with_content, &options_hash) {
+                        if build_options.verbose.is_true() {
+                            let mut writer = sys.writer();
+                            let _ =
+                                writeln!(writer, "Project '{}' is up to date.", normalized_config);
+                        }
+                        return CommandLineResult {
+                            status: ExitStatus::Success,
+                        };
+                    }
+                }
+            }
+        }
+
         let result = perform_compilation(sys, config, pretty);
         status = status.max(result.status);
+
+        // Write .tsbuildinfo on successful build (not --clean).
+        if result.status == ExitStatus::Success && !build_options.clean.is_true() {
+            let build_info =
+                BuildInfo::new(&files_with_content, &normalized_config, &options_hash, &[]);
+            if let Ok(json) = serde_json::to_string(&build_info) {
+                // Ensure parent directory exists for real FS (mirrors emit logic).
+                if let Some(parent) = std::path::Path::new(&ts_build_info_file).parent() {
+                    if !parent.as_os_str().is_empty() {
+                        let _ = std::fs::create_dir_all(parent);
+                    }
+                }
+                let _ = fs.write_file(&ts_build_info_file, &json);
+            }
+        }
     }
 
     CommandLineResult { status }
@@ -584,7 +787,11 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
         ("locale", &options.locale, false),
     ] {
         if !val.is_empty() {
-            let display = if is_path { to_relative(val) } else { val.clone() };
+            let display = if is_path {
+                to_relative(val)
+            } else {
+                val.clone()
+            };
             map.insert(name.to_string(), Value::String(display));
         }
     }
@@ -919,7 +1126,9 @@ fn perform_compilation(
     }
 
     let status = if error_count > 0 {
-        if options.no_emit.is_true() || !emitted_any {
+        // Mirrors Go emit.go: exit 1 only when emit was explicitly skipped
+        // (noEmit or noEmitOnError); otherwise exit 2 even if 0 files emitted.
+        if !should_emit {
             ExitStatus::DiagnosticsPresent_OutputsSkipped
         } else {
             ExitStatus::DiagnosticsPresent_OutputsGenerated
@@ -996,11 +1205,7 @@ fn default_is_pretty(sys: &dyn System) -> bool {
 /// sections, sorted alphabetically within each section.
 fn print_help(sys: &dyn System, show_all: bool) {
     let mut writer = sys.writer();
-    let _ = writeln!(
-        writer,
-        "tsc: The TypeScript Compiler - Version {}",
-        VERSION
-    );
+    let _ = writeln!(writer, "tsc: The TypeScript Compiler - Version {}", VERSION);
     let _ = writeln!(writer);
 
     if show_all {
@@ -1017,14 +1222,26 @@ fn print_simplified_help(writer: &mut dyn Write) {
     let _ = writeln!(writer, "COMMON COMMANDS:");
     let _ = writeln!(writer);
     let commands = [
-        ("tsc", "Compile the current project (tsconfig.json in the working directory)."),
+        (
+            "tsc",
+            "Compile the current project (tsconfig.json in the working directory).",
+        ),
         ("tsc app.ts util.ts", "Compile a set of .ts files."),
         ("tsc -b", "Build a composite project in build mode."),
-        ("tsc --init", "Create a tsconfig.json in the current directory."),
-        ("tsc -p ./path/to/tsconfig.json", "Compile a project at the given path."),
+        (
+            "tsc --init",
+            "Create a tsconfig.json in the current directory.",
+        ),
+        (
+            "tsc -p ./path/to/tsconfig.json",
+            "Compile a project at the given path.",
+        ),
         ("tsc --help --all", "Show all compiler options."),
         ("tsc --noEmit", "Type-check without emitting output."),
-        ("tsc --target esnext", "Compile to the latest ECMAScript target."),
+        (
+            "tsc --target esnext",
+            "Compile to the latest ECMAScript target.",
+        ),
     ];
     for (cmd, desc) in &commands {
         let _ = writeln!(writer, "  {cmd}");
@@ -1072,8 +1289,10 @@ fn print_all_options_section(writer: &mut dyn Write) {
     );
     let _ = writeln!(writer);
 
-    let watch_opts: Vec<&OptionDecl> =
-        OPTIONS_FOR_WATCH.iter().filter(|o| !o.description.is_empty()).collect();
+    let watch_opts: Vec<&OptionDecl> = OPTIONS_FOR_WATCH
+        .iter()
+        .filter(|o| !o.description.is_empty())
+        .collect();
     print_option_section(writer, "WATCH OPTIONS:", &watch_opts);
     let _ = writeln!(writer);
 
@@ -1304,12 +1523,27 @@ mod tests {
         let result = command_line(&sys, &args);
         assert_eq!(result.status, ExitStatus::Success);
         let out = sys.output_string();
-        assert!(out.contains("tsc: The TypeScript Compiler"), "header missing:\n{out}");
+        assert!(
+            out.contains("tsc: The TypeScript Compiler"),
+            "header missing:\n{out}"
+        );
         // Dynamic content from OptionDecl descriptions.
-        assert!(out.contains("Print this message."), "help option desc missing:\n{out}");
-        assert!(out.contains("Do not emit outputs."), "noEmit option desc missing:\n{out}");
-        assert!(out.contains("COMMAND LINE FLAGS"), "section missing:\n{out}");
-        assert!(out.contains("COMMON COMPILER OPTIONS"), "section missing:\n{out}");
+        assert!(
+            out.contains("Print this message."),
+            "help option desc missing:\n{out}"
+        );
+        assert!(
+            out.contains("Do not emit outputs."),
+            "noEmit option desc missing:\n{out}"
+        );
+        assert!(
+            out.contains("COMMAND LINE FLAGS"),
+            "section missing:\n{out}"
+        );
+        assert!(
+            out.contains("COMMON COMPILER OPTIONS"),
+            "section missing:\n{out}"
+        );
     }
 
     #[test]
@@ -2306,12 +2540,27 @@ mod tests {
         let result = command_line(&sys, &args);
         assert_eq!(result.status, ExitStatus::Success);
         let out = sys.output_string();
-        assert!(out.contains("tsc: The TypeScript Compiler"), "header missing:\n{out}");
+        assert!(
+            out.contains("tsc: The TypeScript Compiler"),
+            "header missing:\n{out}"
+        );
         // --all lists every option with a description under "ALL COMPILER OPTIONS".
-        assert!(out.contains("ALL COMPILER OPTIONS"), "section missing:\n{out}");
-        assert!(out.contains("WATCH OPTIONS"), "watch section missing:\n{out}");
-        assert!(out.contains("BUILD OPTIONS"), "build section missing:\n{out}");
+        assert!(
+            out.contains("ALL COMPILER OPTIONS"),
+            "section missing:\n{out}"
+        );
+        assert!(
+            out.contains("WATCH OPTIONS"),
+            "watch section missing:\n{out}"
+        );
+        assert!(
+            out.contains("BUILD OPTIONS"),
+            "build section missing:\n{out}"
+        );
         // A representative compiler option description must appear.
-        assert!(out.contains("Do not emit outputs."), "noEmit desc missing:\n{out}");
+        assert!(
+            out.contains("Do not emit outputs."),
+            "noEmit desc missing:\n{out}"
+        );
     }
 }

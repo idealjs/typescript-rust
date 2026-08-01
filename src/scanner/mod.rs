@@ -1040,7 +1040,11 @@ impl Scanner {
         // Report leading-zero error after the full literal is scanned.
         // Mirrors Go `scanner.go:2012-2016`.
         if token_flags_contains(self.token_flags, TOKEN_FLAGS_CONTAINS_LEADING_ZERO) {
-            self.report_error(DiagnosticKind::DecimalWithLeadingZero, start, self.pos - start);
+            self.report_error(
+                DiagnosticKind::DecimalWithLeadingZero,
+                start,
+                self.pos - start,
+            );
         }
 
         // BigInt suffix
@@ -1251,8 +1255,7 @@ impl Scanner {
                 // Legacy octal escape: up to 2 more octal digits
                 self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
                 for _ in 0..2 {
-                    if self.pos < self.end
-                        && is_octal_digit(self.text.as_bytes()[self.pos] as char)
+                    if self.pos < self.end && is_octal_digit(self.text.as_bytes()[self.pos] as char)
                     {
                         self.pos += 1;
                     } else {
@@ -1277,8 +1280,7 @@ impl Scanner {
                 // scanner.go:1811-1822).
                 let mut digit_count = 0;
                 for _ in 0..2 {
-                    if self.pos < self.end && is_hex_digit(self.text.as_bytes()[self.pos] as char)
-                    {
+                    if self.pos < self.end && is_hex_digit(self.text.as_bytes()[self.pos] as char) {
                         self.pos += 1;
                         digit_count += 1;
                     } else {
@@ -1304,8 +1306,8 @@ impl Scanner {
                         self.pos += 1;
                     }
                     let has_hex = self.pos > hex_start;
-                    let closed = self.pos < self.end
-                        && self.text.as_bytes()[self.pos] as char == '}';
+                    let closed =
+                        self.pos < self.end && self.text.as_bytes()[self.pos] as char == '}';
                     if closed {
                         self.pos += 1; // skip '}'
                     }
@@ -1600,20 +1602,12 @@ impl Scanner {
                 if let Some(bit) = reg_exp_flag_bit(c) {
                     if seen_flags & bit != 0 {
                         // Duplicate flag — report at this char.
-                        self.report_error(
-                            DiagnosticKind::DuplicateRegularExpressionFlag,
-                            p,
-                            1,
-                        );
+                        self.report_error(DiagnosticKind::DuplicateRegularExpressionFlag, p, 1);
                     } else if (seen_flags | bit) & (REG_EXP_FLAG_U | REG_EXP_FLAG_V)
                         == (REG_EXP_FLAG_U | REG_EXP_FLAG_V)
                     {
                         // `u` and `v` are mutually exclusive (TS1502).
-                        self.report_error(
-                            DiagnosticKind::UnicodeUAndVFlagsMutuallyExclusive,
-                            p,
-                            1,
-                        );
+                        self.report_error(DiagnosticKind::UnicodeUAndVFlagsMutuallyExclusive, p, 1);
                     } else {
                         seen_flags |= bit;
                         // Target-gated flag availability (TS1501).
@@ -2241,7 +2235,10 @@ fn is_shebang_trivia(text: &str, pos: usize) -> bool {
     if text.len() < 2 {
         return false;
     }
-    debug_assert_eq!(pos, 0, "shebangs check must only be done at the start of the file");
+    debug_assert_eq!(
+        pos, 0,
+        "shebangs check must only be done at the start of the file"
+    );
     text.as_bytes()[0] == b'#' && text.as_bytes()[1] == b'!'
 }
 
@@ -2346,7 +2343,8 @@ fn scan_conflict_marker_trivia(
         // `>>>>>>>` marker (which begins a new conflict section).
         while pos < text_len {
             let current = bytes[pos];
-            if (current == b'=' || current == b'>') && current as char != ch
+            if (current == b'=' || current == b'>')
+                && current as char != ch
                 && is_conflict_marker_trivia(text, pos)
             {
                 break;
@@ -2430,10 +2428,7 @@ pub fn skip_trivia_ex(
                     if bytes[pos + 1] == b'*' {
                         pos += 2;
                         while pos < text_len {
-                            if bytes[pos] == b'*'
-                                && pos + 1 < text_len
-                                && bytes[pos + 1] == b'/'
-                            {
+                            if bytes[pos] == b'*' && pos + 1 < text_len && bytes[pos + 1] == b'/' {
                                 pos += 2;
                                 break;
                             }
@@ -2893,7 +2888,10 @@ mod tests {
         assert_eq!(s.token_text(), "/foo/gg");
         let errors = s.take_errors();
         assert_eq!(errors.len(), 1);
-        assert_eq!(errors[0].kind, DiagnosticKind::DuplicateRegularExpressionFlag);
+        assert_eq!(
+            errors[0].kind,
+            DiagnosticKind::DuplicateRegularExpressionFlag
+        );
         assert_eq!(errors[0].pos, "/foo/g".len()); // second g
         assert_eq!(errors[0].length, 1);
     }
@@ -3039,12 +3037,18 @@ mod tests {
 
     #[test]
     fn skip_trivia_combined() {
-        assert_eq!(skip_trivia("#!/usr/bin/env node\n// hello\n/* world */\nlet x;", 0), 41);
+        assert_eq!(
+            skip_trivia("#!/usr/bin/env node\n// hello\n/* world */\nlet x;", 0),
+            41
+        );
     }
 
     #[test]
     fn get_shebang_returns_text() {
-        assert_eq!(get_shebang("#!/usr/bin/env node\nlet x;"), "#!/usr/bin/env node");
+        assert_eq!(
+            get_shebang("#!/usr/bin/env node\nlet x;"),
+            "#!/usr/bin/env node"
+        );
         assert_eq!(get_shebang("let x;"), "");
         assert_eq!(get_shebang("#!only\nmore"), "#!only");
     }
@@ -3328,10 +3332,7 @@ mod tests {
         let mut s = Scanner::new("123");
         s.scan();
         let flags = s.token_flags();
-        assert_eq!(
-            flags & TOKEN_FLAGS_NUMERIC_LITERAL_FLAGS,
-            TOKEN_FLAGS_NONE
-        );
+        assert_eq!(flags & TOKEN_FLAGS_NUMERIC_LITERAL_FLAGS, TOKEN_FLAGS_NONE);
     }
 
     #[test]
@@ -3488,7 +3489,10 @@ mod tests {
         // code, which then produces its own diagnostics).
         let text = "<<<<<<< a\nlocal\n||||||| base\nshared\n=======\nremote\n>>>>>>> b\nx";
         let pos = skip_trivia_ex(text, 0, &SkipTriviaOptions::default(), None);
-        assert_eq!(&text[pos..], "local\n||||||| base\nshared\n=======\nremote\n>>>>>>> b\nx");
+        assert_eq!(
+            &text[pos..],
+            "local\n||||||| base\nshared\n=======\nremote\n>>>>>>> b\nx"
+        );
     }
 
     // ────────────────────────────────────────────────────────────────────
@@ -3689,7 +3693,10 @@ mod tests {
         assert!(has_jsdoc_tag("deprecated}foo", &["deprecated"]));
         assert!(has_jsdoc_tag("see", &["see", "link"]));
         assert!(has_jsdoc_tag("link foo", &["see", "link"]));
-        assert!(has_jsdoc_tag("linkcode foo", &["see", "link", "linkcode", "linkplain"]));
+        assert!(has_jsdoc_tag(
+            "linkcode foo",
+            &["see", "link", "linkcode", "linkplain"]
+        ));
         // Non-matching
         assert!(!has_jsdoc_tag("deprecatedX", &["deprecated"]));
         assert!(!has_jsdoc_tag("dep", &["deprecated"]));
@@ -3762,7 +3769,10 @@ mod tests {
         // `\xa0` sets HEX_ESCAPE.
         let mut s = Scanner::new("\"\\xa0\"");
         s.scan();
-        assert!(token_flags_contains(s.token_flags(), TOKEN_FLAGS_HEX_ESCAPE));
+        assert!(token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_HEX_ESCAPE
+        ));
         assert!(!token_flags_contains(
             s.token_flags(),
             TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE
@@ -3778,7 +3788,10 @@ mod tests {
             s.token_flags(),
             TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE
         ));
-        assert!(!token_flags_contains(s.token_flags(), TOKEN_FLAGS_HEX_ESCAPE));
+        assert!(!token_flags_contains(
+            s.token_flags(),
+            TOKEN_FLAGS_HEX_ESCAPE
+        ));
     }
 
     #[test]
@@ -4266,5 +4279,46 @@ mod tests {
             s.scan_jsdoc_comment_text_token(false),
             SyntaxKind::OpenBraceToken
         );
+    }
+
+    // ────────────────────────────────────────────────────────────────────
+    // Ported from Go internal/scanner/scanner_test.go
+    // ────────────────────────────────────────────────────────────────────
+
+    #[test]
+    #[ignore = "TODO: lone-surrogate preservation is not implemented in the Rust scanner"]
+    fn scan_string_preserves_lone_surrogates() {
+        // Ported 1:1 from Go TestScanStringPreservesLoneSurrogates.
+        //
+        // The Go scanner preserves lone surrogates produced by `\uXXXX` escapes
+        // by encoding them as 3-byte WTF-8 sentinels
+        // (stringutil.EncodeJSStringRune), and combines an adjacent
+        // high+low surrogate pair into the supplementary code point
+        // (stringutil.CombineSurrogatePairs). The Rust scanner's
+        // `unescape_string` instead replaces invalid surrogate code points
+        // (U+D800–U+DFFF) with U+FFFD, and Rust `String` cannot hold the
+        // WTF-8 sentinel bytes (they are not valid UTF-8). Implementing this
+        // requires porting EncodeJSStringRune / DecodeJSStringRune /
+        // CombineSurrogatePairs and changing the scanner's string-value
+        // representation.
+        //
+        // Input source text (Go backtick raw string; the `\u` sequences are
+        // literal backslash-u escapes scanned by the scanner):
+        //   `"🦀\ud7ff\ud800\ud801\uD83E\uDD80"`
+        let input = r#""🦀\ud7ff\ud800\ud801\uD83E\uDD80""#;
+        let mut s = Scanner::new(input);
+        assert_eq!(s.scan(), SyntaxKind::StringLiteral);
+
+        // Go expected value (cannot be constructed as a Rust `String` because it
+        // embeds the lone-surrogate WTF-8 sentinels):
+        //   "🦀" +                              // literal crab at start
+        //   EncodeJSStringRune(0xD7FF) +        // U+D7FF (valid char, not a surrogate)
+        //   EncodeJSStringRune(0xD800) +        // lone high surrogate (WTF-8 sentinel)
+        //   EncodeJSStringRune(0xD801) +        // lone high surrogate (WTF-8 sentinel)
+        //   "🦀"                                // U+1F980 from the \uD83E\uDD80 pair
+        //
+        // TODO: once lone-surrogate preservation lands, construct the expected
+        // value and assert:
+        //   assert_eq!(s.token_value(), expected);
     }
 }

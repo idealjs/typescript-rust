@@ -2163,7 +2163,11 @@ fn checker_infer_type_not_visible_in_false_branch() {
     );
     // R is not visible in the false branch → TS2304.
     let count = diags.iter().filter(|d| d.code == 2304).count();
-    assert_eq!(count, 1, "Expected TS2304 for R in false branch, got {}", count);
+    assert_eq!(
+        count, 1,
+        "Expected TS2304 for R in false branch, got {}",
+        count
+    );
 }
 
 #[test]
@@ -2226,9 +2230,12 @@ fn checker_namespace_non_exported_member_not_accessible() {
          \x20let y: number = N.x;",
     );
     let count = diags.iter().filter(|d| d.code == 2339).count();
-    assert_eq!(count, 1, "Expected TS2339 for non-exported member, got {}", count);
+    assert_eq!(
+        count, 1,
+        "Expected TS2339 for non-exported member, got {}",
+        count
+    );
 }
-
 
 // ────────────────────────────────────────────────────────────────────────────
 // NameResolver: global symbol resolution
@@ -3245,7 +3252,6 @@ fn checker_narrowing_typeof_discriminant_property_false_branch() {
     assert_no_diagnostics(&diags);
 }
 
-
 // ────────────────────────────────────────────────────────────────────────────
 // P3.9 Gap 1: Nullish coalescing (??) narrowing
 // ────────────────────────────────────────────────────────────────────────────
@@ -3310,7 +3316,6 @@ fn checker_narrowing_nullish_coalescing_with_const_alias() {
     assert_no_diagnostics(&diags);
 }
 
-
 // ────────────────────────────────────────────────────────────────────────────
 // Type display (type_to_string) via diagnostic message args
 // ────────────────────────────────────────────────────────────────────────────
@@ -3326,26 +3331,26 @@ fn get_ts2322_args(diags: &[tsox::ast::Diagnostic]) -> Vec<String> {
 
 #[test]
 fn checker_type_display_string_literal() {
-    // `"foo"` is not assignable to `number` → message args should contain `"foo"`.
+    // `"foo"` is not assignable to `number` → Go oracle widens to `string`.
     let diags = check_source("let x: number = \"foo\";");
     let args = get_ts2322_args(&diags);
     assert!(!args.is_empty(), "Expected TS2322");
     assert!(
-        args.iter().any(|a| a.contains("\"foo\"")),
-        "Expected \"foo\" in args: {:?}",
+        args.iter().any(|a| a == "string"),
+        "Expected 'string' in args: {:?}",
         args
     );
 }
 
 #[test]
 fn checker_type_display_number_literal() {
-    // `42` is not assignable to `string` → message args should contain `42`.
+    // `42` is not assignable to `string` → Go oracle widens to `number`.
     let diags = check_source("let x: string = 42;");
     let args = get_ts2322_args(&diags);
     assert!(!args.is_empty(), "Expected TS2322");
     assert!(
-        args.iter().any(|a| a == "42"),
-        "Expected '42' in args: {:?}",
+        args.iter().any(|a| a == "number"),
+        "Expected 'number' in args: {:?}",
         args
     );
 }
@@ -3368,13 +3373,13 @@ fn checker_type_display_union() {
 
 #[test]
 fn checker_type_display_boolean_literal() {
-    // `true` not assignable to `string` → should contain `true`.
+    // `true` not assignable to `string` → Go oracle widens to `boolean`.
     let diags = check_source("let x: string = true;");
     let args = get_ts2322_args(&diags);
     assert!(!args.is_empty(), "Expected TS2322");
     assert!(
-        args.iter().any(|a| a == "true"),
-        "Expected 'true' in args: {:?}",
+        args.iter().any(|a| a == "boolean"),
+        "Expected 'boolean' in args: {:?}",
         args
     );
 }
@@ -5996,30 +6001,57 @@ fn value_of(
 #[test]
 fn checker_enum_member_value_numeric_literal() {
     let v = enum_member_values("enum E { A = 1, B = 2 }");
-    assert_eq!(value_of(&v, "A").value, Some(EvalValue::Number(Number(1.0))));
-    assert_eq!(value_of(&v, "B").value, Some(EvalValue::Number(Number(2.0))));
+    assert_eq!(
+        value_of(&v, "A").value,
+        Some(EvalValue::Number(Number(1.0)))
+    );
+    assert_eq!(
+        value_of(&v, "B").value,
+        Some(EvalValue::Number(Number(2.0)))
+    );
 }
 
 #[test]
 fn checker_enum_member_value_auto_increment_from_zero() {
     let v = enum_member_values("enum E { A, B, C }");
-    assert_eq!(value_of(&v, "A").value, Some(EvalValue::Number(Number(0.0))));
-    assert_eq!(value_of(&v, "B").value, Some(EvalValue::Number(Number(1.0))));
-    assert_eq!(value_of(&v, "C").value, Some(EvalValue::Number(Number(2.0))));
+    assert_eq!(
+        value_of(&v, "A").value,
+        Some(EvalValue::Number(Number(0.0)))
+    );
+    assert_eq!(
+        value_of(&v, "B").value,
+        Some(EvalValue::Number(Number(1.0)))
+    );
+    assert_eq!(
+        value_of(&v, "C").value,
+        Some(EvalValue::Number(Number(2.0)))
+    );
 }
 
 #[test]
 fn checker_enum_member_value_auto_increment_from_explicit() {
     let v = enum_member_values("enum E { A = 5, B }");
-    assert_eq!(value_of(&v, "A").value, Some(EvalValue::Number(Number(5.0))));
-    assert_eq!(value_of(&v, "B").value, Some(EvalValue::Number(Number(6.0))));
+    assert_eq!(
+        value_of(&v, "A").value,
+        Some(EvalValue::Number(Number(5.0)))
+    );
+    assert_eq!(
+        value_of(&v, "B").value,
+        Some(EvalValue::Number(Number(6.0)))
+    );
 }
 
 #[test]
 fn checker_enum_member_value_string_literal() {
     let v = enum_member_values("enum E { A = 'x', B = 'y' }");
-    assert_eq!(value_of(&v, "A").value, Some(EvalValue::String("x".to_string())));
-    assert_eq!(value_of(&v, "B").value, Some(EvalValue::String("y".to_string())));
+    assert_eq!(
+        value_of(&v, "A").value,
+        Some(EvalValue::String("x".to_string()))
+    );
+    assert_eq!(
+        value_of(&v, "B").value,
+        Some(EvalValue::String("y".to_string()))
+    );
 }
 
 #[test]
@@ -6028,29 +6060,50 @@ fn checker_enum_member_value_string_resets_auto_increment() {
     // initializer-less member has no computable value (None), mirroring Go's
     // TS1062 case (the error itself is suppressed in Phase 1).
     let v = enum_member_values("enum E { A = 1, B = 's', C }");
-    assert_eq!(value_of(&v, "A").value, Some(EvalValue::Number(Number(1.0))));
-    assert_eq!(value_of(&v, "B").value, Some(EvalValue::String("s".to_string())));
+    assert_eq!(
+        value_of(&v, "A").value,
+        Some(EvalValue::Number(Number(1.0)))
+    );
+    assert_eq!(
+        value_of(&v, "B").value,
+        Some(EvalValue::String("s".to_string()))
+    );
     assert_eq!(value_of(&v, "C").value, None);
 }
 
 #[test]
 fn checker_enum_member_value_unary_minus() {
     let v = enum_member_values("enum E { A = -1, B }");
-    assert_eq!(value_of(&v, "A").value, Some(EvalValue::Number(Number(-1.0))));
-    assert_eq!(value_of(&v, "B").value, Some(EvalValue::Number(Number(0.0))));
+    assert_eq!(
+        value_of(&v, "A").value,
+        Some(EvalValue::Number(Number(-1.0)))
+    );
+    assert_eq!(
+        value_of(&v, "B").value,
+        Some(EvalValue::Number(Number(0.0)))
+    );
 }
 
 #[test]
 fn checker_enum_member_value_binary_arithmetic() {
     let v = enum_member_values("enum E { A = 1 + 2, B = 3 * 4 }");
-    assert_eq!(value_of(&v, "A").value, Some(EvalValue::Number(Number(3.0))));
-    assert_eq!(value_of(&v, "B").value, Some(EvalValue::Number(Number(12.0))));
+    assert_eq!(
+        value_of(&v, "A").value,
+        Some(EvalValue::Number(Number(3.0)))
+    );
+    assert_eq!(
+        value_of(&v, "B").value,
+        Some(EvalValue::Number(Number(12.0)))
+    );
 }
 
 #[test]
 fn checker_enum_member_value_bitwise_shift() {
     let v = enum_member_values("enum E { A = 1 << 2 }");
-    assert_eq!(value_of(&v, "A").value, Some(EvalValue::Number(Number(4.0))));
+    assert_eq!(
+        value_of(&v, "A").value,
+        Some(EvalValue::Number(Number(4.0)))
+    );
 }
 
 #[test]
@@ -6113,3 +6166,148 @@ fn checker_is_enum_type_related_enum_to_enum_regression_no_error() {
     assert_no_diagnostics(&diags);
 }
 
+#[test]
+fn module_resolution_node_modules_basic() {
+    // Simulate a project that imports from node_modules
+    let fs = tsox::vfs::InMemoryFS::new();
+    fs.insert_dir("/project");
+    fs.insert_dir("/project/node_modules");
+    fs.insert_dir("/project/node_modules/mypkg");
+    fs.insert_file(
+        "/project/node_modules/mypkg/index.d.ts",
+        "export declare function greet(name: string): string;",
+    );
+    fs.insert_file(
+        "/project/node_modules/mypkg/package.json",
+        r#"{"name": "mypkg", "version": "1.0.0", "types": "index.d.ts"}"#,
+    );
+    fs.insert_file(
+        "/project/src/main.ts",
+        "import { greet } from 'mypkg';\nconst x: string = greet('world');",
+    );
+
+    let host = std::sync::Arc::new(tsox::compiler::CompilerHostImpl::new(
+        std::sync::Arc::new(fs),
+        "/project".to_string(),
+        tsox::bundled::lib_path(),
+    ));
+    let host: std::sync::Arc<dyn tsox::compiler::CompilerHost> = host;
+
+    let mut config = tsox::tsoptions::ParsedCommandLine::default();
+    config.file_names = vec!["/project/src/main.ts".to_string()];
+    config.compiler_options.no_lib = tsox::core::tristate::Tristate::True;
+
+    let program = std::sync::Arc::new(tsox::compiler::Program::new(
+        tsox::compiler::ProgramOptions { config, host },
+    ));
+
+    // Should resolve the import and not report TS2307 (cannot find module)
+    let diags = program.get_semantic_diagnostics();
+    let has_module_not_found = diags.iter().any(|d| d.code == 2307);
+    assert!(
+        !has_module_not_found,
+        "Expected module 'mypkg' to be resolved from node_modules. Diagnostics: {:?}",
+        diags
+            .iter()
+            .map(|d| (d.code, d.message_args.clone()))
+            .collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn module_resolution_node_modules_scoped_package() {
+    // Simulate a scoped package @scope/pkg
+    let fs = tsox::vfs::InMemoryFS::new();
+    fs.insert_dir("/project");
+    fs.insert_dir("/project/node_modules");
+    fs.insert_dir("/project/node_modules/@scope");
+    fs.insert_dir("/project/node_modules/@scope/mypkg");
+    fs.insert_file(
+        "/project/node_modules/@scope/mypkg/index.d.ts",
+        "export declare const version: number;",
+    );
+    fs.insert_file(
+        "/project/node_modules/@scope/mypkg/package.json",
+        r#"{"name": "@scope/mypkg", "version": "2.0.0", "types": "index.d.ts"}"#,
+    );
+    fs.insert_file(
+        "/project/src/main.ts",
+        "import { version } from '@scope/mypkg';\nconst v: number = version;",
+    );
+
+    let host = std::sync::Arc::new(tsox::compiler::CompilerHostImpl::new(
+        std::sync::Arc::new(fs),
+        "/project".to_string(),
+        tsox::bundled::lib_path(),
+    ));
+    let host: std::sync::Arc<dyn tsox::compiler::CompilerHost> = host;
+
+    let mut config = tsox::tsoptions::ParsedCommandLine::default();
+    config.file_names = vec!["/project/src/main.ts".to_string()];
+    config.compiler_options.no_lib = tsox::core::tristate::Tristate::True;
+
+    let program = std::sync::Arc::new(tsox::compiler::Program::new(
+        tsox::compiler::ProgramOptions { config, host },
+    ));
+
+    let diags = program.get_semantic_diagnostics();
+    let has_module_not_found = diags.iter().any(|d| d.code == 2307);
+    assert!(
+        !has_module_not_found,
+        "Expected scoped module '@scope/mypkg' to be resolved from node_modules. Diagnostics: {:?}",
+        diags
+            .iter()
+            .map(|d| (d.code, d.message_args.clone()))
+            .collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn module_resolution_node_modules_nested() {
+    // node_modules at parent directory level
+    let fs = tsox::vfs::InMemoryFS::new();
+    fs.insert_dir("/root");
+    fs.insert_dir("/root/node_modules");
+    fs.insert_dir("/root/node_modules/shared");
+    fs.insert_file(
+        "/root/node_modules/shared/index.d.ts",
+        "export declare function util(): void;",
+    );
+    fs.insert_file(
+        "/root/node_modules/shared/package.json",
+        r#"{"name": "shared", "version": "1.0.0", "types": "index.d.ts"}"#,
+    );
+    fs.insert_dir("/root/packages");
+    fs.insert_dir("/root/packages/app");
+    fs.insert_dir("/root/packages/app/src");
+    fs.insert_file(
+        "/root/packages/app/src/main.ts",
+        "import { util } from 'shared';\nutil();",
+    );
+
+    let host = std::sync::Arc::new(tsox::compiler::CompilerHostImpl::new(
+        std::sync::Arc::new(fs),
+        "/root/packages/app".to_string(),
+        tsox::bundled::lib_path(),
+    ));
+    let host: std::sync::Arc<dyn tsox::compiler::CompilerHost> = host;
+
+    let mut config = tsox::tsoptions::ParsedCommandLine::default();
+    config.file_names = vec!["/root/packages/app/src/main.ts".to_string()];
+    config.compiler_options.no_lib = tsox::core::tristate::Tristate::True;
+
+    let program = std::sync::Arc::new(tsox::compiler::Program::new(
+        tsox::compiler::ProgramOptions { config, host },
+    ));
+
+    let diags = program.get_semantic_diagnostics();
+    let has_module_not_found = diags.iter().any(|d| d.code == 2307);
+    assert!(
+        !has_module_not_found,
+        "Expected module 'shared' to be resolved from parent node_modules. Diagnostics: {:?}",
+        diags
+            .iter()
+            .map(|d| (d.code, d.message_args.clone()))
+            .collect::<Vec<_>>()
+    );
+}

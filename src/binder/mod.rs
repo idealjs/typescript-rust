@@ -467,7 +467,9 @@ impl Binder {
             DeclareTarget::Exports(parent_sym) => {
                 let parent_mut = Arc::as_ptr(parent_sym) as *mut Symbol;
                 unsafe {
-                    (*parent_mut).exports.insert(name.clone(), Arc::clone(&symbol));
+                    (*parent_mut)
+                        .exports
+                        .insert(name.clone(), Arc::clone(&symbol));
                     // Set the export symbol's parent to the container symbol,
                     // mirroring Go which passes `container.Symbol()` as the
                     // parent argument to `declareSymbol`.
@@ -1685,10 +1687,9 @@ impl Binder {
                 // function expression's own locals in `bind_container` so it
                 // is visible inside the body but not in the enclosing scope.
                 let name = match &node.data {
-                    NodeData::FunctionExpression(data) => data
-                        .name
-                        .as_ref()
-                        .map(|n| self.node_text(n)),
+                    NodeData::FunctionExpression(data) => {
+                        data.name.as_ref().map(|n| self.node_text(n))
+                    }
                     _ => None,
                 }
                 .unwrap_or_else(|| INTERNAL_SYMBOL_NAME_FUNCTION.to_string());
@@ -1941,9 +1942,7 @@ impl Binder {
     /// Mirrors Go's `binder.bindExportAssignment`.
     fn bind_export_assignment(&mut self, node: &Arc<Node>) {
         let (is_export_equals, expr_kind) = match &node.data {
-            NodeData::ExportAssignment(data) => {
-                (data.is_export_equals, data.expression.kind)
-            }
+            NodeData::ExportAssignment(data) => (data.is_export_equals, data.expression.kind),
             _ => return,
         };
         let parent_sym = match self.parent_symbol.clone() {
@@ -2263,7 +2262,8 @@ impl Binder {
             let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
             unsafe {
                 (*symbol_mut).declarations.push(Arc::clone(node));
-                if (*symbol_mut).value_declaration.is_none() && flags.intersects(SymbolFlags::VALUE) {
+                if (*symbol_mut).value_declaration.is_none() && flags.intersects(SymbolFlags::VALUE)
+                {
                     (*symbol_mut).value_declaration = Some(Arc::clone(node));
                 }
             }
@@ -2735,10 +2735,12 @@ mod tests {
             "export = should have a value declaration set"
         );
         let file_sym = file_symbol(&file, &map);
-        assert!(file_sym
-            .exports
-            .get(INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
-            .is_some());
+        assert!(
+            file_sym
+                .exports
+                .get(INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
+                .is_some()
+        );
     }
 
     #[test]
@@ -2755,10 +2757,12 @@ mod tests {
         );
         assert_eq!(sym.name, INTERNAL_SYMBOL_NAME_EXPORT_STAR);
         let file_sym = file_symbol(&file, &map);
-        assert!(file_sym
-            .exports
-            .get(INTERNAL_SYMBOL_NAME_EXPORT_STAR)
-            .is_some());
+        assert!(
+            file_sym
+                .exports
+                .get(INTERNAL_SYMBOL_NAME_EXPORT_STAR)
+                .is_some()
+        );
     }
 
     #[test]
@@ -2768,9 +2772,11 @@ mod tests {
         let (file, map) = parse_and_bind("export * as ns from \"mod\";");
         let export_decl =
             find_statement(&file, SyntaxKind::ExportDeclaration).expect("export declaration");
-        let ns_clause = find_child(&export_decl, SyntaxKind::NamespaceExport)
-            .expect("NamespaceExport clause");
-        let sym = map.symbol_of(&ns_clause).expect("symbol on NamespaceExport clause");
+        let ns_clause =
+            find_child(&export_decl, SyntaxKind::NamespaceExport).expect("NamespaceExport clause");
+        let sym = map
+            .symbol_of(&ns_clause)
+            .expect("symbol on NamespaceExport clause");
         assert!(sym.flags.contains(SymbolFlags::Alias));
         assert_eq!(sym.name, "ns");
         let file_sym = file_symbol(&file, &map);
@@ -2804,10 +2810,7 @@ mod tests {
         let sym = map.symbol_of(&clause).expect("symbol on ImportClause");
         assert!(sym.flags.contains(SymbolFlags::Alias));
         assert_eq!(sym.name, "D");
-        let locals = map
-            .locals
-            .get(&file.node.id())
-            .expect("file locals table");
+        let locals = map.locals.get(&file.node.id()).expect("file locals table");
         let local_sym = locals.get("D").expect("D in file locals");
         assert!(Arc::ptr_eq(local_sym, sym));
         let file_sym = file_symbol(&file, &map);
@@ -2865,10 +2868,7 @@ mod tests {
         // Non-exported namespace members live in the ModuleDeclaration
         // container's locals (the binder keys locals on the container node,
         // which is the ModuleDeclaration, not the ModuleBlock).
-        let locals = map
-            .locals
-            .get(&ns.id())
-            .expect("namespace locals table");
+        let locals = map.locals.get(&ns.id()).expect("namespace locals table");
         let x_local = locals.get("x").expect("x in locals");
         assert!(
             x_local.export_symbol.is_none(),
@@ -2884,10 +2884,10 @@ mod tests {
         let var_stmt =
             find_statement(&file, SyntaxKind::VariableStatement).expect("variable statement");
         // The VariableDeclaration is the first child of the declaration list.
-        let decl_list = find_child(&var_stmt, SyntaxKind::VariableDeclarationList)
-            .expect("declaration list");
-        let var_decl = find_child(&decl_list, SyntaxKind::VariableDeclaration)
-            .expect("variable declaration");
+        let decl_list =
+            find_child(&var_stmt, SyntaxKind::VariableDeclarationList).expect("declaration list");
+        let var_decl =
+            find_child(&decl_list, SyntaxKind::VariableDeclaration).expect("variable declaration");
         let sym = map.symbol_of(&var_decl).expect("symbol for x");
         assert!(
             sym.export_symbol.is_some(),

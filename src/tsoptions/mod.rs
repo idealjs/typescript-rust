@@ -22,13 +22,14 @@ use crate::core::watch_options::{
 use crate::diagnostics::{
     ARGUMENT_FOR_0_OPTION_MUST_BE_COLON_1, CANNOT_READ_FILE_0,
     CIRCULARITY_DETECTED_WHILE_RESOLVING_CONFIGURATION_COLON_0,
-    COMPILER_OPTION_0_MAY_ONLY_BE_USED_WITH_BUILD, NO_INPUTS_WERE_FOUND_IN_CONFIG_FILE_0_SPECIFIED_INCLUDE_PATHS_WERE_1_AND_EXCLUDE_PATHS_WERE_2, OPTIONS_0_AND_1_CANNOT_BE_COMBINED,
+    COMPILER_OPTION_0_MAY_NOT_BE_USED_WITH_BUILD, COMPILER_OPTION_0_MAY_ONLY_BE_USED_WITH_BUILD,
+    NO_INPUTS_WERE_FOUND_IN_CONFIG_FILE_0_SPECIFIED_INCLUDE_PATHS_WERE_1_AND_EXCLUDE_PATHS_WERE_2,
     OPTION_0_CAN_ONLY_BE_SPECIFIED_IN_TSCONFIG_JSON_FILE_OR_SET_TO_FALSE_OR_NULL_ON_COMMAND_LINE,
     OPTION_0_CAN_ONLY_BE_SPECIFIED_IN_TSCONFIG_JSON_FILE_OR_SET_TO_NULL_ON_COMMAND_LINE,
-    OPTION_0_REQUIRES_VALUE_TO_BE_GREATER_THAN_1, UNKNOWN_COMPILER_OPTION_0,
-    UNKNOWN_COMPILER_OPTION_0_DID_YOU_MEAN_1,
-    UNTERMINATED_QUOTED_STRING_IN_RESPONSE_FILE_0, WATCH_OPTION_0_REQUIRES_A_VALUE_OF_TYPE_1,
-    new_ad_hoc_message,
+    OPTION_0_REQUIRES_VALUE_TO_BE_GREATER_THAN_1, OPTIONS_0_AND_1_CANNOT_BE_COMBINED,
+    UNKNOWN_BUILD_OPTION_0, UNKNOWN_BUILD_OPTION_0_DID_YOU_MEAN_1, UNKNOWN_COMPILER_OPTION_0,
+    UNKNOWN_COMPILER_OPTION_0_DID_YOU_MEAN_1, UNTERMINATED_QUOTED_STRING_IN_RESPONSE_FILE_0,
+    WATCH_OPTION_0_REQUIRES_A_VALUE_OF_TYPE_1, new_ad_hoc_message,
 };
 use crate::glob::Glob;
 use crate::tspath;
@@ -108,46 +109,15 @@ const DEFAULT_DECL: OptionDecl = OptionDecl {
 // Valid enum values for the declaration-driven enum options. These mirror the
 // keys of Go's `commandLineOptionEnumMap` (see `internal/tsoptions/enummaps.go`).
 static TARGET_ENUM_VALUES: &[&str] = &[
-    "es3",
-    "es5",
-    "es6",
-    "es2015",
-    "es2016",
-    "es2017",
-    "es2018",
-    "es2019",
-    "es2020",
-    "es2021",
-    "es2022",
-    "es2023",
-    "es2024",
-    "es2025",
-    "esnext",
+    "es3", "es5", "es6", "es2015", "es2016", "es2017", "es2018", "es2019", "es2020", "es2021",
+    "es2022", "es2023", "es2024", "es2025", "esnext",
 ];
 static MODULE_ENUM_VALUES: &[&str] = &[
-    "commonjs",
-    "amd",
-    "system",
-    "umd",
-    "es6",
-    "es2015",
-    "es2020",
-    "es2022",
-    "esnext",
-    "node16",
-    "node18",
-    "node20",
-    "nodenext",
-    "preserve",
+    "commonjs", "amd", "system", "umd", "es6", "es2015", "es2020", "es2022", "esnext", "node16",
+    "node18", "node20", "nodenext", "preserve",
 ];
-static MODULE_RESOLUTION_ENUM_VALUES: &[&str] = &[
-    "node16",
-    "nodenext",
-    "bundler",
-    "classic",
-    "node",
-    "node10",
-];
+static MODULE_RESOLUTION_ENUM_VALUES: &[&str] =
+    &["node16", "nodenext", "bundler", "classic", "node", "node10"];
 static JSX_ENUM_VALUES: &[&str] = &[
     "preserve",
     "react-native",
@@ -1013,6 +983,47 @@ fn find_build_option(name: &str) -> Option<&'static OptionDecl> {
         .find(|o| decl_matches(o, name))
 }
 
+/// Find the closest matching build option name for did-you-mean suggestions.
+/// Uses Levenshtein-like distance heuristic (same as Go's `getSpellingSuggestion`).
+fn did_you_mean_build_option(input: &str) -> Option<String> {
+    let input_lower = input.to_lowercase();
+    let mut best: Option<(usize, &str)> = None;
+    for opt in BUILD_OPTIONS.iter().chain(OPTIONS.iter()) {
+        let name = opt.name.to_lowercase();
+        let dist = levenshtein(&input_lower, &name);
+        // Only suggest if distance is small (Go uses threshold of 2-3)
+        if dist <= 3 && best.map_or(true, |(d, _)| dist < d) {
+            best = Some((dist, opt.name));
+        }
+    }
+    best.map(|(_, name)| name.to_string())
+}
+
+/// Simple Levenshtein distance for did-you-mean suggestions.
+fn levenshtein(a: &str, b: &str) -> usize {
+    let a: Vec<char> = a.chars().collect();
+    let b: Vec<char> = b.chars().collect();
+    let m = a.len();
+    let n = b.len();
+    if m == 0 {
+        return n;
+    }
+    if n == 0 {
+        return m;
+    }
+    let mut prev: Vec<usize> = (0..=n).collect();
+    let mut curr = vec![0usize; n + 1];
+    for i in 1..=m {
+        curr[0] = i;
+        for j in 1..=n {
+            let cost = if a[i - 1] == b[j - 1] { 0 } else { 1 };
+            curr[j] = (prev[j] + 1).min(curr[j - 1] + 1).min(prev[j - 1] + cost);
+        }
+        std::mem::swap(&mut prev, &mut curr);
+    }
+    prev[n]
+}
+
 /// Case-insensitive lookup over the watch option declarations, mirroring Go's
 /// `WatchNameMap` (`internal/tsoptions/namemap.go:12`). Used as a fallback in
 /// `parse_command_line_worker` when the compiler/build map misses, so that
@@ -1352,8 +1363,7 @@ fn parse_command_line_worker(
                 let abs = tspath::get_normalized_absolute_path(response_path, current_dir);
                 if let Some(fs) = fs {
                     if let Some(content) = fs.read_file(&abs) {
-                        let (response_args, split_errors) =
-                            split_response_file(&content, &abs);
+                        let (response_args, split_errors) = split_response_file(&content, &abs);
                         errors.extend(split_errors);
                         let (sub_options, sub_watch_options, sub_files, sub_errors) =
                             parse_command_line_worker(
@@ -1436,6 +1446,38 @@ fn parse_command_line_worker(
                                 COMPILER_OPTION_0_MAY_ONLY_BE_USED_WITH_BUILD,
                                 vec![name.to_string()],
                             ));
+                            continue;
+                        }
+                        // Build mode: check if it's a compiler option used with
+                        // build (TS5094), then try did-you-mean for build options.
+                        if mode == ParseMode::Build {
+                            // Check if it's a known compiler option
+                            if find_option(name).is_some() {
+                                errors.push(Diagnostic::new(
+                                    None,
+                                    TextRange::undefined(),
+                                    COMPILER_OPTION_0_MAY_NOT_BE_USED_WITH_BUILD,
+                                    vec![name.to_string()],
+                                ));
+                                continue;
+                            }
+                            // Unknown build option — try did-you-mean
+                            let suggestion = did_you_mean_build_option(name);
+                            if let Some(s) = suggestion {
+                                errors.push(Diagnostic::new(
+                                    None,
+                                    TextRange::undefined(),
+                                    UNKNOWN_BUILD_OPTION_0_DID_YOU_MEAN_1,
+                                    vec![name.to_string(), s],
+                                ));
+                            } else {
+                                errors.push(Diagnostic::new(
+                                    None,
+                                    TextRange::undefined(),
+                                    UNKNOWN_BUILD_OPTION_0,
+                                    vec![name.to_string()],
+                                ));
+                            }
                             continue;
                         }
                         errors.push(Diagnostic::new(
@@ -1662,10 +1704,7 @@ fn parse_option_value(
                                 None,
                                 TextRange::undefined(),
                                 WATCH_OPTION_0_REQUIRES_A_VALUE_OF_TYPE_1,
-                                vec![
-                                    opt.name.to_string(),
-                                    type_name(opt.kind).to_string(),
-                                ],
+                                vec![opt.name.to_string(), type_name(opt.kind).to_string()],
                             ));
                         } else {
                             errors.push(err(format!("Option '{}' requires a number.", opt.name)));
@@ -2040,7 +2079,8 @@ fn apply_watch_options(options: &HashMap<String, OptValue>, out: &mut WatchOptio
             }
             "watchDirectory" => {
                 if let Some(s) = value.as_str() {
-                    out.directory_kind = parse_watch_directory_kind(s).unwrap_or(WatchDirectoryKind::None);
+                    out.directory_kind =
+                        parse_watch_directory_kind(s).unwrap_or(WatchDirectoryKind::None);
                 } else if matches!(value, OptValue::Null) {
                     out.directory_kind = WatchDirectoryKind::None;
                 }
@@ -2339,15 +2379,9 @@ fn get_parsed_command_line_of_config_file_with_stack(
                 // config in diamond inheritance scenarios (A extends B and C;
                 // both B and C extend D → D parsed once, reused). Mirrors
                 // Go's `getExtendedConfig` (`tsconfigparsing.go:972`).
-                let ext_resolved =
-                    tspath::get_normalized_absolute_path(ext_path, current_dir);
-                let parent = cache.get_or_parse(
-                    &ext_resolved,
-                    ext_path,
-                    current_dir,
-                    fs,
-                    &new_stack,
-                );
+                let ext_resolved = tspath::get_normalized_absolute_path(ext_path, current_dir);
+                let parent =
+                    cache.get_or_parse(&ext_resolved, ext_path, current_dir, fs, &new_stack);
                 extended_configs.push((ext_path.clone(), parent));
             }
             // Options: merge in reverse so the last extends entry wins
@@ -2371,8 +2405,7 @@ fn get_parsed_command_line_of_config_file_with_stack(
             };
             for (ext_path, parent) in &extended_configs {
                 let ext_dir = tspath::get_directory_path(ext_path);
-                let relative_difference =
-                    tspath::convert_to_relative_path(&ext_dir, &compare_opts);
+                let relative_difference = tspath::convert_to_relative_path(&ext_dir, &compare_opts);
                 let rewrite = |spec: &str| -> String {
                     if starts_with_config_dir_template(spec) || tspath::is_rooted_disk_path(spec) {
                         spec.to_string()
@@ -2568,8 +2601,10 @@ fn get_parsed_command_line_of_config_file_with_stack(
     if result.file_names.is_empty() && resolution_stack.is_empty() {
         let can_report = !root_obj.contains_key("files") && !root_obj.contains_key("references");
         if can_report {
-            let include_json = serde_json::to_string(&result.include).unwrap_or_else(|_| "[]".into());
-            let exclude_json = serde_json::to_string(&result.exclude).unwrap_or_else(|_| "[]".into());
+            let include_json =
+                serde_json::to_string(&result.include).unwrap_or_else(|_| "[]".into());
+            let exclude_json =
+                serde_json::to_string(&result.exclude).unwrap_or_else(|_| "[]".into());
             result.errors.push(Diagnostic::new(
                 None,
                 TextRange::undefined(),
@@ -2725,10 +2760,8 @@ fn load_config_from_node_modules(
     // The package name determines which directory contains `package.json`.
     let (package_name, _rest) = crate::module::parse_package_name(module_name);
 
-    let candidate = tspath::normalize_path(&tspath::combine_paths(
-        node_modules_dir,
-        &[module_name],
-    ));
+    let candidate =
+        tspath::normalize_path(&tspath::combine_paths(node_modules_dir, &[module_name]));
 
     // 1. File form: try `<candidate>.json` (or `<candidate>` if it already
     //    ends in `.json`). Mirrors Go's `loadModuleFromFile` with
@@ -2764,10 +2797,8 @@ fn load_config_from_node_modules(
         if let Some(content) = fs.read_file(&package_json_path) {
             if let Ok(fields) = crate::packagejson::parse(&content) {
                 if let Some(tsconfig_field) = fields.path_fields.tsconfig.get_value() {
-                    let resolved = tspath::get_normalized_absolute_path(
-                        tsconfig_field,
-                        &package_dir,
-                    );
+                    let resolved =
+                        tspath::get_normalized_absolute_path(tsconfig_field, &package_dir);
                     if fs.file_exists(&resolved) {
                         return Some(resolved);
                     }
@@ -2842,7 +2873,9 @@ const CONFIG_DIR_TEMPLATE: &str = "${configDir}";
 /// Whether `value` starts with the `${configDir}` template prefix
 /// (case-insensitive). Mirrors Go's `startsWithConfigDirTemplate`.
 fn starts_with_config_dir_template(value: &str) -> bool {
-    value.to_ascii_lowercase().starts_with(&CONFIG_DIR_TEMPLATE.to_ascii_lowercase())
+    value
+        .to_ascii_lowercase()
+        .starts_with(&CONFIG_DIR_TEMPLATE.to_ascii_lowercase())
 }
 
 /// Replace the first `${configDir}` in `value` with `./` and resolve the
@@ -3021,8 +3054,14 @@ fn merge_compiler_options_with_skip(
     merge_tri!(strict_null_checks, "strictNullChecks");
     merge_tri!(strict_function_types, "strictFunctionTypes");
     merge_tri!(strict_bind_call_apply, "strictBindCallApply");
-    merge_tri!(strict_property_initialization, "strictPropertyInitialization");
-    merge_tri!(strict_builtin_iterator_return, "strictBuiltinIteratorReturn");
+    merge_tri!(
+        strict_property_initialization,
+        "strictPropertyInitialization"
+    );
+    merge_tri!(
+        strict_builtin_iterator_return,
+        "strictBuiltinIteratorReturn"
+    );
     merge_tri!(no_implicit_any, "noImplicitAny");
     merge_tri!(no_implicit_this, "noImplicitThis");
     merge_tri!(no_implicit_override, "noImplicitOverride");
@@ -3041,7 +3080,10 @@ fn merge_compiler_options_with_skip(
     merge_tri!(isolated_modules, "isolatedModules");
     merge_tri!(verbatim_module_syntax, "verbatimModuleSyntax");
     merge_tri!(experimental_decorators, "experimentalDecorators");
-    merge_tri!(force_consistent_casing_in_file_names, "forceConsistentCasingInFileNames");
+    merge_tri!(
+        force_consistent_casing_in_file_names,
+        "forceConsistentCasingInFileNames"
+    );
     merge_tri!(use_unknown_in_catch_variables, "useUnknownInCatchVariables");
     merge_tri!(pretty, "pretty");
     merge_tri!(incremental, "incremental");
@@ -3052,7 +3094,9 @@ fn merge_compiler_options_with_skip(
     if dst.module == ModuleKind::None && !skip_fields.contains("module") {
         dst.module = src.module;
     }
-    if dst.module_resolution == ModuleResolutionKind::Unknown && !skip_fields.contains("moduleResolution") {
+    if dst.module_resolution == ModuleResolutionKind::Unknown
+        && !skip_fields.contains("moduleResolution")
+    {
         dst.module_resolution = src.module_resolution;
     }
     if dst.jsx == JsxEmit::None && !skip_fields.contains("jsx") {
@@ -3103,7 +3147,8 @@ fn merge_compiler_options_with_skip(
     if dst.out_file.is_empty() && !skip_fields.contains("outFile") {
         dst.out_file = src.out_file.clone();
     }
-    if dst.module_detection == ModuleDetectionKind::None && !skip_fields.contains("moduleDetection") {
+    if dst.module_detection == ModuleDetectionKind::None && !skip_fields.contains("moduleDetection")
+    {
         dst.module_detection = src.module_detection;
     }
     if dst.new_line == NewLineKind::None && !skip_fields.contains("newLine") {
@@ -3621,13 +3666,21 @@ mod tests {
             parsed.watch_options.directory_kind,
             WatchDirectoryKind::FixedPollingInterval
         );
-        assert_eq!(parsed.watch_options.fallback_polling, PollingKind::PriorityInterval);
+        assert_eq!(
+            parsed.watch_options.fallback_polling,
+            PollingKind::PriorityInterval
+        );
     }
 
     #[test]
     fn watch_options_parse_interval_and_boolean() {
         let parsed = parse_command_line(
-            &args(&["--watchInterval", "250", "--synchronousWatchDirectory", "0.ts"]),
+            &args(&[
+                "--watchInterval",
+                "250",
+                "--synchronousWatchDirectory",
+                "0.ts",
+            ]),
             "/proj",
             None,
         );
@@ -3671,12 +3724,9 @@ mod tests {
         // `--watchInterval` with no value emits TS5080
         // "Watch option 'watchInterval' requires a value of type number."
         let parsed = parse_command_line(&args(&["--watchInterval"]), "/proj", None);
-        assert!(parsed
-            .errors
-            .iter()
-            .any(|d| d.code == 5080
-                && d.message_args.first().map(|s| s.as_str()) == Some("watchInterval")
-                && d.message_args.get(1).map(|s| s.as_str()) == Some("number")));
+        assert!(parsed.errors.iter().any(|d| d.code == 5080
+            && d.message_args.first().map(|s| s.as_str()) == Some("watchInterval")
+            && d.message_args.get(1).map(|s| s.as_str()) == Some("number")));
     }
 
     #[test]
@@ -3714,11 +3764,17 @@ mod tests {
     fn watch_options_do_not_leak_into_compiler_options() {
         // `--watchFile` is a watch option, not a compiler option; it must not
         // appear in the compiler_options map (which would trigger TS5023).
-        let parsed = parse_command_line(&args(&["--watchFile", "usefsevents", "0.ts"]), "/proj", None);
-        assert!(!parsed
-            .errors
-            .iter()
-            .any(|d| d.code == 5023 && d.message_args.iter().any(|a| a == "watchFile")));
+        let parsed = parse_command_line(
+            &args(&["--watchFile", "usefsevents", "0.ts"]),
+            "/proj",
+            None,
+        );
+        assert!(
+            !parsed
+                .errors
+                .iter()
+                .any(|d| d.code == 5023 && d.message_args.iter().any(|a| a == "watchFile"))
+        );
         assert_eq!(parsed.watch_options.file_kind, WatchFileKind::UseFsEvents);
     }
 
@@ -4166,11 +4222,7 @@ mod tests {
                 .iter()
                 .any(|e| e.code == CIRCULARITY_DETECTED_WHILE_RESOLVING_CONFIGURATION_COLON_0.code),
             "expected a circularity diagnostic, got errors: {:?}",
-            parsed
-                .errors
-                .iter()
-                .map(|e| e.code)
-                .collect::<Vec<_>>()
+            parsed.errors.iter().map(|e| e.code).collect::<Vec<_>>()
         );
         // Resolution terminated without stack overflow; own options still apply.
         assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
@@ -4205,7 +4257,11 @@ mod tests {
             "/proj",
             &fs,
         );
-        assert!(parsed.errors.is_empty(), "unexpected errors: {:?}", parsed.errors);
+        assert!(
+            parsed.errors.is_empty(),
+            "unexpected errors: {:?}",
+            parsed.errors
+        );
         // From base1.
         assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
         assert!(parsed.compiler_options.strict.is_true());
@@ -4293,12 +4349,8 @@ mod tests {
         );
         let mut base = CompilerOptions::default();
         base.strict = Tristate::False;
-        let parsed = get_parsed_command_line_of_config_file(
-            "/proj/tsconfig.json",
-            &base,
-            "/proj",
-            &fs,
-        );
+        let parsed =
+            get_parsed_command_line_of_config_file("/proj/tsconfig.json", &base, "/proj", &fs);
         // Command-line `--strict false` overrides config `strict: true`.
         assert!(
             parsed.compiler_options.strict.is_false(),
@@ -4318,14 +4370,8 @@ mod tests {
         fs.insert_dir("/proj/src2");
         fs.insert_file("/proj/src1/a.ts", "export const a = 1;");
         fs.insert_file("/proj/src2/b.ts", "export const b = 2;");
-        fs.insert_file(
-            "/proj/base1.json",
-            r#"{ "include": ["src1/**/*"] }"#,
-        );
-        fs.insert_file(
-            "/proj/base2.json",
-            r#"{ "include": ["src2/**/*"] }"#,
-        );
+        fs.insert_file("/proj/base1.json", r#"{ "include": ["src1/**/*"] }"#);
+        fs.insert_file("/proj/base2.json", r#"{ "include": ["src2/**/*"] }"#);
         fs.insert_file(
             "/proj/tsconfig.json",
             r#"{ "extends": ["./base1.json", "./base2.json"] }"#,
@@ -4360,10 +4406,7 @@ mod tests {
             "/proj/base.json",
             r#"{ "compilerOptions": { "strict": true } }"#,
         );
-        fs.insert_file(
-            "/proj/tsconfig.json",
-            r#"{ "extends": "./base" }"#,
-        );
+        fs.insert_file("/proj/tsconfig.json", r#"{ "extends": "./base" }"#);
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
             &CompilerOptions::default(),
@@ -4623,10 +4666,7 @@ mod tests {
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file("/proj/src/a.ts", "");
-        fs.insert_file(
-            "/proj/tsconfig.json",
-            r#"{ "files": [] }"#,
-        );
+        fs.insert_file("/proj/tsconfig.json", r#"{ "files": [] }"#);
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
             &CompilerOptions::default(),
@@ -5084,7 +5124,10 @@ mod tests {
         // "may only be used with --build" diagnostic (TS5093) instead of the
         // generic unknown-option error.
         let parsed = parse_command_line(&args(&["--dry", "0.ts"]), "/proj", None);
-        assert!(diag_contains(&parsed.errors, "may only be used with '--build'"));
+        assert!(diag_contains(
+            &parsed.errors,
+            "may only be used with '--build'"
+        ));
         assert!(!diag_contains(&parsed.errors, "Unknown compiler option"));
     }
 
@@ -5092,7 +5135,10 @@ mod tests {
     fn test_alternate_mode_verbose_in_compiler_mode() {
         // `--verbose` is build-only; in compiler mode it triggers TS5093.
         let parsed = parse_command_line(&args(&["--verbose"]), "/proj", None);
-        assert!(diag_contains(&parsed.errors, "may only be used with '--build'"));
+        assert!(diag_contains(
+            &parsed.errors,
+            "may only be used with '--build'"
+        ));
     }
 
     #[test]
@@ -5154,7 +5200,10 @@ mod tests {
         // `--builders 0` violates the min-value (1) constraint → TS5002.
         let parsed =
             parse_build_command_line(&args(&["--build", "--builders", "0"]), "/proj", None);
-        assert!(diag_contains(&parsed.errors, "requires value to be greater"));
+        assert!(diag_contains(
+            &parsed.errors,
+            "requires value to be greater"
+        ));
         assert!(diag_contains(&parsed.errors, "builders"));
         assert!(diag_contains(&parsed.errors, "1"));
     }
@@ -5164,7 +5213,10 @@ mod tests {
         // `--builders 1` satisfies the min-value constraint.
         let parsed =
             parse_build_command_line(&args(&["--build", "--builders", "2"]), "/proj", None);
-        assert!(!diag_contains(&parsed.errors, "requires value to be greater"));
+        assert!(!diag_contains(
+            &parsed.errors,
+            "requires value to be greater"
+        ));
         assert_eq!(parsed.build_options.builders, Some(2));
     }
 
@@ -5269,8 +5321,7 @@ mod tests {
             &fs,
         );
         assert_eq!(
-            parsed.compiler_options.out_dir,
-            "/proj/out",
+            parsed.compiler_options.out_dir, "/proj/out",
             "expected ${{configDir}}/out to resolve to /proj/out, got {}",
             parsed.compiler_options.out_dir
         );
@@ -5336,7 +5387,10 @@ mod tests {
             &fs,
         );
         assert_eq!(parsed.compiler_options.declaration_dir, "/proj/decls");
-        assert_eq!(parsed.compiler_options.ts_build_info_file, "/proj/build.tsbuildinfo");
+        assert_eq!(
+            parsed.compiler_options.ts_build_info_file,
+            "/proj/build.tsbuildinfo"
+        );
     }
 
     #[test]
@@ -5384,10 +5438,7 @@ mod tests {
             &fs,
         );
         let paths = parsed.compiler_options.paths.expect("paths should be set");
-        assert_eq!(
-            paths.get("@/*").unwrap(),
-            &vec!["/proj/src/*".to_string()]
-        );
+        assert_eq!(paths.get("@/*").unwrap(), &vec!["/proj/src/*".to_string()]);
         assert_eq!(
             paths.get("lib/*").unwrap(),
             &vec!["/proj/lib/*".to_string()]
@@ -5557,10 +5608,7 @@ mod tests {
         fs.insert_dir("/proj/base");
         fs.insert_dir("/proj/base/src");
         fs.insert_file("/proj/base/src/a.ts", "");
-        fs.insert_file(
-            "/proj/base/tsconfig.json",
-            r#"{ "include": ["src/**/*"] }"#,
-        );
+        fs.insert_file("/proj/base/tsconfig.json", r#"{ "include": ["src/**/*"] }"#);
         fs.insert_file(
             "/proj/tsconfig.json",
             r#"{ "extends": "./base/tsconfig.json" }"#,
@@ -5708,7 +5756,10 @@ mod tests {
         // "src/main.ts" is rewritten to "base/src/main.ts" and resolved
         // against /proj → /proj/base/src/main.ts.
         assert!(
-            parsed.file_names.iter().any(|f| f == "/proj/base/src/main.ts"),
+            parsed
+                .file_names
+                .iter()
+                .any(|f| f == "/proj/base/src/main.ts"),
             "expected /proj/base/src/main.ts in file_names, got {:?}",
             parsed.file_names
         );
@@ -5725,10 +5776,7 @@ mod tests {
         fs.insert_file("/proj/own_src/a.ts", "");
         fs.insert_dir("/proj/base/src");
         fs.insert_file("/proj/base/src/b.ts", "");
-        fs.insert_file(
-            "/proj/base/tsconfig.json",
-            r#"{ "include": ["src/**/*"] }"#,
-        );
+        fs.insert_file("/proj/base/tsconfig.json", r#"{ "include": ["src/**/*"] }"#);
         fs.insert_file(
             "/proj/tsconfig.json",
             r#"{ "extends": "./base/tsconfig.json", "include": ["own_src/**/*"] }"#,
@@ -5855,12 +5903,8 @@ mod tests {
         );
         let mut base = CompilerOptions::default();
         base.strict = crate::core::tristate::Tristate::True;
-        let parsed = get_parsed_command_line_of_config_file(
-            "/proj/tsconfig.json",
-            &base,
-            "/proj",
-            &fs,
-        );
+        let parsed =
+            get_parsed_command_line_of_config_file("/proj/tsconfig.json", &base, "/proj", &fs);
         assert!(
             parsed.compiler_options.strict.is_true(),
             "expected command-line strict=true to survive own strict=null, got {:?}",
@@ -5954,14 +5998,8 @@ mod tests {
             "/proj/d.json",
             r#"{ "compilerOptions": { "strict": true, "noImplicitAny": true } }"#,
         );
-        fs.insert_file(
-            "/proj/b.json",
-            r#"{ "extends": "./d.json" }"#,
-        );
-        fs.insert_file(
-            "/proj/c.json",
-            r#"{ "extends": "./d.json" }"#,
-        );
+        fs.insert_file("/proj/b.json", r#"{ "extends": "./d.json" }"#);
+        fs.insert_file("/proj/c.json", r#"{ "extends": "./d.json" }"#);
         fs.insert_file(
             "/proj/tsconfig.json",
             r#"{ "extends": ["./b.json", "./c.json"] }"#,
@@ -6001,14 +6039,8 @@ mod tests {
             "/proj/d.json",
             r#"{ "compilerOptions": { "strict": true, "Strict": true } }"#,
         );
-        fs.insert_file(
-            "/proj/b.json",
-            r#"{ "extends": "./d.json" }"#,
-        );
-        fs.insert_file(
-            "/proj/c.json",
-            r#"{ "extends": "./d.json" }"#,
-        );
+        fs.insert_file("/proj/b.json", r#"{ "extends": "./d.json" }"#);
+        fs.insert_file("/proj/c.json", r#"{ "extends": "./d.json" }"#);
         fs.insert_file(
             "/proj/tsconfig.json",
             r#"{ "extends": ["./b.json", "./c.json"] }"#,
@@ -6023,11 +6055,7 @@ mod tests {
         // parses D once but returns the cached errors each time, so the
         // error appears twice (once per reference). This matches Go's
         // `getExtendedConfig` behavior.
-        let ts5025_count = parsed
-            .errors
-            .iter()
-            .filter(|d| d.code == 5025)
-            .count();
+        let ts5025_count = parsed.errors.iter().filter(|d| d.code == 5025).count();
         assert_eq!(
             ts5025_count, 2,
             "expected exactly 2 TS5025 errors (D via B and C), got {}: {:?}",
@@ -6042,18 +6070,9 @@ mod tests {
         // The cycle should be detected and reported as TS18000.
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
-        fs.insert_file(
-            "/proj/a.json",
-            r#"{ "extends": "./b.json" }"#,
-        );
-        fs.insert_file(
-            "/proj/b.json",
-            r#"{ "extends": "./a.json" }"#,
-        );
-        fs.insert_file(
-            "/proj/tsconfig.json",
-            r#"{ "extends": "./a.json" }"#,
-        );
+        fs.insert_file("/proj/a.json", r#"{ "extends": "./b.json" }"#);
+        fs.insert_file("/proj/b.json", r#"{ "extends": "./a.json" }"#);
+        fs.insert_file("/proj/tsconfig.json", r#"{ "extends": "./a.json" }"#);
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
             &CompilerOptions::default(),
@@ -6061,10 +6080,7 @@ mod tests {
             &fs,
         );
         // Should detect the cycle and report TS18000.
-        let has_cycle = parsed
-            .errors
-            .iter()
-            .any(|d| d.code == 18000);
+        let has_cycle = parsed.errors.iter().any(|d| d.code == 18000);
         assert!(
             has_cycle,
             "expected TS18000 circularity error, got errors: {:?}",
@@ -6088,10 +6104,7 @@ mod tests {
             "/proj/node_modules/tsconfig-base.json",
             r#"{ "compilerOptions": { "strict": true } }"#,
         );
-        fs.insert_file(
-            "/proj/tsconfig.json",
-            r#"{ "extends": "tsconfig-base" }"#,
-        );
+        fs.insert_file("/proj/tsconfig.json", r#"{ "extends": "tsconfig-base" }"#);
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
             &CompilerOptions::default(),
@@ -6117,10 +6130,7 @@ mod tests {
             "/proj/node_modules/tsconfig-base/tsconfig.json",
             r#"{ "compilerOptions": { "noImplicitAny": true } }"#,
         );
-        fs.insert_file(
-            "/proj/tsconfig.json",
-            r#"{ "extends": "tsconfig-base" }"#,
-        );
+        fs.insert_file("/proj/tsconfig.json", r#"{ "extends": "tsconfig-base" }"#);
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
             &CompilerOptions::default(),
@@ -6151,10 +6161,7 @@ mod tests {
             "/proj/node_modules/tsconfig-base/my-base.json",
             r#"{ "compilerOptions": { "strict": true, "noImplicitThis": true } }"#,
         );
-        fs.insert_file(
-            "/proj/tsconfig.json",
-            r#"{ "extends": "tsconfig-base" }"#,
-        );
+        fs.insert_file("/proj/tsconfig.json", r#"{ "extends": "tsconfig-base" }"#);
         let parsed = get_parsed_command_line_of_config_file(
             "/proj/tsconfig.json",
             &CompilerOptions::default(),

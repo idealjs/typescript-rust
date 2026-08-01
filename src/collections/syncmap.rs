@@ -142,4 +142,30 @@ mod tests {
         assert_eq!(v, 1);
         assert!(loaded);
     }
+
+    // ── Ported from Go internal/collections/syncmap_test.go ──
+
+    #[test]
+    fn test_sync_map_with_nil() {
+        // Go uses SyncMap[string, any] where nil is a valid value distinct from
+        // "key absent". In Rust we model `any`-with-nil as Option<()> where
+        // None represents nil. load() returns Option<V>:
+        //   - key absent  -> None (outer)
+        //   - key present -> Some(None) when the stored value is nil
+        let m: SyncMap<String, Option<()>> = SyncMap::new();
+
+        let got1 = m.load(&"foo".to_string());
+        assert_eq!(got1, None);
+
+        m.store("foo".to_string(), None);
+
+        let got2 = m.load(&"foo".to_string());
+        assert_eq!(got2, Some(None));
+
+        let (too, loaded) = m.load_or_store("too".to_string(), None);
+        assert!(!loaded);
+        assert_eq!(too, None);
+
+        m.for_each(|_, _| true);
+    }
 }

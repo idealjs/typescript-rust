@@ -15,6 +15,7 @@ use crate::binder::Binder;
 use crate::core::compiler_options::CompilerOptions;
 use crate::core::text::TextRange;
 use crate::diagnostics::Category;
+use crate::module;
 use crate::parser::{Parser, script_kind_from_file_name};
 use crate::tspath;
 use crate::vfs::FS;
@@ -30,6 +31,10 @@ use crate::tsoptions::ParsedCommandLine;
 /// Mirrors `compiler.CompilerHost` in Go (a reduced form).
 pub trait CompilerHost: Send + Sync {
     fn fs(&self) -> &dyn FS;
+    /// Return the underlying file system as a cloneable `Arc`, so adapters
+    /// (e.g. the module resolver's `ResolutionHost`) can retain ownership of
+    /// the same FS without lifetime entanglement.
+    fn fs_arc(&self) -> Arc<dyn FS>;
     fn current_directory(&self) -> &str;
     fn default_library_path(&self) -> &str;
     fn use_case_sensitive_file_names(&self) -> bool {
@@ -58,11 +63,46 @@ impl CompilerHost for CompilerHostImpl {
     fn fs(&self) -> &dyn FS {
         self.fs.as_ref()
     }
+    fn fs_arc(&self) -> Arc<dyn FS> {
+        Arc::clone(&self.fs)
+    }
     fn current_directory(&self) -> &str {
         &self.current_directory
     }
     fn default_library_path(&self) -> &str {
         &self.default_library_path
+    }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// ResolutionHostAdapter
+// ────────────────────────────────────────────────────────────────────────────
+
+/// Owned adapter that bridges `CompilerHost` and `module::ResolutionHost`.
+///
+/// Stored as `Arc<dyn ResolutionHost + Send + Sync>` inside the `Resolver`,
+/// so it must own its data (an `Arc<dyn FS>` and a `String` current directory)
+/// rather than borrow from the `CompilerHost`.
+struct ResolutionHostAdapter {
+    fs: Arc<dyn FS>,
+    current_directory: String,
+}
+
+impl ResolutionHostAdapter {
+    fn new(host: &dyn CompilerHost) -> Self {
+        Self {
+            fs: host.fs_arc(),
+            current_directory: host.current_directory().to_string(),
+        }
+    }
+}
+
+impl module::ResolutionHost for ResolutionHostAdapter {
+    fn fs(&self) -> &dyn FS {
+        self.fs.as_ref()
+    }
+    fn get_current_directory(&self) -> &str {
+        &self.current_directory
     }
 }
 
@@ -149,12 +189,60 @@ impl Program {
             );
         }
 
-        // 3. Report any errors from the parsed command line itself.
+        // 3. Resolve module imports (`import`/`export` specifiers) and load any
+        //    resolved dependencies that aren't already part of the program.
+        //    This mirrors Go's `processRootFile`/`fileLoader` import discovery,
+        //    performing a breadth-first walk over every loaded file's `imports`.
+        {
+            let resolution_host: Arc<dyn module::ResolutionHost + Send + Sync> =
+                Arc::new(ResolutionHostAdapter::new(host.as_ref()));
+            let resolver = module::Resolver::new(
+                resolution_host,
+                Arc::new(options.clone()),
+                String::new(), // typings_location
+                String::new(), // project_name
+            );
+
+            let mut visited: std::collections::HashSet<String> = by_name.keys().cloned().collect();
+            let mut queue: Vec<Arc<SourceFile>> = source_files.clone();
+            while let Some(file) = queue.pop() {
+                for import_node in &file.imports {
+                    let module_spec = import_node.text();
+                    if module_spec.is_empty() {
+                        continue;
+                    }
+                    let (resolved, _traces) = resolver.resolve_module_name(
+                        module_spec,
+                        &file.file_name,
+                        crate::core::compiler_options::ModuleKind::None,
+                        None,
+                    );
+                    if let Some(resolved_module) = resolved {
+                        if resolved_module.is_resolved() {
+                            let resolved_path = resolved_module.resolved_file_name.as_str();
+                            if visited.insert(resolved_path.to_string()) {
+                                if let Some(sf) = load_source_file(
+                                    resolved_path,
+                                    host.as_ref(),
+                                    &mut source_files,
+                                    &mut by_name,
+                                    &mut diagnostics,
+                                ) {
+                                    queue.push(sf);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Report any errors from the parsed command line itself.
         for err in &opts.config.errors {
             diagnostics.push(Arc::new(err.clone()));
         }
 
-        // 4. Bind all source files.
+        // 5. Bind all source files.
         let mut binder = Binder::new();
         for file in &source_files {
             binder.bind_source_file(file);
@@ -334,6 +422,44 @@ fn read_and_parse(
         .ok_or_else(|| format!("Cannot read file '{file_name}'."))?;
     let (file, diags) = Parser::parse_source_file_text_with_diagnostics(file_name, text);
     Ok((Arc::new(file), diags))
+}
+
+/// Load a single source file (no `/// <reference path=... />` following):
+/// read, parse, record parse diagnostics, and register it in the program's
+/// file tables. Returns the loaded file, or `None` if it was already loaded
+/// or could not be read.
+///
+/// Used by the module-resolution step to pull in import/export dependencies.
+fn load_source_file(
+    file_name: &str,
+    host: &dyn CompilerHost,
+    source_files: &mut Vec<Arc<SourceFile>>,
+    by_name: &mut HashMap<String, Arc<SourceFile>>,
+    diagnostics: &mut Vec<Arc<Diagnostic>>,
+) -> Option<Arc<SourceFile>> {
+    let normalized = tspath::normalize_path(file_name);
+    if let Some(existing) = by_name.get(&normalized) {
+        return Some(Arc::clone(existing));
+    }
+
+    let (file, parse_diags) = match read_and_parse(&normalized, host) {
+        Ok(result) => result,
+        Err(msg) => {
+            diagnostics.push(Arc::new(file_error_diagnostic(&normalized, &msg)));
+            return None;
+        }
+    };
+
+    for pd in &parse_diags {
+        diagnostics.push(Arc::new(parser_diagnostic_to_diagnostic(
+            Arc::clone(&file),
+            pd,
+        )));
+    }
+
+    by_name.insert(normalized.clone(), Arc::clone(&file));
+    source_files.push(Arc::clone(&file));
+    Some(file)
 }
 
 /// Load a source file and recursively process its `/// <reference path=... />`
@@ -521,15 +647,16 @@ fn parser_diagnostic_to_diagnostic(
     Diagnostic::new(Some(file), pd.range, pd.message, pd.message_args.clone())
 }
 
-fn file_error_diagnostic(file_name: &str, message: &str) -> Diagnostic {
+fn file_error_diagnostic(file_name: &str, _message: &str) -> Diagnostic {
+    use crate::diagnostics::FILE_0_NOT_FOUND;
     Diagnostic {
         file: None,
         loc: TextRange::undefined(),
-        code: 6054, // "File '{0}' not found" (approximate)
+        code: FILE_0_NOT_FOUND.code,
         category: Category::Error,
-        message: None,
-        message_key: "-1",
-        message_args: vec![format!("{message} '{file_name}'.")],
+        message: Some(FILE_0_NOT_FOUND),
+        message_key: FILE_0_NOT_FOUND.key,
+        message_args: vec![file_name.to_string()],
         message_chain: Vec::new(),
         related_information: Vec::new(),
         reports_unnecessary: false,
@@ -717,6 +844,262 @@ mod tests {
         ];
 
         assert_eq!(actual, expected);
+    }
+
+    /// Port of Go's `TestProgram` — FileOrderingImports case.
+    ///
+    /// Same file graph as `program_file_ordering_with_reference_paths` but
+    /// using `import` statements instead of `/// <reference path=... />`
+    /// directives. Go expects files ordered deepest-dependency-first:
+    /// `1.ts … 5.ts, 6.ts … 10.ts, index.ts`.
+    ///
+    /// TODO: The Rust `Program` adds files to the source-file list in
+    /// module-resolution discovery order (root first, then resolved
+    /// dependencies via a stack-based walk), which does not match Go's
+    /// dependency-first ordering. Enable once the file loader reorders
+    /// resolved imports to be dependency-first (mirroring Go's
+    /// `fileLoader.processRootFile`).
+    #[test]
+    #[ignore = "TODO: import-based file ordering (dependency-first) not yet implemented"]
+    fn program_file_ordering_imports() {
+        let fs = Arc::new(InMemoryFS::new());
+        let files = [
+            (
+                "/dev/src/index.ts",
+                "import * as five from '../src2/a/5.ts';\nimport * as ten from '../src2/a/10.ts';",
+            ),
+            ("/dev/src2/a/5.ts", "import * as four from './4.ts';"),
+            ("/dev/src2/a/4.ts", "import * as three from './b/3.ts';"),
+            ("/dev/src2/a/b/3.ts", "import * as two from './2.ts';"),
+            ("/dev/src2/a/b/2.ts", "import * as one from './c/1.ts';"),
+            ("/dev/src2/a/b/c/1.ts", "console.log('hello');"),
+            ("/dev/src2/a/10.ts", "import * as nine from './b/c/d/9.ts';"),
+            (
+                "/dev/src2/a/b/c/d/9.ts",
+                "import * as eight from './e/8.ts';",
+            ),
+            (
+                "/dev/src2/a/b/c/d/e/8.ts",
+                "import * as seven from './7.ts';",
+            ),
+            (
+                "/dev/src2/a/b/c/d/e/7.ts",
+                "import * as six from './f/6.ts';",
+            ),
+            ("/dev/src2/a/b/c/d/e/f/6.ts", "console.log('world!');"),
+        ];
+        for (name, content) in &files {
+            fs.insert_file(name, content);
+        }
+
+        let parsed = ParsedCommandLine {
+            compiler_options: {
+                let mut opts = CompilerOptions::default();
+                opts.no_lib = Tristate::True;
+                opts
+            },
+            file_names: vec!["/dev/src/index.ts".to_string()],
+            ..Default::default()
+        };
+        let host = Arc::new(CompilerHostImpl::new(
+            fs,
+            "/dev/src".to_string(),
+            lib_path(),
+        ));
+        let program = Program::new(ProgramOptions {
+            config: parsed,
+            host,
+        });
+
+        let actual: Vec<&str> = program
+            .source_files()
+            .iter()
+            .map(|f| f.file_name.as_str())
+            .collect();
+        let expected = vec![
+            "/dev/src2/a/b/c/1.ts",
+            "/dev/src2/a/b/2.ts",
+            "/dev/src2/a/b/3.ts",
+            "/dev/src2/a/4.ts",
+            "/dev/src2/a/5.ts",
+            "/dev/src2/a/b/c/d/e/f/6.ts",
+            "/dev/src2/a/b/c/d/e/7.ts",
+            "/dev/src2/a/b/c/d/e/8.ts",
+            "/dev/src2/a/b/c/d/9.ts",
+            "/dev/src2/a/10.ts",
+            "/dev/src/index.ts",
+        ];
+        assert_eq!(actual, expected);
+    }
+
+    /// Port of Go's `TestProgram` — FileOrderingCycles case.
+    ///
+    /// Same graph as `program_file_ordering_imports` but with cyclic imports
+    /// (3.ts and 9.ts import back to index.ts). Go expects the same
+    /// dependency-first ordering, with cycles broken gracefully.
+    ///
+    /// TODO: Same blocker as `program_file_ordering_imports` — the Rust file
+    /// loader does not yet reorder resolved imports to be dependency-first.
+    /// Enable once that is implemented.
+    #[test]
+    #[ignore = "TODO: import-based file ordering (dependency-first) not yet implemented"]
+    fn program_file_ordering_cycles() {
+        let fs = Arc::new(InMemoryFS::new());
+        let files = [
+            (
+                "/dev/src/index.ts",
+                "import * as five from '../src2/a/5.ts';\nimport * as ten from '../src2/a/10.ts';",
+            ),
+            ("/dev/src2/a/5.ts", "import * as four from './4.ts';"),
+            ("/dev/src2/a/4.ts", "import * as three from './b/3.ts';"),
+            (
+                "/dev/src2/a/b/3.ts",
+                "import * as two from './2.ts';\nimport * as cycle from '/dev/src/index.ts';",
+            ),
+            ("/dev/src2/a/b/2.ts", "import * as one from './c/1.ts';"),
+            ("/dev/src2/a/b/c/1.ts", "console.log('hello');"),
+            ("/dev/src2/a/10.ts", "import * as nine from './b/c/d/9.ts';"),
+            (
+                "/dev/src2/a/b/c/d/9.ts",
+                "import * as eight from './e/8.ts';\nimport * as cycle from '/dev/src/index.ts';",
+            ),
+            (
+                "/dev/src2/a/b/c/d/e/8.ts",
+                "import * as seven from './7.ts';",
+            ),
+            (
+                "/dev/src2/a/b/c/d/e/7.ts",
+                "import * as six from './f/6.ts';",
+            ),
+            ("/dev/src2/a/b/c/d/e/f/6.ts", "console.log('world!');"),
+        ];
+        for (name, content) in &files {
+            fs.insert_file(name, content);
+        }
+
+        let parsed = ParsedCommandLine {
+            compiler_options: {
+                let mut opts = CompilerOptions::default();
+                opts.no_lib = Tristate::True;
+                opts
+            },
+            file_names: vec!["/dev/src/index.ts".to_string()],
+            ..Default::default()
+        };
+        let host = Arc::new(CompilerHostImpl::new(
+            fs,
+            "/dev/src".to_string(),
+            lib_path(),
+        ));
+        let program = Program::new(ProgramOptions {
+            config: parsed,
+            host,
+        });
+
+        let actual: Vec<&str> = program
+            .source_files()
+            .iter()
+            .map(|f| f.file_name.as_str())
+            .collect();
+        let expected = vec![
+            "/dev/src2/a/b/c/1.ts",
+            "/dev/src2/a/b/2.ts",
+            "/dev/src2/a/b/3.ts",
+            "/dev/src2/a/4.ts",
+            "/dev/src2/a/5.ts",
+            "/dev/src2/a/b/c/d/e/f/6.ts",
+            "/dev/src2/a/b/c/d/e/7.ts",
+            "/dev/src2/a/b/c/d/e/8.ts",
+            "/dev/src2/a/b/c/d/9.ts",
+            "/dev/src2/a/10.ts",
+            "/dev/src/index.ts",
+        ];
+        assert_eq!(actual, expected);
+    }
+
+    /// Module resolution: importing `"./foo"` should cause `foo.ts` to be
+    /// resolved and loaded into the program, even though it isn't listed as a
+    /// root file. This is the P5.6 integration of the `Resolver` into `Program`.
+    #[test]
+    fn program_resolves_module_imports() {
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/src");
+        fs.insert_file(
+            "/src/main.ts",
+            "import { foo } from \"./foo\"; export const x = foo;",
+        );
+        fs.insert_file("/src/foo.ts", "export const foo: number = 42;");
+
+        let parsed = ParsedCommandLine {
+            compiler_options: {
+                let mut opts = CompilerOptions::default();
+                opts.no_lib = Tristate::True;
+                opts
+            },
+            file_names: vec!["/src/main.ts".to_string()],
+            ..Default::default()
+        };
+        let host = Arc::new(CompilerHostImpl::new(
+            fs,
+            "/src".to_string(),
+            "lib.d.ts".to_string(),
+        ));
+        let program = Program::new(ProgramOptions {
+            config: parsed,
+            host,
+        });
+
+        // Should have loaded main.ts AND the resolved dependency foo.ts.
+        assert_eq!(program.source_files().len(), 2);
+        assert!(
+            program.get_source_file("/src/foo.ts").is_some(),
+            "expected /src/foo.ts to be loaded via import resolution"
+        );
+        assert!(
+            program.get_source_file("/src/main.ts").is_some(),
+            "expected /src/main.ts to be loaded as a root file"
+        );
+    }
+
+    /// Transitive module resolution: `a.ts` imports `b.ts`, which imports `c.ts`.
+    /// The resolver's BFS walk should pull in the whole dependency chain.
+    #[test]
+    fn program_resolves_transitive_module_imports() {
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/src");
+        fs.insert_file(
+            "/src/a.ts",
+            "import { b } from \"./b\"; export const a = b;",
+        );
+        fs.insert_file(
+            "/src/b.ts",
+            "import { c } from \"./c\"; export const b = c;",
+        );
+        fs.insert_file("/src/c.ts", "export const c: number = 3;");
+
+        let parsed = ParsedCommandLine {
+            compiler_options: {
+                let mut opts = CompilerOptions::default();
+                opts.no_lib = Tristate::True;
+                opts
+            },
+            file_names: vec!["/src/a.ts".to_string()],
+            ..Default::default()
+        };
+        let host = Arc::new(CompilerHostImpl::new(
+            fs,
+            "/src".to_string(),
+            "lib.d.ts".to_string(),
+        ));
+        let program = Program::new(ProgramOptions {
+            config: parsed,
+            host,
+        });
+
+        // All three files should be loaded.
+        assert_eq!(program.source_files().len(), 3);
+        assert!(program.get_source_file("/src/b.ts").is_some());
+        assert!(program.get_source_file("/src/c.ts").is_some());
     }
 
     /// Port of Go's `TestIncludeProcessorDiagnosticsWithMissingFileCasing`.

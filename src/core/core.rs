@@ -225,4 +225,18 @@ mod tests {
         assert_eq!(append_if_unique(&[1, 2], &2), vec![1, 2]);
         assert_eq!(append_if_unique(&[1, 2], &3), vec![1, 2, 3]);
     }
+
+    // ── Ported from Go internal/core/pattern_test.go ──
+
+    #[test]
+    #[ignore = "TODO: Pattern / TryParsePattern does not exist in Rust yet"]
+    fn test_pattern_overlapping_match() {
+        // Ported from TestPatternOverlappingMatch:
+        //   let p = try_parse_pattern("ab*ab");
+        //   assert!(!p.matches("ab"));
+        //   assert!(p.matches("abXab"));
+        //   assert_eq!(p.matched_text("abXab"), "X");
+        //   assert!(p.matches("abab"));
+        //   assert_eq!(p.matched_text("abab"), "");
+    }
 }

@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+
+import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ownPath = fileURLToPath(import.meta.url);
+
+// Try to find the Rust binary in order of preference:
+// 1. Next to this shim (npm/bin/tsgo → npm/bin/tsox or npm/bin/tsgo)
+// 2. In the repo's target/release directory
+// 3. In the built/local directory
+// Note: skip the candidate that resolves to this shim itself, otherwise the
+// shim would re-exec itself infinitely in development (where bin/tsgo *is* the shim).
+
+const candidates = [
+    // Installed alongside the shim
+    join(__dirname, "tsox"),
+    join(__dirname, "tsgo"),
+    // Repo build output (development)
+    join(__dirname, "..", "..", "target", "release", "tsox"),
+    join(__dirname, "..", "..", "target", "release", "tsgo"),
+    // Go oracle fallback
+    join(__dirname, "..", "..", "built", "local", "tsgo"),
+];
+
+let exe = null;
+for (const candidate of candidates) {
+    if (candidate === ownPath) continue;
+    if (existsSync(candidate)) {
+        exe = candidate;
+        break;
+    }
+}
+
+if (!exe) {
+    process.stderr.write("tsgo: binary not found. Run 'cargo build --release' first.\n");
+    process.exit(1);
+}
+
+try {
+    execFileSync(exe, process.argv.slice(2), { stdio: "inherit" });
+} catch (e) {
+    process.exitCode = e.status || 1;
+}

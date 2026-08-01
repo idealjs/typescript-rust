@@ -220,4 +220,29 @@ mod tests {
             "reverse at 1: UTF16ToUTF8"
         );
     }
+
+    #[test]
+    #[ignore = "TODO: lone-surrogate (WTF-8 sentinel) text cannot be represented as a Rust &str"]
+    fn test_position_map_lone_surrogate_sentinel() {
+        // Ported 1:1 from Go internal/ast/positionmap_test.go
+        // TestPositionMapLoneSurrogateSentinel.
+        //
+        // Go constructs `text` as "a" + stringutil.EncodeJSStringRune(0xD800)
+        // + "b", where the lone surrogate is stored as a 3-byte WTF-8 sentinel
+        // (0xED 0xA0 0x80). Go's ComputePositionMap uses
+        // stringutil.DecodeJSStringRune to decode the sentinel as a single
+        // code point that is 3 UTF-8 bytes but 1 UTF-16 code unit (delta +2).
+        //
+        // Rust `&str` cannot hold the WTF-8 sentinel (it is invalid UTF-8), and
+        // compute_position_map iterates `char_indices`, which yields only valid
+        // Unicode scalar values. Porting this test requires a WTF-8-aware text
+        // type plus a sentinel-aware position map.
+        //
+        // Go assertions (text length is 1 + 3 + 1 = 5 bytes):
+        //   text := "a" + EncodeJSStringRune(0xD800) + "b"
+        //   pm := ComputePositionMap(text)
+        //   assert(!pm.IsAsciiOnly())
+        //   assert(pm.UTF8ToUTF16(len(text)) == 3)    // 1 + 1 + 1 UTF-16 units
+        //   assert(pm.UTF16ToUTF8(2) == len(text)-1)  // UTF-16 offset 2 -> byte 4
+    }
 }

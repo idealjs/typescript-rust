@@ -59,7 +59,12 @@ impl Node {
 
     /// Create a node with a specific kind, data, source location, and flags.
     /// Used by the JSDoc reparser to mark synthesized nodes with `Reparsed`/`HasJSDoc`.
-    pub fn with_loc_flags(kind: SyntaxKind, data: NodeData, loc: TextRange, flags: NodeFlags) -> Self {
+    pub fn with_loc_flags(
+        kind: SyntaxKind,
+        data: NodeData,
+        loc: TextRange,
+        flags: NodeFlags,
+    ) -> Self {
         Self {
             kind,
             flags,

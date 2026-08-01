@@ -27,8 +27,8 @@ use crate::diagnostics::messages_generated::{
     THIS_EXPRESSION_IS_NOT_CALLABLE, THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE,
     TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
 };
-use crate::jsnum;
 use crate::evaluator::{EvalResult, EvalValue};
+use crate::jsnum;
 
 use super::tracer::Tracer;
 use super::types::*;
@@ -92,7 +92,10 @@ pub trait Program: Send + Sync {
     /// STUB: Returns `ModuleKind::None`. Go's `GetEmitModuleFormatOfFile`
     /// determines CJS vs ESM for a file, driving import/export elision and
     /// `VerbatimModuleSyntax` decisions.
-    fn get_emit_module_format_of_file(&self, _file_name: &str) -> crate::core::compiler_options::ModuleKind {
+    fn get_emit_module_format_of_file(
+        &self,
+        _file_name: &str,
+    ) -> crate::core::compiler_options::ModuleKind {
         crate::core::compiler_options::ModuleKind::None
     }
 
@@ -2222,17 +2225,11 @@ impl Checker {
                 self.string_type()
             }
             SyntaxKind::NoSubstitutionTemplateLiteral => self.string_type(),
-            SyntaxKind::TrueKeyword => {
-                self.get_fresh_type_of_literal_type(&self.true_type())
-            }
-            SyntaxKind::FalseKeyword => {
-                self.get_fresh_type_of_literal_type(&self.false_type())
-            }
+            SyntaxKind::TrueKeyword => self.get_fresh_type_of_literal_type(&self.true_type()),
+            SyntaxKind::FalseKeyword => self.get_fresh_type_of_literal_type(&self.false_type()),
             SyntaxKind::NullKeyword => self.null_type(),
             SyntaxKind::UndefinedKeyword => self.undefined_type(),
-            SyntaxKind::BigIntLiteral => {
-                self.get_fresh_type_of_literal_type(&self.bigint_type())
-            }
+            SyntaxKind::BigIntLiteral => self.get_fresh_type_of_literal_type(&self.bigint_type()),
             SyntaxKind::ArrayLiteralExpression => {
                 return self.get_type_of_array_literal(node);
             }
@@ -4284,11 +4281,21 @@ impl Checker {
                     let init_type = self.get_type_of_node(init);
                     if !self.is_type_assignable_to(&init_type, &annotation_type) {
                         let file = self.current_file.clone();
-                        let init_str = self.type_to_string(&init_type);
+                        // Generalize literal types for error display (mirrors Go's
+                        // reportRelationError: when source is a literal type and
+                        // target can't have singleton types, widen to base type).
+                        let display_type = if crate::checker::is_literal_type(&init_type) {
+                            self.get_base_type_of_literal_type(&init_type)
+                        } else {
+                            init_type.clone()
+                        };
+                        let init_str = self.type_to_string(&display_type);
                         let annot_str = self.type_to_string(&annotation_type);
+                        // Report at the variable declaration (name), not the
+                        // initializer — mirrors Go's checkVariableLikeDeclaration.
                         self.diagnostics.add(crate::ast::Diagnostic::new(
                             file,
-                            init.loc,
+                            node.loc,
                             TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
                             vec![init_str, annot_str],
                         ));
@@ -4748,12 +4755,18 @@ impl Checker {
         auto_value: Option<f64>,
         _previous: Option<&Arc<Node>>,
     ) -> EvalResult {
-        let has_initializer = matches!(&member.data, NodeData::EnumMember(d) if d.initializer.is_some());
+        let has_initializer =
+            matches!(&member.data, NodeData::EnumMember(d) if d.initializer.is_some());
         if has_initializer {
             return self.compute_constant_enum_member_value(member);
         }
         match auto_value {
-            Some(v) => EvalResult::new(Some(EvalValue::Number(jsnum::Number(v))), false, false, false),
+            Some(v) => EvalResult::new(
+                Some(EvalValue::Number(jsnum::Number(v))),
+                false,
+                false,
+                false,
+            ),
             None => EvalResult::none(),
         }
     }
@@ -6329,5 +6342,90 @@ mod tests {
     fn ternary_and_or() {
         assert_eq!(Ternary::True.and(Ternary::False), Ternary::False);
         assert_eq!(Ternary::True.or(Ternary::False), Ternary::True);
+    }
+
+    // ── Ports of Go checker tests ──────────────────────────────────────────
+
+    /// Port of Go's `TestGetSymbolAtLocation`.
+    ///
+    /// Go test sets up a program with an interface, a variable, and a property
+    /// access expression, builds a type checker, then asserts that
+    /// `checker.GetSymbolAtLocation` returns a non-nil symbol for the interface
+    /// name, the variable name, and the property access expression.
+    ///
+    /// TODO: The Rust checker does not yet implement `get_symbol_at_location`.
+    /// The emit resolver has `get_symbol_of_declaration`, but the full
+    /// symbol-at-location lookup (which walks parent nodes for imported symbols)
+    /// is not ported. Enable this test once the method is implemented.
+    #[test]
+    #[ignore = "TODO: Checker::get_symbol_at_location is not yet implemented"]
+    fn get_symbol_at_location() {
+        use crate::bundled::{BundledFS, lib_path};
+        use crate::compiler::{CompilerHostImpl, Program, ProgramOptions};
+        use crate::tsoptions::ParsedCommandLine;
+        use crate::vfs::InMemoryFS;
+        use std::sync::Arc;
+
+        let content = "interface Foo {\n  bar: string;\n}\ndeclare const foo: Foo;\nfoo.bar;";
+        let inner = Arc::new(InMemoryFS::new());
+        inner.insert_file("/foo.ts", content);
+        inner.insert_file(
+            "/tsconfig.json",
+            "{\n  \"compilerOptions\": {},\n  \"files\": [\"foo.ts\"]\n}",
+        );
+        let fs = Arc::new(BundledFS::new(inner));
+
+        let parsed = ParsedCommandLine {
+            file_names: vec!["/foo.ts".to_string()],
+            ..Default::default()
+        };
+        let host = Arc::new(CompilerHostImpl::new(fs, "/".to_string(), lib_path()));
+        let program = Arc::new(Program::new(ProgramOptions {
+            config: parsed,
+            host,
+        }));
+
+        let mut checker = program.build_checker();
+        let file = program.get_source_file("/foo.ts").expect("foo.ts");
+        checker.check_source_file(&file);
+
+        // TODO: once get_symbol_at_location is implemented, look up symbols for
+        // the interface name ("Foo"), the variable name ("foo"), and the
+        // property access ("foo.bar") and assert each is Some.
+    }
+
+    /// Port of Go's `TestTracerPushPreservesEndArgMutations`.
+    ///
+    /// Go test starts a tracing session, pushes a checker tracer span with an
+    /// `args` map, mutates the map after `Push` returns, then pops the span.
+    /// It verifies that:
+    /// 1. `Push` does not leak the injected `checkerId` into the caller's map.
+    /// 2. The `end` (pop) mutations (`variances`) ARE captured in the trace.
+    /// 3. The begin event has `checkerId` set and `variances` nil; the end
+    ///    event has both `checkerId` and `variances` set.
+    ///
+    /// TODO: The Rust `Tracer` API differs significantly from Go's. It uses
+    /// `Tracer::start(name)` returning a `TraceSpan` guard with no arg-map
+    /// support, no `Push`/`pop` closure pattern, and no filesystem-based
+    /// `StartTracing`/`StopTracing` output. Port once the tracer API is
+    /// expanded to match Go's `checker.Tracer`.
+    #[test]
+    #[ignore = "TODO: Tracer::push with arg maps and tracing-to-file not yet implemented"]
+    fn tracer_push_preserves_end_arg_mutations() {
+        // Port of Go's TestTracerPushPreservesEndArgMutations.
+        //
+        // Go flow:
+        //   tr, _ := tracing.StartTracing(fsys, "/trace", "", true)
+        //   args := map[string]any{"id": 1}
+        //   tracer := NewTracer(tr, 7)
+        //   pop := tracer.Push(tracing.PhaseCheckTypes, "getVariancesWorker", args, true)
+        //   args["variances"] = []string{"out"}
+        //   pop()
+        //   // assert begin event args["checkerId"] == 7, args["variances"] == nil
+        //   // assert end event args["checkerId"] == 7, args["variances"] == ["out"]
+        //
+        // The Rust Tracer does not yet support arg maps, the Push/pop pattern,
+        // or JSON trace-file output. This test will be enabled once those are
+        // implemented.
     }
 }

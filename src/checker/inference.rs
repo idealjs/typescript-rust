@@ -996,11 +996,7 @@ impl Checker {
     }
 
     /// Get the element type at `index` from an array or tuple type.
-    fn get_element_type_of_array(
-        &mut self,
-        t: &Arc<Type>,
-        index: usize,
-    ) -> Option<Arc<Type>> {
+    fn get_element_type_of_array(&mut self, t: &Arc<Type>, index: usize) -> Option<Arc<Type>> {
         // Tuple type: return the specific element type if in range.
         if let TypeData::Tuple(tuple) = &t.data {
             if index < tuple.element_infos.len() {
@@ -1020,11 +1016,7 @@ impl Checker {
     /// (Reuses `get_property_of_type` from flow.rs via `pub(super)`; defined
     /// here under a different name to avoid clashing with flow.rs's
     /// `get_property_type_of_type`.)
-    fn property_type_of_type(
-        &mut self,
-        t: &Arc<Type>,
-        name: &str,
-    ) -> Option<Arc<Type>> {
+    fn property_type_of_type(&mut self, t: &Arc<Type>, name: &str) -> Option<Arc<Type>> {
         let prop = self.get_property_of_type(t, name)?;
         Some(self.get_type_of_symbol(&prop))
     }
@@ -1045,11 +1037,10 @@ impl Checker {
 
         let parent = node.parent.as_ref()?;
         match &parent.data {
-            NodeData::VariableDeclaration(data) => {
-                data.type_node
-                    .as_ref()
-                    .map(|tn| self.get_type_from_type_node(tn))
-            }
+            NodeData::VariableDeclaration(data) => data
+                .type_node
+                .as_ref()
+                .map(|tn| self.get_type_from_type_node(tn)),
             NodeData::ReturnStatement(_) => {
                 // return genericFn(...) — contextual type is the function's
                 // declared return type.

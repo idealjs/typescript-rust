@@ -117,4 +117,46 @@ mod tests {
         let values: Vec<&str> = s.iter().copied().collect();
         assert_eq!(values, vec!["a", "c"]);
     }
+
+    // ── Ported from Go internal/collections/ordered_set_test.go ──
+
+    #[test]
+    fn test_ordered_set() {
+        let mut s: OrderedSet<i32> = OrderedSet::new();
+
+        s.add(1);
+        s.add(2);
+        s.add(3);
+
+        assert!(s.has(&1));
+        assert!(s.has(&2));
+        assert!(s.has(&3));
+
+        assert!(s.delete(&2));
+
+        let values: Vec<i32> = s.iter().copied().collect();
+        assert_eq!(values.len(), 2);
+        assert!(values.windows(2).all(|w| w[0] <= w[1]));
+
+        s.clear();
+
+        assert_eq!(s.len(), 0);
+        assert!(!s.has(&1));
+        assert!(!s.has(&2));
+        assert!(!s.has(&3));
+
+        let s2 = s.clone();
+        // In Go: assert.Assert(t, s != s2) -- clone is a separate object.
+        assert_eq!(s2.len(), 0);
+    }
+
+    #[test]
+    #[ignore = "TODO: Go's testing.AllocsPerRun has no Rust equivalent for allocation counting"]
+    fn test_ordered_set_with_size_hint() {
+        // Ported from TestOrderedSetWithSizeHint:
+        // const N: usize = 1024;
+        // let mut s = OrderedSet::with_capacity(N);
+        // for i in 0..N { s.add(i); }
+        // Go verifies allocs < 10; no direct Rust equivalent without a custom allocator.
+    }
 }

@@ -276,4 +276,103 @@ mod tests {
         assert!(!result.stopped);
         assert!(result.path.is_empty());
     }
+
+    // ── Ported from Go internal/core/bfs_test.go ──
+
+    fn diamond_graph() -> std::collections::HashMap<String, Vec<String>> {
+        let mut g = std::collections::HashMap::new();
+        g.insert("A".to_string(), vec!["B".to_string(), "C".to_string()]);
+        g.insert("B".to_string(), vec!["D".to_string()]);
+        g.insert("C".to_string(), vec!["D".to_string()]);
+        g.insert("D".to_string(), vec![]);
+        g
+    }
+
+    #[test]
+    fn bfs_parallel_find_specific_node() {
+        let graph = diamond_graph();
+        let result = bfs_parallel(
+            "A".to_string(),
+            move |n| graph.get(n).cloned().unwrap_or_default(),
+            |n| (n == "D", true),
+        );
+        assert!(result.stopped, "Expected search to stop at D");
+        assert_eq!(
+            result.path,
+            vec!["D".to_string(), "B".to_string(), "A".to_string()]
+        );
+    }
+
+    #[test]
+    fn bfs_parallel_visit_all_nodes() {
+        use std::sync::{Arc, Mutex};
+        let graph = diamond_graph();
+        let visited = Arc::new(Mutex::new(Vec::<String>::new()));
+        let visited_clone = visited.clone();
+        let result = bfs_parallel(
+            "A".to_string(),
+            move |n| graph.get(n).cloned().unwrap_or_default(),
+            move |n| {
+                visited_clone.lock().unwrap().push(n.clone());
+                (false, false) // Never stop early
+            },
+        );
+        // Should return stopped=false since we never return true
+        assert!(!result.stopped, "Expected search to not stop early");
+        assert!(
+            result.path.is_empty(),
+            "Expected empty path when visit function never returns true"
+        );
+        // Should visit all nodes exactly once
+        let mut visited = visited.lock().unwrap().clone();
+        visited.sort();
+        assert_eq!(
+            visited,
+            vec![
+                "A".to_string(),
+                "B".to_string(),
+                "C".to_string(),
+                "D".to_string()
+            ]
+        );
+    }
+
+    #[test]
+    fn bfs_parallel_returns_stop_over_fallback() {
+        // Test that a stop result is preferred over a fallback
+        let graph = diamond_graph();
+        let result = bfs_parallel(
+            "A".to_string(),
+            move |n| graph.get(n).cloned().unwrap_or_default(),
+            |n| match n.as_str() {
+                "A" => (true, false), // Record fallback
+                "D" => (true, true),  // Stop at D
+                _ => (false, false),
+            },
+        );
+        assert!(result.stopped, "Expected search to stop at D");
+        assert_eq!(
+            result.path,
+            vec!["D".to_string(), "B".to_string(), "A".to_string()]
+        );
+    }
+
+    #[test]
+    #[ignore = "TODO: bfs_parallel_ex does not expose the external visited set (SyncSet); \
+                early-termination visited checks cannot be verified"]
+    fn bfs_parallel_early_termination() {
+        // Ported from TestBreadthFirstSearchParallel "early termination":
+        // Graph with Root -> L1A/L1B -> L2A/L2B/L2C -> L3A.
+        // Visits Root, L1A, L1B, L2A, L2B (not L3A) when stopping at L2B.
+        // Requires BreadthFirstSearchOptions.Visited (SyncSet) which is not in the Rust API.
+    }
+
+    #[test]
+    #[ignore = "TODO: bfs_parallel_ex does not expose the external visited set (SyncSet); \
+                fallback visited checks cannot be verified"]
+    fn bfs_parallel_returns_fallback() {
+        // Ported from TestBreadthFirstSearchParallel "returns fallback when no other result found":
+        // result.Stopped == false, result.Path == ["A"], and visited.Has("B"/"C"/"D").
+        // Requires BreadthFirstSearchOptions.Visited (SyncSet) which is not in the Rust API.
+    }
 }

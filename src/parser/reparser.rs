@@ -188,25 +188,27 @@ fn reparse_import_tag(tag: &Arc<Node>) -> Option<Arc<Node>> {
     let (import_clause, module_specifier, attributes) = match &tag.data {
         NodeData::JSDocImportTag(d) => {
             let clause = d.import_clause.as_ref()?;
-            (clause.clone(), d.module_specifier.clone(), d.attributes.clone())
+            (
+                clause.clone(),
+                d.module_specifier.clone(),
+                d.attributes.clone(),
+            )
         }
         _ => return None,
     };
 
     // Set phase_modifier to TypeKeyword on the import clause
     let import_clause = match &import_clause.data {
-        NodeData::ImportClause(d) => {
-            Arc::new(Node::with_loc_flags(
-                SyntaxKind::ImportClause,
-                NodeData::ImportClause(ImportClauseData {
-                    phase_modifier: Some(SyntaxKind::TypeKeyword),
-                    name: d.name.clone(),
-                    named_bindings: d.named_bindings.clone(),
-                }),
-                import_clause.loc,
-                NodeFlags::Reparsed,
-            ))
-        }
+        NodeData::ImportClause(d) => Arc::new(Node::with_loc_flags(
+            SyntaxKind::ImportClause,
+            NodeData::ImportClause(ImportClauseData {
+                phase_modifier: Some(SyntaxKind::TypeKeyword),
+                name: d.name.clone(),
+                named_bindings: d.named_bindings.clone(),
+            }),
+            import_clause.loc,
+            NodeFlags::Reparsed,
+        )),
         _ => import_clause.clone(),
     };
 
@@ -238,9 +240,7 @@ fn reparse_overload_tag(
     // Only create overload signatures for function/method/constructor declarations
     let is_valid_parent = matches!(
         parent.kind,
-        SyntaxKind::FunctionDeclaration
-            | SyntaxKind::MethodDeclaration
-            | SyntaxKind::Constructor
+        SyntaxKind::FunctionDeclaration | SyntaxKind::MethodDeclaration | SyntaxKind::Constructor
     );
     if !is_valid_parent {
         return None;
@@ -335,21 +335,19 @@ fn reparse_jsdoc_signature(
                 NodeFlags::Reparsed,
             ))
         }
-        SyntaxKind::Constructor => {
-            Arc::new(Node::with_loc_flags(
-                SyntaxKind::Constructor,
-                NodeData::ConstructorDeclaration(ConstructorDeclarationData {
-                    modifiers,
-                    type_parameters,
-                    parameters,
-                    type_node: return_type,
-                    full_signature: None,
-                    body: None,
-                }),
-                loc,
-                NodeFlags::Reparsed,
-            ))
-        }
+        SyntaxKind::Constructor => Arc::new(Node::with_loc_flags(
+            SyntaxKind::Constructor,
+            NodeData::ConstructorDeclaration(ConstructorDeclarationData {
+                modifiers,
+                type_parameters,
+                parameters,
+                type_node: return_type,
+                full_signature: None,
+                body: None,
+            }),
+            loc,
+            NodeFlags::Reparsed,
+        )),
         SyntaxKind::JSDocCallbackTag => {
             // For @callback, build a FunctionTypeNode
             Arc::new(Node::with_loc_flags(
@@ -388,9 +386,7 @@ fn reparse_jsdoc_signature(
 /// Extract parameters and return type from a JSDocSignature node.
 ///
 /// Returns `(parameters, return_type)`.
-fn extract_jsdoc_signature_data(
-    js_signature: &Arc<Node>,
-) -> (Vec<Arc<Node>>, Option<Arc<Node>>) {
+fn extract_jsdoc_signature_data(js_signature: &Arc<Node>) -> (Vec<Arc<Node>>, Option<Arc<Node>>) {
     match &js_signature.data {
         NodeData::JSDocSignature(d) => {
             let params: Vec<Arc<Node>> = d
@@ -402,12 +398,12 @@ fn extract_jsdoc_signature_data(
             let return_type = d.type_node.as_ref().and_then(|tn| {
                 // If it's a JSDocReturnTag, extract the type expression
                 match &tn.data {
-                    NodeData::JSDocReturnTag(rt) => rt.type_expression.as_ref().and_then(|te| {
-                        match &te.data {
+                    NodeData::JSDocReturnTag(rt) => {
+                        rt.type_expression.as_ref().and_then(|te| match &te.data {
                             NodeData::JSDocTypeExpression(ted) => Some(ted.type_node.clone()),
                             _ => None,
-                        }
-                    }),
+                        })
+                    }
                     _ => None,
                 }
             });
@@ -535,7 +531,9 @@ fn reparse_jsdoc_type_literal(t: &Arc<Node>) -> Arc<Node> {
                 continue;
             }
             let (name, is_bracketed, type_expression) = match &prop.data {
-                NodeData::JSDocParameterOrPropertyTag(d) => (&d.name, d.is_bracketed, &d.type_expression),
+                NodeData::JSDocParameterOrPropertyTag(d) => {
+                    (&d.name, d.is_bracketed, &d.type_expression)
+                }
                 _ => continue,
             };
 
@@ -549,13 +547,11 @@ fn reparse_jsdoc_type_literal(t: &Arc<Node>) -> Arc<Node> {
                 deep_clone(name)
             };
 
-            let prop_type = type_expression.as_ref().and_then(|te| {
-                match &te.data {
-                    NodeData::JSDocTypeExpression(ted) => {
-                        Some(reparse_jsdoc_type_literal(&ted.type_node))
-                    }
-                    _ => None,
+            let prop_type = type_expression.as_ref().and_then(|te| match &te.data {
+                NodeData::JSDocTypeExpression(ted) => {
+                    Some(reparse_jsdoc_type_literal(&ted.type_node))
                 }
+                _ => None,
             });
 
             let question_token = make_question_if_optional(is_bracketed, type_expression, prop);
@@ -744,7 +740,11 @@ fn get_innermost_name_of_jsdoc_namespace(full_name: &Arc<Node>) -> Arc<Node> {
 /// `namespace A { namespace B { type C = ... } }`
 ///
 /// Mirrors Go's `wrapInJSDocNamespace` (`reparser.go:729-748`).
-fn wrap_in_jsdoc_namespace(full_name: &Arc<Node>, statement: &Arc<Node>, nested: bool) -> Arc<Node> {
+fn wrap_in_jsdoc_namespace(
+    full_name: &Arc<Node>,
+    statement: &Arc<Node>,
+    nested: bool,
+) -> Arc<Node> {
     if full_name.kind != SyntaxKind::ModuleDeclaration {
         return statement.clone();
     }
@@ -1000,7 +1000,10 @@ let x;
                 assert_eq!(body.kind, SyntaxKind::ModuleBlock);
                 if let NodeData::ModuleBlock(mb) = &body.data {
                     assert_eq!(mb.statements.len(), 1);
-                    assert_eq!(mb.statements.nodes[0].kind, SyntaxKind::TypeAliasDeclaration);
+                    assert_eq!(
+                        mb.statements.nodes[0].kind,
+                        SyntaxKind::TypeAliasDeclaration
+                    );
                 }
             }
             _ => panic!("expected ModuleDeclaration"),
@@ -1037,7 +1040,10 @@ let x;
                 // parameters the JSDoc parser produces.
                 if let NodeData::FunctionTypeNode(ft) = &d.type_node.data {
                     // Verify it's a FunctionTypeNode with a type (return type or any)
-                    assert!(ft.type_node.is_some(), "FunctionType should have a return type");
+                    assert!(
+                        ft.type_node.is_some(),
+                        "FunctionType should have a return type"
+                    );
                 } else {
                     panic!("expected FunctionTypeNode");
                 }
@@ -1107,7 +1113,11 @@ function foo(x) { return 42; }
             _ => Vec::new(),
         };
         let reparsed = reparse_tags(&stmts[0], &jsdocs);
-        assert_eq!(reparsed.len(), 0, "@param/@returns are hosted tags, no new statements");
+        assert_eq!(
+            reparsed.len(),
+            0,
+            "@param/@returns are hosted tags, no new statements"
+        );
     }
 
     #[test]
@@ -1307,10 +1317,6 @@ function foo(x) { return 42; }
             NodeData::SourceFile(d) => &d.statements.nodes,
             _ => panic!("expected SourceFile"),
         };
-        assert_eq!(
-            statements.len(),
-            1,
-            "hosted tags only, no new statements"
-        );
+        assert_eq!(statements.len(), 1, "hosted tags only, no new statements");
     }
 }

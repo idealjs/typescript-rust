@@ -10,6 +10,8 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicU32, Ordering};
 
 use crate::ast::{Node, SyntaxKind};
+use crate::scanner::{CommentRange, CommentRangeKind};
+use crate::stringutil;
 
 // ────────────────────────────────────────────────────────────────────────────
 // GeneratedIdentifierFlags
@@ -884,6 +886,347 @@ fn get_external_module_name(node: &Arc<Node>) -> Option<String> {
     }
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// String escaping utilities (ported from printer/utilities.go)
+// ────────────────────────────────────────────────────────────────────────────
+
+/// Quote character used for string literal escaping.
+/// Mirrors Go's `printer.QuoteChar`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum QuoteChar {
+    SingleQuote,
+    DoubleQuote,
+    Backtick,
+}
+
+impl QuoteChar {
+    fn as_char(self) -> char {
+        match self {
+            QuoteChar::SingleQuote => '\'',
+            QuoteChar::DoubleQuote => '"',
+            QuoteChar::Backtick => '`',
+        }
+    }
+}
+
+bitflags::bitflags! {
+    /// Flags controlling how literal text is escaped.
+    /// Mirrors Go's `printer.getLiteralTextFlags`.
+    #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+    pub struct GetLiteralTextFlags: u32 {
+        const NONE = 0;
+        const NEVER_ASCII_ESCAPE = 1 << 0;
+        const JSX_ATTRIBUTE_ESCAPE = 1 << 1;
+        const TERMINATE_UNTERMINATED_LITERALS = 1 << 2;
+        const ALLOW_NUMERIC_SEPARATOR = 1 << 3;
+    }
+}
+
+/// Encode a character as an XML character entity (e.g. `&#x9;`).
+fn encode_jsx_character_entity(b: &mut String, ch: char) {
+    b.push_str("&#x");
+    b.push_str(&format!("{:X}", ch as u32));
+    b.push(';');
+}
+
+/// Encode a character as a `\uXXXX` escape sequence.
+fn encode_utf16_escape_sequence_u32(b: &mut String, code: u32) {
+    let hex = format!("{:X}", code);
+    b.push_str("\\u");
+    for _ in 0..(4 - hex.len()) {
+        b.push('0');
+    }
+    b.push_str(&hex);
+}
+
+fn encode_utf16_escape_sequence(b: &mut String, ch: char) {
+    encode_utf16_escape_sequence_u32(b, ch as u32);
+}
+
+/// Lookup for JSX-escaped characters.
+fn jsx_escaped_chars_map(code: u32) -> Option<&'static str> {
+    match code {
+        0x22 => Some("&quot;"),
+        0x27 => Some("&apos;"),
+        _ => None,
+    }
+}
+
+/// Lookup for standard escaped characters.
+fn escaped_chars_map(code: u32) -> Option<&'static str> {
+    match code {
+        0x09 => Some("\\t"),
+        0x0b => Some("\\v"),
+        0x0c => Some("\\f"),
+        0x08 => Some("\\b"),
+        0x0d => Some("\\r"),
+        0x0a => Some("\\n"),
+        0x5c => Some("\\\\"),
+        0x22 => Some("\\\""),
+        0x27 => Some("\\'"),
+        0x60 => Some("\\`"),
+        0x24 => Some("\\$"),
+        0x2028 => Some("\\u2028"),
+        0x2029 => Some("\\u2029"),
+        0x0085 => Some("\\u0085"),
+        _ => None,
+    }
+}
+
+/// Escape a string for output. Mirrors Go's `escapeStringWorker`.
+fn escape_string_worker(
+    s: &str,
+    quote_char: QuoteChar,
+    flags: GetLiteralTextFlags,
+    b: &mut String,
+) {
+    let bytes = s.as_bytes();
+    let mut pos = 0usize;
+
+    for (i, ch) in s.char_indices() {
+        let code = ch as u32;
+        let size = ch.len_utf8();
+        let mut actual_size = size;
+        let mut escape = false;
+
+        if (0xD800..=0xDFFF).contains(&code) {
+            escape = true;
+        }
+        // Rust strings are always valid UTF-8; no RuneError case needed.
+
+        if !escape {
+            if ch == '\\' {
+                if !flags.contains(GetLiteralTextFlags::JSX_ATTRIBUTE_ESCAPE) {
+                    escape = true;
+                }
+            } else if ch == '$'
+                && quote_char == QuoteChar::Backtick
+                && i + 1 < s.len()
+                && bytes[i + 1] == b'{'
+            {
+                escape = true;
+            } else if ch == quote_char.as_char()
+                || matches!(ch, '\u{2028}' | '\u{2029}' | '\u{0085}' | '\r')
+            {
+                escape = true;
+            } else if ch == '\n' {
+                if quote_char != QuoteChar::Backtick {
+                    escape = true;
+                }
+            } else if code <= 0x1f
+                || (!flags.contains(GetLiteralTextFlags::NEVER_ASCII_ESCAPE) && code > 0x7f)
+            {
+                escape = true;
+            }
+        }
+
+        if escape {
+            if pos < i {
+                b.push_str(&s[pos..i]);
+            }
+
+            if flags.contains(GetLiteralTextFlags::JSX_ATTRIBUTE_ESCAPE) {
+                if code == 0 {
+                    b.push_str("&#0;");
+                } else if let Some(repl) = jsx_escaped_chars_map(code) {
+                    b.push_str(repl);
+                } else {
+                    encode_jsx_character_entity(b, ch);
+                }
+            } else if ch == '\r'
+                && quote_char == QuoteChar::Backtick
+                && i + 1 < s.len()
+                && bytes[i + 1] == b'\n'
+            {
+                actual_size += 1;
+                b.push_str("\\r\\n");
+            } else if code > 0xffff {
+                let adjusted = code - 0x10000;
+                encode_utf16_escape_sequence_u32(b, ((adjusted >> 10) & 0x3ff) + 0xd800);
+                encode_utf16_escape_sequence_u32(b, (adjusted & 0x3ff) + 0xdc00);
+            } else if (0xD800..=0xDFFF).contains(&code) {
+                encode_utf16_escape_sequence(b, ch);
+            } else if code == 0 {
+                if i + 1 < s.len() && stringutil::is_digit(bytes[i + 1] as char) {
+                    b.push_str("\\x00");
+                } else {
+                    b.push_str("\\0");
+                }
+            } else if let Some(repl) = escaped_chars_map(code) {
+                b.push_str(repl);
+            } else {
+                encode_utf16_escape_sequence(b, ch);
+            }
+
+            pos = i + actual_size;
+        }
+    }
+
+    if pos < s.len() {
+        b.push_str(&s[pos..]);
+    }
+}
+
+/// Escape a string, always escaping non-ASCII characters.
+/// Mirrors Go's `printer.EscapeString`.
+pub fn escape_string(s: &str, quote_char: QuoteChar) -> String {
+    let mut b = String::with_capacity(s.len() + 2);
+    escape_string_worker(
+        s,
+        quote_char,
+        GetLiteralTextFlags::NEVER_ASCII_ESCAPE,
+        &mut b,
+    );
+    b
+}
+
+/// Escape a string, preserving non-ASCII characters that don't need escaping.
+/// Mirrors Go's `printer.escapeNonAsciiString`.
+pub fn escape_non_ascii_string(s: &str, quote_char: QuoteChar) -> String {
+    let mut b = String::with_capacity(s.len() + 2);
+    escape_string_worker(s, quote_char, GetLiteralTextFlags::NONE, &mut b);
+    b
+}
+
+/// Escape a string for use as a JSX attribute value.
+/// Mirrors Go's `printer.escapeJsxAttributeString`.
+pub fn escape_jsx_attribute_string(s: &str, quote_char: QuoteChar) -> String {
+    let mut b = String::with_capacity(s.len() + 2);
+    escape_string_worker(
+        s,
+        quote_char,
+        GetLiteralTextFlags::JSX_ATTRIBUTE_ESCAPE | GetLiteralTextFlags::NEVER_ASCII_ESCAPE,
+        &mut b,
+    );
+    b
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Triple-slash comment recognition (ported from printer/utilities.go)
+// ────────────────────────────────────────────────────────────────────────────
+
+fn decode_char_at(text: &str, pos: usize) -> (char, usize) {
+    let c = text[pos..].chars().next().unwrap();
+    (c, c.len_utf8())
+}
+
+fn skip_white_space_single_line(text: &str, pos: &mut usize) {
+    while *pos < text.len() {
+        let (ch, size) = decode_char_at(text, *pos);
+        if !stringutil::is_white_space_single_line(ch) {
+            break;
+        }
+        *pos += size;
+    }
+}
+
+fn match_white_space_single_line(text: &str, pos: &mut usize) -> bool {
+    let start = *pos;
+    skip_white_space_single_line(text, pos);
+    *pos != start
+}
+
+fn match_rune(text: &str, pos: &mut usize, expected: char) -> bool {
+    if *pos < text.len() {
+        let (ch, size) = decode_char_at(text, *pos);
+        if ch == expected {
+            *pos += size;
+            return true;
+        }
+    }
+    false
+}
+
+fn match_string(text: &str, pos: &mut usize, expected: &str) -> bool {
+    let mut text_pos = *pos;
+    for expected_ch in expected.chars() {
+        if !match_rune(text, &mut text_pos, expected_ch) {
+            return false;
+        }
+    }
+    *pos = text_pos;
+    true
+}
+
+fn match_quoted_string(text: &str, pos: &mut usize) -> bool {
+    let mut text_pos = *pos;
+    let quote_char = if match_rune(text, &mut text_pos, '\'') {
+        '\''
+    } else if match_rune(text, &mut text_pos, '"') {
+        '"'
+    } else {
+        return false;
+    };
+    while text_pos < text.len() {
+        let (ch, size) = decode_char_at(text, text_pos);
+        text_pos += size;
+        if ch == quote_char {
+            *pos = text_pos;
+            return true;
+        }
+    }
+    false
+}
+
+/// Whether `text` at `comment_range` is a recognized triple-slash directive.
+/// Mirrors Go's `printer.IsRecognizedTripleSlashComment`.
+pub fn is_recognized_triple_slash_comment(text: &str, comment_range: &CommentRange) -> bool {
+    if comment_range.kind == CommentRangeKind::SingleLine
+        && comment_range.end - comment_range.pos > 2
+        && text.as_bytes()[comment_range.pos + 1] == b'/'
+        && text.as_bytes()[comment_range.pos + 2] == b'/'
+    {
+        let start = comment_range.pos + 3;
+        let inner = &text[start..comment_range.end];
+        let mut pos = 0;
+        skip_white_space_single_line(inner, &mut pos);
+        if !match_rune(inner, &mut pos, '<') {
+            return false;
+        }
+        if match_string(inner, &mut pos, "reference") {
+            if !match_white_space_single_line(inner, &mut pos) {
+                return false;
+            }
+            if !match_string(inner, &mut pos, "path")
+                && !match_string(inner, &mut pos, "types")
+                && !match_string(inner, &mut pos, "lib")
+                && !match_string(inner, &mut pos, "no-default-lib")
+            {
+                return false;
+            }
+            skip_white_space_single_line(inner, &mut pos);
+            if !match_rune(inner, &mut pos, '=') {
+                return false;
+            }
+            skip_white_space_single_line(inner, &mut pos);
+            if !match_quoted_string(inner, &mut pos) {
+                return false;
+            }
+        } else if match_string(inner, &mut pos, "amd-dependency") {
+            if !match_white_space_single_line(inner, &mut pos) {
+                return false;
+            }
+            if !match_string(inner, &mut pos, "path") {
+                return false;
+            }
+            skip_white_space_single_line(inner, &mut pos);
+            if !match_rune(inner, &mut pos, '=') {
+                return false;
+            }
+            skip_white_space_single_line(inner, &mut pos);
+            if !match_quoted_string(inner, &mut pos) {
+                return false;
+            }
+        } else if match_string(inner, &mut pos, "amd-module") {
+            skip_white_space_single_line(inner, &mut pos);
+        } else {
+            return false;
+        }
+        return inner[pos..].contains("/>");
+    }
+    false
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1566,6 +1909,753 @@ mod tests {
         let name1 = factory.new_generated_name_for_node(member);
         let mut g = NameGenerator::new();
         assert_eq!(g.generate_name(&name1), "_a");
+    }
+
+    // ── Utility tests (ported from utilities_test.go) ─────────────────────
+
+    #[test]
+    fn escape_string_test() {
+        // Ported from Go TestEscapeString.
+        let cases: &[(&str, QuoteChar, &str)] = &[
+            ("", QuoteChar::DoubleQuote, ""),
+            ("abc", QuoteChar::DoubleQuote, "abc"),
+            ("ab\"c", QuoteChar::DoubleQuote, "ab\\\"c"),
+            ("ab\tc", QuoteChar::DoubleQuote, "ab\\tc"),
+            ("ab\nc", QuoteChar::DoubleQuote, "ab\\nc"),
+            ("ab'c", QuoteChar::DoubleQuote, "ab'c"),
+            ("ab'c", QuoteChar::SingleQuote, "ab\\'c"),
+            ("ab\"c", QuoteChar::SingleQuote, "ab\"c"),
+            ("ab`c", QuoteChar::Backtick, "ab\\`c"),
+            ("\u{001f}", QuoteChar::Backtick, "\\u001F"),
+        ];
+        for (i, (s, qc, expected)) in cases.iter().enumerate() {
+            let actual = escape_string(s, *qc);
+            assert_eq!(actual, *expected, "[{i}] escape_string({s:?}, {qc:?})");
+        }
+    }
+
+    #[test]
+    fn escape_non_ascii_string_test() {
+        // Ported from Go TestEscapeNonAsciiString.
+        let cases: &[(&str, QuoteChar, &str)] = &[
+            ("", QuoteChar::DoubleQuote, ""),
+            ("abc", QuoteChar::DoubleQuote, "abc"),
+            ("ab\"c", QuoteChar::DoubleQuote, "ab\\\"c"),
+            ("ab\tc", QuoteChar::DoubleQuote, "ab\\tc"),
+            ("ab\nc", QuoteChar::DoubleQuote, "ab\\nc"),
+            ("ab'c", QuoteChar::DoubleQuote, "ab'c"),
+            ("ab'c", QuoteChar::SingleQuote, "ab\\'c"),
+            ("ab\"c", QuoteChar::SingleQuote, "ab\"c"),
+            ("ab`c", QuoteChar::Backtick, "ab\\`c"),
+            ("ab\u{008f}c", QuoteChar::DoubleQuote, "ab\\u008Fc"),
+            (
+                "\u{1D7D8}\u{1D7D9}",
+                QuoteChar::DoubleQuote,
+                "\\uD835\\uDFD8\\uD835\\uDFD9",
+            ),
+        ];
+        for (i, (s, qc, expected)) in cases.iter().enumerate() {
+            let actual = escape_non_ascii_string(s, *qc);
+            assert_eq!(
+                actual, *expected,
+                "[{i}] escape_non_ascii_string({s:?}, {qc:?})"
+            );
+        }
+    }
+
+    #[test]
+    fn escape_jsx_attribute_string_test() {
+        // Ported from Go TestEscapeJsxAttributeString.
+        let cases: &[(&str, QuoteChar, &str)] = &[
+            ("", QuoteChar::DoubleQuote, ""),
+            ("abc", QuoteChar::DoubleQuote, "abc"),
+            ("ab\"c", QuoteChar::DoubleQuote, "ab&quot;c"),
+            ("ab\tc", QuoteChar::DoubleQuote, "ab&#x9;c"),
+            ("ab\nc", QuoteChar::DoubleQuote, "ab&#xA;c"),
+            ("ab'c", QuoteChar::DoubleQuote, "ab'c"),
+            ("ab'c", QuoteChar::SingleQuote, "ab&apos;c"),
+            ("ab\"c", QuoteChar::SingleQuote, "ab\"c"),
+            ("ab\u{008f}c", QuoteChar::DoubleQuote, "ab\u{008f}c"),
+            (
+                "\u{1D7D8}\u{1D7D9}",
+                QuoteChar::DoubleQuote,
+                "\u{1D7D8}\u{1D7D9}",
+            ),
+        ];
+        for (i, (s, qc, expected)) in cases.iter().enumerate() {
+            let actual = escape_jsx_attribute_string(s, *qc);
+            assert_eq!(
+                actual, *expected,
+                "[{i}] escape_jsx_attribute_string({s:?}, {qc:?})"
+            );
+        }
+    }
+
+    #[test]
+    fn is_recognized_triple_slash_comment_test() {
+        // Ported from Go TestIsRecognizedTripleSlashComment.
+        // Each case: (text, optional explicit range, expected).
+        // When range is None, defaults to SingleLine with (0, text.len()).
+        struct TsCase {
+            text: &'static str,
+            explicit: Option<(CommentRangeKind, usize, usize)>,
+            expected: bool,
+        }
+
+        let cases: &[TsCase] = &[
+            TsCase {
+                text: "",
+                explicit: Some((CommentRangeKind::MultiLine, 0, 0)),
+                expected: false,
+            },
+            TsCase {
+                text: "",
+                explicit: Some((CommentRangeKind::SingleLine, 0, 0)),
+                expected: false,
+            },
+            TsCase {
+                text: "/a",
+                explicit: None,
+                expected: false,
+            },
+            TsCase {
+                text: "//",
+                explicit: None,
+                expected: false,
+            },
+            TsCase {
+                text: "//a",
+                explicit: None,
+                expected: false,
+            },
+            TsCase {
+                text: "///",
+                explicit: None,
+                expected: false,
+            },
+            TsCase {
+                text: "///a",
+                explicit: None,
+                expected: false,
+            },
+            TsCase {
+                text: r#"///<reference path="foo" />"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"///<reference types="foo" />"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"///<reference lib="foo" />"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"///<reference no-default-lib="foo" />"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"///<amd-dependency path="foo" />"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: "///<amd-module />",
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <reference path="foo" />"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <reference types="foo" />"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <reference lib="foo" />"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <reference no-default-lib="foo" />"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <amd-dependency path="foo" />"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: "/// <amd-module />",
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <reference path="foo"/>"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <reference types="foo"/>"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <reference lib="foo"/>"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <reference no-default-lib="foo"/>"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <amd-dependency path="foo"/>"#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: "/// <amd-module/>",
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: "/// <reference path='foo' />",
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: "/// <reference types='foo' />",
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: "/// <reference lib='foo' />",
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: "/// <reference no-default-lib='foo' />",
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: "/// <amd-dependency path='foo' />",
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <reference path="foo" />  "#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <reference types="foo" />  "#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <reference lib="foo" />  "#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <reference no-default-lib="foo" />  "#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: r#"/// <amd-dependency path="foo" />  "#,
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: "/// <amd-module />  ",
+                explicit: None,
+                expected: true,
+            },
+            TsCase {
+                text: "/// <foo />",
+                explicit: None,
+                expected: false,
+            },
+            TsCase {
+                text: "/// <reference />",
+                explicit: None,
+                expected: false,
+            },
+            TsCase {
+                text: "/// <amd-dependency />",
+                explicit: None,
+                expected: false,
+            },
+        ];
+
+        for (i, case) in cases.iter().enumerate() {
+            let range = if let Some((kind, pos, end)) = case.explicit {
+                CommentRange {
+                    kind,
+                    pos,
+                    end,
+                    has_trailing_new_line: false,
+                }
+            } else {
+                CommentRange {
+                    kind: CommentRangeKind::SingleLine,
+                    pos: 0,
+                    end: case.text.len(),
+                    has_trailing_new_line: false,
+                }
+            };
+            let actual = is_recognized_triple_slash_comment(case.text, &range);
+            assert_eq!(
+                actual, case.expected,
+                "[{i}] is_recognized_triple_slash_comment({:?})",
+                case.text
+            );
+        }
+    }
+
+    // ── Printer tests (ported from printer_test.go) ───────────────────────
+    // All of these require the full AST→text printer (Emit, Parenthesize*
+    // functions) which is not yet implemented in Rust. Each test is marked
+    // #[ignore] with the expected output documented as a comment for future
+    // implementation.
+
+    #[test]
+    #[ignore = "requires full printer: Emit (AST→text). ~330 cases."]
+    fn emit() {
+        // TestEmit: Parses TypeScript input, emits text, compares to expected.
+        // Representative examples (input → output):
+        //   `;"test"`        → `;\n"test";`        (StringLiteral)
+        //   `0`              → `0;`                (NumericLiteral)
+        //   `10_000`         → `10000;`            (numeric separator removed)
+        //   `0n`             → `0n;`               (BigIntLiteral)
+        //   `a.b`            → `a.b;`              (PropertyAccess)
+        //   `a?.b`           → `a?.b;`             (optional chain)
+        //   `a[b]`           → `a[b];`             (ElementAccess)
+        //   `a()`            → `a();`              (CallExpression)
+        //   `new a`          → `new a;`            (NewExpression)
+        //   `(function(){})` → `(function () { });` (FunctionExpression)
+        //   `a=>{}`          → `a => { };`         (ArrowFunction)
+        //   `a,b`            → `a, b;`             (BinaryExpression/comma)
+        //   `a?b:c`          → `a ? b : c;`        (ConditionalExpression)
+        //   `{}`             → `{ }`               (Block)
+        //   `if(a);`         → `if (a)\n    ;`     (IfStatement)
+        //   `class a {}`     → `class a {\n}`      (ClassDeclaration)
+        //   `interface a {}` → `interface a {\n}`  (InterfaceDeclaration)
+        //   `type T = a | b` → `type T = a | b;`   (UnionTypeNode)
+        //   `enum a{b=c}`    → `enum a {\n    b = c\n}` (EnumDeclaration)
+        //   `<a></a>`        → `<a></a>;`          (JsxElement, jsx=true)
+        //   ... plus imports, exports, type nodes, binding patterns,
+        //   parameters, accessors, JSX attributes — see printer_test.go.
+        // TODO: implement printer::Emit and port the full test table.
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeDecorator"]
+    fn parenthesize_decorator() {
+        // @(a + b)\nclass C {\n}
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeComputedPropertyName"]
+    fn parenthesize_computed_property_name() {
+        // class C {\n    [(a, b)];\n}
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeArrayLiteral"]
+    fn parenthesize_array_literal() {
+        // [(a, b)];
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizePropertyAccess"]
+    fn parenthesize_property_access_1() {
+        // (a, b).c;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizePropertyAccess"]
+    fn parenthesize_property_access_2() {
+        // (a?.b).c;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizePropertyAccess"]
+    fn parenthesize_property_access_3() {
+        // (new a).b;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeElementAccess"]
+    fn parenthesize_element_access_1() {
+        // (a, b)[c];
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeElementAccess"]
+    fn parenthesize_element_access_2() {
+        // (a?.b)[c];
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeElementAccess"]
+    fn parenthesize_element_access_3() {
+        // (new a)[b];
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeCall"]
+    fn parenthesize_call_1() {
+        // (a, b)();
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeCall"]
+    fn parenthesize_call_2() {
+        // (a?.b)();
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeCall"]
+    fn parenthesize_call_3() {
+        // (new C)();
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeCall"]
+    fn parenthesize_call_4() {
+        // a((b, c));
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeNew"]
+    fn parenthesize_new_1() {
+        // new (a, b)();
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeNew"]
+    fn parenthesize_new_2() {
+        // new (C());
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeNew"]
+    fn parenthesize_new_3() {
+        // new C((a, b));
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeTaggedTemplate"]
+    fn parenthesize_tagged_template_1() {
+        // (a, b) ``;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeTaggedTemplate"]
+    fn parenthesize_tagged_template_2() {
+        // (a?.b) ``;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeTypeAssertion"]
+    fn parenthesize_type_assertion_1() {
+        // <T>(a + b);
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeArrowFunction"]
+    fn parenthesize_arrow_function_1() {
+        // () => ({});
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeArrowFunction"]
+    fn parenthesize_arrow_function_2() {
+        // () => ({}.a);
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeDelete"]
+    fn parenthesize_delete() {
+        // delete (a + b);
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeVoid"]
+    fn parenthesize_void() {
+        // void (a + b);
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeTypeOf"]
+    fn parenthesize_typeof() {
+        // typeof (a + b);
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeAwait"]
+    fn parenthesize_await() {
+        // await (a + b);
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeBinary. 14 sub-cases."]
+    fn parenthesize_binary() {
+        // Tests binary operator precedence and parenthesization.
+        // Examples:
+        //   (a ?? b) || c;     l, r
+        //   (ll + lr) * r;     (ll * lr) ** r;
+        //   l && (() => { })   l * rl * rr
+        // ... see printer_test.go TestParenthesizeBinary for full table.
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeConditional"]
+    fn parenthesize_conditional_1() {
+        // (a, b) ? c : d;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeConditional"]
+    fn parenthesize_conditional_2() {
+        // (a = b) ? c : d;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeConditional"]
+    fn parenthesize_conditional_3() {
+        // (() => { }) ? a : b;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeConditional"]
+    fn parenthesize_conditional_4() {
+        // (yield) ? a : b;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeConditional"]
+    fn parenthesize_conditional_5() {
+        // a ? (b, c) : d;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeConditional"]
+    fn parenthesize_conditional_6() {
+        // a ? b : (c, d);
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeYield"]
+    fn parenthesize_yield_1() {
+        // yield (a, b);
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeSpreadElement"]
+    fn parenthesize_spread_element_1() {
+        // [...(a, b)];
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeSpreadElement"]
+    fn parenthesize_spread_element_2() {
+        // a(...(b, c));
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeSpreadElement"]
+    fn parenthesize_spread_element_3() {
+        // new a(...(b, c));
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeExpressionWithTypeArguments"]
+    fn parenthesize_expression_with_type_arguments() {
+        // (a, b)<c>;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeAsExpression"]
+    fn parenthesize_as_expression() {
+        // (a, b) as c;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeSatisfiesExpression"]
+    fn parenthesize_satisfies_expression() {
+        // (a, b) satisfies c;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeNonNullExpression"]
+    fn parenthesize_non_null_expression() {
+        // (a, b)!;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeExpressionStatement"]
+    fn parenthesize_expression_statement_1() {
+        // ({});
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeExpressionStatement"]
+    fn parenthesize_expression_statement_2() {
+        // (function () { });
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeExpressionStatement"]
+    fn parenthesize_expression_statement_3() {
+        // class {\n};
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeExpressionDefault"]
+    fn parenthesize_expression_default_1() {
+        // export default (class {\n});
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeExpressionDefault"]
+    fn parenthesize_expression_default_2() {
+        // export default (function () { });
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeExpressionDefault"]
+    fn parenthesize_expression_default_3() {
+        // export default (a, b);
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeArrayType"]
+    fn parenthesize_array_type() {
+        // type _ = (a | b)[];
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeOptionalType"]
+    fn parenthesize_optional_type() {
+        // type _ = [\n    (a | b)?\n];
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeUnionType"]
+    fn parenthesize_union_type_1() {
+        // type _ = a | (() => b);
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeUnionType"]
+    fn parenthesize_union_type_2() {
+        // type _ = (infer a extends b) | c;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeIntersectionType"]
+    fn parenthesize_intersection_type() {
+        // type _ = a & (b | c);
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeReadonlyTypeOperator"]
+    fn parenthesize_readonly_type_operator_1() {
+        // type _ = readonly (a | b);
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeReadonlyTypeOperator"]
+    fn parenthesize_readonly_type_operator_2() {
+        // type _ = readonly (keyof a);
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeKeyofTypeOperator"]
+    fn parenthesize_keyof_type_operator() {
+        // type _ = keyof (a | b);
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeIndexedAccessType"]
+    fn parenthesize_indexed_access_type() {
+        // type _ = (a | b)[c];
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeConditionalType"]
+    fn parenthesize_conditional_type_1() {
+        // type _ = (() => a) extends b ? c : d;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeConditionalType"]
+    fn parenthesize_conditional_type_2() {
+        // type _ = a extends (b extends c ? d : e) ? f : g;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeConditionalType"]
+    fn parenthesize_conditional_type_3() {
+        // type _ = a extends () => (infer b extends c) ? d : e;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeConditionalType"]
+    fn parenthesize_conditional_type_4() {
+        // type _ = a extends () => (infer b extends c) | d ? e : f;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: Emit + NameGeneration"]
+    fn name_generation() {
+        // var _a;\nfunction f() {\n    var _a;\n}
+    }
+
+    #[test]
+    #[ignore = "requires full printer: Emit + transformers"]
+    fn no_trailing_comma_after_transform() {
+        // [a!]; → [a];
+    }
+
+    #[test]
+    #[ignore = "requires full printer: Emit + transformers"]
+    fn trailing_comma_after_transform() {
+        // [a!,]; → [a,];
+    }
+
+    #[test]
+    #[ignore = "requires full printer: Emit + type erasure transformer"]
+    fn partially_emitted_expression() {
+        // return container.parent\n    .left\n    .expression\n    .expression;
+    }
+
+    #[test]
+    #[ignore = "requires full printer: ParenthesizeBinary (nullish coalescing). 8 sub-cases."]
+    fn parenthesize_binary_expression_mixing_nullish_coalescing() {
+        // Tests mixing of ?? with || and &&:
+        //   (a ?? b) || c;    BarBarWithLeftQuestionQuestion
+        //   (a ?? b) && c;    AmpersandAmpersandWithLeftQuestionQuestion
+        //   a || (b ?? c);    BarBarWithRightQuestionQuestion
+        //   a && (b ?? c);    AmpersandAmpersandWithRightQuestionQuestion
+        //   (a || b) ?? c;    QuestionQuestionWithLeftBarBar
+        //   (a && b) ?? c;    QuestionQuestionWithLeftAmpersandAmpersand
+        //   a ?? (b || c);    QuestionQuestionWithRightBarBar
+        //   a ?? (b && c);    QuestionQuestionWithRightAmpersandAmpersand
     }
 }
 

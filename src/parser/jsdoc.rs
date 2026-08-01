@@ -144,7 +144,12 @@ impl super::Parser {
                         } else {
                             state = JSDocState::SavingComments;
                         }
-                        push_comment(&mut comments, &mut indent, &mut margin,self.scanner.token_text());
+                        push_comment(
+                            &mut comments,
+                            &mut indent,
+                            &mut margin,
+                            self.scanner.token_text(),
+                        );
                     } else {
                         comments = remove_trailing_whitespace(comments);
                         if comments_pos == 0 {
@@ -169,7 +174,7 @@ impl super::Parser {
                     let asterisk = self.scanner.token_text().to_string();
                     if state == JSDocState::SawAsterisk {
                         state = JSDocState::SavingComments;
-                        push_comment(&mut comments, &mut indent, &mut margin,&asterisk);
+                        push_comment(&mut comments, &mut indent, &mut margin, &asterisk);
                     } else {
                         // state must be BeginningOfLine
                         state = JSDocState::SawAsterisk;
@@ -202,7 +207,12 @@ impl super::Parser {
                             state = JSDocState::SavingComments;
                         }
                     }
-                    push_comment(&mut comments, &mut indent, &mut margin,&self.scanner.token_value());
+                    push_comment(
+                        &mut comments,
+                        &mut indent,
+                        &mut margin,
+                        &self.scanner.token_value(),
+                    );
                 }
                 SyntaxKind::BacktickToken => {
                     backtick_count += 1;
@@ -211,12 +221,22 @@ impl super::Parser {
                     } else {
                         state = JSDocState::SavingBackticks;
                     }
-                    push_comment(&mut comments, &mut indent, &mut margin,self.scanner.token_text());
+                    push_comment(
+                        &mut comments,
+                        &mut indent,
+                        &mut margin,
+                        self.scanner.token_text(),
+                    );
                 }
                 SyntaxKind::OpenBraceToken => {
                     if in_fenced_code_block {
                         state = JSDocState::SavingBackticks;
-                        push_comment(&mut comments, &mut indent, &mut margin,self.scanner.token_text());
+                        push_comment(
+                            &mut comments,
+                            &mut indent,
+                            &mut margin,
+                            self.scanner.token_text(),
+                        );
                     } else {
                         state = JSDocState::SavingComments;
                         let comment_end = self.scanner.full_start_pos();
@@ -225,7 +245,8 @@ impl super::Parser {
                             if link_end == start {
                                 comments = remove_leading_newlines(comments);
                             }
-                            let jsdoc_text = self.finish_jsdoc_text(&comments, link_end, comment_end);
+                            let jsdoc_text =
+                                self.finish_jsdoc_text(&comments, link_end, comment_end);
                             comment_parts.push(jsdoc_text);
                             comment_parts.push(link);
                             comments.clear();
@@ -239,7 +260,12 @@ impl super::Parser {
                                     state = JSDocState::SavingComments;
                                 }
                             }
-                            push_comment(&mut comments, &mut indent, &mut margin,self.scanner.token_text());
+                            push_comment(
+                                &mut comments,
+                                &mut indent,
+                                &mut margin,
+                                self.scanner.token_text(),
+                            );
                         }
                     }
                 }
@@ -252,7 +278,12 @@ impl super::Parser {
                             state = JSDocState::SavingComments;
                         }
                     }
-                    push_comment(&mut comments, &mut indent, &mut margin,self.scanner.token_text());
+                    push_comment(
+                        &mut comments,
+                        &mut indent,
+                        &mut margin,
+                        self.scanner.token_text(),
+                    );
                 }
             }
 
@@ -348,10 +379,7 @@ impl super::Parser {
     /// Mirrors Go's `parseExpectedJSDoc`.
     fn parse_expected_jsdoc(&mut self, kind: SyntaxKind) {
         if !self.parse_optional_jsdoc(kind) {
-            self.parse_error_at_current_token(
-                diagnostics::X_0_EXPECTED,
-                &[token_to_string(kind)],
-            );
+            self.parse_error_at_current_token(diagnostics::X_0_EXPECTED, &[token_to_string(kind)]);
         }
     }
 
@@ -363,10 +391,7 @@ impl super::Parser {
             self.next_token_jsdoc();
             node
         } else {
-            self.parse_error_at_current_token(
-                diagnostics::X_0_EXPECTED,
-                &[token_to_string(kind)],
-            );
+            self.parse_error_at_current_token(diagnostics::X_0_EXPECTED, &[token_to_string(kind)]);
             self.create_missing_node(kind, self.token_pos(), self.token_pos())
         }
     }
@@ -382,7 +407,11 @@ impl super::Parser {
 
     /// Create a missing node (zero-width) of the given kind.
     fn create_missing_node(&self, kind: SyntaxKind, pos: usize, end: usize) -> Arc<Node> {
-        Arc::new(Node::with_loc(kind, NodeData::Token, TextRange::new(pos, end)))
+        Arc::new(Node::with_loc(
+            kind,
+            NodeData::Token,
+            TextRange::new(pos, end),
+        ))
     }
 }
 
@@ -443,9 +472,12 @@ impl super::Parser {
             ),
             "deprecated" => self.parse_deprecated_tag(start, tag_name, margin, &indent_text),
             "this" => self.parse_this_tag(start, tag_name, margin, &indent_text),
-            "arg" | "argument" | "param" => {
-                self.parse_parameter_or_property_tag(start, tag_name, PropertyLikeParse(PropertyLikeParse::PARAMETER), margin)
-            }
+            "arg" | "argument" | "param" => self.parse_parameter_or_property_tag(
+                start,
+                tag_name,
+                PropertyLikeParse(PropertyLikeParse::PARAMETER),
+                margin,
+            ),
             "return" | "returns" => self.parse_return_tag(start, tag_name, margin, &indent_text),
             "template" => self.parse_template_tag(start, tag_name, margin, &indent_text),
             "type" => self.parse_type_tag(start, tag_name, margin, &indent_text),
@@ -471,7 +503,12 @@ impl super::Parser {
         indent_text: &str,
         kind: SyntaxKind,
     ) -> Arc<Node> {
-        let comment = self.parse_trailing_tag_comments(self.token_pos(), self.token_end(), margin, indent_text);
+        let comment = self.parse_trailing_tag_comments(
+            self.token_pos(),
+            self.token_end(),
+            margin,
+            indent_text,
+        );
         let end = comment.end();
         let data = match kind {
             SyntaxKind::JSDocPublicTag => NodeData::JSDocPublicTag(JSDocPublicTagData {
@@ -506,7 +543,12 @@ impl super::Parser {
         margin: usize,
         indent_text: &str,
     ) -> Arc<Node> {
-        let comment = self.parse_trailing_tag_comments(self.token_pos(), self.token_end(), margin, indent_text);
+        let comment = self.parse_trailing_tag_comments(
+            self.token_pos(),
+            self.token_end(),
+            margin,
+            indent_text,
+        );
         let end = comment.end();
         Arc::new(Node::with_loc(
             SyntaxKind::JSDocDeprecatedTag,
@@ -525,7 +567,12 @@ impl super::Parser {
         margin: usize,
         indent_text: &str,
     ) -> Arc<Node> {
-        let comment = self.parse_trailing_tag_comments(self.token_pos(), self.token_end(), margin, indent_text);
+        let comment = self.parse_trailing_tag_comments(
+            self.token_pos(),
+            self.token_end(),
+            margin,
+            indent_text,
+        );
         let end = comment.end();
         Arc::new(Node::with_loc(
             SyntaxKind::JSDocUnknownTag,
@@ -545,7 +592,12 @@ impl super::Parser {
         indent_text: &str,
     ) -> Arc<Node> {
         let type_expression = self.try_parse_type_expression();
-        let comment = self.parse_trailing_tag_comments(self.token_pos(), self.token_end(), margin, indent_text);
+        let comment = self.parse_trailing_tag_comments(
+            self.token_pos(),
+            self.token_end(),
+            margin,
+            indent_text,
+        );
         let end = comment
             .end()
             .max(type_expression.as_ref().map(|t| t.end()).unwrap_or(0));
@@ -603,7 +655,12 @@ impl super::Parser {
     ) -> Arc<Node> {
         let type_expression = self.parse_jsdoc_type_expression(true);
         self.skip_whitespace();
-        let comment = self.parse_trailing_tag_comments(self.token_pos(), self.token_end(), margin, indent_text);
+        let comment = self.parse_trailing_tag_comments(
+            self.token_pos(),
+            self.token_end(),
+            margin,
+            indent_text,
+        );
         let end = comment.end().max(type_expression.end());
         Arc::new(Node::with_loc(
             SyntaxKind::JSDocThisTag,
@@ -624,7 +681,12 @@ impl super::Parser {
         indent_text: &str,
     ) -> Arc<Node> {
         let type_expression = self.parse_jsdoc_type_expression(false);
-        let comment = self.parse_trailing_tag_comments(self.token_pos(), self.token_end(), margin, indent_text);
+        let comment = self.parse_trailing_tag_comments(
+            self.token_pos(),
+            self.token_end(),
+            margin,
+            indent_text,
+        );
         let end = comment.end().max(type_expression.end());
         Arc::new(Node::with_loc(
             SyntaxKind::JSDocSatisfiesTag,
@@ -645,7 +707,12 @@ impl super::Parser {
         indent_text: &str,
     ) -> Arc<Node> {
         let type_expression = self.try_parse_type_expression();
-        let comment = self.parse_trailing_tag_comments(self.token_pos(), self.token_end(), margin, indent_text);
+        let comment = self.parse_trailing_tag_comments(
+            self.token_pos(),
+            self.token_end(),
+            margin,
+            indent_text,
+        );
         let end = comment
             .end()
             .max(type_expression.as_ref().map(|t| t.end()).unwrap_or(0));
@@ -680,13 +747,17 @@ impl super::Parser {
                         | SyntaxKind::FalseKeyword
                 );
                 is_id
-            })
-        {
+            }) {
             Some(self.parse_jsdoc_name_reference())
         } else {
             None
         };
-        let comment = self.parse_trailing_tag_comments(self.token_pos(), self.token_end(), margin, indent_text);
+        let comment = self.parse_trailing_tag_comments(
+            self.token_pos(),
+            self.token_end(),
+            margin,
+            indent_text,
+        );
         let end = comment
             .end()
             .max(name_expression.as_ref().map(|n| n.end()).unwrap_or(0));
@@ -712,7 +783,12 @@ impl super::Parser {
         indent_text: &str,
     ) -> Arc<Node> {
         let class_name = self.parse_expression_with_type_arguments_for_augments();
-        let comment = self.parse_trailing_tag_comments(self.token_pos(), self.token_end(), margin, indent_text);
+        let comment = self.parse_trailing_tag_comments(
+            self.token_pos(),
+            self.token_end(),
+            margin,
+            indent_text,
+        );
         let end = comment.end().max(class_name.end());
         Arc::new(Node::with_loc(
             SyntaxKind::JSDocImplementsTag,
@@ -733,7 +809,12 @@ impl super::Parser {
         indent_text: &str,
     ) -> Arc<Node> {
         let class_name = self.parse_expression_with_type_arguments_for_augments();
-        let comment = self.parse_trailing_tag_comments(self.token_pos(), self.token_end(), margin, indent_text);
+        let comment = self.parse_trailing_tag_comments(
+            self.token_pos(),
+            self.token_end(),
+            margin,
+            indent_text,
+        );
         let end = comment.end().max(class_name.end());
         Arc::new(Node::with_loc(
             SyntaxKind::JSDocAugmentsTag,
@@ -758,8 +839,7 @@ impl super::Parser {
         let type_expression = self.try_parse_type_expression();
         let is_name_first = type_expression.is_none();
         self.skip_whitespace_or_asterisk();
-        let (name, is_bracketed) =
-            self.parse_bracket_name_in_property_and_param_tag(target);
+        let (name, is_bracketed) = self.parse_bracket_name_in_property_and_param_tag(target);
         let indent_text = self.skip_whitespace_or_asterisk();
 
         // If name came first, try parsing type expression again
@@ -818,7 +898,12 @@ impl super::Parser {
             None
         };
         let type_parameters = self.parse_template_tag_type_parameters();
-        let comment = self.parse_trailing_tag_comments(self.token_pos(), self.token_end(), margin, indent_text);
+        let comment = self.parse_trailing_tag_comments(
+            self.token_pos(),
+            self.token_end(),
+            margin,
+            indent_text,
+        );
         let end = comment.end().max(type_parameters.end());
         let constraint_node = constraint.unwrap_or_else(|| {
             self.create_missing_node(SyntaxKind::MissingDeclaration, start, start)
@@ -942,10 +1027,7 @@ impl super::Parser {
         self.skip_whitespace();
         let comment = self.parse_tag_comments(margin, None);
         let type_expression = self.parse_jsdoc_signature(start, margin);
-        let end = type_expression
-            .end()
-            .max(comment.end())
-            .max(name.end());
+        let end = type_expression.end().max(comment.end()).max(name.end());
         Arc::new(Node::with_loc(
             SyntaxKind::JSDocCallbackTag,
             NodeData::JSDocCallbackTag(JSDocCallbackTagData {
@@ -1019,13 +1101,11 @@ impl super::Parser {
                 break;
             }
             if self.token == SyntaxKind::AtToken {
-                if let Some(child) =
-                    self.parse_child_parameter_or_property_tag(
-                        PropertyLikeParse(PropertyLikeParse::CALLBACK_PARAMETER),
-                        indent,
-                        None,
-                    )
-                {
+                if let Some(child) = self.parse_child_parameter_or_property_tag(
+                    PropertyLikeParse(PropertyLikeParse::CALLBACK_PARAMETER),
+                    indent,
+                    None,
+                ) {
                     if child.kind == SyntaxKind::JSDocParameterTag {
                         params.push(child);
                     }
@@ -1050,7 +1130,12 @@ impl super::Parser {
         indent_text: &str,
     ) -> Arc<Node> {
         // Simplified: just parse the module specifier
-        let comment = self.parse_trailing_tag_comments(self.token_pos(), self.token_end(), margin, indent_text);
+        let comment = self.parse_trailing_tag_comments(
+            self.token_pos(),
+            self.token_end(),
+            margin,
+            indent_text,
+        );
         let end = comment.end();
         let module_specifier = self.create_missing_node(
             SyntaxKind::StringLiteral,
@@ -1313,10 +1398,7 @@ impl super::Parser {
             let node_pos = node.pos();
             node = Arc::new(Node::with_loc(
                 SyntaxKind::QualifiedName,
-                NodeData::QualifiedName(QualifiedNameData {
-                    left: node,
-                    right,
-                }),
+                NodeData::QualifiedName(QualifiedNameData { left: node, right }),
                 TextRange::new(node_pos, end),
             ));
             // Optional [] suffix (consumed but not stored)
@@ -1373,10 +1455,7 @@ impl super::Parser {
                 let node_pos = node.pos();
                 node = Arc::new(Node::with_loc(
                     SyntaxKind::QualifiedName,
-                    NodeData::QualifiedName(QualifiedNameData {
-                        left: node,
-                        right,
-                    }),
+                    NodeData::QualifiedName(QualifiedNameData { left: node, right }),
                     TextRange::new(node_pos, end),
                 ));
             } else if self.token == SyntaxKind::PrivateIdentifier {
@@ -1394,10 +1473,7 @@ impl super::Parser {
                 let node_pos = node.pos();
                 node = Arc::new(Node::with_loc(
                     SyntaxKind::QualifiedName,
-                    NodeData::QualifiedName(QualifiedNameData {
-                        left: node,
-                        right,
-                    }),
+                    NodeData::QualifiedName(QualifiedNameData { left: node, right }),
                     TextRange::new(node_pos, end),
                 ));
             } else {
@@ -1511,7 +1587,9 @@ impl super::Parser {
         let mut text_parts: Vec<String> = Vec::new();
         loop {
             match self.token {
-                SyntaxKind::CloseBraceToken | SyntaxKind::NewLineTrivia | SyntaxKind::EndOfFile => break,
+                SyntaxKind::CloseBraceToken | SyntaxKind::NewLineTrivia | SyntaxKind::EndOfFile => {
+                    break;
+                }
                 SyntaxKind::WhitespaceTrivia => {
                     text_parts.push(self.scanner.token_text().to_string());
                     self.next_token_jsdoc();
@@ -1532,19 +1610,32 @@ impl super::Parser {
         let (kind, data) = match link_kind.as_str() {
             "linkcode" => (
                 SyntaxKind::JSDocLinkCode,
-                NodeData::JSDocLinkCode(JSDocLinkCodeData { name, text: text_parts }),
+                NodeData::JSDocLinkCode(JSDocLinkCodeData {
+                    name,
+                    text: text_parts,
+                }),
             ),
             "linkplain" => (
                 SyntaxKind::JSDocLinkPlain,
-                NodeData::JSDocLinkPlain(JSDocLinkPlainData { name, text: text_parts }),
+                NodeData::JSDocLinkPlain(JSDocLinkPlainData {
+                    name,
+                    text: text_parts,
+                }),
             ),
             _ => (
                 SyntaxKind::JSDocLink,
-                NodeData::JSDocLink(JSDocLinkData { name, text: text_parts }),
+                NodeData::JSDocLink(JSDocLinkData {
+                    name,
+                    text: text_parts,
+                }),
             ),
         };
 
-        Some(Arc::new(Node::with_loc(kind, data, TextRange::new(start, end))))
+        Some(Arc::new(Node::with_loc(
+            kind,
+            data,
+            TextRange::new(start, end),
+        )))
     }
 
     /// Look ahead to determine if we're at `{@link`/`{@linkcode`/`{@linkplain`.
@@ -1604,11 +1695,7 @@ impl super::Parser {
     /// Parse comment text for a tag body. Sub-state-machine mirroring
     /// `parseJSDocCommentWorker` but for a single tag's comment.
     /// Mirrors Go's `parseTagComments` (`jsdoc.go:546-712`).
-    fn parse_tag_comments(
-        &mut self,
-        indent: usize,
-        initial_margin: Option<&str>,
-    ) -> Arc<NodeList> {
+    fn parse_tag_comments(&mut self, indent: usize, initial_margin: Option<&str>) -> Arc<NodeList> {
         let pos = self.token_pos();
         let mut state = JSDocState::BeginningOfLine;
         let mut comments: Vec<String> = Vec::new();
@@ -1619,7 +1706,7 @@ impl super::Parser {
 
         if let Some(m) = initial_margin {
             if !m.is_empty() {
-                push_comment(&mut comments, &mut indent, &mut margin,m);
+                push_comment(&mut comments, &mut indent, &mut margin, m);
                 state = JSDocState::SawAsterisk;
             }
         }
@@ -1629,11 +1716,17 @@ impl super::Parser {
                 SyntaxKind::AtToken => {
                     if self.scanner.can_follow_jsdoc_at() {
                         // Put the @ back and stop
-                        self.scanner.set_range(self.scanner.token_end() - 1, self.scanner.end());
+                        self.scanner
+                            .set_range(self.scanner.token_end() - 1, self.scanner.end());
                         break;
                     }
                     state = JSDocState::SavingComments;
-                    push_comment(&mut comments, &mut indent, &mut margin,self.scanner.token_text());
+                    push_comment(
+                        &mut comments,
+                        &mut indent,
+                        &mut margin,
+                        self.scanner.token_text(),
+                    );
                 }
                 SyntaxKind::NewLineTrivia => {
                     comments.push(self.scanner.token_text().to_string());
@@ -1644,7 +1737,7 @@ impl super::Parser {
                     let asterisk = self.scanner.token_text().to_string();
                     if state == JSDocState::SawAsterisk {
                         state = JSDocState::SavingComments;
-                        push_comment(&mut comments, &mut indent, &mut margin,&asterisk);
+                        push_comment(&mut comments, &mut indent, &mut margin, &asterisk);
                     } else {
                         state = JSDocState::SawAsterisk;
                         indent += asterisk.len();
@@ -1672,7 +1765,12 @@ impl super::Parser {
                     if state != JSDocState::SavingBackticks {
                         state = JSDocState::SavingComments;
                     }
-                    push_comment(&mut comments, &mut indent, &mut margin,&self.scanner.token_value());
+                    push_comment(
+                        &mut comments,
+                        &mut indent,
+                        &mut margin,
+                        &self.scanner.token_value(),
+                    );
                 }
                 SyntaxKind::BacktickToken => {
                     if state == JSDocState::SavingBackticks {
@@ -1680,7 +1778,12 @@ impl super::Parser {
                     } else {
                         state = JSDocState::SavingBackticks;
                     }
-                    push_comment(&mut comments, &mut indent, &mut margin,self.scanner.token_text());
+                    push_comment(
+                        &mut comments,
+                        &mut indent,
+                        &mut margin,
+                        self.scanner.token_text(),
+                    );
                 }
                 SyntaxKind::OpenBraceToken => {
                     state = JSDocState::SavingComments;
@@ -1696,12 +1799,22 @@ impl super::Parser {
                         comments.clear();
                         link_end = self.scanner.token_end();
                     } else {
-                        push_comment(&mut comments, &mut indent, &mut margin,self.scanner.token_text());
+                        push_comment(
+                            &mut comments,
+                            &mut indent,
+                            &mut margin,
+                            self.scanner.token_text(),
+                        );
                     }
                 }
                 _ => {
                     state = JSDocState::SavingComments;
-                    push_comment(&mut comments, &mut indent, &mut margin,self.scanner.token_text());
+                    push_comment(
+                        &mut comments,
+                        &mut indent,
+                        &mut margin,
+                        self.scanner.token_text(),
+                    );
                 }
             }
 
@@ -1795,9 +1908,9 @@ impl super::Parser {
                 return None;
             }
             "prop" | "property" => PropertyLikeParse(PropertyLikeParse::PROPERTY),
-            "arg" | "argument" | "param" => {
-                PropertyLikeParse(PropertyLikeParse::PARAMETER | PropertyLikeParse::CALLBACK_PARAMETER)
-            }
+            "arg" | "argument" | "param" => PropertyLikeParse(
+                PropertyLikeParse::PARAMETER | PropertyLikeParse::CALLBACK_PARAMETER,
+            ),
             "template" => return Some(self.parse_template_tag(start, tag_name, indent, "")),
             "this" => return Some(self.parse_this_tag(start, tag_name, indent, "")),
             _ => return None,
@@ -1824,7 +1937,8 @@ impl super::Parser {
                 return;
             }
         }
-        while self.token == SyntaxKind::WhitespaceTrivia || self.token == SyntaxKind::NewLineTrivia {
+        while self.token == SyntaxKind::WhitespaceTrivia || self.token == SyntaxKind::NewLineTrivia
+        {
             self.next_token_jsdoc();
         }
     }
@@ -1837,7 +1951,8 @@ impl super::Parser {
             if self.token == SyntaxKind::EndOfFile {
                 return true;
             }
-            if self.token != SyntaxKind::WhitespaceTrivia && self.token != SyntaxKind::NewLineTrivia {
+            if self.token != SyntaxKind::WhitespaceTrivia && self.token != SyntaxKind::NewLineTrivia
+            {
                 return false;
             }
         }
@@ -1900,12 +2015,7 @@ fn is_identifier_or_keyword_token(token: SyntaxKind) -> bool {
 }
 
 /// Push a comment string, updating indent and margin.
-fn push_comment(
-    comments: &mut Vec<String>,
-    indent: &mut usize,
-    margin: &mut i32,
-    text: &str,
-) {
+fn push_comment(comments: &mut Vec<String>, indent: &mut usize, margin: &mut i32, text: &str) {
     if *margin == -1 {
         // margin is set lazily; caller manages indent
     }
@@ -1917,7 +2027,11 @@ fn push_comment(
 /// Mirrors Go's `removeLeadingNewlines` (`jsdoc.go:380-386`).
 fn remove_leading_newlines(mut comments: Vec<String>) -> Vec<String> {
     let mut i = 0;
-    while i < comments.len() && comments[i].trim_matches(|c| c == '\r' || c == '\n').is_empty() {
+    while i < comments.len()
+        && comments[i]
+            .trim_matches(|c| c == '\r' || c == '\n')
+            .is_empty()
+    {
         i += 1;
     }
     comments.drain(..i);
@@ -1971,8 +2085,8 @@ fn remove_trailing_whitespace(mut comments: Vec<String>) -> Vec<String> {
 /// function compensates by scanning backward to find the full start before
 /// calling `get_leading_comment_ranges`.
 pub fn get_jsdoc_comment_ranges(text: &str, node: &Node) -> Vec<crate::scanner::CommentRange> {
-    use crate::scanner::{get_leading_comment_ranges, get_trailing_comment_ranges};
     use crate::ast::SyntaxKind as SK;
+    use crate::scanner::{get_leading_comment_ranges, get_trailing_comment_ranges};
 
     let token_pos = node.pos();
 
@@ -2021,7 +2135,12 @@ fn find_full_start(text: &str, token_pos: usize) -> usize {
 
     while i > 0 {
         // Skip backward through ASCII whitespace
-        while i > 0 && (bytes[i - 1] == b' ' || bytes[i - 1] == b'\t' || bytes[i - 1] == b'\n' || bytes[i - 1] == b'\r') {
+        while i > 0
+            && (bytes[i - 1] == b' '
+                || bytes[i - 1] == b'\t'
+                || bytes[i - 1] == b'\n'
+                || bytes[i - 1] == b'\r')
+        {
             i -= 1;
         }
         // Check if we're at the end of a block comment (*/)
@@ -2058,10 +2177,7 @@ fn find_full_start(text: &str, token_pos: usize) -> usize {
 ///
 /// Returns the parsed JSDoc nodes (possibly empty). The caller
 /// (`SourceFile::resolve_jsdoc`) caches the result.
-pub fn parse_jsdoc_for_node(
-    source_file: &crate::ast::SourceFile,
-    node: &Node,
-) -> Vec<Arc<Node>> {
+pub fn parse_jsdoc_for_node(source_file: &crate::ast::SourceFile, node: &Node) -> Vec<Arc<Node>> {
     let text = &source_file.text;
     let ranges = get_jsdoc_comment_ranges(text, node);
     if ranges.is_empty() {
@@ -2094,12 +2210,10 @@ mod tests {
         let text = source;
         let start = text.find("/**").expect("no /** found");
         // Find the closing */ after start
-        let end = text[start..]
-            .find("*/")
-            .expect("no */ found")
-            + start
-            + 2; // include */
-        parser.parse_jsdoc_comment(start, end, start).expect("parse failed")
+        let end = text[start..].find("*/").expect("no */ found") + start + 2; // include */
+        parser
+            .parse_jsdoc_comment(start, end, start)
+            .expect("parse failed")
     }
 
     #[test]
@@ -2512,6 +2626,9 @@ mod tests {
         // Node doesn't have HasJSDoc flag set (parser integration not done yet),
         // so jsdoc() should return empty.
         let jsdocs = stmt.jsdoc(&file);
-        assert!(jsdocs.is_empty(), "jsdoc() should return empty without HasJSDoc flag");
+        assert!(
+            jsdocs.is_empty(),
+            "jsdoc() should return empty without HasJSDoc flag"
+        );
     }
 }

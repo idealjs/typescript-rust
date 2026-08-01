@@ -86,11 +86,7 @@ fn compare_decimal_strings(a: &str, b: &str) -> i32 {
     let a = if a.is_empty() { "0" } else { a };
     let b = if b.is_empty() { "0" } else { b };
     if a.len() != b.len() {
-        if a.len() < b.len() {
-            -1
-        } else {
-            1
-        }
+        if a.len() < b.len() { -1 } else { 1 }
     } else {
         match a.cmp(b) {
             std::cmp::Ordering::Less => -1,
@@ -410,7 +406,8 @@ impl<'a> RegExpParser<'a> {
                                 self.inc_pos(1);
                                 // In Annex B, `(?=Disjunction)` and `(?!Disjunction)`
                                 // are quantifiable.
-                                is_previous_term_quantifiable = !self.any_unicode_mode_or_non_annex_b;
+                                is_previous_term_quantifiable =
+                                    !self.any_unicode_mode_or_non_annex_b;
                             }
                             '<' => {
                                 let group_name_start = self.pos;
@@ -609,7 +606,11 @@ impl<'a> RegExpParser<'a> {
             if flag == 0 {
                 self.error(diagnostics::UNKNOWN_REGULAR_EXPRESSION_FLAG, self.pos, size);
             } else if curr & flag != 0 {
-                self.error(diagnostics::DUPLICATE_REGULAR_EXPRESSION_FLAG, self.pos, size);
+                self.error(
+                    diagnostics::DUPLICATE_REGULAR_EXPRESSION_FLAG,
+                    self.pos,
+                    size,
+                );
             } else if flag & REG_EXP_FLAG_MODIFIERS == 0 {
                 self.error(
                     diagnostics::THIS_REGULAR_EXPRESSION_FLAG_CANNOT_BE_TOGGLED_WITHIN_A_SUBPATTERN,
@@ -735,7 +736,11 @@ impl<'a> RegExpParser<'a> {
                         .unwrap_or_else(|| code.to_string());
                 }
                 if self.any_unicode_mode_or_non_annex_b {
-                    self.error(diagnostics::X_C_MUST_BE_FOLLOWED_BY_AN_ASCII_LETTER, self.pos - 2, 2);
+                    self.error(
+                        diagnostics::X_C_MUST_BE_FOLLOWED_BY_AN_ASCII_LETTER,
+                        self.pos - 2,
+                        2,
+                    );
                 } else if atom_escape {
                     self.inc_pos(-1);
                     return "\\".to_string();
@@ -764,7 +769,12 @@ impl<'a> RegExpParser<'a> {
     /// default identity escape. `\cX` is handled by `scan_character_escape`.
     /// Reports TS1535/TS1536/TS1537/TS1538 as appropriate. Surrogate pairing
     /// is skipped (not needed for validation).
-    fn scan_escape_sequence(&mut self, annex_b: bool, any_unicode_mode: bool, atom_escape: bool) -> String {
+    fn scan_escape_sequence(
+        &mut self,
+        annex_b: bool,
+        any_unicode_mode: bool,
+        atom_escape: bool,
+    ) -> String {
         // Precondition: pos is at the backslash.
         let start = self.pos;
         self.inc_pos(1); // skip backslash
@@ -1026,9 +1036,10 @@ impl<'a> RegExpParser<'a> {
                 if min_character.is_empty() {
                     continue;
                 }
-                if let (Some((min_c, min_size)), Some((max_c, max_size))) =
-                    (decode_first_rune(&min_character), decode_first_rune(&max_character))
-                {
+                if let (Some((min_c, min_size)), Some((max_c, max_size))) = (
+                    decode_first_rune(&min_character),
+                    decode_first_rune(&max_character),
+                ) {
                     if min_character.len() == min_size
                         && max_character.len() == max_size
                         && (min_c as u32) > (max_c as u32)
@@ -1171,9 +1182,10 @@ impl<'a> RegExpParser<'a> {
                                 self.pos - second_start,
                             );
                         } else if !operand.is_empty() {
-                            if let (Some((min_c, min_size)), Some((max_c, max_size))) =
-                                (decode_first_rune(&operand), decode_first_rune(&second_operand))
-                            {
+                            if let (Some((min_c, min_size)), Some((max_c, max_size))) = (
+                                decode_first_rune(&operand),
+                                decode_first_rune(&second_operand),
+                            ) {
                                 if operand.len() == min_size
                                     && second_operand.len() == max_size
                                     && (min_c as u32) > (max_c as u32)
@@ -1495,10 +1507,9 @@ impl<'a> RegExpParser<'a> {
             let property_name_or_value = self.scan_word_characters();
             if self.char() == '=' {
                 // `name=value` form.
-                let property_name = unicode_properties::non_binary_property_canonical(
-                    &property_name_or_value,
-                )
-                .unwrap_or("");
+                let property_name =
+                    unicode_properties::non_binary_property_canonical(&property_name_or_value)
+                        .unwrap_or("");
                 if self.pos == property_name_or_value_start {
                     self.error(diagnostics::EXPECTED_A_UNICODE_PROPERTY_NAME, self.pos, 0);
                 } else if property_name.is_empty() {
@@ -1530,7 +1541,11 @@ impl<'a> RegExpParser<'a> {
             } else {
                 // Lone property name or value.
                 if self.pos == property_name_or_value_start {
-                    self.error(diagnostics::EXPECTED_A_UNICODE_PROPERTY_NAME_OR_VALUE, self.pos, 0);
+                    self.error(
+                        diagnostics::EXPECTED_A_UNICODE_PROPERTY_NAME_OR_VALUE,
+                        self.pos,
+                        0,
+                    );
                 } else if unicode_properties::is_binary_unicode_property_of_strings(
                     &property_name_or_value,
                 ) {
@@ -1552,8 +1567,9 @@ impl<'a> RegExpParser<'a> {
                 } else if !unicode_properties::is_valid_unicode_property_value(
                     "General_Category",
                     &property_name_or_value,
-                ) && !unicode_properties::is_binary_unicode_property(&property_name_or_value)
-                {
+                ) && !unicode_properties::is_binary_unicode_property(
+                    &property_name_or_value,
+                ) {
                     self.error(
                         diagnostics::UNKNOWN_UNICODE_PROPERTY_NAME_OR_VALUE,
                         property_name_or_value_start,
