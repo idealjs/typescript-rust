@@ -228,6 +228,68 @@ const CASES: &[Case] = &[
         stdout_contains: &[],
         skip_oracle: true,
     },
+    // ── Parser parity smoke cases ───────────────────────────────────────
+    Case {
+        name: "parser_syntax_error",
+        // Various syntax errors (TS1003/TS1005/TS1109/TS1136). No files
+        // should be emitted (noEmitOnError: true). Exit code non-zero.
+        args: &[],
+        expect_success: false,
+        expected_files: &[],
+        stdout_contains: &[],
+        skip_oracle: false,
+    },
+    Case {
+        name: "parser_tsx",
+        // TSX JSX parsing: fragments, components, expressions in JSX.
+        // NOTE: Rust checker lacks JSX namespace types (JSX.IntrinsicElements /
+        // JSX.Element), producing TS2602/TS7026. The parser correctly parses
+        // the TSX; this is a checker parity gap. expect_success = false +
+        // skip_oracle until JSX lib support lands.
+        args: &[],
+        expect_success: false,
+        expected_files: &[],
+        stdout_contains: &[],
+        skip_oracle: true,
+    },
+    Case {
+        name: "parser_generics",
+        // Generic functions, classes, interfaces, constraints, conditional
+        // types with infer.
+        args: &[],
+        expect_success: true,
+        expected_files: &[],
+        stdout_contains: &[],
+        skip_oracle: false,
+    },
+    Case {
+        name: "parser_decorators",
+        // Decorator syntax (method + accessor decorators).
+        args: &[],
+        expect_success: true,
+        expected_files: &[],
+        stdout_contains: &[],
+        skip_oracle: false,
+    },
+    Case {
+        name: "parser_enums",
+        // Numeric, string, const enums with computed values.
+        args: &[],
+        expect_success: true,
+        expected_files: &[],
+        stdout_contains: &[],
+        skip_oracle: false,
+    },
+    Case {
+        name: "parser_conditional_types",
+        // Conditional types, mapped types, template literal types, indexed
+        // access, keyof, typeof.
+        args: &[],
+        expect_success: true,
+        expected_files: &[],
+        stdout_contains: &[],
+        skip_oracle: false,
+    },
 ];
 
 #[test]

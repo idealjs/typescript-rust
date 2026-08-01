@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "strict": true,
+    "jsx": "react-jsx",
+    "noEmitOnError": true
+  },
+  "include": ["src"]
+}
