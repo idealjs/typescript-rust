@@ -342,14 +342,12 @@ pub(crate) struct ResolutionState<'a> {
 impl<'a> ResolutionState<'a> {
     /// Create a new resolution state, deriving features/esmMode/conditions
     /// from the module resolution kind.
-    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         name: &str,
         containing_directory: &str,
         is_type_reference_directive: bool,
         _resolution_mode: ResolutionMode,
         compiler_options: &'a CompilerOptions,
-        _resolver: &'a Resolver,
     ) -> Self {
         // Compute extensions.
         let extensions = if is_type_reference_directive {
@@ -404,6 +402,265 @@ impl<'a> ResolutionState<'a> {
             compiler_options,
             resolve_package_directory_only: false,
         }
+    }
+
+    // ── Relative path resolution ────────────────────────────────────
+
+    /// Normalize a path for CJS resolution. If the last path component is
+    /// `.` or `..`, append a trailing directory separator.
+    fn normalize_path_for_cjs_resolution(directory: &str, name: &str) -> String {
+        let combined = tspath::combine_paths(directory, &[name]);
+        // Check the last component BEFORE normalization, since normalize
+        // would strip `.` and `..` components.
+        let last_component = tspath::get_base_file_name(&combined);
+        let combined = tspath::normalize_path(&combined);
+        if last_component == "." || last_component == ".." {
+            tspath::ensure_trailing_directory_separator(&combined)
+        } else {
+            combined
+        }
+    }
+
+    /// Try to load a module by relative name. First tries file resolution
+    /// (with extension swapping), then directory resolution (package.json
+    /// + index.js). Mirrors Go's `nodeLoadModuleByRelativeName`.
+    fn node_load_module_by_relative_name(
+        &mut self,
+        extensions: Extensions,
+        candidate: &str,
+        _consider_package_json: bool,
+        fs: &dyn FS,
+    ) -> Option<Resolved> {
+        if !tspath::has_trailing_directory_separator(candidate) {
+            let parent_of_candidate = tspath::get_directory_path(candidate);
+            if !fs.directory_exists(&parent_of_candidate) {
+                return CONTINUE_SEARCHING;
+            }
+            if let Some(resolved) = self.load_module_from_file(extensions, candidate, fs) {
+                return Some(resolved);
+            }
+        }
+        if !fs.directory_exists(candidate) {
+            return CONTINUE_SEARCHING;
+        }
+        // In ESM mode, directory lookups (package.json redirection and
+        // implicit index.js) are skipped — only file resolution applies.
+        if self.esm_mode {
+            return CONTINUE_SEARCHING;
+        }
+        // TODO: load_node_module_from_directory (package.json types/main + index lookup)
+        CONTINUE_SEARCHING
+    }
+
+    /// Try to load a module from a file, first by replacing the extension,
+    /// then by appending extensions. Mirrors Go's `loadModuleFromFile`.
+    fn load_module_from_file(
+        &self,
+        extensions: Extensions,
+        candidate: &str,
+        fs: &dyn FS,
+    ) -> Option<Resolved> {
+        // ./foo.js → ./foo.ts (extension replacement)
+        if let Some(resolved) =
+            self.load_module_from_file_no_implicit_extensions(extensions, candidate, fs)
+        {
+            return Some(resolved);
+        }
+        // ./foo → ./foo.ts (extension appending, CJS only)
+        if !self.esm_mode {
+            return self.try_adding_extensions(candidate, extensions, "", fs);
+        }
+        CONTINUE_SEARCHING
+    }
+
+    /// Strip the candidate's extension and try replacing it with TS/DTS/JS
+    /// extensions. Mirrors Go's `loadModuleFromFileNoImplicitExtensions`.
+    fn load_module_from_file_no_implicit_extensions(
+        &self,
+        extensions: Extensions,
+        candidate: &str,
+        fs: &dyn FS,
+    ) -> Option<Resolved> {
+        let base = tspath::get_base_file_name(candidate);
+        if !base.contains('.') {
+            return CONTINUE_SEARCHING;
+        }
+        let extensionless = tspath::remove_file_extension(candidate);
+        if extensionless == candidate {
+            return CONTINUE_SEARCHING;
+        }
+        let extension = &candidate[extensionless.len()..];
+        self.try_adding_extensions(&extensionless, extensions, extension, fs)
+    }
+
+    /// The core extension-priority table. Given an extensionless path and
+    /// the original extension, tries TS/DTS/JS extensions in priority order.
+    /// Mirrors Go's `tryAddingExtensions`.
+    fn try_adding_extensions(
+        &self,
+        extensionless: &str,
+        extensions: Extensions,
+        original_extension: &str,
+        fs: &dyn FS,
+    ) -> Option<Resolved> {
+        let directory = tspath::get_directory_path(extensionless);
+        if !directory.is_empty() && !fs.directory_exists(&directory) {
+            return CONTINUE_SEARCHING;
+        }
+
+        match original_extension {
+            ".mjs" | ".mts" | ".d.mts" => {
+                if extensions.contains(Extensions::TYPESCRIPT) {
+                    if let Some(r) = self.try_extension(".mts", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                if extensions.contains(Extensions::DECLARATION) {
+                    if let Some(r) = self.try_extension(".d.mts", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                if extensions.contains(Extensions::JAVASCRIPT) {
+                    if let Some(r) = self.try_extension(".mjs", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                CONTINUE_SEARCHING
+            }
+            ".cjs" | ".cts" | ".d.cts" => {
+                if extensions.contains(Extensions::TYPESCRIPT) {
+                    if let Some(r) = self.try_extension(".cts", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                if extensions.contains(Extensions::DECLARATION) {
+                    if let Some(r) = self.try_extension(".d.cts", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                if extensions.contains(Extensions::JAVASCRIPT) {
+                    if let Some(r) = self.try_extension(".cjs", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                CONTINUE_SEARCHING
+            }
+            ".json" => {
+                if extensions.contains(Extensions::DECLARATION) {
+                    if let Some(r) = self.try_extension(".d.json.ts", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                if extensions.contains(Extensions::JSON) {
+                    if let Some(r) = self.try_extension(".json", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                CONTINUE_SEARCHING
+            }
+            ".tsx" | ".jsx" => {
+                if extensions.contains(Extensions::TYPESCRIPT) {
+                    if let Some(r) = self.try_extension(".tsx", extensionless, fs) {
+                        return Some(r);
+                    }
+                    if let Some(r) = self.try_extension(".ts", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                if extensions.contains(Extensions::DECLARATION) {
+                    if let Some(r) = self.try_extension(".d.ts", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                if extensions.contains(Extensions::JAVASCRIPT) {
+                    if let Some(r) = self.try_extension(".jsx", extensionless, fs) {
+                        return Some(r);
+                    }
+                    if let Some(r) = self.try_extension(".js", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                CONTINUE_SEARCHING
+            }
+            // .ts, .d.ts, .js, or "" (extensionless)
+            ".ts" | ".d.ts" | ".js" | "" => {
+                if extensions.contains(Extensions::TYPESCRIPT) {
+                    if let Some(r) = self.try_extension(".ts", extensionless, fs) {
+                        return Some(r);
+                    }
+                    if let Some(r) = self.try_extension(".tsx", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                if extensions.contains(Extensions::DECLARATION) {
+                    if let Some(r) = self.try_extension(".d.ts", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                if extensions.contains(Extensions::JAVASCRIPT) {
+                    if let Some(r) = self.try_extension(".js", extensionless, fs) {
+                        return Some(r);
+                    }
+                    if let Some(r) = self.try_extension(".jsx", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                if self.is_config_lookup {
+                    if let Some(r) = self.try_extension(".json", extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                CONTINUE_SEARCHING
+            }
+            _ => {
+                // Arbitrary extensions: try .d.<ext>.ts for declaration mapping
+                if extensions.contains(Extensions::DECLARATION)
+                    && !tspath::is_declaration_file_name(&format!("{extensionless}{original_extension}"))
+                {
+                    let ext = format!(".d{original_extension}.ts");
+                    if let Some(r) = self.try_extension(&ext, extensionless, fs) {
+                        return Some(r);
+                    }
+                }
+                CONTINUE_SEARCHING
+            }
+        }
+    }
+
+    /// Try a single extension on an extensionless path. Returns the resolved
+    /// path if the file exists. Mirrors Go's `tryExtension`.
+    fn try_extension(
+        &self,
+        extension: &str,
+        extensionless: &str,
+        fs: &dyn FS,
+    ) -> Option<Resolved> {
+        let file_name = format!("{extensionless}{extension}");
+        if self.try_file(&file_name, fs) {
+            return Some(Resolved {
+                path: file_name,
+                extension: extension.to_string(),
+                ..Default::default()
+            });
+        }
+        CONTINUE_SEARCHING
+    }
+
+    /// Check if a file exists, applying moduleSuffixes if configured.
+    /// Mirrors Go's `tryFile`.
+    fn try_file(&self, file_name: &str, fs: &dyn FS) -> bool {
+        if self.compiler_options.module_suffixes.is_empty() {
+            return fs.file_exists(file_name);
+        }
+        let ext = tspath::try_get_extension_from_path(file_name);
+        let file_name_no_ext = tspath::remove_extension(file_name, ext);
+        for suffix in &self.compiler_options.module_suffixes {
+            let path = format!("{file_name_no_ext}{suffix}{ext}");
+            if fs.file_exists(&path) {
+                return true;
+            }
+        }
+        false
     }
 }
 
@@ -533,5 +790,164 @@ mod tests {
         let (roots, from_config) = get_effective_type_roots(&opts, "/project");
         assert!(from_config);
         assert_eq!(roots, vec!["./custom-types".to_string()]);
+    }
+
+    // ── Relative path resolution tests ─────────────────────────────
+
+    fn make_state<'a>(name: &str, containing_dir: &str, opts: &'a CompilerOptions) -> ResolutionState<'a> {
+        ResolutionState::new(
+            name,
+            containing_dir,
+            false, // is_type_reference_directive
+            ModuleKind::None,
+            opts,
+        )
+    }
+
+    #[test]
+    fn resolve_relative_ts_file() {
+        use crate::vfs::InMemoryFS;
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/src");
+        fs.write_file("/src/foo.ts", "export const x = 1;").unwrap();
+
+        let opts = CompilerOptions::default();
+        let mut state = make_state("./foo", "/src", &opts);
+        let candidate = ResolutionState::normalize_path_for_cjs_resolution("/src", "./foo");
+        let result = state.node_load_module_by_relative_name(
+            Extensions::TYPESCRIPT
+                .union(Extensions::JAVASCRIPT)
+                .union(Extensions::DECLARATION),
+            &candidate,
+            true,
+            &fs,
+        );
+        assert!(result.is_some());
+        let resolved = result.unwrap();
+        assert_eq!(resolved.path, "/src/foo.ts");
+        assert_eq!(resolved.extension, ".ts");
+    }
+
+    #[test]
+    fn resolve_relative_tsx_file() {
+        use crate::vfs::InMemoryFS;
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/src");
+        fs.write_file("/src/component.tsx", "export const C = 1;").unwrap();
+
+        let opts = CompilerOptions::default();
+        let mut state = make_state("./component", "/src", &opts);
+        let candidate =
+            ResolutionState::normalize_path_for_cjs_resolution("/src", "./component");
+        let result = state.node_load_module_by_relative_name(
+            Extensions::TYPESCRIPT
+                .union(Extensions::JAVASCRIPT)
+                .union(Extensions::DECLARATION),
+            &candidate,
+            true,
+            &fs,
+        );
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().extension, ".tsx");
+    }
+
+    #[test]
+    fn resolve_relative_js_specifier_swaps_to_ts() {
+        use crate::vfs::InMemoryFS;
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/src");
+        // Import "./foo.js" but only foo.ts exists → should resolve to foo.ts
+        fs.write_file("/src/foo.ts", "export const x = 1;").unwrap();
+
+        let opts = CompilerOptions::default();
+        let mut state = make_state("./foo.js", "/src", &opts);
+        let candidate =
+            ResolutionState::normalize_path_for_cjs_resolution("/src", "./foo.js");
+        let result = state.node_load_module_by_relative_name(
+            Extensions::TYPESCRIPT
+                .union(Extensions::JAVASCRIPT)
+                .union(Extensions::DECLARATION),
+            &candidate,
+            true,
+            &fs,
+        );
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().path, "/src/foo.ts");
+    }
+
+    #[test]
+    fn resolve_relative_mjs_specifier_swaps_to_mts() {
+        use crate::vfs::InMemoryFS;
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/src");
+        fs.write_file("/src/foo.mts", "export const x = 1;").unwrap();
+
+        let opts = CompilerOptions::default();
+        let mut state = make_state("./foo.mjs", "/src", &opts);
+        let candidate =
+            ResolutionState::normalize_path_for_cjs_resolution("/src", "./foo.mjs");
+        let result = state.node_load_module_by_relative_name(
+            Extensions::TYPESCRIPT
+                .union(Extensions::JAVASCRIPT)
+                .union(Extensions::DECLARATION),
+            &candidate,
+            true,
+            &fs,
+        );
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().path, "/src/foo.mts");
+    }
+
+    #[test]
+    fn resolve_relative_nonexistent_returns_none() {
+        use crate::vfs::InMemoryFS;
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/src");
+
+        let opts = CompilerOptions::default();
+        let mut state = make_state("./missing", "/src", &opts);
+        let candidate =
+            ResolutionState::normalize_path_for_cjs_resolution("/src", "./missing");
+        let result = state.node_load_module_by_relative_name(
+            Extensions::TYPESCRIPT
+                .union(Extensions::JAVASCRIPT)
+                .union(Extensions::DECLARATION),
+            &candidate,
+            true,
+            &fs,
+        );
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn resolve_relative_parent_dir_not_exists() {
+        use crate::vfs::InMemoryFS;
+        let fs = InMemoryFS::new();
+        // No directory created at all.
+
+        let opts = CompilerOptions::default();
+        let mut state = make_state("./foo", "/nonexistent", &opts);
+        let candidate =
+            ResolutionState::normalize_path_for_cjs_resolution("/nonexistent", "./foo");
+        let result = state.node_load_module_by_relative_name(
+            Extensions::TYPESCRIPT,
+            &candidate,
+            true,
+            &fs,
+        );
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn normalize_path_for_dot() {
+        let result = ResolutionState::normalize_path_for_cjs_resolution("/src", ".");
+        assert!(result.ends_with('/'));
+        assert!(tspath::has_trailing_directory_separator(&result));
+    }
+
+    #[test]
+    fn normalize_path_for_dot_dot() {
+        let result = ResolutionState::normalize_path_for_cjs_resolution("/src", "..");
+        assert!(tspath::has_trailing_directory_separator(&result));
     }
 }
