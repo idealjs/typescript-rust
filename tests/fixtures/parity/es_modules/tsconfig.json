@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "noLib": true,
+    "outDir": "dist",
+    "pretty": false,
+    "module": "ES2015"
+  },
+  "include": ["src/**/*"]
+}

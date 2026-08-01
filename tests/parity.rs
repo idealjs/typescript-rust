@@ -338,6 +338,57 @@ const CASES: &[Case] = &[
         stdout_contains: &[],
         skip_oracle: false,
     },
+    Case {
+        name: "es_modules",
+        // `module: "ES2015"` — import/export preserved as-is (no CommonJS
+        // transform). Both files emit to .js.
+        args: &[],
+        expect_success: true,
+        expected_files: &[
+            (
+                "dist/src/main.js",
+                "import { helper } from \"./helper\";\nconst result = helper(10);\nexport { result };\n",
+            ),
+            ("dist/src/helper.js", "export function helper(x) { return x * 2; }\n"),
+        ],
+        stdout_contains: &[],
+        skip_oracle: false,
+    },
+    Case {
+        name: "class_emit",
+        // Class with properties, constructor, and methods — type annotations
+        // stripped, class structure preserved.
+        args: &[],
+        expect_success: true,
+        expected_files: &[(
+            "dist/src/main.js",
+            "export class Point {\n\
+             \x20   x;\n\
+             \x20   y;\n\
+             \x20   constructor(x, y) { this.x = x; this.y = y; }\n\
+             \x20   sum() { return this.x + this.y; }\n\
+             }\n",
+        )],
+        stdout_contains: &[],
+        skip_oracle: false,
+    },
+    Case {
+        name: "decorators_emit",
+        // Decorator syntax preserved as-is (ESNext target, no down-leveling).
+        args: &[],
+        expect_success: true,
+        expected_files: &[(
+            "dist/src/main.js",
+            "function log(target, key, desc) { return desc; }\n\
+             export class Greeter {\n\
+             \x20   greeting;\n\
+             \x20   constructor(msg) { this.greeting = msg; }\n\
+             \x20   @log greet() { return \"Hello, \" + this.greeting; }\n\
+             }\n",
+        )],
+        stdout_contains: &[],
+        skip_oracle: false,
+    },
     // ── Parser parity smoke cases ───────────────────────────────────────
     Case {
         name: "parser_syntax_error",
