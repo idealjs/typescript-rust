@@ -118,9 +118,14 @@ fn compare_prerelease_identifier(left: &str, right: &str) -> Ordering {
         if !left_is_numeric {
             return Ordering::Greater;
         }
-        let left_num: u64 = left.parse().unwrap_or(0);
-        let right_num: u64 = right.parse().unwrap_or(0);
-        return left_num.cmp(&right_num);
+        return match (left.parse::<u64>(), right.parse::<u64>()) {
+            (Ok(left_num), Ok(right_num)) => left_num.cmp(&right_num),
+            // On overflow, compare by length, then fall back to string comparison.
+            _ => match left.len().cmp(&right.len()) {
+                Ordering::Equal => string_cmp,
+                len_cmp => len_cmp,
+            },
+        };
     }
 
     string_cmp
@@ -155,8 +160,7 @@ pub fn must_parse(text: &str) -> Version {
 }
 
 fn parse_version(text: &str) -> Result<Version, SemverParseError> {
-    let text_lower = text.to_lowercase();
-    let input: &str = &text_lower;
+    let input: &str = text;
 
     // Parse major
     let (major_str, rest) = match input.find(|c: char| !c.is_ascii_digit()) {
@@ -344,9 +348,7 @@ impl VersionRange {
 
 impl fmt::Display for VersionRange {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.alternatives.is_empty() {
-            return write!(f, "*");
-        }
+        let mut empty = true;
         for (i, alt) in self.alternatives.iter().enumerate() {
             if i > 0 {
                 write!(f, " || ")?;
@@ -363,7 +365,11 @@ impl fmt::Display for VersionRange {
                     ComparatorOperator::GreaterThan => ">",
                 };
                 write!(f, "{}{}", op, comp.operand)?;
+                empty = false;
             }
+        }
+        if empty {
+            write!(f, "*")?;
         }
         Ok(())
     }
@@ -456,10 +462,9 @@ struct PartialVersion {
 }
 
 fn parse_partial(text: &str) -> Option<PartialVersion> {
-    let text = text.to_lowercase();
-    let (prerelease_part, build_part) = split_prerelease_build(&text);
+    let (core, prerelease_part, build_part) = split_partial(text);
 
-    let parts: Vec<&str> = prerelease_part.split('.').collect();
+    let parts: Vec<&str> = core.split('.').collect();
     if parts.is_empty() {
         return None;
     }
@@ -503,7 +508,11 @@ fn parse_partial(text: &str) -> Option<PartialVersion> {
         patch_str.parse().ok()?
     };
 
-    let prerelease = Vec::new();
+    let prerelease = if prerelease_part.is_empty() {
+        Vec::new()
+    } else {
+        prerelease_part.split('.').map(|s| s.to_string()).collect()
+    };
     let build = if build_part.is_empty() {
         Vec::new()
     } else {
@@ -524,16 +533,20 @@ fn parse_partial(text: &str) -> Option<PartialVersion> {
     })
 }
 
-fn split_prerelease_build(text: &str) -> (String, String) {
-    // text is already lowercase, find prerelease and build parts
-    // format: major.minor.patch-pre+build
-    if let Some(plus_pos) = text.find('+') {
-        let pre = text[..plus_pos].to_string();
-        let build = text[plus_pos + 1..].to_string();
-        (pre, build)
-    } else {
-        (text.to_string(), String::new())
-    }
+fn split_partial(text: &str) -> (String, String, String) {
+    // Split "major.minor.patch-pre+build" into (core, prerelease, build).
+    let (before_build, build) = match text.find('+') {
+        Some(pos) => (text[..pos].to_string(), text[pos + 1..].to_string()),
+        None => (text.to_string(), String::new()),
+    };
+    let (core, prerelease) = match before_build.find('-') {
+        Some(pos) => (
+            before_build[..pos].to_string(),
+            before_build[pos + 1..].to_string(),
+        ),
+        None => (before_build, String::new()),
+    };
+    (core, prerelease, build)
 }
 
 fn is_valid_partial_numeric(s: &str) -> bool {
@@ -957,7 +970,6 @@ mod tests {
 
     // Ported from TestVersionCompare
     #[test]
-    #[ignore = "Rust semver prerelease compare differs from Go: 1.0.0-A vs 1.0.0-a (case sensitivity)"]
     fn test_version_compare() {
         let tests: &[(&str, &str, Ordering)] = &[
             // Major, minor, patch compared numerically
@@ -1056,7 +1068,6 @@ mod tests {
 
     // Ported from TestWildcardsHaveSameString
     #[test]
-    #[ignore = "Rust try_parse_version_range(\"\") returns empty string, not \"*\" like Go"]
     fn test_wildcards_have_same_string() {
         fn assert_all_identical(name: &str, strs: &[&str]) {
             for &s1 in strs {
@@ -1083,7 +1094,6 @@ mod tests {
 
     // Ported from TestVersionRanges
     #[test]
-    #[ignore = "Rust try_parse_version_range doesn't handle bare prerelease versions like 1.2.3-pre"]
     fn test_version_ranges() {
         assert_ranges_good_bad(
             "1",
@@ -1132,7 +1142,6 @@ mod tests {
 
     // Ported from TestComparatorsOfVersionRanges
     #[test]
-    #[ignore = "Rust try_parse_version_range doesn't handle bare prerelease versions like 1.1.0-0"]
     fn test_comparators_of_version_ranges() {
         let tests: &[(&str, &str, bool)] = &[
             // empty (matches everything)

@@ -161,15 +161,40 @@ where
     V: serde::Deserialize<'de>,
 {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        // We can't preserve arbitrary key order without a custom deserializer,
-        // but for string keys serde_json already preserves order via a Vec.
-        // For the general case, deserialize into a Vec of pairs.
-        let pairs: Vec<(K, V)> = Vec::deserialize(deserializer)?;
-        let mut result = Self::with_capacity(pairs.len());
-        for (k, v) in pairs {
-            result.insert(k, v);
+        struct OrderedMapVisitor<K, V>(std::marker::PhantomData<(K, V)>);
+
+        impl<'de, K, V> serde::de::Visitor<'de> for OrderedMapVisitor<K, V>
+        where
+            K: Eq + Hash + Clone + serde::Deserialize<'de>,
+            V: serde::Deserialize<'de>,
+        {
+            type Value = OrderedMap<K, V>;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("a map")
+            }
+
+            fn visit_map<A>(self, mut access: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::MapAccess<'de>,
+            {
+                let mut map = OrderedMap::with_capacity(access.size_hint().unwrap_or(0));
+                while let Some((key, value)) = access.next_entry()? {
+                    map.insert(key, value);
+                }
+                Ok(map)
+            }
+
+            // `null` deserializes to an empty map, mirroring Go's UnmarshalJSON.
+            fn visit_unit<E: serde::de::Error>(self) -> Result<Self::Value, E> {
+                Ok(OrderedMap::new())
+            }
         }
-        Ok(result)
+
+        // `deserialize_any` routes JSON `null` to `visit_unit`, objects to
+        // `visit_map` (preserving key order), and everything else to the
+        // default visitor methods (which produce a type error).
+        deserializer.deserialize_any(OrderedMapVisitor(std::marker::PhantomData))
     }
 }
 
@@ -406,25 +431,54 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "TODO: Go's testing.AllocsPerRun has no Rust equivalent for allocation counting"]
     fn test_ordered_map_with_size_hint() {
-        // Ported from TestOrderedMapWithSizeHint:
-        // const N: usize = 1024;
-        // let mut m = OrderedMap::with_capacity(N);
-        // for i in 0..N { m.set(i, i); }
-        // Go verifies allocs < 10; no direct Rust equivalent without a custom allocator.
+        // Ported from TestOrderedMapWithSizeHint. Go uses testing.AllocsPerRun
+        // to assert low allocation counts, which has no direct Rust equivalent.
+        // Instead, verify that a capacity-hinted map functions correctly:
+        // insertion, lookup, and in-order iteration all behave as expected.
+        const N: usize = 1024;
+        let mut m = OrderedMap::with_capacity(N);
+        for i in 0..N {
+            m.set(i, i);
+        }
+
+        assert_eq!(m.len(), N);
+
+        for i in 0..N {
+            assert_eq!(m.get(&i), Some(&i));
+        }
+
+        // Iteration order matches insertion order.
+        let keys: Vec<usize> = m.keys().copied().collect();
+        assert_eq!(keys, (0..N).collect::<Vec<_>>());
     }
 
     #[test]
-    #[ignore = "TODO: OrderedMap serde Deserialize uses Vec of pairs, not a JSON object; \
-                JSON object unmarshal into OrderedMap is not supported"]
     fn test_ordered_map_unmarshal_json() {
-        // Ported from TestOrderedMapUnmarshalJSON:
-        // let mut m: OrderedMap<String, serde_json::Value> = OrderedMap::new();
-        // serde_json::from_str(r#"{"a": 1, "b": "two", "c": { "d": 4 } }"#) -> m
-        //   assert size == 3, get_or_zero("a") == 1.0
-        // serde_json::from_str("null") -> m  (no error)
-        // serde_json::from_str(r#""foo""#) -> error "cannot unmarshal non-object JSON value into Map"
-        // serde_json::from_str(r#"{"a": 1, "b": "two"}"#) into OrderedMap<i32, _> -> error "unmarshal"
+        // Ported from TestOrderedMapUnmarshalJSON.
+
+        // Object with mixed-type values; key insertion order is preserved.
+        let m: OrderedMap<String, serde_json::Value> =
+            serde_json::from_str(r#"{"a": 1, "b": "two", "c": { "d": 4 } }"#).unwrap();
+        assert_eq!(m.len(), 3);
+        assert_eq!(m.get(&"a".to_string()).and_then(|v| v.as_f64()), Some(1.0));
+        let keys: Vec<String> = m.keys().cloned().collect();
+        assert_eq!(
+            keys,
+            vec!["a".to_string(), "b".to_string(), "c".to_string()]
+        );
+
+        // `null` unmarshals to an empty map without error.
+        let m: OrderedMap<String, serde_json::Value> = serde_json::from_str("null").unwrap();
+        assert_eq!(m.len(), 0);
+
+        // A non-object JSON value produces an error.
+        let err = serde_json::from_str::<OrderedMap<String, serde_json::Value>>(r#""foo""#);
+        assert!(err.is_err());
+
+        // An object whose keys cannot deserialize into the key type errors.
+        let err =
+            serde_json::from_str::<OrderedMap<i32, serde_json::Value>>(r#"{"a": 1, "b": "two"}"#);
+        assert!(err.is_err());
     }
 }

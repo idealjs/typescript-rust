@@ -194,6 +194,77 @@ pub fn first_non_zero<T: Default + PartialEq + Clone>(values: &[T]) -> T {
     zero
 }
 
+// ── Pattern matching, ported from `internal/core/pattern.go` ──
+
+/// A glob-like pattern with at most one `*` wildcard.
+///
+/// Mirrors `core.Pattern` in Go. `star_index` is the byte offset of the single
+/// `*` wildcard, or `-1` for an exact match (no wildcard).
+#[derive(Debug, Clone, Default)]
+pub struct Pattern {
+    pub text: String,
+    pub star_index: isize,
+}
+
+/// Parse a pattern string, mirroring `core.TryParsePattern` in Go.
+///
+/// Returns a `Pattern` with `star_index` set to the offset of the single `*`
+/// wildcard, or `-1` if there is none. If the pattern contains more than one
+/// `*`, returns an empty (invalid) pattern.
+pub fn try_parse_pattern(pattern: &str) -> Pattern {
+    match pattern.find('*') {
+        None => Pattern {
+            text: pattern.to_string(),
+            star_index: -1,
+        },
+        Some(idx) => {
+            if pattern[idx + 1..].contains('*') {
+                Pattern::default() // more than one `*` → invalid
+            } else {
+                Pattern {
+                    text: pattern.to_string(),
+                    star_index: idx as isize,
+                }
+            }
+        }
+    }
+}
+
+impl Pattern {
+    /// True if this pattern is valid (parsed from a string with at most one `*`).
+    pub fn is_valid(&self) -> bool {
+        self.star_index == -1 || self.star_index < self.text.len() as isize
+    }
+
+    /// True if `candidate` matches this pattern.
+    pub fn matches(&self, candidate: &str) -> bool {
+        if self.star_index == -1 {
+            return self.text == candidate;
+        }
+        let idx = self.star_index as usize;
+        let prefix = &self.text[..idx];
+        let suffix = &self.text[idx + 1..];
+        candidate.len() >= self.text.len() - 1
+            && candidate.starts_with(prefix)
+            && candidate.ends_with(suffix)
+    }
+
+    /// Return the text matched by the `*` wildcard. Panics if `candidate` does
+    /// not match the pattern; returns an empty string for exact (no-wildcard)
+    /// patterns.
+    pub fn matched_text<'a>(&self, candidate: &'a str) -> &'a str {
+        if !self.matches(candidate) {
+            panic!("candidate does not match pattern");
+        }
+        if self.star_index == -1 {
+            return "";
+        }
+        let idx = self.star_index as usize;
+        let suffix_len = self.text.len() - idx - 1;
+        &candidate[idx..candidate.len() - suffix_len]
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -229,14 +300,13 @@ mod tests {
     // ── Ported from Go internal/core/pattern_test.go ──
 
     #[test]
-    #[ignore = "TODO: Pattern / TryParsePattern does not exist in Rust yet"]
     fn test_pattern_overlapping_match() {
-        // Ported from TestPatternOverlappingMatch:
-        //   let p = try_parse_pattern("ab*ab");
-        //   assert!(!p.matches("ab"));
-        //   assert!(p.matches("abXab"));
-        //   assert_eq!(p.matched_text("abXab"), "X");
-        //   assert!(p.matches("abab"));
-        //   assert_eq!(p.matched_text("abab"), "");
+        // Ported from TestPatternOverlappingMatch.
+        let p = try_parse_pattern("ab*ab");
+        assert!(!p.matches("ab"), "'ab' should not match 'ab*ab'");
+        assert!(p.matches("abXab"), "'abXab' should match 'ab*ab'");
+        assert_eq!(p.matched_text("abXab"), "X");
+        assert!(p.matches("abab"), "'abab' should match 'ab*ab'");
+        assert_eq!(p.matched_text("abab"), "");
     }
 }

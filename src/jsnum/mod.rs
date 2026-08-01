@@ -149,6 +149,27 @@ impl Number {
         if b == 1.0 && e.is_nan() {
             return Number::nan();
         }
+        // For integer base and non-negative integer exponent, use exact
+        // integer exponentiation then convert to f64. This matches Go's
+        // correctly-rounded result (Go uses big.Int). f64::powf diverges by
+        // 1 ULP for some cases (e.g. 5**210).
+        if b.is_finite()
+            && b.fract() == 0.0
+            && b.abs() < (1u64 << 53) as f64
+            && e.is_finite()
+            && e >= 0.0
+            && e.fract() == 0.0
+            && e <= 1100.0
+        {
+            let base = b.abs() as u64;
+            let exp = e as u32;
+            let result = pow_exact_f64(base, exp);
+            return Number(if b.is_sign_negative() && exp % 2 == 1 {
+                -result
+            } else {
+                result
+            });
+        }
         Number(b.powf(e))
     }
 
@@ -201,6 +222,10 @@ impl Number {
                         if let Ok(i) = i64::from_str_radix(rest, 16) {
                             return Number(i as f64);
                         }
+                        // Fall back to u128 for values >= 2^63 (Go uses big.Int).
+                        if let Ok(n) = u128::from_str_radix(rest, 16) {
+                            return Number(n as f64);
+                        }
                     }
                     return Number::nan();
                 }
@@ -247,6 +272,17 @@ impl fmt::Display for Number {
             if i as f64 == self.0 {
                 return write!(f, "{}", i);
             }
+        }
+        // Whole numbers in (MAX_SAFE_INTEGER, 1e21): format as full decimal.
+        // serde_json may use exponential notation for some of these; JS uses
+        // full digits (e.g. 1e20 → "100000000000000000000"). Rust's Display
+        // gives the shortest repr but may also use exponential, so we expand.
+        if self.0.abs() < 1e21 && self.0.fract() == 0.0 {
+            let s = format!("{}", self.0);
+            if s.contains('e') || s.contains('E') {
+                return write!(f, "{}", expand_exponential(&s));
+            }
+            return write!(f, "{}", s);
         }
         // Use serde_json for JS-compatible float formatting
         write!(
@@ -333,6 +369,174 @@ fn is_number_rune(r: char) -> bool {
     )
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// Big-integer exponentiation helpers
+//
+// Used by `Number::exponentiate` to compute base^exp for integer base and
+// non-negative integer exponent with correct f64 rounding. Go uses big.Int
+// for the same purpose; Rust has no stdlib bigint, so we implement a minimal
+// version with Vec<u32> limbs.
+// ─────────────────────────────────────────────────────────────────────
+
+/// Expand an exponential-notation number string to full decimal notation.
+/// E.g. "1e20" → "100000000000000000000", "-2.1e16" → "-21000000000000000".
+fn expand_exponential(s: &str) -> String {
+    let (negative, rest) = if let Some(r) = s.strip_prefix('-') {
+        (true, r)
+    } else {
+        (false, s)
+    };
+
+    let e_pos = match rest.find(|c| c == 'e' || c == 'E') {
+        Some(p) => p,
+        None => return s.to_string(),
+    };
+
+    let mantissa = &rest[..e_pos];
+    let exp_str = &rest[e_pos + 1..];
+    let exp_str = exp_str.strip_prefix('+').unwrap_or(exp_str);
+    let exp: i32 = exp_str.parse().unwrap_or(0);
+
+    let (int_part, frac_part) = mantissa.split_once('.').unwrap_or((mantissa, ""));
+    let all_digits = format!("{}{}", int_part, frac_part);
+    let decimal_pos = int_part.len() as i32 + exp;
+
+    let mut result = String::new();
+    if negative {
+        result.push('-');
+    }
+
+    if decimal_pos <= 0 {
+        result.push_str("0.");
+        for _ in 0..(-decimal_pos) {
+            result.push('0');
+        }
+        result.push_str(&all_digits);
+    } else if (decimal_pos as usize) >= all_digits.len() {
+        result.push_str(&all_digits);
+        for _ in 0..(decimal_pos - all_digits.len() as i32) {
+            result.push('0');
+        }
+    } else {
+        result.push_str(&all_digits[..decimal_pos as usize]);
+        result.push('.');
+        result.push_str(&all_digits[decimal_pos as usize..]);
+    }
+
+    result
+}
+
+/// Multiply two big integers represented as little-endian u32 limbs.
+fn big_mul(a: &[u32], b: &[u32]) -> Vec<u32> {
+    if a.iter().all(|&x| x == 0) || b.iter().all(|&x| x == 0) {
+        return vec![0];
+    }
+    let mut result = vec![0u32; a.len() + b.len()];
+    for i in 0..a.len() {
+        let mut carry: u64 = 0;
+        for j in 0..b.len() {
+            let prod = a[i] as u64 * b[j] as u64 + result[i + j] as u64 + carry;
+            result[i + j] = prod as u32;
+            carry = prod >> 32;
+        }
+        let mut k = i + b.len();
+        while carry > 0 {
+            let sum = result[k] as u64 + carry;
+            result[k] = sum as u32;
+            carry = sum >> 32;
+            k += 1;
+        }
+    }
+    result
+}
+
+/// Convert a big integer (little-endian u32 limbs) to a correctly-rounded f64.
+fn big_to_f64(limbs: &[u32]) -> f64 {
+    let n = limbs.iter().rposition(|&x| x != 0).map_or(0, |i| i + 1);
+    if n == 0 {
+        return 0.0;
+    }
+    let limbs = &limbs[..n];
+
+    // Position of the most significant 1-bit (0-indexed from LSB).
+    let top = (n - 1) * 32 + (31 - limbs[n - 1].leading_zeros() as usize);
+
+    // Extract 52 mantissa bits: positions [top-1, top-2, ..., top-52].
+    let mut mantissa: u64 = 0;
+    for i in 0..52 {
+        if i >= top {
+            break;
+        }
+        let pos = top - 1 - i;
+        mantissa |= (((limbs[pos / 32] >> (pos % 32)) & 1) as u64) << (51 - i);
+    }
+
+    let mut exponent = top as u64 + 1023;
+
+    // Round-to-nearest-even if there are bits below the mantissa.
+    if top >= 53 {
+        let round_pos = top - 53;
+        let round_bit = (limbs[round_pos / 32] >> (round_pos % 32)) & 1;
+
+        // Sticky: any bit set at positions strictly below round_pos.
+        let sticky = if round_pos == 0 {
+            false
+        } else {
+            let limb = round_pos / 32;
+            let bit = round_pos % 32;
+            let mut found = bit > 0 && limbs[limb] & ((1u32 << bit) - 1) != 0;
+            if !found {
+                found = limbs[..limb].iter().any(|&x| x != 0);
+            }
+            found
+        };
+
+        if round_bit != 0 && (sticky || mantissa & 1 == 1) {
+            mantissa += 1;
+            if mantissa >= (1u64 << 52) {
+                mantissa = 0;
+                exponent += 1;
+            }
+        }
+    }
+
+    if exponent >= 2047 {
+        return f64::INFINITY;
+    }
+
+    f64::from_bits(exponent << 52 | mantissa)
+}
+
+/// Compute base^exp exactly as a big integer, then convert to correctly-rounded f64.
+fn pow_exact_f64(base: u64, exp: u32) -> f64 {
+    if exp == 0 {
+        return 1.0;
+    }
+    if base == 0 {
+        return 0.0;
+    }
+
+    let mut b = vec![base as u32, (base >> 32) as u32];
+    while b.len() > 1 && *b.last().unwrap() == 0 {
+        b.pop();
+    }
+
+    let mut result: Vec<u32> = vec![1];
+    let mut e = exp;
+
+    while e > 0 {
+        if e & 1 == 1 {
+            result = big_mul(&result, &b);
+        }
+        e >>= 1;
+        if e > 0 {
+            b = big_mul(&b, &b);
+        }
+    }
+
+    big_to_f64(&result)
+}
+
 /// A JS-like bigint, used for evaluating BigInt literals.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PseudoBigInt {
@@ -393,19 +597,22 @@ fn parse_pseudo_big_int(string_value: &str) -> String {
         match s.as_bytes()[1] {
             b'b' | b'B' => {
                 // Binary
-                if let Ok(n) = u128::from_str_radix(&s[2..], 2) {
+                let digits = s[2..].replace('_', "");
+                if let Ok(n) = u128::from_str_radix(&digits, 2) {
                     return n.to_string();
                 }
             }
             b'o' | b'O' => {
                 // Octal
-                if let Ok(n) = u128::from_str_radix(&s[2..], 8) {
+                let digits = s[2..].replace('_', "");
+                if let Ok(n) = u128::from_str_radix(&digits, 8) {
                     return n.to_string();
                 }
             }
             b'x' | b'X' => {
                 // Hex
-                if let Ok(n) = u128::from_str_radix(&s[2..], 16) {
+                let digits = s[2..].replace('_', "");
+                if let Ok(n) = u128::from_str_radix(&digits, 16) {
                     return n.to_string();
                 }
             }
@@ -413,12 +620,8 @@ fn parse_pseudo_big_int(string_value: &str) -> String {
         }
     }
     // Decimal
-    let s = s.trim_start_matches('0');
-    if s.is_empty() {
-        "0".to_string()
-    } else {
-        s.to_string()
-    }
+    let s = s.trim_start_matches('0').replace('_', "");
+    if s.is_empty() { "0".to_string() } else { s }
 }
 
 #[cfg(test)]
@@ -824,7 +1027,6 @@ mod tests {
 
     // Underscore-separated BigInt literals from Go's TestParsePseudoBigInt.
     #[test]
-    #[ignore = "TODO: PseudoBigInt::parse uses u128::from_str_radix which doesn't support underscore separators; Go uses big.Int.SetString"]
     fn test_parse_pseudo_bigint_underscores() {
         let cases: &[(&str, &str)] = &[
             ("0b1010_0101n", "165"),
@@ -1104,7 +1306,6 @@ mod tests {
     // result by 1 ULP. Go uses big.Int for integer base ** integer exponent where
     // the result exceeds 53 bits; Rust uses f64::powf without that optimization.
     #[test]
-    #[ignore = "TODO: Rust's f64::powf diverges from the correctly-rounded result by 1 ULP for 5**210 (produces 0x5e68557f31326bbc instead of 0x5e68557f31326bbb); Go uses big.Int for large integer exponents"]
     fn test_exponentiate_ulp_divergence() {
         assert_equal_number(
             Number(5.0).exponentiate(Number(210.0)),
@@ -1122,7 +1323,6 @@ mod tests {
 
     // String test cases where Rust's Display diverges from JS toString.
     #[test]
-    #[ignore = "TODO: Display impl uses serde_json which produces exponential notation for whole numbers in (MAX_SAFE_INTEGER, 1e21); Go uses encoding/json which matches JS"]
     fn test_string_display_divergent() {
         for (number, s) in string_tests_display_divergent() {
             assert_eq!(number.to_string(), s, "String({})", number);
@@ -1155,7 +1355,6 @@ mod tests {
     // FromString cases for hex literals >= 2^63 that overflow the i64-based parser.
     // Go's FromString uses big.Int as a fallback; Rust uses i64::from_str_radix.
     #[test]
-    #[ignore = "TODO: from_string uses i64::from_str_radix for hex, which overflows for values >= 2^63; Go's tryParseInt falls back to big.Int.SetString"]
     fn test_from_string_hex_overflow() {
         let cases: &[(Number, &str)] = &[
             (Number(18446744073709552000.0), "0X10000000000000000"),

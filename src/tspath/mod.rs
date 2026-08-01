@@ -783,6 +783,37 @@ pub fn contains_ignored_path(path: &str) -> bool {
     ignored_paths.iter().any(|p| path.contains(p))
 }
 
+/// Whether a file path starts with the given directory.
+///
+/// Mirrors `tspath.StartsWithDirectory` in Go (path.go). Canonicalizes both
+/// paths (lowercasing on case-insensitive file systems), trims a trailing
+/// separator from the directory, then checks whether the file name begins with
+/// the directory followed by a separator.
+pub fn starts_with_directory(
+    file_name: &str,
+    directory_name: &str,
+    use_case_sensitive_file_names: bool,
+) -> bool {
+    if directory_name.is_empty() {
+        return false;
+    }
+
+    let canonical_file_name = get_canonical_file_name(file_name, use_case_sensitive_file_names);
+    let mut canonical_directory_name =
+        get_canonical_file_name(directory_name, use_case_sensitive_file_names);
+
+    // Trim a single trailing directory separator (Go trims '/' then '\\').
+    if canonical_directory_name.ends_with('/') {
+        canonical_directory_name.pop();
+    }
+    if canonical_directory_name.ends_with('\\') {
+        canonical_directory_name.pop();
+    }
+
+    canonical_file_name.starts_with(&format!("{}/", canonical_directory_name))
+        || canonical_file_name.starts_with(&format!("{}\\", canonical_directory_name))
+}
+
 /// Options for comparing paths.
 ///
 /// Mirrors `tspath.ComparePathsOptions` in Go.
@@ -1971,15 +2002,8 @@ mod tests {
     }
 
     // ── StartsWithDirectory (ported 1:1 from Go TestStartsWithDirectory) ──
-    //
-    // TODO: `starts_with_directory` is not yet implemented in Rust. The test
-    // data below is a 1:1 port of the Go `TestStartsWithDirectory`. Enable this
-    // test once `starts_with_directory(file_name, directory_name,
-    // use_case_sensitive)` is ported from `internal/tspath/path.go`
-    // (StartsWithDirectory).
+
     #[test]
-    #[ignore = "starts_with_directory not yet implemented in Rust"]
-    #[allow(unused)]
     fn test_starts_with_directory() {
         let tests: &[(&str, &str, &str, bool, bool)] = &[
             // (name, file_name, directory_name, use_case_sensitive, expected)
@@ -2078,29 +2102,18 @@ mod tests {
         ];
 
         for &(name, file_name, directory_name, use_case_sensitive, expected) in tests {
-            // let result = starts_with_directory(file_name, directory_name, use_case_sensitive);
-            // assert_eq!(
-            //     result, expected,
-            //     "StartsWithDirectory({:?}, {:?}, {}) = {}, expected {} ({})",
-            //     file_name, directory_name, use_case_sensitive, result, expected, name
-            // );
-            let _ = (
-                name,
-                file_name,
-                directory_name,
-                use_case_sensitive,
-                expected,
+            let result = starts_with_directory(file_name, directory_name, use_case_sensitive);
+            assert_eq!(
+                result, expected,
+                "StartsWithDirectory({:?}, {:?}, {}) = {}, expected {} ({})",
+                file_name, directory_name, use_case_sensitive, result, expected, name
             );
         }
     }
 
     // ── StartsWithDirectory edge cases (ported 1:1 from Go TestStartsWithDirectoryEdgeCases) ──
-    //
-    // TODO: `starts_with_directory` is not yet implemented in Rust. See
-    // `test_starts_with_directory` above.
+
     #[test]
-    #[ignore = "starts_with_directory not yet implemented in Rust"]
-    #[allow(unused)]
     fn test_starts_with_directory_edge_cases() {
         let tests: &[(&str, &str, &str, bool, bool)] = &[
             // (name, file_name, directory_name, use_case_sensitive, expected)
@@ -2129,18 +2142,11 @@ mod tests {
         ];
 
         for &(name, file_name, directory_name, use_case_sensitive, expected) in tests {
-            // let result = starts_with_directory(file_name, directory_name, use_case_sensitive);
-            // assert_eq!(
-            //     result, expected,
-            //     "StartsWithDirectory({:?}, {:?}, {}) = {}, expected {} ({})",
-            //     file_name, directory_name, use_case_sensitive, result, expected, name
-            // );
-            let _ = (
-                name,
-                file_name,
-                directory_name,
-                use_case_sensitive,
-                expected,
+            let result = starts_with_directory(file_name, directory_name, use_case_sensitive);
+            assert_eq!(
+                result, expected,
+                "StartsWithDirectory({:?}, {:?}, {}) = {}, expected {} ({})",
+                file_name, directory_name, use_case_sensitive, result, expected, name
             );
         }
     }

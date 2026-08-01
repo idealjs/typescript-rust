@@ -10,6 +10,33 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
+/// A thread-safe set, mirroring `collections.SyncSet[K]` in Go.
+///
+/// Used by `bfs_parallel_ex` to expose the set of visited nodes so callers can
+/// inspect which nodes were reached after a search completes.
+#[derive(Debug, Default)]
+pub struct SyncSet<K: Eq + Hash + Clone> {
+    inner: Mutex<HashSet<K>>,
+}
+
+impl<K: Eq + Hash + Clone> SyncSet<K> {
+    pub fn new() -> Self {
+        Self {
+            inner: Mutex::new(HashSet::new()),
+        }
+    }
+
+    /// Insert `key`; returns true if it was not already present.
+    pub fn add_if_absent(&self, key: &K) -> bool {
+        self.inner.lock().unwrap().insert(key.clone())
+    }
+
+    /// True if `key` is in the set.
+    pub fn has(&self, key: &K) -> bool {
+        self.inner.lock().unwrap().contains(key)
+    }
+}
+
 /// Result of a breadth-first search.
 #[derive(Debug, Clone)]
 pub struct BfsResult<N> {
@@ -51,10 +78,15 @@ pub fn bfs_parallel<N>(
 where
     N: Clone + Eq + Hash + Send + Sync + 'static,
 {
-    bfs_parallel_ex(start, neighbors, visit, |_| (), |n| n.clone())
+    let visited: Arc<SyncSet<N>> = Arc::new(SyncSet::new());
+    bfs_parallel_ex(start, neighbors, visit, |_| (), visited, |n| n.clone())
 }
 
 /// Extended BFS with a pre-seeded visited set and a preprocessing hook.
+///
+/// `visited` is the external set of already-visited nodes (mirrors
+/// `BreadthFirstSearchOptions.Visited` in Go); callers may inspect it after the
+/// search to see which nodes were reached.
 ///
 /// Mirrors `core.BreadthFirstSearchParallelEx` in Go.
 pub fn bfs_parallel_ex<N, K>(
@@ -62,13 +94,13 @@ pub fn bfs_parallel_ex<N, K>(
     neighbors: impl Fn(&N) -> Vec<N> + Send + Sync + 'static,
     visit: impl Fn(&N) -> (bool, bool) + Send + Sync + 'static,
     preprocess_level: impl Fn(&BfsLevel<N>) + Send + Sync + 'static,
+    visited: Arc<SyncSet<K>>,
     get_key: impl Fn(&N) -> K + Send + Sync + 'static,
 ) -> BfsResult<N>
 where
     N: Clone + Send + Sync + 'static,
     K: Eq + Hash + Clone + Send + Sync + 'static,
 {
-    let visited: Arc<Mutex<HashSet<K>>> = Arc::new(Mutex::new(HashSet::new()));
     let neighbors = Arc::new(neighbors);
     let visit = Arc::new(visit);
     let preprocess = Arc::new(preprocess_level);
@@ -109,7 +141,7 @@ where
 #[allow(clippy::too_many_arguments)]
 fn process_level<N, K>(
     level: &[Arc<Job<N>>],
-    visited: &Arc<Mutex<HashSet<K>>>,
+    visited: &Arc<SyncSet<K>>,
     neighbors: &Arc<impl Fn(&N) -> Vec<N> + Send + Sync + 'static>,
     visit: &Arc<impl Fn(&N) -> (bool, bool) + Send + Sync + 'static>,
     preprocess: &Arc<impl Fn(&BfsLevel<N>) + Send + Sync + 'static>,
@@ -145,12 +177,8 @@ where
             }
 
             let key = get_key(&job.node);
-            {
-                let mut v = visited.lock().unwrap();
-                if v.contains(&key) {
-                    return;
-                }
-                v.insert(key);
+            if !visited.add_if_absent(&key) {
+                return;
             }
 
             let (is_result, stop) = visit(&job.node);
@@ -358,21 +386,70 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "TODO: bfs_parallel_ex does not expose the external visited set (SyncSet); \
-                early-termination visited checks cannot be verified"]
     fn bfs_parallel_early_termination() {
-        // Ported from TestBreadthFirstSearchParallel "early termination":
-        // Graph with Root -> L1A/L1B -> L2A/L2B/L2C -> L3A.
-        // Visits Root, L1A, L1B, L2A, L2B (not L3A) when stopping at L2B.
-        // Requires BreadthFirstSearchOptions.Visited (SyncSet) which is not in the Rust API.
+        // Ported from TestBreadthFirstSearchParallel "early termination".
+        // Graph: Root -> L1A/L1B -> L2A/L2B/L2C -> L3A.
+        // Stopping at L2B (level 2) must visit Root, L1A, L1B, L2A, L2B but
+        // never reach L3A. Whether L2C is visited is non-deterministic.
+        let mut graph = std::collections::HashMap::new();
+        graph.insert(
+            "Root".to_string(),
+            vec!["L1A".to_string(), "L1B".to_string()],
+        );
+        graph.insert(
+            "L1A".to_string(),
+            vec!["L2A".to_string(), "L2B".to_string()],
+        );
+        graph.insert("L1B".to_string(), vec!["L2C".to_string()]);
+        graph.insert("L2A".to_string(), vec!["L3A".to_string()]);
+        graph.insert("L2B".to_string(), vec![]);
+        graph.insert("L2C".to_string(), vec![]);
+        graph.insert("L3A".to_string(), vec![]);
+
+        let visited: Arc<SyncSet<String>> = Arc::new(SyncSet::new());
+        let visited_for_search = visited.clone();
+        bfs_parallel_ex(
+            "Root".to_string(),
+            move |n| graph.get(n).cloned().unwrap_or_default(),
+            |n| (n == "L2B", true),
+            |_| (),
+            visited_for_search,
+            |n| n.clone(),
+        );
+
+        assert!(visited.has(&"Root".to_string()), "Expected to visit Root");
+        assert!(visited.has(&"L1A".to_string()), "Expected to visit L1A");
+        assert!(visited.has(&"L1B".to_string()), "Expected to visit L1B");
+        assert!(visited.has(&"L2A".to_string()), "Expected to visit L2A");
+        assert!(visited.has(&"L2B".to_string()), "Expected to visit L2B");
+        // L2C is non-deterministic, so it is not asserted.
+        assert!(
+            !visited.has(&"L3A".to_string()),
+            "Expected not to visit L3A"
+        );
     }
 
     #[test]
-    #[ignore = "TODO: bfs_parallel_ex does not expose the external visited set (SyncSet); \
-                fallback visited checks cannot be verified"]
     fn bfs_parallel_returns_fallback() {
-        // Ported from TestBreadthFirstSearchParallel "returns fallback when no other result found":
-        // result.Stopped == false, result.Path == ["A"], and visited.Has("B"/"C"/"D").
-        // Requires BreadthFirstSearchOptions.Visited (SyncSet) which is not in the Rust API.
+        // Ported from TestBreadthFirstSearchParallel "returns fallback when no
+        // other result found". A records as a fallback (is_result, not stop), so
+        // the search continues; B/C/D are visited and the fallback path is ["A"].
+        let graph = diamond_graph();
+        let visited: Arc<SyncSet<String>> = Arc::new(SyncSet::new());
+        let visited_for_search = visited.clone();
+        let result = bfs_parallel_ex(
+            "A".to_string(),
+            move |n| graph.get(n).cloned().unwrap_or_default(),
+            |n| (n == "A", false),
+            |_| (),
+            visited_for_search,
+            |n| n.clone(),
+        );
+
+        assert!(!result.stopped, "Expected search to not stop early");
+        assert_eq!(result.path, vec!["A".to_string()]);
+        assert!(visited.has(&"B".to_string()), "Expected to visit B");
+        assert!(visited.has(&"C".to_string()), "Expected to visit C");
+        assert!(visited.has(&"D".to_string()), "Expected to visit D");
     }
 }
