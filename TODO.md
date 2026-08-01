@@ -61,12 +61,12 @@ npm install && npm run build
 - 每个迁移行为都应新增或扩展一个 parity case，优先对比 exit code、stdout、
   stderr、输出文件内容。
 
-## 当前进度快照（2026-07-31）
+## 当前进度快照（2026-08-01）
 
-测试基线：`cargo test` 通过（862 个 lib 单测 + 2 个 emit parity + 501 个
-checker parity，checker parity 自 2026-07-13 的 106 增长 395 个）。本轮完成
-P2.7 JSDoc parser（jsdoc.rs ~2500 行：state machine + tag parsing + type expression +
-lazy cache + `parse_jsdoc_for_node` + 36 个单测）。
+测试基线：`cargo test` 通过（862 个 lib 单测 + parity smoke 含 6 个 parser
+parity fixture + 501 个 checker parity）。上轮完成 P2.7 JSDoc parser；本轮
+完成 P2.9a/b/c parser parity fixtures（6 个 fixture：syntax_error/tsx/generics/
+decorators/enums/conditional_types）。
 
 | 模块 | Rust 行数（实测） | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
@@ -612,13 +612,23 @@ parser 侧映射到 `UNKNOWN_REGULAR_EXPRESSION_FLAG`/`DUPLICATE_REGULAR_EXPRESS
   映射 + `abortParsingListOrMoveToNextToken`）、`is_list_element` 完整对齐
   Go、`is_start_of_type` 补齐缺失 token、语法错误位置 UTF-16 offset 对齐。
 
-### P2.9 Parser parity fixtures
+### P2.9 Parser parity fixtures（a/b/c 已完成）
 
 已完成：bundled libs 全部 100+ 零错误解析（基线 3347 → 0）。
 
-- [ ] 从 Go parser 测试或 TypeScript baselines 挑选 smoke 集合，转成 Rust parity。
-- [ ] 典型 `.ts` 解析结果和诊断对齐 oracle。
-- [ ] 典型 `.tsx` JSX 解析对齐。
+- [x] 从 Go parser 测试或 TypeScript baselines 挑选 smoke 集合，转成 Rust parity。
+  新增 6 个 parity fixture + parity.rs 中对应 Case：
+  `parser_syntax_error`（TS1003/TS1005/TS1109/TS1136 语法错误 + `noEmitOnError`）、
+  `parser_tsx`（fragment/component/JSX expression；checker JSX namespace gap
+  标 `skip_oracle`）、`parser_generics`（泛型函数/类/接口/constraint/conditional
+  type with `infer`）、`parser_decorators`（method decorator + decorator factory）、
+  `parser_enums`（numeric/string/const enum + computed values）、
+  `parser_conditional_types`（conditional/mapped/template literal/indexed access/
+  keyof/typeof）。
+- [x] 典型 `.ts` 解析结果和诊断对齐 oracle（`parser_generics`/`parser_decorators`/
+  `parser_enums`/`parser_conditional_types` exit 0 对齐）。
+- [x] 典型 `.tsx` JSX 解析对齐（`parser_tsx` parser 正确解析；checker JSX namespace
+  types 缺失标 `skip_oracle`，待 P3 checker lib 支持后移除）。
 - [ ] 典型 `.js`/`.jsx` 对齐。
 - [ ] bundled lib smoke：`lib.es2015.iterable.d.ts`、`lib.dom.d.ts` 错误数验证。
 
