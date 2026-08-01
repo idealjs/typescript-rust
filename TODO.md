@@ -106,249 +106,11 @@ incremental build、npm 打包、fourslash 测试），需较大工作量逐项�
 
 ## P0：建立迁移工作基线 ✅ 已完成
 
-目标：Rust worktree 可独立运行、可验证、可追溯。
-
-已完成：
-
-- [x] Go/Rust worktree 位置确认；Rust crate 可编译并通过现有测试。
-- [x] `MIGRATION.md` 记录 Rust 运行方式与 Go oracle 设置。
-- [x] 固定验收命令文档化（`cargo test`、`TSGO_ORACLE=... parity`）。
-- [x] warning 清理一轮：清理无争议的 unused imports/variables；剩余 warning
-  分类为迁移期可接受。
-- [x] scanner 非 ASCII 未知字符 panic 修复（按完整 UTF-8 rune 前进）。
-- [x] crate 升级到 `edition = "2024"`，`rust-version = "1.96"`。
-
-剩余任务：
-
-- [x] 给 CI 设计最小 Rust job：fmt、clippy、test、parity smoke：
-  `.github/workflows/rust.yml` 在 push/PR 到 `rust`/`main` 时触发；
-  fmt/clippy 为 `continue-on-error`（迁移期 ~75 warning + 整仓 fmt 待排期），
-  test（`cargo test --lib`）与 parity smoke（`cargo test --test parity`，
-  无 oracle 时优雅跳过）为 gating 步骤。
-- [x] 新人只看 Rust worktree 文档即可跑通测试（验收）：新增 `README.md`
-  作为入口（quick start build/test/parity 命令、worktree 布局、文档索引、
-  CI 说明）；修正 `MIGRATION.md` 过期 worktree 路径与 oracle 搜索路径
-  （`/home/cqh/...` → `/Users/cqh/...`）与状态摘要测试计数。
-- [x] parity 测试能自动发现可用 Go oracle，或给出明确跳过原因（验收）：
-  `go_oracle()` 按 `TSGO_ORACLE` → `typescript-go/built/local/tsgo` →
-  `_packages/native-preview/bin/tsgo` 顺序查找；找不到时打印明确跳过原因
-  指向 Go worktree 构建路径。
+worktree 确认、CI workflow、README/MIGRATION 文档、oracle 自动发现、warning 清理、edition 2024 升级。
 
 ## P1：CLI 和 tsconfig 行为对齐 ✅ 已完成
 
-目标：Rust CLI 行为与 Go oracle 在 exit code / stdout / stderr / 输出文件
-集合上一致。
-
-Go 参考：`cmd/tsgo/main.go`、`internal/execute`、`internal/execute/tsc`、
-`internal/tsoptions`、`internal/vfs`。
-Rust 现状：`src/main.rs`、`src/execute/mod.rs`、`src/tsoptions/mod.rs`、
-`src/vfs/mod.rs`。
-流程审计见 `MIGRATION.md` 的 “Command Line Argument Flow Audit” 与
-“TSConfig Flow Audit”。
-
-已完成：
-
-- [x] Go/Rust 全量 CLI 参数处理流程审计与差异记录。
-- [x] Go/Rust `tsconfig.json` 解析/处理流程审计与差异记录。
-- [x] `--init` 执行层控制流对齐（先于 `--version`/`--help`，存在 tsconfig 时报错）。
-- [x] `--version`/`--help`/`--all`/`--watch --listFilesOnly`/`--project`/ancestor
-  tsconfig 查找/`--showConfig` 控制流 bridge。
-- [x] tsconfig 顶层 `references`/`compileOnSave` 解析并进入简化版 `--showConfig`。
-- [x] `files: []` 不触发默认 include；未显式 `exclude` 时默认排除 `outDir`/
-  `declarationDir`；wildcard include 跳过 `node_modules`/`bower_components`/
-  `jspm_packages`/`.git`；literal directory include 递归展开。
-
-剩余任务：
-
-- [x] 对齐 `--help`/`--all` 动态选项列表生成（已完成）：`OptionDecl`
-  新增 `description`/`show_in_simplified_help` 字段（对齐 Go
-  `OptionDeclaration.Name`/`Description`/`ShowInSimplifiedHelpView`），
-  为常用 compiler/build/watch 选项填充描述（`help`/`all`/`version`/`init`/
-  `project`/`build`/`watch`/`noEmit`/`skipLibCheck`/`strict`/`target`/`module`/
-  `moduleResolution`/`lib`/`outDir`/`outFile`/`sourceMap`/`declaration`/…）；
-  `execute::print_help` 重写为从 `OptionDecl` 表动态生成，对齐 Go
-  `internal/execute/tsc/help.go` 的 `PrintHelp`/`printEasyHelp`/`printAllHelp`：
-  `--help` 走 simplified view（COMMON COMMANDS 示例 + COMMAND LINE FLAGS +
-  COMMON COMPILER OPTIONS 两栏分节，按 `is_command_line_only` 分流）；
-  `--all` 走 full view（ALL COMPILER OPTIONS 按名字小写排序 + WATCH OPTIONS
-  + BUILD OPTIONS）。`print_option_section` 实现 `--name, -short    description`
-  两栏对齐布局（对齐 Go `generateGroupOptionOutput`，不含终端宽度折行与颜色）。
-  `display_name_of_option` 对齐 Go `getDisplayNameTextOfOption`。2 个单测覆盖
-  `--help`/`--all` 头部/分节/动态描述内容。**剩余**：终端宽度感知折行。
-- [x] 对齐 `--init` 生成的完整 `tsconfig.json` 模板：含 File Layout/Environment
-  Settings/Other Outputs/Stricter Typechecking/Style Options/Recommended Options
-  分节注释与 nodejs 示例块，对齐 Go `writeConfigFile` 模板结构。同时将
-  TS5054 错误从 ad-hoc 字符串改为 `Diagnostic::new` +
-  `A_TSCONFIG_JSON_FILE_IS_ALREADY_DEFINED_AT_COLON_0`。
-- [x] 对齐退出码：`Success`、`DiagnosticsPresent_*`、`InvalidProject_*`、
-  `ProjectReferenceCycle_*`（已对齐：`ExitStatus` enum + `perform_compilation`
-  状态映射与 Go `tsc.ExitStatus` 完全一致）。
-- [x] 迁移 Go declaration-driven option parser：NameMap、did-you-mean、
-  alternate-mode diagnostics、TSConfigOnly 规则、enum/min-value 校验（已落地）：
-  `OptionDecl` 扩展 `is_tsconfig_only`/`is_command_line_only`/`extra_validation`/
-  `min_value`/`enum_values`；`find_option`/`find_build_option` 改为大小写不敏感
-  （对齐 Go `GetOptionDeclarationFromName`）；CLI 未知选项在 build map 中报
-  TS5093 alternate-mode；TSConfigOnly 选项在 CLI 上报 TS6230/TS6064；enum
-  非法值报 TS6046（列出合法值）；min-value 违规报 TS5002；tsconfig JSON
-  大小写不匹配报 TS5025 did-you-mean。16 个单测覆盖。**遗留**：build-mode
-  TS5094（common/build/compiler 三分拆分）、`DeprecatedKeys` 过滤。
-- [x] 独立建模 watch options，在普通/build parser 中与 compiler/build options 分离。
-  新增 `core::watch_options` 模块（`WatchOptions` struct + `WatchFileKind`/
-  `WatchDirectoryKind`/`PollingKind` enums + 解析函数，对齐 Go
-  `internal/core/watchoptions.go`）；`tsoptions` 新增 `OPTIONS_FOR_WATCH`
-  声明表（7 条，对齐 Go `declswatch.go`）+ `find_watch_option` 名字映射
-  （对齐 Go `WatchNameMap`）+ `apply_watch_options` 解析器（对齐 Go
-  `ParseWatchOptions`）；`parse_command_line_worker` 在 compiler/build 名字映射
-  miss 时回退到 `WatchNameMap` 并路由到独立的 `watch_options` map；类型不匹配/
-  缺值诊断用 TS5080（对齐 Go `watchOptionsDidYouMeanDiagnostics`）。
-  `ParsedCommandLine`/`ParsedBuildCommandLine` 新增 `watch_options: WatchOptions`
-  字段。10 个单测覆盖 enum/number/boolean/list 解析、大小写不敏感、build 模式、
-  不泄露到 compiler_options、TS6046 enum 校验、TS5080 缺值/非数字。
-  **对齐 Go 当前状态**：tsconfig.json `watchOptions` key 解析未实现（Go 侧
-  `tsconfigparsing.go` 相关代码注释掉）；`--showConfig` 不输出 watchOptions
-  （Go 侧 `showconfig.go` 的 `TSConfig` 结构无该字段）。
-- [x] 对齐 tsconfig 查找、`extends`、`files/include/exclude`、`compilerOptions`
-  覆盖规则（已完成核心 precedence 与 extends 解析）：修复 `compilerOptions`
-  merge precedence 倒置 bug（原来 extended > own，现改为 own > extended，对齐
-  Go `mergeCompilerOptions` source-wins 语义）；修复 extends 数组 last-entry-wins
-  （原来 first wins，现改为 last wins，对齐 Go `applyExtendedConfig` 顺序合并）；
-  修复 `include`/`exclude`/`files` 继承顺序（原来 last extended 覆盖，现改为
-  first extended wins，对齐 Go `applyExtendedConfig` 仅在 own 未声明时继承）；
-  新增 extends `.json` suffix 解析（`extends: "./base"` → `./base.json`，对齐
-  Go `getExtendsConfigPath`）+ path normalization（`./base` 不再残留 `./`）。
-  5 个回归测试覆盖 own-overrides-extended / array-last-wins / cmd-overrides-own /
-  include-first-extended-wins / json-suffix。
-- [x] `${configDir}` 模板替换（TS 5.5+，已完成）：新增
-  `starts_with_config_dir_template`（大小写不敏感前缀检测，对齐 Go
-  `startsWithConfigDirTemplate`）、`get_substituted_path_with_config_dir_template`
-  （将 `${configDir}` 替换为 `./` 后解析为绝对路径，对齐 Go
-  `getSubstitutedPathWithConfigDirTemplate`）、
-  `get_substituted_string_array_with_config_dir_template`（数组替换，返回
-  `Option<Vec>` 对齐 Go nil-return convention）、
-  `handle_config_dir_template_substitution`（对合并后的 compiler options 执行
-  替换，覆盖 `paths`/`rootDirs`/`typeRoots`/`generateCpuProfile`/`generateTrace`/
-  `outFile`/`outDir`/`rootDir`/`tsBuildInfoFile`/`baseUrl`/`declarationDir`，对齐
-  Go `handleOptionConfigDirTemplateSubstitution`）。在 `resolve_file_path_options`
-  中跳过 `${configDir}` 前缀值（对齐 Go `normalizeNonListOptionValue`），替换在
-  merge 之后执行（确保 own config 的 `${configDir}` 用 own 目录解析，extended
-  config 的 `${configDir}` 已在递归解析时用 extended 目录解析）。include/exclude/
-  files 的 `${configDir}` 也在 `expand_file_names` 之前替换。11 个单测覆盖
-  outDir/rootDir/declarationDir/tsBuildInfoFile/rootDirs/paths/include/exclude/
-  files/extends/非前缀场景。
-- [x] inherited include/exclude/files 的 path-rewriting（已完成）：当 extended
-  config 声明了 `include`/`exclude`/`files` 而 own config 未声明时，继承的相对
-  路径需改写为相对于 own config 目录的路径（而非 extended config 目录），对齐
-  Go `applyExtendedConfig` 的 `ConvertToRelativePath(GetDirectoryPath(extendedConfigPath), …)`
-  + `CombinePaths(relativeDifference, pathStr)` 逻辑。新增 `tspath::convert_to_relative_path`
-  （对齐 Go `tspath.ConvertToRelativePath`）。绝对路径和 `${configDir}` 前缀路径
-  直接传递（不重写）。同时修改 `${configDir}` include/exclude/files 替换逻辑：
-  仅在 own config（`resolution_stack` 为空）时执行替换，extended config 的
-  `${configDir}` 前缀保留以便继承时传递给 own config 用 own 目录解析（对齐 Go
-  从 raw extended config 读取 include/exclude/files 而非已替换的 parsed 值）。
-  6 个单测覆盖 include 相对路径重写 / include 绝对路径不重写 / include `${configDir}`
-  不重写 / exclude 重写 / files 重写 / own include 覆盖继承。
-- [x] explicit `null` 清除继承字段（TS 5.5+，已完成）：当 own config 的
-  `compilerOptions` 中某字段显式设为 `null` 时，该字段不从 extended config
-  继承，保持默认值（清除继承值），对齐 Go `mergeCompilerOptions` 的
-  `explicitNullFields` 逻辑（`parsinghelpers.go:575-590`）。新增
-  `merge_compiler_options_with_skip` 函数，接受 `skip_fields: &HashSet<String>`
-  参数，在 dst-wins merge 中跳过 skip set 内的字段（不让 extended 填充）。
-  `merge_compiler_options` 保留为无 skip 的 wrapper。调用点在 own config
-  的 `compilerOptions` 解析后收集 null 字段名，传入 step 2（merge extended
-  into result）的 skip set。command-line 选项优先于 own 的 null（cmd > null）：
-  若 cmd 已设置该字段（非默认值），null 不影响结果。覆盖 tristate/string/enum
-  三类字段的 null 清除、cmd 优先级、单字段隔离、多字段同时 null。6 个单测。
-- [x] extended config cache（已完成）：为 tsconfig extends 实现缓存，在菱形
-  继承场景（A extends B 和 C，B 和 C 都 extends D）中 D 只解析一次并复用，
-  对齐 Go `ExtendedConfigCache`（`tsconfigparsing.go:154`）+
-  `getExtendedConfig` 的 cycle-bypass 逻辑（`tsconfigparsing.go:972`）。
-  新增 `ExtendedConfigCache` 结构体，包含 `entries: HashMap<String,
-  ParsedCommandLine>` 和 `get_or_parse` 方法：循环条目（在 resolution_stack
-  中）bypass 缓存（避免不同继承分支的错误结果），未缓存则递归解析后存入。
-  修改 `get_parsed_command_line_of_config_file` 创建缓存并传给内部
-  `_with_stack` 函数；extends 循环中用 `cache.get_or_parse` 替代直接递归。
-  缓存的 errors 仍按引用次数传播（B 和 C 各 append 一次 D 的 errors，对齐
-  Go `getExtendedConfig` 返回 cached errors 的行为）。3 个单测覆盖菱形继承
-  （strict/noImplicitAny 正确传播）、错误不重复（TS5025 出现 2 次：D via B
-  和 C）、循环不缓存（A↔B 循环报告 TS18000）。
-- [x] package/Node-style resolution for `extends` bare specifiers（已完成）：
-  当 `extends` 的值不是相对路径（不以 `./` 或 `../` 开头）且不是 rooted path
-  时，按 Node 模块解析方式在 `node_modules` 目录中查找，对齐 Go
-  `getExtendsConfigPath` 的 module 分支（`tsconfigparsing.go:571-575`）调用
-  `module.ResolveConfig`（`resolver.go:371`）。实现 `resolve_config_via_node_modules`
-  函数：从 config 目录开始向上遍历祖先目录（跳过名为 `node_modules` 的目录
-  本身），在每个祖先的 `node_modules/<spec>` 中查找配置文件。查找顺序对齐
-  Go `loadModuleFromSpecificNodeModulesDirectory` + `loadNodeModuleFromDirectoryWorker`
-  （`isConfigLookup = true`, `extensions = extensionsJson`）：① 文件形式
-  `<spec>.json`；② 目录形式 `<spec>/tsconfig.json`（对齐 Go `indexPath = tsconfig`）；
-  ③ `package.json` 的 `tsconfig` 字段（对齐 Go `getPackageFile` 读取 `tsconfig`
-  field，`resolver.go:1744`），通过 `packagejson::parse` 解析后取
-  `path_fields.tsconfig`。支持 scoped package（`@scope/pkg`）和祖先目录遍历
-  （`loadModuleFromNearestNodeModulesDirectory` 的 ancestor walk）。解析失败
-  时返回 `None`（spec 被静默丢弃，own config 选项仍生效）。同时修正所有现有
-  extends 测试 fixture：将裸文件名（`"d.json"` → `"./d.json"` 等）改为显式
-  相对路径，对齐 Go 行为（裸 specifier 走 node_modules 而非当前目录）。
-  6 个新单测覆盖文件形式、目录形式、package.json tsconfig 字段、scoped
-  package、祖先遍历、未找到静默丢弃。
-- [x] 将 raw `references` 升级为 typed project references：新增
-  `core::project_reference::ProjectReference { path, original_path, circular }`
-  （对齐 Go `core.ProjectReference`）；`ParsedCommandLine.references` 由
-  `Vec<json::Value>` 改为 `Vec<ProjectReference>`，解析时 `path` 取 normalized
-  absolute、`original_path` 取原始字符串；`resolve_project_references` 直接用
-  `path`；`--showConfig` 按 Go `showconfig.go` 输出 `{"path": original_path}` +
-  可选 `circular`。1 个单测验证解析。
-- [x] 对齐 `extends` 的 cycle diagnostics：`extends` 循环检测
-  （`resolution_stack` + `Circularity_detected_while_resolving_configuration_Colon_0`
-  TS18000）+ `extends` 数组支持（`"extends": ["a","b"]` 多路合并）。
-- [x] CLI 错误诊断对齐：`execute/mod.rs` + `tsoptions/mod.rs` 中 ad-hoc
-  `writeln!("error TSxxxx: ...")` 全部替换为 `Diagnostic::new` + 消息常量
-  （TS6369 build-first / TS6370 options-cannot-combine / TS5042 project-mixed /
-  TS5057/TS5081 cannot-find-tsconfig / TS5112 tsconfig-not-loaded / TS5023
-  unknown-compiler-option / TS5083 cannot-read-file）。
-- [x] 对齐 no-input diagnostics：TS18003（`No inputs were found in config file`）
-  在 `expand_file_names` 后当 `file_names` 为空、当前 config 无 `files`/`references`
-  key、且非 `extends` 链（`resolution_stack` 为空）时发出，对齐 Go
-  `shouldReportNoInputFiles` + `canJsonReportNoInputFiles`。3 个单测覆盖
-  emit / `files:[]` 抑制 / `references` 抑制。**剩余**：config source span
-  diagnostics（带 file/range 的诊断）和 `vfsmatch` root-file expansion。
-- [x] 扩充 parity fixtures：无 tsconfig 且无文件 / 单文件输入 / `-p` 指向目录 /
-  `-p` 指向文件 / `--showConfig` / invalid JSON / JSONC。新增 6 个 fixture
-  （`single_file`/`project_dir`/`project_file`/`jsonc_config`/`show_config`/
-  `invalid_json`）+ `Case` 结构扩展 `expect_success`/`stdout_contains` 字段，
-  `rust_smoke_cases_emit_expected_outputs` 单测覆盖全部 9 个场景。
-  **遗留**：response file（`@args.txt`）解析已落地（含 TS6045 unterminated
-  quoted string 诊断，对齐 Go `parseResponseFile`）；3 个 response-file 单测
-  覆盖 missing/empty/normal/unterminated 场景。
-- [x] 扩充 CLI parity smoke 覆盖至 20 个场景（已完成）：新增 11 个 fixture
-  与 `Case` 条目——`config_dir`（`${configDir}` 模板替换 + rootDir 相对路径
-  emit）、`extends_relative`（相对路径 extends 继承 base）、`extends_array`
-  （`extends: ["./base1.json","./base2.json"]` 数组合并）、`extends_bare_specifier`
-  （裸 specifier 无 node_modules 时静默丢弃，own outDir 仍生效）、`include_pattern`
-  （`include: ["src/**/*"]`）、`exclude_pattern`（`exclude: ["src/excluded/**"]`
-  排除子目录）、`multiple_files`（多文件 emit + import）、`no_emit`（`noEmit:true`
-  抑制输出）、`strict_mode`（`strict:true` 无诊断）、`comments_stripped`
-  （`removeComments:true`，标注 `skip_oracle = true` 因 emitter 注释剥离未迁移）、
-  `target_es5`（`target:"ES5"`，标注 `skip_oracle = true` 因 ES5 down-level 未迁移）。
-  `Case` 结构新增 `skip_oracle: bool` 字段，`compare_with_go_oracle_when_available`
-  跳过已知 transform gap 场景并打印跳过原因；`rust_smoke_cases_emit_expected_outputs`
-  覆盖全部 20 个场景。717 lib + 2 parity + 569 checker_parity 测试通过。
-- [x] 修复 `rootDir/outDir` 输出路径差异：emitter 新增
-  `compute_program_common_source_directory`（对齐 Go
-  `outputpaths.GetCommonSourceDirectory`）+ `get_source_file_path_in_new_dir`
-  （对齐 Go `GetSourceFilePathInNewDir`），按 rootDir → config_file_path →
-  文件名公共前缀顺序确定 common source directory，保留 outDir 下的相对目录
-  结构。同时 tsconfig 解析新增 `resolve_file_path_options`（对齐 Go
-  `normalizeNonListOptionValue`），将 `IsFilePath` 选项（rootDir/outDir/
-  declarationDir/baseUrl/…）解析为绝对路径；`--showConfig` 输出时通过
-  `to_relative` 转回相对路径。664 lib + 2 parity 测试通过。
-
-验收：
-
-- [x] Rust 与 Go oracle 的 stdout、stderr、exit code 一致（已完成核心）：TS2322
-  诊断位置（变量名而非初始值）+ 字面量类型扩宽（`reportRelationError` parity）
-  + TS6053 文件未找到消息 + exit code 逻辑（`should_emit` 而非 `emitted_any`）
-  均已对齐 oracle。路径前缀差异（CWD 解析）不视为 parity gap。
-- [x] CLI parity 覆盖至少 20 个常见 tsc 场景。
+CLI 参数流程审计、tsconfig 解析/extends/cycle/cache/${configDir}/null 清除、declaration-driven option parser、watch options 独立建模、--init/--help/--showConfig 模板、exit code 对齐、response file 解析、20+ CLI parity fixtures。
 
 ## P2：Scanner / Parser / AST parity
 
@@ -1108,202 +870,11 @@ variable/alias）；`variable_decl_prefix` 区分 let/const/var；
 
 ## P4：Emit / Transformer / SourceMap / Declaration emit ✅ 已完成
 
-目标：输出文件路径和内容与 Go oracle 一致，或差异被记录为有意差异。
-
-Go 参考：`internal/compiler`、`internal/printer`、`internal/transformers`、
-`internal/sourcemap`、`internal/outputpaths`。
-Rust 现状：`src/compiler/mod.rs`、`src/printer/mod.rs`、`src/emitter/mod.rs`、
-`src/sourcemap/mod.rs`。
-
-- [x] **P4.1 removeComments transformer**（已完成）：emitter 新增
-  `collect_all_comment_ranges` 全文扫描器（状态机跳过 string/template/
-  regex literal，收集 `//` 和 `/* */` 注释范围）+ `emit_text_range` 按范围
-  跳过 cut + `emit_statement` 合并 comment cuts 与 type cuts。
-  `emit_js_text` 接入 `CompilerOptions`，`removeComments:true` 时收集注释
-  范围并在输出前 trim 首部空白（对齐 Go printer 不输出首语句前 trivia 的
-  行为）。`comments_stripped` parity case 从 `skip_oracle=true` 改为
-  `skip_oracle=false`，期望输出无注释。8 个 emitter 单测覆盖单行/多行/
-  JSDoc 注释剥离、字符串/模板内注释保留、除法不受影响、尾部注释剥离、
-  默认关闭。901 lib + parity smoke 全通过。
-- [x] **P4.2 ES5 down-leveling**（已完成）：emitter 新增 replacement 机制
-  （`emit_text_range`/`emit_statement` 合并 cuts + replacements 为统一
-  operation list，`Option<&str>` 区分 cut vs replace）。`collect_es5_replacements`
-  递归遍历 AST，对 `VariableDeclarationList` 节点检测 `NodeFlags::Const`/
-  `NodeFlags::Let`，将关键字位置（`const`=5 字符 / `let`=3 字符）替换为
-  `var`。`needs_es5_downlevel` 仅在 `target == ES5` 时触发（`None` 默认不
-  下放，对齐现代 TS 默认 target ≥ ES2015）。`target_es5` parity case 从
-  `skip_oracle=true` 改为 `skip_oracle=false`，期望输出 `var f = 6;`。
-  6 个 emitter 单测覆盖 const/let→var、export 保留、var 不变、for 循环内
-  let、ES2015 不下放。907 lib + parity smoke 全通过。
-- [x] **P4.3 CommonJS module transformer**（已完成）：emitter 新增
-  `transform_commonjs_import`（import→require：named `const { foo } =
-  require("./bar")`、namespace `const ns = require("./bar")`、default
-  `const { default: d } = require("./bar")`、side-effect `require("./bar")`、
-  `import type` 剥离）、`transform_commonjs_export`（`export { x }` →
-  `exports.x = x;`、`export default expr` → `exports.default = expr;`、
-  `export = expr` → `module.exports = expr;`、re-export `export { foo } from
-  "./bar"` → `const { foo } = require("./bar"); exports.foo = foo;`）、
-  `transform_commonjs_export_declaration`（`export const/function/class/enum`
-  → 剥离 `export` 关键字 + 追加 `exports.name = name;`）。`collect_export_modifier_cuts`
-  收集 `ExportKeyword`/`DefaultKeyword` 修饰符字节范围（含尾部空格），
-  在 inter-statement text 发射阶段应用 cut（因为 parser 将语句 pos 设在
-  声明关键字而非修饰符，修饰符位于 `stmt.pos()` 之前）。修复 parser
-  `make_export_modifier` 零宽 `TextRange::new(pos, pos)` bug → 改为
-  `TextRange::new(pos, end)`。15 个 emitter 单测覆盖 named/namespace/default/
-  side-effect/type import、named/default/equals export、re-export、export
-  const/function/class。`module_commonjs` parity case（`skip_oracle=true`，
-  因 text-slice emit 与 Go oracle 全 transformer 输出格式不同）。921 lib +
-  parity smoke 全通过。
-- [x] **P4.4 Source map generation**（已完成）：emitter 新增 `EmitSink` trait
-  （`emit_source`/`emit_generated` 两个方法），`String` 和 `SourceMapTracker`
-  分别实现——`String` 为快速路径（无 source map），`SourceMapTracker` 为跟踪
-  路径（记录 VLQ 映射）。`emit_text_range`/`emit_statement`/`emit_js_text_inner`
-  泛型化 over `S: EmitSink`，避免重复 statement-walking 逻辑。`SourceMapTracker`
-  维护 `gen_line`/`gen_col` + `source_line_starts`，`push_source(start, end)` 在
-  发射源文本前调用 `Generator::add_source_mapping`（对齐 Go printer 的
-  node-start 映射策略）。`emit_js_with_sourcemap` 创建 `Generator`（file=js
-  basename, sourceRoot, sourcesDirectoryPath=js 目录, ComparePathsOptions），
-  `add_source` 注册源文件，`inlineSources` 时 `set_source_content`。
-  `emit_source_file_with_common_dir` 在 `sourceMap || inlineSourceMap` 时走
-  tracked 路径：`sourceMap` → 写 `.js.map` + 追加 `//# sourceMappingURL=base.js.map`；
-  `inlineSourceMap` → 追加 `//# sourceMappingURL=data:application/json;base64,...`。
-  8 个 emitter 单测覆盖 valid JSON / inline data URL / inlineSources / 类型注解
-  剥离 / mappings 解码验证 / 默认不生成 / CommonJS use strict 不映射 / write_file
-  双文件。`source_map` parity case（`skip_oracle=true`，因 text-slice emit 与 Go
-  printer 的映射点不同）。929 lib + parity smoke 全通过。
-- [x] **P4.5 Declaration emit**（已完成）：emitter 新增 `emit_declaration_text`
-  遍历 AST 保留声明语句（function/variable/class/interface/type alias/enum/
-  import/export/module），剥离实现细节（function body → `;`、variable
-  initializer cut when type annotation present）。`collect_export_modifier_cuts`
-  复用 P4.3 逻辑处理 `export`/`default` 修饰符——`emit_declaration_text` 在
-  `declare` 之前重新发射 `export `/`default ` 使顺序为 `export declare function`
-  （而非 `declare export function`），解决 parser 中 VariableStatement 的
-  `pos()` 包含 `export` 关键字但 FunctionDeclaration 不包含的不一致。
-  FunctionDeclaration body 剥离后从 `body.end()` 反向扫描找到实际 `}` 位置，
-  发射 `}` 与 `body.end()` 之间的空白（保留语句间换行，因 parser 的 `end()`
-  包含 trailing trivia）。`get_dts_output_path` 按 `declarationDir` > `outDir` >
-  source-adjacent 优先级计算 .d.ts 路径（含 .d.mts/.d.cts 扩展名）。
-  `emit_source_file_with_common_dir` 在 `options.get_emit_declarations()` 时
-  发射 .d.ts；`emitDeclarationOnly` 抑制 JS emit。12 个 emitter 单测覆盖
-  function body 剥离/export 修饰符/variable initializer 剥离/interface 与 type
-  alias 透传/enum declare/runtime 语句排除/多声明混合/class declare/write_file
-  集成/emitDeclarationOnly 抑制。`declaration_emit` parity fixture（4 个 export
-  声明验证 .js + .d.ts 输出，`skip_oracle=true`）。941 lib + parity smoke 全通过。
-- [x] **P4.6 Additional emit parity fixtures**（已完成）：新增 3 个 emit parity
-  fixture：`declaration_dir`（`declarationDir: "dist/types"` 将 .d.ts 放到独立
-  目录，`skip_oracle=true`）、`enum_emit`（numeric/string enum 原样发射，
-  oracle 对比通过）、`namespace_emit`（namespace with exported function/const
-  原样发射，oracle 对比通过）。941 lib + parity smoke + oracle comparison 全通过。
-- [x] **P4.7 对齐 output path mixed JS/TS**（已完成）：`allowJs:true` 场景验证——
-  .ts 与 .js 文件均发射到 .js，相对目录结构在 outDir 下保留。新增 `mixed_js_ts`
-  parity fixture（main.ts + util.js 均发射，oracle 对比启用）。扩展
-  `emit_output_extension_mjs` 单测覆盖 .tsx→.js / .jsx→.js / .mjs→.mjs / .cjs→.cjs。
-  942 lib + parity smoke 全通过。
-- [x] **P4.8 扩充 emit parity fixtures**（已完成）：新增 3 个 emit parity fixture：
-  `es_modules`（module:ES2015，import/export 原样保留，oracle 对比通过）、
-  `class_emit`（class 属性/构造函数/方法，类型注解剥离，oracle 对比通过）、
-  `decorators_emit`（decorator 原样保留，ESNext target 无 down-leveling，oracle
-  对比通过）。942 lib + parity smoke 全通过。
-- [x] **P4.9 Transformer 体系替代设计**（已完成，文档化决策）：Go 使用完整的
-  AST→AST transformer 体系（`internal/transformers/`，含 `transformSourceFile`
-  递归遍历 + per-visitor transformer + `null` 表示删除节点），Rust 采用
-  **text-slice emitter + per-pattern transform** 替代方案：在源文本切片式
-  emitter 上叠加 cuts/replacements/transforms，按需处理 CommonJS/import→require/
-  export→exports/ES5 const→var/decorator 剥离/enum 降级等场景。优势：无需重建
-  AST（Rust 所有权模型下重建 immutable AST 成本高）、保留原始格式/注释/trivia。
-  已覆盖：removeComments（P4.1）、ES5 down-level（P4.2）、CommonJS（P4.3）、
-  source map（P4.4）、declaration emit（P4.5）。**已知限制**：无法处理需要全局
-  重排的场景（如 async/await→Promise 链、generator 降级、JSX transform 中的
-  `__jsx` runtime call 注入）；这些场景如需支持，需后续引入轻量 AST rewriter
-  （仅在该 target/module/jsx 组合下触发，不影响默认路径）。
-- [x] 扩充 parity fixtures：CommonJS（P4.3）/ ES modules（P4.8）/ decorators
-  （P4.8）/ enum/namespace（P4.6）/ source maps（P4.4）/ declaration emit
-  （P4.5）。**剩余**：JSX preserve/react/react-jsx transform（需 jsx compiler
-  option 解析 + runtime call 注入，属 transformer 体系已知限制）。
-
-验收：
-
-- [x] 输出文件路径和内容与 Go oracle 一致，或差异被记录为有意差异（text-slice
-  emit 与 Go printer 的差异已在各 parity case 的 `skip_oracle` 字段中标注）。
-- [x] emit parity 覆盖至少 30 个 fixtures（当前 34 个 parity fixture，含 15 个
-  emit 相关场景）。
+removeComments、ES5 down-leveling、CommonJS module transform、source map generation、declaration emit、text-slice emitter 设计、34 个 parity fixtures。
 
 ## P5：Module Resolution / Package JSON / Bundled Libs ✅ 已完成
 
-目标：常见 npm 包解析结果与 Go oracle 一致；bundled lib 相关诊断和 emit 不
-依赖外部 TypeScript checkout。
-
-Go 参考：`internal/module`、`internal/packagejson`、`internal/bundled`、
-`internal/tspath`、`internal/nativepath`。
-Rust 现状：`src/module/mod.rs`、`src/packagejson/mod.rs`、`src/bundled/mod.rs`、
-`src/tspath/mod.rs`。
-
-- [x] **P5.1 Module resolution infrastructure**（已完成）：port `Resolver` struct +
-  `ResolutionHost` trait（`fs` + `get_current_directory`）+ `ModuleResolutionCache`
-  （first-writer-wins）/ `TypeRefDirectiveResolutionCache`（last-writer-wins）+
-  `Extensions` bitfield（TypeScript | JavaScript | Declaration | JSON，`IMPLEMENTATION_FILES`
-  组合）+ `get_effective_type_roots`（typeRoots from config or default
-  `<cwd>/node_modules/@types`）+ `ResolutionState`（extensions/features/esmMode/conditions
-  从 module resolution kind 推导）+ `get_conditions` helper。7 单测。948 lib tests。
-- [x] **P5.2 Relative path resolution**（已完成）：port 完整相对路径解析链：
-  `normalize_path_for_cjs_resolution`（combine + normalize + trailing separator for
-  `.`/`..`）、`node_load_module_by_relative_name`（file resolution then directory
-  resolution，ESM mode 跳过 directory lookup）、`load_module_from_file`（extension
-  replacement `.js`→`.ts` then extension appending `.→.ts`，CJS only）、
-  `try_adding_extensions`（完整 extension-priority table：`.mjs`/`.mts`/`.d.mts`、
-  `.cjs`/`.cts`/`.d.cts`、`.json`、`.tsx`/`.jsx`、`.ts`/`.d.ts`/`.js`、空 extensionless、
-  arbitrary `.d.<ext>.ts`）、`try_extension`、`try_file`（含 moduleSuffixes）。
-  8 单测。956 lib tests。
-- [x] **P5.3 Module resolution pipeline**（已完成）：实现 `resolve_module_name` 入口 →
-  `resolve_node_like` / `resolve_node_like_worker` 分发（relative vs bare）→
-  `load_module_from_nearest_node_modules_directory`（两遍 ancestor walk：TS/DTS 先、
-  JS 后）→ `load_module_from_immediate_node_modules_directory`（含 `@types` fallback）→
-  `load_node_module_from_directory_worker`（package.json `types`/`typings`/`main`
-  字段 + index.* fallback）。6 个新测试。962 lib + 569 checker parity tests。
-- [x] **P5.4 paths/baseUrl/rootDirs**（已完成）：实现 `Pattern`/`ParsedPatterns`/
-  `try_parse_patterns`/`match_pattern_or_exact` + `try_load_module_using_paths`
-  （含 `*` 通配符替换 + extension-from-subst 处理）+ `try_load_module_using_root_dirs`
-  （最长前缀匹配 + sibling rootDir 回退）+ `get_paths_base_path`。`resolve_node_like_worker`
-  首步调用 `try_load_module_using_optional_resolution_settings`。5 个新测试覆盖 exact match、
-  wildcard、no-match fallthrough、rootDirs、pattern parsing。967 lib tests。
-- [x] **P5.5 Package exports/imports**（已完成）：修复 `ExportsOrImports` 对象分类 bug
-  （`compute_object_kind` 返回而非丢弃）。实现 `condition_matches`（`default`/conditions 匹配）+
-  `load_module_from_exports`（main export + subpath dispatch）+
-  `load_module_from_exports_or_imports`（exact match + pattern `*` + prefix `/` 匹配，
-  按 `compare_pattern_keys` 排序）+ `load_module_from_target_export_or_import`（递归条件解析：
-  String/Array/Object(conditions) 分支 + `./` 前缀校验 + `../`/`node_modules` 拒绝）。
-  `load_module_from_specific_node_modules_directory` 在 loader 前检查 exports。3 个新测试
-  覆盖 string main、conditional types/default、subpath。971 lib tests。
-- [x] **P5.6 Compiler integration**（已完成）：`CompilerHost` trait 新增 `fs_arc()` 方法。
-  新增 `ResolutionHostAdapter`（owned adapter bridging CompilerHost → ResolutionHost）。
-  `Program::new()` 新增 step 3：创建 `Resolver`，BFS 遍历所有 source file 的 imports，
-  resolve 每个 module specifier 并加载解析到的依赖文件（cycle protection via visited set）。
-  提取 `load_source_file` 单文件加载 helper。2 个新测试覆盖 direct import 和 transitive
-  import chain。973 lib + 569 checker parity tests。
-- [x] **P5.7 Package imports + typesVersions**（已完成）：实现 `load_module_from_imports`
-  （`#`-prefixed specifiers via containing package `imports` map + `get_package_scope_for_path`
-  ancestor walk）+ typesVersions 版本映射（`try_load_module_using_package_json_type_versions`
-  in `load_node_module_from_directory_worker`，复用 `try_load_module_using_paths`）。
-  6 个新测试覆盖 exact/pattern imports、lone hash、parent scope walk、typesVersions redirect、
-  typesVersions fallback。979 lib tests。
-- [x] **P5.8 Type reference directive resolution**（已完成）：实现
-  `resolve_type_reference_directive` on `ResolutionState`（typeRoots primary lookup +
-  node_modules secondary fallback，`get_candidate_from_type_root` with scoped package
-  mangling for `@types` roots，`create_resolved_type_ref`）。`Resolver::resolve_type_reference_directive`
-  从 stub 替换为真实实现，完整接入 ResolutionState pipeline。
-- [x] 对齐 node/module resolution：classic、node10、node16、nodenext、bundler
-  （**P5.3-P5.8 完成 module resolution 全链路：resolve_module_name + node_modules walk +
-  package directory + paths/rootDirs + exports + imports + typesVersions + type ref directive**）。
-- [x] 对齐 `paths`、`baseUrl`、`rootDirs`（P5.4 已完成）。
-- [x] 对齐 package `exports`、`imports`、`typesVersions`（P5.5/P5.7 已完成）。
-- [x] 对齐 bundled libs 的加载方式和版本（已完成）：`bundled:///` scheme +
-  `build.rs` 嵌入 + `BundledFS` wrapper 委托到 inner FS，与 Go 的
-  `wrappedFS` + `embeddedContents` map 完全对齐。
-- [x] 对齐大小写敏感文件系统行为（已完成）：`BundledFS` 委托
-  `use_case_sensitive_file_names` 到 inner FS；lib 名匹配使用 case-sensitive
-  查找（与 Go map lookup 一致）。3 个测试验证 case-sensitivity behavior。
-- [x] 增加 node_modules fixture parity（已完成）：3 个测试覆盖 basic、scoped
-  package（@scope/pkg）、nested parent node_modules walk。
+Module resolution 全链路（relative/node_modules/paths/rootDirs/exports/imports/typesVersions/typeRef）、bundled libs 加载、case-sensitive FS、node_modules fixture parity。
 
 ## P6：Build / Watch / Incremental
 
@@ -1395,22 +966,7 @@ Rust 现状：`src/api/mod.rs` 实现了最小 API server（JSON-RPC 2.0 over st
 
 ## P9：工具链、代码质量和发布 ✅ 已完成
 
-目标：CI 能在干净环境跑通 Rust checks；发布包不依赖本地 Go 构建产物。
-
-- [x] 增加 `rustfmt.toml`（已完成）：`edition = "2024"`, `max_width = 100`。
-  `cargo fmt --check` 全仓通过（整仓格式化已在 P9.1 完成）。
-- [x] 增加 clippy 策略（已完成）：`cargo clippy` 零 warning（剩余 compiler
-  warning 约 90 个为 dead-code in stub implementations，非 clippy 问题）。
-- [x] 建立 Rust codegen 命令（已完成）：`_scripts/generate-rust-ast.ts` +
-  `_scripts/generate-rust-diagnostics.ts`，复用 Go 侧 `_scripts/ast.json` +
-  `diagnostics_generated.go`；两个生成器输出与现有文件字节级一致。
-- [x] 更新 `.gitignore`（已完成）：纳入 `target/`、`*.rs.bk`、`Cargo.lock.bak`。
-- [x] 更新 CI workflow（已完成）：`.github/workflows/rust.yml` 在 push/PR 到
-  `rust`/`main` 时触发；fmt（gating）、clippy（gating，零 warning）、test
-  （`cargo test --lib`）、parity smoke（`cargo test --test parity`）。
-- [x] 设计 benchmark（已完成基础）：`benchmarks/benchmark.sh` 对比 tsgo vs tsox
-  CLI cold run + type check。
-- [x] 发布前安全检查：license、NOTICE、third-party deps。
+rustfmt.toml、clippy 零 warning、codegen 命令、CI workflow、benchmark 脚本、license/NOTICE 安全检查。
 
 ## 已知风险
 
@@ -1491,77 +1047,77 @@ collections/ast/scanner/printer/sourcemap/module/packagejson），再迁移
 | `TestToPath` | ✅ | |
 | `TestPathIsRelative` | ✅ | |
 | `TestGetCommonParents` | ✅ | |
-| `TestUntitledPathHandling` | ❌ | |
-| `TestUntitledPathEdgeCases` | ❌ | |
-| `TestStartsWithDirectory` | ❌ | |
-| `TestStartsWithDirectoryEdgeCases` | ❌ | |
-| `TestContainsIgnoredPath` | ❌ | |
-| `TestIgnoredPathsPatterns` | ❌ | |
-| `TestIgnoredPathsEdgeCases` | ❌ | |
+| `TestUntitledPathHandling` | ✅ | |
+| `TestUntitledPathEdgeCases` | ✅ | |
+| `TestStartsWithDirectory` | ⏳ | 函数未实现 |
+| `TestStartsWithDirectoryEdgeCases` | ⏳ | 函数未实现 |
+| `TestContainsIgnoredPath` | ✅ | |
+| `TestIgnoredPathsPatterns` | ✅ | |
+| `TestIgnoredPathsEdgeCases` | ✅ | |
 
 #### jsnum — 15 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestParsePseudoBigInt` | ❌ | |
-| `TestToInt32` | ❌ | |
-| `TestBitwiseNOT` | ❌ | |
-| `TestBitwiseAND` | ❌ | |
-| `TestBitwiseOR` | ❌ | |
-| `TestBitwiseXOR` | ❌ | |
-| `TestSignedRightShift` | ❌ | |
-| `TestUnsignedRightShift` | ❌ | |
-| `TestLeftShift` | ❌ | |
-| `TestRemainder` | ❌ | |
-| `TestExponentiate` | ❌ | |
-| `TestString` | ❌ | |
-| `TestFromString` | ❌ | |
-| `TestStringRoundtrip` | ❌ | |
-| `TestStringJS` | ❌ | |
+| `TestParsePseudoBigInt` | ✅ | 3 个用例运行，下划线变体 ⏳ |
+| `TestToInt32` | ✅ | |
+| `TestBitwiseNOT` | ✅ | |
+| `TestBitwiseAND` | ✅ | |
+| `TestBitwiseOR` | ✅ | |
+| `TestBitwiseXOR` | ✅ | |
+| `TestSignedRightShift` | ✅ | |
+| `TestUnsignedRightShift` | ✅ | |
+| `TestLeftShift` | ✅ | |
+| `TestRemainder` | ✅ | |
+| `TestExponentiate` | ✅ | 1 个 ULP 偏差用例 ⏳ |
+| `TestString` | ✅ | display 分歧 ⏳ |
+| `TestFromString` | ✅ | hex 溢出 ⏳ |
+| `TestStringRoundtrip` | ✅ | |
+| `TestStringJS` | ⏳ | 需要 Node.js |
 
 #### core — 2 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestPatternOverlappingMatch` | ❌ | |
-| `TestBreadthFirstSearchParallel` | ❌ | |
+| `TestPatternOverlappingMatch` | ⏳ | Pattern 模块未实现 |
+| `TestBreadthFirstSearchParallel` | ⏳ | BFS 并发外部 visited 集合 |
 
 #### collections — 8 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestOrderedMap` | ❌ | |
-| `TestOrderedMapClone` | ❌ | |
-| `TestOrderedMapClear` | ❌ | |
-| `TestOrderedMapWithSizeHint` | ❌ | |
-| `TestOrderedMapUnmarshalJSON` | ❌ | |
-| `TestOrderedSet` | ❌ | |
-| `TestOrderedSetWithSizeHint` | ❌ | |
-| `TestSyncMapWithNil` | ❌ | |
+| `TestOrderedMap` | ✅ | |
+| `TestOrderedMapClone` | ✅ | |
+| `TestOrderedMapClear` | ✅ | |
+| `TestOrderedMapWithSizeHint` | ⏳ | allocsPerRun |
+| `TestOrderedMapUnmarshalJSON` | ⏳ | JSON 对象格式 |
+| `TestOrderedSet` | ✅ | |
+| `TestOrderedSetWithSizeHint` | ⏳ | allocsPerRun |
+| `TestSyncMapWithNil` | ✅ | |
 
 #### stringutil — 3 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestJSCasing` | ❌ | |
-| `TestEncodeURI` | ❌ | |
-| `TestContainsNonASCII` | ❌ | |
+| `TestJSCasing` | ⏳ | |
+| `TestEncodeURI` | ⏳ | |
+| `TestContainsNonASCII` | ✅ | |
 
 #### semver — 11 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestWildcardsHaveSameString` | ❌ | |
-| `TestVersionRanges` | ❌ | |
-| `TestComparatorsOfVersionRanges` | ❌ | |
-| `TestConjunctionsOfVersionRanges` | ❌ | |
-| `TestDisjunctionsOfVersionRanges` | ❌ | |
-| `TestHyphensOfVersionRanges` | ❌ | |
-| `TestTildesOfVersionRanges` | ❌ | |
-| `TestCaretsOfVersionRanges` | ❌ | |
-| `TestTryParseSemver` | ❌ | |
-| `TestVersionString` | ❌ | |
-| `TestVersionCompare` | ❌ | |
+| `TestWildcardsHaveSameString` | ⏳ | |
+| `TestVersionRanges` | ⏳ | |
+| `TestComparatorsOfVersionRanges` | ⏳ | |
+| `TestConjunctionsOfVersionRanges` | ✅ | |
+| `TestDisjunctionsOfVersionRanges` | ✅ | |
+| `TestHyphensOfVersionRanges` | ✅ | |
+| `TestTildesOfVersionRanges` | ✅ | |
+| `TestCaretsOfVersionRanges` | ✅ | |
+| `TestTryParseSemver` | ✅ | |
+| `TestVersionString` | ✅ | |
+| `TestVersionCompare` | ⏳ | |
 
 ### P10.2 编译器核心测试（高优先级）
 
@@ -1569,87 +1125,87 @@ collections/ast/scanner/printer/sourcemap/module/packagejson），再迁移
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestScanStringPreservesLoneSurrogates` | ❌ | |
+| `TestScanStringPreservesLoneSurrogates` | ⏳ | |
 
 #### ast — 7 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestDeepCloneNodeSanityCheck` | ❌ | |
-| `TestPositionMapASCII` | ❌ | |
-| `TestPositionMapTwoByte` | ❌ | |
-| `TestPositionMapFourByte` | ❌ | |
-| `TestPositionMapMultipleNonASCII` | ❌ | |
-| `TestPositionMapLoneSurrogateSentinel` | ❌ | |
-| `TestPositionMapRoundtrip` | ❌ | |
+| `TestDeepCloneNodeSanityCheck` | ⏳ | |
+| `TestPositionMapASCII` | ✅ | 原已存在 |
+| `TestPositionMapTwoByte` | ✅ | 原已存在 |
+| `TestPositionMapFourByte` | ✅ | 原已存在 |
+| `TestPositionMapMultipleNonASCII` | ✅ | 原已存在 |
+| `TestPositionMapLoneSurrogateSentinel` | ⏳ | |
+| `TestPositionMapRoundtrip` | ✅ | 原已存在 |
 
 #### astnav — 6 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestGetTokenAtPosition` | ❌ | |
-| `TestGetTouchingPropertyName` | ❌ | |
-| `TestFindPrecedingToken` | ❌ | |
-| `TestFindNextToken` | ❌ | |
-| `TestUnitFindPrecedingToken` | ❌ | |
+| `TestGetTokenAtPosition` | ⏳ | |
+| `TestGetTouchingPropertyName` | ⏳ | |
+| `TestFindPrecedingToken` | ⏳ | |
+| `TestFindNextToken` | ⏳ | |
+| `TestUnitFindPrecedingToken` | ⏳ | |
 
 #### printer — 105 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestEmit` | ❌ | |
-| `TestParenthesize*` (65 个) | ❌ | Decorator/ComputedPropertyName/ArrayLiteral/PropertyAccess/ElementAccess/Call/New/TaggedTemplate/TypeAssertion/ArrowFunction/Delete/Void/TypeOf/Await/Binary/Conditional/Yield/SpreadElement/ExpressionWithTypeArguments/AsExpression/SatisfiesExpression/NonNullExpression/ExpressionStatement/ExpressionDefault/ArrayType/OptionalType/UnionType/IntersectionType/ReadonlyTypeOperator/KeyofTypeOperator/IndexedAccessType/ConditionalType |
-| `TestNameGeneration` | ❌ | |
-| `TestNoTrailingCommaAfterTransform` | ❌ | |
-| `TestTrailingCommaAfterTransform` | ❌ | |
-| `TestPartiallyEmittedExpression` | ❌ | |
-| `TestParenthesizeBinaryExpressionMixingNullishCoalescing` | ❌ | |
-| `TestTempVariable1/2/3` | ❌ | namegenerator |
-| `TestTempVariableScoped` | ❌ | |
-| `TestTempVariableScopedReserved` | ❌ | |
-| `TestLoopVariable1/2/3` | ❌ | |
-| `TestLoopVariableScoped` | ❌ | |
-| `TestUniqueName1/2/Scoped` | ❌ | |
-| `TestUniquePrivateName1/2/Scoped` | ❌ | |
-| `TestGeneratedNameFor*` (16 个) | ❌ | Identifier/Namespace1-4/NodeCached/Import/Export/FunctionDeclaration1-2/ClassDeclaration1-2/ExportAssignment/ClassExpression/Method1-2/ComputedPropertyName/Other |
-| `TestEscapeString` | ❌ | utilities |
-| `TestEscapeNonAsciiString` | ❌ | |
-| `TestEscapeJsxAttributeString` | ❌ | |
-| `TestIsRecognizedTripleSlashComment` | ❌ | |
+| `TestEmit` | ⏳ | |
+| `TestParenthesize*` (65 个) | ⏳ | Decorator/ComputedPropertyName/ArrayLiteral/PropertyAccess/ElementAccess/Call/New/TaggedTemplate/TypeAssertion/ArrowFunction/Delete/Void/TypeOf/Await/Binary/Conditional/Yield/SpreadElement/ExpressionWithTypeArguments/AsExpression/SatisfiesExpression/NonNullExpression/ExpressionStatement/ExpressionDefault/ArrayType/OptionalType/UnionType/IntersectionType/ReadonlyTypeOperator/KeyofTypeOperator/IndexedAccessType/ConditionalType |
+| `TestNameGeneration` | ✅ | 原已存在 |
+| `TestNoTrailingCommaAfterTransform` | ⏳ | |
+| `TestTrailingCommaAfterTransform` | ⏳ | |
+| `TestPartiallyEmittedExpression` | ⏳ | |
+| `TestParenthesizeBinaryExpressionMixingNullishCoalescing` | ⏳ | |
+| `TestTempVariable1/2/3` | ✅ | namegenerator |
+| `TestTempVariableScoped` | ✅ | |
+| `TestTempVariableScopedReserved` | ✅ | |
+| `TestLoopVariable1/2/3` | ✅ | |
+| `TestLoopVariableScoped` | ✅ | |
+| `TestUniqueName1/2/Scoped` | ✅ | |
+| `TestUniquePrivateName1/2/Scoped` | ✅ | |
+| `TestGeneratedNameFor*` (16 个) | ✅ | 原已存在 Identifier/Namespace1-4/NodeCached/Import/Export/FunctionDeclaration1-2/ClassDeclaration1-2/ExportAssignment/ClassExpression/Method1-2/ComputedPropertyName/Other |
+| `TestEscapeString` | ✅ | utilities（新实现） |
+| `TestEscapeNonAsciiString` | ✅ | 新实现 |
+| `TestEscapeJsxAttributeString` | ✅ | 新实现 |
+| `TestIsRecognizedTripleSlashComment` | ✅ | 新实现 |
 
 #### sourcemap — 30 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestSourceMapGenerator_*` (30 个) | ❌ | Empty/Serialized/AddSource/SetSourceContent/AddName/AddGeneratedMapping/AddSourceMapping/NamedSourceMapping 等 |
+| `TestSourceMapGenerator_*` (30 个) | ✅ | 原已存在 Empty/Serialized/AddSource/SetSourceContent/AddName/AddGeneratedMapping/AddSourceMapping/NamedSourceMapping 等 |
 
 #### compiler — 2 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestProgram` | ❌ | |
-| `TestIncludeProcessorDiagnosticsWithMissingFileCasing` | ❌ | |
+| `TestProgram` | ✅ | 1 个用例已存在，2 个用例 ⏳ |
+| `TestIncludeProcessorDiagnosticsWithMissingFileCasing` | ✅ | |
 
 #### checker — 2 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestGetSymbolAtLocation` | ❌ | |
-| `TestTracerPushPreservesEndArgMutations` | ❌ | |
+| `TestGetSymbolAtLocation` | ⏳ | |
+| `TestTracerPushPreservesEndArgMutations` | ⏳ | |
 
 #### transformers/tstransforms — 2 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestTypeEraser` | ❌ | |
-| `TestImportElision` | ❌ | |
+| `TestTypeEraser` | ⏳ | |
+| `TestImportElision` | ⏳ | |
 
 #### diagnostics — 2 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestLocalize` | ❌ | |
-| `TestLocalize_ByKey` | ❌ | |
+| `TestLocalize` | ⏳ | |
+| `TestLocalize_ByKey` | ⏳ | |
 
 ### P10.3 模块/包测试（中优先级）
 
@@ -1657,77 +1213,120 @@ collections/ast/scanner/printer/sourcemap/module/packagejson），再迁移
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestResolveModuleNameTrailingSlash` | ❌ | |
-| `TestResolveModuleNameTrailingSlashRace` | ❌ | 并发，可能不适用 |
-| `TestResolveSubpathNilContentsRace` | ❌ | 并发 |
-| `TestParseNodeModuleFromPath` | ❌ | |
-| `TestResolvePeerDependencyNilContentsRace` | ❌ | 并发 |
+| `TestResolveModuleNameTrailingSlash` | ✅ | |
+| `TestResolveModuleNameTrailingSlashRace` | ✅ | 并发，可能不适用 |
+| `TestResolveSubpathNilContentsRace` | ⏳ | 并发 |
+| `TestParseNodeModuleFromPath` | ✅ | |
+| `TestResolvePeerDependencyNilContentsRace` | ⏳ | 并发 |
 
 #### packagejson — 4 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestParse` | ❌ | |
-| `TestExpected` | ❌ | |
-| `TestExports` | ❌ | |
-| `TestJSONValue` | ❌ | |
+| `TestParse` | ✅ | |
+| `TestExpected` | ✅ | |
+| `TestExports` | ✅ | |
+| `TestJSONValue` | ✅ | |
 
 #### modulespecifiers — 6 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestGetEachFileNameOfModule` | ❌ | |
-| `TestGetEachFileNameOfModuleWithSymlinks` | ❌ | |
-| `TestContainsNodeModules` | ❌ | |
-| `TestContainsIgnoredPath` | ❌ | |
-| `TestTryGetRealFileNameForNonJSDeclarationFileName` | ❌ | |
-| `TestTryGetModuleNameFromExportsOrImports` | ❌ | |
+| `TestGetEachFileNameOfModule` | ⏳ | |
+| `TestGetEachFileNameOfModuleWithSymlinks` | ⏳ | |
+| `TestContainsNodeModules` | ⏳ | |
+| `TestContainsIgnoredPath` | ⏳ | |
+| `TestTryGetRealFileNameForNonJSDeclarationFileName` | ⏳ | |
+| `TestTryGetModuleNameFromExportsOrImports` | ⏳ | |
 
 #### bundled — 2 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestTestingLibPath` | ❌ | |
-| `TestEmbeddedLibs` | ❌ | |
+| `TestTestingLibPath` | ✅ | |
+| `TestEmbeddedLibs` | ✅ | |
 
 #### nativepath — 4 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestIsSymlinkOrReparsePoint` | ❌ | 平台特定 |
-| `TestIsSymlinkOrReparsePointLongPath` | ❌ | |
-| `TestIsSymlinkOrReparsePointNestedInSymlink` | ❌ | |
-| `TestIsSymlinkOrReparsePointRelativePath` | ❌ | |
+| `TestIsSymlinkOrReparsePoint` | ⏳ | 平台特定 |
+| `TestIsSymlinkOrReparsePointLongPath` | ⏳ | |
+| `TestIsSymlinkOrReparsePointNestedInSymlink` | ⏳ | |
+| `TestIsSymlinkOrReparsePointRelativePath` | ⏳ | |
 
 #### symlinks — 8 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestNewKnownSymlink` | ❌ | |
-| `TestSetDirectory` | ❌ | |
-| `TestSetFile` | ❌ | |
-| `TestProcessResolution` | ❌ | |
-| `TestGuessDirectorySymlink` | ❌ | |
-| `TestIsNodeModulesOrScopedPackageDirectory` | ❌ | |
-| `TestSetSymlinksFromResolutions` | ❌ | |
-| `TestKnownSymlinksThreadSafety` | ❌ | |
+| `TestNewKnownSymlink` | ⏳ | |
+| `TestSetDirectory` | ⏳ | |
+| `TestSetFile` | ⏳ | |
+| `TestProcessResolution` | ⏳ | |
+| `TestGuessDirectorySymlink` | ⏳ | |
+| `TestIsNodeModulesOrScopedPackageDirectory` | ⏳ | |
+| `TestSetSymlinksFromResolutions` | ⏳ | |
+| `TestKnownSymlinksThreadSafety` | ⏳ | |
 
 ### P10.4 VFS 测试（中优先级）
 
 #### vfs/vfstest — 18 个测试
+
+| Go 测试 | Rust 状态 | 说明 |
+|---------|----------|------|
+| 全部 (18 个) | 9 ✅ / 9 ⏳ | 9 个运行通过，9 个 `#[ignore]` |
+
 #### vfs/vfsmatch — 17 个测试
+
+| Go 测试 | Rust 状态 | 说明 |
+|---------|----------|------|
+| 全部 (17 个) | ⏳ | 全部 `#[ignore]` |
+
 #### vfs/cachedvfs — 10 个测试
+
+| Go 测试 | Rust 状态 | 说明 |
+|---------|----------|------|
+| 全部 (10 个) | ⏳ | 全部 `#[ignore]` |
+
 #### vfs/osvfs — 3 个测试
+
+| Go 测试 | Rust 状态 | 说明 |
+|---------|----------|------|
+| 全部 (3 个) | ✅ | 已迁移 5 个测试 |
+
 #### vfs/iovfs — 1 个测试
+
+| Go 测试 | Rust 状态 | 说明 |
+|---------|----------|------|
+| 全部 (1 个) | ⏳ | `#[ignore]` |
+
 #### vfs/vfsmock — 1 个测试
+
+| Go 测试 | Rust 状态 | 说明 |
+|---------|----------|------|
+| 全部 (1 个) | ⏳ | `#[ignore]` |
 
 （共 50 个，详见 Go `internal/vfs/` 下各子包）
 
 ### P10.5 格式化/调试测试（低优先级）
 
 #### format — 7 个测试
+
+| Go 测试 | Rust 状态 | 说明 |
+|---------|----------|------|
+| 全部 (7 个) | ⏳ | 全部 `#[ignore]` |
+
 #### debug — 12 个测试
+
+| Go 测试 | Rust 状态 | 说明 |
+|---------|----------|------|
+| 全部 (12 个) | ✅ | 已迁移 |
+
 #### tracing — 2 个测试
+
+| Go 测试 | Rust 状态 | 说明 |
+|---------|----------|------|
+| 全部 (2 个) | ⏳ | `#[ignore]` |
 
 ### P10.6 execute/tsc 集成测试（中优先级）
 
