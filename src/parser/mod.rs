@@ -5010,11 +5010,11 @@ impl Parser {
 
     /// Create a `ModifierList` containing a single `ExportKeyword` token,
     /// used for `export const/let/var` statements.
-    fn make_export_modifier(&self, pos: usize) -> ModifierList {
+    fn make_export_modifier(&self, pos: usize, end: usize) -> ModifierList {
         let export_token = Arc::new(Node::with_loc(
             SyntaxKind::ExportKeyword,
             NodeData::Token,
-            TextRange::new(pos, pos),
+            TextRange::new(pos, end),
         ));
         ModifierList::new(vec![export_token], ModifierFlags::Export)
     }
@@ -5106,7 +5106,7 @@ impl Parser {
             }
             SyntaxKind::ConstKeyword | SyntaxKind::LetKeyword | SyntaxKind::VarKeyword => {
                 // export const/let/var x = ...
-                let export_mod = self.make_export_modifier(pos);
+                let export_mod = self.make_export_modifier(pos, export_end);
                 let declaration_list = self.parse_variable_declaration_list(false);
                 self.parse_semicolon();
                 let end = self.token_pos();

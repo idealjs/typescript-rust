@@ -12,9 +12,10 @@
 use std::sync::Arc;
 
 use crate::ast::node_data_generated::NodeData;
-use crate::ast::{Node, NodeFlags, SourceFile};
+use crate::ast::{Node, NodeFlags, SourceFile, SyntaxKind};
+use crate::ast::node_flags::ModifierFlags;
 use crate::core::compiler_options::CompilerOptions;
-use crate::core::compiler_options::ScriptTarget;
+use crate::core::compiler_options::{ModuleKind, ScriptTarget};
 use crate::tspath;
 use crate::vfs::FS;
 
@@ -220,35 +221,92 @@ fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
             Vec::new()
         };
 
+    let commonjs = options.module == ModuleKind::CommonJS;
+
     let mut output = String::new();
     let mut prev_end = 0usize;
+
+    // CommonJS modules start with "use strict";
+    if commonjs {
+        output.push_str("\"use strict\";\n");
+    }
 
     for stmt in statements.iter() {
         // Skip type-only statements entirely.
         if is_type_only_statement(stmt) {
-            // Emit any source text between the previous statement and this
-            // skipped statement (e.g., leading whitespace/comments).
-            // Actually, skip the whitespace too to avoid blank gaps.
             prev_end = stmt.end();
             continue;
         }
 
+        // For CommonJS declarations with `export` modifier, cut the
+        // `export` (and `default`) keyword. The modifier keyword lives
+        // BEFORE the statement's `pos()` (the parser sets the statement
+        // position to the declaration keyword, not the modifier), so we
+        // must apply these cuts during inter-statement text emission.
+        let modifier_cuts: Vec<(usize, usize)> = if commonjs {
+            collect_export_modifier_cuts(stmt, source)
+        } else {
+            Vec::new()
+        };
+
+        // Merge modifier cuts into comment cuts for both inter-statement
+        // text and statement text emission.
+        let effective_cuts: Vec<(usize, usize)> = if modifier_cuts.is_empty() {
+            comment_cuts.clone()
+        } else {
+            let mut cuts = comment_cuts.clone();
+            cuts.extend(modifier_cuts);
+            cuts
+        };
+
         // Emit source text between the previous statement and this one
-        // (handles leading whitespace, comments, etc.).
+        // (handles leading whitespace, comments, and modifier keywords).
         if stmt.pos() > prev_end {
             emit_text_range(
                 source,
                 prev_end,
                 stmt.pos(),
-                &comment_cuts,
+                &effective_cuts,
                 &replacements,
                 &mut output,
             );
         }
 
+        // CommonJS: handle import/export statements specially.
+        if commonjs {
+            // Import statements are replaced entirely with require() calls.
+            if let Some(transformed) = transform_commonjs_import(stmt, source) {
+                prev_end = stmt.end();
+                if !transformed.is_empty() {
+                    output.push_str(&transformed);
+                    output.push('\n');
+                }
+                continue;
+            }
+            // Pure export statements (export { foo }, export default expr,
+            // export = expr) are replaced entirely.
+            if let Some(transformed) = transform_commonjs_export(stmt, source) {
+                prev_end = stmt.end();
+                if !transformed.is_empty() {
+                    output.push_str(&transformed);
+                    output.push('\n');
+                }
+                continue;
+            }
+        }
+
         // Emit the statement with type annotations stripped.
-        emit_statement(stmt, source, &comment_cuts, &replacements, &mut output);
+        emit_statement(stmt, source, &effective_cuts, &replacements, &mut output);
         prev_end = stmt.end();
+
+        // CommonJS: for declarations with `export` modifier, append
+        // `exports.name = name;` after the declaration.
+        if commonjs {
+            if let Some(append) = transform_commonjs_export_declaration(stmt, source) {
+                output.push_str(&append);
+                output.push('\n');
+            }
+        }
     }
 
     // Emit trailing source text (e.g., trailing whitespace).
@@ -573,6 +631,317 @@ fn collect_es5_replacements_recursive(
         collect_es5_replacements_recursive(child, replacements);
         false
     });
+}
+
+// ── CommonJS module transformation (P4.3) ───────────────────────────
+
+/// Collect byte ranges of `export` and `default` keyword modifiers that
+/// should be cut from the emitted text when transforming to CommonJS.
+///
+/// For `export const x = 1`, this cuts the `export` keyword and trailing
+/// whitespace, leaving `const x = 1`.
+/// For `export default function foo() {}`, this cuts both `export` and
+/// `default` keywords (and inter/trailing whitespace), leaving
+/// `function foo() {}`.
+fn collect_export_modifier_cuts(stmt: &Node, source: &str) -> Vec<(usize, usize)> {
+    let modifiers = match stmt.modifiers() {
+        Some(m) => m,
+        None => return Vec::new(),
+    };
+    if !modifiers.modifier_flags.contains(ModifierFlags::Export) {
+        return Vec::new();
+    }
+
+    let mut cuts = Vec::new();
+    let bytes = source.as_bytes();
+    for mod_node in modifiers.list.iter() {
+        if mod_node.kind == SyntaxKind::ExportKeyword
+            || mod_node.kind == SyntaxKind::DefaultKeyword
+        {
+            let start = mod_node.pos();
+            let mut end = mod_node.end();
+            // Extend end to include trailing whitespace so the declaration
+            // keyword starts cleanly.
+            while end < bytes.len() && (bytes[end] == b' ' || bytes[end] == b'\t') {
+                end += 1;
+            }
+            cuts.push((start, end));
+        }
+    }
+    cuts
+}
+
+/// Transform an `import` declaration into CommonJS `require()` calls.
+///
+/// Returns `Some(transformed_text)` if the statement is an import
+/// declaration, or `None` if it's not.
+///
+/// - `import { foo } from "./bar"` → `const { foo } = require("./bar");`
+/// - `import * as ns from "./bar"` → `const ns = require("./bar");`
+/// - `import d from "./bar"` → `const { default: d } = require("./bar");`
+/// - `import d, { foo } from "./bar"` → `const { default: d, foo } = require("./bar");`
+/// - `import "./bar"` → `require("./bar");`
+/// - `import type { foo } from "./bar"` → `` (empty, type-only)
+fn transform_commonjs_import(stmt: &Node, source: &str) -> Option<String> {
+    let import_data = match &stmt.data {
+        NodeData::ImportDeclaration(d) => d,
+        _ => return None,
+    };
+
+    let specifier = &import_data.module_specifier;
+    let specifier_text = &source[specifier.pos()..specifier.end()];
+
+    // No import clause → side-effect import.
+    let clause = match &import_data.import_clause {
+        None => return Some(format!("require({specifier_text});")),
+        Some(c) => c,
+    };
+    let clause_data = match &clause.data {
+        NodeData::ImportClause(d) => d,
+        _ => return Some(format!("require({specifier_text});")),
+    };
+
+    // Detect `import type` via the clause's phase_modifier field.
+    if clause_data.phase_modifier == Some(SyntaxKind::TypeKeyword) {
+        return Some(String::new());
+    }
+
+    // Namespace import: `import * as ns from "./bar"` → `const ns = require("./bar");`
+    if let Some(bindings) = &clause_data.named_bindings {
+        if let NodeData::NamespaceImport(ns_data) = &bindings.data {
+            if let NodeData::Identifier(ident) = &ns_data.name.data {
+                return Some(format!(
+                    "const {} = require({});",
+                    ident.text, specifier_text
+                ));
+            }
+        }
+    }
+
+    // Build destructuring parts for default import + named imports.
+    let mut parts: Vec<String> = Vec::new();
+
+    // Default import.
+    if let Some(name) = &clause_data.name {
+        if let NodeData::Identifier(ident) = &name.data {
+            parts.push(format!("default: {}", ident.text));
+        }
+    }
+
+    // Named imports.
+    if let Some(bindings) = &clause_data.named_bindings {
+        if let NodeData::NamedImports(named) = &bindings.data {
+            for spec in named.elements.iter() {
+                if let NodeData::ImportSpecifier(spec_data) = &spec.data {
+                    if spec_data.is_type_only {
+                        continue;
+                    }
+                    if let Some(prop_name) = &spec_data.property_name {
+                        if let (NodeData::Identifier(prop_ident), NodeData::Identifier(name_ident)) =
+                            (&prop_name.data, &spec_data.name.data)
+                        {
+                            parts.push(format!("{}: {}", prop_ident.text, name_ident.text));
+                        }
+                    } else if let NodeData::Identifier(name_ident) = &spec_data.name.data {
+                        parts.push(name_ident.text.clone());
+                    }
+                }
+            }
+        }
+    }
+
+    if parts.is_empty() {
+        return Some(format!("require({specifier_text});"));
+    }
+
+    Some(format!(
+        "const {{ {} }} = require({});",
+        parts.join(", "),
+        specifier_text
+    ))
+}
+
+/// Transform a pure export statement (export declaration or export
+/// assignment) into CommonJS `exports.x = ...` assignments.
+///
+/// Returns `Some(transformed_text)` if the statement is an export
+/// declaration or export assignment, or `None` otherwise.
+fn transform_commonjs_export(stmt: &Node, source: &str) -> Option<String> {
+    match &stmt.data {
+        NodeData::ExportDeclaration(d) => {
+            if d.is_type_only {
+                return Some(String::new());
+            }
+
+            let specifier_text = d
+                .module_specifier
+                .as_ref()
+                .map(|spec| source[spec.pos()..spec.end()].to_string());
+
+            match d.export_clause.as_ref().map(|c| (&c.kind, c)) {
+                Some((SyntaxKind::NamedExports, clause_node)) => {
+                    if let NodeData::NamedExports(named) = &clause_node.data {
+                        let mut lines: Vec<String> = Vec::new();
+
+                        // For re-exports, first require the module.
+                        if let Some(spec) = &specifier_text {
+                            let mut import_parts: Vec<String> = Vec::new();
+                            for spec_node in named.elements.iter() {
+                                if let NodeData::ExportSpecifier(spec_data) = &spec_node.data {
+                                    if let NodeData::Identifier(name_ident) =
+                                        &spec_data.name.data
+                                    {
+                                        import_parts.push(name_ident.text.clone());
+                                    }
+                                }
+                            }
+                            if !import_parts.is_empty() {
+                                lines.push(format!(
+                                    "const {{ {} }} = require({});",
+                                    import_parts.join(", "),
+                                    spec
+                                ));
+                            }
+                        }
+
+                        // Generate export assignments.
+                        for spec_node in named.elements.iter() {
+                            if let NodeData::ExportSpecifier(spec_data) = &spec_node.data {
+                                let (local_name, export_name) = if let Some(prop_name) =
+                                    &spec_data.property_name
+                                {
+                                    match (&prop_name.data, &spec_data.name.data) {
+                                        (NodeData::Identifier(p), NodeData::Identifier(n)) => {
+                                            (p.text.clone(), n.text.clone())
+                                        }
+                                        _ => continue,
+                                    }
+                                } else if let NodeData::Identifier(name_ident) =
+                                    &spec_data.name.data
+                                {
+                                    (name_ident.text.clone(), name_ident.text.clone())
+                                } else {
+                                    continue;
+                                };
+                                lines.push(format!("exports.{export_name} = {local_name};"));
+                            }
+                        }
+                        return Some(lines.join("\n"));
+                    }
+                    Some(String::new())
+                }
+                Some((SyntaxKind::NamespaceExport, clause_node)) => {
+                    // `export * as ns from "./bar"`
+                    if let NodeData::NamespaceExport(ns_data) = &clause_node.data {
+                        if let NodeData::Identifier(ident) = &ns_data.name.data {
+                            if let Some(spec) = &specifier_text {
+                                return Some(format!(
+                                    "const {n} = require({s});\nexports.{n} = {n};",
+                                    n = ident.text,
+                                    s = spec
+                                ));
+                            }
+                        }
+                    }
+                    Some(String::new())
+                }
+                None => {
+                    // `export * from "./bar"` — wildcard re-export.
+                    if let Some(spec) = &specifier_text {
+                        return Some(format!(
+                            "Object.keys(require({s})).forEach(function(k) {{ if (k !== \"default\") exports[k] = require({s})[k]; }});",
+                            s = spec
+                        ));
+                    }
+                    Some(String::new())
+                }
+                _ => Some(String::new()),
+            }
+        }
+        NodeData::ExportAssignment(d) => {
+            let expr_source = source[d.expression.pos()..d.expression.end()].to_string();
+            if d.is_export_equals {
+                Some(format!("module.exports = {expr_source};"))
+            } else {
+                Some(format!("exports.default = {expr_source};"))
+            }
+        }
+        _ => None,
+    }
+}
+
+/// Generate `exports.name = name;` lines for declarations with `export`
+/// modifier (VariableStatement, FunctionDeclaration, ClassDeclaration,
+/// EnumDeclaration).
+///
+/// Called AFTER the declaration is emitted (with the `export` keyword
+/// stripped). Returns `Some(append_text)` if the statement has an export
+/// modifier, or `None` otherwise.
+fn transform_commonjs_export_declaration(stmt: &Node, _source: &str) -> Option<String> {
+    let modifiers = stmt.modifiers()?;
+    if !modifiers.modifier_flags.contains(ModifierFlags::Export) {
+        return None;
+    }
+    let is_default = modifiers.modifier_flags.contains(ModifierFlags::Default);
+
+    match &stmt.data {
+        NodeData::VariableStatement(d) => {
+            let decl_list = &d.declaration_list;
+            let list_data = match &decl_list.data {
+                NodeData::VariableDeclarationList(ld) => ld,
+                _ => return None,
+            };
+            let mut lines: Vec<String> = Vec::new();
+            for decl in list_data.declarations.iter() {
+                if let NodeData::VariableDeclaration(decl_data) = &decl.data {
+                    if let NodeData::Identifier(ident) = &decl_data.name.data {
+                        if is_default {
+                            lines.push(format!("exports.default = {};", ident.text));
+                        } else {
+                            lines.push(format!("exports.{n} = {n};", n = ident.text));
+                        }
+                    }
+                }
+            }
+            if lines.is_empty() {
+                None
+            } else {
+                Some(lines.join("\n"))
+            }
+        }
+        NodeData::FunctionDeclaration(d) => {
+            let name = d.name.as_ref()?;
+            if let NodeData::Identifier(ident) = &name.data {
+                if is_default {
+                    Some(format!("exports.default = {};", ident.text))
+                } else {
+                    Some(format!("exports.{n} = {n};", n = ident.text))
+                }
+            } else {
+                None
+            }
+        }
+        NodeData::ClassDeclaration(d) => {
+            let name = d.name.as_ref()?;
+            if let NodeData::Identifier(ident) = &name.data {
+                if is_default {
+                    Some(format!("exports.default = {};", ident.text))
+                } else {
+                    Some(format!("exports.{n} = {n};", n = ident.text))
+                }
+            } else {
+                None
+            }
+        }
+        NodeData::EnumDeclaration(d) => {
+            if let NodeData::Identifier(ident) = &d.name.data {
+                Some(format!("exports.{n} = {n};", n = ident.text))
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
 }
 
 /// Whether a statement is type-only and should be skipped during emit.
@@ -1394,5 +1763,111 @@ mod tests {
         let js = emit_js_text(&sf, &opts);
         assert!(js.contains("const x = 1;"));
         assert!(!js.contains("var x"));
+    }
+
+    // ── CommonJS module transform tests (P4.3) ──────────────────────────
+
+    fn emit_to_string_commonjs(source: &str) -> String {
+        let sf = parse(source);
+        let mut opts = CompilerOptions::default();
+        opts.module = ModuleKind::CommonJS;
+        emit_js_text(&sf, &opts)
+    }
+
+    #[test]
+    fn commonjs_starts_with_use_strict() {
+        let js = emit_to_string_commonjs("const x = 1;");
+        assert!(js.starts_with("\"use strict\";\n"));
+    }
+
+    #[test]
+    fn commonjs_export_named() {
+        let js = emit_to_string_commonjs("const x = 1;\nexport { x };");
+        assert!(js.contains("const x = 1;"));
+        assert!(js.contains("exports.x = x;"));
+        assert!(!js.contains("export { x }"));
+    }
+
+    #[test]
+    fn commonjs_export_default_expression() {
+        let js = emit_to_string_commonjs("export default 42;");
+        assert!(js.contains("exports.default = 42;"));
+        assert!(!js.contains("export default"));
+    }
+
+    #[test]
+    fn commonjs_export_equals() {
+        let js = emit_to_string_commonjs("const obj = {};\nexport = obj;");
+        assert!(js.contains("module.exports = obj;"));
+    }
+
+    #[test]
+    fn commonjs_export_const() {
+        let js = emit_to_string_commonjs("export const x = 1;");
+        assert!(js.contains("const x = 1;"));
+        assert!(js.contains("exports.x = x;"));
+        assert!(!js.contains("export const"));
+    }
+
+    #[test]
+    fn commonjs_export_function() {
+        let js = emit_to_string_commonjs("export function foo() { return 1; }");
+        assert!(js.contains("function foo()"));
+        assert!(js.contains("exports.foo = foo;"));
+        assert!(!js.contains("export function"));
+    }
+
+    #[test]
+    fn commonjs_export_class() {
+        let js = emit_to_string_commonjs("export class Foo { }");
+        assert!(js.contains("class Foo"));
+        assert!(js.contains("exports.Foo = Foo;"));
+        assert!(!js.contains("export class"));
+    }
+
+    #[test]
+    fn commonjs_import_named() {
+        let js = emit_to_string_commonjs("import { foo } from \"./bar\";");
+        assert!(js.contains("const { foo } = require(\"./bar\");"));
+        assert!(!js.contains("import { foo }"));
+    }
+
+    #[test]
+    fn commonjs_import_namespace() {
+        let js = emit_to_string_commonjs("import * as ns from \"./bar\";");
+        assert!(js.contains("const ns = require(\"./bar\");"));
+    }
+
+    #[test]
+    fn commonjs_import_default() {
+        let js = emit_to_string_commonjs("import d from \"./bar\";");
+        assert!(js.contains("const { default: d } = require(\"./bar\");"));
+    }
+
+    #[test]
+    fn commonjs_import_side_effect() {
+        let js = emit_to_string_commonjs("import \"./bar\";");
+        assert!(js.contains("require(\"./bar\");"));
+    }
+
+    #[test]
+    fn commonjs_import_type_stripped() {
+        let js = emit_to_string_commonjs("import type { foo } from \"./bar\";");
+        assert!(!js.contains("import"));
+        assert!(!js.contains("require"));
+    }
+
+    #[test]
+    fn commonjs_export_multiple_named() {
+        let js = emit_to_string_commonjs("const x = 1;\nconst y = 2;\nexport { x, y };");
+        assert!(js.contains("exports.x = x;"));
+        assert!(js.contains("exports.y = y;"));
+    }
+
+    #[test]
+    fn commonjs_export_reexport() {
+        let js = emit_to_string_commonjs("export { foo } from \"./bar\";");
+        assert!(js.contains("const { foo } = require(\"./bar\");"));
+        assert!(js.contains("exports.foo = foo;"));
     }
 }

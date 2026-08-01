@@ -220,6 +220,21 @@ const CASES: &[Case] = &[
         stdout_contains: &[],
         skip_oracle: false,
     },
+    Case {
+        name: "module_commonjs",
+        // `module: "CommonJS"` — import/export → require/exports.
+        // Export declarations (export const/function/class) use a
+        // text-slice approach that differs from the Go oracle's full
+        // transformer, so oracle comparison is skipped.
+        args: &[],
+        expect_success: true,
+        expected_files: &[(
+            "dist/src/main.js",
+            "\"use strict\";\nconst x = 1;\nconst y = 2;\nexports.x = x;\nexports.y = y;\nexports.default = 42;\n",
+        )],
+        stdout_contains: &[],
+        skip_oracle: true,
+    },
     // ── Parser parity smoke cases ───────────────────────────────────────
     Case {
         name: "parser_syntax_error",

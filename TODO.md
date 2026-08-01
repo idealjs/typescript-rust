@@ -1172,7 +1172,25 @@ Rust 现状：`src/compiler/mod.rs`、`src/printer/mod.rs`、`src/emitter/mod.rs
   `skip_oracle=true` 改为 `skip_oracle=false`，期望输出 `var f = 6;`。
   6 个 emitter 单测覆盖 const/let→var、export 保留、var 不变、for 循环内
   let、ES2015 不下放。907 lib + parity smoke 全通过。
-- [ ] 对齐 declaration emit：`.d.ts`、`.d.ts.map`、strip internal、declaration maps。
+- [x] **P4.3 CommonJS module transformer**（已完成）：emitter 新增
+  `transform_commonjs_import`（import→require：named `const { foo } =
+  require("./bar")`、namespace `const ns = require("./bar")`、default
+  `const { default: d } = require("./bar")`、side-effect `require("./bar")`、
+  `import type` 剥离）、`transform_commonjs_export`（`export { x }` →
+  `exports.x = x;`、`export default expr` → `exports.default = expr;`、
+  `export = expr` → `module.exports = expr;`、re-export `export { foo } from
+  "./bar"` → `const { foo } = require("./bar"); exports.foo = foo;`）、
+  `transform_commonjs_export_declaration`（`export const/function/class/enum`
+  → 剥离 `export` 关键字 + 追加 `exports.name = name;`）。`collect_export_modifier_cuts`
+  收集 `ExportKeyword`/`DefaultKeyword` 修饰符字节范围（含尾部空格），
+  在 inter-statement text 发射阶段应用 cut（因为 parser 将语句 pos 设在
+  声明关键字而非修饰符，修饰符位于 `stmt.pos()` 之前）。修复 parser
+  `make_export_modifier` 零宽 `TextRange::new(pos, pos)` bug → 改为
+  `TextRange::new(pos, end)`。15 个 emitter 单测覆盖 named/namespace/default/
+  side-effect/type import、named/default/equals export、re-export、export
+  const/function/class。`module_commonjs` parity case（`skip_oracle=true`，
+  因 text-slice emit 与 Go oracle 全 transformer 输出格式不同）。921 lib +
+  parity smoke 全通过。
 - [ ] 对齐 sourcemap：路径、sources、sourcesContent、VLQ mappings。
 - [ ] 对齐 output path：`rootDir`、`outDir`、`declarationDir`、mixed JS/TS。
 - [ ] 补齐 transformer 体系或明确替代设计。
