@@ -79,7 +79,7 @@ pub fn emit_source_file_with_common_dir(
     }
 
     // Emit JS text.
-    let js_text = emit_js_text(source_file);
+    let js_text = emit_js_text(source_file, options);
 
     // Write file.
     match write_file(&js_path, &js_text) {
@@ -193,11 +193,20 @@ fn get_output_extension(file_name: &str) -> &'static str {
 
 /// Emit JavaScript text for a source file by walking the AST and stripping
 /// TypeScript-only constructs.
-fn emit_js_text(source_file: &SourceFile) -> String {
+fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
     let source = &source_file.text;
     let statements = match &source_file.node.data {
         NodeData::SourceFile(d) => &d.statements,
         _ => return source.clone(),
+    };
+
+    // When `removeComments` is true, collect all comment ranges in the file
+    // so they can be stripped during emission. Mirrors Go's printer behavior
+    // where `removeComments` suppresses all comment output.
+    let comment_cuts: Vec<(usize, usize)> = if options.remove_comments.is_true() {
+        collect_all_comment_ranges(source)
+    } else {
+        Vec::new()
     };
 
     let mut output = String::new();
@@ -216,20 +225,264 @@ fn emit_js_text(source_file: &SourceFile) -> String {
         // Emit source text between the previous statement and this one
         // (handles leading whitespace, comments, etc.).
         if stmt.pos() > prev_end {
-            output.push_str(&source[prev_end..stmt.pos()]);
+            emit_text_range(source, prev_end, stmt.pos(), &comment_cuts, &mut output);
         }
 
         // Emit the statement with type annotations stripped.
-        emit_statement(stmt, source, &mut output);
+        emit_statement(stmt, source, &comment_cuts, &mut output);
         prev_end = stmt.end();
     }
 
     // Emit trailing source text (e.g., trailing whitespace).
     if prev_end < source.len() {
-        output.push_str(&source[prev_end..]);
+        emit_text_range(source, prev_end, source.len(), &comment_cuts, &mut output);
+    }
+
+    // When removeComments is active, trim leading whitespace that remained
+    // after stripping comments before the first statement. The Go printer
+    // doesn't emit leading trivia before the first statement, so a stripped
+    // leading comment shouldn't leave a blank line.
+    if options.remove_comments.is_true() {
+        while output.starts_with(|c: char| c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+            output.remove(0);
+        }
     }
 
     output
+}
+
+/// Emit a range of source text `[start, end)`, skipping any cut ranges
+/// (comment or type-annotation cuts) that fall within it.
+fn emit_text_range(
+    source: &str,
+    start: usize,
+    end: usize,
+    cuts: &[(usize, usize)],
+    output: &mut String,
+) {
+    if cuts.is_empty() {
+        output.push_str(&source[start..end]);
+        return;
+    }
+    let mut pos = start;
+    for &(c_start, c_end) in cuts {
+        if c_start >= end || c_end <= start {
+            continue;
+        }
+        let s = c_start.max(start);
+        let e = c_end.min(end);
+        if s > pos {
+            output.push_str(&source[pos..s]);
+        }
+        pos = e;
+    }
+    if pos < end {
+        output.push_str(&source[pos..end]);
+    }
+}
+
+/// Scan the entire source text and collect all comment ranges (both `//`
+/// single-line and `/* */` multi-line), being careful to skip string
+/// literals, template literals, and regex literals.
+///
+/// This is used by the emitter when `removeComments: true` to strip all
+/// comments from the emitted JS. The approach mirrors how Go's printer
+/// suppresses comment emission — but since our emitter is source-text-slice
+/// based (not printer-based), we collect ranges upfront and treat them as
+/// additional cut ranges.
+fn collect_all_comment_ranges(text: &str) -> Vec<(usize, usize)> {
+    let bytes = text.as_bytes();
+    let len = bytes.len();
+    let mut ranges: Vec<(usize, usize)> = Vec::new();
+    let mut pos = 0usize;
+
+    // Track the previous significant (non-whitespace) character for regex
+    // detection. A `/` is treated as regex start if the previous significant
+    // char is one that can't end an expression (operators, brackets, etc.).
+    let mut prev_significant: char = ';';
+
+    while pos < len {
+        let b = bytes[pos];
+        match b {
+            b'/' if pos + 1 < len && bytes[pos + 1] == b'/' => {
+                // Single-line comment: `// ...` until newline.
+                let start = pos;
+                pos += 2;
+                while pos < len && bytes[pos] != b'\n' && bytes[pos] != b'\r' {
+                    pos += 1;
+                }
+                ranges.push((start, pos));
+            }
+            b'/' if pos + 1 < len && bytes[pos + 1] == b'*' => {
+                // Multi-line comment: `/* ... */`.
+                let start = pos;
+                pos += 2;
+                while pos < len {
+                    if bytes[pos] == b'*' && pos + 1 < len && bytes[pos + 1] == b'/' {
+                        pos += 2;
+                        break;
+                    }
+                    pos += 1;
+                }
+                ranges.push((start, pos));
+            }
+            b'/' => {
+                // Could be a regex literal or a division operator.
+                // Heuristic: if the previous significant character suggests
+                // we're at the start of an expression, treat `/` as regex.
+                if is_regex_context(prev_significant) {
+                    let start = pos;
+                    pos += 1;
+                    let mut in_class = false; // inside `[...]`
+                    while pos < len {
+                        let c = bytes[pos];
+                        if c == b'\\' && pos + 1 < len {
+                            pos += 2;
+                            continue;
+                        }
+                        if c == b'[' {
+                            in_class = true;
+                        }
+                        if c == b']' {
+                            in_class = false;
+                        }
+                        if c == b'/' && !in_class {
+                            pos += 1;
+                            // Consume flags.
+                            while pos < len && is_regex_flag_char(bytes[pos]) {
+                                pos += 1;
+                            }
+                            break;
+                        }
+                        if c == b'\n' {
+                            // Unterminated regex — bail.
+                            break;
+                        }
+                        pos += 1;
+                    }
+                    let _ = start;
+                } else {
+                    pos += 1;
+                }
+                prev_significant = '/';
+            }
+            b'\'' | b'"' => {
+                // String literal.
+                let quote = b;
+                prev_significant = char::from(quote);
+                pos += 1;
+                while pos < len {
+                    let c = bytes[pos];
+                    if c == b'\\' && pos + 1 < len {
+                        pos += 2;
+                        continue;
+                    }
+                    if c == quote {
+                        pos += 1;
+                        break;
+                    }
+                    if c == b'\n' {
+                        // Unterminated string — bail.
+                        break;
+                    }
+                    pos += 1;
+                }
+                prev_significant = char::from(quote);
+            }
+            b'`' => {
+                // Template literal — may contain `${...}` expressions.
+                prev_significant = '`';
+                pos += 1;
+                skip_template_literal(text, &mut pos);
+            }
+            b' ' | b'\t' | b'\n' | b'\r' => {
+                // Whitespace — skip without updating prev_significant.
+                pos += 1;
+            }
+            _ => {
+                prev_significant = char::from(b);
+                pos += 1;
+            }
+        }
+    }
+
+    ranges
+}
+
+/// Skip a template literal body (after the opening backtick), handling
+/// `${...}` expression interpolation and nested templates.
+fn skip_template_literal(text: &str, pos: &mut usize) {
+    let bytes = text.as_bytes();
+    let len = bytes.len();
+    while *pos < len {
+        let b = bytes[*pos];
+        if b == b'\\' && *pos + 1 < len {
+            *pos += 2;
+            continue;
+        }
+        if b == b'`' {
+            *pos += 1;
+            return;
+        }
+        if b == b'$' && *pos + 1 < len && bytes[*pos + 1] == b'{' {
+            // Expression interpolation — skip until matching `}`.
+            *pos += 2;
+            let mut depth = 1;
+            while *pos < len && depth > 0 {
+                let c = bytes[*pos];
+                match c {
+                    b'{' => {
+                        depth += 1;
+                        *pos += 1;
+                    }
+                    b'}' => {
+                        depth -= 1;
+                        *pos += 1;
+                    }
+                    b'\'' | b'"' => {
+                        let quote = c;
+                        *pos += 1;
+                        while *pos < len {
+                            if bytes[*pos] == b'\\' && *pos + 1 < len {
+                                *pos += 2;
+                                continue;
+                            }
+                            if bytes[*pos] == quote {
+                                *pos += 1;
+                                break;
+                            }
+                            *pos += 1;
+                        }
+                    }
+                    b'`' => {
+                        *pos += 1;
+                        skip_template_literal(text, pos);
+                    }
+                    _ => {
+                        *pos += 1;
+                    }
+                }
+            }
+        } else {
+            *pos += 1;
+        }
+    }
+}
+
+/// Whether a `/` following `prev` should be treated as the start of a regex
+/// literal (rather than a division operator).
+fn is_regex_context(prev: char) -> bool {
+    matches!(
+        prev,
+        '(' | ',' | '=' | ':' | '[' | '!'
+            | '&' | '|' | '?' | '{' | '}' | ';'
+            | '<' | '>' | '+' | '-' | '*' | '/' | '%'
+            | '~' | '^' | '\n' | '\0'
+    )
+}
+
+fn is_regex_flag_char(b: u8) -> bool {
+    matches!(b, b'g' | b'i' | b'm' | b's' | b'u' | b'y' | b'd' | b'v')
 }
 
 /// Whether a statement is type-only and should be skipped during emit.
@@ -244,16 +497,30 @@ fn is_type_only_statement(node: &Node) -> bool {
     }
 }
 
-/// Emit a statement, stripping type annotations.
+/// Emit a statement, stripping type annotations and (optionally) comments.
 ///
 /// For most statements, this collects "cut ranges" (byte ranges to remove)
 /// and then emits the source text with those ranges removed.
-fn emit_statement(node: &Node, source: &str, output: &mut String) {
+fn emit_statement(
+    node: &Node,
+    source: &str,
+    comment_cuts: &[(usize, usize)],
+    output: &mut String,
+) {
     let mut cuts: Vec<(usize, usize)> = Vec::new();
     collect_type_cuts(node, source, &mut cuts);
 
+    // Merge comment cuts that fall within this statement's range.
+    if !comment_cuts.is_empty() {
+        for &(cs, ce) in comment_cuts {
+            if ce > node.pos() && cs < node.end() {
+                cuts.push((cs, ce));
+            }
+        }
+    }
+
     if cuts.is_empty() {
-        // No type annotations to strip — emit source text as-is.
+        // No type annotations or comments to strip — emit source text as-is.
         output.push_str(&source[node.pos()..node.end()]);
         return;
     }
@@ -577,7 +844,14 @@ mod tests {
 
     fn emit_to_string(source: &str) -> String {
         let sf = parse(source);
-        emit_js_text(&sf)
+        emit_js_text(&sf, &CompilerOptions::default())
+    }
+
+    fn emit_to_string_no_comments(source: &str) -> String {
+        let sf = parse(source);
+        let mut opts = CompilerOptions::default();
+        opts.remove_comments = Tristate::True;
+        emit_js_text(&sf, &opts)
     }
 
     #[test]
@@ -902,5 +1176,62 @@ mod tests {
         assert!(js.contains("method(x)"));
         assert!(!js.contains(": number"));
         assert!(js.contains("return x;"));
+    }
+
+    // ── removeComments tests (P4.1) ────────────────────────────────────
+
+    #[test]
+    fn remove_comments_strips_single_line_comment() {
+        let js = emit_to_string_no_comments("// This comment should be removed\nconst e = 5;");
+        assert!(!js.contains("// This comment"));
+        assert!(js.contains("const e = 5;"));
+    }
+
+    #[test]
+    fn remove_comments_strips_multi_line_comment() {
+        let js = emit_to_string_no_comments("/* block comment */ const x = 1;");
+        assert!(!js.contains("block comment"));
+        assert!(js.contains("const x = 1;"));
+    }
+
+    #[test]
+    fn remove_comments_strips_jsdoc_comment() {
+        let js = emit_to_string_no_comments("/** JSDoc */\nfunction foo() { return 1; }");
+        assert!(!js.contains("JSDoc"));
+        assert!(js.contains("function foo()"));
+    }
+
+    #[test]
+    fn remove_comments_preserves_comments_in_strings() {
+        let js = emit_to_string_no_comments("// real comment\nconst s = \"// not a comment\";");
+        assert!(!js.contains("real comment"));
+        assert!(js.contains("\"// not a comment\""));
+    }
+
+    #[test]
+    fn remove_comments_preserves_comments_in_template_literals() {
+        let js =
+            emit_to_string_no_comments("// real comment\nconst s = `// not a comment ${1}`;");
+        assert!(!js.contains("real comment"));
+        assert!(js.contains("`// not a comment"));
+    }
+
+    #[test]
+    fn remove_comments_does_not_affect_division() {
+        let js = emit_to_string_no_comments("const x = 10 / 2;");
+        assert!(js.contains("10 / 2"));
+    }
+
+    #[test]
+    fn remove_comments_strips_trailing_comment() {
+        let js = emit_to_string_no_comments("const x = 1; // trailing");
+        assert!(js.contains("const x = 1;"));
+        assert!(!js.contains("trailing"));
+    }
+
+    #[test]
+    fn remove_comments_off_by_default() {
+        let js = emit_to_string("// comment\nconst x = 1;");
+        assert!(js.contains("// comment"));
     }
 }

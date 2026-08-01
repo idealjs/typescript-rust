@@ -1152,6 +1152,16 @@ Go 参考：`internal/compiler`、`internal/printer`、`internal/transformers`�
 Rust 现状：`src/compiler/mod.rs`、`src/printer/mod.rs`、`src/emitter/mod.rs`、
 `src/sourcemap/mod.rs`。
 
+- [x] **P4.1 removeComments transformer**（已完成）：emitter 新增
+  `collect_all_comment_ranges` 全文扫描器（状态机跳过 string/template/
+  regex literal，收集 `//` 和 `/* */` 注释范围）+ `emit_text_range` 按范围
+  跳过 cut + `emit_statement` 合并 comment cuts 与 type cuts。
+  `emit_js_text` 接入 `CompilerOptions`，`removeComments:true` 时收集注释
+  范围并在输出前 trim 首部空白（对齐 Go printer 不输出首语句前 trivia 的
+  行为）。`comments_stripped` parity case 从 `skip_oracle=true` 改为
+  `skip_oracle=false`，期望输出无注释。8 个 emitter 单测覆盖单行/多行/
+  JSDoc 注释剥离、字符串/模板内注释保留、除法不受影响、尾部注释剥离、
+  默认关闭。901 lib + parity smoke 全通过。
 - [ ] 对齐 JS emit：target、module、jsx、imports/exports、helpers。
 - [ ] 对齐 declaration emit：`.d.ts`、`.d.ts.map`、strip internal、declaration maps。
 - [ ] 对齐 sourcemap：路径、sources、sourcesContent、VLQ mappings。

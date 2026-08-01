@@ -204,18 +204,12 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "comments_stripped",
-        // `removeComments: true`. NOTE: comment stripping is not yet
-        // migrated in the Rust emitter, so the comment is currently
-        // retained; oracle comparison is skipped until the transformer
-        // lands.
+        // `removeComments: true` — comments are stripped from emitted JS.
         args: &[],
         expect_success: true,
-        expected_files: &[(
-            "dist/src/main.js",
-            "// This comment should be removed\nconst e = 5;\nexport { e };\n",
-        )],
+        expected_files: &[("dist/src/main.js", "const e = 5;\nexport { e };\n")],
         stdout_contains: &[],
-        skip_oracle: true,
+        skip_oracle: false,
     },
     Case {
         name: "target_es5",
