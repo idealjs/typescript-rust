@@ -224,7 +224,75 @@ impl Parser {
         // mirroring Go's `finishSourceFile` + `collectExternalModuleReferences`.
         references::set_external_module_indicator(&mut file);
         references::collect_external_module_references(&mut file);
+        // Apply JSDoc reparser: convert unhosted JSDoc tags (@typedef,
+        // @callback, @import, @overload) into regular AST declaration nodes
+        // inserted before the host statement. Mirrors Go's `processJSDoc` +
+        // `reparseTags` integration in `parseList`.
+        Self::apply_jsdoc_reparser(&mut file);
         (file, parser.diagnostics)
+    }
+
+    /// Post-processing step that applies the JSDoc reparser to each statement.
+    ///
+    /// For each statement with preceding JSDoc comments, resolves the JSDoc
+    /// and calls `reparse_tags` to convert unhosted tags (@typedef, @callback,
+    /// @import, @overload) into new declaration nodes. The new nodes are
+    /// inserted before the host statement in the source file's statement list.
+    ///
+    /// Mirrors Go's `processJSDoc` called from `parseList` after each
+    /// statement is parsed (`parser.go: parseList`). In Rust, since the AST
+    /// is immutable, this is done as a post-processing step that rebuilds
+    /// the statement list and SourceFile node when reparsed nodes are found.
+    fn apply_jsdoc_reparser(file: &mut SourceFile) {
+        let statements = match &file.node.data {
+            NodeData::SourceFile(d) => &d.statements.nodes,
+            _ => return,
+        };
+
+        let mut new_statements: Vec<Arc<Node>> = Vec::with_capacity(statements.len());
+        let mut has_reparsed = false;
+
+        for stmt in statements {
+            // Resolve JSDoc for this statement (lazy, cached)
+            let js_docs = file.resolve_jsdoc(stmt);
+            if !js_docs.is_empty() {
+                let reparsed = reparse_tags(stmt, &js_docs);
+                if !reparsed.is_empty() {
+                    has_reparsed = true;
+                    new_statements.extend(reparsed);
+                }
+            }
+            new_statements.push(stmt.clone());
+        }
+
+        if !has_reparsed {
+            return;
+        }
+
+        // Rebuild the SourceFile node with the new statement list
+        let (end_of_file_token, old_loc) = match &file.node.data {
+            NodeData::SourceFile(d) => (d.end_of_file_token.clone(), file.node.loc),
+            _ => return,
+        };
+        let new_statements_node_list = Arc::new(NodeList {
+            loc: TextRange::new(
+                old_loc.pos(),
+                new_statements
+                    .last()
+                    .map(|s| s.end())
+                    .unwrap_or(old_loc.pos()),
+            ),
+            nodes: new_statements,
+        });
+        let new_node = Arc::new(Node::with_loc(
+            SyntaxKind::SourceFile,
+            NodeData::SourceFile(SourceFileData {
+                statements: new_statements_node_list,
+                end_of_file_token,
+            }),
+            old_loc,
+        ));
+        file.node = new_node;
     }
 
     // ─────────────────────────────────────────────────────────────────────

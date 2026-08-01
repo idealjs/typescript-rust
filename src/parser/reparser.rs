@@ -875,10 +875,11 @@ mod tests {
         (Arc::new(result.0), result.1)
     }
 
-    /// Get JSDoc tags from the first statement's JSDoc.
-    /// Uses `resolve_jsdoc` directly (bypassing the `HasJSDoc` flag check)
-    /// because parser integration to set `HasJSDoc` on statements is not yet
-    /// implemented — JSDoc is lazily parsed on demand.
+    /// Get JSDoc tags from the last statement's JSDoc.
+    /// Uses `resolve_jsdoc` directly (bypassing the `HasJSDoc` flag check).
+    /// Uses the last statement because `apply_jsdoc_reparser` (called during
+    /// parsing) inserts reparsed nodes before the original statement, making
+    /// the original statement the last one in the list.
     fn get_first_statement_jsdoc(file: &SourceFile) -> Vec<Arc<Node>> {
         let statements = match &file.node.data {
             NodeData::SourceFile(d) => &d.statements.nodes,
@@ -887,7 +888,9 @@ mod tests {
         if statements.is_empty() {
             return Vec::new();
         }
-        let stmt = &statements[0];
+        // The original statement (with JSDoc) is the last one after reparser
+        // integration inserts reparsed nodes before it.
+        let stmt = statements.last().unwrap();
         file.resolve_jsdoc(stmt)
     }
 
@@ -1193,5 +1196,121 @@ function foo(x) { return 42; }
         // Not a ModuleDeclaration — should return as-is
         let result = wrap_in_jsdoc_namespace(&statement, &statement, false);
         assert_eq!(result.kind, SyntaxKind::TypeAliasDeclaration);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Integration tests: verify reparser runs during parsing (P2.6b)
+    // ─────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn test_integration_typedef_prepended_to_statements() {
+        let text = r#"
+/**
+ * @typedef {string} MyString
+ */
+let x;
+"#;
+        let (file, _diags) = parse_source(text);
+        let statements = match &file.node.data {
+            NodeData::SourceFile(d) => &d.statements.nodes,
+            _ => panic!("expected SourceFile"),
+        };
+        // After reparser integration, the TypeAliasDeclaration should be
+        // inserted before the original `let x;` statement.
+        assert_eq!(statements.len(), 2);
+        assert_eq!(statements[0].kind, SyntaxKind::TypeAliasDeclaration);
+        assert_eq!(statements[1].kind, SyntaxKind::VariableStatement);
+
+        // Verify the TypeAliasDeclaration has the correct name and type
+        match &statements[0].data {
+            NodeData::TypeAliasDeclaration(d) => {
+                assert_eq!(node_text(&d.name), "MyString");
+                assert_eq!(d.type_node.kind, SyntaxKind::StringKeyword);
+            }
+            _ => panic!("expected TypeAliasDeclaration"),
+        }
+    }
+
+    #[test]
+    fn test_integration_typedef_namespace_prepended() {
+        let text = r#"
+/**
+ * @typedef {string} Foo.Bar
+ */
+let x;
+"#;
+        let (file, _diags) = parse_source(text);
+        let statements = match &file.node.data {
+            NodeData::SourceFile(d) => &d.statements.nodes,
+            _ => panic!("expected SourceFile"),
+        };
+        // Should have: [ModuleDeclaration(Foo { type Bar }), VariableStatement]
+        assert_eq!(statements.len(), 2);
+        assert_eq!(statements[0].kind, SyntaxKind::ModuleDeclaration);
+        assert_eq!(statements[1].kind, SyntaxKind::VariableStatement);
+    }
+
+    #[test]
+    fn test_integration_overload_prepended_to_function() {
+        let text = r#"
+/**
+ * @overload
+ * @param {string} x
+ * @returns {string}
+ */
+function foo(x) { return x; }
+"#;
+        let (file, _diags) = parse_source(text);
+        let statements = match &file.node.data {
+            NodeData::SourceFile(d) => &d.statements.nodes,
+            _ => panic!("expected SourceFile"),
+        };
+        // Should have: [FunctionDeclaration (overload), FunctionDeclaration (original)]
+        assert_eq!(statements.len(), 2);
+        assert_eq!(statements[0].kind, SyntaxKind::FunctionDeclaration);
+        assert_eq!(statements[1].kind, SyntaxKind::FunctionDeclaration);
+
+        // The first (overload) should have Reparsed flag and no body
+        assert!(statements[0].flags.contains(NodeFlags::Reparsed));
+        match &statements[0].data {
+            NodeData::FunctionDeclaration(d) => {
+                assert!(d.body.is_none(), "overload signature should have no body");
+            }
+            _ => panic!("expected FunctionDeclaration"),
+        }
+    }
+
+    #[test]
+    fn test_integration_no_jsdoc_unchanged() {
+        // Source file without JSDoc should have the same number of statements
+        let text = "let x = 1;\nlet y = 2;\n";
+        let (file, _diags) = parse_source(text);
+        let statements = match &file.node.data {
+            NodeData::SourceFile(d) => &d.statements.nodes,
+            _ => panic!("expected SourceFile"),
+        };
+        assert_eq!(statements.len(), 2, "no JSDoc, no reparsed nodes");
+    }
+
+    #[test]
+    fn test_integration_hosted_tags_only_unchanged() {
+        // JSDoc with only hosted tags (@param, @returns) should not add statements
+        let text = r#"
+/**
+ * @param {string} x
+ * @returns {number}
+ */
+function foo(x) { return 42; }
+"#;
+        let (file, _diags) = parse_source(text);
+        let statements = match &file.node.data {
+            NodeData::SourceFile(d) => &d.statements.nodes,
+            _ => panic!("expected SourceFile"),
+        };
+        assert_eq!(
+            statements.len(),
+            1,
+            "hosted tags only, no new statements"
+        );
     }
 }

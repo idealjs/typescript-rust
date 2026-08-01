@@ -588,7 +588,13 @@ parser 侧映射到 `UNKNOWN_REGULAR_EXPRESSION_FLAG`/`DUPLICATE_REGULAR_EXPRESS
   **遗留**：hosted tag mutation（`@type`/`@param`/`@return`/`@readonly` 等
   修改宿主节点）需 mutable AST 重建，延后；JSDoc parser 的 `@typedef {Object}`
   + `@property` → JSDocTypeLiteral 与 `@import` 完整解析为 P2.7 scope。
-- [ ] `@typedef` JSDoc → type alias 节点追加到 statements。
+- [x] `@typedef` JSDoc → type alias 节点追加到 statements。`apply_jsdoc_reparser`
+  后处理步骤在 `parse_source_file_text_with_diagnostics` 中调用：遍历每个
+  statement，resolve JSDoc（lazy + cached），调用 `reparse_tags` 生成新声明
+  节点，插入到原 statement 之前。当有 reparsed 节点时重建 SourceFile node
+  （immutable AST，需 rebuild statement list）。5 个集成测试覆盖 typedef
+  prepended、typedef namespace prepended、overload prepended、无 JSDoc 不变、
+  hosted-tags-only 不变。全量 lib test：888 passed, 0 failed。
 - [x] `reparseTopLevelAwait`：外部模块 + `possibleAwaitSpans` 重解析。
   **不需要迁移**：Rust scanner 始终将 `await` 扫描为 `AwaitKeyword`（不像 Go
   scanner 在非 AwaitContext 时扫描为 Identifier），因此 top-level `await`
