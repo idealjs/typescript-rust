@@ -1274,7 +1274,25 @@ Go 参考：`internal/module`、`internal/packagejson`、`internal/bundled`、
 Rust 现状：`src/module/mod.rs`、`src/packagejson/mod.rs`、`src/bundled/mod.rs`、
 `src/tspath/mod.rs`。
 
-- [ ] 对齐 node/module resolution：classic、node10、node16、nodenext、bundler。
+- [x] **P5.1 Module resolution infrastructure**（已完成）：port `Resolver` struct +
+  `ResolutionHost` trait（`fs` + `get_current_directory`）+ `ModuleResolutionCache`
+  （first-writer-wins）/ `TypeRefDirectiveResolutionCache`（last-writer-wins）+
+  `Extensions` bitfield（TypeScript | JavaScript | Declaration | JSON，`IMPLEMENTATION_FILES`
+  组合）+ `get_effective_type_roots`（typeRoots from config or default
+  `<cwd>/node_modules/@types`）+ `ResolutionState`（extensions/features/esmMode/conditions
+  从 module resolution kind 推导）+ `get_conditions` helper。7 单测。948 lib tests。
+- [x] **P5.2 Relative path resolution**（已完成）：port 完整相对路径解析链：
+  `normalize_path_for_cjs_resolution`（combine + normalize + trailing separator for
+  `.`/`..`）、`node_load_module_by_relative_name`（file resolution then directory
+  resolution，ESM mode 跳过 directory lookup）、`load_module_from_file`（extension
+  replacement `.js`→`.ts` then extension appending `.→.ts`，CJS only）、
+  `try_adding_extensions`（完整 extension-priority table：`.mjs`/`.mts`/`.d.mts`、
+  `.cjs`/`.cts`/`.d.cts`、`.json`、`.tsx`/`.jsx`、`.ts`/`.d.ts`/`.js`、空 extensionless、
+  arbitrary `.d.<ext>.ts`）、`try_extension`、`try_file`（含 moduleSuffixes）。
+  8 单测。956 lib tests。
+- [ ] 对齐 node/module resolution：classic、node10、node16、nodenext、bundler
+  （**P5.1/P5.2 完成 infrastructure + 相对路径解析；node_modules walk + package.json
+  解析待续**）。
 - [ ] 对齐 `paths`、`baseUrl`、`rootDirs`、`typeRoots`、`types`。
 - [ ] 对齐 package `exports`、`imports`、`typesVersions`、`type`。
 - [ ] 对齐 bundled libs 的加载方式和版本。
