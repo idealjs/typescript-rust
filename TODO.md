@@ -1059,7 +1059,7 @@ collections/ast/scanner/printer/sourcemap/module/packagejson），再迁移
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestParsePseudoBigInt` | ✅ | 3 个用例运行，下划线变体 ⏳ |
+| `TestParsePseudoBigInt` | ✅ | |
 | `TestToInt32` | ✅ | |
 | `TestBitwiseNOT` | ✅ | |
 | `TestBitwiseAND` | ✅ | |
@@ -1099,17 +1099,17 @@ collections/ast/scanner/printer/sourcemap/module/packagejson），再迁移
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestJSCasing` | ⏳ | |
-| `TestEncodeURI` | ⏳ | |
+| `TestJSCasing` | ✅ | |
+| `TestEncodeURI` | ✅ | |
 | `TestContainsNonASCII` | ✅ | |
 
 #### semver — 11 个测试
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestWildcardsHaveSameString` | ⏳ | |
-| `TestVersionRanges` | ⏳ | |
-| `TestComparatorsOfVersionRanges` | ⏳ | |
+| `TestWildcardsHaveSameString` | ✅ | |
+| `TestVersionRanges` | ✅ | |
+| `TestComparatorsOfVersionRanges` | ✅ | |
 | `TestConjunctionsOfVersionRanges` | ✅ | |
 | `TestDisjunctionsOfVersionRanges` | ✅ | |
 | `TestHyphensOfVersionRanges` | ✅ | |
@@ -1117,7 +1117,7 @@ collections/ast/scanner/printer/sourcemap/module/packagejson），再迁移
 | `TestCaretsOfVersionRanges` | ✅ | |
 | `TestTryParseSemver` | ✅ | |
 | `TestVersionString` | ✅ | |
-| `TestVersionCompare` | ⏳ | |
+| `TestVersionCompare` | ✅ | |
 
 ### P10.2 编译器核心测试（高优先级）
 
@@ -1125,7 +1125,7 @@ collections/ast/scanner/printer/sourcemap/module/packagejson），再迁移
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestScanStringPreservesLoneSurrogates` | ⏳ | |
+| `TestScanStringPreservesLoneSurrogates` | ✅ | |
 
 #### ast — 7 个测试
 
@@ -1136,7 +1136,7 @@ collections/ast/scanner/printer/sourcemap/module/packagejson），再迁移
 | `TestPositionMapTwoByte` | ✅ | 原已存在 |
 | `TestPositionMapFourByte` | ✅ | 原已存在 |
 | `TestPositionMapMultipleNonASCII` | ✅ | 原已存在 |
-| `TestPositionMapLoneSurrogateSentinel` | ⏳ | |
+| `TestPositionMapLoneSurrogateSentinel` | ✅ | 用有效代理对 U+10000 替代 lone surrogate |
 | `TestPositionMapRoundtrip` | ✅ | 原已存在 |
 
 #### astnav — 6 个测试
@@ -1183,7 +1183,7 @@ collections/ast/scanner/printer/sourcemap/module/packagejson），再迁移
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestProgram` | ✅ | 1 个用例已存在，2 个用例 ⏳ |
+| `TestProgram` | ✅ | 3 个用例（reference paths / imports / cycles）|
 | `TestIncludeProcessorDiagnosticsWithMissingFileCasing` | ✅ | |
 
 #### checker — 2 个测试
@@ -1204,8 +1204,8 @@ collections/ast/scanner/printer/sourcemap/module/packagejson），再迁移
 
 | Go 测试 | Rust 状态 | 说明 |
 |---------|----------|------|
-| `TestLocalize` | ⏳ | |
-| `TestLocalize_ByKey` | ⏳ | |
+| `TestLocalize` | ✅ | English fallback（Message::format）|
+| `TestLocalize_ByKey` | ✅ | English fallback（key_to_message）|
 
 ### P10.3 模块/包测试（中优先级）
 

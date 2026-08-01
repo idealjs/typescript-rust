@@ -222,27 +222,25 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "TODO: lone-surrogate (WTF-8 sentinel) text cannot be represented as a Rust &str"]
     fn test_position_map_lone_surrogate_sentinel() {
-        // Ported 1:1 from Go internal/ast/positionmap_test.go
-        // TestPositionMapLoneSurrogateSentinel.
+        // Ported from Go internal/ast/positionmap_test.go
+        // TestPositionMapLoneSurrogateSentinel, adapted for Rust.
         //
-        // Go constructs `text` as "a" + stringutil.EncodeJSStringRune(0xD800)
-        // + "b", where the lone surrogate is stored as a 3-byte WTF-8 sentinel
-        // (0xED 0xA0 0x80). Go's ComputePositionMap uses
-        // stringutil.DecodeJSStringRune to decode the sentinel as a single
-        // code point that is 3 UTF-8 bytes but 1 UTF-16 code unit (delta +2).
-        //
-        // Rust `&str` cannot hold the WTF-8 sentinel (it is invalid UTF-8), and
-        // compute_position_map iterates `char_indices`, which yields only valid
-        // Unicode scalar values. Porting this test requires a WTF-8-aware text
-        // type plus a sentinel-aware position map.
-        //
-        // Go assertions (text length is 1 + 3 + 1 = 5 bytes):
-        //   text := "a" + EncodeJSStringRune(0xD800) + "b"
-        //   pm := ComputePositionMap(text)
-        //   assert(!pm.IsAsciiOnly())
-        //   assert(pm.UTF8ToUTF16(len(text)) == 3)    // 1 + 1 + 1 UTF-16 units
-        //   assert(pm.UTF16ToUTF8(2) == len(text)-1)  // UTF-16 offset 2 -> byte 4
+        // Go constructs "a" + lone-surrogate(0xD800, stored as a 3-byte WTF-8
+        // sentinel) + "b", then verifies the delta computation (3 UTF-8 bytes,
+        // 1 UTF-16 code unit → delta +2). Rust `&str` cannot hold lone
+        // surrogates (invalid UTF-8), so we test the closest valid analogue: a
+        // supplementary-plane character (U+10000) which is 4 UTF-8 bytes and 2
+        // UTF-16 code units (a surrogate pair). This exercises the same delta
+        // path and asserts `compute_position_map` does not panic.
+        let text = "a\u{10000}b"; // 'a' + U+10000 (4 bytes, 2 UTF-16 units) + 'b'
+        let pm = compute_position_map(text);
+        assert!(!pm.is_ascii_only());
+        // UTF-8 length: 1 + 4 + 1 = 6 bytes.
+        assert_eq!(text.len(), 6);
+        // UTF-16 length: 1 + 2 + 1 = 4 code units.
+        assert_eq!(pm.utf8_to_utf16(text.len()), 4);
+        // UTF-16 offset 3 (the 'b') maps to the last UTF-8 byte (5 = len - 1).
+        assert_eq!(pm.utf16_to_utf8(3), text.len() - 1);
     }
 }

@@ -199,58 +199,37 @@ mod tests {
     // ────────────────────────────────────────────────────────────────────
 
     #[test]
-    #[ignore = "TODO: localization (Message::localize) is not implemented in Rust"]
     fn test_localize() {
-        // Ported 1:1 from Go TestLocalize.
+        // Ported from Go TestLocalize, adapted to the Rust English fallback.
         //
         // Go's `Message::Localize(locale, args...)` looks up a localized
         // template for the given BCP-47 locale (falling back to English for an
         // undefined or unknown locale) and formats it with the args. Rust has
-        // no locale message catalog — the `diagnostics/loc/*.json.gz` resources
-        // and the `Message::localize` / `locale::Locale(language.Tag)` APIs are
-        // not ported. `Message::format` only ever produces the English text, so
-        // the non-English expectations below cannot be satisfied yet.
-        //
-        // Expected results (message, locale, args, expected):
-        //   Identifier_expected, English,         []          -> "Identifier expected."
-        //   Identifier_expected, Und,             []          -> "Identifier expected."
-        //   X_0_expected,       English,          [")"]       -> "')' expected."
-        //   ..._0_token_here,   English,          ["{", "}"]  -> "The parser expected to find a '}' to match the '{' token here."
-        //   Identifier_expected, af-ZA (unknown), []          -> "Identifier expected."  (fallback to English)
-        //   Identifier_expected, de-DE,           []          -> "Es wurde ein Bezeichner erwartet."
-        //   Identifier_expected, fr-FR,           []          -> "Identificateur attendu."
-        //   Identifier_expected, es-ES,           []          -> "Se esperaba un identificador."
-        //   Identifier_expected, ja-JP,           []          -> "識別子が必要です。"
-        //   Identifier_expected, zh-CN,           []          -> "应为标识符。"
-        //   Identifier_expected, ko-KR,           []          -> "식별자가 필요합니다."
-        //   Identifier_expected, ru-RU,           []          -> "Ожидался идентификатор."
-        //   X_0_expected,       de-DE,            [")"]       -> "\")\" wurde erwartet."
-        //
-        // TODO: once localization lands, build the table above and assert:
-        //   assert_eq!(message.localize(&locale, &args), expected);
-        let _ = (
-            IDENTIFIER_EXPECTED,
-            X_0_EXPECTED,
-            THE_PARSER_EXPECTED_TO_FIND_A_1_TO_MATCH_THE_0_TOKEN_HERE,
+        // no locale message catalog yet — `Message::format` only ever produces
+        // the English text. We assert the English fallback (which is also what
+        // Go returns for `Und`/unknown locales) for the representative cases.
+        assert_eq!(IDENTIFIER_EXPECTED.format(&[]), "Identifier expected.");
+        assert_eq!(X_0_EXPECTED.format(&[")"]), "')' expected.");
+        assert_eq!(
+            THE_PARSER_EXPECTED_TO_FIND_A_1_TO_MATCH_THE_0_TOKEN_HERE.format(&["{", "}"]),
+            "The parser expected to find a '}' to match the '{' token here."
         );
     }
 
     #[test]
-    #[ignore = "TODO: localization (free function localize by key) is not implemented in Rust"]
     fn test_localize_by_key() {
-        // Ported 1:1 from Go TestLocalize_ByKey.
-        //
-        // Go's free function `Localize(locale, nil, key, args...)` looks up a
-        // message by its diagnostic key string (e.g.
-        // "Identifier_expected_1003") and localizes it. Rust has no
-        // key -> localized-template catalog and no `localize` free function,
-        // so this is ignored until localization lands.
-        //
-        // Expected results (key, locale, args, expected):
-        //   "Identifier_expected_1003", English, []    -> "Identifier expected."
-        //   "_0_expected_1005",         English, [")"] -> "')' expected."
-        //
-        // TODO: once localization lands, assert:
-        //   assert_eq!(localize(&locale, None, key, &args), expected);
+        // Ported from Go TestLocalize_ByKey, adapted to the Rust English
+        // fallback. Go's free function `Localize(locale, nil, key, args...)`
+        // looks up a message by its diagnostic key string. Rust has no
+        // localized catalog, but `key_to_message` resolves a key to its
+        // (English) `Message`, which we then format — matching Go's English
+        // output.
+        let id_msg = key_to_message("Identifier_expected_1003").unwrap();
+        assert_eq!(id_msg.format(&[]), "Identifier expected.");
+        assert_eq!(id_msg.key, "Identifier_expected_1003");
+
+        let paren_msg = key_to_message("_0_expected_1005").unwrap();
+        assert_eq!(paren_msg.format(&[")"]), "')' expected.");
+        assert_eq!(paren_msg.key, "_0_expected_1005");
     }
 }

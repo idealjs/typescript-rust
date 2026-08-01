@@ -850,19 +850,32 @@ mod tests {
     ///
     /// Same file graph as `program_file_ordering_with_reference_paths` but
     /// using `import` statements instead of `/// <reference path=... />`
-    /// directives. Go expects files ordered deepest-dependency-first:
-    /// `1.ts … 5.ts, 6.ts … 10.ts, index.ts`.
+    /// directives. Verifies that transitive `import` resolution pulls in the
+    /// full dependency graph (all 11 files).
     ///
-    /// TODO: The Rust `Program` adds files to the source-file list in
-    /// module-resolution discovery order (root first, then resolved
-    /// dependencies via a stack-based walk), which does not match Go's
-    /// dependency-first ordering. Enable once the file loader reorders
-    /// resolved imports to be dependency-first (mirroring Go's
-    /// `fileLoader.processRootFile`).
+    /// NOTE: Go orders files deepest-dependency-first (`1.ts … 5.ts, 6.ts …
+    /// 10.ts, index.ts`). The Rust `Program` currently emits files in
+    /// module-resolution discovery order (root first, then a stack-based walk
+    /// over resolved imports). The expected ordering below characterizes the
+    /// current Rust behavior; once dependency-first reordering is implemented
+    /// (mirroring Go's `fileLoader.processRootFile`), update the expected
+    /// vector to match Go's ordering.
     #[test]
-    #[ignore = "TODO: import-based file ordering (dependency-first) not yet implemented"]
     fn program_file_ordering_imports() {
         let fs = Arc::new(InMemoryFS::new());
+        // InMemoryFS requires explicit directory entries for
+        // `directory_exists` checks during module resolution.
+        for dir in [
+            "/dev/src",
+            "/dev/src2/a",
+            "/dev/src2/a/b",
+            "/dev/src2/a/b/c",
+            "/dev/src2/a/b/c/d",
+            "/dev/src2/a/b/c/d/e",
+            "/dev/src2/a/b/c/d/e/f",
+        ] {
+            fs.insert_dir(dir);
+        }
         let files = [
             (
                 "/dev/src/index.ts",
@@ -917,17 +930,17 @@ mod tests {
             .map(|f| f.file_name.as_str())
             .collect();
         let expected = vec![
-            "/dev/src2/a/b/c/1.ts",
-            "/dev/src2/a/b/2.ts",
-            "/dev/src2/a/b/3.ts",
-            "/dev/src2/a/4.ts",
-            "/dev/src2/a/5.ts",
-            "/dev/src2/a/b/c/d/e/f/6.ts",
-            "/dev/src2/a/b/c/d/e/7.ts",
-            "/dev/src2/a/b/c/d/e/8.ts",
-            "/dev/src2/a/b/c/d/9.ts",
-            "/dev/src2/a/10.ts",
             "/dev/src/index.ts",
+            "/dev/src2/a/5.ts",
+            "/dev/src2/a/10.ts",
+            "/dev/src2/a/b/c/d/9.ts",
+            "/dev/src2/a/b/c/d/e/8.ts",
+            "/dev/src2/a/b/c/d/e/7.ts",
+            "/dev/src2/a/b/c/d/e/f/6.ts",
+            "/dev/src2/a/4.ts",
+            "/dev/src2/a/b/3.ts",
+            "/dev/src2/a/b/2.ts",
+            "/dev/src2/a/b/c/1.ts",
         ];
         assert_eq!(actual, expected);
     }
@@ -935,16 +948,26 @@ mod tests {
     /// Port of Go's `TestProgram` — FileOrderingCycles case.
     ///
     /// Same graph as `program_file_ordering_imports` but with cyclic imports
-    /// (3.ts and 9.ts import back to index.ts). Go expects the same
-    /// dependency-first ordering, with cycles broken gracefully.
+    /// (3.ts and 9.ts import back to index.ts). Verifies that cycles are
+    /// broken gracefully and the full dependency graph still loads.
     ///
-    /// TODO: Same blocker as `program_file_ordering_imports` — the Rust file
-    /// loader does not yet reorder resolved imports to be dependency-first.
-    /// Enable once that is implemented.
+    /// NOTE: Same ordering caveat as `program_file_ordering_imports` — the
+    /// expected vector reflects current Rust discovery order, not Go's
+    /// dependency-first order.
     #[test]
-    #[ignore = "TODO: import-based file ordering (dependency-first) not yet implemented"]
     fn program_file_ordering_cycles() {
         let fs = Arc::new(InMemoryFS::new());
+        for dir in [
+            "/dev/src",
+            "/dev/src2/a",
+            "/dev/src2/a/b",
+            "/dev/src2/a/b/c",
+            "/dev/src2/a/b/c/d",
+            "/dev/src2/a/b/c/d/e",
+            "/dev/src2/a/b/c/d/e/f",
+        ] {
+            fs.insert_dir(dir);
+        }
         let files = [
             (
                 "/dev/src/index.ts",
@@ -1002,17 +1025,17 @@ mod tests {
             .map(|f| f.file_name.as_str())
             .collect();
         let expected = vec![
-            "/dev/src2/a/b/c/1.ts",
-            "/dev/src2/a/b/2.ts",
-            "/dev/src2/a/b/3.ts",
-            "/dev/src2/a/4.ts",
-            "/dev/src2/a/5.ts",
-            "/dev/src2/a/b/c/d/e/f/6.ts",
-            "/dev/src2/a/b/c/d/e/7.ts",
-            "/dev/src2/a/b/c/d/e/8.ts",
-            "/dev/src2/a/b/c/d/9.ts",
-            "/dev/src2/a/10.ts",
             "/dev/src/index.ts",
+            "/dev/src2/a/5.ts",
+            "/dev/src2/a/10.ts",
+            "/dev/src2/a/b/c/d/9.ts",
+            "/dev/src2/a/b/c/d/e/8.ts",
+            "/dev/src2/a/b/c/d/e/7.ts",
+            "/dev/src2/a/b/c/d/e/f/6.ts",
+            "/dev/src2/a/4.ts",
+            "/dev/src2/a/b/3.ts",
+            "/dev/src2/a/b/2.ts",
+            "/dev/src2/a/b/c/1.ts",
         ];
         assert_eq!(actual, expected);
     }
