@@ -791,4 +791,66 @@ mod tests {
         let refs = extract_reference_path_directives(text, "/dev/src2/a/5.ts");
         assert_eq!(refs, vec!["/dev/src2/a/b/3.ts"]);
     }
+
+    // ── Bundled lib smoke tests (P2.9d) ─────────────────────────────────
+    // Verify that the historically-troublesome bundled lib files parse
+    // with zero parser diagnostics. Prior to P2.4/P2.5 these produced
+    // thousands of TS1003 errors.
+
+    fn parse_bundled_lib(lib_name: &str) -> Vec<crate::parser::ParserDiagnostic> {
+        let content = crate::bundled::lib_contents(lib_name)
+            .unwrap_or_else(|| panic!("bundled lib '{lib_name}' not found"));
+        let (_file, diags) = crate::parser::Parser::parse_source_file_text_with_diagnostics(
+            &format!("/bundled/{lib_name}"),
+            content.to_string(),
+        );
+        diags
+    }
+
+    fn assert_no_parser_errors(lib_name: &str, diags: &[crate::parser::ParserDiagnostic]) {
+        let errors: Vec<_> = diags
+            .iter()
+            .filter(|d| d.message.category == crate::diagnostics::Category::Error)
+            .collect();
+        assert!(
+            errors.is_empty(),
+            "{lib_name} should parse with zero errors, got {}:\n{}",
+            errors.len(),
+            errors
+                .iter()
+                .map(|d| format!("  {:?}: {}", d.message.code, d.message.text))
+                .collect::<Vec<_>>()
+                .join("\n")
+        );
+    }
+
+    #[test]
+    fn bundled_lib_es2015_iterable_parses_without_errors() {
+        let diags = parse_bundled_lib("lib.es2015.iterable.d.ts");
+        assert_no_parser_errors("lib.es2015.iterable.d.ts", &diags);
+    }
+
+    #[test]
+    fn bundled_lib_dom_parses_without_errors() {
+        let diags = parse_bundled_lib("lib.dom.d.ts");
+        assert_no_parser_errors("lib.dom.d.ts", &diags);
+    }
+
+    #[test]
+    fn bundled_lib_es5_parses_without_errors() {
+        let diags = parse_bundled_lib("lib.es5.d.ts");
+        assert_no_parser_errors("lib.es5.d.ts", &diags);
+    }
+
+    #[test]
+    fn bundled_lib_es2015_collection_parses_without_errors() {
+        let diags = parse_bundled_lib("lib.es2015.collection.d.ts");
+        assert_no_parser_errors("lib.es2015.collection.d.ts", &diags);
+    }
+
+    #[test]
+    fn bundled_lib_decorators_parses_without_errors() {
+        let diags = parse_bundled_lib("lib.decorators.d.ts");
+        assert_no_parser_errors("lib.decorators.d.ts", &diags);
+    }
 }

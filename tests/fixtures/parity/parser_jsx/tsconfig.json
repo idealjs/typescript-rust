@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "allowJs": true,
+    "checkJs": false,
+    "jsx": "react",
+    "noEmitOnError": true
+  },
+  "include": ["src"]
+}

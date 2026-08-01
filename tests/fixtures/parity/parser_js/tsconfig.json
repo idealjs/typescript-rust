@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "allowJs": true,
+    "checkJs": false,
+    "noEmitOnError": true
+  },
+  "include": ["src"]
+}

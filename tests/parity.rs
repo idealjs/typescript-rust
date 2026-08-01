@@ -290,6 +290,33 @@ const CASES: &[Case] = &[
         stdout_contains: &[],
         skip_oracle: false,
     },
+    Case {
+        name: "parser_js",
+        // JavaScript parsing: function declarations, var/let/const, object
+        // literals, prototype chains, template literals. allowJs:true,
+        // checkJs:false. NOTE: Rust checker type-checks .js files even with
+        // checkJs:false (gap), producing TS2339 for `Animal.prototype`.
+        // expect_success = false + skip_oracle until checkJs:false is
+        // honored.
+        args: &[],
+        expect_success: false,
+        expected_files: &[],
+        stdout_contains: &[],
+        skip_oracle: true,
+    },
+    Case {
+        name: "parser_jsx",
+        // JSX in .jsx: function components, arrow function components,
+        // fragments, conditional rendering, event handlers. jsx:react.
+        // NOTE: Rust checker lacks JSX namespace types, producing checker
+        // errors. expect_success = false + skip_oracle until JSX lib support
+        // lands (same as parser_tsx).
+        args: &[],
+        expect_success: false,
+        expected_files: &[],
+        stdout_contains: &[],
+        skip_oracle: true,
+    },
 ];
 
 #[test]

@@ -644,7 +644,7 @@ parser 侧映射到 `UNKNOWN_REGULAR_EXPRESSION_FLAG`/`DUPLICATE_REGULAR_EXPRESS
   映射 + `abortParsingListOrMoveToNextToken`）、`is_list_element` 完整对齐
   Go、`is_start_of_type` 补齐缺失 token、语法错误位置 UTF-16 offset 对齐。
 
-### P2.9 Parser parity fixtures（a/b/c 已完成）
+### P2.9 Parser parity fixtures（a/b/c/d 已完成）
 
 已完成：bundled libs 全部 100+ 零错误解析（基线 3347 → 0）。
 
@@ -661,8 +661,17 @@ parser 侧映射到 `UNKNOWN_REGULAR_EXPRESSION_FLAG`/`DUPLICATE_REGULAR_EXPRESS
   `parser_enums`/`parser_conditional_types` exit 0 对齐）。
 - [x] 典型 `.tsx` JSX 解析对齐（`parser_tsx` parser 正确解析；checker JSX namespace
   types 缺失标 `skip_oracle`，待 P3 checker lib 支持后移除）。
-- [ ] 典型 `.js`/`.jsx` 对齐。
-- [ ] bundled lib smoke：`lib.es2015.iterable.d.ts`、`lib.dom.d.ts` 错误数验证。
+- [x] 典型 `.js`/`.jsx` 对齐。新增 `parser_js`（CommonJS require、function
+  declaration、prototype chain、var hoisting、template literal、array/object）
+  与 `parser_jsx`（function/arrow component、fragment、event handler）parity
+  fixture。`allowJs:true` 选项接入 `is_supported_source_file_ex`，include glob
+  扩展现在正确包含 `.js`/`.jsx`/`.mjs`/`.cjs` 文件。`parser_js` 标 `skip_oracle`
+  因 checker 在 `checkJs:false` 时仍类型检查 `.js` 文件（gap，待后续修复）；
+  `parser_jsx` 标 `skip_oracle` 因 JSX namespace types 缺失。
+- [x] bundled lib smoke：`lib.es2015.iterable.d.ts`、`lib.dom.d.ts`、
+  `lib.es5.d.ts`、`lib.es2015.collection.d.ts`、`lib.decorators.d.ts` 错误数
+  验证。5 个 compiler 单测直接解析 bundled lib 内容并断言零 parser error，
+  覆盖 record.warn 基线中错误数最多的 5 个 lib 文件。
 
 ### P2.10 位置信息一致性（已全部完成）
 

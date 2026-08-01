@@ -3176,7 +3176,7 @@ fn expand_file_names(
             if is_excluded(&path, &exclude_globs, &exclude_dirs) {
                 continue;
             }
-            if !is_supported_source_file(&path) {
+            if !is_supported_source_file_ex(&path, options.allow_js.is_true()) {
                 continue;
             }
             add(&path, &mut result, &mut seen);
@@ -3200,11 +3200,24 @@ fn path_is_under_dir(path: &str, dir: &str) -> bool {
 }
 
 fn is_supported_source_file(path: &str) -> bool {
+    is_supported_source_file_ex(path, false)
+}
+
+/// Mirrors Go's `isSupportedSourceFile` with `allowJs`/`checkJs` plumbing.
+/// When `allow_js` is true, `.js`/`.jsx`/`.mjs`/`.cjs` files are included.
+/// When `allow_js` is false, only TypeScript extensions are matched.
+fn is_supported_source_file_ex(path: &str, allow_js: bool) -> bool {
     let ext = path.rfind('.').map(|i| &path[i..]).unwrap_or("");
-    matches!(
+    if matches!(
         ext,
         ".ts" | ".tsx" | ".d.ts" | ".mts" | ".cts" | ".d.mts" | ".d.cts"
-    )
+    ) {
+        return true;
+    }
+    if allow_js && matches!(ext, ".js" | ".jsx" | ".mjs" | ".cjs") {
+        return true;
+    }
+    false
 }
 
 /// Match an include glob spec against the filesystem, returning matching file paths.
