@@ -63,10 +63,9 @@ npm install && npm run build
 
 ## 当前进度快照（2026-08-01）
 
-测试基线：`cargo test` 通过（862 个 lib 单测 + parity smoke 含 6 个 parser
-parity fixture + 501 个 checker parity）。上轮完成 P2.7 JSDoc parser；本轮
-完成 P2.9a/b/c parser parity fixtures（6 个 fixture：syntax_error/tsx/generics/
-decorators/enums/conditional_types）。
+测试基线：`cargo test` 通过（941 个 lib 单测 + parity smoke 含 30 个 fixture
++ oracle comparison）。本轮完成 P4.5 declaration emit（.d.ts 生成）+ P4.6
+additional emit parity fixtures（declaration_dir/enum_emit/namespace_emit）。
 
 | 模块 | Rust 行数（实测） | Go 行数 | 完成度 | 备注 |
 |------|-----------|---------|--------|------|
@@ -1208,6 +1207,29 @@ Rust 现状：`src/compiler/mod.rs`、`src/printer/mod.rs`、`src/emitter/mod.rs
   剥离 / mappings 解码验证 / 默认不生成 / CommonJS use strict 不映射 / write_file
   双文件。`source_map` parity case（`skip_oracle=true`，因 text-slice emit 与 Go
   printer 的映射点不同）。929 lib + parity smoke 全通过。
+- [x] **P4.5 Declaration emit**（已完成）：emitter 新增 `emit_declaration_text`
+  遍历 AST 保留声明语句（function/variable/class/interface/type alias/enum/
+  import/export/module），剥离实现细节（function body → `;`、variable
+  initializer cut when type annotation present）。`collect_export_modifier_cuts`
+  复用 P4.3 逻辑处理 `export`/`default` 修饰符——`emit_declaration_text` 在
+  `declare` 之前重新发射 `export `/`default ` 使顺序为 `export declare function`
+  （而非 `declare export function`），解决 parser 中 VariableStatement 的
+  `pos()` 包含 `export` 关键字但 FunctionDeclaration 不包含的不一致。
+  FunctionDeclaration body 剥离后从 `body.end()` 反向扫描找到实际 `}` 位置，
+  发射 `}` 与 `body.end()` 之间的空白（保留语句间换行，因 parser 的 `end()`
+  包含 trailing trivia）。`get_dts_output_path` 按 `declarationDir` > `outDir` >
+  source-adjacent 优先级计算 .d.ts 路径（含 .d.mts/.d.cts 扩展名）。
+  `emit_source_file_with_common_dir` 在 `options.get_emit_declarations()` 时
+  发射 .d.ts；`emitDeclarationOnly` 抑制 JS emit。12 个 emitter 单测覆盖
+  function body 剥离/export 修饰符/variable initializer 剥离/interface 与 type
+  alias 透传/enum declare/runtime 语句排除/多声明混合/class declare/write_file
+  集成/emitDeclarationOnly 抑制。`declaration_emit` parity fixture（4 个 export
+  声明验证 .js + .d.ts 输出，`skip_oracle=true`）。941 lib + parity smoke 全通过。
+- [x] **P4.6 Additional emit parity fixtures**（已完成）：新增 3 个 emit parity
+  fixture：`declaration_dir`（`declarationDir: "dist/types"` 将 .d.ts 放到独立
+  目录，`skip_oracle=true`）、`enum_emit`（numeric/string enum 原样发射，
+  oracle 对比通过）、`namespace_emit`（namespace with exported function/const
+  原样发射，oracle 对比通过）。941 lib + parity smoke + oracle comparison 全通过。
 - [ ] 对齐 output path：`rootDir`、`outDir`、`declarationDir`、mixed JS/TS。
 - [ ] 补齐 transformer 体系或明确替代设计。
 - [ ] 扩充 parity fixtures：CommonJS / ES modules / JSX preserve/react/react-jsx /
