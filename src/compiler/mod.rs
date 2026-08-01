@@ -305,7 +305,11 @@ impl Program {
     /// picked up.
     pub fn get_semantic_diagnostics(self: &Arc<Self>) -> Vec<Diagnostic> {
         let mut checker = self.build_checker();
-        checker.get_semantic_diagnostics()
+        let mut diagnostics = checker.get_semantic_diagnostics();
+        // Surface binder-level diagnostics (e.g. TS2451 block-scoped
+        // redeclarations) alongside the checker's semantic diagnostics.
+        diagnostics.extend(self.symbol_map.binder_diagnostics.iter().cloned());
+        diagnostics
     }
 
     /// Build a fully-initialized `Checker` for this program, with all source

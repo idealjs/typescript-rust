@@ -8,6 +8,7 @@
 //! we use side tables (`NodeSymbolMap`) keyed by node ID.
 
 use crate::ast::*;
+use crate::diagnostics::messages_generated::CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0;
 use std::sync::Arc;
 
 /// The binder.
@@ -282,8 +283,25 @@ impl Binder {
                 return existing;
             }
             // Non-mergeable redeclaration: fall through to create a new
-            // symbol (overwrites the previous entry). Real TS would emit a
-            // TS2300/TS2640 duplicate-identifier error here.
+            // symbol (overwrites the previous entry). When both the existing
+            // symbol and the new declaration are block-scoped variables
+            // (let/const), report TS2451 ("Cannot redeclare block-scoped
+            // variable"). Mirrors Go's `declareSymbol` BlockScoped collision
+            // check. The binder assigns `BlockScopedVariable` to all variable
+            // declarations (including `var`), so we additionally verify the
+            // new declaration's keyword is `let`/`const` to avoid a false
+            // positive on `var x; var x;`.
+            if existing.flags.contains(SymbolFlags::BlockScopedVariable)
+                && includes.contains(SymbolFlags::BlockScopedVariable)
+                && Self::is_let_or_const_declaration(node)
+            {
+                self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                    None,
+                    node.loc,
+                    CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0,
+                    vec![name.clone()],
+                ));
+            }
         }
 
         let symbol = self.new_symbol(includes, name.clone());
@@ -556,6 +574,23 @@ impl Binder {
             return true;
         }
         false
+    }
+
+    /// Whether `node` is a `let`/`const` (block-scoped) variable declaration,
+    /// as opposed to a function-scoped `var`. Used by the TS2451 redeclaration
+    /// check: the binder assigns `BlockScopedVariable` to every variable
+    /// declaration, so the keyword must be inspected explicitly. Non-variable
+    /// declarations (e.g. binding elements) are conservatively treated as
+    /// block-scoped. Mirrors the checker's `is_let_or_const_declaration`.
+    fn is_let_or_const_declaration(node: &Arc<Node>) -> bool {
+        if node.kind == SyntaxKind::VariableDeclaration {
+            if let Some(parent) = node.parent.as_ref() {
+                if parent.kind == SyntaxKind::VariableDeclarationList {
+                    return parent.flags.intersects(NodeFlags::Let | NodeFlags::Const);
+                }
+            }
+        }
+        true
     }
 
     /// Get the combined modifier flags for a node, walking up the

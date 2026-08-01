@@ -6506,3 +6506,341 @@ fn checker_ts18048_property_access_on_possibly_null_union() {
     let diags = check_source("let x: { a: number } | null = { a: 1 };\nx.a;");
     assert_diagnostic_code(&diags, 18048);
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// TS2451: Cannot redeclare block-scoped variable (binder-level check)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_ts2451_const_redeclare() {
+    // Two `const name` in the same scope → TS2451.
+    let diags = check_source("const name = \"Alice\";\nconst name = \"Bob\";");
+    assert_diagnostic_code(&diags, 2451);
+}
+
+#[test]
+fn checker_ts2451_let_redeclare() {
+    // Two `let x` in the same scope → TS2451.
+    let diags = check_source("let x = 1;\nlet x = 2;");
+    assert_diagnostic_code(&diags, 2451);
+}
+
+#[test]
+fn checker_ts2451_let_then_const_redeclare() {
+    // `let x` then `const x` in the same scope → TS2451.
+    let diags = check_source("let x = 1;\nconst x = 2;");
+    assert_diagnostic_code(&diags, 2451);
+}
+
+#[test]
+fn checker_ts2451_const_then_let_redeclare() {
+    // `const x` then `let x` in the same scope → TS2451.
+    let diags = check_source("const x = 1;\nlet x = 2;");
+    assert_diagnostic_code(&diags, 2451);
+}
+
+#[test]
+fn checker_ts2451_triple_redeclare_reports_two() {
+    // Three `let x` → TS2451 reported for the 2nd and 3rd declarations.
+    let diags = check_source("let x = 1;\nlet x = 2;\nlet x = 3;");
+    assert_diagnostic_count(&diags, 2451, 2);
+}
+
+#[test]
+fn checker_ts2451_redeclare_in_separate_blocks_no_error() {
+    // `let x` in two separate block scopes is legal (distinct scopes).
+    let diags = check_source("if (true) { let x = 1; }\nif (true) { let x = 2; }");
+    assert_diagnostic_count(&diags, 2451, 0);
+}
+
+#[test]
+fn checker_ts2451_var_redeclare_no_error() {
+    // `var` is function-scoped and may be redeclared freely → no TS2451.
+    let diags = check_source("var x = 1;\nvar x = 2;");
+    assert_diagnostic_count(&diags, 2451, 0);
+}
+
+#[test]
+fn checker_ts2451_distinct_names_no_error() {
+    // Distinct block-scoped names in the same scope → no TS2451.
+    let diags = check_source("let a = 1;\nlet b = 2;");
+    assert_diagnostic_count(&diags, 2451, 0);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Array methods (with lib.d.ts): the global `Array<T>` interface supplies
+// methods like push/map/filter. These fixtures verify the checker consults it.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_array_push_with_lib_no_error() {
+    let diags = check_source_with_lib("let arr: number[] = [1, 2, 3];\narr.push(4);", false);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_array_map_with_lib_no_error() {
+    let diags = check_source_with_lib(
+        "let arr: number[] = [1, 2, 3];\nlet y = arr.map(x => x);",
+        false,
+    );
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_array_map_without_lib_ts2339() {
+    let diags = check_source("let arr: number[] = [1, 2, 3];\narr.map(x => x);");
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_array_pop_with_lib_no_error() {
+    let diags = check_source_with_lib("let arr: number[] = [1, 2, 3];\narr.pop();", false);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_array_filter_with_lib_no_error() {
+    let diags = check_source_with_lib(
+        "let arr: number[] = [1, 2, 3];\nlet y = arr.filter(x => x > 1);",
+        false,
+    );
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_array_find_with_lib_no_error() {
+    let diags = check_source_with_lib(
+        "let arr: number[] = [1, 2, 3];\nlet y = arr.find(x => x > 1);",
+        false,
+    );
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_array_reduce_with_lib_no_error() {
+    let diags = check_source_with_lib(
+        "let arr: number[] = [1, 2, 3];\nlet y = arr.reduce((a, b) => a + b, 0);",
+        false,
+    );
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_array_forEach_with_lib_no_error() {
+    let diags = check_source_with_lib(
+        "let arr: number[] = [1, 2, 3];\narr.forEach(x => { let z = x; });",
+        false,
+    );
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_array_some_with_lib_no_error() {
+    let diags = check_source_with_lib(
+        "let arr: number[] = [1, 2, 3];\nlet y = arr.some(x => x > 1);",
+        false,
+    );
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_array_every_with_lib_no_error() {
+    let diags = check_source_with_lib(
+        "let arr: number[] = [1, 2, 3];\nlet y = arr.every(x => x > 0);",
+        false,
+    );
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_array_push_without_lib_ts2339() {
+    // Without lib.d.ts, `push` is unknown on a fully-typed array → TS2339.
+    let diags = check_source("let arr: number[] = [1, 2, 3];\narr.push(4);");
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_array_filter_without_lib_ts2339() {
+    let diags = check_source("let arr: number[] = [1, 2, 3];\narr.filter(x => x > 1);");
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_array_includes_without_lib_ts2339() {
+    let diags = check_source("let arr: number[] = [1, 2, 3];\narr.includes(2);");
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_array_reduce_without_lib_ts2339() {
+    let diags = check_source("let arr: number[] = [1, 2, 3];\narr.reduce((a, b) => a + b, 0);");
+    assert_diagnostic_code(&diags, 2339);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// TS2741: Property 'X' is missing in type 'Y' but required in type 'Z'
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_ts2741_fresh_literal_missing_one_property() {
+    // `{ a: 1 }` lacks required `b` → TS2741.
+    let diags = check_source("let x: { a: number; b: string } = { a: 1 };");
+    assert_diagnostic_code(&diags, 2741);
+}
+
+#[test]
+fn checker_ts2741_interface_target_missing_property() {
+    let diags = check_source(
+        "interface P { a: number; b: number; }\n\
+         let x: P = { a: 1 };",
+    );
+    assert_diagnostic_code(&diags, 2741);
+}
+
+#[test]
+fn checker_ts2741_type_alias_target_missing_property() {
+    let diags = check_source(
+        "type P = { a: number; b: number; };\n\
+         let x: P = { a: 1 };",
+    );
+    assert_diagnostic_code(&diags, 2741);
+}
+
+#[test]
+fn checker_ts2741_variable_source_missing_property() {
+    // A non-fresh variable missing a property the target requires → TS2741.
+    let diags = check_source(
+        "let obj = { a: 1 };\n\
+         let y: { a: number; b: number } = obj;",
+    );
+    assert_diagnostic_code(&diags, 2741);
+}
+
+#[test]
+fn checker_ts2739_multiple_missing_properties() {
+    // Two missing properties (`b`, `c`) → TS2739 (the multi-missing form).
+    let diags = check_source("let x: { a: number; b: number; c: number } = { a: 1 };");
+    assert_diagnostic_code(&diags, 2739);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// TS2353: Object literal may only specify known properties
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_ts2353_excess_property_on_type_literal() {
+    // `{ a: 1, b: 2 }` has excess `b` → TS2353.
+    let diags = check_source("let x: { a: number } = { a: 1, b: 2 };");
+    assert_diagnostic_code(&diags, 2353);
+}
+
+#[test]
+fn checker_ts2353_excess_property_on_interface() {
+    let diags = check_source(
+        "interface P { a: number; }\n\
+         let x: P = { a: 1, b: 2 };",
+    );
+    assert_diagnostic_code(&diags, 2353);
+}
+
+#[test]
+fn checker_ts2353_excess_property_on_type_alias() {
+    let diags = check_source(
+        "type P = { a: number; };\n\
+         let x: P = { a: 1, b: 2, c: 3 };",
+    );
+    assert_diagnostic_code(&diags, 2353);
+}
+
+#[test]
+fn checker_ts2353_excess_property_all_required_present() {
+    // All required properties present, plus an extra one → TS2353.
+    let diags = check_source("let x: { a: number; b: number } = { a: 1, b: 2, c: 3 };");
+    assert_diagnostic_code(&diags, 2353);
+}
+
+#[test]
+fn checker_ts2353_no_excess_when_index_signature_present() {
+    // An index signature accepts any extra property → no TS2353.
+    let diags = check_source("let x: { a: number; [k: string]: number } = { a: 1, b: 2 };");
+    assert_diagnostic_count(&diags, 2353, 0);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// TS2448: Block-scoped variable used before declaration (additional scenarios)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_ts2448_let_used_in_initializer_of_another() {
+    // `b` referenced in `a`'s initializer before `b` is declared → TS2448.
+    let diags = check_source("let a = b;\nlet b = 1;");
+    assert_diagnostic_code(&diags, 2448);
+}
+
+#[test]
+fn checker_ts2448_const_used_in_expression_before_declaration() {
+    // `s` referenced before its `const` declaration → TS2448.
+    let diags = check_source("const r = s + 1;\nconst s = 2;");
+    assert_diagnostic_code(&diags, 2448);
+}
+
+#[test]
+fn checker_ts2448_class_instantiation_before_declaration() {
+    // `new C()` before `class C` → TS2448.
+    let diags = check_source("const i = new C();\nclass C {}");
+    assert_diagnostic_code(&diags, 2448);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// TS2454: Variable used before being assigned (additional scenarios)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_ts2454_boolean_uninitialized_used_before_assignment() {
+    // `let v: boolean;` read before assignment → TS2454.
+    let diags = check_source("let v: boolean;\nlet y = v;\nv = true;");
+    assert_diagnostic_code(&diags, 2454);
+}
+
+#[test]
+fn checker_ts2454_annotated_assignment_after_use() {
+    // Reading `v` (typed `number`) before its later assignment → TS2454.
+    let diags = check_source("let v: number;\nconst y: number = v;\nv = 5;");
+    assert_diagnostic_code(&diags, 2454);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// TS18048: 'X' is possibly 'undefined' (additional scenarios)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_ts18048_nullable_via_type_alias() {
+    // A type-aliased object type unioned with `undefined` → TS18048.
+    let diags = check_source(
+        "type Box = { v: number };\n\
+         let x: Box | undefined = { v: 1 };\n\
+         x.v;",
+    );
+    assert_diagnostic_code(&diags, 18048);
+}
+
+#[test]
+fn checker_ts18048_chained_property_access_on_possibly_undefined() {
+    // `x.a.b` where `x` is possibly undefined → TS18048.
+    let diags = check_source(
+        "let x: { a: { b: number } } | undefined = { a: { b: 1 } };\n\
+         x.a.b;",
+    );
+    assert_diagnostic_code(&diags, 18048);
+}
+
+#[test]
+fn checker_ts18048_optional_chain_deep_suppresses_error() {
+    // `x?.a?.b` suppresses TS18048 even when `x` is possibly undefined.
+    let diags = check_source(
+        "let x: { a: { b: number } } | undefined = { a: { b: 1 } };\n\
+         x?.a?.b;",
+    );
+    assert_no_diagnostics(&diags);
+}

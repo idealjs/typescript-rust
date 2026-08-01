@@ -414,6 +414,10 @@ pub struct NodeSymbolMap {
     pub locals: HashMap<u64, SymbolTable>,
     /// Maps expression nodes to their flow nodes.
     pub flow_nodes: HashMap<u64, Arc<FlowNode>>,
+    /// Diagnostics recorded by the binder (e.g. TS2451 block-scoped
+    /// redeclarations). Surfaced through the program's semantic
+    /// diagnostics.
+    pub binder_diagnostics: Vec<super::diagnostic::Diagnostic>,
 }
 
 impl NodeSymbolMap {
