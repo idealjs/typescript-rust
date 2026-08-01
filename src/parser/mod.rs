@@ -4,8 +4,10 @@
 //! The full parser (6800+ lines in Go) is being ported incrementally.
 
 mod jsdoc;
+mod references;
 
 pub use jsdoc::parse_jsdoc_for_node;
+pub use references::{collect_external_module_references, set_external_module_indicator};
 
 use crate::ast::*;
 use crate::core::text::TextRange;
@@ -197,7 +199,8 @@ impl Parser {
             }),
             TextRange::new(pos, end),
         ));
-        let file = SourceFile {
+        let is_declaration_file = crate::tspath::is_declaration_file_name(file_name);
+        let mut file = SourceFile {
             node,
             file_name: file_name.to_string(),
             text,
@@ -207,7 +210,18 @@ impl Parser {
             comment_directives: parser.scanner.comment_directives().to_vec(),
             jsdoc_cache: std::sync::RwLock::new(std::collections::HashMap::new()),
             has_lazy_jsdoc: !matches!(script_kind, ScriptKind::Js | ScriptKind::Jsx),
+            is_declaration_file,
+            imports: Vec::new(),
+            module_augmentations: Vec::new(),
+            ambient_module_names: Vec::new(),
+            external_module_indicator: None,
+            common_js_module_indicator: None,
+            uses_uri_style_node_core_modules: crate::core::tristate::Tristate::Unknown,
         };
+        // Detect external module indicator and collect module references,
+        // mirroring Go's `finishSourceFile` + `collectExternalModuleReferences`.
+        references::set_external_module_indicator(&mut file);
+        references::collect_external_module_references(&mut file);
         (file, parser.diagnostics)
     }
 

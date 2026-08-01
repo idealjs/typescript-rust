@@ -172,6 +172,13 @@ mod tests {
             comment_directives: Vec::new(),
             jsdoc_cache: std::sync::RwLock::new(std::collections::HashMap::new()),
             has_lazy_jsdoc: true,
+            is_declaration_file: false,
+            imports: Vec::new(),
+            module_augmentations: Vec::new(),
+            ambient_module_names: Vec::new(),
+            external_module_indicator: None,
+            common_js_module_indicator: None,
+            uses_uri_style_node_core_modules: crate::core::tristate::Tristate::Unknown,
         })
     }
 

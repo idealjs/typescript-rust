@@ -579,7 +579,18 @@ parser 侧映射到 `UNKNOWN_REGULAR_EXPRESSION_FLAG`/`DUPLICATE_REGULAR_EXPRESS
 - [ ] 迁移 `internal/parser/reparser.go`（748 行）到 `src/parser/reparser.rs`。
 - [ ] `@typedef` JSDoc → type alias 节点追加到 statements。
 - [ ] `reparseTopLevelAwait`：外部模块 + `possibleAwaitSpans` 重解析。
-- [ ] `collectExternalModuleReferences`。
+- [x] `collectExternalModuleReferences`：新增 `src/parser/references.rs`
+  （70 行），`collect_external_module_references` 遍历顶层 statements 收集
+  import/export 模块说明符到 `SourceFile.imports`、`declare module "name"` 到
+  `module_augmentations`（外部模块文件）或 `ambient_module_names`（脚本文件）；
+  `set_external_module_indicator` 检测首个 import/export 语句设置
+  `external_module_indicator`（对齐 Go `SetExternalModuleIndicator` legacy 模式）；
+  `uses_uri_style_node_core_modules` Tristate 跟踪 `node:` 前缀。SourceFile
+  新增 7 个字段（imports/module_augmentations/ambient_module_names/
+  external_module_indicator/common_js_module_indicator/is_declaration_file/
+  uses_uri_style_node_core_modules）。11 个单测通过。**遗留**：dynamic import /
+  require call 遍历（`ForEachDynamicImportOrRequireCall`，仅 JS 文件需要）、
+  `force`/JSX 模式检测（需 compiler options plumbing）。
 
 ### P2.7 Parser JSDoc（已完成）
 

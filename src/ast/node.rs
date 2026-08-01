@@ -301,6 +301,30 @@ pub struct SourceFile {
     /// Whether JSDoc is parsed lazily on first access (TS/TSX files).
     /// Mirrors Go's `SourceFile.hasLazyJSDoc`.
     pub(crate) has_lazy_jsdoc: bool,
+    /// Whether this file is a declaration file (`.d.ts`). Mirrors Go's
+    /// `SourceFile.IsDeclarationFile`.
+    pub is_declaration_file: bool,
+    /// Module specifier expressions collected from import/export statements.
+    /// Mirrors Go's `SourceFile.imports`. Populated by
+    /// `collect_external_module_references`.
+    pub imports: Vec<Arc<Node>>,
+    /// Module augmentation name nodes from `declare module "name"` in
+    /// external module files. Mirrors Go's `SourceFile.ModuleAugmentations`.
+    pub module_augmentations: Vec<Arc<Node>>,
+    /// Ambient module names from `declare module "name"` in non-module files.
+    /// Mirrors Go's `SourceFile.AmbientModuleNames`.
+    pub ambient_module_names: Vec<String>,
+    /// The node that marks this file as an external module (first
+    /// import/export statement). `None` for scripts. Mirrors Go's
+    /// `SourceFile.ExternalModuleIndicator`.
+    pub external_module_indicator: Option<Arc<Node>>,
+    /// The node that marks this file as a CommonJS module (e.g.
+    /// `module.exports = ...`). Mirrors Go's
+    /// `SourceFile.CommonJSModuleIndicator`.
+    pub common_js_module_indicator: Option<Arc<Node>>,
+    /// Whether the file uses URI-style node core modules (`node:fs`).
+    /// Mirrors Go's `SourceFile.UsesUriStyleNodeCoreModules`.
+    pub uses_uri_style_node_core_modules: crate::core::tristate::Tristate,
 }
 
 impl SourceFile {
