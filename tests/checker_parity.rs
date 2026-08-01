@@ -7213,3 +7213,312 @@ fn checker_array_spread_into_new_array_no_error() {
 // spurious TS2304). The intended fixtures (`[1,2,3] as const`, `{ a: 1 } as
 // const`, `42 as const`) are omitted until that parsing path is implemented.
 // ────────────────────────────────────────────────────────────────────────────
+
+// ────────────────────────────────────────────────────────────────────────────
+// Real-world TypeScript patterns: function types, class features, type
+// manipulation, control-flow narrowing, module/import patterns, and common
+// error / known-checker-gap scenarios. Single-file fixtures use `check_source`
+// (which runs with `--noLib`); the circular-import fixture uses `check_sources`.
+// ────────────────────────────────────────────────────────────────────────────
+
+// === Function types and signatures ==========================================
+
+#[test]
+fn checker_fn_optional_parameter_decl_no_error() {
+    // `function f(a?: string)` — optional parameter declaration.
+    let diags = check_source("function f(a?: string) { return a; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_fn_default_parameter_decl_no_error() {
+    // `function f(a: number = 1)` — default parameter declaration.
+    let diags = check_source("function f(a: number = 1) { return a; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_fn_rest_parameter_decl_no_error() {
+    // `function f(...args: number[])` — rest parameter declaration.
+    let diags = check_source("function f(...args: number[]) { return args.length; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_fn_overload_resolution_no_error() {
+    // Overload resolution: `f(1)` selects the number overload and `f("a")` the
+    // string overload. Both call sites are type-correct.
+    let diags = check_source(
+        "function f(x: number): number;\n\
+         function f(x: string): string;\n\
+         function f(x: any) { return x; }\n\
+         let n = f(1);\n\
+         let s = f(\"a\");",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_fn_overload_resolution_mismatch_ts2322() {
+    // `f("a")` resolves to the `string` overload (returns `string`), so
+    // assigning the result to a `number`-typed variable is a TS2322.
+    let diags = check_source(
+        "function f(x: number): number;\n\
+         function f(x: string): string;\n\
+         function f(x: any) { return x; }\n\
+         let n: number = f(\"a\");",
+    );
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn checker_fn_this_type_return_no_error() {
+    // A method whose declared return type is `this` returns the receiver.
+    let diags = check_source("class C { x = 1; chain(): this { return this; } }");
+    assert_no_diagnostics(&diags);
+}
+
+// === Class features =========================================================
+
+#[test]
+fn checker_abstract_class_declaration_no_error() {
+    // Declaring an abstract class with an abstract method is itself valid.
+    // (Instantiating one is a separate, currently-unreported error — see
+    // `checker_abstract_instantiation_not_reported_no_error` below.)
+    let diags = check_source("abstract class A { abstract m(): void; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_private_protected_members_decl_no_error() {
+    // A class with `private`/`protected` members declares without error.
+    let diags = check_source("class C { private a: number = 1; protected b: number = 2; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_static_method_call_no_error() {
+    // A static method is reachable through the class name from an instance
+    // method.
+    let diags = check_source("class C { static inc(): void {} test() { C.inc(); } }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_getter_setter_no_error() {
+    // `get`/`set` accessors: reading and writing `value` route through the
+    // accessors and produce no diagnostics.
+    let diags = check_source(
+        "class C {\n  _v: number = 0;\n  get value(): number { return this._v; }\n  set value(v: number) { this._v = v; }\n}\nconst c = new C();\nc.value = 5;\nlet x = c.value;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_class_implements_multiple_interfaces_no_error() {
+    // `class C implements A, B` — satisfying two interfaces at once.
+    let diags = check_source(
+        "interface A { a: number; }\ninterface B { b: number; }\nclass C implements A, B { a = 1; b = 2; }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+// === Type manipulation ======================================================
+
+#[test]
+fn checker_keyof_three_keys_union_no_error() {
+    // `keyof { a; b; c }` is the union `"a" | "b" | "c"`.
+    let diags = check_source(
+        "type K = keyof { a: 1; b: 2; c: 3 };\nlet x: \"a\" | \"b\" | \"c\" = null as any as K;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_conditional_infer_array_element_type_no_error() {
+    // `T extends (infer U)[] ? U : never` extracts the array element type.
+    let diags = check_source(
+        "type Elem<T> = T extends (infer U)[] ? U : never;\nlet x: number = null as any as Elem<number[]>;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_mapped_type_no_error() {
+    // Homomorphic mapped type `{ [K in keyof T]: number }`.
+    let diags = check_source(
+        "type Boxed<T> = { [K in keyof T]: number };\ntype R = Boxed<{ a: string; b: string }>;\nlet x: R = { a: 1, b: 2 };",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_mapped_type_optional_modifier_no_error() {
+    // Mapped type with the optional (`?`) modifier.
+    let diags = check_source(
+        "type Flags<T> = { [K in keyof T]?: boolean };\ntype R = Flags<{ a: 1 }>;\nlet x: R = { a: true };",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_readonly_modifier_array_no_error() {
+    // `readonly number[]` accepts a regular `number[]`.
+    let diags = check_source("let x: readonly number[] = [1, 2, 3];");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_tuple_type_with_labels_no_error() {
+    // Tuple types with element labels.
+    let diags = check_source("let x: [a: number, b: string] = [1, \"hi\"];");
+    assert_no_diagnostics(&diags);
+}
+
+// === Control-flow narrowing =================================================
+
+#[test]
+fn checker_typeof_narrow_to_string_no_error() {
+    // `typeof x === "string"` narrows `x` to `string` inside the branch.
+    let diags = check_source(
+        "let x: string | number = \"hi\";\nif (typeof x === \"string\") { let y: string = x; }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_typeof_narrow_to_number_no_error() {
+    // `typeof x === "number"` narrows `x` to `number` inside the branch.
+    let diags = check_source(
+        "let x: string | number = 5;\nif (typeof x === \"number\") { let y: number = x; }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_typeof_narrow_to_boolean_no_error() {
+    // `typeof x === "boolean"` narrows `x` to `boolean` inside the branch.
+    let diags = check_source(
+        "let x: string | boolean = true;\nif (typeof x === \"boolean\") { let y: boolean = x; }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_falsy_narrowing_else_assign_no_error() {
+    // `if (!x) { x = \"d\" }` re-assigns, narrowing `x` to `string` afterward.
+    let diags =
+        check_source("let x: string | null = null;\nif (!x) { x = \"d\"; }\nlet y: string = x;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_switch_on_typeof_narrowing_no_error() {
+    // A `switch (typeof x)` case narrows within its `case` block.
+    let diags = check_source(
+        "let x: number | string = 1;\nswitch (typeof x) {\n  case \"number\": let y: number = x; break;\n  default: break;\n}",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_optional_chain_access_no_error() {
+    // `o?.a` on an optional property yields `number | undefined`.
+    let diags =
+        check_source("let o: { a?: number } = { a: 1 };\nlet y: number | undefined = o?.a;");
+    assert_no_diagnostics(&diags);
+}
+
+// === Module / import patterns ===============================================
+
+#[test]
+fn checker_named_import_unreferenced_no_error() {
+    // `import { x } from "mod"` binds a local alias; unreferenced => no diag.
+    let diags = check_source("import { x } from \"mod\";");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_namespace_import_unreferenced_no_error() {
+    // `import * as ns from "mod"` binds a namespace alias.
+    let diags = check_source("import * as ns from \"mod\";");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_import_type_unreferenced_no_error() {
+    // `import type { T } from "mod"` binds a type-only alias.
+    let diags = check_source("import type { T } from \"mod\";");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_reexport_named_from_module_no_error() {
+    // `export { x } from "mod"` re-exports a name from another module.
+    let diags = check_source("export { x } from \"mod\";");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_import_side_effect_no_error() {
+    // `import "mod"` — side-effect-only import.
+    let diags = check_source("import \"mod\";");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_circular_import_no_crash() {
+    // Two modules importing each other must not crash or hang the checker.
+    let diags = check_sources(&[
+        ("a.ts", "import { b } from \"./b\";\nexport const a = 1;"),
+        ("b.ts", "import { a } from \"./a\";\nexport const b = 2;"),
+    ]);
+    assert_no_diagnostics(&diags);
+}
+
+// === Common error patterns / known checker gaps =============================
+//
+// Characterization tests for diagnostics the upstream Go checker emits but
+// this Rust checker does NOT yet report. They lock in the current (no-error)
+// behaviour so future work that implements the check surfaces here as a
+// failing test to update. The corresponding TS codes are noted in comments.
+
+#[test]
+fn checker_const_reassignment_not_reported_no_error() {
+    // TS2588 "Cannot assign to 'x' because it is a constant." is not yet
+    // emitted for reassigning a `const` binding.
+    let diags = check_source("const x = 1;\nx = 2;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_missing_return_not_reported_no_error() {
+    // TS2366 (function lacks a return statement; return type does not include
+    // undefined) is not yet reported.
+    let diags = check_source("function f(): number { if (false) { return 1; } }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_unreachable_code_not_reported_no_error() {
+    // TS7027 "Unreachable code detected." is not yet reported.
+    let diags = check_source("function f(): void { return; let x = 1; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_abstract_instantiation_not_reported_no_error() {
+    // TS2511 "Cannot create an instance of an abstract class." is not yet
+    // reported.
+    let diags = check_source("abstract class A {}\nconst a = new A();");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_private_access_not_reported_no_error() {
+    // TS2341 "Property 'x' is private and only accessible within class 'C'."
+    // is not yet reported for outside-the-class access.
+    let diags =
+        check_source("class C { private x: number = 1; }\nconst c = new C();\nlet y = c.x;");
+    assert_no_diagnostics(&diags);
+}
