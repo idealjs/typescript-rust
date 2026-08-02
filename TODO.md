@@ -23,7 +23,7 @@ TSGO_ORACLE=/Users/cqh/workspace/typescript-go/built/local/tsgo cargo test --tes
 
 ## 当前进度（2026-08-02）
 
-**2,038 通过**（1,126 lib + 910 checker_parity + 2 emit），99 ignored。
+**2,041 通过**（1,129 lib + 910 checker_parity + 2 emit），96 ignored。
 
 | 模块 | 完成度 |
 |------|--------|
@@ -57,11 +57,11 @@ P4 Emit ✅ | P5 Module Resolution ✅ | P6 Build/Watch ✅ | P7 LSP ✅ | P8 np
 
 ## P10：Go 测试用例 1:1 迁移
 
-Go **1,219 测试 / 508 文件 / 44 模块**。Rust **1,126 lib 通过 / 99 ignored**。
+Go **1,219 测试 / 508 文件 / 44 模块**。Rust **1,129 lib 通过 / 96 ignored**。
 
 全 ✅ 模块：tspath(24), semver(11), core(2), stringutil(3), scanner(1), astnav(5),
 sourcemap(30), compiler(2), symlinks(8), packagejson(4), bundled(2), debug(12),
-format(7), tracing(2), collections(7/8), ast(6/7), diagnostics(2), vfs/cachedvfs(10),
+format(7), tracing(2), collections(8/8), diagnostics(2), vfs/cachedvfs(10),
 vfs/osvfs(3).
 
 剩余 ⏳ 项：
@@ -70,12 +70,10 @@ vfs/osvfs(3).
 |------|-------|------|
 | printer | ~70 | 需完整 AST→文本 printer |
 | jsnum | 1 | TestStringJS 需 Node.js |
-| collections | 1 | allocsPerRun |
-| ast | 1 | DeepCloneNode |
-| checker | 1 | TracerPushPreservesEndArgMutations |
-| transformers | 1 | ImportElision |
+| ast | 1 | DeepCloneNode（需 generated NodeFactory） |
+| checker | 1 | Tracer（Rust 所有权限制） |
 | module | 2 | 并发竞态测试 |
-| modulespecifiers | 3 | 模块说明符解析 |
+| modulespecifiers | 2 | symlink cache + exports 解析 |
 | nativepath | 4 | 平台特定 symlink |
 | vfs/vfstest | 4 | symlink |
 | vfs/vfsmatch | 1 | symlink cycle |
