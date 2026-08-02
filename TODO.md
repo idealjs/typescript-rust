@@ -63,7 +63,7 @@ npm install && npm run build
 
 ## 当前进度快照（2026-08-02）
 
-测试基线：**1,126** lib + **810** checker parity + **2** emit = **1,938 通过**，99 ignored。
+测试基线：**1,126** lib + **910** checker parity + **2** emit = **2,038 通过**，99 ignored。
 checker_parity 从 572→710（+138）。新增诊断码：TS2741/TS2739/TS2353/TS2448/TS2454/
 TS18048/TS2451/TS2300。Array 方法解析已修复（.find/.map/.reduce 等不再 false positive）。
 
