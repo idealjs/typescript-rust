@@ -7605,3 +7605,646 @@ fn checker_void_return_type_no_ts2366() {
     let diags = check_source("function f(): void { if (false) { return; } }");
     assert!(!diags.iter().any(|d| d.code == 2366));
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// String / Number / Boolean type operations.
+//
+// These exercise the built-in `String`, `Number` and `Boolean` globals from
+// lib.d.ts. Note: unlike `Array<T>`, the checker does not yet resolve members
+// declared on the `String` / `Number` interfaces, so instance-method access
+// currently emits a false-positive TS2339 (documented below). Global calls
+// (`String(...)`, `Number(...)`) and operators are fine.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_boolean_negation_with_lib_no_error() {
+    let diags = check_source_with_lib("let b = true; let x = !b;", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_template_literal_interpolation_no_error() {
+    let diags = check_source_with_lib("let x = `val ${1 + 2}`;", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_string_concatenation_with_lib_no_error() {
+    let diags = check_source_with_lib("let s = \"a\" + \"b\";", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_string_index_access_with_lib_no_error() {
+    let diags = check_source_with_lib("let s = \"abc\"; let c = s[0];", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_string_global_call_with_lib_no_error() {
+    let diags = check_source_with_lib("let s = String(true);", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_number_global_call_with_lib_no_error() {
+    let diags = check_source_with_lib("let n = Number(\"3\");", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_string_charat_currently_false_positive_ts2339() {
+    // KNOWN LIMITATION: `String` interface members are not resolved, so
+    // `.charAt` produces a false-positive TS2339 (unlike `Array` methods).
+    let diags = check_source_with_lib("let s = \"hi\"; s.charAt(0);", false);
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_string_touppercase_currently_false_positive_ts2339() {
+    // KNOWN LIMITATION: `.toUpperCase` resolves via the `String` interface.
+    let diags = check_source_with_lib("let s = \"hi\"; s.toUpperCase();", false);
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_string_trim_currently_false_positive_ts2339() {
+    // KNOWN LIMITATION: `.trim` resolves via the `String` interface.
+    let diags = check_source_with_lib("let s = \" hi \"; s.trim();", false);
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_string_includes_currently_false_positive_ts2339() {
+    // KNOWN LIMITATION: `.includes` resolves via the `String` interface.
+    let diags = check_source_with_lib("let s = \"hi\"; s.includes(\"i\");", false);
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_number_tofixed_currently_false_positive_ts2339() {
+    // KNOWN LIMITATION: `Number` interface members are not resolved.
+    let diags = check_source_with_lib("let n = 3.14; n.toFixed(2);", false);
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_number_tostring_currently_false_positive_ts2339() {
+    // KNOWN LIMITATION: `Number` interface members are not resolved.
+    let diags = check_source_with_lib("let n = 3.14; n.toString();", false);
+    assert_diagnostic_code(&diags, 2339);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Promise / async patterns (with lib.d.ts): `Promise`, `async`/`await`.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_promise_resolve_with_lib_no_error() {
+    let diags = check_source_with_lib("Promise.resolve(1);", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_promise_reject_with_lib_no_error() {
+    let diags = check_source_with_lib("Promise.reject(\"e\");", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_async_return_number_with_lib_no_error() {
+    let diags = check_source_with_lib("async function f() { return 1; }", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_async_await_with_lib_no_error() {
+    let diags = check_source_with_lib(
+        "async function f() { let x = await Promise.resolve(1); }",
+        false,
+    );
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_async_await_arith_with_lib_no_error() {
+    let diags = check_source_with_lib(
+        "async function f() { let x = await Promise.resolve(1); let y = x + 1; }",
+        false,
+    );
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_promise_then_with_lib_no_error() {
+    let diags = check_source_with_lib("Promise.resolve(1).then(x => x);", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_promise_then_chain_with_lib_no_error() {
+    let diags = check_source_with_lib(
+        "let p = Promise.resolve(1).then(x => x).then(y => y);",
+        false,
+    );
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_promise_all_with_lib_no_error() {
+    let diags = check_source_with_lib("Promise.all([1, 2]);", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_promise_race_with_lib_no_error() {
+    let diags = check_source_with_lib("Promise.race([1, 2]);", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_new_promise_executor_with_lib_no_error() {
+    let diags = check_source_with_lib("let p = new Promise((resolve) => { resolve(1); });", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Object / Record utility types (with lib.d.ts): `Record`, `Partial`,
+// `Required`, `Pick`, `Omit`, `Readonly`, and `Object.*`.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_record_type_with_lib_no_error() {
+    let diags = check_source_with_lib("let x: Record<string, number> = { a: 1 };", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_partial_type_with_lib_no_error() {
+    let diags = check_source_with_lib("interface T { a: number; }\nlet x: Partial<T> = {};", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_required_type_with_lib_no_error() {
+    let diags = check_source_with_lib(
+        "interface T { a?: number; }\nlet x: Required<T> = { a: 1 };",
+        false,
+    );
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_pick_type_with_lib_no_error() {
+    let diags = check_source_with_lib(
+        "interface T { a: number; }\nlet x: Pick<T, \"a\"> = { a: 1 };",
+        false,
+    );
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_omit_type_with_lib_no_error() {
+    let diags = check_source_with_lib(
+        "interface T { a: number; b: number; }\nlet x: Omit<T, \"a\">;",
+        false,
+    );
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_readonly_type_with_lib_no_error() {
+    let diags = check_source_with_lib("let x: Readonly<{ a: number }> = { a: 1 };", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_record_type_alias_with_lib_no_error() {
+    let diags = check_source_with_lib("type R = Record<string, number>;", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_object_keys_with_lib_no_error() {
+    let diags = check_source_with_lib("let x = Object.keys({ a: 1 });", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_object_values_currently_false_positive_ts2339() {
+    // KNOWN LIMITATION: `Object.values` is not resolved on the `Object`
+    // constructor type (only `Object.keys` is), so it emits TS2339.
+    let diags = check_source_with_lib("let x = Object.values({ a: 1 });", false);
+    assert_diagnostic_code(&diags, 2339);
+}
+
+#[test]
+fn checker_object_entries_currently_false_positive_ts2339() {
+    // KNOWN LIMITATION: `Object.entries` is not resolved on the `Object`
+    // constructor type (only `Object.keys` is), so it emits TS2339.
+    let diags = check_source_with_lib("let x = Object.entries({ a: 1 });", false);
+    assert_diagnostic_code(&diags, 2339);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Array / Iterable patterns: `for...of`, spread, destructuring, `Array.*`,
+// `Map` / `Set`.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_for_of_array_with_lib_no_error() {
+    let diags = check_source_with_lib("for (let x of [1, 2, 3]) { let y = x; }", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_for_of_string_with_lib_no_error() {
+    let diags = check_source_with_lib("for (let c of \"abc\") { let y = c; }", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_spread_in_array_with_lib_no_error() {
+    let diags = check_source_with_lib("let a = [1, 2]; let b = [...a];", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_spread_in_call_no_error() {
+    let diags = check_source("function f(...args: number[]) {}\nf(1, 2);");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_array_destructuring_with_lib_no_error() {
+    let diags = check_source_with_lib("let a = [1, 2]; let [x, y] = a;", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_array_from_with_lib_no_error() {
+    let diags = check_source_with_lib("let x = Array.from([1, 2]);", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_array_isarray_with_lib_no_error() {
+    let diags = check_source_with_lib("let x = Array.isArray([1]);", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_map_set_with_lib_no_error() {
+    let diags = check_source_with_lib("let m = new Map<string, number>(); m.set(\"a\", 1);", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_set_add_with_lib_no_error() {
+    let diags = check_source_with_lib("let s = new Set<number>(); s.add(1);", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+#[test]
+fn checker_array_from_string_with_lib_no_error() {
+    let diags = check_source_with_lib("let arr = Array.from(\"abc\");", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Conditional / switch patterns: fallthrough, default, nested switch,
+// ternary chains, nullish coalescing.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_switch_with_default_no_error() {
+    let diags = check_source("switch (1) { case 1: break; default: break; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_switch_fallthrough_no_error() {
+    let diags = check_source("let x = 1; switch (x) { case 1: case 2: break; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_switch_on_string_no_error() {
+    let diags = check_source("let s = \"a\"; switch (s) { case \"a\": break; case \"b\": break; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_switch_on_string_union_no_error() {
+    let diags = check_source("let x: \"a\" | \"b\" = \"a\"; switch (x) { case \"a\": break; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_nested_switch_no_error() {
+    let diags = check_source(
+        "function f(a: number, b: number) { switch (a) { case 1: switch (b) { case 2: break; } break; } }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_switch_with_return_no_error() {
+    let diags = check_source(
+        "function f(x: number) { switch (x) { case 1: return \"a\"; case 2: return \"b\"; default: return \"c\"; } }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_ternary_chain_no_error() {
+    let diags = check_source("let x = 1; let y = x ? 2 : x ? 3 : 4;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_nested_ternary_no_error() {
+    let diags = check_source("let x = 1; let y = x === 1 ? (x === 2 ? 3 : 4) : 5;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_nullish_coalescing_no_error() {
+    let diags = check_source("let x = null; let y = x ?? 5;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_logical_or_default_no_error() {
+    let diags = check_source("let x = 0; let y = x || \"fallback\";");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Generic type inference: generic functions, constraints, generic classes,
+// multiple / default type parameters.
+//
+// Note: generic *declarations* type-check cleanly; call-site type-argument
+// inference currently emits a false-positive TS2345 (documented below).
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_generic_function_declaration_no_error() {
+    let diags = check_source("function f<T>(x: T): T { return x; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_generic_constraint_call_no_error() {
+    let diags = check_source("function f<T extends number>(x: T): T { return x; }\nf(1);");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_generic_class_instantiation_no_error() {
+    let diags = check_source("class C<T> { x: T; }\nlet c = new C<number>();");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_generic_class_constructor_no_error() {
+    let diags = check_source("class Box<T> { constructor(public value: T) {} }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_multiple_type_params_no_error() {
+    let diags = check_source("function f<A, B>(a: A, b: B): [A, B] { return [a, b]; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_default_type_param_no_error() {
+    let diags = check_source("function f<T = string>(x: T): T { return x; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_generic_interface_usage_no_error() {
+    let diags = check_source("interface I<T> { data: T; }\nlet x: I<number> = { data: 1 };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_generic_multi_param_interface_no_error() {
+    let diags = check_source("interface I<T, U> { a: T; b: U; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_generic_type_alias_no_error() {
+    let diags = check_source("type CB<T> = (x: T) => void;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_generic_constraint_length_no_error() {
+    let diags = check_source(
+        "function len<T extends { length: number }>(x: T): number { return x.length; }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_generic_call_inference_currently_false_positive_ts2345() {
+    // KNOWN LIMITATION: type-argument inference at call sites is not wired up,
+    // so invoking a generic function emits a false-positive TS2345.
+    let diags = check_source("function id<T>(x: T): T { return x; }\nid(\"hi\");");
+    assert_diagnostic_code(&diags, 2345);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Interface / type advanced features: optional & readonly members, index
+// signatures, call / construct signatures, multiple inheritance, intersections.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_optional_properties_no_error() {
+    let diags = check_source("interface T { a?: number; }\nlet x: T = {};");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_readonly_properties_no_error() {
+    let diags = check_source("interface T { readonly a: number; }\nlet x: T = { a: 1 };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_index_signature_no_error() {
+    let diags = check_source("interface T { [k: string]: number; }\nlet x: T = { a: 1 };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_readonly_index_signature_no_error() {
+    let diags = check_source("let x: { readonly [k: string]: number } = { a: 1 };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_call_signature_no_error() {
+    let diags = check_source("interface T { (): number; }\nlet x: T;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_construct_signature_no_error() {
+    let diags = check_source("interface T { new (): number; }\nlet x: T;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_extends_multiple_interfaces_no_error() {
+    let diags = check_source(
+        "interface A { a: number; }\ninterface B { b: number; }\ninterface C extends A, B { c: number; }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_object_type_alias_usage_no_error() {
+    let diags = check_source("type T = { a: number; };\nlet x: T = { a: 1 };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_intersection_type_no_error() {
+    let diags = check_source("interface A { a: number; }\ntype B = A & { b: number; };");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_string_literal_union_type_no_error() {
+    let diags = check_source("type K = \"a\" | \"b\";");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_interface_with_methods_no_error() {
+    let diags = check_source("interface I { m(x: number): string; p: { q: number }; }");
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Error / edge cases: deep unions, circular references, long property chains,
+// empty interfaces, and `never` / `unknown` / `any` / `void`.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_deep_union_type_no_error() {
+    let diags = check_source("type T = number | string | boolean;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_circular_interface_reference_no_crash() {
+    // A self-referential interface must not crash the checker.
+    let diags = check_source("interface X { a: X; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_long_property_chain_no_error() {
+    let diags = check_source("let o = { a: { b: { c: { d: 1 } } } }; let x = o.a.b.c.d;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_nested_array_access_no_error() {
+    let diags = check_source("let arr = [{ a: 1 }, { a: 2 }]; let n = arr[0].a;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_empty_interface_assignment_no_error() {
+    let diags = check_source("interface E {}\nlet x: E = {};");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_empty_type_alias_no_error() {
+    let diags = check_source("type Empty = {};");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_never_type_throw_no_error() {
+    let diags = check_source("function f(): never { throw 1; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_unknown_type_assignment_no_error() {
+    let diags = check_source("let x: unknown = 1;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_unknown_typeof_guard_no_error() {
+    let diags = check_source("let x: unknown = 1; if (typeof x === \"number\") { let y = x; }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_any_type_method_call_no_error() {
+    let diags = check_source("let x: any = 1; x.foo();");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_any_type_property_access_no_error() {
+    let diags = check_source("let x: any = null; let y: any = x.bar;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_void_function_no_error() {
+    let diags = check_source("function g(): void {}");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_void_assignment_with_lib_no_error() {
+    let diags = check_source_with_lib("let x: void = undefined;", false);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
+}
