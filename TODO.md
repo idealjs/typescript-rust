@@ -63,7 +63,7 @@ npm install && npm run build
 
 ## 当前进度快照（2026-08-02）
 
-测试基线：**1,105** lib + **808** checker parity + **2** emit = **1,915 通过**，99 ignored。
+测试基线：**1,105** lib + **810** checker parity + **2** emit = **1,917 通过**，99 ignored。
 checker_parity 从 572→710（+138）。新增诊断码：TS2741/TS2739/TS2353/TS2448/TS2454/
 TS18048/TS2451/TS2300。Array 方法解析已修复（.find/.map/.reduce 等不再 false positive）。
 
@@ -97,7 +97,7 @@ compiler warning 约 90 个（dead code in stub implementations），归类为�
 - [x] TS2511/TS2341/TS2366/TS2588/TS7027
 - [x] 扩充 checker parity fixtures 到 800+（当前 808）
 - [x] 修复 String/Number interface 方法解析（仅 Array 已修复）
-- [ ] 修复 generic call-site inference（TS2345 false positive）
+- [x] 修复 generic call-site inference（TS2345 false positive）
 
 ### B. Watch mode（中）
 
