@@ -357,11 +357,15 @@ impl Program {
         write_file: &dyn Fn(&str, &str) -> std::io::Result<()>,
     ) -> crate::emitter::EmitResult {
         let fs = self.host.fs();
-        // Only emit non-lib source files.
+        // Only emit non-lib, non-external-library source files.
+        // External library files are those found under node_modules.
         let source_files: Vec<_> = self
             .source_files
             .iter()
-            .filter(|sf| !self.default_library_file_names.contains(&sf.file_name))
+            .filter(|sf| {
+                !self.default_library_file_names.contains(&sf.file_name)
+                    && !is_external_library_file(&sf.file_name)
+            })
             .cloned()
             .collect();
         crate::emitter::emit_program(&source_files, &self.options, fs, write_file)
@@ -408,6 +412,12 @@ impl crate::checker::Program for Program {
             .collect();
         crate::emitter::compute_program_common_source_directory(&source_files, &self.options)
     }
+}
+
+/// Check if a file path belongs to an external library (node_modules).
+/// Mirrors Go's `IsSourceFileFromExternalLibrary` substring check.
+fn is_external_library_file(file_name: &str) -> bool {
+    file_name.contains("/node_modules/") || file_name.contains("\\node_modules\\")
 }
 
 // ────────────────────────────────────────────────────────────────────────────

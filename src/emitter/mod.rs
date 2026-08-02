@@ -443,6 +443,8 @@ fn get_output_extension(file_name: &str) -> &'static str {
 fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
     let mut output = String::new();
     emit_js_text_inner(source_file, options, &mut output);
+    // Rewrite relative import/export specifiers: `.ts`/`.tsx` → `.js`.
+    output = rewrite_import_extensions(&output);
     // When removeComments is active, trim leading whitespace that remained
     // after stripping comments before the first statement. The Go printer
     // doesn't emit leading trivia before the first statement, so a stripped
@@ -1501,6 +1503,32 @@ fn is_type_only_statement(node: &Node) -> bool {
     }
 }
 
+/// Rewrite relative import/export specifiers in the emitted JS text.
+/// Replaces `.ts`/`.tsx` extensions with `.js` in relative paths.
+/// Mirrors Go's `rewriteModuleSpecifier` + `GetOutputExtension`.
+fn rewrite_import_extensions(text: &str) -> String {
+    // Simple regex-free approach: find `from "./...ts"` or `from "./...tsx"`
+    // or `import("./...ts")` patterns and replace the extension.
+    let mut result = text.to_string();
+    for old_ext in &[
+        ".ts\"", ".ts'", ".tsx\"", ".tsx'", ".mts\"", ".mts'", ".cts\"", ".cts'",
+    ] {
+        let new_ext = if *old_ext == ".tsx\"" || *old_ext == ".tsx'" {
+            ".js"
+        } else if *old_ext == ".mts\"" || *old_ext == ".mts'" {
+            ".mjs"
+        } else if *old_ext == ".cts\"" || *old_ext == ".cts'" {
+            ".cjs"
+        } else {
+            ".js"
+        };
+        let suffix = &old_ext[old_ext.len() - 1..]; // " or '
+        let replacement = format!("{}{}", new_ext, suffix);
+        result = result.replace(old_ext, &replacement);
+    }
+    result
+}
+
 /// Emit a statement, stripping type annotations and (optionally) comments,
 /// and applying ES5 down-leveling replacements.
 fn emit_statement<S: EmitSink>(
@@ -1709,6 +1737,15 @@ fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) 
             // Cut "as Type" — the expression stays, the type is removed.
             // The "as" keyword is between expression.end() and type.pos().
             cuts.push((d.expression.end(), d.type_node.end()));
+        }
+        NodeData::SatisfiesExpression(d) => {
+            // Cut "satisfies Type" — same as AsExpression.
+            cuts.push((d.expression.end(), d.type_node.end()));
+        }
+        NodeData::NonNullExpression(d) => {
+            // Cut the "!" — everything after the expression to the node end.
+            cuts.push((d.expression.end(), node.end()));
+            collect_type_cuts(&d.expression, source, cuts);
         }
         NodeData::ExpressionStatement(d) => {
             collect_type_cuts(&d.expression, source, cuts);
