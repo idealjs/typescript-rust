@@ -63,7 +63,7 @@ npm install && npm run build
 
 ## 当前进度快照（2026-08-02）
 
-测试基线：**1,110** lib + **810** checker parity + **2** emit = **1,922 通过**，99 ignored。
+测试基线：**1,123** lib + **810** checker parity + **2** emit = **1,935 通过**，99 ignored。
 checker_parity 从 572→710（+138）。新增诊断码：TS2741/TS2739/TS2353/TS2448/TS2454/
 TS18048/TS2451/TS2300。Array 方法解析已修复（.find/.map/.reduce 等不再 false positive）。
 
@@ -116,7 +116,7 @@ compiler warning 约 90 个（dead code in stub implementations），归类为�
 
 ### D. 其他（低）
 
-- [ ] `symbol_to_display_parts`（LS 层功能）
+- [x] `symbol_to_display_parts`（LS hover 分类信息）
 - [ ] 本地化支持（locale/loc_generated）
 - [ ] 正则 `lastIndex`/`d` flag runtime 特性
 - [ ] `.ts/.tsx/.js/.jsx` 解析结果与 oracle 完全对齐（依赖 checker 深度）
