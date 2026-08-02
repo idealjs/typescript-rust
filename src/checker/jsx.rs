@@ -277,6 +277,17 @@ impl Checker {
         // Look up the resolved type to check signatures.
         let tag_type = self.get_type_of_node(&tag_name);
 
+        // If the type is `any` or unresolved (e.g. import binding couldn't
+        // be fully resolved), skip TS2604 — it's better to miss a real error
+        // than to emit a false positive. Mirrors Go's pragmatic behavior where
+        // unresolved types don't trigger component-signature checks.
+        if tag_type
+            .flags
+            .contains(crate::checker::types::TypeFlags::Any)
+        {
+            return;
+        }
+
         let has_call_sigs = !self
             .get_signatures_of_type(&tag_type, crate::checker::SignatureKind::Call)
             .is_empty();
