@@ -38,11 +38,19 @@ TSGO_ORACLE=/Users/cqh/workspace/typescript-go/built/local/tsgo cargo test --tes
 | --watch | 已实现（notify crate）|
 | --build | 已实现（project reference + cycle + .tsbuildinfo）|
 
+## 集成测试
+
+真实项目对比文档：[INTEGRATION_TEST.md](INTEGRATION_TEST.md)（ai-Color-toner）
+Go→Rust 差异适配：[RUST_ADAPTATIONS.md](RUST_ADAPTATIONS.md)
+
+当前差距：Rust 产出 104 个 false positive（JSX 全局命名空间 101 + DOM 全局 3），
+Go oracle 仅 1 个有效错误。修复方向：JSX 全局类型加载 + DOM lib 全局变量。
+
 ## 待办清单
 
 已完成：A(Checker 深度 13 诊断码 + 方法解析 + generic inference + 910 parity)、
 B(Watch mode + cycle)、C(LSP references/rename/documentSymbol/project service)、
-D(symbol_to_display_parts)。
+D(symbol_to_display_parts)、E(零 ignore — 全部 Rust 适配)。
 
 剩余：
 - [ ] fourslash 测试 smoke
