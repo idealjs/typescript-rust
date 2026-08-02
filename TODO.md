@@ -111,7 +111,7 @@ compiler warning 约 90 个（dead code in stub implementations），归类为�
 - [x] references（跨文件符号引用查找）
 - [x] documentSymbol（文档符号树）
 - [x] rename（重命名 + WorkspaceEdit）
-- [ ] project service（多文件 open/close/change 管理）
+- [x] project service（多文件 open/close/change + 跨文件诊断 + didChangeWatchedFiles）
 - [ ] fourslash 测试 smoke
 
 ### D. 其他（低）
