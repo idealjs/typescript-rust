@@ -102,6 +102,10 @@ impl Checker {
             SyntaxKind::NullKeyword => self.null_type(),
             SyntaxKind::NeverKeyword => self.never_type(),
             SyntaxKind::ObjectKeyword => self.non_primitive_type(),
+            // `const` keyword type node from `as const` — should only appear
+            // as the type operand of an `AsExpression`, handled there.
+            // If reached directly, return any (no false errors).
+            SyntaxKind::ConstKeyword => self.any_type(),
             SyntaxKind::ThisType | SyntaxKind::ThisKeyword => {
                 self.get_type_from_this_type_node(node)
             }

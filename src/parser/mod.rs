@@ -2962,7 +2962,24 @@ impl Parser {
             let pos = expr.pos();
             let kind = self.token;
             self.next_token();
-            let type_node = self.parse_type();
+            // `as const` — produce a `ConstKeyword` type node instead of
+            // parsing `const` as a type reference. Mirrors Go's
+            // `parseAssertedType` which checks `token == ConstKeyword`.
+            let type_node = if kind == SyntaxKind::AsKeyword
+                && self.token == SyntaxKind::ConstKeyword
+                && !self.has_preceding_line_break()
+            {
+                let tp = self.token_pos();
+                let te = self.token_end();
+                self.next_token();
+                Arc::new(Node::with_loc(
+                    SyntaxKind::ConstKeyword,
+                    NodeData::KeywordTypeNode,
+                    TextRange::new(tp, te),
+                ))
+            } else {
+                self.parse_type()
+            };
             let end = type_node.end();
             expr = match kind {
                 SyntaxKind::AsKeyword => Arc::new(Node::with_loc(

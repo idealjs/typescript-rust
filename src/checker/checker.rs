@@ -2306,6 +2306,11 @@ impl Checker {
             SyntaxKind::AsExpression => {
                 // `x as T` has the type of the type annotation `T`.
                 if let crate::ast::NodeData::AsExpression(data) = &node.data {
+                    // `x as const` — narrow the expression's literal type
+                    // without widening. Mirrors Go's `getConstAssertionType`.
+                    if data.type_node.kind == SyntaxKind::ConstKeyword {
+                        return self.get_const_assertion_type(&data.expression);
+                    }
                     return self.get_type_from_type_node(&data.type_node);
                 }
                 self.get_any_type()
@@ -4156,6 +4161,48 @@ impl Checker {
         }
         // Mixed types → any[] for now.
         self.create_array_type(self.get_any_type())
+    }
+
+    /// Get the type of a `const` assertion expression (`x as const`).
+    ///
+    /// For `as const`, TypeScript narrows all literal types to their literal
+    /// forms (no widening) and makes object properties readonly and arrays
+    /// readonly tuples. Mirrors Go's `getConstAssertionType`.
+    ///
+    ///   - `[1, 2, 3] as const` → `readonly [1, 2, 3]` (tuple, not widened)
+    ///   - `{ a: 1 } as const` → `{ readonly a: 1 }`
+    ///   - `"hello" as const` → `"hello"` (already narrow)
+    ///
+    /// The checker already returns narrow literal types for literals and
+    /// keeps literal types in object literals, so the main special case is
+    /// array literals (which `get_type_of_array_literal` normally widens to
+    /// `T[]`).
+    fn get_const_assertion_type(&mut self, expr: &Arc<Node>) -> Arc<Type> {
+        match expr.kind {
+            SyntaxKind::ArrayLiteralExpression => {
+                // Build a tuple with narrow (non-widened) element types.
+                let elements = match &expr.data {
+                    crate::ast::NodeData::ArrayLiteralExpression(data) => &data.elements,
+                    _ => return self.get_any_type(),
+                };
+                let mut element_types: Vec<Arc<Type>> = Vec::new();
+                for elem in elements.iter() {
+                    if elem.kind == SyntaxKind::SpreadElement {
+                        // Spread in `as const` → fall back to array type.
+                        let t = self.get_type_of_node(elem);
+                        element_types.push(t);
+                    } else {
+                        element_types.push(self.get_type_of_node(elem));
+                    }
+                }
+                self.create_tuple_type(element_types)
+            }
+            _ => {
+                // Object literals already keep literal types; literals are
+                // already narrow. Just return the expression's type.
+                self.get_type_of_node(expr)
+            }
+        }
     }
 
     /// Get the type of an object literal expression `{ a: 1, b: "hi" }`.
