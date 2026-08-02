@@ -125,8 +125,12 @@ impl LspServer {
                 (None, notifications)
             }
             "textDocument/didClose" => {
-                self.handle_did_close(&params);
-                (None, Vec::new())
+                let notifications = self.handle_did_close(&params);
+                (None, notifications)
+            }
+            "workspace/didChangeWatchedFiles" => {
+                let notifications = self.handle_did_change_watched_files(&params);
+                (None, notifications)
             }
             "textDocument/hover" => {
                 let result = self.handle_hover(&params);
@@ -151,6 +155,11 @@ impl LspServer {
             "textDocument/rename" => {
                 let result = self.handle_rename(&params);
                 (Some(make_response(id, result)), Vec::new())
+            }
+            "textDocument/formatting" => {
+                // Register the capability so the client offers "Format
+                // Document"; no edits are produced.
+                (Some(make_response(id, json!([]))), Vec::new())
             }
             _ => {
                 // Unknown method — return method not found error for requests
@@ -192,6 +201,22 @@ impl LspServer {
                     "triggerCharacters": [".", "\"", "'", "/", "@", "<"],
                     "resolveProvider": false
                 },
+                "documentFormattingProvider": true,
+                "diagnosticProvider": {
+                    "interFileDependencies": true,
+                    "workspaceDiagnostics": false
+                },
+                "workspace": {
+                    "workspaceFolders": {
+                        "supported": true,
+                        "changeNotifications": true
+                    },
+                    "fileOperations": {
+                        "didCreate": true,
+                        "didRename": true,
+                        "didDelete": true
+                    }
+                }
             },
             "serverInfo": {
                 "name": "tsox",
@@ -205,9 +230,10 @@ impl LspServer {
             let uri = td.get("uri").and_then(|v| v.as_str()).unwrap_or("");
             let text = td.get("text").and_then(|v| v.as_str()).unwrap_or("");
             self.documents.insert(uri.to_string(), text.to_string());
-            return self.compute_diagnostics(uri);
         }
-        Vec::new()
+        // Recompute diagnostics across ALL open documents so that opening one
+        // file can surface cross-file type errors in another.
+        self.compute_all_diagnostics()
     }
 
     fn handle_did_change(&mut self, params: &Value) -> Vec<Value> {
@@ -218,19 +244,31 @@ impl LspServer {
                 if let Some(last) = changes.last() {
                     if let Some(text) = last.get("text").and_then(|v| v.as_str()) {
                         self.documents.insert(uri.to_string(), text.to_string());
-                        return self.compute_diagnostics(uri);
                     }
                 }
             }
         }
-        Vec::new()
+        // Recompute diagnostics across ALL open documents so that editing one
+        // file updates cross-file type errors in every other open file.
+        self.compute_all_diagnostics()
     }
 
-    fn handle_did_close(&mut self, params: &Value) {
+    fn handle_did_close(&mut self, params: &Value) -> Vec<Value> {
         if let Some(td) = params.get("textDocument") {
             let uri = td.get("uri").and_then(|v| v.as_str()).unwrap_or("");
             self.documents.remove(uri);
+            // Publish empty diagnostics to clear any previously reported
+            // errors for the now-closed document.
+            return vec![json!({
+                "jsonrpc": "2.0",
+                "method": "textDocument/publishDiagnostics",
+                "params": {
+                    "uri": uri,
+                    "diagnostics": []
+                }
+            })];
         }
+        Vec::new()
     }
 
     fn handle_hover(&self, params: &Value) -> Value {
@@ -294,18 +332,17 @@ impl LspServer {
         })
     }
 
-    /// Run the compiler pipeline (parse + bind + check) for a single document
-    /// and return a `textDocument/publishDiagnostics` notification with all of
-    /// its diagnostics. An empty diagnostic list is published to clear any
-    /// previously reported errors for the file.
-    fn compute_diagnostics(&self, uri: &str) -> Vec<Value> {
-        let path = uri.strip_prefix("file://").unwrap_or(uri);
-        let content = match self.documents.get(uri) {
-            Some(c) => c.clone(),
+    /// Run the compiler pipeline (parse + bind + check) over ALL open
+    /// documents and return one `textDocument/publishDiagnostics` notification
+    /// per open document. Building a single program from every open file
+    /// enables cross-file type checking: changing file A may surface or clear
+    /// diagnostics in file B. An empty diagnostic list is published for files
+    /// with no errors, which also clears previously reported errors.
+    fn compute_all_diagnostics(&self) -> Vec<Value> {
+        let program = match build_program_from_documents(&self.documents) {
+            Some(p) => p,
             None => return Vec::new(),
         };
-
-        let program = build_program(path, &content);
 
         // Collect parse/bind diagnostics (from the program) plus semantic
         // diagnostics (from the checker).
@@ -315,19 +352,82 @@ impl LspServer {
         }
         all_diags.extend(program.get_semantic_diagnostics());
 
-        let lsp_diags: Vec<Value> = all_diags
-            .iter()
-            .map(|d| diagnostic_to_lsp(d, &content))
-            .collect();
-
-        vec![json!({
-            "jsonrpc": "2.0",
-            "method": "textDocument/publishDiagnostics",
-            "params": {
-                "uri": uri,
-                "diagnostics": lsp_diags
+        // Group diagnostics by the path of their attached source file.
+        // Diagnostics without an attached file (rare, program-level) are
+        // attributed to the sole open document when only one is open, which
+        // preserves the prior single-file reporting behavior; otherwise they
+        // are dropped to avoid duplication across files.
+        let mut by_path: HashMap<&str, Vec<&crate::ast::diagnostic::Diagnostic>> = HashMap::new();
+        let mut fileless: Vec<&crate::ast::diagnostic::Diagnostic> = Vec::new();
+        for d in &all_diags {
+            match &d.file {
+                Some(f) => by_path.entry(f.file_name.as_str()).or_default().push(d),
+                None => fileless.push(d),
             }
-        })]
+        }
+
+        let single_uri = if self.documents.len() == 1 {
+            self.documents.keys().next().cloned()
+        } else {
+            None
+        };
+
+        let mut notifications = Vec::with_capacity(self.documents.len());
+        for uri in self.documents.keys() {
+            let path = uri.strip_prefix("file://").unwrap_or(uri);
+            let content = self.documents.get(uri).map(String::as_str).unwrap_or("");
+            let mut lsp_diags: Vec<Value> = Vec::new();
+            if let Some(list) = by_path.get(path) {
+                for d in list {
+                    lsp_diags.push(diagnostic_to_lsp(d, content));
+                }
+            }
+            if single_uri.as_deref() == Some(uri.as_str()) {
+                for d in &fileless {
+                    lsp_diags.push(diagnostic_to_lsp(d, content));
+                }
+            }
+            notifications.push(json!({
+                "jsonrpc": "2.0",
+                "method": "textDocument/publishDiagnostics",
+                "params": {
+                    "uri": uri,
+                    "diagnostics": lsp_diags
+                }
+            }));
+        }
+        notifications
+    }
+
+    /// Handle `workspace/didChangeWatchedFiles` — synchronize on-disk file
+    /// changes into the open-document set and recompute diagnostics across all
+    /// files. Change types follow the LSP `FileChangeType` enum: 1 = Created,
+    /// 2 = Changed, 3 = Deleted.
+    fn handle_did_change_watched_files(&mut self, params: &Value) -> Vec<Value> {
+        if let Some(changes) = params.get("changes").and_then(|v| v.as_array()) {
+            for change in changes {
+                let uri = change.get("uri").and_then(|v| v.as_str()).unwrap_or("");
+                let typ = change.get("type").and_then(|v| v.as_u64()).unwrap_or(0);
+                if uri.is_empty() {
+                    continue;
+                }
+                match typ {
+                    1 | 2 => {
+                        // Created or Changed: read the file from disk.
+                        let path = uri.strip_prefix("file://").unwrap_or(uri);
+                        if let Ok(text) = std::fs::read_to_string(path) {
+                            self.documents.insert(uri.to_string(), text);
+                        }
+                    }
+                    3 => {
+                        // Deleted: drop from the open-document set.
+                        self.documents.remove(uri);
+                    }
+                    _ => {}
+                }
+            }
+        }
+        self.compute_all_diagnostics()
     }
 
     /// Handle `textDocument/definition` — find the declaration of the symbol
