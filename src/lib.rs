@@ -19,6 +19,7 @@ pub mod emitter;
 pub mod evaluator;
 pub mod execute;
 pub mod format;
+pub mod fourslash;
 pub mod glob;
 pub mod incremental;
 pub mod jsnum;
