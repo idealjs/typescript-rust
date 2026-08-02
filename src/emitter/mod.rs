@@ -445,6 +445,8 @@ fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
     emit_js_text_inner(source_file, options, &mut output);
     // Rewrite relative import/export specifiers: `.ts`/`.tsx` → `.js`.
     output = rewrite_import_extensions(&output);
+    // Add missing semicolons to match Go's ASI-implicit-semicolon printer.
+    output = add_implicit_semicolons(&output);
     // When removeComments is active, trim leading whitespace that remained
     // after stripping comments before the first statement. The Go printer
     // doesn't emit leading trivia before the first statement, so a stripped
@@ -467,7 +469,7 @@ fn emit_js_text_tracked(
 ) -> String {
     let mut tracker = SourceMapTracker::new(&source_file.text, Some(generator), source_index);
     emit_js_text_inner(source_file, options, &mut tracker);
-    tracker.finish()
+    rewrite_import_extensions(&add_implicit_semicolons(&tracker.finish()))
 }
 
 /// Core statement-walking emit logic, generic over the output sink.
@@ -1581,24 +1583,117 @@ fn is_type_only_import_specifier(spec: &Node) -> bool {
 /// Replaces `.ts`/`.tsx` extensions with `.js` in relative paths.
 /// Mirrors Go's `rewriteModuleSpecifier` + `GetOutputExtension`.
 fn rewrite_import_extensions(text: &str) -> String {
-    // Simple regex-free approach: find `from "./...ts"` or `from "./...tsx"`
-    // or `import("./...ts")` patterns and replace the extension.
-    let mut result = text.to_string();
-    for old_ext in &[
-        ".ts\"", ".ts'", ".tsx\"", ".tsx'", ".mts\"", ".mts'", ".cts\"", ".cts'",
-    ] {
-        let new_ext = if *old_ext == ".tsx\"" || *old_ext == ".tsx'" {
-            ".js"
-        } else if *old_ext == ".mts\"" || *old_ext == ".mts'" {
-            ".mjs"
-        } else if *old_ext == ".cts\"" || *old_ext == ".cts'" {
-            ".cjs"
+    // Only rewrite within import/export module specifiers, not JSX text or
+    // other string literals. We look for `from "...ts"` or `import("...ts")`
+    // patterns to limit the rewrite scope.
+    let mut result = String::with_capacity(text.len());
+    let bytes = text.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        // Check for `from ` or `import(` patterns followed by a string literal
+        if i + 5 <= bytes.len() && &text[i..i + 5] == "from " {
+            result.push_str("from ");
+            i += 5;
+            // Skip whitespace
+            while i < bytes.len() && bytes[i].is_ascii_whitespace() {
+                result.push(bytes[i] as char);
+                i += 1;
+            }
+            // Now at the string literal — rewrite its extension
+            if i < bytes.len() && (bytes[i] == b'"' || bytes[i] == b'\'') {
+                let quote = bytes[i] as char;
+                let start = i + 1;
+                result.push(quote);
+                i += 1;
+                while i < bytes.len() && bytes[i] as char != quote {
+                    i += 1;
+                }
+                let specifier = &text[start..i];
+                let rewritten = rewrite_one_specifier(specifier);
+                result.push_str(&rewritten);
+                if i < bytes.len() {
+                    result.push(quote);
+                    i += 1;
+                }
+            }
+        } else if i + 7 <= bytes.len() && &text[i..i + 7] == "import(" {
+            result.push_str("import(");
+            i += 7;
+            while i < bytes.len() && bytes[i].is_ascii_whitespace() {
+                result.push(bytes[i] as char);
+                i += 1;
+            }
+            if i < bytes.len() && (bytes[i] == b'"' || bytes[i] == b'\'') {
+                let quote = bytes[i] as char;
+                let start = i + 1;
+                result.push(quote);
+                i += 1;
+                while i < bytes.len() && bytes[i] as char != quote {
+                    i += 1;
+                }
+                let specifier = &text[start..i];
+                let rewritten = rewrite_one_specifier(specifier);
+                result.push_str(&rewritten);
+                if i < bytes.len() {
+                    result.push(quote);
+                    i += 1;
+                }
+            }
         } else {
-            ".js"
-        };
-        let suffix = &old_ext[old_ext.len() - 1..]; // " or '
-        let replacement = format!("{}{}", new_ext, suffix);
-        result = result.replace(old_ext, &replacement);
+            // Copy one char
+            let ch = text[i..].chars().next().unwrap();
+            result.push(ch);
+            i += ch.len_utf8();
+        }
+    }
+    result
+}
+
+/// Rewrite a single module specifier's extension if it has a TS extension.
+fn rewrite_one_specifier(spec: &str) -> String {
+    for (old, new) in [
+        (".ts", ".js"),
+        (".tsx", ".js"),
+        (".mts", ".mjs"),
+        (".cts", ".cjs"),
+    ] {
+        if spec.ends_with(old) {
+            return format!("{}{}", &spec[..spec.len() - old.len()], new);
+        }
+    }
+    spec.to_string()
+}
+
+/// Add semicolons to lines that need them, matching Go's ASI printer behavior.
+fn add_implicit_semicolons(text: &str) -> String {
+    let mut result = String::with_capacity(text.len());
+    for line in text.lines() {
+        let trimmed = line.trim_end();
+        if trimmed.is_empty() {
+            result.push('\n');
+            continue;
+        }
+        let last = trimmed.chars().last().unwrap_or(' ');
+        // Skip lines that should not get a semicolon
+        let skip = matches!(
+            last,
+            '{' | '(' | '[' | ',' | ';' | ':' | '.' | '|' | '&' | '=' | '>' | '?'
+        ) || trimmed.ends_with("=>")
+            || trimmed.starts_with("//")
+            || trimmed.starts_with("/*")
+            || trimmed.ends_with("*/");
+        if skip {
+            result.push_str(trimmed);
+        } else if last == '}' || last == ')' {
+            result.push_str(trimmed);
+        } else {
+            result.push_str(trimmed);
+            result.push(';');
+        }
+        result.push('\n');
+    }
+    if !text.ends_with('\n') && result.ends_with('\n') {
+        result.pop();
     }
     result
 }
