@@ -495,6 +495,17 @@ pub struct Checker {
     // `Static_members_cannot_reference_class_type_parameters`.
     pub in_static_member_type: bool,
 
+    // Depth counter set while building interface call/construct signatures.
+    // When non-zero, unresolved type-name references in type nodes do not
+    // emit TS2304. This is needed because lib.d.ts construct/call signatures
+    // declare their own signature-level type parameters (e.g.
+    // `new <TArrayBuffer>(buffer: TArrayBuffer)`) that the binder does not
+    // always create symbols for; without suppression, processing those
+    // signatures would emit false "Cannot find name" errors. The unresolved
+    // names degrade to `any`, preserving the signature (which JSX component
+    // checks rely on).
+    pub suppress_cannot_find_name_in_type_nodes: u32,
+
     // Tracer
     pub tracer: Arc<Tracer>,
 
@@ -707,6 +718,7 @@ impl Checker {
             flow_node_reachable: HashMap::new(),
             flow_inline_level: 0,
             in_static_member_type: false,
+            suppress_cannot_find_name_in_type_nodes: 0,
 
             merged_symbols: HashMap::new(),
 

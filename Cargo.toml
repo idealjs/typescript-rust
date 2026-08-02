@@ -47,6 +47,8 @@ bitflags = "2"
 base64 = "0.22"
 # File system watching for `--watch` mode
 notify = "6"
+# Gzip decompression for embedded locale message bundles
+flate2 = "1"
 
 [dev-dependencies]
 pretty_assertions = "1"

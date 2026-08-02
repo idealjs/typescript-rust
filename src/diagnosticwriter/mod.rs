@@ -11,6 +11,7 @@ use std::sync::Arc;
 use crate::ast::diagnostic::Diagnostic;
 use crate::ast::{LineMap, SourceFile, utf16_len};
 use crate::diagnostics::Category;
+use crate::locale::Locale;
 
 /// Convert a byte offset into a 0-based (line, character) pair within a source
 /// file, using its line map. The character is a UTF-16 code unit offset from
@@ -40,28 +41,30 @@ pub fn line_and_character(line_map: &LineMap, text: &str, offset: usize) -> (usi
 /// Format a single diagnostic into a compact single-line string.
 ///
 /// Mirrors `WriteFormatDiagnostic`: `file(line,col): category TScode: message`.
-pub fn format_diagnostic_compact(diag: &Diagnostic) -> String {
+/// When `locale` is `Some`, the message is localized via `Message::localize`;
+/// otherwise the English text is used.
+pub fn format_diagnostic_compact(diag: &Diagnostic, locale: Option<&Locale>) -> String {
     let mut out = String::new();
     if let Some(file) = &diag.file {
         let (line, col) = line_and_character(&file.line_map, &file.text, diag.loc.pos());
         out.push_str(&format!("{}({},{}): ", file.file_name, line + 1, col + 1));
     }
     out.push_str(&format!("{} TS{}: ", diag.category.name(), diag.code));
-    out.push_str(&message_text(diag));
+    out.push_str(&message_text(diag, locale));
     out
 }
 
 /// Format a single diagnostic into a pretty string with a code snippet.
 ///
 /// Mirrors `FormatDiagnosticWithColorAndContext` (without ANSI colors).
-pub fn format_diagnostic_pretty(diag: &Diagnostic) -> String {
+pub fn format_diagnostic_pretty(diag: &Diagnostic, locale: Option<&Locale>) -> String {
     let mut out = String::new();
     if let Some(file) = &diag.file {
         let (line, col) = line_and_character(&file.line_map, &file.text, diag.loc.pos());
         out.push_str(&format!("{}:{}:{} - ", file.file_name, line + 1, col + 1));
     }
     out.push_str(&format!("{} TS{}: ", diag.category.name(), diag.code));
-    out.push_str(&message_text(diag));
+    out.push_str(&message_text(diag, locale));
     if let Some(file) = &diag.file {
         out.push('\n');
         out.push_str(&code_snippet(file, diag.loc.pos(), diag.loc.len()));
@@ -70,17 +73,21 @@ pub fn format_diagnostic_pretty(diag: &Diagnostic) -> String {
 }
 
 /// Resolve the flattened message text of a diagnostic (including its chain).
-pub fn message_text(diag: &Diagnostic) -> String {
+/// When `locale` is `Some`, each message is localized.
+pub fn message_text(diag: &Diagnostic, locale: Option<&Locale>) -> String {
     let mut out = match &diag.message {
         Some(msg) => {
             let args: Vec<&str> = diag.message_args.iter().map(|s| s.as_str()).collect();
-            msg.format(&args)
+            match locale {
+                Some(loc) => msg.localize(loc, &args),
+                None => msg.format(&args),
+            }
         }
         None => diag.message_args.join(""),
     };
     for chain in &diag.message_chain {
         out.push('\n');
-        out.push_str(&message_text(chain));
+        out.push_str(&message_text(chain, locale));
     }
     out
 }
@@ -105,11 +112,11 @@ fn code_snippet(file: &SourceFile, pos: usize, len: usize) -> String {
 }
 
 /// Format a diagnostic using the chosen style.
-pub fn format_diagnostic(diag: &Diagnostic, pretty: bool) -> String {
+pub fn format_diagnostic(diag: &Diagnostic, pretty: bool, locale: Option<&Locale>) -> String {
     if pretty {
-        format_diagnostic_pretty(diag)
+        format_diagnostic_pretty(diag, locale)
     } else {
-        format_diagnostic_compact(diag)
+        format_diagnostic_compact(diag, locale)
     }
 }
 
@@ -118,9 +125,10 @@ pub fn write_diagnostics<W: Write>(
     writer: &mut W,
     diags: &[Diagnostic],
     pretty: bool,
+    locale: Option<&Locale>,
 ) -> std::io::Result<()> {
     for diag in diags {
-        writeln!(writer, "{}", format_diagnostic(diag, pretty))?;
+        writeln!(writer, "{}", format_diagnostic(diag, pretty, locale))?;
     }
     Ok(())
 }
@@ -130,13 +138,14 @@ pub fn report_diagnostics<W: Write>(
     writer: &mut W,
     diags: &[Arc<Diagnostic>],
     pretty: bool,
+    locale: Option<&Locale>,
 ) -> std::io::Result<usize> {
     let mut error_count = 0usize;
     for diag in diags {
         if diag.category == Category::Error {
             error_count += 1;
         }
-        writeln!(writer, "{}", format_diagnostic(diag, pretty))?;
+        writeln!(writer, "{}", format_diagnostic(diag, pretty, locale))?;
     }
     Ok(error_count)
 }
@@ -199,7 +208,7 @@ mod tests {
             new_ad_hoc_message("Cannot find name 'x'."),
             vec![],
         );
-        let s = format_diagnostic_compact(&diag);
+        let s = format_diagnostic_compact(&diag, None);
         assert_eq!(s, "test.ts(2,2): error TS-1: Cannot find name 'x'.");
     }
 
@@ -212,7 +221,7 @@ mod tests {
             new_ad_hoc_message("oops"),
             vec![],
         );
-        let s = format_diagnostic_pretty(&diag);
+        let s = format_diagnostic_pretty(&diag, None);
         assert!(s.contains("test.ts:1:5 - error TS-1: oops"));
         assert!(s.contains("~"));
     }

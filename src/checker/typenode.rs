@@ -289,15 +289,22 @@ impl Checker {
                 // Report TS2304 "Cannot find name '{0}'." for unresolved type
                 // references. Mirrors Go's NameResolver which is called with
                 // `nameNotFoundMessage = Cannot_find_name_0` for type nodes.
-                use crate::diagnostics::messages_generated::CANNOT_FIND_NAME_0;
-                let name_text = type_name.text();
-                let file = self.current_file.clone();
-                self.diagnostics.add(crate::ast::Diagnostic::new(
-                    file,
-                    type_name.loc,
-                    CANNOT_FIND_NAME_0,
-                    vec![name_text.to_string()],
-                ));
+                //
+                // Suppressed while building interface call/construct
+                // signatures (see `suppress_cannot_find_name_in_type_nodes`),
+                // where lib.d.ts signatures may reference signature-level type
+                // parameters the binder has no symbol for.
+                if self.suppress_cannot_find_name_in_type_nodes == 0 {
+                    use crate::diagnostics::messages_generated::CANNOT_FIND_NAME_0;
+                    let name_text = type_name.text();
+                    let file = self.current_file.clone();
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        file,
+                        type_name.loc,
+                        CANNOT_FIND_NAME_0,
+                        vec![name_text.to_string()],
+                    ));
+                }
                 return self.error_type();
             }
         };
@@ -561,7 +568,15 @@ impl Checker {
         let mut symbol_table = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::new();
         let mut index_infos: Vec<Arc<crate::checker::IndexInfo>> = Vec::new();
-        let mut signatures: Vec<Arc<Signature>> = Vec::new();
+        // Call and construct signatures are tracked separately so that, after
+        // the member loop, they can be concatenated with call signatures first
+        // (StructuredTypeData stores call sigs at indices
+        // 0..call_signature_count, then construct sigs). Without this, an
+        // interface like `interface FC { (props): any }` loses its call
+        // signature, causing TS2604 for JSX components typed via such an
+        // interface (e.g. React's `ExoticComponent`/`StrictMode`).
+        let mut call_signatures: Vec<Arc<Signature>> = Vec::new();
+        let mut construct_signatures: Vec<Arc<Signature>> = Vec::new();
         for member in members.iter() {
             match &member.data {
                 NodeData::PropertySignatureDeclaration(data) => {
@@ -754,10 +769,52 @@ impl Checker {
                     symbol_table.insert(name, Arc::clone(&symbol));
                     props.push(symbol);
                 }
+                NodeData::CallSignatureDeclaration(data) => {
+                    // Suppress TS2304 while resolving the signature's
+                    // parameter/return types: lib.d.ts call/construct
+                    // signatures may reference signature-level type parameters
+                    // (e.g. `<TArrayBuffer>`) that have no binder symbol; such
+                    // names degrade to `any` instead of erroring. The
+                    // suppression is scoped to this signature's type
+                    // resolution only.
+                    self.suppress_cannot_find_name_in_type_nodes += 1;
+                    let return_type = match data.type_node.as_ref() {
+                        Some(tn) => self.get_type_from_type_node(tn),
+                        None => self.get_any_type(),
+                    };
+                    let sig = self.build_signature_from_function_like_type_node(
+                        &data.parameters,
+                        return_type,
+                        /* is_construct */ false,
+                        /* contextual_signature */ None,
+                        /* declaration */ Some(Arc::clone(member)),
+                    );
+                    self.suppress_cannot_find_name_in_type_nodes -= 1;
+                    call_signatures.push(sig);
+                }
+                NodeData::ConstructSignatureDeclaration(data) => {
+                    self.suppress_cannot_find_name_in_type_nodes += 1;
+                    let return_type = match data.type_node.as_ref() {
+                        Some(tn) => self.get_type_from_type_node(tn),
+                        None => self.get_any_type(),
+                    };
+                    let sig = self.build_signature_from_function_like_type_node(
+                        &data.parameters,
+                        return_type,
+                        /* is_construct */ true,
+                        /* contextual_signature */ None,
+                        /* declaration */ Some(Arc::clone(member)),
+                    );
+                    self.suppress_cannot_find_name_in_type_nodes -= 1;
+                    construct_signatures.push(sig);
+                }
                 _ => {}
             }
         }
-        let call_signature_count = signatures.len();
+        // Concatenate call signatures first, then construct signatures.
+        let call_signature_count = call_signatures.len();
+        let mut signatures = call_signatures;
+        signatures.extend(construct_signatures);
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,

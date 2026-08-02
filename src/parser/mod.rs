@@ -193,13 +193,23 @@ impl Parser {
             });
         }
 
-        let node = Arc::new(Node::with_loc(
+        // Set NodeFlags for JS/JSON files, mirroring Go's initializeState.
+        let mut context_flags = crate::ast::node_flags::NodeFlags::empty();
+        if matches!(script_kind, ScriptKind::Js | ScriptKind::Jsx) {
+            context_flags |= crate::ast::node_flags::NodeFlags::JavaScriptFile;
+        }
+        if matches!(script_kind, ScriptKind::Json) {
+            context_flags |= crate::ast::node_flags::NodeFlags::JavaScriptFile;
+            context_flags |= crate::ast::node_flags::NodeFlags::JsonFile;
+        }
+        let node = Arc::new(Node::with_loc_flags(
             SyntaxKind::SourceFile,
             NodeData::SourceFile(SourceFileData {
                 statements: Arc::new(statements),
                 end_of_file_token: end_of_file,
             }),
             TextRange::new(pos, end),
+            context_flags,
         ));
         let is_declaration_file = crate::tspath::is_declaration_file_name(file_name);
         let mut file = SourceFile {

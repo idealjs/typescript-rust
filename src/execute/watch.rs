@@ -10,6 +10,7 @@ use notify::{Config, RecursiveMode, Watcher};
 
 use super::{CommandLineResult, ExitStatus, System, perform_compilation};
 use crate::core::compiler_options::CompilerOptions;
+use crate::locale::Locale;
 use crate::tsoptions::{ParsedCommandLine, get_parsed_command_line_of_config_file};
 
 /// Run the compiler in watch mode.
@@ -28,6 +29,7 @@ pub(crate) fn watch_mode(
     base_options: CompilerOptions,
     config_file_name: &str,
     pretty: bool,
+    locale: Option<Locale>,
 ) -> CommandLineResult {
     // 1. Initial compilation + start banner.
     {
@@ -39,7 +41,14 @@ pub(crate) fn watch_mode(
             timestamp()
         );
     }
-    let result = compile_once(sys, &config, &base_options, config_file_name, pretty);
+    let result = compile_once(
+        sys,
+        &config,
+        &base_options,
+        config_file_name,
+        pretty,
+        locale.clone(),
+    );
     print_watch_summary(sys, result.status);
 
     // 2. Set up the file watcher on the project directory.
@@ -90,7 +99,14 @@ pub(crate) fn watch_mode(
                         timestamp()
                     );
                 }
-                let r = compile_once(sys, &config, &base_options, config_file_name, pretty);
+                let r = compile_once(
+                    sys,
+                    &config,
+                    &base_options,
+                    config_file_name,
+                    pretty,
+                    locale.clone(),
+                );
                 print_watch_summary(sys, r.status);
             }
             Err(_) => break,
@@ -112,6 +128,7 @@ pub(super) fn compile_once(
     base_options: &CompilerOptions,
     config_file_name: &str,
     pretty: bool,
+    locale: Option<Locale>,
 ) -> CommandLineResult {
     let fresh = if !config_file_name.is_empty() {
         get_parsed_command_line_of_config_file(
@@ -123,7 +140,7 @@ pub(super) fn compile_once(
     } else {
         config.clone()
     };
-    perform_compilation(sys, fresh, pretty)
+    perform_compilation(sys, fresh, pretty, locale.as_ref())
 }
 
 /// Print the post-compilation summary line shown after each compile in watch

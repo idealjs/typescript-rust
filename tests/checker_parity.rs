@@ -2067,6 +2067,48 @@ fn checker_jsx_class_component_no_error() {
     assert_no_diagnostics(&diags);
 }
 
+#[test]
+fn checker_jsx_function_component_returning_jsx_no_error() {
+    // Function component whose body contains JSX: no error expected.
+    let diags = check_source_tsx("function App() { return <div/> }\nconst el = <App />;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_jsx_arrow_function_component_no_error() {
+    // Arrow-function component assigned to a const: no error expected.
+    let diags = check_source_tsx("const App = () => <div/>;\nconst el = <App />;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_jsx_class_component_with_render_no_error() {
+    // Class component with a render method: no error expected.
+    let diags = check_source_tsx("class App { render() { return <div/> } }\nconst el = <App />;");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_jsx_interface_call_signature_component_no_error() {
+    // Component typed via an interface with a call signature (mirrors
+    // React's `ExoticComponent`/`StrictMode`). Previously this reported a
+    // false TS2604 because interface call signatures were dropped during
+    // `build_interface_type_from_members`.
+    let diags = check_source_tsx(
+        "interface FC { (props: any): any }\nconst Foo: FC = () => null;\nconst el = <Foo />;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_jsx_interface_construct_signature_component_no_error() {
+    // Component typed via an interface with a construct signature.
+    let diags = check_source_tsx(
+        "interface Ctor { new (): any }\nconst Foo: Ctor = class {};\nconst el = <Foo />;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // G1: JSX global namespace must be synthesized when --jsx is enabled but no
 // @types/react is in scope. Without it, every JSX element triggers false

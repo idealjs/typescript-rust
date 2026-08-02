@@ -1215,7 +1215,7 @@ fn diagnostic_to_lsp(diag: &crate::ast::diagnostic::Diagnostic, content: &str) -
         crate::diagnostics::Category::Message => 3,
     };
 
-    let message = crate::diagnosticwriter::message_text(diag);
+    let message = crate::diagnosticwriter::message_text(diag, None);
 
     json!({
         "range": {

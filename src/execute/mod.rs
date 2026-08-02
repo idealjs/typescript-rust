@@ -43,6 +43,7 @@ use crate::diagnostics::{
 };
 use crate::diagnosticwriter::{format_diagnostic, report_diagnostics};
 use crate::incremental::{BuildInfo, compute_options_hash};
+use crate::locale::Locale;
 use crate::tsoptions::{
     BUILD_OPTIONS, BuildOptions, OPTIONS, OPTIONS_FOR_WATCH, OptionDecl, ParsedBuildCommandLine,
     ParsedCommandLine, get_parsed_command_line_of_config_file, parse_build_command_line,
@@ -170,6 +171,17 @@ fn compiler_diagnostic(message: crate::diagnostics::Message, args: Vec<String>) 
     Diagnostic::new(None, TextRange::undefined(), message, args)
 }
 
+/// Resolve the effective locale from compiler options, returning `None` when no
+/// `--locale`/`"locale"` was specified (English fallback). Used to localize
+/// emitted diagnostics.
+fn locale_of(options: &CompilerOptions) -> Option<Locale> {
+    if options.locale.is_empty() {
+        None
+    } else {
+        Locale::parse(&options.locale)
+    }
+}
+
 /// The main entry point for the `tsc` command line.
 ///
 /// Mirrors `execute.CommandLine` in Go. Dispatches build mode (`-b`) or runs a
@@ -187,7 +199,7 @@ pub fn command_line(sys: &dyn System, args: &[String]) -> CommandLineResult {
         let mut writer = sys.writer();
         let diag =
             compiler_diagnostic(OPTION_BUILD_MUST_BE_THE_FIRST_COMMAND_LINE_ARGUMENT, vec![]);
-        let _ = writeln!(writer, "{}", format_diagnostic(&diag, false));
+        let _ = writeln!(writer, "{}", format_diagnostic(&diag, false, None));
         return CommandLineResult {
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
         };
@@ -209,11 +221,12 @@ fn tsc_build_compilation(
     command_line: ParsedBuildCommandLine,
 ) -> CommandLineResult {
     let pretty = should_be_pretty(sys, &command_line.compiler_options);
+    let locale = locale_of(&command_line.compiler_options);
 
     if !command_line.errors.is_empty() {
         let mut writer = sys.writer();
         for e in &command_line.errors {
-            let _ = writeln!(writer, "{}", format_diagnostic(e, pretty));
+            let _ = writeln!(writer, "{}", format_diagnostic(e, pretty, locale.as_ref()));
         }
         return CommandLineResult {
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
@@ -243,6 +256,7 @@ fn tsc_build_compilation(
             &command_line.compiler_options,
             &command_line.build_options,
             pretty,
+            locale.as_ref(),
             &mut seen_projects,
             &mut building,
             &mut cycle_stack,
@@ -402,6 +416,7 @@ fn build_project(
     compiler_options: &CompilerOptions,
     build_options: &BuildOptions,
     pretty: bool,
+    locale: Option<&Locale>,
     seen_projects: &mut HashSet<String>,
     building: &mut HashSet<String>,
     cycle_stack: &mut Vec<String>,
@@ -410,7 +425,7 @@ fn build_project(
         Ok(config) => config,
         Err(diag) => {
             let mut writer = sys.writer();
-            let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
+            let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty, locale));
             return CommandLineResult {
                 status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
             };
@@ -436,7 +451,7 @@ fn build_project(
             PROJECT_REFERENCES_MAY_NOT_FORM_A_CIRCULAR_GRAPH_CYCLE_DETECTED_COLON_0,
             vec![cycle_stack.join("\n")],
         );
-        let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
+        let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty, locale));
         return CommandLineResult {
             status: ExitStatus::ProjectReferenceCycle_OutputsSkipped,
         };
@@ -455,7 +470,7 @@ fn build_project(
     if !config.errors.is_empty() {
         let mut writer = sys.writer();
         for e in &config.errors {
-            let _ = writeln!(writer, "{}", format_diagnostic(e, pretty));
+            let _ = writeln!(writer, "{}", format_diagnostic(e, pretty, locale));
         }
         cycle_stack.pop();
         building.remove(&normalized_config);
@@ -473,6 +488,7 @@ fn build_project(
             compiler_options,
             build_options,
             pretty,
+            locale,
             seen_projects,
             building,
             cycle_stack,
@@ -524,7 +540,7 @@ fn build_project(
             }
         }
 
-        let result = perform_compilation(sys, config, pretty);
+        let result = perform_compilation(sys, config, pretty, locale);
         status = status.max(result.status);
 
         // Write .tsbuildinfo on successful build (not --clean).
@@ -597,12 +613,13 @@ fn resolve_config_file_name_of_project_reference(config_dir: &str, path: &str) -
 
 fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> CommandLineResult {
     let pretty = should_be_pretty(sys, &command_line.compiler_options);
+    let locale = locale_of(&command_line.compiler_options);
 
     // Report parse errors from the command line itself.
     if !command_line.errors.is_empty() {
         let mut writer = sys.writer();
         for e in &command_line.errors {
-            let _ = writeln!(writer, "{}", format_diagnostic(e, pretty));
+            let _ = writeln!(writer, "{}", format_diagnostic(e, pretty, locale.as_ref()));
         }
         return CommandLineResult {
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
@@ -640,7 +657,11 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
             OPTIONS_0_AND_1_CANNOT_BE_COMBINED,
             vec!["watch".to_string(), "listFilesOnly".to_string()],
         );
-        let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
+        let _ = writeln!(
+            writer,
+            "{}",
+            format_diagnostic(&diag, pretty, locale.as_ref())
+        );
         return CommandLineResult {
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
         };
@@ -656,7 +677,11 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
                 OPTION_PROJECT_CANNOT_BE_MIXED_WITH_SOURCE_FILES_ON_A_COMMAND_LINE,
                 vec![],
             );
-            let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
+            let _ = writeln!(
+                writer,
+                "{}",
+                format_diagnostic(&diag, pretty, locale.as_ref())
+            );
             return CommandLineResult {
                 status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
             };
@@ -673,7 +698,11 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
                     CANNOT_FIND_A_TSCONFIG_JSON_FILE_AT_THE_SPECIFIED_DIRECTORY_COLON_0,
                     vec![config_file_name.clone()],
                 );
-                let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
+                let _ = writeln!(
+                    writer,
+                    "{}",
+                    format_diagnostic(&diag, pretty, locale.as_ref())
+                );
                 return CommandLineResult {
                     status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
                 };
@@ -686,7 +715,11 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
                     THE_SPECIFIED_PATH_DOES_NOT_EXIST_COLON_0,
                     vec![file_or_directory.clone()],
                 );
-                let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
+                let _ = writeln!(
+                    writer,
+                    "{}",
+                    format_diagnostic(&diag, pretty, locale.as_ref())
+                );
                 return CommandLineResult {
                     status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
                 };
@@ -703,7 +736,11 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
                     X_TSCONFIG_JSON_IS_PRESENT_BUT_WILL_NOT_BE_LOADED_IF_FILES_ARE_SPECIFIED_ON_COMMANDLINE_USE_IGNORECONFIG_TO_SKIP_THIS_ERROR,
                     vec![],
                 );
-                let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
+                let _ = writeln!(
+                    writer,
+                    "{}",
+                    format_diagnostic(&diag, pretty, locale.as_ref())
+                );
                 return CommandLineResult {
                     status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
                 };
@@ -714,7 +751,11 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
                 CANNOT_FIND_A_TSCONFIG_JSON_FILE_AT_THE_CURRENT_DIRECTORY_COLON_0,
                 vec![search_path],
             );
-            let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
+            let _ = writeln!(
+                writer,
+                "{}",
+                format_diagnostic(&diag, pretty, locale.as_ref())
+            );
             let _ = writeln!(writer, "  Searching for: tsconfig.json");
             print_help(sys, false);
             return CommandLineResult {
@@ -741,7 +782,7 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
         if !config_parsed.errors.is_empty() {
             let mut writer = sys.writer();
             for e in &config_parsed.errors {
-                let _ = writeln!(writer, "{}", format_diagnostic(e, pretty));
+                let _ = writeln!(writer, "{}", format_diagnostic(e, pretty, locale.as_ref()));
             }
             return CommandLineResult {
                 status: ExitStatus::DiagnosticsPresent_OutputsGenerated,
@@ -769,10 +810,11 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
             base_options,
             &config_file_name,
             pretty,
+            locale,
         );
     }
 
-    perform_compilation(sys, config_for_compilation, pretty)
+    perform_compilation(sys, config_for_compilation, pretty, locale.as_ref())
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -1137,6 +1179,7 @@ fn perform_compilation(
     sys: &dyn System,
     config: ParsedCommandLine,
     pretty: bool,
+    locale: Option<&Locale>,
 ) -> CommandLineResult {
     let host: Arc<dyn CompilerHost> = Arc::new(CompilerHostImpl::new(
         sys.fs(),
@@ -1151,7 +1194,7 @@ fn perform_compilation(
 
     let diags = program.get_diagnostics_to_report();
     let mut writer = sys.writer();
-    let error_count = report_diagnostics(&mut writer, &diags, pretty).unwrap_or(0);
+    let error_count = report_diagnostics(&mut writer, &diags, pretty, locale).unwrap_or(0);
 
     // Run the type checker and merge semantic diagnostics.
     let semantic_diags: Vec<Arc<Diagnostic>> = program
@@ -1161,7 +1204,7 @@ fn perform_compilation(
         .collect();
     let semantic_error_count = if !semantic_diags.is_empty() {
         let mut writer = sys.writer();
-        report_diagnostics(&mut writer, &semantic_diags, pretty).unwrap_or(0)
+        report_diagnostics(&mut writer, &semantic_diags, pretty, locale).unwrap_or(0)
     } else {
         0
     };
@@ -1411,7 +1454,7 @@ fn write_config_file(sys: &dyn System, options: &CompilerOptions) -> CommandLine
             A_TSCONFIG_JSON_FILE_IS_ALREADY_DEFINED_AT_COLON_0,
             vec![config_file_name.clone()],
         );
-        let _ = writeln!(writer, "{}", format_diagnostic(&diag, false));
+        let _ = writeln!(writer, "{}", format_diagnostic(&diag, false, None));
         return CommandLineResult {
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
         };
@@ -2837,7 +2880,7 @@ mod tests {
         );
         config.compiler_options.watch = Tristate::True;
         // No config file present → compile_once reuses the parsed config.
-        let result = watch::compile_once(&sys, &config, &config.compiler_options, "", false);
+        let result = watch::compile_once(&sys, &config, &config.compiler_options, "", false, None);
         assert_eq!(
             result.status,
             ExitStatus::Success,
