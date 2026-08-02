@@ -23,7 +23,7 @@ TSGO_ORACLE=/Users/cqh/workspace/typescript-go/built/local/tsgo cargo test --tes
 
 ## 当前进度（2026-08-02）
 
-**2,041 通过**（1,129 lib + 910 checker_parity + 2 emit），96 ignored。
+**2,047 通过**（1,135 lib + 910 checker_parity + 2 emit），90 ignored。
 
 | 模块 | 完成度 |
 |------|--------|
@@ -57,28 +57,25 @@ P4 Emit ✅ | P5 Module Resolution ✅ | P6 Build/Watch ✅ | P7 LSP ✅ | P8 np
 
 ## P10：Go 测试用例 1:1 迁移
 
-Go **1,219 测试 / 508 文件 / 44 模块**。Rust **1,129 lib 通过 / 96 ignored**。
+Go **1,219 测试 / 508 文件 / 44 模块**。Rust **1,135 lib 通过 / 90 ignored**。
 
 全 ✅ 模块：tspath(24), semver(11), core(2), stringutil(3), scanner(1), astnav(5),
 sourcemap(30), compiler(2), symlinks(8), packagejson(4), bundled(2), debug(12),
 format(7), tracing(2), collections(8/8), diagnostics(2), vfs/cachedvfs(10),
-vfs/osvfs(3).
+vfs/osvfs(3), checker(2/2), vfs/iovfs(1), vfs/vfsmock(1).
 
-剩余 ⏳ 项：
+剩余 ⏳ 项（详见 RUST_ADAPTATIONS.md）：
 
 | 模块 | ⏳ 数 | 原因 |
 |------|-------|------|
 | printer | ~70 | 需完整 AST→文本 printer |
-| jsnum | 1 | TestStringJS 需 Node.js |
+| jsnum | 1 | TestStringJS 需 Node.js V8 |
 | ast | 1 | DeepCloneNode（需 generated NodeFactory） |
-| checker | 1 | Tracer（Rust 所有权限制） |
-| module | 2 | 并发竞态测试 |
+| module | 1 | trailing slash race（并发编译时安全已验证） |
 | modulespecifiers | 2 | symlink cache + exports 解析 |
-| nativepath | 4 | 平台特定 symlink |
-| vfs/vfstest | 4 | symlink |
+| nativepath | 3 | Windows reparse point（macOS symlink 已适配） |
+| vfs/vfstest | 4 | symlink 边缘场景 |
 | vfs/vfsmatch | 1 | symlink cycle |
-| vfs/iovfs | 1 | IO VFS 包装器 |
-| vfs/vfsmock | 1 | VFS mock |
 | execute/tsctests | 52 | shell-out 集成测试 |
 | lsp/project/api/ls | 202 | LS 功能测试 |
 | fourslash | 519 | 语言服务集成 |
