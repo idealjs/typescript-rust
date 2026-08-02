@@ -13,9 +13,9 @@ use std::sync::Arc;
 
 use crate::ast::node_data_generated::NodeData;
 use crate::ast::node_flags::ModifierFlags;
-use crate::ast::{Node, NodeFlags, SourceFile, SyntaxKind};
+use crate::ast::{Node, NodeFlags, NodeList, SourceFile, SyntaxKind};
 use crate::core::compiler_options::CompilerOptions;
-use crate::core::compiler_options::{ModuleKind, ScriptTarget};
+use crate::core::compiler_options::{JsxEmit, ModuleKind, ScriptTarget};
 use crate::sourcemap::{Generator, SourceIndex};
 use crate::tspath::{self, ComparePathsOptions};
 use crate::vfs::FS;
@@ -507,6 +507,26 @@ fn emit_js_text_inner<S: EmitSink>(
         Vec::new()
     };
 
+    // Collect JSX element replacements for react-jsx/react-jsxdev mode.
+    // Each JSX node is replaced with a `_jsx()`/`_jsxs()` call string.
+    let jsx_enabled = needs_jsx_transform(options, source_file);
+    let mut jsx_usage = JsxRuntimeUsage::default();
+    let jsx_replacements: Vec<(usize, usize, String)> = if jsx_enabled {
+        collect_jsx_replacements(&statements.nodes, source, &mut jsx_usage)
+    } else {
+        Vec::new()
+    };
+
+    // Build a combined replacement list (ES5 static + JSX dynamic) as `&str`
+    // so it can be passed to `emit_text_range` / `emit_statement`.
+    let mut all_replacements: Vec<(usize, usize, &str)> = Vec::new();
+    for &(s, e, r) in &replacements {
+        all_replacements.push((s, e, r));
+    }
+    for (s, e, r) in &jsx_replacements {
+        all_replacements.push((*s, *e, r.as_str()));
+    }
+
     let commonjs = options.module == ModuleKind::CommonJS;
 
     let mut prev_end = 0usize;
@@ -514,6 +534,16 @@ fn emit_js_text_inner<S: EmitSink>(
     // CommonJS modules start with "use strict";
     if commonjs {
         sink.emit_generated("\"use strict\";\n");
+    }
+
+    // Inject JSX runtime import when JSX was transformed.
+    if !jsx_replacements.is_empty() {
+        let import_source: &str = if options.jsx_import_source.is_empty() {
+            "react"
+        } else {
+            &options.jsx_import_source
+        };
+        sink.emit_generated(&build_jsx_import(&jsx_usage, import_source, commonjs));
     }
 
     for stmt in statements.iter() {
@@ -552,7 +582,7 @@ fn emit_js_text_inner<S: EmitSink>(
                 prev_end,
                 stmt.pos(),
                 &effective_cuts,
-                &replacements,
+                &all_replacements,
                 sink,
             );
         }
@@ -581,7 +611,7 @@ fn emit_js_text_inner<S: EmitSink>(
         }
 
         // Emit the statement with type annotations stripped.
-        emit_statement(stmt, source, &effective_cuts, &replacements, sink);
+        emit_statement(stmt, source, &effective_cuts, &all_replacements, sink);
         prev_end = stmt.end();
 
         // CommonJS: for declarations with `export` modifier, append
@@ -601,7 +631,7 @@ fn emit_js_text_inner<S: EmitSink>(
             prev_end,
             source.len(),
             &comment_cuts,
-            &replacements,
+            &all_replacements,
             sink,
         );
     }
@@ -1592,6 +1622,26 @@ fn emit_statement<S: EmitSink>(
 /// Recursively collect "cut ranges" — byte ranges in the source text that
 /// should be removed because they contain TypeScript type annotations.
 fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) {
+    // JSX nodes are handled entirely by the JSX transform. The generated
+    // replacement text already has types stripped, so we must NOT collect
+    // type cuts inside JSX nodes (they would conflict with replacements).
+    match node.kind {
+        SyntaxKind::JsxElement
+        | SyntaxKind::JsxSelfClosingElement
+        | SyntaxKind::JsxFragment
+        | SyntaxKind::JsxOpeningElement
+        | SyntaxKind::JsxAttributes
+        | SyntaxKind::JsxAttribute
+        | SyntaxKind::JsxSpreadAttribute
+        | SyntaxKind::JsxClosingElement
+        | SyntaxKind::JsxExpression
+        | SyntaxKind::JsxText
+        | SyntaxKind::JsxTextAllWhiteSpaces
+        | SyntaxKind::JsxOpeningFragment
+        | SyntaxKind::JsxClosingFragment
+        | SyntaxKind::JsxNamespacedName => return,
+        _ => {}
+    }
     match &node.data {
         NodeData::VariableDeclaration(d) => {
             // Cut the type annotation: ": Type"
@@ -1802,6 +1852,531 @@ fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) 
                 false
             });
         }
+    }
+}
+
+// ── JSX transform (react-jsx mode) ────────────────────────────────
+
+/// Tracks which JSX runtime helpers are used, to build the minimal import.
+#[derive(Default)]
+struct JsxRuntimeUsage {
+    used_jsx: bool,
+    used_jsxs: bool,
+    used_fragment: bool,
+}
+
+/// Whether JSX transformation should be applied to this source file.
+fn needs_jsx_transform(options: &CompilerOptions, source_file: &SourceFile) -> bool {
+    matches!(options.jsx, JsxEmit::ReactJSX | JsxEmit::ReactJSXDev)
+        && tspath::file_extension_is(&source_file.file_name, ".tsx")
+}
+
+/// Walk all statements and collect JSX element replacements.
+///
+/// For each top-level JSX node (not nested inside another JSX node), generates
+/// the `_jsx()`/`_jsxs()` replacement string. Nested JSX is handled recursively
+/// inside [`generate_jsx_call`].
+fn collect_jsx_replacements(
+    statements: &[Arc<Node>],
+    source: &str,
+    usage: &mut JsxRuntimeUsage,
+) -> Vec<(usize, usize, String)> {
+    let mut replacements = Vec::new();
+    for stmt in statements {
+        collect_jsx_replacements_recursive(stmt, source, &mut replacements, usage);
+    }
+    replacements
+}
+
+fn collect_jsx_replacements_recursive(
+    node: &Node,
+    source: &str,
+    replacements: &mut Vec<(usize, usize, String)>,
+    usage: &mut JsxRuntimeUsage,
+) {
+    match node.kind {
+        SyntaxKind::JsxElement | SyntaxKind::JsxSelfClosingElement | SyntaxKind::JsxFragment => {
+            let text = generate_jsx_call(node, source, usage);
+            replacements.push((node.pos(), node.end(), text));
+            // Don't recurse — nested JSX is handled inline by generate_jsx_call.
+        }
+        _ => {
+            crate::ast::node_data_generated::for_each_child(node, |child| {
+                collect_jsx_replacements_recursive(child, source, replacements, usage);
+                false
+            });
+        }
+    }
+}
+
+/// Generate the `_jsx()`/`_jsxs()` call string for a JSX node.
+fn generate_jsx_call(node: &Node, source: &str, usage: &mut JsxRuntimeUsage) -> String {
+    match &node.data {
+        NodeData::JsxSelfClosingElement(d) => {
+            generate_element_call(&d.tag_name, &d.attributes, None, source, usage)
+        }
+        NodeData::JsxElement(d) => {
+            let opener = &d.opening_element;
+            let (tag_name, attributes) = match &opener.data {
+                NodeData::JsxOpeningElement(o) => (&o.tag_name, &o.attributes),
+                _ => return source[node.pos()..node.end()].to_string(),
+            };
+            generate_element_call(tag_name, attributes, Some(&d.children), source, usage)
+        }
+        NodeData::JsxFragment(d) => generate_fragment_call(&d.children, source, usage),
+        _ => source[node.pos()..node.end()].to_string(),
+    }
+}
+
+/// Generate the `_jsx()`/`_jsxs()` call for an element (opening or self-closing).
+fn generate_element_call(
+    tag_name: &Arc<Node>,
+    attributes: &Arc<Node>,
+    children: Option<&Arc<NodeList>>,
+    source: &str,
+    usage: &mut JsxRuntimeUsage,
+) -> String {
+    let tag_str = tag_name_to_string(tag_name, source);
+
+    // Get attribute properties, extracting `key` if present.
+    let (props, key_arg) = attributes_to_props(attributes, source, usage);
+
+    // Convert children.
+    let children_prop = children.and_then(|c| convert_children(c, source, usage));
+
+    // Determine _jsx vs _jsxs.
+    let is_static = children.map_or(false, |c| is_static_children(c));
+
+    // Build props object string.
+    let mut all_props = props;
+    if let Some(children_str) = children_prop {
+        all_props.push(format!("children: {}", children_str));
+    }
+    let props_str = if all_props.is_empty() {
+        "{}".to_string()
+    } else {
+        format!("{{ {} }}", all_props.join(", "))
+    };
+
+    let callee = if is_static {
+        usage.used_jsxs = true;
+        "_jsxs"
+    } else {
+        usage.used_jsx = true;
+        "_jsx"
+    };
+
+    let mut result = format!("{}({}, {}", callee, tag_str, props_str);
+    if let Some(key) = key_arg {
+        result.push_str(&format!(", {}", key));
+    }
+    result.push(')');
+    result
+}
+
+/// Generate the `_jsx()`/`_jsxs()` call for a fragment `<>...</>`.
+fn generate_fragment_call(
+    children: &Arc<NodeList>,
+    source: &str,
+    usage: &mut JsxRuntimeUsage,
+) -> String {
+    usage.used_fragment = true;
+
+    let children_prop = convert_children(children, source, usage);
+    let is_static = is_static_children(children);
+
+    let props_str = match children_prop {
+        Some(c) => format!("{{ children: {} }}", c),
+        None => "{}".to_string(),
+    };
+
+    let callee = if is_static {
+        usage.used_jsxs = true;
+        "_jsxs"
+    } else {
+        usage.used_jsx = true;
+        "_jsx"
+    };
+
+    format!("{}(_Fragment, {})", callee, props_str)
+}
+
+/// Convert a JSX tag name to its output representation.
+///
+/// - Intrinsic names (lowercase identifiers like `div`) → `"div"` (string literal)
+/// - Namespace names (`a:b`) → `"a:b"` (string literal)
+/// - Component identifiers (`Foo`) / member expressions (`Foo.Bar`) → kept as-is
+fn tag_name_to_string(tag_name: &Node, source: &str) -> String {
+    if let NodeData::Identifier(d) = &tag_name.data {
+        if is_intrinsic_jsx_name(&d.text) {
+            return format!("\"{}\"", d.text);
+        }
+    }
+    if let NodeData::JsxNamespacedName(d) = &tag_name.data {
+        return format!("\"{}:{}\"", d.namespace.text(), d.name.text());
+    }
+    source[tag_name.pos()..tag_name.end()].to_string()
+}
+
+/// Convert JSX attributes to object-literal property strings.
+///
+/// Returns `(props, key_arg)` where `key_arg` is the extracted `key` attribute
+/// value (to be passed as the third argument to `_jsx`).
+fn attributes_to_props(
+    attributes: &Node,
+    source: &str,
+    usage: &mut JsxRuntimeUsage,
+) -> (Vec<String>, Option<String>) {
+    let mut props = Vec::new();
+    let mut key_arg = None;
+
+    let properties = match &attributes.data {
+        NodeData::JsxAttributes(d) => &d.properties,
+        _ => return (props, key_arg),
+    };
+
+    for attr in properties.iter() {
+        match &attr.data {
+            NodeData::JsxAttribute(d) => {
+                let name = attribute_name_to_string(&d.name, source);
+                // Extract `key` attribute as the third argument.
+                if name == "key" {
+                    key_arg = Some(match &d.initializer {
+                        Some(init) => attribute_value_to_string(init, source, usage),
+                        None => "true".to_string(),
+                    });
+                    continue;
+                }
+                let value = match &d.initializer {
+                    None => "true".to_string(),
+                    Some(init) => attribute_value_to_string(init, source, usage),
+                };
+                props.push(format!("{}: {}", name, value));
+            }
+            NodeData::JsxSpreadAttribute(d) => {
+                let expr_text = emit_expr_with_jsx(&d.expression, source, usage);
+                props.push(format!("...{}", expr_text));
+            }
+            _ => {}
+        }
+    }
+
+    (props, key_arg)
+}
+
+/// Convert a JSX attribute name to its output representation.
+///
+/// Valid identifiers are kept bare; others are quoted (e.g., `"aria-hidden"`).
+fn attribute_name_to_string(name: &Node, source: &str) -> String {
+    if let NodeData::Identifier(d) = &name.data {
+        return if is_valid_identifier(&d.text) {
+            d.text.clone()
+        } else {
+            format!("\"{}\"", d.text)
+        };
+    }
+    if let NodeData::JsxNamespacedName(d) = &name.data {
+        return format!("\"{}:{}\"", d.namespace.text(), d.name.text());
+    }
+    source[name.pos()..name.end()].to_string()
+}
+
+/// Convert a JSX attribute initializer to its output value string.
+fn attribute_value_to_string(init: &Node, source: &str, usage: &mut JsxRuntimeUsage) -> String {
+    match init.kind {
+        SyntaxKind::StringLiteral => {
+            // Keep source text (includes quotes).
+            source[init.pos()..init.end()].to_string()
+        }
+        SyntaxKind::JsxExpression => {
+            if let NodeData::JsxExpression(d) = &init.data {
+                match &d.expression {
+                    Some(expr) => emit_expr_with_jsx(expr, source, usage),
+                    None => "true".to_string(),
+                }
+            } else {
+                "true".to_string()
+            }
+        }
+        SyntaxKind::JsxElement | SyntaxKind::JsxSelfClosingElement | SyntaxKind::JsxFragment => {
+            generate_jsx_call(init, source, usage)
+        }
+        _ => source[init.pos()..init.end()].to_string(),
+    }
+}
+
+/// Convert JSX children to the `children` property value string.
+///
+/// Returns `None` when there are no semantic (non-whitespace) children.
+fn convert_children(
+    children: &Arc<NodeList>,
+    source: &str,
+    usage: &mut JsxRuntimeUsage,
+) -> Option<String> {
+    let semantic: Vec<Arc<Node>> = children
+        .iter()
+        .filter(|c| !is_whitespace_only_jsx_text(c))
+        .cloned()
+        .collect();
+
+    if semantic.is_empty() {
+        return None;
+    }
+
+    // Single non-spread child.
+    if semantic.len() == 1 && !is_spread_jsx_expression(&semantic[0]) {
+        return Some(transform_jsx_child(&semantic[0], source, usage));
+    }
+
+    // Multiple children → array.
+    let parts: Vec<String> = semantic
+        .iter()
+        .map(|c| transform_jsx_child(c, source, usage))
+        .collect();
+    Some(format!("[{}]", parts.join(", ")))
+}
+
+/// Whether the children list should produce `_jsxs` (static children).
+///
+/// `_jsxs` is used when there are multiple semantic children, or a single
+/// spread child (`{...expr}`).
+fn is_static_children(children: &Arc<NodeList>) -> bool {
+    let semantic: Vec<&Arc<Node>> = children
+        .iter()
+        .filter(|c| !is_whitespace_only_jsx_text(c))
+        .collect();
+    if semantic.len() > 1 {
+        return true;
+    }
+    if semantic.len() == 1 {
+        return is_spread_jsx_expression(semantic[0]);
+    }
+    false
+}
+
+/// Transform a single JSX child node to its output expression string.
+fn transform_jsx_child(child: &Node, source: &str, usage: &mut JsxRuntimeUsage) -> String {
+    match child.kind {
+        SyntaxKind::JsxText | SyntaxKind::JsxTextAllWhiteSpaces => {
+            let fixed = fixup_jsx_text(child.text());
+            format!("\"{}\"", escape_js_string(&fixed))
+        }
+        SyntaxKind::JsxExpression => {
+            if let NodeData::JsxExpression(d) = &child.data {
+                match &d.expression {
+                    Some(expr) => emit_expr_with_jsx(expr, source, usage),
+                    None => String::new(),
+                }
+            } else {
+                String::new()
+            }
+        }
+        SyntaxKind::JsxElement | SyntaxKind::JsxSelfClosingElement | SyntaxKind::JsxFragment => {
+            generate_jsx_call(child, source, usage)
+        }
+        _ => source[child.pos()..child.end()].to_string(),
+    }
+}
+
+/// Emit an expression's text with type annotations stripped and nested JSX
+/// transformed to `_jsx()` calls.
+///
+/// This handles cases like `{cond ? <div/> : <span/>}` where JSX nodes are
+/// nested inside non-JSX expressions.
+fn emit_expr_with_jsx(node: &Node, source: &str, usage: &mut JsxRuntimeUsage) -> String {
+    let start = node.pos();
+    let end = node.end();
+
+    // Collect type cuts within this expression.
+    let mut cuts: Vec<(usize, usize)> = Vec::new();
+    collect_type_cuts(node, source, &mut cuts);
+
+    // Collect nested JSX replacements within this expression.
+    let mut jsx_repls: Vec<(usize, usize, String)> = Vec::new();
+    collect_nested_jsx_in_expr(node, source, &mut jsx_repls, usage);
+
+    // Filter out type cuts that fall within JSX replacement ranges.
+    let cuts: Vec<(usize, usize)> = cuts
+        .iter()
+        .filter(|(cs, ce)| !jsx_repls.iter().any(|(js, je, _)| *cs >= *js && *ce <= *je))
+        .copied()
+        .collect();
+
+    // Build merged operations list.
+    let mut ops: Vec<(usize, usize, Option<String>)> = Vec::new();
+    for &(cs, ce) in &cuts {
+        if ce > start && cs < end {
+            ops.push((cs.max(start), ce.min(end), None));
+        }
+    }
+    for (rs, re, text) in &jsx_repls {
+        if *re > start && *rs < end {
+            ops.push(((*rs).max(start), (*re).min(end), Some(text.clone())));
+        }
+    }
+
+    if ops.is_empty() {
+        return source[start..end].to_string();
+    }
+
+    ops.sort_by_key(|(s, _, _)| *s);
+
+    let mut result = String::new();
+    let mut pos = start;
+    for (s, e, repl) in &ops {
+        if *s > pos {
+            result.push_str(&source[pos..*s]);
+        }
+        if let Some(r) = repl {
+            result.push_str(r);
+        }
+        pos = *e;
+    }
+    if pos < end {
+        result.push_str(&source[pos..end]);
+    }
+    result
+}
+
+/// Walk an expression's children and collect nested JSX node replacements.
+fn collect_nested_jsx_in_expr(
+    node: &Node,
+    source: &str,
+    repls: &mut Vec<(usize, usize, String)>,
+    usage: &mut JsxRuntimeUsage,
+) {
+    crate::ast::node_data_generated::for_each_child(node, |child| {
+        match child.kind {
+            SyntaxKind::JsxElement
+            | SyntaxKind::JsxSelfClosingElement
+            | SyntaxKind::JsxFragment => {
+                let text = generate_jsx_call(child, source, usage);
+                repls.push((child.pos(), child.end(), text));
+            }
+            _ => {
+                collect_nested_jsx_in_expr(child, source, repls, usage);
+            }
+        }
+        false
+    });
+}
+
+/// Whether a name is an intrinsic JSX element name (first char is not A-Z).
+fn is_intrinsic_jsx_name(text: &str) -> bool {
+    !text
+        .bytes()
+        .next()
+        .map_or(false, |c| c.is_ascii_uppercase())
+}
+
+/// Whether a string is a valid JavaScript identifier.
+fn is_valid_identifier(text: &str) -> bool {
+    let mut chars = text.chars();
+    match chars.next() {
+        Some(c) if c.is_alphabetic() || c == '_' || c == '$' => {}
+        _ => return false,
+    }
+    chars.all(|c| c.is_alphanumeric() || c == '_' || c == '$')
+}
+
+/// Whether a JSX node is whitespace-only text.
+fn is_whitespace_only_jsx_text(node: &Node) -> bool {
+    matches!(&node.data, NodeData::JsxText(d) if d.contains_only_trivia_white_spaces)
+}
+
+/// Whether a JSX expression node has a spread (`...`) token.
+fn is_spread_jsx_expression(node: &Node) -> bool {
+    matches!(&node.data, NodeData::JsxExpression(d) if d.dot_dot_dot_token.is_some())
+}
+
+/// Fixup whitespace and decode entities in JSX text, mirroring the JSX
+/// whitespace collapsing rules.
+fn fixup_jsx_text(text: &str) -> String {
+    let decoded = decode_jsx_entities(text);
+    if !decoded.contains('\n') {
+        return decoded;
+    }
+    let lines: Vec<&str> = decoded.split('\n').collect();
+    let n = lines.len();
+    let mut parts: Vec<String> = Vec::new();
+    for (i, line) in lines.iter().enumerate() {
+        let trimmed = if i == 0 {
+            line.trim_end()
+        } else if i == n - 1 {
+            line.trim_start()
+        } else {
+            line.trim()
+        };
+        if !trimmed.is_empty() {
+            parts.push(trimmed.to_string());
+        }
+    }
+    parts.join(" ")
+}
+
+/// Decode common JSX/HTML entities in text.
+fn decode_jsx_entities(text: &str) -> String {
+    if !text.contains('&') {
+        return text.to_string();
+    }
+    let mut result = text.to_string();
+    for (entity, replacement) in &[
+        ("&amp;", "&"),
+        ("&lt;", "<"),
+        ("&gt;", ">"),
+        ("&quot;", "\""),
+        ("&apos;", "'"),
+        ("&nbsp;", "\u{00A0}"),
+    ] {
+        result = result.replace(entity, replacement);
+    }
+    result
+}
+
+/// Escape a string for use inside a double-quoted JavaScript string literal.
+fn escape_js_string(text: &str) -> String {
+    let mut result = String::new();
+    for c in text.chars() {
+        match c {
+            '"' => result.push_str("\\\""),
+            '\\' => result.push_str("\\\\"),
+            '\n' => result.push_str("\\n"),
+            '\r' => result.push_str("\\r"),
+            '\t' => result.push_str("\\t"),
+            _ => result.push(c),
+        }
+    }
+    result
+}
+
+/// Build the JSX runtime import statement.
+///
+/// Only imports the helpers that were actually used. For ESM modules produces
+/// an `import` statement; for CommonJS produces a `require()` call.
+fn build_jsx_import(usage: &JsxRuntimeUsage, import_source: &str, commonjs: bool) -> String {
+    let mut specs: Vec<&str> = Vec::new();
+    let mut bindings: Vec<&str> = Vec::new();
+    if usage.used_fragment {
+        specs.push("Fragment as _Fragment");
+        bindings.push("Fragment: _Fragment");
+    }
+    if usage.used_jsx {
+        specs.push("jsx as _jsx");
+        bindings.push("jsx: _jsx");
+    }
+    if usage.used_jsxs {
+        specs.push("jsxs as _jsxs");
+        bindings.push("jsxs: _jsxs");
+    }
+    let runtime = format!("{}/jsx-runtime", import_source);
+    if commonjs {
+        format!(
+            "const {{ {} }} = require(\"{}\");\n",
+            bindings.join(", "),
+            runtime
+        )
+    } else {
+        format!("import {{ {} }} from \"{}\";\n", specs.join(", "), runtime)
     }
 }
 
@@ -2906,5 +3481,171 @@ mod tests {
             js.contains("require(\"./bar\")"),
             "import_elision: mixed import should still require the module, got {js:?}"
         );
+    }
+
+    // ── JSX transform tests (react-jsx mode) ────────────────────────────
+
+    fn parse_tsx(source: &str) -> SourceFile {
+        let (file, _diags) =
+            Parser::parse_source_file_text_with_diagnostics("/test.tsx", source.to_string());
+        file
+    }
+
+    fn emit_to_string_jsx(source: &str) -> String {
+        let sf = parse_tsx(source);
+        let mut opts = CompilerOptions::default();
+        opts.jsx = JsxEmit::ReactJSX;
+        emit_js_text(&sf, &opts)
+    }
+
+    #[test]
+    fn jsx_self_closing_element() {
+        let js = emit_to_string_jsx("const x = <div />;");
+        assert!(js.contains("_jsx(\"div\", {})"));
+        assert!(
+            js.contains("import { jsx as _jsx } from \"react/jsx-runtime\";"),
+            "expected jsx import, got {js:?}"
+        );
+    }
+
+    #[test]
+    fn jsx_element_with_string_attribute() {
+        let js = emit_to_string_jsx("const x = <div className=\"x\" />;");
+        assert!(js.contains("_jsx(\"div\", { className: \"x\" })"));
+    }
+
+    #[test]
+    fn jsx_element_with_expression_attribute() {
+        let js = emit_to_string_jsx("const x = <div onClick={handler} />;");
+        assert!(js.contains("onClick: handler"));
+    }
+
+    #[test]
+    fn jsx_element_with_boolean_attribute() {
+        let js = emit_to_string_jsx("const x = <input disabled />;");
+        assert!(js.contains("disabled: true"));
+    }
+
+    #[test]
+    fn jsx_element_with_single_text_child() {
+        let js = emit_to_string_jsx("const x = <h1>Hello</h1>;");
+        assert!(js.contains("_jsx(\"h1\", { children: \"Hello\" })"));
+    }
+
+    #[test]
+    fn jsx_element_with_single_element_child() {
+        let js = emit_to_string_jsx("const x = <div><span /></div>;");
+        assert!(
+            js.contains("children: _jsx(\"span\", {})"),
+            "expected single element child, got {js:?}"
+        );
+    }
+
+    #[test]
+    fn jsx_element_with_multiple_children() {
+        let js = emit_to_string_jsx("const x = <div><span /><p /></div>;");
+        assert!(js.contains("_jsxs(\"div\","));
+        assert!(js.contains("children: [_jsx(\"span\", {}), _jsx(\"p\", {})]"));
+    }
+
+    #[test]
+    fn jsx_fragment() {
+        let js = emit_to_string_jsx("const x = <><span /><p /></>;");
+        assert!(js.contains("_jsxs(_Fragment,"));
+        assert!(
+            js.contains("import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs }"),
+            "expected all three imports, got {js:?}"
+        );
+    }
+
+    #[test]
+    fn jsx_fragment_empty() {
+        let js = emit_to_string_jsx("const x = <></>;");
+        assert!(js.contains("_jsx(_Fragment, {})"));
+    }
+
+    #[test]
+    fn jsx_expression_child() {
+        let js = emit_to_string_jsx("const x = <div>{count}</div>;");
+        assert!(js.contains("children: count"));
+    }
+
+    #[test]
+    fn jsx_mixed_children() {
+        let js = emit_to_string_jsx("const x = <p>Edit <code>file</code> now</p>;");
+        assert!(js.contains("_jsxs(\"p\","));
+        assert!(js.contains("\"Edit \""));
+        assert!(js.contains("_jsx(\"code\", { children: \"file\" })"));
+        assert!(js.contains("\" now\""));
+    }
+
+    #[test]
+    fn jsx_component_tag() {
+        let js = emit_to_string_jsx("const x = <Foo bar=\"1\" />;");
+        assert!(js.contains("_jsx(Foo, { bar: \"1\" })"));
+    }
+
+    #[test]
+    fn jsx_member_expression_tag() {
+        let js = emit_to_string_jsx("const x = <Foo.Bar />;");
+        assert!(js.contains("_jsx(Foo.Bar, {})"));
+    }
+
+    #[test]
+    fn jsx_namespaced_attribute() {
+        let js = emit_to_string_jsx("const x = <div aria-hidden=\"true\" />;");
+        assert!(js.contains("\"aria-hidden\": \"true\""));
+    }
+
+    #[test]
+    fn jsx_import_injection() {
+        let js = emit_to_string_jsx("const x = <div />;");
+        let import_line = js
+            .lines()
+            .find(|l| l.starts_with("import"))
+            .expect("should have an import");
+        assert_eq!(
+            import_line,
+            "import { jsx as _jsx } from \"react/jsx-runtime\";"
+        );
+    }
+
+    #[test]
+    fn jsx_import_only_used_helpers() {
+        // No fragment → should not import _Fragment, only _jsx and _jsxs
+        let js = emit_to_string_jsx("const x = <div><a /><b /></div>;");
+        assert!(!js.contains("Fragment as _Fragment"));
+        assert!(js.contains("jsx as _jsx"));
+        assert!(js.contains("jsxs as _jsxs"));
+    }
+
+    #[test]
+    fn jsx_preserves_expression_in_attribute() {
+        let js = emit_to_string_jsx("const x = <button onClick={() => fn(1)}>click</button>;");
+        assert!(js.contains("onClick: () => fn(1)"));
+        assert!(js.contains("children: \"click\""));
+    }
+
+    #[test]
+    fn jsx_nested_elements() {
+        let js = emit_to_string_jsx("const x = <div><span><p /></span></div>;");
+        assert!(js.contains("children: _jsx(\"span\", { children: _jsx(\"p\", {}) })"));
+    }
+
+    #[test]
+    fn jsx_no_transform_when_not_tsx() {
+        // .ts files should not transform JSX even if jsx option is set
+        let (sf, _diags) =
+            Parser::parse_source_file_text_with_diagnostics("/test.ts", "const x = 1;".to_string());
+        let mut opts = CompilerOptions::default();
+        opts.jsx = JsxEmit::ReactJSX;
+        let js = emit_js_text(&sf, &opts);
+        assert!(!js.contains("_jsx"));
+    }
+
+    #[test]
+    fn jsx_empty_element_no_children_prop() {
+        let js = emit_to_string_jsx("const x = <section id=\"main\"></section>;");
+        assert!(js.contains("_jsx(\"section\", { id: \"main\" })"));
     }
 }
