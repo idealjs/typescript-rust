@@ -11,7 +11,7 @@
 
 use std::sync::Arc;
 
-use crate::ast::node_data_generated::NodeData;
+use crate::ast::node_data_generated::{ImportDeclarationData, NodeData};
 use crate::ast::node_flags::ModifierFlags;
 use crate::ast::{Node, NodeFlags, NodeList, SourceFile, SyntaxKind};
 use crate::core::compiler_options::CompilerOptions;
@@ -558,11 +558,16 @@ fn emit_js_text_inner<S: EmitSink>(
         // BEFORE the statement's `pos()` (the parser sets the statement
         // position to the declaration keyword, not the modifier), so we
         // must apply these cuts during inter-statement text emission.
-        let modifier_cuts: Vec<(usize, usize)> = if commonjs {
+        let mut modifier_cuts: Vec<(usize, usize)> = if commonjs {
             collect_export_modifier_cuts(stmt, source)
         } else {
             Vec::new()
         };
+        // Type-only modifier keywords (abstract, declare, override, readonly)
+        // on top-level declarations also live before `stmt.pos()` and must be
+        // stripped during inter-statement text emission. Nested member
+        // modifiers are handled inside `collect_type_cuts`.
+        collect_modifier_cuts(stmt, source, &mut modifier_cuts);
 
         // Merge modifier cuts into comment cuts for both inter-statement
         // text and statement text emission.
@@ -1526,11 +1531,50 @@ fn is_type_only_statement(node: &Node) -> bool {
     match &node.data {
         NodeData::InterfaceDeclaration(_) => true,
         NodeData::TypeAliasDeclaration(_) => true,
-        // Note: `import type` detection requires source text inspection,
-        // which is done in `emit_js_text` via the ImportClause position.
-        // For now, we don't skip `import type` here — it will be emitted as-is.
+        // `import type { ... }`, `import type d`, `import type * as ns` — the
+        // entire declaration is type-only (ImportClause.phase_modifier ==
+        // TypeKeyword) and is elided. Also elides inline imports whose every
+        // binding is type-only (e.g. `import { type Foo }`) when there is no
+        // default value binding. Mirrors Go's typeeraser ImportDeclaration /
+        // ImportClause / NamedImports elision logic.
+        NodeData::ImportDeclaration(d) => is_type_only_import(d),
         _ => false,
     }
+}
+
+/// Whether an import declaration carries no runtime binding and should be
+/// elided entirely.
+fn is_type_only_import(d: &ImportDeclarationData) -> bool {
+    let clause = match &d.import_clause {
+        Some(c) => c,
+        None => return false, // side-effect import: `import "./bar"`
+    };
+    let cd = match &clause.data {
+        NodeData::ImportClause(cd) => cd,
+        _ => return false,
+    };
+    // `import type ...` — whole declaration is type-only.
+    if cd.phase_modifier == Some(SyntaxKind::TypeKeyword) {
+        return true;
+    }
+    // No default value binding and every named specifier is type-only → elide.
+    if cd.name.is_none() {
+        if let Some(bindings) = &cd.named_bindings {
+            if let NodeData::NamedImports(named) = &bindings.data {
+                return !named.elements.is_empty()
+                    && named
+                        .elements
+                        .iter()
+                        .all(|spec| is_type_only_import_specifier(spec));
+            }
+        }
+    }
+    false
+}
+
+/// Whether an import specifier node is type-only.
+fn is_type_only_import_specifier(spec: &Node) -> bool {
+    matches!(&spec.data, NodeData::ImportSpecifier(sd) if sd.is_type_only)
 }
 
 /// Rewrite relative import/export specifiers in the emitted JS text.
@@ -1595,9 +1639,14 @@ fn emit_statement<S: EmitSink>(
     }
 
     // Merge cuts and replacements into a single sorted operation list.
+    // Cuts are clamped to the statement's `[pos, end)` range so that modifier
+    // keywords sitting *before* `pos` (e.g. top-level `abstract`/`declare`,
+    // handled during inter-statement text emission) don't corrupt the body.
     let mut ops: Vec<(usize, usize, Option<&str>)> = Vec::new();
     for (cs, ce) in &cuts {
-        ops.push((*cs, *ce, None));
+        if *ce > node.pos() && *cs < node.end() {
+            ops.push(((*cs).max(node.pos()), (*ce).min(node.end()), None));
+        }
     }
     for (rs, re, repl) in &stmt_replacements {
         ops.push((*rs, *re, Some(*repl)));
@@ -1642,6 +1691,12 @@ fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) 
         | SyntaxKind::JsxNamespacedName => return,
         _ => {}
     }
+    // Cut TypeScript-only modifier keywords (abstract, declare, override,
+    // readonly). These are valid modifier tokens on declarations/members but
+    // have no JavaScript equivalent, so they are stripped. `accessor` is NOT
+    // cut — it is a runtime (ES2022 auto-accessor) modifier preserved by the
+    // Go type eraser. Mirrors Go's typeeraser keyword elision list.
+    collect_modifier_cuts(node, source, cuts);
     match &node.data {
         NodeData::VariableDeclaration(d) => {
             // Cut the type annotation: ": Type"
@@ -1723,6 +1778,8 @@ fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) 
             if let Some(tp) = &d.type_parameters {
                 cuts.push((tp.pos(), tp.end()));
             }
+            // Cut `implements` heritage clauses entirely (TypeScript-only).
+            cut_implements_clauses(d.heritage_clauses.as_deref(), source, cuts);
             // Recurse into members.
             for member in d.members.iter() {
                 collect_type_cuts(member, source, cuts);
@@ -1732,6 +1789,7 @@ fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) 
             if let Some(tp) = &d.type_parameters {
                 cuts.push((tp.pos(), tp.end()));
             }
+            cut_implements_clauses(d.heritage_clauses.as_deref(), source, cuts);
             for member in d.members.iter() {
                 collect_type_cuts(member, source, cuts);
             }
@@ -1783,10 +1841,25 @@ fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) 
                 cuts.push((d.name.end(), type_node.end()));
             }
         }
+        NodeData::ImportDeclaration(d) => {
+            // Mixed imports with per-binding `type` modifiers (e.g.
+            // `import { type Foo, Bar }`) keep their value bindings and elide
+            // the type-only specifiers. Whole-declaration `import type` and
+            // all-type-only inline imports are elided earlier by
+            // `is_type_only_statement`, so this only runs for mixed imports.
+            if let Some(clause) = &d.import_clause {
+                collect_import_clause_type_cuts(clause, source, cuts);
+            }
+        }
         NodeData::AsExpression(d) => {
             // Cut "as Type" — the expression stays, the type is removed.
             // The "as" keyword is between expression.end() and type.pos().
             cuts.push((d.expression.end(), d.type_node.end()));
+        }
+        NodeData::TypeAssertion(d) => {
+            // `<Type>expr` — keep the expression, cut `<Type>`.
+            cuts.push((node.pos(), d.expression.pos()));
+            collect_type_cuts(&d.expression, source, cuts);
         }
         NodeData::SatisfiesExpression(d) => {
             // Cut "satisfies Type" — same as AsExpression.
@@ -1853,6 +1926,152 @@ fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) 
             });
         }
     }
+}
+
+/// Cut ranges for TypeScript-only modifier keyword tokens.
+///
+/// Strips `abstract`, `declare`, `override`, and `readonly` modifiers (plus
+/// their trailing whitespace) from a node's modifier list. These keywords have
+/// no JavaScript meaning. `accessor` is intentionally NOT cut — it is a
+/// runtime ES2022 auto-accessor modifier that the Go type eraser preserves.
+fn collect_modifier_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) {
+    let modifiers = node.modifier_nodes();
+    if modifiers.is_empty() {
+        return;
+    }
+    let bytes = source.as_bytes();
+    for mod_node in modifiers {
+        if matches!(
+            mod_node.kind,
+            SyntaxKind::AbstractKeyword
+                | SyntaxKind::DeclareKeyword
+                | SyntaxKind::OverrideKeyword
+                | SyntaxKind::ReadonlyKeyword
+        ) {
+            let start = mod_node.pos();
+            let mut end = mod_node.end();
+            // Absorb trailing whitespace so the declaration starts cleanly.
+            while end < bytes.len() && (bytes[end] == b' ' || bytes[end] == b'\t') {
+                end += 1;
+            }
+            cuts.push((start, end));
+        }
+    }
+}
+
+/// Cut `implements` heritage clauses from a class's heritage clause list.
+///
+/// The entire `implements` clause (keyword + type list) is TypeScript-only and
+/// removed. The cut start is extended backward over preceding whitespace so a
+/// preceding `extends` clause isn't left with a dangling space.
+fn cut_implements_clauses(
+    heritage_clauses: Option<&NodeList>,
+    source: &str,
+    cuts: &mut Vec<(usize, usize)>,
+) {
+    let clauses = match heritage_clauses {
+        Some(c) => c,
+        None => return,
+    };
+    let bytes = source.as_bytes();
+    for hc in clauses.iter() {
+        if let NodeData::HeritageClause(hcd) = &hc.data {
+            if hcd.token == SyntaxKind::ImplementsKeyword {
+                let mut start = hc.pos();
+                while start > 0 && (bytes[start - 1] == b' ' || bytes[start - 1] == b'\t') {
+                    start -= 1;
+                }
+                cuts.push((start, hc.end()));
+            }
+        }
+    }
+}
+
+/// Collect cuts for type-only specifiers within an import clause (mixed
+/// imports). When every named specifier is type-only but a default value
+/// binding exists, the entire named-imports group (and its preceding `, `) is
+/// cut. Otherwise each type-only specifier is cut with an adjacent comma.
+fn collect_import_clause_type_cuts(clause: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) {
+    let cd = match &clause.data {
+        NodeData::ImportClause(cd) => cd,
+        _ => return,
+    };
+    // `import type ...` is elided wholesale by `is_type_only_statement`.
+    let bindings = match &cd.named_bindings {
+        Some(b) => b,
+        None => return,
+    };
+    let named = match &bindings.data {
+        NodeData::NamedImports(named) => named,
+        _ => return,
+    };
+    if named.elements.is_empty() {
+        return;
+    }
+    let all_type = named
+        .elements
+        .iter()
+        .all(|spec| is_type_only_import_specifier(spec));
+
+    if all_type {
+        // All named specifiers are type-only. If there is a default value
+        // import, drop just the named-imports group; otherwise the whole
+        // statement is elided elsewhere.
+        if cd.name.is_some() {
+            let bytes = source.as_bytes();
+            let mut start = bindings.pos();
+            while start > 0 && (bytes[start - 1] == b' ' || bytes[start - 1] == b'\t') {
+                start -= 1;
+            }
+            if start > 0 && bytes[start - 1] == b',' {
+                start -= 1;
+            }
+            cuts.push((start, bindings.end()));
+        }
+        return;
+    }
+
+    // Mixed: cut each type-only specifier with an adjacent comma.
+    for spec in named.elements.iter() {
+        if is_type_only_import_specifier(spec) {
+            cuts.push(specifier_cut_range(spec, source));
+        }
+    }
+}
+
+/// Compute the cut range for a single type-only import specifier, extending
+/// the range to absorb an adjacent comma so the remaining list stays valid.
+///
+/// - `{ type Foo, Bar }`  → cut `type Foo, ` (forward comma)
+/// - `{ Bar, type Foo }`  → cut `, type Foo` (backward comma)
+fn specifier_cut_range(spec: &Node, source: &str) -> (usize, usize) {
+    let s = spec.pos();
+    let e = spec.end();
+    let bytes = source.as_bytes();
+
+    // Try to absorb a preceding comma.
+    let mut back = s;
+    while back > 0 && (bytes[back - 1] == b' ' || bytes[back - 1] == b'\t') {
+        back -= 1;
+    }
+    if back > 0 && bytes[back - 1] == b',' {
+        return (back - 1, e);
+    }
+
+    // No preceding comma — try to absorb a following comma.
+    let mut fwd = e;
+    while fwd < bytes.len() && (bytes[fwd] == b' ' || bytes[fwd] == b'\t') {
+        fwd += 1;
+    }
+    if fwd < bytes.len() && bytes[fwd] == b',' {
+        let mut end = fwd + 1;
+        while end < bytes.len() && (bytes[end] == b' ' || bytes[end] == b'\t') {
+            end += 1;
+        }
+        return (s, end);
+    }
+
+    (s, e)
 }
 
 // ── JSX transform (react-jsx mode) ────────────────────────────────
@@ -3647,5 +3866,141 @@ mod tests {
     fn jsx_empty_element_no_children_prop() {
         let js = emit_to_string_jsx("const x = <section id=\"main\"></section>;");
         assert!(js.contains("_jsx(\"section\", { id: \"main\" })"));
+    }
+
+    // ── F5: Type Eraser enhancement tests ──────────────────────────────
+
+    #[test]
+    fn type_eraser_strips_abstract_class_modifier() {
+        let js = emit_to_string("abstract class Foo { abstract bar(): void; }");
+        assert!(!js.contains("abstract"));
+        assert!(js.contains("class Foo"));
+        assert!(js.contains("bar()"));
+    }
+
+    #[test]
+    fn type_eraser_strips_readonly_modifier() {
+        let js = emit_to_string("class Foo { readonly x: number = 1; }");
+        assert!(!js.contains("readonly"));
+        assert!(js.contains("x = 1;"));
+    }
+
+    #[test]
+    fn type_eraser_strips_override_modifier() {
+        let js = emit_to_string("class Foo { override m(): void {} }");
+        assert!(!js.contains("override"));
+        assert!(js.contains("m()"));
+    }
+
+    #[test]
+    fn type_eraser_strips_implements_clause() {
+        let js = emit_to_string("interface I { x: number; }\nclass Foo implements I { x = 1; }");
+        assert!(!js.contains("implements"));
+        assert!(!js.contains("interface"));
+        assert!(js.contains("class Foo"));
+        assert!(js.contains("x = 1;"));
+    }
+
+    #[test]
+    fn type_eraser_keeps_extends_strips_implements() {
+        let js =
+            emit_to_string("class Base {}\ninterface I {}\nclass Foo extends Base implements I {}");
+        assert!(js.contains("extends Base"));
+        assert!(!js.contains("implements"));
+    }
+
+    #[test]
+    fn type_eraser_strips_declare_keyword() {
+        let js = emit_to_string("declare const x: number;\nlet y = x;");
+        assert!(!js.contains("declare"));
+    }
+
+    #[test]
+    fn type_eraser_strips_type_assertion() {
+        // `<number>5` type assertion — keeps `5`, drops `<number>`.
+        // Only meaningful if the parser produces a TypeAssertion node; if it
+        // does not, the source is emitted verbatim and `<number>` would leak.
+        let js = emit_to_string("let x = <number>5;");
+        assert!(
+            !js.contains("<number>"),
+            "type assertion <number> should be erased, got {js:?}"
+        );
+        assert!(js.contains("5;"));
+    }
+
+    // ── F6: Import Elision tests ───────────────────────────────────────
+
+    #[test]
+    fn import_elision_import_type_named() {
+        let js = emit_to_string("import type { Foo } from \"./bar\";\nlet x = 1;");
+        assert!(!js.contains("import"));
+        assert!(!js.contains("Foo"));
+        assert!(js.contains("let x = 1;"));
+    }
+
+    #[test]
+    fn import_elision_import_type_default() {
+        let js = emit_to_string("import type Foo from \"./bar\";\nlet x = 1;");
+        assert!(!js.contains("import"));
+        assert!(!js.contains("Foo"));
+        assert!(js.contains("let x = 1;"));
+    }
+
+    #[test]
+    fn import_elision_import_type_namespace() {
+        let js = emit_to_string("import type * as ns from \"./bar\";\nlet x = 1;");
+        assert!(!js.contains("import"));
+        assert!(!js.contains("require"));
+        assert!(js.contains("let x = 1;"));
+    }
+
+    #[test]
+    fn import_elision_mixed_named_bindings() {
+        // `import { type Foo, Bar }` — Foo elided, Bar retained.
+        let js = emit_to_string("import { type Foo, Bar } from \"./bar\";\nlet x = Bar;");
+        assert!(
+            !js.contains("Foo"),
+            "type-only binding Foo should be elided, got {js:?}"
+        );
+        assert!(
+            js.contains("Bar"),
+            "value binding Bar should be retained, got {js:?}"
+        );
+        assert!(js.contains("from \"./bar\";"));
+    }
+
+    #[test]
+    fn import_elision_mixed_named_bindings_trailing() {
+        // `import { Bar, type Foo }` — Foo elided (backward comma), Bar kept.
+        let js = emit_to_string("import { Bar, type Foo } from \"./bar\";\nlet x = Bar;");
+        assert!(!js.contains("Foo"));
+        assert!(js.contains("Bar"));
+        assert!(js.contains("from \"./bar\";"));
+    }
+
+    #[test]
+    fn import_elision_mixed_default_and_type_named() {
+        // Default value import kept; type-only named group dropped.
+        let js = emit_to_string("import Foo, { type Bar } from \"./bar\";\nlet x = Foo;");
+        assert!(js.contains("Foo"));
+        assert!(!js.contains("Bar"));
+        assert!(js.contains("from \"./bar\";"));
+    }
+
+    #[test]
+    fn import_elision_preserves_value_import() {
+        let js = emit_to_string("import { foo } from \"./bar\";\nlet x = foo;");
+        assert!(js.contains("import { foo }"));
+        assert!(js.contains("from \"./bar\";"));
+    }
+
+    #[test]
+    fn import_elision_all_inline_type_only() {
+        // Every inline binding is type-only and no default → elide entirely.
+        let js = emit_to_string("import { type Foo, type Bar } from \"./bar\";\nlet x = 1;");
+        assert!(!js.contains("import"));
+        assert!(!js.contains("Foo"));
+        assert!(!js.contains("Bar"));
+        assert!(js.contains("let x = 1;"));
     }
 }
