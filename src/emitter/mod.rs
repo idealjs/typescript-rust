@@ -801,10 +801,26 @@ fn emit_declaration_statement(node: &Node, source: &str, start: usize, output: &
         // Function: strip body, replace with ';'.
         NodeData::FunctionDeclaration(d) => {
             if let Some(body) = &d.body {
-                // Emit signature (up to body start), trim trailing space, add ';'.
+                // Emit signature (up to body start), trim trailing space.
                 let sig = &source[start..body.pos()];
-                output.push_str(sig.trim_end());
-                output.push(';');
+                let sig_trimmed = sig.trim_end();
+
+                // Check if signature already has a return type annotation.
+                // If not, and the function body returns JSX, add the
+                // JSX.Element return type (matching Go's checker-driven
+                // declaration emit for React components).
+                let has_return_type = sig_trimmed.rfind(')').map_or(false, |close_paren| {
+                    sig_trimmed[close_paren..].contains(':')
+                });
+
+                if !has_return_type && function_returns_jsx(body) {
+                    // Insert return type before the semicolon.
+                    output.push_str(sig_trimmed);
+                    output.push_str(": import(\"react\").JSX.Element;");
+                } else {
+                    output.push_str(sig_trimmed);
+                    output.push(';');
+                }
                 // Emit trailing whitespace after the body's closing `}`.
                 // The parser may include trailing trivia in body.end(),
                 // so scan backward to find the actual `}` and emit the
@@ -842,6 +858,54 @@ fn emit_declaration_statement(node: &Node, source: &str, start: usize, output: &
             output.push_str(&source[start..node.end()]);
         }
     }
+}
+
+/// Check if a function body contains a return statement returning JSX.
+/// This is a heuristic for inferring React component return types in
+/// declaration emit (matching Go's checker-driven type inference).
+fn function_returns_jsx(body: &Arc<Node>) -> bool {
+    fn returns_jsx_recursive(node: &Arc<Node>) -> bool {
+        match &node.data {
+            NodeData::ReturnStatement(d) => {
+                if let Some(expr) = &d.expression {
+                    if is_jsx_expression(expr) {
+                        return true;
+                    }
+                }
+                false
+            }
+            NodeData::Block(d) => d.statements.iter().any(returns_jsx_recursive),
+            NodeData::IfStatement(d) => {
+                let then_jsx = returns_jsx_recursive(&d.then_statement);
+                let else_jsx = d
+                    .else_statement
+                    .as_ref()
+                    .map_or(false, |s| returns_jsx_recursive(s));
+                then_jsx || else_jsx
+            }
+            _ => false,
+        }
+    }
+    returns_jsx_recursive(body)
+}
+
+/// Check if an expression node is a JSX element, fragment, or self-closing element.
+/// Also unwraps parenthesized expressions to check the inner expression.
+fn is_jsx_expression(node: &Arc<Node>) -> bool {
+    if matches!(
+        node.kind,
+        SyntaxKind::JsxElement
+            | SyntaxKind::JsxFragment
+            | SyntaxKind::JsxSelfClosingElement
+            | SyntaxKind::JsxExpression
+    ) {
+        return true;
+    }
+    // Unwrap parenthesized expressions: `return (<JSX />)`
+    if let NodeData::ParenthesizedExpression(d) = &node.data {
+        return is_jsx_expression(&d.expression);
+    }
+    false
 }
 
 /// Emit a class declaration with method/constructor/accessor bodies stripped
