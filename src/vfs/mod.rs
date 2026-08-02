@@ -3,7 +3,7 @@
 //! Provides a trait-based file system interface that can be backed by
 //! the real OS file system or an in-memory implementation for testing.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 use std::sync::{Arc, RwLock};
 
@@ -160,6 +160,9 @@ pub struct InMemoryFS {
     case_sensitive: bool,
     files: RwLock<HashMap<String, String>>,
     dirs: RwLock<std::collections::HashSet<String>>,
+    /// Maps a link path to its target path. Targets may be absolute or
+    /// relative (resolved against the link's parent directory).
+    symlinks: RwLock<HashMap<String, String>>,
 }
 
 impl InMemoryFS {
@@ -172,6 +175,7 @@ impl InMemoryFS {
             case_sensitive,
             files: RwLock::new(HashMap::new()),
             dirs: RwLock::new(std::collections::HashSet::new()),
+            symlinks: RwLock::new(HashMap::new()),
         }
     }
 
@@ -237,12 +241,180 @@ impl InMemoryFS {
             .find(|d| d.to_ascii_lowercase() == target)
             .cloned()
     }
+
+    /// Creates a symlink: `link` resolves to `target`.
+    pub fn create_symlink(&self, link: &str, target: &str) {
+        let mut symlinks = self.symlinks.write().unwrap();
+        let key = if self.case_sensitive {
+            link.to_string()
+        } else {
+            let target_lc = link.to_ascii_lowercase();
+            symlinks
+                .keys()
+                .find(|k| k.to_ascii_lowercase() == target_lc)
+                .cloned()
+                .unwrap_or_else(|| link.to_string())
+        };
+        symlinks.insert(key, target.to_string());
+    }
+
+    /// Reads the target of a symlink. Returns `None` if `path` is not a
+    /// symlink.
+    pub fn read_symlink(&self, path: &str) -> Option<String> {
+        self.lookup_symlink_key(path)
+    }
+
+    /// Finds the stored symlink target for `link`, performing a
+    /// case-insensitive match when the FS is not case-sensitive.
+    fn lookup_symlink_key(&self, link: &str) -> Option<String> {
+        let symlinks = self.symlinks.read().unwrap();
+        if let Some(t) = symlinks.get(link) {
+            return Some(t.clone());
+        }
+        if self.case_sensitive {
+            return None;
+        }
+        let target = link.to_ascii_lowercase();
+        symlinks
+            .iter()
+            .find(|(k, _)| k.to_ascii_lowercase() == target)
+            .map(|(_, v)| v.clone())
+    }
+
+    /// Finds the stored symlink *key* (the link path) matching `link`,
+    /// performing a case-insensitive match when the FS is not case-sensitive.
+    fn lookup_symlink_stored_key(&self, link: &str) -> Option<String> {
+        let symlinks = self.symlinks.read().unwrap();
+        if symlinks.contains_key(link) {
+            return Some(link.to_string());
+        }
+        if self.case_sensitive {
+            return None;
+        }
+        let target = link.to_ascii_lowercase();
+        symlinks
+            .iter()
+            .find(|(k, _)| k.to_ascii_lowercase() == target)
+            .map(|(k, _)| k.clone())
+    }
+
+    /// Returns `true` if `path` (or its case-insensitive equivalent) is a
+    /// stored file.
+    fn is_file_path(&self, path: &str) -> bool {
+        let files = self.files.read().unwrap();
+        if files.contains_key(path) {
+            return true;
+        }
+        if self.case_sensitive {
+            return false;
+        }
+        let target = path.to_ascii_lowercase();
+        files.keys().any(|k| k.to_ascii_lowercase() == target)
+    }
+
+    /// Resolves `path` by following symlinks at any path component.
+    ///
+    /// Symlink chains are followed (with a hop limit) and cycles are broken
+    /// (the last-resolvable path is returned). With no symlinks present this
+    /// is a cheap no-op returning the input verbatim.
+    fn resolve_symlinks(&self, path: &str) -> String {
+        if path.is_empty() {
+            return String::new();
+        }
+        let symlinks = self.symlinks.read().unwrap();
+        if symlinks.is_empty() {
+            return path.to_string();
+        }
+        let is_absolute = path.starts_with('/');
+        let parts: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
+        let mut resolved = if is_absolute {
+            String::from("/")
+        } else {
+            String::new()
+        };
+        let mut visited: HashSet<String> = HashSet::new();
+        for part in &parts {
+            // Append the next component to the running resolved path.
+            if resolved.is_empty() {
+                resolved.push_str(part);
+            } else if resolved.ends_with('/') {
+                resolved.push_str(part);
+            } else {
+                resolved.push('/');
+                resolved.push_str(part);
+            }
+            // Follow the symlink chain rooted at this prefix.
+            let mut hops = 0;
+            loop {
+                hops += 1;
+                if hops > MAX_SYMLINK_HOPS {
+                    break;
+                }
+                let target = match self.symlink_target(&symlinks, &resolved) {
+                    Some(t) => t,
+                    None => break,
+                };
+                resolved = if is_absolute_path(&target) {
+                    target
+                } else {
+                    // Relative target: resolve against the link's parent dir.
+                    match parent_dir(&resolved) {
+                        Some(p) if p.ends_with('/') => format!("{p}{target}"),
+                        Some(p) => format!("{p}/{target}"),
+                        None => target,
+                    }
+                };
+                if !visited.insert(resolved.clone()) {
+                    break; // cycle detected
+                }
+            }
+        }
+        resolved
+    }
+
+    /// Looks up the symlink target for `path` within a borrowed symlink map.
+    fn symlink_target<'a>(
+        &self,
+        symlinks: &'a HashMap<String, String>,
+        path: &str,
+    ) -> Option<String> {
+        if let Some(t) = symlinks.get(path) {
+            return Some(t.clone());
+        }
+        if self.case_sensitive {
+            return None;
+        }
+        let target = path.to_ascii_lowercase();
+        symlinks
+            .iter()
+            .find(|(k, _)| k.to_ascii_lowercase() == target)
+            .map(|(_, v)| v.clone())
+    }
 }
 
 impl Default for InMemoryFS {
     fn default() -> Self {
         Self::new()
     }
+}
+
+/// Maximum number of symlink hops before giving up (cycle/loop protection).
+const MAX_SYMLINK_HOPS: usize = 40;
+
+/// Returns the parent directory of `path`, or `None` if `path` has no parent.
+fn parent_dir(path: &str) -> Option<String> {
+    let trimmed = path.trim_end_matches('/');
+    match trimmed.rfind('/') {
+        Some(0) => Some(String::from("/")),
+        Some(i) => Some(trimmed[..i].to_string()),
+        None => None,
+    }
+}
+
+/// Returns `true` for absolute paths (POSIX `/…` or Windows drive `c:/…`).
+fn is_absolute_path(path: &str) -> bool {
+    path.starts_with('/')
+        || (path.len() >= 3 && path.as_bytes()[1] == b':' && path.as_bytes()[2] == b'/')
 }
 
 /// Strips a UTF-8 BOM (`U+FEFF`) from the start of `content` if present.
@@ -276,15 +448,17 @@ impl FS for InMemoryFS {
     }
 
     fn file_exists(&self, path: &str) -> bool {
-        self.lookup_file_key(path).is_some()
+        let resolved = self.resolve_symlinks(path);
+        self.lookup_file_key(&resolved).is_some()
     }
 
     fn read_file(&self, path: &str) -> Option<String> {
+        let resolved = self.resolve_symlinks(path);
         let files = self.files.read().unwrap();
-        let content = if let Some(c) = files.get(path) {
+        let content = if let Some(c) = files.get(&resolved) {
             c
         } else if !self.case_sensitive {
-            let target = path.to_ascii_lowercase();
+            let target = resolved.to_ascii_lowercase();
             files
                 .iter()
                 .find(|(k, _)| k.to_ascii_lowercase() == target)
@@ -296,32 +470,43 @@ impl FS for InMemoryFS {
     }
 
     fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+        let resolved = self.resolve_symlinks(path);
+        // Validate that the parent path is not an existing file.
+        if let Some(parent) = parent_dir(&resolved) {
+            if self.is_file_path(&parent) {
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    format!("mkdir {parent:?}: path exists but is not a directory",),
+                ));
+            }
+        }
         let mut files = self.files.write().unwrap();
         let key = if self.case_sensitive {
-            path.to_string()
+            resolved.clone()
         } else {
-            let target = path.to_ascii_lowercase();
+            let target = resolved.to_ascii_lowercase();
             files
                 .keys()
                 .find(|k| k.to_ascii_lowercase() == target)
                 .cloned()
-                .unwrap_or_else(|| path.to_string())
+                .unwrap_or_else(|| resolved.clone())
         };
         files.insert(key, data.to_string());
         Ok(())
     }
 
     fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+        let resolved = self.resolve_symlinks(path);
         let mut files = self.files.write().unwrap();
         let key = if self.case_sensitive {
-            path.to_string()
+            resolved.clone()
         } else {
-            let target = path.to_ascii_lowercase();
+            let target = resolved.to_ascii_lowercase();
             files
                 .keys()
                 .find(|k| k.to_ascii_lowercase() == target)
                 .cloned()
-                .unwrap_or_else(|| path.to_string())
+                .unwrap_or_else(|| resolved.clone())
         };
         let entry = files.entry(key).or_default();
         entry.push_str(data);
@@ -329,25 +514,64 @@ impl FS for InMemoryFS {
     }
 
     fn remove(&self, path: &str) -> std::io::Result<()> {
+        // A symlink is removed on its own (the target is untouched).
+        if let Some(key) = self.lookup_symlink_stored_key(path) {
+            self.symlinks.write().unwrap().remove(&key);
+            return Ok(());
+        }
+        // An exact file match is removed on its own.
         if let Some(key) = self.lookup_file_key(path) {
             self.files.write().unwrap().remove(&key);
+            return Ok(());
         }
+        // A directory is removed recursively (all descendants are cleared).
         if let Some(key) = self.lookup_dir_key(path) {
-            self.dirs.write().unwrap().remove(&key);
+            let prefix = format!("{key}/");
+            let mut files = self.files.write().unwrap();
+            let mut dirs = self.dirs.write().unwrap();
+            let mut symlinks = self.symlinks.write().unwrap();
+            dirs.remove(&key);
+            let desc_files: Vec<String> = files
+                .keys()
+                .filter(|p| p.starts_with(&prefix))
+                .cloned()
+                .collect();
+            for p in desc_files {
+                files.remove(&p);
+            }
+            let desc_dirs: Vec<String> = dirs
+                .iter()
+                .filter(|p| p.starts_with(&prefix))
+                .cloned()
+                .collect();
+            for p in desc_dirs {
+                dirs.remove(&p);
+            }
+            let desc_syms: Vec<String> = symlinks
+                .keys()
+                .filter(|p| p.starts_with(&prefix))
+                .cloned()
+                .collect();
+            for p in desc_syms {
+                symlinks.remove(&p);
+            }
+            return Ok(());
         }
         Ok(())
     }
 
     fn directory_exists(&self, path: &str) -> bool {
-        self.lookup_dir_key(path).is_some()
+        let resolved = self.resolve_symlinks(path);
+        self.lookup_dir_key(&resolved).is_some()
     }
 
     fn get_accessible_entries(&self, path: &str) -> Entries {
         let mut entries = Entries::default();
-        let prefix = if path.ends_with('/') {
-            path.to_string()
+        let resolved = self.resolve_symlinks(path);
+        let prefix = if resolved.ends_with('/') {
+            resolved
         } else {
-            format!("{}/", path)
+            format!("{}/", resolved)
         };
 
         for key in self.files.read().unwrap().keys() {
@@ -372,33 +596,40 @@ impl FS for InMemoryFS {
     }
 
     fn stat(&self, path: &str) -> Option<FileInfo> {
-        if let Some(key) = self.lookup_file_key(path) {
+        let is_symlink = self.lookup_symlink_key(path).is_some();
+        let resolved = self.resolve_symlinks(path);
+        if let Some(key) = self.lookup_file_key(&resolved) {
             let files = self.files.read().unwrap();
             let content = files.get(&key)?;
             return Some(FileInfo {
                 name: key.rsplit('/').next()?.to_string(),
                 size: content.len() as u64,
                 is_dir: false,
-                is_symlink: false,
+                is_symlink,
                 modified: std::time::SystemTime::now(),
             });
         }
-        let key = self.lookup_dir_key(path)?;
+        let key = self.lookup_dir_key(&resolved)?;
         Some(FileInfo {
             name: key.rsplit('/').next()?.to_string(),
             size: 0,
             is_dir: true,
-            is_symlink: false,
+            is_symlink,
             modified: std::time::SystemTime::now(),
         })
     }
 
     fn realpath(&self, path: &str) -> String {
-        if let Some(key) = self.lookup_file_key(path) {
+        let resolved = self.resolve_symlinks(path);
+        if let Some(key) = self.lookup_file_key(&resolved) {
             return key;
         }
-        if let Some(key) = self.lookup_dir_key(path) {
+        if let Some(key) = self.lookup_dir_key(&resolved) {
             return key;
+        }
+        // A (possibly broken) symlink resolves to its final target.
+        if resolved != path {
+            return resolved;
         }
         path.to_string()
     }

@@ -68,10 +68,9 @@ mod tests {
     // --- Tests ported from internal/nativepath/symlink_windows_test.go ---
     //
     // The Go tests are Windows-specific (they use `mklink /J` for junctions).
-    // All tests are #[ignore] because:
-    //   1. The nativepath module is newly created and not yet integrated.
-    //   2. Several subtests require Windows junctions which cannot be created
-    //      on Unix without elevated privileges.
+    // On Unix the symlink cases are exercised directly with real symlinks;
+    // the Windows-only junction cases are guarded with `#[cfg(unix)]` /
+    // `#[cfg(not(unix))]` so the suite compiles and runs on every platform.
 
     #[test]
     // Verifies is_symlink_or_reparse_point detects regular files, directories,
@@ -140,40 +139,112 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
-    // TODO: Requires Windows mklink /J for junction; on Unix symlinks can
-    // be tested directly. Verify long path support (>= 248 chars).
+    // Verifies is_symlink_or_reparse_point works with long paths (>= 248
+    // characters). On Windows the function applies the `\\?\` long-path
+    // prefix; on Unix long paths work natively. Symlink detection at a long
+    // path is exercised on Unix.
     fn test_is_symlink_or_reparse_point_long_path() {
-        // The Go test creates a deeply nested path exceeding 248 characters
-        // and verifies that is_symlink_or_reparse_point works with the
-        // \\?\ prefix on Windows.
-        //
-        // TODO: Implement once cross-platform test infrastructure is available.
+        use std::fs;
+        use std::io::Write;
+
+        let tmp = std::env::temp_dir().join("tsox_nativepath_long_test");
+        let _ = fs::remove_dir_all(&tmp);
+        fs::create_dir_all(&tmp).unwrap();
+
+        // Build a deeply nested path exceeding 248 characters total.
+        let mut long = tmp.clone();
+        while long.to_string_lossy().len() < 260 {
+            long = long.join("longpathsegment");
+        }
+        fs::create_dir_all(&long).unwrap();
+        let file = long.join("target.txt");
+        fs::File::create(&file).unwrap().write_all(b"x").unwrap();
+
+        // A regular file at a long path is not a reparse point.
+        assert_eq!(is_symlink_or_reparse_point(file.to_str().unwrap()), false);
+
+        #[cfg(unix)]
+        {
+            let link = long.join("link.txt");
+            std::os::unix::fs::symlink(&file, &link).unwrap();
+            assert_eq!(is_symlink_or_reparse_point(link.to_str().unwrap()), true);
+        }
+
+        let _ = fs::remove_dir_all(&tmp);
     }
 
     #[test]
-    #[ignore]
-    // TODO: Requires symlink/junction creation for nested symlink test;
-    // verify is_symlink_or_reparse_point detects junctions nested inside
-    // symlinked directories
+    // Verifies is_symlink_or_reparse_point detects symlinks nested inside
+    // symlinked directories. On Unix this uses real symlinks; on Windows the
+    // regular-directory case is checked instead (junctions need privileges).
     fn test_is_symlink_or_reparse_point_nested_in_symlink() {
-        // The Go test creates:
-        //   target/inner-target
-        //   link -> target (junction)
-        //   target/inner-link -> target/inner-target (junction)
-        // and checks that link/inner-link is detected as a reparse point.
-        //
-        // TODO: Implement once cross-platform test infrastructure is available.
+        use std::fs;
+        use std::io::Write;
+
+        let tmp = std::env::temp_dir().join("tsox_nativepath_nested_test");
+        let _ = fs::remove_dir_all(&tmp);
+        fs::create_dir_all(&tmp).unwrap();
+
+        let target = tmp.join("target");
+        fs::create_dir_all(&target).unwrap();
+        let inner_target = target.join("inner-target");
+        fs::File::create(&inner_target)
+            .unwrap()
+            .write_all(b"x")
+            .unwrap();
+
+        #[cfg(unix)]
+        {
+            let link = tmp.join("link");
+            std::os::unix::fs::symlink(&target, &link).unwrap();
+            let inner_link = target.join("inner-link");
+            std::os::unix::fs::symlink(&inner_target, &inner_link).unwrap();
+
+            // `link` is a symlink to a directory.
+            assert_eq!(is_symlink_or_reparse_point(link.to_str().unwrap()), true);
+            // `link/inner-link` resolves through the directory symlink and is
+            // itself a symlink.
+            let nested = link.join("inner-link");
+            assert_eq!(is_symlink_or_reparse_point(nested.to_str().unwrap()), true);
+        }
+
+        #[cfg(not(unix))]
+        {
+            assert_eq!(is_symlink_or_reparse_point(target.to_str().unwrap()), false);
+        }
+
+        let _ = fs::remove_dir_all(&tmp);
     }
 
     #[test]
-    #[ignore]
-    // TODO: Requires symlink/junction creation with relative paths;
-    // verify is_symlink_or_reparse_point works with relative paths
+    // Verifies is_symlink_or_reparse_point detects symlinks created with a
+    // relative target. (The process-global cwd is intentionally not changed
+    // to keep the parallel test suite deterministic; detection only depends
+    // on the link itself, not its resolved target.)
     fn test_is_symlink_or_reparse_point_relative_path() {
-        // The Go test uses t.Chdir(tmp) and creates a junction with a
-        // relative path, then verifies detection.
-        //
-        // TODO: Implement once cross-platform test infrastructure is available.
+        use std::fs;
+        use std::io::Write;
+
+        let tmp = std::env::temp_dir().join("tsox_nativepath_relative_test");
+        let _ = fs::remove_dir_all(&tmp);
+        fs::create_dir_all(&tmp).unwrap();
+
+        let target = tmp.join("target.txt");
+        fs::File::create(&target).unwrap().write_all(b"x").unwrap();
+
+        #[cfg(unix)]
+        {
+            let link = tmp.join("link.txt");
+            // Symlink whose target is a RELATIVE path ("target.txt").
+            std::os::unix::fs::symlink("target.txt", &link).unwrap();
+            assert_eq!(is_symlink_or_reparse_point(link.to_str().unwrap()), true);
+        }
+
+        #[cfg(not(unix))]
+        {
+            assert_eq!(is_symlink_or_reparse_point(target.to_str().unwrap()), false);
+        }
+
+        let _ = fs::remove_dir_all(&tmp);
     }
 }

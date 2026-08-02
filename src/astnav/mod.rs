@@ -194,35 +194,71 @@ mod tests {
         );
     }
 
-    /// Go baseline sub-tests require Node.js + the TS submodule and are not
-    /// portable as unit tests.
+    /// Verifies `get_token_at_position` returns the deepest node containing a
+    /// given source position on parsed input (no Node.js oracle required).
     #[test]
-    #[ignore = "requires Node.js oracle + TypeScript submodule baseline"]
-    fn get_token_at_position_baseline() {}
+    fn get_token_at_position_baseline() {
+        let file_text = "a.b";
+        let file = Parser::parse_source_file_text("/f.ts", file_text.to_string());
+        // Position 2 is the property name `b`.
+        let pos: usize = 2;
+        let token = get_token_at_position(&file.node, pos).expect("a token at position");
+        assert!(
+            token.pos() <= pos && pos < token.end(),
+            "returned node must contain the position"
+        );
+        assert_eq!(token.kind, SyntaxKind::Identifier);
+    }
 
     // -------------------------------------------------------------------------
     // TestGetTouchingPropertyName (baseline-only in Go)
     // -------------------------------------------------------------------------
 
+    /// Verifies `get_touching_property_name` resolves a property-name position
+    /// to the name token on parsed input.
     #[test]
-    #[ignore = "baseline needs Node.js oracle"]
-    fn get_touching_property_name_baseline() {}
+    fn get_touching_property_name_baseline() {
+        let file_text = "foo.bar";
+        let file = Parser::parse_source_file_text("/f.ts", file_text.to_string());
+        // Position 4 is the property name `bar`.
+        let pos: usize = 4;
+        let token = get_touching_property_name(&file.node, pos).expect("a token at position");
+        assert!(
+            token.pos() <= pos && pos < token.end(),
+            "returned node must contain the position"
+        );
+        assert_eq!(token.kind, SyntaxKind::Identifier);
+    }
 
     // -------------------------------------------------------------------------
     // TestFindPrecedingToken (baseline-only in Go)
     // -------------------------------------------------------------------------
 
+    /// Verifies `find_preceding_token` returns the rightmost token ending at or
+    /// before a position on parsed input.
     #[test]
-    #[ignore = "baseline needs Node.js oracle"]
-    fn find_preceding_token_baseline() {}
+    fn find_preceding_token_baseline() {
+        let file_text = "a - b";
+        let file = Parser::parse_source_file_text("/f.ts", file_text.to_string());
+        // Position 4 is the space after `-`; the preceding token is `-`.
+        let token = find_preceding_token(&file.node, 4).expect("a preceding token");
+        assert_eq!(token.kind, SyntaxKind::MinusToken, "Expected MinusToken");
+    }
 
     // -------------------------------------------------------------------------
     // TestFindNextToken (baseline-only in Go)
     // -------------------------------------------------------------------------
 
+    /// Verifies `find_next_token` returns the leftmost token starting strictly
+    /// after a position on parsed input.
     #[test]
-    #[ignore = "baseline needs Node.js oracle"]
-    fn find_next_token_baseline() {}
+    fn find_next_token_baseline() {
+        let file_text = "a + b";
+        let file = Parser::parse_source_file_text("/f.ts", file_text.to_string());
+        // The first token after position 0 (the `a`) is the `+` operator.
+        let token = find_next_token(&file.node, 0).expect("a following token");
+        assert_eq!(token.kind, SyntaxKind::PlusToken, "Expected PlusToken");
+    }
 
     // -------------------------------------------------------------------------
     // TestUnitFindPrecedingToken — table-driven unit test

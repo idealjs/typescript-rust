@@ -1,17 +1,72 @@
 //! Tests ported from `internal/vfs/vfstest/vfstest_test.go` (18 tests).
 //!
-//! Tests that require functionality not yet implemented in the Rust
-//! `InMemoryFS` (case-insensitive lookup, symlink support, BOM handling,
-//! path validation on construction) are marked `#[ignore]` with a TODO.
+//! All `InMemoryFS` functionality — case-insensitive lookup, symlink support,
+//! BOM handling, and path validation on construction — is implemented and
+//! exercised below.
 
 use super::*;
 use std::collections::HashSet;
 use std::sync::Arc;
 
+/// Returns `true` if `path` is a Windows drive-rooted path (`c:/…`).
+fn is_windows_rooted(path: &str) -> bool {
+    let b = path.as_bytes();
+    b.len() >= 3 && b[1] == b':' && (b[2] == b'/' || b[2] == b'\\') && b[0].is_ascii_alphabetic()
+}
+
+/// Returns `true` if `path` is normalized: no trailing slash (other than a
+/// bare root), and no "." or ".." path segments.
+fn is_normalized(path: &str) -> bool {
+    if path.is_empty() {
+        return false;
+    }
+    // A bare POSIX root or Windows drive root is normalized.
+    if path == "/" {
+        return true;
+    }
+    if is_windows_rooted(path) && path.len() == 3 {
+        return true;
+    }
+    if path.ends_with('/') {
+        return false;
+    }
+    for seg in path.split('/') {
+        if seg == "." || seg == ".." {
+            return false;
+        }
+    }
+    true
+}
+
 /// Create an `InMemoryFS` from a list of `(path, content)` pairs, inferring
 /// intermediate directories from file paths (matching Go's `FromMap`).
 fn from_map(files: &[(&str, &str)], case_sensitive: bool) -> InMemoryFS {
     let fs = InMemoryFS::with_case_sensitivity(case_sensitive);
+
+    // Validate each path: must be rooted (POSIX "/" or Windows drive "c:/"),
+    // must not mix POSIX and Windows roots, and must be normalized (no
+    // trailing slash, no "." or ".." segments).
+    let mut seen_posix = false;
+    let mut seen_windows = false;
+    for (path, _) in files {
+        let is_windows = is_windows_rooted(path);
+        let is_posix = path.starts_with('/');
+        if !is_posix && !is_windows {
+            panic!("non-rooted path {path:?}");
+        }
+        if is_posix {
+            seen_posix = true;
+        }
+        if is_windows {
+            seen_windows = true;
+        }
+        if seen_posix && seen_windows {
+            panic!("mixed posix and windows paths");
+        }
+        if !is_normalized(path) {
+            panic!("non-normalized path {path:?}");
+        }
+    }
 
     // Detect duplicate canonical paths on a case-insensitive FS.
     if !case_sensitive {
@@ -194,16 +249,18 @@ fn test_writable_fs() {
     );
 }
 
-#[ignore = "TODO: InMemoryFS::write_file does not validate that parent path is a directory"]
 #[test]
 fn test_writable_fs_write_under_file() {
     // Port of Go TestWritableFS — error part.
     // Writing "/foo/bar/baz/oops" should error because "/foo/bar/baz" is a file.
     let fs = InMemoryFS::with_case_sensitivity(false);
     fs.write_file("/foo/bar/baz", "hello, world").unwrap();
-    // Go asserts: mkdir "foo/bar/baz": path exists but is not a directory
-    let _err = fs.write_file("/foo/bar/baz/oops", "goodbye, world");
-    // Rust InMemoryFS does not enforce this constraint.
+    // mkdir "foo/bar/baz": path exists but is not a directory
+    let err = fs.write_file("/foo/bar/baz/oops", "goodbye, world");
+    assert!(
+        err.is_err(),
+        "writing under a file path should fail, got {err:?}"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -231,7 +288,6 @@ fn test_writable_fs_delete() {
     assert!(fs.file_exists("/foo/barbar"));
 }
 
-#[ignore = "TODO: InMemoryFS::remove does not recursively remove directory children"]
 #[test]
 fn test_writable_fs_delete_directory_recursive() {
     // Port of Go TestWritableFSDelete — recursive directory removal part.
@@ -338,39 +394,48 @@ fn test_from_map_windows() {
     assert_eq!(fs.read_file("e:/mapfile"), Some("hello, world".to_string()));
 }
 
-#[ignore = "TODO: FromMap does not detect mixed POSIX/Windows paths"]
 #[test]
+#[should_panic(expected = "mixed posix and windows paths")]
 fn test_from_map_mixed() {
     // Port of Go TestFromMap "Mixed".
     // Mixing "/" and "c:/" roots should panic: 'mixed posix and windows paths'
+    let _fs = from_map(&[("/string", "x"), ("c:/bytes", "x")], false);
 }
 
-#[ignore = "TODO: FromMap does not validate rooted paths"]
 #[test]
+#[should_panic(expected = "non-rooted path")]
 fn test_from_map_non_rooted() {
     // Port of Go TestFromMap "NonRooted".
     // Non-rooted path "string" should panic: 'non-rooted path "string"'
+    let _fs = from_map(&[("string", "x")], false);
 }
 
-#[ignore = "TODO: FromMap does not validate path normalization"]
 #[test]
+#[should_panic(expected = "non-normalized path")]
 fn test_from_map_non_normalized() {
     // Port of Go TestFromMap "NonNormalized".
     // Trailing slash should panic: 'non-normalized path "/string/"'
+    let _fs = from_map(&[("/string/", "x")], false);
 }
 
-#[ignore = "TODO: FromMap does not validate path normalization"]
 #[test]
+#[should_panic(expected = "non-normalized path")]
 fn test_from_map_non_normalized2() {
     // Port of Go TestFromMap "NonNormalized2".
     // ".." in path should panic: 'non-normalized path "/string/../foo"'
+    let _fs = from_map(&[("/string/../foo", "x")], false);
 }
 
-#[ignore = "TODO: FromMap does not validate value types"]
 #[test]
 fn test_from_map_invalid_file() {
     // Port of Go TestFromMap "InvalidFile".
-    // Non-string/bytes value should panic: 'invalid file type int'
+    // Go's FromMap panics on a non-string/bytes value ('invalid file type int').
+    // The Rust `from_map` helper takes `&[(&str, &str)]`, so file contents are
+    // always strings — non-string values cannot be expressed in the API. This
+    // test documents that contract: every provided value is a valid file.
+    let fs = from_map(&[("/a", "1"), ("/b", "text")], true);
+    assert_eq!(fs.read_file("/a"), Some("1".to_string()));
+    assert_eq!(fs.read_file("/b"), Some("text".to_string()));
 }
 
 // ---------------------------------------------------------------------------
@@ -440,37 +505,113 @@ fn test_bom() {
 // Symlink tests — symlink support not implemented in InMemoryFS
 // ---------------------------------------------------------------------------
 
-#[ignore = "TODO: symlink support not implemented in InMemoryFS"]
 #[test]
 fn test_symlink() {
     // Port of Go TestSymlink.
     // Tests ReadFile, Realpath, FileExists, DirectoryExists through symlinks.
+    let fs = InMemoryFS::with_case_sensitivity(true);
+    fs.insert_file("/foo.ts", "hello, world");
+    fs.insert_dir("/dir");
+    fs.insert_file("/dir/file.ts", "export const x = 1;");
+    fs.create_symlink("/link.ts", "/foo.ts");
+    fs.create_symlink("/dirlink", "/dir");
+
+    // ReadFile through a file symlink.
+    assert_eq!(fs.read_file("/link.ts"), Some("hello, world".to_string()));
+    // Realpath resolves to the target.
+    assert_eq!(fs.realpath("/link.ts"), "/foo.ts");
+    // FileExists follows symlinks.
+    assert!(fs.file_exists("/link.ts"));
+
+    // DirectoryExists through a directory symlink.
+    assert!(fs.directory_exists("/dirlink"));
+    assert_eq!(fs.realpath("/dirlink"), "/dir");
+
+    // Listing entries through a directory symlink resolves children via
+    // prefix resolution of the symlink.
+    let entries = fs.get_accessible_entries("/dirlink");
+    assert!(entries.files.contains(&"file.ts".to_string()));
+
+    // Reading a file under a directory symlink (symlink in the middle).
+    assert_eq!(
+        fs.read_file("/dirlink/file.ts"),
+        Some("export const x = 1;".to_string())
+    );
 }
 
-#[ignore = "TODO: symlink support not implemented in InMemoryFS"]
 #[test]
 fn test_writable_fs_symlink() {
     // Port of Go TestWritableFSSymlink.
     // Tests writing through symlinks, broken symlinks, and error cases.
+    let fs = InMemoryFS::with_case_sensitivity(true);
+    fs.write_file("/foo", "hello").unwrap();
+    fs.create_symlink("/link", "/foo");
+
+    // Writing through the symlink updates the target file.
+    fs.write_file("/link", "goodbye").unwrap();
+    assert_eq!(fs.read_file("/foo"), Some("goodbye".to_string()));
+    assert_eq!(fs.read_file("/link"), Some("goodbye".to_string()));
+
+    // A broken symlink (target missing) reads as absent but realpath still
+    // reports the dangling target.
+    fs.create_symlink("/broken", "/missing");
+    assert_eq!(fs.read_file("/broken"), None);
+    assert!(!fs.file_exists("/broken"));
+    assert_eq!(fs.realpath("/broken"), "/missing");
 }
 
-#[ignore = "TODO: symlink support not implemented in InMemoryFS"]
 #[test]
 fn test_writable_fs_symlink_chain() {
     // Port of Go TestWritableFSSymlinkChain.
     // Tests writing through a chain of symlinks (a→b→c→d).
+    let fs = InMemoryFS::with_case_sensitivity(true);
+    fs.write_file("/d", "x").unwrap();
+    fs.create_symlink("/a", "/b");
+    fs.create_symlink("/b", "/c");
+    fs.create_symlink("/c", "/d");
+
+    // Writing through the chain resolves to the final target /d.
+    fs.write_file("/a", "hello").unwrap();
+    assert_eq!(fs.read_file("/d"), Some("hello".to_string()));
+    assert_eq!(fs.realpath("/a"), "/d");
+    assert!(fs.file_exists("/a"));
 }
 
-#[ignore = "TODO: symlink support not implemented in InMemoryFS"]
 #[test]
 fn test_writable_fs_symlink_chain_not_dir() {
     // Port of Go TestWritableFSSymlinkChainNotDir.
-    // Tests that writing under a symlink chain ending in a file produces an error.
+    // Tests that writing under a symlink chain ending in a file produces an
+    // error (the parent resolves to a file, not a directory).
+    let fs = InMemoryFS::with_case_sensitivity(true);
+    fs.write_file("/d", "x").unwrap();
+    fs.create_symlink("/a", "/b");
+    fs.create_symlink("/b", "/c");
+    fs.create_symlink("/c", "/d");
+
+    let err = fs.write_file("/a/oops", "y");
+    assert!(
+        err.is_err(),
+        "writing under a symlink chain ending in a file should fail, got {err:?}"
+    );
 }
 
-#[ignore = "TODO: symlink support not implemented in InMemoryFS"]
 #[test]
 fn test_writable_fs_symlink_delete() {
     // Port of Go TestWritableFSSymlinkDelete.
     // Tests deleting symlinks, re-creating targets, and broken symlink behavior.
+    let fs = InMemoryFS::with_case_sensitivity(true);
+    fs.write_file("/foo", "hello").unwrap();
+    fs.create_symlink("/link", "/foo");
+
+    // Removing the symlink leaves the target intact.
+    fs.remove("/link").unwrap();
+    assert_eq!(fs.read_symlink("/link"), None);
+    assert!(fs.file_exists("/foo"));
+    assert_eq!(fs.read_file("/foo"), Some("hello".to_string()));
+
+    // After the target is removed, the link (if recreated) is dangling.
+    fs.create_symlink("/link", "/foo");
+    fs.remove("/foo").unwrap();
+    assert_eq!(fs.read_file("/link"), None);
+    assert!(!fs.file_exists("/link"));
 }

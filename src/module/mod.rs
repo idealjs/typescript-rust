@@ -479,9 +479,55 @@ mod tests {
     // result.
 
     /// Ported from Go `TestResolveModuleNameTrailingSlashRace`.
+    ///
+    /// Rust prevents the original data race at compile time, so instead we
+    /// exercise the same module-resolution logic concurrently: resolving
+    /// `pkg` and `pkg/` (trailing slash) from N threads and asserting every
+    /// thread resolves successfully and to the identical file name.
     #[test]
-    #[ignore = "concurrency race test — does not apply to Rust's cache model"]
-    fn resolve_module_name_trailing_slash_race() {}
+    fn resolve_module_name_trailing_slash_race() {
+        use crate::core::compiler_options::ModuleKind;
+        use std::thread;
+
+        const N: usize = 8;
+        let resolver = build_concurrent_resolver();
+
+        let results = thread::scope(|s| {
+            (0..N)
+                .map(|i| {
+                    let name = if i % 2 == 0 { "pkg" } else { "pkg/" };
+                    let r = &resolver;
+                    s.spawn(move || {
+                        let (resolved, _) = r.resolve_module_name(
+                            name,
+                            "/repo/src/file.ts",
+                            ModuleKind::ESNext,
+                            None,
+                        );
+                        (name, resolved)
+                    })
+                })
+                .map(|h| h.join().unwrap())
+                .collect::<Vec<_>>()
+        });
+
+        // Every thread resolves successfully.
+        for (name, r) in &results {
+            assert!(
+                r.as_ref().is_some_and(|m| m.is_resolved()),
+                "{name:?} failed to resolve"
+            );
+        }
+        // "pkg" and "pkg/" resolve to the same file (no trailing-slash race).
+        let expected = results[0].1.as_ref().unwrap().resolved_file_name.clone();
+        for (name, r) in &results {
+            assert_eq!(
+                r.as_ref().unwrap().resolved_file_name,
+                expected,
+                "{name:?} resolved to a different file than the first thread"
+            );
+        }
+    }
 
     /// Builds a resolver backed by an in-memory FS containing a `pkg`
     /// node_modules package, mirroring the layout used by

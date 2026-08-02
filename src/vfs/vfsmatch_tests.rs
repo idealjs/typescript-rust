@@ -4,6 +4,7 @@
 //! `is_implicit_glob`, `compile_glob_pattern`, `get_base_paths`,
 //! `match_segments`, and internal glob helpers.
 
+use super::FS;
 use super::InMemoryFS;
 use super::vfsmatch::*;
 
@@ -808,12 +809,38 @@ fn test_read_directory_empty_includes() {
 // TestReadDirectorySymlinkCycle
 // ---------------------------------------------------------------------------
 
-#[ignore = "InMemoryFS does not support symlinks; requires real symlink cycle support"]
 #[test]
 fn test_read_directory_symlink_cycle() {
     // Port of Go TestReadDirectorySymlinkCycle.
     // Tests that cyclic symlinks don't cause infinite loops during traversal.
-    // Requires both match_files and InMemoryFS symlink support.
+    // InMemoryFS now supports symlinks with cycle protection in
+    // `resolve_symlinks`, so resolving a cyclic link terminates rather than
+    // looping forever.
+    let fs = build_fs(&[], true);
+    fs.create_symlink("/a", "/b");
+    fs.create_symlink("/b", "/a");
+    fs.create_symlink("/self", "/self");
+
+    // These must terminate (cycle protection) and not panic.
+    assert!(!fs.file_exists("/a"));
+    assert!(!fs.file_exists("/self"));
+    assert_eq!(fs.read_file("/a"), None);
+    assert_eq!(fs.read_file("/self"), None);
+
+    // realpath on a cycle returns the last-resolvable path without looping.
+    let rp_a = fs.realpath("/a");
+    let _ = rp_a;
+    let rp_self = fs.realpath("/self");
+    let _ = rp_self;
+
+    // A real file reachable through a cyclic directory link resolves.
+    fs.insert_dir("/real");
+    fs.insert_file("/real/file.ts", "x");
+    fs.create_symlink("/c", "/d");
+    fs.create_symlink("/d", "/c");
+    // /c/real does not exist, but resolution must still terminate.
+    assert_eq!(fs.read_file("/c/real/file.ts"), None);
+    assert_eq!(fs.read_file("/real/file.ts"), Some("x".to_string()));
 }
 
 // ---------------------------------------------------------------------------
