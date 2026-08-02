@@ -819,6 +819,8 @@ impl Checker {
             "btoa",
             "scrollTo",
             "scrollBy",
+            // Value constructor also referenced as a type.
+            "Function",
         ];
         // Type-position globals (e.g. `HTMLElement`, `Event`).
         const DOM_TYPES: &[&str] = &[
@@ -844,6 +846,66 @@ impl Checker {
             "CanvasRenderingContext2D",
             "MouseEvent",
             "KeyboardEvent",
+            "DataTransfer",
+            "SVGElement",
+            "TrustedHTML",
+            "StyleMedia",
+            "FormData",
+            "Blob",
+            "File",
+            "URL",
+            "URLSearchParams",
+            "TextEncoder",
+            "TextDecoder",
+            "AbortController",
+            "AbortSignal",
+            "Headers",
+            "Request",
+            "Response",
+            "ReadableStream",
+            "WritableStream",
+            "TransformStream",
+        ];
+        // ES2015+ built-in types referenced in type position by ambient `.d.ts`
+        // files when the matching `lib.es*.d.ts` is not fully merged into
+        // globals.
+        const ES_TYPES: &[&str] = &[
+            "Promise",
+            "Iterable",
+            "Iterator",
+            "IterableIterator",
+            "Symbol",
+            "Generator",
+            "AsyncIterable",
+            "AsyncIterator",
+            "Awaited",
+            "ArrayBuffer",
+            "Uint8Array",
+            "Int8Array",
+            "Uint16Array",
+            "Int16Array",
+            "Uint32Array",
+            "Int32Array",
+            "Float32Array",
+            "Float64Array",
+            "DataView",
+        ];
+        // Built-in utility (mapped) types that ambient declarations depend on.
+        const UTILITY_TYPES: &[&str] = &[
+            "Partial",
+            "Readonly",
+            "Pick",
+            "Record",
+            "Omit",
+            "Exclude",
+            "Extract",
+            "NonNullable",
+            "Parameters",
+            "ReturnType",
+            "ConstructorParameters",
+            "InstanceType",
+            "Required",
+            "ReadonlyArray",
         ];
         // Use `FunctionScopedVariable` as a neutral flag for both value and
         // type fallbacks: it is found by both value and type reference
@@ -851,15 +913,12 @@ impl Checker {
         // resolves to `any` via the non-interface fallback in
         // `resolve_type_reference` (no declaration nodes, so interface member
         // resolution is never attempted).
-        for &name in DOM_VALUES {
-            if self.globals.get(name).is_none() {
-                self.globals.insert(
-                    name.to_string(),
-                    Arc::new(Symbol::new(SymbolFlags::FunctionScopedVariable, name)),
-                );
-            }
-        }
-        for &name in DOM_TYPES {
+        for &name in DOM_VALUES
+            .iter()
+            .chain(DOM_TYPES.iter())
+            .chain(ES_TYPES.iter())
+            .chain(UTILITY_TYPES.iter())
+        {
             if self.globals.get(name).is_none() {
                 self.globals.insert(
                     name.to_string(),
