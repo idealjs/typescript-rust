@@ -63,7 +63,7 @@ npm install && npm run build
 
 ## 当前进度快照（2026-08-02）
 
-测试基线：**1,123** lib + **810** checker parity + **2** emit = **1,935 通过**，99 ignored。
+测试基线：**1,126** lib + **810** checker parity + **2** emit = **1,938 通过**，99 ignored。
 checker_parity 从 572→710（+138）。新增诊断码：TS2741/TS2739/TS2353/TS2448/TS2454/
 TS18048/TS2451/TS2300。Array 方法解析已修复（.find/.map/.reduce 等不再 false positive）。
 
@@ -104,7 +104,7 @@ compiler warning 约 90 个（dead code in stub implementations），归类为�
 - [x] 引入 `notify` crate 实现文件监听
 - [x] `--watch` 模式：文件变更 → 重编译 → 诊断输出
 - [x] watch 测试（5 个单元测试覆盖 helper 函数）
-- [ ] project reference cycle 精细化处理
+- [x] project reference cycle 精细化处理（TS6202）
 
 ### C. LSP features（中）✅ 已完成
 
