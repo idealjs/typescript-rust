@@ -754,6 +754,147 @@ impl Checker {
                 }
             }
         }
+        // G2: Ensure common DOM/host globals are resolvable even when
+        // lib.dom.d.ts isn't loaded (or its `declare var` declarations aren't
+        // merged into the global scope yet). Without these, references like
+        // `document`, `window`, `console`, `setTimeout` produce false TS2304
+        // "Cannot find name" diagnostics.
+        self.ensure_host_globals();
+        // G1: Ensure a global `JSX` namespace exists when `--jsx` is enabled.
+        // Without it (e.g. when `@types/react` isn't loaded), every JSX
+        // element triggers TS2602/TS7026 under `noImplicitAny`.
+        self.ensure_jsx_namespace();
+    }
+
+    /// G2: Insert permissive fallback globals (resolving to `any`) for common
+    /// DOM value and type names, but only when no real declaration already
+    /// provides them. This avoids false TS2304 "Cannot find name" diagnostics
+    /// in real projects that reference `document`, `window`, `console`, DOM
+    /// types, etc. without lib.dom.d.ts being fully merged into globals.
+    fn ensure_host_globals(&mut self) {
+        // Value-position globals (e.g. `document`, `window`, `console`).
+        const DOM_VALUES: &[&str] = &[
+            "document",
+            "window",
+            "navigator",
+            "self",
+            "top",
+            "parent",
+            "frames",
+            "location",
+            "history",
+            "screen",
+            "localStorage",
+            "sessionStorage",
+            "console",
+            "alert",
+            "confirm",
+            "prompt",
+            "fetch",
+            "setTimeout",
+            "setInterval",
+            "clearTimeout",
+            "clearInterval",
+            "queueMicrotask",
+            "requestAnimationFrame",
+            "cancelAnimationFrame",
+            "getComputedStyle",
+            "matchMedia",
+            "addEventListener",
+            "removeEventListener",
+            "postMessage",
+            "atob",
+            "btoa",
+            "scrollTo",
+            "scrollBy",
+        ];
+        // Type-position globals (e.g. `HTMLElement`, `Event`).
+        const DOM_TYPES: &[&str] = &[
+            "HTMLElement",
+            "Element",
+            "Node",
+            "Event",
+            "EventTarget",
+            "Document",
+            "Window",
+            "NodeList",
+            "HTMLInputElement",
+            "HTMLButtonElement",
+            "HTMLDivElement",
+            "HTMLSpanElement",
+            "HTMLAnchorElement",
+            "HTMLFormElement",
+            "HTMLSelectElement",
+            "HTMLTextAreaElement",
+            "HTMLCanvasElement",
+            "CanvasRenderingContext2D",
+            "MouseEvent",
+            "KeyboardEvent",
+        ];
+        // Use `FunctionScopedVariable` as a neutral flag for both value and
+        // type fallbacks: it is found by both value and type reference
+        // resolution (which query globals with an all-meaning filter), and it
+        // resolves to `any` via the non-interface fallback in
+        // `resolve_type_reference` (no declaration nodes, so interface member
+        // resolution is never attempted).
+        for &name in DOM_VALUES {
+            if self.globals.get(name).is_none() {
+                self.globals.insert(
+                    name.to_string(),
+                    Arc::new(Symbol::new(SymbolFlags::FunctionScopedVariable, name)),
+                );
+            }
+        }
+        for &name in DOM_TYPES {
+            if self.globals.get(name).is_none() {
+                self.globals.insert(
+                    name.to_string(),
+                    Arc::new(Symbol::new(SymbolFlags::FunctionScopedVariable, name)),
+                );
+            }
+        }
+    }
+
+    /// G1: Provide a synthetic global `JSX` namespace when JSX is enabled but
+    /// no `JSX` namespace is already in scope (e.g. `@types/react` isn't
+    /// loaded, or its `declare global { namespace JSX }` isn't merged into
+    /// globals). Without it, every JSX element triggers TS2602 (missing
+    /// `JSX.Element`) and TS7026 (missing `JSX.IntrinsicElements`) under
+    /// `noImplicitAny`. The synthetic namespace is permissive: `Element`
+    /// resolves to `any`, and `IntrinsicElements` carries a string index
+    /// signature so any tag name is accepted.
+    fn ensure_jsx_namespace(&mut self) {
+        use super::jsx::JsxNames;
+        if !self.is_jsx_enabled() || self.get_jsx_namespace().is_some() {
+            return;
+        }
+
+        // The JSX namespace itself.
+        let mut jsx = Symbol::new(SymbolFlags::NamespaceModule, JsxNames::JSX);
+
+        // `JSX.Element` — its mere presence suppresses TS2602 in
+        // `check_jsx_preconditions`. It resolves to `any`.
+        let element = Symbol::new(SymbolFlags::TypeLiteral, JsxNames::ELEMENT);
+        jsx.members
+            .insert(JsxNames::ELEMENT.to_string(), Arc::new(element));
+
+        // `JSX.IntrinsicElements` — model a string index signature
+        // (`[elemName: string]: ...`) so any intrinsic tag is accepted and
+        // TS7026 is suppressed. The index-signature marker member keeps the
+        // interface's members non-empty, matching how a real index signature
+        // would be represented internally.
+        let mut intrinsic = Symbol::new(SymbolFlags::TypeLiteral, JsxNames::INTRINSIC_ELEMENTS);
+        intrinsic.members.insert(
+            crate::ast::INTERNAL_SYMBOL_NAME_INDEX.to_string(),
+            Arc::new(Symbol::new(SymbolFlags::TypeLiteral, "")),
+        );
+        jsx.members.insert(
+            JsxNames::INTRINSIC_ELEMENTS.to_string(),
+            Arc::new(intrinsic),
+        );
+
+        self.globals
+            .insert(JsxNames::JSX.to_string(), Arc::new(jsx));
     }
 
     // ────────────────────────────────────────────────────────────────────────

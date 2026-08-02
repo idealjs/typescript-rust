@@ -179,6 +179,7 @@ impl Program {
         // 2. Load input files from the parsed command line / tsconfig.
         //    Process `/// <reference path=... />` directives recursively so that
         //    dependencies are loaded before dependent files (matching Go's ordering).
+        let allow_js = options.get_allow_js();
         for file_name in &opts.config.file_names {
             load_source_file_with_references(
                 file_name,
@@ -186,6 +187,7 @@ impl Program {
                 &mut source_files,
                 &mut by_name,
                 &mut diagnostics,
+                allow_js,
             );
         }
 
@@ -227,6 +229,7 @@ impl Program {
                                     &mut source_files,
                                     &mut by_name,
                                     &mut diagnostics,
+                                    allow_js,
                                 ) {
                                     queue.push(sf);
                                 }
@@ -420,6 +423,24 @@ fn is_external_library_file(file_name: &str) -> bool {
     file_name.contains("/node_modules/") || file_name.contains("\\node_modules\\")
 }
 
+/// Whether a JavaScript file inside `node_modules` should be skipped when
+/// loading source files. When `allowJs`/`checkJs` is false (the default),
+/// `.js`/`.jsx`/`.mjs`/`.cjs` files are not part of the program: parsing them
+/// as TypeScript produces false TS1003/TS1005 syntax diagnostics. Only the
+/// corresponding `.d.ts` declarations (if any) are loaded for type checking.
+///
+/// Mirrors Go's `fileLoader`/`processRootFile`, which only includes JS files
+/// when `allowJs` is enabled. Files outside `node_modules` are unaffected.
+fn should_skip_js_file(file_name: &str, allow_js: bool) -> bool {
+    if allow_js || !is_external_library_file(file_name) {
+        return false;
+    }
+    matches!(
+        script_kind_from_file_name(file_name),
+        crate::ast::ScriptKind::Js | crate::ast::ScriptKind::Jsx
+    )
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // File loading helpers
 // ────────────────────────────────────────────────────────────────────────────
@@ -450,10 +471,17 @@ fn load_source_file(
     source_files: &mut Vec<Arc<SourceFile>>,
     by_name: &mut HashMap<String, Arc<SourceFile>>,
     diagnostics: &mut Vec<Arc<Diagnostic>>,
+    allow_js: bool,
 ) -> Option<Arc<SourceFile>> {
     let normalized = tspath::normalize_path(file_name);
     if let Some(existing) = by_name.get(&normalized) {
         return Some(Arc::clone(existing));
+    }
+    // G3: When `allowJs` is false, skip `.js`/`.jsx` (etc.) files pulled in
+    // from `node_modules` during module resolution — they are not part of the
+    // program and would otherwise produce false syntax diagnostics.
+    if should_skip_js_file(&normalized, allow_js) {
+        return None;
     }
 
     let (file, parse_diags) = match read_and_parse(&normalized, host) {
@@ -489,9 +517,15 @@ fn load_source_file_with_references(
     source_files: &mut Vec<Arc<SourceFile>>,
     by_name: &mut HashMap<String, Arc<SourceFile>>,
     diagnostics: &mut Vec<Arc<Diagnostic>>,
+    allow_js: bool,
 ) {
     let normalized = tspath::normalize_path(file_name);
     if by_name.contains_key(&normalized) {
+        return;
+    }
+    // G3: When `allowJs` is false, skip `.js`/`.jsx` (etc.) files coming from
+    // `node_modules` — they are not part of the program.
+    if should_skip_js_file(&normalized, allow_js) {
         return;
     }
 
@@ -517,7 +551,14 @@ fn load_source_file_with_references(
     let text = file.text.as_str();
     let refs = extract_reference_path_directives(text, &normalized);
     for ref_path in &refs {
-        load_source_file_with_references(ref_path, host, source_files, by_name, diagnostics);
+        load_source_file_with_references(
+            ref_path,
+            host,
+            source_files,
+            by_name,
+            diagnostics,
+            allow_js,
+        );
     }
 
     source_files.push(file);
@@ -1272,5 +1313,121 @@ mod tests {
     fn bundled_lib_decorators_parses_without_errors() {
         let diags = parse_bundled_lib("lib.decorators.d.ts");
         assert_no_parser_errors("lib.decorators.d.ts", &diags);
+    }
+
+    // ── G3: node_modules .js files must not be parsed when allowJs is false ──
+
+    /// When `allowJs` is false (the default), `.js` files pulled in from
+    /// `node_modules` during module resolution must not be parsed as
+    /// TypeScript — otherwise they produce false TS1003/TS1005 syntax
+    /// diagnostics. They should also not appear in the program's source files.
+    #[test]
+    fn node_modules_js_skipped_when_allow_js_false() {
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/src");
+        fs.insert_dir("/proj/node_modules");
+        fs.insert_dir("/proj/node_modules/mypkg");
+        // A `.js` entry point whose package.json `main` points at it. This
+        // file is intentionally valid JS but would be parsed (and could
+        // surface syntax diagnostics) if it were loaded into the program.
+        fs.insert_file(
+            "/proj/node_modules/mypkg/index.js",
+            "module.exports = { x: 1 };\nfunction f(a, b) { return a + b; }\n",
+        );
+        fs.insert_file(
+            "/proj/node_modules/mypkg/package.json",
+            r#"{"name": "mypkg", "version": "1.0.0", "main": "index.js"}"#,
+        );
+        fs.insert_file(
+            "/proj/src/main.ts",
+            "import * as pkg from 'mypkg';\nexport const v = pkg;",
+        );
+
+        // allowJs is false (default): no `--allowJs`.
+        let parsed = ParsedCommandLine {
+            compiler_options: {
+                let mut opts = CompilerOptions::default();
+                opts.no_lib = Tristate::True;
+                opts
+            },
+            file_names: vec!["/proj/src/main.ts".to_string()],
+            ..Default::default()
+        };
+        let host = Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
+        let program = Program::new(ProgramOptions {
+            config: parsed,
+            host,
+        });
+
+        // The `.js` file must not have been loaded into the program.
+        assert!(
+            program
+                .get_source_file("/proj/node_modules/mypkg/index.js")
+                .is_none(),
+            "expected node_modules .js file to be skipped when allowJs is false"
+        );
+        // And it must not have produced any syntax diagnostics.
+        let has_syntax_error = program
+            .diagnostics()
+            .iter()
+            .any(|d| d.code == 1003 || d.code == 1005);
+        assert!(
+            !has_syntax_error,
+            "expected no TS1003/TS1005 syntax diagnostics from node_modules .js, got: {:?}",
+            program
+                .diagnostics()
+                .iter()
+                .map(|d| (d.code, d.message_args.clone()))
+                .collect::<Vec<_>>()
+        );
+    }
+
+    /// When `allowJs` is true, `.js` files in `node_modules` ARE loaded.
+    /// This guards against the G3 filter being too aggressive.
+    #[test]
+    fn node_modules_js_loaded_when_allow_js_true() {
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/proj");
+        fs.insert_dir("/proj/src");
+        fs.insert_dir("/proj/node_modules");
+        fs.insert_dir("/proj/node_modules/mypkg");
+        fs.insert_file("/proj/node_modules/mypkg/index.js", "export const x = 1;\n");
+        fs.insert_file(
+            "/proj/node_modules/mypkg/package.json",
+            r#"{"name": "mypkg", "version": "1.0.0", "main": "index.js"}"#,
+        );
+        fs.insert_file(
+            "/proj/src/main.ts",
+            "import { x } from 'mypkg';\nexport const v = x;",
+        );
+
+        let parsed = ParsedCommandLine {
+            compiler_options: {
+                let mut opts = CompilerOptions::default();
+                opts.no_lib = Tristate::True;
+                opts.allow_js = Tristate::True;
+                opts
+            },
+            file_names: vec!["/proj/src/main.ts".to_string()],
+            ..Default::default()
+        };
+        let host = Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
+        let program = Program::new(ProgramOptions {
+            config: parsed,
+            host,
+        });
+
+        assert!(
+            program
+                .get_source_file("/proj/node_modules/mypkg/index.js")
+                .is_some(),
+            "expected node_modules .js file to be loaded when allowJs is true; files: {:?}",
+            program
+                .source_files()
+                .iter()
+                .map(|f| f.file_name.as_str())
+                .collect::<Vec<_>>()
+        );
     }
 }

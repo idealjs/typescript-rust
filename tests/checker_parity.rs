@@ -2068,6 +2068,115 @@ fn checker_jsx_class_component_no_error() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// G1: JSX global namespace must be synthesized when --jsx is enabled but no
+// @types/react is in scope. Without it, every JSX element triggers false
+// TS2602 (missing JSX.Element) and TS7026 (missing JSX.IntrinsicElements)
+// under noImplicitAny — the default in strict React projects.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_jsx_namespace_synthesized_no_implicit_any_react_jsx() {
+    // `--jsx react-jsx` + `--noImplicitAny`, no @types/react: the checker
+    // synthesizes a permissive global JSX namespace, so intrinsic elements
+    // must NOT produce TS2602/TS7026.
+    let diags = check_source_tsx_with_args(
+        "const el = <div className=\"x\">hello <span>world</span></div>;",
+        &["--jsx", "react-jsx", "--noImplicitAny"],
+    );
+    let jsx_diags: Vec<_> = diags
+        .iter()
+        .filter(|d| d.code == 2602 || d.code == 7026)
+        .collect();
+    assert!(
+        jsx_diags.is_empty(),
+        "expected no TS2602/TS7026 with synthesized JSX namespace, got: {:?}",
+        jsx_diags
+            .iter()
+            .map(|d| (d.code, d.message_args.clone()))
+            .collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn checker_jsx_namespace_synthesized_no_implicit_any_preserve() {
+    // Same as above but with `--jsx preserve`.
+    let diags = check_source_tsx_with_args(
+        "const el = <input type=\"text\" value={1} />;",
+        &["--jsx", "preserve", "--noImplicitAny"],
+    );
+    let jsx_diags: Vec<_> = diags
+        .iter()
+        .filter(|d| d.code == 2602 || d.code == 7026)
+        .collect();
+    assert!(
+        jsx_diags.is_empty(),
+        "expected no TS2602/TS7026 with synthesized JSX namespace, got: {:?}",
+        jsx_diags
+            .iter()
+            .map(|d| (d.code, d.message_args.clone()))
+            .collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn checker_jsx_component_still_checked_under_synthetic_namespace() {
+    // The synthetic JSX namespace only relaxes intrinsic-element checks
+    // (TS2602/TS7026). A component with no call/construct signatures must
+    // still be reported (TS2604), proving the namespace doesn't over-relax.
+    let diags = check_source_tsx_with_args(
+        "const Foo = 42;\nconst el = <Foo />;",
+        &["--jsx", "react-jsx", "--noImplicitAny"],
+    );
+    assert_diagnostic_code(&diags, 2604);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// G2: Common DOM/host globals (document, window, console, setTimeout) and DOM
+// type names (HTMLElement, Event) must be resolvable even without lib.dom.d.ts
+// merged into globals, to avoid false TS2304 "Cannot find name" diagnostics.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_dom_value_globals_resolvable() {
+    let diags = check_source(
+        "const t = document.title;\n\
+         const h = window.location.href;\n\
+         console.log(t, h);\n\
+         const id = setTimeout(() => {}, 0);\n\
+         clearTimeout(id);\n\
+         const ua = navigator.userAgent;",
+    );
+    let ts2304 = diags.iter().filter(|d| d.code == 2304).collect::<Vec<_>>();
+    assert!(
+        ts2304.is_empty(),
+        "expected no TS2304 for DOM value globals, got: {:?}",
+        ts2304
+            .iter()
+            .map(|d| d.message_args.clone())
+            .collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn checker_dom_type_globals_resolve_to_any() {
+    // DOM type names used in type position must resolve (to `any`) rather
+    // than producing TS2304.
+    let diags = check_source(
+        "function handler(e: Event): void {}\n\
+         function getNode(): HTMLElement | null { return null; }",
+    );
+    let ts2304 = diags.iter().filter(|d| d.code == 2304).collect::<Vec<_>>();
+    assert!(
+        ts2304.is_empty(),
+        "expected no TS2304 for DOM type globals, got: {:?}",
+        ts2304
+            .iter()
+            .map(|d| d.message_args.clone())
+            .collect::<Vec<_>>()
+    );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // JSDoc type-check smoke tests (.js with JSDoc annotations)
 // ────────────────────────────────────────────────────────────────────────────
 
