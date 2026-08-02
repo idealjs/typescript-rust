@@ -45,6 +45,8 @@ cfg-if = "1"
 bitflags = "2"
 # Base64 encoding for source map data URLs
 base64 = "0.22"
+# File system watching for `--watch` mode
+notify = "6"
 
 [dev-dependencies]
 pretty_assertions = "1"

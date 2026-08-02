@@ -49,6 +49,8 @@ use crate::tsoptions::{
 use crate::tspath;
 use crate::vfs::{FS, OsFS};
 
+mod watch;
+
 /// Compiler version string, matching Go's `core.Version()`.
 pub const VERSION: &str = "7.1.0-dev";
 
@@ -675,6 +677,10 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
     // Save the show_config flag before command_line is moved into config_for_compilation.
     let show_config_requested = command_line.compiler_options.show_config.is_true();
 
+    // Save the command-line options before `command_line` is moved, so watch
+    // mode can re-read the config file (which may change) on each recompilation.
+    let base_options = command_line.compiler_options.clone();
+
     // Read the config file (if found) and merge with command-line options.
     let config_for_compilation: ParsedCommandLine = if !config_file_name.is_empty() {
         let config_parsed = get_parsed_command_line_of_config_file(
@@ -703,6 +709,18 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
         return CommandLineResult {
             status: ExitStatus::Success,
         };
+    }
+
+    // --watch mode: perform an initial compilation, then watch the project
+    // directory for source changes and recompile until interrupted.
+    if config_for_compilation.compiler_options.watch.is_true() {
+        return watch::watch_mode(
+            sys,
+            config_for_compilation,
+            base_options,
+            &config_file_name,
+            pretty,
+        );
     }
 
     perform_compilation(sys, config_for_compilation, pretty)
@@ -1438,6 +1456,7 @@ fn generate_tsconfig(options: &CompilerOptions) -> String {
 
 #[cfg(test)]
 mod tests {
+    use super::watch;
     use super::*;
     use crate::bundled::BundledFS;
     use crate::vfs::InMemoryFS;
@@ -2561,6 +2580,95 @@ mod tests {
         assert!(
             out.contains("Do not emit outputs."),
             "noEmit desc missing:\n{out}"
+        );
+    }
+
+    // ───────────────────────────────────────────────────────────────────────
+    // --watch mode tests
+    //
+    // The watcher loop itself is inherently async and would require a
+    // timeout-based test (flaky), so the tests below cover the composable,
+    // deterministic pieces that watch mode is built from: the source-file
+    // filter, the timestamp format, the post-compile summary line, and the
+    // single-compilation helper that backs both the initial compile and each
+    // recompile.
+    // ───────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn watch_is_source_file_matches_known_extensions() {
+        let yes = [".ts", ".tsx", ".js", ".jsx", ".json", ".mts", ".cts"];
+        for ext in yes {
+            let path = format!("/proj/src/a{ext}");
+            assert!(watch::is_source_file(&path), "expected {path} to match");
+        }
+        assert!(watch::is_source_file("a.ts"));
+        // Non-source extensions must not trigger a recompile.
+        assert!(!watch::is_source_file("a.ts.map"));
+        assert!(!watch::is_source_file("readme.md"));
+        assert!(!watch::is_source_file("a.d.ts.bak"));
+        assert!(!watch::is_source_file(""));
+    }
+
+    #[test]
+    fn watch_timestamp_is_hh_mm_ss() {
+        let ts = watch::timestamp();
+        let parts: Vec<&str> = ts.split(':').collect();
+        assert_eq!(parts.len(), 3, "expected HH:MM:SS, got {ts}");
+        for p in &parts {
+            assert_eq!(p.len(), 2, "each component should be 2 digits: {ts}");
+            assert!(
+                p.chars().all(|c| c.is_ascii_digit()),
+                "non-digit component in {ts}"
+            );
+        }
+    }
+
+    #[test]
+    fn watch_summary_reports_zero_errors_on_success() {
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/proj");
+        let sys = TestSystem::new(fs, "/proj");
+        watch::print_watch_summary(&sys, ExitStatus::Success);
+        let out = sys.output_string();
+        assert!(out.contains("Found 0 errors."), "got:\n{out}");
+        assert!(out.contains("Watching for file changes."));
+    }
+
+    #[test]
+    fn watch_summary_reports_errors_on_failure() {
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/proj");
+        let sys = TestSystem::new(fs, "/proj");
+        watch::print_watch_summary(&sys, ExitStatus::DiagnosticsPresent_OutputsGenerated);
+        let out = sys.output_string();
+        assert!(out.contains("Found errors."), "got:\n{out}");
+    }
+
+    #[test]
+    fn watch_compile_once_runs_initial_compilation() {
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/proj");
+        fs.insert_file("/proj/a.ts", "let x: number = 1;");
+        let sys = TestSystem::new(fs, "/proj");
+        // Build the command-line config exactly as the CLI would for a one-off
+        // compile (`--noLib --ignoreConfig a.ts`), then mark it as watch mode.
+        let mut config = parse_command_line(
+            &[
+                "--noLib".to_string(),
+                "--ignoreConfig".to_string(),
+                "/proj/a.ts".to_string(),
+            ],
+            "/proj",
+            None,
+        );
+        config.compiler_options.watch = Tristate::True;
+        // No config file present → compile_once reuses the parsed config.
+        let result = watch::compile_once(&sys, &config, &config.compiler_options, "", false);
+        assert_eq!(
+            result.status,
+            ExitStatus::Success,
+            "initial watch compilation failed:\n{}",
+            sys.output_string()
         );
     }
 }
