@@ -669,6 +669,14 @@ fn emit_declaration_text(source_file: &SourceFile, _options: &CompilerOptions) -
             continue;
         }
 
+        // Drop value-only imports — they are not part of the type surface.
+        // Side-effect imports (`import './x.css'`) and type-only imports
+        // (`import type { T } from '...'`) are kept.
+        if is_value_only_import(stmt) {
+            prev_end = stmt.end();
+            continue;
+        }
+
         // Collect export/default modifier ranges. The parser may or may not
         // include the `export` keyword in `stmt.pos()` depending on the
         // statement kind, so we handle modifiers explicitly here.
@@ -723,7 +731,10 @@ fn emit_declaration_text(source_file: &SourceFile, _options: &CompilerOptions) -
         output.push_str(&source[prev_end..]);
     }
 
-    output
+    // Match Go's ASI-implicit-semicolon printer and rewrite relative import
+    // specifiers, consistent with the JS emitter.
+    let output = rewrite_import_extensions(&output);
+    add_implicit_semicolons(&output)
 }
 
 /// Whether a statement should be included in the `.d.ts` output.
@@ -743,6 +754,24 @@ fn is_declaration_statement(node: &Node) -> bool {
             | SyntaxKind::ExportAssignment
             | SyntaxKind::ModuleDeclaration
     )
+}
+
+/// Whether an import declaration is a value-only import (dropped from the
+/// `.d.ts` output). Side-effect imports (`import './x.css'`) and type-only
+/// imports (`import type { T } from '...'`) are kept.
+fn is_value_only_import(node: &Node) -> bool {
+    if let NodeData::ImportDeclaration(d) = &node.data {
+        match &d.import_clause {
+            // Side-effect-only import: keep.
+            None => false,
+            Some(clause) => match &clause.data {
+                NodeData::ImportClause(ic) => ic.phase_modifier != Some(SyntaxKind::TypeKeyword),
+                _ => false,
+            },
+        }
+    } else {
+        false
+    }
 }
 
 /// Whether a `declare` keyword should be inserted before this statement.
@@ -786,23 +815,20 @@ fn emit_declaration_statement(node: &Node, source: &str, start: usize, output: &
                 output.push_str(&source[start..node.end()]);
             }
         }
-        // Variable statement: strip initializers (when type annotation exists).
+        // Variable statement: strip initializers. In declaration mode ALL
+        // initializers are stripped (even without a type annotation).
         NodeData::VariableStatement(d) => {
             let mut cuts: Vec<(usize, usize)> = Vec::new();
-            collect_variable_initializer_cuts(&d.declaration_list, &mut cuts);
+            collect_variable_initializer_cuts(&d.declaration_list, &mut cuts, true);
             if cuts.is_empty() {
                 output.push_str(&source[start..node.end()]);
             } else {
                 emit_with_cuts(source, start, node.end(), &cuts, output);
             }
         }
-        // Class: strip method bodies, keep signatures.
+        // Class: strip method/constructor/accessor bodies, keep signatures.
         NodeData::ClassDeclaration(d) => {
-            // For now, emit the class as-is. Full body stripping (removing
-            // method bodies while keeping type annotations on members)
-            // requires recursive AST walking — left as a future enhancement.
-            let _ = d;
-            output.push_str(&source[start..node.end()]);
+            emit_class_members(&d.members, source, start, node.end(), output);
         }
         // All other declarations: emit source as-is.
         _ => {
@@ -811,9 +837,67 @@ fn emit_declaration_statement(node: &Node, source: &str, start: usize, output: &
     }
 }
 
-/// Collect cut ranges for variable initializers. Only strips the initializer
-/// when a type annotation is present (so the declaration remains valid).
-fn collect_variable_initializer_cuts(list: &Arc<Node>, cuts: &mut Vec<(usize, usize)>) {
+/// Emit a class declaration with method/constructor/accessor bodies stripped
+/// (each body `{ ... }` is replaced with `;`). Property declarations and
+/// their type annotations are preserved.
+fn emit_class_members(
+    members: &NodeList,
+    source: &str,
+    start: usize,
+    end: usize,
+    output: &mut String,
+) {
+    // Collect (signature_end, body_end) ranges for members that have a body.
+    let mut ops: Vec<(usize, usize)> = Vec::new();
+    let bytes = source.as_bytes();
+    for member in members.iter() {
+        if let Some(body) = class_member_body(member) {
+            // `body.pos()` includes leading whitespace trivia. Scan back to
+            // the end of the member signature so the cut also removes the
+            // whitespace between the signature and `{`.
+            let mut sig_end = body.pos();
+            while sig_end > start && bytes[sig_end - 1].is_ascii_whitespace() {
+                sig_end -= 1;
+            }
+            ops.push((sig_end, body.end()));
+        }
+    }
+    ops.sort_by_key(|&(s, _)| s);
+    let mut pos = start;
+    for (cs, ce) in &ops {
+        if *cs > pos {
+            output.push_str(&source[pos..*cs]);
+        }
+        output.push(';');
+        pos = *ce;
+    }
+    if pos < end {
+        output.push_str(&source[pos..end]);
+    }
+}
+
+/// Return the body node of a class member that has one (methods, constructors,
+/// accessors). Returns `None` for property declarations (no body to strip).
+fn class_member_body(member: &Node) -> Option<&Arc<Node>> {
+    match &member.data {
+        NodeData::MethodDeclaration(d) => d.body.as_ref(),
+        NodeData::ConstructorDeclaration(d) => d.body.as_ref(),
+        NodeData::GetAccessorDeclaration(d) => d.body.as_ref(),
+        NodeData::SetAccessorDeclaration(d) => d.body.as_ref(),
+        _ => None,
+    }
+}
+
+/// Collect cut ranges for variable initializers. When `declaration_mode` is
+/// false, only strips the initializer when a type annotation is present (so
+/// the declaration remains valid). When `declaration_mode` is true (`.d.ts`
+/// emit), strips ALL initializers — a bare declaration is valid under a
+/// `declare` modifier even without a type annotation.
+fn collect_variable_initializer_cuts(
+    list: &Arc<Node>,
+    cuts: &mut Vec<(usize, usize)>,
+    declaration_mode: bool,
+) {
     if let NodeData::VariableDeclarationList(d) = &list.data {
         for decl in d.declarations.iter() {
             if let NodeData::VariableDeclaration(vd) = &decl.data {
@@ -821,9 +905,16 @@ fn collect_variable_initializer_cuts(list: &Arc<Node>, cuts: &mut Vec<(usize, us
                     // Cut from end of type annotation to end of initializer.
                     // This removes ` = value` while keeping `: Type`.
                     cuts.push((type_node.end(), init.end()));
+                } else if declaration_mode {
+                    if let Some(init) = &vd.initializer {
+                        // No type annotation: strip the initializer entirely
+                        // (` = value`), leaving the bare name. The cut starts
+                        // at the end of the name and removes through the value.
+                        cuts.push((vd.name.end(), init.end()));
+                    }
                 }
                 // Recurse into binding patterns (array/object destructuring).
-                collect_variable_initializer_cuts(&vd.name, cuts);
+                collect_variable_initializer_cuts(&vd.name, cuts, declaration_mode);
             }
         }
     }
@@ -3670,6 +3761,83 @@ mod tests {
         // Should only have .d.ts, no .js.
         assert!(!result.emitted_files.iter().any(|p| p.ends_with(".js")));
         assert!(result.emitted_files.iter().any(|p| p.ends_with(".d.ts")));
+    }
+
+    #[test]
+    fn dts_drops_value_imports_keeps_side_effect() {
+        // Mirrors a React component entry: value imports are dropped, the
+        // side-effect CSS import is kept.
+        let src = "import { useState } from 'react';\n\
+                   import reactLogo from './assets/react.svg';\n\
+                   import './App.css';\n\
+                   export default function App() { return 1; }\n";
+        let dts = emit_dts(src);
+        // Value imports are not part of the type surface.
+        assert!(!dts.contains("useState"));
+        assert!(!dts.contains("reactLogo"));
+        // Side-effect import is retained and gets an implicit semicolon.
+        assert!(dts.contains("import './App.css';"));
+        // Function body is stripped; signature retained.
+        assert!(dts.contains("declare function App();"));
+        assert!(!dts.contains("return"));
+    }
+
+    #[test]
+    fn dts_keeps_type_only_import() {
+        let src = "import type { Config } from './config';\n\
+                   import { value } from './values';\n\
+                   export const c: Config = {} as any;\n";
+        let dts = emit_dts(src);
+        // Type-only import is kept.
+        assert!(dts.contains("import type { Config } from './config';"));
+        // Value import is dropped.
+        assert!(!dts.contains("value"));
+    }
+
+    #[test]
+    fn dts_function_declare_keyword_and_semicolon() {
+        // A non-exported function gets `declare` and an implicit semicolon.
+        let dts = emit_dts("function add(a: number, b: number): number { return a + b; }");
+        assert!(dts.contains("declare function add(a: number, b: number): number;"));
+    }
+
+    #[test]
+    fn dts_class_strips_method_bodies() {
+        let src = "export class Counter {\n\
+                   count: number;\n\
+                   constructor(initial: number) { this.count = initial; }\n\
+                   increment(): void { this.count++; }\n\
+                   }\n";
+        let dts = emit_dts(src);
+        assert!(dts.contains("export declare class Counter"));
+        // Property type annotation is preserved.
+        assert!(dts.contains("count: number;"));
+        // Constructor & method bodies are replaced with `;`.
+        assert!(dts.contains("constructor(initial: number);"));
+        assert!(dts.contains("increment(): void;"));
+        // Implementation details are gone.
+        assert!(!dts.contains("this.count"));
+        assert!(!dts.contains("initial;"));
+    }
+
+    #[test]
+    fn dts_variable_strips_initializer_without_type() {
+        // No type annotation: the initializer is still stripped in .d.ts mode.
+        let dts = emit_dts("const answer = 42;");
+        assert!(dts.contains("declare const answer;"));
+        assert!(!dts.contains("42"));
+    }
+
+    #[test]
+    fn dts_variable_multiple_no_type() {
+        // Use separate statements: the parser has a known comma-operator
+        // limitation for multi-declaration lists. Both initializers are
+        // stripped even without type annotations.
+        let dts = emit_dts("let a = 1;\nlet b = 2;");
+        assert!(dts.contains("declare let a;"));
+        assert!(dts.contains("declare let b;"));
+        assert!(!dts.contains("= 1"));
+        assert!(!dts.contains("= 2"));
     }
 
     // ── Ports of Go transformers/tstransforms tests ───────────────────────
