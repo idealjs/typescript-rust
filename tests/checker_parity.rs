@@ -8037,10 +8037,8 @@ fn checker_logical_or_default_no_error() {
 
 // ────────────────────────────────────────────────────────────────────────────
 // Generic type inference: generic functions, constraints, generic classes,
-// multiple / default type parameters.
-//
-// Note: generic *declarations* type-check cleanly; call-site type-argument
-// inference currently emits a false-positive TS2345 (documented below).
+// multiple / default type parameters. Call-site type-argument inference is
+// wired up, so invoking a generic function infers `T` from the arguments.
 // ────────────────────────────────────────────────────────────────────────────
 
 #[test]
@@ -8106,11 +8104,27 @@ fn checker_generic_constraint_length_no_error() {
 }
 
 #[test]
-fn checker_generic_call_inference_currently_false_positive_ts2345() {
-    // KNOWN LIMITATION: type-argument inference at call sites is not wired up,
-    // so invoking a generic function emits a false-positive TS2345.
+fn checker_generic_call_inference_no_error() {
+    // Call-site type-argument inference: `id("hi")` infers `T = string`,
+    // so the argument is assignable and no TS2345 is emitted.
     let diags = check_source("function id<T>(x: T): T { return x; }\nid(\"hi\");");
-    assert_diagnostic_code(&diags, 2345);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_generic_identity_inference_number_no_error() {
+    // `identity(42)` infers `T` from the numeric argument; no TS2345.
+    let diags =
+        check_source("function identity<T>(x: T): T { return x; }\nconst n = identity(42);");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_generic_identity_inference_string_no_error() {
+    // `identity("hi")` infers `T` from the string argument; no TS2345.
+    let diags =
+        check_source("function identity<T>(x: T): T { return x; }\nconst s = identity(\"hi\");");
+    assert_no_diagnostics(&diags);
 }
 
 // ────────────────────────────────────────────────────────────────────────────

@@ -1243,6 +1243,16 @@ impl Checker {
         contextual_signature: Option<&Arc<Signature>>,
         declaration: Option<Arc<Node>>,
     ) -> Arc<Signature> {
+        // Collect the declaration's type parameters (the `<T>` in
+        // `function f<T>(x: T): T`). Each is resolved via
+        // `get_type_parameter_from_symbol`, which caches the `TypeParameter`
+        // type on the symbol — so the same `Arc<Type>` is shared by this
+        // list and by type references in parameter/return annotations.
+        // That pointer-equality is what lets call-site inference substitute
+        // inferred type arguments into the signature. Resolved here (before
+        // the parameter loop) so type-parameter constraint resolution, which
+        // may walk the scope stack, runs while the caller's scope is pushed.
+        let type_parameters = self.type_parameters_of_declaration(&declaration);
         let mut param_symbols: Vec<Arc<Symbol>> = Vec::with_capacity(parameters.len());
         let mut flags = SignatureFlags::None;
         if is_construct {
@@ -1319,7 +1329,7 @@ impl Checker {
             min_argument_count,
             resolved_min_argument_count: -1,
             declaration,
-            type_parameters: Vec::new(),
+            type_parameters,
             parameters: param_symbols,
             this_parameter: None,
             resolved_return_type: std::sync::OnceLock::new(),
@@ -1333,6 +1343,46 @@ impl Checker {
         // separate inference pass.
         let _ = sig.resolved_return_type.set(return_type);
         sig
+    }
+
+    /// Collect the type-parameter `Type`s declared by a function-like node
+    /// (the `<T>` in `function f<T>(...)`). Returns an empty vec when
+    /// `declaration` is `None` or has no type parameters. Mirrors the
+    /// collection Go performs in `createSignature` /
+    /// `getSignatureFromDeclaration`.
+    fn type_parameters_of_declaration(
+        &mut self,
+        declaration: &Option<Arc<Node>>,
+    ) -> Vec<Arc<Type>> {
+        let Some(decl) = declaration else {
+            return Vec::new();
+        };
+        let tp_list = match &decl.data {
+            NodeData::FunctionDeclaration(d) => d.type_parameters.as_ref(),
+            NodeData::FunctionExpression(d) => d.type_parameters.as_ref(),
+            NodeData::ArrowFunction(d) => d.type_parameters.as_ref(),
+            NodeData::MethodDeclaration(d) => d.type_parameters.as_ref(),
+            NodeData::MethodSignatureDeclaration(d) => d.type_parameters.as_ref(),
+            NodeData::ConstructorDeclaration(d) => d.type_parameters.as_ref(),
+            NodeData::GetAccessorDeclaration(d) => d.type_parameters.as_ref(),
+            NodeData::SetAccessorDeclaration(d) => d.type_parameters.as_ref(),
+            NodeData::FunctionTypeNode(d) => d.type_parameters.as_ref(),
+            NodeData::ConstructorTypeNode(d) => d.type_parameters.as_ref(),
+            _ => None,
+        };
+        let Some(list) = tp_list else {
+            return Vec::new();
+        };
+        // Collect symbols first to avoid borrowing `self.program` (immutable)
+        // across the mutable `get_type_parameter_from_symbol` call.
+        let symbols: Vec<Arc<Symbol>> = list
+            .iter()
+            .filter_map(|tp| self.program.symbol_map().symbol_of(tp).map(Arc::clone))
+            .collect();
+        symbols
+            .iter()
+            .map(|s| self.get_type_parameter_from_symbol(s))
+            .collect()
     }
 
     /// Create an anonymous object type with the given signatures. When

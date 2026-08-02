@@ -41,6 +41,8 @@ use crate::jsnum;
 use super::tracer::Tracer;
 use super::types::*;
 
+use super::inference::{InferenceContext, InferenceInfo};
+
 // ────────────────────────────────────────────────────────────────────────────
 // Program trait (simplified)
 // ────────────────────────────────────────────────────────────────────────────
@@ -2998,6 +3000,20 @@ impl Checker {
             };
             let sig = &signatures[matching_idx];
             if let Some(rt) = self.get_return_type_of_signature(sig) {
+                // For a generic signature, infer the type arguments from the
+                // call arguments and substitute them into the return type
+                // (so `identity(42)` yields `number`, not the type parameter
+                // `T`). Mirrors Go's `getReturnTypeOfSignature` applied to
+                // the instantiated signature from `chooseOverload`.
+                if !sig.type_parameters.is_empty() {
+                    let args: Vec<Arc<Node>> = callee.1.iter().cloned().collect();
+                    let inferred = self.infer_call_type_arguments(node, sig, &args);
+                    return self.substitute_infer_type_parameters(
+                        &rt,
+                        &sig.type_parameters,
+                        &inferred,
+                    );
+                }
                 return rt;
             }
             // Signature without a resolved return type — fall back to
@@ -3013,14 +3029,30 @@ impl Checker {
     /// signatures, and returns the first signature's return type (the
     /// instance type). Falls back to `any`.
     fn get_return_type_of_new_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        let callee = match &node.data {
-            crate::ast::NodeData::NewExpression(data) => &data.expression,
+        let (callee, args) = match &node.data {
+            crate::ast::NodeData::NewExpression(data) => {
+                (&data.expression, data.arguments.clone().unwrap_or_default())
+            }
             _ => return self.get_any_type(),
         };
         let callee_type = self.get_type_of_node(callee);
         if let Some(structured) = callee_type.as_structured() {
             for sig in structured.construct_signatures() {
                 if let Some(rt) = self.get_return_type_of_signature(sig) {
+                    // For a generic construct signature, infer the type
+                    // arguments from the call arguments and substitute them
+                    // into the return type. (Class constructors don't carry
+                    // their own type parameters, so this is a no-op for the
+                    // common `new Foo()` case.)
+                    if !sig.type_parameters.is_empty() {
+                        let arg_vec: Vec<Arc<Node>> = args.iter().cloned().collect();
+                        let inferred = self.infer_call_type_arguments(node, sig, &arg_vec);
+                        return self.substitute_infer_type_parameters(
+                            &rt,
+                            &sig.type_parameters,
+                            &inferred,
+                        );
+                    }
                     return rt;
                 }
                 return self.get_any_type();
@@ -3671,6 +3703,13 @@ impl Checker {
     /// and the first one whose parameters accept all arguments is used.
     /// If no signature matches, the error is reported against the first
     /// signature (matching TypeScript's behavior).
+    ///
+    /// For generic signatures, type arguments are first inferred from the
+    /// call arguments and substituted into the parameter types before
+    /// checking assignability (so `identity(42)` infers `T = number` and
+    /// checks `number` against `number`, not against the bare type
+    /// parameter `T`). Simplified port of the inference branch of Go's
+    /// `chooseOverload`.
     fn check_call_arguments(&mut self, node: &Arc<Node>, is_new: bool) {
         let (callee_expr, arguments) = match &node.data {
             crate::ast::NodeData::CallExpression(data) => {
@@ -3764,9 +3803,14 @@ impl Checker {
         } else {
             None
         };
+        // For a generic signature, infer type arguments from the call
+        // arguments and substitute them into each parameter type before the
+        // assignability check. Mirrors Go's `getSignatureInstantiation` +
+        // `isSignatureApplicable` flow inside `chooseOverload`.
+        let inferred_types = self.infer_call_type_arguments(node, &sig, &arguments.nodes);
         for (i, arg) in arguments.iter().enumerate() {
             // Determine the parameter type to check against.
-            let param_type = if has_rest && i >= rest_index {
+            let base_param_type = if has_rest && i >= rest_index {
                 // Rest position: check against the array element type.
                 Arc::clone(rest_element_type.as_ref().unwrap())
             } else if i < sig.parameters.len() {
@@ -3775,6 +3819,16 @@ impl Checker {
                 // Beyond declared params with no rest — should have been
                 // caught by the arity check; skip to avoid false positives.
                 continue;
+            };
+            // Substitute inferred type arguments into the parameter type.
+            let param_type = if !inferred_types.is_empty() {
+                self.substitute_infer_type_parameters(
+                    &base_param_type,
+                    &sig.type_parameters,
+                    &inferred_types,
+                )
+            } else {
+                base_param_type
             };
             // `any` parameter → always assignable, skip.
             if param_type.flags.contains(TypeFlags::Any) {
@@ -3792,6 +3846,36 @@ impl Checker {
                 ));
             }
         }
+    }
+
+    /// Run call-site type-argument inference for `signature` given the
+    /// call's argument nodes. Returns one inferred `Type` per type
+    /// parameter of `signature`; returns an empty vec when the signature is
+    /// non-generic.
+    ///
+    /// Simplified port of the inference branch of Go's `chooseOverload`:
+    /// builds an `InferenceContext` from the signature's type parameters,
+    /// invokes `infer_type_arguments`, and returns the resolved inferred
+    /// types. Does not yet handle explicit type-argument lists on the call
+    /// (`f<T>(...)`), context-sensitive two-pass inference, or the
+    /// `CheckModeSkipGenericFunctions` deferred-function heuristic.
+    fn infer_call_type_arguments(
+        &mut self,
+        node: &Arc<Node>,
+        signature: &Arc<Signature>,
+        args: &[Arc<Node>],
+    ) -> Vec<Arc<Type>> {
+        if signature.type_parameters.is_empty() {
+            return Vec::new();
+        }
+        let inferences: Vec<InferenceInfo> = signature
+            .type_parameters
+            .iter()
+            .map(|p| InferenceInfo::new(Arc::clone(p)))
+            .collect();
+        let mut context = InferenceContext::new(inferences);
+        context.signature = Some(Arc::clone(signature));
+        self.infer_type_arguments(node, signature, args, &mut context)
     }
 
     /// Check call/new-expression argument arity against a signature.
