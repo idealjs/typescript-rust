@@ -96,7 +96,7 @@ compiler warning 约 90 个（dead code in stub implementations），归类为�
 - [x] TS2741/TS2739/TS2353/TS2448/TS2454/TS18048/TS2451/TS2300
 - [x] TS2511/TS2341/TS2366/TS2588/TS7027
 - [x] 扩充 checker parity fixtures 到 800+（当前 808）
-- [ ] 修复 String/Number interface 方法解析（仅 Array 已修复）
+- [x] 修复 String/Number interface 方法解析（仅 Array 已修复）
 - [ ] 修复 generic call-site inference（TS2345 false positive）
 
 ### B. Watch mode（中）
