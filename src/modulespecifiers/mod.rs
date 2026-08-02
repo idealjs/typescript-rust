@@ -122,9 +122,12 @@ mod tests {
     // until the full ModuleSpecifierGenerationHost trait lands.
 
     #[test]
-    #[ignore]
-    // TODO: Requires full ModuleSpecifierGenerationHost trait and symlink cache;
-    // verify GetEachFileNameOfModule returns correct paths for each test case
+    // Port of Go's `TestGetEachFileNameOfModule`. The Rust
+    // `get_each_file_name_of_module` is a simplified port: it normalizes the
+    // imported file path against the host's current directory and reports a
+    // single `ModulePath` (no symlink alternatives yet). The symlink-preference
+    // variants are exercised here against the non-symlink path; full symlink
+    // resolution is covered by `test_get_each_file_name_of_module_with_symlinks`.
     fn test_get_each_file_name_of_module() {
         struct TestCase {
             name: &'static str,
@@ -337,9 +340,23 @@ mod tests {
 
     #[test]
     #[ignore]
-    // TODO: Requires full ModuleSpecifierGenerationHost trait, packagejson::ExportsOrImports,
-    // and core::CompilerOptions; verify tryGetModuleNameFromExportsOrImports
-    // matches exports patterns
+    // Port of Go's `TestTryGetModuleNameFromExportsOrImports`.
+    //
+    // BLOCKER: the function under test,
+    // `try_get_module_name_from_exports_or_imports` (Go:
+    // `specifiers.go:1199`), is not yet ported. A faithful port needs, beyond
+    // the already-available tspath helpers (`combine_paths`,
+    // `get_normalized_absolute_path`, `remove_file_extension`,
+    // `has_ts_file_extension`):
+    //   - `stringutil::has_prefix_and_suffix_without_overlap` (not ported) for
+    //     the `MatchingModePattern` wildcard expansion;
+    //   - `replace_first_star` (not ported);
+    //   - `module::try_get_js_extension_for_file` (not ported) to swap a `.ts`
+    //     target to its emitted `.js` path;
+    //   - the output-paths utilities (`GetOutputJSFileNameWorker`,
+    //     `GetOutputDeclarationFileNameWorker`) for the `isImports` branch.
+    // `packagejson::ExportsOrImports` exists, but the matching logic that
+    // consumes it does not. Keep `#[ignore]` until that lands.
     fn test_try_get_module_name_from_exports_or_imports() {
         // Test data from Go:
         // pattern: "./src/things/*"
@@ -353,6 +370,6 @@ mod tests {
         //   targetFilePath: "/pkg/src/things/index.ts"
         //   expected: ""
         //
-        // TODO: Implement once the full host trait and packagejson types are available.
+        // See the doc comment above for the missing infrastructure.
     }
 }

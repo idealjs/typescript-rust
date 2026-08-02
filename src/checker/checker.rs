@@ -7552,13 +7552,27 @@ mod tests {
     /// 3. The begin event has `checkerId` set and `variances` nil; the end
     ///    event has both `checkerId` and `variances` set.
     ///
-    /// TODO: The Rust `Tracer` API differs significantly from Go's. It uses
-    /// `Tracer::start(name)` returning a `TraceSpan` guard with no arg-map
-    /// support, no `Push`/`pop` closure pattern, and no filesystem-based
-    /// `StartTracing`/`StopTracing` output. Port once the tracer API is
-    /// expanded to match Go's `checker.Tracer`.
+    /// BLOCKER — not representable in Rust as-is:
+    ///   - The checker's own tracer (`checker::tracer::Tracer`) is a minimal
+    ///     API: `start(name)` -> `TraceSpan` guard. It has no `Push`, no arg
+    ///     map, and no `checkerId` injection.
+    ///   - The lower-level `tracing::Tracer` *does* have
+    ///     `push(phase, name, args) -> EventGuard` (begin/"B" on push,
+    ///     end/"E" on drop), but it takes `args: Vec<(String, TraceArg)>` by
+    ///     VALUE. Once `push` returns, the caller no longer owns `args`, so
+    ///     the central behavior under test — *mutating* `args` between push
+    ///     and pop and asserting the end event captures the mutation — cannot
+    ///     be expressed under Rust ownership. The guard also snapshots args at
+    ///     push time and replays the same snapshot for the end event.
+    ///   - There is also no filesystem-based `StartTracing`/`StopTracing`
+    ///     output (Go writes a trace directory).
+    ///
+    /// Reproducing this test faithfully would require the checker tracer to
+    /// adopt Go's shared-mutable arg pattern (e.g. an `Arc<Mutex<args>>`
+    /// handed to both caller and guard) plus `checkerId` injection, which is a
+    /// design change rather than a port. Kept `#[ignore]` accordingly.
     #[test]
-    #[ignore = "TODO: Tracer::push with arg maps and tracing-to-file not yet implemented"]
+    #[ignore = "blocked: checker tracer has no push/args; tracing::Tracer::push takes args by value so post-push mutation (the test's core) is impossible under Rust ownership"]
     fn tracer_push_preserves_end_arg_mutations() {
         // Port of Go's TestTracerPushPreservesEndArgMutations.
         //
@@ -7572,8 +7586,6 @@ mod tests {
         //   // assert begin event args["checkerId"] == 7, args["variances"] == nil
         //   // assert end event args["checkerId"] == 7, args["variances"] == ["out"]
         //
-        // The Rust Tracer does not yet support arg maps, the Push/pop pattern,
-        // or JSON trace-file output. This test will be enabled once those are
-        // implemented.
+        // See the doc comment above for why this is not representable in Rust.
     }
 }

@@ -2819,40 +2819,55 @@ mod tests {
     /// via a `fakeProgram`) and asserts that imports/exports used only for
     /// types are elided while value imports are retained.
     ///
-    /// The test is table-driven with ~20 cases covering: `import = require`,
-    /// bare/namespace/default/named imports, re-exports (`export *`, `export *
-    /// as`), export specifiers, and `export default` with value vs type.
-    ///
-    /// This remains `#[ignore]`: import elision requires a checker-backed emit
-    /// resolver to determine whether each import binding is used as a value or
-    /// only as a type. The Rust emitter has no such resolver, so it cannot
-    /// decide which imports to elide. (The CommonJS transform path does handle
-    /// `import type` syntactically, but not checker-driven elision.)
+    /// ADAPTATION: Rust has no separate ImportElision transformer and no
+    /// checker-backed emit resolver, so checker-driven elision (eliding a
+    /// binding imported without `type` that is only used in type positions)
+    /// cannot be tested here. However, the Rust emitter *does* perform
+    /// syntactic `import type` elision inline (in the CommonJS transform path):
+    /// `import type` declarations are dropped entirely, and per-binding
+    /// `type` modifiers on named specifiers are elided while value bindings
+    /// are retained. This adapted test exercises that functionality through
+    /// the emitter API (`emit_to_string_commonjs`).
     #[test]
-    #[ignore = "requires a checker-backed emit resolver for value-vs-type usage"]
     fn import_elision() {
-        // Port of Go's TestImportElision.
-        //
-        // Go flow (per case):
-        //   file := parsetestutil.ParseTypeScript(input, jsx)
-        //   c, _ := checker.NewChecker(&fakeProgram{...}, nil)
-        //   emitResolver := c.GetEmitResolver()
-        //   opts := &TransformOptions{..., EmitResolver: emitResolver}
-        //   file = tstransforms.NewTypeEraserTransformer(opts).TransformSourceFile(file)
-        //   file = tstransforms.NewImportElisionTransformer(opts).TransformSourceFile(file)
-        //   emittestutil.CheckEmit(t, nil, file, expectedOutput)
-        //
-        // Representative cases from the Go table:
-        //   { input: "import x = require(\"other\"); x;",
-        //     output: "import x = require(\"other\");\nx;" }
-        //   { input: "import x from \"other\";", output: "" }
-        //   { input: "import { x } from \"other\"; x;",
-        //     output: "import { x } from \"other\";\nx;" }
-        //   { input: "export { x }; type x = any;", output: "" }
-        //
-        // The Rust emitter does not yet have a separate ImportElisionTransformer
-        // or a checker-backed emit resolver for determining value vs type usage.
-        // Enable once that API is ported.
-        let _ = parse("import { x } from \"other\";");
+        // Whole-declaration `import type` is fully elided (no require, no import).
+        for input in [
+            "import type { foo } from \"./bar\";",
+            "import type * as ns from \"./bar\";",
+            "import type d from \"./bar\";",
+        ] {
+            let js = emit_to_string_commonjs(input);
+            assert!(
+                !js.contains("require"),
+                "import_elision({input:?}): type-only import should be elided, got {js:?}"
+            );
+            assert!(
+                !js.contains("import"),
+                "import_elision({input:?}): type-only import should be elided, got {js:?}"
+            );
+        }
+
+        // A value import is retained as a require() call.
+        let js = emit_to_string_commonjs("import { foo } from \"./bar\";");
+        assert!(
+            js.contains("require(\"./bar\")"),
+            "import_elision: value import should be retained, got {js:?}"
+        );
+
+        // Mixed named specifiers: the `type` binding is elided, the value
+        // binding is retained. `import { type foo, bar }` -> `const { bar }`.
+        let js = emit_to_string_commonjs("import { type foo, bar } from \"./bar\";");
+        assert!(
+            js.contains("bar"),
+            "import_elision: value binding 'bar' should be retained, got {js:?}"
+        );
+        assert!(
+            !js.contains("foo"),
+            "import_elision: type-only binding 'foo' should be elided, got {js:?}"
+        );
+        assert!(
+            js.contains("require(\"./bar\")"),
+            "import_elision: mixed import should still require the module, got {js:?}"
+        );
     }
 }

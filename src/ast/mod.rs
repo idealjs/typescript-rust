@@ -29,18 +29,36 @@ mod deepclone_tests {
     // asserting that every cloned node is a distinct allocation from its
     // original and that corresponding nodes have equal child counts.
     //
-    // This requires the following APIs that are not yet ported to Rust:
-    //   - `ast::NodeFactory` (Go: `&ast.NodeFactory{}`)
-    //   - `NodeFactory::deep_clone_node` (Go: `factory.DeepCloneNode`)
-    //   - `Node::visit_each_child` (Go: `node.VisitEachChild`)
-    //   - a `parse_type_script` test helper (Go: `parsetestutil.ParseTypeScript`)
+    // BLOCKER: A faithful port requires a Rust `ast::NodeFactory` with a
+    // `deep_clone_node` method, mirroring Go's `factory.DeepCloneNode`. In Go
+    // this is generated code: every node variant has a `Clone`/`Update`
+    // method that rebuilds the node with fresh child pointers, and the deep
+    // clone visitor (`getDeepCloneVisitor`) walks the tree via
+    // `node.VisitEachChild`, forcing every node to be a new allocation.
     //
-    // The Go test always parses with `jsx = false`
+    // The Rust AST cannot currently support this because:
+    //   - `NodeData` is a generated enum (~150 variants, see
+    //     `node_data_generated.rs`, marked "DO NOT EDIT") whose variants only
+    //     derive `Debug`, not `Clone`. Deep cloning requires rebuilding every
+    //     variant with recursively-cloned child `Arc<Node>`s; there is no
+    //     per-variant `Clone`/`update_each_child` reconstruction.
+    //   - `Node` carries an `AtomicU64` id (not `Clone`) and a `parent`
+    //     back-pointer, so it cannot be cheaply duplicated.
+    //   - `for_each_child` (in `node_data_generated.rs`) only *reads*
+    //     children; it cannot reconstruct a node with replaced children, which
+    //     is what `VisitEachChild` does in Go.
+    //
+    // Implementing `deep_clone_node` therefore requires generator work to
+    // emit per-variant reconstruction (analogous to Go's generated
+    // `NodeFactory`), which is out of scope here. The test stays `#[ignore]`
+    // until that infrastructure lands.
+    //
+    // Note: the Go test always parses with `jsx = false`
     // (`parsetestutil.ParseTypeScript(rec.input, false)`), so the struct's
     // unused `jsx` field is dropped here; each case is just `(title, input)`.
 
     #[test]
-    #[ignore = "TODO: NodeFactory / DeepCloneNode / visit_each_child not yet implemented in Rust"]
+    #[ignore = "blocked: needs a generated ast::NodeFactory with deep_clone_node (per-variant child reconstruction); see comment above"]
     fn test_deep_clone_node_sanity_check() {
         let cases: &[(&str, &str)] = &[
             ("StringLiteral#1", ";\"test\""),

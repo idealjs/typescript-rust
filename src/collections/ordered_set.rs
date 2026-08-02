@@ -150,13 +150,42 @@ mod tests {
         assert_eq!(s2.len(), 0);
     }
 
+    /// Ported from Go's `TestOrderedSetWithSizeHint`.
+    ///
+    /// The Go test uses `testing.AllocsPerRun` to assert that pre-sizing the
+    /// set with `NewOrderedSetWithSizeHint(N)` keeps allocations under 10 when
+    /// inserting N=1024 elements. Rust has no equivalent of `AllocsPerRun`, so
+    /// this is adapted into a *functional* test: it verifies that
+    /// `OrderedSet::with_capacity` (the Rust size-hint constructor) correctly
+    /// accepts and retains all N elements in insertion order without panicking
+    /// or growing the logical contents.
     #[test]
-    #[ignore = "TODO: Go's testing.AllocsPerRun has no Rust equivalent for allocation counting"]
     fn test_ordered_set_with_size_hint() {
-        // Ported from TestOrderedSetWithSizeHint:
-        // const N: usize = 1024;
-        // let mut s = OrderedSet::with_capacity(N);
-        // for i in 0..N { s.add(i); }
-        // Go verifies allocs < 10; no direct Rust equivalent without a custom allocator.
+        const N: usize = 1024;
+
+        let mut s: OrderedSet<i32> = OrderedSet::with_capacity(N);
+        for i in 0..N {
+            s.add(i as i32);
+        }
+
+        // All N elements are present and the size matches.
+        assert_eq!(s.len(), N);
+        for i in 0..N {
+            assert!(
+                s.has(&(i as i32)),
+                "set pre-sized with with_capacity should contain {i}"
+            );
+        }
+
+        // Insertion order is preserved (0, 1, 2, ... N-1), and duplicates have
+        // no effect.
+        let values: Vec<i32> = s.iter().copied().collect();
+        assert_eq!(values.len(), N);
+        for (idx, v) in values.iter().enumerate() {
+            assert_eq!(*v, idx as i32, "insertion order broken at index {idx}");
+        }
+
+        s.add(0); // duplicate
+        assert_eq!(s.len(), N);
     }
 }
