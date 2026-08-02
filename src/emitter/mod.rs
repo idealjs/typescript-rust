@@ -469,7 +469,13 @@ fn emit_js_text_tracked(
 ) -> String {
     let mut tracker = SourceMapTracker::new(&source_file.text, Some(generator), source_index);
     emit_js_text_inner(source_file, options, &mut tracker);
-    rewrite_import_extensions(&add_implicit_semicolons(&tracker.finish()))
+    let text = tracker.finish();
+    let text = rewrite_import_extensions(&text);
+    // Normalize to match Go's AST printer. NOTE: normalization reshapes the
+    // text, which invalidates the source positions recorded above; generated
+    // source maps will be approximate until tracking is rebuilt on the
+    // normalized output.
+    normalize_js_output(&text)
 }
 
 /// Core statement-walking emit logic, generic over the output sink.
@@ -731,9 +737,10 @@ fn emit_declaration_text(source_file: &SourceFile, _options: &CompilerOptions) -
         output.push_str(&source[prev_end..]);
     }
 
-    // Match Go's ASI-implicit-semicolon printer and rewrite relative import
-    // specifiers, consistent with the JS emitter.
+    // Match Go's declaration printer: rewrite imports, normalize whitespace
+    // (remove blank lines, reindent), and add semicolons.
     let output = rewrite_import_extensions(&output);
+    let output = reindent_and_dedup(&output);
     add_implicit_semicolons(&output)
 }
 
@@ -1777,7 +1784,10 @@ fn add_implicit_semicolons(text: &str) -> String {
             || trimmed.ends_with("*/");
         if skip {
             result.push_str(trimmed);
-        } else if last == '}' || last == ')' {
+        } else if last == '}' {
+            // Closing brace (e.g. a block) does not get a semicolon.
+            // A line ending in ')' is a complete statement after expression
+            // folding, so it falls through to receive a semicolon.
             result.push_str(trimmed);
         } else {
             result.push_str(trimmed);
@@ -1789,6 +1799,388 @@ fn add_implicit_semicolons(text: &str) -> String {
         result.pop();
     }
     result
+}
+
+/// Normalize JS output to match Go's AST printer formatting.
+///
+/// Folds multi-line expressions (newlines inside `()`/`[]`), re-indents to
+/// 4 spaces per brace level, removes blank lines, and adds missing
+/// semicolons. String literals, template literals (with `${}` interpolation),
+/// comments, and escape sequences are tracked so brackets inside them are
+/// ignored.
+fn normalize_js_output(text: &str) -> String {
+    let folded = fold_expression_newlines(text);
+    let reindented = reindent_and_dedup(&folded);
+    add_implicit_semicolons(&reindented)
+}
+
+/// Fold newlines that occur inside `()` or `[]` so that multi-line calls,
+/// parenthesized expressions, and array literals collapse to a single line.
+///
+/// The fold decision is based on the *innermost* enclosing bracket: a newline
+/// is dropped only when the nearest enclosing bracket is `(` or `[`, never `{`.
+/// Trailing commas left behind by the fold (e.g. `foo(a,)`) are removed.
+fn fold_expression_newlines(text: &str) -> String {
+    let chars: Vec<char> = text.chars().collect();
+    let n = chars.len();
+    let mut out: Vec<char> = Vec::with_capacity(n);
+
+    // Lexical context for strings and comments (empty => code).
+    #[derive(Clone, Copy, PartialEq)]
+    enum SCtx {
+        Single,
+        Double,
+        Template,
+        LineComment,
+        BlockComment,
+    }
+    // Bracket nesting. The bool records whether any newline was folded inside
+    // the group, so a trailing comma can be dropped when it closes.
+    #[derive(Clone, Copy)]
+    enum Group {
+        Paren(bool),
+        Bracket(bool),
+        Brace,
+        TmplInterp,
+    }
+
+    let mut sctx: Vec<SCtx> = Vec::new();
+    let mut groups: Vec<Group> = Vec::new();
+
+    let mut i = 0;
+    while i < n {
+        let c = chars[i];
+
+        // --- Inside a string or comment ---
+        if let Some(&ctx) = sctx.last() {
+            match ctx {
+                SCtx::Single => {
+                    out.push(c);
+                    if c == '\\' {
+                        i += 1;
+                        if i < n {
+                            out.push(chars[i]);
+                            i += 1;
+                        }
+                        continue;
+                    }
+                    if c == '\'' {
+                        sctx.pop();
+                    }
+                    i += 1;
+                    continue;
+                }
+                SCtx::Double => {
+                    out.push(c);
+                    if c == '\\' {
+                        i += 1;
+                        if i < n {
+                            out.push(chars[i]);
+                            i += 1;
+                        }
+                        continue;
+                    }
+                    if c == '"' {
+                        sctx.pop();
+                    }
+                    i += 1;
+                    continue;
+                }
+                SCtx::Template => {
+                    out.push(c);
+                    if c == '\\' {
+                        i += 1;
+                        if i < n {
+                            out.push(chars[i]);
+                            i += 1;
+                        }
+                        continue;
+                    }
+                    if c == '`' {
+                        sctx.pop();
+                        i += 1;
+                        continue;
+                    }
+                    if c == '$' && i + 1 < n && chars[i + 1] == '{' {
+                        out.push('{');
+                        sctx.pop(); // leave template -> code (interpolation)
+                        groups.push(Group::TmplInterp);
+                        i += 2;
+                        continue;
+                    }
+                    i += 1;
+                    continue;
+                }
+                SCtx::LineComment => {
+                    if c == '\n' || c == '\r' {
+                        sctx.pop();
+                        // Fall through to code-mode handling of the line break.
+                    } else {
+                        out.push(c);
+                        i += 1;
+                        continue;
+                    }
+                }
+                SCtx::BlockComment => {
+                    out.push(c);
+                    if c == '*' && i + 1 < n && chars[i + 1] == '/' {
+                        out.push('/');
+                        sctx.pop();
+                        i += 2;
+                        continue;
+                    }
+                    i += 1;
+                    continue;
+                }
+            }
+        }
+
+        // --- CODE MODE ---
+
+        // Enter string / comment contexts.
+        if c == '\'' {
+            sctx.push(SCtx::Single);
+            out.push(c);
+            i += 1;
+            continue;
+        }
+        if c == '"' {
+            sctx.push(SCtx::Double);
+            out.push(c);
+            i += 1;
+            continue;
+        }
+        if c == '`' {
+            sctx.push(SCtx::Template);
+            out.push(c);
+            i += 1;
+            continue;
+        }
+        if c == '/' && i + 1 < n && chars[i + 1] == '/' {
+            sctx.push(SCtx::LineComment);
+            out.push('/');
+            out.push('/');
+            i += 2;
+            continue;
+        }
+        if c == '/' && i + 1 < n && chars[i + 1] == '*' {
+            sctx.push(SCtx::BlockComment);
+            out.push('/');
+            out.push('*');
+            i += 2;
+            continue;
+        }
+
+        // Brackets.
+        if c == '(' {
+            groups.push(Group::Paren(false));
+            out.push(c);
+            i += 1;
+            continue;
+        }
+        if c == '[' {
+            groups.push(Group::Bracket(false));
+            out.push(c);
+            i += 1;
+            continue;
+        }
+        if c == '{' {
+            groups.push(Group::Brace);
+            out.push(c);
+            i += 1;
+            continue;
+        }
+        if c == ')' {
+            if let Some(Group::Paren(folded)) = groups.last().copied() {
+                groups.pop();
+                if folded {
+                    drop_trailing_comma(&mut out);
+                }
+            }
+            out.push(c);
+            i += 1;
+            continue;
+        }
+        if c == ']' {
+            if let Some(Group::Bracket(folded)) = groups.last().copied() {
+                groups.pop();
+                if folded {
+                    drop_trailing_comma(&mut out);
+                }
+            }
+            out.push(c);
+            i += 1;
+            continue;
+        }
+        if c == '}' {
+            match groups.last() {
+                Some(Group::TmplInterp) => {
+                    groups.pop();
+                    sctx.push(SCtx::Template);
+                    out.push(c);
+                    i += 1;
+                    continue;
+                }
+                Some(Group::Brace) => {
+                    groups.pop();
+                }
+                _ => {}
+            }
+            out.push(c);
+            i += 1;
+            continue;
+        }
+
+        // Line break: fold only when the innermost bracket is ( or [.
+        if c == '\n' || c == '\r' {
+            let do_fold = matches!(
+                groups.last(),
+                Some(Group::Paren(_)) | Some(Group::Bracket(_))
+            );
+            if do_fold {
+                if let Some(g) = groups.last_mut() {
+                    if let Group::Paren(f) | Group::Bracket(f) = g {
+                        *f = true;
+                    }
+                }
+                // Drop trailing horizontal whitespace already emitted.
+                while let Some(&ch) = out.last() {
+                    if ch == ' ' || ch == '\t' {
+                        out.pop();
+                    } else {
+                        break;
+                    }
+                }
+                // Advance past the line break (\r\n counts as one).
+                i += 1;
+                if i < n && chars[i - 1] == '\r' && chars[i] == '\n' {
+                    i += 1;
+                }
+                // Skip leading horizontal whitespace of the next line.
+                while i < n && (chars[i] == ' ' || chars[i] == '\t') {
+                    i += 1;
+                }
+            } else {
+                out.push('\n');
+                i += 1;
+                if i < n && chars[i - 1] == '\r' && chars[i] == '\n' {
+                    i += 1;
+                }
+            }
+            continue;
+        }
+
+        out.push(c);
+        i += 1;
+    }
+
+    out.into_iter().collect()
+}
+
+/// Remove a trailing comma (and any horizontal whitespace before it) from the
+/// end of the output buffer. Used when a folded `()` / `[]` group closes.
+fn drop_trailing_comma(out: &mut Vec<char>) {
+    while let Some(&ch) = out.last() {
+        if ch == ' ' || ch == '\t' {
+            out.pop();
+        } else {
+            break;
+        }
+    }
+    if out.last() == Some(&',') {
+        out.pop();
+    }
+}
+
+/// Net `{`/`}` delta of a line, ignoring braces inside string literals,
+/// template literals, and comments. Single-line scan.
+fn brace_delta(line: &str) -> i32 {
+    let chars: Vec<char> = line.chars().collect();
+    let n = chars.len();
+    let mut delta = 0i32;
+    let mut i = 0;
+    while i < n {
+        let c = chars[i];
+        match c {
+            '\'' | '"' | '`' => {
+                let quote = c;
+                i += 1;
+                while i < n {
+                    if chars[i] == '\\' {
+                        i += 2;
+                        continue;
+                    }
+                    if chars[i] == quote {
+                        i += 1;
+                        break;
+                    }
+                    i += 1;
+                }
+            }
+            '/' if i + 1 < n && chars[i + 1] == '/' => {
+                // Line comment runs to end of line.
+                break;
+            }
+            '/' if i + 1 < n && chars[i + 1] == '*' => {
+                i += 2;
+                while i < n {
+                    if chars[i] == '*' && i + 1 < n && chars[i + 1] == '/' {
+                        i += 2;
+                        break;
+                    }
+                    i += 1;
+                }
+            }
+            '{' => {
+                delta += 1;
+                i += 1;
+            }
+            '}' => {
+                delta -= 1;
+                i += 1;
+            }
+            _ => {
+                i += 1;
+            }
+        }
+    }
+    delta
+}
+
+/// Re-indent to 4 spaces per brace level and drop all blank lines.
+///
+/// Each line's indentation is the brace depth at the start of the line, except
+/// that a line beginning with `}` is indented one level less (the closing
+/// brace de-indents before the line's content).
+fn reindent_and_dedup(folded: &str) -> String {
+    let mut out = String::with_capacity(folded.len());
+    let mut depth: i32 = 0;
+    let had_trailing_newline = folded.ends_with('\n');
+
+    for raw_line in folded.split('\n') {
+        let stripped = raw_line.trim();
+        if stripped.is_empty() {
+            continue;
+        }
+        let starts_with_close = stripped.starts_with('}');
+        let indent_depth = (depth - if starts_with_close { 1 } else { 0 }).max(0);
+        for _ in 0..indent_depth {
+            out.push_str("    ");
+        }
+        out.push_str(stripped);
+        out.push('\n');
+        depth += brace_delta(stripped);
+        if depth < 0 {
+            depth = 0;
+        }
+    }
+
+    // Preserve whether the input ended with a trailing newline so that the
+    // subsequent semicolon pass reproduces Go's trailing-newline behavior.
+    if !had_trailing_newline && out.ends_with('\n') {
+        out.pop();
+    }
+    out
 }
 
 /// Emit a statement, stripping type annotations and (optionally) comments,
