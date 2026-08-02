@@ -828,6 +828,8 @@ impl Checker {
             "Event",
             "EventTarget",
             "Document",
+            "DocumentFragment",
+            "ShadowRoot",
             "Window",
             "NodeList",
             "HTMLInputElement",

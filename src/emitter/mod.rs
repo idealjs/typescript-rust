@@ -1631,6 +1631,8 @@ fn is_type_only_statement(node: &Node) -> bool {
         // default value binding. Mirrors Go's typeeraser ImportDeclaration /
         // ImportClause / NamedImports elision logic.
         NodeData::ImportDeclaration(d) => is_type_only_import(d),
+        // `export as namespace X` is declaration-only — never emitted to JS.
+        NodeData::NamespaceExportDeclaration(_) => true,
         _ => false,
     }
 }

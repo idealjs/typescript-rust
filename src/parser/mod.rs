@@ -5119,6 +5119,25 @@ impl Parser {
             ));
         }
 
+        // export as namespace X
+        if self.token == SyntaxKind::AsKeyword {
+            self.next_token(); // consume 'as'
+            if self.token == SyntaxKind::NamespaceKeyword {
+                self.next_token(); // consume 'namespace'
+                let name = self.parse_identifier_name_or_keyword();
+                self.parse_semicolon();
+                let end = self.token_pos();
+                return Arc::new(Node::with_loc(
+                    SyntaxKind::NamespaceExportDeclaration,
+                    NodeData::NamespaceExportDeclaration(NamespaceExportDeclarationData {
+                        modifiers: None,
+                        name,
+                    }),
+                    TextRange::new(pos, end),
+                ));
+            }
+        }
+
         // export function/class/interface/type/enum/namespace declarations
         // Route through `parse_declaration_with_modifiers` so the `export`
         // keyword is attached as a modifier (mirrors Go's `parseDeclaration`).

@@ -1751,17 +1751,10 @@ impl<'a> ResolutionState<'a> {
                     tspath::normalize_path(&combined)
                 };
 
-                // Try exact file match.
-                if let Some(p) = self.try_file(&final_path) {
-                    let extension = tspath::try_get_extension_from_path(&p).to_string();
-                    return Some(Resolved {
-                        path: p,
-                        extension,
-                        ..Default::default()
-                    });
-                }
-
-                // Try extension swapping (e.g. .js → .ts/.d.ts).
+                // Delegate to extension-aware lookup — do NOT try_file the raw
+                // target, which would match .js files even in TS/DTS-only pass
+                // and prevent the @types fallback from being reached. Mirrors
+                // Go's loadFileNameFromPackageJSONField (resolver.go:1708).
                 self.load_file_name_from_package_json_field(ext, &final_path)
             }
 
