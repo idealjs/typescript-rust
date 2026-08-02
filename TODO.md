@@ -23,7 +23,7 @@ TSGO_ORACLE=/Users/cqh/workspace/typescript-go/built/local/tsgo cargo test --tes
 
 ## 当前进度（2026-08-02）
 
-**2,188 通过**（1,266 lib + 920 checker_parity + 2 emit），**0 ignored**。
+**2,204 通过**（1,282 lib + 920 checker_parity + 2 emit），**0 ignored**。
 
 | 模块 | 完成度 |
 |------|--------|
@@ -73,7 +73,7 @@ D(symbol_to_display_parts)、E(零 ignore — 全部 Rust 适配)。
 - [x] 本地化支持（13 locale bundles + --locale flag + Message::localize）
 - [x] 正则 `d` flag（scanner 层已实现，runtime 属于 JS 引擎）
 - [x] `.ts/.tsx/.js/.jsx` 解析：NodeFlags::JavaScriptFile/JsonFile 标志已设置
-- [ ] fourslash 测试 smoke
+- [x] fourslash 测试 smoke（10 个基础测试：marker 解析 + hover/completion/definition）
 
 ## P0-P9 状态
 
