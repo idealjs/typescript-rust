@@ -3118,6 +3118,13 @@ impl Checker {
                 }
                 _ => continue,
             };
+            // Push the overload declaration's scope before resolving its
+            // parameter and return types so its own type parameters (e.g.
+            // `<S, A>` in `function f<S, A>(s: S, a: A): [S, A]`) are visible
+            // via the function symbol's members. Without this, the type
+            // parameters of every overload except the first go out of scope
+            // and produce false-positive TS2304 "Cannot find name" errors.
+            self.push_scope(decl);
             let return_type = match type_node {
                 Some(tn) => self.get_type_from_type_node(tn),
                 None => self.get_any_type(),
@@ -3129,6 +3136,7 @@ impl Checker {
                 /* contextual_signature */ None,
                 /* declaration */ Some(Arc::clone(decl)),
             );
+            self.pop_scope();
             signatures.push(sig);
         }
         if signatures.is_empty() {

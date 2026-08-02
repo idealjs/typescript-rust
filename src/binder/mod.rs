@@ -339,9 +339,30 @@ impl Binder {
                         .union(SymbolFlags::TypeParameter)
                         .union(SymbolFlags::Constructor)
                         .union(SymbolFlags::Signature);
-                    if existing.flags.intersects(member_flags) || includes.intersects(member_flags)
+                    // `export as namespace Foo` (NamespaceExportDeclaration)
+                    // declares a UMD global alias that intentionally coexists
+                    // with a same-named `declare namespace Foo`. Go's binder
+                    // stores such aliases in a separate `GlobalExports` table,
+                    // so they never participate in the duplicate-identifier
+                    // check; since we lack that table and store the alias in
+                    // the container's exports, suppress the false-positive
+                    // TS2300 when either side is a namespace export
+                    // declaration (the common `@types/react` pattern:
+                    //   export as namespace React;
+                    //   declare namespace React { ... }
+                    // ).
+                    let involves_namespace_export = node.kind
+                        == SyntaxKind::NamespaceExportDeclaration
+                        || existing
+                            .declarations
+                            .iter()
+                            .any(|d| d.kind == SyntaxKind::NamespaceExportDeclaration);
+                    if involves_namespace_export
+                        || existing.flags.intersects(member_flags)
+                        || includes.intersects(member_flags)
                     {
-                        // Member-level collision — not a scope-level duplicate.
+                        // Member-level collision or UMD global alias — not a
+                        // scope-level duplicate.
                     } else {
                         let new_is_var = includes.contains(SymbolFlags::BlockScopedVariable)
                             && Self::is_var_declaration(node);

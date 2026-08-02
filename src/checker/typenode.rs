@@ -367,7 +367,13 @@ impl Checker {
                 .get(&symbol)
                 .and_then(|l| l.declared_type.clone());
             cached.unwrap_or_else(|| {
+                // The alias body is a separate lexical scope; drop the
+                // `in_static_member_type` flag so any type-parameter reference
+                // resolved while expanding it is not spuriously flagged TS2302.
+                let saved_static = self.in_static_member_type;
+                self.in_static_member_type = false;
                 let found = self.resolve_alias_body(&symbol);
+                self.in_static_member_type = saved_static;
                 self.type_alias_links.get_or_default(&symbol).declared_type =
                     Some(Arc::clone(&found));
                 found
@@ -392,7 +398,14 @@ impl Checker {
                 }
             }
             self.type_argument_stack.push(mapping);
+            // The alias body is a separate lexical scope: type parameters
+            // referenced inside it belong to the alias, not the referencing
+            // static member. Drop the flag so nested resolution does not emit
+            // spurious TS2302. Mirrors Go's NameResolver lexical check.
+            let saved_static = self.in_static_member_type;
+            self.in_static_member_type = false;
             let found = self.get_type_from_type_node(&type_node);
+            self.in_static_member_type = saved_static;
             self.type_argument_stack.pop();
             found
         };
@@ -543,7 +556,17 @@ impl Checker {
                     })
                     .collect();
                 let merged_list = Arc::new(NodeList::new(merged_members));
+                // Resolving an interface's member types crosses into a new
+                // lexical scope: type-parameter references here belong to the
+                // interface's own declaration, not the referencing static
+                // member. Drop `in_static_member_type` so nested member
+                // resolution does not emit spurious TS2302. Mirrors Go's
+                // NameResolver, which only fires when the reference's own
+                // `lastLocation` is a static member.
+                let saved_static = self.in_static_member_type;
+                self.in_static_member_type = false;
                 let result = self.build_interface_type_from_members(&merged_list);
+                self.in_static_member_type = saved_static;
                 self.pop_scope();
                 if has_type_args {
                     self.type_argument_stack.pop();

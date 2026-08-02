@@ -1557,7 +1557,15 @@ impl Parser {
     /// Parse a type or a type predicate (`identifier is T`) for return types.
     /// Go: `parseTypeOrTypePredicate`.
     fn parse_type_or_type_predicate(&mut self) -> Arc<Node> {
-        if self.token == SyntaxKind::Identifier {
+        // Type predicate: `identifier is Type` or `this is Type`.
+        // `object` is a keyword that can also be a type predicate parameter name
+        // (e.g. `object is ReactElement<P>`), so we check for both Identifier and
+        // ObjectKeyword. Mirrors Go's parseTypeOrTypePredicate which calls
+        // isIdentifier() (includes keyword-as-identifier cases).
+        if self.token == SyntaxKind::Identifier
+            || self.token == SyntaxKind::ObjectKeyword
+            || self.token == SyntaxKind::ThisKeyword
+        {
             let mut scanner = self.scanner.clone();
             scanner.scan(); // skip identifier
             if scanner.token() == SyntaxKind::IsKeyword && !scanner.has_preceding_line_break() {
