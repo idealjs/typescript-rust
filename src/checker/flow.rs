@@ -2379,11 +2379,21 @@ impl Checker {
     // Property / instance-type helpers
     // ─────────────────────────────────────────────────────────────────
 
-    /// Look up a property symbol by name on a structured type.
-    /// Returns `None` for non-structured types or missing properties.
+    /// Look up a property symbol by name on a type.
+    ///
+    /// First checks the type's own structured members, then falls back to the
+    /// global `Array<T>` / `String` / `Number` / `Boolean` / `BigInt` interface
+    /// symbols (whose cross-file members may be incomplete in this port). This
+    /// mirrors the existence check in `has_property_of_type`. Returns `None`
+    /// for missing properties; callers then fall back to `any`.
     pub(super) fn get_property_of_type(&self, t: &Arc<Type>, name: &str) -> Option<Arc<Symbol>> {
-        if let Some(sym) = t.as_structured()?.members.get(name).cloned() {
-            return Some(sym);
+        // Structured member lookup. Uses a nested match (not `?`) so that
+        // non-structured types (primitives) fall through to the fallbacks
+        // below instead of short-circuiting to `None`.
+        if let Some(structured) = t.as_structured() {
+            if let Some(sym) = structured.members.get(name) {
+                return Some(Arc::clone(sym));
+            }
         }
         // Fallback for array types: array types created by `create_array_type`
         // carry no members, so resolve the property against the global
@@ -2395,7 +2405,49 @@ impl Checker {
                 }
             }
         }
+        // Fallback for primitive types (string/number/boolean/bigint) and
+        // their literals: these have no structured members of their own, so
+        // resolve the property symbol against the corresponding global
+        // interface symbol. Mirrors the Array fallback above; member coverage
+        // is best-effort (cross-file interface augmentations may be incomplete
+        // in this port), with callers falling back to `any` otherwise.
+        if let Some(interface_name) = self.primitive_interface_name(t) {
+            if let Some(sym) = self.globals.get(interface_name) {
+                if let Some(member) = sym.members.get(name) {
+                    return Some(Arc::clone(member));
+                }
+            }
+        }
         None
+    }
+
+    /// Return the global interface name for a primitive type, if any.
+    /// Maps `string`/`StringLiteral` → `"String"`, `number`/`NumberLiteral` →
+    /// `"Number"`, `boolean`/`BooleanLiteral` → `"Boolean"`,
+    /// `bigint`/`BigIntLiteral` → `"BigInt"`.
+    fn primitive_interface_name(&self, t: &Arc<Type>) -> Option<&'static str> {
+        if t.flags
+            .intersects(TypeFlags::String | TypeFlags::StringLiteral)
+        {
+            Some("String")
+        } else if t
+            .flags
+            .intersects(TypeFlags::Number | TypeFlags::NumberLiteral)
+        {
+            Some("Number")
+        } else if t
+            .flags
+            .intersects(TypeFlags::Boolean | TypeFlags::BooleanLiteral)
+        {
+            Some("Boolean")
+        } else if t
+            .flags
+            .intersects(TypeFlags::BigInt | TypeFlags::BigIntLiteral)
+        {
+            Some("BigInt")
+        } else {
+            None
+        }
     }
 
     /// Get the type of a named property on a type, if the property exists.

@@ -93,6 +93,31 @@ fn check_source_named_with_lib(
     program.get_semantic_diagnostics()
 }
 
+/// Like `check_source_with_lib` but with extra CLI args (e.g. `--lib`).
+fn check_source_with_lib_args(source: &str, extra_args: &[&str]) -> Vec<tsox::ast::Diagnostic> {
+    let fs = Arc::new(InMemoryFS::new());
+    fs.insert_dir("/proj");
+    fs.insert_file("/proj/entry.ts", source);
+
+    let mut args: Vec<String> = Vec::new();
+    for a in extra_args {
+        args.push((*a).to_string());
+    }
+    args.push("/proj/entry.ts".to_string());
+    let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
+
+    let bf = Arc::new(BundledFS::new(fs));
+    let host: Arc<dyn tsox::compiler::CompilerHost> =
+        Arc::new(CompilerHostImpl::new(bf, "/proj".to_string(), lib_path()));
+
+    let program = Arc::new(Program::new(ProgramOptions {
+        config: parsed,
+        host,
+    }));
+
+    program.get_semantic_diagnostics()
+}
+
 /// Run the checker on multiple source files and return all diagnostics.
 fn check_sources(files: &[(&str, &str)]) -> Vec<tsox::ast::Diagnostic> {
     check_sources_with_lib(files, true)
@@ -7659,46 +7684,39 @@ fn checker_number_global_call_with_lib_no_error() {
 }
 
 #[test]
-fn checker_string_charat_currently_false_positive_ts2339() {
-    // KNOWN LIMITATION: `String` interface members are not resolved, so
-    // `.charAt` produces a false-positive TS2339 (unlike `Array` methods).
+fn checker_string_charat_with_lib_no_error() {
     let diags = check_source_with_lib("let s = \"hi\"; s.charAt(0);", false);
-    assert_diagnostic_code(&diags, 2339);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 #[test]
-fn checker_string_touppercase_currently_false_positive_ts2339() {
-    // KNOWN LIMITATION: `.toUpperCase` resolves via the `String` interface.
+fn checker_string_touppercase_with_lib_no_error() {
     let diags = check_source_with_lib("let s = \"hi\"; s.toUpperCase();", false);
-    assert_diagnostic_code(&diags, 2339);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 #[test]
-fn checker_string_trim_currently_false_positive_ts2339() {
-    // KNOWN LIMITATION: `.trim` resolves via the `String` interface.
+fn checker_string_trim_with_lib_no_error() {
     let diags = check_source_with_lib("let s = \" hi \"; s.trim();", false);
-    assert_diagnostic_code(&diags, 2339);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 #[test]
-fn checker_string_includes_currently_false_positive_ts2339() {
-    // KNOWN LIMITATION: `.includes` resolves via the `String` interface.
+fn checker_string_includes_with_lib_no_error() {
     let diags = check_source_with_lib("let s = \"hi\"; s.includes(\"i\");", false);
-    assert_diagnostic_code(&diags, 2339);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 #[test]
-fn checker_number_tofixed_currently_false_positive_ts2339() {
-    // KNOWN LIMITATION: `Number` interface members are not resolved.
+fn checker_number_tofixed_with_lib_no_error() {
     let diags = check_source_with_lib("let n = 3.14; n.toFixed(2);", false);
-    assert_diagnostic_code(&diags, 2339);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 #[test]
-fn checker_number_tostring_currently_false_positive_ts2339() {
-    // KNOWN LIMITATION: `Number` interface members are not resolved.
+fn checker_number_tostring_with_lib_no_error() {
     let diags = check_source_with_lib("let n = 3.14; n.toString();", false);
-    assert_diagnostic_code(&diags, 2339);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -7855,19 +7873,23 @@ fn checker_object_keys_with_lib_no_error() {
 }
 
 #[test]
-fn checker_object_values_currently_false_positive_ts2339() {
-    // KNOWN LIMITATION: `Object.values` is not resolved on the `Object`
-    // constructor type (only `Object.keys` is), so it emits TS2339.
-    let diags = check_source_with_lib("let x = Object.values({ a: 1 });", false);
-    assert_diagnostic_code(&diags, 2339);
+fn checker_object_values_with_lib_no_error() {
+    // `Object.values` is declared in lib.es2017.object.d.ts (an augmentation
+    // of `interface ObjectConstructor`), so the es2017 lib is required.
+    let diags =
+        check_source_with_lib_args("let x = Object.values({ a: 1 });", &["--lib", "es2017"]);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 #[test]
-fn checker_object_entries_currently_false_positive_ts2339() {
-    // KNOWN LIMITATION: `Object.entries` is not resolved on the `Object`
-    // constructor type (only `Object.keys` is), so it emits TS2339.
-    let diags = check_source_with_lib("let x = Object.entries({ a: 1 });", false);
-    assert_diagnostic_code(&diags, 2339);
+fn checker_object_entries_with_lib_no_error() {
+    // `Object.entries` is declared in lib.es2017.object.d.ts (an augmentation
+    // of `interface ObjectConstructor`), so the es2017 lib is required.
+    let diags =
+        check_source_with_lib_args("let x = Object.entries({ a: 1 });", &["--lib", "es2017"]);
+    assert_diagnostic_count(&diags, 2304, 0);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 // ────────────────────────────────────────────────────────────────────────────

@@ -3402,21 +3402,40 @@ impl Checker {
             return name == "length";
         }
 
-        // Primitive types and their literals: without lib.d.ts, no
-        // properties are available — any access is TS2339.
-        if t.flags.intersects(
-            TypeFlags::Number
-                | TypeFlags::String
-                | TypeFlags::Boolean
-                | TypeFlags::BigInt
-                | TypeFlags::ESSymbol
-                | TypeFlags::Void
-                | TypeFlags::StringLiteral
-                | TypeFlags::NumberLiteral
-                | TypeFlags::BigIntLiteral
-                | TypeFlags::BooleanLiteral
-                | TypeFlags::UniqueESSymbol,
-        ) {
+        // String types and their literals: resolve methods/properties via
+        // the global `String` interface (lib.d.ts `interface String`),
+        // using the same AST-scanning fallback as the Array fix.
+        if t.flags
+            .intersects(TypeFlags::String | TypeFlags::StringLiteral)
+        {
+            return self.global_interface_has_property("String", name);
+        }
+        // Number types and their literals: resolve via the global `Number`
+        // interface.
+        if t.flags
+            .intersects(TypeFlags::Number | TypeFlags::NumberLiteral)
+        {
+            return self.global_interface_has_property("Number", name);
+        }
+        // Boolean types and their literals: resolve via the global `Boolean`
+        // interface.
+        if t.flags
+            .intersects(TypeFlags::Boolean | TypeFlags::BooleanLiteral)
+        {
+            return self.global_interface_has_property("Boolean", name);
+        }
+        // BigInt types and their literals: resolve via the global `BigInt`
+        // interface.
+        if t.flags
+            .intersects(TypeFlags::BigInt | TypeFlags::BigIntLiteral)
+        {
+            return self.global_interface_has_property("BigInt", name);
+        }
+        // Remaining primitive types (symbol, void, unique symbol) have no
+        // resolvable properties — any access is TS2339.
+        if t.flags
+            .intersects(TypeFlags::ESSymbol | TypeFlags::Void | TypeFlags::UniqueESSymbol)
+        {
             return false;
         }
 
@@ -3566,6 +3585,15 @@ impl Checker {
         if self.has_property_of_type(&obj_type, name_text) {
             return;
         }
+        // Fallback for static methods on global constructor values (e.g.
+        // `Object.values`/`Object.entries`). These are declared on the
+        // `ObjectConstructor` interface, whose augmentations are spread across
+        // multiple lib files (lib.es5 + lib.es2017) and not fully merged by
+        // the binder. Resolve the accessed value to its global symbol and scan
+        // the corresponding constructor interface, mirroring the Array fix.
+        if self.global_constructor_value_has_property(obj_expr, name_text) {
+            return;
+        }
         let file = self.current_file.clone();
         let type_str = self.type_to_string(&obj_type);
         self.diagnostics.add(crate::ast::Diagnostic::new(
@@ -3574,6 +3602,35 @@ impl Checker {
             PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
             vec![name_text.to_string(), type_str],
         ));
+    }
+
+    /// Check whether `obj_expr` references a global constructor value (such as
+    /// `Object`) whose corresponding interface (e.g. `ObjectConstructor`)
+    /// declares a property named `name`. Used as a fallback for static methods
+    /// whose declarations span multiple lib files and aren't fully merged by
+    /// the binder.
+    fn global_constructor_value_has_property(&mut self, obj_expr: &Arc<Node>, name: &str) -> bool {
+        if obj_expr.kind != SyntaxKind::Identifier {
+            return false;
+        }
+        // Resolve the accessed identifier. Only proceed when it resolves to the
+        // actual global symbol (a local shadow must not trigger the fallback).
+        let resolved = match self.resolve_identifier(obj_expr) {
+            Some(sym) => sym,
+            None => return false,
+        };
+        let interface_name = match resolved.name.as_str() {
+            "Object" => {
+                // Confirm this is the global `Object` value, not a local
+                // variable that happens to be named `Object`.
+                match self.globals.get("Object") {
+                    Some(global_sym) if Arc::ptr_eq(&resolved, global_sym) => "ObjectConstructor",
+                    _ => return false,
+                }
+            }
+            _ => return false,
+        };
+        self.global_interface_has_property(interface_name, name)
     }
 
     /// Whether `name` exists as a property on the non-nullable constituents of
