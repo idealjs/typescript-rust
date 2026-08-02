@@ -36,7 +36,9 @@ use crate::diagnostics::{
     CANNOT_FIND_A_TSCONFIG_JSON_FILE_AT_THE_SPECIFIED_DIRECTORY_COLON_0, CANNOT_READ_FILE_0,
     OPTION_BUILD_MUST_BE_THE_FIRST_COMMAND_LINE_ARGUMENT,
     OPTION_PROJECT_CANNOT_BE_MIXED_WITH_SOURCE_FILES_ON_A_COMMAND_LINE,
-    OPTIONS_0_AND_1_CANNOT_BE_COMBINED, THE_SPECIFIED_PATH_DOES_NOT_EXIST_COLON_0,
+    OPTIONS_0_AND_1_CANNOT_BE_COMBINED,
+    PROJECT_REFERENCES_MAY_NOT_FORM_A_CIRCULAR_GRAPH_CYCLE_DETECTED_COLON_0,
+    THE_SPECIFIED_PATH_DOES_NOT_EXIST_COLON_0,
     X_TSCONFIG_JSON_IS_PRESENT_BUT_WILL_NOT_BE_LOADED_IF_FILES_ARE_SPECIFIED_ON_COMMANDLINE_USE_IGNORECONFIG_TO_SKIP_THIS_ERROR,
 };
 use crate::diagnosticwriter::{format_diagnostic, report_diagnostics};
@@ -229,6 +231,11 @@ fn tsc_build_compilation(
 
     let mut status = ExitStatus::Success;
     let mut seen_projects = HashSet::new();
+    // Projects currently on the build path (gray/in-progress), used to detect
+    // project reference cycles. `cycle_stack` records the ordered path for the
+    // TS6202 message, mirroring Go's `circularityStack`.
+    let mut building = HashSet::new();
+    let mut cycle_stack: Vec<String> = Vec::new();
     for project in projects {
         let result = build_project(
             sys,
@@ -237,6 +244,8 @@ fn tsc_build_compilation(
             &command_line.build_options,
             pretty,
             &mut seen_projects,
+            &mut building,
+            &mut cycle_stack,
         );
         status = status.max(result.status);
     }
@@ -394,6 +403,8 @@ fn build_project(
     build_options: &BuildOptions,
     pretty: bool,
     seen_projects: &mut HashSet<String>,
+    building: &mut HashSet<String>,
+    cycle_stack: &mut Vec<String>,
 ) -> CommandLineResult {
     let config_file_name = match resolve_project_config(sys, project) {
         Ok(config) => config,
@@ -407,11 +418,33 @@ fn build_project(
     };
 
     let normalized_config = tspath::normalize_path(&config_file_name);
-    if !seen_projects.insert(normalized_config.clone()) {
+
+    // Already fully built earlier in this run — skip (no re-build).
+    if seen_projects.contains(&normalized_config) {
         return CommandLineResult {
             status: ExitStatus::Success,
         };
     }
+
+    // This project is already on the current build path — a project reference
+    // cycle has been detected. Report TS6202 with the cycle path and abort this
+    // branch without recursing further, mirroring `Orchestrator.setupBuildTask`
+    // in Go (the `analyzing` set detects the back edge).
+    if building.contains(&normalized_config) {
+        let mut writer = sys.writer();
+        let diag = compiler_diagnostic(
+            PROJECT_REFERENCES_MAY_NOT_FORM_A_CIRCULAR_GRAPH_CYCLE_DETECTED_COLON_0,
+            vec![cycle_stack.join("\n")],
+        );
+        let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty));
+        return CommandLineResult {
+            status: ExitStatus::ProjectReferenceCycle_OutputsSkipped,
+        };
+    }
+
+    // Mark this project as in-progress and record it on the cycle path.
+    building.insert(normalized_config.clone());
+    cycle_stack.push(normalized_config.clone());
 
     let config = get_parsed_command_line_of_config_file(
         &normalized_config,
@@ -424,6 +457,9 @@ fn build_project(
         for e in &config.errors {
             let _ = writeln!(writer, "{}", format_diagnostic(e, pretty));
         }
+        cycle_stack.pop();
+        building.remove(&normalized_config);
+        seen_projects.insert(normalized_config);
         return CommandLineResult {
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
         };
@@ -438,11 +474,16 @@ fn build_project(
             build_options,
             pretty,
             seen_projects,
+            building,
+            cycle_stack,
         );
         status = status.max(result.status);
     }
 
-    if !config.file_names.is_empty() {
+    // A cycle detected while traversing references aborts all building — match
+    // Go's `buildOrClean`, which skips every project when circularity errors
+    // are present. Otherwise build this project normally.
+    if status < ExitStatus::ProjectReferenceCycle_OutputsSkipped && !config.file_names.is_empty() {
         // Check if project is up-to-date via .tsbuildinfo.
         let ts_build_info_file = BuildInfo::get_ts_build_info_file_path(
             &normalized_config,
@@ -472,6 +513,9 @@ fn build_project(
                             let _ =
                                 writeln!(writer, "Project '{}' is up to date.", normalized_config);
                         }
+                        cycle_stack.pop();
+                        building.remove(&normalized_config);
+                        seen_projects.insert(normalized_config);
                         return CommandLineResult {
                             status: ExitStatus::Success,
                         };
@@ -498,6 +542,11 @@ fn build_project(
             }
         }
     }
+
+    // Done with this project: move it from the in-progress set to the built set.
+    cycle_stack.pop();
+    building.remove(&normalized_config);
+    seen_projects.insert(normalized_config);
 
     CommandLineResult { status }
 }
@@ -1885,6 +1934,131 @@ mod tests {
             sys.output_string()
         );
         assert!(sys.fs().file_exists("/proj/dist/src/app.js"));
+    }
+
+    // ───────────────────────────────────────────────────────────────────────
+    // Project reference cycle detection (build parity with Go's TS6202)
+    // ───────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn build_mode_detects_two_project_cycle() {
+        // A references B, B references A → cycle.
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/cyc/a");
+        fs.insert_dir("/cyc/b");
+        fs.insert_file("/cyc/a/a.ts", "let a = 1;");
+        fs.insert_file("/cyc/b/b.ts", "let b = 2;");
+        fs.insert_file(
+            "/cyc/a/tsconfig.json",
+            r#"{"compilerOptions":{"noLib":true},"files":["a.ts"],"references":[{"path":"../b"}]}"#,
+        );
+        fs.insert_file(
+            "/cyc/b/tsconfig.json",
+            r#"{"compilerOptions":{"noLib":true},"files":["b.ts"],"references":[{"path":"../a"}]}"#,
+        );
+        let sys = TestSystem::new(fs, "/cyc/a");
+        let args = vec!["-b".to_string()];
+        let result = command_line(&sys, &args);
+        let out = sys.output_string();
+        assert_eq!(
+            result.status,
+            ExitStatus::ProjectReferenceCycle_OutputsSkipped,
+            "output:\n{out}"
+        );
+        assert!(out.contains("TS6202"), "expected TS6202 in output:\n{out}");
+        assert!(
+            out.contains("Project references may not form a circular graph"),
+            "output:\n{out}"
+        );
+        // Both projects in the cycle path should be named.
+        assert!(out.contains("/cyc/a/tsconfig.json"), "output:\n{out}");
+        assert!(out.contains("/cyc/b/tsconfig.json"), "output:\n{out}");
+        // A cycle aborts all building — no output files should be emitted.
+        assert!(!sys.fs().file_exists("/cyc/a/a.js"));
+        assert!(!sys.fs().file_exists("/cyc/b/b.js"));
+    }
+
+    #[test]
+    fn build_mode_detects_three_project_cycle() {
+        // A → B → C → A → cycle.
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/cyc3/a");
+        fs.insert_dir("/cyc3/b");
+        fs.insert_dir("/cyc3/c");
+        fs.insert_file("/cyc3/a/a.ts", "let a = 1;");
+        fs.insert_file("/cyc3/b/b.ts", "let b = 2;");
+        fs.insert_file("/cyc3/c/c.ts", "let c = 3;");
+        fs.insert_file(
+            "/cyc3/a/tsconfig.json",
+            r#"{"compilerOptions":{"noLib":true},"files":["a.ts"],"references":[{"path":"../b"}]}"#,
+        );
+        fs.insert_file(
+            "/cyc3/b/tsconfig.json",
+            r#"{"compilerOptions":{"noLib":true},"files":["b.ts"],"references":[{"path":"../c"}]}"#,
+        );
+        fs.insert_file(
+            "/cyc3/c/tsconfig.json",
+            r#"{"compilerOptions":{"noLib":true},"files":["c.ts"],"references":[{"path":"../a"}]}"#,
+        );
+        let sys = TestSystem::new(fs, "/cyc3/a");
+        let args = vec!["-b".to_string()];
+        let result = command_line(&sys, &args);
+        let out = sys.output_string();
+        assert_eq!(
+            result.status,
+            ExitStatus::ProjectReferenceCycle_OutputsSkipped,
+            "output:\n{out}"
+        );
+        assert!(out.contains("TS6202"), "expected TS6202 in output:\n{out}");
+        // The full three-project cycle path should be reported.
+        assert!(out.contains("/cyc3/a/tsconfig.json"), "output:\n{out}");
+        assert!(out.contains("/cyc3/b/tsconfig.json"), "output:\n{out}");
+        assert!(out.contains("/cyc3/c/tsconfig.json"), "output:\n{out}");
+        assert!(!sys.fs().file_exists("/cyc3/a/a.js"));
+        assert!(!sys.fs().file_exists("/cyc3/b/b.js"));
+        assert!(!sys.fs().file_exists("/cyc3/c/c.js"));
+    }
+
+    #[test]
+    fn build_mode_no_cycle_builds_in_dependency_order() {
+        // A → B → C with no cycle; all three should build successfully.
+        let fs = Arc::new(InMemoryFS::new());
+        fs.insert_dir("/chain/a");
+        fs.insert_dir("/chain/b");
+        fs.insert_dir("/chain/c");
+        fs.insert_file("/chain/a/a.ts", "let a = 1;");
+        fs.insert_file("/chain/b/b.ts", "let b = 2;");
+        fs.insert_file("/chain/c/c.ts", "let c = 3;");
+        fs.insert_file(
+            "/chain/a/tsconfig.json",
+            r#"{"compilerOptions":{"noLib":true},"files":["a.ts"],"references":[{"path":"../b"}]}"#,
+        );
+        fs.insert_file(
+            "/chain/b/tsconfig.json",
+            r#"{"compilerOptions":{"noLib":true},"files":["b.ts"],"references":[{"path":"../c"}]}"#,
+        );
+        fs.insert_file(
+            "/chain/c/tsconfig.json",
+            r#"{"compilerOptions":{"noLib":true},"files":["c.ts"]}"#,
+        );
+        let sys = TestSystem::new(fs, "/chain/a");
+        let args = vec!["-b".to_string()];
+        let result = command_line(&sys, &args);
+        let out = sys.output_string();
+        assert_eq!(
+            result.status,
+            ExitStatus::Success,
+            "expected successful build, output:\n{out}"
+        );
+        // No cycle diagnostic should be reported.
+        assert!(
+            !out.contains("TS6202"),
+            "unexpected cycle diagnostic:\n{out}"
+        );
+        // All projects build in dependency order (C, then B, then A).
+        assert!(sys.fs().file_exists("/chain/c/c.js"), "output:\n{out}");
+        assert!(sys.fs().file_exists("/chain/b/b.js"), "output:\n{out}");
+        assert!(sys.fs().file_exists("/chain/a/a.js"), "output:\n{out}");
     }
 
     // ───────────────────────────────────────────────────────────────────────
