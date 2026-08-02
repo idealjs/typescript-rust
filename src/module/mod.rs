@@ -472,22 +472,162 @@ mod tests {
         }
     }
 
-    // The following race tests are ported from Go but marked `#[ignore]` because
-    // they test goroutine-specific concurrency behaviour (info-cache
-    // LoadOrStore races) that does not map to Rust's thread-safe cache model.
+    // The following tests are adapted from Go goroutine race tests. Rust
+    // prevents the original data races at compile time, so instead of testing
+    // for races we exercise the same module-resolution logic concurrently
+    // across multiple threads and verify every thread gets the same correct
+    // result.
 
     /// Ported from Go `TestResolveModuleNameTrailingSlashRace`.
     #[test]
     #[ignore = "concurrency race test — does not apply to Rust's cache model"]
     fn resolve_module_name_trailing_slash_race() {}
 
-    /// Ported from Go `TestResolveSubpathNilContentsRace`.
-    #[test]
-    #[ignore = "concurrency race test — does not apply to Rust's cache model"]
-    fn resolve_subpath_nil_contents_race() {}
+    /// Builds a resolver backed by an in-memory FS containing a `pkg`
+    /// node_modules package, mirroring the layout used by
+    /// `resolve_module_name_trailing_slash`. The `Resolver` is `Send + Sync`
+    /// (its caches are guarded by `Mutex`), so `&Resolver` can be shared across
+    /// scoped threads.
+    fn build_concurrent_resolver() -> Resolver {
+        use crate::core::compiler_options::{
+            CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget,
+        };
+        use crate::vfs::{FS, InMemoryFS};
+        use std::sync::Arc;
 
-    /// Ported from Go `TestResolvePeerDependencyNilContentsRace`.
+        struct ResolutionHostStub {
+            fs: InMemoryFS,
+            cwd: String,
+        }
+        impl ResolutionHost for ResolutionHostStub {
+            fn fs(&self) -> &dyn FS {
+                &self.fs
+            }
+            fn get_current_directory(&self) -> &str {
+                &self.cwd
+            }
+        }
+
+        let fs = InMemoryFS::new();
+        for dir in [
+            "/repo",
+            "/repo/src",
+            "/repo/node_modules",
+            "/repo/node_modules/pkg",
+        ] {
+            fs.insert_dir(dir);
+        }
+        fs.write_file(
+            "/repo/node_modules/pkg/package.json",
+            r#"{"name":"pkg","main":"main.js","types":"main.d.ts"}"#,
+        )
+        .unwrap();
+        fs.write_file(
+            "/repo/node_modules/pkg/main.d.ts",
+            "export const x: number;",
+        )
+        .unwrap();
+        fs.write_file("/repo/node_modules/pkg/main.js", "exports.x = 1;")
+            .unwrap();
+        fs.write_file("/repo/src/file.ts", "").unwrap();
+
+        let host = Arc::new(ResolutionHostStub {
+            fs,
+            cwd: "/repo".to_string(),
+        });
+        let mut opts = CompilerOptions::default();
+        opts.module_resolution = ModuleResolutionKind::Bundler;
+        opts.module = ModuleKind::ESNext;
+        opts.target = ScriptTarget::ESNext;
+        Resolver::new(host, Arc::new(opts), String::new(), String::new())
+    }
+
+    /// Adapted from Go `TestResolveSubpathNilContentsRace`.
+    ///
+    /// Resolves the `pkg` module from N threads concurrently and asserts every
+    /// thread resolves to the same file.
     #[test]
-    #[ignore = "concurrency race test — does not apply to Rust's cache model"]
-    fn resolve_peer_dependency_nil_contents_race() {}
+    fn resolve_subpath_nil_contents_race() {
+        use crate::core::compiler_options::ModuleKind;
+        use std::thread;
+
+        const N: usize = 8;
+        let resolver = build_concurrent_resolver();
+
+        let results = thread::scope(|s| {
+            (0..N)
+                .map(|_| {
+                    s.spawn(|| {
+                        let (resolved, _) = resolver.resolve_module_name(
+                            "pkg",
+                            "/repo/src/file.ts",
+                            ModuleKind::ESNext,
+                            None,
+                        );
+                        resolved
+                    })
+                })
+                .map(|h| h.join().unwrap())
+                .collect::<Vec<_>>()
+        });
+
+        assert!(
+            results
+                .iter()
+                .all(|r| r.as_ref().is_some_and(|m| m.is_resolved()))
+        );
+        let expected = results[0].as_ref().unwrap().resolved_file_name.clone();
+        assert!(
+            results
+                .iter()
+                .all(|r| r.as_ref().unwrap().resolved_file_name == expected),
+            "threads disagreed on resolved file name: {results:?}"
+        );
+    }
+
+    /// Adapted from Go `TestResolvePeerDependencyNilContentsRace`.
+    ///
+    /// Same as the subpath test but resolves `pkg` and `pkg/` (trailing slash)
+    /// concurrently, verifying both spellings resolve identically across all
+    /// threads without races.
+    #[test]
+    fn resolve_peer_dependency_nil_contents_race() {
+        use crate::core::compiler_options::ModuleKind;
+        use std::thread;
+
+        const N: usize = 8;
+        let resolver = build_concurrent_resolver();
+
+        let results = thread::scope(|s| {
+            (0..N)
+                .flat_map(|i| {
+                    let name = if i % 2 == 0 { "pkg" } else { "pkg/" };
+                    let r = &resolver;
+                    Some(s.spawn(move || {
+                        let (resolved, _) = r.resolve_module_name(
+                            name,
+                            "/repo/src/file.ts",
+                            ModuleKind::ESNext,
+                            None,
+                        );
+                        resolved
+                    }))
+                })
+                .map(|h| h.join().unwrap())
+                .collect::<Vec<_>>()
+        });
+
+        assert!(
+            results
+                .iter()
+                .all(|r| r.as_ref().is_some_and(|m| m.is_resolved()))
+        );
+        let expected = results[0].as_ref().unwrap().resolved_file_name.clone();
+        assert!(
+            results
+                .iter()
+                .all(|r| r.as_ref().unwrap().resolved_file_name == expected),
+            "threads disagreed on resolved file name: {results:?}"
+        );
+    }
 }

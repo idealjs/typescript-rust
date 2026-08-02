@@ -74,10 +74,8 @@ mod tests {
     //      on Unix without elevated privileges.
 
     #[test]
-    #[ignore]
-    // TODO: Requires nativepath module integration; verify
-    // is_symlink_or_reparse_point detects regular files, directories,
-    // junctions, and symlinks correctly
+    // Verifies is_symlink_or_reparse_point detects regular files, directories,
+    // symlinks, and handles nonexistent / empty / invalid paths.
     fn test_is_symlink_or_reparse_point() {
         use std::fs;
         use std::io::Write;
@@ -114,6 +112,29 @@ mod tests {
 
         // invalid path with null byte
         assert_eq!(is_symlink_or_reparse_point("invalid\x00path"), false);
+
+        // symlink detection. On Windows, creating a symlink requires elevated
+        // privileges / developer mode, so the reparse-point case is exercised
+        // via the Windows-specific cfg path instead.
+        #[cfg(unix)]
+        {
+            let link = tmp.join("link.txt");
+            std::os::unix::fs::symlink(&regular, &link).unwrap();
+            // The symlink itself must be detected as a symlink/reparse point.
+            assert_eq!(
+                is_symlink_or_reparse_point(link.to_str().unwrap()),
+                true,
+                "expected symlink at {} to be detected",
+                link.display()
+            );
+            // A symlink to a directory is also detected.
+            let dir_link = tmp.join("dir-link");
+            std::os::unix::fs::symlink(&dir, &dir_link).unwrap();
+            assert_eq!(
+                is_symlink_or_reparse_point(dir_link.to_str().unwrap()),
+                true
+            );
+        }
 
         let _ = fs::remove_dir_all(&tmp);
     }
