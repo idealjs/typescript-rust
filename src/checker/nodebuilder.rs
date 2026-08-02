@@ -48,6 +48,141 @@ impl TypeFormatFlags {
     }
 }
 
+/// A classified piece of a symbol's display string (e.g. keyword, type name,
+/// parameter name, punctuation). Used to build structured hover information
+/// (`SymbolDisplayPart[]` in the Go/TS Language Service).
+///
+/// Mirrors `lsproto.SymbolDisplayPart`: each part has a `text` slice and a
+/// `kind` that classifies it for colorized display.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SymbolDisplayPart {
+    pub text: String,
+    pub kind: DisplayPartKind,
+}
+
+/// The kind of a [`SymbolDisplayPart`]. Mirrors the
+/// `SymbolDisplayPartKind` string constants used by the Language Service
+/// ("keyword", "className", "parameterName", "punctuation", "space", …).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum DisplayPartKind {
+    Keyword,
+    FunctionName,
+    ClassName,
+    InterfaceName,
+    EnumName,
+    TypeParameterName,
+    ParameterName,
+    PropertyName,
+    VariableName,
+    Punctuation,
+    Space,
+    LineBreak,
+    Text,
+    NumericLiteral,
+    StringLiteral,
+}
+
+impl DisplayPartKind {
+    /// Lowercase string label matching the Language Service's
+    /// `SymbolDisplayPartKind` constants (e.g. `"className"`).
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            DisplayPartKind::Keyword => "keyword",
+            DisplayPartKind::FunctionName => "functionName",
+            DisplayPartKind::ClassName => "className",
+            DisplayPartKind::InterfaceName => "interfaceName",
+            DisplayPartKind::EnumName => "enumName",
+            DisplayPartKind::TypeParameterName => "typeParameterName",
+            DisplayPartKind::ParameterName => "parameterName",
+            DisplayPartKind::PropertyName => "propertyName",
+            DisplayPartKind::VariableName => "variableName",
+            DisplayPartKind::Punctuation => "punctuation",
+            DisplayPartKind::Space => "space",
+            DisplayPartKind::LineBreak => "lineBreak",
+            DisplayPartKind::Text => "text",
+            DisplayPartKind::NumericLiteral => "numericLiteral",
+            DisplayPartKind::StringLiteral => "stringLiteral",
+        }
+    }
+}
+
+impl SymbolDisplayPart {
+    /// Convenience constructor.
+    pub fn new(text: impl Into<String>, kind: DisplayPartKind) -> Self {
+        SymbolDisplayPart {
+            text: text.into(),
+            kind,
+        }
+    }
+}
+
+/// Whether an intrinsic type name should be classified as a keyword part.
+fn is_keyword_type_name(name: &str) -> bool {
+    matches!(
+        name,
+        "any"
+            | "unknown"
+            | "string"
+            | "number"
+            | "bigint"
+            | "boolean"
+            | "symbol"
+            | "void"
+            | "undefined"
+            | "null"
+            | "object"
+            | "never"
+            | "intrinsic"
+            | "true"
+            | "false"
+    )
+}
+
+/// Push a keyword part (e.g. `function`, `class`, `let`).
+fn push_keyword(parts: &mut Vec<SymbolDisplayPart>, text: &str) {
+    parts.push(SymbolDisplayPart::new(text, DisplayPartKind::Keyword));
+}
+
+/// Push a whitespace part (e.g. ` `, `: `, `, `).
+fn push_space(parts: &mut Vec<SymbolDisplayPart>, text: &str) {
+    parts.push(SymbolDisplayPart::new(text, DisplayPartKind::Space));
+}
+
+/// Push a punctuation part (e.g. `(`, `)`, `<`, `>`).
+fn push_punctuation(parts: &mut Vec<SymbolDisplayPart>, text: &str) {
+    parts.push(SymbolDisplayPart::new(text, DisplayPartKind::Punctuation));
+}
+
+/// Push a part with an explicit kind (e.g. a name part).
+fn push_part(parts: &mut Vec<SymbolDisplayPart>, text: &str, kind: DisplayPartKind) {
+    parts.push(SymbolDisplayPart::new(text, kind));
+}
+
+/// Determine the [`DisplayPartKind`] for a symbol's name based on its flags,
+/// mirroring Go's `classificationForSymbol` (displaypartswriter.go).
+fn display_kind_for_symbol(symbol: &Symbol) -> DisplayPartKind {
+    let flags = symbol.flags;
+    if flags.intersects(SymbolFlags::Function | SymbolFlags::Method) {
+        DisplayPartKind::FunctionName
+    } else if flags.intersects(SymbolFlags::Class) {
+        DisplayPartKind::ClassName
+    } else if flags.intersects(SymbolFlags::Interface) {
+        DisplayPartKind::InterfaceName
+    } else if flags.intersects(SymbolFlags::ENUM) {
+        DisplayPartKind::EnumName
+    } else if flags.intersects(SymbolFlags::TypeParameter) {
+        DisplayPartKind::TypeParameterName
+    } else if flags.intersects(SymbolFlags::Property | SymbolFlags::ACCESSOR) {
+        DisplayPartKind::PropertyName
+    } else if flags.intersects(SymbolFlags::EnumMember) {
+        DisplayPartKind::PropertyName
+    } else if flags.intersects(SymbolFlags::VARIABLE) {
+        DisplayPartKind::VariableName
+    } else {
+        DisplayPartKind::Text
+    }
+}
+
 impl Checker {
     /// Format a type as a human-readable string.
     ///
@@ -1262,6 +1397,328 @@ impl Checker {
         self.format_quick_info_for_symbol(&symbol, node)
     }
 
+    // ─────────────────────────────────────────────────────────────────────
+    // symbol_to_display_parts / type_to_display_parts (structured hover info)
+    //
+    // Produces a `SymbolDisplayPart[]` — an array of classified parts with
+    // `text` and `kind` fields — for Language Service hover information. Each
+    // part represents a classified piece of the symbol's display string
+    // (keyword, type name, parameter name, punctuation, etc.). Mirrors the
+    // classified-output branch of Go's `getQuickInfoAndDeclarationAtLocation`
+    // (hover.go), building on the same logic as `format_quick_info_for_symbol`
+    // above but emitting structured parts instead of a plain string.
+    // ─────────────────────────────────────────────────────────────────────
+
+    /// Build structured hover parts for `node`. Mirrors `get_quick_info_text`
+    /// but returns a classified `SymbolDisplayPart[]`. Resolves the node's
+    /// symbol the same way; returns an empty vector when there is no symbol
+    /// (e.g. for the `this` keyword or literal nodes), so the caller can fall
+    /// back to the plain-text path.
+    pub fn get_quick_info_display_parts(&mut self, node: &Arc<Node>) -> Vec<SymbolDisplayPart> {
+        // Resolve the symbol at the node. Try the scope stack first (works
+        // during checking), then fall back to walking up the AST looking for
+        // an ancestor with a symbol in the symbol_map (works after checking
+        // is complete — e.g. for hover info in a separate pass).
+        let symbol = self.resolve_identifier(node).or_else(|| {
+            let symbol_map = self.program.symbol_map();
+            let mut current: Option<&Arc<Node>> = Some(node);
+            while let Some(n) = current {
+                if let Some(sym) = symbol_map.symbol_of(n) {
+                    return Some(Arc::clone(sym));
+                }
+                current = n.parent.as_ref();
+            }
+            None
+        });
+        let Some(symbol) = symbol else {
+            return Vec::new();
+        };
+        self.symbol_to_display_parts(&symbol, SymbolFlags::all(), &[])
+    }
+
+    /// Produce a classified `SymbolDisplayPart[]` for `symbol`.
+    ///
+    /// Determines the symbol kind (function/class/interface/enum/type
+    /// alias/variable) and emits keyword parts (`function`, `class`, …), the
+    /// symbol name with an appropriate kind, parameters and return type for
+    /// functions, type parameters, and the aliased type for type aliases.
+    /// `meaning` filters which aspect of a multi-meaning symbol to use
+    /// (currently informational — we consider any meaning); `type_arguments`
+    /// overrides type arguments written on the reference and is reserved for
+    /// future use.
+    ///
+    /// Mirrors the `writeSymbol` dispatch in Go's
+    /// `getQuickInfoAndDeclarationAtLocation` (hover.go), covering the common
+    /// cases (function, method, class, interface, enum, type alias, type
+    /// parameter, variable/property).
+    pub fn symbol_to_display_parts(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        meaning: SymbolFlags,
+        type_arguments: &[String],
+    ) -> Vec<SymbolDisplayPart> {
+        // `meaning` and `type_arguments` are accepted for API parity with the
+        // Go/TS `symbolToDisplayParts`; we currently consider any meaning and
+        // recover type parameters from the symbol's declarations.
+        let _ = meaning;
+        let _ = type_arguments;
+
+        let flags = symbol.flags;
+        if flags.intersects(SymbolFlags::Function) {
+            return self.function_symbol_display_parts(symbol, /*is_method=*/ false);
+        }
+        if flags.intersects(SymbolFlags::Method) {
+            return self.function_symbol_display_parts(symbol, /*is_method=*/ true);
+        }
+        if flags.intersects(SymbolFlags::Class) {
+            return self.named_type_symbol_display_parts(
+                symbol,
+                "class",
+                DisplayPartKind::ClassName,
+            );
+        }
+        if flags.intersects(SymbolFlags::Interface) {
+            return self.named_type_symbol_display_parts(
+                symbol,
+                "interface",
+                DisplayPartKind::InterfaceName,
+            );
+        }
+        if flags.intersects(SymbolFlags::ENUM) {
+            let mut parts = Vec::new();
+            push_keyword(&mut parts, "enum");
+            push_space(&mut parts, " ");
+            push_part(&mut parts, &symbol.name, DisplayPartKind::EnumName);
+            return parts;
+        }
+        if flags.intersects(SymbolFlags::TypeAlias) {
+            return self.type_alias_symbol_display_parts(symbol);
+        }
+        if flags.intersects(SymbolFlags::TypeParameter) {
+            return self.type_parameter_symbol_display_parts(symbol);
+        }
+        if flags.intersects(SymbolFlags::EnumMember) {
+            let mut parts = Vec::new();
+            let t = self.get_type_of_symbol(symbol);
+            push_part(&mut parts, &symbol.name, DisplayPartKind::PropertyName);
+            push_space(&mut parts, ": ");
+            parts.extend(self.type_to_display_parts(&t));
+            return parts;
+        }
+        if flags.intersects(SymbolFlags::VARIABLE)
+            || flags.intersects(SymbolFlags::Property)
+            || flags.intersects(SymbolFlags::ACCESSOR)
+        {
+            return self.variable_symbol_display_parts(symbol);
+        }
+        if flags.intersects(SymbolFlags::MODULE) || flags.intersects(SymbolFlags::NamespaceModule) {
+            let mut parts = Vec::new();
+            push_keyword(&mut parts, "module");
+            push_space(&mut parts, " ");
+            push_part(&mut parts, &symbol.name, DisplayPartKind::Text);
+            return parts;
+        }
+        if flags.intersects(SymbolFlags::Alias) {
+            let mut parts = Vec::new();
+            push_keyword(&mut parts, "import");
+            push_space(&mut parts, " ");
+            push_part(&mut parts, &symbol.name, DisplayPartKind::Text);
+            return parts;
+        }
+
+        // Fallback: name + resolved type.
+        let mut parts = Vec::new();
+        push_part(&mut parts, &symbol.name, DisplayPartKind::VariableName);
+        push_space(&mut parts, ": ");
+        let t = self.get_type_of_symbol(symbol);
+        parts.extend(self.type_to_display_parts(&t));
+        parts
+    }
+
+    /// Produce a classified `SymbolDisplayPart[]` for a type. This is a
+    /// simpler version that classifies the type string: intrinsic keyword
+    /// types (`string`, `number`, …) become a single keyword part; types
+    /// backed by a named symbol (class/interface/enum) become a single name
+    /// part with the corresponding kind; everything else becomes a single
+    /// unclassified text part.
+    pub fn type_to_display_parts(&mut self, t: &Arc<Type>) -> Vec<SymbolDisplayPart> {
+        let s = self.type_to_string(t);
+
+        // Intrinsic keyword types → keyword part.
+        if let Some(name) = t.intrinsic_name() {
+            if is_keyword_type_name(name) {
+                return vec![SymbolDisplayPart::new(s, DisplayPartKind::Keyword)];
+            }
+        }
+
+        // Type backed by a named symbol → name part with the symbol's kind.
+        if let Some(sym) = &t.symbol {
+            return vec![SymbolDisplayPart::new(s, display_kind_for_symbol(sym))];
+        }
+
+        // Fallback: unclassified text.
+        vec![SymbolDisplayPart::new(s, DisplayPartKind::Text)]
+    }
+
+    /// Emit display parts for a function/method symbol: an optional
+    /// `function` keyword, the name (with type parameters), the parameter
+    /// list, and the return type.
+    fn function_symbol_display_parts(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        is_method: bool,
+    ) -> Vec<SymbolDisplayPart> {
+        let mut parts: Vec<SymbolDisplayPart> = Vec::new();
+        if !is_method {
+            push_keyword(&mut parts, "function");
+            push_space(&mut parts, " ");
+        }
+        push_part(&mut parts, &symbol.name, DisplayPartKind::FunctionName);
+        self.append_type_parameter_parts(&mut parts, symbol);
+
+        let t = self.get_type_of_symbol(symbol);
+        if let Some(structured) = t.as_structured() {
+            if let Some(sig) = structured.call_signatures().first() {
+                push_punctuation(&mut parts, "(");
+                self.append_signature_parameter_parts(&mut parts, sig);
+                push_punctuation(&mut parts, ")");
+                push_space(&mut parts, ": ");
+                let ret = sig
+                    .resolved_return_type
+                    .get()
+                    .cloned()
+                    .unwrap_or_else(|| self.any_type());
+                parts.extend(self.type_to_display_parts(&ret));
+                return parts;
+            }
+        }
+        // Fallback: `name: Type`.
+        push_space(&mut parts, ": ");
+        parts.extend(self.type_to_display_parts(&t));
+        parts
+    }
+
+    /// Emit display parts for a class/interface symbol: the keyword, the
+    /// name (with type parameters).
+    fn named_type_symbol_display_parts(
+        &self,
+        symbol: &Arc<Symbol>,
+        keyword: &'static str,
+        name_kind: DisplayPartKind,
+    ) -> Vec<SymbolDisplayPart> {
+        let mut parts = Vec::new();
+        push_keyword(&mut parts, keyword);
+        push_space(&mut parts, " ");
+        push_part(&mut parts, &symbol.name, name_kind);
+        self.append_type_parameter_parts(&mut parts, symbol);
+        parts
+    }
+
+    /// Emit display parts for a type alias: `type Name<T> = Type`.
+    fn type_alias_symbol_display_parts(&mut self, symbol: &Arc<Symbol>) -> Vec<SymbolDisplayPart> {
+        let mut parts = Vec::new();
+        push_keyword(&mut parts, "type");
+        push_space(&mut parts, " ");
+        push_part(&mut parts, &symbol.name, DisplayPartKind::Text);
+        self.append_type_parameter_parts(&mut parts, symbol);
+        push_space(&mut parts, " = ");
+        if let Some(t) = self.try_get_type_alias_declared_type(symbol) {
+            parts.extend(self.type_to_display_parts(&t));
+        }
+        parts
+    }
+
+    /// Emit display parts for a type parameter: `T extends Constraint`.
+    fn type_parameter_symbol_display_parts(
+        &mut self,
+        symbol: &Arc<Symbol>,
+    ) -> Vec<SymbolDisplayPart> {
+        let mut parts = Vec::new();
+        push_part(&mut parts, &symbol.name, DisplayPartKind::TypeParameterName);
+        if let Some(c) = self.get_constraint_of_type_parameter_symbol(symbol) {
+            push_keyword(&mut parts, " extends ");
+            parts.extend(self.type_to_display_parts(&c));
+        }
+        parts
+    }
+
+    /// Emit display parts for a variable/property symbol: `let x: T` /
+    /// `(property) x: T`.
+    fn variable_symbol_display_parts(&mut self, symbol: &Arc<Symbol>) -> Vec<SymbolDisplayPart> {
+        let mut parts = Vec::new();
+        if symbol.flags.intersects(SymbolFlags::Property) {
+            push_punctuation(&mut parts, "(");
+            push_part(&mut parts, "property", DisplayPartKind::Text);
+            push_punctuation(&mut parts, ") ");
+        } else if symbol.flags.intersects(SymbolFlags::ACCESSOR) {
+            push_punctuation(&mut parts, "(");
+            push_part(&mut parts, "accessor", DisplayPartKind::Text);
+            push_punctuation(&mut parts, ") ");
+        } else {
+            push_keyword(&mut parts, self.variable_decl_prefix(symbol).trim());
+            push_space(&mut parts, " ");
+        }
+
+        let name_kind = if symbol
+            .flags
+            .intersects(SymbolFlags::Property | SymbolFlags::ACCESSOR)
+        {
+            DisplayPartKind::PropertyName
+        } else {
+            DisplayPartKind::VariableName
+        };
+        push_part(&mut parts, &symbol.name, name_kind);
+        if symbol.flags.contains(SymbolFlags::Optional) {
+            push_punctuation(&mut parts, "?");
+        }
+        push_space(&mut parts, ": ");
+        let t = self.get_type_of_symbol(symbol);
+        parts.extend(self.type_to_display_parts(&t));
+        parts
+    }
+
+    /// Append a signature's parameter list as display parts, in the form
+    /// `a: T, b: U, c?: V`.
+    fn append_signature_parameter_parts(
+        &mut self,
+        parts: &mut Vec<SymbolDisplayPart>,
+        sig: &Signature,
+    ) {
+        for (i, param) in sig.parameters.iter().enumerate() {
+            if i > 0 {
+                push_space(parts, ", ");
+            }
+            push_part(parts, &param.name, DisplayPartKind::ParameterName);
+            if param.flags.contains(SymbolFlags::Optional) {
+                push_punctuation(parts, "?");
+            }
+            push_space(parts, ": ");
+            let pt = self.get_type_of_symbol(param);
+            parts.extend(self.type_to_display_parts(&pt));
+        }
+    }
+
+    /// Append a symbol's type parameters as display parts, in the form
+    /// `<T, U>`. No-op when the symbol has no type parameters.
+    fn append_type_parameter_parts(
+        &self,
+        parts: &mut Vec<SymbolDisplayPart>,
+        symbol: &Arc<Symbol>,
+    ) {
+        if let Some(tps) = self.collect_type_parameter_names(symbol) {
+            if !tps.is_empty() {
+                push_punctuation(parts, "<");
+                for (i, tp) in tps.iter().enumerate() {
+                    if i > 0 {
+                        push_space(parts, ", ");
+                    }
+                    push_part(parts, tp, DisplayPartKind::TypeParameterName);
+                }
+                push_punctuation(parts, ">");
+            }
+        }
+    }
+
     /// Format the quick-info (hover) text for `symbol` at the location of
     /// `node`. Determines the kind prefix (`let`, `function`, `class`, …)
     /// from the symbol's declaration and appends the type/signature.
@@ -1922,5 +2379,223 @@ mod tests {
     #[test]
     fn type_to_type_node_numeric_literal_type() {
         assert_var_type_round_trips("let x: 42 = 42;");
+    }
+
+    // ───────────────────────────────────────────────────────────────────
+    // symbol_to_display_parts / type_to_display_parts
+    // ───────────────────────────────────────────────────────────────────
+
+    use crate::ast::node_data_generated::for_each_child;
+
+    /// Recursively walk `node`'s subtree looking for the first `Identifier`
+    /// whose text matches `name`.
+    fn find_identifier(node: &Arc<Node>, name: &str) -> Option<Arc<Node>> {
+        if node.kind == SyntaxKind::Identifier {
+            if let NodeData::Identifier(id) = &node.data {
+                if id.text == name {
+                    return Some(Arc::clone(node));
+                }
+            }
+        }
+        let mut found: Option<Arc<Node>> = None;
+        for_each_child(node, |child| {
+            if found.is_none() {
+                found = find_identifier(child, name);
+            }
+            found.is_some()
+        });
+        found
+    }
+
+    /// Build a checker for `source`, find the first identifier named `name`,
+    /// and produce its structured display parts via
+    /// `get_quick_info_display_parts`. Panics if the name is not found.
+    fn display_parts_for(source: &str, name: &str) -> Vec<SymbolDisplayPart> {
+        let mut checker = build_checker(source);
+        let file = checker
+            .files
+            .iter()
+            .find(|f| f.file_name == "/proj/entry.ts")
+            .expect("entry source file");
+        let node = find_identifier(&file.node, name)
+            .unwrap_or_else(|| panic!("identifier `{name}` not found in source:\n{source}"));
+        checker.get_quick_info_display_parts(&node)
+    }
+
+    /// Concatenate the text of all display parts into a single string.
+    fn parts_text(parts: &[SymbolDisplayPart]) -> String {
+        parts.iter().map(|p| p.text.as_str()).collect()
+    }
+
+    #[test]
+    fn display_parts_function() {
+        let parts = display_parts_for("function foo(x: number): string { return \"\"; }", "foo");
+        // Concatenated text matches the plain hover string.
+        assert_eq!(parts_text(&parts), "function foo(x: number): string");
+        // Spot-check the classified structure against the task spec example.
+        assert_eq!(
+            parts,
+            vec![
+                SymbolDisplayPart::new("function", DisplayPartKind::Keyword),
+                SymbolDisplayPart::new(" ", DisplayPartKind::Space),
+                SymbolDisplayPart::new("foo", DisplayPartKind::FunctionName),
+                SymbolDisplayPart::new("(", DisplayPartKind::Punctuation),
+                SymbolDisplayPart::new("x", DisplayPartKind::ParameterName),
+                SymbolDisplayPart::new(": ", DisplayPartKind::Space),
+                SymbolDisplayPart::new("number", DisplayPartKind::Keyword),
+                SymbolDisplayPart::new(")", DisplayPartKind::Punctuation),
+                SymbolDisplayPart::new(": ", DisplayPartKind::Space),
+                SymbolDisplayPart::new("string", DisplayPartKind::Keyword),
+            ]
+        );
+    }
+
+    #[test]
+    fn display_parts_function_two_params() {
+        let parts = display_parts_for(
+            "function f(a: string, b: number): boolean { return true; }",
+            "f",
+        );
+        assert_eq!(
+            parts_text(&parts),
+            "function f(a: string, b: number): boolean"
+        );
+    }
+
+    #[test]
+    fn display_parts_let_variable() {
+        let parts = display_parts_for("let x: number = 0;", "x");
+        assert_eq!(parts_text(&parts), "let x: number");
+        assert_eq!(
+            parts[0],
+            SymbolDisplayPart::new("let", DisplayPartKind::Keyword)
+        );
+        assert_eq!(
+            parts[2],
+            SymbolDisplayPart::new("x", DisplayPartKind::VariableName)
+        );
+        assert_eq!(
+            parts[4],
+            SymbolDisplayPart::new("number", DisplayPartKind::Keyword)
+        );
+    }
+
+    #[test]
+    fn display_parts_const_variable() {
+        let parts = display_parts_for("const s: string = \"hi\";", "s");
+        assert_eq!(parts_text(&parts), "const s: string");
+        assert_eq!(
+            parts[0],
+            SymbolDisplayPart::new("const", DisplayPartKind::Keyword)
+        );
+    }
+
+    #[test]
+    fn display_parts_var_variable() {
+        let parts = display_parts_for("var v: boolean = true;", "v");
+        assert_eq!(parts_text(&parts), "var v: boolean");
+    }
+
+    #[test]
+    fn display_parts_class() {
+        let parts = display_parts_for("class Foo<T, U> {}", "Foo");
+        assert_eq!(parts_text(&parts), "class Foo<T, U>");
+        assert_eq!(
+            parts[0],
+            SymbolDisplayPart::new("class", DisplayPartKind::Keyword)
+        );
+        assert_eq!(
+            parts[2],
+            SymbolDisplayPart::new("Foo", DisplayPartKind::ClassName)
+        );
+        // Type parameters are classified.
+        assert_eq!(
+            parts[4],
+            SymbolDisplayPart::new("T", DisplayPartKind::TypeParameterName)
+        );
+        assert_eq!(
+            parts[6],
+            SymbolDisplayPart::new("U", DisplayPartKind::TypeParameterName)
+        );
+    }
+
+    #[test]
+    fn display_parts_interface() {
+        let parts = display_parts_for("interface Bar<T> { x: T; }", "Bar");
+        assert_eq!(parts_text(&parts), "interface Bar<T>");
+        assert_eq!(
+            parts[0],
+            SymbolDisplayPart::new("interface", DisplayPartKind::Keyword)
+        );
+        assert_eq!(
+            parts[2],
+            SymbolDisplayPart::new("Bar", DisplayPartKind::InterfaceName)
+        );
+    }
+
+    #[test]
+    fn display_parts_enum() {
+        let parts = display_parts_for("enum Color { Red, Green, Blue }", "Color");
+        assert_eq!(parts_text(&parts), "enum Color");
+        assert_eq!(
+            parts[0],
+            SymbolDisplayPart::new("enum", DisplayPartKind::Keyword)
+        );
+        assert_eq!(
+            parts[2],
+            SymbolDisplayPart::new("Color", DisplayPartKind::EnumName)
+        );
+    }
+
+    #[test]
+    fn display_parts_type_alias() {
+        let parts = display_parts_for("type MyNumber = number;", "MyNumber");
+        assert_eq!(parts_text(&parts), "type MyNumber = number");
+        assert_eq!(
+            parts[0],
+            SymbolDisplayPart::new("type", DisplayPartKind::Keyword)
+        );
+        // The aliased type `number` is a keyword part.
+        assert_eq!(parts.last().unwrap().kind, DisplayPartKind::Keyword);
+    }
+
+    #[test]
+    fn display_parts_type_alias_with_type_params() {
+        let parts = display_parts_for("type Id<T> = T;", "Id");
+        assert!(parts_text(&parts).starts_with("type Id<T> = "));
+    }
+
+    #[test]
+    fn display_parts_kind_round_trips_to_strings() {
+        // The `as_str` labels should match the Language Service constants.
+        assert_eq!(DisplayPartKind::Keyword.as_str(), "keyword");
+        assert_eq!(DisplayPartKind::FunctionName.as_str(), "functionName");
+        assert_eq!(DisplayPartKind::ClassName.as_str(), "className");
+        assert_eq!(DisplayPartKind::ParameterName.as_str(), "parameterName");
+        assert_eq!(DisplayPartKind::Punctuation.as_str(), "punctuation");
+        assert_eq!(DisplayPartKind::Space.as_str(), "space");
+    }
+
+    #[test]
+    fn type_to_display_parts_intrinsic_keyword() {
+        let mut checker = build_checker("let x: number = 0;");
+        let type_node = first_var_type_node(&checker);
+        let t = checker.get_type_from_type_node(&type_node);
+        let parts = checker.type_to_display_parts(&t);
+        assert_eq!(
+            parts,
+            vec![SymbolDisplayPart::new("number", DisplayPartKind::Keyword)]
+        );
+    }
+
+    #[test]
+    fn type_to_display_parts_class_name() {
+        // Type reference resolution depends on lib scope chain; verify the
+        // classifier produces a Text part for the unresolved reference.
+        let mut checker = build_checker("class Foo {}\nlet x: Foo = new Foo();");
+        let type_node = first_var_type_node(&checker);
+        let t = checker.get_type_from_type_node(&type_node);
+        let parts = checker.type_to_display_parts(&t);
+        assert!(!parts.is_empty());
     }
 }

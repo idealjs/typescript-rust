@@ -273,7 +273,15 @@ impl LspServer {
         // for its quick-info (hover) text.
         let node = find_deepest_node(&source_file.node, offset);
         let mut checker = program.build_checker();
-        let type_str = checker.get_quick_info_text(&node);
+        // Prefer structured `SymbolDisplayPart[]` (colorized hover) when a
+        // symbol is available; fall back to the plain-text quick-info path
+        // for nodes without a symbol (e.g. `this`, literals).
+        let parts = checker.get_quick_info_display_parts(&node);
+        let type_str = if parts.is_empty() {
+            checker.get_quick_info_text(&node)
+        } else {
+            display_parts_to_string(&parts)
+        };
         if type_str.is_empty() {
             return Value::Null;
         }
@@ -706,6 +714,11 @@ fn build_program(path: &str, content: &str) -> Arc<crate::compiler::Program> {
     Arc::new(crate::compiler::Program::new(
         crate::compiler::ProgramOptions { config, host },
     ))
+}
+
+/// Convert structured `SymbolDisplayPart[]` into a plain string.
+fn display_parts_to_string(parts: &[crate::checker::nodebuilder::SymbolDisplayPart]) -> String {
+    parts.iter().map(|p| p.text.as_str()).collect()
 }
 
 /// Recursively descend into the deepest AST node whose source range covers
