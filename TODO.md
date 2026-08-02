@@ -131,21 +131,15 @@ CLI 参数流程审计、tsconfig 解析/extends/cycle/cache/${configDir}/null �
 
 ## P2：Scanner / Parser / AST parity ✅ 基本完成
 
-Scanner ~95%（转义/JSX/正则/CommentDirectives/ASI/trivia/TokenFlags 完整位集/conflict-marker/JSDoc flag）、Parser ~95%（TS6/7 语法/类型语法/JSX/装饰器/import attributes/JSDoc parser/reparser/references.rs）、AST 生成链路、Parser diagnostic parity、位置信息一致性。
-
-剩余：
-- [ ] 正则 `lastIndex`/`d` flag runtime 特性（scanner body 校验已落地）
-- [ ] `.ts/.tsx/.js/.jsx` 解析结果与 oracle 完全对齐（checker 深度限制）
+Scanner ~95%、Parser ~95%、AST 生成链路、Parser diagnostic parity、位置信息一致性。
+（剩余项见上方待办清单 D）
 
 ## P3：Binder / Checker / Diagnostics parity — 进行中
 
-Binder ~60%。Checker ~30%。710 个 checker parity fixtures 通过。
-
-剩余（见上方待办清单 A）：
-- [ ] `symbol_to_display_parts`（LS 层功能，待 P7 LS 启动时补齐）
-- [ ] 本地化支持（locale/loc_generated）
-- [ ] 真实项目诊断集合与 Go oracle 完全一致（checker 深度需继续提升）
-- [ ] 继续补齐诊断码（TS2511/TS2341/TS2366/TS2588/TS7027）
+Binder ~60%。Checker ~30%。810 个 checker parity fixtures 通过。13 个新诊断码
+（TS2741/2739/2353/2448/2454/18048/2451/2300/2511/2341/2366/2588/7027）。
+Array/String/Number 方法解析 + generic call-site inference 已修复。
+（剩余项见上方待办清单 A/D）
 
 ## P4：Emit / Transformer / SourceMap / Declaration emit ✅ 已完成
 
@@ -155,26 +149,17 @@ removeComments、ES5 down-leveling、CommonJS module transform、source map gene
 
 Module resolution 全链路（relative/node_modules/paths/rootDirs/exports/imports/typesVersions/typeRef）、bundled libs 加载、case-sensitive FS、node_modules fixture parity。
 
-## P6：Build / Watch / Incremental
+## P6：Build / Watch / Incremental ✅ 基本完成
 
-已完成：`--build` dispatch、typed project reference graph（DFS）、build-specific
-did-you-mean、`.tsbuildinfo` 读写 + up-to-date check、incremental rebuild 基础。
+已完成：`--build` dispatch、project reference graph、`.tsbuildinfo` 读写 +
+up-to-date check、`--watch` 模式（notify crate + PollWatcher + 重编译）。
+（剩余 cycle 处理见上方待办清单 B）
 
-剩余：
-- [ ] 支持 watch mode，明确文件监听库选择
-- [ ] 对齐 project reference cycle、输出跳过逻辑
-- [ ] 设计 watch 测试，避免 flaky
+## P7：Language Service / LSP ✅ 基本完成
 
-## P7：Language Service / LSP
-
-已完成：自研 JSON-RPC 协议层、`--lsp` 启动、initialize/shutdown、didChange/didClose
-文档同步、diagnostics 推送（接入 checker）、hover（接入 checker nodebuilder）、
-completion（global symbols + keywords）、definition（checker symbol resolution）。
-
-剩余：
-- [ ] 迁移 project service 基础：open/close/change watched files + 多文件管理
-- [ ] 逐步迁移 LS features：references / rename / document symbols / formatting
-- [ ] 迁移 fourslash 测试策略，先只保留关键 smoke
+已完成：JSON-RPC 协议层、initialize/shutdown、文档同步、diagnostics 推送、hover、
+completion、definition、references（跨文件符号查找）、documentSymbol、rename。
+（剩余 project service / fourslash 见上方待办清单 C）
 
 ## P8：API / npm package / VS Code extension
 
