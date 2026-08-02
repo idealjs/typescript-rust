@@ -5809,7 +5809,7 @@ impl Parser {
             .parse_optional_token(SyntaxKind::QuestionToken)
             .or_else(|| self.parse_optional_token(SyntaxKind::ExclamationToken));
 
-        if self.token == SyntaxKind::OpenParenToken {
+        if self.token == SyntaxKind::OpenParenToken || self.token == SyntaxKind::LessThanToken {
             // Check if this is a constructor (`constructor(...) {}`).
             let is_constructor =
                 name.kind == SyntaxKind::Identifier && name.text() == "constructor";
