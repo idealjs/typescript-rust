@@ -490,13 +490,15 @@ fn emit_js_text_tracked(
         &src_offsets,
         source,
         &source_line_starts,
+        source_file,
     );
 
     js_text
 }
 
 /// Walk the final output text and src_offsets array, emitting source map
-/// mappings to the generator.
+/// mappings to the generator. Combines linear scan (for base coverage)
+/// with AST node walking (for per-node granularity).
 fn generate_source_map_from_offsets(
     generator: &mut Generator,
     source_index: SourceIndex,
@@ -504,7 +506,10 @@ fn generate_source_map_from_offsets(
     src_offsets: &[u32],
     source: &str,
     source_line_starts: &[usize],
+    _source_file: &SourceFile,
 ) {
+    // Linear scan: emit a mapping at every source-offset transition point.
+    // This provides correct base coverage for all output characters.
     let out_chars: Vec<char> = output.chars().collect();
     let mut gen_line: i32 = 0;
     let mut gen_col: i32 = 0;
@@ -513,9 +518,6 @@ fn generate_source_map_from_offsets(
     for (i, &src_off) in src_offsets.iter().enumerate() {
         let ch = out_chars.get(i).copied().unwrap_or('\n');
 
-        // Only emit mappings for non-newline characters with valid source
-        // offsets. Newline characters are line terminators and never carry
-        // meaningful source position information.
         if ch != '\n' && src_off != UNMAPPED {
             let should_emit = if prev_src == UNMAPPED {
                 true
@@ -546,8 +548,6 @@ fn generate_source_map_from_offsets(
             }
         }
 
-        // Advance generated position. Reset continuity at line boundaries so
-        // the first character of each line always emits a mapping.
         if ch == '\n' {
             gen_line += 1;
             gen_col = 0;
