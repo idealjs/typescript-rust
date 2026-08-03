@@ -15,9 +15,10 @@ cargo test
 TSGO_ORACLE=/Users/cqh/workspace/typescript-go/built/local/tsgo cargo test --test parity
 ```
 
-## 当前进度（2026-08-03）
+## 当前进度（2026-08-05）
 
 **1,290 lib 通过**（+ 920 checker_parity + 2 emit），**0 failed，0 ignored**。
+**零 `todo!()` 宏调用，零 `unimplemented!()`。**
 
 源码规模：**157,237 行**（checker 目录 33,797 行，ls 目录 12,752 行）。
 
@@ -278,10 +279,13 @@ scanner/parser (95-100%) ✅
   桥接到 `ls/` 的 `LanguageService` providers
 - **依赖**：6.x 全部
 
-#### 7.2 project/session.rs — 会话管理补全 ⬜
+#### 7.2 project/session.rs — 会话管理补全 ✅
 
-- **现状**：骨架
-- **依赖**：5.1, 6.x
+- **现状**：完整实现，零 `todo!()`
+- **完成**：new/fs/snapshot/did_open/close/change/save_file、
+  did_change_watched_files、flush_changes、update_snapshot、
+  get_language_service、schedule_snapshot_update/diagnostics_refresh、
+  config/configure、close、telemetry
 
 ### ── 已完成的 LSP 功能 ──
 
@@ -344,7 +348,7 @@ Layer 1–6 全部交付，LSP 能力声明与 LanguageService 桥接完成：
 ## P0-P9 状态
 
 P0 基线 ✅ | P1 CLI/tsconfig ✅ | P2 Scanner/Parser ✅ | P3 Binder/Checker ✅ |
-P4 Emit ✅ | P5 Module Resolution ✅ | P6 Build/Watch ✅ | P7 LSP ✅ | P8 npm/API ✅ | P9 工具链 ✅
+P4 Emit ✅ (JS/d.ts 字节对齐) | P5 Module Resolution ✅ | P6 Build/Watch ✅ | P7 LSP ✅ (全部 7 层完成) | P8 npm/API ✅ | P9 工具链 ✅
 
 ## P10：Go 测试用例 1:1 迁移
 
