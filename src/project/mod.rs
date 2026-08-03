@@ -1,6 +1,7 @@
 //! Project management for LSP (1:1 port of Go's `internal/project/`).
 
 pub mod api;
+pub mod ata;
 pub mod auto_import;
 pub mod background;
 pub mod checker_pool;

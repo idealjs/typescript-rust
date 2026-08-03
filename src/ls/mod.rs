@@ -6,6 +6,8 @@ pub mod change;
 pub mod lsconv;
 pub mod lsutil;
 
+pub mod autoimport;
+
 // Core infrastructure
 pub mod api;
 pub mod constants;
