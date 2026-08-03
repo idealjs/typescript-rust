@@ -89,6 +89,51 @@ pub fn get_each_file_name_of_module(
     }]
 }
 
+// ============================================================================
+// Module-specifier preference enums (ported from Go's modulespecifiers/types.go)
+// ============================================================================
+
+/// The style of module specifiers to use for auto-imports.
+///
+/// Mirrors `modulespecifiers.ImportModuleSpecifierPreference` in Go.
+pub type ImportModuleSpecifierPreference = String;
+
+pub const IMPORT_MODULE_SPECIFIER_PREFERENCE_SHORTEST: &str = "shortest";
+pub const IMPORT_MODULE_SPECIFIER_PREFERENCE_PROJECT_RELATIVE: &str = "project-relative";
+pub const IMPORT_MODULE_SPECIFIER_PREFERENCE_RELATIVE: &str = "relative";
+pub const IMPORT_MODULE_SPECIFIER_PREFERENCE_NON_RELATIVE: &str = "non-relative";
+
+/// The file-extension ending to use for module specifiers.
+///
+/// Mirrors `modulespecifiers.ImportModuleSpecifierEndingPreference` in Go.
+pub type ImportModuleSpecifierEndingPreference = String;
+
+pub const IMPORT_MODULE_SPECIFIER_ENDING_PREFERENCE_AUTO: &str = "auto";
+pub const IMPORT_MODULE_SPECIFIER_ENDING_PREFERENCE_MINIMAL: &str = "minimal";
+pub const IMPORT_MODULE_SPECIFIER_ENDING_PREFERENCE_INDEX: &str = "index";
+pub const IMPORT_MODULE_SPECIFIER_ENDING_PREFERENCE_JS: &str = "js";
+
+/// The subset of [`crate::ls::lsutil::user_preferences::UserPreferences`] used by
+/// module-specifier generation.
+///
+/// Mirrors `modulespecifiers.UserPreferences` in Go.
+#[derive(Debug, Clone, Default)]
+pub struct UserPreferences {
+    pub import_module_specifier_preference: ImportModuleSpecifierPreference,
+    pub import_module_specifier_ending: ImportModuleSpecifierEndingPreference,
+    pub auto_import_specifier_exclude_regexes: Vec<String>,
+}
+
+/// Returns whether `module_specifier` is excluded by any of the given regexes.
+///
+/// Mirrors `modulespecifiers.IsExcludedByRegex` in Go. Regex matching is
+/// stubbed until the full regex-based exclude logic is ported.
+#[allow(unused_variables)]
+pub fn is_excluded_by_regex(module_specifier: &str, exclude_regexes: &[String]) -> bool {
+    // TODO: Port full regex-based exclusion (Go uses regexp.MatchString).
+    false
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

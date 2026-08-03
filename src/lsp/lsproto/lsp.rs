@@ -210,6 +210,25 @@ pub struct Location {
     pub range: Range,
 }
 
+/// A textual edit applicable to a text document.
+///
+/// Mirrors `lsproto.TextEdit` in Go.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TextEdit {
+    pub new_text: String,
+    pub range: Range,
+}
+
+/// Value-object describing what options formatting should use.
+///
+/// Mirrors `lsproto.FormattingOptions` in Go.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FormattingOptions {
+    pub tab_size: u32,
+    pub insert_spaces: bool,
+    pub trim_trailing_whitespace: Option<bool>,
+}
+
 /// Markup kind enum.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
