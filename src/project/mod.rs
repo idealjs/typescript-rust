@@ -1,5 +1,26 @@
 //! Project management for LSP (1:1 port of Go's `internal/project/`).
 
+pub mod api;
+pub mod auto_import;
 pub mod background;
+pub mod checker_pool;
+pub mod client;
+pub mod compiler_host;
+pub mod config_file_registry;
+pub mod config_file_registry_builder;
 pub mod dirty;
+pub mod extended_config_cache;
+pub mod file_change;
 pub mod logging;
+pub mod overlay_fs;
+pub mod owner_cache;
+pub mod parse_cache;
+pub mod program_counter;
+pub mod project;
+pub mod project_collection;
+pub mod project_collection_builder;
+pub mod refcount_cache;
+pub mod session;
+pub mod snapshot;
+pub mod snapshot_fs;
+pub mod watch;

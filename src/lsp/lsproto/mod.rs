@@ -7,3 +7,6 @@ pub mod baseproto;
 pub mod jsonrpc;
 pub mod lsp;
 pub mod util;
+
+// Re-export all public types from lsp.rs so callers can use `lsproto::TypeName`.
+pub use lsp::*;

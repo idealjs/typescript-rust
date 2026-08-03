@@ -8,7 +8,7 @@ pub const DIRECTORY_SEPARATOR: char = '/';
 const URL_SCHEME_SEPARATOR: &str = "://";
 
 /// A canonicalized path used as a key in maps.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Default)]
 pub struct Path(pub String);
 
 impl Path {
