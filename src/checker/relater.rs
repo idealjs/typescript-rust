@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 //! Type relation checking: determining whether one type is assignable to,
 //! a subtype of, or identical to another.
 //!
@@ -105,6 +106,16 @@ pub const RELATION_COMPARISON_RESULT_OVERFLOW: RelationComparisonResult =
         RelationComparisonResult::ComplexityOverflow.bits()
             | RelationComparisonResult::StackDepthOverflow.bits(),
     );
+
+bitflags::bitflags! {
+    /// Flags controlling minimum argument count computation.
+    #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+    pub struct MinArgumentCountFlags: u32 {
+        const None                    = 0;
+        const StrongArityForUntypedJS = 1 << 0;
+        const VoidIsNonOptional       = 1 << 1;
+    }
+}
 
 /// Maximum recursion depth for `is_type_related_to` before the relater
 /// gives up and optimistically assumes the types are related. Matches the
@@ -3411,6 +3422,840 @@ fn type_contains_type_parameter(t: &Arc<Type>) -> bool {
         }
         TypeData::TypeParameter(_) => true,
         _ => false,
+    }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Ternary-returning comparison wrappers
+// ────────────────────────────────────────────────────────────────────────────
+
+impl Checker {
+    pub fn compare_types_identical(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> Ternary {
+        if self.is_type_identical_to(source, target) {
+            Ternary::True
+        } else {
+            Ternary::False
+        }
+    }
+
+    pub fn compare_types_assignable_simple(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> Ternary {
+        if self.is_type_assignable_to(source, target) {
+            Ternary::True
+        } else {
+            Ternary::False
+        }
+    }
+
+    pub fn compare_types_assignable_worker(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        _report_errors: bool,
+    ) -> Ternary {
+        if self.is_type_assignable_to(source, target) {
+            Ternary::True
+        } else {
+            Ternary::False
+        }
+    }
+
+    pub fn compare_types_subtype_of(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> Ternary {
+        if self.is_type_subtype_of(source, target) {
+            Ternary::True
+        } else {
+            Ternary::False
+        }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Error-reporting relation checks
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn check_type_assignable_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        _error_node: Option<&Arc<crate::ast::Node>>,
+        _head_message: Option<&crate::diagnostics::Message>,
+    ) -> bool {
+        // TODO: full error reporting with diagnostics
+        self.is_type_assignable_to(source, target)
+    }
+
+    pub fn check_type_assignable_to_ex(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        _error_node: Option<&Arc<crate::ast::Node>>,
+        _head_message: Option<&crate::diagnostics::Message>,
+        _diagnostic_output: Option<&mut Vec<crate::ast::Diagnostic>>,
+    ) -> bool {
+        // TODO: full error reporting with diagnostics
+        self.is_type_assignable_to(source, target)
+    }
+
+    pub fn check_type_comparable_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        _error_node: Option<&Arc<crate::ast::Node>>,
+        _head_message: Option<&crate::diagnostics::Message>,
+    ) -> bool {
+        // TODO: full error reporting with diagnostics
+        self.is_type_comparable_to(source, target)
+    }
+
+    pub fn check_type_related_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+        _error_node: Option<&Arc<crate::ast::Node>>,
+    ) -> bool {
+        // TODO: full error reporting with diagnostics
+        self.is_type_related_to(source, target, relation)
+    }
+
+    pub fn check_type_assignable_to_and_optionally_elaborate(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        _error_node: Option<&Arc<crate::ast::Node>>,
+        _expr: Option<&Arc<crate::ast::Node>>,
+        _head_message: Option<&crate::diagnostics::Message>,
+        _diagnostic_output: Option<&mut Vec<crate::ast::Diagnostic>>,
+    ) -> bool {
+        // TODO: elaborate error reporting
+        self.is_type_assignable_to(source, target)
+    }
+
+    pub fn check_type_related_to_and_optionally_elaborate(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+        _error_node: Option<&Arc<crate::ast::Node>>,
+        _expr: Option<&Arc<crate::ast::Node>>,
+        _head_message: Option<&crate::diagnostics::Message>,
+        _diagnostic_output: Option<&mut Vec<crate::ast::Diagnostic>>,
+    ) -> bool {
+        // TODO: elaborate error reporting
+        self.is_type_related_to(source, target, relation)
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Weak type and property checks
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn is_weak_type(&mut self, t: &Arc<Type>) -> bool {
+        if t.flags.contains(TypeFlags::Object) {
+            // TODO: needs resolve_structured_type_members
+            false
+        } else if t.flags.contains(TypeFlags::Substitution) {
+            if let TypeData::Substitution(s) = &t.data {
+                s.base_type
+                    .as_ref()
+                    .map(|bt| self.is_weak_type(bt))
+                    .unwrap_or(false)
+            } else {
+                false
+            }
+        } else if t.flags.contains(TypeFlags::Intersection) {
+            // Every constituent must be weak
+            if let Some(types) = t.types() {
+                types.iter().all(|ty| self.is_weak_type(ty))
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    }
+
+    pub fn has_common_properties(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        _is_comparing_jsx_attributes: bool,
+    ) -> bool {
+        // TODO: needs get_properties_of_type + is_known_property
+        let _ = (source, target);
+        false
+    }
+
+    pub fn is_known_property(
+        &mut self,
+        _target_type: &Arc<Type>,
+        _name: &str,
+        _is_comparing_jsx_attributes: bool,
+    ) -> bool {
+        // TODO: needs get_property_of_object_type, get_applicable_index_info
+        false
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Recursion and deeply nested types
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn is_deeply_nested_type(
+        &mut self,
+        t: &Arc<Type>,
+        stack: &[Arc<Type>],
+        max_depth: usize,
+    ) -> bool {
+        if stack.len() >= max_depth {
+            // TODO: handle instantiated mapped types + intersection recursion
+            // For now, count matching recursion identities
+            let count = stack.iter().filter(|s| Arc::ptr_eq(s, t)).count();
+            count >= max_depth
+        } else {
+            false
+        }
+    }
+
+    pub fn get_mapped_target_with_symbol(&self, t: &Arc<Type>) -> Arc<Type> {
+        // TODO: unwrap nested homomorphic mapped types
+        Arc::clone(t)
+    }
+
+    pub fn has_matching_recursion_identity(&self, t: &Arc<Type>, identity: &Arc<Type>) -> bool {
+        Arc::ptr_eq(t, identity)
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Type matching and discrimination
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn get_best_matching_type(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        _is_related_to: &dyn Fn(&Arc<Type>, &Arc<Type>) -> Ternary,
+    ) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        let _ = (source, target);
+        None
+    }
+
+    pub fn find_matching_type_reference_or_type_alias_reference(
+        &mut self,
+        source: &Arc<Type>,
+        union_target: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        let _ = (source, union_target);
+        None
+    }
+
+    pub fn find_best_type_for_invokable(
+        &mut self,
+        source: &Arc<Type>,
+        union_target: &Arc<Type>,
+        _kind: SignatureKind,
+    ) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        let _ = (source, union_target);
+        None
+    }
+
+    pub fn find_most_overlappy_type(
+        &mut self,
+        source: &Arc<Type>,
+        union_target: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        let _ = (source, union_target);
+        None
+    }
+
+    pub fn find_best_type_for_object_literal(
+        &mut self,
+        source: &Arc<Type>,
+        union_target: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        let _ = (source, union_target);
+        None
+    }
+
+    pub fn should_report_unmatched_property_error(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> bool {
+        // TODO: full implementation
+        let _ = (source, target);
+        true
+    }
+
+    pub fn get_unmatched_property(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        _require_optional_properties: bool,
+        _match_discriminant_properties: bool,
+    ) -> Option<Arc<Symbol>> {
+        // TODO: full implementation
+        let _ = (source, target);
+        None
+    }
+
+    pub fn get_unmatched_properties(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        require_optional_properties: bool,
+        match_discriminant_properties: bool,
+    ) -> Vec<Arc<Symbol>> {
+        // TODO: full implementation via get_unmatched_properties_worker
+        let _ = (
+            source,
+            target,
+            require_optional_properties,
+            match_discriminant_properties,
+        );
+        Vec::new()
+    }
+
+    pub fn find_matching_discriminant_type(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        _is_related_to: &dyn Fn(&Arc<Type>, &Arc<Type>) -> Ternary,
+    ) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        let _ = (source, target);
+        None
+    }
+
+    pub fn find_discriminant_properties(
+        &mut self,
+        _source_properties: &[Arc<Symbol>],
+        _target: &Arc<Type>,
+    ) -> Vec<Arc<Symbol>> {
+        // TODO: full implementation
+        Vec::new()
+    }
+
+    pub fn is_discriminant_property(&mut self, _t: &Arc<Type>, _name: &str) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn get_matching_union_constituent_for_type(
+        &mut self,
+        _union_type: &Arc<Type>,
+        _t: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_key_property_name(&mut self, t: &Arc<Type>) -> Option<String> {
+        // TODO: full implementation
+        let _ = t;
+        None
+    }
+
+    pub fn get_constituent_type_for_key_type(
+        &mut self,
+        _t: &Arc<Type>,
+        _key_type: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn filter_primitives_if_contains_non_primitive(
+        &mut self,
+        union_type: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        let _ = union_type;
+        None
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Error display helpers
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn get_type_names_for_error_display(
+        &mut self,
+        left: &Arc<Type>,
+        right: &Arc<Type>,
+    ) -> (String, String) {
+        // TODO: full implementation with type display
+        (
+            self.get_type_name_for_error_display(left),
+            self.get_type_name_for_error_display(right),
+        )
+    }
+
+    pub fn get_type_name_for_error_display(&mut self, t: &Arc<Type>) -> String {
+        // TODO: full implementation with contextual type display
+        crate::checker::utilities::type_to_string(t)
+    }
+
+    pub fn symbol_value_declaration_is_context_sensitive(&mut self, _symbol: &Arc<Symbol>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn type_could_have_top_level_singleton_types(&mut self, t: &Arc<Type>) -> bool {
+        t.flags.intersects(
+            TypeFlags::StringLiteral
+                | TypeFlags::NumberLiteral
+                | TypeFlags::BigIntLiteral
+                | TypeFlags::BooleanLiteral
+                | TypeFlags::UniqueESSymbol
+                | TypeFlags::EnumLiteral
+                | TypeFlags::Union,
+        )
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Variance computation
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn get_alias_variances(&mut self, _symbol: &Arc<Symbol>) -> Vec<VarianceFlags> {
+        // TODO: full implementation
+        Vec::new()
+    }
+
+    pub fn create_marker_type(
+        &mut self,
+        _symbol: &Arc<Symbol>,
+        _source: &Arc<Type>,
+        _target: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_type_parameter_modifiers(&mut self, _tp: &Arc<Type>) -> crate::ast::ModifierFlags {
+        // TODO: full implementation
+        crate::ast::ModifierFlags::empty()
+    }
+
+    pub fn has_covariant_void_argument(
+        &mut self,
+        _type_arguments: &[Arc<Type>],
+        _variances: &[VarianceFlags],
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn is_signature_assignable_to(
+        &mut self,
+        _source: &Arc<Signature>,
+        _target: &Arc<Signature>,
+        _ignore_return_types: bool,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Signature helpers
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn get_min_argument_count_ex(
+        &mut self,
+        sig: &Arc<Signature>,
+        _flags: MinArgumentCountFlags,
+    ) -> usize {
+        // TODO: full implementation with flags
+        sig.min_argument_count.max(0) as usize
+    }
+
+    pub fn is_instantiated_generic_parameter(
+        &mut self,
+        _signature: &Arc<Signature>,
+        _pos: usize,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn get_parameter_name_at_position(
+        &mut self,
+        _signature: &Arc<Signature>,
+        _pos: usize,
+    ) -> String {
+        // TODO: full implementation
+        String::new()
+    }
+
+    pub fn get_tuple_element_label(
+        &mut self,
+        _element_info: &TupleElementInfo,
+        _rest_symbol: Option<&Arc<Symbol>>,
+        _index: usize,
+    ) -> String {
+        // TODO: full implementation
+        String::new()
+    }
+
+    pub fn get_tuple_element_label_from_binding_element(
+        &mut self,
+        _node: &Arc<crate::ast::Node>,
+        _index: usize,
+        _element_flags: ElementFlags,
+    ) -> String {
+        // TODO: full implementation
+        String::new()
+    }
+
+    pub fn get_nameable_declaration_at_position(
+        &mut self,
+        _signature: &Arc<Signature>,
+        _pos: usize,
+    ) -> Option<Arc<crate::ast::Node>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn is_valid_declaration_for_tuple_label(&mut self, _d: &Arc<crate::ast::Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn slice_tuple_type(
+        &mut self,
+        _t: &Arc<Type>,
+        _index: usize,
+        _end_skip_count: usize,
+    ) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_known_keys_of_tuple_type(&mut self, _t: &Arc<Type>) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_rest_array_type_of_tuple_type(&mut self, _t: &Arc<Type>) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Type predicate helpers
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn get_union_or_intersection_type_predicate(
+        &mut self,
+        _signatures: &[Arc<Signature>],
+        _is_union: bool,
+    ) -> Option<Box<TypePredicate>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn type_predicate_kinds_match(&mut self, a: &TypePredicate, b: &TypePredicate) -> bool {
+        a.kind == b.kind
+    }
+
+    pub fn create_type_predicate_from_type_predicate_node(
+        &mut self,
+        _node: &Arc<crate::ast::Node>,
+        _signature: &Arc<Signature>,
+    ) -> Option<Box<TypePredicate>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn instantiate_type_predicate(
+        &mut self,
+        _predicate: &TypePredicate,
+        _mapper: &Arc<TypeMapper>,
+    ) -> Option<Box<TypePredicate>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn new_type_predicate(
+        &mut self,
+        kind: TypePredicateKind,
+        parameter_name: String,
+        parameter_index: i32,
+        t: Arc<Type>,
+    ) -> Box<TypePredicate> {
+        Box::new(TypePredicate {
+            kind,
+            parameter_name,
+            parameter_index,
+            t: Some(t),
+        })
+    }
+
+    pub fn is_resolving_return_type_of_signature(&mut self, _signature: &Arc<Signature>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn find_matching_signatures(
+        &mut self,
+        _signature_lists: &[Vec<Arc<Signature>>],
+        _signature: &Arc<Signature>,
+        _list_index: usize,
+    ) -> Vec<Arc<Signature>> {
+        // TODO: full implementation
+        Vec::new()
+    }
+
+    pub fn is_matching_signature(
+        &mut self,
+        source: &Arc<Signature>,
+        target: &Arc<Signature>,
+        partial_match: bool,
+    ) -> bool {
+        self.compare_signatures_identical(source, target, partial_match, false, false)
+            != Ternary::False
+    }
+
+    pub fn compare_type_predicates_identical(
+        &mut self,
+        source: &TypePredicate,
+        target: &TypePredicate,
+        _compare_types: &dyn Fn(&Arc<Type>, &Arc<Type>) -> Ternary,
+    ) -> Ternary {
+        if source.kind != target.kind {
+            return Ternary::False;
+        }
+        if source.parameter_name != target.parameter_name {
+            return Ternary::False;
+        }
+        Ternary::True
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Effective constraint and template literal helpers
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn get_effective_constraint_of_intersection(
+        &mut self,
+        _types: &[Arc<Type>],
+        _target_is_union: bool,
+    ) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn template_literal_types_definitely_unrelated(
+        &mut self,
+        _source: &TemplateLiteralTypeData,
+        _target: &TemplateLiteralTypeData,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn is_type_matched_by_template_literal_type(
+        &mut self,
+        _source: &Arc<Type>,
+        _target: &TemplateLiteralTypeData,
+        _compare_types: TypeComparer,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn infer_types_from_template_literal_type(
+        &mut self,
+        _source: &Arc<Type>,
+        _target: &TemplateLiteralTypeData,
+    ) -> Vec<Arc<Type>> {
+        // TODO: full implementation
+        Vec::new()
+    }
+
+    pub fn get_string_like_type_for_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        if t.flags.intersects(TYPE_FLAGS_STRING_LIKE) {
+            Some(Arc::clone(t))
+        } else {
+            None
+        }
+    }
+
+    pub fn is_valid_type_for_template_literal_placeholder(
+        &mut self,
+        _source: &Arc<Type>,
+        _target: &Arc<Type>,
+        _compare_types: TypeComparer,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn is_member_of_string_mapping(
+        &mut self,
+        _source: &Arc<Type>,
+        _target: &Arc<Type>,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn apply_target_string_mapping_to_source(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> (Arc<Type>, Arc<Type>) {
+        // TODO: full implementation
+        (Arc::clone(source), Arc::clone(target))
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Type property helpers
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn get_type_of_property_in_types(
+        &mut self,
+        _types: &[Arc<Type>],
+        _name: &str,
+    ) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_type_of_property_in_type(
+        &mut self,
+        _t: &Arc<Type>,
+        _name: &str,
+    ) -> Option<Arc<Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn is_type_subset_of_union(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+        // TODO: full implementation
+        self.is_type_subset_of(source, target)
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Relater pool management
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn is_type_derived_from(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+        // TODO: full implementation
+        self.is_type_assignable_to(source, target)
+    }
+
+    pub fn is_distribution_dependent(&mut self, _root: &ConditionalRoot) -> bool {
+        // TODO: full implementation
+        false
+    }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Free functions
+// ────────────────────────────────────────────────────────────────────────────
+
+pub fn is_hyphenated_jsx_name(name: &str) -> bool {
+    name.contains('-')
+}
+
+pub fn is_excess_property_check_target(t: &Type) -> bool {
+    if t.flags.contains(TypeFlags::Object)
+        && !t
+            .object_flags
+            .contains(ObjectFlags::ObjectLiteralPatternWithComputedProperties)
+    {
+        return true;
+    }
+    if t.flags.contains(TypeFlags::NonPrimitive) {
+        return true;
+    }
+    if t.flags.contains(TypeFlags::Substitution) {
+        if let TypeData::Substitution(s) = &t.data {
+            return s
+                .base_type
+                .as_ref()
+                .map(|t| is_excess_property_check_target(t))
+                .unwrap_or(false);
+        }
+    }
+    if t.flags.contains(TypeFlags::Union) {
+        if let Some(types) = t.types() {
+            return types.iter().any(|t| is_excess_property_check_target(t));
+        }
+    }
+    if t.flags.contains(TypeFlags::Intersection) {
+        if let Some(types) = t.types() {
+            return types.iter().all(|t| is_excess_property_check_target(t));
+        }
+    }
+    false
+}
+
+pub fn is_object_or_instantiable_non_primitive(t: &Type) -> bool {
+    t.flags
+        .intersects(TypeFlags::Object | TYPE_FLAGS_INSTANTIABLE_NON_PRIMITIVE)
+}
+
+pub fn is_non_primitive_type(t: &Type) -> bool {
+    t.flags.contains(TypeFlags::NonPrimitive)
+}
+
+pub fn visibility_to_string(flags: crate::ast::ModifierFlags) -> String {
+    if flags == crate::ast::ModifierFlags::Private {
+        "private".to_string()
+    } else if flags == crate::ast::ModifierFlags::Protected {
+        "protected".to_string()
+    } else {
+        "public".to_string()
+    }
+}
+
+pub fn exclude_properties(
+    properties: &[Arc<Symbol>],
+    excluded_properties: &std::collections::HashSet<String>,
+) -> Vec<Arc<Symbol>> {
+    properties
+        .iter()
+        .filter(|p| !excluded_properties.contains(&p.name))
+        .cloned()
+        .collect()
+}
+
+pub fn should_check_as_excess_property(_prop: &Symbol, _container: &Symbol) -> bool {
+    // TODO: full implementation
+    false
+}
+
+pub fn is_ignored_jsx_property(_source: &Type, _source_prop: &Symbol) -> bool {
+    // TODO: full implementation
+    false
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// TypeDiscriminator
+// ────────────────────────────────────────────────────────────────────────────
+
+/// A discriminator for type matching in union/intersection narrowing.
+pub struct TypeDiscriminator {
+    pub names: Vec<String>,
+}
+
+impl TypeDiscriminator {
+    pub fn len(&self) -> usize {
+        self.names.len()
+    }
+
+    pub fn name(&self, index: usize) -> &str {
+        &self.names[index]
+    }
+
+    pub fn matches(&self, _index: usize, _t: &Arc<Type>) -> bool {
+        // TODO: full implementation
+        false
     }
 }
 

@@ -878,16 +878,6 @@ impl Checker {
         Vec::new()
     }
 
-    /// Get the contextual type for a JSX attribute.
-    /// Go: `(c *Checker) GetContextualTypeForJsxAttribute`.
-    pub fn get_contextual_type_for_jsx_attribute(
-        &mut self,
-        attribute: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
-        // TODO: getContextualTypeForJsxAttribute (not yet ported).
-        None
-    }
-
     // ── Constant values ────────────────────────────────────────────────────
 
     /// Get the constant value of an enum member or computed property.

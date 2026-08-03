@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 //! JSX type checking.
 //!
 //! Ported from `internal/checker/jsx.go` in the Go implementation. The Go
@@ -337,4 +338,417 @@ impl Checker {
             self.check_jsx_component(opening);
         }
     }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Additional JSX checking functions (stubs)
+    // ─────────────────────────────────────────────────────────────────────
+
+    pub fn check_jsx_element_deferred(&mut self, _node: &Arc<Node>) {
+        // TODO: full implementation
+    }
+
+    pub fn check_jsx_expression(
+        &mut self,
+        _node: &Arc<Node>,
+        _check_mode: u32,
+    ) -> Arc<super::types::Type> {
+        // TODO: full implementation
+        self.any_type()
+    }
+
+    pub fn check_jsx_self_closing_element(
+        &mut self,
+        _node: &Arc<Node>,
+        _check_mode: u32,
+    ) -> Arc<super::types::Type> {
+        // TODO: full implementation
+        self.any_type()
+    }
+
+    pub fn check_jsx_self_closing_element_deferred(&mut self, _node: &Arc<Node>) {
+        // TODO: full implementation
+    }
+
+    pub fn check_jsx_fragment(&mut self, _node: &Arc<Node>) -> Arc<super::types::Type> {
+        // TODO: full implementation
+        self.any_type()
+    }
+
+    pub fn check_jsx_attributes(
+        &mut self,
+        _node: &Arc<Node>,
+        _check_mode: u32,
+    ) -> Arc<super::types::Type> {
+        // TODO: full implementation
+        self.any_type()
+    }
+
+    pub fn check_jsx_return_assignable_to_appropriate_bound(
+        &mut self,
+        _ref_kind: JsxReferenceKind,
+        _elem_instance_type: &Arc<super::types::Type>,
+        _opening_like_element: &Arc<Node>,
+    ) {
+        // TODO: full implementation
+    }
+
+    pub fn infer_jsx_type_arguments(
+        &mut self,
+        _node: &Arc<Node>,
+        _signature: &Arc<super::types::Signature>,
+        _check_mode: u32,
+        _context: &super::inference::InferenceContext,
+    ) -> Vec<Arc<super::types::Type>> {
+        // TODO: full implementation
+        Vec::new()
+    }
+
+    pub fn get_contextual_type_for_jsx_expression(
+        &mut self,
+        _node: &Arc<Node>,
+        _context_flags: super::types::ContextFlags,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_contextual_type_for_jsx_attribute(
+        &mut self,
+        _attribute: &Arc<Node>,
+        _context_flags: super::types::ContextFlags,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_contextual_jsx_element_attributes_type(
+        &mut self,
+        _node: &Arc<Node>,
+        _context_flags: super::types::ContextFlags,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_contextual_type_for_child_jsx_expression(
+        &mut self,
+        _node: &Arc<Node>,
+        _child: &Arc<Node>,
+        _context_flags: super::types::ContextFlags,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn discriminate_contextual_type_by_jsx_attributes(
+        &mut self,
+        _node: &Arc<Node>,
+        contextual_type: &Arc<super::types::Type>,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        let _ = contextual_type;
+        None
+    }
+
+    pub fn elaborate_jsx_components(
+        &mut self,
+        _node: &Arc<Node>,
+        _source: &Arc<super::types::Type>,
+        _target: &Arc<super::types::Type>,
+        _relation: super::relater::RelationKind,
+        _diagnostic_output: Option<&mut Vec<crate::ast::Diagnostic>>,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn get_suggested_symbol_for_nonexistent_jsx_attribute(
+        &mut self,
+        _name: &str,
+        _containing_type: &Arc<super::types::Type>,
+    ) -> Option<Arc<crate::ast::Symbol>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_fragment_type(&mut self, _node: &Arc<Node>) -> Arc<super::types::Type> {
+        // TODO: full implementation
+        self.any_type()
+    }
+
+    pub fn resolve_jsx_opening_like_element(
+        &mut self,
+        _node: &Arc<Node>,
+        _candidates_out_array: Option<&mut Vec<Arc<super::types::Signature>>>,
+        _check_mode: u32,
+    ) -> Option<Arc<super::types::Signature>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn check_applicable_signature_for_jsx_call_like_element(
+        &mut self,
+        _node: &Arc<Node>,
+        _signature: &Arc<super::types::Signature>,
+        _relation: super::relater::RelationKind,
+        _check_mode: u32,
+        _report_errors: bool,
+        _diagnostic_output: Option<&mut Vec<crate::ast::Diagnostic>>,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn create_jsx_attributes_type_from_attributes_property(
+        &mut self,
+        _opening_like_element: &Arc<Node>,
+        _check_mode: u32,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn check_jsx_children(
+        &mut self,
+        _node: &Arc<Node>,
+        _check_mode: u32,
+    ) -> Vec<Arc<super::types::Type>> {
+        // TODO: full implementation
+        Vec::new()
+    }
+
+    pub fn get_uninstantiated_jsx_signatures_of_type(
+        &mut self,
+        _element_type: &Arc<super::types::Type>,
+        _caller: &Arc<Node>,
+    ) -> Vec<Arc<super::types::Signature>> {
+        // TODO: full implementation
+        Vec::new()
+    }
+
+    pub fn get_effective_first_argument_for_jsx_signature(
+        &mut self,
+        _signature: &Arc<super::types::Signature>,
+        _node: &Arc<Node>,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_props_type_from_call_signature(
+        &mut self,
+        _sig: &Arc<super::types::Signature>,
+        _context: &Arc<Node>,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_props_type_from_class_type(
+        &mut self,
+        _sig: &Arc<super::types::Signature>,
+        _context: &Arc<Node>,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_props_type_for_signature_from_member(
+        &mut self,
+        _sig: &Arc<super::types::Signature>,
+        _forced_lookup_location: &str,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_managed_attributes_from_located_attributes(
+        &mut self,
+        _context: &Arc<Node>,
+        _ns: &Arc<crate::ast::Symbol>,
+        _attributes_type: &Arc<super::types::Type>,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn instantiate_alias_or_interface_with_defaults(
+        &mut self,
+        _managed_sym: &Arc<crate::ast::Symbol>,
+        _type_arguments: &[Arc<super::types::Type>],
+        _in_java_script: bool,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_library_managed_attributes(
+        &self,
+        _jsx_namespace: &Arc<crate::ast::Symbol>,
+    ) -> Option<Arc<crate::ast::Symbol>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_element_type_symbol(
+        &self,
+        _jsx_namespace: &Arc<crate::ast::Symbol>,
+    ) -> Option<Arc<crate::ast::Symbol>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_element_properties_name(
+        &self,
+        _jsx_namespace: &Arc<crate::ast::Symbol>,
+    ) -> Option<String> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_element_children_property_name(
+        &self,
+        _jsx_namespace: &Arc<crate::ast::Symbol>,
+    ) -> Option<String> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_name_from_jsx_element_attributes_container(
+        &self,
+        _name_of_attrib_prop_container: &str,
+        _jsx_namespace: &Arc<crate::ast::Symbol>,
+    ) -> Option<String> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_static_type_of_referenced_jsx_constructor(
+        &mut self,
+        _context: &Arc<Node>,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_intrinsic_attributes_type_from_string_literal_type(
+        &mut self,
+        _t: &Arc<super::types::Type>,
+        _location: &Arc<Node>,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_reference_kind(&self, _node: &Arc<Node>) -> JsxReferenceKind {
+        // TODO: full implementation
+        JsxReferenceKind::Function
+    }
+
+    pub fn create_signature_for_jsx_intrinsic(
+        &mut self,
+        _node: &Arc<Node>,
+        _result: &Arc<super::types::Type>,
+    ) -> Option<Arc<super::types::Signature>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_intrinsic_attributes_type_from_jsx_opening_like_element(
+        &mut self,
+        _node: &Arc<Node>,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_intrinsic_tag_symbol(&self, _node: &Arc<Node>) -> Option<Arc<crate::ast::Symbol>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_stateless_element_type_at(
+        &mut self,
+        _location: &Arc<Node>,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_element_class_type_at(
+        &mut self,
+        _location: &Arc<Node>,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_element_type_at(
+        &mut self,
+        _location: &Arc<Node>,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_element_type_type_at(
+        &mut self,
+        _location: &Arc<Node>,
+    ) -> Option<Arc<super::types::Type>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_namespace_str(&self, _location: &Arc<Node>) -> String {
+        // TODO: full implementation with location-based resolution
+        "jsx".to_string()
+    }
+
+    pub fn get_local_jsx_namespace(&self, _file: &Arc<crate::ast::SourceFile>) -> String {
+        // TODO: full implementation
+        "jsx".to_string()
+    }
+
+    pub fn get_jsx_factory_entity(&self, _location: &Arc<Node>) -> Option<Arc<Node>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_fragment_factory_entity(&self, _location: &Arc<Node>) -> Option<Arc<Node>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_namespace_container_for_implicit_import(
+        &self,
+        _location: &Arc<Node>,
+    ) -> Option<Arc<crate::ast::Symbol>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn get_jsx_runtime_import_specifier(
+        &self,
+        _file: &Arc<crate::ast::SourceFile>,
+    ) -> (String, Option<Arc<Node>>) {
+        // TODO: full implementation
+        (String::new(), None)
+    }
+}
+
+/// Parse an isolated entity name from a string.
+///
+/// Mirrors Go's `parseIsolatedEntityName`.
+pub fn parse_isolated_entity_name(_name: &str) -> Option<Arc<Node>> {
+    // TODO: full implementation with parser
+    None
+}
+
+/// Mark a node as synthetic.
+///
+/// Mirrors Go's `markAsSynthetic`.
+pub fn mark_as_synthetic(node: &Arc<Node>) -> bool {
+    // TODO: set node flags to synthesized
+    let _ = node;
+    false
 }

@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 //! Grammar checks: syntactic-level diagnostics emitted during semantic
 //! checking.
 //!
@@ -1311,6 +1312,393 @@ impl Checker {
     fn is_jsx_transform_enabled(&self) -> bool {
         self.compiler_options.jsx != crate::core::compiler_options::JsxEmit::None
     }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Additional grammar checks (stubs — full implementations need AST accessors)
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn grammar_error_on_node_skipped_on_no_emit(
+        &mut self,
+        node: &Arc<Node>,
+        message: &Message,
+    ) -> bool {
+        // TODO: skip on noEmit
+        self.grammar_error_on_node(node, message)
+    }
+
+    pub fn check_grammar_regular_expression_literal(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_private_identifier_expression(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_mapped_type(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_decorator(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_export_declaration(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_module_element_context(
+        &mut self,
+        _node: &Arc<Node>,
+        _error_message: &Message,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn report_obvious_modifier_errors(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn find_first_modifier_except(
+        &self,
+        _node: &Arc<Node>,
+        _allowed_modifier: SyntaxKind,
+    ) -> Option<Arc<Node>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn find_first_illegal_modifier(&self, _node: &Arc<Node>) -> Option<Arc<Node>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn report_obvious_decorator_errors(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn find_first_illegal_decorator(&self, _node: &Arc<Node>) -> Option<Arc<Node>> {
+        // TODO: full implementation
+        None
+    }
+
+    pub fn check_grammar_async_modifier(
+        &mut self,
+        _node: &Arc<Node>,
+        _async_modifier: &Arc<Node>,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_for_disallowed_trailing_comma(
+        &mut self,
+        _list: &crate::ast::NodeList,
+        _diag: &Message,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_type_parameter_list(
+        &mut self,
+        _type_parameters: &crate::ast::NodeList,
+        _file: &Arc<crate::ast::SourceFile>,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_for_use_strict_simple_parameter_list(
+        &mut self,
+        _node: &Arc<Node>,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_function_like_declaration(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_class_like_declaration(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_arrow_function(
+        &mut self,
+        _node: &Arc<Node>,
+        _file: &Arc<crate::ast::SourceFile>,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_index_signature_parameters(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_index_signature(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_for_at_least_one_type_argument(
+        &mut self,
+        _node: &Arc<Node>,
+        _type_arguments: &crate::ast::NodeList,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_type_arguments(
+        &mut self,
+        _node: &Arc<Node>,
+        _type_arguments: &crate::ast::NodeList,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_tagged_template_chain(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_heritage_clause(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_expression_with_type_arguments(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_class_declaration_heritage_clauses(
+        &mut self,
+        _node: &Arc<Node>,
+        _file: &Arc<crate::ast::SourceFile>,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_interface_declaration(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_computed_property_name(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_for_generator(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_for_invalid_question_mark(
+        &mut self,
+        _postfix_token: &Arc<Node>,
+        _message: &Message,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_for_invalid_exclamation_token(
+        &mut self,
+        _postfix_token: &Arc<Node>,
+        _message: &Message,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_object_literal_expression(
+        &mut self,
+        _node: &Arc<Node>,
+        _in_destructuring: bool,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_for_in_or_for_of_statement(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_accessor(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn does_accessor_have_correct_parameter_count(&mut self, _accessor: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        true
+    }
+
+    pub fn check_grammar_type_operator_node(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_for_invalid_dynamic_name(
+        &mut self,
+        _node: &Arc<Node>,
+        _message: &Message,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn is_non_bindable_dynamic_name(&self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_method(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_binding_element(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_for_es_module_marker_in_binding_name(
+        &mut self,
+        _name: &Arc<Node>,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_name_in_let_or_const_declarations(&mut self, _name: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_await_or_await_using(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_yield_expression(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_for_disallowed_block_scoped_variable_statement(
+        &mut self,
+        _node: &Arc<Node>,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn container_allows_block_scoped_variable(&self, _parent: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_meta_property(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_constructor_type_parameters(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_constructor_type_annotation(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_property(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_ambient_initializer(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn is_initializer_simple_literal_enum_reference(&mut self, _expr: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_top_level_element_for_required_declare_modifier(
+        &mut self,
+        _node: &Arc<Node>,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_top_level_elements_for_required_declare_modifier(
+        &mut self,
+        _file: &Arc<crate::ast::SourceFile>,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_source_file(&mut self, _node: &Arc<crate::ast::SourceFile>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_statement_in_ambient_context(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_numeric_literal(&mut self, _node: &Arc<Node>) {
+        // TODO: full implementation
+    }
+
+    pub fn check_grammar_big_int_literal(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_import_clause(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_type_only_named_imports_or_exports(
+        &mut self,
+        _named_bindings: &Arc<Node>,
+    ) -> bool {
+        // TODO: full implementation
+        false
+    }
+
+    pub fn check_grammar_import_call_expression(&mut self, _node: &Arc<Node>) -> bool {
+        // TODO: full implementation
+        false
+    }
 }
 
 /// Whether `node` is a comma-sequence expression (`a, b`).
@@ -1324,4 +1712,39 @@ fn is_comma_sequence(node: &Arc<Node>) -> bool {
         NodeData::BinaryExpression(data) => data.operator_token.kind == SyntaxKind::CommaToken,
         _ => false,
     }
+}
+
+/// Get the identifier from an entity name expression.
+///
+/// Mirrors Go's `getIdentifierFromEntityNameExpression`.
+fn get_identifier_from_entity_name_expression(node: &Arc<Node>) -> Option<Arc<Node>> {
+    match node.kind {
+        SyntaxKind::Identifier => Some(Arc::clone(node)),
+        SyntaxKind::PropertyAccessExpression => {
+            // TODO: walk up property access chain
+            None
+        }
+        _ => None,
+    }
+}
+
+/// Whether an initializer is a string or number literal expression.
+///
+/// Mirrors Go's `isInitializerStringOrNumberLiteralExpression`.
+fn is_initializer_string_or_number_literal_expression(expr: &Arc<Node>) -> bool {
+    matches!(
+        expr.kind,
+        SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral
+    )
+}
+
+/// Whether an initializer is a bigint literal expression.
+///
+/// Mirrors Go's `isInitializerBigIntLiteralExpression`.
+fn is_initializer_big_int_literal_expression(expr: &Arc<Node>) -> bool {
+    if expr.kind == SyntaxKind::BigIntLiteral {
+        return true;
+    }
+    // TODO: handle negative bigint via prefix unary expression
+    false
 }

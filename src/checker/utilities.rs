@@ -1,10 +1,21 @@
+#![allow(dead_code)]
 //! Checker utility functions.
 //!
 //! Ported from `internal/checker/utilities.go`. Contains standalone helper
 //! functions used throughout the checker. Functions that require `Checker`
 //! state are methods on `Checker` in `checker.rs`.
 
-use crate::ast::{Symbol, SyntaxKind};
+use std::sync::Arc;
+
+use crate::ast::{
+    self, CheckFlags, ModifierFlags, Node, NodeFlags, Symbol, SymbolFlags, SymbolTable, SyntaxKind,
+    get_combined_modifier_flags, has_syntactic_modifier, is_access_expression,
+    is_array_literal_expression, is_assertion_expression, is_call_expression, is_class_like,
+    is_element_access_expression, is_identifier, is_jsx_namespaced_name, is_non_null_expression,
+    is_object_literal_expression, is_property_access_expression, is_property_declaration,
+    is_qualified_name, is_static, is_type_reference_node, is_variable_declaration,
+    is_variable_declaration_list, is_variable_statement,
+};
 
 use super::types::*;
 
@@ -532,6 +543,801 @@ pub fn get_numeric_literal_name(name: &str) -> String {
     } else {
         name.to_string()
     }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Binary operator precedence helpers
+// ────────────────────────────────────────────────────────────────────────────
+
+pub fn is_exponentiation_operator(kind: SyntaxKind) -> bool {
+    kind == SyntaxKind::AsteriskAsteriskToken
+}
+
+pub fn is_multiplicative_operator(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
+        SyntaxKind::AsteriskToken | SyntaxKind::SlashToken | SyntaxKind::PercentToken
+    )
+}
+
+pub fn is_multiplicative_operator_or_higher(kind: SyntaxKind) -> bool {
+    is_exponentiation_operator(kind) || is_multiplicative_operator(kind)
+}
+
+pub fn is_additive_operator(kind: SyntaxKind) -> bool {
+    matches!(kind, SyntaxKind::PlusToken | SyntaxKind::MinusToken)
+}
+
+pub fn is_additive_operator_or_higher(kind: SyntaxKind) -> bool {
+    is_additive_operator(kind) || is_multiplicative_operator_or_higher(kind)
+}
+
+pub fn is_shift_operator(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
+        SyntaxKind::LessThanLessThanToken
+            | SyntaxKind::GreaterThanGreaterThanToken
+            | SyntaxKind::GreaterThanGreaterThanGreaterThanToken
+    )
+}
+
+pub fn is_shift_operator_or_higher(kind: SyntaxKind) -> bool {
+    is_shift_operator(kind) || is_additive_operator_or_higher(kind)
+}
+
+pub fn is_relational_operator(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
+        SyntaxKind::LessThanToken
+            | SyntaxKind::LessThanEqualsToken
+            | SyntaxKind::GreaterThanToken
+            | SyntaxKind::GreaterThanEqualsToken
+            | SyntaxKind::InstanceOfKeyword
+            | SyntaxKind::InKeyword
+    )
+}
+
+pub fn is_relational_operator_or_higher(kind: SyntaxKind) -> bool {
+    is_relational_operator(kind) || is_shift_operator_or_higher(kind)
+}
+
+pub fn is_equality_operator(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
+        SyntaxKind::EqualsEqualsToken
+            | SyntaxKind::EqualsEqualsEqualsToken
+            | SyntaxKind::ExclamationEqualsToken
+            | SyntaxKind::ExclamationEqualsEqualsToken
+    )
+}
+
+pub fn is_equality_operator_or_higher(kind: SyntaxKind) -> bool {
+    is_equality_operator(kind) || is_relational_operator_or_higher(kind)
+}
+
+pub fn is_bitwise_operator(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
+        SyntaxKind::AmpersandToken | SyntaxKind::BarToken | SyntaxKind::CaretToken
+    )
+}
+
+pub fn is_bitwise_operator_or_higher(kind: SyntaxKind) -> bool {
+    is_bitwise_operator(kind) || is_equality_operator_or_higher(kind)
+}
+
+pub fn is_logical_operator_or_higher(kind: SyntaxKind) -> bool {
+    crate::ast::is_logical_binary_operator(kind) || is_bitwise_operator_or_higher(kind)
+}
+
+pub fn is_assignment_operator_or_higher(kind: SyntaxKind) -> bool {
+    kind == SyntaxKind::QuestionQuestionToken
+        || is_logical_operator_or_higher(kind)
+        || crate::ast::is_assignment_operator(kind)
+}
+
+pub fn is_binary_operator(kind: SyntaxKind) -> bool {
+    is_assignment_operator_or_higher(kind) || kind == SyntaxKind::CommaToken
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Modifier helpers
+// ────────────────────────────────────────────────────────────────────────────
+
+pub fn has_override_modifier(node: &Node) -> bool {
+    crate::ast::has_syntactic_modifier(node, ModifierFlags::Override)
+}
+
+pub fn has_async_modifier(node: &Node) -> bool {
+    crate::ast::has_syntactic_modifier(node, ModifierFlags::Async)
+}
+
+pub fn get_selected_modifier_flags(node: &Node, flags: ModifierFlags) -> ModifierFlags {
+    node.syntactic_modifier_flags() & flags
+}
+
+pub fn has_readonly_modifier(node: &Node) -> bool {
+    crate::ast::has_syntactic_modifier(node, ModifierFlags::Readonly)
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Simple string helpers
+// ────────────────────────────────────────────────────────────────────────────
+
+pub fn is_infinity_or_nan_string(name: &str) -> bool {
+    name == "Infinity" || name == "-Infinity" || name == "NaN"
+}
+
+pub fn is_reserved_member_name(name: &str) -> bool {
+    let bytes = name.as_bytes();
+    bytes.len() >= 2 && bytes[0] == 0xFE && bytes[1] != b'@' && bytes[1] != b'#'
+}
+
+pub fn is_late_bound_name(name: &str) -> bool {
+    let bytes = name.as_bytes();
+    bytes.len() >= 2 && bytes[0] == 0xFE && bytes[1] == b'@'
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Node kind helpers
+// ────────────────────────────────────────────────────────────────────────────
+
+pub fn is_exclamation_token(node: &Node) -> bool {
+    node.kind == SyntaxKind::ExclamationToken
+}
+
+pub fn is_type_alias(node: &Node) -> bool {
+    matches!(
+        node.kind,
+        SyntaxKind::TypeAliasDeclaration | SyntaxKind::JSTypeAliasDeclaration
+    )
+}
+
+pub fn is_literal_expression_of_object(node: &Node) -> bool {
+    matches!(
+        node.kind,
+        SyntaxKind::ObjectLiteralExpression
+            | SyntaxKind::ArrayLiteralExpression
+            | SyntaxKind::RegularExpressionLiteral
+            | SyntaxKind::FunctionExpression
+            | SyntaxKind::ClassExpression
+    )
+}
+
+pub fn introduces_arguments_exotic_object(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
+        SyntaxKind::MethodDeclaration
+            | SyntaxKind::MethodSignature
+            | SyntaxKind::Constructor
+            | SyntaxKind::GetAccessor
+            | SyntaxKind::SetAccessor
+            | SyntaxKind::FunctionDeclaration
+            | SyntaxKind::FunctionExpression
+    )
+}
+
+pub fn node_starts_new_lexical_environment(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
+        SyntaxKind::Constructor
+            | SyntaxKind::FunctionExpression
+            | SyntaxKind::FunctionDeclaration
+            | SyntaxKind::ArrowFunction
+            | SyntaxKind::MethodDeclaration
+            | SyntaxKind::GetAccessor
+            | SyntaxKind::SetAccessor
+            | SyntaxKind::ModuleDeclaration
+            | SyntaxKind::SourceFile
+    )
+}
+
+pub fn has_only_expression_initialization(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
+        SyntaxKind::VariableDeclaration
+            | SyntaxKind::Parameter
+            | SyntaxKind::BindingElement
+            | SyntaxKind::PropertyDeclaration
+            | SyntaxKind::PropertyAssignment
+            | SyntaxKind::EnumMember
+    )
+}
+
+pub fn is_super_call(n: &Node) -> bool {
+    crate::ast::is_call_expression(n)
+        && n.expression()
+            .map(|e| e.kind == SyntaxKind::SuperKeyword)
+            .unwrap_or(false)
+}
+
+pub fn is_call_chain(node: &Node) -> bool {
+    crate::ast::is_call_expression(node) && node.flags.contains(NodeFlags::OptionalChain)
+}
+
+pub fn is_non_null_access(node: &Node) -> bool {
+    crate::ast::is_access_expression(node)
+        && node
+            .expression()
+            .map(|e| crate::ast::is_non_null_expression(e))
+            .unwrap_or(false)
+}
+
+pub fn is_this_property(node: &Node) -> bool {
+    (crate::ast::is_property_access_expression(node)
+        || crate::ast::is_element_access_expression(node))
+        && node
+            .expression()
+            .map(|e| e.kind == SyntaxKind::ThisKeyword)
+            .unwrap_or(false)
+}
+
+pub fn is_optional_declaration(declaration: &Node) -> bool {
+    // TODO: HasQuestionToken — need question_token accessor
+    false
+}
+
+pub fn is_type_assertion(node: &Node) -> bool {
+    // TODO: needs skip_parentheses + is_assertion_expression on AST
+    crate::ast::is_assertion_expression(node)
+}
+
+pub fn is_empty_object_literal(expression: &Node) -> bool {
+    // TODO: needs properties() accessor on Node
+    crate::ast::is_object_literal_expression(expression)
+}
+
+pub fn is_empty_array_literal(expression: &Node) -> bool {
+    // TODO: needs elements() accessor on Node
+    crate::ast::is_array_literal_expression(expression)
+}
+
+pub fn has_type(node: &Node) -> bool {
+    node.type_node().is_some()
+}
+
+pub fn can_have_flow_node(node: &Node) -> bool {
+    // TODO: needs FlowNodeData accessor
+    let _ = node;
+    false
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Symbol helpers
+// ────────────────────────────────────────────────────────────────────────────
+
+pub fn is_private_identifier_symbol(symbol: &Symbol) -> bool {
+    symbol
+        .name
+        .starts_with(&format!("{}#", crate::ast::INTERNAL_SYMBOL_NAME_PREFIX))
+}
+
+pub fn is_known_symbol(symbol: &Symbol) -> bool {
+    is_late_bound_name(&symbol.name)
+}
+
+pub fn is_external_module_symbol(module_symbol: &Symbol) -> bool {
+    module_symbol.flags.contains(SymbolFlags::MODULE) && module_symbol.name.starts_with('"')
+}
+
+pub fn has_export_assignment_symbol(module_symbol: &Symbol) -> bool {
+    module_symbol
+        .exports
+        .get(crate::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
+        .is_some()
+}
+
+pub fn is_static_private_identifier_property(s: &Symbol) -> bool {
+    // TODO: needs is_private_identifier_class_element_declaration on AST
+    s.value_declaration
+        .as_ref()
+        .map(|d| crate::ast::is_static(d))
+        .unwrap_or(false)
+}
+
+pub fn get_declarations_of_kind(symbol: &Symbol, kind: SyntaxKind) -> Vec<Arc<Node>> {
+    symbol
+        .declarations
+        .iter()
+        .filter(|d| d.kind == kind)
+        .cloned()
+        .collect()
+}
+
+pub fn all_declarations_in_same_source_file(symbol: &Symbol) -> bool {
+    if symbol.declarations.len() > 1 {
+        let mut source_file_id: Option<u64> = None;
+        for (i, d) in symbol.declarations.iter().enumerate() {
+            if let Some(sf) = crate::ast::get_source_file_of_node(d) {
+                if i == 0 {
+                    source_file_id = Some(sf.id());
+                } else if source_file_id != Some(sf.id()) {
+                    return false;
+                }
+            }
+        }
+    }
+    true
+}
+
+pub fn get_index_symbol_from_symbol_table(symbol_table: &SymbolTable) -> Option<Arc<Symbol>> {
+    symbol_table
+        .get(crate::ast::INTERNAL_SYMBOL_NAME_INDEX)
+        .cloned()
+}
+
+pub fn symbols_to_array(symbols: &SymbolTable) -> Vec<Arc<Symbol>> {
+    symbols
+        .iter()
+        .filter(|(id, _)| !is_reserved_member_name(id))
+        .map(|(_, symbol)| Arc::clone(symbol))
+        .collect()
+}
+
+pub fn create_symbol_table(symbols: &[Arc<Symbol>]) -> SymbolTable {
+    let mut result = SymbolTable::new();
+    for symbol in symbols {
+        result.insert(symbol.name.clone(), Arc::clone(symbol));
+    }
+    result
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Type helpers
+// ────────────────────────────────────────────────────────────────────────────
+
+pub fn is_object_or_array_literal_type(t: &Type) -> bool {
+    t.object_flags
+        .intersects(ObjectFlags::ObjectLiteral | ObjectFlags::ArrayLiteral)
+}
+
+pub fn is_this_type_parameter(t: &Type) -> bool {
+    t.flags.contains(TypeFlags::TypeParameter)
+        && matches!(&t.data, TypeData::TypeParameter(tp) if tp.is_this_type)
+}
+
+pub fn get_type_name_symbol(t: &Type) -> Option<Arc<Symbol>> {
+    if let Some(alias) = &t.alias {
+        return alias.symbol.clone();
+    }
+    if t.flags
+        .intersects(TypeFlags::TypeParameter | TypeFlags::StringMapping)
+        || t.object_flags
+            .intersects(OBJECT_FLAGS_CLASS_OR_INTERFACE | ObjectFlags::Reference)
+    {
+        return t.symbol.clone();
+    }
+    None
+}
+
+pub fn get_object_type_name(t: &Type) -> Option<Arc<Symbol>> {
+    if t.object_flags
+        .intersects(OBJECT_FLAGS_CLASS_OR_INTERFACE | ObjectFlags::Reference)
+    {
+        return t.symbol.clone();
+    }
+    None
+}
+
+pub fn get_sort_order_flags(t: &Type) -> u32 {
+    if t.flags.intersects(TypeFlags::EnumLiteral | TypeFlags::Enum)
+        && !t.flags.contains(TypeFlags::Union)
+    {
+        return TypeFlags::Enum.bits();
+    }
+    t.flags.bits()
+}
+
+pub fn compare_type_names(t1: &Type, t2: &Type) -> std::cmp::Ordering {
+    let s1 = get_type_name_symbol(t1);
+    let s2 = get_type_name_symbol(t2);
+    if s1.as_ref().map(|s| s.id()) == s2.as_ref().map(|s| s.id()) {
+        if let Some(alias) = &t1.alias {
+            return compare_type_lists(
+                &alias.type_arguments,
+                &t2.alias.as_ref().unwrap().type_arguments,
+            );
+        }
+        return std::cmp::Ordering::Equal;
+    }
+    match (s1, s2) {
+        (None, None) => std::cmp::Ordering::Equal,
+        (None, Some(_)) => std::cmp::Ordering::Greater,
+        (Some(_), None) => std::cmp::Ordering::Less,
+        (Some(a), Some(b)) => a.name.cmp(&b.name),
+    }
+}
+
+pub fn compare_type_lists(s1: &[Arc<Type>], s2: &[Arc<Type>]) -> std::cmp::Ordering {
+    if s1.len() != s2.len() {
+        return s1.len().cmp(&s2.len());
+    }
+    for (t1, t2) in s1.iter().zip(s2.iter()) {
+        let c = compare_types(t1, t2);
+        if c != std::cmp::Ordering::Equal {
+            return c;
+        }
+    }
+    std::cmp::Ordering::Equal
+}
+
+pub fn compare_types(t1: &Type, t2: &Type) -> std::cmp::Ordering {
+    if t1.id == t2.id {
+        return std::cmp::Ordering::Equal;
+    }
+    let c = get_sort_order_flags(t1).cmp(&get_sort_order_flags(t2));
+    if c != std::cmp::Ordering::Equal {
+        return c;
+    }
+    let c = compare_type_names(t1, t2);
+    if c != std::cmp::Ordering::Equal {
+        return c;
+    }
+    // Fall back to type IDs (creation order)
+    t1.id.cmp(&t2.id)
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// AssignmentKind helpers
+// ────────────────────────────────────────────────────────────────────────────
+
+pub fn get_assignment_target_kind(node: &Node) -> AssignmentKind {
+    // TODO: needs ast.GetAssignmentTarget which requires complex tree walking
+    let _ = node;
+    AssignmentKind::None
+}
+
+pub fn is_compound_like_assignment(assignment: &Node) -> bool {
+    // TODO: needs skip_parentheses + binary expression accessor
+    let _ = assignment;
+    false
+}
+
+pub fn is_in_compound_like_assignment(node: &Node) -> bool {
+    // TODO: needs get_assignment_target + is_assignment_expression
+    let _ = node;
+    false
+}
+
+pub fn is_delete_target(node: &Node) -> bool {
+    // TODO: needs walk_up_parenthesized_expressions
+    if !crate::ast::is_access_expression(node) {
+        return false;
+    }
+    node.parent
+        .as_ref()
+        .map(|p| p.kind == SyntaxKind::DeleteExpression)
+        .unwrap_or(false)
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Node relationship helpers
+// ────────────────────────────────────────────────────────────────────────────
+
+pub fn is_right_side_of_access_expression(node: &Node) -> bool {
+    if let Some(parent) = &node.parent {
+        if is_property_access_expression(parent) {
+            return parent
+                .name()
+                .map(|n| std::ptr::eq(n.as_ref(), node))
+                .unwrap_or(false);
+        }
+        if is_element_access_expression(parent) {
+            return parent
+                .expression()
+                .map(|e| std::ptr::eq(e.as_ref(), node))
+                .unwrap_or(false);
+        }
+    }
+    false
+}
+
+pub fn is_top_level_in_external_module_augmentation(node: &Node) -> bool {
+    // TODO: needs is_module_block + is_external_module_augmentation
+    let _ = node;
+    false
+}
+
+pub fn is_syntactic_default(node: &Node) -> bool {
+    // TODO: needs is_export_assignment with is_export_equals + is_namespace_export
+    matches!(
+        node.kind,
+        SyntaxKind::ExportSpecifier | SyntaxKind::NamespaceExportDeclaration
+    ) || node.has_syntactic_modifier(ModifierFlags::Default)
+}
+
+pub fn is_type_reference_identifier(node: &Node) -> bool {
+    // TODO: needs parent walking for qualified names
+    node.parent
+        .as_ref()
+        .map(|p| crate::ast::is_type_reference_node(p))
+        .unwrap_or(false)
+}
+
+pub fn is_in_type_query(node: &Node) -> bool {
+    // TODO: needs find_ancestor_or_quit
+    let _ = node;
+    false
+}
+
+pub fn is_side_effect_import(node: &Node) -> bool {
+    // TODO: needs find_ancestor(IsImportDeclaration) + import_clause accessor
+    let _ = node;
+    false
+}
+
+pub fn get_external_module_require_argument(node: &Node) -> Option<Arc<Node>> {
+    // TODO: needs is_variable_declaration_initialized_to_require
+    let _ = node;
+    None
+}
+
+pub fn is_shorthand_ambient_module(node: &Node) -> bool {
+    node.kind == SyntaxKind::ModuleDeclaration
+    // TODO: needs body() accessor to check for nil
+}
+
+pub fn is_shorthand_ambient_module_symbol(module_symbol: &Symbol) -> bool {
+    module_symbol
+        .value_declaration
+        .as_ref()
+        .map(|d| is_shorthand_ambient_module(d))
+        .unwrap_or(false)
+}
+
+pub fn entity_name_to_string(name: &Node) -> String {
+    // TODO: needs entity_name_to_string in scanner/ast
+    name.text().to_string()
+}
+
+pub fn get_containing_qualified_name_node(node: &Arc<Node>) -> Arc<Node> {
+    let mut result = Arc::clone(node);
+    let mut current = node.parent.clone();
+    while let Some(ref parent) = current {
+        if is_qualified_name(parent) {
+            result = Arc::clone(parent);
+            current = parent.parent.clone();
+        } else {
+            break;
+        }
+    }
+    result
+}
+
+pub fn is_const_type_reference(node: &Node) -> bool {
+    // TODO: needs type_arguments accessor + as_type_reference_node
+    crate::ast::is_type_reference_node(node) && node.text() == "const"
+}
+
+pub fn get_single_variable_of_variable_statement(node: &Node) -> Option<Arc<Node>> {
+    // TODO: needs variable_statement/declaration_list accessors
+    let _ = node;
+    None
+}
+
+pub fn is_jsx_intrinsic_tag_name(tag_name: &Node) -> bool {
+    crate::ast::is_identifier(tag_name) || crate::ast::is_jsx_namespaced_name(tag_name)
+}
+
+pub fn walk_up_outer_expressions(node: &Node) -> Option<Arc<Node>> {
+    // TODO: needs is_outer_expression
+    node.parent.clone()
+}
+
+pub fn get_containing_function_or_class_static_block(node: &Node) -> Option<Arc<Node>> {
+    node.parent.as_ref().and_then(|parent| {
+        crate::ast::find_ancestor(parent, |n| {
+            crate::ast::is_function_like_or_class_static_block_declaration(n)
+        })
+    })
+}
+
+pub fn get_enclosing_container(node: &Node) -> Option<Arc<Node>> {
+    // TODO: needs binder::get_container_flags
+    node.parent.as_ref().and_then(|parent| {
+        crate::ast::find_ancestor(parent, |n| {
+            matches!(
+                n.kind,
+                SyntaxKind::FunctionDeclaration
+                    | SyntaxKind::FunctionExpression
+                    | SyntaxKind::ArrowFunction
+                    | SyntaxKind::MethodDeclaration
+                    | SyntaxKind::GetAccessor
+                    | SyntaxKind::SetAccessor
+                    | SyntaxKind::Constructor
+                    | SyntaxKind::ClassDeclaration
+                    | SyntaxKind::ClassExpression
+                    | SyntaxKind::ModuleDeclaration
+                    | SyntaxKind::SourceFile
+            )
+        })
+    })
+}
+
+pub fn is_this_initialized_declaration(node: &Node) -> bool {
+    crate::ast::is_variable_declaration(node)
+        && node
+            .expression()
+            .map(|e| e.kind == SyntaxKind::ThisKeyword)
+            .unwrap_or(false)
+}
+
+pub fn is_declaration_readonly(declaration: &Arc<Node>) -> bool {
+    get_combined_modifier_flags(declaration).contains(ModifierFlags::Readonly)
+    // TODO: also check !is_parameter_property_declaration
+}
+
+pub fn get_binding_element_property_name(node: &Node) -> Option<Arc<Node>> {
+    node.name().cloned()
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Misc helpers
+// ────────────────────────────────────────────────────────────────────────────
+
+pub fn is_valid_number_string(s: &str, round_trip_only: bool) -> bool {
+    if s.is_empty() {
+        return false;
+    }
+    let n = crate::jsnum::Number::from_string(s);
+    !n.is_nan() && !n.is_inf() && (!round_trip_only || n.to_string() == s)
+}
+
+pub fn is_valid_big_int_string(_s: &str, _round_trip_only: bool) -> bool {
+    // TODO: needs scanner for bigint validation
+    false
+}
+
+pub fn is_valid_es_symbol_declaration(node: &Node) -> bool {
+    // TODO: needs is_var_const, is_property_declaration, is_property_signature_declaration
+    let _ = node;
+    false
+}
+
+pub fn is_variable_declaration_in_variable_statement(node: &Node) -> bool {
+    node.parent
+        .as_ref()
+        .map(|p| is_variable_declaration_list(p))
+        .unwrap_or(false)
+        && node
+            .parent
+            .as_ref()
+            .and_then(|p| p.parent.as_ref())
+            .map(|gp| is_variable_statement(gp))
+            .unwrap_or(false)
+}
+
+pub fn is_in_ambient_or_type_node(node: &Node) -> bool {
+    if node.flags.contains(NodeFlags::Ambient) {
+        return true;
+    }
+    // TODO: needs find_ancestor for interface/type alias/type literal
+    false
+}
+
+pub fn is_private_within_ambient(node: &Node) -> bool {
+    (crate::ast::has_syntactic_modifier(node, ModifierFlags::Private)) // TODO: || is_private_identifier_class_element_declaration
+        && node.flags.contains(NodeFlags::Ambient)
+}
+
+pub fn pseudo_big_int_to_string(value: &crate::jsnum::PseudoBigInt) -> String {
+    value.to_string()
+}
+
+pub fn value_to_string(value: &LiteralValue) -> String {
+    match value {
+        LiteralValue::String(s) => format!("\"{}\"", s),
+        LiteralValue::Number(n) => n.to_string(),
+        LiteralValue::Boolean(b) => b.to_string(),
+        LiteralValue::BigInt(b) => format!("{}n", b),
+        LiteralValue::None => String::new(),
+    }
+}
+
+pub fn get_non_rest_parameter_count(sig: &Signature) -> usize {
+    let has_rest = sig.flags.contains(SignatureFlags::HasRestParameter);
+    sig.parameters.len() - if has_rest { 1 } else { 0 }
+}
+
+pub fn contains_non_missing_undefined_type(t: &Type) -> bool {
+    if t.flags.contains(TypeFlags::Union) {
+        if let TypeData::Union(u) = &t.data {
+            if let Some(first) = u.union_or_intersection.types.first() {
+                return first.flags.contains(TypeFlags::Undefined);
+            }
+        }
+        false
+    } else {
+        t.flags.contains(TypeFlags::Undefined)
+    }
+}
+
+pub fn try_get_property_access_or_identifier_to_string(expr: &Node) -> String {
+    // TODO: needs recursive AST traversal with property access / element access
+    if crate::ast::is_identifier(expr) {
+        return expr.text().to_string();
+    }
+    String::new()
+}
+
+pub fn get_set_accessor_value_parameter(accessor: &Node) -> Option<Arc<Node>> {
+    // TODO: needs parameters() accessor on Node
+    let _ = accessor;
+    None
+}
+
+pub fn get_super_container(node: &Node, _stop_on_functions: bool) -> Option<Arc<Node>> {
+    // TODO: needs parent walking with computed property name handling
+    node.parent.clone()
+}
+
+pub fn get_alias_declaration_from_name(node: &Node) -> Option<Arc<Node>> {
+    // TODO: needs parent walking
+    let _ = node;
+    None
+}
+
+pub fn get_containing_object_literal(f: &Node) -> Option<Arc<Node>> {
+    // TODO: needs kind checking on parent
+    let _ = f;
+    None
+}
+
+pub fn is_import_type_qualifier_part(node: &Node) -> Option<Arc<Node>> {
+    // TODO: needs qualified_name walking + import_type accessor
+    let _ = node;
+    None
+}
+
+pub fn is_in_name_of_expression_with_type_arguments(node: &Node) -> bool {
+    // TODO: needs property_access_expression walking
+    let _ = node;
+    false
+}
+
+pub fn is_in_right_side_of_import_or_export_assignment(node: &Node) -> bool {
+    // TODO: needs qualified_name walking
+    let _ = node;
+    false
+}
+
+pub fn is_class_instance_property(node: &Node) -> bool {
+    // TODO: needs is_expando_property_declaration for JS files
+    node.parent
+        .as_ref()
+        .map(|p| {
+            crate::ast::is_class_like(p)
+                && crate::ast::is_property_declaration(node)
+                && !crate::ast::has_accessor_modifier(node)
+        })
+        .unwrap_or(false)
+}
+
+pub fn is_this_initialized_object_binding_expression(node: &Node) -> bool {
+    // TODO: needs parent.parent + binary expression accessor
+    let _ = node;
+    false
+}
+
+pub fn get_members_of_declaration(node: &Node) -> Vec<Arc<Node>> {
+    // TODO: needs members()/properties() accessors
+    let _ = node;
+    Vec::new()
+}
+
+pub fn expression_result_is_unused(node: &Node) -> bool {
+    // TODO: needs parent walking for expression_statement/void/for/comma
+    let _ = node;
+    false
+}
+
+pub fn for_each_yield_expression(body: &Node, _visitor: impl Fn(&Node)) {
+    // TODO: needs for_each_child traversal
+    let _ = body;
+}
+
+pub fn is_jsdoc_optional_parameter(_node: &Node) -> bool {
+    false // !!! TODO: JSDoc support
 }
 
 #[cfg(test)]
