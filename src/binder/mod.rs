@@ -7,6 +7,9 @@
 //! In Go, symbols and flow nodes are stored directly on AST nodes. In Rust,
 //! we use side tables (`NodeSymbolMap`) keyed by node ID.
 
+pub mod nameresolver;
+pub mod referenceresolver;
+
 use crate::ast::*;
 use crate::diagnostics::messages_generated::{
     CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0, DUPLICATE_IDENTIFIER_0,

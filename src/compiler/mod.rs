@@ -726,6 +726,340 @@ fn _ensure_script_kind(file_name: &str) -> crate::ast::ScriptKind {
     script_kind_from_file_name(file_name)
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// File-include tracking types (ported from `internal/compiler/fileInclude.go`)
+// ────────────────────────────────────────────────────────────────────────────
+
+/// Why a file was included in the program.
+///
+/// Mirrors `compiler.fileIncludeKind` in Go.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[repr(i32)]
+#[allow(dead_code)]
+pub enum FileIncludeKind {
+    /// An `import`/`export` reference.
+    #[default]
+    Import = 0,
+    /// A `/// <reference path=... />` directive.
+    ReferenceFile = 1,
+    /// A `/// <reference types=... />` directive.
+    TypeReferenceDirective = 2,
+    /// A `/// <reference lib=... />` directive.
+    LibReferenceDirective = 3,
+    /// A root file from the command line / tsconfig `files`.
+    RootFile = 4,
+    /// A default library file.
+    LibFile = 5,
+    /// An automatic type-directive file.
+    AutomaticTypeDirectiveFile = 6,
+}
+
+/// A reason a file was included in the program.
+///
+/// Mirrors `compiler.FileIncludeReason` in Go. The Go struct carries an
+/// untyped `data any` field plus lazily-computed diagnostics; the Rust port
+/// models the common case (a `FileIncludeKind` plus an optional file-name
+/// payload).
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+pub struct FileIncludeReason {
+    pub kind: FileIncludeKind,
+    pub file_name: String,
+}
+
+impl FileIncludeReason {
+    pub fn new(kind: FileIncludeKind, file_name: impl Into<String>) -> Self {
+        Self {
+            kind,
+            file_name: file_name.into(),
+        }
+    }
+
+    /// Whether this reason is a referenced-file kind (reference path,
+    /// type-reference, or lib-reference directive).
+    pub fn is_referenced_file(&self) -> bool {
+        matches!(
+            self.kind,
+            FileIncludeKind::ReferenceFile
+                | FileIncludeKind::TypeReferenceDirective
+                | FileIncludeKind::LibReferenceDirective
+        )
+    }
+}
+
+/// A parsed file that was dropped from the final program (deduplicated).
+///
+/// Mirrors `compiler.DuplicateSourceFile` in Go.
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+pub struct DuplicateSourceFile {
+    pub file_name: String,
+    pub hash: u128,
+    pub script_kind: crate::ast::ScriptKind,
+}
+
+/// A library file reference (name + resolved path + replaced flag).
+///
+/// Mirrors `compiler.LibFile` in Go.
+#[derive(Debug, Clone, Default)]
+#[allow(dead_code)]
+pub struct LibFile {
+    pub name: String,
+    pub path: String,
+    pub replaced: bool,
+}
+
+/// Build-info snapshot for diagnostics and stats.
+///
+/// Mirrors the data surfaced by Go's `Program` stats methods
+/// (`LineCount`, `IdentifierCount`, `SymbolCount`, `TypeCount`,
+/// `InstantiationCount`).
+#[derive(Debug, Clone, Default)]
+#[allow(dead_code)]
+pub struct ProgramBuildInfo {
+    pub file_count: usize,
+    pub line_count: usize,
+    pub identifier_count: usize,
+    pub symbol_count: usize,
+    pub type_count: usize,
+    pub instantiation_count: usize,
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Additional Program methods (ported from `internal/compiler/program.go`)
+// ────────────────────────────────────────────────────────────────────────────
+
+#[allow(dead_code)]
+impl Program {
+    /// Get all source files as an owned vector.
+    ///
+    /// Mirrors `Program.GetSourceFiles` in Go (the capital-G alias that
+    /// returns the file slice). [`Program::source_files`] returns a borrow.
+    pub fn get_source_files(&self) -> Vec<Arc<SourceFile>> {
+        self.source_files.clone()
+    }
+
+    /// Get the file-include reasons map (testing only).
+    ///
+    /// Mirrors `Program.GetIncludeReasons` in Go. The Rust program does not
+    /// yet track per-file include reasons, so this returns an empty map.
+    pub fn get_file_include_reasons(&self) -> HashMap<String, Vec<FileIncludeReason>> {
+        // TODO: track include reasons during the file-loading pipeline.
+        HashMap::new()
+    }
+
+    /// Whether `path` is a missing file (referenced but not found).
+    ///
+    /// Mirrors `Program.IsMissingPath` in Go.
+    pub fn is_missing_path(&self, path: &str) -> bool {
+        !self.source_files_by_name.contains_key(path)
+    }
+
+    /// Get a source file by its normalized path.
+    ///
+    /// Mirrors `Program.GetSourceFileByPath` in Go.
+    pub fn get_source_file_by_path(&self, path: &str) -> Option<Arc<SourceFile>> {
+        self.source_files_by_name.get(path).cloned()
+    }
+
+    /// Get duplicate source files dropped during program construction.
+    ///
+    /// Mirrors `Program.DuplicateSourceFiles` in Go.
+    pub fn duplicate_source_files(&self) -> &[DuplicateSourceFile] {
+        // TODO: track duplicates during the file-loading pipeline.
+        &[]
+    }
+
+    /// The total line count across all source files.
+    ///
+    /// Mirrors `Program.LineCount` in Go.
+    pub fn line_count(&self) -> usize {
+        self.source_files
+            .iter()
+            .map(|f| f.text.lines().count())
+            .sum()
+    }
+
+    /// The total identifier count across all source files.
+    ///
+    /// Mirrors `Program.IdentifierCount` in Go.
+    pub fn identifier_count(&self) -> usize {
+        // TODO: requires a node-count walk over each source file's AST.
+        0
+    }
+
+    /// The total symbol count.
+    ///
+    /// Mirrors `Program.SymbolCount` in Go.
+    pub fn symbol_count(&self) -> usize {
+        self.symbol_map.symbols.len()
+    }
+
+    /// The total type count (checker stat).
+    ///
+    /// Mirrors `Program.TypeCount` in Go.
+    pub fn type_count(&self) -> usize {
+        // TODO: requires checker-side type accounting.
+        0
+    }
+
+    /// The total instantiation count (checker stat).
+    ///
+    /// Mirrors `Program.InstantiationCount` in Go.
+    pub fn instantiation_count(&self) -> usize {
+        // TODO: requires checker-side instantiation accounting.
+        0
+    }
+
+    /// A build-info snapshot.
+    ///
+    /// Aggregates the stats surfaced by Go's `Program` methods
+    /// (`LineCount`, `IdentifierCount`, `SymbolCount`, …).
+    pub fn get_program_build_info(&self) -> ProgramBuildInfo {
+        ProgramBuildInfo {
+            file_count: self.source_files.len(),
+            line_count: self.line_count(),
+            identifier_count: self.identifier_count(),
+            symbol_count: self.symbol_count(),
+            type_count: self.type_count(),
+            instantiation_count: self.instantiation_count(),
+        }
+    }
+
+    /// Whether file names are compared case-sensitively.
+    ///
+    /// Mirrors `Program.UseCaseSensitiveFileNames` in Go.
+    pub fn use_case_sensitive_file_names(&self) -> bool {
+        self.host.use_case_sensitive_file_names()
+    }
+
+    /// The current working directory.
+    ///
+    /// Mirrors `Program.GetCurrentDirectory` in Go.
+    pub fn get_current_directory(&self) -> &str {
+        self.host.current_directory()
+    }
+
+    /// The resolved modules cache (per-file import resolutions).
+    ///
+    /// Mirrors `Program.GetResolvedModules` in Go.
+    pub fn get_resolved_modules(
+        &self,
+    ) -> HashMap<String, Vec<(String, Option<crate::module::ResolvedModule>)>> {
+        // TODO: requires tracking per-file resolved modules during the
+        // file-loading pipeline. The current pipeline resolves modules
+        // inline without caching.
+        HashMap::new()
+    }
+
+    /// The set of package names discovered during module resolution.
+    ///
+    /// Mirrors `Program.GetPackagesMap` in Go.
+    pub fn get_packages_map(&self) -> HashMap<String, bool> {
+        // TODO: requires package-name tracking during module resolution.
+        HashMap::new()
+    }
+
+    /// Whether the program runs single-threaded.
+    ///
+    /// Mirrors `Program.SingleThreaded` in Go. The Rust port is always
+    /// single-threaded for now.
+    pub fn single_threaded(&self) -> bool {
+        true
+    }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// File-loading pipeline (ported from `internal/compiler/fileloader.go` and
+// `internal/compiler/filesparser.go`). These functions mirror Go's
+// `processRootFile`/`processSourceFile`/`processAllProgramFiles`; the Rust
+// `Program::new` already inlines a simplified version of this pipeline, so
+// these are provided as standalone entry points for callers that need to
+// drive file loading incrementally.
+// ────────────────────────────────────────────────────────────────────────────
+
+/// Process a root file: read, parse, register, and recursively resolve its
+/// references and imports.
+///
+/// Mirrors `fileLoader.addRootFileTask` + `processRootFile` in Go. The Rust
+/// `Program::new` performs this inline; this entry point is provided for
+/// parity with the Go API surface.
+#[allow(dead_code)]
+pub fn process_root_file(
+    file_name: &str,
+    host: &dyn CompilerHost,
+    source_files: &mut Vec<Arc<SourceFile>>,
+    by_name: &mut HashMap<String, Arc<SourceFile>>,
+    diagnostics: &mut Vec<Arc<Diagnostic>>,
+    allow_js: bool,
+) {
+    load_source_file_with_references(
+        file_name,
+        host,
+        source_files,
+        by_name,
+        diagnostics,
+        allow_js,
+    );
+}
+
+/// Process a single source file: read, parse, and register it (no reference
+/// or import resolution).
+///
+/// Mirrors `fileLoader.parseSourceFile` / `processSourceFile` in Go.
+#[allow(dead_code)]
+pub fn process_source_file(
+    file_name: &str,
+    host: &dyn CompilerHost,
+    source_files: &mut Vec<Arc<SourceFile>>,
+    by_name: &mut HashMap<String, Arc<SourceFile>>,
+    diagnostics: &mut Vec<Arc<Diagnostic>>,
+    allow_js: bool,
+) -> Option<Arc<SourceFile>> {
+    load_source_file(
+        file_name,
+        host,
+        source_files,
+        by_name,
+        diagnostics,
+        allow_js,
+    )
+}
+
+/// Process all program files: load root files, resolve references and imports,
+/// and return the resulting file set.
+///
+/// Mirrors `compiler.processAllProgramFiles` in Go. The Rust `Program::new`
+/// inlines this pipeline; this entry point is provided for parity.
+#[allow(dead_code)]
+pub fn process_all_program_files(
+    root_file_names: &[String],
+    host: &dyn CompilerHost,
+    options: &CompilerOptions,
+) -> (
+    Vec<Arc<SourceFile>>,
+    HashMap<String, Arc<SourceFile>>,
+    Vec<Arc<Diagnostic>>,
+) {
+    let mut source_files: Vec<Arc<SourceFile>> = Vec::new();
+    let mut by_name: HashMap<String, Arc<SourceFile>> = HashMap::new();
+    let mut diagnostics: Vec<Arc<Diagnostic>> = Vec::new();
+    let allow_js = options.get_allow_js();
+
+    for file_name in root_file_names {
+        process_root_file(
+            file_name,
+            host,
+            &mut source_files,
+            &mut by_name,
+            &mut diagnostics,
+            allow_js,
+        );
+    }
+
+    (source_files, by_name, diagnostics)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
