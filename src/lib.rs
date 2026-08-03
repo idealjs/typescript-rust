@@ -24,6 +24,7 @@ pub mod glob;
 pub mod incremental;
 pub mod jsnum;
 pub mod json;
+pub mod jsonrpc;
 pub mod locale;
 pub mod lsp;
 pub mod module;

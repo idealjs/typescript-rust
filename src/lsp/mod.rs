@@ -3,6 +3,8 @@
 //! Implements initialize/shutdown lifecycle, text document synchronization,
 //! and basic diagnostics. Hover uses the checker's nodebuilder for type info.
 
+pub mod lsproto;
+
 use std::collections::HashMap;
 use std::io::{self, BufRead, BufReader, Write};
 use std::sync::Arc;
