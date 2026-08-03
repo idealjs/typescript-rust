@@ -10,7 +10,9 @@
 
 use std::sync::Arc;
 
-use crate::ast::{Node, SourceFile, Symbol};
+use crate::ast::node::LineMap;
+use crate::ast::node_data_generated::for_each_child;
+use crate::ast::{Node, SourceFile, Symbol, SymbolFlags, SyntaxKind};
 use crate::checker::Checker;
 use crate::compiler::Program;
 use crate::lsp::lsproto::lsp::{DocumentUri, Position};
@@ -52,26 +54,67 @@ impl LanguageService {
     /// Mirrors `ProvideCompletion`.
     pub fn provide_completion(
         &self,
-        _document_uri: &DocumentUri,
-        _position: Position,
+        document_uri: &DocumentUri,
+        position: Position,
         _context: &CompletionContext,
     ) -> CompletionList {
-        // TODO: requires getCompletionsAtPosition
-        CompletionList::default()
+        let (program, source_file) = self.get_program_and_file(document_uri);
+        let offset = lsp_position_to_offset(&source_file.line_map, &position);
+        match self.get_completions_at_position(&source_file, offset, None, false) {
+            Ok(list) => ensure_item_data(&source_file.file_name, offset, list),
+            Err(_) => CompletionList::default(),
+        }
     }
 
     /// Get completions at a position.
     ///
     /// Mirrors `GetCompletionsAtPosition`.
+    ///
+    /// This implementation focuses on **identifier completions** from scope:
+    /// variables, functions, classes, interfaces, types, and enums that are
+    /// visible at the cursor position.
     pub fn get_completions_at_position(
         &self,
-        _file: &Arc<SourceFile>,
-        _position: usize,
+        file: &Arc<SourceFile>,
+        position: usize,
         _trigger_character: Option<&str>,
         _include_symbols: bool,
     ) -> Result<CompletionList, String> {
-        // TODO: requires checker + scanner + nodebuilder
-        Ok(CompletionList::default())
+        // Find the node at the cursor position.
+        let node = find_deepest_node(&file.node, position);
+
+        let checker = program_build_checker(&self.get_program());
+
+        // Gather symbols in scope. The meaning covers value, type, and
+        // namespace spaces so that identifiers, types, and modules all
+        // complete.
+        let meaning = SymbolFlags::VALUE
+            .union(SymbolFlags::TYPE)
+            .union(SymbolFlags::NAMESPACE);
+        let mut symbols = checker.get_symbols_in_scope(&node, meaning);
+
+        // Fallback: `get_symbols_in_scope` may be incomplete. Collect
+        // top-level and local declaration symbols by walking the AST and
+        // resolving declaration names via the checker's symbol map.
+        if symbols.is_empty() {
+            symbols = collect_scope_symbols_fallback(&checker, file, &node);
+        }
+
+        // De-duplicate by symbol id, preserving first-seen order.
+        let mut seen: std::collections::HashSet<u64> = std::collections::HashSet::new();
+        symbols.retain(|s| seen.insert(s.id()));
+
+        // Convert each symbol into a completion item.
+        let items: Vec<CompletionItem> = symbols
+            .iter()
+            .filter(|s| !s.name.is_empty() && !s.name.starts_with('\u{FE}'))
+            .map(|s| symbol_to_completion_item(s))
+            .collect();
+
+        Ok(CompletionList {
+            is_incomplete: false,
+            items,
+        })
     }
 
     /// Resolve a completion item's details.
@@ -83,9 +126,236 @@ impl LanguageService {
         _position: usize,
         _name: &str,
     ) -> Option<CompletionItem> {
-        // TODO: requires checker symbol resolution
+        // TODO: requires checker symbol resolution for full detail
         None
     }
+}
+
+/// Build a checker from a program (helper to keep call sites readable).
+fn program_build_checker(program: &Arc<Program>) -> Checker {
+    program.build_checker()
+}
+
+/// Map a `SymbolFlags` value to an LSP `CompletionItemKind`.
+///
+/// Mirrors the `completionKind` switch in Go's completions logic.
+fn symbol_to_completion_kind(flags: SymbolFlags) -> u32 {
+    // LSP CompletionItemKind values.
+    const METHOD: u32 = 2;
+    const FUNCTION: u32 = 3;
+    const CONSTRUCTOR: u32 = 4;
+    const FIELD: u32 = 5;
+    const VARIABLE: u32 = 6;
+    const CLASS: u32 = 7;
+    const INTERFACE: u32 = 8;
+    const MODULE: u32 = 9;
+    const PROPERTY: u32 = 10;
+    const ENUM: u32 = 13;
+    const KEYWORD: u32 = 14;
+    const ENUM_MEMBER: u32 = 20;
+    const CONSTANT: u32 = 21;
+    const STRUCT: u32 = 22;
+    const TYPE_PARAMETER: u32 = 25;
+
+    if flags.contains(SymbolFlags::TypeParameter) {
+        return TYPE_PARAMETER;
+    }
+    if flags.contains(SymbolFlags::Class) {
+        return CLASS;
+    }
+    if flags.contains(SymbolFlags::Interface) {
+        return INTERFACE;
+    }
+    if flags.contains(SymbolFlags::TypeAlias) {
+        return STRUCT;
+    }
+    if flags.contains(SymbolFlags::ENUM) {
+        return ENUM;
+    }
+    if flags.contains(SymbolFlags::EnumMember) {
+        return ENUM_MEMBER;
+    }
+    if flags.contains(SymbolFlags::Function) {
+        return FUNCTION;
+    }
+    if flags.contains(SymbolFlags::Method) {
+        return METHOD;
+    }
+    if flags.contains(SymbolFlags::Constructor) {
+        return CONSTRUCTOR;
+    }
+    if flags.intersects(SymbolFlags::GetAccessor | SymbolFlags::SetAccessor) {
+        return PROPERTY;
+    }
+    if flags.contains(SymbolFlags::Property) {
+        return PROPERTY;
+    }
+    if flags.intersects(SymbolFlags::ValueModule | SymbolFlags::NamespaceModule) {
+        return MODULE;
+    }
+    if flags.contains(SymbolFlags::Alias) {
+        return VARIABLE;
+    }
+    if flags.contains(SymbolFlags::BlockScopedVariable) {
+        // Heuristic: `const`-flavored variables show as constants.
+        if flags.contains(SymbolFlags::BlockScopedVariable) {
+            return CONSTANT;
+        }
+        return VARIABLE;
+    }
+    if flags.contains(SymbolFlags::FunctionScopedVariable) {
+        return VARIABLE;
+    }
+    let _ = KEYWORD;
+    let _ = FIELD;
+    VARIABLE
+}
+
+/// Convert a scope symbol into a `CompletionItem`.
+fn symbol_to_completion_item(symbol: &Arc<Symbol>) -> CompletionItem {
+    CompletionItem {
+        label: symbol.name.clone(),
+        kind: Some(symbol_to_completion_kind(symbol.flags)),
+        detail: Some(flags_to_detail(&symbol.flags)),
+        documentation: None,
+        sort_text: None,
+        filter_text: None,
+        insert_text: Some(symbol.name.clone()),
+        insert_text_format: Some(1), // PlainText
+        text_edit: None,
+        additional_text_edits: None,
+        commit_characters: None,
+        data: None,
+    }
+}
+
+/// Produce a short human-readable detail string from symbol flags.
+fn flags_to_detail(flags: &SymbolFlags) -> String {
+    if flags.contains(SymbolFlags::Function) {
+        "function".to_string()
+    } else if flags.contains(SymbolFlags::Class) {
+        "class".to_string()
+    } else if flags.contains(SymbolFlags::Interface) {
+        "interface".to_string()
+    } else if flags.contains(SymbolFlags::TypeAlias) {
+        "type".to_string()
+    } else if flags.contains(SymbolFlags::ENUM) {
+        "enum".to_string()
+    } else if flags.contains(SymbolFlags::EnumMember) {
+        "enum member".to_string()
+    } else if flags.contains(SymbolFlags::Method) {
+        "method".to_string()
+    } else if flags.contains(SymbolFlags::MODULE) {
+        "module".to_string()
+    } else if flags.contains(SymbolFlags::VARIABLE) {
+        "variable".to_string()
+    } else {
+        "value".to_string()
+    }
+}
+
+/// Fallback scope-symbol collector: walks the source file AST collecting
+/// declaration symbols reachable from the cursor. Used when
+/// `get_symbols_in_scope` returns an empty result.
+fn collect_scope_symbols_fallback(
+    checker: &Checker,
+    file: &Arc<SourceFile>,
+    _location: &Arc<Node>,
+) -> Vec<Arc<Symbol>> {
+    let mut result: Vec<Arc<Symbol>> = Vec::new();
+    let mut seen: std::collections::HashSet<u64> = std::collections::HashSet::new();
+
+    // Source-file locals (top-level declarations).
+    let symbol_map = checker.program.symbol_map();
+    if let Some(locals) = symbol_map.locals_of(&file.node) {
+        for sym in locals.entries.values() {
+            if seen.insert(sym.id()) {
+                result.push(Arc::clone(sym));
+            }
+        }
+    }
+
+    // Walk the AST collecting declaration-name symbols.
+    collect_declaration_symbols(checker, &file.node, &mut seen, &mut result);
+
+    result
+}
+
+/// Recursively collect symbols from declaration nodes.
+fn collect_declaration_symbols(
+    checker: &Checker,
+    node: &Arc<Node>,
+    seen: &mut std::collections::HashSet<u64>,
+    result: &mut Vec<Arc<Symbol>>,
+) {
+    // Declaration kinds whose name carries a symbol.
+    if is_declaration_kind(node.kind) {
+        if let Some(sym) = checker.get_symbol_at_location(node) {
+            if seen.insert(sym.id()) {
+                result.push(sym);
+            }
+        }
+    }
+
+    for_each_child(node, |child| {
+        collect_declaration_symbols(checker, child, seen, result);
+        false
+    });
+}
+
+/// Whether a syntax kind is a declaration with an associated symbol.
+fn is_declaration_kind(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
+        SyntaxKind::VariableDeclaration
+            | SyntaxKind::FunctionDeclaration
+            | SyntaxKind::ClassDeclaration
+            | SyntaxKind::InterfaceDeclaration
+            | SyntaxKind::TypeAliasDeclaration
+            | SyntaxKind::EnumDeclaration
+            | SyntaxKind::EnumMember
+            | SyntaxKind::MethodDeclaration
+            | SyntaxKind::MethodSignature
+            | SyntaxKind::PropertyDeclaration
+            | SyntaxKind::PropertySignature
+            | SyntaxKind::GetAccessor
+            | SyntaxKind::SetAccessor
+            | SyntaxKind::ModuleDeclaration
+            | SyntaxKind::Parameter
+            | SyntaxKind::ImportSpecifier
+            | SyntaxKind::ImportClause
+            | SyntaxKind::TypeParameter
+    )
+}
+
+/// Find the deepest AST node whose source range covers `offset`.
+fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
+    let mut deepest = Arc::clone(node);
+    loop {
+        let current = Arc::clone(&deepest);
+        let mut next: Option<Arc<Node>> = None;
+        for_each_child(&current, |child| {
+            if child.pos() <= offset && offset < child.end() {
+                next = Some(Arc::clone(child));
+                true
+            } else {
+                false
+            }
+        });
+        match next {
+            Some(child) => deepest = child,
+            None => break,
+        }
+    }
+    deepest
+}
+
+/// Convert an LSP `Position` to a byte offset within a line map.
+fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
+    let line = position.line as usize;
+    let character = position.character as usize;
+    let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
+    line_start + character
 }
 
 /// Ensure each item in a completion list has `data` populated.
