@@ -63,75 +63,72 @@ fn utf16_column(text: &str, line_start: usize, offset: usize) -> i32 {
         .sum()
 }
 
-/// Tracks generated output position and feeds source map mappings to a
-/// `Generator`. Used by `emit_js_text` when `sourceMap` or `inlineSourceMap`
-/// is enabled.
+/// Sentinel value indicating an unmapped output character.
+const UNMAPPED: u32 = u32::MAX;
+
+/// Tracks generated output text alongside a per-character source offset
+/// array. For each output character, `src_offsets` records the corresponding
+/// source byte offset, or `UNMAPPED` for generated/synthesized text.
+/// After emission and normalization, this array is used to produce source
+/// map mappings.
 struct SourceMapTracker<'a> {
     output: String,
-    gen_line: i32,
-    gen_col: i32,
+    /// For each output *character*, the source byte offset (u32::MAX = unmapped).
+    src_offsets: Vec<u32>,
     source: &'a str,
-    source_line_starts: Vec<usize>,
-    generator: Option<&'a mut Generator>,
-    source_index: SourceIndex,
 }
 
 impl<'a> SourceMapTracker<'a> {
-    fn new(
-        source: &'a str,
-        generator: Option<&'a mut Generator>,
-        source_index: SourceIndex,
-    ) -> Self {
-        let source_line_starts = compute_line_starts(source);
+    fn new(source: &'a str) -> Self {
         SourceMapTracker {
             output: String::new(),
-            gen_line: 0,
-            gen_col: 0,
+            src_offsets: Vec::new(),
             source,
-            source_line_starts,
-            generator,
-            source_index,
         }
     }
 
-    /// Append generated text (no source mapping). Updates generated position.
+    /// Append generated text (no source mapping). Each character gets
+    /// `UNMAPPED` in the src_offsets array.
     fn push_generated(&mut self, text: &str) {
-        for ch in text.chars() {
-            if ch == '\n' {
-                self.gen_line += 1;
-                self.gen_col = 0;
-            } else {
-                self.gen_col += ch.len_utf16() as i32;
-            }
-        }
+        let char_count = text.chars().count();
         self.output.push_str(text);
+        self.src_offsets
+            .resize(self.src_offsets.len() + char_count, UNMAPPED);
     }
 
-    /// Append a range of source text `[start, end)` and record a source
-    /// mapping from the current generated position to the source position
-    /// at `start`.
+    /// Append a range of source text `[start, end)`. Each character gets
+    /// its corresponding source byte offset.
     fn push_source(&mut self, start: usize, end: usize) {
         if start >= end {
             return;
         }
-        // Add source mapping before emitting the text.
-        if let Some(generator) = &mut self.generator {
-            let (src_line, line_start) = offset_to_line(&self.source_line_starts, start);
-            let src_col = utf16_column(self.source, line_start, start);
-            let _ = generator.add_source_mapping(
-                self.gen_line,
-                self.gen_col,
-                self.source_index,
-                src_line,
-                src_col,
-            );
+        let slice = &self.source[start..end];
+        let mut byte_off = start;
+        for ch in slice.chars() {
+            self.output.push(ch);
+            self.src_offsets.push(byte_off as u32);
+            byte_off += ch.len_utf8();
         }
-        let text = &self.source[start..end];
-        self.push_generated(text);
     }
 
-    fn finish(self) -> String {
-        self.output
+    /// Append replacement text where the first character maps to `src_pos`
+    /// and the rest are unmapped. Used for JSX replacement text that
+    /// corresponds to a source JSX element.
+    fn push_source_mapped(&mut self, text: &str, src_pos: usize) {
+        let mut first = true;
+        for ch in text.chars() {
+            self.output.push(ch);
+            if first {
+                self.src_offsets.push(src_pos as u32);
+                first = false;
+            } else {
+                self.src_offsets.push(UNMAPPED);
+            }
+        }
+    }
+
+    fn finish(self) -> (String, Vec<u32>) {
+        (self.output, self.src_offsets)
     }
 }
 
@@ -141,11 +138,13 @@ impl<'a> SourceMapTracker<'a> {
 /// `SourceMapTracker` implements it for source-map-tracked emission.
 trait EmitSink {
     /// Emit a slice of source text `[start, end)`. When source map tracking
-    /// is active, a mapping from the current generated position to the source
-    /// position at `start` is recorded.
+    /// is active, the source byte offsets are recorded per character.
     fn emit_source(&mut self, source: &str, start: usize, end: usize);
     /// Emit generated text with no source mapping.
     fn emit_generated(&mut self, text: &str);
+    /// Emit replacement text where the first character maps to `src_pos`
+    /// and the rest are unmapped. Used for JSX replacement text.
+    fn emit_source_mapped(&mut self, text: &str, src_pos: usize);
 }
 
 impl EmitSink for String {
@@ -153,6 +152,9 @@ impl EmitSink for String {
         self.push_str(&source[start..end]);
     }
     fn emit_generated(&mut self, text: &str) {
+        self.push_str(text);
+    }
+    fn emit_source_mapped(&mut self, text: &str, _src_pos: usize) {
         self.push_str(text);
     }
 }
@@ -164,6 +166,9 @@ impl<'a> EmitSink for SourceMapTracker<'a> {
     }
     fn emit_generated(&mut self, text: &str) {
         self.push_generated(text);
+    }
+    fn emit_source_mapped(&mut self, text: &str, src_pos: usize) {
+        self.push_source_mapped(text, src_pos);
     }
 }
 
@@ -460,22 +465,98 @@ fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
 }
 
 /// Emit JavaScript text with source map tracking. The `Generator` receives
-/// mappings as source text slices are emitted.
+/// mappings derived from the per-character source offset array after
+/// normalization.
 fn emit_js_text_tracked(
     source_file: &SourceFile,
     options: &CompilerOptions,
     generator: &mut Generator,
     source_index: SourceIndex,
 ) -> String {
-    let mut tracker = SourceMapTracker::new(&source_file.text, Some(generator), source_index);
+    let source = &source_file.text;
+    let source_line_starts = compute_line_starts(source);
+
+    let mut tracker = SourceMapTracker::new(source);
     emit_js_text_inner(source_file, options, &mut tracker);
-    let text = tracker.finish();
-    let text = rewrite_import_extensions(&text);
-    // Normalize to match Go's AST printer. NOTE: normalization reshapes the
-    // text, which invalidates the source positions recorded above; generated
-    // source maps will be approximate until tracking is rebuilt on the
-    // normalized output.
-    normalize_js_output(&text)
+    let (text, src_offsets) = tracker.finish();
+
+    let (text, src_offsets) = rewrite_import_extensions_tracked(&text, &src_offsets);
+    let (js_text, src_offsets) = normalize_js_output_tracked(&text, &src_offsets);
+
+    generate_source_map_from_offsets(
+        generator,
+        source_index,
+        &js_text,
+        &src_offsets,
+        source,
+        &source_line_starts,
+    );
+
+    js_text
+}
+
+/// Walk the final output text and src_offsets array, emitting source map
+/// mappings to the generator.
+fn generate_source_map_from_offsets(
+    generator: &mut Generator,
+    source_index: SourceIndex,
+    output: &str,
+    src_offsets: &[u32],
+    source: &str,
+    source_line_starts: &[usize],
+) {
+    let out_chars: Vec<char> = output.chars().collect();
+    let mut gen_line: i32 = 0;
+    let mut gen_col: i32 = 0;
+    let mut prev_src: u32 = UNMAPPED;
+
+    for (i, &src_off) in src_offsets.iter().enumerate() {
+        let ch = out_chars.get(i).copied().unwrap_or('\n');
+
+        // Only emit mappings for non-newline characters with valid source
+        // offsets. Newline characters are line terminators and never carry
+        // meaningful source position information.
+        if ch != '\n' && src_off != UNMAPPED {
+            let should_emit = if prev_src == UNMAPPED {
+                true
+            } else {
+                let prev_byte = prev_src as usize;
+                if prev_byte < source.len() {
+                    let prev_char_len = source[prev_byte..]
+                        .chars()
+                        .next()
+                        .map(|c| c.len_utf8())
+                        .unwrap_or(1);
+                    src_off != prev_src + prev_char_len as u32
+                } else {
+                    true
+                }
+            };
+            if should_emit {
+                let byte_off = src_off as usize;
+                let (src_line, line_start) = offset_to_line(source_line_starts, byte_off);
+                let src_col = utf16_column(source, line_start, byte_off);
+                let _ = generator.add_source_mapping(
+                    gen_line,
+                    gen_col,
+                    source_index,
+                    src_line,
+                    src_col,
+                );
+            }
+        }
+
+        // Advance generated position. Reset continuity at line boundaries so
+        // the first character of each line always emits a mapping.
+        if ch == '\n' {
+            gen_line += 1;
+            gen_col = 0;
+            prev_src = UNMAPPED;
+        } else {
+            gen_col += ch.len_utf16() as i32;
+            prev_src = src_off;
+        }
+    }
 }
 
 /// Core statement-walking emit logic, generic over the output sink.
@@ -525,14 +606,17 @@ fn emit_js_text_inner<S: EmitSink>(
         Vec::new()
     };
 
-    // Build a combined replacement list (ES5 static + JSX dynamic) as `&str`
-    // so it can be passed to `emit_text_range` / `emit_statement`.
-    let mut all_replacements: Vec<(usize, usize, &str)> = Vec::new();
+    // Build a combined replacement list (ES5 static + JSX dynamic).
+    // Each entry is (start, end, replacement_str, Option<src_pos>).
+    // For JSX replacements, src_pos is the JSX element's source position
+    // so the replacement text can be source-mapped. For ES5/type-erasure
+    // replacements, src_pos is None (purely generated text).
+    let mut all_replacements: Vec<(usize, usize, &str, Option<usize>)> = Vec::new();
     for &(s, e, r) in &replacements {
-        all_replacements.push((s, e, r));
+        all_replacements.push((s, e, r, None));
     }
     for (s, e, r) in &jsx_replacements {
-        all_replacements.push((*s, *e, r.as_str()));
+        all_replacements.push((*s, *e, r.as_str(), Some(*s)));
     }
 
     let commonjs = options.module == ModuleKind::CommonJS;
@@ -1072,7 +1156,7 @@ fn emit_text_range<S: EmitSink>(
     start: usize,
     end: usize,
     cuts: &[(usize, usize)],
-    replacements: &[(usize, usize, &str)],
+    replacements: &[(usize, usize, &str, Option<usize>)],
     sink: &mut S,
 ) {
     if cuts.is_empty() && replacements.is_empty() {
@@ -1080,16 +1164,16 @@ fn emit_text_range<S: EmitSink>(
         return;
     }
     // Merge cuts and replacements into a single sorted operation list.
-    // Each operation is (start, end, Option<replacement>).
-    let mut ops: Vec<(usize, usize, Option<&str>)> = Vec::new();
+    // Each operation is (start, end, Option<(replacement, src_pos)>).
+    let mut ops: Vec<(usize, usize, Option<(&str, Option<usize>)>)> = Vec::new();
     for &(cs, ce) in cuts {
         if ce > start && cs < end {
             ops.push((cs.max(start), ce.min(end), None));
         }
     }
-    for &(rs, re, repl) in replacements {
+    for &(rs, re, repl, src_pos) in replacements {
         if re > start && rs < end {
-            ops.push((rs.max(start), re.min(end), Some(repl)));
+            ops.push((rs.max(start), re.min(end), Some((repl, src_pos))));
         }
     }
     if ops.is_empty() {
@@ -1102,8 +1186,12 @@ fn emit_text_range<S: EmitSink>(
         if *s > pos {
             sink.emit_source(source, pos, *s);
         }
-        if let Some(r) = repl {
-            sink.emit_generated(r);
+        if let Some((r, src_pos)) = repl {
+            if let Some(sp) = src_pos {
+                sink.emit_source_mapped(r, *sp);
+            } else {
+                sink.emit_generated(r);
+            }
         }
         pos = *e;
     }
@@ -1878,6 +1966,571 @@ fn normalize_js_output(text: &str) -> String {
     add_implicit_semicolons(&reindented)
 }
 
+// ── Position-aware (tracked) normalization ──────────────────────────
+//
+// These functions mirror their non-tracked counterparts exactly in text
+// output, but also carry a parallel `src_offsets` array (one u32 per
+// character) through each transformation.  After normalization the array
+// is used to emit source-map mappings.
+
+/// Tracked version of `rewrite_import_extensions`.
+fn rewrite_import_extensions_tracked(text: &str, src_offsets: &[u32]) -> (String, Vec<u32>) {
+    let chars: Vec<char> = text.chars().collect();
+    let n = chars.len();
+    let mut out_text = String::with_capacity(text.len());
+    let mut out_offsets = Vec::with_capacity(n);
+    let mut i = 0;
+    while i < n {
+        if i + 5 <= n
+            && chars[i] == 'f'
+            && chars[i + 1] == 'r'
+            && chars[i + 2] == 'o'
+            && chars[i + 3] == 'm'
+            && chars[i + 4] == ' '
+        {
+            i = copy_string_literal_tracked(
+                &chars,
+                src_offsets,
+                i,
+                &mut out_text,
+                &mut out_offsets,
+            );
+        } else if i + 7 <= n
+            && chars[i] == 'i'
+            && chars[i + 1] == 'm'
+            && chars[i + 2] == 'p'
+            && chars[i + 3] == 'o'
+            && chars[i + 4] == 'r'
+            && chars[i + 5] == 't'
+            && chars[i + 6] == '('
+        {
+            for j in 0..7 {
+                out_text.push(chars[i + j]);
+                out_offsets.push(src_offsets[i + j]);
+            }
+            i += 7;
+            while i < n && chars[i].is_ascii_whitespace() {
+                out_text.push(chars[i]);
+                out_offsets.push(src_offsets[i]);
+                i += 1;
+            }
+            if i < n && (chars[i] == '"' || chars[i] == '\'') {
+                i = copy_string_literal_tracked(
+                    &chars,
+                    src_offsets,
+                    i,
+                    &mut out_text,
+                    &mut out_offsets,
+                );
+            }
+        } else {
+            out_text.push(chars[i]);
+            out_offsets.push(src_offsets[i]);
+            i += 1;
+        }
+    }
+    (out_text, out_offsets)
+}
+
+/// Helper: copy a `from "..."` or string-literal starting at index `i`
+/// (pointing at `f` of `from` or at the quote), rewriting the extension.
+/// Returns the index past the closing quote.
+fn copy_string_literal_tracked(
+    chars: &[char],
+    src_offsets: &[u32],
+    start: usize,
+    out_text: &mut String,
+    out_offsets: &mut Vec<u32>,
+) -> usize {
+    // Copy the `from ` prefix (or just start at the quote).
+    let mut i = start;
+    if chars[i] == 'f' {
+        for _ in 0..5 {
+            out_text.push(chars[i]);
+            out_offsets.push(src_offsets[i]);
+            i += 1;
+        }
+        while i < chars.len() && chars[i].is_ascii_whitespace() {
+            out_text.push(chars[i]);
+            out_offsets.push(src_offsets[i]);
+            i += 1;
+        }
+    }
+    // Now at the quote.
+    if i < chars.len() && (chars[i] == '"' || chars[i] == '\'') {
+        let quote = chars[i];
+        out_text.push(quote);
+        out_offsets.push(src_offsets[i]);
+        i += 1;
+        let spec_start = i;
+        while i < chars.len() && chars[i] != quote {
+            i += 1;
+        }
+        let specifier: String = chars[spec_start..i].iter().collect();
+        let rewritten = rewrite_one_specifier(&specifier);
+        let spec_len = i - spec_start;
+        for (j, rc) in rewritten.chars().enumerate() {
+            out_text.push(rc);
+            if j < spec_len {
+                out_offsets.push(src_offsets[spec_start + j]);
+            } else {
+                out_offsets.push(src_offsets[spec_start + spec_len - 1]);
+            }
+        }
+        if i < chars.len() {
+            out_text.push(chars[i]);
+            out_offsets.push(src_offsets[i]);
+            i += 1;
+        }
+    }
+    i
+}
+
+/// Tracked version of `fold_expression_newlines`.
+fn fold_expression_newlines_tracked(text: &str, src_offsets: &[u32]) -> (String, Vec<u32>) {
+    let chars: Vec<char> = text.chars().collect();
+    let n = chars.len();
+    let mut out: Vec<char> = Vec::with_capacity(n);
+    let mut out_idx: Vec<usize> = Vec::with_capacity(n); // input char index per output char
+
+    #[derive(Clone, Copy, PartialEq)]
+    enum SCtx {
+        Single,
+        Double,
+        Template,
+        LineComment,
+        BlockComment,
+    }
+    #[derive(Clone, Copy)]
+    enum Group {
+        Paren(bool),
+        Bracket(bool),
+        Brace,
+        TmplInterp,
+    }
+
+    let mut sctx: Vec<SCtx> = Vec::new();
+    let mut groups: Vec<Group> = Vec::new();
+
+    let mut i = 0;
+    while i < n {
+        let c = chars[i];
+
+        // --- Inside a string or comment ---
+        if let Some(&ctx) = sctx.last() {
+            match ctx {
+                SCtx::Single => {
+                    out.push(c);
+                    out_idx.push(i);
+                    if c == '\\' {
+                        i += 1;
+                        if i < n {
+                            out.push(chars[i]);
+                            out_idx.push(i);
+                            i += 1;
+                        }
+                        continue;
+                    }
+                    if c == '\'' {
+                        sctx.pop();
+                    }
+                    i += 1;
+                    continue;
+                }
+                SCtx::Double => {
+                    out.push(c);
+                    out_idx.push(i);
+                    if c == '\\' {
+                        i += 1;
+                        if i < n {
+                            out.push(chars[i]);
+                            out_idx.push(i);
+                            i += 1;
+                        }
+                        continue;
+                    }
+                    if c == '"' {
+                        sctx.pop();
+                    }
+                    i += 1;
+                    continue;
+                }
+                SCtx::Template => {
+                    out.push(c);
+                    out_idx.push(i);
+                    if c == '\\' {
+                        i += 1;
+                        if i < n {
+                            out.push(chars[i]);
+                            out_idx.push(i);
+                            i += 1;
+                        }
+                        continue;
+                    }
+                    if c == '`' {
+                        sctx.pop();
+                        i += 1;
+                        continue;
+                    }
+                    if c == '$' && i + 1 < n && chars[i + 1] == '{' {
+                        out.push('{');
+                        out_idx.push(i + 1);
+                        sctx.pop();
+                        groups.push(Group::TmplInterp);
+                        i += 2;
+                        continue;
+                    }
+                    i += 1;
+                    continue;
+                }
+                SCtx::LineComment => {
+                    if c == '\n' || c == '\r' {
+                        sctx.pop();
+                        // Fall through to code-mode handling.
+                    } else {
+                        out.push(c);
+                        out_idx.push(i);
+                        i += 1;
+                        continue;
+                    }
+                }
+                SCtx::BlockComment => {
+                    out.push(c);
+                    out_idx.push(i);
+                    if c == '*' && i + 1 < n && chars[i + 1] == '/' {
+                        out.push('/');
+                        out_idx.push(i + 1);
+                        sctx.pop();
+                        i += 2;
+                        continue;
+                    }
+                    i += 1;
+                    continue;
+                }
+            }
+        }
+
+        // --- CODE MODE ---
+        if c == '\'' {
+            sctx.push(SCtx::Single);
+            out.push(c);
+            out_idx.push(i);
+            i += 1;
+            continue;
+        }
+        if c == '"' {
+            sctx.push(SCtx::Double);
+            out.push(c);
+            out_idx.push(i);
+            i += 1;
+            continue;
+        }
+        if c == '`' {
+            sctx.push(SCtx::Template);
+            out.push(c);
+            out_idx.push(i);
+            i += 1;
+            continue;
+        }
+        if c == '/' && i + 1 < n && chars[i + 1] == '/' {
+            sctx.push(SCtx::LineComment);
+            out.push('/');
+            out_idx.push(i);
+            out.push('/');
+            out_idx.push(i + 1);
+            i += 2;
+            continue;
+        }
+        if c == '/' && i + 1 < n && chars[i + 1] == '*' {
+            sctx.push(SCtx::BlockComment);
+            out.push('/');
+            out_idx.push(i);
+            out.push('*');
+            out_idx.push(i + 1);
+            i += 2;
+            continue;
+        }
+
+        if c == '(' {
+            groups.push(Group::Paren(false));
+            out.push(c);
+            out_idx.push(i);
+            i += 1;
+            continue;
+        }
+        if c == '[' {
+            groups.push(Group::Bracket(false));
+            out.push(c);
+            out_idx.push(i);
+            i += 1;
+            continue;
+        }
+        if c == '{' {
+            groups.push(Group::Brace);
+            out.push(c);
+            out_idx.push(i);
+            i += 1;
+            continue;
+        }
+        if c == ')' {
+            if let Some(Group::Paren(folded)) = groups.last().copied() {
+                groups.pop();
+                if folded {
+                    drop_trailing_idx(&mut out, &mut out_idx);
+                }
+            }
+            out.push(c);
+            out_idx.push(i);
+            i += 1;
+            continue;
+        }
+        if c == ']' {
+            if let Some(Group::Bracket(folded)) = groups.last().copied() {
+                groups.pop();
+                if folded {
+                    drop_trailing_idx(&mut out, &mut out_idx);
+                }
+            }
+            out.push(c);
+            out_idx.push(i);
+            i += 1;
+            continue;
+        }
+        if c == '}' {
+            match groups.last() {
+                Some(Group::TmplInterp) => {
+                    groups.pop();
+                    sctx.push(SCtx::Template);
+                    out.push(c);
+                    out_idx.push(i);
+                    i += 1;
+                    continue;
+                }
+                Some(Group::Brace) => {
+                    groups.pop();
+                }
+                _ => {}
+            }
+            out.push(c);
+            out_idx.push(i);
+            i += 1;
+            continue;
+        }
+
+        if c == '\n' || c == '\r' {
+            let do_fold = matches!(
+                groups.last(),
+                Some(Group::Paren(_)) | Some(Group::Bracket(_))
+            );
+            if do_fold {
+                if let Some(g) = groups.last_mut() {
+                    if let Group::Paren(f) | Group::Bracket(f) = g {
+                        *f = true;
+                    }
+                }
+                while let Some(&ch) = out.last() {
+                    if ch == ' ' || ch == '\t' {
+                        out.pop();
+                        out_idx.pop();
+                    } else {
+                        break;
+                    }
+                }
+                i += 1;
+                if i < n && chars[i - 1] == '\r' && chars[i] == '\n' {
+                    i += 1;
+                }
+                while i < n && (chars[i] == ' ' || chars[i] == '\t') {
+                    i += 1;
+                }
+            } else {
+                out.push('\n');
+                out_idx.push(i);
+                i += 1;
+                if i < n && chars[i - 1] == '\r' && chars[i] == '\n' {
+                    i += 1;
+                }
+            }
+            continue;
+        }
+
+        out.push(c);
+        out_idx.push(i);
+        i += 1;
+    }
+
+    let result_text: String = out.into_iter().collect();
+    let result_offsets: Vec<u32> = out_idx.iter().map(|&idx| src_offsets[idx]).collect();
+    (result_text, result_offsets)
+}
+
+/// Remove a trailing comma (and preceding whitespace) from both the char
+/// buffer and the index buffer.
+fn drop_trailing_idx(out: &mut Vec<char>, out_idx: &mut Vec<usize>) {
+    while let Some(&ch) = out.last() {
+        if ch == ' ' || ch == '\t' {
+            out.pop();
+            out_idx.pop();
+        } else {
+            break;
+        }
+    }
+    if out.last() == Some(&',') {
+        out.pop();
+        out_idx.pop();
+    }
+}
+
+/// Tracked version of `reindent_and_dedup`.
+fn reindent_and_dedup_tracked(folded: &str, src_offsets: &[u32]) -> (String, Vec<u32>) {
+    let chars: Vec<char> = folded.chars().collect();
+    let n = chars.len();
+    let mut out_text = String::with_capacity(folded.len());
+    let mut out_offsets: Vec<u32> = Vec::new();
+    let mut depth: i32 = 0;
+    let had_trailing_newline = n > 0 && chars[n - 1] == '\n';
+
+    let mut i = 0;
+    while i < n {
+        let line_start = i;
+        while i < n && chars[i] != '\n' {
+            i += 1;
+        }
+        let line_end = i;
+        let newline_idx = if i < n && chars[i] == '\n' {
+            Some(i)
+        } else {
+            None
+        };
+        if i < n && chars[i] == '\n' {
+            i += 1;
+        }
+
+        // Trim leading/trailing whitespace within the line.
+        let mut content_start = line_start;
+        while content_start < line_end && chars[content_start].is_whitespace() {
+            content_start += 1;
+        }
+        let mut content_end = line_end;
+        while content_end > content_start && chars[content_end - 1].is_whitespace() {
+            content_end -= 1;
+        }
+
+        if content_start >= content_end {
+            continue;
+        }
+
+        let starts_with_close = chars[content_start] == '}';
+        let indent_depth = (depth - if starts_with_close { 1 } else { 0 }).max(0);
+        for _ in 0..indent_depth {
+            out_text.push_str("    ");
+            for _ in 0..4 {
+                out_offsets.push(UNMAPPED);
+            }
+        }
+        for j in content_start..content_end {
+            out_text.push(chars[j]);
+            out_offsets.push(src_offsets[j]);
+        }
+        out_text.push('\n');
+        if let Some(nl) = newline_idx {
+            out_offsets.push(src_offsets[nl]);
+        } else {
+            out_offsets.push(src_offsets[content_end - 1]);
+        }
+
+        let content: String = chars[content_start..content_end].iter().collect();
+        depth += brace_delta(&content);
+        if depth < 0 {
+            depth = 0;
+        }
+    }
+
+    if !had_trailing_newline && out_text.ends_with('\n') {
+        out_text.pop();
+        out_offsets.pop();
+    }
+    (out_text, out_offsets)
+}
+
+/// Tracked version of `add_implicit_semicolons`.
+fn add_implicit_semicolons_tracked(text: &str, src_offsets: &[u32]) -> (String, Vec<u32>) {
+    let chars: Vec<char> = text.chars().collect();
+    let n = chars.len();
+    let mut out_text = String::with_capacity(text.len());
+    let mut out_offsets: Vec<u32> = Vec::new();
+    let had_trailing_newline = n > 0 && chars[n - 1] == '\n';
+
+    let mut i = 0;
+    while i < n {
+        let line_start = i;
+        while i < n && chars[i] != '\n' {
+            i += 1;
+        }
+        let line_end = i;
+        let has_newline = i < n && chars[i] == '\n';
+        if has_newline {
+            i += 1;
+        }
+
+        // trim_end
+        let mut content_end = line_end;
+        while content_end > line_start && chars[content_end - 1].is_whitespace() {
+            content_end -= 1;
+        }
+
+        if content_end == line_start {
+            out_text.push('\n');
+            if has_newline {
+                out_offsets.push(src_offsets[line_end]);
+            } else {
+                out_offsets.push(UNMAPPED);
+            }
+            continue;
+        }
+
+        let last = chars[content_end - 1];
+        let trimmed_str: String = chars[line_start..content_end].iter().collect();
+        let skip = matches!(
+            last,
+            '{' | '(' | '[' | ',' | ';' | ':' | '.' | '|' | '&' | '=' | '>' | '?'
+        ) || trimmed_str.ends_with("=>")
+            || trimmed_str.starts_with("//")
+            || trimmed_str.starts_with("/*")
+            || trimmed_str.ends_with("*/");
+
+        for j in line_start..content_end {
+            out_text.push(chars[j]);
+            out_offsets.push(src_offsets[j]);
+        }
+
+        if !skip && last != '}' {
+            out_text.push(';');
+            out_offsets.push(UNMAPPED);
+        }
+
+        out_text.push('\n');
+        if has_newline {
+            out_offsets.push(src_offsets[line_end]);
+        } else {
+            out_offsets.push(UNMAPPED);
+        }
+    }
+
+    if !had_trailing_newline && out_text.ends_with('\n') {
+        out_text.pop();
+        out_offsets.pop();
+    }
+    (out_text, out_offsets)
+}
+
+/// Tracked version of `normalize_js_output`.
+fn normalize_js_output_tracked(text: &str, src_offsets: &[u32]) -> (String, Vec<u32>) {
+    let (text, offsets) = fold_expression_newlines_tracked(text, src_offsets);
+    let (text, offsets) = reindent_and_dedup_tracked(&text, &offsets);
+    add_implicit_semicolons_tracked(&text, &offsets)
+}
+
 /// Fold newlines that occur inside `()` or `[]` so that multi-line calls,
 /// parenthesized expressions, and array literals collapse to a single line.
 ///
@@ -2253,7 +2906,7 @@ fn emit_statement<S: EmitSink>(
     node: &Node,
     source: &str,
     comment_cuts: &[(usize, usize)],
-    replacements: &[(usize, usize, &str)],
+    replacements: &[(usize, usize, &str, Option<usize>)],
     sink: &mut S,
 ) {
     let mut cuts: Vec<(usize, usize)> = Vec::new();
@@ -2269,10 +2922,10 @@ fn emit_statement<S: EmitSink>(
     }
 
     // Collect replacements that fall within this statement's range.
-    let mut stmt_replacements: Vec<(usize, usize, &str)> = Vec::new();
-    for &(rs, re, repl) in replacements {
+    let mut stmt_replacements: Vec<(usize, usize, &str, Option<usize>)> = Vec::new();
+    for &(rs, re, repl, src_pos) in replacements {
         if re > node.pos() && rs < node.end() {
-            stmt_replacements.push((rs, re, repl));
+            stmt_replacements.push((rs, re, repl, src_pos));
         }
     }
 
@@ -2286,14 +2939,14 @@ fn emit_statement<S: EmitSink>(
     // Cuts are clamped to the statement's `[pos, end)` range so that modifier
     // keywords sitting *before* `pos` (e.g. top-level `abstract`/`declare`,
     // handled during inter-statement text emission) don't corrupt the body.
-    let mut ops: Vec<(usize, usize, Option<&str>)> = Vec::new();
+    let mut ops: Vec<(usize, usize, Option<(&str, Option<usize>)>)> = Vec::new();
     for (cs, ce) in &cuts {
         if *ce > node.pos() && *cs < node.end() {
             ops.push(((*cs).max(node.pos()), (*ce).min(node.end()), None));
         }
     }
-    for (rs, re, repl) in &stmt_replacements {
-        ops.push((*rs, *re, Some(*repl)));
+    for (rs, re, repl, src_pos) in &stmt_replacements {
+        ops.push((*rs, *re, Some((*repl, *src_pos))));
     }
     ops.sort_by_key(|&(s, _, _)| s);
 
@@ -2302,8 +2955,12 @@ fn emit_statement<S: EmitSink>(
         if *s > pos {
             sink.emit_source(source, pos, *s);
         }
-        if let Some(r) = repl {
-            sink.emit_generated(r);
+        if let Some((r, src_pos)) = repl {
+            if let Some(sp) = src_pos {
+                sink.emit_source_mapped(r, *sp);
+            } else {
+                sink.emit_generated(r);
+            }
         }
         pos = *e;
     }
