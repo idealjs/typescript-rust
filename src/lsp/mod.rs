@@ -202,14 +202,64 @@ impl LspServer {
                 "textDocumentSync": 1, // Full sync
                 "hoverProvider": true,
                 "definitionProvider": true,
+                "typeDefinitionProvider": true,
                 "referencesProvider": true,
+                "implementationProvider": true,
                 "documentSymbolProvider": true,
-                "renameProvider": true,
+                "workspaceSymbolProvider": true,
+                "renameProvider": {
+                    "prepareProvider": true
+                },
                 "completionProvider": {
                     "triggerCharacters": [".", "\"", "'", "/", "@", "<"],
-                    "resolveProvider": false
+                    "resolveProvider": true
+                },
+                "signatureHelpProvider": {
+                    "triggerCharacters": ["(", ",", "<"],
+                    "retriggerCharacters": [")"]
                 },
                 "documentFormattingProvider": true,
+                "documentRangeFormattingProvider": true,
+                "documentOnTypeFormattingProvider": {
+                    "firstTriggerCharacter": "{",
+                    "moreTriggerCharacter": ["}", ";", "\n"]
+                },
+                "foldingRangeProvider": true,
+                "selectionRangeProvider": true,
+                "documentHighlightProvider": true,
+                "inlayHintProvider": true,
+                "codeLensProvider": {
+                    "resolveProvider": true
+                },
+                "codeActionProvider": {
+                    "codeActionKinds": [
+                        "quickfix",
+                        "source.organizeImports",
+                        "source.removeUnusedImports",
+                        "source.sortImports",
+                        "source.fixAll"
+                    ]
+                },
+                "callHierarchyProvider": true,
+                "linkedEditingRangeProvider": true,
+                "semanticTokensProvider": {
+                    "legend": {
+                        "tokenTypes": [
+                            "namespace", "class", "enum", "interface", "struct",
+                            "typeParameter", "type", "parameter", "variable",
+                            "property", "enumMember", "decorator", "event",
+                            "function", "method", "macro", "label", "comment",
+                            "string", "keyword", "number", "regexp", "operator"
+                        ],
+                        "tokenModifiers": [
+                            "declaration", "definition", "readonly", "static",
+                            "deprecated", "abstract", "async", "modification",
+                            "documentation", "defaultLibrary", "local"
+                        ]
+                    },
+                    "full": true,
+                    "range": true
+                },
                 "diagnosticProvider": {
                     "interFileDependencies": true,
                     "workspaceDiagnostics": false
