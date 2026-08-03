@@ -271,7 +271,7 @@ impl UserPreferences {
 /// Inlay-hints preferences.
 ///
 /// Mirrors `InlayHintsPreferences` in Go.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct InlayHintsPreferences {
     pub include_inlay_parameter_name_hints: IncludeInlayParameterNameHints,
     pub include_inlay_parameter_name_hints_when_argument_matches_name: Tristate,
@@ -286,7 +286,7 @@ pub struct InlayHintsPreferences {
 /// Code-lens preferences.
 ///
 /// Mirrors `CodeLensUserPreferences` in Go.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct CodeLensUserPreferences {
     pub references_code_lens_enabled: Tristate,
     pub implementations_code_lens_enabled: Tristate,
