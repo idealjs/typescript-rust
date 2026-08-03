@@ -21,9 +21,9 @@ TSGO_ORACLE=/Users/cqh/workspace/typescript-go/built/local/tsgo cargo test --tes
 2. 真实项目可对齐（`tsox -p tsconfig.json` 诊断集合一致）
 3. LSP/API/npm 包独立可用
 
-## 当前进度（2026-08-03）
+## 当前进度（2026-08-04）
 
-**1,282 lib 通过**（+ 920 checker_parity + 2 emit），**0 ignored**。
+**1,290 lib 通过**（+ 920 checker_parity + 2 emit），**0 ignored**。
 
 | 模块 | 完成度 |
 |------|--------|
@@ -33,7 +33,7 @@ TSGO_ORACLE=/Users/cqh/workspace/typescript-go/built/local/tsgo cargo test --tes
 | Checker | ~30% |
 | Compiler/Module | ~60% |
 | Emitter | 基础完成 + JS/d.ts 字节对齐 Go |
-| LSP | 基础完成（hover/completion/definition/references/rename/documentSymbol/diagnostics）|
+| LSP | 骨架完成（107 文件 / 17,745 行 — 严格 1:1 Go 映射）|
 | API | 基础完成 |
 | --watch | 已实现（notify crate）|
 | --build | 已实现（project reference + cycle + .tsbuildinfo）|
@@ -83,11 +83,11 @@ D(symbol_to_display_parts)、E(零 ignore — 全部 Rust 适配)。
 ## P0-P9 状态
 
 P0 基线 ✅ | P1 CLI/tsconfig ✅ | P2 Scanner/Parser ✅ | P3 Binder/Checker 进行中(~30%) |
-P4 Emit ✅ (JS/d.ts 字节对齐) | P5 Module Resolution ✅ | P6 Build/Watch ✅ | P7 LSP ✅ | P8 npm/API ✅ | P9 工具链 ✅
+P4 Emit ✅ (JS/d.ts 字节对齐) | P5 Module Resolution ✅ | P6 Build/Watch ✅ | P7 LSP ✅ (骨架完成) | P8 npm/API ✅ | P9 工具链 ✅
 
 ## P10：Go 测试用例 1:1 迁移
 
-Go **1,219 测试 / 508 文件 / 44 模块**。Rust **1,282 lib 通过 / 0 ignored**。
+Go **1,219 测试 / 508 文件 / 44 模块**。Rust **1,290 lib 通过 / 0 ignored**。
 
 所有 Go 测试模块已迁移或适配。Rust 无法直接移植的测试（Go 并发竞态、V8 引擎、
 Windows reparse point、AST 深拷贝等）已用 Rust 等价实现替代，详见
