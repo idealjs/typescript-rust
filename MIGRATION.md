@@ -7,9 +7,10 @@ enough to stand alone.
 > **规划文档**：迁移目标、阶段任务、进度快照、下阶段优先级统一记录在
 > [`TODO.md`](./TODO.md)。本文档只保留流程审计与行为差异细节，按阶段查阅。
 >
-> 2026-07-31 状态摘要：`cargo test` 通过（609 lib + 2 emit parity + 501
-> checker parity）。Parser ~77%、Binder ~41%、Checker ~20%。当前焦点为
-> P1 CLI/tsconfig 收尾与 P0 CI/文档基线，详见 TODO.md “下阶段优先级”。
+> 2026-08-03 状态摘要：`cargo test` 通过（1,282 lib + 2 emit parity + 920
+> checker parity）。集成测试里程碑：ai-Color-toner 项目 JS/d.ts 产物与 Go
+> oracle **字节一致**，诊断 **0 错误**。Parser ~95%、Binder ~60%、Checker ~30%。
+> Emitter 基础完成 + JS/d.ts 字节对齐。详见 TODO.md 与 INTEGRATION_TEST.md。
 
 ## Worktrees
 

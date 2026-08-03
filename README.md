@@ -48,10 +48,25 @@ and prints a clear skip reason when none is found.
 
 - [`TODO.md`](./TODO.md) — migration goals, staged tasks, progress snapshot,
   and next priorities. **Start here.**
+- [`INTEGRATION_TEST.md`](./INTEGRATION_TEST.md) — real-project integration
+  test results (ai-Color-toner): JS/d.ts byte-identical to Go, 0 diagnostics.
 - [`MIGRATION.md`](./MIGRATION.md) — flow audits and behavior-diff details by
   phase, plus run/build instructions.
 - [`ANALYSIS.md`](./ANALYSIS.md) — Go vs Rust structure comparison, module
   mapping, and completed-work inventory.
+
+## Integration test status
+
+The `ai-Color-toner` project (React + Vite + TypeScript) serves as the
+integration benchmark:
+
+| Metric | Status |
+|--------|--------|
+| Diagnostics | 0 errors (matches Go) |
+| `App.js` / `main.js` | Byte-identical to Go |
+| `App.d.ts` / `main.d.ts` | Byte-identical to Go |
+| Source maps | Structurally correct (lower granularity than Go) |
+| Library tests | 1,282 passed, 0 failed |
 
 ## Worktree layout
 
