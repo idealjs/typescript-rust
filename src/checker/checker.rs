@@ -366,6 +366,13 @@ pub struct Checker {
     pub reverse_mapped_symbol_links: LinkStore<Symbol, ReverseMappedSymbolLinks>,
     pub marked_assignment_symbol_links: LinkStore<Symbol, MarkedAssignmentSymbolLinks>,
     pub symbol_container_links: LinkStore<Symbol, ContainingSymbolLinks>,
+    /// Cache of alias symbols from globals/exports/resolved-exports symbol
+    /// tables, keyed by `symbolTableID`. Mirrors Go's
+    /// `symbolTableAliasCache` (checker.go).
+    pub symbol_table_alias_cache: HashMap<u64, Vec<Arc<Symbol>>>,
+    /// Cached symbol tables for class expression names, keyed by node ID.
+    /// Mirrors Go's `classExpressionNameTables` (checker.go).
+    pub class_expression_name_tables: HashMap<u64, SymbolTable>,
     pub source_file_links: LinkStore<SourceFile, SourceFileLinks>,
     /// Per-declaration emit-resolver links (caches `isDeclarationVisible`).
     pub declaration_links: LinkStore<Node, DeclarationLinks>,
@@ -647,6 +654,8 @@ impl Checker {
             reverse_mapped_symbol_links: LinkStore::new(),
             marked_assignment_symbol_links: LinkStore::new(),
             symbol_container_links: LinkStore::new(),
+            symbol_table_alias_cache: HashMap::new(),
+            class_expression_name_tables: HashMap::new(),
             source_file_links: LinkStore::new(),
             declaration_links: LinkStore::new(),
             declaration_file_links: LinkStore::new(),
@@ -2094,7 +2103,7 @@ impl Checker {
     /// Build a union type from a vec of constituents without the full
     /// `get_union_type` caching machinery (used by `get_widened_type` which
     /// runs under an immutable borrow).
-    fn build_union_from_types(&self, types: Vec<Arc<Type>>) -> Arc<Type> {
+    pub(crate) fn build_union_from_types(&self, types: Vec<Arc<Type>>) -> Arc<Type> {
         if types.is_empty() {
             return self.never_type();
         }
@@ -6774,27 +6783,26 @@ impl Checker {
         {
             if symbol.flags.intersects(SymbolFlags::ExportValue) {
                 if let Some(ref export_symbol) = symbol.export_symbol {
-                    if let Some(merged) = self.get_merged_symbol(export_symbol) {
-                        if !prefix_locals
-                            && merged.flags.intersects(SymbolFlags::EXPORT_HAS_LOCAL)
-                            && !merged.flags.intersects(SymbolFlags::VARIABLE)
+                    let merged = self.get_merged_symbol(export_symbol);
+                    if !prefix_locals
+                        && merged.flags.intersects(SymbolFlags::EXPORT_HAS_LOCAL)
+                        && !merged.flags.intersects(SymbolFlags::VARIABLE)
+                    {
+                        return None;
+                    }
+                    // Find the parent symbol (the container).
+                    if let Some(parent) = &merged.parent {
+                        if parent.flags.intersects(SymbolFlags::ValueModule)
+                            && parent.value_declaration.is_some()
                         {
-                            return None;
+                            return Some(parent.value_declaration.as_ref().unwrap().id());
                         }
-                        // Find the parent symbol (the container).
-                        if let Some(parent) = &merged.parent {
-                            if parent.flags.intersects(SymbolFlags::ValueModule)
-                                && parent.value_declaration.is_some()
-                            {
-                                return Some(parent.value_declaration.as_ref().unwrap().id());
-                            }
-                            // Find the matching container in the scope stack.
-                            for &container_id in self.scope_stack.iter().rev() {
-                                let symbol_map = self.program.symbol_map();
-                                if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
-                                    if Arc::ptr_eq(container_sym, parent) {
-                                        return Some(container_id);
-                                    }
+                        // Find the matching container in the scope stack.
+                        for &container_id in self.scope_stack.iter().rev() {
+                            let symbol_map = self.program.symbol_map();
+                            if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
+                                if Arc::ptr_eq(container_sym, parent) {
+                                    return Some(container_id);
                                 }
                             }
                         }
@@ -6902,10 +6910,8 @@ impl Checker {
             // Might be a declaration instead of a ref, get the merged symbol.
             if let Some(sym) = symbol_map.symbol_of(node) {
                 let merged = self.get_merged_symbol(sym);
-                if let Some(merged) = merged {
-                    let export_sym = self.get_export_symbol_of_value_symbol_if_exported(&merged);
-                    return export_sym.value_declaration.clone();
-                }
+                let export_sym = self.get_export_symbol_of_value_symbol_if_exported(&merged);
+                return export_sym.value_declaration.clone();
             }
         }
         if let Some(ref s) = s {
@@ -6918,12 +6924,12 @@ impl Checker {
     /// Get the merged symbol.
     ///
     /// Go: `referenceResolver.getMergedSymbol`
-    fn get_merged_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
-        if let Some(target_id) = self.merged_symbols.get(&symbol.id()) {
+    pub fn get_merged_symbol(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> {
+        if let Some(_target_id) = self.merged_symbols.get(&symbol.id()) {
             // We need a way to look up symbols by ID. For now, return the symbol itself.
             // In a full implementation, we'd have a symbol_by_id map.
         }
-        Some(Arc::clone(symbol))
+        Arc::clone(symbol)
     }
 
     /// Get the export symbol of a value symbol if it's exported.
@@ -6933,9 +6939,7 @@ impl Checker {
         let mut result = Arc::clone(symbol);
         if symbol.flags.intersects(SymbolFlags::ExportValue) {
             if let Some(ref export_sym) = symbol.export_symbol {
-                result = self
-                    .get_merged_symbol(export_sym)
-                    .unwrap_or(Arc::clone(export_sym));
+                result = self.get_merged_symbol(export_sym);
             }
         }
         result
@@ -7080,7 +7084,7 @@ impl Checker {
             } else {
                 // No existing target symbol, use the merged version of source
                 let merged = self.get_merged_symbol(&source_symbol);
-                target.insert(name, merged.unwrap_or_else(|| Arc::clone(&source_symbol)));
+                target.insert(name, merged);
             }
         }
     }
@@ -7184,9 +7188,7 @@ impl Checker {
                     *target_sym = merged;
                 } else {
                     let merged = self.get_merged_symbol(&source_sym);
-                    result_mut
-                        .members
-                        .insert(name, merged.unwrap_or_else(|| Arc::clone(&source_sym)));
+                    result_mut.members.insert(name, merged);
                 }
             }
 
@@ -7202,9 +7204,7 @@ impl Checker {
                     *target_sym = merged;
                 } else {
                     let merged = self.get_merged_symbol(&source_sym);
-                    result_mut
-                        .exports
-                        .insert(name, merged.unwrap_or_else(|| Arc::clone(&source_sym)));
+                    result_mut.exports.insert(name, merged);
                 }
             }
 

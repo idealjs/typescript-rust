@@ -12,7 +12,7 @@ use std::sync::{Arc, OnceLock};
 
 use bitflags::bitflags;
 
-use crate::ast::{Node, Symbol, SymbolTable};
+use crate::ast::{Node, Symbol, SymbolFlags, SymbolTable};
 use crate::core::tristate::Tristate;
 use crate::evaluator;
 use crate::jsnum;
@@ -1592,9 +1592,53 @@ pub struct JsxElementLinks {
     pub tag_name: Option<Arc<Symbol>>,
 }
 
+/// Key for the accessible-symbol-chain cache. Mirrors Go's
+/// `accessibleChainCacheKey` (types.go).
+#[derive(Debug, Clone)]
+pub struct AccessibleChainCacheKey {
+    pub use_only_external_aliasing: bool,
+    pub location: Option<Arc<Node>>,
+    pub meaning: SymbolFlags,
+}
+
+impl PartialEq for AccessibleChainCacheKey {
+    fn eq(&self, other: &Self) -> bool {
+        self.use_only_external_aliasing == other.use_only_external_aliasing
+            && self.meaning == other.meaning
+            && match (&self.location, &other.location) {
+                (None, None) => true,
+                (Some(a), Some(b)) => a.id() == b.id(),
+                _ => false,
+            }
+    }
+}
+
+impl Eq for AccessibleChainCacheKey {}
+
+impl std::hash::Hash for AccessibleChainCacheKey {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.use_only_external_aliasing.hash(state);
+        self.meaning.bits().hash(state);
+        match &self.location {
+            Some(n) => n.id().hash(state),
+            None => 0u64.hash(state),
+        }
+    }
+}
+
+/// Per-symbol links tracking accessible container relationships.
+///
+/// Mirrors Go's `ContainingSymbolLinks` (types.go).
 #[derive(Debug, Default)]
 pub struct ContainingSymbolLinks {
-    pub extended_containers: Vec<Arc<Symbol>>,
+    /// Symbols of nodes which logically contain this one, cached by file
+    /// the request is made within.
+    pub extended_containers_by_file: HashMap<u64, Vec<Arc<Symbol>>>,
+    /// Containers (other than the parent) which this symbol is aliased in.
+    /// `None` means not yet computed; `Some(vec)` is the result (may be empty).
+    pub extended_containers: Option<Vec<Arc<Symbol>>>,
+    /// Cache for `getAccessibleSymbolChainEx`.
+    pub accessible_chain_cache: HashMap<AccessibleChainCacheKey, Vec<Arc<Symbol>>>,
 }
 
 /// Per-declaration links used by the emit resolver to track visibility.
@@ -1618,15 +1662,16 @@ pub struct DeclarationFileLinks {
 
 /// Result of a symbol accessibility / entity-name visibility query.
 ///
-/// Mirrors Go's `printer.SymbolAccessibilityResult`. Only the fields needed
-/// by the emit resolver are ported. `PartialEq` is intentionally not derived
-/// because `Node` is not `Eq` (it carries interior-mutable state).
+/// Mirrors Go's `printer.SymbolAccessibilityResult`. `PartialEq` is
+/// intentionally not derived because `Node` is not `Eq` (it carries
+/// interior-mutable state).
 #[derive(Debug, Clone, Default)]
 pub struct SymbolAccessibilityResult {
     pub accessibility: SymbolAccessibility,
     /// Aliases that must be marked visible for the reference to serialize.
     pub aliases_to_make_visible: Vec<Arc<crate::ast::Node>>,
     pub error_symbol_name: String,
+    pub error_module_name: String,
     pub error_node: Option<Arc<crate::ast::Node>>,
 }
 
@@ -1638,6 +1683,7 @@ pub enum SymbolAccessibility {
     #[default]
     Accessible,
     NotAccessible,
+    CannotBeNamed,
     NotResolved,
 }
 

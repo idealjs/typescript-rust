@@ -593,7 +593,7 @@ impl Checker {
     /// Returns `Some(Accessible)` if visible, `None` if not visible. The
     /// aliases-to-make-visible computation is simplified: unexported imports
     /// and variable statements whose parent is visible are marked visible.
-    fn has_visible_declarations(
+    pub fn has_visible_declarations(
         &mut self,
         symbol: &Arc<Symbol>,
     ) -> Option<SymbolAccessibilityResult> {

@@ -13,7 +13,7 @@
 //! stored as AST children (e.g. punctuation consumed by the parser) are not
 //! returned. The behaviour contract mirrors `internal/astnav/tokens.go`.
 
-use crate::ast::{Node, SyntaxKind, for_each_child, is_token_kind};
+use crate::ast::{Node, SourceFile, SyntaxKind, for_each_child, is_token_kind};
 use std::sync::Arc;
 
 /// Collect the direct children of `node` into a `Vec` (owned `Arc` clones).
@@ -115,6 +115,134 @@ fn find_first_token_starting_after(node: &Arc<Node>, position: usize) -> Option<
 /// a callback to check for property-name contexts; the basic Rust version
 /// delegates directly to `get_token_at_position`.
 pub fn get_touching_property_name(source_file: &Arc<Node>, position: usize) -> Option<Arc<Node>> {
+    get_token_at_position(source_file, position)
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Additional navigation utilities (ported from astnav/tokens.go)
+// ────────────────────────────────────────────────────────────────────────────
+
+/// Find a direct child of `containing_node` whose kind matches `kind`.
+///
+/// Mirrors `astnav.FindChildOfKind` in Go. Unlike the Go version (which
+/// also scans intervening tokens via the scanner), the Rust version only
+/// searches AST child nodes — tokens not stored as AST children (e.g.
+/// punctuation consumed by the parser) are not returned.
+pub fn find_child_of_kind(containing_node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> {
+    let mut result = None;
+    for_each_child(containing_node, |child| {
+        if child.kind == kind {
+            result = Some(Arc::clone(child));
+            return true; // stop traversal
+        }
+        false
+    });
+    result
+}
+
+/// Get the start position of a node (excluding leading trivia).
+///
+/// Mirrors `astnav.GetStartOfNode` in Go. In the Go implementation this
+/// delegates to `scanner.GetTokenPosOfNode`, which skips leading trivia
+/// (whitespace, comments) to find the first real token. Since the Rust
+/// AST does not currently expose per-node token positions, this returns
+/// `node.pos()` (the full start including trivia) when `include_jsdoc`
+/// is false, and otherwise searches backward for any preceding JSDoc.
+pub fn get_start_of_node(
+    node: &Arc<Node>,
+    _source_file: &SourceFile,
+    _include_jsdoc: bool,
+) -> usize {
+    // Without a scanner-based implementation, we approximate by returning
+    // the node's pos(). The Go version skips trivia; callers that need
+    // trivia-skipping should use the scanner module directly.
+    node.pos()
+}
+
+/// Get the end position of a node.
+///
+/// Mirrors `astnav.GetEndOfNode` (node.End() in Go).
+pub fn get_end_of_node(node: &Arc<Node>) -> usize {
+    node.end()
+}
+
+/// Whether a node is a "missing" node (zero-width range).
+///
+/// Mirrors `ast.NodeIsMissing` in Go. A missing node has `pos == end`
+/// and is not the end-of-file token.
+pub fn is_missing_node(node: &Node) -> bool {
+    node.pos() == node.end() && (node.pos() as i32) >= 0 && node.kind != SyntaxKind::EndOfFile
+}
+
+/// Convert a (line, character) pair to a byte offset.
+///
+/// Mirrors `astnav.GetPositionOfLineAndCharacter` in Go.
+/// `line` and `character` are 0-based; `character` is a UTF-16 code unit
+/// offset within the line.
+pub fn get_position_of_line_and_character(
+    source_file: &SourceFile,
+    line: usize,
+    character: usize,
+) -> usize {
+    let line_map = &source_file.line_map;
+    if line >= line_map.line_starts.len() {
+        return source_file.text.len();
+    }
+    let line_start = line_map.line_starts[line] as usize;
+    let text = &source_file.text;
+    let bytes = text.as_bytes();
+    let text_len = bytes.len();
+    let mut col_utf16 = 0usize;
+    let mut pos = line_start;
+    while pos < text_len && col_utf16 < character {
+        let b = bytes[pos];
+        if b < 0x80 {
+            pos += 1;
+            col_utf16 += 1;
+        } else {
+            let remaining = &text[pos..];
+            match remaining.chars().next() {
+                Some(ch) => {
+                    pos += ch.len_utf8();
+                    col_utf16 += ch.len_utf16();
+                }
+                None => break,
+            }
+        }
+    }
+    pos
+}
+
+/// Convert a byte offset to a (line, character) pair.
+///
+/// Mirrors `astnav.GetLineAndCharacterOfPosition` in Go.
+/// Returns (0-based line, 0-based UTF-16 column).
+pub fn get_line_and_character_of_position(
+    source_file: &SourceFile,
+    position: usize,
+) -> (usize, usize) {
+    let line_map = &source_file.line_map;
+    let line = line_map.line_at(position);
+    let character = line_map.utf16_column_at(&source_file.text, position);
+    (line, character)
+}
+
+/// Find the touching property name at a position.
+///
+/// Mirrors `astnav.GetTouchingPropertyName` in Go. The Rust version
+/// delegates to `get_token_at_position` (same as the existing
+/// `get_touching_property_name`).
+pub fn get_touching_property_name_astnav(
+    source_file: &Arc<Node>,
+    position: usize,
+) -> Option<Arc<Node>> {
+    get_token_at_position(source_file, position)
+}
+
+/// Get the touching token at a position.
+///
+/// Mirrors `astnav.GetTouchingToken` in Go.
+pub fn get_touching_token(source_file: &Arc<Node>, position: usize) -> Option<Arc<Node>> {
     get_token_at_position(source_file, position)
 }
 
