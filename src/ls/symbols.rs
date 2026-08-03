@@ -4,132 +4,327 @@
 
 use std::sync::Arc;
 
-use crate::ast::{Node, SourceFile};
-use crate::compiler::Program;
-use crate::core::text::TextRange;
-use crate::ls::lsconv::converters::Converters;
-use crate::ls::lsutil::UserPreferences;
-use crate::lsp::lsproto::lsp::DocumentUri;
+use crate::ast::node::LineMap;
+use crate::ast::{Node, NodeData, SourceFile, SyntaxKind, node_data_generated::for_each_child};
+use crate::lsp::lsproto::lsp::{DocumentUri, Range};
+use crate::scanner;
 
 use super::language_service::LanguageService;
-use super::types::{DocumentSymbol, SymbolInformation, SymbolKind};
+use super::types::{DocumentSymbol, SymbolKind};
 
 impl LanguageService {
     /// Provide document symbols for a file.
-    ///
-    /// Mirrors `ProvideDocumentSymbols`.
-    pub fn provide_document_symbols(&self, _document_uri: &DocumentUri) -> Vec<DocumentSymbol> {
-        // TODO: requires AST traversal + hierarchical symbol building
-        Vec::new()
-    }
-
-    /// Get document symbols for children of a node.
-    ///
-    /// Mirrors `getDocumentSymbolsForChildren`.
-    pub fn get_document_symbols_for_children(
-        &self,
-        _node: &Arc<Node>,
-        _file: &Arc<SourceFile>,
-    ) -> Vec<DocumentSymbol> {
-        // TODO: requires full AST visit
-        Vec::new()
-    }
-
-    /// Create a new `DocumentSymbol` for a node.
-    ///
-    /// Mirrors `newDocumentSymbol`.
-    pub fn new_document_symbol(
-        &self,
-        _node: &Arc<Node>,
-        _name: Option<&Arc<Node>>,
-        _children: Vec<DocumentSymbol>,
-    ) -> Option<DocumentSymbol> {
-        // TODO: requires scanner + converters
-        None
+    pub fn provide_document_symbols(&self, document_uri: &DocumentUri) -> Vec<DocumentSymbol> {
+        let (_program, source_file) = self.get_program_and_file(document_uri);
+        get_document_symbols_for_children(&source_file.node, &source_file)
     }
 }
 
-/// Provide workspace symbols across multiple programs.
-///
-/// Mirrors `ProvideWorkspaceSymbols`.
-pub fn provide_workspace_symbols(
-    _programs: &[Program],
-    _converters: &Converters,
-    _preferences: &UserPreferences,
-    _query: &str,
-) -> Vec<SymbolInformation> {
-    // TODO: requires declaration-map traversal + match scoring
-    Vec::new()
+/// Get document symbols for children of a node.
+pub fn get_document_symbols_for_children(
+    node: &Arc<Node>,
+    source_file: &Arc<SourceFile>,
+) -> Vec<DocumentSymbol> {
+    let text = &source_file.text;
+    let line_map = &source_file.line_map;
+    let mut symbols = Vec::new();
+
+    for_each_child(node, |child| {
+        visit_for_symbols(child, text, line_map, &mut symbols);
+        false
+    });
+
+    symbols
 }
 
-/// Get the symbol kind from an AST node.
-///
-/// Mirrors `getSymbolKindFromNode`.
-pub fn get_symbol_kind_from_node(node: &Arc<Node>) -> SymbolKind {
-    use crate::ast::SyntaxKind;
-    match node.kind {
-        SyntaxKind::SourceFile => SymbolKind::File,
-        SyntaxKind::ModuleDeclaration => SymbolKind::Namespace,
+/// Visit a node and collect document symbols.
+fn visit_for_symbols(
+    node: &Arc<Node>,
+    text: &str,
+    line_map: &LineMap,
+    symbols: &mut Vec<DocumentSymbol>,
+) {
+    let kind = node.kind;
+
+    match kind {
+        // Class / Interface / Enum: collect with children
+        SyntaxKind::ClassDeclaration
+        | SyntaxKind::ClassExpression
+        | SyntaxKind::InterfaceDeclaration
+        | SyntaxKind::EnumDeclaration => {
+            let children = get_children_symbols(node, text, line_map);
+            if let Some(sym) = new_document_symbol(node, text, line_map, children) {
+                symbols.push(sym);
+            }
+        }
+
+        // Module declaration (namespace)
+        SyntaxKind::ModuleDeclaration => {
+            let children = get_children_symbols(node, text, line_map);
+            if let Some(sym) = new_document_symbol(node, text, line_map, children) {
+                symbols.push(sym);
+            }
+        }
+
+        // Function / Method / Constructor
+        SyntaxKind::FunctionDeclaration
+        | SyntaxKind::FunctionExpression
+        | SyntaxKind::ArrowFunction
+        | SyntaxKind::MethodDeclaration
+        | SyntaxKind::GetAccessor
+        | SyntaxKind::SetAccessor
+        | SyntaxKind::Constructor => {
+            let children = get_children_symbols(node, text, line_map);
+            if let Some(sym) = new_document_symbol(node, text, line_map, children) {
+                symbols.push(sym);
+            }
+        }
+
+        // Variable declaration: `const x = ...`
+        SyntaxKind::VariableDeclaration => {
+            if let Some(sym) = new_document_symbol(node, text, line_map, Vec::new()) {
+                symbols.push(sym);
+            }
+        }
+
+        // Type alias
+        SyntaxKind::TypeAliasDeclaration => {
+            if let Some(sym) = new_document_symbol(node, text, line_map, Vec::new()) {
+                symbols.push(sym);
+            }
+        }
+
+        // Enum member
+        SyntaxKind::EnumMember => {
+            if let Some(sym) = new_document_symbol(node, text, line_map, Vec::new()) {
+                symbols.push(sym);
+            }
+        }
+
+        // Property / Method signatures (in interfaces)
+        SyntaxKind::PropertySignature
+        | SyntaxKind::MethodSignature
+        | SyntaxKind::PropertyDeclaration
+        | SyntaxKind::PropertyAssignment
+        | SyntaxKind::ShorthandPropertyAssignment => {
+            if let Some(sym) = new_document_symbol(node, text, line_map, Vec::new()) {
+                symbols.push(sym);
+            }
+        }
+
+        // Import specifiers
+        SyntaxKind::ImportSpecifier | SyntaxKind::ImportClause => {
+            if let Some(sym) = new_document_symbol(node, text, line_map, Vec::new()) {
+                symbols.push(sym);
+            }
+        }
+
+        // Export specifier
+        SyntaxKind::ExportSpecifier => {
+            if let Some(sym) = new_document_symbol(node, text, line_map, Vec::new()) {
+                symbols.push(sym);
+            }
+        }
+
+        // Variable statement: visit its declaration list children
+        SyntaxKind::VariableStatement => {
+            for_each_child(node, |child| {
+                visit_for_symbols(child, text, line_map, symbols);
+                false
+            });
+        }
+
+        // VariableDeclarationList: visit each declaration
+        SyntaxKind::VariableDeclarationList => {
+            for_each_child(node, |child| {
+                visit_for_symbols(child, text, line_map, symbols);
+                false
+            });
+        }
+
+        // Default: recurse into children
+        _ => {
+            for_each_child(node, |child| {
+                visit_for_symbols(child, text, line_map, symbols);
+                false
+            });
+        }
+    }
+}
+
+/// Collect symbols from a node's children.
+fn get_children_symbols(node: &Arc<Node>, text: &str, line_map: &LineMap) -> Vec<DocumentSymbol> {
+    let mut children = Vec::new();
+    for_each_child(node, |child| {
+        visit_for_symbols(child, text, line_map, &mut children);
+        false
+    });
+    children
+}
+
+/// Create a DocumentSymbol for a node.
+fn new_document_symbol(
+    node: &Arc<Node>,
+    text: &str,
+    line_map: &LineMap,
+    children: Vec<DocumentSymbol>,
+) -> Option<DocumentSymbol> {
+    let name = get_node_name(node, text)?;
+    if name.is_empty() {
+        return None;
+    }
+
+    let node_start = scanner::skip_trivia(text, node.pos());
+    let node_end = node.end();
+    let kind = symbol_kind_from_node(node.kind);
+
+    let (name_start, name_end) = get_name_range(node, text, node_start);
+
+    Some(DocumentSymbol {
+        name,
+        detail: None,
+        kind,
+        range: offset_range_to_lsp_range(line_map, node_start, node_end),
+        selection_range: offset_range_to_lsp_range(line_map, name_start, name_end),
+        children: if children.is_empty() {
+            None
+        } else {
+            Some(children)
+        },
+        tags: None,
+        deprecated: None,
+    })
+}
+
+/// Get the text name of a declaration node.
+fn get_node_name(node: &Arc<Node>, text: &str) -> Option<String> {
+    match &node.data {
+        NodeData::ClassDeclaration(d) => d.name.as_ref().map(|n| identifier_text(n, text)),
+        NodeData::InterfaceDeclaration(d) => Some(identifier_text(&d.name, text)),
+        NodeData::EnumDeclaration(d) => Some(identifier_text(&d.name, text)),
+        NodeData::FunctionDeclaration(d) => d.name.as_ref().map(|n| identifier_text(n, text)),
+        NodeData::FunctionExpression(d) => d.name.as_ref().map(|n| identifier_text(n, text)),
+        NodeData::MethodDeclaration(d) => Some(property_name_text(&d.name, text)),
+        NodeData::GetAccessorDeclaration(d) => Some(property_name_text(&d.name, text)),
+        NodeData::SetAccessorDeclaration(d) => Some(property_name_text(&d.name, text)),
+        NodeData::ConstructorDeclaration(_) => Some("constructor".to_string()),
+        NodeData::VariableDeclaration(d) => Some(binding_name_text(&d.name, text)),
+        NodeData::TypeAliasDeclaration(d) => Some(identifier_text(&d.name, text)),
+        NodeData::EnumMember(d) => Some(property_name_text(&d.name, text)),
+        NodeData::PropertyDeclaration(d) => Some(property_name_text(&d.name, text)),
+        NodeData::PropertySignatureDeclaration(d) => Some(property_name_text(&d.name, text)),
+        NodeData::MethodSignatureDeclaration(d) => Some(property_name_text(&d.name, text)),
+        NodeData::PropertyAssignment(d) => Some(property_name_text(&d.name, text)),
+        NodeData::ModuleDeclaration(d) => Some(module_name_text(&d.name, text)),
+        NodeData::ImportSpecifier(d) => Some(identifier_text(&d.name, text)),
+        NodeData::ImportClause(d) => d.name.as_ref().map(|n| identifier_text(n, text)),
+        NodeData::ExportSpecifier(d) => Some(identifier_text(
+            d.property_name.as_ref().unwrap_or(&d.name),
+            text,
+        )),
+        _ => None,
+    }
+}
+
+/// Get the (start, end) byte offsets of a node's name.
+fn get_name_range(node: &Arc<Node>, text: &str, node_start: usize) -> (usize, usize) {
+    let name_ref: Option<&Arc<Node>> = match &node.data {
+        NodeData::ClassDeclaration(d) => d.name.as_ref(),
+        NodeData::FunctionDeclaration(d) => d.name.as_ref(),
+        NodeData::VariableDeclaration(d) => Some(&d.name),
+        NodeData::InterfaceDeclaration(d) => Some(&d.name),
+        NodeData::EnumDeclaration(d) => Some(&d.name),
+        NodeData::TypeAliasDeclaration(d) => Some(&d.name),
+        _ => None,
+    };
+
+    if let Some(name) = name_ref {
+        let start = scanner::skip_trivia(text, name.pos());
+        let end = name.end();
+        return (start.max(node_start), end.max(node_start));
+    }
+
+    (node_start, node_start)
+}
+
+/// Get text from an Identifier node.
+fn identifier_text(node: &Arc<Node>, text: &str) -> String {
+    text[node.pos()..node.end()].trim().to_string()
+}
+
+/// Get text from a PropertyName node.
+fn property_name_text(node: &Arc<Node>, text: &str) -> String {
+    match &node.data {
+        NodeData::Identifier(d) => d.text.clone(),
+        NodeData::StringLiteral(d) => format!("\"{}\"", d.text),
+        NodeData::NumericLiteral(d) => d.text.clone(),
+        NodeData::ComputedPropertyName(d) => {
+            let inner = &d.expression;
+            text[inner.pos()..inner.end()].to_string()
+        }
+        _ => text[node.pos()..node.end()].trim().to_string(),
+    }
+}
+
+/// Get text from a BindingName node.
+fn binding_name_text(node: &Arc<Node>, text: &str) -> String {
+    match &node.data {
+        NodeData::Identifier(d) => d.text.clone(),
+        _ => text[node.pos()..node.end()].trim().to_string(),
+    }
+}
+
+/// Get text from a ModuleName node.
+fn module_name_text(node: &Arc<Node>, text: &str) -> String {
+    text[node.pos()..node.end()].trim().to_string()
+}
+
+/// Map AST node kind to LSP SymbolKind.
+fn symbol_kind_from_node(kind: SyntaxKind) -> SymbolKind {
+    match kind {
         SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => SymbolKind::Class,
         SyntaxKind::InterfaceDeclaration => SymbolKind::Interface,
         SyntaxKind::EnumDeclaration => SymbolKind::Enum,
-        SyntaxKind::VariableDeclaration => SymbolKind::Variable,
-        SyntaxKind::ArrowFunction
-        | SyntaxKind::FunctionDeclaration
-        | SyntaxKind::FunctionExpression => SymbolKind::Function,
-        SyntaxKind::GetAccessor | SyntaxKind::SetAccessor => SymbolKind::Property,
-        SyntaxKind::MethodDeclaration | SyntaxKind::MethodSignature => SymbolKind::Method,
-        SyntaxKind::Constructor | SyntaxKind::ClassStaticBlockDeclaration => {
-            SymbolKind::Constructor
-        }
-        SyntaxKind::TypeParameter => SymbolKind::TypeParameter,
         SyntaxKind::EnumMember => SymbolKind::EnumMember,
+        SyntaxKind::FunctionDeclaration
+        | SyntaxKind::FunctionExpression
+        | SyntaxKind::ArrowFunction => SymbolKind::Function,
+        SyntaxKind::MethodDeclaration | SyntaxKind::MethodSignature => SymbolKind::Method,
+        SyntaxKind::GetAccessor | SyntaxKind::SetAccessor => SymbolKind::Property,
+        SyntaxKind::Constructor => SymbolKind::Constructor,
+        SyntaxKind::VariableDeclaration => SymbolKind::Variable,
+        SyntaxKind::TypeAliasDeclaration => SymbolKind::TypeParameter,
+        SyntaxKind::PropertyDeclaration
+        | SyntaxKind::PropertySignature
+        | SyntaxKind::PropertyAssignment
+        | SyntaxKind::ShorthandPropertyAssignment => SymbolKind::Property,
+        SyntaxKind::ModuleDeclaration => SymbolKind::Namespace,
+        SyntaxKind::ImportSpecifier | SyntaxKind::ImportClause | SyntaxKind::ExportSpecifier => {
+            SymbolKind::Module
+        }
         _ => SymbolKind::Variable,
     }
 }
 
-/// Declaration info used for workspace symbol search.
-pub struct DeclarationInfo {
-    pub name: String,
-    pub declaration: Arc<Node>,
-    pub match_score: i32,
-}
-
-/// Compute a match score for a string against a pattern.
-///
-/// Mirrors `getMatchScore`.
-pub fn get_match_score(s: &str, pattern: &str) -> i32 {
-    let mut score = 0i32;
-    let mut remaining = s;
-    for p in pattern.chars() {
-        let exact = p.is_uppercase();
-        loop {
-            match remaining.chars().next() {
-                None => return -1,
-                Some(c) => {
-                    remaining = &remaining[c.len_utf8()..];
-                    if exact && c == p || !exact && c.eq_ignore_ascii_case(&p) {
-                        break;
-                    }
-                    score += 1;
-                }
-            }
-        }
+fn offset_range_to_lsp_range(line_map: &LineMap, start: usize, end: usize) -> Range {
+    Range {
+        start: offset_to_position(line_map, start),
+        end: offset_to_position(line_map, end),
     }
-    score
 }
 
-/// Should this file be excluded from workspace symbol search?
-///
-/// Mirrors `shouldExcludeFile`.
-pub fn should_exclude_file(
-    _file: &Arc<SourceFile>,
-    _program: &Program,
-    _exclude_library_symbols: bool,
-) -> bool {
-    // TODO: requires isInsideNodeModules + isLibFile
-    false
+fn offset_to_position(line_map: &LineMap, offset: usize) -> crate::lsp::lsproto::lsp::Position {
+    let line = line_of_offset(line_map, offset);
+    let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
+    crate::lsp::lsproto::lsp::Position {
+        line: line as u32,
+        character: offset.saturating_sub(line_start) as u32,
+    }
 }
 
-/// Max symbol name length before truncation.
-pub const MAX_LENGTH: usize = 150;
+fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
+    match line_map.line_starts.binary_search(&(offset as u32)) {
+        Ok(idx) => idx,
+        Err(idx) => idx.saturating_sub(1),
+    }
+}
