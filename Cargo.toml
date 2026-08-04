@@ -3,8 +3,12 @@ name = "tsox"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.96"
-description = "TypeScript compiler ported from Go to Rust"
+description = "Native TypeScript compiler — Rust port of typescript-go"
 license = "Apache-2.0"
+repository = "https://github.com/idealjs/typescript-rust"
+homepage = "https://github.com/idealjs/typescript-rust"
+keywords = ["typescript", "compiler", "lsp", "tsox"]
+categories = ["compilers", "development-tools"]
 
 [[bin]]
 name = "tsox"

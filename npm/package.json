@@ -1,13 +1,13 @@
 {
-    "private": true,
-    "name": "@typescript/native-preview",
-    "version": "0.0.0",
+    "name": "@idealjs/tsox",
+    "version": "0.1.0",
     "license": "Apache-2.0",
-    "author": "Microsoft Corp.",
-    "description": "Preview CLI and JS API for the native TypeScript compiler (Rust port)",
-    "keywords": ["TypeScript", "compiler", "rust", "tsgo"],
+    "description": "Native TypeScript compiler — Rust port of typescript-go",
+    "keywords": ["TypeScript", "compiler", "rust", "tsox"],
     "type": "module",
-    "engines": { "node": ">=16.20.0" },
-    "files": ["bin", "lib"],
-    "bin": { "tsgo": "./bin/tsgo" }
+    "engines": { "node": ">=18.0.0" },
+    "os": ["darwin", "linux", "win32"],
+    "cpu": ["x64", "arm64"],
+    "files": ["bin", "lib", "README.md"],
+    "bin": { "tsox": "./bin/tsgo" }
 }

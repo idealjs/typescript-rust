@@ -1,13 +1,11 @@
-# @typescript/native-preview (Rust)
+# @idealjs/tsox
 
-Native TypeScript compiler preview - Rust port.
-
-This package contains the Rust implementation of the TypeScript compiler (`tsgo`).
+Native TypeScript compiler — Rust port of [typescript-go](https://github.com/microsoft/typescript-go).
 
 ## Installation
 
 ```bash
-npm install @typescript/native-preview
+npm install @idealjs/tsox
 ```
 
 ## Usage
@@ -15,15 +13,29 @@ npm install @typescript/native-preview
 ### CLI
 
 ```bash
-npx tsgo --version
-npx tsgo file.ts
-npx tsgo -p tsconfig.json
+# Compile a project
+npx tsox -p tsconfig.json
+
+# Compile a single file
+npx tsox file.ts --outDir dist
+
+# Type-check only (no emit)
+npx tsox -p tsconfig.json --noEmit
+
+# Watch mode
+npx tsox -p tsconfig.json --watch
+
+# LSP server mode (for editor integration)
+npx tsox --lsp
+
+# API server mode (JSON-RPC over stdio)
+npx tsox --api
 ```
 
 ### Programmatic API
 
 ```typescript
-import { createSyncApi } from "@typescript/native-preview/unstable/sync";
+import { createSyncApi } from "@idealjs/tsox/unstable/sync";
 
 const api = createSyncApi();
 const program = api.createProgram({
@@ -39,6 +51,8 @@ const diagnostics = program.getSemanticDiagnostics();
 # Build the Rust binary
 cargo build --release
 
-# The binary will be at target/release/tsox
-# Copy it to npm/bin/tsgo or use the bin/tsgo shim
+# Build the npm package
+cd npm && ./scripts/build.sh
 ```
+
+The binary will be at `target/release/tsox`.

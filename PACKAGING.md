@@ -8,7 +8,7 @@
 |------|------|------|
 | Rust 二进制 `tsox` | `target/release/tsox` | CLI 编译器 + `--lsp` LSP 服务器 + `--api` JSON-RPC API |
 | Rust 库 crate `tsox` | `src/lib.rs` | 可作为 Rust crate 依赖 |
-| npm 包 `@typescript/native-preview` | `npm/` | 通过 `npx tsgo` 调用 Rust 二进制 |
+| npm 包 `@idealjs/tsox` | `npm/` | 通过 `npx tsox` 调用 Rust 二进制 |
 | 内置 lib.d.ts | `bundled/libs/` | 120+ 个 .d.ts 文件，编译时 `include_str!` 嵌入 |
 | 本地化消息包 | `diagnostics/loc/*.json.gz` | 13 种语言，编译时嵌入 |
 
@@ -31,9 +31,9 @@ tsox --api                             # API 服务器模式（stdio JSON-RPC）
 #### 当前状态
 
 已有完整的 npm 包结构：
-- `npm/package.json` — 包定义，名称 `@typescript/native-preview`
-- `npm/bin/tsgo` — shell 入口
-- `npm/lib/tsgo.js` — Node.js shim，调用 Rust 二进制
+- `npm/package.json` — 包定义，名称 `@idealjs/tsox`
+- `npm/bin/tsox` — shell 入口
+- `npm/lib/tsgo.js` — Node.js shim，调用 Rust 二进制（`npx tsox` 命令名）
 - `npm/lib/getExePath.js` — 自动查找二进制路径（开发/安装环境）
 - `npm/scripts/build.sh` — 构建脚本
 
@@ -43,12 +43,12 @@ tsox --api                             # API 服务器模式（stdio JSON-RPC）
    ```
    npm/
    ├── bin/
-   │   ├── tsgo                          # 统一入口 shim
-   │   ├── tsgo-darwin-arm64             # macOS Apple Silicon
-   │   ├── tsgo-darwin-x64              # macOS Intel
-   │   ├── tsgo-linux-x64               # Linux x86_64
-   │   ├── tsgo-linux-arm64             # Linux ARM64
-   │   └── tsgo-win32-x64.exe           # Windows x86_64
+   │   ├── tsox                          # 统一入口 shim
+   │   ├── tsox-darwin-arm64             # macOS Apple Silicon
+   │   ├── tsox-darwin-x64              # macOS Intel
+   │   ├── tsox-linux-x64               # Linux x86_64
+   │   ├── tsox-linux-arm64             # Linux ARM64
+   │   └── tsox-win32-x64.exe           # Windows x86_64
    ├── lib/
    │   ├── tsgo.js
    │   └── getExePath.js
@@ -58,7 +58,7 @@ tsox --api                             # API 服务器模式（stdio JSON-RPC）
 2. **`getExePath.js` 改进** — 按平台选择正确的二进制：
    ```js
    const platform = `${process.platform}-${process.arch}`;
-   const binName = `tsgo-${platform}`;
+   const binName = `tsox-${platform}`;
    ```
 
 3. **可选：optionalDependencies 方案** — 拆分为平台子包：
@@ -77,7 +77,7 @@ tsox --api                             # API 服务器模式（stdio JSON-RPC）
    {
      "name": "@typescript/native-preview",
      "version": "0.1.0",
-     "bin": { "tsgo": "./bin/tsgo" },
+     "bin": { "tsox": "./bin/tsox" },
      "engines": { "node": ">=18.0.0" },
      "os": ["darwin", "linux", "win32"],
      "cpu": ["x64", "arm64"],
@@ -100,28 +100,28 @@ tsox --api                             # API 服务器模式（stdio JSON-RPC）
          include:
            - os: ubuntu-latest
              target: x86_64-unknown-linux-gnu
-             artifact: tsgo-linux-x64
+             artifact: tsox-linux-x64
            - os: ubuntu-latest
              target: aarch64-unknown-linux-gnu
-             artifact: tsgo-linux-arm64
+             artifact: tsox-linux-arm64
            - os: macos-latest
              target: aarch64-apple-darwin
-             artifact: tsgo-darwin-arm64
+             artifact: tsox-darwin-arm64
            - os: macos-13
              target: x86_64-apple-darwin
-             artifact: tsgo-darwin-x64
+             artifact: tsox-darwin-x64
            - os: windows-latest
              target: x86_64-pc-windows-msvc
-             artifact: tsgo-win32-x64.exe
+             artifact: tsox-win32-x64.exe
      steps:
        - cargo build --release --target ${{ matrix.target }}
        - 上传 artifact 到 GitHub Release
    ```
 
 2. **发布物**：
-   - `tsgo-{platform}-{arch}.tar.gz`（Linux/macOS）
-   - `tsgo-{platform}-{arch}.zip`（Windows）
-   - `tsgo-{version}-checksums.txt`（SHA256 校验和）
+   - `tsox-{platform}-{arch}.tar.gz`（Linux/macOS）
+   - `tsox-{platform}-{arch}.zip`（Windows）
+   - `tsox-{version}-checksums.txt`（SHA256 校验和）
 
 3. **触发条件**：git tag `v0.1.0` 触发自动发布
 
@@ -146,7 +146,7 @@ tsox --api                             # API 服务器模式（stdio JSON-RPC）
    license = "Apache-2.0"
    repository = "https://github.com/idealjs/typescript-rust"
    homepage = "https://github.com/idealjs/typescript-rust"
-   keywords = ["typescript", "compiler", "lsp", "tsgo"]
+   keywords = ["typescript", "compiler", "lsp", "tsox"]
    categories = ["compilers", "development-tools"]
 
    [features]
@@ -174,8 +174,8 @@ COPY . .
 RUN cargo build --release
 
 FROM debian:bookworm-slim
-COPY --from=builder /app/target/release/tsox /usr/local/bin/tsgo
-ENTRYPOINT ["tsgo"]
+COPY --from=builder /app/target/release/tsox /usr/local/bin/tsox
+ENTRYPOINT ["tsox"]
 ```
 
 ---
@@ -189,12 +189,12 @@ ENTRYPOINT ["tsgo"]
 npm install -g @typescript/native-preview
 
 # 使用
-tsgo --version
-tsgo -p tsconfig.json
-tsgo src/index.ts --outDir dist
+tsox --version
+tsox -p tsconfig.json
+tsox src/index.ts --outDir dist
 
 # LSP 模式（配合编辑器）
-tsgo --lsp
+tsox --lsp
 ```
 
 ### 场景 B：编辑器集成（LSP）
@@ -213,8 +213,8 @@ tsgo --lsp
 
 ```lua
 -- Neovim lspconfig
-require'lspconfig'.tsgo.setup{
-  cmd = { "tsgo", "--lsp" },
+require'lspconfig'.tsox.setup{
+  cmd = { "tsox", "--lsp" },
   filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
 }
 ```
@@ -251,9 +251,9 @@ let hover = ls.provide_hover(&uri, position);
 
 ```dockerfile
 # Dockerfile
-FROM ghcr.io/idealjs/tsgo:latest
+FROM ghcr.io/idealjs/tsox:latest
 COPY . /app
-RUN tsgo -p tsconfig.json --noEmit
+RUN tsox -p tsconfig.json --noEmit
 ```
 
 ---
@@ -316,7 +316,7 @@ jobs:
       - run: cargo build --release --target ${{ matrix.target }}
       - uses: actions/upload-artifact@v4
         with:
-          name: tsgo-${{ matrix.target }}
+          name: tsox-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/tsox
 
   release:
@@ -328,7 +328,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            tsgo-*/tsox
+            tsox-*/tsox
 ```
 
 ### 步骤 4：npm 发布
@@ -340,7 +340,7 @@ jobs:
 # 2. 测试
 npm pack
 npm install -g ./typescript-native-preview-0.1.0.tgz
-tsgo --version
+tsox --version
 
 # 3. 发布
 npm publish
