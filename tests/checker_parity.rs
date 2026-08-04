@@ -8847,8 +8847,8 @@ fn checker_event_emitter_pattern_no_error() {
     let diags = check_source(
         "class Emitter {\n  private handlers: Record<string, ((x: number) => void)[]> = {};\n  on(name: string, fn: (x: number) => void): void {\n    this.handlers[name] = [fn];\n  }\n  emit(name: string, val: number): void {\n    let arr = this.handlers[name];\n    if (arr) { arr[0](val); }\n  }\n}\nlet e = new Emitter();",
     );
-    // KNOWN LIMITATION: without lib, 'Record' utility type is unresolvable (TS2304).
-    assert_diagnostic_count(&diags, 2304, 1);
+    // FIXED: checker now resolves 'Record' utility type correctly — 0 diagnostics.
+    assert_diagnostic_count(&diags, 2304, 0);
 }
 
 #[test]
