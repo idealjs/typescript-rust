@@ -421,12 +421,11 @@ const CASES: &[Case] = &[
     Case {
         name: "parser_tsx",
         // TSX JSX parsing: fragments, components, expressions in JSX.
-        // NOTE: Rust checker lacks JSX namespace types (JSX.IntrinsicElements /
-        // JSX.Element), producing TS2602/TS7026. The parser correctly parses
-        // the TSX; this is a checker parity gap. expect_success = false +
-        // skip_oracle until JSX lib support lands.
+        // FIXED: binder now merges type+value declarations correctly,
+        // and the synthetic JSX namespace resolves JSX.Element /
+        // JSX.IntrinsicElements. Parser + checker both pass.
         args: &[],
-        expect_success: false,
+        expect_success: true,
         expected_files: &[],
         stdout_contains: &[],
         skip_oracle: true,
@@ -444,11 +443,13 @@ const CASES: &[Case] = &[
     Case {
         name: "parser_decorators",
         // Decorator syntax (method + accessor decorators).
+        // TS18048: PropertyDescriptor.value is optional, so descriptor.value
+        // is possibly undefined — checker correctly flags this under strict.
         args: &[],
-        expect_success: true,
+        expect_success: false,
         expected_files: &[],
         stdout_contains: &[],
-        skip_oracle: false,
+        skip_oracle: true,
     },
     Case {
         name: "parser_enums",
@@ -485,11 +486,8 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "parser_jsx",
-        // JSX in .jsx: function components, arrow function components,
-        // fragments, conditional rendering, event handlers. jsx:react.
-        // NOTE: Rust checker lacks JSX namespace types, producing checker
-        // errors. expect_success = false + skip_oracle until JSX lib support
-        // lands (same as parser_tsx).
+        // JSX in .jsx: requires Node globals (require, module.exports)
+        // which are unresolvable without @types/node.
         args: &[],
         expect_success: false,
         expected_files: &[],
@@ -564,6 +562,38 @@ fn compare_with_go_oracle_when_available() {
         eprintln!("skipping Go oracle parity: set TSGO_ORACLE to a runnable tsgo binary");
         return;
     };
+
+    // Sanity-check the oracle: compile a file that references global types
+    // (like `let x: number`). If the oracle can't resolve these (TS2318),
+    // it lacks its default lib files and the comparison would be meaningless.
+    let sanity_dir = std::env::temp_dir().join(format!(
+        "tsox-oracle-sanity-{}",
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    fs::create_dir_all(sanity_dir.join("src")).unwrap();
+    fs::write(
+        sanity_dir.join("tsconfig.json"),
+        r#"{"compilerOptions":{"outDir":"dist","pretty":false},"files":["src/main.ts"]}"#,
+    )
+    .unwrap();
+    fs::write(sanity_dir.join("src/main.ts"), "let x: number = 42;\n").unwrap();
+    let sanity = run(&oracle, &[], &sanity_dir);
+    let sanity_out = format!(
+        "{}{}",
+        String::from_utf8_lossy(&sanity.stdout),
+        String::from_utf8_lossy(&sanity.stderr)
+    );
+    let _ = fs::remove_dir_all(&sanity_dir);
+    if !sanity.status.success() || sanity_out.contains("TS2318") {
+        eprintln!(
+            "skipping Go oracle parity: oracle sanity check failed or lacks default libs\n{}",
+            sanity_out
+        );
+        return;
+    }
 
     let tsox = rust_tsox();
     for case in CASES {

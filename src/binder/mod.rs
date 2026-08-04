@@ -621,6 +621,21 @@ impl Binder {
         {
             return true;
         }
+        // Type + Value coexistence: an interface or type alias (type-only)
+        // can coexist with a variable/function (value-only) of the same
+        // name. This is how lib files declare `interface Object` alongside
+        // `declare var Object: ObjectConstructor;`, or `type NodeFilter`
+        // alongside `declare var NodeFilter: { ... }`.
+        let existing_type_only = existing_flags.contains(SymbolFlags::Interface)
+            || existing_flags.contains(SymbolFlags::TypeAlias);
+        let new_type_only = new_flags.contains(SymbolFlags::Interface)
+            || new_flags.contains(SymbolFlags::TypeAlias);
+        if existing_type_only && !new_type_only && !new_flags.contains(SymbolFlags::Class) {
+            return true;
+        }
+        if new_type_only && !existing_type_only && !existing_flags.contains(SymbolFlags::Class) {
+            return true;
+        }
         // Namespace merging: a ValueModule can merge with another ValueModule,
         // a Function, a Class, or an Enum.
         let existing_ns = existing_flags.contains(SymbolFlags::ValueModule);
