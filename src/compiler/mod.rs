@@ -280,38 +280,90 @@ impl Program {
         &self.diagnostics
     }
 
-    /// Diagnostics that should be reported (excludes lib-file diagnostics when
-    /// `skipLibCheck`-style suppression is desired for parse errors in libs).
+    /// Diagnostics that should be reported, applying `skipLibCheck` /
+    /// `skipDefaultLibCheck` filtering.
+    ///
+    /// In typescript-go, `skipLibCheck` skips type-checking of *all*
+    /// declaration files (`.d.ts`) and external library files
+    /// (node_modules). `skipDefaultLibCheck` only skips the built-in default
+    /// library files (e.g. `lib.d.ts`). Both options also suppress parse/bind
+    /// diagnostics from the same set of files.
     pub fn get_diagnostics_to_report(&self) -> Vec<Arc<Diagnostic>> {
-        if self.options.skip_lib_check.is_true() {
-            self.diagnostics
-                .iter()
-                .filter(|d| {
-                    d.file
-                        .as_ref()
-                        .map(|f| !self.default_library_file_names.contains(&f.file_name))
-                        .unwrap_or(true)
-                })
-                .cloned()
-                .collect()
-        } else {
-            self.diagnostics.clone()
+        let skip_lib = self.options.skip_lib_check.is_true();
+        let skip_default_lib = self.options.skip_default_lib_check.is_true();
+
+        if !skip_lib && !skip_default_lib {
+            return self.diagnostics.clone();
         }
+
+        self.diagnostics
+            .iter()
+            .filter(|d| {
+                let Some(file) = &d.file else {
+                    return true; // Keep fileless diagnostics.
+                };
+                if skip_lib {
+                    // skipLibCheck suppresses all declaration files and
+                    // node_modules files.
+                    !file.is_declaration_file && !is_external_library_file(&file.file_name)
+                } else {
+                    // skipDefaultLibCheck suppresses only default library files.
+                    !self.default_library_file_names.contains(&file.file_name)
+                }
+            })
+            .cloned()
+            .collect()
     }
 
     /// Run the type checker and return semantic diagnostics.
     ///
     /// Go: `Program.GetSemanticDiagnostics` → creates a `Checker`, calls
     /// `checkSourceFile` for each source file, and returns accumulated diagnostics.
-    /// Currently the checker is a stub (P3.6), so this returns empty diagnostics,
-    /// but it wires up the full pipeline so future checker work is automatically
-    /// picked up.
+    ///
+    /// When `skipLibCheck` is on, the checker skips declaration files (`.d.ts`)
+    /// and node_modules files — mirroring Go's behavior of not type-checking
+    /// those files. `skipDefaultLibCheck` only skips built-in default library
+    /// files.
     pub fn get_semantic_diagnostics(self: &Arc<Self>) -> Vec<Diagnostic> {
-        let mut checker = self.build_checker();
+        let skip_lib = self.options.skip_lib_check.is_true();
+        let skip_default_lib = self.options.skip_default_lib_check.is_true();
+
+        let mut checker = self.build_checker_internal(skip_lib, skip_default_lib);
         let mut diagnostics = checker.get_semantic_diagnostics();
         // Surface binder-level diagnostics (e.g. TS2451 block-scoped
-        // redeclarations) alongside the checker's semantic diagnostics.
-        diagnostics.extend(self.symbol_map.binder_diagnostics.iter().cloned());
+        // redeclarations) alongside the checker's semantic diagnostics,
+        // applying the same skip filtering.
+        if skip_lib {
+            diagnostics.extend(
+                self.symbol_map
+                    .binder_diagnostics
+                    .iter()
+                    .filter(|d| {
+                        d.file
+                            .as_ref()
+                            .map(|f| {
+                                !f.is_declaration_file && !is_external_library_file(&f.file_name)
+                            })
+                            .unwrap_or(true)
+                    })
+                    .cloned(),
+            );
+        } else if skip_default_lib {
+            diagnostics.extend(
+                self.symbol_map
+                    .binder_diagnostics
+                    .iter()
+                    .filter(|d| {
+                        d.file
+                            .as_ref()
+                            .map(|f| !self.default_library_file_names.contains(&f.file_name))
+                            .unwrap_or(true)
+                    })
+                    .cloned(),
+            );
+        } else {
+            diagnostics.extend(self.symbol_map.binder_diagnostics.iter().cloned());
+        }
         diagnostics
     }
 
@@ -320,10 +372,30 @@ impl Program {
     /// inspect checker state (e.g. emit-resolver visibility) after the
     /// type-check pass. Mirrors the setup done by `get_semantic_diagnostics`.
     pub fn build_checker(self: &Arc<Self>) -> crate::checker::Checker {
+        self.build_checker_internal(false, false)
+    }
+
+    /// Internal checker builder with skipLibCheck / skipDefaultLibCheck support.
+    /// When `skip_lib` is true, skips checking declaration files and
+    /// node_modules files. When `skip_default_lib` is true (and `skip_lib`
+    /// is false), only skips built-in default library files.
+    fn build_checker_internal(
+        self: &Arc<Self>,
+        skip_lib: bool,
+        skip_default_lib: bool,
+    ) -> crate::checker::Checker {
         let tracer = Arc::new(crate::checker::Tracer::new());
         let program: Arc<dyn crate::checker::Program> = Arc::clone(self) as _;
         let mut checker = crate::checker::Checker::new(program, tracer);
         for file in &self.source_files {
+            // Skip declaration files when skipLibCheck is on.
+            if skip_lib && (file.is_declaration_file || is_external_library_file(&file.file_name)) {
+                continue;
+            }
+            // Skip default library files when skipDefaultLibCheck is on.
+            if skip_default_lib && self.default_library_file_names.contains(&file.file_name) {
+                continue;
+            }
             checker.check_source_file(file);
         }
         checker
@@ -419,7 +491,7 @@ impl crate::checker::Program for Program {
 
 /// Check if a file path belongs to an external library (node_modules).
 /// Mirrors Go's `IsSourceFileFromExternalLibrary` substring check.
-fn is_external_library_file(file_name: &str) -> bool {
+pub fn is_external_library_file(file_name: &str) -> bool {
     file_name.contains("/node_modules/") || file_name.contains("\\node_modules\\")
 }
 
