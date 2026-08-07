@@ -829,7 +829,21 @@ impl<'a> ResolutionState<'a> {
             return Some(r);
         }
         if !tspath::is_external_module_name_relative(&self.name) {
-            // Non-relative and paths didn't match → continue to node_modules.
+            // Non-relative name. If paths didn't match, try baseUrl resolution
+            // (when baseUrl is set). Mirrors Go's behavior of resolving bare
+            // specifiers relative to baseUrl.
+            if !self.compiler_options.base_url.is_empty() {
+                let candidate = tspath::normalize_path(&tspath::combine_paths(
+                    &self.compiler_options.base_url,
+                    &[&self.name],
+                ));
+                if let Some(r) =
+                    self.node_load_module_by_relative_name(self.extensions, &candidate, true)
+                {
+                    return Some(r);
+                }
+            }
+            // Non-relative and paths/baseUrl didn't match → continue to node_modules.
             return CONTINUE_SEARCHING;
         }
         // Relative name → try rootDirs.

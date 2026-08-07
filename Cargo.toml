@@ -62,6 +62,16 @@ pretty_assertions = "1"
 proptest = "1"
 criterion = "0.5"
 
+[features]
+# When enabled, baseline tests write their output to reference/ instead of
+# comparing. Used by the `baseline-accept` binary.
+accept = []
+
+[[bin]]
+name = "baseline-accept"
+path = "src/bin/baseline_accept.rs"
+required-features = ["accept"]
+
 [profile.release]
 opt-level = 3
 lto = "thin"
