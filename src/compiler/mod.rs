@@ -207,7 +207,64 @@ impl Program {
 
             let mut visited: std::collections::HashSet<String> = by_name.keys().cloned().collect();
             let mut queue: Vec<Arc<SourceFile>> = source_files.clone();
+
+            // Resolve tsconfig `types` option — auto-include @types packages.
+            for type_name in &options.types {
+                let (resolved, _traces) = resolver.resolve_type_reference_directive(
+                    type_name,
+                    &config_file_name,
+                    crate::core::compiler_options::ModuleKind::None,
+                    None,
+                );
+                if let Some(resolved_tr) = resolved {
+                    if resolved_tr.is_resolved() {
+                        let resolved_path = resolved_tr.resolved_file_name.as_str();
+                        if visited.insert(resolved_path.to_string()) {
+                            if let Some(sf) = load_source_file(
+                                resolved_path,
+                                host.as_ref(),
+                                &mut source_files,
+                                &mut by_name,
+                                &mut diagnostics,
+                                allow_js,
+                            ) {
+                                queue.push(sf);
+                            }
+                        }
+                    }
+                }
+            }
+
             while let Some(file) = queue.pop() {
+                // 3a. Resolve `/// <reference types="..." />` directives.
+                let type_refs = extract_reference_types_directives(&file.text);
+                for type_ref in &type_refs {
+                    let (resolved, _traces) = resolver.resolve_type_reference_directive(
+                        type_ref,
+                        &file.file_name,
+                        crate::core::compiler_options::ModuleKind::None,
+                        None, // redirected_reference
+                    );
+                    if let Some(resolved_tr) = resolved {
+                        if resolved_tr.is_resolved() {
+                            let resolved_path = resolved_tr.resolved_file_name.as_str();
+                            if visited.insert(resolved_path.to_string()) {
+                                if let Some(sf) = load_source_file(
+                                    resolved_path,
+                                    host.as_ref(),
+                                    &mut source_files,
+                                    &mut by_name,
+                                    &mut diagnostics,
+                                    allow_js,
+                                ) {
+                                    queue.push(sf);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3b. Resolve `import`/`export` specifiers.
                 for import_node in &file.imports {
                     let module_spec = import_node.text();
                     if module_spec.is_empty() {
@@ -673,6 +730,34 @@ fn extract_reference_path_directives(text: &str, containing_file: &str) -> Vec<S
         }
     }
     refs
+}
+
+/// Extract `/// <reference types="..." />` directive names from source text.
+///
+/// Returns the raw package names (e.g. "node", "express") — not resolved
+/// paths. The caller resolves these via `resolve_type_reference_directive`.
+fn extract_reference_types_directives(text: &str) -> Vec<String> {
+    let mut types = Vec::new();
+    for line in text.lines() {
+        let trimmed = line.trim_start();
+        let Some(rest) = trimmed.strip_prefix("///") else {
+            continue;
+        };
+        // Match types="..." or types='...'
+        for quote in ['"', '\''] {
+            let marker = format!("types={quote}");
+            if let Some(start) = rest.find(&marker) {
+                let after = &rest[start + marker.len()..];
+                if let Some(end) = after.find(quote) {
+                    let name = &after[..end];
+                    if !name.is_empty() {
+                        types.push(name.to_string());
+                    }
+                }
+            }
+        }
+    }
+    types
 }
 
 /// Recursively load a lib file and its `/// <reference lib="..." />` dependencies.
