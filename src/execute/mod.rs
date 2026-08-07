@@ -6,7 +6,7 @@
 //!
 //! ```text
 //! CommandLine(args)
-//!   ├─ -b / --build  → build mode (stubbed)
+//!   ├─ -b / --build  → build mode (project references, incremental)
 //!   └─ tsc_compilation(args)
 //!        ├─ report parse errors
 //!        ├─ --version / --help / --all
@@ -519,8 +519,9 @@ fn build_project(
 
         let options_hash = compute_options_signature(&config.compiler_options);
 
-        // Skip the up-to-date check when --clean is requested.
-        if !build_options.clean.is_true() {
+        // Skip the up-to-date check when --clean or --force is requested.
+        let force = build_options.force.is_true();
+        if !build_options.clean.is_true() && !force {
             if let Some(json) = fs.read_file(&ts_build_info_file) {
                 if let Ok(build_info) = serde_json::from_str::<BuildInfo>(&json) {
                     if build_info.is_up_to_date(&files_with_content, &options_hash) {
@@ -538,6 +539,21 @@ fn build_project(
                     }
                 }
             }
+        }
+
+        if build_options.verbose.is_true() {
+            let mut writer = sys.writer();
+            let _ = writeln!(writer, "Project '{}' is being built.", normalized_config);
+        }
+
+        // --dry: report what would be built without actually compiling.
+        if build_options.dry.is_true() {
+            cycle_stack.pop();
+            building.remove(&normalized_config);
+            seen_projects.insert(normalized_config);
+            return CommandLineResult {
+                status: ExitStatus::Success,
+            };
         }
 
         let result = perform_compilation(sys, config, pretty, locale);
