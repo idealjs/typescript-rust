@@ -53,6 +53,9 @@ base64 = "0.22"
 notify = "6"
 # Gzip decompression for embedded locale message bundles
 flate2 = "1"
+# Windows API for reparse-point (junction) detection in nativepath
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Storage_FileSystem", "Win32_Foundation"] }
 
 [dev-dependencies]
 pretty_assertions = "1"

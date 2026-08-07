@@ -26,8 +26,7 @@ pub fn is_symlink_or_reparse_point(path: &str) -> bool {
         use std::ffi::OsStr;
         use std::os::windows::ffi::OsStrExt;
         use windows_sys::Win32::Storage::FileSystem::{
-            FILE_ATTRIBUTE_REPARSE_POINT, GET_FILEEX_INFO_LEVELS, GetFileAttributesExW,
-            WIN32_FILE_ATTRIBUTE_DATA,
+            FILE_ATTRIBUTE_REPARSE_POINT, GetFileAttributesExW, WIN32_FILE_ATTRIBUTE_DATA,
         };
 
         let path = if path.len() >= 248 {
@@ -42,13 +41,8 @@ pub fn is_symlink_or_reparse_point(path: &str) -> bool {
             .collect();
 
         let mut data: WIN32_FILE_ATTRIBUTE_DATA = unsafe { std::mem::zeroed() };
-        let ok = unsafe {
-            GetFileAttributesExW(
-                wide.as_ptr(),
-                GET_FILEEX_INFO_LEVELS(0), // GetFileExInfoStandard
-                &mut data as *mut _ as *mut _,
-            )
-        };
+        // GetFileExInfoStandard = 0
+        let ok = unsafe { GetFileAttributesExW(wide.as_ptr(), 0, &mut data as *mut _ as *mut _) };
         if ok == 0 {
             return false;
         }
