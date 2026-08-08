@@ -1933,15 +1933,17 @@ impl Checker {
             }
         }
         // Cycle guard: a recursive alias (`type A = B; type B = A`) would
-        // otherwise infinite-loop. Reuses the same `resolving_type_aliases`
-        // set as `resolve_type_reference` so cycles are detected across both
-        // entry points.
+        // otherwise infinite-loop. Uses the stack-based resolution cycle
+        // detection (mirrors Go's pushTypeResolution).
         let key = Arc::as_ptr(symbol) as *const crate::ast::Symbol;
-        if !self.resolving_type_aliases.insert(key) {
+        if !self.push_type_resolution(
+            key,
+            crate::checker::checker::TypeResolutionProperty::DeclaredType,
+        ) {
             return None;
         }
         let result = self.resolve_alias_body(symbol);
-        self.resolving_type_aliases.remove(&key);
+        self.pop_type_resolution();
         // Cache the result for future lookups.
         self.type_alias_links.get_or_default(symbol).declared_type = Some(Arc::clone(&result));
         Some(result)

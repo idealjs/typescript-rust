@@ -350,9 +350,13 @@ impl Checker {
             return self.error_type();
         }
         // Cycle guard: a recursive alias (`type A = B; type B = A`) would
-        // otherwise infinite-loop here.
+        // otherwise infinite-loop here. Use the stack-based resolution
+        // cycle detection (mirrors Go's pushTypeResolution).
         let key = Arc::as_ptr(&symbol) as *const crate::ast::Symbol;
-        if !self.resolving_type_aliases.insert(key) {
+        if !self.push_type_resolution(
+            key,
+            crate::checker::checker::TypeResolutionProperty::DeclaredType,
+        ) {
             return self.error_type();
         }
         // For non-generic aliases (no type arguments on the reference), use
@@ -409,7 +413,7 @@ impl Checker {
             self.type_argument_stack.pop();
             found
         };
-        self.resolving_type_aliases.remove(&key);
+        self.pop_type_resolution();
         resolved
     }
 
@@ -484,7 +488,10 @@ impl Checker {
         }
         // Cycle guard for recursive interface references.
         let key = Arc::as_ptr(symbol) as *const crate::ast::Symbol;
-        if !self.resolving_type_aliases.insert(key) {
+        if !self.push_type_resolution(
+            key,
+            crate::checker::checker::TypeResolutionProperty::DeclaredType,
+        ) {
             return self.error_type();
         }
         // Collect ALL InterfaceDeclaration nodes so declaration merging
@@ -575,7 +582,7 @@ impl Checker {
             }
             None => self.error_type(),
         };
-        self.resolving_type_aliases.remove(&key);
+        self.pop_type_resolution();
         if !has_type_args {
             self.type_alias_links.get_or_default(symbol).declared_type = Some(result.clone());
         }
@@ -878,7 +885,10 @@ impl Checker {
         }
         // Cycle guard for recursive enum references.
         let key = Arc::as_ptr(symbol) as *const crate::ast::Symbol;
-        if !self.resolving_type_aliases.insert(key) {
+        if !self.push_type_resolution(
+            key,
+            crate::checker::checker::TypeResolutionProperty::DeclaredType,
+        ) {
             return self.error_type();
         }
         // Collect members from ALL EnumDeclaration nodes in the symbol's
@@ -958,7 +968,7 @@ impl Checker {
                 _ => self.get_union_type(member_types),
             }
         };
-        self.resolving_type_aliases.remove(&key);
+        self.pop_type_resolution();
         self.type_alias_links.get_or_default(symbol).declared_type = Some(result.clone());
         result
     }

@@ -44,6 +44,46 @@ use super::types::*;
 use super::inference::{InferenceContext, InferenceInfo};
 
 // ────────────────────────────────────────────────────────────────────────────
+// Type resolution cycle detection (mirrors Go's typeResolutions)
+// ────────────────────────────────────────────────────────────────────────────
+
+/// Which property of a symbol/type/signature is being resolved.
+/// Mirrors Go's `TypeSystemPropertyName` enum.
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub enum TypeResolutionProperty {
+    /// `SymbolLinks.resolvedType` — the type of a value symbol.
+    Type,
+    /// `TypeAliasLinks.declaredType` — the declared type of a type alias.
+    DeclaredType,
+    /// Resolving base types of an interface.
+    ResolvedBaseTypes,
+    /// Resolving base constructor type.
+    ResolvedBaseConstructorType,
+    /// Resolving resolved return type of a signature.
+    ResolvedReturnType,
+    /// Resolving resolved type arguments of a type reference.
+    ResolvedTypeArguments,
+    /// Resolving resolved base constraint of a constrained type.
+    ResolvedBaseConstraint,
+}
+
+/// A single entry on the type resolution stack. Mirrors Go's `TypeResolution`.
+#[derive(Clone, Copy)]
+pub struct TypeResolutionEntry {
+    /// Raw pointer identity of the symbol being resolved.
+    pub target: *const Symbol,
+    /// Which property is being resolved.
+    pub property: TypeResolutionProperty,
+    /// False if a cycle was detected passing through this entry.
+    pub result: bool,
+}
+
+// SAFETY: The raw pointer is only used for identity comparison within
+// a single-threaded checker context.
+unsafe impl Send for TypeResolutionEntry {}
+unsafe impl Sync for TypeResolutionEntry {}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Program trait (simplified)
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -325,10 +365,13 @@ pub struct Checker {
     pub members_and_exports_links: LinkStore<Symbol, MembersAndExportsLinks>,
     pub type_alias_links: LinkStore<Symbol, TypeAliasLinks>,
     pub declared_type_links: LinkStore<Symbol, DeclaredTypeLinks>,
-    /// Symbols (by raw pointer identity) whose declared type is currently
-    /// being resolved, to break cycles in recursive type aliases
-    /// (e.g. `type A = B; type B = A`).
-    pub resolving_type_aliases: HashSet<*const Symbol>,
+    /// Stack-based cycle detection for type resolution, mirroring Go's
+    /// `typeResolutions` + `pushTypeResolution`/`popTypeResolution`/
+    /// `findResolutionCycle` (checker.go:18663). Each entry tracks a
+    /// (symbol, property) pair being resolved. When a duplicate pair is
+    /// found on the stack, all entries from the cycle start onward are
+    /// marked as failed, breaking the cycle.
+    pub type_resolution_stack: Vec<TypeResolutionEntry>,
     /// Stack of type-parameter → type-argument substitutions, used when
     /// instantiating a generic type alias (e.g. `T<number[]>` where
     /// `type T<U> = ...`). Each frame maps type-parameter symbol pointers
@@ -652,7 +695,7 @@ impl Checker {
             members_and_exports_links: LinkStore::new(),
             type_alias_links: LinkStore::new(),
             declared_type_links: LinkStore::new(),
-            resolving_type_aliases: HashSet::new(),
+            type_resolution_stack: Vec::new(),
             type_argument_stack: Vec::new(),
             relater_depth: 0,
             relation_count: 0,
@@ -1816,6 +1859,62 @@ fn ast_get_combined_modifier_flags(node: &Arc<Node>) -> ModifierFlags {
         }
     }
     flags
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Type resolution cycle detection (mirrors Go checker.go:18663)
+// ────────────────────────────────────────────────────────────────────────────
+
+impl Checker {
+    /// Push a (target, property) pair onto the type resolution stack.
+    /// Returns `true` if no cycle was detected (safe to proceed), or
+    /// `false` if a cycle was found (all entries from the cycle start
+    /// onward are marked as failed). Mirrors Go's `pushTypeResolution`.
+    pub fn push_type_resolution(
+        &mut self,
+        target: *const Symbol,
+        property: TypeResolutionProperty,
+    ) -> bool {
+        // Search the stack from top to bottom for a matching entry.
+        let cycle_start = self
+            .type_resolution_stack
+            .iter()
+            .rposition(|entry| entry.target == target && entry.property == property);
+
+        if let Some(idx) = cycle_start {
+            // Cycle found: mark all entries from cycle_start as failed.
+            for entry in &mut self.type_resolution_stack[idx..] {
+                entry.result = false;
+            }
+            false
+        } else {
+            self.type_resolution_stack.push(TypeResolutionEntry {
+                target,
+                property,
+                result: true,
+            });
+            true
+        }
+    }
+
+    /// Pop the top entry from the resolution stack and return its result.
+    /// `true` means no circularity was detected; `false` means a cycle
+    /// was found. Mirrors Go's `popTypeResolution`.
+    pub fn pop_type_resolution(&mut self) -> bool {
+        self.type_resolution_stack
+            .pop()
+            .map(|entry| entry.result)
+            .unwrap_or(true)
+    }
+
+    /// Check if a (target, property) pair is currently being resolved.
+    /// Convenience method for simple cycle guards that don't need the
+    /// full push/pop protocol.
+    pub fn is_resolving(&self, target: *const Symbol, property: TypeResolutionProperty) -> bool {
+        self.type_resolution_stack
+            .iter()
+            .any(|entry| entry.target == target && entry.property == property)
+    }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -5441,11 +5540,14 @@ impl Checker {
                             // Avoid infinite recursion for self-referential
                             // extends (shouldn't happen, but be safe).
                             let key = Arc::as_ptr(&symbol) as *const crate::ast::Symbol;
-                            if !self.resolving_type_aliases.insert(key) {
+                            if !self.push_type_resolution(
+                                key,
+                                TypeResolutionProperty::ResolvedBaseTypes,
+                            ) {
                                 return self.get_any_type();
                             }
                             let instance = self.build_class_instance_type_with_base(&class_node);
-                            self.resolving_type_aliases.remove(&key);
+                            self.pop_type_resolution();
                             return instance;
                         }
                     }

@@ -286,6 +286,16 @@ fn process_batch(
 
     for rel_path in files {
         let full_path = test_dir.join(rel_path);
+        // Extract basename from the original rel_path (before clean_name
+        // transformation) for accurate skip-list matching.
+        let basename = Path::new(rel_path)
+            .file_name()
+            .map(|f| f.to_string_lossy().to_string())
+            .unwrap_or_default();
+        if SKIPPED_TESTS.contains(&basename.as_str()) {
+            skipped += 1;
+            continue;
+        }
         let clean_name = if is_submodule {
             Path::new(rel_path)
                 .components()
@@ -297,16 +307,6 @@ fn process_batch(
         } else {
             rel_path.replace('\\', "/")
         };
-
-        // Check skip list.
-        let basename = Path::new(&clean_name)
-            .file_name()
-            .map(|f| f.to_string_lossy().to_string())
-            .unwrap_or_default();
-        if SKIPPED_TESTS.contains(&basename.as_str()) {
-            skipped += 1;
-            continue;
-        }
 
         let content = match std::fs::read_to_string(&full_path) {
             Ok(c) => c,
