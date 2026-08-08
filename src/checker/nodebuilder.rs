@@ -649,16 +649,14 @@ impl Checker {
     /// printed, renders the type as it would appear in source. Used by
     /// declaration emit and hover display.
     ///
-    /// Reuses the `serialization_level` recursion guard from
-    /// `type_to_string_ex` to prevent stack overflow on recursive types.
+    /// NOTE: Unlike `type_to_string_ex`, this does NOT check/increment
+    /// `serialization_level`. In Go, `typeToStringEx` increments
+    /// `serializationLevel` once before calling `TypeToTypeNode`, and the
+    /// node builder's own recursion is independent. The serialization level
+    /// is only for preventing reentrant `typeToStringEx` calls (e.g. from
+    /// diagnostics produced during lazy member resolution).
     pub fn type_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
-        if self.serialization_level >= MAX_SERIALIZATION_LEVEL {
-            return self.keyword_node(SyntaxKind::AnyKeyword);
-        }
-        self.serialization_level += 1;
-        let result = self.type_to_type_node_worker(t);
-        self.serialization_level -= 1;
-        result
+        self.type_to_type_node_worker(t)
     }
 
     fn type_to_type_node_worker(&mut self, t: &Arc<Type>) -> Arc<Node> {
@@ -1991,8 +1989,11 @@ impl Checker {
 }
 
 /// Maximum recursion depth for type serialization. Prevents stack overflow
-/// on recursive types. Mirrors Go's `maxSerializationLevel`.
-const MAX_SERIALIZATION_LEVEL: i32 = 300;
+/// on recursive types. Mirrors Go's `maxSerializationLevel` (= 2).
+/// Type serialization can trigger lazy member resolution, which in turn
+/// produces diagnostics requiring further serialization — leading to
+/// infinite recursion. At this depth we return "?".
+const MAX_SERIALIZATION_LEVEL: i32 = 2;
 
 #[cfg(test)]
 mod tests {

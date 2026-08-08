@@ -341,6 +341,15 @@ pub struct Checker {
     /// structural types such as `type Box<T> = { next: Box<T> | null }`.
     /// Mirrors `Checker.relationStackDepth` in Go (relater.go).
     pub relater_depth: u32,
+    /// Complexity budget for type relation comparisons. Decremented on
+    /// each failed sub-comparison. When it reaches zero, the relater
+    /// reports overflow and stops. Mirrors Go's `relationCount`
+    /// (relater.go:369). Initialized per top-level comparison call.
+    pub relation_count: u32,
+    /// Set to true when the relater exceeds either the depth limit
+    /// (`RELATER_MAX_DEPTH`) or the complexity budget (`relation_count`).
+    /// Mirrors Go's `r.overflow` (relater.go:3087).
+    pub relater_overflow: bool,
     /// Per-call relation comparison cache. Stores the final boolean
     /// result of `is_type_related_to` for a `(source, target, relation)`
     /// triple so that repeated sub-comparisons within a single top-level
@@ -646,6 +655,8 @@ impl Checker {
             resolving_type_aliases: HashSet::new(),
             type_argument_stack: Vec::new(),
             relater_depth: 0,
+            relation_count: 0,
+            relater_overflow: false,
             relation_cache: HashMap::new(),
             enum_relation: HashMap::new(),
             relation_in_progress: std::collections::HashSet::new(),

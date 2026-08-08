@@ -32,9 +32,9 @@ use tsox::vfs::{FS, InMemoryFS};
 
 const SRC_FOLDER: &str = "/.src";
 /// Number of tests per subprocess batch.
-const BATCH_SIZE: usize = 50;
+const BATCH_SIZE: usize = 10;
 /// Timeout for a batch subprocess (seconds).
-const BATCH_TIMEOUT_SECS: u64 = 60;
+const BATCH_TIMEOUT_SECS: u64 = 30;
 
 /// Tests known to hang or crash.
 const SKIPPED_TESTS: &[&str] = &[
@@ -522,6 +522,16 @@ fn run_compiler_baselines(
 }
 
 fn main() {
+    // Run on a thread with a large stack (256 MB) to handle deep recursion
+    // in the type checker, both in batch mode (child process) and normal mode.
+    let handle = std::thread::Builder::new()
+        .stack_size(256 * 1024 * 1024)
+        .spawn(main_inner)
+        .unwrap();
+    handle.join().unwrap();
+}
+
+fn main_inner() {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
     let args: Vec<String> = std::env::args().collect();

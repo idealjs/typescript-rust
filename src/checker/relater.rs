@@ -118,11 +118,12 @@ bitflags::bitflags! {
 }
 
 /// Maximum recursion depth for `is_type_related_to` before the relater
-/// gives up and optimistically assumes the types are related. Matches the
-/// spirit of Go's `stackDepthOverflow` constant in `relater.go` (128).
-/// Without this, recursive structural types such as
-/// `type Box<T> = { next: Box<T> | null }` blow the native stack.
-pub const RELATER_MAX_DEPTH: u32 = 128;
+/// gives up and reports overflow. Matches Go's `stackDepthOverflow`
+/// constant in `relater.go` (100). Without this, recursive structural
+/// types such as `type Box<T> = { next: Box<T> | null }` blow the
+/// native stack. Go uses fixed-size `sourceStack`/`targetStack` arrays
+/// of this length; we use a depth counter.
+pub const RELATER_MAX_DEPTH: u32 = 100;
 
 /// The kind of relation being checked.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
@@ -292,17 +293,32 @@ impl Checker {
         };
         // Recursion guard: structural comparisons on recursive types
         // (e.g. `type Box<T> = { next: Box<T> | null }`) can blow the native
-        // stack. Once we exceed `RELATER_MAX_DEPTH`, optimistically assume
-        // the types are related — Go's relater does the same when it hits
-        // `stackDepthOverflow`.
+        // stack. Once we exceed `RELATER_MAX_DEPTH`, report overflow.
+        // Mirrors Go's sourceStack/targetStack depth check (relater.go:3103).
+        if self.relater_overflow {
+            return true;
+        }
         if self.relater_depth >= RELATER_MAX_DEPTH {
+            self.relater_overflow = true;
+            return true;
+        }
+        // Complexity budget: decrement on each failed comparison to prevent
+        // exponential blowup on complex type graphs. Mirrors Go's
+        // `relationCount` (relater.go:3086-3088).
+        if self.relation_count == 0 && self.relater_depth > 0 {
+            self.relater_overflow = true;
             return true;
         }
         // On top-level entry, reset the per-call caches so optimistic
         // cycle-broken results from a previous call don't leak in.
+        // Also initialize the complexity budget.
         if self.relater_depth == 0 {
             self.relation_cache.clear();
             self.relation_in_progress.clear();
+            self.relater_overflow = false;
+            // Go uses (16_000_000 - relation.size()) / 8. We use a fixed
+            // budget since we don't track relation cache size.
+            self.relation_count = 2_000_000;
         }
         let key = RelationCacheKey {
             source_ptr: Arc::as_ptr(&source) as usize,
@@ -324,6 +340,10 @@ impl Checker {
         let result = self.is_type_related_to_inner(&source, &target, relation);
         self.relater_depth -= 1;
         self.relation_in_progress.remove(&key);
+        // Decrement complexity budget on failed comparisons (Go: relater.go:3163).
+        if !result {
+            self.relation_count = self.relation_count.saturating_sub(1);
+        }
         self.relation_cache.insert(key, result);
         result
     }
