@@ -1,20 +1,20 @@
 assignmentTargets.ts(1,19): error TS2304: Cannot find name 'ImportMeta'.
-assignmentTargets.ts(1,32): error TS2304: Cannot find name 'import'.
-assignmentTargets.ts(1,51): error TS2304: Cannot find name 'import'.
-assignmentTargets.ts(1,70): error TS2304: Cannot find name 'import'.
+assignmentTargets.ts(1,39): error TS2304: Cannot find name 'meta'.
+assignmentTargets.ts(1,58): error TS2304: Cannot find name 'meta'.
+assignmentTargets.ts(1,77): error TS2304: Cannot find name 'meta'.
 assignmentTargets.ts(2,7): error TS1012: Unexpected token.
 assignmentTargets.ts(2,8): error TS1005: ';' expected.
 assignmentTargets.ts(2,8): error TS2304: Cannot find name 'meta'.
-assignmentTargets.ts(11,21): error TS2304: Cannot find name 'import'.
-example.ts(3,59): error TS2304: Cannot find name 'import'.
-example.ts(6,16): error TS2304: Cannot find name 'import'.
+assignmentTargets.ts(11,28): error TS2304: Cannot find name 'meta'.
+example.ts(3,66): error TS2304: Cannot find name 'meta'.
+example.ts(6,23): error TS2304: Cannot find name 'meta'.
 example.ts(8,21): error TS2304: Cannot find name 'Image'.
-moduleLookingFile01.ts(1,16): error TS2304: Cannot find name 'import'.
-moduleLookingFile01.ts(2,16): error TS2304: Cannot find name 'import'.
-moduleLookingFile01.ts(3,16): error TS2304: Cannot find name 'import'.
-scriptLookingFile01.ts(1,15): error TS2304: Cannot find name 'import'.
-scriptLookingFile01.ts(2,15): error TS2304: Cannot find name 'import'.
-scriptLookingFile01.ts(3,15): error TS2304: Cannot find name 'import'.
+moduleLookingFile01.ts(1,23): error TS2304: Cannot find name 'meta'.
+moduleLookingFile01.ts(2,23): error TS2304: Cannot find name 'metal'.
+moduleLookingFile01.ts(3,23): error TS2304: Cannot find name 'import'.
+scriptLookingFile01.ts(1,22): error TS2304: Cannot find name 'meta'.
+scriptLookingFile01.ts(2,22): error TS2304: Cannot find name 'metal'.
+scriptLookingFile01.ts(3,22): error TS2304: Cannot find name 'import'.
 
 
 ==== importMeta.ts (0 errors) ====
@@ -23,13 +23,13 @@ scriptLookingFile01.ts(3,15): error TS2304: Cannot find name 'import'.
     // Adapted from https://github.com/tc39/proposal-import-meta/tree/c3902a9ffe2e69a7ac42c19d7ea74cbdcea9b7fb#example
     (async () => {
       const response = await fetch(new URL("../hamsters.jpg", import.meta.url).toString());
-                                                              ~~~~~~
-!!! error TS2304: Cannot find name 'import'.
+                                                                     ~~~~
+!!! error TS2304: Cannot find name 'meta'.
       const blob = await response.blob();
     
       const size = import.meta.scriptElement.dataset.size || 300;
-                   ~~~~~~
-!!! error TS2304: Cannot find name 'import'.
+                          ~~~~
+!!! error TS2304: Cannot find name 'meta'.
     
       const image = new Image();
                         ~~~~~
@@ -42,36 +42,36 @@ scriptLookingFile01.ts(3,15): error TS2304: Cannot find name 'import'.
     
 ==== moduleLookingFile01.ts (3 errors) ====
     export let x = import.meta;
-                   ~~~~~~
-!!! error TS2304: Cannot find name 'import'.
+                          ~~~~
+!!! error TS2304: Cannot find name 'meta'.
     export let y = import.metal;
-                   ~~~~~~
-!!! error TS2304: Cannot find name 'import'.
+                          ~~~~~
+!!! error TS2304: Cannot find name 'metal'.
     export let z = import.import.import.malkovich;
-                   ~~~~~~
+                          ~~~~~~
 !!! error TS2304: Cannot find name 'import'.
     
 ==== scriptLookingFile01.ts (3 errors) ====
     let globalA = import.meta;
-                  ~~~~~~
-!!! error TS2304: Cannot find name 'import'.
+                         ~~~~
+!!! error TS2304: Cannot find name 'meta'.
     let globalB = import.metal;
-                  ~~~~~~
-!!! error TS2304: Cannot find name 'import'.
+                         ~~~~~
+!!! error TS2304: Cannot find name 'metal'.
     let globalC = import.import.import.malkovich;
-                  ~~~~~~
+                         ~~~~~~
 !!! error TS2304: Cannot find name 'import'.
     
 ==== assignmentTargets.ts (8 errors) ====
     export const foo: ImportMeta = import.meta.blah = import.meta.blue = import.meta;
                       ~~~~~~~~~~
 !!! error TS2304: Cannot find name 'ImportMeta'.
-                                   ~~~~~~
-!!! error TS2304: Cannot find name 'import'.
-                                                      ~~~~~~
-!!! error TS2304: Cannot find name 'import'.
-                                                                         ~~~~~~
-!!! error TS2304: Cannot find name 'import'.
+                                          ~~~~
+!!! error TS2304: Cannot find name 'meta'.
+                                                             ~~~~
+!!! error TS2304: Cannot find name 'meta'.
+                                                                                ~~~~
+!!! error TS2304: Cannot find name 'meta'.
     import.meta = foo;
           ~
 !!! error TS1012: Unexpected token.
@@ -88,5 +88,5 @@ scriptLookingFile01.ts(3,15): error TS2304: Cannot find name 'import'.
     }
     
     const { a, b, c } = import.meta.wellKnownProperty;
-                        ~~~~~~
-!!! error TS2304: Cannot find name 'import'.
+                               ~~~~
+!!! error TS2304: Cannot find name 'meta'.

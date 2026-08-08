@@ -3829,6 +3829,9 @@ impl Parser {
             }
             SyntaxKind::FunctionKeyword => self.parse_function_expression(),
             SyntaxKind::ClassKeyword => self.parse_class_expression(),
+            // `import.meta` — parse as MetaProperty when `import` is followed
+            // by `.` on the same line. Mirrors Go's parsePrimaryExpression.
+            SyntaxKind::ImportKeyword if self.is_import_meta() => self.parse_import_meta(),
             // `async function` expression: when `async` is followed by `function`
             // on the same line, parse as an async function expression.
             // Mirrors Go's parsePrimaryExpression AsyncKeyword case (line 5581).
@@ -4312,6 +4315,32 @@ impl Parser {
         Arc::new(Node::with_loc(
             SyntaxKind::JsxClosingElement,
             NodeData::JsxClosingElement(JsxClosingElementData { tag_name }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    /// Check if current `import` keyword is followed by `.` (i.e. `import.meta`).
+    fn is_import_meta(&self) -> bool {
+        if self.token != SyntaxKind::ImportKeyword {
+            return false;
+        }
+        let mut scanner = self.scanner.clone();
+        scanner.scan() == SyntaxKind::DotToken && !scanner.has_preceding_line_break()
+    }
+
+    /// Parse `import.meta` as a MetaProperty node.
+    fn parse_import_meta(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        self.next_token(); // consume 'import'
+        self.next_token(); // consume '.'
+        let name = self.parse_identifier_name_or_keyword();
+        let end = name.end();
+        Arc::new(Node::with_loc(
+            SyntaxKind::MetaProperty,
+            NodeData::MetaProperty(MetaPropertyData {
+                keyword_token: SyntaxKind::ImportKeyword,
+                name,
+            }),
             TextRange::new(pos, end),
         ))
     }

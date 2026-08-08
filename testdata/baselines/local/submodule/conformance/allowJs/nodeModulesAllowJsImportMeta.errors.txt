@@ -1,18 +1,18 @@
-index.js(2,11): error TS2304: Cannot find name 'import'.
+index.js(2,18): error TS2304: Cannot find name 'meta'.
 package.json(2,11): error TS1005: ';' expected.
 
 
 ==== index.js (1 errors) ====
     // cjs format file
     const x = import.meta.url;
-              ~~~~~~
-!!! error TS2304: Cannot find name 'import'.
+                     ~~~~
+!!! error TS2304: Cannot find name 'meta'.
     export {x};
 ==== index.js (1 errors) ====
     // esm format file
     const x = import.meta.url;
-              ~~~~~~
-!!! error TS2304: Cannot find name 'import'.
+                     ~~~~
+!!! error TS2304: Cannot find name 'meta'.
     export {x};
 ==== package.json (1 errors) ====
     {
