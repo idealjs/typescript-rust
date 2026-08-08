@@ -1,0 +1,57 @@
+a.js(4,13): error TS2351: This expression is not constructable.
+a.js(11,11): error TS2339: Property 'property' does not exist on type '() => void'.
+a.js(12,13): error TS2351: This expression is not constructable.
+a.js(23,3): error TS2339: Property 'prototype' does not exist on type '() => void'.
+a.js(27,3): error TS2339: Property 't' does not exist on type '() => void'.
+a.js(30,13): error TS2351: This expression is not constructable.
+a.js(32,3): error TS2339: Property 't' does not exist on type '() => void'.
+
+
+==== a.js (7 errors) ====
+    function Instance() {
+        this.i = 'simple'
+    }
+    var i = new Instance();
+                ~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    Instance;
+    i;
+    
+    function StaticToo() {
+        this.i = 'more complex'
+    }
+    StaticToo.property = 'yep'
+              ~~~~~~~~
+!!! error TS2339: Property 'property' does not exist on type '() => void'.
+    var s = new StaticToo();
+                ~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    s;
+    StaticToo;
+    
+    // Both!
+    function A () {
+        this.x = 1
+        /** @type {1} */
+        this.second = 1
+    }
+    /** @param {number} n */
+    A.prototype.z = function f(n) {
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+        return n + this.x
+    }
+    /** @param {number} m */
+    A.t = function g(m) {
+      ~
+!!! error TS2339: Property 't' does not exist on type '() => void'.
+        return m + 1
+    }
+    var a = new A()
+                ~
+!!! error TS2351: This expression is not constructable.
+    a.z(3)
+    A.t(2)
+      ~
+!!! error TS2339: Property 't' does not exist on type '() => void'.
+    a.second = 1

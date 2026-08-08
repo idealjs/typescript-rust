@@ -1,0 +1,20 @@
+propertyOverridesAccessors5.ts(2,9): error TS1005: ';' expected.
+propertyOverridesAccessors5.ts(5,24): error TS1005: ',' expected.
+propertyOverridesAccessors5.ts(6,9): error TS2349: This expression is not callable.
+
+
+==== propertyOverridesAccessors5.ts (3 errors) ====
+    class A {
+        get p() { return 'oh no' }
+            ~
+!!! error TS1005: ';' expected.
+    }
+    class B extends A {
+        constructor(public p: string) {
+                           ~
+!!! error TS1005: ',' expected.
+            super()
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }

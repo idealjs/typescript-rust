@@ -1,0 +1,14 @@
+parserErrorRecovery_ModuleElement2.ts(7,1): error TS1128: Declaration or statement expected.
+
+
+==== parserErrorRecovery_ModuleElement2.ts (1 errors) ====
+    function foo() {
+    }
+    
+    function foo() {
+    }
+    
+    )
+    ~
+!!! error TS1128: Declaration or statement expected.
+    )

@@ -2,7 +2,7 @@
 /a/b/consumer.ts(2,4): error TS2339: Property 'foo' does not exist on type 'object'.
 
 
-==== references/library-reference-15.ts (0 errors) ====
+==== library-reference-15.ts (0 errors) ====
     
 ==== /a/types/jquery/index.d.ts (0 errors) ====
     declare var $: { foo(): void };

@@ -1,0 +1,81 @@
+0.js(7,3): error TS2304: Cannot find name 'method1'.
+0.js(7,10): error TS1005: ',' expected.
+0.js(7,10): error TS2304: Cannot find name '('.
+0.js(7,11): error TS1005: ',' expected.
+0.js(7,11): error TS2448: Block-scoped variable 'n1' used before its declaration.
+0.js(7,13): error TS1005: ',' expected.
+0.js(7,13): error TS2304: Cannot find name ')'.
+0.js(7,15): error TS1005: ',' expected.
+0.js(7,15): error TS2304: Cannot find name '{'.
+0.js(8,7): error TS1005: ',' expected.
+0.js(8,7): error TS2304: Cannot find name 'return'.
+0.js(8,14): error TS1005: ',' expected.
+0.js(8,18): error TS1005: ',' expected.
+0.js(8,18): error TS2304: Cannot find name ';'.
+0.js(11,3): error TS2304: Cannot find name 'method2'.
+0.js(11,10): error TS1005: ',' expected.
+0.js(11,12): error TS1134: Variable declaration expected.
+0.js(11,15): error TS1005: ',' expected.
+
+
+==== checkJsdocTypeTagOnObjectProperty2.ts (0 errors) ====
+    
+==== 0.js (18 errors) ====
+    // @ts-check
+    var lol;
+    const obj = {
+      /** @type {string|undefined} */
+      bar: 42,
+      /** @type {function(number): number} */
+      method1(n1) {
+      ~~~~~~~
+!!! error TS2304: Cannot find name 'method1'.
+             ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS2304: Cannot find name '('.
+              ~~
+!!! error TS1005: ',' expected.
+              ~~
+!!! error TS2448: Block-scoped variable 'n1' used before its declaration.
+                ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS2304: Cannot find name ')'.
+                  ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS2304: Cannot find name '{'.
+          return "42";
+          ~~~~~~
+!!! error TS1005: ',' expected.
+          ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                 ~~~~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS2304: Cannot find name ';'.
+      },
+      /** @type {function(number): number} */
+      method2: (n1) => "lol",
+      ~~~~~~~
+!!! error TS2304: Cannot find name 'method2'.
+             ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1134: Variable declaration expected.
+                  ~
+!!! error TS1005: ',' expected.
+      /** @type {function(number): number} */
+      arrowFunc: (num="0") => num + 42,
+      /** @type {string} */
+      lol
+    }
+    lol = "string"
+    /** @type {string} */
+    var s = obj.method1(0);
+    
+    /** @type {string} */
+    var s1 = obj.method2("0");

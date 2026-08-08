@@ -1,7 +1,7 @@
-constructorParameters/constructorImplementationWithDefaultValues.ts(15,19): error TS2304: Cannot find name 'Date'.
+constructorImplementationWithDefaultValues.ts(15,19): error TS2304: Cannot find name 'Date'.
 
 
-==== constructorParameters/constructorImplementationWithDefaultValues.ts (1 errors) ====
+==== constructorImplementationWithDefaultValues.ts (1 errors) ====
     class C {
         constructor(x);
         constructor(x = 1) {

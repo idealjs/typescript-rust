@@ -1,10 +1,53 @@
-es6/asyncAwaitIsolatedModules_es6.ts(10,10): error TS2304: Cannot find name 'async'.
-es6/asyncAwaitIsolatedModules_es6.ts(10,16): error TS1005: ',' expected.
-es6/asyncAwaitIsolatedModules_es6.ts(10,24): error TS1005: ',' expected.
-es6/asyncAwaitIsolatedModules_es6.ts(10,25): error TS1134: Variable declaration expected.
+error TS2300: Duplicate identifier 'MyPromise'.
+error TS2451: Cannot redeclare block-scoped variable 'void'.
+error TS2451: Cannot redeclare block-scoped variable 'Promise'.
+error TS2451: Cannot redeclare block-scoped variable 'MyPromise'.
+error TS2451: Cannot redeclare block-scoped variable 'number'.
+asyncAwaitIsolatedModules_es6.ts(15,10): error TS2304: Cannot find name 'async'.
+asyncAwaitIsolatedModules_es6.ts(15,18): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(15,27): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(15,32): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(15,34): error TS1005: ';' expected.
+asyncAwaitIsolatedModules_es6.ts(16,10): error TS2304: Cannot find name 'async'.
+asyncAwaitIsolatedModules_es6.ts(16,18): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(16,29): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(16,34): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(16,36): error TS1005: ';' expected.
+asyncAwaitIsolatedModules_es6.ts(19,11): error TS2304: Cannot find name 'async'.
+asyncAwaitIsolatedModules_es6.ts(19,19): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(19,28): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(19,35): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(19,37): error TS1005: ';' expected.
+asyncAwaitIsolatedModules_es6.ts(20,11): error TS2304: Cannot find name 'async'.
+asyncAwaitIsolatedModules_es6.ts(20,19): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(20,30): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(20,37): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(20,39): error TS1005: ';' expected.
+asyncAwaitIsolatedModules_es6.ts(23,2): error TS2304: Cannot find name 'async'.
+asyncAwaitIsolatedModules_es6.ts(23,8): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(23,8): error TS2304: Cannot find name 'm1'.
+asyncAwaitIsolatedModules_es6.ts(23,10): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(23,10): error TS2304: Cannot find name '('.
+asyncAwaitIsolatedModules_es6.ts(23,11): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(23,11): error TS2304: Cannot find name ')'.
+asyncAwaitIsolatedModules_es6.ts(23,13): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(23,13): error TS2304: Cannot find name '{'.
+asyncAwaitIsolatedModules_es6.ts(24,2): error TS2304: Cannot find name 'async'.
+asyncAwaitIsolatedModules_es6.ts(24,8): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(24,10): error TS1005: ',' expected.
+asyncAwaitIsolatedModules_es6.ts(24,11): error TS1134: Variable declaration expected.
 
 
-==== es6/asyncAwaitIsolatedModules_es6.ts (4 errors) ====
+!!! error TS2300: Duplicate identifier 'MyPromise'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'void'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'Promise'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'MyPromise'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'number'.
+==== asyncAwaitIsolatedModules_es6.ts (33 errors) ====
     import { MyPromise } from "missing";
     
     declare var p: Promise<number>;
@@ -15,28 +58,86 @@ es6/asyncAwaitIsolatedModules_es6.ts(10,25): error TS1134: Variable declaration 
     async function f3(): MyPromise<void> { }
     
     let f4 = async function() { }
-             ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-                   ~~~~~~~~
-!!! error TS1005: ',' expected.
-                           ~
-!!! error TS1005: ',' expected.
-                            ~
-!!! error TS1134: Variable declaration expected.
     let f5 = async function(): Promise<void> { }
     let f6 = async function(): MyPromise<void> { }
     
     let f7 = async () => { };
     let f8 = async (): Promise<void> => { };
+             ~~~~~
+!!! error TS2304: Cannot find name 'async'.
+                     ~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1005: ',' expected.
+                                   ~
+!!! error TS1005: ',' expected.
+                                     ~~
+!!! error TS1005: ';' expected.
     let f9 = async (): MyPromise<void> => { }; 
+             ~~~~~
+!!! error TS2304: Cannot find name 'async'.
+                     ~
+!!! error TS1005: ',' expected.
+                                ~
+!!! error TS1005: ',' expected.
+                                     ~
+!!! error TS1005: ',' expected.
+                                       ~~
+!!! error TS1005: ';' expected.
     let f10 = async () => p;
     let f11 = async () => mp;
     let f12 = async (): Promise<number> => mp;
+              ~~~~~
+!!! error TS2304: Cannot find name 'async'.
+                      ~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS1005: ',' expected.
+                                      ~
+!!! error TS1005: ',' expected.
+                                        ~~
+!!! error TS1005: ';' expected.
     let f13 = async (): MyPromise<number> => p;
+              ~~~~~
+!!! error TS2304: Cannot find name 'async'.
+                      ~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+                                        ~
+!!! error TS1005: ',' expected.
+                                          ~~
+!!! error TS1005: ';' expected.
     
     let o = {
     	async m1() { },
+    	~~~~~
+!!! error TS2304: Cannot find name 'async'.
+    	      ~~
+!!! error TS1005: ',' expected.
+    	      ~~
+!!! error TS2304: Cannot find name 'm1'.
+    	        ~
+!!! error TS1005: ',' expected.
+    	        ~
+!!! error TS2304: Cannot find name '('.
+    	         ~
+!!! error TS1005: ',' expected.
+    	         ~
+!!! error TS2304: Cannot find name ')'.
+    	           ~
+!!! error TS1005: ',' expected.
+    	           ~
+!!! error TS2304: Cannot find name '{'.
     	async m2(): Promise<void> { },
+    	~~~~~
+!!! error TS2304: Cannot find name 'async'.
+    	      ~~
+!!! error TS1005: ',' expected.
+    	        ~
+!!! error TS1005: ',' expected.
+    	         ~
+!!! error TS1134: Variable declaration expected.
     	async m3(): MyPromise<void> { }
     };
     

@@ -1,0 +1,55 @@
+innerTypeParameterShadowingOuterOne2.ts(4,19): error TS2304: Cannot find name 'Date'.
+innerTypeParameterShadowingOuterOne2.ts(5,17): error TS2304: Cannot find name 'Number'.
+innerTypeParameterShadowingOuterOne2.ts(16,36): error TS2304: Cannot find name 'Date'.
+innerTypeParameterShadowingOuterOne2.ts(17,17): error TS2304: Cannot find name 'Number'.
+innerTypeParameterShadowingOuterOne2.ts(17,35): error TS2304: Cannot find name 'Number'.
+
+
+==== innerTypeParameterShadowingOuterOne2.ts (5 errors) ====
+    // inner type parameters shadow outer ones of the same name
+    // no errors expected
+    
+    class C<T extends Date> {
+                      ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        g<T extends Number>() {
+                    ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
+            var x: T;
+            x.toFixed();
+        }
+    
+        h() {
+            var x: T;
+            x.getDate();
+        }
+    }
+    
+    class C2<T extends Date, U extends Date> {
+                                       ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        g<T extends Number, U extends Number>() {
+                    ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
+                                      ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
+            var x: U;
+            x.toFixed();
+        }
+    
+        h() {
+            var x: U;
+            x.getDate();
+        }
+    }
+    //class C2<T extends Date, U extends T> {
+    //    g<T extends Number, U extends T>() {
+    //        var x: U;
+    //        x.toFixed();
+    //    }
+    
+    //    h() {
+    //        var x: U;
+    //        x.getDate();
+    //    }
+    //}

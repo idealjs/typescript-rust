@@ -1,0 +1,33 @@
+b.ts(1,19): error TS1005: '=' expected.
+b.ts(1,21): error TS1005: ';' expected.
+b.ts(1,21): error TS2304: Cannot find name 'as'.
+b.ts(1,24): error TS1005: ';' expected.
+b.ts(1,24): error TS2304: Cannot find name 'ns1'.
+b.ts(1,28): error TS1005: ';' expected.
+b.ts(1,28): error TS2304: Cannot find name 'from'.
+b.ts(1,33): error TS1005: ';' expected.
+
+
+==== a.ts (0 errors) ====
+    export function foo() {
+      console.log("foo from a");
+    }
+    
+==== b.ts (8 errors) ====
+    import type defer * as ns1 from "./a";
+                      ~
+!!! error TS1005: '=' expected.
+                        ~~
+!!! error TS1005: ';' expected.
+                        ~~
+!!! error TS2304: Cannot find name 'as'.
+                           ~~~
+!!! error TS1005: ';' expected.
+                           ~~~
+!!! error TS2304: Cannot find name 'ns1'.
+                               ~~~~
+!!! error TS1005: ';' expected.
+                               ~~~~
+!!! error TS2304: Cannot find name 'from'.
+                                    ~~~~~
+!!! error TS1005: ';' expected.

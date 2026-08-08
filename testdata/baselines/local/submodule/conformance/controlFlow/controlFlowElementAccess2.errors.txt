@@ -1,0 +1,21 @@
+controlFlowElementAccess2.ts(7,21): error TS2339: Property 'prop' does not exist on type 'boolean | { prop: string }'.
+controlFlowElementAccess2.ts(10,21): error TS2339: Property 'prop' does not exist on type 'boolean | { prop: string }'.
+
+
+==== controlFlowElementAccess2.ts (2 errors) ====
+    declare const config: {
+        [key: string]: boolean | { prop: string };
+    };
+    
+    if (typeof config['works'] !== 'boolean') {
+        config.works.prop = 'test'; // ok
+        config['works'].prop = 'test'; // error, config['works']: boolean | { 'prop': string }
+                        ~~~~
+!!! error TS2339: Property 'prop' does not exist on type 'boolean | { prop: string }'.
+    }
+    if (typeof config.works !== 'boolean') {
+        config['works'].prop = 'test'; // error, config['works']: boolean | { 'prop': string }
+                        ~~~~
+!!! error TS2339: Property 'prop' does not exist on type 'boolean | { prop: string }'.
+        config.works.prop = 'test'; // ok
+    }

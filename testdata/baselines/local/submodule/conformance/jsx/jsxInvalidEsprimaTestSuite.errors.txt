@@ -1,0 +1,228 @@
+1.tsx(3,1): error TS1128: Declaration or statement expected.
+1.tsx(3,3): error TS1128: Declaration or statement expected.
+10.tsx(1,2): error TS2304: Cannot find name 'a'.
+10.tsx(1,13): error TS1005: '>' expected.
+10.tsx(1,14): error TS1005: ';' expected.
+10.tsx(1,14): error TS2304: Cannot find name 'c'.
+10.tsx(1,16): error TS1012: Unexpected token.
+11.tsx(1,2): error TS2304: Cannot find name 'a'.
+12.tsx(1,8): error TS1005: '>' expected.
+12.tsx(1,10): error TS1012: Unexpected token.
+13.tsx(1,2): error TS2304: Cannot find name 'a'.
+13.tsx(1,11): error TS1005: '</' expected.
+14.tsx(1,12): error TS1005: '>' expected.
+14.tsx(1,13): error TS1005: ';' expected.
+14.tsx(1,13): error TS2304: Cannot find name 'foo'.
+14.tsx(1,16): error TS1005: ';' expected.
+15.tsx(1,14): error TS1005: '>' expected.
+15.tsx(1,15): error TS1005: ';' expected.
+15.tsx(1,20): error TS1005: ';' expected.
+16.tsx(1,10): error TS1005: '</' expected.
+17.tsx(1,6): error TS17000: JSX attributes must only be assigned a non-empty 'expression'.
+17.tsx(1,10): error TS1005: '</' expected.
+18.tsx(1,49): error TS1005: ',' expected.
+18.tsx(1,52): error TS1005: ',' expected.
+18.tsx(1,57): error TS1005: ',' expected.
+19.tsx(1,55): error TS1005: ',' expected.
+19.tsx(1,58): error TS1005: ',' expected.
+19.tsx(1,63): error TS1005: ',' expected.
+20.tsx(1,10): error TS1005: '}' expected.
+22.tsx(1,22): error TS1005: '</' expected.
+23.tsx(1,7): error TS1005: '...' expected.
+23.tsx(1,7): error TS2304: Cannot find name 'props'.
+24.tsx(1,17): error TS1005: '>' expected.
+24.tsx(1,18): error TS1005: ';' expected.
+24.tsx(1,21): error TS2304: Cannot find name 'props'.
+24.tsx(1,26): error TS1128: Declaration or statement expected.
+25.tsx(1,10): error TS2304: Cannot find name 'props'.
+25.tsx(1,28): error TS1005: '>' expected.
+25.tsx(1,29): error TS1005: ';' expected.
+25.tsx(1,32): error TS2304: Cannot find name 'props'.
+25.tsx(1,37): error TS1128: Declaration or statement expected.
+26.tsx(2,1): error TS1005: '</' expected.
+28.tsx(2,1): error TS1005: '</' expected.
+29.tsx(2,1): error TS1005: '</' expected.
+5.tsx(1,5): error TS1005: '</' expected.
+7.tsx(1,8): error TS1002: Unterminated string literal.
+7.tsx(1,13): error TS1005: '>' expected.
+9.tsx(1,11): error TS1005: '>' expected.
+9.tsx(1,12): error TS1005: ';' expected.
+9.tsx(1,12): error TS2304: Cannot find name 'b'.
+9.tsx(1,16): error TS1012: Unexpected token.
+
+
+==== 1.tsx (2 errors) ====
+    declare var React: any;
+    
+    </>;
+    ~~
+!!! error TS1128: Declaration or statement expected.
+      ~
+!!! error TS1128: Declaration or statement expected.
+==== 2.tsx (0 errors) ====
+    <a: />;
+==== 3.tsx (0 errors) ====
+    <:a />;
+==== 4.tsx (0 errors) ====
+    <a b=d />;
+==== 5.tsx (1 errors) ====
+    <a>;
+        
+!!! error TS1005: '</' expected.
+==== 6.tsx (0 errors) ====
+    <a></b>;
+==== 7.tsx (2 errors) ====
+    <a foo="bar;
+           ~~~~~
+!!! error TS1002: Unterminated string literal.
+                
+!!! error TS1005: '>' expected.
+==== 8.tsx (0 errors) ====
+    <a:b></b>;
+==== 9.tsx (4 errors) ====
+    <a:b.c></a:b.c>;
+              ~
+!!! error TS1005: '>' expected.
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS2304: Cannot find name 'b'.
+                   ~
+!!! error TS1012: Unexpected token.
+==== 10.tsx (5 errors) ====
+    <a.b:c></a.b:c>;
+     ~
+!!! error TS2304: Cannot find name 'a'.
+                ~
+!!! error TS1005: '>' expected.
+                 ~
+!!! error TS1005: ';' expected.
+                 ~
+!!! error TS2304: Cannot find name 'c'.
+                   ~
+!!! error TS1012: Unexpected token.
+==== 11.tsx (1 errors) ====
+    <a.b.c></a>;
+     ~
+!!! error TS2304: Cannot find name 'a'.
+==== 12.tsx (2 errors) ====
+    <.a></.a>;
+           ~
+!!! error TS1005: '>' expected.
+             ~
+!!! error TS1012: Unexpected token.
+==== 13.tsx (2 errors) ====
+    <a.></a.>;
+     ~
+!!! error TS2304: Cannot find name 'a'.
+              
+!!! error TS1005: '</' expected.
+==== 14.tsx (4 errors) ====
+    <a[foo]></a[foo]>;
+               ~
+!!! error TS1005: '>' expected.
+                ~~~
+!!! error TS1005: ';' expected.
+                ~~~
+!!! error TS2304: Cannot find name 'foo'.
+                   ~
+!!! error TS1005: ';' expected.
+==== 15.tsx (3 errors) ====
+    <a['foo']></a['foo']>;
+                 ~
+!!! error TS1005: '>' expected.
+                  ~~~~~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+==== 16.tsx (1 errors) ====
+    <a><a />;
+             
+!!! error TS1005: '</' expected.
+==== 17.tsx (2 errors) ====
+    <a b={}>;
+         ~~
+!!! error TS17000: JSX attributes must only be assigned a non-empty 'expression'.
+             
+!!! error TS1005: '</' expected.
+==== 18.tsx (3 errors) ====
+    var x = /* Leading trivia */ <div>one</div><div>two</div>;;
+                                                    ~~~
+!!! error TS1005: ',' expected.
+                                                       ~~
+!!! error TS1005: ',' expected.
+                                                            ~
+!!! error TS1005: ',' expected.
+==== 19.tsx (3 errors) ====
+    var x = <div>one</div> /* intervening comment */ <div>two</div>;;
+                                                          ~~~
+!!! error TS1005: ',' expected.
+                                                             ~~
+!!! error TS1005: ',' expected.
+                                                                  ~
+!!! error TS1005: ',' expected.
+==== 20.tsx (1 errors) ====
+    <a>{"str";}</a>;
+             ~
+!!! error TS1005: '}' expected.
+==== 21.tsx (0 errors) ====
+    <span className="a", id="b" />;
+==== 22.tsx (1 errors) ====
+    <div className"app">;
+                         
+!!! error TS1005: '</' expected.
+==== 23.tsx (2 errors) ====
+    <div {props} />;
+          ~~~~~
+!!! error TS1005: '...' expected.
+          ~~~~~
+!!! error TS2304: Cannot find name 'props'.
+    
+==== 24.tsx (4 errors) ====
+    <div>stuff</div {...props}>;
+                    ~
+!!! error TS1005: '>' expected.
+                     ~~~
+!!! error TS1005: ';' expected.
+                        ~~~~~
+!!! error TS2304: Cannot find name 'props'.
+                             ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== 25.tsx (5 errors) ====
+    <div {...props}>stuff</div {...props}>;
+             ~~~~~
+!!! error TS2304: Cannot find name 'props'.
+                               ~
+!!! error TS1005: '>' expected.
+                                ~~~
+!!! error TS1005: ';' expected.
+                                   ~~~~~
+!!! error TS2304: Cannot find name 'props'.
+                                        ~
+!!! error TS1128: Declaration or statement expected.
+    
+    
+==== 26.tsx (1 errors) ====
+    <a>></a>;
+    
+    
+!!! error TS1005: '</' expected.
+==== 27.tsx (0 errors) ====
+    <a> ></a>;
+    
+==== 28.tsx (1 errors) ====
+    <a b=}>;
+    
+    
+!!! error TS1005: '</' expected.
+==== 29.tsx (1 errors) ====
+    <a b=<}>;
+    
+    
+!!! error TS1005: '</' expected.
+==== 30.tsx (0 errors) ====
+    <a>}</a>;
+    
+==== 31.tsx (0 errors) ====
+    <a .../*hai*/asdf/>;

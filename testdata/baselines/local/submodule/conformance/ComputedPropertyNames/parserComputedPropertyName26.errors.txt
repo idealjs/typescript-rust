@@ -1,0 +1,11 @@
+parserComputedPropertyName26.ts(4,6): error TS2304: Cannot find name 'e2'.
+
+
+==== parserComputedPropertyName26.ts (1 errors) ====
+    enum E {
+        // No ASI
+        [e] = 0
+        [e2] = 1
+         ~~
+!!! error TS2304: Cannot find name 'e2'.
+    }

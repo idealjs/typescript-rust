@@ -1,0 +1,23 @@
+usingDeclarations.13.ts(1,8): error TS1005: '{' expected.
+usingDeclarations.13.ts(1,16): error TS1003: Identifier expected.
+usingDeclarations.13.ts(1,22): error TS1003: Identifier expected.
+usingDeclarations.13.ts(2,16): error TS1003: Identifier expected.
+usingDeclarations.13.ts(2,22): error TS1003: Identifier expected.
+usingDeclarations.13.ts(2,23): error TS1005: '}' expected.
+
+
+==== usingDeclarations.13.ts (6 errors) ====
+    export using x = null;
+           ~~~~~
+!!! error TS1005: '{' expected.
+                   ~
+!!! error TS1003: Identifier expected.
+                         ~
+!!! error TS1003: Identifier expected.
+    declare using y: null;
+                   ~
+!!! error TS1003: Identifier expected.
+                         ~
+!!! error TS1003: Identifier expected.
+                          
+!!! error TS1005: '}' expected.

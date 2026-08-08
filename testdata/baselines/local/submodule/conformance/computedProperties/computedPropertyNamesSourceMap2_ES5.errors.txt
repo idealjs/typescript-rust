@@ -1,0 +1,59 @@
+computedPropertyNamesSourceMap2_ES5.ts(2,14): error TS1005: ',' expected.
+computedPropertyNamesSourceMap2_ES5.ts(2,14): error TS2304: Cannot find name '('.
+computedPropertyNamesSourceMap2_ES5.ts(2,15): error TS1005: ',' expected.
+computedPropertyNamesSourceMap2_ES5.ts(2,15): error TS2304: Cannot find name ')'.
+computedPropertyNamesSourceMap2_ES5.ts(2,17): error TS1005: ',' expected.
+computedPropertyNamesSourceMap2_ES5.ts(2,17): error TS2304: Cannot find name '{'.
+computedPropertyNamesSourceMap2_ES5.ts(3,9): error TS1005: ',' expected.
+computedPropertyNamesSourceMap2_ES5.ts(3,9): error TS2304: Cannot find name 'debugger'.
+computedPropertyNamesSourceMap2_ES5.ts(3,17): error TS1005: ',' expected.
+computedPropertyNamesSourceMap2_ES5.ts(5,5): error TS2304: Cannot find name 'get'.
+computedPropertyNamesSourceMap2_ES5.ts(5,23): error TS1005: ',' expected.
+computedPropertyNamesSourceMap2_ES5.ts(5,23): error TS1182: A destructuring declaration must have an initializer.
+computedPropertyNamesSourceMap2_ES5.ts(6,10): error TS1005: ',' expected.
+computedPropertyNamesSourceMap2_ES5.ts(6,11): error TS1005: ':' expected.
+computedPropertyNamesSourceMap2_ES5.ts(8,1): error TS1128: Declaration or statement expected.
+
+
+==== computedPropertyNamesSourceMap2_ES5.ts (15 errors) ====
+    var v = {
+        ["hello"]() {
+                 ~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS2304: Cannot find name '('.
+                  ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS2304: Cannot find name ')'.
+                    ~
+!!! error TS1005: ',' expected.
+                    ~
+!!! error TS2304: Cannot find name '{'.
+            debugger;
+            ~~~~~~~~
+!!! error TS1005: ',' expected.
+            ~~~~~~~~
+!!! error TS2304: Cannot find name 'debugger'.
+                    ~
+!!! error TS1005: ',' expected.
+    	},
+        get ["goodbye"]() {
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+                          ~
+!!! error TS1005: ',' expected.
+                          ~
+    		return 0;
+    ~~~~~~~~~~~
+    		       ~
+!!! error TS1005: ',' expected.
+    		        ~
+!!! error TS1005: ':' expected.
+    	}
+    ~~
+    }
+    
+!!! error TS1182: A destructuring declaration must have an initializer.
+    ~
+!!! error TS1128: Declaration or statement expected.

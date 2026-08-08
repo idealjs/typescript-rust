@@ -1,0 +1,14 @@
+stringLiteralTypesAsTypeParameterConstraint02.ts(7,13): error TS2345: Argument of type '(y: "foo" | "bar") => "foo" | "bar" | string' is not assignable to parameter of type '(x: T) => T'.
+
+
+==== stringLiteralTypesAsTypeParameterConstraint02.ts (1 errors) ====
+    ﻿// @target: es2015
+    
+    function foo<T extends "foo">(f: (x: T) => T) {
+        return f;
+    }
+    
+    let f = foo((y: "foo" | "bar") => y === "foo" ? y : "foo");
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(y: "foo" | "bar") => "foo" | "bar" | string' is not assignable to parameter of type '(x: T) => T'.
+    let fResult = f("foo");

@@ -1,0 +1,33 @@
+typeGuardsInWhileStatement.ts(11,13): error TS2454: Variable 'cond' is used before being assigned.
+typeGuardsInWhileStatement.ts(19,13): error TS2454: Variable 'cond' is used before being assigned.
+
+
+==== typeGuardsInWhileStatement.ts (2 errors) ====
+    let cond: boolean;
+    function a(x: string | number) {
+        while (typeof x === "string") {
+            x; // string
+            x = undefined;
+        }
+        x; // number
+    }
+    function b(x: string | number) {
+        while (typeof x === "string") {
+            if (cond) continue;
+                ~~~~
+!!! error TS2454: Variable 'cond' is used before being assigned.
+            x; // string
+            x = undefined;
+        }
+        x; // number
+    }
+    function c(x: string | number) {
+        while (typeof x === "string") {
+            if (cond) break;
+                ~~~~
+!!! error TS2454: Variable 'cond' is used before being assigned.
+            x; // string
+            x = undefined;
+        }
+        x; // string | number
+    }

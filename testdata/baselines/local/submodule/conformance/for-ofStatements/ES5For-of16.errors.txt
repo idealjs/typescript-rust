@@ -1,0 +1,13 @@
+ES5For-of16.ts(2,5): error TS2448: Block-scoped variable 'v' used before its declaration.
+
+
+==== ES5For-of16.ts (1 errors) ====
+    for (let v of []) {
+        v;
+        ~
+!!! error TS2448: Block-scoped variable 'v' used before its declaration.
+        for (let v of []) {
+            var x = v;
+            v++;
+        }
+    }

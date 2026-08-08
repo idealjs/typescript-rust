@@ -1,0 +1,9 @@
+parser_continueLabel.ts(1,29): error TS1005: '>' expected.
+
+
+==== parser_continueLabel.ts (1 errors) ====
+    label1: for(var i = 0; i < 1; i++) {
+                                ~
+!!! error TS1005: '>' expected.
+        continue label1;
+    }

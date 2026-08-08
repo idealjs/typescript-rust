@@ -1,18 +1,18 @@
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingPublicStatic.ts(7,23): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingPublicStatic.ts(8,23): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingPublicStatic.ts(19,24): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingPublicStatic.ts(20,24): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingPublicStatic.ts(23,14): error TS2339: Property 'x' does not exist on type 'object'.
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingPublicStatic.ts(24,18): error TS2339: Property 'x' does not exist on type 'object'.
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingPublicStatic.ts(26,15): error TS2339: Property 'fn' does not exist on type 'object'.
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingPublicStatic.ts(27,18): error TS2339: Property 'fn' does not exist on type 'object'.
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingPublicStatic.ts(29,15): error TS2339: Property 'a' does not exist on type 'object'.
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingPublicStatic.ts(30,6): error TS2339: Property 'a' does not exist on type 'object'.
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingPublicStatic.ts(32,18): error TS2339: Property 'a' does not exist on type 'object'.
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingPublicStatic.ts(33,9): error TS2339: Property 'a' does not exist on type 'object'.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(7,23): error TS1005: ';' expected.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(8,23): error TS1005: ';' expected.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(19,24): error TS1005: ';' expected.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(20,24): error TS1005: ';' expected.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(23,14): error TS2339: Property 'x' does not exist on type 'object'.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(24,18): error TS2339: Property 'x' does not exist on type 'object'.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(26,15): error TS2339: Property 'fn' does not exist on type 'object'.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(27,18): error TS2339: Property 'fn' does not exist on type 'object'.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(29,15): error TS2339: Property 'a' does not exist on type 'object'.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(30,6): error TS2339: Property 'a' does not exist on type 'object'.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(32,18): error TS2339: Property 'a' does not exist on type 'object'.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(33,9): error TS2339: Property 'a' does not exist on type 'object'.
 
 
-==== inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingPublicStatic.ts (12 errors) ====
+==== derivedClassWithPrivateStaticShadowingPublicStatic.ts (12 errors) ====
     class Base {
         public static x: string;
         public static fn(): string {

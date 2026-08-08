@@ -1,0 +1,37 @@
+elementAccessChain.3.ts(18,22): error TS1005: ';' expected.
+elementAccessChain.3.ts(19,23): error TS1005: ';' expected.
+
+
+==== elementAccessChain.3.ts (2 errors) ====
+    declare const obj: any;
+    
+    obj?.["a"]++;
+    obj?.a["b"]++;
+    obj?.["a"]--;
+    obj?.a["b"]--;
+    
+    ++obj?.["a"];
+    ++obj?.a["b"];
+    --obj?.["a"];
+    --obj?.a["b"];
+    
+    obj?.["a"] = 1;
+    obj?.a["b"] = 1;
+    obj?.["a"] += 1;
+    obj?.a["b"] += 1;
+    
+    for (obj?.["a"] in {});
+                         ~
+!!! error TS1005: ';' expected.
+    for (obj?.a["b"] in {});
+                          ~
+!!! error TS1005: ';' expected.
+    for (obj?.["a"] of []);
+    for (obj?.a["b"] of []);
+    
+    ({ a: obj?.["a"] } = { a: 1 });
+    ({ a: obj?.a["b"] } = { a: 1 });
+    ({ ...obj?.["a"] } = { a: 1 });
+    ({ ...obj?.a["b"] } = { a: 1 });
+    [...obj?.["a"]] = [];
+    [...obj?.a["b"]] = [];

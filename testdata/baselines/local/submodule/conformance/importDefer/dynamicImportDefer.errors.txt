@@ -1,0 +1,22 @@
+b.ts(1,7): error TS1012: Unexpected token.
+b.ts(1,8): error TS1005: ';' expected.
+b.ts(1,8): error TS2304: Cannot find name 'defer'.
+
+
+==== dynamicImportDefer.ts (0 errors) ====
+    
+==== a.ts (0 errors) ====
+    export function foo() {
+      console.log("foo from a");
+    }
+    
+==== b.ts (3 errors) ====
+    import.defer("./a.js").then(ns => {
+          ~
+!!! error TS1012: Unexpected token.
+           ~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~
+!!! error TS2304: Cannot find name 'defer'.
+      ns.foo();
+    });

@@ -1,0 +1,48 @@
+index.js(1,20): error TS2304: Cannot find name 'I'.
+index.js(2,23): error TS2304: Cannot find name 'extends'.
+index.js(2,31): error TS1005: '{' expected.
+index.js(2,36): error TS1005: ';' expected.
+index.js(2,37): error TS1005: ';' expected.
+index.js(2,42): error TS1005: ';' expected.
+index.js(4,26): error TS2304: Cannot find name 'extends'.
+index.js(4,34): error TS1005: '{' expected.
+index.js(4,40): error TS1005: ';' expected.
+index.js(4,41): error TS1005: ';' expected.
+index.js(4,48): error TS1005: ';' expected.
+
+
+==== index.js (11 errors) ====
+    First.Item = class I {}
+                       ~
+!!! error TS2304: Cannot find name 'I'.
+    Common.Object = class extends First.Item {}
+                          ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                                  ~~~~~
+!!! error TS1005: '{' expected.
+                                       ~
+!!! error TS1005: ';' expected.
+                                        ~~~~
+!!! error TS1005: ';' expected.
+                                             ~
+!!! error TS1005: ';' expected.
+    
+    Workspace.Object = class extends Common.Object {}
+                             ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                                     ~~~~~~
+!!! error TS1005: '{' expected.
+                                           ~
+!!! error TS1005: ';' expected.
+                                            ~~~~~~
+!!! error TS1005: ';' expected.
+                                                   ~
+!!! error TS1005: ';' expected.
+    
+    /** @type {Workspace.Object} */
+    var am;
+    
+==== roots.js (0 errors) ====
+    var First = {};
+    var Common = {};
+    var Workspace = {};

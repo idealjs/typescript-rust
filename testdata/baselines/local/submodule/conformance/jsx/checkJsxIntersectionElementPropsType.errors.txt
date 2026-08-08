@@ -1,0 +1,21 @@
+checkJsxIntersectionElementPropsType.tsx(11,17): error TS2554: Expected 0 arguments, but got 1.
+checkJsxIntersectionElementPropsType.tsx(12,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+
+
+==== checkJsxIntersectionElementPropsType.tsx (2 errors) ====
+    declare namespace JSX {
+        interface ElementAttributesProperty { props: {}; }
+    }
+    
+    declare class Component<P> {
+      constructor(props: Readonly<P>);
+      readonly props: Readonly<P>;
+    }
+    
+    class C<T> extends Component<{ x?: boolean; } & T> {}
+    const y = new C({foobar: "example"});
+                    ~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 0 arguments, but got 1.
+    const x = <C foobar="example" />
+              ~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.

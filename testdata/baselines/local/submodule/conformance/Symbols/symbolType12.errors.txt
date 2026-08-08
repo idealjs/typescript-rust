@@ -1,0 +1,43 @@
+symbolType12.ts(19,6): error TS1012: Unexpected token.
+symbolType12.ts(19,8): error TS1005: ';' expected.
+symbolType12.ts(20,6): error TS1012: Unexpected token.
+symbolType12.ts(20,8): error TS1005: ';' expected.
+
+
+==== symbolType12.ts (4 errors) ====
+    var s = Symbol.for("assign");
+    var str = "";
+    s *= s;
+    s *= 0;
+    s /= s;
+    s /= 0;
+    s %= s;
+    s %= 0;
+    s += s;
+    s += 0;
+    s += "";
+    str += s;
+    s -= s;
+    s -= 0;
+    s <<= s;
+    s <<= 0;
+    s >>= s;
+    s >>= 0;
+    s >>>= s;
+         ~
+!!! error TS1012: Unexpected token.
+           ~
+!!! error TS1005: ';' expected.
+    s >>>= 0;
+         ~
+!!! error TS1012: Unexpected token.
+           ~
+!!! error TS1005: ';' expected.
+    s &= s;
+    s &= 0;
+    s ^= s;
+    s ^= 0;
+    s |= s;
+    s |= 0;
+    
+    str += (s || str);

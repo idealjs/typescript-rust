@@ -1,15 +1,15 @@
-privateNames/privateNameComputedPropertyName4.ts(3,12): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName4.ts(3,12): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName4.ts(3,13): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName4.ts(7,12): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName4.ts(7,12): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName4.ts(7,13): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName4.ts(11,12): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName4.ts(11,12): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName4.ts(11,13): error TS1005: ';' expected.
+privateNameComputedPropertyName4.ts(3,12): error TS1005: ';' expected.
+privateNameComputedPropertyName4.ts(3,12): error TS1127: Invalid character.
+privateNameComputedPropertyName4.ts(3,13): error TS1005: ';' expected.
+privateNameComputedPropertyName4.ts(7,12): error TS1005: ';' expected.
+privateNameComputedPropertyName4.ts(7,12): error TS1127: Invalid character.
+privateNameComputedPropertyName4.ts(7,13): error TS1005: ';' expected.
+privateNameComputedPropertyName4.ts(11,12): error TS1005: ';' expected.
+privateNameComputedPropertyName4.ts(11,12): error TS1127: Invalid character.
+privateNameComputedPropertyName4.ts(11,13): error TS1005: ';' expected.
 
 
-==== privateNames/privateNameComputedPropertyName4.ts (9 errors) ====
+==== privateNameComputedPropertyName4.ts (9 errors) ====
     // https://github.com/microsoft/TypeScript/issues/44113
     class C1 {
         static #qux = 42;

@@ -1,0 +1,65 @@
+staticIndexSignature3.ts(2,23): error TS1005: ']' expected.
+staticIndexSignature3.ts(2,31): error TS1005: ';' expected.
+staticIndexSignature3.ts(3,23): error TS1005: ']' expected.
+staticIndexSignature3.ts(3,31): error TS1005: ';' expected.
+staticIndexSignature3.ts(7,23): error TS1005: ']' expected.
+staticIndexSignature3.ts(7,31): error TS1005: ';' expected.
+staticIndexSignature3.ts(11,23): error TS1005: ']' expected.
+staticIndexSignature3.ts(11,31): error TS1005: ';' expected.
+staticIndexSignature3.ts(12,23): error TS1005: ']' expected.
+staticIndexSignature3.ts(12,31): error TS1005: ';' expected.
+staticIndexSignature3.ts(16,23): error TS1005: ']' expected.
+staticIndexSignature3.ts(16,31): error TS1005: ';' expected.
+
+
+==== staticIndexSignature3.ts (12 errors) ====
+    class B {
+        static readonly [s: string]: number;
+                          ~
+!!! error TS1005: ']' expected.
+                                  ~
+!!! error TS1005: ';' expected.
+        static readonly [s: number]: 42 | 233
+                          ~
+!!! error TS1005: ']' expected.
+                                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class D extends B {
+        static readonly [s: string]: number
+                          ~
+!!! error TS1005: ']' expected.
+                                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class ED extends D {
+        static readonly [s: string]: boolean
+                          ~
+!!! error TS1005: ']' expected.
+                                  ~
+!!! error TS1005: ';' expected.
+        static readonly [s: number]: 1 
+                          ~
+!!! error TS1005: ']' expected.
+                                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class DD extends D {
+        static readonly [s: string]: 421
+                          ~
+!!! error TS1005: ']' expected.
+                                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    const a = B["f"];
+    const b =  B[42];
+    const c = D["f"]
+    const d = D[42]
+    const e = ED["f"]
+    const f = ED[42]
+    const g = DD["f"]
+    const h = DD[42]

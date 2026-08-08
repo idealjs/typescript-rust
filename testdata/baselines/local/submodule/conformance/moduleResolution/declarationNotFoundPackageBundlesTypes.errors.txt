@@ -1,10 +1,16 @@
-node_modules/foo/package.json(2,11): error TS1005: ';' expected.
-node_modules/foo/package.json(3,14): error TS1005: ';' expected.
+index.js(2,7): error TS1003: Identifier expected.
+index.js(2,8): error TS1005: ';' expected.
+index.js(2,8): error TS2304: Cannot find name 'exports'.
+other.js(1,7): error TS1003: Identifier expected.
+other.js(1,8): error TS1005: ';' expected.
+other.js(1,8): error TS2304: Cannot find name 'exports'.
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
 
 
-==== moduleResolution/declarationNotFoundPackageBundlesTypes.ts (0 errors) ====
+==== declarationNotFoundPackageBundlesTypes.ts (0 errors) ====
     
-==== node_modules/foo/package.json (2 errors) ====
+==== package.json (2 errors) ====
     {   
         "name": "foo",
               ~
@@ -14,16 +20,28 @@ node_modules/foo/package.json(3,14): error TS1005: ';' expected.
 !!! error TS1005: ';' expected.
     }
     
-==== node_modules/foo/index.js (0 errors) ====
+==== index.js (3 errors) ====
     var foo = 0;
     module.exports = foo;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
     
-==== node_modules/foo/index.d.ts (0 errors) ====
+==== index.d.ts (0 errors) ====
     declare const foo: any;
     export = foo;
     
-==== node_modules/foo/other.js (0 errors) ====
+==== other.js (3 errors) ====
     module.exports = {};
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
     
 ==== index.ts (0 errors) ====
     import * as Foo from "foo";

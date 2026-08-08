@@ -1,0 +1,17 @@
+a.ts(2,18): error TS2304: Cannot find name 'Foo'.
+
+
+==== umd9.ts (0 errors) ====
+    
+==== foo.d.ts (0 errors) ====
+    declare class Thing {
+      foo(): number;
+    }
+    export = Thing;
+    export as namespace Foo;
+    
+==== a.ts (1 errors) ====
+    /// <reference path="foo.d.ts" />
+    export const x = Foo; // OK in value position because allowUmdGlobalAccess: true
+                     ~~~
+!!! error TS2304: Cannot find name 'Foo'.

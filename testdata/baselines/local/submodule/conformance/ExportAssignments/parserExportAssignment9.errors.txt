@@ -1,0 +1,16 @@
+parserExportAssignment9.ts(2,18): error TS2304: Cannot find name 'foo'.
+parserExportAssignment9.ts(6,18): error TS2304: Cannot find name 'bar'.
+
+
+==== parserExportAssignment9.ts (2 errors) ====
+    namespace Foo {
+      export default foo;
+                     ~~~
+!!! error TS2304: Cannot find name 'foo'.
+    }
+    
+    namespace Bar {
+      export default bar;
+                     ~~~
+!!! error TS2304: Cannot find name 'bar'.
+    }

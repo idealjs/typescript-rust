@@ -1,0 +1,20 @@
+importMetaNarrowing.ts(3,5): error TS2304: Cannot find name 'import'.
+importMetaNarrowing.ts(4,9): error TS1012: Unexpected token.
+importMetaNarrowing.ts(4,10): error TS1005: ';' expected.
+importMetaNarrowing.ts(4,10): error TS2304: Cannot find name 'meta'.
+
+
+==== importMetaNarrowing.ts (4 errors) ====
+    declare global { interface ImportMeta {foo?: () => void} };
+    
+    if (import.meta.foo) {
+        ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+      import.meta.foo();
+            ~
+!!! error TS1012: Unexpected token.
+             ~~~~
+!!! error TS1005: ';' expected.
+             ~~~~
+!!! error TS2304: Cannot find name 'meta'.
+    }

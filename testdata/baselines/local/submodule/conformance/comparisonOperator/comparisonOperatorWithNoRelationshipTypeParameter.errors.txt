@@ -1,0 +1,510 @@
+comparisonOperatorWithNoRelationshipTypeParameter.ts(12,19): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(16,14): error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(17,14): error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(18,14): error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(19,14): error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(22,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(23,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(24,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(25,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(26,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(27,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(28,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(30,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(31,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(32,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(33,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(34,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(35,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(36,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(39,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(40,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(41,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(42,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(43,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(44,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(45,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(47,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(48,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(49,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(50,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(51,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(52,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(53,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(56,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(57,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(58,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(59,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(60,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(61,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(62,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(64,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(65,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(66,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(67,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(68,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(69,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(70,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(73,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(74,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(75,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(76,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(77,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(78,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(79,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(81,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(82,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(83,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(84,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(85,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(86,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(87,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(90,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(91,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(92,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(93,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(94,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(95,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(96,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(98,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(99,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(100,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(101,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(102,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(103,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(104,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(107,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(108,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(109,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(110,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(111,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(112,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(113,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(115,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(116,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(117,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(118,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(119,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(120,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(121,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(124,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(125,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(126,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(127,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(128,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(129,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(130,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(132,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(133,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(134,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(135,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(136,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(137,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(138,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(141,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(142,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(143,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(144,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(145,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(146,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(147,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(149,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(150,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(151,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(152,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(153,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(154,21): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipTypeParameter.ts(155,21): error TS1005: '>' expected.
+
+
+==== comparisonOperatorWithNoRelationshipTypeParameter.ts (117 errors) ====
+    enum E { a, b, c }
+    
+    var a: boolean;
+    var b: number;
+    var c: string;
+    var d: void;
+    var e: E;
+    var f: { a: string };
+    var g: any[];
+    
+    function foo<T, U>(t: T, u: U) {
+        var r1 = t < u;
+                      ~
+!!! error TS1005: '>' expected.
+        var r2 = t > u;
+        var r3 = t <= u;
+        var r4 = t >= u;
+        var r5 = t == u;
+                 ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+        var r6 = t != u;
+                 ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+        var r7 = t === u;
+                 ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+        var r8 = t !== u;
+                 ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+    
+        // operator <
+        var r1a1 = t < a;
+                        ~
+!!! error TS1005: '>' expected.
+        var r1a2 = t < b;
+                        ~
+!!! error TS1005: '>' expected.
+        var r1a3 = t < c;
+                        ~
+!!! error TS1005: '>' expected.
+        var r1a4 = t < d;
+                        ~
+!!! error TS1005: '>' expected.
+        var r1a5 = t < e;
+                        ~
+!!! error TS1005: '>' expected.
+        var r1a6 = t < f;
+                        ~
+!!! error TS1005: '>' expected.
+        var r1a7 = t < g;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        var r1b1 = a < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r1b2 = b < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r1b3 = c < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r1b4 = d < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r1b5 = e < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r1b6 = f < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r1b7 = g < t;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        // operator >
+        var r2a1 = t < a;
+                        ~
+!!! error TS1005: '>' expected.
+        var r2a2 = t < b;
+                        ~
+!!! error TS1005: '>' expected.
+        var r2a3 = t < c;
+                        ~
+!!! error TS1005: '>' expected.
+        var r2a4 = t < d;
+                        ~
+!!! error TS1005: '>' expected.
+        var r2a5 = t < e;
+                        ~
+!!! error TS1005: '>' expected.
+        var r2a6 = t < f;
+                        ~
+!!! error TS1005: '>' expected.
+        var r2a7 = t < g;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        var r2b1 = a < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r2b2 = b < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r2b3 = c < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r2b4 = d < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r2b5 = e < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r2b6 = f < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r2b7 = g < t;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        // operator <=
+        var r3a1 = t < a;
+                        ~
+!!! error TS1005: '>' expected.
+        var r3a2 = t < b;
+                        ~
+!!! error TS1005: '>' expected.
+        var r3a3 = t < c;
+                        ~
+!!! error TS1005: '>' expected.
+        var r3a4 = t < d;
+                        ~
+!!! error TS1005: '>' expected.
+        var r3a5 = t < e;
+                        ~
+!!! error TS1005: '>' expected.
+        var r3a6 = t < f;
+                        ~
+!!! error TS1005: '>' expected.
+        var r3a7 = t < g;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        var r3b1 = a < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r3b2 = b < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r3b3 = c < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r3b4 = d < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r3b5 = e < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r3b6 = f < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r3b7 = g < t;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        // operator >=
+        var r4a1 = t < a;
+                        ~
+!!! error TS1005: '>' expected.
+        var r4a2 = t < b;
+                        ~
+!!! error TS1005: '>' expected.
+        var r4a3 = t < c;
+                        ~
+!!! error TS1005: '>' expected.
+        var r4a4 = t < d;
+                        ~
+!!! error TS1005: '>' expected.
+        var r4a5 = t < e;
+                        ~
+!!! error TS1005: '>' expected.
+        var r4a6 = t < f;
+                        ~
+!!! error TS1005: '>' expected.
+        var r4a7 = t < g;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        var r4b1 = a < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r4b2 = b < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r4b3 = c < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r4b4 = d < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r4b5 = e < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r4b6 = f < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r4b7 = g < t;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        // operator ==
+        var r5a1 = t < a;
+                        ~
+!!! error TS1005: '>' expected.
+        var r5a2 = t < b;
+                        ~
+!!! error TS1005: '>' expected.
+        var r5a3 = t < c;
+                        ~
+!!! error TS1005: '>' expected.
+        var r5a4 = t < d;
+                        ~
+!!! error TS1005: '>' expected.
+        var r5a5 = t < e;
+                        ~
+!!! error TS1005: '>' expected.
+        var r5a6 = t < f;
+                        ~
+!!! error TS1005: '>' expected.
+        var r5a7 = t < g;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        var r5b1 = a < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r5b2 = b < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r5b3 = c < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r5b4 = d < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r5b5 = e < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r5b6 = f < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r5b7 = g < t;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        // operator !=
+        var r6a1 = t < a;
+                        ~
+!!! error TS1005: '>' expected.
+        var r6a2 = t < b;
+                        ~
+!!! error TS1005: '>' expected.
+        var r6a3 = t < c;
+                        ~
+!!! error TS1005: '>' expected.
+        var r6a4 = t < d;
+                        ~
+!!! error TS1005: '>' expected.
+        var r6a5 = t < e;
+                        ~
+!!! error TS1005: '>' expected.
+        var r6a6 = t < f;
+                        ~
+!!! error TS1005: '>' expected.
+        var r6a7 = t < g;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        var r6b1 = a < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r6b2 = b < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r6b3 = c < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r6b4 = d < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r6b5 = e < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r6b6 = f < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r6b7 = g < t;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        // operator ===
+        var r7a1 = t < a;
+                        ~
+!!! error TS1005: '>' expected.
+        var r7a2 = t < b;
+                        ~
+!!! error TS1005: '>' expected.
+        var r7a3 = t < c;
+                        ~
+!!! error TS1005: '>' expected.
+        var r7a4 = t < d;
+                        ~
+!!! error TS1005: '>' expected.
+        var r7a5 = t < e;
+                        ~
+!!! error TS1005: '>' expected.
+        var r7a6 = t < f;
+                        ~
+!!! error TS1005: '>' expected.
+        var r7a7 = t < g;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        var r7b1 = a < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r7b2 = b < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r7b3 = c < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r7b4 = d < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r7b5 = e < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r7b6 = f < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r7b7 = g < t;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        // operator !==
+        var r8a1 = t < a;
+                        ~
+!!! error TS1005: '>' expected.
+        var r8a2 = t < b;
+                        ~
+!!! error TS1005: '>' expected.
+        var r8a3 = t < c;
+                        ~
+!!! error TS1005: '>' expected.
+        var r8a4 = t < d;
+                        ~
+!!! error TS1005: '>' expected.
+        var r8a5 = t < e;
+                        ~
+!!! error TS1005: '>' expected.
+        var r8a6 = t < f;
+                        ~
+!!! error TS1005: '>' expected.
+        var r8a7 = t < g;
+                        ~
+!!! error TS1005: '>' expected.
+    
+        var r8b1 = a < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r8b2 = b < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r8b3 = c < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r8b4 = d < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r8b5 = e < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r8b6 = f < t;
+                        ~
+!!! error TS1005: '>' expected.
+        var r8b7 = g < t;
+                        ~
+!!! error TS1005: '>' expected.
+    }

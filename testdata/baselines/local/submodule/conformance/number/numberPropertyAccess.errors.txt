@@ -1,0 +1,15 @@
+numberPropertyAccess.ts(2,11): error TS2339: Property 'toExponential' does not exist on type 'number'.
+numberPropertyAccess.ts(3,11): error TS2339: Property 'hasOwnProperty' does not exist on type 'number'.
+
+
+==== numberPropertyAccess.ts (2 errors) ====
+    var x = 1;
+    var a = x.toExponential();
+              ~~~~~~~~~~~~~
+!!! error TS2339: Property 'toExponential' does not exist on type 'number'.
+    var b = x.hasOwnProperty('toFixed');
+              ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'hasOwnProperty' does not exist on type 'number'.
+    
+    var c = x['toExponential']();
+    var d = x['hasOwnProperty']('toFixed');

@@ -1,0 +1,36 @@
+objectTypeWithConstructSignatureAppearsToBeFunctionType.ts(8,18): error TS2349: This expression is not callable.
+objectTypeWithConstructSignatureAppearsToBeFunctionType.ts(10,39): error TS2339: Property 'apply' does not exist on type 'object'.
+objectTypeWithConstructSignatureAppearsToBeFunctionType.ts(16,18): error TS2349: This expression is not callable.
+objectTypeWithConstructSignatureAppearsToBeFunctionType.ts(17,23): error TS2351: This expression is not constructable.
+objectTypeWithConstructSignatureAppearsToBeFunctionType.ts(18,39): error TS2339: Property 'apply' does not exist on type 'object'.
+
+
+==== objectTypeWithConstructSignatureAppearsToBeFunctionType.ts (5 errors) ====
+    // no errors expected below 
+    
+    interface I {
+        new(): number;
+    }
+    
+    declare var i: I;
+    var r2: number = i();
+                     ~
+!!! error TS2349: This expression is not callable.
+    var r2b: number = new i();
+    var r2c: (x: any, y?: any) => any = i.apply;
+                                          ~~~~~
+!!! error TS2339: Property 'apply' does not exist on type 'object'.
+    
+    declare var b: {
+        new(): number;
+    }
+    
+    var r4: number = b();
+                     ~
+!!! error TS2349: This expression is not callable.
+    var r4b: number = new b();
+                          ~
+!!! error TS2351: This expression is not constructable.
+    var r4c: (x: any, y?: any) => any = b.apply;
+                                          ~~~~~
+!!! error TS2339: Property 'apply' does not exist on type 'object'.

@@ -1,0 +1,12 @@
+trailingCommasInGetter.ts(2,9): error TS1005: ';' expected.
+trailingCommasInGetter.ts(2,11): error TS1138: Parameter declaration expected.
+
+
+==== trailingCommasInGetter.ts (2 errors) ====
+    class X {
+        get x(,) { return 0; }
+            ~
+!!! error TS1005: ';' expected.
+              ~
+!!! error TS1138: Parameter declaration expected.
+    }

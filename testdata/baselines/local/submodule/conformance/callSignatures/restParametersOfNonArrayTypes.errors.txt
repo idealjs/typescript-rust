@@ -1,0 +1,85 @@
+restParametersOfNonArrayTypes.ts(5,17): error TS2304: Cannot find name 'Date'.
+restParametersOfNonArrayTypes.ts(22,8): error TS1005: ',' expected.
+restParametersOfNonArrayTypes.ts(22,8): error TS2304: Cannot find name '('.
+restParametersOfNonArrayTypes.ts(22,9): error TS1005: ',' expected.
+restParametersOfNonArrayTypes.ts(22,13): error TS1005: ',' expected.
+restParametersOfNonArrayTypes.ts(22,13): error TS2304: Cannot find name ':'.
+restParametersOfNonArrayTypes.ts(22,15): error TS1005: ',' expected.
+restParametersOfNonArrayTypes.ts(22,15): error TS2304: Cannot find name 'string'.
+restParametersOfNonArrayTypes.ts(22,21): error TS1005: ',' expected.
+restParametersOfNonArrayTypes.ts(22,21): error TS2304: Cannot find name ')'.
+restParametersOfNonArrayTypes.ts(22,23): error TS1005: ',' expected.
+restParametersOfNonArrayTypes.ts(22,23): error TS2304: Cannot find name '{'.
+restParametersOfNonArrayTypes.ts(23,6): error TS1005: ',' expected.
+restParametersOfNonArrayTypes.ts(23,17): error TS1005: ',' expected.
+restParametersOfNonArrayTypes.ts(23,20): error TS1005: ',' expected.
+restParametersOfNonArrayTypes.ts(23,21): error TS1134: Variable declaration expected.
+restParametersOfNonArrayTypes.ts(23,35): error TS1134: Variable declaration expected.
+restParametersOfNonArrayTypes.ts(23,41): error TS2304: Cannot find name 'Date'.
+restParametersOfNonArrayTypes.ts(23,45): error TS1005: ',' expected.
+
+
+==== restParametersOfNonArrayTypes.ts (19 errors) ====
+    // Rest parameters must be an array type if they have a type annotation, so all these are errors
+    
+    function foo(...x: string) { }
+    var f = function foo(...x: number) { }
+    var f2 = (...x: Date, ...y: boolean) => { }
+                    ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    
+    class C {
+        foo(...x: C) { }
+    }
+    
+    interface I {
+        (...x: string);
+        foo(...x: number, ...y: number);
+    }
+    
+    var a: {
+        (...x: string);
+        foo(...x: string);
+    }
+    
+    var b = {
+        foo(...x: string) { },
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '('.
+            ~~~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS2304: Cannot find name ':'.
+                  ~~~~~~
+!!! error TS1005: ',' expected.
+                  ~~~~~~
+!!! error TS2304: Cannot find name 'string'.
+                        ~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS2304: Cannot find name ')'.
+                          ~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS2304: Cannot find name '{'.
+        a: function foo(...x: number, ...y: Date) { },
+         ~
+!!! error TS1005: ',' expected.
+                    ~~~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS1005: ',' expected.
+                        ~~~
+!!! error TS1134: Variable declaration expected.
+                                      ~~~
+!!! error TS1134: Variable declaration expected.
+                                            ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+                                                ~
+!!! error TS1005: ',' expected.
+        b: (...x: string) => { }
+    }

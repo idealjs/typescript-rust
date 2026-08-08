@@ -1,0 +1,153 @@
+unionAndIntersectionInference1.ts(10,12): error TS2322: Type 'r | r' is not assignable to type 'r'.
+unionAndIntersectionInference1.ts(13,13): error TS2304: Cannot find name 'Math'.
+unionAndIntersectionInference1.ts(15,26): error TS2345: Argument of type 'string | { i am a very certain type: error }' is not assignable to parameter of type 'a | { i am a very certain type: error }'.
+unionAndIntersectionInference1.ts(15,33): error TS2345: Argument of type '(text: a) => string' is not assignable to parameter of type '(value: a) => r'.
+unionAndIntersectionInference1.ts(15,51): error TS2345: Argument of type '(y: { i am a very certain type: error }) => string' is not assignable to parameter of type '(value: { i am a very certain type: error }) => r'.
+unionAndIntersectionInference1.ts(20,12): error TS2322: Type 'undefined' is not assignable to type 'boolean'.
+unionAndIntersectionInference1.ts(24,12): error TS2322: Type 'undefined' is not assignable to type 'boolean'.
+unionAndIntersectionInference1.ts(28,16): error TS2345: Argument of type 'void | a' is not assignable to parameter of type 'void | a'.
+unionAndIntersectionInference1.ts(36,21): error TS2345: Argument of type 'void | a' is not assignable to parameter of type 'void | a'.
+unionAndIntersectionInference1.ts(48,11): error TS2322: Type 'null' is not assignable to type 'U'.
+unionAndIntersectionInference1.ts(52,5): error TS2454: Variable 'foo' is used before being assigned.
+unionAndIntersectionInference1.ts(89,5): error TS2322: Type 'string | unknown' is not assignable to type 'string'.
+unionAndIntersectionInference1.ts(90,5): error TS2322: Type 'string | unknown' is not assignable to type 'string'.
+unionAndIntersectionInference1.ts(95,18): error TS1005: '>' expected.
+unionAndIntersectionInference1.ts(95,20): error TS1005: ',' expected.
+unionAndIntersectionInference1.ts(95,21): error TS1005: ',' expected.
+unionAndIntersectionInference1.ts(95,22): error TS1134: Variable declaration expected.
+unionAndIntersectionInference1.ts(95,33): error TS1005: ',' expected.
+
+
+==== unionAndIntersectionInference1.ts (18 errors) ====
+    // Repro from #2264
+    
+    interface Y { 'i am a very certain type': Y }
+    var y: Y = <Y>undefined;
+    function destructure<a, r>(
+        something: a | Y,
+        haveValue: (value: a) => r,
+        haveY: (value: Y) => r
+    ): r {
+        return something === y ? haveY(y) : haveValue(<a>something);
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'r | r' is not assignable to type 'r'.
+    }
+    
+    var value = Math.random() > 0.5 ? 'hey!' : <Y>undefined;
+                ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+    
+    var result = destructure(value, text => 'string', y => 'other one'); // text: string, y: Y
+                             ~~~~~
+!!! error TS2345: Argument of type 'string | { i am a very certain type: error }' is not assignable to parameter of type 'a | { i am a very certain type: error }'.
+                                    ~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(text: a) => string' is not assignable to parameter of type '(value: a) => r'.
+                                                      ~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(y: { i am a very certain type: error }) => string' is not assignable to parameter of type '(value: { i am a very certain type: error }) => r'.
+    
+    // Repro from #4212
+    
+    function isVoid<a>(value: void | a): value is void {
+        return undefined;
+               ~~~~~~~~~
+!!! error TS2322: Type 'undefined' is not assignable to type 'boolean'.
+    }
+    
+    function isNonVoid<a>(value: void | a) : value is a {
+        return undefined;
+               ~~~~~~~~~
+!!! error TS2322: Type 'undefined' is not assignable to type 'boolean'.
+    }
+    
+    function foo1<a>(value: void|a): void {
+        if (isVoid(value)) {
+                   ~~~~~
+!!! error TS2345: Argument of type 'void | a' is not assignable to parameter of type 'void | a'.
+            value; // value is void
+        } else {
+            value; // value is a
+        }
+    }
+    
+    function baz1<a>(value: void|a): void {
+          if (isNonVoid(value)) {
+                        ~~~~~
+!!! error TS2345: Argument of type 'void | a' is not assignable to parameter of type 'void | a'.
+              value; // value is a
+          } else {
+              value; // value is void
+          }
+    }
+    
+    // Repro from #5417
+    
+    type Maybe<T> = T | void;
+    
+    function get<U>(x: U | void): U {
+       return null; // just an example
+              ~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'U'.
+    }
+    
+    let foo: Maybe<string>;
+    get(foo).toUpperCase(); // Ok
+        ~~~
+!!! error TS2454: Variable 'foo' is used before being assigned.
+    
+    // Repro from #5456
+    
+    interface Man {
+        walks: boolean;
+    }
+    
+    interface Bear {
+        roars: boolean;
+    }
+    
+    interface Pig {
+        oinks: boolean;
+    }
+    
+    declare function pigify<T>(y: T & Bear): T & Pig;
+    declare var mbp: Man & Bear;
+    
+    pigify(mbp).oinks; // OK, mbp is treated as Pig
+    pigify(mbp).walks; // Ok, mbp is treated as Man
+    
+    // Repros from #29815
+    
+    interface ITest {
+      name: 'test'
+    }
+    
+    const createTestAsync = (): Promise<ITest> => Promise.resolve().then(() => ({ name: 'test' }))
+    
+    const createTest = (): ITest => {
+      return { name: 'test' }
+    }
+    
+    declare function f1<T, U>(x: T | U): T | U;
+    declare function f2<T, U>(x: T, y: U): T | U;
+    
+    let x1: string = f1('a');
+        ~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'string | unknown' is not assignable to type 'string'.
+    let x2: string = f2('a', 'b');
+        ~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'string | unknown' is not assignable to type 'string'.
+    
+    // Repro from #30442
+    
+    const func = <T>() => {};
+    const assign = <T, U>(a: T, b: U) => Object.assign(a, b);
+                     ~
+!!! error TS1005: '>' expected.
+                       ~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1134: Variable declaration expected.
+                                    ~
+!!! error TS1005: ',' expected.
+    const res: (() => void) & { func: any } = assign(() => {}, { func });

@@ -1,0 +1,32 @@
+commaOperatorOtherValidOperation.ts(2,17): error TS2304: Cannot find name 'j'.
+commaOperatorOtherValidOperation.ts(2,30): error TS1005: '>' expected.
+commaOperatorOtherValidOperation.ts(2,37): error TS2304: Cannot find name 'j'.
+
+
+==== commaOperatorOtherValidOperation.ts (3 errors) ====
+    //Comma operator in for loop
+    for (var i = 0, j = 10; i < j; i++, j--)
+                    ~
+!!! error TS2304: Cannot find name 'j'.
+                                 ~
+!!! error TS1005: '>' expected.
+                                        ~
+!!! error TS2304: Cannot find name 'j'.
+    {
+    }
+    
+    //Comma operator in function arguments and return
+    function foo(x: number, y: string)
+    {
+        return x, y;
+    }
+    var resultIsString = foo(1, "123");
+    
+    //TypeParameters
+    function foo1<T1, T2>()
+    {
+        var x: T1;
+        var y: T2;
+        x, y;
+        var resultIsT1 = (y, x);
+    }

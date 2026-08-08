@@ -1,0 +1,277 @@
+typeParameterConstModifiersReturnsAndYields.ts(5,23): error TS2345: Argument of type '() => string[]' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(6,23): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(6,33): error TS2304: Cannot find name 'Math'.
+typeParameterConstModifiersReturnsAndYields.ts(7,23): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(8,23): error TS2345: Argument of type '() => boolean' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(9,23): error TS2345: Argument of type '() => bigint' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(10,23): error TS2345: Argument of type '() => boolean' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(11,23): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(12,23): error TS2345: Argument of type '() => 0' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(14,23): error TS2345: Argument of type '() => string[]' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(15,24): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(15,43): error TS2304: Cannot find name 'Math'.
+typeParameterConstModifiersReturnsAndYields.ts(16,24): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(17,24): error TS2345: Argument of type '() => boolean' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(18,24): error TS2345: Argument of type '() => bigint' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(19,24): error TS2345: Argument of type '() => boolean' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(20,24): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(21,24): error TS2345: Argument of type '() => 0' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(23,30): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(24,30): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(38,53): error TS2304: Cannot find name 'AsyncGenerator'.
+typeParameterConstModifiersReturnsAndYields.ts(46,40): error TS1005: '>' expected.
+typeParameterConstModifiersReturnsAndYields.ts(46,40): error TS2304: Cannot find name 'ValidRoutes'.
+typeParameterConstModifiersReturnsAndYields.ts(46,52): error TS1012: Unexpected token.
+typeParameterConstModifiersReturnsAndYields.ts(46,54): error TS2304: Cannot find name 'route'.
+typeParameterConstModifiersReturnsAndYields.ts(46,59): error TS1005: ',' expected.
+typeParameterConstModifiersReturnsAndYields.ts(47,3): error TS2304: Cannot find name 'readonly'.
+typeParameterConstModifiersReturnsAndYields.ts(47,12): error TS1005: ',' expected.
+typeParameterConstModifiersReturnsAndYields.ts(47,28): error TS1005: ']' expected.
+typeParameterConstModifiersReturnsAndYields.ts(47,28): error TS2304: Cannot find name 'ValidRoutes'.
+typeParameterConstModifiersReturnsAndYields.ts(47,39): error TS1005: ',' expected.
+typeParameterConstModifiersReturnsAndYields.ts(48,23): error TS2304: Cannot find name 'ValidRoutes'.
+typeParameterConstModifiersReturnsAndYields.ts(48,35): error TS2304: Cannot find name 'Route'.
+typeParameterConstModifiersReturnsAndYields.ts(48,41): error TS1005: ',' expected.
+typeParameterConstModifiersReturnsAndYields.ts(48,41): error TS2304: Cannot find name ';'.
+typeParameterConstModifiersReturnsAndYields.ts(49,5): error TS1005: ',' expected.
+typeParameterConstModifiersReturnsAndYields.ts(49,38): error TS2304: Cannot find name 'ValidRoutes'.
+typeParameterConstModifiersReturnsAndYields.ts(49,50): error TS2304: Cannot find name 'Route'.
+typeParameterConstModifiersReturnsAndYields.ts(49,67): error TS1012: Unexpected token.
+typeParameterConstModifiersReturnsAndYields.ts(50,4): error TS1005: ',' expected.
+typeParameterConstModifiersReturnsAndYields.ts(50,4): error TS2304: Cannot find name ';'.
+typeParameterConstModifiersReturnsAndYields.ts(51,4): error TS1005: ';' expected.
+typeParameterConstModifiersReturnsAndYields.ts(68,30): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(76,30): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(84,30): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(88,31): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(89,43): error TS2554: Expected 1 arguments, but got 2.
+typeParameterConstModifiersReturnsAndYields.ts(93,31): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(94,43): error TS2554: Expected 1 arguments, but got 2.
+typeParameterConstModifiersReturnsAndYields.ts(98,31): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(99,43): error TS2554: Expected 1 arguments, but got 2.
+typeParameterConstModifiersReturnsAndYields.ts(103,31): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(104,43): error TS2554: Expected 1 arguments, but got 2.
+typeParameterConstModifiersReturnsAndYields.ts(108,31): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+typeParameterConstModifiersReturnsAndYields.ts(109,43): error TS2554: Expected 1 arguments, but got 2.
+
+
+==== typeParameterConstModifiersReturnsAndYields.ts (55 errors) ====
+    enum E { Val, Val2 }
+    
+    declare function test1<const T>(create: () => T): T;
+    
+    const result1 = test1(() => ['a']);
+                          ~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => string[]' is not assignable to parameter of type '() => T'.
+    const result2 = test1(() => `a${Math.random()}`);
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+                                    ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+    const result3 = test1(() => 'a');
+                          ~~~~~~~~~
+!!! error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+    const result4 = test1(() => true);
+                          ~~~~~~~~~~
+!!! error TS2345: Argument of type '() => boolean' is not assignable to parameter of type '() => T'.
+    const result5 = test1(() => 101n);
+                          ~~~~~~~~~~
+!!! error TS2345: Argument of type '() => bigint' is not assignable to parameter of type '() => T'.
+    const result6 = test1(() => false);
+                          ~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => boolean' is not assignable to parameter of type '() => T'.
+    const result7 = test1(() => 11111);
+                          ~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+    const result8 = test1(() => E.Val);
+                          ~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => 0' is not assignable to parameter of type '() => T'.
+    
+    const result9 = test1(() => { return ['a']; });
+                          ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => string[]' is not assignable to parameter of type '() => T'.
+    const result10 = test1(() => { return `a${Math.random()}`; });
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+                                              ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+    const result11 = test1(() => { return 'a'; });
+                           ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+    const result12 = test1(() => { return true; });
+                           ~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => boolean' is not assignable to parameter of type '() => T'.
+    const result13 = test1(() => { return 101n; });
+                           ~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => bigint' is not assignable to parameter of type '() => T'.
+    const result14 = test1(() => { return false; });
+                           ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => boolean' is not assignable to parameter of type '() => T'.
+    const result15 = test1(() => { return 11111; });
+                           ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+    const result16 = test1(() => { return E.Val; });
+                           ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => 0' is not assignable to parameter of type '() => T'.
+    
+    const result17 = test1(async () => 'foo');
+                                 ~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+    const result18 = test1(async () => { return 'foo'; });
+                                 ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+    
+    declare function test2<const T>(create: () => Promise<T>): T;
+    
+    const result19 = test2(async () => 'foo');
+    const result20 = test2(async () => { return 'foo'; });
+    
+    declare function test3<const T, const R>(arg: () => Generator<T, R>): [T, R]
+    
+    const result21 = test3(function*() {
+        yield 10;
+        return '1';
+    });
+    
+    declare function test4<const T, const R>(arg: () => AsyncGenerator<T, R>): [T, R]
+                                                        ~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'AsyncGenerator'.
+    
+    const result22 = test4(async function*() {
+        yield 10;
+        return '1';
+    });
+    
+    // https://github.com/microsoft/TypeScript/issues/53813
+    const UploadThingServerHelper = <const ValidRoutes,>(route: {
+                                           ~~~~~~~~~~~
+!!! error TS1005: '>' expected.
+                                           ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'ValidRoutes'.
+                                                       ~
+!!! error TS1012: Unexpected token.
+                                                         ~~~~~
+!!! error TS2304: Cannot find name 'route'.
+                                                              ~
+!!! error TS1005: ',' expected.
+      readonly [Route in keyof ValidRoutes]: {
+      ~~~~~~~~
+!!! error TS2304: Cannot find name 'readonly'.
+               ~
+!!! error TS1005: ',' expected.
+                               ~~~~~~~~~~~
+!!! error TS1005: ']' expected.
+                               ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'ValidRoutes'.
+                                          ~
+!!! error TS1005: ',' expected.
+        middleware: () => ValidRoutes[Route];
+                          ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'ValidRoutes'.
+                                      ~~~~~
+!!! error TS2304: Cannot find name 'Route'.
+                                            ~
+!!! error TS1005: ',' expected.
+                                            ~
+!!! error TS2304: Cannot find name ';'.
+        onUpload: (response: { metadata: ValidRoutes[Route] }) => void;
+        ~~~~~~~~
+!!! error TS1005: ',' expected.
+                                         ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'ValidRoutes'.
+                                                     ~~~~~
+!!! error TS2304: Cannot find name 'Route'.
+                                                                      ~
+!!! error TS1012: Unexpected token.
+      };
+       ~
+!!! error TS1005: ',' expected.
+       ~
+!!! error TS2304: Cannot find name ';'.
+    }) => {};
+       ~~
+!!! error TS1005: ';' expected.
+    
+    const FileRouter = UploadThingServerHelper({
+      example: {
+        middleware: () => "someValue",
+        onUpload: (response) => {
+          const v: "someValue" = response.metadata;
+        },
+      },
+    });
+    
+    function outer1<const T>(cb: () => T) {
+      function inner1<const U>(cb2: () => U) {
+        return [cb(), cb2()];
+      }
+      return inner1;
+    }
+    const nestedResult1 = outer1(() => 1)(() => "foo");
+                                 ~~~~~~~
+!!! error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+    
+    function outer2<T>(cb: () => T) {
+      function inner2<const U>(cb2: () => U) {
+        return [cb(), cb2()];
+      }
+      return inner2;
+    }
+    const nestedResult2 = outer2(() => 1)(() => "foo");
+                                 ~~~~~~~
+!!! error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+    
+    function outer3<const T>(cb: () => T) {
+      function inner3<U>(cb2: () => U) {
+        return [cb(), cb2()];
+      }
+      return inner3;
+    }
+    const nestedResult3 = outer3(() => 1)(() => "foo");
+                                 ~~~~~~~
+!!! error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+    
+    declare function overloaded1<const T>(cb: () => T): T;
+    declare function overloaded1<const T, const U>(cb: () => T, cb2: () => U): [T, U];
+    const overloadA = overloaded1(() => 42);
+                                  ~~~~~~~~
+!!! error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+    const overloadB = overloaded1(() => "hi", () => true);
+                                              ~~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 2.
+    
+    declare function overloaded2<T>(cb: () => T): T;
+    declare function overloaded2<T, const U>(cb: () => T, cb2: () => U): [T, U];
+    const overloadC = overloaded2(() => 42);
+                                  ~~~~~~~~
+!!! error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+    const overloadD = overloaded2(() => "hi", () => true);
+                                              ~~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 2.
+    
+    declare function overloaded3<const T>(cb: () => T): T;
+    declare function overloaded3<const T, U>(cb: () => T, cb2: () => U): [T, U];
+    const overloadE = overloaded3(() => 42);
+                                  ~~~~~~~~
+!!! error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+    const overloadF = overloaded3(() => "hi", () => true);
+                                              ~~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 2.
+    
+    declare function overloaded4<const T>(cb: () => T): T;
+    declare function overloaded4<T, U>(cb: () => T, cb2: () => U): [T, U];
+    const overloadG = overloaded4(() => 42);
+                                  ~~~~~~~~
+!!! error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+    const overloadH = overloaded4(() => "hi", () => true);
+                                              ~~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 2.
+    
+    declare function overloaded5<T>(cb: () => T): T;
+    declare function overloaded5<const T, U>(cb: () => T, cb2: () => U): [T, U];
+    const overloadI = overloaded5(() => 42);
+                                  ~~~~~~~~
+!!! error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+    const overloadJ = overloaded5(() => "hi", () => true);
+                                              ~~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 2.

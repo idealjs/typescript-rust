@@ -1,9 +1,9 @@
-es2017/await_incorrectThisType.ts(6,20): error TS2304: Cannot find name 'e'.
-es2017/await_incorrectThisType.ts(6,21): error TS1005: ')' expected.
-es2017/await_incorrectThisType.ts(6,24): error TS1005: ',' expected.
+await_incorrectThisType.ts(6,20): error TS2304: Cannot find name 'e'.
+await_incorrectThisType.ts(6,21): error TS1005: ')' expected.
+await_incorrectThisType.ts(6,24): error TS1005: ',' expected.
 
 
-==== es2017/await_incorrectThisType.ts (3 errors) ====
+==== await_incorrectThisType.ts (3 errors) ====
     // https://github.com/microsoft/TypeScript/issues/47711
     type Either<E, A> = Left<E> | Right<A>;
     type Left<E> = { tag: 'Left', e: E };

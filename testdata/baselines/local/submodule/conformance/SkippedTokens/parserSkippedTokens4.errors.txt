@@ -1,0 +1,10 @@
+parserSkippedTokens4.ts(1,1): error TS1127: Invalid character.
+parserSkippedTokens4.ts(1,1): error TS1128: Declaration or statement expected.
+
+
+==== parserSkippedTokens4.ts (2 errors) ====
+    \  /regexp/;
+    ~
+!!! error TS1127: Invalid character.
+    ~
+!!! error TS1128: Declaration or statement expected.

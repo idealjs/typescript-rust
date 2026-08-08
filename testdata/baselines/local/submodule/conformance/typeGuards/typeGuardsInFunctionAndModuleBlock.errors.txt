@@ -1,0 +1,124 @@
+typeGuardsInFunctionAndModuleBlock.ts(9,21): error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+typeGuardsInFunctionAndModuleBlock.ts(10,21): error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+typeGuardsInFunctionAndModuleBlock.ts(19,21): error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+typeGuardsInFunctionAndModuleBlock.ts(20,21): error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+typeGuardsInFunctionAndModuleBlock.ts(21,12): error TS2345: Argument of type 'number | string | boolean' is not assignable to parameter of type 'number | boolean'.
+typeGuardsInFunctionAndModuleBlock.ts(29,21): error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+typeGuardsInFunctionAndModuleBlock.ts(30,21): error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+typeGuardsInFunctionAndModuleBlock.ts(39,21): error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+typeGuardsInFunctionAndModuleBlock.ts(40,21): error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+typeGuardsInFunctionAndModuleBlock.ts(41,12): error TS2345: Argument of type 'number | string | boolean' is not assignable to parameter of type 'number | boolean'.
+typeGuardsInFunctionAndModuleBlock.ts(61,17): error TS2339: Property 'toString' does not exist on type 'number | boolean'.
+typeGuardsInFunctionAndModuleBlock.ts(62,17): error TS2339: Property 'toString' does not exist on type 'number | boolean'.
+typeGuardsInFunctionAndModuleBlock.ts(75,17): error TS2339: Property 'toString' does not exist on type 'never | number | boolean'.
+typeGuardsInFunctionAndModuleBlock.ts(76,17): error TS2339: Property 'toString' does not exist on type 'never | number | boolean'.
+
+
+==== typeGuardsInFunctionAndModuleBlock.ts (14 errors) ====
+    // typeguards are scoped in function/module block
+    
+    function foo(x: number | string | boolean) {
+        return typeof x === "string"
+            ? x
+            : function f() {
+                var b = x; // number | boolean
+                return typeof x === "boolean"
+                    ? x.toString() // boolean
+                        ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+                    : x.toString(); // number
+                        ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+            } ();
+    }
+    function foo2(x: number | string | boolean) {
+        return typeof x === "string"
+            ? x
+            : function f(a: number | boolean) {
+                var b = x; // new scope - number | boolean
+                return typeof x === "boolean"
+                    ? x.toString() // boolean
+                        ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+                    : x.toString(); // number
+                        ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+            } (x); // x here is narrowed to number | boolean
+               ~
+!!! error TS2345: Argument of type 'number | string | boolean' is not assignable to parameter of type 'number | boolean'.
+    }
+    function foo3(x: number | string | boolean) {
+        return typeof x === "string"
+            ? x
+            : (() => {
+                var b = x; // new scope - number | boolean
+                return typeof x === "boolean"
+                    ? x.toString() // boolean
+                        ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+                    : x.toString(); // number
+                        ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+            })();
+    }
+    function foo4(x: number | string | boolean) {
+        return typeof x === "string"
+            ? x
+            : ((a: number | boolean) => {
+                var b = x; // new scope - number | boolean
+                return typeof x === "boolean"
+                    ? x.toString() // boolean
+                        ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+                    : x.toString(); // number
+                        ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'number | string | boolean'.
+            })(x); // x here is narrowed to number | boolean
+               ~
+!!! error TS2345: Argument of type 'number | string | boolean' is not assignable to parameter of type 'number | boolean'.
+    }
+    // Type guards do not affect nested function declarations
+    function foo5(x: number | string | boolean) {
+        if (typeof x === "string") {
+            var y = x; // string;
+            function foo() {
+                var z = x; // string
+            }
+        }
+    }
+    namespace m {
+        var x: number | string | boolean;
+        namespace m2 {
+            var b = x; // new scope - number | boolean | string
+            var y: string;
+            if (typeof x === "string") {
+                y = x // string;
+            } else {
+                y = typeof x === "boolean"
+                ? x.toString() // boolean
+                    ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'number | boolean'.
+                : x.toString(); // number
+                    ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'number | boolean'.
+            }
+        }
+    }
+    namespace m1 {
+        var x: number | string | boolean;
+        namespace m2.m3 {
+            var b = x; // new scope - number | boolean | string
+            var y: string;
+            if (typeof x === "string") {
+                y = x // string;
+            } else {
+                y = typeof x === "boolean"
+                ? x.toString() // boolean
+                    ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'never | number | boolean'.
+                : x.toString(); // number
+                    ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'never | number | boolean'.
+            }
+        }
+    }

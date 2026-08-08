@@ -1,0 +1,28 @@
+/a.js(10,13): error TS2339: Property 'toFixed' does not exist on type 'number'.
+/a.js(11,13): error TS2339: Property 'substring' does not exist on type 'string'.
+/a.js(14,11): error TS2339: Property 'd' does not exist on type '{ a: number; b: string; x: number }'.
+
+
+==== checkJsdocSatisfiesTag7.ts (0 errors) ====
+    
+==== /a.js (3 errors) ====
+    /** @typedef {"a" | "b" | "c" | "d"} Keys */
+    
+    const p = /** @satisfies {Record<Keys, unknown>} */ ({
+        a: 0,
+        b: "hello",
+        x: 8 // Should error, 'x' isn't in 'Keys'
+    })
+    
+    // Should be OK -- retain info that a is number and b is string
+    let a = p.a.toFixed();
+                ~~~~~~~
+!!! error TS2339: Property 'toFixed' does not exist on type 'number'.
+    let b = p.b.substring(1);
+                ~~~~~~~~~
+!!! error TS2339: Property 'substring' does not exist on type 'string'.
+    
+    // Should error even though 'd' is in 'Keys'
+    let d = p.d;
+              ~
+!!! error TS2339: Property 'd' does not exist on type '{ a: number; b: string; x: number }'.

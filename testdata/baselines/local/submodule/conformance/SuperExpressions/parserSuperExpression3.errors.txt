@@ -1,0 +1,11 @@
+parserSuperExpression3.ts(3,10): error TS2339: Property 'super' does not exist on type '{ M: () => any }'.
+
+
+==== parserSuperExpression3.ts (1 errors) ====
+    class C {
+      M() {
+        this.super<T>(0);
+             ~~~~~
+!!! error TS2339: Property 'super' does not exist on type '{ M: () => any }'.
+      }
+    }

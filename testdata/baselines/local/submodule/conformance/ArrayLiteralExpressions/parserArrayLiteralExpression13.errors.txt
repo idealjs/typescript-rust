@@ -1,0 +1,16 @@
+parserArrayLiteralExpression13.ts(1,12): error TS1012: Unexpected token.
+parserArrayLiteralExpression13.ts(1,13): error TS1005: ',' expected.
+parserArrayLiteralExpression13.ts(1,15): error TS1012: Unexpected token.
+parserArrayLiteralExpression13.ts(1,16): error TS1005: ',' expected.
+
+
+==== parserArrayLiteralExpression13.ts (4 errors) ====
+    var v = [1,,1,,1];
+               ~
+!!! error TS1012: Unexpected token.
+                ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1012: Unexpected token.
+                   ~
+!!! error TS1005: ',' expected.

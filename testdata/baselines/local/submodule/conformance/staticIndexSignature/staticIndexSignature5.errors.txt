@@ -1,0 +1,37 @@
+staticIndexSignature5.ts(2,23): error TS1005: ']' expected.
+staticIndexSignature5.ts(2,31): error TS1005: ';' expected.
+staticIndexSignature5.ts(3,23): error TS1005: ']' expected.
+staticIndexSignature5.ts(3,31): error TS1005: ';' expected.
+
+
+==== staticIndexSignature5.ts (4 errors) ====
+    class B {
+        static readonly [s: string]: number;
+                          ~
+!!! error TS1005: ']' expected.
+                                  ~
+!!! error TS1005: ';' expected.
+        static readonly [s: number]: 42 | 233
+                          ~
+!!! error TS1005: ']' expected.
+                                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    interface I {
+        static readonly [s: string]: number;
+        static readonly [s: number]: 42 | 233
+    }
+    
+    type TA = (typeof B)["foo"]
+    type TB = (typeof B)[42]
+    
+    type TC = (typeof B)[string]
+    type TD = (typeof B)[number]
+    
+    type TE = keyof typeof B;
+    
+    type TF = Pick<typeof B, number>
+    type TFI = Pick<I, number>
+    type TG = Omit<typeof B, number>
+    type TGI = Omit<I, number>

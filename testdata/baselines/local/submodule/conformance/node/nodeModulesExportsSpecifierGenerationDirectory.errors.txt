@@ -1,0 +1,58 @@
+index.ts(3,25): error TS2304: Cannot find name 'import'.
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+package.json(4,11): error TS1005: ';' expected.
+package.json(5,14): error TS1005: ';' expected.
+package.json(6,13): error TS1005: ';' expected.
+
+
+==== index.ts (1 errors) ====
+    // esm format file
+    import { Thing } from "inner/other";
+    export const a = (await import("inner/index.js")).x();
+                            ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+==== index.d.ts (0 errors) ====
+    // esm format file
+    export { x } from "./other.js";
+==== other.d.ts (0 errors) ====
+    // esm format file
+    export interface Thing {}
+    export const x: () => Thing;
+==== package.json (5 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+               ~
+!!! error TS1005: ';' expected.
+        "type": "module",
+            ~
+!!! error TS1005: ';' expected.
+        "exports": "./index.js"
+               ~
+!!! error TS1005: ';' expected.
+                               
+    }
+    
+!!! error TS1005: ';' expected.
+==== package.json (5 errors) ====
+    {
+        "name": "inner",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+                 ~
+!!! error TS1005: ';' expected.
+        "type": "module",
+              ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            "./": "./"
+                ~
+!!! error TS1005: ';' expected.
+        }
+    }

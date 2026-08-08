@@ -1,0 +1,21 @@
+esDecorators-classDeclaration-fields-staticAmbient.ts(6,28): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticAmbient.ts(7,28): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticAmbient.ts(8,28): error TS1005: ';' expected.
+
+
+==== esDecorators-classDeclaration-fields-staticAmbient.ts (3 errors) ====
+    declare let dec: any;
+    
+    const field3 = "field3";
+    
+    class C {
+        @dec(1) static declare field1 = 1;
+                               ~~~~~~
+!!! error TS1005: ';' expected.
+        @dec(2) static declare ["field2"] = 2;
+                               ~
+!!! error TS1005: ';' expected.
+        @dec(3) static declare [field3] = 3;
+                               ~
+!!! error TS1005: ';' expected.
+    }

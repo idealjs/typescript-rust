@@ -1,0 +1,21 @@
+foo2.ts(2,9): error TS2304: Cannot find name 'foo1'.
+foo3.ts(2,9): error TS2304: Cannot find name 'foo2'.
+
+
+==== foo1.ts (0 errors) ====
+    export function x(){
+    	return true;
+    }
+    
+==== foo2.ts (1 errors) ====
+    import foo1 = require('./foo1');
+    var x = foo1.x;
+            ~~~~
+!!! error TS2304: Cannot find name 'foo1'.
+    export = x;
+    
+==== foo3.ts (1 errors) ====
+    import foo2 = require('./foo2');
+    var x = foo2(); // should be boolean
+            ~~~~
+!!! error TS2304: Cannot find name 'foo2'.

@@ -1,0 +1,11 @@
+exportDefaultNamespace.ts(5,10): error TS2339: Property 'someProp' does not exist on type '() => string'.
+
+
+==== exportDefaultNamespace.ts (1 errors) ====
+    export default function someFunc() {
+        return 'hello!';
+    }
+    
+    someFunc.someProp = 'yo';
+             ~~~~~~~~
+!!! error TS2339: Property 'someProp' does not exist on type '() => string'.

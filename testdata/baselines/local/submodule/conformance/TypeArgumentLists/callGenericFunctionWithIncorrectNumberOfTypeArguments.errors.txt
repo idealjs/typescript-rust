@@ -1,0 +1,71 @@
+callGenericFunctionWithIncorrectNumberOfTypeArguments.ts(4,42): error TS2322: Type 'null' is not assignable to type 'T'.
+callGenericFunctionWithIncorrectNumberOfTypeArguments.ts(8,11): error TS2304: Cannot find name 'T'.
+callGenericFunctionWithIncorrectNumberOfTypeArguments.ts(8,12): error TS1005: '>' expected.
+callGenericFunctionWithIncorrectNumberOfTypeArguments.ts(8,14): error TS1005: ',' expected.
+callGenericFunctionWithIncorrectNumberOfTypeArguments.ts(8,15): error TS1005: ',' expected.
+callGenericFunctionWithIncorrectNumberOfTypeArguments.ts(8,16): error TS1134: Variable declaration expected.
+callGenericFunctionWithIncorrectNumberOfTypeArguments.ts(8,20): error TS2304: Cannot find name 'T'.
+callGenericFunctionWithIncorrectNumberOfTypeArguments.ts(8,27): error TS1005: ',' expected.
+
+
+==== callGenericFunctionWithIncorrectNumberOfTypeArguments.ts (8 errors) ====
+    // type parameter lists must exactly match type argument lists
+    // all of these invocations are errors
+    
+    function f<T, U>(x: T, y: U): T { return null; }
+                                             ~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'T'.
+    var r1 = f<number>(1, '');
+    var r1b = f<number, string, number>(1, '');
+    
+    var f2 = <T, U>(x: T, y: U): T => { return null; }
+              ~
+!!! error TS2304: Cannot find name 'T'.
+               ~
+!!! error TS1005: '>' expected.
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS1134: Variable declaration expected.
+                       ~
+!!! error TS2304: Cannot find name 'T'.
+                              ~
+!!! error TS1005: ',' expected.
+    var r2 = f2<number>(1, '');
+    var r2b = f2<number, string, number>(1, '');
+    
+    declare var f3: { <T, U>(x: T, y: U): T; };
+    var r3 = f3<number>(1, '');
+    var r3b = f3<number, string, number>(1, '');
+    
+    class C {
+        f<T, U>(x: T, y: U): T {
+            return null;
+        }
+    }
+    var r4 = (new C()).f<number>(1, '');
+    var r4b = (new C()).f<number, string, number>(1, '');
+    
+    interface I {
+        f<T, U>(x: T, y: U): T;
+    }
+    declare var i: I;
+    var r5 = i.f<number>(1, '');
+    var r5b = i.f<number, string, number>(1, '');
+    
+    class C2<T, U> {
+        f(x: T, y: U): T {
+            return null;
+        }
+    }
+    var r6 = (new C2()).f<number>(1, '');
+    var r6b = (new C2()).f<number, string, number>(1, '');
+    
+    interface I2<T, U> {
+        f(x: T, y: U): T;
+    }
+    declare var i2: I2<number, string>;
+    var r7 = i2.f<number>(1, '');
+    var r7b = i2.f<number, string, number>(1, '');

@@ -1,0 +1,18 @@
+/node_modules/@foo/bar/package.json(1,9): error TS1005: ';' expected.
+/node_modules/@foo/bar/package.json(1,32): error TS1005: ';' expected.
+
+
+==== untypedModuleImport_noImplicitAny_scoped.ts (0 errors) ====
+    
+==== /node_modules/@foo/bar/package.json (2 errors) ====
+    { "name": "@foo/bar", "version": "1.2.3" }
+            ~
+!!! error TS1005: ';' expected.
+                                   ~
+!!! error TS1005: ';' expected.
+    
+==== /node_modules/@foo/bar/index.js (0 errors) ====
+    This file is not processed.
+    
+==== /a.ts (0 errors) ====
+    import * as foo from "@foo/bar";

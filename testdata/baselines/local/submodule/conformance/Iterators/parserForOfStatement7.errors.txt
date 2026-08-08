@@ -1,0 +1,14 @@
+parserForOfStatement7.ts(1,25): error TS2304: Cannot find name 'b'.
+parserForOfStatement7.ts(1,26): error TS1005: ',' expected.
+parserForOfStatement7.ts(1,43): error TS2304: Cannot find name 'X'.
+
+
+==== parserForOfStatement7.ts (3 errors) ====
+    for (var a: number = 1, b: string = "" of X) {
+                            ~
+!!! error TS2304: Cannot find name 'b'.
+                             ~
+!!! error TS1005: ',' expected.
+                                              ~
+!!! error TS2304: Cannot find name 'X'.
+    }

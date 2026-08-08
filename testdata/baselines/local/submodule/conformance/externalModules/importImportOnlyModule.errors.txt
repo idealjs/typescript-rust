@@ -1,0 +1,18 @@
+foo_2.ts(2,9): error TS2304: Cannot find name 'foo'.
+
+
+==== foo_0.ts (0 errors) ====
+    export class C1 {
+    	m1 = 42;
+    	static s1 = true;
+    }
+    
+==== foo_1.ts (0 errors) ====
+    import c1 = require('./foo_0'); // Makes this an external module
+    var answer = 42; // No exports
+    
+==== foo_2.ts (1 errors) ====
+    import foo = require("./foo_1");
+    var x = foo; // Cause a runtime dependency
+            ~~~
+!!! error TS2304: Cannot find name 'foo'.

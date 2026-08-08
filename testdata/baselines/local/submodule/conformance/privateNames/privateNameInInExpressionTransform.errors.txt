@@ -1,55 +1,55 @@
-privateNames/privateNameInInExpressionTransform.ts(2,5): error TS1003: Identifier expected.
-privateNames/privateNameInInExpressionTransform.ts(2,5): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(2,6): error TS1005: ';' expected.
-privateNames/privateNameInInExpressionTransform.ts(3,5): error TS1003: Identifier expected.
-privateNames/privateNameInInExpressionTransform.ts(3,5): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(3,6): error TS1005: ';' expected.
-privateNames/privateNameInInExpressionTransform.ts(4,12): error TS1005: ';' expected.
-privateNames/privateNameInInExpressionTransform.ts(4,12): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(4,13): error TS1005: ';' expected.
-privateNames/privateNameInInExpressionTransform.ts(5,12): error TS1005: ';' expected.
-privateNames/privateNameInInExpressionTransform.ts(5,12): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(5,13): error TS1005: ';' expected.
-privateNames/privateNameInInExpressionTransform.ts(8,9): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(8,9): error TS1128: Declaration or statement expected.
-privateNames/privateNameInInExpressionTransform.ts(9,9): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(9,9): error TS1128: Declaration or statement expected.
-privateNames/privateNameInInExpressionTransform.ts(10,9): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(10,9): error TS1128: Declaration or statement expected.
-privateNames/privateNameInInExpressionTransform.ts(11,9): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(11,9): error TS1128: Declaration or statement expected.
-privateNames/privateNameInInExpressionTransform.ts(18,14): error TS1012: Unexpected token.
-privateNames/privateNameInInExpressionTransform.ts(18,14): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(18,15): error TS1005: ';' expected.
-privateNames/privateNameInInExpressionTransform.ts(20,14): error TS1012: Unexpected token.
-privateNames/privateNameInInExpressionTransform.ts(20,14): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(20,15): error TS1005: ';' expected.
-privateNames/privateNameInInExpressionTransform.ts(22,14): error TS1012: Unexpected token.
-privateNames/privateNameInInExpressionTransform.ts(22,14): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(22,15): error TS1005: ';' expected.
-privateNames/privateNameInInExpressionTransform.ts(24,14): error TS1012: Unexpected token.
-privateNames/privateNameInInExpressionTransform.ts(24,14): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(24,15): error TS1005: ';' expected.
-privateNames/privateNameInInExpressionTransform.ts(26,9): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(26,9): error TS1128: Declaration or statement expected.
-privateNames/privateNameInInExpressionTransform.ts(26,24): error TS1012: Unexpected token.
-privateNames/privateNameInInExpressionTransform.ts(26,24): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(26,25): error TS1005: ';' expected.
-privateNames/privateNameInInExpressionTransform.ts(30,9): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(30,9): error TS1128: Declaration or statement expected.
-privateNames/privateNameInInExpressionTransform.ts(35,5): error TS1003: Identifier expected.
-privateNames/privateNameInInExpressionTransform.ts(35,5): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(35,6): error TS1005: ';' expected.
-privateNames/privateNameInInExpressionTransform.ts(37,9): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(37,9): error TS1128: Declaration or statement expected.
-privateNames/privateNameInInExpressionTransform.ts(42,12): error TS1012: Unexpected token.
-privateNames/privateNameInInExpressionTransform.ts(42,12): error TS1127: Invalid character.
-privateNames/privateNameInInExpressionTransform.ts(42,13): error TS1005: ';' expected.
-privateNames/privateNameInInExpressionTransform.ts(42,13): error TS2304: Cannot find name 'field'.
-privateNames/privateNameInInExpressionTransform.ts(42,13): error TS7027: Unreachable code detected.
+privateNameInInExpressionTransform.ts(2,5): error TS1003: Identifier expected.
+privateNameInInExpressionTransform.ts(2,5): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(2,6): error TS1005: ';' expected.
+privateNameInInExpressionTransform.ts(3,5): error TS1003: Identifier expected.
+privateNameInInExpressionTransform.ts(3,5): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(3,6): error TS1005: ';' expected.
+privateNameInInExpressionTransform.ts(4,12): error TS1005: ';' expected.
+privateNameInInExpressionTransform.ts(4,12): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(4,13): error TS1005: ';' expected.
+privateNameInInExpressionTransform.ts(5,12): error TS1005: ';' expected.
+privateNameInInExpressionTransform.ts(5,12): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(5,13): error TS1005: ';' expected.
+privateNameInInExpressionTransform.ts(8,9): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(8,9): error TS1128: Declaration or statement expected.
+privateNameInInExpressionTransform.ts(9,9): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(9,9): error TS1128: Declaration or statement expected.
+privateNameInInExpressionTransform.ts(10,9): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(10,9): error TS1128: Declaration or statement expected.
+privateNameInInExpressionTransform.ts(11,9): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(11,9): error TS1128: Declaration or statement expected.
+privateNameInInExpressionTransform.ts(18,14): error TS1012: Unexpected token.
+privateNameInInExpressionTransform.ts(18,14): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(18,15): error TS1005: ';' expected.
+privateNameInInExpressionTransform.ts(20,14): error TS1012: Unexpected token.
+privateNameInInExpressionTransform.ts(20,14): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(20,15): error TS1005: ';' expected.
+privateNameInInExpressionTransform.ts(22,14): error TS1012: Unexpected token.
+privateNameInInExpressionTransform.ts(22,14): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(22,15): error TS1005: ';' expected.
+privateNameInInExpressionTransform.ts(24,14): error TS1012: Unexpected token.
+privateNameInInExpressionTransform.ts(24,14): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(24,15): error TS1005: ';' expected.
+privateNameInInExpressionTransform.ts(26,9): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(26,9): error TS1128: Declaration or statement expected.
+privateNameInInExpressionTransform.ts(26,24): error TS1012: Unexpected token.
+privateNameInInExpressionTransform.ts(26,24): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(26,25): error TS1005: ';' expected.
+privateNameInInExpressionTransform.ts(30,9): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(30,9): error TS1128: Declaration or statement expected.
+privateNameInInExpressionTransform.ts(35,5): error TS1003: Identifier expected.
+privateNameInInExpressionTransform.ts(35,5): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(35,6): error TS1005: ';' expected.
+privateNameInInExpressionTransform.ts(37,9): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(37,9): error TS1128: Declaration or statement expected.
+privateNameInInExpressionTransform.ts(42,12): error TS1012: Unexpected token.
+privateNameInInExpressionTransform.ts(42,12): error TS1127: Invalid character.
+privateNameInInExpressionTransform.ts(42,13): error TS1005: ';' expected.
+privateNameInInExpressionTransform.ts(42,13): error TS2304: Cannot find name 'field'.
+privateNameInInExpressionTransform.ts(42,13): error TS7027: Unreachable code detected.
 
 
-==== privateNames/privateNameInInExpressionTransform.ts (49 errors) ====
+==== privateNameInInExpressionTransform.ts (49 errors) ====
     class Foo {
         #field = 1;
         ~

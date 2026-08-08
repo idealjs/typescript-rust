@@ -1,0 +1,178 @@
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(4,15): error TS2304: Cannot find name 'T'.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(4,19): error TS2304: Cannot find name 'T'.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,11): error TS2304: Cannot find name 'foo'.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,14): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,14): error TS2304: Cannot find name '<'.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,15): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,24): error TS2304: Cannot find name 'D'.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,27): error TS2304: Cannot find name 'E'.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,30): error TS2304: Cannot find name 'F'.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,31): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,31): error TS2304: Cannot find name '>'.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,32): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,32): error TS2304: Cannot find name '('.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,33): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,37): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,37): error TS2304: Cannot find name ')'.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,39): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,39): error TS2304: Cannot find name '{'.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,41): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,41): error TS2304: Cannot find name 'return'.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,48): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,48): error TS2304: Cannot find name 'x'.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,49): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,49): error TS2304: Cannot find name ';'.
+objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,53): error TS1128: Declaration or statement expected.
+
+
+==== objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts (25 errors) ====
+    // object types are identical structurally
+    
+    class A {
+        foo<T>(x: T): T { return null; }
+                  ~
+!!! error TS2304: Cannot find name 'T'.
+                      ~
+!!! error TS2304: Cannot find name 'T'.
+    }
+    
+    class B<U, V> {
+        foo(x: U): U { return null; }
+    }
+    
+    class C<V, W, X> {
+        foo(x: V): V { return null; }
+    }
+    
+    interface I<X, Y, Z, A> {
+        foo(x: X): X;
+    }
+    
+    interface I2 {
+        foo<Y, Z, A, B>(x: Y): Y;
+    }
+    
+    var a: { foo<Z, A, B, C, D>(x: Z): Z }
+    var b = { foo<A, B, C, D, E, F>(x: A) { return x; } };
+              ~~~
+!!! error TS2304: Cannot find name 'foo'.
+                 ~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS2304: Cannot find name '<'.
+                  ~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS2304: Cannot find name 'D'.
+                              ~
+!!! error TS2304: Cannot find name 'E'.
+                                 ~
+!!! error TS2304: Cannot find name 'F'.
+                                  ~
+!!! error TS1005: ',' expected.
+                                  ~
+!!! error TS2304: Cannot find name '>'.
+                                   ~
+!!! error TS1005: ',' expected.
+                                   ~
+!!! error TS2304: Cannot find name '('.
+                                    ~
+!!! error TS1005: ',' expected.
+                                        ~
+!!! error TS1005: ',' expected.
+                                        ~
+!!! error TS2304: Cannot find name ')'.
+                                          ~
+!!! error TS1005: ',' expected.
+                                          ~
+!!! error TS2304: Cannot find name '{'.
+                                            ~~~~~~
+!!! error TS1005: ',' expected.
+                                            ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                                                   ~
+!!! error TS1005: ',' expected.
+                                                   ~
+!!! error TS2304: Cannot find name 'x'.
+                                                    ~
+!!! error TS1005: ',' expected.
+                                                    ~
+!!! error TS2304: Cannot find name ';'.
+                                                        ~
+!!! error TS1128: Declaration or statement expected.
+    
+    function foo1(x: A);
+    function foo1(x: A); // error
+    function foo1(x: any) { }
+    
+    function foo1b(x: B<string, string>);
+    function foo1b(x: B<string, string>); // error
+    function foo1b(x: any) { }
+    
+    function foo1c(x: C<string, number, boolean>);
+    function foo1c(x: C<string, number, boolean>); // error
+    function foo1c(x: any) { }
+    
+    function foo2(x: I<string, boolean, number, string>);
+    function foo2(x: I<string, boolean, number, string>); // error
+    function foo2(x: any) { }
+    
+    function foo3(x: typeof a);
+    function foo3(x: typeof a); // error
+    function foo3(x: any) { }
+    
+    function foo4(x: typeof b);
+    function foo4(x: typeof b); // error
+    function foo4(x: any) { }
+    
+    function foo5(x: A);
+    function foo5(x: B<string, string>); // ok
+    function foo5(x: any) { }
+    
+    function foo5b(x: A);
+    function foo5b(x: C<string, number, boolean>); // ok
+    function foo5b(x: any) { }
+    
+    function foo6(x: A);
+    function foo6(x: I<string, number, boolean, Date>); // ok
+    function foo6(x: any) { }
+    
+    function foo7(x: A);
+    function foo7(x: typeof a); // no error, bug?
+    function foo7(x: any) { }
+    
+    function foo8(x: B<string, string>);
+    function foo8(x: I<string, string, boolean, Date>); // error
+    function foo8(x: any) { }
+    
+    function foo9(x: B<string, number>);
+    function foo9(x: C<string, number, B<string, string>>); // error
+    function foo9(x: any) { }
+    
+    function foo10(x: B<string, boolean>);
+    function foo10(x: typeof a); // ok
+    function foo10(x: any) { }
+    
+    function foo11(x: B<string, boolean>);
+    function foo11(x: typeof b); // ok
+    function foo11(x: any) { }
+    
+    function foo12(x: I<B<string, number>, number, Date, string>);
+    function foo12(x: C<B<string, number>, number, Date>); // error
+    function foo12(x: any) { }
+    
+    function foo12b(x: I2);
+    function foo12b(x: C<string, string, boolean>); // ok
+    function foo12b(x: any) { }
+    
+    function foo13(x: I<string, Date, RegExp, Date>);
+    function foo13(x: typeof a); // ok
+    function foo13(x: any) { }
+    
+    function foo14(x: I<string, Date, RegExp, boolean>);
+    function foo14(x: typeof b); // ok
+    function foo14(x: any) { }
+    
+    function foo15(x: I2);
+    function foo15(x: C<number, B<string, string>, B<number, string>>); // ok
+    function foo15(x: any) { }

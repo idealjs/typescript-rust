@@ -1,0 +1,54 @@
+parserErrorRecovery_IncompleteMemberVariable1.ts(14,29): error TS1005: ',' expected.
+parserErrorRecovery_IncompleteMemberVariable1.ts(14,47): error TS1005: ',' expected.
+parserErrorRecovery_IncompleteMemberVariable1.ts(17,28): error TS2304: Cannot find name 'Math'.
+parserErrorRecovery_IncompleteMemberVariable1.ts(17,43): error TS2339: Property 'x' does not exist on type '{ con: "hello"; getDist: () => any }'.
+parserErrorRecovery_IncompleteMemberVariable1.ts(17,52): error TS2339: Property 'x' does not exist on type '{ con: "hello"; getDist: () => any }'.
+parserErrorRecovery_IncompleteMemberVariable1.ts(17,61): error TS2339: Property 'y' does not exist on type '{ con: "hello"; getDist: () => any }'.
+parserErrorRecovery_IncompleteMemberVariable1.ts(17,70): error TS2339: Property 'y' does not exist on type '{ con: "hello"; getDist: () => any }'.
+parserErrorRecovery_IncompleteMemberVariable1.ts(26,17): error TS2554: Expected 4 arguments, but got 2.
+
+
+==== parserErrorRecovery_IncompleteMemberVariable1.ts (8 errors) ====
+    // Interface
+    interface IPoint {
+        getDist(): number;
+    }
+    
+    // Module
+    namespace Shapes {
+    
+        // Class
+        export class Point implements IPoint {
+    
+            public con: "hello";
+            // Constructor
+            constructor (public x: number, public y: number) { }
+                                ~
+!!! error TS1005: ',' expected.
+                                                  ~
+!!! error TS1005: ',' expected.
+    
+            // Instance member
+            getDist() { return Math.sqrt(this.x * this.x + this.y * this.y); }
+                               ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                                              ~
+!!! error TS2339: Property 'x' does not exist on type '{ con: "hello"; getDist: () => any }'.
+                                                       ~
+!!! error TS2339: Property 'x' does not exist on type '{ con: "hello"; getDist: () => any }'.
+                                                                ~
+!!! error TS2339: Property 'y' does not exist on type '{ con: "hello"; getDist: () => any }'.
+                                                                         ~
+!!! error TS2339: Property 'y' does not exist on type '{ con: "hello"; getDist: () => any }'.
+    
+            // Static member
+            static origin = new Point(0, 0);
+        }
+    
+    }
+    
+    // Local variables
+    var p: IPoint = new Shapes.Point(3, 4);
+                    ~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 4 arguments, but got 2.
+    var dist = p.getDist();

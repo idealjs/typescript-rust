@@ -1,0 +1,7 @@
+generatorTypeCheck4.ts(1,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
+
+
+==== generatorTypeCheck4.ts (1 errors) ====
+    function* g1(): {} { }
+    ~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2366: Function lacks ending return statement and return type does not include 'undefined'.

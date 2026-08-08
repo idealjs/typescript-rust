@@ -1,0 +1,12 @@
+symbolType16.ts(6,5): error TS2339: Property 'newSymbolProp' does not exist on type 'symbol'.
+
+
+==== symbolType16.ts (1 errors) ====
+    interface Symbol {
+        newSymbolProp: number;
+    }
+    
+    var sym: symbol;
+    sym.newSymbolProp;
+        ~~~~~~~~~~~~~
+!!! error TS2339: Property 'newSymbolProp' does not exist on type 'symbol'.

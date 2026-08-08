@@ -1,0 +1,24 @@
+esDecorators-classDeclaration-fields-nonStatic.ts(7,24): error TS1003: Identifier expected.
+esDecorators-classDeclaration-fields-nonStatic.ts(7,26): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-nonStatic.ts(8,22): error TS1003: Identifier expected.
+esDecorators-classDeclaration-fields-nonStatic.ts(8,24): error TS1005: ';' expected.
+
+
+==== esDecorators-classDeclaration-fields-nonStatic.ts (4 errors) ====
+    declare let dec: any;
+    
+    const field3 = "field3";
+    
+    class C {
+        @dec(1) field1 = 1;
+        @dec(2) ["field2"] = 2;
+                           ~
+!!! error TS1003: Identifier expected.
+                             ~
+!!! error TS1005: ';' expected.
+        @dec(3) [field3] = 3;
+                         ~
+!!! error TS1003: Identifier expected.
+                           ~
+!!! error TS1005: ';' expected.
+    }

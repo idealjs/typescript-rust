@@ -1,0 +1,24 @@
+importCallExpressionGrammarError.ts(5,8): error TS1012: Unexpected token.
+importCallExpressionGrammarError.ts(7,10): error TS2304: Cannot find name 'import'.
+importCallExpressionGrammarError.ts(8,12): error TS2304: Cannot find name 'import'.
+importCallExpressionGrammarError.ts(9,12): error TS2304: Cannot find name 'import'.
+
+
+==== importCallExpressionGrammarError.ts (4 errors) ====
+    declare function getSpecifier(): string;
+    declare var whatToLoad: boolean;
+    
+    var a = ["./0"];
+    import(...["PathModule"]);
+           ~~~
+!!! error TS1012: Unexpected token.
+    
+    var p1 = import(...a);
+             ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const p2 = import();
+               ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const p4 = import("pathToModule", "secondModule");
+               ~~~~~~
+!!! error TS2304: Cannot find name 'import'.

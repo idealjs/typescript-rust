@@ -1,0 +1,21 @@
+classDoesNotDependOnBaseTypes.ts(3,7): error TS1005: ']' expected.
+classDoesNotDependOnBaseTypes.ts(3,15): error TS1005: ';' expected.
+
+
+==== classDoesNotDependOnBaseTypes.ts (2 errors) ====
+    type StringTree = string | StringTreeCollection;
+    class StringTreeCollectionBase {
+        [n: number]: StringTree;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class StringTreeCollection extends StringTreeCollectionBase { }
+    
+    var x: StringTree;
+    if (typeof x !== "string") {
+        x[0] = "";
+        x[0] = new StringTreeCollection;
+    }

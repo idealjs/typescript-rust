@@ -1,0 +1,101 @@
+ModuleWithExportedAndNonExportedImportAlias.ts(14,28): error TS1005: ',' expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(14,51): error TS1005: ',' expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(19,12): error TS1005: '{' expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(19,26): error TS1003: Identifier expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(19,29): error TS1003: Identifier expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(20,18): error TS1003: Identifier expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(20,21): error TS1003: Identifier expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(22,22): error TS1003: Identifier expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(22,30): error TS1003: Identifier expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(22,37): error TS1003: Identifier expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(22,39): error TS1003: Identifier expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(22,42): error TS1003: Identifier expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(22,44): error TS1003: Identifier expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(22,45): error TS1003: Identifier expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(22,48): error TS1003: Identifier expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(22,50): error TS1003: Identifier expected.
+ModuleWithExportedAndNonExportedImportAlias.ts(25,39): error TS2304: Cannot find name 'Lines'.
+ModuleWithExportedAndNonExportedImportAlias.ts(25,50): error TS2304: Cannot find name 'Origin'.
+ModuleWithExportedAndNonExportedImportAlias.ts(31,18): error TS2339: Property 'Origin' does not exist on type 'Geometry'.
+ModuleWithExportedAndNonExportedImportAlias.ts(37,21): error TS2339: Property 'Lines' does not exist on type 'Geometry'.
+
+
+==== ModuleWithExportedAndNonExportedImportAlias.ts (20 errors) ====
+    namespace A {
+        export interface Point {
+            x: number;
+            y: number;
+        }
+    
+        interface Point3d extends Point {
+            z: number;
+        }
+    }
+    
+    namespace B {
+        export class Line {
+            constructor(public start: A.Point, public end: A.Point) { }
+                               ~~~~~
+!!! error TS1005: ',' expected.
+                                                      ~~~
+!!! error TS1005: ',' expected.
+        }
+    }
+    
+    namespace Geometry {
+        export import Points = A;
+               ~~~~~~
+!!! error TS1005: '{' expected.
+                             ~
+!!! error TS1003: Identifier expected.
+                                ~
+!!! error TS1003: Identifier expected.
+        import Lines = B;
+                     ~
+!!! error TS1003: Identifier expected.
+                        ~
+!!! error TS1003: Identifier expected.
+    
+        export var Origin: Points.Point = { x: 0, y: 0 };
+                         ~
+!!! error TS1003: Identifier expected.
+                                 ~
+!!! error TS1003: Identifier expected.
+                                        ~
+!!! error TS1003: Identifier expected.
+                                          ~
+!!! error TS1003: Identifier expected.
+                                             ~
+!!! error TS1003: Identifier expected.
+                                               ~
+!!! error TS1003: Identifier expected.
+                                                ~
+!!! error TS1003: Identifier expected.
+                                                   ~
+!!! error TS1003: Identifier expected.
+                                                     ~
+!!! error TS1003: Identifier expected.
+    
+        // this is valid since B.Line _is_ visible outside Geometry
+        export var Unit: Lines.Line = new Lines.Line(Origin, { x: 1, y: 0 });
+                                          ~~~~~
+!!! error TS2304: Cannot find name 'Lines'.
+                                                     ~~~~~~
+!!! error TS2304: Cannot find name 'Origin'.
+    }
+    
+    // expected to work since all are exported
+    var p: { x: number; y: number };
+    var p: Geometry.Points.Point;
+    var p = Geometry.Origin;
+                     ~~~~~~
+!!! error TS2339: Property 'Origin' does not exist on type 'Geometry'.
+    
+    var line: { start: { x: number; y: number }; end: { x: number; y: number; } };
+    var line = Geometry.Unit;
+    
+    // not expected to work since non are exported
+    var line = Geometry.Lines.Line;
+                        ~~~~~
+!!! error TS2339: Property 'Lines' does not exist on type 'Geometry'.
+    

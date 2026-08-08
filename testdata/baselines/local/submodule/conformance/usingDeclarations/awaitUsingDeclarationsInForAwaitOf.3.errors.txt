@@ -1,0 +1,18 @@
+awaitUsingDeclarationsInForAwaitOf.3.ts(5,18): error TS2304: Cannot find name 'using'.
+awaitUsingDeclarationsInForAwaitOf.3.ts(8,20): error TS2304: Cannot find name 'using'.
+
+
+==== awaitUsingDeclarationsInForAwaitOf.3.ts (2 errors) ====
+    // https://github.com/microsoft/TypeScript/pull/55558#issuecomment-1817595357
+    
+    declare const x: any[]
+    
+    for await (await using of x);
+                     ~~~~~
+!!! error TS2304: Cannot find name 'using'.
+    
+    export async function test() {
+      for await (await using of x);
+                       ~~~~~
+!!! error TS2304: Cannot find name 'using'.
+    }

@@ -1,0 +1,10 @@
+classWithSemicolonClassElementES62.ts(2,5): error TS1003: Identifier expected.
+
+
+==== classWithSemicolonClassElementES62.ts (1 errors) ====
+    class C {
+        ;
+        ~
+!!! error TS1003: Identifier expected.
+        ;
+    }

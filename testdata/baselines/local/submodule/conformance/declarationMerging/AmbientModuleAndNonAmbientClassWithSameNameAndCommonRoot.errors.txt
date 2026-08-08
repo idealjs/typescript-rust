@@ -1,0 +1,35 @@
+classPoint.ts(3,28): error TS1005: ',' expected.
+classPoint.ts(3,46): error TS1005: ',' expected.
+test.ts(2,17): error TS2339: Property 'Origin' does not exist on type 'object'.
+test.ts(3,9): error TS2554: Expected 4 arguments, but got 2.
+
+
+==== module.d.ts (0 errors) ====
+    declare namespace A {
+        export namespace Point {
+            export var Origin: {
+                x: number;
+                y: number;
+            }
+        }
+    }
+    
+==== classPoint.ts (2 errors) ====
+    namespace A {
+        export class Point {
+            constructor(public x: number, public y: number) { }
+                               ~
+!!! error TS1005: ',' expected.
+                                                 ~
+!!! error TS1005: ',' expected.
+        }
+    }
+    
+==== test.ts (2 errors) ====
+    var p: { x: number; y: number; }
+    var p = A.Point.Origin;
+                    ~~~~~~
+!!! error TS2339: Property 'Origin' does not exist on type 'object'.
+    var p = new A.Point(0, 0); // unexpected error here, bug 840000
+            ~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 4 arguments, but got 2.

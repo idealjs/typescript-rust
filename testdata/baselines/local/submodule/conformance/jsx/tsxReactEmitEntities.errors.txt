@@ -1,0 +1,77 @@
+file.tsx(9,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(9,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+file.tsx(10,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(10,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+file.tsx(11,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(11,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+file.tsx(13,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(13,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+file.tsx(16,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(16,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+file.tsx(16,11): error TS1002: Unterminated string literal.
+file.tsx(18,6): error TS17001: JSX elements cannot have multiple attributes with the same name.
+file.tsx(20,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(20,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+file.tsx(22,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(22,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+
+
+==== file.tsx (16 errors) ====
+    declare namespace JSX {
+    	interface Element { }
+    	interface IntrinsicElements {
+    		[s: string]: any;
+    	}
+    }
+    declare var React: any;
+    
+    <div>Dot goes here: &middot; &notAnEntity; </div>;
+    ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    <div>Be careful of &quot;-ed strings!</div>;
+    ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    <div>&#0123;&#123;braces&#x7d;&#x7D;</div>;
+    ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    // Escapes do nothing
+    <div>\n</div>;
+    ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    
+    // Also works in string literal attributes
+    <div attr="&#0123;&hellip;&#x7D;\"></div>;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS1002: Unterminated string literal.
+    // Does not happen for a string literal that happens to be inside an attribute (and escapes then work)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    <div attr={"&#0123;&hellip;&#x7D;\""}></div>;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+         ~~~~
+!!! error TS17001: JSX elements cannot have multiple attributes with the same name.
+    // Preserves single quotes
+    <div attr='"'></div>;
+    ~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~~~~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    // https://github.com/microsoft/TypeScript/issues/35732
+    <div>&#x1F408;&#x1F415;&#128007;&#128017;</div>;
+    ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.

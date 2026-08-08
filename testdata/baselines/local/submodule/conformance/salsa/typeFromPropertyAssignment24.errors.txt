@@ -1,0 +1,23 @@
+def.js(2,7): error TS2339: Property 'Inner' does not exist on type 'object'.
+
+
+==== usage.js (0 errors) ====
+    // note that usage is first in the compilation
+    Outer.Inner.Message = function() {
+    };
+    
+    var y = new Outer.Inner()
+    y.name
+    /** @type {Outer.Inner} should be instance type, not static type */
+    var x;
+    x.name
+    
+==== def.js (1 errors) ====
+    var Outer = {}
+    Outer.Inner = class {
+          ~~~~~
+!!! error TS2339: Property 'Inner' does not exist on type 'object'.
+      name() {
+        return 'hi'
+      }
+    }

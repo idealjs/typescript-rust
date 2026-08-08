@@ -1,0 +1,19 @@
+superCallBeforeThisAccessing8.ts(9,16): error TS2349: This expression is not callable.
+
+
+==== superCallBeforeThisAccessing8.ts (1 errors) ====
+    ﻿// @strict: false
+    class Base {
+        constructor(c) { }
+    }
+    class D extends Base {
+        private _t;
+        constructor() {
+            let x = {
+                k: super(undefined), 
+                ~~~~~
+!!! error TS2349: This expression is not callable.
+                j: this._t,  // no error
+            }
+        }
+    }

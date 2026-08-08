@@ -1,0 +1,8 @@
+parser630933.ts(2,11): error TS2339: Property 'match' does not exist on type 'string'.
+
+
+==== parser630933.ts (1 errors) ====
+    var a = "Hello";
+    var b = a.match(/\/ver=([^/]+)/);
+              ~~~~~
+!!! error TS2339: Property 'match' does not exist on type 'string'.

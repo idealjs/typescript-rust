@@ -1,0 +1,75 @@
+error TS2300: Duplicate identifier 'x'.
+error TS2300: Duplicate identifier 'x'.
+error TS2300: Duplicate identifier 'x'.
+error TS2300: Duplicate identifier 'x'.
+/node_modules/@types/foo/package.json(2,9): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(3,12): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(4,12): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(5,8): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(6,15): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(7,16): error TS1005: ';' expected.
+
+
+!!! error TS2300: Duplicate identifier 'x'.
+
+!!! error TS2300: Duplicate identifier 'x'.
+
+!!! error TS2300: Duplicate identifier 'x'.
+
+!!! error TS2300: Duplicate identifier 'x'.
+==== resolutionModeTypeOnlyImport1.ts (0 errors) ====
+    
+==== /node_modules/@types/foo/package.json (6 errors) ====
+    {
+      "name": "@types/foo",
+            ~
+!!! error TS1005: ';' expected.
+      "version": "1.0.0",
+               ~
+!!! error TS1005: ';' expected.
+      "exports": {
+               ~
+!!! error TS1005: ';' expected.
+        ".": {
+           ~
+!!! error TS1005: ';' expected.
+          "import": "./index.d.mts",
+                  ~
+!!! error TS1005: ';' expected.
+          "require": "./index.d.cts"
+                   ~
+!!! error TS1005: ';' expected.
+        }
+      }
+    }
+    
+==== /node_modules/@types/foo/index.d.mts (0 errors) ====
+    export declare const x: "module";
+    
+==== /node_modules/@types/foo/index.d.cts (0 errors) ====
+    export declare const x: "script";
+    
+==== /app.ts (0 errors) ====
+    import type { x as Default } from "foo";
+    import type { x as Import } from "foo" with { "resolution-mode": "import" };
+    import type { x as Require } from "foo" with { "resolution-mode": "require" };
+    type _Default = typeof Default;
+    type _Import = typeof Import;
+    type _Require = typeof Require;
+    
+    // resolution-mode does not enforce file extension in `bundler`, just sets conditions
+    import type { x as ImportRelative } from "./other" with { "resolution-mode": "import" };
+    import type { x as RequireRelative } from "./other" with { "resolution-mode": "require" };
+    type _ImportRelative = typeof ImportRelative;
+    type _RequireRelative = typeof RequireRelative;
+    
+    export {
+      _Default,
+      _Import,
+      _Require,
+      _ImportRelative,
+      _RequireRelative
+    }
+    
+==== /other.ts (0 errors) ====
+    export const x = "other";

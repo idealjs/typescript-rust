@@ -5,7 +5,7 @@ error TS2300: Duplicate identifier 'ChildNoBaseClass'.
 !!! error TS2300: Duplicate identifier 'Child'.
 
 !!! error TS2300: Duplicate identifier 'ChildNoBaseClass'.
-==== classDeclarations/mergedInheritedClassInterface.ts (0 errors) ====
+==== mergedInheritedClassInterface.ts (0 errors) ====
     interface BaseInterface {
         required: number;
         optional?: number;

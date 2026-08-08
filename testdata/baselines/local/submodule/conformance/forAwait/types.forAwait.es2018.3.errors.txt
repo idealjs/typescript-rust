@@ -1,0 +1,23 @@
+types.forAwait.es2018.3.ts(5,16): error TS2454: Variable 'y' is used before being assigned.
+types.forAwait.es2018.3.ts(12,16): error TS2454: Variable 'y' is used before being assigned.
+
+
+==== types.forAwait.es2018.3.ts (2 errors) ====
+    async function f1() {
+        let y: number;
+        for await (const x of {}) {
+        }
+        for await (y of {}) {
+                   ~
+!!! error TS2454: Variable 'y' is used before being assigned.
+        }
+    }
+    async function* f2() {
+        let y: number;
+        for await (const x of {}) {
+        }
+        for await (y of {}) {
+                   ~
+!!! error TS2454: Variable 'y' is used before being assigned.
+        }
+    }

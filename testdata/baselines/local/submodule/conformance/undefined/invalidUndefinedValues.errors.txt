@@ -1,0 +1,58 @@
+invalidUndefinedValues.ts(22,7): error TS2304: Cannot find name 'f'.
+invalidUndefinedValues.ts(22,8): error TS1005: ',' expected.
+invalidUndefinedValues.ts(22,8): error TS2304: Cannot find name '('.
+invalidUndefinedValues.ts(22,9): error TS1005: ',' expected.
+invalidUndefinedValues.ts(22,9): error TS2304: Cannot find name ')'.
+invalidUndefinedValues.ts(22,11): error TS1005: ',' expected.
+invalidUndefinedValues.ts(22,11): error TS2304: Cannot find name '{'.
+invalidUndefinedValues.ts(22,15): error TS1128: Declaration or statement expected.
+
+
+==== invalidUndefinedValues.ts (8 errors) ====
+    var x: typeof undefined;
+    
+    x = 1;
+    x = '';
+    x = true;
+    var a: void;
+    x = a;
+    x = null;
+    
+    class C { foo: string }
+    var b: C;
+    x = C;
+    x = b;
+    
+    interface I { foo: string }
+    var c: I;
+    x = c;
+    
+    namespace M { export var x = 1; }
+    x = M;
+    
+    x = { f() { } }
+          ~
+!!! error TS2304: Cannot find name 'f'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '('.
+            ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS2304: Cannot find name ')'.
+              ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS2304: Cannot find name '{'.
+                  ~
+!!! error TS1128: Declaration or statement expected.
+    
+    function f<T>(a: T) {
+        x = a;
+    }
+    x = f;
+    
+    enum E { A }
+    x = E;
+    x = E.A;

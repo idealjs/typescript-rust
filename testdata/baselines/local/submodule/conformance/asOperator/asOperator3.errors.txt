@@ -1,0 +1,22 @@
+asOperator3.ts(9,13): error TS1005: ',' expected.
+asOperator3.ts(9,22): error TS1134: Variable declaration expected.
+asOperator3.ts(9,25): error TS1128: Declaration or statement expected.
+
+
+==== asOperator3.ts (3 errors) ====
+    declare function tag(...x: any[]): any;
+    
+    var a = `${123 + 456 as number}`;
+    var b = `leading ${123 + 456 as number}`;
+    var c = `${123 + 456 as number} trailing`;
+    var d = `Hello ${123} World` as string;
+    var e = `Hello` as string;
+    var f = 1 + `${1} end of string` as string;
+    var g = tag `Hello ${123} World` as string;
+                ~~~~~~~~~
+!!! error TS1005: ',' expected.
+                         ~~~
+!!! error TS1134: Variable declaration expected.
+                            ~
+!!! error TS1128: Declaration or statement expected.
+    var h = tag `Hello` as string;

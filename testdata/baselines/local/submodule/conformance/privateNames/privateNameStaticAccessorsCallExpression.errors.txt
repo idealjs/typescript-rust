@@ -1,0 +1,174 @@
+error TS2451: Cannot redeclare block-scoped variable 'arr'.
+privateNameStaticAccessorsCallExpression.ts(2,16): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(2,16): error TS1127: Invalid character.
+privateNameStaticAccessorsCallExpression.ts(2,17): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(2,54): error TS1003: Identifier expected.
+privateNameStaticAccessorsCallExpression.ts(2,54): error TS1127: Invalid character.
+privateNameStaticAccessorsCallExpression.ts(2,55): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(3,16): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(3,16): error TS1127: Invalid character.
+privateNameStaticAccessorsCallExpression.ts(3,17): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(4,12): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(4,12): error TS1127: Invalid character.
+privateNameStaticAccessorsCallExpression.ts(4,13): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(6,14): error TS1003: Identifier expected.
+privateNameStaticAccessorsCallExpression.ts(6,14): error TS1127: Invalid character.
+privateNameStaticAccessorsCallExpression.ts(6,15): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(7,27): error TS1003: Identifier expected.
+privateNameStaticAccessorsCallExpression.ts(7,27): error TS1127: Invalid character.
+privateNameStaticAccessorsCallExpression.ts(7,28): error TS1005: ',' expected.
+privateNameStaticAccessorsCallExpression.ts(9,18): error TS1003: Identifier expected.
+privateNameStaticAccessorsCallExpression.ts(9,18): error TS1127: Invalid character.
+privateNameStaticAccessorsCallExpression.ts(9,19): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(12,14): error TS1003: Identifier expected.
+privateNameStaticAccessorsCallExpression.ts(12,14): error TS1127: Invalid character.
+privateNameStaticAccessorsCallExpression.ts(12,15): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(13,28): error TS1003: Identifier expected.
+privateNameStaticAccessorsCallExpression.ts(13,28): error TS1127: Invalid character.
+privateNameStaticAccessorsCallExpression.ts(13,29): error TS1005: ',' expected.
+privateNameStaticAccessorsCallExpression.ts(13,39): error TS1005: ',' expected.
+privateNameStaticAccessorsCallExpression.ts(13,40): error TS1134: Variable declaration expected.
+privateNameStaticAccessorsCallExpression.ts(13,41): error TS1134: Variable declaration expected.
+privateNameStaticAccessorsCallExpression.ts(13,43): error TS1134: Variable declaration expected.
+privateNameStaticAccessorsCallExpression.ts(13,51): error TS1134: Variable declaration expected.
+privateNameStaticAccessorsCallExpression.ts(13,52): error TS1134: Variable declaration expected.
+privateNameStaticAccessorsCallExpression.ts(14,15): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(14,26): error TS1003: Identifier expected.
+privateNameStaticAccessorsCallExpression.ts(14,26): error TS1127: Invalid character.
+privateNameStaticAccessorsCallExpression.ts(14,27): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(14,37): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(14,44): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(14,46): error TS2304: Cannot find name 'middle$'.
+privateNameStaticAccessorsCallExpression.ts(14,53): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(14,56): error TS2304: Cannot find name 'tail'.
+privateNameStaticAccessorsCallExpression.ts(14,60): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(15,37): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(15,37): error TS2304: Cannot find name 'test$'.
+privateNameStaticAccessorsCallExpression.ts(15,42): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(15,45): error TS2304: Cannot find name 'and$'.
+privateNameStaticAccessorsCallExpression.ts(15,49): error TS1005: ';' expected.
+privateNameStaticAccessorsCallExpression.ts(15,52): error TS1160: Unterminated template literal.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'arr'.
+==== privateNameStaticAccessorsCallExpression.ts (49 errors) ====
+    class A {
+        static get #fieldFunc() {  return function() { A.#x = 10; } }
+                   ~
+!!! error TS1005: ';' expected.
+                   ~
+!!! error TS1127: Invalid character.
+                    ~~~~~~~~~
+!!! error TS1005: ';' expected.
+                                                         ~
+!!! error TS1003: Identifier expected.
+                                                         ~
+!!! error TS1127: Invalid character.
+                                                          ~
+!!! error TS1005: ';' expected.
+        static get #fieldFunc2() { return  function(a, ...b) {}; }
+                   ~
+!!! error TS1005: ';' expected.
+                   ~
+!!! error TS1127: Invalid character.
+                    ~~~~~~~~~~
+!!! error TS1005: ';' expected.
+        static #x = 1;
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~
+!!! error TS1005: ';' expected.
+        static test() {
+            this.#fieldFunc();
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~~~~~~~
+!!! error TS1005: ';' expected.
+            const func = this.#fieldFunc;
+                              ~
+!!! error TS1003: Identifier expected.
+                              ~
+!!! error TS1127: Invalid character.
+                               ~~~~~~~~~
+!!! error TS1005: ',' expected.
+            func();
+            new this.#fieldFunc();
+                     ~
+!!! error TS1003: Identifier expected.
+                     ~
+!!! error TS1127: Invalid character.
+                      ~~~~~~~~~
+!!! error TS1005: ';' expected.
+    
+            const arr = [ 1, 2 ];
+            this.#fieldFunc2(0, ...arr, 3);
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~~~~~~~~
+!!! error TS1005: ';' expected.
+            const b = new this.#fieldFunc2(0, ...arr, 3);
+                               ~
+!!! error TS1003: Identifier expected.
+                               ~
+!!! error TS1127: Invalid character.
+                                ~~~~~~~~~~
+!!! error TS1005: ',' expected.
+                                          ~
+!!! error TS1005: ',' expected.
+                                           ~
+!!! error TS1134: Variable declaration expected.
+                                            ~
+!!! error TS1134: Variable declaration expected.
+                                              ~~~
+!!! error TS1134: Variable declaration expected.
+                                                      ~
+!!! error TS1134: Variable declaration expected.
+                                                       ~
+!!! error TS1134: Variable declaration expected.
+            const str = this.#fieldFunc2`head${1}middle${2}tail`;
+                  ~~~
+!!! error TS1005: ';' expected.
+                             ~
+!!! error TS1003: Identifier expected.
+                             ~
+!!! error TS1127: Invalid character.
+                              ~~~~~~~~~~
+!!! error TS1005: ';' expected.
+                                        ~~~~~~~
+!!! error TS1005: ';' expected.
+                                               ~
+!!! error TS1005: ';' expected.
+                                                 ~~~~~~~
+!!! error TS2304: Cannot find name 'middle$'.
+                                                        ~
+!!! error TS1005: ';' expected.
+                                                           ~~~~
+!!! error TS2304: Cannot find name 'tail'.
+                                                               ~~
+            this.getClass().#fieldFunc2`test${1}and${2}`;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+                                        ~~~~~
+!!! error TS1005: ';' expected.
+                                        ~~~~~
+!!! error TS2304: Cannot find name 'test$'.
+                                             ~
+!!! error TS1005: ';' expected.
+                                                ~~~~
+!!! error TS2304: Cannot find name 'and$'.
+                                                    ~
+!!! error TS1005: ';' expected.
+                                                       ~~
+        }
+    ~~~~~
+        static getClass() { return A; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+    ~
+!!! error TS1160: Unterminated template literal.

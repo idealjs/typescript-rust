@@ -1,0 +1,27 @@
+error TS6053: File 'react16.d.ts' not found.
+tsxReactEmit8.tsx(3,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxReactEmit8.tsx(3,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxReactEmit8.tsx(3,1): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+tsxReactEmit8.tsx(4,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxReactEmit8.tsx(4,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxReactEmit8.tsx(4,1): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.
+==== tsxReactEmit8.tsx (6 errors) ====
+    /// <reference path="/.lib/react16.d.ts" />
+    
+    <div>1</div>;
+    ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    ~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+    <div key={"key-attr"}>2</div>;
+    ~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    ~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.

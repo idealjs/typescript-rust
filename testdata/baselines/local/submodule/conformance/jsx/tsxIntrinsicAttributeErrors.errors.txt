@@ -1,0 +1,35 @@
+tsxIntrinsicAttributeErrors.tsx(29,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+
+
+==== tsxIntrinsicAttributeErrors.tsx (1 errors) ====
+    declare namespace JSX {
+        interface Element { }
+        interface ElementClass {
+            render: any;
+        }
+        interface IntrinsicAttributes {
+            key: string | number
+        }
+        interface IntrinsicClassAttributes<T> {
+            ref: T
+        }
+        interface IntrinsicElements {
+            div: {
+                text?: string;
+                width?: number;
+            }
+    
+            span: any;
+        }
+    }
+    
+    interface I {
+        new(n: string): {
+            x: number
+            render(): void
+        }
+    }
+    declare var E: I;
+    <E x={10} />
+    ~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.

@@ -1,0 +1,19 @@
+parser618973.ts(1,8): error TS1005: '{' expected.
+parser618973.ts(1,25): error TS1003: Identifier expected.
+parser618973.ts(2,13): error TS1003: Identifier expected.
+parser618973.ts(2,14): error TS1003: Identifier expected.
+
+
+==== parser618973.ts (4 errors) ====
+    export export class Foo {
+           ~~~~~~
+!!! error TS1005: '{' expected.
+                            ~
+!!! error TS1003: Identifier expected.
+      public Bar() {
+                ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1003: Identifier expected.
+      }
+    }

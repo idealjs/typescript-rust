@@ -1,0 +1,54 @@
+legacyDecorators-contextualTypes.ts(3,17): error TS1138: Parameter declaration expected.
+legacyDecorators-contextualTypes.ts(3,18): error TS1138: Parameter declaration expected.
+legacyDecorators-contextualTypes.ts(3,19): error TS1138: Parameter declaration expected.
+legacyDecorators-contextualTypes.ts(3,29): error TS1005: ';' expected.
+legacyDecorators-contextualTypes.ts(3,32): error TS1005: ';' expected.
+legacyDecorators-contextualTypes.ts(3,34): error TS1128: Declaration or statement expected.
+
+
+==== legacyDecorators-contextualTypes.ts (6 errors) ====
+    @((t) => { })
+    class C {
+        constructor(@((t, k, i) => {}) p: any) {}
+                    ~
+!!! error TS1138: Parameter declaration expected.
+                     ~
+!!! error TS1138: Parameter declaration expected.
+                      ~
+!!! error TS1138: Parameter declaration expected.
+                                ~~
+!!! error TS1005: ';' expected.
+                                   ~
+!!! error TS1005: ';' expected.
+                                     ~
+!!! error TS1128: Declaration or statement expected.
+    
+        @((t, k, d) => { })
+        static f() {}
+    
+        @((t, k, d) => { })
+        static get x() { return 1; }
+        static set x(value) { }
+    
+        @((t, k, d) => { })
+        static accessor y = 1;
+    
+        @((t, k) => { })
+        static z = 1;
+    
+        @((t, k, d) => { })
+        g() {}
+    
+        @((t, k, d) => { })
+        get a() { return 1; }
+        set a(value) { }
+    
+        @((t, k, d) => { })
+        accessor b = 1;
+    
+        @((t, k) => { })
+        c = 1;
+    
+        static h(@((t, k, i) => {}) p: any) {}
+        h(@((t, k, i) => {}) p: any) {}
+    }

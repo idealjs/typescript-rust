@@ -1,8 +1,8 @@
-accessibility/privateInstanceMemberAccessibility.ts(12,12): error TS1005: ';' expected.
-accessibility/privateInstanceMemberAccessibility.ts(12,13): error TS1005: ';' expected.
+privateInstanceMemberAccessibility.ts(12,12): error TS1005: ';' expected.
+privateInstanceMemberAccessibility.ts(12,13): error TS1005: ';' expected.
 
 
-==== accessibility/privateInstanceMemberAccessibility.ts (2 errors) ====
+==== privateInstanceMemberAccessibility.ts (2 errors) ====
     class Base {
         private foo: string;
     }

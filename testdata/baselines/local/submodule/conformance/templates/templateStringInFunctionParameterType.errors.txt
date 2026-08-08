@@ -1,0 +1,12 @@
+templateStringInFunctionParameterType.ts(2,12): error TS1138: Parameter declaration expected.
+
+
+==== templateStringInFunctionParameterType.ts (1 errors) ====
+    ﻿// @target: es2015
+    function f(`hello`);
+            ~~~~~~~
+!!! error TS1138: Parameter declaration expected.
+    function f(x: string);
+    function f(x: string) {
+        return x;
+    }

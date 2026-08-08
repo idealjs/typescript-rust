@@ -1,0 +1,54 @@
+file.tsx(10,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(10,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+file.tsx(10,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(10,11): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+file.tsx(12,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(12,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+file.tsx(12,6): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(12,6): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+file.tsx(14,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(14,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+file.tsx(14,6): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(14,6): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+
+
+==== file.tsx (12 errors) ====
+    declare namespace JSX {
+    	interface Element { }
+    	interface IntrinsicElements {
+    		[s: string]: any;
+    	}
+    }
+    declare var React: any;
+    
+    // Emit ' word' in the last string
+    <div>word <code>code</code> word</div>;
+    ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+              ~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+              ~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    // Same here
+    <div><code>code</code> word</div>;
+    ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+         ~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+         ~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    // And here
+    <div><code /> word</div>;
+    ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+         ~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+         ~~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    

@@ -1,0 +1,27 @@
+error TS2300: Duplicate identifier 'Broken'.
+error TS2300: Duplicate identifier 'IncorrectlyExtends'.
+
+
+!!! error TS2300: Duplicate identifier 'Broken'.
+
+!!! error TS2300: Duplicate identifier 'IncorrectlyExtends'.
+==== mergedInheritedMembersSatisfyAbstractBase.ts (0 errors) ====
+    abstract class BaseClass {
+      abstract bar: number;
+    }
+    
+    class Broken extends BaseClass {}
+    
+    // declaration merging should satisfy abstract bar
+    interface IGetters {
+      bar: number;
+    }
+    interface Broken extends IGetters {}
+    
+    new Broken().bar
+    
+    class IncorrectlyExtends extends BaseClass {}
+    interface IncorrectGetters {
+      bar: string;
+    }
+    interface IncorrectlyExtends extends IncorrectGetters {}

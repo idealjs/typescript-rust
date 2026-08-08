@@ -1,0 +1,23 @@
+a.js(3,9): error TS2339: Property 'bar' does not exist on type '() => void'.
+a.js(3,21): error TS2304: Cannot find name 'C'.
+a.js(5,9): error TS2339: Property 'bar' does not exist on type '() => void'.
+
+
+==== a.js (3 errors) ====
+    export default function MyClass() {
+    }
+    MyClass.bar = class C {
+            ~~~
+!!! error TS2339: Property 'bar' does not exist on type '() => void'.
+                        ~
+!!! error TS2304: Cannot find name 'C'.
+    }
+    MyClass.bar
+            ~~~
+!!! error TS2339: Property 'bar' does not exist on type '() => void'.
+    
+==== b.js (0 errors) ====
+    import MC from './a'
+    MC.bar
+    /** @type {MC.bar} */
+    var x

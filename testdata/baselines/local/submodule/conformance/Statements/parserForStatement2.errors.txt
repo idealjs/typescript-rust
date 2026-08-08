@@ -1,0 +1,15 @@
+parserForStatement2.ts(4,30): error TS2304: Cannot find name 'd'.
+parserForStatement2.ts(4,31): error TS1005: ';' expected.
+
+
+==== parserForStatement2.ts (2 errors) ====
+    var a;
+    var b = [];
+    var c;
+    for (a in b[c] = b[c] || [], d) {
+                                 ~
+!!! error TS2304: Cannot find name 'd'.
+                                  ~
+!!! error TS1005: ';' expected.
+    
+    }

@@ -1,0 +1,34 @@
+propertyAndAccessorWithSameName.ts(3,9): error TS1005: ';' expected.
+propertyAndAccessorWithSameName.ts(10,9): error TS1005: ';' expected.
+propertyAndAccessorWithSameName.ts(15,9): error TS1005: ';' expected.
+propertyAndAccessorWithSameName.ts(18,9): error TS1005: ';' expected.
+
+
+==== propertyAndAccessorWithSameName.ts (4 errors) ====
+    class C {
+        x: number;
+        get x() { // error
+            ~
+!!! error TS1005: ';' expected.
+            return 1;
+        }
+    }
+    
+    class D {
+        x: number;
+        set x(v) { } // error
+            ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class E {
+        private x: number;
+        get x() { // error
+            ~
+!!! error TS1005: ';' expected.
+            return 1;
+        }
+        set x(v) { }
+            ~
+!!! error TS1005: ';' expected.
+    }

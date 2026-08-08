@@ -1,0 +1,32 @@
+emitClassDeclarationWithExtensionInES6.ts(13,9): error TS2349: This expression is not callable.
+emitClassDeclarationWithExtensionInES6.ts(21,19): error TS2554: Expected 0 arguments, but got 2.
+
+
+==== emitClassDeclarationWithExtensionInES6.ts (2 errors) ====
+    ﻿// @target: es6
+    class B {
+        baz(a: string, y = 10) { }
+    }
+    class C extends B {
+        foo() { }
+        baz(a: string, y:number) {
+            super.baz(a, y);
+        }
+    }
+    class D extends C {
+        constructor() {
+            super();
+         ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    
+        foo() {
+            super.foo();
+        }
+    
+        baz() {
+            super.baz("hello", 10);
+                   ~~~~~~~~~~~
+!!! error TS2554: Expected 0 arguments, but got 2.
+        }
+    }

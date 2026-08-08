@@ -1,0 +1,40 @@
+error TS2300: Duplicate identifier 'Box'.
+error TS2300: Duplicate identifier 'Circle'.
+exportDeclaration_missingBraces.ts(11,16): error TS1005: '=' expected.
+exportDeclaration_missingBraces.ts(14,20): error TS1005: '=' expected.
+exportDeclaration_missingBraces.ts(15,16): error TS1005: '=' expected.
+exportDeclaration_missingBraces.ts(16,19): error TS1005: '=' expected.
+exportDeclaration_missingBraces.ts(17,15): error TS1005: '=' expected.
+
+
+!!! error TS2300: Duplicate identifier 'Box'.
+
+!!! error TS2300: Duplicate identifier 'Circle'.
+==== exportDeclaration_missingBraces.ts (5 errors) ====
+    enum Numbers {
+      One,
+      Two
+    }
+    
+    class Box<T> {}
+    
+    interface Circle {}
+    
+    namespace ns {
+      export type T; // Normal parse error because there is no other 'T'
+                   ~
+!!! error TS1005: '=' expected.
+    }
+    
+    export type Numbers;
+                       ~
+!!! error TS1005: '=' expected.
+    export type Box;
+                   ~
+!!! error TS1005: '=' expected.
+    export type Circle;
+                      ~
+!!! error TS1005: '=' expected.
+    export type ns;
+                  ~
+!!! error TS1005: '=' expected.

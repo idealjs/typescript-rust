@@ -1,0 +1,136 @@
+unionTypeReduction2.ts(3,7): error TS2339: Property 'f' does not exist on type 'object | object'.
+unionTypeReduction2.ts(4,7): error TS2339: Property 'f' does not exist on type 'object | object'.
+unionTypeReduction2.ts(9,7): error TS2339: Property 'f' does not exist on type 'object | object'.
+unionTypeReduction2.ts(10,7): error TS2339: Property 'f' does not exist on type 'object | object'.
+unionTypeReduction2.ts(15,5): error TS2349: This expression is not callable.
+unionTypeReduction2.ts(16,5): error TS2349: This expression is not callable.
+unionTypeReduction2.ts(21,5): error TS2349: This expression is not callable.
+unionTypeReduction2.ts(22,5): error TS2349: This expression is not callable.
+unionTypeReduction2.ts(27,5): error TS2349: This expression is not callable.
+unionTypeReduction2.ts(28,5): error TS2349: This expression is not callable.
+unionTypeReduction2.ts(33,5): error TS2349: This expression is not callable.
+unionTypeReduction2.ts(34,5): error TS2349: This expression is not callable.
+unionTypeReduction2.ts(48,7): error TS2339: Property 'f' does not exist on type 'object | object'.
+unionTypeReduction2.ts(49,7): error TS2339: Property 'f' does not exist on type 'object | object'.
+unionTypeReduction2.ts(58,24): error TS2304: Cannot find name 'something'.
+unionTypeReduction2.ts(58,33): error TS1005: ',' expected.
+unionTypeReduction2.ts(58,33): error TS2304: Cannot find name '('.
+unionTypeReduction2.ts(58,33): error TS2353: Object literal may only specify known properties, and '(' does not exist in type '{ something: () => void }'.
+unionTypeReduction2.ts(58,34): error TS1005: ',' expected.
+unionTypeReduction2.ts(58,34): error TS2304: Cannot find name ')'.
+unionTypeReduction2.ts(58,36): error TS1005: ',' expected.
+unionTypeReduction2.ts(58,36): error TS2304: Cannot find name '{'.
+unionTypeReduction2.ts(58,40): error TS1128: Declaration or statement expected.
+
+
+==== unionTypeReduction2.ts (23 errors) ====
+    function f1(x: { f(): void }, y: { f(x?: string): void }) {
+        let z = !!true ? x : y;  // { f(x?: string): void }
+        z.f();
+          ~
+!!! error TS2339: Property 'f' does not exist on type 'object | object'.
+        z.f('hello');
+          ~
+!!! error TS2339: Property 'f' does not exist on type 'object | object'.
+    }
+    
+    function f2(x: { f(x: string | undefined): void }, y: { f(x?: string): void }) {
+        let z = !!true ? x : y;  // { f(x?: string): void }
+        z.f();
+          ~
+!!! error TS2339: Property 'f' does not exist on type 'object | object'.
+        z.f('hello');
+          ~
+!!! error TS2339: Property 'f' does not exist on type 'object | object'.
+    }
+    
+    function f3(x: () => void, y: (x?: string) => void) {
+        let f = !!true ? x : y;  // (x?: string) => void
+        f();
+        ~
+!!! error TS2349: This expression is not callable.
+        f('hello');
+        ~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    function f4(x: (x: string | undefined) => void, y: (x?: string) => void) {
+        let f = !!true ? x : y;  // (x?: string) => void
+        f();
+        ~
+!!! error TS2349: This expression is not callable.
+        f('hello');
+        ~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    function f5(x: (x: string | undefined) => void, y: (x?: 'hello') => void) {
+        let f = !!true ? x : y;  // (x?: 'hello') => void
+        f();
+        ~
+!!! error TS2349: This expression is not callable.
+        f('hello');
+        ~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    function f6(x: (x: 'hello' | undefined) => void, y: (x?: string) => void) {
+        let f = !!true ? x : y;  // (x: 'hello' | undefined) => void
+        f();  // Error
+        ~
+!!! error TS2349: This expression is not callable.
+        f('hello');
+        ~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    type A = {
+        f(): void;
+    }
+    
+    type B = {
+        f(x?: string): void;
+        g(): void;
+    }
+    
+    function f11(a: A, b: B) {
+        let z = !!true ? a : b;  // A | B
+        z.f();
+          ~
+!!! error TS2339: Property 'f' does not exist on type 'object | object'.
+        z.f('hello');
+          ~
+!!! error TS2339: Property 'f' does not exist on type 'object | object'.
+    }
+    
+    // Repro from #35414
+    
+    interface ReturnVal {
+        something(): void;
+    }
+    
+    const k: ReturnVal = { something() { } }
+                           ~~~~~~~~~
+!!! error TS2304: Cannot find name 'something'.
+                                    ~
+!!! error TS1005: ',' expected.
+                                    ~
+!!! error TS2304: Cannot find name '('.
+                                    ~
+!!! error TS2353: Object literal may only specify known properties, and '(' does not exist in type '{ something: () => void }'.
+                                     ~
+!!! error TS1005: ',' expected.
+                                     ~
+!!! error TS2304: Cannot find name ')'.
+                                       ~
+!!! error TS1005: ',' expected.
+                                       ~
+!!! error TS2304: Cannot find name '{'.
+                                           ~
+!!! error TS1128: Declaration or statement expected.
+    
+    declare const val: ReturnVal;
+    function run(options: { something?(b?: string): void }) {
+        const something = options.something ?? val.something;
+        something('');
+    }

@@ -1,0 +1,27 @@
+privateNameMethodInStaticFieldInit.ts(2,24): error TS1003: Identifier expected.
+privateNameMethodInStaticFieldInit.ts(2,24): error TS1127: Invalid character.
+privateNameMethodInStaticFieldInit.ts(2,25): error TS1005: ';' expected.
+privateNameMethodInStaticFieldInit.ts(3,5): error TS1003: Identifier expected.
+privateNameMethodInStaticFieldInit.ts(3,5): error TS1127: Invalid character.
+privateNameMethodInStaticFieldInit.ts(3,6): error TS1005: ';' expected.
+
+
+==== privateNameMethodInStaticFieldInit.ts (6 errors) ====
+    class C {
+        static s = new C().#method();
+                           ~
+!!! error TS1003: Identifier expected.
+                           ~
+!!! error TS1127: Invalid character.
+                            ~~~~~~
+!!! error TS1005: ';' expected.
+        #method() { return 42; }
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~~~
+!!! error TS1005: ';' expected.
+    }
+    
+    console.log(C.s);

@@ -1,0 +1,146 @@
+privateNameUnused.ts(2,5): error TS1003: Identifier expected.
+privateNameUnused.ts(2,5): error TS1127: Invalid character.
+privateNameUnused.ts(2,6): error TS1005: ';' expected.
+privateNameUnused.ts(3,5): error TS1003: Identifier expected.
+privateNameUnused.ts(3,5): error TS1127: Invalid character.
+privateNameUnused.ts(3,6): error TS1005: ';' expected.
+privateNameUnused.ts(5,26): error TS1003: Identifier expected.
+privateNameUnused.ts(5,26): error TS1127: Invalid character.
+privateNameUnused.ts(5,27): error TS1005: ',' expected.
+privateNameUnused.ts(10,5): error TS1003: Identifier expected.
+privateNameUnused.ts(10,5): error TS1127: Invalid character.
+privateNameUnused.ts(10,6): error TS1005: ';' expected.
+privateNameUnused.ts(10,17): error TS1003: Identifier expected.
+privateNameUnused.ts(11,5): error TS1003: Identifier expected.
+privateNameUnused.ts(11,5): error TS1127: Invalid character.
+privateNameUnused.ts(11,6): error TS1005: ';' expected.
+privateNameUnused.ts(11,18): error TS1003: Identifier expected.
+privateNameUnused.ts(13,26): error TS1003: Identifier expected.
+privateNameUnused.ts(13,26): error TS1127: Invalid character.
+privateNameUnused.ts(13,27): error TS1005: ',' expected.
+privateNameUnused.ts(18,9): error TS1005: ';' expected.
+privateNameUnused.ts(18,9): error TS1127: Invalid character.
+privateNameUnused.ts(18,10): error TS1005: ';' expected.
+privateNameUnused.ts(18,29): error TS1003: Identifier expected.
+privateNameUnused.ts(19,9): error TS1005: ';' expected.
+privateNameUnused.ts(19,9): error TS1127: Invalid character.
+privateNameUnused.ts(19,10): error TS1005: ';' expected.
+privateNameUnused.ts(19,34): error TS1003: Identifier expected.
+privateNameUnused.ts(21,9): error TS1005: ';' expected.
+privateNameUnused.ts(21,9): error TS1127: Invalid character.
+privateNameUnused.ts(21,10): error TS1005: ';' expected.
+privateNameUnused.ts(21,31): error TS1003: Identifier expected.
+privateNameUnused.ts(22,9): error TS1005: ';' expected.
+privateNameUnused.ts(22,9): error TS1127: Invalid character.
+privateNameUnused.ts(22,10): error TS1005: ';' expected.
+privateNameUnused.ts(22,36): error TS1003: Identifier expected.
+privateNameUnused.ts(24,26): error TS1003: Identifier expected.
+privateNameUnused.ts(24,26): error TS1127: Invalid character.
+privateNameUnused.ts(24,27): error TS1005: ',' expected.
+
+
+==== privateNameUnused.ts (39 errors) ====
+    export class A {
+        #used = "used";
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~
+!!! error TS1005: ';' expected.
+        #unused = "unused";
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~~~
+!!! error TS1005: ';' expected.
+        constructor () {
+            console.log(this.#used);
+                             ~
+!!! error TS1003: Identifier expected.
+                             ~
+!!! error TS1127: Invalid character.
+                              ~~~~
+!!! error TS1005: ',' expected.
+        }
+    }
+    
+    export class A2 {
+        #used() {  };
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~
+!!! error TS1005: ';' expected.
+                    ~
+!!! error TS1003: Identifier expected.
+        #unused() { };
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~~~
+!!! error TS1005: ';' expected.
+                     ~
+!!! error TS1003: Identifier expected.
+        constructor () {
+            console.log(this.#used());
+                             ~
+!!! error TS1003: Identifier expected.
+                             ~
+!!! error TS1127: Invalid character.
+                              ~~~~
+!!! error TS1005: ',' expected.
+        }
+    }
+    
+    export class A3 {
+        get #used() { return 0 };
+            ~
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS1127: Invalid character.
+             ~~~~
+!!! error TS1005: ';' expected.
+                                ~
+!!! error TS1003: Identifier expected.
+        set #used(value: number) {  };
+            ~
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS1127: Invalid character.
+             ~~~~
+!!! error TS1005: ';' expected.
+                                     ~
+!!! error TS1003: Identifier expected.
+        
+        get #unused() { return 0 };
+            ~
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS1127: Invalid character.
+             ~~~~~~
+!!! error TS1005: ';' expected.
+                                  ~
+!!! error TS1003: Identifier expected.
+        set #unused(value: number) {  };
+            ~
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS1127: Invalid character.
+             ~~~~~~
+!!! error TS1005: ';' expected.
+                                       ~
+!!! error TS1003: Identifier expected.
+        constructor () {
+            console.log(this.#used);
+                             ~
+!!! error TS1003: Identifier expected.
+                             ~
+!!! error TS1127: Invalid character.
+                              ~~~~
+!!! error TS1005: ',' expected.
+        }
+    }

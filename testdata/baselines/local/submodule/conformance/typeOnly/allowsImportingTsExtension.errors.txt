@@ -1,0 +1,34 @@
+error TS2300: Duplicate identifier 'A'.
+error TS2300: Duplicate identifier 'A'.
+b.ts(5,18): error TS2304: Cannot find name 'import'.
+c.ts(5,18): error TS2304: Cannot find name 'import'.
+
+
+!!! error TS2300: Duplicate identifier 'A'.
+
+!!! error TS2300: Duplicate identifier 'A'.
+==== allowsImportingTsExtension.ts (0 errors) ====
+    
+==== a.ts (0 errors) ====
+    export class A {}
+    
+==== a.d.ts (0 errors) ====
+    export class A {}
+    
+==== b.ts (1 errors) ====
+    import type { A } from "./a.ts"; // ok
+    import {} from "./a.ts"; // error
+    import { type A as _A } from "./a.ts"; // error
+    type __A = import("./a.ts").A; // ok
+    const aPromise = import("./a.ts"); // error
+                     ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    
+==== c.ts (1 errors) ====
+    import type { A } from "./a.d.ts"; // ok
+    import {} from "./a.d.ts"; // error
+    import { type A as _A } from "./a.d.ts"; // error
+    type __A = import("./a.d.ts").A; // ok
+    const aPromise = import("./a.d.ts"); // error
+                     ~~~~~~
+!!! error TS2304: Cannot find name 'import'.

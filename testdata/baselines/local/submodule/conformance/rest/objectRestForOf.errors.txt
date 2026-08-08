@@ -1,0 +1,19 @@
+objectRestForOf.ts(10,28): error TS2339: Property 'map' does not exist on type '{ x: number; y: string }[]'.
+
+
+==== objectRestForOf.ts (1 errors) ====
+    let array: { x: number, y: string }[];
+    for (let { x, ...restOf } of array) {
+        [x, restOf];
+    }
+    let xx: number;
+    let rrestOff: { y: string };
+    for ({ x: xx, ...rrestOff } of array ) {
+        [xx, rrestOff];
+    }
+    for (const norest of array.map(a => ({ ...a, x: 'a string' }))) {
+                               ~~~
+!!! error TS2339: Property 'map' does not exist on type '{ x: number; y: string }[]'.
+        [norest.x, norest.y];
+        // x is now a string. who knows why.
+    }

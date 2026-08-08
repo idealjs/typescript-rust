@@ -1,0 +1,38 @@
+thisTypeSyntacticContext.ts(4,7): error TS2741: Property 'test' is missing in type '{ n: 1 }' but required in type '{ n: number; test: (this: { n: number }) => void }'.
+thisTypeSyntacticContext.ts(7,1): error TS2554: Expected 1 arguments, but got 0.
+thisTypeSyntacticContext.ts(8,1): error TS2554: Expected 1 arguments, but got 0.
+thisTypeSyntacticContext.ts(9,1): error TS2554: Expected 1 arguments, but got 0.
+thisTypeSyntacticContext.ts(10,1): error TS2554: Expected 1 arguments, but got 0.
+thisTypeSyntacticContext.ts(11,1): error TS2554: Expected 1 arguments, but got 0.
+thisTypeSyntacticContext.ts(12,1): error TS2554: Expected 1 arguments, but got 0.
+
+
+==== thisTypeSyntacticContext.ts (7 errors) ====
+    function f(this: { n: number }) {
+    }
+    
+    const o: { n: number, test?: (this: { n: number }) => void } = { n: 1 }
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    o.test = f
+    
+!!! error TS2741: Property 'test' is missing in type '{ n: 1 }' but required in type '{ n: number; test: (this: { n: number }) => void }'.
+    
+    o.test();
+    ~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    o!.test();
+    ~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    o.test!();
+    ~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    o.test!!!();
+    ~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    (o.test!)();
+    ~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    (o.test)();
+    ~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    

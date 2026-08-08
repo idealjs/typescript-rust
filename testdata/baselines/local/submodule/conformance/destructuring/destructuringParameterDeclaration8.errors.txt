@@ -1,0 +1,30 @@
+destructuringParameterDeclaration8.ts(5,11): error TS1005: ',' expected.
+destructuringParameterDeclaration8.ts(5,13): error TS1180: Property destructuring pattern expected.
+destructuringParameterDeclaration8.ts(6,1): error TS1005: ',' expected.
+
+
+==== destructuringParameterDeclaration8.ts (3 errors) ====
+    // explicit type annotation should cause `method` to have type 'x' | 'y'
+    // both inside and outside `test`.
+    function test({
+        method = 'z',
+        nested: { p = 'c' }
+              ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS1180: Property destructuring pattern expected.
+    }: {
+    ~
+!!! error TS1005: ',' expected.
+        method?: 'x' | 'y',
+        nested?: { p: 'a' | 'b' }
+    })
+    {
+        method
+        p
+    }
+    
+    test({});
+    test({ method: 'x', nested: { p: 'a' } })
+    test({ method: 'z', nested: { p: 'b' } })
+    test({ method: 'one', nested: { p: 'a' } })

@@ -1,0 +1,22 @@
+a.ts(3,10): error TS1012: Unexpected token.
+a.ts(3,11): error TS1005: ';' expected.
+a.ts(3,15): error TS1005: ';' expected.
+
+
+==== esDecorators-classExpression-namedEvaluation.9.ts (0 errors) ====
+    
+==== a.ts (3 errors) ====
+    declare let dec: any;
+    
+    export = @dec class { };
+             ~
+!!! error TS1012: Unexpected token.
+              ~~~
+!!! error TS1005: ';' expected.
+                  ~~~~~
+!!! error TS1005: ';' expected.
+    
+==== b.ts (0 errors) ====
+    declare let dec: any;
+    
+    export = class { @dec y: any };

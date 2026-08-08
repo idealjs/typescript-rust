@@ -1,0 +1,31 @@
+a.js(4,10): error TS2339: Property 'p' does not exist on type 'object'.
+a.js(5,3): error TS2339: Property 'GLOBSTAR' does not exist on type '() => void'.
+a.js(7,10): error TS2339: Property 'p' does not exist on type 'object'.
+a.js(8,10): error TS2339: Property 'q' does not exist on type 'object'.
+a.js(9,3): error TS2339: Property 'GLOBSTAR' does not exist on type '() => void'.
+a.js(10,3): error TS2339: Property 'GLOBSTAR' does not exist on type '() => void'.
+
+
+==== a.js (6 errors) ====
+    var GLOBSTAR = m.GLOBSTAR = {}
+    function m() {
+    }
+    GLOBSTAR.p = 1
+             ~
+!!! error TS2339: Property 'p' does not exist on type 'object'.
+    m.GLOBSTAR.q = 2
+      ~~~~~~~~
+!!! error TS2339: Property 'GLOBSTAR' does not exist on type '() => void'.
+    
+    GLOBSTAR.p
+             ~
+!!! error TS2339: Property 'p' does not exist on type 'object'.
+    GLOBSTAR.q
+             ~
+!!! error TS2339: Property 'q' does not exist on type 'object'.
+    m.GLOBSTAR.p
+      ~~~~~~~~
+!!! error TS2339: Property 'GLOBSTAR' does not exist on type '() => void'.
+    m.GLOBSTAR.q
+      ~~~~~~~~
+!!! error TS2339: Property 'GLOBSTAR' does not exist on type '() => void'.

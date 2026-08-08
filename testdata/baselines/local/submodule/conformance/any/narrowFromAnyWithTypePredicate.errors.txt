@@ -1,0 +1,67 @@
+narrowFromAnyWithTypePredicate.ts(3,36): error TS2304: Cannot find name 'Object'.
+narrowFromAnyWithTypePredicate.ts(5,35): error TS2304: Cannot find name 'Error'.
+narrowFromAnyWithTypePredicate.ts(6,34): error TS2304: Cannot find name 'Date'.
+narrowFromAnyWithTypePredicate.ts(18,5): error TS2349: This expression is not callable.
+narrowFromAnyWithTypePredicate.ts(22,7): error TS2339: Property 'method' does not exist on type 'error | never | error | object'.
+narrowFromAnyWithTypePredicate.ts(23,5): error TS2349: This expression is not callable.
+narrowFromAnyWithTypePredicate.ts(27,7): error TS2339: Property 'message' does not exist on type 'error | never | error | object | error | never | error | never'.
+narrowFromAnyWithTypePredicate.ts(28,7): error TS2339: Property 'mesage' does not exist on type 'error | never | error | object | error | never | error | never'.
+narrowFromAnyWithTypePredicate.ts(32,7): error TS2339: Property 'getDate' does not exist on type 'error | never | error | object | error | never | error | never | error | never | error | object | error | never | error | never'.
+narrowFromAnyWithTypePredicate.ts(33,7): error TS2339: Property 'getHuors' does not exist on type 'error | never | error | object | error | never | error | never | error | never | error | object | error | never | error | never'.
+
+
+==== narrowFromAnyWithTypePredicate.ts (10 errors) ====
+    declare var x: any;
+    declare function isFunction(x): x is Function;
+    declare function isObject(x): x is Object;
+                                       ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    declare function isAnything(x): x is {};
+    declare function isError(x): x is Error;
+                                      ~~~~~
+!!! error TS2304: Cannot find name 'Error'.
+    declare function isDate(x): x is Date;
+                                     ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    
+    
+    if (isFunction(x)) { // 'any' is not narrowed when target type is 'Function'
+        x();
+        x(1, 2, 3);
+        x("hello!");
+        x.prop;
+    }
+    
+    if (isObject(x)) { // 'any' is not narrowed when target type is 'Object'
+        x.method();
+        x();
+        ~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    if (isAnything(x)) { // 'any' is narrowed to types other than 'Function'/'Object' (including {})
+        x.method();
+          ~~~~~~
+!!! error TS2339: Property 'method' does not exist on type 'error | never | error | object'.
+        x();
+        ~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    if (isError(x)) { 
+        x.message;
+          ~~~~~~~
+!!! error TS2339: Property 'message' does not exist on type 'error | never | error | object | error | never | error | never'.
+        x.mesage;
+          ~~~~~~
+!!! error TS2339: Property 'mesage' does not exist on type 'error | never | error | object | error | never | error | never'.
+    }
+    
+    if (isDate(x)) {
+        x.getDate();
+          ~~~~~~~
+!!! error TS2339: Property 'getDate' does not exist on type 'error | never | error | object | error | never | error | never | error | never | error | object | error | never | error | never'.
+        x.getHuors();
+          ~~~~~~~~
+!!! error TS2339: Property 'getHuors' does not exist on type 'error | never | error | object | error | never | error | never | error | never | error | object | error | never | error | never'.
+    }

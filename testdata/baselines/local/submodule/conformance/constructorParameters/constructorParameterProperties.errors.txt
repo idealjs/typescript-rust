@@ -1,10 +1,10 @@
-constructorParameters/constructorParameterProperties.ts(3,25): error TS1005: ',' expected.
-constructorParameters/constructorParameterProperties.ts(3,46): error TS1005: ',' expected.
-constructorParameters/constructorParameterProperties.ts(13,31): error TS1005: ',' expected.
-constructorParameters/constructorParameterProperties.ts(13,47): error TS1005: ',' expected.
+constructorParameterProperties.ts(3,25): error TS1005: ',' expected.
+constructorParameterProperties.ts(3,46): error TS1005: ',' expected.
+constructorParameterProperties.ts(13,31): error TS1005: ',' expected.
+constructorParameterProperties.ts(13,47): error TS1005: ',' expected.
 
 
-==== constructorParameters/constructorParameterProperties.ts (4 errors) ====
+==== constructorParameterProperties.ts (4 errors) ====
     class C {
         y: string;
         constructor(private x: string, protected z: string) { }

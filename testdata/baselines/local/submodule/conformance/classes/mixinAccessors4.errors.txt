@@ -1,0 +1,37 @@
+mixinAccessors4.ts(5,7): error TS1005: ';' expected.
+mixinAccessors4.ts(11,16): error TS2304: Cannot find name 'B'.
+mixinAccessors4.ts(12,9): error TS1005: ';' expected.
+mixinAccessors4.ts(19,7): error TS1005: ';' expected.
+
+
+==== mixinAccessors4.ts (4 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/44938
+    
+    class A {
+      constructor(...args: any[]) {}
+      get myName(): string {
+          ~~~~~~
+!!! error TS1005: ';' expected.
+        return "A";
+      }
+    }
+    
+    function Mixin<T extends typeof A>(Super: T) {
+      return class B extends Super {
+                   ~
+!!! error TS2304: Cannot find name 'B'.
+        get myName(): string {
+            ~~~~~~
+!!! error TS1005: ';' expected.
+          return "B";
+        }
+      };
+    }
+    
+    class C extends Mixin(A) {
+      get myName(): string {
+          ~~~~~~
+!!! error TS1005: ';' expected.
+        return "C";
+      }
+    }

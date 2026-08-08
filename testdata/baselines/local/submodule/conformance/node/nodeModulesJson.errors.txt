@@ -1,0 +1,105 @@
+/config.json(2,12): error TS1005: ';' expected.
+/loosey.cts(5,1): error TS2304: Cannot find name 'config3'.
+/loosey.cts(6,1): error TS2304: Cannot find name 'config3'.
+/main.mts(12,1): error TS2304: Cannot find name 'config3'.
+/main.mts(13,1): error TS2304: Cannot find name 'config3'.
+/node_modules/actually-json/package.json(2,9): error TS1005: ';' expected.
+/node_modules/actually-json/package.json(3,12): error TS1005: ';' expected.
+/node_modules/actually-json/package.json(4,9): error TS1005: ';' expected.
+/node_modules/actually-json/package.json(5,12): error TS1005: ';' expected.
+/node_modules/actually-json/package.json(6,8): error TS1005: ';' expected.
+/node_modules/actually-json/package.json(7,14): error TS1005: ';' expected.
+/node_modules/not.json/package.json(2,9): error TS1005: ';' expected.
+/node_modules/not.json/package.json(3,12): error TS1005: ';' expected.
+/node_modules/not.json/package.json(4,9): error TS1005: ';' expected.
+/node_modules/not.json/package.json(5,12): error TS1005: ';' expected.
+
+
+==== nodeModulesJson.ts (0 errors) ====
+    
+==== /node_modules/not.json/package.json (4 errors) ====
+    {
+      "name": "not.json",
+            ~
+!!! error TS1005: ';' expected.
+      "version": "1.0.0",
+               ~
+!!! error TS1005: ';' expected.
+      "type": "module",
+            ~
+!!! error TS1005: ';' expected.
+      "exports": "./index.js"
+               ~
+!!! error TS1005: ';' expected.
+    }
+    
+==== /node_modules/not.json/index.d.ts (0 errors) ====
+    export function oops(json: string): any;
+    
+==== /node_modules/actually-json/package.json (6 errors) ====
+    {
+      "name": "actually-json",
+            ~
+!!! error TS1005: ';' expected.
+      "version": "1.0.0",
+               ~
+!!! error TS1005: ';' expected.
+      "type": "module",
+            ~
+!!! error TS1005: ';' expected.
+      "exports": {
+               ~
+!!! error TS1005: ';' expected.
+        ".": "./index.json",
+           ~
+!!! error TS1005: ';' expected.
+        "./typed": "./typed.d.json.ts"
+                 ~
+!!! error TS1005: ';' expected.
+      }
+    }
+    
+==== /node_modules/actually-json/index.json (0 errors) ====
+    {}
+    
+==== /node_modules/actually-json/typed.d.json.ts (0 errors) ====
+    declare const _default: {};
+    export default _default;
+    
+==== /config.json (1 errors) ====
+    {
+      "version": 1
+               ~
+!!! error TS1005: ';' expected.
+    }
+    
+==== /main.mts (2 errors) ====
+    import { oops } from "not.json"; // Ok
+    import moreOops from "actually-json"; // Error in nodenext
+    import typed from "actually-json/typed"; // Error in nodenext
+    
+    import config from "./config.json" with { type: "json" }; // Ok
+    import { default as config1 } from "./config.json" with { type: "json" }; // Ok
+    import config2 from "./config.json"; // Error in nodenext, no attribute
+    import type config2Type from "./config.json"; // Ok, type-only
+    import type config2Type2 from "./config.json" with { type: "json" }; // Error, import attributes not allowed on type-only imports
+    import { version } from "./config.json" with { type: "json" }; // Error, named import
+    import * as config3 from "./config.json" with { type: "json" };
+    config3.version; // Error
+    ~~~~~~~
+!!! error TS2304: Cannot find name 'config3'.
+    config3.default; // Ok
+    ~~~~~~~
+!!! error TS2304: Cannot find name 'config3'.
+    
+==== /loosey.cts (2 errors) ====
+    import config from "./config.json" with { type: "json" }; // Error
+    import config2 from "./config.json"; // Ok
+    import { version } from "./config.json"; // Ok
+    import * as config3 from "./config.json";
+    config3.version; // Ok
+    ~~~~~~~
+!!! error TS2304: Cannot find name 'config3'.
+    config3.default; // Error
+    ~~~~~~~
+!!! error TS2304: Cannot find name 'config3'.

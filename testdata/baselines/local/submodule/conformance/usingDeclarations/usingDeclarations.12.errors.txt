@@ -1,0 +1,41 @@
+usingDeclarations.12.ts(8,9): error TS2349: This expression is not callable.
+usingDeclarations.12.ts(9,39): error TS1005: ',' expected.
+usingDeclarations.12.ts(9,39): error TS2304: Cannot find name '('.
+usingDeclarations.12.ts(9,40): error TS1005: ',' expected.
+usingDeclarations.12.ts(9,40): error TS2304: Cannot find name ')'.
+usingDeclarations.12.ts(9,42): error TS1005: ',' expected.
+usingDeclarations.12.ts(9,42): error TS2304: Cannot find name '{'.
+usingDeclarations.12.ts(9,46): error TS1003: Identifier expected.
+usingDeclarations.12.ts(11,1): error TS1128: Declaration or statement expected.
+
+
+==== usingDeclarations.12.ts (9 errors) ====
+    class C1 {
+        constructor() {}
+    }
+    
+    class C2 extends C1 {
+        y = 1;
+        constructor() {
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            using d17 = { [Symbol.dispose]() {} };
+                                          ~
+!!! error TS1005: ',' expected.
+                                          ~
+!!! error TS2304: Cannot find name '('.
+                                           ~
+!!! error TS1005: ',' expected.
+                                           ~
+!!! error TS2304: Cannot find name ')'.
+                                             ~
+!!! error TS1005: ',' expected.
+                                             ~
+!!! error TS2304: Cannot find name '{'.
+                                                 ~
+!!! error TS1003: Identifier expected.
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

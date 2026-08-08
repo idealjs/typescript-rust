@@ -1,0 +1,35 @@
+iterableArrayPattern16.ts(2,12): error TS2448: Block-scoped variable 'FooIteratorIterator' used before its declaration.
+
+
+==== iterableArrayPattern16.ts (1 errors) ====
+    function fun(...[a, b]: [Bar, Bar][]) { }
+    fun(...new FooIteratorIterator);
+               ~~~~~~~~~~~~~~~~~~~
+!!! error TS2448: Block-scoped variable 'FooIteratorIterator' used before its declaration.
+    class Bar { x }
+    class Foo extends Bar { y }
+    class FooIterator {
+        next() {
+            return {
+                value: new Foo,
+                done: false
+            };
+        }
+    
+        [Symbol.iterator]() {
+            return this;
+        }
+    }
+    
+    class FooIteratorIterator {
+        next() {
+            return {
+                value: new FooIterator,
+                done: false
+            };
+        }
+    
+        [Symbol.iterator]() {
+            return this;
+        }
+    }

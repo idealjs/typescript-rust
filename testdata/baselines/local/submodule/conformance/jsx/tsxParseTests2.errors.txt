@@ -1,0 +1,15 @@
+file.tsx(6,9): error TS1012: Unexpected token.
+file.tsx(6,24): error TS1012: Unexpected token.
+
+
+==== file.tsx (2 errors) ====
+    declare namespace JSX {
+    	interface Element { }
+    	interface IntrinsicElements { div; span; }
+    }
+    
+    var x = </**/div></div>;
+            ~~
+!!! error TS1012: Unexpected token.
+                           ~
+!!! error TS1012: Unexpected token.

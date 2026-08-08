@@ -1,9 +1,9 @@
-instanceAndStaticMembers/typeOfThisInInstanceMember.ts(10,11): error TS2339: Property 'z' does not exist on type '{ x: any; foo: () => any; get: any; y: () => any }'.
-instanceAndStaticMembers/typeOfThisInInstanceMember.ts(14,9): error TS1005: ';' expected.
-instanceAndStaticMembers/typeOfThisInInstanceMember.ts(27,4): error TS2339: Property 'forEach' does not exist on type 'any[]'.
+typeOfThisInInstanceMember.ts(10,11): error TS2339: Property 'z' does not exist on type '{ x: any; foo: () => any; get: any; y: () => any }'.
+typeOfThisInInstanceMember.ts(14,9): error TS1005: ';' expected.
+typeOfThisInInstanceMember.ts(27,4): error TS2339: Property 'forEach' does not exist on type 'any[]'.
 
 
-==== instanceAndStaticMembers/typeOfThisInInstanceMember.ts (3 errors) ====
+==== typeOfThisInInstanceMember.ts (3 errors) ====
     class C {
         x = this;
         foo() {

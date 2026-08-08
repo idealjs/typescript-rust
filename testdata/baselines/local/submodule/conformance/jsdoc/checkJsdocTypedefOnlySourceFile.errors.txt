@@ -1,0 +1,19 @@
+0.js(8,9): error TS2339: Property 'SomeName' does not exist on type 'object'.
+
+
+==== checkJsdocTypedefOnlySourceFile.ts (0 errors) ====
+    
+==== 0.js (1 errors) ====
+    // @ts-check
+    
+    var exports = {};
+    
+    /**
+     * @typedef {string}
+     */
+    exports.SomeName;
+            ~~~~~~~~
+!!! error TS2339: Property 'SomeName' does not exist on type 'object'.
+    
+    /** @type {exports.SomeName} */
+    const myString = 'str';

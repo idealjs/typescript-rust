@@ -1,0 +1,18 @@
+bug24062.js(4,7): error TS1003: Identifier expected.
+bug24062.js(4,8): error TS1005: ';' expected.
+bug24062.js(4,8): error TS2304: Cannot find name 'exports'.
+
+
+==== bug24062.js (3 errors) ====
+    // #24062
+    class C {
+    }
+    module.exports = {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        C
+    };

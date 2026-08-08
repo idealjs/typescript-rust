@@ -1,7 +1,7 @@
-Symbols/ES5SymbolType1.ts(2,3): error TS2339: Property 'toString' does not exist on type 'symbol'.
+ES5SymbolType1.ts(2,3): error TS2339: Property 'toString' does not exist on type 'symbol'.
 
 
-==== Symbols/ES5SymbolType1.ts (1 errors) ====
+==== ES5SymbolType1.ts (1 errors) ====
     var s: symbol;
     s.toString();
       ~~~~~~~~

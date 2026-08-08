@@ -1,0 +1,8 @@
+templateStringInTaggedTemplate.ts(2,42): error TS1005: ';' expected.
+
+
+==== templateStringInTaggedTemplate.ts (1 errors) ====
+    ﻿// @target: es2015
+    `I AM THE ${ `${ `TAG` } ` } PORTION`    `I ${ "AM" } THE TEMPLATE PORTION`
+                                          ~~~~~
+!!! error TS1005: ';' expected.

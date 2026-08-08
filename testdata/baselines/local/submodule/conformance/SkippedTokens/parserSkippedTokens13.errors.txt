@@ -1,0 +1,10 @@
+parserSkippedTokens13.ts(1,10): error TS1005: ';' expected.
+parserSkippedTokens13.ts(1,10): error TS1127: Invalid character.
+
+
+==== parserSkippedTokens13.ts (2 errors) ====
+    /regexp/ \ ;
+             ~
+!!! error TS1005: ';' expected.
+             ~
+!!! error TS1127: Invalid character.

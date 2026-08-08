@@ -1,0 +1,18 @@
+esDecorators-classDeclaration-commonjs-classNamespaceMerge.ts(12,9): error TS2339: Property 'foo' does not exist on type 'Example'.
+
+
+==== esDecorators-classDeclaration-commonjs-classNamespaceMerge.ts (1 errors) ====
+    declare var deco: any;
+    
+    @deco
+    export class Example {
+        static foo() {}
+    }
+    
+    export namespace Example {
+        export const x = 1;
+    }
+    
+    Example.foo();
+            ~~~
+!!! error TS2339: Property 'foo' does not exist on type 'Example'.

@@ -1,0 +1,57 @@
+/node_modules/@restart/hooks/package.json(2,11): error TS1005: ';' expected.
+/node_modules/@restart/hooks/package.json(3,14): error TS1005: ';' expected.
+/node_modules/@restart/hooks/package.json(4,11): error TS1005: ';' expected.
+/node_modules/@restart/hooks/package.json(5,12): error TS1005: ';' expected.
+/node_modules/@restart/hooks/package.json(6,13): error TS1005: ';' expected.
+/node_modules/@restart/hooks/useMergedRefs/package.json(2,11): error TS1005: ';' expected.
+/node_modules/@restart/hooks/useMergedRefs/package.json(3,14): error TS1005: ';' expected.
+/node_modules/@restart/hooks/useMergedRefs/package.json(4,11): error TS1005: ';' expected.
+/node_modules/@restart/hooks/useMergedRefs/package.json(5,13): error TS1005: ';' expected.
+/node_modules/@restart/hooks/useMergedRefs/package.json(6,12): error TS1005: ';' expected.
+
+
+==== nestedPackageJsonRedirect.ts (0 errors) ====
+    
+==== /node_modules/@restart/hooks/package.json (5 errors) ====
+    {
+        "name": "@restart/hooks",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "0.3.25",
+                 ~
+!!! error TS1005: ';' expected.
+        "main": "cjs/index.js",
+              ~
+!!! error TS1005: ';' expected.
+        "types": "cjs/index.d.ts",
+               ~
+!!! error TS1005: ';' expected.
+        "module": "esm/index.js"
+                ~
+!!! error TS1005: ';' expected.
+    }
+    
+==== /node_modules/@restart/hooks/useMergedRefs/package.json (5 errors) ====
+    {
+        "name": "@restart/hooks/useMergedRefs",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+                 ~
+!!! error TS1005: ';' expected.
+        "main": "../cjs/useMergedRefs.js",
+              ~
+!!! error TS1005: ';' expected.
+        "module": "../esm/useMergedRefs.js",
+                ~
+!!! error TS1005: ';' expected.
+        "types": "../esm/useMergedRefs.d.ts"
+               ~
+!!! error TS1005: ';' expected.
+      }
+    
+==== /node_modules/@restart/hooks/esm/useMergedRefs.d.ts (0 errors) ====
+    export {};
+    
+==== /main.ts (0 errors) ====
+    import {} from "@restart/hooks/useMergedRefs";

@@ -1,0 +1,19 @@
+a.ts(1,16): error TS2304: Cannot find name 'ClassDecorator'.
+b.ts(1,16): error TS2304: Cannot find name 'ClassDecorator'.
+
+
+==== a.ts (1 errors) ====
+    var decorator: ClassDecorator;
+                   ~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'ClassDecorator'.
+    
+    @decorator
+    export default class Foo {}
+    
+==== b.ts (1 errors) ====
+    var decorator: ClassDecorator;
+                   ~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'ClassDecorator'.
+    
+    @decorator
+    export default class {}

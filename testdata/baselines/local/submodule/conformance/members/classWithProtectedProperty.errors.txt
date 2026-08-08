@@ -1,0 +1,39 @@
+classWithProtectedProperty.ts(23,28): error TS2339: Property 'e' does not exist on type 'object'.
+classWithProtectedProperty.ts(24,28): error TS2339: Property 'f' does not exist on type 'object'.
+classWithProtectedProperty.ts(25,28): error TS2339: Property 'g' does not exist on type 'object'.
+
+
+==== classWithProtectedProperty.ts (3 errors) ====
+    // accessing any protected outside the class is an error
+    
+    class C {
+        protected x;
+        protected a = '';
+        protected b: string = '';
+        protected c() { return '' }
+        protected d = () => '';
+        protected static e;
+        protected static f() { return '' }
+        protected static g = () => '';
+    }
+    
+    class D extends C {
+        method() {
+            // No errors
+            var d = new D();
+            var r1: string = d.x;
+            var r2: string = d.a;
+            var r3: string = d.b;
+            var r4: string = d.c();
+            var r5: string = d.d();
+            var r6: string = C.e;
+                               ~
+!!! error TS2339: Property 'e' does not exist on type 'object'.
+            var r7: string = C.f();
+                               ~
+!!! error TS2339: Property 'f' does not exist on type 'object'.
+            var r8: string = C.g();
+                               ~
+!!! error TS2339: Property 'g' does not exist on type 'object'.
+        }
+    }

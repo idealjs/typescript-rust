@@ -1,10 +1,10 @@
-superCalls/emitStatementsBeforeSuperCall.ts(5,24): error TS1005: ',' expected.
-superCalls/emitStatementsBeforeSuperCall.ts(7,9): error TS2349: This expression is not callable.
-superCalls/emitStatementsBeforeSuperCall.ts(15,24): error TS1005: ',' expected.
-superCalls/emitStatementsBeforeSuperCall.ts(17,9): error TS2349: This expression is not callable.
+emitStatementsBeforeSuperCall.ts(5,24): error TS1005: ',' expected.
+emitStatementsBeforeSuperCall.ts(7,9): error TS2349: This expression is not callable.
+emitStatementsBeforeSuperCall.ts(15,24): error TS1005: ',' expected.
+emitStatementsBeforeSuperCall.ts(17,9): error TS2349: This expression is not callable.
 
 
-==== superCalls/emitStatementsBeforeSuperCall.ts (4 errors) ====
+==== emitStatementsBeforeSuperCall.ts (4 errors) ====
     class Base {
     }
     class Sub extends Base {

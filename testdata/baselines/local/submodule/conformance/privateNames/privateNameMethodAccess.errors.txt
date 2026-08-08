@@ -1,0 +1,106 @@
+privateNameMethodAccess.ts(2,5): error TS1003: Identifier expected.
+privateNameMethodAccess.ts(2,5): error TS1127: Invalid character.
+privateNameMethodAccess.ts(2,6): error TS1005: ';' expected.
+privateNameMethodAccess.ts(4,26): error TS1003: Identifier expected.
+privateNameMethodAccess.ts(4,26): error TS1127: Invalid character.
+privateNameMethodAccess.ts(4,27): error TS1005: ',' expected.
+privateNameMethodAccess.ts(6,11): error TS1003: Identifier expected.
+privateNameMethodAccess.ts(6,11): error TS1127: Invalid character.
+privateNameMethodAccess.ts(6,12): error TS1005: ';' expected.
+privateNameMethodAccess.ts(8,15): error TS1003: Identifier expected.
+privateNameMethodAccess.ts(8,15): error TS1127: Invalid character.
+privateNameMethodAccess.ts(8,16): error TS1005: ';' expected.
+privateNameMethodAccess.ts(12,5): error TS2349: This expression is not callable.
+privateNameMethodAccess.ts(12,10): error TS1003: Identifier expected.
+privateNameMethodAccess.ts(12,10): error TS1127: Invalid character.
+privateNameMethodAccess.ts(12,11): error TS1005: ';' expected.
+privateNameMethodAccess.ts(12,11): error TS2304: Cannot find name 'method'.
+privateNameMethodAccess.ts(15,9): error TS2349: This expression is not callable.
+privateNameMethodAccess.ts(15,14): error TS1003: Identifier expected.
+privateNameMethodAccess.ts(15,14): error TS1127: Invalid character.
+privateNameMethodAccess.ts(15,15): error TS1005: ';' expected.
+privateNameMethodAccess.ts(15,15): error TS2304: Cannot find name 'method'.
+privateNameMethodAccess.ts(20,13): error TS2349: This expression is not callable.
+privateNameMethodAccess.ts(20,18): error TS1003: Identifier expected.
+privateNameMethodAccess.ts(20,18): error TS1127: Invalid character.
+privateNameMethodAccess.ts(20,19): error TS1005: ';' expected.
+privateNameMethodAccess.ts(20,19): error TS2304: Cannot find name 'method'.
+
+
+==== privateNameMethodAccess.ts (27 errors) ====
+    class A2 {
+        #method() { return "" }
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~~~
+!!! error TS1005: ';' expected.
+        constructor() {
+            console.log(this.#method);
+                             ~
+!!! error TS1003: Identifier expected.
+                             ~
+!!! error TS1127: Invalid character.
+                              ~~~~~~
+!!! error TS1005: ',' expected.
+            let a: A2 = this;
+            a.#method();
+              ~
+!!! error TS1003: Identifier expected.
+              ~
+!!! error TS1127: Invalid character.
+               ~~~~~~
+!!! error TS1005: ';' expected.
+            function  foo (){
+                a.#method();
+                  ~
+!!! error TS1003: Identifier expected.
+                  ~
+!!! error TS1127: Invalid character.
+                   ~~~~~~
+!!! error TS1005: ';' expected.
+            }
+        }
+    }
+    new A2().#method(); // Error
+        ~~
+!!! error TS2349: This expression is not callable.
+             ~
+!!! error TS1003: Identifier expected.
+             ~
+!!! error TS1127: Invalid character.
+              ~~~~~~
+!!! error TS1005: ';' expected.
+              ~~~~~~
+!!! error TS2304: Cannot find name 'method'.
+    
+    function  foo (){
+        new A2().#method(); // Error
+            ~~
+!!! error TS2349: This expression is not callable.
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~~~~
+!!! error TS1005: ';' expected.
+                  ~~~~~~
+!!! error TS2304: Cannot find name 'method'.
+    }
+    
+    class B2 {
+        m() {
+            new A2().#method();
+                ~~
+!!! error TS2349: This expression is not callable.
+                     ~
+!!! error TS1003: Identifier expected.
+                     ~
+!!! error TS1127: Invalid character.
+                      ~~~~~~
+!!! error TS1005: ';' expected.
+                      ~~~~~~
+!!! error TS2304: Cannot find name 'method'.
+        }
+    }

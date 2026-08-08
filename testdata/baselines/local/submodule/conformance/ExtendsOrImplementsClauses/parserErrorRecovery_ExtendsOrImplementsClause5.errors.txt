@@ -1,0 +1,14 @@
+parserErrorRecovery_ExtendsOrImplementsClause5.ts(1,17): error TS2304: Cannot find name 'A'.
+parserErrorRecovery_ExtendsOrImplementsClause5.ts(1,31): error TS2304: Cannot find name 'B'.
+parserErrorRecovery_ExtendsOrImplementsClause5.ts(2,2): error TS1005: '{' expected.
+
+
+==== parserErrorRecovery_ExtendsOrImplementsClause5.ts (3 errors) ====
+    class C extends A, implements B, {
+                    ~
+!!! error TS2304: Cannot find name 'A'.
+                                  ~
+!!! error TS2304: Cannot find name 'B'.
+    }
+     
+!!! error TS1005: '{' expected.

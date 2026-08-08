@@ -1,0 +1,228 @@
+typeArgumentInference.ts(20,16): error TS2345: Argument of type '(n: string) => string' is not assignable to parameter of type '(x: T) => void'.
+typeArgumentInference.ts(21,24): error TS2345: Argument of type '(n: string) => string' is not assignable to parameter of type '(x: T) => void'.
+typeArgumentInference.ts(25,16): error TS2345: Argument of type '(n: string, x: number) => string' is not assignable to parameter of type '(x: T, y: U) => void'.
+typeArgumentInference.ts(26,32): error TS2345: Argument of type '(n: string, t: number) => string' is not assignable to parameter of type '(x: T, y: U) => void'.
+typeArgumentInference.ts(31,15): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+typeArgumentInference.ts(32,21): error TS2345: Argument of type '() => undefined' is not assignable to parameter of type '() => T'.
+typeArgumentInference.ts(33,23): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+typeArgumentInference.ts(39,37): error TS2345: Argument of type 'null' is not assignable to parameter of type '(x: U) => void'.
+typeArgumentInference.ts(45,37): error TS2345: Argument of type 'null' is not assignable to parameter of type '(x: U) => void'.
+typeArgumentInference.ts(49,15): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(a: A) => A'.
+typeArgumentInference.ts(49,23): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(b: A) => A'.
+typeArgumentInference.ts(49,31): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(c: A) => A'.
+typeArgumentInference.ts(50,23): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(a: A) => A'.
+typeArgumentInference.ts(50,31): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(b: A) => A'.
+typeArgumentInference.ts(50,39): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(c: A) => A'.
+typeArgumentInference.ts(51,23): error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(a: A) => A'.
+typeArgumentInference.ts(51,41): error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(b: A) => A'.
+typeArgumentInference.ts(51,59): error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(c: A) => A'.
+typeArgumentInference.ts(55,15): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(a: A) => A'.
+typeArgumentInference.ts(55,23): error TS2345: Argument of type '(n: B) => B' is not assignable to parameter of type '(b: B) => B'.
+typeArgumentInference.ts(55,31): error TS2345: Argument of type '(n: C) => C' is not assignable to parameter of type '(c: C) => C'.
+typeArgumentInference.ts(56,39): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(a: A) => A'.
+typeArgumentInference.ts(56,47): error TS2345: Argument of type '(n: B) => B' is not assignable to parameter of type '(b: B) => B'.
+typeArgumentInference.ts(56,55): error TS2345: Argument of type '(n: C) => C' is not assignable to parameter of type '(c: C) => C'.
+typeArgumentInference.ts(57,39): error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(a: A) => A'.
+typeArgumentInference.ts(57,57): error TS2345: Argument of type '(n: string) => string' is not assignable to parameter of type '(b: B) => B'.
+typeArgumentInference.ts(57,75): error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(c: C) => C'.
+typeArgumentInference.ts(62,27): error TS2345: Argument of type 'null' is not assignable to parameter of type '(a: A) => A'.
+typeArgumentInference.ts(62,33): error TS2345: Argument of type 'null' is not assignable to parameter of type '(b: B) => B'.
+typeArgumentInference.ts(62,39): error TS2345: Argument of type 'null' is not assignable to parameter of type '(c: C) => C'.
+typeArgumentInference.ts(66,12): error TS2322: Type 'null' is not assignable to type 'T'.
+typeArgumentInference.ts(68,29): error TS2345: Argument of type '0' is not assignable to parameter of type 'string'.
+typeArgumentInference.ts(68,32): error TS2345: Argument of type 'any[]' is not assignable to parameter of type 'string'.
+typeArgumentInference.ts(70,54): error TS2345: Argument of type '{ a: 0 }' is not assignable to parameter of type 'null | null'.
+typeArgumentInference.ts(70,64): error TS2345: Argument of type '{ b: "" }' is not assignable to parameter of type 'null | null'.
+typeArgumentInference.ts(80,9): error TS2304: Cannot find name 'Date'.
+typeArgumentInference.ts(82,36): error TS2345: Argument of type '{ x: 6; z: any }' is not assignable to parameter of type 'undefined | undefined'.
+typeArgumentInference.ts(82,51): error TS2304: Cannot find name 'Date'.
+typeArgumentInference.ts(82,61): error TS2345: Argument of type '{ x: 6; y: "" }' is not assignable to parameter of type 'undefined | undefined'.
+typeArgumentInference.ts(84,41): error TS2345: Argument of type '{ x: 6; z: any }' is not assignable to parameter of type 'undefined | undefined'.
+typeArgumentInference.ts(84,56): error TS2304: Cannot find name 'Date'.
+typeArgumentInference.ts(84,66): error TS2345: Argument of type '{ x: 6; y: "" }' is not assignable to parameter of type 'undefined | undefined'.
+
+
+==== typeArgumentInference.ts (42 errors) ====
+    // Generic call with no parameters
+    function noParams<T>() { }
+    noParams();
+    noParams<string>();
+    noParams<{}>();
+    
+    // Generic call with parameters but none use type parameter type
+    function noGenericParams<T>(n: string) { }
+    noGenericParams('');
+    noGenericParams<number>('');
+    noGenericParams<{}>('');
+    
+    // Generic call with multiple type parameters and only one used in parameter type annotation
+    function someGenerics1<T, U>(n: T, m: number) { }
+    someGenerics1(3, 4);
+    someGenerics1<number, {}>(3, 4);
+    
+    // Generic call with argument of function type whose parameter is of type parameter type
+    function someGenerics2a<T>(n: (x: T) => void) { }
+    someGenerics2a((n: string) => n);
+                   ~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(n: string) => string' is not assignable to parameter of type '(x: T) => void'.
+    someGenerics2a<string>((n: string) => n);
+                           ~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(n: string) => string' is not assignable to parameter of type '(x: T) => void'.
+    someGenerics2a<string>((n) => n.substr(0));
+    
+    function someGenerics2b<T, U>(n: (x: T, y: U) => void) { }
+    someGenerics2b((n: string, x: number) => n);
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(n: string, x: number) => string' is not assignable to parameter of type '(x: T, y: U) => void'.
+    someGenerics2b<string, number>((n: string, t: number) => n);
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(n: string, t: number) => string' is not assignable to parameter of type '(x: T, y: U) => void'.
+    someGenerics2b<string, number>((n, t) => n.substr(t * t));
+    
+    // Generic call with argument of function type whose parameter is not of type parameter type but body/return type uses type parameter
+    function someGenerics3<T>(producer: () => T) { }
+    someGenerics3(() => '');
+                  ~~~~~~~~
+!!! error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+    someGenerics3<Date>(() => undefined);
+                        ~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => undefined' is not assignable to parameter of type '() => T'.
+    someGenerics3<number>(() => 3);
+                          ~~~~~~~
+!!! error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+    
+    // 2 parameter generic call with argument 1 of type parameter type and argument 2 of function type whose parameter is of type parameter type
+    function someGenerics4<T, U>(n: T, f: (x: U) => void) { }
+    someGenerics4(4, () => null);
+    someGenerics4<string, number>('', () => 3);
+    someGenerics4<string, number>(null, null);
+                                        ~~~~
+!!! error TS2345: Argument of type 'null' is not assignable to parameter of type '(x: U) => void'.
+    
+    // 2 parameter generic call with argument 2 of type parameter type and argument 1 of function type whose parameter is of type parameter type
+    function someGenerics5<U, T>(n: T, f: (x: U) => void) { }
+    someGenerics5(4, () => null);
+    someGenerics5<number, string>('', () => 3);
+    someGenerics5<string, number>(null, null);
+                                        ~~~~
+!!! error TS2345: Argument of type 'null' is not assignable to parameter of type '(x: U) => void'.
+    
+    // Generic call with multiple arguments of function types that each have parameters of the same generic type
+    function someGenerics6<A>(a: (a: A) => A, b: (b: A) => A, c: (c: A) => A) { }
+    someGenerics6(n => n, n => n, n => n);
+                  ~~~~~~
+!!! error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(a: A) => A'.
+                          ~~~~~~
+!!! error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(b: A) => A'.
+                                  ~~~~~~
+!!! error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(c: A) => A'.
+    someGenerics6<number>(n => n, n => n, n => n);
+                          ~~~~~~
+!!! error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(a: A) => A'.
+                                  ~~~~~~
+!!! error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(b: A) => A'.
+                                          ~~~~~~
+!!! error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(c: A) => A'.
+    someGenerics6<number>((n: number) => n, (n: number) => n, (n: number) => n);
+                          ~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(a: A) => A'.
+                                            ~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(b: A) => A'.
+                                                              ~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(c: A) => A'.
+    
+    // Generic call with multiple arguments of function types that each have parameters of different generic type
+    function someGenerics7<A, B, C>(a: (a: A) => A, b: (b: B) => B, c: (c: C) => C) { }
+    someGenerics7(n => n, n => n, n => n);
+                  ~~~~~~
+!!! error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(a: A) => A'.
+                          ~~~~~~
+!!! error TS2345: Argument of type '(n: B) => B' is not assignable to parameter of type '(b: B) => B'.
+                                  ~~~~~~
+!!! error TS2345: Argument of type '(n: C) => C' is not assignable to parameter of type '(c: C) => C'.
+    someGenerics7<number, string, number>(n => n, n => n, n => n);
+                                          ~~~~~~
+!!! error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(a: A) => A'.
+                                                  ~~~~~~
+!!! error TS2345: Argument of type '(n: B) => B' is not assignable to parameter of type '(b: B) => B'.
+                                                          ~~~~~~
+!!! error TS2345: Argument of type '(n: C) => C' is not assignable to parameter of type '(c: C) => C'.
+    someGenerics7<number, string, number>((n: number) => n, (n: string) => n, (n: number) => n);
+                                          ~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(a: A) => A'.
+                                                            ~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(n: string) => string' is not assignable to parameter of type '(b: B) => B'.
+                                                                              ~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(c: C) => C'.
+    
+    // Generic call with argument of generic function type
+    function someGenerics8<T>(n: T): T { return n; }
+    var x = someGenerics8(someGenerics7);
+    x<string, string, string>(null, null, null);
+                              ~~~~
+!!! error TS2345: Argument of type 'null' is not assignable to parameter of type '(a: A) => A'.
+                                    ~~~~
+!!! error TS2345: Argument of type 'null' is not assignable to parameter of type '(b: B) => B'.
+                                          ~~~~
+!!! error TS2345: Argument of type 'null' is not assignable to parameter of type '(c: C) => C'.
+    
+    // Generic call with multiple parameters of generic type passed arguments with no best common type
+    function someGenerics9<T>(a: T, b: T, c: T): T {
+        return null;
+               ~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'T'.
+    }
+    var a9a = someGenerics9('', 0, []);
+                                ~
+!!! error TS2345: Argument of type '0' is not assignable to parameter of type 'string'.
+                                   ~~
+!!! error TS2345: Argument of type 'any[]' is not assignable to parameter of type 'string'.
+    var a9a: {};
+    var a9b = someGenerics9<{ a?: number; b?: string; }>({ a: 0 }, { b: '' }, null);
+                                                         ~~~~~~~~
+!!! error TS2345: Argument of type '{ a: 0 }' is not assignable to parameter of type 'null | null'.
+                                                                   ~~~~~~~~~
+!!! error TS2345: Argument of type '{ b: "" }' is not assignable to parameter of type 'null | null'.
+    var a9b: { a?: number; b?: string; };
+    
+    // Generic call with multiple parameters of generic type passed arguments with multiple best common types
+    interface A91 {
+        x: number;
+        y?: string;
+    }
+    interface A92 {
+        x: number;
+        z?: Date;
+            ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    }
+    var a9e = someGenerics9(undefined, { x: 6, z: new Date() }, { x: 6, y: '' });
+                                       ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ x: 6; z: any }' is not assignable to parameter of type 'undefined | undefined'.
+                                                      ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+                                                                ~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ x: 6; y: "" }' is not assignable to parameter of type 'undefined | undefined'.
+    var a9e: {};
+    var a9f = someGenerics9<A92>(undefined, { x: 6, z: new Date() }, { x: 6, y: '' });
+                                            ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ x: 6; z: any }' is not assignable to parameter of type 'undefined | undefined'.
+                                                           ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+                                                                     ~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ x: 6; y: "" }' is not assignable to parameter of type 'undefined | undefined'.
+    var a9f: A92;
+    
+    // Generic call with multiple parameters of generic type passed arguments with a single best common type
+    var a9d = someGenerics9({ x: 3 }, { x: 6 }, { x: 6 });
+    var a9d: { x: number; };
+    
+    // Generic call with multiple parameters of generic type where one argument is of type 'any'
+    var anyVar: any;
+    var a = someGenerics9(7, anyVar, 4);
+    var a: any;
+    
+    // Generic call with multiple parameters of generic type where one argument is [] and the other is not 'any'
+    var arr = someGenerics9([], null, undefined);
+    var arr: any[];
+    

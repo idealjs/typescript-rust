@@ -1,0 +1,14 @@
+a.js(3,3): error TS2339: Property 'a' does not exist on type '() => void'.
+
+
+==== a.js (1 errors) ====
+    var /*1*/x = function foo() {
+    }
+    x.a = function bar() {
+      ~
+!!! error TS2339: Property 'a' does not exist on type '() => void'.
+    }
+==== b.ts (0 errors) ====
+    var x = function () {
+        return 1;
+    }();

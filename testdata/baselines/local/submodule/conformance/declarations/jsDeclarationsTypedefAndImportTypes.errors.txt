@@ -1,0 +1,58 @@
+conn.js(11,7): error TS1003: Identifier expected.
+conn.js(11,8): error TS1005: ';' expected.
+conn.js(11,8): error TS2304: Cannot find name 'exports'.
+usage.js(10,14): error TS2339: Property 'connItem' does not exist on type 'object'.
+usage.js(12,14): error TS2339: Property 'another' does not exist on type 'object'.
+usage.js(16,7): error TS1003: Identifier expected.
+usage.js(16,8): error TS1005: ';' expected.
+usage.js(16,8): error TS2304: Cannot find name 'exports'.
+
+
+==== conn.js (3 errors) ====
+    /**
+     * @typedef {string | number} Whatever
+     */
+    
+    class Conn {
+        constructor() {}
+        item = 3;
+        method() {}
+    }
+    
+    module.exports = Conn;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    
+==== usage.js (5 errors) ====
+    /**
+     * @typedef {import("./conn")} Conn
+     */
+    
+    class Wrap {
+        /**
+         * @param {Conn} c
+         */
+        constructor(c) {
+            this.connItem = c.item;
+                 ~~~~~~~~
+!!! error TS2339: Property 'connItem' does not exist on type 'object'.
+            /** @type {import("./conn").Whatever} */
+            this.another = "";
+                 ~~~~~~~
+!!! error TS2339: Property 'another' does not exist on type 'object'.
+        }
+    }
+    
+    module.exports = {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        Wrap
+    };

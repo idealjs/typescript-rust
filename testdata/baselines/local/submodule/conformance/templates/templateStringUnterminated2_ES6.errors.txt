@@ -1,0 +1,9 @@
+templateStringUnterminated2_ES6.ts(2,1): error TS1160: Unterminated template literal.
+
+
+==== templateStringUnterminated2_ES6.ts (1 errors) ====
+    ﻿// @target: ES6
+                  ~~
+    `\`
+    
+!!! error TS1160: Unterminated template literal.

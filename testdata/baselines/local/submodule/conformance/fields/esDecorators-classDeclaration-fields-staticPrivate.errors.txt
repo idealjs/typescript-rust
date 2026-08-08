@@ -1,0 +1,65 @@
+esDecorators-classDeclaration-fields-staticPrivate.ts(4,17): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticPrivate.ts(4,17): error TS1127: Invalid character.
+esDecorators-classDeclaration-fields-staticPrivate.ts(4,18): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticPrivate.ts(9,12): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticPrivate.ts(9,12): error TS1127: Invalid character.
+esDecorators-classDeclaration-fields-staticPrivate.ts(9,13): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticPrivate.ts(10,12): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticPrivate.ts(11,13): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticPrivate.ts(11,14): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticPrivate.ts(11,14): error TS1127: Invalid character.
+esDecorators-classDeclaration-fields-staticPrivate.ts(11,15): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticPrivate.ts(12,13): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticPrivate.ts(12,14): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticPrivate.ts(12,14): error TS1127: Invalid character.
+esDecorators-classDeclaration-fields-staticPrivate.ts(12,15): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticPrivate.ts(14,1): error TS1128: Declaration or statement expected.
+
+
+==== esDecorators-classDeclaration-fields-staticPrivate.ts (16 errors) ====
+    declare let dec: any;
+    
+    class C {
+        @dec static #field1 = 0;
+                    ~
+!!! error TS1005: ';' expected.
+                    ~
+!!! error TS1127: Invalid character.
+                     ~~~~~~
+!!! error TS1005: ';' expected.
+    }
+    
+    @dec
+    class D {
+        static #field1 = 0;
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~~~~
+!!! error TS1005: ';' expected.
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            this.#field1;
+                ~
+!!! error TS1005: ';' expected.
+                 ~
+!!! error TS1005: ';' expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~~~~
+!!! error TS1005: ';' expected.
+            this.#field1 = 1;
+                ~
+!!! error TS1005: ';' expected.
+                 ~
+!!! error TS1005: ';' expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~~~~
+!!! error TS1005: ';' expected.
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

@@ -1,18 +1,18 @@
-classStaticBlock/classStaticBlock20.ts(2,18): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock20.ts(6,5): error TS2304: Cannot find name 'public'.
-classStaticBlock/classStaticBlock20.ts(6,12): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock20.ts(6,12): error TS2304: Cannot find name 'static'.
-classStaticBlock/classStaticBlock20.ts(6,19): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock20.ts(10,5): error TS2304: Cannot find name 'readonly'.
-classStaticBlock/classStaticBlock20.ts(10,14): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock20.ts(10,14): error TS2304: Cannot find name 'private'.
-classStaticBlock/classStaticBlock20.ts(10,22): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock20.ts(10,22): error TS2304: Cannot find name 'static'.
-classStaticBlock/classStaticBlock20.ts(10,29): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock20.ts(13,1): error TS1128: Declaration or statement expected.
+classStaticBlock20.ts(2,18): error TS1005: ';' expected.
+classStaticBlock20.ts(6,5): error TS2304: Cannot find name 'public'.
+classStaticBlock20.ts(6,12): error TS1005: ';' expected.
+classStaticBlock20.ts(6,12): error TS2304: Cannot find name 'static'.
+classStaticBlock20.ts(6,19): error TS1005: ';' expected.
+classStaticBlock20.ts(10,5): error TS2304: Cannot find name 'readonly'.
+classStaticBlock20.ts(10,14): error TS1005: ';' expected.
+classStaticBlock20.ts(10,14): error TS2304: Cannot find name 'private'.
+classStaticBlock20.ts(10,22): error TS1005: ';' expected.
+classStaticBlock20.ts(10,22): error TS2304: Cannot find name 'static'.
+classStaticBlock20.ts(10,29): error TS1005: ';' expected.
+classStaticBlock20.ts(13,1): error TS1128: Declaration or statement expected.
 
 
-==== classStaticBlock/classStaticBlock20.ts (12 errors) ====
+==== classStaticBlock20.ts (12 errors) ====
     class C {
         async static {
                      ~

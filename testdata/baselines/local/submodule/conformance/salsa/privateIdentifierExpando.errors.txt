@@ -1,0 +1,20 @@
+privateIdentifierExpando.js(2,3): error TS1003: Identifier expected.
+privateIdentifierExpando.js(2,3): error TS1127: Invalid character.
+privateIdentifierExpando.js(2,3): error TS2339: Property '#' does not exist on type 'object'.
+privateIdentifierExpando.js(2,4): error TS1005: ';' expected.
+privateIdentifierExpando.js(2,4): error TS2304: Cannot find name 'bar'.
+
+
+==== privateIdentifierExpando.js (5 errors) ====
+    const x = {};
+    x.#bar.baz = 20;
+      ~
+!!! error TS1003: Identifier expected.
+      ~
+!!! error TS1127: Invalid character.
+      ~
+!!! error TS2339: Property '#' does not exist on type 'object'.
+       ~~~
+!!! error TS1005: ';' expected.
+       ~~~
+!!! error TS2304: Cannot find name 'bar'.

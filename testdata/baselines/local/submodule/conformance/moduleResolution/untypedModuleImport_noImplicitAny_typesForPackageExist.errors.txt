@@ -1,0 +1,83 @@
+/node_modules/@scope/bar/package.json(1,9): error TS1005: ';' expected.
+/node_modules/@scope/bar/package.json(1,34): error TS1005: ';' expected.
+/node_modules/@scope/foo/package.json(1,9): error TS1005: ';' expected.
+/node_modules/@scope/foo/package.json(1,34): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(1,9): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(1,34): error TS1005: ';' expected.
+/node_modules/@types/scope__foo/package.json(1,9): error TS1005: ';' expected.
+/node_modules/@types/scope__foo/package.json(1,41): error TS1005: ';' expected.
+/node_modules/bar/package.json(1,9): error TS1005: ';' expected.
+/node_modules/bar/package.json(1,27): error TS1005: ';' expected.
+/node_modules/foo/package.json(1,9): error TS1005: ';' expected.
+/node_modules/foo/package.json(1,27): error TS1005: ';' expected.
+
+
+==== untypedModuleImport_noImplicitAny_typesForPackageExist.ts (0 errors) ====
+    
+==== /node_modules/@types/foo/index.d.ts (0 errors) ====
+    export const foo: number;
+    
+==== /node_modules/@types/foo/package.json (2 errors) ====
+    { "name": "@types/foo", "version": "1.2.3" }
+            ~
+!!! error TS1005: ';' expected.
+                                     ~
+!!! error TS1005: ';' expected.
+    
+==== /node_modules/foo/sub.js (0 errors) ====
+    const x = 0;
+    
+==== /node_modules/foo/package.json (2 errors) ====
+    { "name": "foo", "version": "1.2.3" }
+            ~
+!!! error TS1005: ';' expected.
+                              ~
+!!! error TS1005: ';' expected.
+    
+==== /node_modules/bar/sub.js (0 errors) ====
+    const x = 0;
+    
+==== /node_modules/bar/package.json (2 errors) ====
+    { "name": "bar", "version": "1.2.3" }
+            ~
+!!! error TS1005: ';' expected.
+                              ~
+!!! error TS1005: ';' expected.
+    
+==== /node_modules/@types/scope__foo/index.d.ts (0 errors) ====
+    export const foo: number;
+    
+==== /node_modules/@types/scope__foo/package.json (2 errors) ====
+    { "name": "@types/scope__foo", "version": "1.2.3" }
+            ~
+!!! error TS1005: ';' expected.
+                                            ~
+!!! error TS1005: ';' expected.
+    
+==== /node_modules/@scope/foo/sub.js (0 errors) ====
+    const x = 0;
+    
+==== /node_modules/@scope/foo/package.json (2 errors) ====
+    { "name": "@scope/foo", "version": "1.2.3" }
+            ~
+!!! error TS1005: ';' expected.
+                                     ~
+!!! error TS1005: ';' expected.
+    
+==== /node_modules/@scope/bar/sub.js (0 errors) ====
+    const x = 0;
+    
+==== /node_modules/@scope/bar/package.json (2 errors) ====
+    { "name": "@scope/bar", "version": "1.2.3" }
+            ~
+!!! error TS1005: ';' expected.
+                                     ~
+!!! error TS1005: ';' expected.
+    
+==== /a.ts (0 errors) ====
+    import * as foo from "foo";
+    import * as fooSub from "foo/sub";
+    import * as barSub from "bar/sub";
+    import * as scopeFoo from "@scope/foo";
+    import * as scopeFooSub from "@scope/foo/sub";
+    import * as scopeBarSub from "@scope/bar/sub";

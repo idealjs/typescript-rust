@@ -1,0 +1,14 @@
+computedPropertyNamesDeclarationEmit1_ES6.ts(3,9): error TS1005: ';' expected.
+computedPropertyNamesDeclarationEmit1_ES6.ts(4,9): error TS1005: ';' expected.
+
+
+==== computedPropertyNamesDeclarationEmit1_ES6.ts (2 errors) ====
+    class C {
+        ["" + ""]() { }
+        get ["" + ""]() { return 0; }
+            ~
+!!! error TS1005: ';' expected.
+        set ["" + ""](x) { }
+            ~
+!!! error TS1005: ';' expected.
+    }

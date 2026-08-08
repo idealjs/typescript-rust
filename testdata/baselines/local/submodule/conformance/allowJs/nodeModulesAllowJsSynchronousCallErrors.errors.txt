@@ -1,0 +1,53 @@
+error TS2300: Duplicate identifier 'h'.
+index.js(7,24): error TS2304: Cannot find name 'import'.
+index.js(8,24): error TS2304: Cannot find name 'import'.
+package.json(2,11): error TS1005: ';' expected.
+
+
+!!! error TS2300: Duplicate identifier 'h'.
+==== index.js (2 errors) ====
+    // cjs format file
+    import {h} from "../index.js";
+    import mod = require("../index.js");
+    import {f as _f} from "./index.js";
+    import mod2 = require("./index.js");
+    export async function f() {
+        const mod3 = await import ("../index.js");
+                                             ~~~~~
+        const mod4 = await import ("./index.js");
+    
+!!! error TS2304: Cannot find name 'import'.
+                                            ~~~~~
+        h();
+    
+!!! error TS2304: Cannot find name 'import'.
+    }
+==== index.js (2 errors) ====
+    // esm format file
+    import {h as _h} from "./index.js";
+    import mod = require("./index.js");
+    import {f} from "./subfolder/index.js";
+    import mod2 = require("./subfolder/index.js");
+    export async function h() {
+        const mod3 = await import ("./index.js");
+                           ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+        const mod4 = await import ("./subfolder/index.js");
+                           ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+        f();
+    }
+==== package.json (1 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+        "type": "module"
+    }
+==== package.json (1 errors) ====
+    {
+        "type": "commonjs"
+              ~
+!!! error TS1005: ';' expected.
+    }

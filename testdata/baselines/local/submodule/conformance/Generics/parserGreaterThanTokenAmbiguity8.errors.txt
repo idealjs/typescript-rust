@@ -1,0 +1,10 @@
+parserGreaterThanTokenAmbiguity8.ts(1,9): error TS1012: Unexpected token.
+parserGreaterThanTokenAmbiguity8.ts(1,11): error TS1005: ';' expected.
+
+
+==== parserGreaterThanTokenAmbiguity8.ts (2 errors) ====
+    1 >>/**/> 2;
+            ~
+!!! error TS1012: Unexpected token.
+              ~
+!!! error TS1005: ';' expected.

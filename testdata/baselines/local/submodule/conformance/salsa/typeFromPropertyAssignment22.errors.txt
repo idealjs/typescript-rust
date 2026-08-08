@@ -1,0 +1,21 @@
+npm-install.js(4,11): error TS2339: Property 'prototype' does not exist on type '() => void'.
+npm-install.js(11,13): error TS2351: This expression is not constructable.
+
+
+==== npm-install.js (2 errors) ====
+    function Installer () {
+        this.args = 0
+    }
+    Installer.prototype.loadArgMetadata = function (next) {
+              ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+        // ArrowFunction isn't treated as a this-container
+        (args) => {
+            this.args = 'hi'
+            this.newProperty = 1
+        }
+    }
+    var i = new Installer()
+                ~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    i.newProperty = i.args // ok, number ==> number | undefined

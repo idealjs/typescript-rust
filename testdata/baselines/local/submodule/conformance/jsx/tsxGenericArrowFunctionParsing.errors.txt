@@ -1,0 +1,79 @@
+file.tsx(8,10): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(12,10): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(12,22): error TS1005: '...' expected.
+file.tsx(12,32): error TS1005: '}' expected.
+file.tsx(13,5): error TS17001: JSX elements cannot have multiple attributes with the same name.
+file.tsx(16,10): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(20,10): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(24,10): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(28,10): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(29,6): error TS1005: '</' expected.
+
+
+==== file.tsx (10 errors) ====
+    declare namespace JSX {
+    	interface Element { isElement; }
+    }
+    
+    var T: any, T1: any, T2: any;
+    
+    // This is an element
+    var x1 = <T>() => {}</T>;
+             ~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    x1.isElement;
+    
+    // This is a generic function
+    var x2 = <T extends {}>() => {};
+             ~~~~~~~~~~~~~~~~~~~~~~~
+                         ~
+!!! error TS1005: '...' expected.
+                                   ~
+!!! error TS1005: '}' expected.
+    x2();
+    ~~~~~
+        ~
+!!! error TS17001: JSX elements cannot have multiple attributes with the same name.
+    
+    
+    // This is a generic function
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    var x3 = <T, T1>() => {};
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+             ~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    x3();
+    ~~~~~
+    
+    
+    // This is an element
+    ~~~~~~~~~~~~~~~~~~~~~
+    var x4 = <T extends={true}>() => {}</T>;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+             ~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    x4.isElement;
+    ~~~~~~~~~~~~~
+    
+    
+    // This is an element
+    ~~~~~~~~~~~~~~~~~~~~~
+    var x5 = <T extends>() => {}</T>;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+             ~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    x5.isElement;
+    ~~~~~~~~~~~~~
+    
+    
+    // This is a generic function
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    var x6 = <T = string,>() => {};
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+             ~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    x6();
+    ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+         
+!!! error TS1005: '</' expected.

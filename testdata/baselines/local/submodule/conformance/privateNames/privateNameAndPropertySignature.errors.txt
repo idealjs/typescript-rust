@@ -1,24 +1,24 @@
-privateNames/privateNameAndPropertySignature.ts(2,5): error TS1003: Identifier expected.
-privateNames/privateNameAndPropertySignature.ts(2,5): error TS1127: Invalid character.
-privateNames/privateNameAndPropertySignature.ts(3,5): error TS1003: Identifier expected.
-privateNames/privateNameAndPropertySignature.ts(3,5): error TS1127: Invalid character.
-privateNames/privateNameAndPropertySignature.ts(7,5): error TS1003: Identifier expected.
-privateNames/privateNameAndPropertySignature.ts(7,5): error TS1127: Invalid character.
-privateNames/privateNameAndPropertySignature.ts(8,5): error TS1003: Identifier expected.
-privateNames/privateNameAndPropertySignature.ts(8,5): error TS1127: Invalid character.
-privateNames/privateNameAndPropertySignature.ts(12,5): error TS1003: Identifier expected.
-privateNames/privateNameAndPropertySignature.ts(12,5): error TS1127: Invalid character.
-privateNames/privateNameAndPropertySignature.ts(14,9): error TS1003: Identifier expected.
-privateNames/privateNameAndPropertySignature.ts(14,9): error TS1127: Invalid character.
-privateNames/privateNameAndPropertySignature.ts(15,9): error TS1003: Identifier expected.
-privateNames/privateNameAndPropertySignature.ts(15,9): error TS1127: Invalid character.
-privateNames/privateNameAndPropertySignature.ts(17,5): error TS1003: Identifier expected.
-privateNames/privateNameAndPropertySignature.ts(17,5): error TS1127: Invalid character.
-privateNames/privateNameAndPropertySignature.ts(20,28): error TS1003: Identifier expected.
-privateNames/privateNameAndPropertySignature.ts(20,28): error TS1127: Invalid character.
+privateNameAndPropertySignature.ts(2,5): error TS1003: Identifier expected.
+privateNameAndPropertySignature.ts(2,5): error TS1127: Invalid character.
+privateNameAndPropertySignature.ts(3,5): error TS1003: Identifier expected.
+privateNameAndPropertySignature.ts(3,5): error TS1127: Invalid character.
+privateNameAndPropertySignature.ts(7,5): error TS1003: Identifier expected.
+privateNameAndPropertySignature.ts(7,5): error TS1127: Invalid character.
+privateNameAndPropertySignature.ts(8,5): error TS1003: Identifier expected.
+privateNameAndPropertySignature.ts(8,5): error TS1127: Invalid character.
+privateNameAndPropertySignature.ts(12,5): error TS1003: Identifier expected.
+privateNameAndPropertySignature.ts(12,5): error TS1127: Invalid character.
+privateNameAndPropertySignature.ts(14,9): error TS1003: Identifier expected.
+privateNameAndPropertySignature.ts(14,9): error TS1127: Invalid character.
+privateNameAndPropertySignature.ts(15,9): error TS1003: Identifier expected.
+privateNameAndPropertySignature.ts(15,9): error TS1127: Invalid character.
+privateNameAndPropertySignature.ts(17,5): error TS1003: Identifier expected.
+privateNameAndPropertySignature.ts(17,5): error TS1127: Invalid character.
+privateNameAndPropertySignature.ts(20,28): error TS1003: Identifier expected.
+privateNameAndPropertySignature.ts(20,28): error TS1127: Invalid character.
 
 
-==== privateNames/privateNameAndPropertySignature.ts (18 errors) ====
+==== privateNameAndPropertySignature.ts (18 errors) ====
     type A = {
         #foo: string;
         ~

@@ -1,0 +1,16 @@
+parserConstructorAmbiguity4.ts(1,5): error TS2304: Cannot find name 'Date'.
+parserConstructorAmbiguity4.ts(1,12): error TS1005: '>' expected.
+parserConstructorAmbiguity4.ts(1,14): error TS2304: Cannot find name 'B'.
+parserConstructorAmbiguity4.ts(1,18): error TS2304: Cannot find name 'C'.
+
+
+==== parserConstructorAmbiguity4.ts (4 errors) ====
+    new Date<A ? B : C
+        ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+               ~
+!!! error TS1005: '>' expected.
+                 ~
+!!! error TS2304: Cannot find name 'B'.
+                     ~
+!!! error TS2304: Cannot find name 'C'.

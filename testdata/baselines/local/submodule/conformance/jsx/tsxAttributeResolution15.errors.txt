@@ -1,0 +1,24 @@
+error TS6053: File 'react.d.ts' not found.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.
+==== tsxAttributeResolution15.tsx (0 errors) ====
+    ﻿// @target: es2015
+==== file.tsx (0 errors) ====
+    /// <reference path="/.lib/react.d.ts" />
+    
+    import React = require('react');
+    
+    class BigGreeter extends React.Component<{ }, {}> {
+        render() {
+            return <div>Default hi</div>;
+        }
+        greeting: string;
+    }
+    
+    // Error
+    let a = <BigGreeter prop1="hello" />
+    
+    // OK
+    let b = <BigGreeter ref={(input) => { this.textInput = input; }} />
+    let c = <BigGreeter data-extra="hi" />

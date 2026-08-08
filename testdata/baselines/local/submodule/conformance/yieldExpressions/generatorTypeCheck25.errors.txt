@@ -1,0 +1,16 @@
+generatorTypeCheck25.ts(5,5): error TS2304: Cannot find name 'yield'.
+
+
+==== generatorTypeCheck25.ts (1 errors) ====
+    class Foo { x: number }
+    class Bar extends Foo { y: string }
+    class Baz { z: number }
+    var g3: () => Iterable<Foo> = function* () {
+        yield;
+        ~~~~~
+!!! error TS2304: Cannot find name 'yield'.
+        yield new Bar;
+        yield new Baz;
+        yield *[new Bar];
+        yield *[new Baz];
+    }

@@ -1,0 +1,55 @@
+error TS2300: Duplicate identifier 'fa'.
+main.ts(5,20): error TS2304: Cannot find name 'fa2'.
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+package.json(4,12): error TS1005: ';' expected.
+package.json(5,20): error TS1005: ';' expected.
+package.json(6,20): error TS1005: ';' expected.
+package.json(7,21): error TS1005: ';' expected.
+
+
+!!! error TS2300: Duplicate identifier 'fa'.
+==== package.json (6 errors) ====
+    {
+        "name": "ext",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "1.0.0",
+                 ~
+!!! error TS1005: ';' expected.
+        "types": "index",
+               ~
+!!! error TS1005: ';' expected.
+        "typesVersions": {
+                       ~
+!!! error TS1005: ';' expected.
+            ">=3.1.0-0": {
+                       ~
+!!! error TS1005: ';' expected.
+                "index" : ["ts3.1/index"]
+                        ~
+!!! error TS1005: ';' expected.
+            }
+        }
+    }
+    
+==== index.d.ts (0 errors) ====
+    export interface A {}
+    export function fa(): A;
+    
+==== other.d.ts (0 errors) ====
+    export interface A2 {}
+    export function fa(): A2;
+    
+==== index.d.ts (0 errors) ====
+    export * from "../other";
+    
+==== main.ts (1 errors) ====
+    import { fa } from "ext";
+    import { fa as fa2 } from "ext/other";
+    
+    export const va = fa();
+    export const va2 = fa2();
+                       ~~~
+!!! error TS2304: Cannot find name 'fa2'.
+    

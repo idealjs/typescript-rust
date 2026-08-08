@@ -1,0 +1,22 @@
+accessorsAreNotContextuallyTyped.ts(4,9): error TS1005: ';' expected.
+accessorsAreNotContextuallyTyped.ts(7,9): error TS1005: ';' expected.
+
+
+==== accessorsAreNotContextuallyTyped.ts (2 errors) ====
+    // accessors are not contextually typed
+    
+    class C {
+        set x(v: (a: string) => string) {
+            ~
+!!! error TS1005: ';' expected.
+        }
+    
+        get x() {
+            ~
+!!! error TS1005: ';' expected.
+            return (x: string) => "";
+        }
+    }
+    
+    var c: C;
+    var r = c.x(''); // string

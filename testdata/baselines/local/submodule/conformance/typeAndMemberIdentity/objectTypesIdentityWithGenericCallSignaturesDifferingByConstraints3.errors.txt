@@ -1,0 +1,225 @@
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(15,19): error TS2304: Cannot find name 'U'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(15,40): error TS2304: Cannot find name 'T'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(15,46): error TS2304: Cannot find name 'U'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,11): error TS2304: Cannot find name 'foo'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,14): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,14): error TS2304: Cannot find name '<'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,15): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,15): error TS2304: Cannot find name 'T'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,17): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,17): error TS2304: Cannot find name 'extends'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,25): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,25): error TS2304: Cannot find name 'U'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,28): error TS2304: Cannot find name 'U'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,30): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,30): error TS2304: Cannot find name 'extends'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,38): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,41): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,41): error TS2304: Cannot find name '>'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,42): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,42): error TS2304: Cannot find name '('.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,43): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,46): error TS2304: Cannot find name 'T'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,52): error TS2304: Cannot find name 'U'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,53): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,53): error TS2304: Cannot find name ')'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,55): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,55): error TS2304: Cannot find name '{'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,57): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,57): error TS2304: Cannot find name 'return'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,64): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,66): error TS1005: ',' expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,66): error TS2304: Cannot find name ';'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts(39,70): error TS1128: Declaration or statement expected.
+
+
+==== objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints3.ts (33 errors) ====
+    // Two call or construct signatures are considered identical when they have the same number of type parameters and, considering those 
+    // parameters pairwise identical, have identical type parameter constraints, identical number of parameters with identical kind(required, 
+    // optional or rest) and types, and identical return types.
+    
+    class One { foo: string }
+    class Two { foo: string }
+    interface Three { foo: string }
+    interface Four<T> { foo: T }
+    interface Five<T> extends Four<T> { }
+    interface Six<T, U> {
+        foo: T;
+    }
+    
+    class A {
+        foo<T extends U, U extends One>(x: T, y: U): string { return null; }
+                      ~
+!!! error TS2304: Cannot find name 'U'.
+                                           ~
+!!! error TS2304: Cannot find name 'T'.
+                                                 ~
+!!! error TS2304: Cannot find name 'U'.
+    }
+    
+    class B<T extends U, U extends Two> {
+        foo(x: T, y: U): string { return null; }
+    }
+    
+    class C<T extends U, U extends Three> {
+        foo(x: T, y: U): string { return null; }
+    }
+    
+    class D<T extends U, U extends Four<string>> {
+        foo(x: T, y: U): string { return null; }
+    }
+    
+    interface I<T extends U, U extends Five<string>> {
+        foo(x: T, y: U): string;
+    }
+    
+    interface I2 {
+        foo<T extends U, U extends Six<string, string>>(x: T, y: U): string;
+    }
+    
+    var a: { foo<T extends U, U extends One>(x: T, y: U): string }
+    var b = { foo<T extends U, U extends Two>(x: T, y: U) { return ''; } };
+              ~~~
+!!! error TS2304: Cannot find name 'foo'.
+                 ~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS2304: Cannot find name '<'.
+                  ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS2304: Cannot find name 'T'.
+                    ~~~~~~~
+!!! error TS1005: ',' expected.
+                    ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                            ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS2304: Cannot find name 'U'.
+                               ~
+!!! error TS2304: Cannot find name 'U'.
+                                 ~~~~~~~
+!!! error TS1005: ',' expected.
+                                 ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                                         ~~~
+!!! error TS1005: ',' expected.
+                                            ~
+!!! error TS1005: ',' expected.
+                                            ~
+!!! error TS2304: Cannot find name '>'.
+                                             ~
+!!! error TS1005: ',' expected.
+                                             ~
+!!! error TS2304: Cannot find name '('.
+                                              ~
+!!! error TS1005: ',' expected.
+                                                 ~
+!!! error TS2304: Cannot find name 'T'.
+                                                       ~
+!!! error TS2304: Cannot find name 'U'.
+                                                        ~
+!!! error TS1005: ',' expected.
+                                                        ~
+!!! error TS2304: Cannot find name ')'.
+                                                          ~
+!!! error TS1005: ',' expected.
+                                                          ~
+!!! error TS2304: Cannot find name '{'.
+                                                            ~~~~~~
+!!! error TS1005: ',' expected.
+                                                            ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                                                                   ~~
+!!! error TS1005: ',' expected.
+                                                                     ~
+!!! error TS1005: ',' expected.
+                                                                     ~
+!!! error TS2304: Cannot find name ';'.
+                                                                         ~
+!!! error TS1128: Declaration or statement expected.
+    
+    function foo1(x: A);
+    function foo1(x: A); // error
+    function foo1(x: any) { }
+    
+    function foo1b(x: B<Two, Two>);
+    function foo1b(x: B<Two, Two>); // error
+    function foo1b(x: any) { }
+    
+    function foo1c(x: C<Three, Three>);
+    function foo1c(x: C<Three, Three>); // error
+    function foo1c(x: any) { }
+    
+    function foo2(x: I<Five<string>, Five<string>>);
+    function foo2(x: I<Five<string>, Five<string>>); // error
+    function foo2(x: any) { }
+    
+    function foo3(x: typeof a);
+    function foo3(x: typeof a); // error
+    function foo3(x: any) { }
+    
+    function foo4(x: typeof b);
+    function foo4(x: typeof b); // error
+    function foo4(x: any) { }
+    
+    function foo5(x: A);
+    function foo5(x: B<Two, Two>); // ok
+    function foo5(x: any) { }
+    
+    function foo5b(x: A);
+    function foo5b(x: C<Three, Three>); // ok
+    function foo5b(x: any) { }
+    
+    function foo5c(x: C<Three, Three>);
+    function foo5c(x: D<Four<string>, Four<string>>); // error
+    function foo5c(x: any) { }
+    
+    function foo6c(x: C<Three, Three>);
+    function foo6c(x: D<Four<string>, Four<string>>); // error
+    function foo6c(x: any) { }
+    
+    function foo6(x: A);
+    function foo6(x: I<Five<string>, Five<string>>); // ok
+    function foo6(x: any) { }
+    
+    function foo7(x: A);
+    function foo7(x: typeof a); // error
+    function foo7(x: any) { }
+    
+    function foo8(x: B<Two, Two>);
+    function foo8(x: I<Five<string>, Five<string>>); // error
+    function foo8(x: any) { }
+    
+    function foo9(x: B<Two, Two>);
+    function foo9(x: C<Three, Three>); // error
+    function foo9(x: any) { }
+    
+    function foo10(x: B<Two, Two>);
+    function foo10(x: typeof a); // ok
+    function foo10(x: any) { }
+    
+    function foo11(x: B<Two, Two>);
+    function foo11(x: typeof b); // ok
+    function foo11(x: any) { }
+    
+    function foo12(x: I<Five<string>, Five<string>>);
+    function foo12(x: C<Three, Three>); // error
+    function foo12(x: any) { }
+    
+    function foo12b(x: I2);
+    function foo12b(x: C<Three, Three>); // ok
+    function foo12b(x: any) { }
+    
+    function foo13(x: I<Five<string>, Five<string>>);
+    function foo13(x: typeof a); // ok
+    function foo13(x: any) { }
+    
+    function foo14(x: I<Five<string>, Five<string>>);
+    function foo14(x: typeof b); // ok
+    function foo14(x: any) { }
+    
+    function foo15(x: I2);
+    function foo15(x: C<Three, Three>); // ok
+    function foo15(x: any) { }

@@ -1,0 +1,209 @@
+error TS6053: File 'typescript.ts' not found.
+parserRealSource1.ts(65,29): error TS1005: ',' expected.
+parserRealSource1.ts(66,38): error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
+parserRealSource1.ts(67,32): error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
+parserRealSource1.ts(68,34): error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
+parserRealSource1.ts(69,32): error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
+parserRealSource1.ts(70,32): error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
+parserRealSource1.ts(80,18): error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
+parserRealSource1.ts(98,26): error TS2304: Cannot find name 'Date'.
+parserRealSource1.ts(100,24): error TS2304: Cannot find name 'Date'.
+parserRealSource1.ts(101,20): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+parserRealSource1.ts(109,28): error TS2339: Property 'charCodeAt' does not exist on type 'string'.
+parserRealSource1.ts(140,30): error TS2339: Property 'length' does not exist on type 'string'.
+parserRealSource1.ts(143,36): error TS1005: '>' expected.
+parserRealSource1.ts(145,32): error TS2339: Property 'length' does not exist on type 'string'.
+parserRealSource1.ts(145,62): error TS1005: '>' expected.
+parserRealSource1.ts(148,28): error TS2339: Property 'length' does not exist on type 'string'.
+parserRealSource1.ts(149,39): error TS1005: '>' expected.
+
+
+!!! error TS6053: File '/.src/typescript.ts' not found.
+==== parserRealSource1.ts (17 errors) ====
+    // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+    // See LICENSE.txt in the project root for complete license information.
+    
+    ///<reference path='typescript.ts' />
+    
+    namespace TypeScript {
+        export namespace CompilerDiagnostics {
+            export var debug = false;
+            export interface IDiagnosticWriter {
+                Alert(output: string): void;
+            }
+    
+            export var diagnosticWriter: IDiagnosticWriter = null;
+    
+            export var analysisPass: number = 0;
+    
+            export function Alert(output: string) {
+                if (diagnosticWriter) {
+                    diagnosticWriter.Alert(output);
+                }
+            }
+    
+            export function debugPrint(s: string) {
+                if (debug) {
+                    Alert(s);
+                }
+            }
+    
+            export function assert(condition: boolean, s: string) {
+                if (debug) {
+                    if (!condition) {
+                        Alert(s);
+                    }
+                }
+            }
+    
+        }
+    
+        export interface ILogger {
+            information(): boolean;
+            debug(): boolean;
+            warning(): boolean;
+            error(): boolean;
+            fatal(): boolean;
+            log(s: string): void;
+        }
+    
+        export class NullLogger implements ILogger {
+            public information(): boolean { return false; }
+            public debug(): boolean { return false; }
+            public warning(): boolean { return false; }
+            public error(): boolean { return false; }
+            public fatal(): boolean { return false; }
+            public log(s: string): void {
+            }
+        }
+    
+        export class LoggerAdapter implements ILogger {
+            private _information: boolean;
+            private _debug: boolean;
+            private _warning: boolean;
+            private _error: boolean;
+            private _fatal: boolean;
+    
+            constructor (public logger: ILogger) { 
+                                ~~~~~~
+!!! error TS1005: ',' expected.
+                this._information = this.logger.information();
+                                         ~~~~~~
+!!! error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
+                this._debug = this.logger.debug();
+                                   ~~~~~~
+!!! error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
+                this._warning = this.logger.warning();
+                                     ~~~~~~
+!!! error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
+                this._error = this.logger.error();
+                                   ~~~~~~
+!!! error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
+                this._fatal = this.logger.fatal();
+                                   ~~~~~~
+!!! error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
+            }
+    
+    
+            public information(): boolean { return this._information; }
+            public debug(): boolean { return this._debug; }
+            public warning(): boolean { return this._warning; }
+            public error(): boolean { return this._error; }
+            public fatal(): boolean { return this._fatal; }
+            public log(s: string): void {
+                this.logger.log(s);
+                     ~~~~~~
+!!! error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
+            }
+        }
+    
+        export class BufferedLogger implements ILogger {
+            public logContents = [];
+    
+            public information(): boolean { return false; }
+            public debug(): boolean { return false; }
+            public warning(): boolean { return false; }
+            public error(): boolean { return false; }
+            public fatal(): boolean { return false; }
+            public log(s: string): void {
+                this.logContents.push(s);
+            }
+        }
+    
+        export function timeFunction(logger: ILogger, funcDescription: string, func: () =>any): any {
+            var start = +new Date();
+                             ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+            var result = func();
+            var end = +new Date();
+                           ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+            logger.log(funcDescription + " completed in " + (end - start) + " msec");
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+            return result;
+        }
+    
+        export function stringToLiteral(value: string, length: number): string {
+            var result = "";
+    
+            var addChar = (index: number) => {
+                var ch = value.charCodeAt(index);
+                               ~~~~~~~~~~
+!!! error TS2339: Property 'charCodeAt' does not exist on type 'string'.
+                switch (ch) {
+                    case 0x09: // tab
+                        result += "\\t";
+                        break;
+                    case 0x0a: // line feed
+                        result += "\\n";
+                        break;
+                    case 0x0b: // vertical tab
+                        result += "\\v";
+                        break;
+                    case 0x0c: // form feed
+                        result += "\\f";
+                        break;
+                    case 0x0d: // carriage return
+                        result += "\\r";
+                        break;
+                    case 0x22:  // double quote
+                        result += "\\\"";
+                        break;
+                    case 0x27: // single quote
+                        result += "\\\'";
+                        break;
+                    case 0x5c: // Backslash
+                        result += "\\";
+                        break;
+                    default:
+                        result += value.charAt(index);
+                }
+            }
+    
+            var tooLong = (value.length > length);
+                                 ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type 'string'.
+            if (tooLong) {
+                var mid = length >> 1;
+                for (var i = 0; i < mid; i++) addChar(i);
+                                       ~
+!!! error TS1005: '>' expected.
+                result += "(...)";
+                for (var i = value.length - mid; i < value.length; i++) addChar(i);
+                                   ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type 'string'.
+                                                                 ~
+!!! error TS1005: '>' expected.
+            }
+            else {
+                length = value.length;
+                               ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type 'string'.
+                for (var i = 0; i < length; i++) addChar(i);
+                                          ~
+!!! error TS1005: '>' expected.
+            }
+            return result;
+        }
+    }

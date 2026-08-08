@@ -1,0 +1,43 @@
+/package.json(2,9): error TS1005: ';' expected.
+/package.json(3,9): error TS1005: ';' expected.
+/package.json(4,12): error TS1005: ';' expected.
+/package.json(5,10): error TS1005: ';' expected.
+/package.json(6,14): error TS1005: ';' expected.
+/package.json(7,16): error TS1005: ';' expected.
+
+
+==== /package.json (6 errors) ====
+    {
+      "name": "js-self-name-import",
+            ~
+!!! error TS1005: ';' expected.
+      "type": "module",
+            ~
+!!! error TS1005: ';' expected.
+      "exports": {
+               ~
+!!! error TS1005: ';' expected.
+        "./*": {
+             ~
+!!! error TS1005: ';' expected.
+          "types": "./types/src/*",
+                 ~
+!!! error TS1005: ';' expected.
+          "default": "./src/*"
+                   ~
+!!! error TS1005: ';' expected.
+        }
+      }
+    }
+    
+==== /types/src/foo.d.ts (0 errors) ====
+    export const foo: 1;
+    
+==== /types/test/foo.d.ts (0 errors) ====
+    export {};
+    
+==== /src/foo.js (0 errors) ====
+    export const foo = 1;
+    
+==== /test/foo.js (0 errors) ====
+    import { foo } from "js-self-name-import/foo.js";

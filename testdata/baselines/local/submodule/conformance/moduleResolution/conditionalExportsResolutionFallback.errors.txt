@@ -1,0 +1,51 @@
+/node_modules/dep/package.json(2,9): error TS1005: ';' expected.
+/node_modules/dep/package.json(3,12): error TS1005: ';' expected.
+/node_modules/dep/package.json(4,12): error TS1005: ';' expected.
+/node_modules/dep/package.json(5,8): error TS1005: ';' expected.
+/node_modules/dep/package.json(6,17): error TS1005: ';' expected.
+/node_modules/dep/package.json(7,18): error TS1005: ';' expected.
+/node_modules/dep/package.json(8,16): error TS1005: ';' expected.
+
+
+==== conditionalExportsResolutionFallback.ts (0 errors) ====
+    // This documents bug https://github.com/microsoft/TypeScript/issues/50762.
+    
+==== /node_modules/dep/package.json (7 errors) ====
+    {
+      "name": "dep",
+            ~
+!!! error TS1005: ';' expected.
+      "version": "1.0.0",
+               ~
+!!! error TS1005: ';' expected.
+      "exports": {
+               ~
+!!! error TS1005: ';' expected.
+        ".": {
+           ~
+!!! error TS1005: ';' expected.
+            "import": "./dist/index.mjs",
+                    ~
+!!! error TS1005: ';' expected.
+            "require": "./dist/index.js",
+                     ~
+!!! error TS1005: ';' expected.
+            "types": "./dist/index.d.ts"
+                   ~
+!!! error TS1005: ';' expected.
+        }
+      }
+    }
+    
+==== /node_modules/dep/dist/index.d.ts (0 errors) ====
+    export {};
+    
+==== /node_modules/dep/dist/index.mjs (0 errors) ====
+    export {};
+    
+==== /index.mts (0 errors) ====
+    import {} from "dep";
+    // Should be an untyped resolution to dep/dist/index.mjs,
+    // but the first search is only for TS files, and when
+    // there's no dist/index.d.mts, it continues looking for
+    // matching conditions and resolves via `types`.

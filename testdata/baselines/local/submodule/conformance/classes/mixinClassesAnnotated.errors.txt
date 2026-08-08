@@ -1,0 +1,143 @@
+mixinClassesAnnotated.ts(4,24): error TS1005: ',' expected.
+mixinClassesAnnotated.ts(4,42): error TS1005: ',' expected.
+mixinClassesAnnotated.ts(8,46): error TS1005: ',' expected.
+mixinClassesAnnotated.ts(9,9): error TS2349: This expression is not callable.
+mixinClassesAnnotated.ts(17,47): error TS1005: '?' expected.
+mixinClassesAnnotated.ts(17,48): error TS1005: ':' expected.
+mixinClassesAnnotated.ts(17,63): error TS1005: '=>' expected.
+mixinClassesAnnotated.ts(17,65): error TS1005: ',' expected.
+mixinClassesAnnotated.ts(17,76): error TS1005: ',' expected.
+mixinClassesAnnotated.ts(17,86): error TS1005: ',' expected.
+mixinClassesAnnotated.ts(17,88): error TS1134: Variable declaration expected.
+mixinClassesAnnotated.ts(17,90): error TS1182: A destructuring declaration must have an initializer.
+mixinClassesAnnotated.ts(17,110): error TS1005: ',' expected.
+mixinClassesAnnotated.ts(17,114): error TS1005: ';' expected.
+mixinClassesAnnotated.ts(18,19): error TS1005: '{' expected.
+mixinClassesAnnotated.ts(18,30): error TS1005: ';' expected.
+mixinClassesAnnotated.ts(21,33): error TS2339: Property 'x' does not exist on type '{ superClass: any; {: any; print: () => any }'.
+mixinClassesAnnotated.ts(21,48): error TS2339: Property 'y' does not exist on type '{ superClass: any; {: any; print: () => any }'.
+mixinClassesAnnotated.ts(33,13): error TS2349: This expression is not callable.
+mixinClassesAnnotated.ts(37,12): error TS2322: Type 'object' is not assignable to type 'object & T'.
+mixinClassesAnnotated.ts(45,23): error TS2351: This expression is not constructable.
+mixinClassesAnnotated.ts(51,23): error TS2351: This expression is not constructable.
+mixinClassesAnnotated.ts(59,9): error TS2349: This expression is not callable.
+mixinClassesAnnotated.ts(60,14): error TS2339: Property '_tag' does not exist on type '{ test: () => any }'.
+mixinClassesAnnotated.ts(63,14): error TS2339: Property 'print' does not exist on type '{ test: () => any }'.
+
+
+==== mixinClassesAnnotated.ts (25 errors) ====
+    type Constructor<T> = new(...args: any[]) => T;
+    
+    class Base {
+        constructor(public x: number, public y: number) {}
+                           ~
+!!! error TS1005: ',' expected.
+                                             ~
+!!! error TS1005: ',' expected.
+    }
+    
+    class Derived extends Base {
+        constructor(x: number, y: number, public z: number) {
+                                                 ~
+!!! error TS1005: ',' expected.
+            super(x, y);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    interface Printable {
+        print(): void;
+    }
+    
+    const Printable = <T extends Constructor<Base>>(superClass: T): Constructor<Printable> & { message: string } & T =>
+                                                  ~
+!!! error TS1005: '?' expected.
+                                                   ~
+!!! error TS1005: ':' expected.
+                                                                  ~
+!!! error TS1005: '=>' expected.
+                                                                    ~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+                                                                               ~
+!!! error TS1005: ',' expected.
+                                                                                         ~
+!!! error TS1005: ',' expected.
+                                                                                           ~
+!!! error TS1134: Variable declaration expected.
+                                                                                             ~~~~~~~~~~~~~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+                                                                                                                 ~
+!!! error TS1005: ',' expected.
+                                                                                                                     ~~
+!!! error TS1005: ';' expected.
+        class extends superClass {
+                      ~~~~~~~~~~
+!!! error TS1005: '{' expected.
+                                 ~
+!!! error TS1005: ';' expected.
+            static message = "hello";
+            print() {
+                const output = this.x + "," + this.y;
+                                    ~
+!!! error TS2339: Property 'x' does not exist on type '{ superClass: any; {: any; print: () => any }'.
+                                                   ~
+!!! error TS2339: Property 'y' does not exist on type '{ superClass: any; {: any; print: () => any }'.
+            }
+        }
+    
+    interface Tagged {
+        _tag: string;
+    }
+    
+    function Tagged<T extends Constructor<{}>>(superClass: T): Constructor<Tagged> & T {
+        class C extends superClass {
+            _tag: string;
+            constructor(...args: any[]) {
+                super(...args);
+                ~~~~~
+!!! error TS2349: This expression is not callable.
+                this._tag = "hello";
+            }
+        }
+        return C;
+               ~
+!!! error TS2322: Type 'object' is not assignable to type 'object & T'.
+    }
+    
+    const Thing1 = Tagged(Derived);
+    const Thing2 = Tagged(Printable(Derived));
+    Thing2.message;
+    
+    function f1() {
+        const thing = new Thing1(1, 2, 3);
+                          ~~~~~~
+!!! error TS2351: This expression is not constructable.
+        thing.x;
+        thing._tag;
+    }
+    
+    function f2() {
+        const thing = new Thing2(1, 2, 3);
+                          ~~~~~~
+!!! error TS2351: This expression is not constructable.
+        thing.x;
+        thing._tag;
+        thing.print();
+    }
+    
+    class Thing3 extends Thing2 {
+        constructor(tag: string) {
+            super(10, 20, 30);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            this._tag = tag;
+                 ~~~~
+!!! error TS2339: Property '_tag' does not exist on type '{ test: () => any }'.
+        }
+        test() {
+            this.print();
+                 ~~~~~
+!!! error TS2339: Property 'print' does not exist on type '{ test: () => any }'.
+        }
+    }

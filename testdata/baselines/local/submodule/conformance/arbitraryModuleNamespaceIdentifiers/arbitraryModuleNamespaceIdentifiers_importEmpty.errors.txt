@@ -1,14 +1,14 @@
 error TS2300: Duplicate identifier 'stringliteral'.
 error TS2300: Duplicate identifier 'stringliteral'.
-arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_importEmpty.ts(8,14): error TS2304: Cannot find name 'x'.
-arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_importEmpty.ts(8,17): error TS2304: Cannot find name 'y'.
-arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_importEmpty.ts(8,20): error TS2304: Cannot find name 'z'.
+arbitraryModuleNamespaceIdentifiers_importEmpty.ts(8,14): error TS2304: Cannot find name 'x'.
+arbitraryModuleNamespaceIdentifiers_importEmpty.ts(8,17): error TS2304: Cannot find name 'y'.
+arbitraryModuleNamespaceIdentifiers_importEmpty.ts(8,20): error TS2304: Cannot find name 'z'.
 
 
 !!! error TS2300: Duplicate identifier 'stringliteral'.
 
 !!! error TS2300: Duplicate identifier 'stringliteral'.
-==== arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_importEmpty.ts (3 errors) ====
+==== arbitraryModuleNamespaceIdentifiers_importEmpty.ts (3 errors) ====
     // These should all be errors. In particular, the empty string is a now a valid
     // module export name, and should be treated as such here.
     import {

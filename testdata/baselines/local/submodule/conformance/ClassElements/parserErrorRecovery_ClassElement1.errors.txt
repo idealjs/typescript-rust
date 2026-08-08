@@ -1,0 +1,15 @@
+parserErrorRecovery_ClassElement1.ts(5,7): error TS1005: ';' expected.
+parserErrorRecovery_ClassElement1.ts(5,9): error TS1005: ';' expected.
+
+
+==== parserErrorRecovery_ClassElement1.ts (2 errors) ====
+    class C {
+    
+    // Classes can't be nested.  So we should bail out of parsing here and recover
+    // this as a source unit element.
+    class D {
+          ~
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS1005: ';' expected.
+    }

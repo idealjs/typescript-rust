@@ -1,0 +1,8 @@
+parserStrictMode7.ts(2,3): error TS2304: Cannot find name 'eval'.
+
+
+==== parserStrictMode7.ts (1 errors) ====
+    "use strict";
+    ++eval;
+      ~~~~
+!!! error TS2304: Cannot find name 'eval'.

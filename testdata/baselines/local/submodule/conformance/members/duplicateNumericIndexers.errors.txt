@@ -1,0 +1,47 @@
+duplicateNumericIndexers.ts(19,7): error TS1005: ']' expected.
+duplicateNumericIndexers.ts(19,15): error TS1005: ';' expected.
+duplicateNumericIndexers.ts(20,7): error TS1005: ']' expected.
+duplicateNumericIndexers.ts(20,15): error TS1005: ';' expected.
+
+
+==== duplicateNumericIndexers.ts (4 errors) ====
+    // it is an error to have duplicate index signatures of the same kind in a type
+    
+    interface Number {
+        [x: number]: string;
+        [x: number]: string;
+    }
+    
+    interface String {
+        [x: number]: string;
+        [x: number]: string;
+    }
+    
+    interface Array<T> {
+        [x: number]: T;
+        [x: number]: T;
+    }
+    
+    class C {
+        [x: number]: string;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        [x: number]: string;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    interface I {
+        [x: number]: string;
+        [x: number]: string;
+    }
+    
+    var a: {
+        [x: number]: string;
+        [x: number]: string;
+    }
+    

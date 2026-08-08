@@ -1,0 +1,53 @@
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+package.json(4,12): error TS1005: ';' expected.
+package.json(5,20): error TS1005: ';' expected.
+package.json(6,20): error TS1005: ';' expected.
+package.json(6,28): error TS1005: ';' expected.
+
+
+==== package.json (6 errors) ====
+    {
+        "name": "ext",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "1.0.0",
+                 ~
+!!! error TS1005: ';' expected.
+        "types": "index",
+               ~
+!!! error TS1005: ';' expected.
+        "typesVersions": {
+                       ~
+!!! error TS1005: ';' expected.
+            ">=3.1.0-0": { "*" : ["ts3.1/*"] }
+                       ~
+!!! error TS1005: ';' expected.
+                               ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+==== index.d.ts (0 errors) ====
+    export interface A {}
+    export function fa(): A;
+    
+==== other.d.ts (0 errors) ====
+    export interface B {}
+    export function fb(): B;
+    
+==== index.d.ts (0 errors) ====
+    export interface A {}
+    export function fa(): A;
+    
+==== other.d.ts (0 errors) ====
+    export interface B {}
+    export function fb(): B;
+    
+==== main.ts (0 errors) ====
+    import { fa } from "ext";
+    import { fb } from "ext/other";
+    
+    export const va = fa();
+    export const vb = fb();
+    

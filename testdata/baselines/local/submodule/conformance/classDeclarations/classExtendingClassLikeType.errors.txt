@@ -1,16 +1,16 @@
-classDeclarations/classExtendingClassLikeType.ts(21,9): error TS2349: This expression is not callable.
-classDeclarations/classExtendingClassLikeType.ts(22,14): error TS2339: Property 'x' does not exist on type 'object'.
-classDeclarations/classExtendingClassLikeType.ts(23,14): error TS2339: Property 'y' does not exist on type 'object'.
-classDeclarations/classExtendingClassLikeType.ts(29,9): error TS2349: This expression is not callable.
-classDeclarations/classExtendingClassLikeType.ts(30,9): error TS2349: This expression is not callable.
-classDeclarations/classExtendingClassLikeType.ts(31,14): error TS2339: Property 'x' does not exist on type 'object'.
-classDeclarations/classExtendingClassLikeType.ts(32,14): error TS2339: Property 'y' does not exist on type 'object'.
-classDeclarations/classExtendingClassLikeType.ts(38,9): error TS2349: This expression is not callable.
-classDeclarations/classExtendingClassLikeType.ts(39,14): error TS2339: Property 'x' does not exist on type 'object'.
-classDeclarations/classExtendingClassLikeType.ts(40,14): error TS2339: Property 'y' does not exist on type 'object'.
+classExtendingClassLikeType.ts(21,9): error TS2349: This expression is not callable.
+classExtendingClassLikeType.ts(22,14): error TS2339: Property 'x' does not exist on type 'object'.
+classExtendingClassLikeType.ts(23,14): error TS2339: Property 'y' does not exist on type 'object'.
+classExtendingClassLikeType.ts(29,9): error TS2349: This expression is not callable.
+classExtendingClassLikeType.ts(30,9): error TS2349: This expression is not callable.
+classExtendingClassLikeType.ts(31,14): error TS2339: Property 'x' does not exist on type 'object'.
+classExtendingClassLikeType.ts(32,14): error TS2339: Property 'y' does not exist on type 'object'.
+classExtendingClassLikeType.ts(38,9): error TS2349: This expression is not callable.
+classExtendingClassLikeType.ts(39,14): error TS2339: Property 'x' does not exist on type 'object'.
+classExtendingClassLikeType.ts(40,14): error TS2339: Property 'y' does not exist on type 'object'.
 
 
-==== classDeclarations/classExtendingClassLikeType.ts (10 errors) ====
+==== classExtendingClassLikeType.ts (10 errors) ====
     interface Base<T, U> {
         x: T;
         y: U;

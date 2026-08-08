@@ -1,0 +1,20 @@
+withStatements.ts(2,1): error TS2304: Cannot find name 'with'.
+withStatements.ts(2,10): error TS1005: ';' expected.
+withStatements.ts(3,5): error TS2304: Cannot find name 'name'.
+withStatements.ts(4,5): error TS2304: Cannot find name 'id'.
+
+
+==== withStatements.ts (4 errors) ====
+    var x = 12;
+    with (x) {
+    ~~~~
+!!! error TS2304: Cannot find name 'with'.
+             ~
+!!! error TS1005: ';' expected.
+        name = 'twelve'
+        ~~~~
+!!! error TS2304: Cannot find name 'name'.
+        id = 12
+        ~~
+!!! error TS2304: Cannot find name 'id'.
+    }

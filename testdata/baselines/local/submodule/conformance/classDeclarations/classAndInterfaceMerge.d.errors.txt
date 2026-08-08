@@ -8,7 +8,7 @@ error TS2300: Duplicate identifier 'C2'.
 !!! error TS2300: Duplicate identifier 'C'.
 
 !!! error TS2300: Duplicate identifier 'C2'.
-==== classDeclarations/classAndInterfaceMerge.d.ts (0 errors) ====
+==== classAndInterfaceMerge.d.ts (0 errors) ====
     interface C { }
     
     declare class C { }

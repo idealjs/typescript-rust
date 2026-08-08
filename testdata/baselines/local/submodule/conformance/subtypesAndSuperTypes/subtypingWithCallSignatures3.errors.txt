@@ -1,0 +1,610 @@
+subtypingWithCallSignatures3.ts(25,36): error TS2304: Cannot find name 'Array'.
+subtypingWithCallSignatures3.ts(25,52): error TS2304: Cannot find name 'Array'.
+subtypingWithCallSignatures3.ts(25,72): error TS2304: Cannot find name 'Array'.
+subtypingWithCallSignatures3.ts(56,21): error TS1005: '>' expected.
+subtypingWithCallSignatures3.ts(56,23): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(56,23): error TS2304: Cannot find name 'U'.
+subtypingWithCallSignatures3.ts(56,23): error TS2554: Expected 1 arguments, but got 2.
+subtypingWithCallSignatures3.ts(56,29): error TS2304: Cannot find name 'T'.
+subtypingWithCallSignatures3.ts(56,36): error TS2304: Cannot find name 'U'.
+subtypingWithCallSignatures3.ts(57,38): error TS2304: Cannot find name 'T'.
+subtypingWithCallSignatures3.ts(57,39): error TS1005: '>' expected.
+subtypingWithCallSignatures3.ts(57,41): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(57,41): error TS2304: Cannot find name 'U'.
+subtypingWithCallSignatures3.ts(57,47): error TS2304: Cannot find name 'T'.
+subtypingWithCallSignatures3.ts(57,54): error TS2304: Cannot find name 'U'.
+subtypingWithCallSignatures3.ts(58,17): error TS2304: Cannot find name 'T'.
+subtypingWithCallSignatures3.ts(58,18): error TS1005: '>' expected.
+subtypingWithCallSignatures3.ts(58,20): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(58,20): error TS2304: Cannot find name 'U'.
+subtypingWithCallSignatures3.ts(58,26): error TS2304: Cannot find name 'T'.
+subtypingWithCallSignatures3.ts(58,33): error TS2304: Cannot find name 'U'.
+subtypingWithCallSignatures3.ts(60,18): error TS2304: Cannot find name 'T'.
+subtypingWithCallSignatures3.ts(60,32): error TS1005: '?' expected.
+subtypingWithCallSignatures3.ts(60,34): error TS1005: ':' expected.
+subtypingWithCallSignatures3.ts(60,51): error TS1005: '?' expected.
+subtypingWithCallSignatures3.ts(60,53): error TS1005: ':' expected.
+subtypingWithCallSignatures3.ts(60,71): error TS1005: '?' expected.
+subtypingWithCallSignatures3.ts(60,72): error TS1005: ':' expected.
+subtypingWithCallSignatures3.ts(60,107): error TS1005: '(' expected.
+subtypingWithCallSignatures3.ts(60,111): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(61,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(61,76): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(62,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(62,25): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(63,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(63,30): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(64,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(64,30): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(66,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(66,32): error TS1005: '?' expected.
+subtypingWithCallSignatures3.ts(66,34): error TS1005: ':' expected.
+subtypingWithCallSignatures3.ts(66,51): error TS1005: '?' expected.
+subtypingWithCallSignatures3.ts(66,52): error TS1005: ':' expected.
+subtypingWithCallSignatures3.ts(66,121): error TS1005: '(' expected.
+subtypingWithCallSignatures3.ts(66,125): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(67,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(67,103): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(68,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(68,25): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(69,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(69,30): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(70,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(70,30): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(72,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(72,35): error TS1005: '?' expected.
+subtypingWithCallSignatures3.ts(72,36): error TS1005: ':' expected.
+subtypingWithCallSignatures3.ts(72,54): error TS1005: '(' expected.
+subtypingWithCallSignatures3.ts(72,58): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(73,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(73,46): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(74,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(74,26): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(75,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(75,30): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(76,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(76,30): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(78,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(78,35): error TS1005: '?' expected.
+subtypingWithCallSignatures3.ts(78,36): error TS1005: ':' expected.
+subtypingWithCallSignatures3.ts(78,55): error TS1005: '(' expected.
+subtypingWithCallSignatures3.ts(78,59): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(79,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(79,85): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(80,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(80,26): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(81,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(81,30): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(82,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(82,30): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(84,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(84,77): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(85,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(85,44): error TS1005: '?' expected.
+subtypingWithCallSignatures3.ts(85,45): error TS1005: ':' expected.
+subtypingWithCallSignatures3.ts(85,84): error TS1005: '(' expected.
+subtypingWithCallSignatures3.ts(85,88): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(86,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(86,26): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(87,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(87,30): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(88,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(88,30): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(90,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(90,50): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(91,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(91,52): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(92,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(92,26): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(93,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(93,30): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(94,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(94,30): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(96,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(96,33): error TS1005: '?' expected.
+subtypingWithCallSignatures3.ts(96,34): error TS1005: ':' expected.
+subtypingWithCallSignatures3.ts(96,58): error TS1005: '>' expected.
+subtypingWithCallSignatures3.ts(97,5): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(97,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(97,28): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(98,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(98,31): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(99,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(99,31): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(101,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(101,49): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(102,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(102,26): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(104,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(104,51): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(105,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(105,26): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(106,1): error TS1138: Parameter declaration expected.
+subtypingWithCallSignatures3.ts(108,1): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(108,11): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(108,43): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(109,13): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(109,22): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(109,26): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(109,31): error TS1003: Identifier expected.
+subtypingWithCallSignatures3.ts(109,32): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(109,33): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(109,34): error TS1180: Property destructuring pattern expected.
+subtypingWithCallSignatures3.ts(109,39): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(109,47): error TS1005: '>' expected.
+subtypingWithCallSignatures3.ts(109,48): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(109,57): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(109,59): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(110,13): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(110,22): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(110,26): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(110,35): error TS1005: '=>' expected.
+subtypingWithCallSignatures3.ts(110,37): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(110,40): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(111,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(111,35): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(112,9): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(112,26): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(114,13): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(114,22): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(114,26): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(114,53): error TS1005: '=>' expected.
+subtypingWithCallSignatures3.ts(114,55): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(114,62): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(114,64): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(115,13): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(115,22): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(115,26): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(115,35): error TS1005: '=>' expected.
+subtypingWithCallSignatures3.ts(115,37): error TS1005: ',' expected.
+subtypingWithCallSignatures3.ts(116,19): error TS2304: Cannot find name 'T'.
+subtypingWithCallSignatures3.ts(116,25): error TS2304: Cannot find name 'T'.
+subtypingWithCallSignatures3.ts(116,32): error TS2304: Cannot find name 'T'.
+subtypingWithCallSignatures3.ts(117,14): error TS2304: Cannot find name 'foo3'.
+
+
+==== subtypingWithCallSignatures3.ts (163 errors) ====
+    // checking subtype relations for function types as it relates to contextual signature instantiation
+    // error cases, so function calls will all result in 'any'
+    
+    namespace Errors {
+        class Base { foo: string; }
+        class Derived extends Base { bar: string; }
+        class Derived2 extends Derived { baz: string; }
+        class OtherDerived extends Base { bing: string; }
+    
+        declare function foo2(a2: (x: number) => string[]): typeof a2;
+        declare function foo2(a2: any): any;
+    
+        declare function foo7(a2: (x: (arg: Base) => Derived) => (r: Base) => Derived2): typeof a2;
+        declare function foo7(a2: any): any;
+    
+        declare function foo8(a2: (x: (arg: Base) => Derived, y: (arg2: Base) => Derived) => (r: Base) => Derived): typeof a2;
+        declare function foo8(a2: any): any;
+    
+        declare function foo10(a2: (...x: Base[]) => Base): typeof a2;
+        declare function foo10(a2: any): any;
+    
+        declare function foo11(a2: (x: { foo: string }, y: { foo: string; bar: string }) => Base): typeof a2;
+        declare function foo11(a2: any): any;
+    
+        declare function foo12(a2: (x: Array<Base>, y: Array<Derived2>) => Array<Derived>): typeof a2;
+                                       ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                                       ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                                                           ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+        declare function foo12(a2: any): any;
+    
+        declare function foo15(a2: (x: { a: string; b: number }) => number): typeof a2;
+        declare function foo15(a2: any): any;
+    
+        declare function foo16(a2: {
+            // type of parameter is overload set which means we can't do inference based on this type
+            (x: {
+                (a: number): number;
+                (a?: number): number;
+            }): number[];
+            (x: {
+                (a: boolean): boolean;
+                (a?: boolean): boolean;
+            }): boolean[];
+        }): typeof a2;
+        declare function foo16(a2: any): any;
+    
+        declare function foo17(a2: {
+            (x: {
+                <T extends Derived>(a: T): T;
+                <T extends Base>(a: T): T;
+            }): any[];
+            (x: {
+                <T extends Derived2>(a: T): T;
+                <T extends Base>(a: T): T;
+            }): any[];
+        }): typeof a2;
+        declare function foo17(a2: any): any;
+    
+        var r1 = foo2(<T, U>(x: T) => <U[]>null); // any
+                        ~
+!!! error TS1005: '>' expected.
+                          ~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS2304: Cannot find name 'U'.
+                          ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 2.
+                                ~
+!!! error TS2304: Cannot find name 'T'.
+                                       ~
+!!! error TS2304: Cannot find name 'U'.
+        var r1a = [(x: number) => [''], <T, U>(x: T) => <U[]>null];
+                                         ~
+!!! error TS2304: Cannot find name 'T'.
+                                          ~
+!!! error TS1005: '>' expected.
+                                            ~
+!!! error TS1005: ',' expected.
+                                            ~
+!!! error TS2304: Cannot find name 'U'.
+                                                  ~
+!!! error TS2304: Cannot find name 'T'.
+                                                         ~
+!!! error TS2304: Cannot find name 'U'.
+        var r1b = [<T, U>(x: T) => <U[]>null, (x: number) => ['']];
+                    ~
+!!! error TS2304: Cannot find name 'T'.
+                     ~
+!!! error TS1005: '>' expected.
+                       ~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS2304: Cannot find name 'U'.
+                             ~
+!!! error TS2304: Cannot find name 'T'.
+                                    ~
+!!! error TS2304: Cannot find name 'U'.
+    
+        var r2arg = <T extends Base, U extends Derived, V extends Derived2>(x: (arg: T) => U) => (r: T) => <V>null;
+                     ~
+!!! error TS2304: Cannot find name 'T'.
+                                   ~
+!!! error TS1005: '?' expected.
+                                     ~
+!!! error TS1005: ':' expected.
+                                                      ~
+!!! error TS1005: '?' expected.
+                                                        ~
+!!! error TS1005: ':' expected.
+                                                                          ~
+!!! error TS1005: '?' expected.
+                                                                           ~
+!!! error TS1005: ':' expected.
+                                                                                                              ~~~~
+!!! error TS1005: '(' expected.
+                                                                                                                  ~
+!!! error TS1005: ',' expected.
+        var r2arg2 = (x: (arg: Base) => Derived) => (r: Base) => <Derived2>null;
+            ~~~~~~
+!!! error TS1005: ',' expected.
+                                                                               ~
+!!! error TS1005: ',' expected.
+        var r2 = foo7(r2arg); // any
+            ~~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS1005: ',' expected.
+        var r2a = [r2arg2, r2arg];
+            ~~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+        var r2b = [r2arg, r2arg2];
+            ~~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+    
+        var r3arg = <T extends Base, U extends Derived>(x: (arg: T) => U, y: (arg2: { foo: number; }) => U) => (r: T) => <U>null;
+            ~~~~~
+!!! error TS1005: ',' expected.
+                                   ~
+!!! error TS1005: '?' expected.
+                                     ~
+!!! error TS1005: ':' expected.
+                                                      ~
+!!! error TS1005: '?' expected.
+                                                       ~
+!!! error TS1005: ':' expected.
+                                                                                                                            ~~~~
+!!! error TS1005: '(' expected.
+                                                                                                                                ~
+!!! error TS1005: ',' expected.
+        var r3arg2 = (x: (arg: Base) => Derived, y: (arg2: Base) => Derived) => (r: Base) => <Derived>null;
+            ~~~~~~
+!!! error TS1005: ',' expected.
+                                                                                                          ~
+!!! error TS1005: ',' expected.
+        var r3 = foo8(r3arg); // any
+            ~~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS1005: ',' expected.
+        var r3a = [r3arg2, r3arg];
+            ~~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+        var r3b = [r3arg, r3arg2];
+            ~~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+    
+        var r4arg = <T extends Derived>(...x: T[]) => <T>null;
+            ~~~~~
+!!! error TS1005: ',' expected.
+                                      ~
+!!! error TS1005: '?' expected.
+                                       ~
+!!! error TS1005: ':' expected.
+                                                         ~~~~
+!!! error TS1005: '(' expected.
+                                                             ~
+!!! error TS1005: ',' expected.
+        var r4arg2 = (...x: Base[]) => <Base>null;
+            ~~~~~~
+!!! error TS1005: ',' expected.
+                                                 ~
+!!! error TS1005: ',' expected.
+        var r4 = foo10(r4arg); // any
+            ~~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+        var r4a = [r4arg2, r4arg];
+            ~~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+        var r4b = [r4arg, r4arg2];
+            ~~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+    
+        var r5arg = <T extends Derived>(x: T, y: T) => <T>null;
+            ~~~~~
+!!! error TS1005: ',' expected.
+                                      ~
+!!! error TS1005: '?' expected.
+                                       ~
+!!! error TS1005: ':' expected.
+                                                          ~~~~
+!!! error TS1005: '(' expected.
+                                                              ~
+!!! error TS1005: ',' expected.
+        var r5arg2 = (x: { foo: string }, y: { foo: string; bar: string }) => <Base>null;
+            ~~~~~~
+!!! error TS1005: ',' expected.
+                                                                                        ~
+!!! error TS1005: ',' expected.
+        var r5 = foo11(r5arg); // any
+            ~~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+        var r5a = [r5arg2, r5arg];
+            ~~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+        var r5b = [r5arg, r5arg2];
+            ~~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+    
+        var r6arg = (x: Array<Base>, y: Array<Derived2>) => <Array<Derived>>null;
+            ~~~~~
+!!! error TS1005: ',' expected.
+                                                                                ~
+!!! error TS1005: ',' expected.
+        var r6arg2 = <T extends Array<Derived2>>(x: Array<Base>, y: Array<Base>) => <T>null;
+            ~~~~~~
+!!! error TS1005: ',' expected.
+                                               ~
+!!! error TS1005: '?' expected.
+                                                ~
+!!! error TS1005: ':' expected.
+                                                                                       ~~~~
+!!! error TS1005: '(' expected.
+                                                                                           ~
+!!! error TS1005: ',' expected.
+        var r6 = foo12(r6arg); // (x: Array<Base>, y: Array<Derived2>) => Array<Derived>
+            ~~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+        var r6a = [r6arg2, r6arg];
+            ~~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+        var r6b = [r6arg, r6arg2];
+            ~~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+    
+        var r7arg = <T>(x: { a: T; b: T }) => <T>null;
+            ~~~~~
+!!! error TS1005: ',' expected.
+                                                     ~
+!!! error TS1005: ',' expected.
+        var r7arg2 = (x: { a: string; b: number }) => 1;
+            ~~~~~~
+!!! error TS1005: ',' expected.
+                                                       ~
+!!! error TS1005: ',' expected.
+        var r7 = foo15(r7arg); // any
+            ~~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+        var r7a = [r7arg2, r7arg];
+            ~~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+        var r7b = [r7arg, r7arg2];
+            ~~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+    
+        var r7arg3 = <T extends Base>(x: { a: T; b: T }) => 1;
+            ~~~~~~
+!!! error TS1005: ',' expected.
+                                    ~
+!!! error TS1005: '?' expected.
+                                     ~
+!!! error TS1005: ':' expected.
+                                                             ~
+!!! error TS1005: '>' expected.
+        var r7c = foo15(r7arg3); // (x: { a: string; b: number }) => number): number;
+        ~~~
+!!! error TS1005: ',' expected.
+            ~~~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS1005: ',' expected.
+        var r7d = [r7arg2, r7arg3];
+            ~~~
+!!! error TS1005: ',' expected.
+                                  ~
+!!! error TS1005: ',' expected.
+        var r7e = [r7arg3, r7arg2];
+            ~~~
+!!! error TS1005: ',' expected.
+                                  ~
+!!! error TS1005: ',' expected.
+    
+        var r8arg = <T>(x: (a: T) => T) => <T[]>null;
+            ~~~~~
+!!! error TS1005: ',' expected.
+                                                    ~
+!!! error TS1005: ',' expected.
+        var r8 = foo16(r8arg); // any
+            ~~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+    
+        var r9arg = <T>(x: (a: T) => T) => <any[]>null;
+            ~~~~~
+!!! error TS1005: ',' expected.
+                                                      ~
+!!! error TS1005: ',' expected.
+        var r9 = foo17(r9arg); // (x: { <T extends Derived >(a: T): T; <T extends Base >(a: T): T; }): any[]; (x: { <T extends Derived2>(a: T): T; <T extends Base>(a: T): T; }): any[];
+            ~~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+    }
+    ~
+!!! error TS1138: Parameter declaration expected.
+    
+    namespace WithGenericSignaturesInBaseType {
+    ~~~~~~~~~
+!!! error TS1005: ',' expected.
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+                                              ~
+!!! error TS1005: ',' expected.
+        declare function foo2(a2: <T>(x: T) => T[]): typeof a2;
+                ~~~~~~~~
+!!! error TS1005: ',' expected.
+                         ~~~~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+                                  ~
+!!! error TS1003: Identifier expected.
+                                   ~
+!!! error TS1005: ',' expected.
+                                    ~
+!!! error TS1005: ',' expected.
+                                     ~
+!!! error TS1180: Property destructuring pattern expected.
+                                          ~
+!!! error TS1005: ',' expected.
+                                                  ~
+!!! error TS1005: '>' expected.
+                                                   ~
+!!! error TS1005: ',' expected.
+                                                            ~~
+!!! error TS1005: ',' expected.
+                                                              ~
+!!! error TS1005: ',' expected.
+        declare function foo2(a2: any): any;
+                ~~~~~~~~
+!!! error TS1005: ',' expected.
+                         ~~~~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+                                      ~
+!!! error TS1005: '=>' expected.
+                                        ~~~
+!!! error TS1005: ',' expected.
+                                           ~
+!!! error TS1005: ',' expected.
+        var r2arg2 = <T>(x: T) => [''];
+            ~~~~~~
+!!! error TS1005: ',' expected.
+                                      ~
+!!! error TS1005: ',' expected.
+        var r2 = foo2(r2arg2); // <T>(x:T) => T[] since we can infer from generic signatures now
+            ~~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+    
+        declare function foo3(a2: <T>(x: T) => string[]): typeof a2;
+                ~~~~~~~~
+!!! error TS1005: ',' expected.
+                         ~~~~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+                                                        ~
+!!! error TS1005: '=>' expected.
+                                                          ~~~~~~
+!!! error TS1005: ',' expected.
+                                                                 ~~
+!!! error TS1005: ',' expected.
+                                                                   ~
+!!! error TS1005: ',' expected.
+        declare function foo3(a2: any): any;
+                ~~~~~~~~
+!!! error TS1005: ',' expected.
+                         ~~~~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+                                      ~
+!!! error TS1005: '=>' expected.
+                                        ~~~
+!!! error TS1005: ',' expected.
+        var r3arg2 = <T>(x: T) => <T[]>null;
+                      ~
+!!! error TS2304: Cannot find name 'T'.
+                            ~
+!!! error TS2304: Cannot find name 'T'.
+                                   ~
+!!! error TS2304: Cannot find name 'T'.
+        var r3 = foo3(r3arg2); // any
+                 ~~~~
+!!! error TS2304: Cannot find name 'foo3'.
+    }

@@ -1,0 +1,80 @@
+genericCallWithOverloadedFunctionTypedArguments.ts(15,26): error TS2304: Cannot find name 'T'.
+genericCallWithOverloadedFunctionTypedArguments.ts(24,19): error TS2345: Argument of type '(x: any) => any' is not assignable to parameter of type 'object'.
+genericCallWithOverloadedFunctionTypedArguments.ts(32,19): error TS2345: Argument of type '(x: any) => any' is not assignable to parameter of type 'object'.
+genericCallWithOverloadedFunctionTypedArguments.ts(33,20): error TS2304: Cannot find name 'T'.
+genericCallWithOverloadedFunctionTypedArguments.ts(33,26): error TS2304: Cannot find name 'T'.
+genericCallWithOverloadedFunctionTypedArguments.ts(34,21): error TS2304: Cannot find name 'T'.
+genericCallWithOverloadedFunctionTypedArguments.ts(34,27): error TS2304: Cannot find name 'T'.
+genericCallWithOverloadedFunctionTypedArguments.ts(34,34): error TS2304: Cannot find name 'T'.
+genericCallWithOverloadedFunctionTypedArguments.ts(40,23): error TS2345: Argument of type '(x: any) => any' is not assignable to parameter of type 'object'.
+genericCallWithOverloadedFunctionTypedArguments.ts(41,24): error TS2304: Cannot find name 'T'.
+genericCallWithOverloadedFunctionTypedArguments.ts(41,30): error TS2304: Cannot find name 'T'.
+
+
+==== genericCallWithOverloadedFunctionTypedArguments.ts (11 errors) ====
+    // Function typed arguments with multiple signatures must be passed an implementation that matches all of them
+    // Inferences are made quadratic-pairwise to and from these overload sets
+    
+    namespace NonGenericParameter {
+        var a: {
+            (x: boolean): boolean;
+            (x: string): string;
+        }
+    
+        function foo4(cb: typeof a) {
+            return cb;
+        }
+    
+        var r = foo4(a);
+        var r2 = foo4(<T>(x: T) => x);
+                             ~
+!!! error TS2304: Cannot find name 'T'.
+        var r4 = foo4(x => x);    
+    }
+    
+    namespace GenericParameter {
+        function foo5<T>(cb: { (x: T): string; (x: number): T }) {
+            return cb;
+        }
+    
+        var r5 = foo5(x => x); // any => string (+1 overload) [inferences are made for T, but lambda not contextually typed]. T is any
+                      ~~~~~~
+!!! error TS2345: Argument of type '(x: any) => any' is not assignable to parameter of type 'object'.
+        var a: { <T>(x: T): string; <T>(x: number): T; }
+        var r7 = foo5(a); // any => string (+1 overload)
+    
+        function foo6<T>(cb: { (x: T): string; (x: T, y?: T): string }) {
+            return cb;
+        }
+    
+        var r8 = foo6(x => x); // any => string (+1 overload) [inferences are made for T, but lambda not contextually typed]. T is any
+                      ~~~~~~
+!!! error TS2345: Argument of type '(x: any) => any' is not assignable to parameter of type 'object'.
+        var r9 = foo6(<T>(x: T) => ''); // any => string (+1 overload)
+                       ~
+!!! error TS2304: Cannot find name 'T'.
+                             ~
+!!! error TS2304: Cannot find name 'T'.
+        var r11 = foo6(<T>(x: T, y?: T) => ''); // any => string (+1 overload)
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+                              ~
+!!! error TS2304: Cannot find name 'T'.
+                                     ~
+!!! error TS2304: Cannot find name 'T'.
+    
+        function foo7<T>(x:T, cb: { (x: T): string; (x: T, y?: T): string }) {
+            return cb;
+        }
+    
+        var r12 = foo7(1, (x) => x); // any => string (+1 overload) [inferences are made for T, but lambda not contextually typed]
+                          ~~~~~~~~
+!!! error TS2345: Argument of type '(x: any) => any' is not assignable to parameter of type 'object'.
+        var r13 = foo7(1, <T>(x: T) => ''); // any => string (+1 overload) [inferences are made for T, but lambda not contextually typed]
+                           ~
+!!! error TS2304: Cannot find name 'T'.
+                                 ~
+!!! error TS2304: Cannot find name 'T'.
+        var a: { <T>(x: T): string; <T>(x: number): T; }
+        var r14 = foo7(1, a); // any => string (+1 overload) [inferences are made for T, but lambda not contextually typed]
+    }

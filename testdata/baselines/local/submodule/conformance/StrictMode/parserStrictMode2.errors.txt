@@ -1,0 +1,20 @@
+parserStrictMode2.ts(2,1): error TS2304: Cannot find name 'foo1'.
+parserStrictMode2.ts(3,1): error TS2304: Cannot find name 'foo1'.
+parserStrictMode2.ts(4,1): error TS2304: Cannot find name 'foo1'.
+parserStrictMode2.ts(5,1): error TS2304: Cannot find name 'static'.
+
+
+==== parserStrictMode2.ts (4 errors) ====
+    "use strict";
+    foo1();
+    ~~~~
+!!! error TS2304: Cannot find name 'foo1'.
+    foo1();
+    ~~~~
+!!! error TS2304: Cannot find name 'foo1'.
+    foo1();
+    ~~~~
+!!! error TS2304: Cannot find name 'foo1'.
+    static();
+    ~~~~~~
+!!! error TS2304: Cannot find name 'static'.

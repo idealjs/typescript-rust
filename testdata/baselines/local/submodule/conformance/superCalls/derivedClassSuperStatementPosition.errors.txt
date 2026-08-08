@@ -1,32 +1,32 @@
-superCalls/derivedClassSuperStatementPosition.ts(1,28): error TS2304: Cannot find name 'Object'.
-superCalls/derivedClassSuperStatementPosition.ts(4,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperStatementPosition.ts(8,44): error TS2304: Cannot find name 'Object'.
-superCalls/derivedClassSuperStatementPosition.ts(13,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperStatementPosition.ts(18,41): error TS2304: Cannot find name 'Object'.
-superCalls/derivedClassSuperStatementPosition.ts(23,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperStatementPosition.ts(28,31): error TS2304: Cannot find name 'Object'.
-superCalls/derivedClassSuperStatementPosition.ts(34,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperStatementPosition.ts(41,42): error TS2304: Cannot find name 'Object'.
-superCalls/derivedClassSuperStatementPosition.ts(49,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperStatementPosition.ts(56,36): error TS2304: Cannot find name 'Object'.
-superCalls/derivedClassSuperStatementPosition.ts(59,9): error TS2304: Cannot find name 'Math'.
-superCalls/derivedClassSuperStatementPosition.ts(60,15): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperStatementPosition.ts(61,15): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperStatementPosition.ts(65,27): error TS2304: Cannot find name 'Object'.
-superCalls/derivedClassSuperStatementPosition.ts(68,13): error TS2304: Cannot find name 'Math'.
-superCalls/derivedClassSuperStatementPosition.ts(69,13): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperStatementPosition.ts(72,13): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperStatementPosition.ts(77,44): error TS2304: Cannot find name 'Object'.
-superCalls/derivedClassSuperStatementPosition.ts(79,25): error TS1005: ',' expected.
-superCalls/derivedClassSuperStatementPosition.ts(81,13): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperStatementPosition.ts(86,50): error TS2304: Cannot find name 'Object'.
-superCalls/derivedClassSuperStatementPosition.ts(88,25): error TS1005: ',' expected.
-superCalls/derivedClassSuperStatementPosition.ts(89,13): error TS2304: Cannot find name 'Math'.
-superCalls/derivedClassSuperStatementPosition.ts(90,13): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperStatementPosition.ts(92,13): error TS2349: This expression is not callable.
+derivedClassSuperStatementPosition.ts(1,28): error TS2304: Cannot find name 'Object'.
+derivedClassSuperStatementPosition.ts(4,9): error TS2349: This expression is not callable.
+derivedClassSuperStatementPosition.ts(8,44): error TS2304: Cannot find name 'Object'.
+derivedClassSuperStatementPosition.ts(13,9): error TS2349: This expression is not callable.
+derivedClassSuperStatementPosition.ts(18,41): error TS2304: Cannot find name 'Object'.
+derivedClassSuperStatementPosition.ts(23,9): error TS2349: This expression is not callable.
+derivedClassSuperStatementPosition.ts(28,31): error TS2304: Cannot find name 'Object'.
+derivedClassSuperStatementPosition.ts(34,9): error TS2349: This expression is not callable.
+derivedClassSuperStatementPosition.ts(41,42): error TS2304: Cannot find name 'Object'.
+derivedClassSuperStatementPosition.ts(49,9): error TS2349: This expression is not callable.
+derivedClassSuperStatementPosition.ts(56,36): error TS2304: Cannot find name 'Object'.
+derivedClassSuperStatementPosition.ts(59,9): error TS2304: Cannot find name 'Math'.
+derivedClassSuperStatementPosition.ts(60,15): error TS2349: This expression is not callable.
+derivedClassSuperStatementPosition.ts(61,15): error TS2349: This expression is not callable.
+derivedClassSuperStatementPosition.ts(65,27): error TS2304: Cannot find name 'Object'.
+derivedClassSuperStatementPosition.ts(68,13): error TS2304: Cannot find name 'Math'.
+derivedClassSuperStatementPosition.ts(69,13): error TS2349: This expression is not callable.
+derivedClassSuperStatementPosition.ts(72,13): error TS2349: This expression is not callable.
+derivedClassSuperStatementPosition.ts(77,44): error TS2304: Cannot find name 'Object'.
+derivedClassSuperStatementPosition.ts(79,25): error TS1005: ',' expected.
+derivedClassSuperStatementPosition.ts(81,13): error TS2349: This expression is not callable.
+derivedClassSuperStatementPosition.ts(86,50): error TS2304: Cannot find name 'Object'.
+derivedClassSuperStatementPosition.ts(88,25): error TS1005: ',' expected.
+derivedClassSuperStatementPosition.ts(89,13): error TS2304: Cannot find name 'Math'.
+derivedClassSuperStatementPosition.ts(90,13): error TS2349: This expression is not callable.
+derivedClassSuperStatementPosition.ts(92,13): error TS2349: This expression is not callable.
 
 
-==== superCalls/derivedClassSuperStatementPosition.ts (26 errors) ====
+==== derivedClassSuperStatementPosition.ts (26 errors) ====
     class DerivedBasic extends Object {
                                ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.

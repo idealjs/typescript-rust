@@ -1,0 +1,24 @@
+first.js(5,7): error TS1003: Identifier expected.
+first.js(5,8): error TS1005: ';' expected.
+first.js(5,8): error TS2304: Cannot find name 'exports'.
+main.js(1,9): error TS2304: Cannot find name 'require'.
+
+
+==== first.js (3 errors) ====
+    /** @template T
+     * @param {T} x
+     * @param {(t: T) => void} k
+     */
+    module.exports = function (x, k) { return k(x) }
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    
+==== main.js (1 errors) ====
+    var f = require('./first');
+            ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    f(1, n => { })

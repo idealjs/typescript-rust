@@ -1,0 +1,29 @@
+t1.ts(1,1): error TS2304: Cannot find name 'let'.
+t1.ts(1,8): error TS1003: Identifier expected.
+t1.ts(1,10): error TS1005: ';' expected.
+
+
+==== exportsAndImportsWithContextualKeywordNames02.ts (0 errors) ====
+    ﻿// @module: commonjs
+    
+==== t1.ts (3 errors) ====
+    let as = 100;
+    ~~~
+!!! error TS2304: Cannot find name 'let'.
+           ~
+!!! error TS1003: Identifier expected.
+             ~~~
+!!! error TS1005: ';' expected.
+    
+    export { as as return, as };
+    
+==== t2.ts (0 errors) ====
+    import * as as from "./t1";
+    var x = as.as;
+    var y = as.return;
+    
+==== t3.ts (0 errors) ====
+    import { as as as } from "./t1";
+    
+==== t4.ts (0 errors) ====
+    import { as } from "./t1";

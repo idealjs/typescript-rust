@@ -1,0 +1,159 @@
+index.js(2,1): error TS2304: Cannot find name 'Object'.
+index.js(3,1): error TS2304: Cannot find name 'Object'.
+index.js(4,1): error TS2304: Cannot find name 'Object'.
+index.js(5,1): error TS2304: Cannot find name 'Object'.
+index.js(5,35): error TS2304: Cannot find name 'get'.
+index.js(5,38): error TS1005: ',' expected.
+index.js(5,38): error TS2304: Cannot find name '('.
+index.js(5,39): error TS1005: ',' expected.
+index.js(5,39): error TS2304: Cannot find name ')'.
+index.js(5,41): error TS1005: ',' expected.
+index.js(5,41): error TS2304: Cannot find name '{'.
+index.js(5,43): error TS1005: ',' expected.
+index.js(5,43): error TS2304: Cannot find name 'return'.
+index.js(5,50): error TS1005: ',' expected.
+index.js(5,59): error TS2304: Cannot find name 'set'.
+index.js(5,63): error TS2304: Cannot find name '_'.
+index.js(5,66): error TS1005: ',' expected.
+index.js(5,81): error TS1005: ',' expected.
+validate.ts(3,3): error TS2339: Property 'name' does not exist on type 'object'.
+validate.ts(4,3): error TS2339: Property 'middleInit' does not exist on type 'object'.
+validate.ts(5,3): error TS2339: Property 'lastName' does not exist on type 'object'.
+validate.ts(6,3): error TS2339: Property 'zip' does not exist on type 'object'.
+validate.ts(7,3): error TS2339: Property 'houseNumber' does not exist on type 'object'.
+validate.ts(8,3): error TS2339: Property 'zipStr' does not exist on type 'object'.
+validate.ts(10,3): error TS2339: Property 'name' does not exist on type 'object'.
+validate.ts(11,3): error TS2339: Property 'zip' does not exist on type 'object'.
+validate.ts(12,3): error TS2339: Property 'zipStr' does not exist on type 'object'.
+validate.ts(14,3): error TS2339: Property 'lastName' does not exist on type 'object'.
+validate.ts(15,3): error TS2339: Property 'houseNumber' does not exist on type 'object'.
+validate.ts(16,3): error TS2339: Property 'zipStr' does not exist on type 'object'.
+validate.ts(17,3): error TS2339: Property 'middleInit' does not exist on type 'object'.
+
+
+==== index.js (18 errors) ====
+    const x = {};
+    Object.defineProperty(x, "name", { value: "Charles", writable: true });
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    Object.defineProperty(x, "middleInit", { value: "H" });
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    Object.defineProperty(x, "lastName", { value: "Smith", writable: false });
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    Object.defineProperty(x, "zip", { get() { return 98122 }, set(_) { /*ignore*/ } });
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                                      ~~~
+!!! error TS2304: Cannot find name 'get'.
+                                         ~
+!!! error TS1005: ',' expected.
+                                         ~
+!!! error TS2304: Cannot find name '('.
+                                          ~
+!!! error TS1005: ',' expected.
+                                          ~
+!!! error TS2304: Cannot find name ')'.
+                                            ~
+!!! error TS1005: ',' expected.
+                                            ~
+!!! error TS2304: Cannot find name '{'.
+                                              ~~~~~~
+!!! error TS1005: ',' expected.
+                                              ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                                                     ~~~~~
+!!! error TS1005: ',' expected.
+                                                              ~~~
+!!! error TS2304: Cannot find name 'set'.
+                                                                  ~
+!!! error TS2304: Cannot find name '_'.
+                                                                     ~
+!!! error TS1005: ',' expected.
+                                                                                    ~
+!!! error TS1005: ',' expected.
+    Object.defineProperty(x, "houseNumber", { get() { return 21.75 } });
+    Object.defineProperty(x, "zipStr", {
+        /** @param {string} str */
+        set(str) {
+            this.zip = Number(str) 
+        }
+    });
+    
+    /**
+     * @param {{name: string}} named
+     */
+    function takeName(named) { return named.name; }
+    
+    takeName(x);
+    /**
+     * @type {number}
+     */
+    var a = x.zip;
+    
+    /**
+     * @type {number}
+     */
+    var b = x.houseNumber;
+    
+    const returnExemplar = () => x;
+    const needsExemplar = (_ = x) => void 0;
+    
+    const expected = /** @type {{name: string, readonly middleInit: string, readonly lastName: string, zip: number, readonly houseNumber: number, zipStr: string}} */(/** @type {*} */(null));
+    
+    /**
+     * 
+     * @param {typeof returnExemplar} a 
+     * @param {typeof needsExemplar} b 
+     */
+    function match(a, b) {}
+    
+    match(() => expected, (x = expected) => void 0);
+    
+    module.exports = x;
+    
+==== validate.ts (13 errors) ====
+    // Validate in TS as simple validations would usually be interpreted as more special assignments
+    import x = require("./");
+    x.name;
+      ~~~~
+!!! error TS2339: Property 'name' does not exist on type 'object'.
+    x.middleInit;
+      ~~~~~~~~~~
+!!! error TS2339: Property 'middleInit' does not exist on type 'object'.
+    x.lastName;
+      ~~~~~~~~
+!!! error TS2339: Property 'lastName' does not exist on type 'object'.
+    x.zip;
+      ~~~
+!!! error TS2339: Property 'zip' does not exist on type 'object'.
+    x.houseNumber;
+      ~~~~~~~~~~~
+!!! error TS2339: Property 'houseNumber' does not exist on type 'object'.
+    x.zipStr;
+      ~~~~~~
+!!! error TS2339: Property 'zipStr' does not exist on type 'object'.
+    
+    x.name = "Another";
+      ~~~~
+!!! error TS2339: Property 'name' does not exist on type 'object'.
+    x.zip = 98123;
+      ~~~
+!!! error TS2339: Property 'zip' does not exist on type 'object'.
+    x.zipStr = "OK";
+      ~~~~~~
+!!! error TS2339: Property 'zipStr' does not exist on type 'object'.
+    
+    x.lastName = "should fail";
+      ~~~~~~~~
+!!! error TS2339: Property 'lastName' does not exist on type 'object'.
+    x.houseNumber = 12; // should also fail
+      ~~~~~~~~~~~
+!!! error TS2339: Property 'houseNumber' does not exist on type 'object'.
+    x.zipStr = 12; // should fail
+      ~~~~~~
+!!! error TS2339: Property 'zipStr' does not exist on type 'object'.
+    x.middleInit = "R"; // should also fail
+      ~~~~~~~~~~
+!!! error TS2339: Property 'middleInit' does not exist on type 'object'.

@@ -1,0 +1,14 @@
+computedPropertyNamesDeclarationEmit2_ES5.ts(3,16): error TS1005: ';' expected.
+computedPropertyNamesDeclarationEmit2_ES5.ts(4,16): error TS1005: ';' expected.
+
+
+==== computedPropertyNamesDeclarationEmit2_ES5.ts (2 errors) ====
+    class C {
+        static ["" + ""]() { }
+        static get ["" + ""]() { return 0; }
+                   ~
+!!! error TS1005: ';' expected.
+        static set ["" + ""](x) { }
+                   ~
+!!! error TS1005: ';' expected.
+    }

@@ -1,0 +1,75 @@
+error TS2300: Duplicate identifier 'default'.
+error TS2300: Duplicate identifier 'default'.
+t2.ts(2,1): error TS2304: Cannot find name 'a'.
+t2.ts(6,1): error TS2304: Cannot find name 'c'.
+t2.ts(8,1): error TS2304: Cannot find name 'd'.
+t2.ts(11,1): error TS2304: Cannot find name 'e2'.
+t2.ts(14,1): error TS2304: Cannot find name 'f2'.
+t3.ts(2,1): error TS2304: Cannot find name 'a'.
+t3.ts(6,1): error TS2304: Cannot find name 'c'.
+t3.ts(8,1): error TS2304: Cannot find name 'd'.
+t3.ts(11,1): error TS2304: Cannot find name 'e2'.
+t3.ts(14,1): error TS2304: Cannot find name 'f2'.
+
+
+!!! error TS2300: Duplicate identifier 'default'.
+
+!!! error TS2300: Duplicate identifier 'default'.
+==== exportsAndImports4.ts (0 errors) ====
+    
+==== t1.ts (0 errors) ====
+    export default "hello";
+    
+==== t2.ts (5 errors) ====
+    import a = require("./t1");
+    a.default;
+    ~
+!!! error TS2304: Cannot find name 'a'.
+    import b from "./t1";
+    b;
+    import * as c from "./t1";
+    c.default;
+    ~
+!!! error TS2304: Cannot find name 'c'.
+    import { default as d } from "./t1";
+    d;
+    ~
+!!! error TS2304: Cannot find name 'd'.
+    import e1, * as e2 from "./t1";
+    e1;
+    e2.default;
+    ~~
+!!! error TS2304: Cannot find name 'e2'.
+    import f1, { default as f2 } from "./t1";
+    f1;
+    f2;
+    ~~
+!!! error TS2304: Cannot find name 'f2'.
+    import "./t1";
+    
+==== t3.ts (5 errors) ====
+    import a = require("./t1");
+    a.default;
+    ~
+!!! error TS2304: Cannot find name 'a'.
+    import b from "./t1";
+    b;
+    import * as c from "./t1";
+    c.default;
+    ~
+!!! error TS2304: Cannot find name 'c'.
+    import { default as d } from "./t1";
+    d;
+    ~
+!!! error TS2304: Cannot find name 'd'.
+    import e1, * as e2 from "./t1";
+    e1;
+    e2.default;
+    ~~
+!!! error TS2304: Cannot find name 'e2'.
+    import f1, { default as f2 } from "./t1";
+    f1;
+    f2;
+    ~~
+!!! error TS2304: Cannot find name 'f2'.
+    export { a, b, c, d, e1, e2, f1, f2 };

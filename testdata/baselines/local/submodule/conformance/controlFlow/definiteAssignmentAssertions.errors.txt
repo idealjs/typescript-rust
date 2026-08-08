@@ -1,0 +1,147 @@
+definiteAssignmentAssertions.ts(41,10): error TS1005: ',' expected.
+definiteAssignmentAssertions.ts(41,11): error TS1134: Variable declaration expected.
+definiteAssignmentAssertions.ts(43,10): error TS1005: ',' expected.
+definiteAssignmentAssertions.ts(43,11): error TS1134: Variable declaration expected.
+definiteAssignmentAssertions.ts(48,10): error TS1005: ',' expected.
+definiteAssignmentAssertions.ts(48,11): error TS1134: Variable declaration expected.
+definiteAssignmentAssertions.ts(48,20): error TS1005: ',' expected.
+definiteAssignmentAssertions.ts(58,10): error TS1005: ',' expected.
+definiteAssignmentAssertions.ts(58,11): error TS1134: Variable declaration expected.
+definiteAssignmentAssertions.ts(69,10): error TS1005: ',' expected.
+definiteAssignmentAssertions.ts(70,10): error TS1005: ',' expected.
+definiteAssignmentAssertions.ts(70,12): error TS1134: Variable declaration expected.
+definiteAssignmentAssertions.ts(70,14): error TS1134: Variable declaration expected.
+definiteAssignmentAssertions.ts(71,10): error TS1005: ',' expected.
+definiteAssignmentAssertions.ts(71,11): error TS1134: Variable declaration expected.
+definiteAssignmentAssertions.ts(76,15): error TS1005: ',' expected.
+definiteAssignmentAssertions.ts(76,16): error TS1134: Variable declaration expected.
+definiteAssignmentAssertions.ts(77,15): error TS1005: ',' expected.
+definiteAssignmentAssertions.ts(77,16): error TS1134: Variable declaration expected.
+definiteAssignmentAssertions.ts(80,7): error TS1005: ',' expected.
+definiteAssignmentAssertions.ts(80,8): error TS1134: Variable declaration expected.
+
+
+==== definiteAssignmentAssertions.ts (21 errors) ====
+    // Suppress strict property initialization check
+    
+    class C1 {
+        a!: number;
+        b: string;  // Error
+    }
+    
+    // Suppress definite assignment check in constructor
+    
+    class C2 {
+        a!: number;
+        constructor() {
+            let x = this.a;
+        }
+    }
+    
+    // Definite assignment assertion requires type annotation, no initializer, no static modifier
+    
+    class C3 {
+        a! = 1;
+        b!: number = 1;
+        static c!: number;
+        d!;
+    }
+    
+    // Definite assignment assertion not permitted in ambient context
+    
+    declare class C4 {
+        a!: number;
+    }
+    
+    // Definite assignment assertion not permitted on abstract property
+    
+    abstract class C5 {
+        abstract a!: number;
+    }
+    
+    // Suppress definite assignment check for variable
+    
+    function f1() {
+        let x!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        let y = x;
+        var a!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var b = a;
+    }
+    
+    function f2() {
+        let x!: string | number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+                       ~
+!!! error TS1005: ',' expected.
+        if (typeof x === "string") {
+            let s: string = x;
+        }
+        else {
+            let n: number = x;
+        }
+    }
+    
+    function f3() {
+        let x!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        const g = () => {
+            x = 1;
+        }
+        g();
+        let y = x;
+    }
+    
+    // Definite assignment assertion requires type annotation and no initializer
+    
+    function f4() {
+        let a!;
+             ~
+!!! error TS1005: ',' expected.
+        let b! = 1;
+             ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1134: Variable declaration expected.
+                 ~
+!!! error TS1134: Variable declaration expected.
+        let c!: number = 1;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+    }
+    
+    // Definite assignment assertion not permitted in ambient context
+    
+    declare let v1!: number;
+                  ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS1134: Variable declaration expected.
+    declare var v2!: number;
+                  ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS1134: Variable declaration expected.
+    
+    declare namespace foo {
+    	var v!: number;
+    	     ~
+!!! error TS1005: ',' expected.
+    	      ~
+!!! error TS1134: Variable declaration expected.
+    }

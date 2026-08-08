@@ -1,0 +1,99 @@
+constraintSatisfactionWithAny.ts(3,24): error TS2304: Cannot find name 'String'.
+constraintSatisfactionWithAny.ts(4,58): error TS2322: Type 'null' is not assignable to type 'T'.
+constraintSatisfactionWithAny.ts(6,62): error TS2322: Type 'null' is not assignable to type 'T'.
+constraintSatisfactionWithAny.ts(15,11): error TS2345: Argument of type 'number' is not assignable to parameter of type '{ x: number }'.
+constraintSatisfactionWithAny.ts(17,11): error TS2345: Argument of type 'number' is not assignable to parameter of type '(x: T) => void'.
+constraintSatisfactionWithAny.ts(23,19): error TS2304: Cannot find name 'String'.
+constraintSatisfactionWithAny.ts(24,24): error TS1005: ',' expected.
+constraintSatisfactionWithAny.ts(27,10): error TS2554: Expected 2 arguments, but got 1.
+constraintSatisfactionWithAny.ts(28,10): error TS2554: Expected 2 arguments, but got 1.
+constraintSatisfactionWithAny.ts(31,24): error TS1005: ',' expected.
+constraintSatisfactionWithAny.ts(34,10): error TS2554: Expected 2 arguments, but got 1.
+constraintSatisfactionWithAny.ts(35,10): error TS2554: Expected 2 arguments, but got 1.
+constraintSatisfactionWithAny.ts(45,24): error TS1005: ',' expected.
+constraintSatisfactionWithAny.ts(48,10): error TS2554: Expected 2 arguments, but got 1.
+constraintSatisfactionWithAny.ts(49,10): error TS2554: Expected 2 arguments, but got 1.
+
+
+==== constraintSatisfactionWithAny.ts (15 errors) ====
+    // any is not a valid type argument unless there is no constraint, or the constraint is any
+    
+    function foo<T extends String>(x: T): T { return null; }
+                           ~~~~~~
+!!! error TS2304: Cannot find name 'String'.
+    function foo2<T extends { x: number }>(x: T): T { return null; }
+                                                             ~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'T'.
+    //function foo3<T extends T[]>(x: T): T { return null; }
+    function foo4<T extends <T>(x: T) => void>(x: T): T { return null; }
+                                                                 ~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'T'.
+    var a;
+    foo(a);
+    foo2(a);
+    //foo3(a);
+    foo4(a);
+    
+    var b: number;
+    foo<any>(b);
+    foo2<any>(b);
+              ~
+!!! error TS2345: Argument of type 'number' is not assignable to parameter of type '{ x: number }'.
+    //foo3<any>(b);
+    foo4<any>(b);
+              ~
+!!! error TS2345: Argument of type 'number' is not assignable to parameter of type '(x: T) => void'.
+    
+    //function foo5<T extends String, U extends T>(x: T, y: U): T { return null; }
+    //foo5(a, a);
+    //foo5<any, any>(b, b);
+    
+    class C<T extends String> {
+                      ~~~~~~
+!!! error TS2304: Cannot find name 'String'.
+        constructor(public x: T) { }
+                           ~
+!!! error TS1005: ',' expected.
+    }
+    
+    var c1 = new C(a);
+             ~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    var c2 = new C<any>(b);
+             ~~~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    
+    class C2<T extends { x: number }> {
+        constructor(public x: T) { }
+                           ~
+!!! error TS1005: ',' expected.
+    }
+    
+    var c3 = new C2(a);
+             ~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    var c4 = new C2<any>(b);
+             ~~~~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    
+    //class C3<T extends T[]> {
+    //    constructor(public x: T) { }
+    //}
+    
+    //var c5 = new C3(a);
+    //var c6 = new C3<any>(b);
+    
+    class C4<T extends <T>(x:T) => T> {
+        constructor(public x: T) { }
+                           ~
+!!! error TS1005: ',' expected.
+    }
+    
+    var c7 = new C4(a);
+             ~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    var c8 = new C4<any>(b);
+             ~~~~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    
+    

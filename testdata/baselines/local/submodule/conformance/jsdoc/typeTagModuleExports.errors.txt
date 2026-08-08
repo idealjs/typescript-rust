@@ -1,0 +1,14 @@
+bug27327.js(2,7): error TS1003: Identifier expected.
+bug27327.js(2,8): error TS1005: ';' expected.
+bug27327.js(2,8): error TS2304: Cannot find name 'exports'.
+
+
+==== bug27327.js (3 errors) ====
+    /** @type {string} */
+    module.exports = 0;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.

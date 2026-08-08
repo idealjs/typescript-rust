@@ -1,11 +1,11 @@
-es6/awaitUnion_es6.ts(2,16): error TS2304: Cannot find name 'PromiseLike'.
-es6/awaitUnion_es6.ts(2,38): error TS2304: Cannot find name 'PromiseLike'.
-es6/awaitUnion_es6.ts(3,16): error TS2304: Cannot find name 'PromiseLike'.
-es6/awaitUnion_es6.ts(4,25): error TS2304: Cannot find name 'PromiseLike'.
-es6/awaitUnion_es6.ts(5,25): error TS2304: Cannot find name 'PromiseLike'.
+awaitUnion_es6.ts(2,16): error TS2304: Cannot find name 'PromiseLike'.
+awaitUnion_es6.ts(2,38): error TS2304: Cannot find name 'PromiseLike'.
+awaitUnion_es6.ts(3,16): error TS2304: Cannot find name 'PromiseLike'.
+awaitUnion_es6.ts(4,25): error TS2304: Cannot find name 'PromiseLike'.
+awaitUnion_es6.ts(5,25): error TS2304: Cannot find name 'PromiseLike'.
 
 
-==== es6/awaitUnion_es6.ts (5 errors) ====
+==== awaitUnion_es6.ts (5 errors) ====
     declare let a: number | string;
     declare let b: PromiseLike<number> | PromiseLike<string>;
                    ~~~~~~~~~~~

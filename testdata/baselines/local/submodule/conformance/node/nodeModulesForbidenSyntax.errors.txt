@@ -1,0 +1,130 @@
+index.cts(2,12): error TS2304: Cannot find name 'T'.
+index.cts(2,21): error TS2304: Cannot find name 'T'.
+index.mts(2,12): error TS2304: Cannot find name 'T'.
+index.mts(2,21): error TS2304: Cannot find name 'T'.
+index.ts(2,12): error TS2304: Cannot find name 'T'.
+index.ts(2,21): error TS2304: Cannot find name 'T'.
+package.json(2,11): error TS1005: ';' expected.
+
+
+==== index.ts (2 errors) ====
+    // cjs format file
+    const x = <T>() => <T><any>(void 0);
+               ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+    export {x};
+==== index.cts (2 errors) ====
+    // cjs format file
+    const x = <T>() => <T><any>(void 0);
+               ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+    export {x};
+==== index.mts (2 errors) ====
+    // esm format file
+    const x = <T>() => <T><any>(void 0);
+               ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+    export {x};
+==== index.ts (2 errors) ====
+    // cjs format file
+    const x = <T>() => <T><any>(void 0);
+               ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+    export {x};
+==== index.cts (2 errors) ====
+    // cjs format file
+    const x = <T>() => <T><any>(void 0);
+               ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+    export {x};
+==== index.mts (2 errors) ====
+    // esm format file
+    const x = <T>() => <T><any>(void 0);
+               ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+    export {x};
+==== index.ts (2 errors) ====
+    // esm format file
+    const x = <T>() => <T><any>(void 0);
+               ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+    export {x};
+==== index.mts (2 errors) ====
+    // esm format file
+    const x = <T>() => <T><any>(void 0);
+               ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+    export {x};
+==== index.cts (2 errors) ====
+    // cjs format file
+    const x = <T>() => <T><any>(void 0);
+               ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+    export {x};
+==== index.mts (2 errors) ====
+    // esm format file
+    const x = <T>() => <T><any>(void 0);
+               ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+    export {x};
+==== index.cts (2 errors) ====
+    // cjs format file
+    const x = <T>() => <T><any>(void 0);
+               ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+    export {x};
+==== index.ts (2 errors) ====
+    // esm format file
+    const x = <T>() => <T><any>(void 0);
+               ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+    export {x};
+==== package.json (1 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+        "type": "module"
+    }
+==== package.json (1 errors) ====
+    {
+        "type": "commonjs"
+              ~
+!!! error TS1005: ';' expected.
+    }
+==== package.json (1 errors) ====
+    {
+    }
+     
+!!! error TS1005: ';' expected.
+==== package.json (1 errors) ====
+    {
+        "type": "module"
+              ~
+!!! error TS1005: ';' expected.
+    }

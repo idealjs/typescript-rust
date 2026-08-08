@@ -1,0 +1,10 @@
+booleanPropertyAccess.ts(3,11): error TS2339: Property 'toString' does not exist on type 'boolean'.
+
+
+==== booleanPropertyAccess.ts (1 errors) ====
+    var x = true;
+    
+    var a = x.toString();
+              ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'boolean'.
+    var b = x['toString']();

@@ -1,16 +1,16 @@
-privateNames/privateNameAccessorssDerivedClasses.ts(2,9): error TS1005: ';' expected.
-privateNames/privateNameAccessorssDerivedClasses.ts(2,9): error TS1127: Invalid character.
-privateNames/privateNameAccessorssDerivedClasses.ts(2,10): error TS1005: ';' expected.
-privateNames/privateNameAccessorssDerivedClasses.ts(4,23): error TS1003: Identifier expected.
-privateNames/privateNameAccessorssDerivedClasses.ts(4,23): error TS1127: Invalid character.
-privateNames/privateNameAccessorssDerivedClasses.ts(4,24): error TS1005: ',' expected.
-privateNames/privateNameAccessorssDerivedClasses.ts(9,23): error TS1003: Identifier expected.
-privateNames/privateNameAccessorssDerivedClasses.ts(9,23): error TS1127: Invalid character.
-privateNames/privateNameAccessorssDerivedClasses.ts(9,24): error TS1005: ',' expected.
-privateNames/privateNameAccessorssDerivedClasses.ts(9,24): error TS2304: Cannot find name 'prop'.
+privateNameAccessorssDerivedClasses.ts(2,9): error TS1005: ';' expected.
+privateNameAccessorssDerivedClasses.ts(2,9): error TS1127: Invalid character.
+privateNameAccessorssDerivedClasses.ts(2,10): error TS1005: ';' expected.
+privateNameAccessorssDerivedClasses.ts(4,23): error TS1003: Identifier expected.
+privateNameAccessorssDerivedClasses.ts(4,23): error TS1127: Invalid character.
+privateNameAccessorssDerivedClasses.ts(4,24): error TS1005: ',' expected.
+privateNameAccessorssDerivedClasses.ts(9,23): error TS1003: Identifier expected.
+privateNameAccessorssDerivedClasses.ts(9,23): error TS1127: Invalid character.
+privateNameAccessorssDerivedClasses.ts(9,24): error TS1005: ',' expected.
+privateNameAccessorssDerivedClasses.ts(9,24): error TS2304: Cannot find name 'prop'.
 
 
-==== privateNames/privateNameAccessorssDerivedClasses.ts (10 errors) ====
+==== privateNameAccessorssDerivedClasses.ts (10 errors) ====
     class Base {
         get #prop(): number { return  123; }
             ~

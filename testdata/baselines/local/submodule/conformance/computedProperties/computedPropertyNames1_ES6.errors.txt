@@ -1,0 +1,59 @@
+computedPropertyNames1_ES6.ts(2,5): error TS2304: Cannot find name 'get'.
+computedPropertyNames1_ES6.ts(2,9): error TS1005: ',' expected.
+computedPropertyNames1_ES6.ts(2,16): error TS1005: ',' expected.
+computedPropertyNames1_ES6.ts(2,16): error TS2304: Cannot find name '('.
+computedPropertyNames1_ES6.ts(2,17): error TS1005: ',' expected.
+computedPropertyNames1_ES6.ts(2,17): error TS2304: Cannot find name ')'.
+computedPropertyNames1_ES6.ts(2,19): error TS1005: ',' expected.
+computedPropertyNames1_ES6.ts(2,19): error TS2304: Cannot find name '{'.
+computedPropertyNames1_ES6.ts(2,21): error TS1005: ',' expected.
+computedPropertyNames1_ES6.ts(2,21): error TS2304: Cannot find name 'return'.
+computedPropertyNames1_ES6.ts(2,28): error TS1005: ',' expected.
+computedPropertyNames1_ES6.ts(3,5): error TS2304: Cannot find name 'set'.
+computedPropertyNames1_ES6.ts(3,18): error TS1005: ',' expected.
+computedPropertyNames1_ES6.ts(3,20): error TS2304: Cannot find name 'string'.
+computedPropertyNames1_ES6.ts(3,28): error TS1005: ',' expected.
+computedPropertyNames1_ES6.ts(3,28): error TS1182: A destructuring declaration must have an initializer.
+computedPropertyNames1_ES6.ts(4,1): error TS1128: Declaration or statement expected.
+
+
+==== computedPropertyNames1_ES6.ts (17 errors) ====
+    var v = {
+        get [0 + 1]() { return 0 },
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+            ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS2304: Cannot find name '('.
+                    ~
+!!! error TS1005: ',' expected.
+                    ~
+!!! error TS2304: Cannot find name ')'.
+                      ~
+!!! error TS1005: ',' expected.
+                      ~
+!!! error TS2304: Cannot find name '{'.
+                        ~~~~~~
+!!! error TS1005: ',' expected.
+                        ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                               ~
+!!! error TS1005: ',' expected.
+        set [0 + 1](v: string) { } //No error
+        ~~~
+!!! error TS2304: Cannot find name 'set'.
+                     ~
+!!! error TS1005: ',' expected.
+                       ~~~~~~
+!!! error TS2304: Cannot find name 'string'.
+                               ~
+!!! error TS1005: ',' expected.
+                               ~~~~~~~~~~~~~~
+    }
+    
+!!! error TS1182: A destructuring declaration must have an initializer.
+    ~
+!!! error TS1128: Declaration or statement expected.

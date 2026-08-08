@@ -1,0 +1,11 @@
+parserComputedPropertyName34.ts(3,11): error TS2304: Cannot find name 'id'.
+
+
+==== parserComputedPropertyName34.ts (1 errors) ====
+    enum E {
+        // no ASI, comma expected
+        [e] = id++,
+              ~~
+!!! error TS2304: Cannot find name 'id'.
+        [e2] = 1
+    }

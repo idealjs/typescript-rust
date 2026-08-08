@@ -1,0 +1,75 @@
+thisInObjectLiterals.ts(14,5): error TS2304: Cannot find name 'f'.
+thisInObjectLiterals.ts(14,6): error TS1005: ',' expected.
+thisInObjectLiterals.ts(14,6): error TS2304: Cannot find name '('.
+thisInObjectLiterals.ts(14,7): error TS1005: ',' expected.
+thisInObjectLiterals.ts(14,7): error TS2304: Cannot find name ')'.
+thisInObjectLiterals.ts(14,9): error TS1005: ',' expected.
+thisInObjectLiterals.ts(14,9): error TS2304: Cannot find name '{'.
+thisInObjectLiterals.ts(15,9): error TS1005: ',' expected.
+thisInObjectLiterals.ts(15,9): error TS2304: Cannot find name 'return'.
+thisInObjectLiterals.ts(15,16): error TS1005: ',' expected.
+thisInObjectLiterals.ts(15,16): error TS2304: Cannot find name 'this'.
+thisInObjectLiterals.ts(15,20): error TS1005: ',' expected.
+thisInObjectLiterals.ts(15,20): error TS2304: Cannot find name '.'.
+thisInObjectLiterals.ts(15,21): error TS1005: ',' expected.
+thisInObjectLiterals.ts(15,21): error TS2304: Cannot find name 'spaaace'.
+thisInObjectLiterals.ts(15,28): error TS1005: ',' expected.
+thisInObjectLiterals.ts(15,28): error TS2304: Cannot find name ';'.
+thisInObjectLiterals.ts(17,1): error TS1128: Declaration or statement expected.
+
+
+==== thisInObjectLiterals.ts (18 errors) ====
+    class MyClass {
+        t: number;
+    
+        fn() {
+            type ContainingThis = this;
+            //type of 'this' in an object literal is the containing scope's this
+            var t = { x: this, y: this.t };
+            var t: { x: ContainingThis; y: number };
+        }
+    }
+    
+    //type of 'this' in an object literal method is the type of the object literal
+    var obj = {
+        f() {
+        ~
+!!! error TS2304: Cannot find name 'f'.
+         ~
+!!! error TS1005: ',' expected.
+         ~
+!!! error TS2304: Cannot find name '('.
+          ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS2304: Cannot find name ')'.
+            ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS2304: Cannot find name '{'.
+            return this.spaaace;
+            ~~~~~~
+!!! error TS1005: ',' expected.
+            ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                   ~~~~
+!!! error TS1005: ',' expected.
+                   ~~~~
+!!! error TS2304: Cannot find name 'this'.
+                       ~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS2304: Cannot find name '.'.
+                        ~~~~~~~
+!!! error TS1005: ',' expected.
+                        ~~~~~~~
+!!! error TS2304: Cannot find name 'spaaace'.
+                               ~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS2304: Cannot find name ';'.
+        }
+    };
+    ~
+!!! error TS1128: Declaration or statement expected.
+    var obj: { f: () => any; };

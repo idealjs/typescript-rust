@@ -1,0 +1,28 @@
+source.js(2,5): error TS2339: Property 'null' does not exist on type '() => void'.
+source.js(5,5): error TS2339: Property 'async' does not exist on type '() => void'.
+source.js(6,5): error TS2339: Property 'normal' does not exist on type '() => void'.
+source.js(9,5): error TS2339: Property 'class' does not exist on type '() => void'.
+source.js(10,5): error TS2339: Property 'normal' does not exist on type '() => void'.
+
+
+==== source.js (5 errors) ====
+    function foo() {}
+    foo.null = true;
+        ~~~~
+!!! error TS2339: Property 'null' does not exist on type '() => void'.
+    
+    function bar() {}
+    bar.async = true;
+        ~~~~~
+!!! error TS2339: Property 'async' does not exist on type '() => void'.
+    bar.normal = false;
+        ~~~~~~
+!!! error TS2339: Property 'normal' does not exist on type '() => void'.
+    
+    function baz() {}
+    baz.class = true;
+        ~~~~~
+!!! error TS2339: Property 'class' does not exist on type '() => void'.
+    baz.normal = false;
+        ~~~~~~
+!!! error TS2339: Property 'normal' does not exist on type '() => void'.

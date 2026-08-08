@@ -1,0 +1,29 @@
+ExportClassWithInaccessibleTypeInIndexerTypeAnnotations.ts(10,13): error TS1005: ']' expected.
+ExportClassWithInaccessibleTypeInIndexerTypeAnnotations.ts(10,21): error TS1005: ';' expected.
+ExportClassWithInaccessibleTypeInIndexerTypeAnnotations.ts(11,13): error TS1005: ']' expected.
+ExportClassWithInaccessibleTypeInIndexerTypeAnnotations.ts(11,21): error TS1005: ';' expected.
+
+
+==== ExportClassWithInaccessibleTypeInIndexerTypeAnnotations.ts (4 errors) ====
+    namespace A {
+    
+        class Point {
+            x: number;
+            y: number;
+        }
+    
+        export class points {
+    
+            [idx: number]: Point;
+                ~
+!!! error TS1005: ']' expected.
+                        ~
+!!! error TS1005: ';' expected.
+            [idx: string]: Point;
+                ~
+!!! error TS1005: ']' expected.
+                        ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    

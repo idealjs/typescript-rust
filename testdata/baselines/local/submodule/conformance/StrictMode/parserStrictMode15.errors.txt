@@ -1,0 +1,8 @@
+parserStrictMode15.ts(2,8): error TS2304: Cannot find name 'a'.
+
+
+==== parserStrictMode15.ts (1 errors) ====
+    "use strict";
+    delete a;
+           ~
+!!! error TS2304: Cannot find name 'a'.

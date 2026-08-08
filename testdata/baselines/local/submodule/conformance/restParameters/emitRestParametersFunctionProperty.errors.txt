@@ -1,0 +1,41 @@
+emitRestParametersFunctionProperty.ts(7,5): error TS2304: Cannot find name 'func'.
+emitRestParametersFunctionProperty.ts(7,9): error TS1005: ',' expected.
+emitRestParametersFunctionProperty.ts(7,9): error TS2304: Cannot find name '('.
+emitRestParametersFunctionProperty.ts(7,10): error TS1005: ',' expected.
+emitRestParametersFunctionProperty.ts(7,13): error TS2304: Cannot find name 'rest'.
+emitRestParametersFunctionProperty.ts(7,17): error TS1005: ',' expected.
+emitRestParametersFunctionProperty.ts(7,17): error TS2304: Cannot find name ')'.
+emitRestParametersFunctionProperty.ts(7,19): error TS1005: ',' expected.
+emitRestParametersFunctionProperty.ts(7,19): error TS2304: Cannot find name '{'.
+emitRestParametersFunctionProperty.ts(8,1): error TS1128: Declaration or statement expected.
+
+
+==== emitRestParametersFunctionProperty.ts (10 errors) ====
+    ﻿// @strict: false
+    var obj: {
+        func1: (...rest) => void
+    }
+    
+    var obj2 = {
+        func(...rest) { }
+     ~~~~
+!!! error TS2304: Cannot find name 'func'.
+         ~
+!!! error TS1005: ',' expected.
+         ~
+!!! error TS2304: Cannot find name '('.
+          ~~~
+!!! error TS1005: ',' expected.
+             ~~~~
+!!! error TS2304: Cannot find name 'rest'.
+                 ~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS2304: Cannot find name ')'.
+                   ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS2304: Cannot find name '{'.
+                       ~
+!!! error TS1128: Declaration or statement expected.
+    }

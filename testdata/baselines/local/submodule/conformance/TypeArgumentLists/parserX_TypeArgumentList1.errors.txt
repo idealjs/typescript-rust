@@ -1,0 +1,16 @@
+parserX_TypeArgumentList1.ts(1,1): error TS2304: Cannot find name 'Foo'.
+parserX_TypeArgumentList1.ts(1,9): error TS1005: '>' expected.
+parserX_TypeArgumentList1.ts(1,9): error TS1127: Invalid character.
+parserX_TypeArgumentList1.ts(1,11): error TS2304: Cannot find name 'C'.
+
+
+==== parserX_TypeArgumentList1.ts (4 errors) ====
+    Foo<A,B,\ C>(4, 5, 6);
+    ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+            ~
+!!! error TS1005: '>' expected.
+            ~
+!!! error TS1127: Invalid character.
+              ~
+!!! error TS2304: Cannot find name 'C'.

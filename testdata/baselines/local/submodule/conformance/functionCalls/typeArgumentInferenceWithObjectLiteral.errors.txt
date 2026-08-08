@@ -1,0 +1,80 @@
+typeArgumentInferenceWithObjectLiteral.ts(11,5): error TS2345: Argument of type '{ read: () => string; write: (value: T) => T }' is not assignable to parameter of type '{ read: () => T; write: (value: T) => any }'.
+typeArgumentInferenceWithObjectLiteral.ts(15,5): error TS2345: Argument of type '{ write: (value: T) => T; read: () => string }' is not assignable to parameter of type '{ read: () => T; write: (value: T) => any }'.
+typeArgumentInferenceWithObjectLiteral.ts(28,13): error TS2345: Argument of type '{ w: (x: T) => T; r: () => number }' is not assignable to parameter of type '{ w: (x: T) => U; r: () => T }'.
+typeArgumentInferenceWithObjectLiteral.ts(28,40): error TS2345: Argument of type '0' is not assignable to parameter of type 'T'.
+typeArgumentInferenceWithObjectLiteral.ts(29,13): error TS2345: Argument of type '{ w: (x: T) => T; r: () => number }' is not assignable to parameter of type '{ w: (x: T) => U; r: () => T }'.
+typeArgumentInferenceWithObjectLiteral.ts(29,40): error TS2345: Argument of type '0' is not assignable to parameter of type 'T'.
+typeArgumentInferenceWithObjectLiteral.ts(30,13): error TS2345: Argument of type '{ w: (x: T) => T; r: () => 0 }' is not assignable to parameter of type '{ w: (x: T) => U; r: () => T }'.
+typeArgumentInferenceWithObjectLiteral.ts(30,43): error TS2345: Argument of type '0' is not assignable to parameter of type 'T'.
+typeArgumentInferenceWithObjectLiteral.ts(33,13): error TS2345: Argument of type '{ w: (x: T) => T; r: () => 0 }' is not assignable to parameter of type '{ w: (x: T) => U; r: () => T }'.
+typeArgumentInferenceWithObjectLiteral.ts(33,43): error TS2345: Argument of type '0' is not assignable to parameter of type 'T'.
+typeArgumentInferenceWithObjectLiteral.ts(35,13): error TS2345: Argument of type '{ w: (x: T) => T; r: () => 0 }' is not assignable to parameter of type '{ w: (x: T) => U; r: () => T }'.
+typeArgumentInferenceWithObjectLiteral.ts(35,43): error TS2345: Argument of type '0' is not assignable to parameter of type 'T'.
+
+
+==== typeArgumentInferenceWithObjectLiteral.ts (12 errors) ====
+    interface Computed<T> {
+        read(): T;
+        write(value: T);
+    }
+    
+    function foo<T>(x: Computed<T>) { }
+    
+    var s: string;
+    
+    // Calls below should infer string for T and then assign that type to the value parameter
+    foo({
+        ~
+        read: () => s,
+    ~~~~~~~~~~~~~~~~~~
+        write: value => s = value
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    });
+    ~
+!!! error TS2345: Argument of type '{ read: () => string; write: (value: T) => T }' is not assignable to parameter of type '{ read: () => T; write: (value: T) => any }'.
+    foo({
+        ~
+        write: value => s = value,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        read: () => s
+    ~~~~~~~~~~~~~~~~~
+    });
+    ~
+!!! error TS2345: Argument of type '{ write: (value: T) => T; read: () => string }' is not assignable to parameter of type '{ read: () => T; write: (value: T) => any }'.
+    
+    enum E1 { X }
+    enum E2 { X }
+    
+    // Check that we infer from both a.r and b before fixing T in a.w
+    
+    declare function f1<T, U>(a: { w: (x: T) => U; r: () => T; }, b: T): U;
+    
+    var v1: number;
+    var v1 = f1({ w: x => x, r: () => 0 }, 0);
+                ~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ w: (x: T) => T; r: () => number }' is not assignable to parameter of type '{ w: (x: T) => U; r: () => T }'.
+                                           ~
+!!! error TS2345: Argument of type '0' is not assignable to parameter of type 'T'.
+    var v1 = f1({ w: x => x, r: () => 0 }, E1.X);
+                ~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ w: (x: T) => T; r: () => number }' is not assignable to parameter of type '{ w: (x: T) => U; r: () => T }'.
+                                           ~~~~
+!!! error TS2345: Argument of type '0' is not assignable to parameter of type 'T'.
+    var v1 = f1({ w: x => x, r: () => E1.X }, 0);
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ w: (x: T) => T; r: () => 0 }' is not assignable to parameter of type '{ w: (x: T) => U; r: () => T }'.
+                                              ~
+!!! error TS2345: Argument of type '0' is not assignable to parameter of type 'T'.
+    
+    var v2: E1;
+    var v2 = f1({ w: x => x, r: () => E1.X }, E1.X);
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ w: (x: T) => T; r: () => 0 }' is not assignable to parameter of type '{ w: (x: T) => U; r: () => T }'.
+                                              ~~~~
+!!! error TS2345: Argument of type '0' is not assignable to parameter of type 'T'.
+    
+    var v3 = f1({ w: x => x, r: () => E1.X }, E2.X);  // Error
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ w: (x: T) => T; r: () => 0 }' is not assignable to parameter of type '{ w: (x: T) => U; r: () => T }'.
+                                              ~~~~
+!!! error TS2345: Argument of type '0' is not assignable to parameter of type 'T'.

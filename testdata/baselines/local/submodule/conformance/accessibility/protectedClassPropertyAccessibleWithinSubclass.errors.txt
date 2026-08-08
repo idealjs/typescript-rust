@@ -1,10 +1,10 @@
-accessibility/protectedClassPropertyAccessibleWithinSubclass.ts(9,19): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinSubclass.ts(10,19): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinSubclass.ts(14,26): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinSubclass.ts(15,26): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinSubclass.ts(9,19): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinSubclass.ts(10,19): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinSubclass.ts(14,26): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinSubclass.ts(15,26): error TS1005: ';' expected.
 
 
-==== accessibility/protectedClassPropertyAccessibleWithinSubclass.ts (4 errors) ====
+==== protectedClassPropertyAccessibleWithinSubclass.ts (4 errors) ====
     // no errors
     
     class B {

@@ -1,0 +1,46 @@
+neverInference.ts(3,5): error TS2322: Type 'any[]' is not assignable to type 'never[]'.
+neverInference.ts(22,7): error TS2322: Type '{ comparator: (x: number, y: number) => number; nodes: { value: T; next: error } | null }' is not assignable to type '{ comparator: (x: number, y: number) => number; nodes: { value: number; next: error } | null }'.
+neverInference.ts(27,4): error TS2304: Cannot find name 'Array'.
+neverInference.ts(28,4): error TS2304: Cannot find name 'Array'.
+neverInference.ts(28,20): error TS2345: Argument of type 'number[]' is not assignable to parameter of type 'a[]'.
+
+
+==== neverInference.ts (5 errors) ====
+    declare function f1<T>(x: T[]): T;
+    
+    let neverArray: never[] = [];
+        ~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'any[]' is not assignable to type 'never[]'.
+    
+    let a1 = f1([]);  // never
+    let a2 = f1(neverArray);  // never
+    
+    // Repro from #19576
+    
+    type Comparator<T> = (x: T, y: T) => number;
+    
+    interface LinkedList<T> {
+        comparator: Comparator<T>,
+        nodes: Node<T>
+    }
+    
+    type Node<T> = { value: T, next: Node<T> } | null
+    
+    declare function compareNumbers(x: number, y: number): number;
+    declare function mkList<T>(items: T[], comparator: Comparator<T>): LinkedList<T>;
+    
+    const list: LinkedList<number> = mkList([], compareNumbers);
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '{ comparator: (x: number, y: number) => number; nodes: { value: T; next: error } | null }' is not assignable to type '{ comparator: (x: number, y: number) => number; nodes: { value: number; next: error } | null }'.
+    
+    // Repro from #19858
+    
+    declare function f2<a>(as1: a[], as2: a[], cmp: (a1: a, a2: a) => number): void;
+    f2(Array.from([0]), [], (a1, a2) => a1 - a2);
+       ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    f2(Array.from([]), [0], (a1, a2) => a1 - a2);
+       ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                       ~~~
+!!! error TS2345: Argument of type 'number[]' is not assignable to parameter of type 'a[]'.

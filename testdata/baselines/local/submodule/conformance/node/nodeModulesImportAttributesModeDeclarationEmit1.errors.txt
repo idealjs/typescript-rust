@@ -1,0 +1,56 @@
+error TS2300: Duplicate identifier 'RequireInterface'.
+error TS2300: Duplicate identifier 'ImportInterface'.
+/index.ts(10,13): error TS1003: Identifier expected.
+/index.ts(10,15): error TS1005: '=' expected.
+/index.ts(10,32): error TS1128: Declaration or statement expected.
+/node_modules/pkg/package.json(2,11): error TS1005: ';' expected.
+/node_modules/pkg/package.json(3,14): error TS1005: ';' expected.
+/node_modules/pkg/package.json(4,14): error TS1005: ';' expected.
+/node_modules/pkg/package.json(5,17): error TS1005: ';' expected.
+/node_modules/pkg/package.json(6,18): error TS1005: ';' expected.
+
+
+!!! error TS2300: Duplicate identifier 'RequireInterface'.
+
+!!! error TS2300: Duplicate identifier 'ImportInterface'.
+==== /node_modules/pkg/package.json (5 errors) ====
+    {
+        "name": "pkg",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "0.0.1",
+                 ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            "import": "./import.js",
+                    ~
+!!! error TS1005: ';' expected.
+            "require": "./require.js"
+                     ~
+!!! error TS1005: ';' expected.
+        }
+    }
+==== /node_modules/pkg/import.d.ts (0 errors) ====
+    export interface ImportInterface {}
+==== /node_modules/pkg/require.d.ts (0 errors) ====
+    export interface RequireInterface {}
+==== /index.ts (3 errors) ====
+    import type { RequireInterface } from "pkg" with { "resolution-mode": "require" };
+    import type { ImportInterface } from "pkg" with { "resolution-mode": "import" };
+    
+    export interface LocalInterface extends RequireInterface, ImportInterface {}
+    
+    import {type RequireInterface as Req} from "pkg" with { "resolution-mode": "require" };
+    import {type ImportInterface as Imp} from "pkg" with { "resolution-mode": "import" };
+    export interface Loc extends Req, Imp {}
+    
+    export type { RequireInterface } from "pkg" with { "resolution-mode": "require" };
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~~~~~~~~~~~~~~
+!!! error TS1005: '=' expected.
+                                   ~
+!!! error TS1128: Declaration or statement expected.
+    export type { ImportInterface } from "pkg" with { "resolution-mode": "import" };

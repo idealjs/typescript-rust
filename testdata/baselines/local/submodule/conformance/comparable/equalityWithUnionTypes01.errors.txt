@@ -1,0 +1,41 @@
+equalityWithUnionTypes01.ts(10,5): error TS2353: Object literal may only specify known properties, and 'p1' does not exist in type 'number | { p2: number }'.
+equalityWithUnionTypes01.ts(11,5): error TS2353: Object literal may only specify known properties, and 'p2' does not exist in type '{ p1: number }'.
+equalityWithUnionTypes01.ts(13,5): error TS2367: This comparison appears to be unintentional because the types 'number | { p2: number }' and '{ p1: number }' have no overlap.
+equalityWithUnionTypes01.ts(13,16): error TS2367: This comparison appears to be unintentional because the types '{ p1: number }' and 'number | { p2: number }' have no overlap.
+equalityWithUnionTypes01.ts(15,10): error TS2367: This comparison appears to be unintentional because the types 'number | { p2: number }' and '{ p1: number }' have no overlap.
+equalityWithUnionTypes01.ts(15,21): error TS2367: This comparison appears to be unintentional because the types '{ p1: number }' and 'number | { p2: number }' have no overlap.
+
+
+==== equalityWithUnionTypes01.ts (6 errors) ====
+    interface I1 {
+        p1: number
+    }
+    
+    interface I2 extends I1 {
+        p2: number;
+    }
+    
+    var x = { p1: 10, p2: 20 };
+    var y: number | I2 = x;
+        ~~~~~~~~~~~~~~~~~~
+!!! error TS2353: Object literal may only specify known properties, and 'p1' does not exist in type 'number | { p2: number }'.
+    var z: I1 = x;
+        ~~~~~~~~~
+!!! error TS2353: Object literal may only specify known properties, and 'p2' does not exist in type '{ p1: number }'.
+    
+    if (y === z || z === y) {
+        ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'number | { p2: number }' and '{ p1: number }' have no overlap.
+                   ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '{ p1: number }' and 'number | { p2: number }' have no overlap.
+    }
+    else if (y !== z || z !== y) {
+             ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'number | { p2: number }' and '{ p1: number }' have no overlap.
+                        ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '{ p1: number }' and 'number | { p2: number }' have no overlap.
+    }
+    else if (y == z || z == y) {
+    }
+    else if (y != z || z != y) {
+    }

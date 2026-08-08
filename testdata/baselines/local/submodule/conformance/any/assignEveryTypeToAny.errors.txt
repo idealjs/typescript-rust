@@ -1,18 +1,18 @@
-any/assignEveryTypeToAny.ts(50,8): error TS1005: ',' expected.
-any/assignEveryTypeToAny.ts(50,8): error TS2304: Cannot find name '('.
-any/assignEveryTypeToAny.ts(50,9): error TS1005: ',' expected.
-any/assignEveryTypeToAny.ts(50,9): error TS2304: Cannot find name ')'.
-any/assignEveryTypeToAny.ts(50,11): error TS1005: ',' expected.
-any/assignEveryTypeToAny.ts(50,11): error TS2304: Cannot find name '{'.
-any/assignEveryTypeToAny.ts(50,13): error TS1005: ',' expected.
-any/assignEveryTypeToAny.ts(50,13): error TS2304: Cannot find name 'return'.
-any/assignEveryTypeToAny.ts(50,20): error TS1005: ',' expected.
-any/assignEveryTypeToAny.ts(50,21): error TS1005: ',' expected.
-any/assignEveryTypeToAny.ts(50,21): error TS2304: Cannot find name ';'.
-any/assignEveryTypeToAny.ts(50,25): error TS1128: Declaration or statement expected.
+assignEveryTypeToAny.ts(50,8): error TS1005: ',' expected.
+assignEveryTypeToAny.ts(50,8): error TS2304: Cannot find name '('.
+assignEveryTypeToAny.ts(50,9): error TS1005: ',' expected.
+assignEveryTypeToAny.ts(50,9): error TS2304: Cannot find name ')'.
+assignEveryTypeToAny.ts(50,11): error TS1005: ',' expected.
+assignEveryTypeToAny.ts(50,11): error TS2304: Cannot find name '{'.
+assignEveryTypeToAny.ts(50,13): error TS1005: ',' expected.
+assignEveryTypeToAny.ts(50,13): error TS2304: Cannot find name 'return'.
+assignEveryTypeToAny.ts(50,20): error TS1005: ',' expected.
+assignEveryTypeToAny.ts(50,21): error TS1005: ',' expected.
+assignEveryTypeToAny.ts(50,21): error TS2304: Cannot find name ';'.
+assignEveryTypeToAny.ts(50,25): error TS1128: Declaration or statement expected.
 
 
-==== any/assignEveryTypeToAny.ts (12 errors) ====
+==== assignEveryTypeToAny.ts (12 errors) ====
     // all of these are valid
     
     var x: any;

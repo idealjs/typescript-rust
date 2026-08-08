@@ -1,0 +1,9 @@
+parserMemberFunctionDeclaration4.ts(2,12): error TS1005: ';' expected.
+
+
+==== parserMemberFunctionDeclaration4.ts (1 errors) ====
+    class C {
+        export Foo() { }
+               ~~~
+!!! error TS1005: ';' expected.
+    }

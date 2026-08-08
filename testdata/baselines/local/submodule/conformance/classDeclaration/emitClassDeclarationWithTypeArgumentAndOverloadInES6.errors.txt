@@ -1,0 +1,32 @@
+emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts(17,9): error TS1005: ';' expected.
+emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts(20,9): error TS1005: ';' expected.
+
+
+==== emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts (2 errors) ====
+    ﻿// @strict: false
+    class B<T> {
+        x: T;
+        B: T;
+    
+        constructor(a: any)
+        constructor(a: any,b: T)
+        constructor(a: T) { this.B = a;}
+    
+        foo(a: T)
+        foo(a: any)
+        foo(b: string)
+        foo(): T {
+            return this.x;
+        }
+    
+        get BB(): T {
+         ~~
+!!! error TS1005: ';' expected.
+            return this.B;
+        }
+        set BBWith(c: T) {
+         ~~~~~~
+!!! error TS1005: ';' expected.
+            this.B = c;
+        }
+    }

@@ -1,0 +1,22 @@
+parser512325.ts(1,14): error TS1138: Parameter declaration expected.
+parser512325.ts(1,20): error TS1005: '=>' expected.
+parser512325.ts(1,22): error TS1005: ';' expected.
+parser512325.ts(1,25): error TS2304: Cannot find name 'a'.
+parser512325.ts(1,27): error TS2304: Cannot find name 'b'.
+parser512325.ts(1,29): error TS2304: Cannot find name 'c'.
+
+
+==== parser512325.ts (6 errors) ====
+    var tt = (a, (b, c)) => a+b+c;
+                 ~
+!!! error TS1138: Parameter declaration expected.
+                       ~
+!!! error TS1005: '=>' expected.
+                         ~~
+!!! error TS1005: ';' expected.
+                            ~
+!!! error TS2304: Cannot find name 'a'.
+                              ~
+!!! error TS2304: Cannot find name 'b'.
+                                ~
+!!! error TS2304: Cannot find name 'c'.

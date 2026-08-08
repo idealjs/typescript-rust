@@ -1,0 +1,16 @@
+globalThisUnknownNoImplicitAny.ts(6,12): error TS2339: Property 'hi' does not exist on type 'globalThis'.
+
+
+==== globalThisUnknownNoImplicitAny.ts (1 errors) ====
+    declare let win: Window & typeof globalThis;
+    
+    // all accesses should be errors
+    win.hi
+    this.hi
+    globalThis.hi
+               ~~
+!!! error TS2339: Property 'hi' does not exist on type 'globalThis'.
+    
+    win['hi']
+    this['hi']
+    globalThis['hi']

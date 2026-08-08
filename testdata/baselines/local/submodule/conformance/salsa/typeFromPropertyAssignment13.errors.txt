@@ -1,0 +1,54 @@
+module.js(2,7): error TS2339: Property 'Inner' does not exist on type 'object'.
+module.js(3,7): error TS2339: Property 'Inner' does not exist on type 'object'.
+module.js(4,5): error TS2304: Cannot find name 'm'.
+module.js(4,6): error TS1005: ',' expected.
+module.js(4,6): error TS2304: Cannot find name '('.
+module.js(4,7): error TS1005: ',' expected.
+module.js(4,7): error TS2304: Cannot find name ')'.
+module.js(4,9): error TS1005: ',' expected.
+module.js(4,9): error TS2304: Cannot find name '{'.
+module.js(5,5): error TS2304: Cannot find name 'i'.
+module.js(5,6): error TS1005: ';' expected.
+module.js(6,1): error TS1128: Declaration or statement expected.
+
+
+==== module.js (12 errors) ====
+    var Outer = {}
+    Outer.Inner = function() {}
+          ~~~~~
+!!! error TS2339: Property 'Inner' does not exist on type 'object'.
+    Outer.Inner.prototype = {
+          ~~~~~
+!!! error TS2339: Property 'Inner' does not exist on type 'object'.
+        m() { },
+        ~
+!!! error TS2304: Cannot find name 'm'.
+         ~
+!!! error TS1005: ',' expected.
+         ~
+!!! error TS2304: Cannot find name '('.
+          ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS2304: Cannot find name ')'.
+            ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS2304: Cannot find name '{'.
+        i: 1
+        ~
+!!! error TS2304: Cannot find name 'i'.
+         ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    // incremental assignments still work
+    Outer.Inner.prototype.j = 2
+    /** @type {string} */
+    Outer.Inner.prototype.k;
+    var inner = new Outer.Inner()
+    inner.m()
+    inner.i
+    inner.j
+    inner.k

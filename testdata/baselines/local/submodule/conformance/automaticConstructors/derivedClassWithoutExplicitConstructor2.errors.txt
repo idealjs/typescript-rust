@@ -1,19 +1,19 @@
-automaticConstructors/derivedClassWithoutExplicitConstructor2.ts(14,22): error TS2554: Expected 0 arguments, but got 1.
-automaticConstructors/derivedClassWithoutExplicitConstructor2.ts(15,22): error TS2554: Expected 0 arguments, but got 2.
-automaticConstructors/derivedClassWithoutExplicitConstructor2.ts(16,22): error TS2554: Expected 0 arguments, but got 3.
-automaticConstructors/derivedClassWithoutExplicitConstructor2.ts(25,19): error TS2304: Cannot find name 'Date'.
-automaticConstructors/derivedClassWithoutExplicitConstructor2.ts(31,16): error TS2554: Expected 0 arguments, but got 1.
-automaticConstructors/derivedClassWithoutExplicitConstructor2.ts(31,20): error TS2304: Cannot find name 'Date'.
-automaticConstructors/derivedClassWithoutExplicitConstructor2.ts(32,16): error TS2554: Expected 0 arguments, but got 2.
-automaticConstructors/derivedClassWithoutExplicitConstructor2.ts(32,20): error TS2304: Cannot find name 'Date'.
-automaticConstructors/derivedClassWithoutExplicitConstructor2.ts(32,32): error TS2304: Cannot find name 'Date'.
-automaticConstructors/derivedClassWithoutExplicitConstructor2.ts(33,16): error TS2554: Expected 0 arguments, but got 3.
-automaticConstructors/derivedClassWithoutExplicitConstructor2.ts(33,20): error TS2304: Cannot find name 'Date'.
-automaticConstructors/derivedClassWithoutExplicitConstructor2.ts(33,32): error TS2304: Cannot find name 'Date'.
-automaticConstructors/derivedClassWithoutExplicitConstructor2.ts(33,44): error TS2304: Cannot find name 'Date'.
+derivedClassWithoutExplicitConstructor2.ts(14,22): error TS2554: Expected 0 arguments, but got 1.
+derivedClassWithoutExplicitConstructor2.ts(15,22): error TS2554: Expected 0 arguments, but got 2.
+derivedClassWithoutExplicitConstructor2.ts(16,22): error TS2554: Expected 0 arguments, but got 3.
+derivedClassWithoutExplicitConstructor2.ts(25,19): error TS2304: Cannot find name 'Date'.
+derivedClassWithoutExplicitConstructor2.ts(31,16): error TS2554: Expected 0 arguments, but got 1.
+derivedClassWithoutExplicitConstructor2.ts(31,20): error TS2304: Cannot find name 'Date'.
+derivedClassWithoutExplicitConstructor2.ts(32,16): error TS2554: Expected 0 arguments, but got 2.
+derivedClassWithoutExplicitConstructor2.ts(32,20): error TS2304: Cannot find name 'Date'.
+derivedClassWithoutExplicitConstructor2.ts(32,32): error TS2304: Cannot find name 'Date'.
+derivedClassWithoutExplicitConstructor2.ts(33,16): error TS2554: Expected 0 arguments, but got 3.
+derivedClassWithoutExplicitConstructor2.ts(33,20): error TS2304: Cannot find name 'Date'.
+derivedClassWithoutExplicitConstructor2.ts(33,32): error TS2304: Cannot find name 'Date'.
+derivedClassWithoutExplicitConstructor2.ts(33,44): error TS2304: Cannot find name 'Date'.
 
 
-==== automaticConstructors/derivedClassWithoutExplicitConstructor2.ts (13 errors) ====
+==== derivedClassWithoutExplicitConstructor2.ts (13 errors) ====
     class Base {
         a = 1;
         constructor(x: number, y?: number, z?: number);

@@ -1,0 +1,18 @@
+foo_1.ts(3,9): error TS2304: Cannot find name 'foo'.
+foo_1.ts(3,17): error TS2304: Cannot find name 'fum'.
+
+
+==== foo_0.ts (0 errors) ====
+    export var x: number;
+    
+==== fum.d.ts (0 errors) ====
+    export declare var y: number;
+    
+==== foo_1.ts (2 errors) ====
+    import foo = require("./vs/foo_0");
+    import fum = require("./vs/fum");
+    var z = foo.x + fum.y;
+            ~~~
+!!! error TS2304: Cannot find name 'foo'.
+                    ~~~
+!!! error TS2304: Cannot find name 'fum'.

@@ -1,0 +1,33 @@
+mod1.js(2,7): error TS1003: Identifier expected.
+mod1.js(2,8): error TS1005: ';' expected.
+mod1.js(2,8): error TS2304: Cannot find name 'exports'.
+mod1.js(3,7): error TS1003: Identifier expected.
+mod1.js(3,8): error TS1005: ';' expected.
+mod1.js(3,8): error TS2304: Cannot find name 'exports'.
+
+
+==== requires.d.ts (0 errors) ====
+    declare var module: { exports: any };
+    declare function require(name: string): any;
+==== mod1.js (6 errors) ====
+    /// <reference path='./requires.d.ts' />
+    module.exports = 1
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    module.exports.f = function () { }
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    
+==== a.js (0 errors) ====
+    /// <reference path='./requires.d.ts' />
+    var mod1 = require('./mod1')
+    mod1.toFixed(12)
+    mod1.f() // error, 'f' is not a property on 'number'

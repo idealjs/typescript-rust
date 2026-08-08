@@ -1,0 +1,13 @@
+parser643728.ts(3,8): error TS1005: '(' expected.
+parser643728.ts(4,1): error TS1138: Parameter declaration expected.
+
+
+==== parser643728.ts (2 errors) ====
+    interface C {
+        foo;
+        new;
+           ~
+!!! error TS1005: '(' expected.
+    }
+    ~
+!!! error TS1138: Parameter declaration expected.

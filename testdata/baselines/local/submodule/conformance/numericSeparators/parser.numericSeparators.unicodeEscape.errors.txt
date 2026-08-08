@@ -1,0 +1,159 @@
+16.ts(1,12): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+28.ts(1,12): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+4.ts(1,12): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+40.ts(1,13): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+
+
+==== parser.numericSeparators.unicodeEscape.ts (0 errors) ====
+    
+==== 1.ts (0 errors) ====
+    "\u{10_ffff}"
+    
+==== 2.ts (0 errors) ====
+    '\u{10_ffff}'
+    
+==== 3.ts (0 errors) ====
+    `\u{10_ffff}`
+    
+==== 4.ts (1 errors) ====
+    /\u{10_ffff}/u
+               ~
+!!! error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+    
+==== 5.ts (0 errors) ====
+    "\uff_ff"
+    
+==== 6.ts (0 errors) ====
+    '\uff_ff'
+    
+==== 7.ts (0 errors) ====
+    `\uff_ff`
+    
+==== 8.ts (0 errors) ====
+    /\uff_ff/u
+    
+==== 9.ts (0 errors) ====
+    "\xf_f"
+    
+==== 10.ts (0 errors) ====
+    '\xf_f'
+    
+==== 11.ts (0 errors) ====
+    `\xf_f`
+    
+==== 12.ts (0 errors) ====
+    /\xf_f/u
+    
+==== 13.ts (0 errors) ====
+    "\u{_10ffff}"
+    
+==== 14.ts (0 errors) ====
+    '\u{_10ffff}'
+    
+==== 15.ts (0 errors) ====
+    `\u{_10ffff}`
+    
+==== 16.ts (1 errors) ====
+    /\u{_10ffff}/u
+               ~
+!!! error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+    
+==== 17.ts (0 errors) ====
+    "\u_ffff"
+    
+==== 18.ts (0 errors) ====
+    '\u_ffff'
+    
+==== 19.ts (0 errors) ====
+    `\u_ffff`
+    
+==== 20.ts (0 errors) ====
+    /\u_ffff/u
+    
+==== 21.ts (0 errors) ====
+    "\x_ff"
+    
+==== 22.ts (0 errors) ====
+    '\x_ff'
+    
+==== 23.ts (0 errors) ====
+    `\x_ff`
+    
+==== 24.ts (0 errors) ====
+    /\x_ff/u
+    
+==== 25.ts (0 errors) ====
+    "\u{10ffff_}"
+    
+==== 26.ts (0 errors) ====
+    '\u{10ffff_}'
+    
+==== 27.ts (0 errors) ====
+    `\u{10ffff_}`
+    
+==== 28.ts (1 errors) ====
+    /\u{10ffff_}/u
+               ~
+!!! error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+    
+==== 29.ts (0 errors) ====
+    "\uffff_"
+    
+==== 30.ts (0 errors) ====
+    '\uffff_'
+    
+==== 31.ts (0 errors) ====
+    `\uffff_`
+    
+==== 32.ts (0 errors) ====
+    /\uffff_/u
+    
+==== 33.ts (0 errors) ====
+    "\xff_"
+    
+==== 34.ts (0 errors) ====
+    '\xff_'
+    
+==== 35.ts (0 errors) ====
+    `\xff_`
+    
+==== 36.ts (0 errors) ====
+    /\xff_/u
+    
+==== 37.ts (0 errors) ====
+    "\u{10__ffff}"
+    
+==== 38.ts (0 errors) ====
+    '\u{10__ffff}'
+    
+==== 39.ts (0 errors) ====
+    `\u{10__ffff}`
+    
+==== 40.ts (1 errors) ====
+    /\u{10__ffff}/u
+                ~
+!!! error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+    
+==== 41.ts (0 errors) ====
+    "\uff__ff"
+    
+==== 42.ts (0 errors) ====
+    '\uff__ff'
+    
+==== 43.ts (0 errors) ====
+    `\uff__ff`
+    
+==== 44.ts (0 errors) ====
+    /\uff__ff/u
+    
+==== 45.ts (0 errors) ====
+    "\xf__f"
+    
+==== 46.ts (0 errors) ====
+    '\xf__f'
+    
+==== 47.ts (0 errors) ====
+    `\xf__f`
+    
+==== 48.ts (0 errors) ====
+    /\xf__f/u

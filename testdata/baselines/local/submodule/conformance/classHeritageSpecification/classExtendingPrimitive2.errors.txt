@@ -1,9 +1,9 @@
-classHeritageSpecification/classExtendingPrimitive2.ts(3,19): error TS1109: Expression expected.
-classHeritageSpecification/classExtendingPrimitive2.ts(4,1): error TS1005: ',' expected.
-classHeritageSpecification/classExtendingPrimitive2.ts(4,27): error TS1005: '{' expected.
+classExtendingPrimitive2.ts(3,19): error TS1109: Expression expected.
+classExtendingPrimitive2.ts(4,1): error TS1005: ',' expected.
+classExtendingPrimitive2.ts(4,27): error TS1005: '{' expected.
 
 
-==== classHeritageSpecification/classExtendingPrimitive2.ts (3 errors) ====
+==== classExtendingPrimitive2.ts (3 errors) ====
     // classes cannot extend primitives
     
     class C4a extends void {}

@@ -1,0 +1,55 @@
+functionCalls.ts(18,1): error TS2349: This expression is not callable.
+functionCalls.ts(19,1): error TS2349: This expression is not callable.
+functionCalls.ts(20,1): error TS2349: This expression is not callable.
+functionCalls.ts(25,1): error TS2349: This expression is not callable.
+functionCalls.ts(26,1): error TS2349: This expression is not callable.
+functionCalls.ts(27,1): error TS2349: This expression is not callable.
+
+
+==== functionCalls.ts (6 errors) ====
+    // Invoke function call on value of type 'any' with no type arguments
+    declare var anyVar: any;
+    anyVar(0);
+    anyVar('');
+    
+    // Invoke function call on value of type 'any' with type arguments
+    // These should be errors
+    anyVar<string>('hello');
+    anyVar<number>();
+    anyVar<Window>(undefined);
+    
+    
+    // Invoke function call on value of a subtype of Function with no call signatures with no type arguments
+    interface SubFunc extends Function {
+        prop: number;
+    }
+    declare var subFunc: SubFunc;
+    subFunc(0);
+    ~~~~~~~
+!!! error TS2349: This expression is not callable.
+    subFunc('');
+    ~~~~~~~
+!!! error TS2349: This expression is not callable.
+    subFunc();
+    ~~~~~~~
+!!! error TS2349: This expression is not callable.
+    
+    
+    // Invoke function call on value of a subtype of Function with no call signatures with type arguments
+    // These should be errors
+    subFunc<number>(0);
+    ~~~~~~~
+!!! error TS2349: This expression is not callable.
+    subFunc<string>('');
+    ~~~~~~~
+!!! error TS2349: This expression is not callable.
+    subFunc<any>();
+    ~~~~~~~
+!!! error TS2349: This expression is not callable.
+    
+    // Invoke function call on value of type Function with no call signatures with type arguments
+    // These should be errors
+    declare var func: Function;
+    func<number>(0);
+    func<string>('');
+    func<any>();

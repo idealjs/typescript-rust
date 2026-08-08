@@ -1,0 +1,16 @@
+a.js(3,3): error TS2339: Property 'prototype' does not exist on type '() => void'.
+a.js(5,15): error TS2351: This expression is not constructable.
+
+
+==== a.js (2 errors) ====
+    // mixed prototype-assignment+function declaration
+    function C() { this.p = 1; }
+    C.prototype = { q: 2 };
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+    
+    const c = new C()
+                  ~
+!!! error TS2351: This expression is not constructable.
+    c.p
+    c.q

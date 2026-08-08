@@ -1,0 +1,26 @@
+accessorsOverrideProperty6.ts(5,9): error TS1005: ';' expected.
+accessorsOverrideProperty6.ts(12,9): error TS1005: ';' expected.
+accessorsOverrideProperty6.ts(13,9): error TS1005: ';' expected.
+
+
+==== accessorsOverrideProperty6.ts (3 errors) ====
+    class A {
+        p = 'yep'
+    }
+    class B extends A {
+        get p() { return 'oh no' } // error
+            ~
+!!! error TS1005: ';' expected.
+    }
+    class C {
+       p = 101
+    }
+    class D extends C {
+         _secret = 11
+        get p() { return this._secret } // error
+            ~
+!!! error TS1005: ';' expected.
+        set p(value) { this._secret = value } // error
+            ~
+!!! error TS1005: ';' expected.
+    }

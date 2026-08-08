@@ -1,0 +1,187 @@
+file1.ts(21,9): error TS1005: ';' expected.
+file1.ts(28,9): error TS1005: ';' expected.
+file1.ts(49,12): error TS1005: ';' expected.
+file1.ts(49,12): error TS1127: Invalid character.
+file1.ts(49,13): error TS1005: ';' expected.
+file1.ts(56,16): error TS1005: ';' expected.
+file1.ts(56,16): error TS1127: Invalid character.
+file1.ts(56,17): error TS1005: ';' expected.
+file1.ts(63,16): error TS1005: ';' expected.
+file1.ts(63,16): error TS1127: Invalid character.
+file1.ts(63,17): error TS1005: ';' expected.
+file1.ts(70,12): error TS1005: ';' expected.
+file1.ts(70,12): error TS1127: Invalid character.
+file1.ts(70,13): error TS1005: ';' expected.
+file1.ts(77,21): error TS1005: ';' expected.
+file1.ts(77,21): error TS1127: Invalid character.
+file1.ts(77,22): error TS1005: ';' expected.
+file3.ts(4,1): error TS1005: '{' expected.
+file3.ts(6,1): error TS1003: Identifier expected.
+file3.ts(8,9): error TS1003: Identifier expected.
+file3.ts(14,1): error TS1012: Unexpected token.
+file3.ts(14,2): error TS1005: ';' expected.
+
+
+==== esDecorators-classDeclaration-commentPreservation.ts (0 errors) ====
+    
+==== file1.ts (17 errors) ====
+    declare var dec: any;
+    
+    /*1*/
+    @dec
+    /*2*/
+    @dec
+    /*3*/
+    class C {
+        /*4*/
+        @dec
+        /*5*/
+        @dec
+        /*6*/
+        method() {}
+    
+        /*7*/
+        @dec
+        /*8*/
+        @dec
+        /*9*/
+        get x() { return 1; }
+            ~
+!!! error TS1005: ';' expected.
+    
+        /*10*/
+        @dec
+        /*11*/
+        @dec
+        /*12*/
+        set x(value: number) { }
+            ~
+!!! error TS1005: ';' expected.
+    
+        /*13*/
+        @dec
+        /*14*/
+        @dec
+        /*15*/
+        y = 1;
+    
+        /*16*/
+        @dec
+        /*17*/
+        @dec
+        /*18*/
+        accessor z = 1;
+    
+        /*19*/
+        @dec
+        /*20*/
+        @dec
+        /*21*/
+        static #method() {}
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~~~~
+!!! error TS1005: ';' expected.
+    
+        /*22*/
+        @dec
+        /*23*/
+        @dec
+        /*24*/
+        static get #x() { return 1; }
+                   ~
+!!! error TS1005: ';' expected.
+                   ~
+!!! error TS1127: Invalid character.
+                    ~
+!!! error TS1005: ';' expected.
+    
+        /*25*/
+        @dec
+        /*26*/
+        @dec
+        /*27*/
+        static set #x(value: number) { }
+                   ~
+!!! error TS1005: ';' expected.
+                   ~
+!!! error TS1127: Invalid character.
+                    ~
+!!! error TS1005: ';' expected.
+    
+        /*28*/
+        @dec
+        /*29*/
+        @dec
+        /*30*/
+        static #y = 1;
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~
+!!! error TS1005: ';' expected.
+    
+        /*31*/
+        @dec
+        /*32*/
+        @dec
+        /*33*/
+        static accessor #z = 1;
+                        ~
+!!! error TS1005: ';' expected.
+                        ~
+!!! error TS1127: Invalid character.
+                         ~
+!!! error TS1005: ';' expected.
+    }
+    
+==== file2.ts (0 errors) ====
+    /*34*/
+    @dec
+    /*35*/
+    @dec
+    /*36*/
+    export class D {
+    }
+    
+    /*37*/
+    @dec
+    /*38*/
+    @dec
+    /*39*/
+    export default class E {
+    }
+    
+==== file3.ts (5 errors) ====
+    /*40*/
+    export
+    /*41*/
+    @dec
+    ~
+!!! error TS1005: '{' expected.
+    /*42*/
+    @dec
+    ~
+!!! error TS1003: Identifier expected.
+    /*43*/
+    class F {
+            ~
+!!! error TS1003: Identifier expected.
+    }
+    
+    /*44*/
+    export default
+    /*45*/
+    @dec
+    ~
+!!! error TS1012: Unexpected token.
+     ~~~
+!!! error TS1005: ';' expected.
+    /*46*/
+    @dec
+    /*47*/
+    class G {
+    }

@@ -1,0 +1,2580 @@
+generatedContextualTyping.ts(5,21): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(5,42): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(6,31): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(6,35): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(7,45): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(7,49): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(8,51): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(8,55): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(9,5): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(9,34): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(9,38): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(10,5): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(10,48): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(10,52): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(11,5): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(11,54): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(11,58): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(12,19): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(12,23): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(13,9): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(13,24): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(13,28): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(14,35): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(14,39): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(15,33): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(15,37): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(17,48): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(17,52): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(18,43): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(18,47): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(19,57): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(19,61): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(20,63): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(20,67): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(21,46): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(21,50): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(22,60): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(22,64): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(23,66): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(23,70): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(24,31): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(24,35): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(25,21): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(25,36): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(25,40): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(26,47): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(26,51): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(27,44): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(27,48): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(29,59): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(29,63): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(30,51): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(30,55): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(31,65): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(31,69): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(32,71): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(32,75): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(33,54): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(33,58): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(34,68): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(34,72): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(35,74): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(35,78): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(36,39): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(36,43): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(37,29): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(37,44): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(37,48): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(38,55): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(38,59): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(39,52): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(39,56): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(41,67): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(41,71): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(42,50): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(42,54): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(43,64): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(43,68): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(44,70): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(44,74): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(45,53): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(45,57): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(46,67): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(46,71): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(47,73): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(47,77): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(48,38): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(48,42): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(49,28): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(49,43): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(49,47): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(50,54): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(50,58): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(51,51): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(51,55): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(53,66): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(53,70): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(54,50): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(54,54): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(55,64): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(55,68): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(56,70): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(56,74): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(57,53): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(57,57): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(58,67): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(58,71): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(59,73): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(59,77): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(60,38): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(60,42): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(61,28): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(61,43): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(61,47): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(62,54): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(62,58): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(63,51): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(63,55): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(65,66): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(65,70): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(66,58): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(66,62): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(67,72): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(67,76): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(68,78): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(68,82): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(69,61): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(69,65): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(70,75): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(70,79): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(71,81): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(71,85): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(72,46): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(72,50): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(73,36): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(73,51): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(73,55): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(74,62): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(74,66): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(75,59): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(75,63): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(77,74): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(77,78): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(78,57): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(78,61): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(79,71): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(79,75): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(80,77): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(80,81): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(81,60): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(81,64): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(82,74): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(82,78): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(83,80): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(83,84): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(84,45): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(84,49): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(85,35): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(85,50): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(85,54): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(86,61): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(86,65): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(87,58): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(87,62): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(89,73): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(89,77): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(97,31): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(102,32): error TS1005: ',' expected.
+generatedContextualTyping.ts(103,32): error TS1005: ',' expected.
+generatedContextualTyping.ts(104,32): error TS1005: ',' expected.
+generatedContextualTyping.ts(105,33): error TS1005: ',' expected.
+generatedContextualTyping.ts(106,33): error TS1005: ',' expected.
+generatedContextualTyping.ts(107,33): error TS1005: ',' expected.
+generatedContextualTyping.ts(108,33): error TS1005: ',' expected.
+generatedContextualTyping.ts(109,33): error TS1005: ',' expected.
+generatedContextualTyping.ts(109,39): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(110,33): error TS1005: ',' expected.
+generatedContextualTyping.ts(111,33): error TS1005: ',' expected.
+generatedContextualTyping.ts(112,33): error TS1005: ',' expected.
+generatedContextualTyping.ts(113,33): error TS1005: ',' expected.
+generatedContextualTyping.ts(114,34): error TS1005: ',' expected.
+generatedContextualTyping.ts(115,34): error TS1005: ',' expected.
+generatedContextualTyping.ts(116,34): error TS1005: ',' expected.
+generatedContextualTyping.ts(117,34): error TS1005: ',' expected.
+generatedContextualTyping.ts(118,34): error TS1005: ',' expected.
+generatedContextualTyping.ts(119,34): error TS1005: ',' expected.
+generatedContextualTyping.ts(120,34): error TS1005: ',' expected.
+generatedContextualTyping.ts(121,34): error TS1005: ',' expected.
+generatedContextualTyping.ts(121,40): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(122,34): error TS1005: ',' expected.
+generatedContextualTyping.ts(123,34): error TS1005: ',' expected.
+generatedContextualTyping.ts(124,34): error TS1005: ',' expected.
+generatedContextualTyping.ts(125,34): error TS1005: ',' expected.
+generatedContextualTyping.ts(133,21): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(138,47): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(138,51): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(139,61): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(139,65): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(140,67): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(140,71): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(141,43): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(141,50): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(141,54): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(142,43): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(142,64): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(142,68): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(143,43): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(143,70): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(143,74): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(144,35): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(144,39): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(145,18): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(145,40): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(145,44): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(146,51): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(146,55): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(147,48): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(147,52): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(149,63): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(149,67): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(150,47): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(150,51): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(150,56): error TS7027: Unreachable code detected.
+generatedContextualTyping.ts(150,70): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(150,74): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(151,61): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(151,65): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(151,72): error TS7027: Unreachable code detected.
+generatedContextualTyping.ts(151,100): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(151,104): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(152,67): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(152,71): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(152,78): error TS7027: Unreachable code detected.
+generatedContextualTyping.ts(152,112): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(152,116): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(153,43): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(153,50): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(153,54): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(153,59): error TS7027: Unreachable code detected.
+generatedContextualTyping.ts(153,66): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(153,73): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(153,77): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(154,43): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(154,64): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(154,68): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(154,75): error TS7027: Unreachable code detected.
+generatedContextualTyping.ts(154,82): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(154,103): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(154,107): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(155,43): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(155,70): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(155,74): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(155,81): error TS7027: Unreachable code detected.
+generatedContextualTyping.ts(155,88): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(155,115): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(155,119): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(156,35): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(156,39): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(156,44): error TS7027: Unreachable code detected.
+generatedContextualTyping.ts(156,52): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(156,56): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(157,18): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(157,40): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(157,44): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(157,49): error TS7027: Unreachable code detected.
+generatedContextualTyping.ts(157,57): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(157,61): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(158,51): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(158,55): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(158,60): error TS7027: Unreachable code detected.
+generatedContextualTyping.ts(158,68): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(158,72): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(159,48): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(159,52): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(159,59): error TS7027: Unreachable code detected.
+generatedContextualTyping.ts(159,72): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(159,76): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(160,84): error TS7027: Unreachable code detected.
+generatedContextualTyping.ts(161,63): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(161,67): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(161,77): error TS7027: Unreachable code detected.
+generatedContextualTyping.ts(161,107): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(161,111): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(162,54): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(162,58): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(163,68): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(163,72): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(164,74): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(164,78): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(165,5): error TS2322: Type '() => () => any[]' is not assignable to type '() => object'.
+generatedContextualTyping.ts(165,57): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(165,61): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(166,5): error TS2322: Type '() => () => any[]' is not assignable to type '() => object'.
+generatedContextualTyping.ts(166,71): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(166,75): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(167,5): error TS2322: Type '() => () => any[]' is not assignable to type '() => object'.
+generatedContextualTyping.ts(167,77): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(167,81): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(168,42): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(168,46): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(169,17): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(169,47): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(169,51): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(170,58): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(170,62): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(171,55): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(171,59): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(173,70): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(173,74): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(174,59): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(174,63): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(175,73): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(175,77): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(176,79): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(176,83): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(177,5): error TS2322: Type '() => () => any[]' is not assignable to type '() => object'.
+generatedContextualTyping.ts(177,62): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(177,66): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(178,5): error TS2322: Type '() => () => any[]' is not assignable to type '() => object'.
+generatedContextualTyping.ts(178,76): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(178,80): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(179,5): error TS2322: Type '() => () => any[]' is not assignable to type '() => object'.
+generatedContextualTyping.ts(179,82): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(179,86): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(180,47): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(180,51): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(181,17): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(181,52): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(181,56): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(182,63): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(182,67): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(183,60): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(183,64): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(185,75): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(185,79): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(186,47): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(186,51): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(187,61): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(187,65): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(188,67): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(188,71): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(189,22): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(189,50): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(189,54): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(190,22): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(190,64): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(190,68): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(191,22): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(191,70): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(191,74): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(192,35): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(192,39): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(193,25): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(193,40): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(193,44): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(194,51): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(194,55): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(195,48): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(195,52): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(197,63): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(197,67): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(198,54): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(198,58): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(199,68): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(199,72): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(200,74): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(200,78): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(201,29): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(201,57): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(201,61): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(202,29): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(202,71): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(202,75): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(203,29): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(203,77): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(203,81): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(204,42): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(204,46): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(205,32): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(205,47): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(205,51): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(206,58): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(206,62): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(207,55): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(207,59): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(209,70): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(209,74): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(210,47): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(210,51): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(211,53): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(211,57): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(212,50): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(212,54): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(213,56): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(213,60): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(214,21): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(214,25): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(215,13): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(215,26): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(215,30): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(216,37): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(216,41): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(217,34): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(217,38): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(218,49): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(218,53): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(219,62): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(219,66): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(220,68): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(220,72): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(221,65): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(221,69): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(222,71): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(222,75): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(223,36): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(223,40): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(224,14): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(224,41): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(224,45): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(225,52): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(225,56): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(226,49): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(226,53): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(227,39): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(227,43): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(228,53): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(228,57): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(229,59): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(229,63): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(230,42): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(230,46): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(231,56): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(231,60): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(232,62): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(232,66): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(233,27): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(233,31): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(234,11): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(234,32): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(234,36): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(235,43): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(235,47): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(236,40): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(236,44): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(238,55): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(238,59): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(239,46): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(239,50): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(240,60): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(240,64): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(241,66): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(241,70): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(242,5): error TS2322: Type '{ n: () => any[] }' is not assignable to type '{ n: object }'.
+generatedContextualTyping.ts(242,49): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(242,53): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(243,5): error TS2322: Type '{ n: () => any[] }' is not assignable to type '{ n: object }'.
+generatedContextualTyping.ts(243,63): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(243,67): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(244,5): error TS2322: Type '{ n: () => any[] }' is not assignable to type '{ n: object }'.
+generatedContextualTyping.ts(244,69): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(244,73): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(245,34): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(245,38): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(246,16): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(246,39): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(246,43): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(247,50): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(247,54): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(248,47): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(248,51): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(250,62): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(250,66): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(251,5): error TS2322: Type '(() => any[])[]' is not assignable to type 'object[]'.
+generatedContextualTyping.ts(251,39): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(251,43): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(252,5): error TS2322: Type '(() => any[])[]' is not assignable to type 'object[]'.
+generatedContextualTyping.ts(252,53): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(252,57): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(253,5): error TS2322: Type '(() => any[])[]' is not assignable to type 'object[]'.
+generatedContextualTyping.ts(253,59): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(253,63): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(254,24): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(254,28): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(255,11): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(255,29): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(255,33): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(256,40): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(256,44): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(257,37): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(257,41): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(258,52): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(258,56): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(259,47): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(259,51): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(260,53): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(260,57): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(261,5): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(261,50): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(261,54): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(262,5): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(262,56): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(262,60): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(263,21): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(263,25): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(264,11): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(264,26): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(264,30): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(265,37): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(265,41): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(266,34): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(266,38): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(267,60): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(267,64): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(268,66): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(268,70): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(269,63): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(269,67): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(270,69): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(270,73): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(271,34): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(271,38): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(272,11): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(272,39): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(272,43): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(273,50): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(273,54): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(274,47): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(274,51): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(275,47): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(275,51): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(275,81): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(275,85): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(276,53): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(276,57): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(276,93): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(276,97): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(277,5): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(277,50): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(277,54): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(277,84): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(277,88): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(278,5): error TS2322: Type '() => any[]' is not assignable to type 'object'.
+generatedContextualTyping.ts(278,56): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(278,60): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(278,96): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(278,100): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(279,21): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(279,25): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(279,33): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(279,37): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(280,11): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(280,26): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(280,30): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(280,38): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(280,42): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(281,37): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(281,41): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(281,49): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(281,53): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(282,34): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(282,38): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(282,53): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(282,57): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(283,40): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(283,44): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(283,57): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(283,61): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(284,54): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(284,58): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(284,87): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(284,91): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(285,60): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(285,64): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(285,99): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(285,103): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(286,5): error TS2322: Type '(() => any[]) | (() => any[])' is not assignable to type 'object'.
+generatedContextualTyping.ts(286,43): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(286,47): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(286,60): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(286,64): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(287,5): error TS2322: Type '(() => any[]) | (() => any[])' is not assignable to type 'object'.
+generatedContextualTyping.ts(287,57): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(287,61): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(287,90): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(287,94): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(288,5): error TS2322: Type '(() => any[]) | (() => any[])' is not assignable to type 'object'.
+generatedContextualTyping.ts(288,63): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(288,67): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(288,102): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(288,106): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(289,28): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(289,32): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(289,39): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(289,43): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(290,11): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(290,33): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(290,37): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(290,44): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(290,48): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(291,44): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(291,48): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(291,55): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(291,59): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(292,41): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(292,45): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(292,59): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(292,63): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(294,56): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(294,60): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(294,94): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(294,98): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(295,52): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(295,56): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(296,66): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(296,70): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(297,72): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(297,76): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(298,5): error TS2322: Type 'undefined | (() => any[])' is not assignable to type 'object'.
+generatedContextualTyping.ts(298,55): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(298,59): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(299,5): error TS2322: Type 'undefined | (() => any[])' is not assignable to type 'object'.
+generatedContextualTyping.ts(299,69): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(299,73): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(300,5): error TS2322: Type 'undefined | (() => any[])' is not assignable to type 'object'.
+generatedContextualTyping.ts(300,75): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(300,79): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(301,40): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(301,44): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(302,11): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(302,45): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(302,49): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(303,56): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(303,60): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(304,53): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(304,57): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(306,68): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(306,72): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(307,40): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(307,44): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(308,54): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(308,58): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(309,60): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(309,64): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(310,5): error TS2322: Type '(() => any[]) | undefined' is not assignable to type 'object'.
+generatedContextualTyping.ts(310,43): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(310,47): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(311,5): error TS2322: Type '(() => any[]) | undefined' is not assignable to type 'object'.
+generatedContextualTyping.ts(311,57): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(311,61): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(312,5): error TS2322: Type '(() => any[]) | undefined' is not assignable to type 'object'.
+generatedContextualTyping.ts(312,63): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(312,67): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(313,28): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(313,32): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(314,11): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(314,33): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(314,37): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(315,44): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(315,48): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(316,41): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(316,45): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(318,56): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(318,60): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(319,49): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(319,53): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(320,63): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(320,67): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(321,69): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(321,73): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(322,45): error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+generatedContextualTyping.ts(322,52): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(322,56): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(323,45): error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+generatedContextualTyping.ts(323,66): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(323,70): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(324,45): error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+generatedContextualTyping.ts(324,72): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(324,76): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(325,37): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(325,41): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(326,18): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(326,42): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(326,46): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(327,53): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(327,57): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(328,50): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(328,54): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(330,65): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(330,69): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(331,48): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(331,52): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(332,62): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(332,66): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(333,68): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(333,72): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(334,44): error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+generatedContextualTyping.ts(334,51): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(334,55): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(335,44): error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+generatedContextualTyping.ts(335,65): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(335,69): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(336,44): error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+generatedContextualTyping.ts(336,71): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(336,75): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(337,36): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(337,40): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(338,16): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(338,41): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(338,45): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(339,52): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(339,56): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(340,49): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(340,53): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(342,64): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(342,68): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(343,55): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(343,59): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(344,69): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(344,73): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(345,75): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(345,79): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(346,51): error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+generatedContextualTyping.ts(346,58): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(346,62): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(347,51): error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+generatedContextualTyping.ts(347,72): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(347,76): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(348,51): error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+generatedContextualTyping.ts(348,78): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(348,82): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(349,43): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(349,47): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(350,24): error TS2304: Cannot find name 'Array'.
+generatedContextualTyping.ts(350,48): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(350,52): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(351,59): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(351,63): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(352,56): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(352,60): error TS2304: Cannot find name 'd2'.
+generatedContextualTyping.ts(354,71): error TS2304: Cannot find name 'd1'.
+generatedContextualTyping.ts(354,75): error TS2304: Cannot find name 'd2'.
+
+
+==== generatedContextualTyping.ts (741 errors) ====
+    class Base { private p; }
+    class Derived1 extends Base { private m; }
+    class Derived2 extends Base { private n; }
+    interface Genric<T> { func(n: T[]); }
+    var b = new Base(), d1 = new Derived1(), d2 = new Derived2();
+                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x1: () => Base[] = () => [d1, d2];
+                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x2: () => Base[] = function() { return [d1, d2] };
+                                                ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                    ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x3: () => Base[] = function named() { return [d1, d2] };
+                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x4: { (): Base[]; } = () => [d1, d2];
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x5: { (): Base[]; } = function() { return [d1, d2] };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x6: { (): Base[]; } = function named() { return [d1, d2] };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x7: Base[] = [d1, d2];
+                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x8: Array<Base> = [d1, d2];
+            ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x9: { [n: number]: Base; } = [d1, d2];
+                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x10: {n: Base[]; }  = { n: [d1, d2] };
+                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x11: (s: Base[]) => any = n => { var n: Base[]; return null; };
+    var x12: Genric<Base> = { func: n => { return [d1, d2]; } };
+                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x13 { member: () => Base[] = () => [d1, d2] }
+                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x14 { member: () => Base[] = function() { return [d1, d2] } }
+                                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x15 { member: () => Base[] = function named() { return [d1, d2] } }
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x16 { member: { (): Base[]; } = () => [d1, d2] }
+                                                 ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                     ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x17 { member: { (): Base[]; } = function() { return [d1, d2] } }
+                                                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x18 { member: { (): Base[]; } = function named() { return [d1, d2] } }
+                                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x19 { member: Base[] = [d1, d2] }
+                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x20 { member: Array<Base> = [d1, d2] }
+                        ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x21 { member: { [n: number]: Base; } = [d1, d2] }
+                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x22 { member: {n: Base[]; }  = { n: [d1, d2] } }
+                                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x23 { member: (s: Base[]) => any = n => { var n: Base[]; return null; } }
+    class x24 { member: Genric<Base> = { func: n => { return [d1, d2]; } } }
+                                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x25 { private member: () => Base[] = () => [d1, d2] }
+                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x26 { private member: () => Base[] = function() { return [d1, d2] } }
+                                                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x27 { private member: () => Base[] = function named() { return [d1, d2] } }
+                                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x28 { private member: { (): Base[]; } = () => [d1, d2] }
+                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x29 { private member: { (): Base[]; } = function() { return [d1, d2] } }
+                                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x30 { private member: { (): Base[]; } = function named() { return [d1, d2] } }
+                                                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x31 { private member: Base[] = [d1, d2] }
+                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x32 { private member: Array<Base> = [d1, d2] }
+                                ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x33 { private member: { [n: number]: Base; } = [d1, d2] }
+                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x34 { private member: {n: Base[]; }  = { n: [d1, d2] } }
+                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x35 { private member: (s: Base[]) => any = n => { var n: Base[]; return null; } }
+    class x36 { private member: Genric<Base> = { func: n => { return [d1, d2]; } } }
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x37 { public member: () => Base[] = () => [d1, d2] }
+                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x38 { public member: () => Base[] = function() { return [d1, d2] } }
+                                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x39 { public member: () => Base[] = function named() { return [d1, d2] } }
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x40 { public member: { (): Base[]; } = () => [d1, d2] }
+                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x41 { public member: { (): Base[]; } = function() { return [d1, d2] } }
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x42 { public member: { (): Base[]; } = function named() { return [d1, d2] } }
+                                                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x43 { public member: Base[] = [d1, d2] }
+                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x44 { public member: Array<Base> = [d1, d2] }
+                               ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x45 { public member: { [n: number]: Base; } = [d1, d2] }
+                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x46 { public member: {n: Base[]; }  = { n: [d1, d2] } }
+                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x47 { public member: (s: Base[]) => any = n => { var n: Base[]; return null; } }
+    class x48 { public member: Genric<Base> = { func: n => { return [d1, d2]; } } }
+                                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x49 { static member: () => Base[] = () => [d1, d2] }
+                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x50 { static member: () => Base[] = function() { return [d1, d2] } }
+                                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x51 { static member: () => Base[] = function named() { return [d1, d2] } }
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x52 { static member: { (): Base[]; } = () => [d1, d2] }
+                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x53 { static member: { (): Base[]; } = function() { return [d1, d2] } }
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x54 { static member: { (): Base[]; } = function named() { return [d1, d2] } }
+                                                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x55 { static member: Base[] = [d1, d2] }
+                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x56 { static member: Array<Base> = [d1, d2] }
+                               ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x57 { static member: { [n: number]: Base; } = [d1, d2] }
+                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x58 { static member: {n: Base[]; }  = { n: [d1, d2] } }
+                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x59 { static member: (s: Base[]) => any = n => { var n: Base[]; return null; } }
+    class x60 { static member: Genric<Base> = { func: n => { return [d1, d2]; } } }
+                                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x61 { private static member: () => Base[] = () => [d1, d2] }
+                                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x62 { private static member: () => Base[] = function() { return [d1, d2] } }
+                                                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x63 { private static member: () => Base[] = function named() { return [d1, d2] } }
+                                                                                 ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                     ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x64 { private static member: { (): Base[]; } = () => [d1, d2] }
+                                                                ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                    ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x65 { private static member: { (): Base[]; } = function() { return [d1, d2] } }
+                                                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x66 { private static member: { (): Base[]; } = function named() { return [d1, d2] } }
+                                                                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x67 { private static member: Base[] = [d1, d2] }
+                                                 ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                     ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x68 { private static member: Array<Base> = [d1, d2] }
+                                       ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x69 { private static member: { [n: number]: Base; } = [d1, d2] }
+                                                                 ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                     ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x70 { private static member: {n: Base[]; }  = { n: [d1, d2] } }
+                                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x71 { private static member: (s: Base[]) => any = n => { var n: Base[]; return null; } }
+    class x72 { private static member: Genric<Base> = { func: n => { return [d1, d2]; } } }
+                                                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x73 { public static member: () => Base[] = () => [d1, d2] }
+                                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x74 { public static member: () => Base[] = function() { return [d1, d2] } }
+                                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x75 { public static member: () => Base[] = function named() { return [d1, d2] } }
+                                                                                ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                    ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x76 { public static member: { (): Base[]; } = () => [d1, d2] }
+                                                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x77 { public static member: { (): Base[]; } = function() { return [d1, d2] } }
+                                                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x78 { public static member: { (): Base[]; } = function named() { return [d1, d2] } }
+                                                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x79 { public static member: Base[] = [d1, d2] }
+                                                ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                    ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x80 { public static member: Array<Base> = [d1, d2] }
+                                      ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x81 { public static member: { [n: number]: Base; } = [d1, d2] }
+                                                                ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                    ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x82 { public static member: {n: Base[]; }  = { n: [d1, d2] } }
+                                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x83 { public static member: (s: Base[]) => any = n => { var n: Base[]; return null; } }
+    class x84 { public static member: Genric<Base> = { func: n => { return [d1, d2]; } } }
+                                                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    class x85 { constructor(parm: () => Base[] = () => [d1, d2]) { } }
+    class x86 { constructor(parm: () => Base[] = function() { return [d1, d2] }) { } }
+    class x87 { constructor(parm: () => Base[] = function named() { return [d1, d2] }) { } }
+    class x88 { constructor(parm: { (): Base[]; } = () => [d1, d2]) { } }
+    class x89 { constructor(parm: { (): Base[]; } = function() { return [d1, d2] }) { } }
+    class x90 { constructor(parm: { (): Base[]; } = function named() { return [d1, d2] }) { } }
+    class x91 { constructor(parm: Base[] = [d1, d2]) { } }
+    class x92 { constructor(parm: Array<Base> = [d1, d2]) { } }
+                                  ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    class x93 { constructor(parm: { [n: number]: Base; } = [d1, d2]) { } }
+    class x94 { constructor(parm: {n: Base[]; }  = { n: [d1, d2] }) { } }
+    class x95 { constructor(parm: (s: Base[]) => any = n => { var n: Base[]; return null; }) { } }
+    class x96 { constructor(parm: Genric<Base> = { func: n => { return [d1, d2]; } }) { } }
+    class x97 { constructor(public parm: () => Base[] = () => [d1, d2]) { } }
+                                   ~~~~
+!!! error TS1005: ',' expected.
+    class x98 { constructor(public parm: () => Base[] = function() { return [d1, d2] }) { } }
+                                   ~~~~
+!!! error TS1005: ',' expected.
+    class x99 { constructor(public parm: () => Base[] = function named() { return [d1, d2] }) { } }
+                                   ~~~~
+!!! error TS1005: ',' expected.
+    class x100 { constructor(public parm: { (): Base[]; } = () => [d1, d2]) { } }
+                                    ~~~~
+!!! error TS1005: ',' expected.
+    class x101 { constructor(public parm: { (): Base[]; } = function() { return [d1, d2] }) { } }
+                                    ~~~~
+!!! error TS1005: ',' expected.
+    class x102 { constructor(public parm: { (): Base[]; } = function named() { return [d1, d2] }) { } }
+                                    ~~~~
+!!! error TS1005: ',' expected.
+    class x103 { constructor(public parm: Base[] = [d1, d2]) { } }
+                                    ~~~~
+!!! error TS1005: ',' expected.
+    class x104 { constructor(public parm: Array<Base> = [d1, d2]) { } }
+                                    ~~~~
+!!! error TS1005: ',' expected.
+                                          ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    class x105 { constructor(public parm: { [n: number]: Base; } = [d1, d2]) { } }
+                                    ~~~~
+!!! error TS1005: ',' expected.
+    class x106 { constructor(public parm: {n: Base[]; }  = { n: [d1, d2] }) { } }
+                                    ~~~~
+!!! error TS1005: ',' expected.
+    class x107 { constructor(public parm: (s: Base[]) => any = n => { var n: Base[]; return null; }) { } }
+                                    ~~~~
+!!! error TS1005: ',' expected.
+    class x108 { constructor(public parm: Genric<Base> = { func: n => { return [d1, d2]; } }) { } }
+                                    ~~~~
+!!! error TS1005: ',' expected.
+    class x109 { constructor(private parm: () => Base[] = () => [d1, d2]) { } }
+                                     ~~~~
+!!! error TS1005: ',' expected.
+    class x110 { constructor(private parm: () => Base[] = function() { return [d1, d2] }) { } }
+                                     ~~~~
+!!! error TS1005: ',' expected.
+    class x111 { constructor(private parm: () => Base[] = function named() { return [d1, d2] }) { } }
+                                     ~~~~
+!!! error TS1005: ',' expected.
+    class x112 { constructor(private parm: { (): Base[]; } = () => [d1, d2]) { } }
+                                     ~~~~
+!!! error TS1005: ',' expected.
+    class x113 { constructor(private parm: { (): Base[]; } = function() { return [d1, d2] }) { } }
+                                     ~~~~
+!!! error TS1005: ',' expected.
+    class x114 { constructor(private parm: { (): Base[]; } = function named() { return [d1, d2] }) { } }
+                                     ~~~~
+!!! error TS1005: ',' expected.
+    class x115 { constructor(private parm: Base[] = [d1, d2]) { } }
+                                     ~~~~
+!!! error TS1005: ',' expected.
+    class x116 { constructor(private parm: Array<Base> = [d1, d2]) { } }
+                                     ~~~~
+!!! error TS1005: ',' expected.
+                                           ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    class x117 { constructor(private parm: { [n: number]: Base; } = [d1, d2]) { } }
+                                     ~~~~
+!!! error TS1005: ',' expected.
+    class x118 { constructor(private parm: {n: Base[]; }  = { n: [d1, d2] }) { } }
+                                     ~~~~
+!!! error TS1005: ',' expected.
+    class x119 { constructor(private parm: (s: Base[]) => any = n => { var n: Base[]; return null; }) { } }
+                                     ~~~~
+!!! error TS1005: ',' expected.
+    class x120 { constructor(private parm: Genric<Base> = { func: n => { return [d1, d2]; } }) { } }
+                                     ~~~~
+!!! error TS1005: ',' expected.
+    function x121(parm: () => Base[] = () => [d1, d2]) { }
+    function x122(parm: () => Base[] = function() { return [d1, d2] }) { }
+    function x123(parm: () => Base[] = function named() { return [d1, d2] }) { }
+    function x124(parm: { (): Base[]; } = () => [d1, d2]) { }
+    function x125(parm: { (): Base[]; } = function() { return [d1, d2] }) { }
+    function x126(parm: { (): Base[]; } = function named() { return [d1, d2] }) { }
+    function x127(parm: Base[] = [d1, d2]) { }
+    function x128(parm: Array<Base> = [d1, d2]) { }
+                        ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    function x129(parm: { [n: number]: Base; } = [d1, d2]) { }
+    function x130(parm: {n: Base[]; }  = { n: [d1, d2] }) { }
+    function x131(parm: (s: Base[]) => any = n => { var n: Base[]; return null; }) { }
+    function x132(parm: Genric<Base> = { func: n => { return [d1, d2]; } }) { }
+    function x133(): () => Base[] { return () => [d1, d2]; }
+                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x134(): () => Base[] { return function() { return [d1, d2] }; }
+                                                                ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                    ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x135(): () => Base[] { return function named() { return [d1, d2] }; }
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x136(): { (): Base[]; } { return () => [d1, d2]; }
+                                              ~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x137(): { (): Base[]; } { return function() { return [d1, d2] }; }
+                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x138(): { (): Base[]; } { return function named() { return [d1, d2] }; }
+                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x139(): Base[] { return [d1, d2]; }
+                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x140(): Array<Base> { return [d1, d2]; }
+                     ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x141(): { [n: number]: Base; } { return [d1, d2]; }
+                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x142(): {n: Base[]; }  { return { n: [d1, d2] }; }
+                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x143(): (s: Base[]) => any { return n => { var n: Base[]; return null; }; }
+    function x144(): Genric<Base> { return { func: n => { return [d1, d2]; } }; }
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x145(): () => Base[] { return () => [d1, d2]; return () => [d1, d2]; }
+                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                           ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x146(): () => Base[] { return function() { return [d1, d2] }; return function() { return [d1, d2] }; }
+                                                                ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                    ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                                                                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x147(): () => Base[] { return function named() { return [d1, d2] }; return function named() { return [d1, d2] }; }
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                                                                                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x148(): { (): Base[]; } { return () => [d1, d2]; return () => [d1, d2]; }
+                                              ~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                              ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                                                                     ~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x149(): { (): Base[]; } { return function() { return [d1, d2] }; return function() { return [d1, d2] }; }
+                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                                                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x150(): { (): Base[]; } { return function named() { return [d1, d2] }; return function named() { return [d1, d2] }; }
+                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                                                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                                                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x151(): Base[] { return [d1, d2]; return [d1, d2]; }
+                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                               ~~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x152(): Array<Base> { return [d1, d2]; return [d1, d2]; }
+                     ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                    ~~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x153(): { [n: number]: Base; } { return [d1, d2]; return [d1, d2]; }
+                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                               ~~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x154(): {n: Base[]; }  { return { n: [d1, d2] }; return { n: [d1, d2] }; }
+                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                              ~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                                                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x155(): (s: Base[]) => any { return n => { var n: Base[]; return null; }; return n => { var n: Base[]; return null; }; }
+                                                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+    function x156(): Genric<Base> { return { func: n => { return [d1, d2]; } }; return { func: n => { return [d1, d2]; } }; }
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                                                                                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x157: () => () => Base[] = () => { return () => [d1, d2]; };
+                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x158: () => () => Base[] = () => { return function() { return [d1, d2] }; };
+                                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x159: () => () => Base[] = () => { return function named() { return [d1, d2] }; };
+                                                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x160: () => { (): Base[]; } = () => { return () => [d1, d2]; };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => () => any[]' is not assignable to type '() => object'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x161: () => { (): Base[]; } = () => { return function() { return [d1, d2] }; };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => () => any[]' is not assignable to type '() => object'.
+                                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x162: () => { (): Base[]; } = () => { return function named() { return [d1, d2] }; };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => () => any[]' is not assignable to type '() => object'.
+                                                                                ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                    ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x163: () => Base[] = () => { return [d1, d2]; };
+                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x164: () => Array<Base> = () => { return [d1, d2]; };
+                    ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x165: () => { [n: number]: Base; } = () => { return [d1, d2]; };
+                                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x166: () => {n: Base[]; }  = () => { return { n: [d1, d2] }; };
+                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x167: () => (s: Base[]) => any = () => { return n => { var n: Base[]; return null; }; };
+    var x168: () => Genric<Base> = () => { return { func: n => { return [d1, d2]; } }; };
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x169: () => () => Base[] = function() { return () => [d1, d2]; };
+                                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x170: () => () => Base[] = function() { return function() { return [d1, d2] }; };
+                                                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x171: () => () => Base[] = function() { return function named() { return [d1, d2] }; };
+                                                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x172: () => { (): Base[]; } = function() { return () => [d1, d2]; };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => () => any[]' is not assignable to type '() => object'.
+                                                                 ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                     ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x173: () => { (): Base[]; } = function() { return function() { return [d1, d2] }; };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => () => any[]' is not assignable to type '() => object'.
+                                                                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x174: () => { (): Base[]; } = function() { return function named() { return [d1, d2] }; };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => () => any[]' is not assignable to type '() => object'.
+                                                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x175: () => Base[] = function() { return [d1, d2]; };
+                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x176: () => Array<Base> = function() { return [d1, d2]; };
+                    ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x177: () => { [n: number]: Base; } = function() { return [d1, d2]; };
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x178: () => {n: Base[]; }  = function() { return { n: [d1, d2] }; };
+                                                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x179: () => (s: Base[]) => any = function() { return n => { var n: Base[]; return null; }; };
+    var x180: () => Genric<Base> = function() { return { func: n => { return [d1, d2]; } }; };
+                                                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x181 { var t: () => Base[] = () => [d1, d2]; }
+                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x182 { var t: () => Base[] = function() { return [d1, d2] }; }
+                                                                ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                    ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x183 { var t: () => Base[] = function named() { return [d1, d2] }; }
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x184 { var t: { (): Base[]; } = () => [d1, d2]; }
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x185 { var t: { (): Base[]; } = function() { return [d1, d2] }; }
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x186 { var t: { (): Base[]; } = function named() { return [d1, d2] }; }
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x187 { var t: Base[] = [d1, d2]; }
+                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x188 { var t: Array<Base> = [d1, d2]; }
+                            ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x189 { var t: { [n: number]: Base; } = [d1, d2]; }
+                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x190 { var t: {n: Base[]; }  = { n: [d1, d2] }; }
+                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x191 { var t: (s: Base[]) => any = n => { var n: Base[]; return null; }; }
+    namespace x192 { var t: Genric<Base> = { func: n => { return [d1, d2]; } }; }
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x193 { export var t: () => Base[] = () => [d1, d2]; }
+                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x194 { export var t: () => Base[] = function() { return [d1, d2] }; }
+                                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x195 { export var t: () => Base[] = function named() { return [d1, d2] }; }
+                                                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x196 { export var t: { (): Base[]; } = () => [d1, d2]; }
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x197 { export var t: { (): Base[]; } = function() { return [d1, d2] }; }
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x198 { export var t: { (): Base[]; } = function named() { return [d1, d2] }; }
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                                                ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                    ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x199 { export var t: Base[] = [d1, d2]; }
+                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x200 { export var t: Array<Base> = [d1, d2]; }
+                                   ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x201 { export var t: { [n: number]: Base; } = [d1, d2]; }
+                                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x202 { export var t: {n: Base[]; }  = { n: [d1, d2] }; }
+                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    namespace x203 { export var t: (s: Base[]) => any = n => { var n: Base[]; return null; }; }
+    namespace x204 { export var t: Genric<Base> = { func: n => { return [d1, d2]; } }; }
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x206 = <() => Base[]>function() { return [d1, d2] };
+                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x207 = <() => Base[]>function named() { return [d1, d2] };
+                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x209 = <{ (): Base[]; }>function() { return [d1, d2] };
+                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x210 = <{ (): Base[]; }>function named() { return [d1, d2] };
+                                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x211 = <Base[]>[d1, d2];
+                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x212 = <Array<Base>>[d1, d2];
+                ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x213 = <{ [n: number]: Base; }>[d1, d2];
+                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x214 = <{n: Base[]; } >{ n: [d1, d2] };
+                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x216 = <Genric<Base>>{ func: n => { return [d1, d2]; } };
+                                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x217 = (<() => Base[]>undefined) || function() { return [d1, d2] };
+                                                                 ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                     ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x218 = (<() => Base[]>undefined) || function named() { return [d1, d2] };
+                                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x219 = (<{ (): Base[]; }>undefined) || function() { return [d1, d2] };
+                                                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x220 = (<{ (): Base[]; }>undefined) || function named() { return [d1, d2] };
+                                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x221 = (<Base[]>undefined) || [d1, d2];
+                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x222 = (<Array<Base>>undefined) || [d1, d2];
+                 ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x223 = (<{ [n: number]: Base; }>undefined) || [d1, d2];
+                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x224 = (<{n: Base[]; } >undefined) || { n: [d1, d2] };
+                                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x225: () => Base[]; x225 = () => [d1, d2];
+                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x226: () => Base[]; x226 = function() { return [d1, d2] };
+                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x227: () => Base[]; x227 = function named() { return [d1, d2] };
+                                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x228: { (): Base[]; }; x228 = () => [d1, d2];
+                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x229: { (): Base[]; }; x229 = function() { return [d1, d2] };
+                                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x230: { (): Base[]; }; x230 = function named() { return [d1, d2] };
+                                                                 ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                     ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x231: Base[]; x231 = [d1, d2];
+                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x232: Array<Base>; x232 = [d1, d2];
+              ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x233: { [n: number]: Base; }; x233 = [d1, d2];
+                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x234: {n: Base[]; } ; x234 = { n: [d1, d2] };
+                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x235: (s: Base[]) => any; x235 = n => { var n: Base[]; return null; };
+    var x236: Genric<Base>; x236 = { func: n => { return [d1, d2]; } };
+                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x237: { n: () => Base[]; } = { n: () => [d1, d2] };
+                                                 ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                     ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x238: { n: () => Base[]; } = { n: function() { return [d1, d2] } };
+                                                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x239: { n: () => Base[]; } = { n: function named() { return [d1, d2] } };
+                                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x240: { n: { (): Base[]; }; } = { n: () => [d1, d2] };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '{ n: () => any[] }' is not assignable to type '{ n: object }'.
+                                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x241: { n: { (): Base[]; }; } = { n: function() { return [d1, d2] } };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '{ n: () => any[] }' is not assignable to type '{ n: object }'.
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x242: { n: { (): Base[]; }; } = { n: function named() { return [d1, d2] } };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '{ n: () => any[] }' is not assignable to type '{ n: object }'.
+                                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x243: { n: Base[]; } = { n: [d1, d2] };
+                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x244: { n: Array<Base>; } = { n: [d1, d2] };
+                   ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x245: { n: { [n: number]: Base; }; } = { n: [d1, d2] };
+                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x246: { n: {n: Base[]; } ; } = { n: { n: [d1, d2] } };
+                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x247: { n: (s: Base[]) => any; } = { n: n => { var n: Base[]; return null; } };
+    var x248: { n: Genric<Base>; } = { n: { func: n => { return [d1, d2]; } } };
+                                                                 ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                     ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x252: { (): Base[]; }[] = [() => [d1, d2]];
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '(() => any[])[]' is not assignable to type 'object[]'.
+                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x253: { (): Base[]; }[] = [function() { return [d1, d2] }];
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '(() => any[])[]' is not assignable to type 'object[]'.
+                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x254: { (): Base[]; }[] = [function named() { return [d1, d2] }];
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '(() => any[])[]' is not assignable to type 'object[]'.
+                                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x255: Base[][] = [[d1, d2]];
+                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x256: Array<Base>[] = [[d1, d2]];
+              ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                    ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x257: { [n: number]: Base; }[] = [[d1, d2]];
+                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x258: {n: Base[]; } [] = [{ n: [d1, d2] }];
+                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x260: Genric<Base>[] = [{ func: n => { return [d1, d2]; } }];
+                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x261: () => Base[] = function() { return [d1, d2] } || undefined;
+                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x262: () => Base[] = function named() { return [d1, d2] } || undefined;
+                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x263: { (): Base[]; } = function() { return [d1, d2] } || undefined;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x264: { (): Base[]; } = function named() { return [d1, d2] } || undefined;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x265: Base[] = [d1, d2] || undefined;
+                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x266: Array<Base> = [d1, d2] || undefined;
+              ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x267: { [n: number]: Base; } = [d1, d2] || undefined;
+                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x268: {n: Base[]; }  = { n: [d1, d2] } || undefined;
+                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x269: () => Base[] = undefined || function() { return [d1, d2] };
+                                                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x270: () => Base[] = undefined || function named() { return [d1, d2] };
+                                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x271: { (): Base[]; } = undefined || function() { return [d1, d2] };
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x272: { (): Base[]; } = undefined || function named() { return [d1, d2] };
+                                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x273: Base[] = undefined || [d1, d2];
+                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x274: Array<Base> = undefined || [d1, d2];
+              ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x275: { [n: number]: Base; } = undefined || [d1, d2];
+                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x276: {n: Base[]; }  = undefined || { n: [d1, d2] };
+                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x277: () => Base[] = function() { return [d1, d2] } || function() { return [d1, d2] };
+                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x278: () => Base[] = function named() { return [d1, d2] } || function named() { return [d1, d2] };
+                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                                                                ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                                    ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x279: { (): Base[]; } = function() { return [d1, d2] } || function() { return [d1, d2] };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x280: { (): Base[]; } = function named() { return [d1, d2] } || function named() { return [d1, d2] };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => any[]' is not assignable to type 'object'.
+                                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x281: Base[] = [d1, d2] || [d1, d2];
+                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x282: Array<Base> = [d1, d2] || [d1, d2];
+              ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x283: { [n: number]: Base; } = [d1, d2] || [d1, d2];
+                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x284: {n: Base[]; }  = { n: [d1, d2] } || { n: [d1, d2] };
+                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x285: () => Base[] = true ? () => [d1, d2] : () => [d1, d2];
+                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x286: () => Base[] = true ? function() { return [d1, d2] } : function() { return [d1, d2] };
+                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x287: () => Base[] = true ? function named() { return [d1, d2] } : function named() { return [d1, d2] };
+                                                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x288: { (): Base[]; } = true ? () => [d1, d2] : () => [d1, d2];
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '(() => any[]) | (() => any[])' is not assignable to type 'object'.
+                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x289: { (): Base[]; } = true ? function() { return [d1, d2] } : function() { return [d1, d2] };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '(() => any[]) | (() => any[])' is not assignable to type 'object'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x290: { (): Base[]; } = true ? function named() { return [d1, d2] } : function named() { return [d1, d2] };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '(() => any[]) | (() => any[])' is not assignable to type 'object'.
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x291: Base[] = true ? [d1, d2] : [d1, d2];
+                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x292: Array<Base> = true ? [d1, d2] : [d1, d2];
+              ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x293: { [n: number]: Base; } = true ? [d1, d2] : [d1, d2];
+                                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x294: {n: Base[]; }  = true ? { n: [d1, d2] } : { n: [d1, d2] };
+                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x295: (s: Base[]) => any = true ? n => { var n: Base[]; return null; } : n => { var n: Base[]; return null; };
+    var x296: Genric<Base> = true ? { func: n => { return [d1, d2]; } } : { func: n => { return [d1, d2]; } };
+                                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+                                                                                                 ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                                     ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x297: () => Base[] = true ? undefined : () => [d1, d2];
+                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x298: () => Base[] = true ? undefined : function() { return [d1, d2] };
+                                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x299: () => Base[] = true ? undefined : function named() { return [d1, d2] };
+                                                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x300: { (): Base[]; } = true ? undefined : () => [d1, d2];
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'undefined | (() => any[])' is not assignable to type 'object'.
+                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x301: { (): Base[]; } = true ? undefined : function() { return [d1, d2] };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'undefined | (() => any[])' is not assignable to type 'object'.
+                                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x302: { (): Base[]; } = true ? undefined : function named() { return [d1, d2] };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'undefined | (() => any[])' is not assignable to type 'object'.
+                                                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x303: Base[] = true ? undefined : [d1, d2];
+                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x304: Array<Base> = true ? undefined : [d1, d2];
+              ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                                ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                    ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x305: { [n: number]: Base; } = true ? undefined : [d1, d2];
+                                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x306: {n: Base[]; }  = true ? undefined : { n: [d1, d2] };
+                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x307: (s: Base[]) => any = true ? undefined : n => { var n: Base[]; return null; };
+    var x308: Genric<Base> = true ? undefined : { func: n => { return [d1, d2]; } };
+                                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x309: () => Base[] = true ? () => [d1, d2] : undefined;
+                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x310: () => Base[] = true ? function() { return [d1, d2] } : undefined;
+                                                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                             ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x311: () => Base[] = true ? function named() { return [d1, d2] } : undefined;
+                                                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x312: { (): Base[]; } = true ? () => [d1, d2] : undefined;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '(() => any[]) | undefined' is not assignable to type 'object'.
+                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x313: { (): Base[]; } = true ? function() { return [d1, d2] } : undefined;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '(() => any[]) | undefined' is not assignable to type 'object'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x314: { (): Base[]; } = true ? function named() { return [d1, d2] } : undefined;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '(() => any[]) | undefined' is not assignable to type 'object'.
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x315: Base[] = true ? [d1, d2] : undefined;
+                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x316: Array<Base> = true ? [d1, d2] : undefined;
+              ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x317: { [n: number]: Base; } = true ? [d1, d2] : undefined;
+                                               ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                   ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x318: {n: Base[]; }  = true ? { n: [d1, d2] } : undefined;
+                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x319: (s: Base[]) => any = true ? n => { var n: Base[]; return null; } : undefined;
+    var x320: Genric<Base> = true ? { func: n => { return [d1, d2]; } } : undefined;
+                                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x321(n: () => Base[]) { }; x321(() => [d1, d2]);
+                                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x322(n: () => Base[]) { }; x322(function() { return [d1, d2] });
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                      ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x323(n: () => Base[]) { }; x323(function named() { return [d1, d2] });
+                                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x324(n: { (): Base[]; }) { }; x324(() => [d1, d2]);
+                                                ~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x325(n: { (): Base[]; }) { }; x325(function() { return [d1, d2] });
+                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+                                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x326(n: { (): Base[]; }) { }; x326(function named() { return [d1, d2] });
+                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+                                                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x327(n: Base[]) { }; x327([d1, d2]);
+                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x328(n: Array<Base>) { }; x328([d1, d2]);
+                     ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x329(n: { [n: number]: Base; }) { }; x329([d1, d2]);
+                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x330(n: {n: Base[]; } ) { }; x330({ n: [d1, d2] });
+                                                     ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                         ~~
+!!! error TS2304: Cannot find name 'd2'.
+    function x331(n: (s: Base[]) => any) { }; x331(n => { var n: Base[]; return null; });
+    function x332(n: Genric<Base>) { }; x332({ func: n => { return [d1, d2]; } });
+                                                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x333 = (n: () => Base[]) => n; x333(() => [d1, d2]);
+                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x334 = (n: () => Base[]) => n; x334(function() { return [d1, d2] });
+                                                                 ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                     ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x335 = (n: () => Base[]) => n; x335(function named() { return [d1, d2] });
+                                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x336 = (n: { (): Base[]; }) => n; x336(() => [d1, d2]);
+                                               ~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+                                                      ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                          ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x337 = (n: { (): Base[]; }) => n; x337(function() { return [d1, d2] });
+                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+                                                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x338 = (n: { (): Base[]; }) => n; x338(function named() { return [d1, d2] });
+                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+                                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x339 = (n: Base[]) => n; x339([d1, d2]);
+                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x340 = (n: Array<Base>) => n; x340([d1, d2]);
+                   ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                            ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x341 = (n: { [n: number]: Base; }) => n; x341([d1, d2]);
+                                                       ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                           ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x342 = (n: {n: Base[]; } ) => n; x342({ n: [d1, d2] });
+                                                    ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                        ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x343 = (n: (s: Base[]) => any) => n; x343(n => { var n: Base[]; return null; });
+    var x344 = (n: Genric<Base>) => n; x344({ func: n => { return [d1, d2]; } });
+                                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x345 = function(n: () => Base[]) { }; x345(() => [d1, d2]);
+                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x346 = function(n: () => Base[]) { }; x346(function() { return [d1, d2] });
+                                                                        ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                            ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x347 = function(n: () => Base[]) { }; x347(function named() { return [d1, d2] });
+                                                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x348 = function(n: { (): Base[]; }) { }; x348(() => [d1, d2]);
+                                                      ~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+                                                             ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                 ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x349 = function(n: { (): Base[]; }) { }; x349(function() { return [d1, d2] });
+                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+                                                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x350 = function(n: { (): Base[]; }) { }; x350(function named() { return [d1, d2] });
+                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => any[]' is not assignable to parameter of type 'object'.
+                                                                                 ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                                     ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x351 = function(n: Base[]) { }; x351([d1, d2]);
+                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x352 = function(n: Array<Base>) { }; x352([d1, d2]);
+                           ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                                   ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                       ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x353 = function(n: { [n: number]: Base; }) { }; x353([d1, d2]);
+                                                              ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                  ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x354 = function(n: {n: Base[]; } ) { }; x354({ n: [d1, d2] });
+                                                           ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                               ~~
+!!! error TS2304: Cannot find name 'd2'.
+    var x355 = function(n: (s: Base[]) => any) { }; x355(n => { var n: Base[]; return null; });
+    var x356 = function(n: Genric<Base>) { }; x356({ func: n => { return [d1, d2]; } });
+                                                                          ~~
+!!! error TS2304: Cannot find name 'd1'.
+                                                                              ~~
+!!! error TS2304: Cannot find name 'd2'.

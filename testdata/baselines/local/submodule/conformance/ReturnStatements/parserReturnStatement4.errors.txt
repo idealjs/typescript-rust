@@ -1,0 +1,40 @@
+parserReturnStatement4.ts(1,11): error TS2304: Cannot find name 'get'.
+parserReturnStatement4.ts(1,15): error TS1005: ',' expected.
+parserReturnStatement4.ts(1,15): error TS2304: Cannot find name 'foo'.
+parserReturnStatement4.ts(1,18): error TS1005: ',' expected.
+parserReturnStatement4.ts(1,18): error TS2304: Cannot find name '('.
+parserReturnStatement4.ts(1,19): error TS1005: ',' expected.
+parserReturnStatement4.ts(1,19): error TS2304: Cannot find name ')'.
+parserReturnStatement4.ts(1,21): error TS1005: ',' expected.
+parserReturnStatement4.ts(1,21): error TS2304: Cannot find name '{'.
+parserReturnStatement4.ts(1,23): error TS1005: ',' expected.
+parserReturnStatement4.ts(1,23): error TS2304: Cannot find name 'return'.
+parserReturnStatement4.ts(1,32): error TS1128: Declaration or statement expected.
+
+
+==== parserReturnStatement4.ts (12 errors) ====
+    var v = { get foo() { return } };
+              ~~~
+!!! error TS2304: Cannot find name 'get'.
+                  ~~~
+!!! error TS1005: ',' expected.
+                  ~~~
+!!! error TS2304: Cannot find name 'foo'.
+                     ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS2304: Cannot find name '('.
+                      ~
+!!! error TS1005: ',' expected.
+                      ~
+!!! error TS2304: Cannot find name ')'.
+                        ~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS2304: Cannot find name '{'.
+                          ~~~~~~
+!!! error TS1005: ',' expected.
+                          ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                                   ~
+!!! error TS1128: Declaration or statement expected.

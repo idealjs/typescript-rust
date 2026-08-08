@@ -1,0 +1,25 @@
+superCallBeforeThisAccessing4.ts(6,9): error TS2349: This expression is not callable.
+superCallBeforeThisAccessing4.ts(13,9): error TS2349: This expression is not callable.
+
+
+==== superCallBeforeThisAccessing4.ts (2 errors) ====
+    ﻿// @target: es2015
+    class D extends null {
+        private _t;
+        constructor() {
+            this._t;
+            super();
+         ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    class E extends null {
+        private _t;
+        constructor() {
+            super();
+         ~~~~~
+!!! error TS2349: This expression is not callable.
+            this._t;
+        }
+    }

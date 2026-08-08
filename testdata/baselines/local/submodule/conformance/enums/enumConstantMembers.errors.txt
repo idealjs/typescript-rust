@@ -1,12 +1,12 @@
-enums/enumConstantMembers.ts(26,9): error TS2304: Cannot find name 'NaN'.
-enums/enumConstantMembers.ts(27,9): error TS2304: Cannot find name 'Infinity'.
-enums/enumConstantMembers.ts(28,10): error TS2304: Cannot find name 'Infinity'.
-enums/enumConstantMembers.ts(36,9): error TS2304: Cannot find name 'NaN'.
-enums/enumConstantMembers.ts(37,9): error TS2304: Cannot find name 'Infinity'.
-enums/enumConstantMembers.ts(38,10): error TS2304: Cannot find name 'Infinity'.
+enumConstantMembers.ts(26,9): error TS2304: Cannot find name 'NaN'.
+enumConstantMembers.ts(27,9): error TS2304: Cannot find name 'Infinity'.
+enumConstantMembers.ts(28,10): error TS2304: Cannot find name 'Infinity'.
+enumConstantMembers.ts(36,9): error TS2304: Cannot find name 'NaN'.
+enumConstantMembers.ts(37,9): error TS2304: Cannot find name 'Infinity'.
+enumConstantMembers.ts(38,10): error TS2304: Cannot find name 'Infinity'.
 
 
-==== enums/enumConstantMembers.ts (6 errors) ====
+==== enumConstantMembers.ts (6 errors) ====
     // Constant members allow negatives, but not decimals. Also hex literals are allowed
     enum E1 {
         a = 1,

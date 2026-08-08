@@ -1,0 +1,9 @@
+nullishCoalescingOperatorInParameterInitializer.ts(3,1): error TS2554: Expected 1 arguments, but got 0.
+
+
+==== nullishCoalescingOperatorInParameterInitializer.ts (1 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/36295
+    const a = (): string | undefined => undefined;
+    ((b = a() ?? "d") => {})();
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 0.

@@ -1,9 +1,9 @@
-superCalls/superCallInConstructorWithNoBaseType.ts(3,9): error TS2349: This expression is not callable.
-superCalls/superCallInConstructorWithNoBaseType.ts(8,31): error TS1005: ',' expected.
-superCalls/superCallInConstructorWithNoBaseType.ts(9,9): error TS2349: This expression is not callable.
+superCallInConstructorWithNoBaseType.ts(3,9): error TS2349: This expression is not callable.
+superCallInConstructorWithNoBaseType.ts(8,31): error TS1005: ',' expected.
+superCallInConstructorWithNoBaseType.ts(9,9): error TS2349: This expression is not callable.
 
 
-==== superCalls/superCallInConstructorWithNoBaseType.ts (3 errors) ====
+==== superCallInConstructorWithNoBaseType.ts (3 errors) ====
     class C {
         constructor() {
             super(); // error

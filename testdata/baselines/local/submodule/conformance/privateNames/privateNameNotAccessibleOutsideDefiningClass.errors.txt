@@ -1,0 +1,32 @@
+privateNameNotAccessibleOutsideDefiningClass.ts(2,5): error TS1003: Identifier expected.
+privateNameNotAccessibleOutsideDefiningClass.ts(2,5): error TS1127: Invalid character.
+privateNameNotAccessibleOutsideDefiningClass.ts(2,6): error TS1005: ';' expected.
+privateNameNotAccessibleOutsideDefiningClass.ts(5,5): error TS2349: This expression is not callable.
+privateNameNotAccessibleOutsideDefiningClass.ts(5,9): error TS1003: Identifier expected.
+privateNameNotAccessibleOutsideDefiningClass.ts(5,9): error TS1127: Invalid character.
+privateNameNotAccessibleOutsideDefiningClass.ts(5,10): error TS1005: ';' expected.
+privateNameNotAccessibleOutsideDefiningClass.ts(5,10): error TS2304: Cannot find name 'foo'.
+
+
+==== privateNameNotAccessibleOutsideDefiningClass.ts (8 errors) ====
+    class A {
+        #foo: number = 3;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~
+!!! error TS1005: ';' expected.
+    }
+    
+    new A().#foo = 4;               // Error
+        ~
+!!! error TS2349: This expression is not callable.
+            ~
+!!! error TS1003: Identifier expected.
+            ~
+!!! error TS1127: Invalid character.
+             ~~~
+!!! error TS1005: ';' expected.
+             ~~~
+!!! error TS2304: Cannot find name 'foo'.

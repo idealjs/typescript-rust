@@ -1,0 +1,140 @@
+a.js(12,10): error TS2339: Property 'prototype' does not exist on type '() => void'.
+a.js(19,5): error TS2304: Cannot find name 'get'.
+a.js(19,8): error TS1005: ',' expected.
+a.js(19,8): error TS2304: Cannot find name '('.
+a.js(19,9): error TS1005: ',' expected.
+a.js(19,9): error TS2304: Cannot find name ')'.
+a.js(19,11): error TS1005: ',' expected.
+a.js(19,11): error TS2304: Cannot find name '{'.
+a.js(20,9): error TS1005: ',' expected.
+a.js(20,9): error TS2304: Cannot find name 'this'.
+a.js(20,13): error TS1005: ',' expected.
+a.js(20,13): error TS2304: Cannot find name '.'.
+a.js(20,14): error TS1005: ',' expected.
+a.js(20,14): error TS2304: Cannot find name '_map'.
+a.js(21,9): error TS1005: ',' expected.
+a.js(21,9): error TS2304: Cannot find name 'this'.
+a.js(21,13): error TS1005: ',' expected.
+a.js(21,13): error TS2304: Cannot find name '.'.
+a.js(21,14): error TS1005: ',' expected.
+a.js(21,14): error TS2304: Cannot find name 'set'.
+a.js(22,9): error TS1005: ',' expected.
+a.js(22,9): error TS2304: Cannot find name 'this'.
+a.js(22,13): error TS1005: ',' expected.
+a.js(22,13): error TS2304: Cannot find name '.'.
+a.js(22,14): error TS1005: ',' expected.
+a.js(22,14): error TS2304: Cannot find name 'get'.
+a.js(23,9): error TS1005: ',' expected.
+a.js(23,9): error TS2304: Cannot find name 'this'.
+a.js(23,13): error TS1005: ',' expected.
+a.js(23,13): error TS2304: Cannot find name '.'.
+a.js(23,14): error TS1005: ',' expected.
+a.js(23,14): error TS2304: Cannot find name 'addon'.
+a.js(25,1): error TS1128: Declaration or statement expected.
+
+
+==== a.js (33 errors) ====
+    // all references to _map, set, get, addon should be ok
+    
+    /** @constructor */
+    var Multimap = function() {
+        this._map = {};
+        this._map
+        this.set
+        this.get
+        this.addon
+    };
+    
+    Multimap.prototype = {
+             ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+        set: function() {
+            this._map
+            this.set
+            this.get
+            this.addon
+        },
+        get() {
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '('.
+            ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS2304: Cannot find name ')'.
+              ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS2304: Cannot find name '{'.
+            this._map
+            ~~~~
+!!! error TS1005: ',' expected.
+            ~~~~
+!!! error TS2304: Cannot find name 'this'.
+                ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS2304: Cannot find name '.'.
+                 ~~~~
+!!! error TS1005: ',' expected.
+                 ~~~~
+!!! error TS2304: Cannot find name '_map'.
+            this.set
+            ~~~~
+!!! error TS1005: ',' expected.
+            ~~~~
+!!! error TS2304: Cannot find name 'this'.
+                ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS2304: Cannot find name '.'.
+                 ~~~
+!!! error TS1005: ',' expected.
+                 ~~~
+!!! error TS2304: Cannot find name 'set'.
+            this.get
+            ~~~~
+!!! error TS1005: ',' expected.
+            ~~~~
+!!! error TS2304: Cannot find name 'this'.
+                ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS2304: Cannot find name '.'.
+                 ~~~
+!!! error TS1005: ',' expected.
+                 ~~~
+!!! error TS2304: Cannot find name 'get'.
+            this.addon
+            ~~~~
+!!! error TS1005: ',' expected.
+            ~~~~
+!!! error TS2304: Cannot find name 'this'.
+                ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS2304: Cannot find name '.'.
+                 ~~~~~
+!!! error TS1005: ',' expected.
+                 ~~~~~
+!!! error TS2304: Cannot find name 'addon'.
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+    Multimap.prototype.addon = function () {
+        this._map
+        this.set
+        this.get
+        this.addon
+    }
+    
+    var mm = new Multimap();
+    mm._map
+    mm.set
+    mm.get
+    mm.addon

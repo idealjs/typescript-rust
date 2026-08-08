@@ -1,0 +1,25 @@
+second.js(3,5): error TS2339: Property 'D' does not exist on type 'object'.
+
+
+==== typeFromPropertyAssignment35.ts (0 errors) ====
+    
+==== bug26877.js (0 errors) ====
+    /** @param {Emu.D} x */
+    function ollKorrect(x) {
+        x._model
+        const y = new Emu.D()
+        const z = Emu.D._wrapperInstance;
+    }
+    Emu.D = class {
+        constructor() {
+            this._model = 1
+        }
+    }
+    
+==== second.js (1 errors) ====
+    var Emu = {}
+    /** @type {string} */
+    Emu.D._wrapperInstance;
+        ~
+!!! error TS2339: Property 'D' does not exist on type 'object'.
+    

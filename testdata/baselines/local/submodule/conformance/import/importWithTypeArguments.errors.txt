@@ -1,0 +1,14 @@
+importWithTypeArguments.ts(2,7): error TS1005: ';' expected.
+importWithTypeArguments.ts(2,7): error TS2304: Cannot find name 'a'.
+importWithTypeArguments.ts(2,11): error TS2304: Cannot find name 'import'.
+
+
+==== importWithTypeArguments.ts (3 errors) ====
+    import<T>
+    const a = import<string, number>
+          ~
+!!! error TS1005: ';' expected.
+          ~
+!!! error TS2304: Cannot find name 'a'.
+              ~~~~~~
+!!! error TS2304: Cannot find name 'import'.

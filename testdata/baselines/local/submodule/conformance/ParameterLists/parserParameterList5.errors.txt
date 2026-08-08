@@ -1,0 +1,17 @@
+parserParameterList5.ts(1,16): error TS2304: Cannot find name 'public'.
+parserParameterList5.ts(1,23): error TS1005: ')' expected.
+parserParameterList5.ts(1,23): error TS2304: Cannot find name 'B'.
+parserParameterList5.ts(1,24): error TS1005: ';' expected.
+
+
+==== parserParameterList5.ts (4 errors) ====
+    function A(): (public B) => C {
+                   ~~~~~~
+!!! error TS2304: Cannot find name 'public'.
+                          ~
+!!! error TS1005: ')' expected.
+                          ~
+!!! error TS2304: Cannot find name 'B'.
+                           ~
+!!! error TS1005: ';' expected.
+    }

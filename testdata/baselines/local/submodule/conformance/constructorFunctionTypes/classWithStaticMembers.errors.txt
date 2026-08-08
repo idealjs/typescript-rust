@@ -1,12 +1,12 @@
-constructorFunctionTypes/classWithStaticMembers.ts(3,16): error TS1005: ';' expected.
-constructorFunctionTypes/classWithStaticMembers.ts(4,16): error TS1005: ';' expected.
-constructorFunctionTypes/classWithStaticMembers.ts(5,24): error TS1005: ',' expected.
-constructorFunctionTypes/classWithStaticMembers.ts(5,43): error TS1005: ',' expected.
-constructorFunctionTypes/classWithStaticMembers.ts(9,11): error TS2339: Property 'fn' does not exist on type 'object'.
-constructorFunctionTypes/classWithStaticMembers.ts(17,11): error TS2339: Property 'fn' does not exist on type 'object'.
+classWithStaticMembers.ts(3,16): error TS1005: ';' expected.
+classWithStaticMembers.ts(4,16): error TS1005: ';' expected.
+classWithStaticMembers.ts(5,24): error TS1005: ',' expected.
+classWithStaticMembers.ts(5,43): error TS1005: ',' expected.
+classWithStaticMembers.ts(9,11): error TS2339: Property 'fn' does not exist on type 'object'.
+classWithStaticMembers.ts(17,11): error TS2339: Property 'fn' does not exist on type 'object'.
 
 
-==== constructorFunctionTypes/classWithStaticMembers.ts (6 errors) ====
+==== classWithStaticMembers.ts (6 errors) ====
     class C {
         static fn() { return this; }
         static get x() { return 1; }

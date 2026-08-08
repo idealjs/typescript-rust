@@ -1,0 +1,8 @@
+objectRestCatchES5.ts(1,12): error TS2304: Cannot find name 'b'.
+
+
+==== objectRestCatchES5.ts (1 errors) ====
+    let a = 1, b = 2;
+               ~
+!!! error TS2304: Cannot find name 'b'.
+    try {} catch ({ a, ...b }) {}

@@ -1,0 +1,33 @@
+main.ts(6,9): error TS1012: Unexpected token.
+main.ts(6,10): error TS1005: ',' expected.
+main.ts(6,14): error TS1005: ',' expected.
+main.ts(6,14): error TS2304: Cannot find name 'class'.
+main.ts(6,20): error TS1005: ',' expected.
+main.ts(6,20): error TS2304: Cannot find name '{'.
+main.ts(6,23): error TS1005: ')' expected.
+
+
+==== main.ts (7 errors) ====
+    export {};
+    declare var dec: any;
+    declare var x: any;
+    
+    // uses __esDecorate, __runInitializers, __setFunctionName, __propKey
+    ({ [x]: @dec class {} });
+            ~
+!!! error TS1012: Unexpected token.
+             ~~~
+!!! error TS1005: ',' expected.
+                 ~~~~~
+!!! error TS1005: ',' expected.
+                 ~~~~~
+!!! error TS2304: Cannot find name 'class'.
+                       ~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS2304: Cannot find name '{'.
+                          ~
+!!! error TS1005: ')' expected.
+    
+==== tslib.d.ts (0 errors) ====
+    export {}

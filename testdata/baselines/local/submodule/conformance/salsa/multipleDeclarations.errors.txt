@@ -1,0 +1,52 @@
+input.js(4,3): error TS2339: Property 'prototype' does not exist on type '() => void'.
+input.js(9,25): error TS2339: Property 'bind' does not exist on type '() => any'.
+input.js(18,3): error TS2339: Property 'prototype' does not exist on type 'object'.
+input.js(27,25): error TS2339: Property 'bind' does not exist on type '() => any'.
+input.js(31,3): error TS2339: Property 'prototype' does not exist on type 'object'.
+
+
+==== input.js (5 errors) ====
+    function C() {
+        this.m = null;
+    }
+    C.prototype.m = function() {
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+        this.nothing();
+    }
+    class X {
+        constructor() {
+            this.m = this.m.bind(this);
+                            ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '() => any'.
+            this.mistake = 'frankly, complete nonsense';
+        }
+        m() {
+        }
+        mistake() {
+        }
+    }
+    let x = new X();
+    X.prototype.mistake = false;
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+    x.m();
+    x.mistake;
+    class Y {
+        mistake() {
+        }
+        m() {
+        }
+        constructor() {
+            this.m = this.m.bind(this);
+                            ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '() => any'.
+            this.mistake = 'even more nonsense';
+        }
+    }
+    Y.prototype.mistake = true;
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+    let y = new Y();
+    y.m();
+    y.mistake();

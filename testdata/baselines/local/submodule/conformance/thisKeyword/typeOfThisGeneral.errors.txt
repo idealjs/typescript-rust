@@ -1,0 +1,428 @@
+typeOfThisGeneral.ts(8,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(8,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(14,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(14,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(18,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(18,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(22,9): error TS1005: ';' expected.
+typeOfThisGeneral.ts(24,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(24,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(27,9): error TS1005: ';' expected.
+typeOfThisGeneral.ts(29,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(29,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(37,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(37,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(42,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(42,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(42,24): error TS1005: ',' expected.
+typeOfThisGeneral.ts(48,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(48,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(48,24): error TS1005: ',' expected.
+typeOfThisGeneral.ts(53,16): error TS1005: ';' expected.
+typeOfThisGeneral.ts(56,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(56,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(56,24): error TS1005: ',' expected.
+typeOfThisGeneral.ts(61,16): error TS1005: ';' expected.
+typeOfThisGeneral.ts(64,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(64,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(64,24): error TS1005: ',' expected.
+typeOfThisGeneral.ts(77,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(77,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(83,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(83,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(83,35): error TS1005: ',' expected.
+typeOfThisGeneral.ts(83,40): error TS1005: ',' expected.
+typeOfThisGeneral.ts(87,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(87,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(87,35): error TS1005: ',' expected.
+typeOfThisGeneral.ts(87,40): error TS1005: ',' expected.
+typeOfThisGeneral.ts(91,9): error TS1005: ';' expected.
+typeOfThisGeneral.ts(93,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(93,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(93,35): error TS1005: ',' expected.
+typeOfThisGeneral.ts(93,40): error TS1005: ',' expected.
+typeOfThisGeneral.ts(96,9): error TS1005: ';' expected.
+typeOfThisGeneral.ts(98,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(98,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(98,35): error TS1005: ',' expected.
+typeOfThisGeneral.ts(98,40): error TS1005: ',' expected.
+typeOfThisGeneral.ts(106,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(106,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(106,35): error TS1005: ',' expected.
+typeOfThisGeneral.ts(106,40): error TS1005: ',' expected.
+typeOfThisGeneral.ts(111,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(111,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(111,24): error TS1005: ',' expected.
+typeOfThisGeneral.ts(117,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(117,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(117,24): error TS1005: ',' expected.
+typeOfThisGeneral.ts(122,16): error TS1005: ';' expected.
+typeOfThisGeneral.ts(125,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(125,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(125,24): error TS1005: ',' expected.
+typeOfThisGeneral.ts(130,16): error TS1005: ';' expected.
+typeOfThisGeneral.ts(133,14): error TS1005: ',' expected.
+typeOfThisGeneral.ts(133,15): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(133,24): error TS1005: ',' expected.
+typeOfThisGeneral.ts(141,10): error TS1005: ',' expected.
+typeOfThisGeneral.ts(141,11): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(145,10): error TS1005: ',' expected.
+typeOfThisGeneral.ts(145,11): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(152,10): error TS1005: ',' expected.
+typeOfThisGeneral.ts(152,11): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(156,10): error TS1005: ',' expected.
+typeOfThisGeneral.ts(156,11): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(163,10): error TS1005: ',' expected.
+typeOfThisGeneral.ts(163,11): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(163,20): error TS1005: ',' expected.
+typeOfThisGeneral.ts(167,10): error TS1005: ',' expected.
+typeOfThisGeneral.ts(167,11): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(167,20): error TS1005: ',' expected.
+typeOfThisGeneral.ts(173,6): error TS1005: ',' expected.
+typeOfThisGeneral.ts(173,7): error TS1134: Variable declaration expected.
+typeOfThisGeneral.ts(173,16): error TS1005: ',' expected.
+
+
+==== typeOfThisGeneral.ts (83 errors) ====
+    class MyTestClass {
+        private canary: number;
+        static staticCanary: number;
+    
+        constructor() {
+            //type of 'this' in constructor body is the class instance type
+            var p = this.canary;
+            var p!: number;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+            this.canary = 3;
+        }
+    
+        //type of 'this' in member function param list is the class instance type
+        memberFunc(t = this) {
+            var t!: MyTestClass;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+    
+            //type of 'this' in member function body is the class instance type
+            var p = this;
+            var p!: MyTestClass;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+        }
+    
+        //type of 'this' in member accessor(get and set) body is the class instance type
+        get prop() {
+            ~~~~
+!!! error TS1005: ';' expected.
+            var p = this;
+            var p!: MyTestClass;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+            return this;
+        }
+        set prop(v) {
+            ~~~~
+!!! error TS1005: ';' expected.
+            var p = this;
+            var p!: MyTestClass;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+            p = v;
+            v = p;
+        }
+    
+        someFunc = () => {
+            //type of 'this' in member variable initializer is the class instance type
+            var t = this;
+            var t!: MyTestClass;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+        };
+    
+        //type of 'this' in static function param list is constructor function type
+        static staticFn(t = this) {
+            var t!: typeof MyTestClass;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                           ~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+            var t = MyTestClass;
+            t.staticCanary;
+    
+            //type of 'this' in static function body is constructor function type
+            var p = this;
+            var p!: typeof MyTestClass;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                           ~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+            var p = MyTestClass;
+            p.staticCanary;
+        }
+    
+        static get staticProp() {
+                   ~~~~~~~~~~
+!!! error TS1005: ';' expected.
+            //type of 'this' in static accessor body is constructor function type
+            var p = this;
+            var p!: typeof MyTestClass;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                           ~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+            var p = MyTestClass;
+            p.staticCanary;
+            return this;
+        }
+        static set staticProp(v: typeof MyTestClass) {
+                   ~~~~~~~~~~
+!!! error TS1005: ';' expected.
+            //type of 'this' in static accessor body is constructor function type
+            var p = this;
+            var p!: typeof MyTestClass;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                           ~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+            var p = MyTestClass;
+            p.staticCanary;
+        }
+    }
+    
+    class MyGenericTestClass<T, U> {
+        private canary: number;
+        static staticCanary: number;
+    
+        constructor() {
+            //type of 'this' in constructor body is the class instance type
+            var p = this.canary;
+            var p!: number;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+            this.canary = 3;
+        }
+    
+        //type of 'this' in member function param list is the class instance type
+        memberFunc(t = this) {
+            var t!: MyGenericTestClass<T, U>;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                                      ~
+!!! error TS1005: ',' expected.
+                                           ~
+!!! error TS1005: ',' expected.
+    
+            //type of 'this' in member function body is the class instance type
+            var p = this;
+            var p!: MyGenericTestClass<T, U>;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                                      ~
+!!! error TS1005: ',' expected.
+                                           ~
+!!! error TS1005: ',' expected.
+        }
+    
+        //type of 'this' in member accessor(get and set) body is the class instance type
+        get prop() {
+            ~~~~
+!!! error TS1005: ';' expected.
+            var p = this;
+            var p!: MyGenericTestClass<T, U>;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                                      ~
+!!! error TS1005: ',' expected.
+                                           ~
+!!! error TS1005: ',' expected.
+            return this;
+        }
+        set prop(v) {
+            ~~~~
+!!! error TS1005: ';' expected.
+            var p = this;
+            var p!: MyGenericTestClass<T, U>;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                                      ~
+!!! error TS1005: ',' expected.
+                                           ~
+!!! error TS1005: ',' expected.
+            p = v;
+            v = p;
+        }
+    
+        someFunc = () => {
+            //type of 'this' in member variable initializer is the class instance type
+            var t = this;
+            var t!: MyGenericTestClass<T, U>;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                                      ~
+!!! error TS1005: ',' expected.
+                                           ~
+!!! error TS1005: ',' expected.
+        };
+    
+        //type of 'this' in static function param list is constructor function type
+        static staticFn(t = this) {
+            var t!: typeof MyGenericTestClass;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                           ~~~~~~~~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+            var t = MyGenericTestClass;
+            t.staticCanary;
+    
+            //type of 'this' in static function body is constructor function type
+            var p = this;
+            var p!: typeof MyGenericTestClass;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                           ~~~~~~~~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+            var p = MyGenericTestClass;
+            p.staticCanary;
+        }
+    
+        static get staticProp() {
+                   ~~~~~~~~~~
+!!! error TS1005: ';' expected.
+            //type of 'this' in static accessor body is constructor function type
+            var p = this;
+            var p!: typeof MyGenericTestClass;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                           ~~~~~~~~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+            var p = MyGenericTestClass;
+            p.staticCanary;
+            return this;
+        }
+        static set staticProp(v: typeof MyGenericTestClass) {
+                   ~~~~~~~~~~
+!!! error TS1005: ';' expected.
+            //type of 'this' in static accessor body is constructor function type
+            var p = this;
+            var p!: typeof MyGenericTestClass;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                           ~~~~~~~~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+            var p = MyGenericTestClass;
+            p.staticCanary;
+        }
+    }
+    
+    //type of 'this' in a function declaration param list is Any
+    function fn(s = this) {
+        var s!: any;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        s.spaaaaaaace = 4;
+    
+        //type of 'this' in a function declaration body is Any
+        var t!: any;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var t = this;
+        this.spaaaaace = 4;
+    }
+    
+    //type of 'this' in a function expression param list list is Any
+    var q1 = function (s = this) {
+        var s!: any;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        s.spaaaaaaace = 4;
+    
+        //type of 'this' in a function expression body is Any
+        var t!: any;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var t = this;
+        this.spaaaaace = 4;
+    }
+    
+    //type of 'this' in a fat arrow expression param list is typeof globalThis
+    var q2 = (s = this) => {
+        var s!: typeof globalThis;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+                       ~~~~~~~~~~
+!!! error TS1005: ',' expected.
+        s.spaaaaaaace = 4;
+    
+        //type of 'this' in a fat arrow expression body is typeof globalThis
+        var t!: typeof globalThis;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+                       ~~~~~~~~~~
+!!! error TS1005: ',' expected.
+        var t = this;
+        this.spaaaaace = 4;
+    }
+    
+    //type of 'this' in global namespace is GlobalThis
+    var t!: typeof globalThis;
+         ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS1134: Variable declaration expected.
+                   ~~~~~~~~~~
+!!! error TS1005: ',' expected.
+    var t = this;
+    this.spaaaaace = 4;
+    

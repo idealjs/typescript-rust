@@ -1,0 +1,577 @@
+parserS7.6_A4.2_T1.ts(13,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(13,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(14,5): error TS2304: Cannot find name 'А'.
+parserS7.6_A4.2_T1.ts(15,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(17,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(17,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(18,5): error TS2304: Cannot find name 'Б'.
+parserS7.6_A4.2_T1.ts(19,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(21,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(21,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(22,5): error TS2304: Cannot find name 'В'.
+parserS7.6_A4.2_T1.ts(23,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(25,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(25,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(26,5): error TS2304: Cannot find name 'Г'.
+parserS7.6_A4.2_T1.ts(27,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(29,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(29,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(30,5): error TS2304: Cannot find name 'Д'.
+parserS7.6_A4.2_T1.ts(31,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(33,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(33,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(34,5): error TS2304: Cannot find name 'Е'.
+parserS7.6_A4.2_T1.ts(35,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(37,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(37,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(38,5): error TS2304: Cannot find name 'Ж'.
+parserS7.6_A4.2_T1.ts(39,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(41,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(41,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(42,5): error TS2304: Cannot find name 'З'.
+parserS7.6_A4.2_T1.ts(43,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(45,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(45,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(46,5): error TS2304: Cannot find name 'И'.
+parserS7.6_A4.2_T1.ts(47,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(49,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(49,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(50,5): error TS2304: Cannot find name 'Й'.
+parserS7.6_A4.2_T1.ts(51,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(53,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(53,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(54,5): error TS2304: Cannot find name 'К'.
+parserS7.6_A4.2_T1.ts(55,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(57,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(57,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(58,5): error TS2304: Cannot find name 'Л'.
+parserS7.6_A4.2_T1.ts(59,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(61,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(61,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(62,5): error TS2304: Cannot find name 'М'.
+parserS7.6_A4.2_T1.ts(63,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(65,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(65,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(66,5): error TS2304: Cannot find name 'Н'.
+parserS7.6_A4.2_T1.ts(67,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(69,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(69,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(70,5): error TS2304: Cannot find name 'О'.
+parserS7.6_A4.2_T1.ts(71,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(73,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(73,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(74,5): error TS2304: Cannot find name 'П'.
+parserS7.6_A4.2_T1.ts(75,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(77,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(77,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(78,5): error TS2304: Cannot find name 'Р'.
+parserS7.6_A4.2_T1.ts(79,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(81,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(81,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(82,5): error TS2304: Cannot find name 'С'.
+parserS7.6_A4.2_T1.ts(83,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(85,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(85,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(86,5): error TS2304: Cannot find name 'Т'.
+parserS7.6_A4.2_T1.ts(87,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(89,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(89,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(90,5): error TS2304: Cannot find name 'У'.
+parserS7.6_A4.2_T1.ts(91,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(93,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(93,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(94,5): error TS2304: Cannot find name 'Ф'.
+parserS7.6_A4.2_T1.ts(95,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(97,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(97,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(98,5): error TS2304: Cannot find name 'Х'.
+parserS7.6_A4.2_T1.ts(99,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(101,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(101,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(102,5): error TS2304: Cannot find name 'Ц'.
+parserS7.6_A4.2_T1.ts(103,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(105,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(105,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(106,5): error TS2304: Cannot find name 'Ч'.
+parserS7.6_A4.2_T1.ts(107,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(109,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(109,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(110,5): error TS2304: Cannot find name 'Ш'.
+parserS7.6_A4.2_T1.ts(111,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(113,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(113,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(114,5): error TS2304: Cannot find name 'Щ'.
+parserS7.6_A4.2_T1.ts(115,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(117,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(117,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(118,5): error TS2304: Cannot find name 'Ъ'.
+parserS7.6_A4.2_T1.ts(119,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(121,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(121,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(122,5): error TS2304: Cannot find name 'Ы'.
+parserS7.6_A4.2_T1.ts(123,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(125,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(125,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(126,5): error TS2304: Cannot find name 'Ь'.
+parserS7.6_A4.2_T1.ts(127,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(129,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(129,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(130,5): error TS2304: Cannot find name 'Э'.
+parserS7.6_A4.2_T1.ts(131,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(133,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(133,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(134,5): error TS2304: Cannot find name 'Ю'.
+parserS7.6_A4.2_T1.ts(135,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(137,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(137,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(138,5): error TS2304: Cannot find name 'Я'.
+parserS7.6_A4.2_T1.ts(139,3): error TS2304: Cannot find name '$ERROR'.
+parserS7.6_A4.2_T1.ts(141,5): error TS1127: Invalid character.
+parserS7.6_A4.2_T1.ts(141,5): error TS1134: Variable declaration expected.
+parserS7.6_A4.2_T1.ts(142,5): error TS2304: Cannot find name 'Ё'.
+parserS7.6_A4.2_T1.ts(143,3): error TS2304: Cannot find name '$ERROR'.
+
+
+==== parserS7.6_A4.2_T1.ts (132 errors) ====
+    ﻿// @target: es2015
+    // Copyright 2009 the Sputnik authors.  All rights reserved.
+    // This code is governed by the BSD license found in the LICENSE file.
+    
+    /**
+     * Correct interpretation of RUSSIAN ALPHABET
+     *
+     * @path ch07/7.6/S7.6_A4.2_T1.js
+     * @description Check RUSSIAN CAPITAL ALPHABET
+     */
+    
+    //CHECK#А-Я
+    var \u0410 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (А !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'А'.
+                  
+      $ERROR('#А');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0411 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Б !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Б'.
+                  
+      $ERROR('#Б');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0412 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (В !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'В'.
+                  
+      $ERROR('#В');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0413 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Г !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Г'.
+                  
+      $ERROR('#Г');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0414 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Д !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Д'.
+                  
+      $ERROR('#Д');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0415 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Е !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Е'.
+                  
+      $ERROR('#Е');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0416 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Ж !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Ж'.
+                  
+      $ERROR('#Ж');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0417 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (З !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'З'.
+                  
+      $ERROR('#З');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0418 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (И !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'И'.
+                  
+      $ERROR('#И');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0419 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Й !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Й'.
+                  
+      $ERROR('#Й');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u041A = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (К !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'К'.
+                  
+      $ERROR('#К');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u041B = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Л !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Л'.
+                  
+      $ERROR('#Л');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u041C = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (М !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'М'.
+                  
+      $ERROR('#М');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u041D = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Н !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Н'.
+                  
+      $ERROR('#Н');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u041E = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (О !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'О'.
+                  
+      $ERROR('#О');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u041F = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (П !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'П'.
+                  
+      $ERROR('#П');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0420 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Р !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Р'.
+                  
+      $ERROR('#Р');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0421 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (С !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'С'.
+                  
+      $ERROR('#С');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0422 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Т !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Т'.
+                  
+      $ERROR('#Т');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0423 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (У !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'У'.
+                  
+      $ERROR('#У');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0424 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Ф !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Ф'.
+                  
+      $ERROR('#Ф');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0425 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Х !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Х'.
+                  
+      $ERROR('#Х');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0426 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Ц !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Ц'.
+                  
+      $ERROR('#Ц');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0427 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Ч !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Ч'.
+                  
+      $ERROR('#Ч');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0428 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Ш !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Ш'.
+                  
+      $ERROR('#Ш');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0429 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Щ !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Щ'.
+                  
+      $ERROR('#Щ');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u042A = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Ъ !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Ъ'.
+                  
+      $ERROR('#Ъ');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u042B = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Ы !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Ы'.
+                  
+      $ERROR('#Ы');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u042C = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Ь !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Ь'.
+                  
+      $ERROR('#Ь');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u042D = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Э !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Э'.
+                  
+      $ERROR('#Э');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u042E = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Ю !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Ю'.
+                  
+      $ERROR('#Ю');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u042F = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Я !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Я'.
+                  
+      $ERROR('#Я');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    var \u0401 = 1;
+     ~
+!!! error TS1127: Invalid character.
+     ~
+!!! error TS1134: Variable declaration expected.
+    if (Ё !== 1) {
+     ~~
+!!! error TS2304: Cannot find name 'Ё'.
+                  
+      $ERROR('#Ё');
+    ~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+    }
+    

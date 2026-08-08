@@ -1,0 +1,82 @@
+tsxSpreadChildrenInvalidType.tsx(17,12): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxSpreadChildrenInvalidType.tsx(17,12): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxSpreadChildrenInvalidType.tsx(17,12): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+tsxSpreadChildrenInvalidType.tsx(17,27): error TS2339: Property 'toString' does not exist on type 'number'.
+tsxSpreadChildrenInvalidType.tsx(20,12): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxSpreadChildrenInvalidType.tsx(20,12): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxSpreadChildrenInvalidType.tsx(20,12): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+tsxSpreadChildrenInvalidType.tsx(21,13): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxSpreadChildrenInvalidType.tsx(21,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+tsxSpreadChildrenInvalidType.tsx(26,12): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxSpreadChildrenInvalidType.tsx(26,12): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxSpreadChildrenInvalidType.tsx(26,12): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+tsxSpreadChildrenInvalidType.tsx(27,14): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxSpreadChildrenInvalidType.tsx(27,14): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+tsxSpreadChildrenInvalidType.tsx(31,5): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxSpreadChildrenInvalidType.tsx(31,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+
+
+==== tsxSpreadChildrenInvalidType.tsx (16 errors) ====
+    declare namespace JSX {
+    	interface Element { }
+    	interface IntrinsicElements {
+    		[s: string]: any;
+    	}
+    }
+    declare var React: any;
+    
+    interface TodoProp {
+        id: number;
+        todo: string;
+    }
+    interface TodoListProps {
+        todos: TodoProp[];
+    }
+    function Todo(prop: { key: number, todo: string }) {
+        return <div>{prop.key.toString() + prop.todo}</div>;
+               ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+               ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+               ~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+                              ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'number'.
+    }
+    function TodoList({ todos }: TodoListProps) {
+        return <div>
+               ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+               ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+               ~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+            {...<Todo key={todos[0].id} todo={todos[0].todo} />}
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+        </div>;
+    }
+    function TodoListNoError({ todos }: TodoListProps) {
+        // any is not checked
+        return <div>
+               ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+               ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+               ~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+            {...(<Todo key={todos[0].id} todo={todos[0].todo} /> as any)}
+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+        </div>;
+    }
+    declare let x: TodoListProps;
+        <TodoList {...x}/>
+        ~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+        ~~~~~~~~~~~~~~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.

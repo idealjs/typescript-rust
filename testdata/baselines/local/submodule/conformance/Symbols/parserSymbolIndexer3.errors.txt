@@ -1,0 +1,12 @@
+parserSymbolIndexer3.ts(2,14): error TS1005: ']' expected.
+parserSymbolIndexer3.ts(2,22): error TS1005: ';' expected.
+
+
+==== parserSymbolIndexer3.ts (2 errors) ====
+    class C {
+        static [s: symbol]: string;
+                 ~
+!!! error TS1005: ']' expected.
+                         ~
+!!! error TS1005: ';' expected.
+    }

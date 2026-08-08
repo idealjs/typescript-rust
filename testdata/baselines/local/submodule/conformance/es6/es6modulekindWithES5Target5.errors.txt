@@ -1,0 +1,21 @@
+es6modulekindWithES5Target5.ts(5,19): error TS1005: ',' expected.
+es6modulekindWithES5Target5.ts(5,22): error TS1005: ',' expected.
+es6modulekindWithES5Target5.ts(5,22): error TS1182: A destructuring declaration must have an initializer.
+
+
+==== es6modulekindWithES5Target5.ts (3 errors) ====
+    export enum E1 {
+        value1
+    }
+    
+    export const enum E2 {
+                      ~~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1005: ',' expected.
+                         ~
+        value1
+    ~~~~~~~~~~
+    }
+    ~
+!!! error TS1182: A destructuring declaration must have an initializer.

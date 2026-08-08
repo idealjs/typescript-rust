@@ -1,0 +1,21 @@
+index.js(3,7): error TS1003: Identifier expected.
+index.js(3,8): error TS1005: ';' expected.
+index.js(3,8): error TS2304: Cannot find name 'exports'.
+
+
+==== /some-mod.d.ts (0 errors) ====
+    interface Item {
+        x: string;
+    }
+    declare const items: Item[];
+    export = items;
+==== index.js (3 errors) ====
+    /** @type {typeof import("/some-mod")} */
+    const items = [];
+    module.exports = items;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.

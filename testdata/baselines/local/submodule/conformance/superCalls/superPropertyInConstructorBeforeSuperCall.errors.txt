@@ -1,8 +1,8 @@
-superCalls/superPropertyInConstructorBeforeSuperCall.ts(8,9): error TS2349: This expression is not callable.
-superCalls/superPropertyInConstructorBeforeSuperCall.ts(13,9): error TS2349: This expression is not callable.
+superPropertyInConstructorBeforeSuperCall.ts(8,9): error TS2349: This expression is not callable.
+superPropertyInConstructorBeforeSuperCall.ts(13,9): error TS2349: This expression is not callable.
 
 
-==== superCalls/superPropertyInConstructorBeforeSuperCall.ts (2 errors) ====
+==== superPropertyInConstructorBeforeSuperCall.ts (2 errors) ====
     class B {
         constructor(x?: string) {}
         x(): string { return ""; }

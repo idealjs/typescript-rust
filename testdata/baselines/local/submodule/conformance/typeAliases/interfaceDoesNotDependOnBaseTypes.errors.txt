@@ -1,0 +1,17 @@
+interfaceDoesNotDependOnBaseTypes.ts(3,7): error TS2339: Property 'push' does not exist on type 'object'.
+interfaceDoesNotDependOnBaseTypes.ts(4,7): error TS2339: Property 'push' does not exist on type 'object'.
+
+
+==== interfaceDoesNotDependOnBaseTypes.ts (2 errors) ====
+    var x: StringTree;
+    if (typeof x !== "string") {
+        x.push("");
+          ~~~~
+!!! error TS2339: Property 'push' does not exist on type 'object'.
+        x.push([""]);
+          ~~~~
+!!! error TS2339: Property 'push' does not exist on type 'object'.
+    }
+    
+    type StringTree = string | StringTreeArray;
+    interface StringTreeArray extends Array<StringTree> { }

@@ -1,0 +1,50 @@
+privateNameMethod.ts(2,5): error TS1003: Identifier expected.
+privateNameMethod.ts(2,5): error TS1127: Invalid character.
+privateNameMethod.ts(2,6): error TS1005: ';' expected.
+privateNameMethod.ts(6,14): error TS1003: Identifier expected.
+privateNameMethod.ts(6,14): error TS1127: Invalid character.
+privateNameMethod.ts(6,15): error TS1005: ';' expected.
+privateNameMethod.ts(7,14): error TS1003: Identifier expected.
+privateNameMethod.ts(7,14): error TS1127: Invalid character.
+privateNameMethod.ts(7,15): error TS1005: ';' expected.
+privateNameMethod.ts(8,14): error TS1003: Identifier expected.
+privateNameMethod.ts(8,14): error TS1127: Invalid character.
+privateNameMethod.ts(8,15): error TS1005: ';' expected.
+
+
+==== privateNameMethod.ts (12 errors) ====
+    class A1 {
+        #method(param: string): string {
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~~~
+!!! error TS1005: ';' expected.
+            return "";
+        }
+        constructor(name: string) {
+            this.#method("")
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~~~~
+!!! error TS1005: ';' expected.
+            this.#method(1) // Error
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~~~~
+!!! error TS1005: ';' expected.
+            this.#method()  // Error 
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~~~~
+!!! error TS1005: ';' expected.
+    
+        }
+    }

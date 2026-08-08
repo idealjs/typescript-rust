@@ -1,8 +1,8 @@
-accessibility/protectedInstanceMemberAccessibility.ts(14,23): error TS2339: Property 'z' does not exist on type '{ x: string; f: () => string; y: string; g: () => any }'.
-accessibility/protectedInstanceMemberAccessibility.ts(19,24): error TS2339: Property 'z' does not exist on type '{ x: string; f: () => string; y: string; g: () => any }'.
+protectedInstanceMemberAccessibility.ts(14,23): error TS2339: Property 'z' does not exist on type '{ x: string; f: () => string; y: string; g: () => any }'.
+protectedInstanceMemberAccessibility.ts(19,24): error TS2339: Property 'z' does not exist on type '{ x: string; f: () => string; y: string; g: () => any }'.
 
 
-==== accessibility/protectedInstanceMemberAccessibility.ts (2 errors) ====
+==== protectedInstanceMemberAccessibility.ts (2 errors) ====
     class A {
         protected x!: string;
         protected f(): string {

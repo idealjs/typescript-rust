@@ -1,0 +1,8 @@
+templateStringWithPropertyAccessES6.ts(2,14): error TS2339: Property 'indexOf' does not exist on type 'string'.
+
+
+==== templateStringWithPropertyAccessES6.ts (1 errors) ====
+    ﻿// @target: ES6
+    `abc${0}abc`.indexOf(`abc`);
+              ~~~~~~~
+!!! error TS2339: Property 'indexOf' does not exist on type 'string'.

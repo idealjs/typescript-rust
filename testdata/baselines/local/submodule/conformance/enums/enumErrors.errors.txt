@@ -1,0 +1,101 @@
+enumErrors.ts(9,13): error TS2304: Cannot find name 'Number'.
+enumErrors.ts(27,13): error TS2304: Cannot find name 'Date'.
+enumErrors.ts(36,13): error TS2304: Cannot find name 'Date'.
+enumErrors.ts(48,18): error TS1005: ',' expected.
+enumErrors.ts(49,5): error TS1005: ',' expected.
+enumErrors.ts(49,24): error TS1005: ',' expected.
+enumErrors.ts(49,26): error TS1005: ',' expected.
+enumErrors.ts(50,28): error TS1005: ',' expected.
+enumErrors.ts(50,30): error TS1005: ',' expected.
+enumErrors.ts(50,31): error TS1005: ',' expected.
+enumErrors.ts(53,16): error TS1005: ',' expected.
+enumErrors.ts(53,18): error TS1005: ',' expected.
+enumErrors.ts(53,22): error TS1005: ',' expected.
+enumErrors.ts(53,30): error TS1005: ',' expected.
+enumErrors.ts(53,33): error TS1005: ',' expected.
+
+
+==== enumErrors.ts (15 errors) ====
+    // Enum named with PredefinedTypes
+    enum any { }
+    enum number { }
+    enum string { }
+    enum boolean { }
+    
+    // Enum with computed member initializer of type Number
+    enum E5 {
+        C = new Number(30)
+                ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
+    }
+    
+    enum E9 {
+        A,
+        B = A
+    }
+    
+    //Enum with computed member intializer of different enum type
+    // Bug 707850: This should be allowed
+    enum E10 {
+        A = E9.A,
+        B = E9.B
+    }
+    
+    // Enum with computed member intializer of other types
+    enum E11 {
+        A = true,
+        B = new Date(),
+                ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        C = window,
+        D = {},
+        E = (() => 'foo')(),
+    }
+    
+    // Enum with string valued member and computed member initializers
+    enum E12 {
+        A = '',
+        B = new Date(),
+                ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        C = window,
+        D = {},
+        E = 1 + 1,
+        F = (() => 'foo')(),
+    }
+    
+    // Enum with incorrect syntax
+    enum E13 {
+        postComma,
+        postValueComma = 1,
+    
+        postSemicolon;
+                     ~
+!!! error TS1005: ',' expected.
+        postColonValueComma: 2,
+        ~~~~~~~~~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+        postColonValueSemicolon: 3;
+                               ~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+                                  ~
+!!! error TS1005: ',' expected.
+    };
+    
+    enum E14 { a, b: any "hello" += 1, c, d}
+                   ~
+!!! error TS1005: ',' expected.
+                     ~~~
+!!! error TS1005: ',' expected.
+                         ~~~~~~~
+!!! error TS1005: ',' expected.
+                                 ~~
+!!! error TS1005: ',' expected.
+                                    ~
+!!! error TS1005: ',' expected.

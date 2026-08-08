@@ -1,0 +1,19 @@
+subtypingWithOptionalProperties.ts(5,9): error TS2322: Type 'T' is not assignable to type '{ s: number }'.
+subtypingWithOptionalProperties.ts(9,20): error TS2304: Cannot find name 'Object'.
+
+
+==== subtypingWithOptionalProperties.ts (2 errors) ====
+    // subtyping is not transitive due to optional properties but the subtyping algorithm assumes it is for the 99% case
+    
+    // returns { s?: number; }
+    function f<T>(a: T) {
+        var b: { s?: number } = a;
+            ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'T' is not assignable to type '{ s: number }'.
+        return b;
+    }
+    
+    var r = f({ s: new Object() }); // ok
+                       ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    r.s && r.s.toFixed(); // would blow up at runtime

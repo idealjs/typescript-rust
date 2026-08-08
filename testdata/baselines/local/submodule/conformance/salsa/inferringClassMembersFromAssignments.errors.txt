@@ -1,0 +1,296 @@
+a.js(3,13): error TS2304: Cannot find name 'Math'.
+a.js(4,18): error TS2339: Property 'inConstructor' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(7,18): error TS2339: Property 'inConstructor' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(9,14): error TS2339: Property 'inMultiple' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(12,13): error TS2304: Cannot find name 'Math'.
+a.js(13,18): error TS2339: Property 'inMethod' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(14,18): error TS2339: Property 'inMethodNullable' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(17,18): error TS2339: Property 'inMethod' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(18,18): error TS2339: Property 'inMethodNullable' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(20,14): error TS2339: Property 'inMultiple' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(21,14): error TS2339: Property 'inMultipleMethods' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(24,17): error TS2304: Cannot find name 'Math'.
+a.js(25,22): error TS2339: Property 'inNestedArrowFunction' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(28,22): error TS2339: Property 'inNestedArrowFunction' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(33,13): error TS2304: Cannot find name 'Math'.
+a.js(34,18): error TS2339: Property 'inGetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(37,18): error TS2339: Property 'inGetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(39,14): error TS2339: Property 'inMultiple' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(40,14): error TS2339: Property 'inMultipleMethods' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(43,13): error TS2304: Cannot find name 'Math'.
+a.js(44,18): error TS2339: Property 'inSetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(47,18): error TS2339: Property 'inSetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(51,13): error TS2304: Cannot find name 'Math'.
+a.js(52,18): error TS2339: Property 'inPropertyDeclaration' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(55,18): error TS2339: Property 'inPropertyDeclaration' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(59,13): error TS2304: Cannot find name 'Math'.
+a.js(60,18): error TS2339: Property 'inStaticMethod' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(63,18): error TS2339: Property 'inStaticMethod' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(67,17): error TS2304: Cannot find name 'Math'.
+a.js(68,22): error TS2339: Property 'inStaticNestedArrowFunction' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(71,22): error TS2339: Property 'inStaticNestedArrowFunction' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(76,13): error TS2304: Cannot find name 'Math'.
+a.js(77,18): error TS2339: Property 'inStaticGetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(80,18): error TS2339: Property 'inStaticGetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(84,13): error TS2304: Cannot find name 'Math'.
+a.js(85,18): error TS2339: Property 'inStaticSetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(88,18): error TS2339: Property 'inStaticSetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(92,13): error TS2304: Cannot find name 'Math'.
+a.js(93,18): error TS2339: Property 'inStaticPropertyDeclaration' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+a.js(96,18): error TS2339: Property 'inStaticPropertyDeclaration' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+b.ts(4,24): error TS2339: Property 'inConstructor' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+b.ts(8,35): error TS2339: Property 'inMethod' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+b.ts(9,35): error TS2339: Property 'inGetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+b.ts(10,35): error TS2339: Property 'inSetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+b.ts(11,35): error TS2339: Property 'inPropertyDeclaration' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+b.ts(12,35): error TS2339: Property 'inNestedArrowFunction' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+b.ts(17,16): error TS2339: Property 'inMultiple' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+b.ts(19,36): error TS2339: Property 'inMultipleMethods' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+b.ts(21,13): error TS2339: Property 'inMethodNullable' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+b.ts(24,35): error TS2339: Property 'inStaticMethod' does not exist on type 'object'.
+b.ts(25,35): error TS2339: Property 'inStaticGetter' does not exist on type 'object'.
+b.ts(26,35): error TS2339: Property 'inStaticSetter' does not exist on type 'object'.
+b.ts(27,35): error TS2339: Property 'inStaticPropertyDeclaration' does not exist on type 'object'.
+b.ts(28,35): error TS2339: Property 'inStaticNestedArrowFunction' does not exist on type 'object'.
+
+
+==== inferringClassMembersFromAssignments.ts (0 errors) ====
+    
+==== a.js (40 errors) ====
+    class C {
+        constructor() {
+            if (Math.random()) {
+                ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                this.inConstructor = 0;
+                     ~~~~~~~~~~~~~
+!!! error TS2339: Property 'inConstructor' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+            else {
+                this.inConstructor = "string"
+                     ~~~~~~~~~~~~~
+!!! error TS2339: Property 'inConstructor' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+            this.inMultiple = 0;
+                 ~~~~~~~~~~
+!!! error TS2339: Property 'inMultiple' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+        }
+        method() {
+            if (Math.random()) {
+                ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                this.inMethod = 0;
+                     ~~~~~~~~
+!!! error TS2339: Property 'inMethod' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+                this.inMethodNullable = null;
+                     ~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inMethodNullable' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+            else {
+                this.inMethod = "string"
+                     ~~~~~~~~
+!!! error TS2339: Property 'inMethod' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+                this.inMethodNullable = undefined;
+                     ~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inMethodNullable' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+            this.inMultiple = "string";
+                 ~~~~~~~~~~
+!!! error TS2339: Property 'inMultiple' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            this.inMultipleMethods = "string";
+                 ~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inMultipleMethods' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+    
+            var action = () => {
+                if (Math.random()) {
+                    ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                    this.inNestedArrowFunction = 0;
+                         ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inNestedArrowFunction' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+                }
+                else {
+                    this.inNestedArrowFunction = "string"
+                         ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inNestedArrowFunction' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+                }
+            };
+        }
+        get() {
+            if (Math.random()) {
+                ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                this.inGetter = 0;
+                     ~~~~~~~~
+!!! error TS2339: Property 'inGetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+            else {
+                this.inGetter = "string"
+                     ~~~~~~~~
+!!! error TS2339: Property 'inGetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+            this.inMultiple = false;
+                 ~~~~~~~~~~
+!!! error TS2339: Property 'inMultiple' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            this.inMultipleMethods = false;
+                 ~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inMultipleMethods' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+        }
+        set() {
+            if (Math.random()) {
+                ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                this.inSetter = 0;
+                     ~~~~~~~~
+!!! error TS2339: Property 'inSetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+            else {
+                this.inSetter = "string"
+                     ~~~~~~~~
+!!! error TS2339: Property 'inSetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+        }
+        prop = () => {
+            if (Math.random()) {
+                ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                this.inPropertyDeclaration = 0;
+                     ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inPropertyDeclaration' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+            else {
+                this.inPropertyDeclaration = "string"
+                     ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inPropertyDeclaration' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+        }
+        static method() {
+            if (Math.random()) {
+                ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                this.inStaticMethod = 0;
+                     ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticMethod' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+            else {
+                this.inStaticMethod = "string"
+                     ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticMethod' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+    
+            var action = () => {
+                if (Math.random()) {
+                    ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                    this.inStaticNestedArrowFunction = 0;
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticNestedArrowFunction' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+                }
+                else {
+                    this.inStaticNestedArrowFunction = "string"
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticNestedArrowFunction' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+                }
+            };
+        }
+        static get() {
+            if (Math.random()) {
+                ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                this.inStaticGetter = 0;
+                     ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticGetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+            else {
+                this.inStaticGetter = "string"
+                     ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticGetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+        }
+        static set() {
+            if (Math.random()) {
+                ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                this.inStaticSetter = 0;
+                     ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticSetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+            else {
+                this.inStaticSetter = "string"
+                     ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticSetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+        }
+        static prop = () => {
+            if (Math.random()) {
+                ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                this.inStaticPropertyDeclaration = 0;
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticPropertyDeclaration' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+            else {
+                this.inStaticPropertyDeclaration = "string"
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticPropertyDeclaration' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+            }
+        }
+    }
+    
+==== b.ts (14 errors) ====
+    var c = new C();
+    
+    var stringOrNumber: string | number;
+    var stringOrNumber = c.inConstructor;
+                           ~~~~~~~~~~~~~
+!!! error TS2339: Property 'inConstructor' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+    
+    var stringOrNumberOrUndefined: string | number | undefined;
+    
+    var stringOrNumberOrUndefined = c.inMethod;
+                                      ~~~~~~~~
+!!! error TS2339: Property 'inMethod' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+    var stringOrNumberOrUndefined = c.inGetter;
+                                      ~~~~~~~~
+!!! error TS2339: Property 'inGetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+    var stringOrNumberOrUndefined = c.inSetter;
+                                      ~~~~~~~~
+!!! error TS2339: Property 'inSetter' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+    var stringOrNumberOrUndefined = c.inPropertyDeclaration;
+                                      ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inPropertyDeclaration' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+    var stringOrNumberOrUndefined = c.inNestedArrowFunction
+                                      ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inNestedArrowFunction' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+    
+    var stringOrNumberOrBoolean: string | number | boolean;
+    
+    var number: number;
+    var number = c.inMultiple;
+                   ~~~~~~~~~~
+!!! error TS2339: Property 'inMultiple' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+    var stringOrBooleanOrUndefined : string | boolean | undefined;
+    var stringOrBooleanOrUndefined = c.inMultipleMethods;
+                                       ~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inMultipleMethods' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+    var any: any;
+    var any = c.inMethodNullable;
+                ~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inMethodNullable' does not exist on type '{ method: () => any; get: () => any; set: () => any; prop: () => void }'.
+    
+    
+    var stringOrNumberOrUndefined = C.inStaticMethod;
+                                      ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticMethod' does not exist on type 'object'.
+    var stringOrNumberOrUndefined = C.inStaticGetter;
+                                      ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticGetter' does not exist on type 'object'.
+    var stringOrNumberOrUndefined = C.inStaticSetter;
+                                      ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticSetter' does not exist on type 'object'.
+    var stringOrNumberOrUndefined = C.inStaticPropertyDeclaration;
+                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticPropertyDeclaration' does not exist on type 'object'.
+    var stringOrNumberOrUndefined = C.inStaticNestedArrowFunction;
+                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'inStaticNestedArrowFunction' does not exist on type 'object'.

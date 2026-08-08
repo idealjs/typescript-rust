@@ -1,0 +1,181 @@
+restTuplesFromContextualTypes.ts(3,27): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+restTuplesFromContextualTypes.ts(5,27): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+restTuplesFromContextualTypes.ts(6,30): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+restTuplesFromContextualTypes.ts(7,33): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+restTuplesFromContextualTypes.ts(19,27): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+restTuplesFromContextualTypes.ts(21,27): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+restTuplesFromContextualTypes.ts(22,30): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+restTuplesFromContextualTypes.ts(23,33): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+restTuplesFromContextualTypes.ts(35,30): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+restTuplesFromContextualTypes.ts(38,33): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+restTuplesFromContextualTypes.ts(39,36): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+restTuplesFromContextualTypes.ts(61,13): error TS2345: Argument of type '() => string' is not assignable to parameter of type '(args: T) => U'.
+restTuplesFromContextualTypes.ts(62,13): error TS2345: Argument of type '(x: T, y: any) => number' is not assignable to parameter of type '(args: T) => U'.
+restTuplesFromContextualTypes.ts(63,13): error TS2345: Argument of type '(x: number, y: any) => number' is not assignable to parameter of type '(args: T) => U'.
+restTuplesFromContextualTypes.ts(64,13): error TS2345: Argument of type '(x: number, y: number) => number' is not assignable to parameter of type '(args: T) => U'.
+restTuplesFromContextualTypes.ts(65,13): error TS2345: Argument of type '(args: T) => boolean' is not assignable to parameter of type '(args: T) => U'.
+restTuplesFromContextualTypes.ts(69,15): error TS2345: Argument of type '() => boolean' is not assignable to parameter of type '(args: A) => B'.
+restTuplesFromContextualTypes.ts(69,27): error TS2345: Argument of type '(b: B) => number' is not assignable to parameter of type '(x: B) => C'.
+restTuplesFromContextualTypes.ts(70,15): error TS2345: Argument of type '(x: A) => string' is not assignable to parameter of type '(args: A) => B'.
+restTuplesFromContextualTypes.ts(71,15): error TS2345: Argument of type '(x: A, y: any) => number' is not assignable to parameter of type '(args: A) => B'.
+restTuplesFromContextualTypes.ts(71,29): error TS2345: Argument of type '(x: B) => number' is not assignable to parameter of type '(x: B) => C'.
+restTuplesFromContextualTypes.ts(72,15): error TS2345: Argument of type '(x: number, y: string) => number' is not assignable to parameter of type '(args: A) => B'.
+restTuplesFromContextualTypes.ts(72,45): error TS2345: Argument of type '(x: B) => number' is not assignable to parameter of type '(x: B) => C'.
+restTuplesFromContextualTypes.ts(77,26): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+restTuplesFromContextualTypes.ts(88,46): error TS2304: Cannot find name 'Error'.
+restTuplesFromContextualTypes.ts(91,7): error TS2322: Type '(num: [number, string] | [number, error], strOrErr: any) => [number, string] | [number, error]' is not assignable to type '(params: [number, string] | [number, error]) => number'.
+
+
+==== restTuplesFromContextualTypes.ts (26 errors) ====
+    declare const t1: [number, boolean, string];
+    
+    (function (a, b, c){})(...t1);
+                              ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    (function (...x){})(...t1);
+    (function (a, ...x){})(...t1);
+                              ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    (function (a, b, ...x){})(...t1);
+                                 ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    (function (a, b, c, ...x){})(...t1);
+                                    ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    
+    declare function f1(cb: (...args: typeof t1) => void): void;
+    
+    f1((a, b, c) => {})
+    f1((...x) => {})
+    f1((a, ...x) => {})
+    f1((a, b, ...x) => {})
+    f1((a, b, c, ...x) => {})
+    
+    declare const t2: [number, boolean, ...string[]];
+    
+    (function (a, b, c){})(...t2);
+                              ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    (function (...x){})(...t2);
+    (function (a, ...x){})(...t2);
+                              ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    (function (a, b, ...x){})(...t2);
+                                 ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    (function (a, b, c, ...x){})(...t2);
+                                    ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    
+    declare function f2(cb: (...args: typeof t2) => void): void;
+    
+    f2((a, b, c) => {})
+    f2((...x) => {})
+    f2((a, ...x) => {})
+    f2((a, b, ...x) => {})
+    f2((a, b, c, ...x) => {})
+    
+    declare const t3: [boolean, ...string[]];
+    
+    (function (a, b, c){})(1, ...t3);
+                                 ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    (function (...x){})(1, ...t3);
+    (function (a, ...x){})(1, ...t3);
+    (function (a, b, ...x){})(1, ...t3);
+                                    ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    (function (a, b, c, ...x){})(1, ...t3);
+                                       ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    
+    declare function f3(cb: (x: number, ...args: typeof t3) => void): void;
+    
+    f3((a, b, c) => {})
+    f3((...x) => {})
+    f3((a, ...x) => {})
+    f3((a, b, ...x) => {})
+    f3((a, b, c, ...x) => {})
+    
+    function f4<T extends any[]>(t: T) {
+        (function(...x){})(...t);
+        (function(a, ...x){})(1, ...t);
+        (function(a, ...x){})(1, 2, ...t);
+        function f(cb: (x: number, ...args: T) => void) {}
+        f((...x) => {});
+        f((a, ...x) => {});
+        f((a, b, ...x) => {});
+    }
+    
+    declare function f5<T extends any[], U>(f: (...args: T) => U): (...args: T) => U;
+    
+    let g0 = f5(() => "hello");
+                ~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '() => string' is not assignable to parameter of type '(args: T) => U'.
+    let g1 = f5((x, y) => 42);
+                ~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(x: T, y: any) => number' is not assignable to parameter of type '(args: T) => U'.
+    let g2 = f5((x: number, y) => 42);
+                ~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(x: number, y: any) => number' is not assignable to parameter of type '(args: T) => U'.
+    let g3 = f5((x: number, y: number) => x + y);
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(x: number, y: number) => number' is not assignable to parameter of type '(args: T) => U'.
+    let g4 = f5((...args) => true);
+                ~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(args: T) => boolean' is not assignable to parameter of type '(args: T) => U'.
+    
+    declare function pipe<A extends any[], B, C>(f: (...args: A) => B, g: (x: B) => C): (...args: A) => C;
+    
+    let g5 = pipe(() => true, b => 42);
+                  ~~~~~~~~~~
+!!! error TS2345: Argument of type '() => boolean' is not assignable to parameter of type '(args: A) => B'.
+                              ~~~~~~~
+!!! error TS2345: Argument of type '(b: B) => number' is not assignable to parameter of type '(x: B) => C'.
+    let g6 = pipe(x => "hello", s => s.length);
+                  ~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(x: A) => string' is not assignable to parameter of type '(args: A) => B'.
+    let g7 = pipe((x, y) => 42, x => "" + x);
+                  ~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(x: A, y: any) => number' is not assignable to parameter of type '(args: A) => B'.
+                                ~~~~~~~~~~~
+!!! error TS2345: Argument of type '(x: B) => number' is not assignable to parameter of type '(x: B) => C'.
+    let g8 = pipe((x: number, y: string) => 42, x => "" + x);
+                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(x: number, y: string) => number' is not assignable to parameter of type '(args: A) => B'.
+                                                ~~~~~~~~~~~
+!!! error TS2345: Argument of type '(x: B) => number' is not assignable to parameter of type '(x: B) => C'.
+    
+    // Repro from #25288
+    
+    declare var tuple: [number, string];
+    (function foo(a, b){}(...tuple));
+                             ~~~~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    
+    // Repro from #25289
+    
+    declare function take(cb: (a: number, b: string) => void): void;
+    
+    (function foo(...rest){}(1, ''));
+    take(function(...rest){});
+    
+    // Repro from #29833
+    
+    type ArgsUnion = [number, string] | [number, Error];
+                                                 ~~~~~
+!!! error TS2304: Cannot find name 'Error'.
+    type TupleUnionFunc = (...params: ArgsUnion) => number;
+    
+    const funcUnionTupleNoRest: TupleUnionFunc = (num, strOrErr) => {
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      return num;
+    ~~~~~~~~~~~~~
+    };
+    ~
+!!! error TS2322: Type '(num: [number, string] | [number, error], strOrErr: any) => [number, string] | [number, error]' is not assignable to type '(params: [number, string] | [number, error]) => number'.
+    
+    const funcUnionTupleRest: TupleUnionFunc = (...params) => {
+      const [num, strOrErr] = params;
+      return num;
+    };

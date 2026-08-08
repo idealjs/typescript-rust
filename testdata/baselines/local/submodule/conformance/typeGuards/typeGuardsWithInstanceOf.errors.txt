@@ -1,0 +1,66 @@
+typeGuardsWithInstanceOf.ts(4,11): error TS1005: ',' expected.
+typeGuardsWithInstanceOf.ts(4,12): error TS1134: Variable declaration expected.
+typeGuardsWithInstanceOf.ts(5,12): error TS1005: ',' expected.
+typeGuardsWithInstanceOf.ts(5,13): error TS1134: Variable declaration expected.
+typeGuardsWithInstanceOf.ts(7,25): error TS2304: Cannot find name 'RegExp'.
+typeGuardsWithInstanceOf.ts(38,11): error TS2339: Property 'onChanges' does not exist on type '{ validate: () => any } | never'.
+typeGuardsWithInstanceOf.ts(39,11): error TS2339: Property 'onChanges' does not exist on type '{ validate: () => any } | never'.
+
+
+==== typeGuardsWithInstanceOf.ts (7 errors) ====
+    ﻿// @target: es2015
+    
+    interface I { global: string; }
+    var result!: I;
+           ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS1134: Variable declaration expected.
+    var result2!: I;
+            ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1134: Variable declaration expected.
+    
+    if (!(result instanceof RegExp)) {
+                         ~~~~~~
+!!! error TS2304: Cannot find name 'RegExp'.
+        result = result2;
+    } else if (!result.global) {
+    }
+    
+    // Repro from #31155
+    
+    interface OnChanges {
+        onChanges(changes: Record<string, unknown>): void
+    }
+    interface Validator {
+        validate(): null | Record<string, unknown>;
+    }
+    
+    class C {
+        validate() {
+            return {}
+        }
+    }
+    
+    function foo() {
+        let v: Validator & Partial<OnChanges> = null as any;
+        if (v instanceof C) {
+            v // Validator & Partial<OnChanges> & C
+        }
+        v // Validator & Partial<OnChanges> via subtype reduction
+    
+        // In 4.1, we introduced a change which _fixed_ a bug with CFA
+        // correctly setting this to be the right object. With 4.2,
+        // we reverted that fix in #42231 which brought behavior back to
+        // before 4.1.
+        if (v.onChanges) {
+           ~~~~~~~~~
+!!! error TS2339: Property 'onChanges' does not exist on type '{ validate: () => any } | never'.
+            v.onChanges({});
+           ~~~~~~~~~
+!!! error TS2339: Property 'onChanges' does not exist on type '{ validate: () => any } | never'.
+        }
+    }
+    

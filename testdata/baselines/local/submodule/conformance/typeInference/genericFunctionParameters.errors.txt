@@ -1,0 +1,36 @@
+genericFunctionParameters.ts(1,35): error TS2304: Cannot find name 'S'.
+genericFunctionParameters.ts(2,50): error TS2304: Cannot find name 'S'.
+genericFunctionParameters.ts(3,39): error TS2304: Cannot find name 'Array'.
+genericFunctionParameters.ts(3,52): error TS2304: Cannot find name 'S'.
+genericFunctionParameters.ts(11,54): error TS2304: Cannot find name 'R'.
+genericFunctionParameters.ts(11,60): error TS2304: Cannot find name 'R'.
+genericFunctionParameters.ts(12,20): error TS2339: Property 'init' does not exist on type 'object'.
+
+
+==== genericFunctionParameters.ts (7 errors) ====
+    declare function f1<T>(cb: <S>(x: S) => T): T;
+                                      ~
+!!! error TS2304: Cannot find name 'S'.
+    declare function f2<T>(cb: <S extends number>(x: S) => T): T;
+                                                     ~
+!!! error TS2304: Cannot find name 'S'.
+    declare function f3<T>(cb: <S extends Array<S>>(x: S) => T): T;
+                                          ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                                       ~
+!!! error TS2304: Cannot find name 'S'.
+    
+    let x1 = f1(x => x);  // {}
+    let x2 = f2(x => x);  // number
+    let x3 = f3(x => x);  // Array<any>
+    
+    // Repro from #19345
+    
+    declare const s: <R>(go: <S>(ops: { init(): S; }) => R) => R;
+                                                         ~
+!!! error TS2304: Cannot find name 'R'.
+                                                               ~
+!!! error TS2304: Cannot find name 'R'.
+    const x = s(a => a.init());  // x is any, should have been {}
+                       ~~~~
+!!! error TS2339: Property 'init' does not exist on type 'object'.

@@ -1,0 +1,13 @@
+nonPrimitiveAsProperty.ts(7,5): error TS2322: Type '{ foo: "bar" }' is not assignable to type '{ foo: object }'.
+
+
+==== nonPrimitiveAsProperty.ts (1 errors) ====
+    interface WithNonPrimitive {
+        foo: object
+    }
+    
+    var a: WithNonPrimitive = { foo: {bar: "bar"} };
+    
+    var b: WithNonPrimitive = {foo: "bar"}; // expect error
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '{ foo: "bar" }' is not assignable to type '{ foo: object }'.

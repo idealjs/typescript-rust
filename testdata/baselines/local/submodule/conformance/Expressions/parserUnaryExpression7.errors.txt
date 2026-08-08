@@ -1,0 +1,7 @@
+parserUnaryExpression7.ts(1,8): error TS2304: Cannot find name 'Foo'.
+
+
+==== parserUnaryExpression7.ts (1 errors) ====
+    ++ new Foo();
+           ~~~
+!!! error TS2304: Cannot find name 'Foo'.

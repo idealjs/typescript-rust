@@ -1,0 +1,13 @@
+topLevelAwaitNonModule.ts(1,7): error TS2304: Cannot find name 'x'.
+
+
+==== topLevelAwaitNonModule.ts (1 errors) ====
+    await x;
+          ~
+!!! error TS2304: Cannot find name 'x'.
+    
+    const arr = [Promise.resolve()];
+    
+    for await (const item of arr) {
+      item;
+    }

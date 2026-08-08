@@ -1,0 +1,33 @@
+anonymousClassAccessorsDeclarationEmit1.ts(15,16): error TS2304: Cannot find name 'B'.
+anonymousClassAccessorsDeclarationEmit1.ts(16,9): error TS1005: ';' expected.
+anonymousClassAccessorsDeclarationEmit1.ts(19,9): error TS1005: ';' expected.
+
+
+==== anonymousClassAccessorsDeclarationEmit1.ts (3 errors) ====
+    export abstract class Base {
+      accessor a = 1;
+    }
+    
+    export function middle(Super = Base) {
+      abstract class Middle extends Super {}
+      return Middle;
+    }
+    
+    class A {
+      constructor(...args: any[]) {}
+    }
+    
+    export function Mixin<T extends typeof A>(Super: T) {
+      return class B extends Super {
+                   ~
+!!! error TS2304: Cannot find name 'B'.
+        get myName(): string {
+            ~~~~~~
+!!! error TS1005: ';' expected.
+          return "B";
+        }
+        set myName(arg: string) {}
+            ~~~~~~
+!!! error TS1005: ';' expected.
+      };
+    }

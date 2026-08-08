@@ -1,0 +1,23 @@
+a.js(2,3): error TS2304: Cannot find name 'require'.
+a.js(4,3): error TS2304: Cannot find name 'require'.
+
+
+==== emitModuleCommonJS.ts (0 errors) ====
+    
+==== a.js (2 errors) ====
+    {
+      require("" + "./foo.ts");
+      ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+      import("" + "./foo.ts");
+      require("./foo.ts");
+      ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+      import("./foo.ts");
+    }
+    
+==== b.ts (0 errors) ====
+    {
+      import("" + "./foo.ts");
+      import("./foo.ts");
+    }

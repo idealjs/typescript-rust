@@ -1,0 +1,16 @@
+foo_1.ts(2,4): error TS2304: Cannot find name 'foo'.
+
+
+==== foo_0.ts (0 errors) ====
+    namespace Foo {
+    	export var answer = 42;
+    }
+    export = Foo;
+    
+==== foo_1.ts (1 errors) ====
+    import foo = require("./foo_0");
+    if(foo.answer === 42){
+       ~~~
+!!! error TS2304: Cannot find name 'foo'.
+    
+    }

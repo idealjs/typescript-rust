@@ -1,0 +1,31 @@
+package.json(2,11): error TS1005: ';' expected.
+
+
+==== index.ts (0 errors) ====
+    // cjs format file
+    export * from "fs";
+    export * as fs from "fs";
+==== index.js (0 errors) ====
+    // esm format file
+    export * from "fs";
+    export * as fs from "fs";
+==== package.json (1 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+        "type": "module"
+    }
+==== package.json (1 errors) ====
+    {
+        "type": "commonjs"
+              ~
+!!! error TS1005: ';' expected.
+    }
+==== types.d.ts (0 errors) ====
+    declare module "fs";
+    declare module "tslib" {
+        export {};
+        // intentionally missing all helpers
+    }

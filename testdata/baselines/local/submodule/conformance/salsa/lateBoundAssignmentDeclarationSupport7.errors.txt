@@ -1,0 +1,37 @@
+lateBoundAssignmentDeclarationSupport7.js(8,7): error TS1003: Identifier expected.
+lateBoundAssignmentDeclarationSupport7.js(8,8): error TS1005: ';' expected.
+lateBoundAssignmentDeclarationSupport7.js(8,8): error TS2304: Cannot find name 'exports'.
+lateBoundAssignmentDeclarationSupport7.js(9,7): error TS1003: Identifier expected.
+lateBoundAssignmentDeclarationSupport7.js(9,8): error TS1005: ';' expected.
+lateBoundAssignmentDeclarationSupport7.js(9,8): error TS2304: Cannot find name 'exports'.
+usage.js(1,11): error TS2304: Cannot find name 'require'.
+
+
+==== lateBoundAssignmentDeclarationSupport7.js (6 errors) ====
+    const _sym = Symbol();
+    const _str = "my-fake-sym";
+    
+    function F() {
+    }
+    F[_sym] = "ok";
+    F[_str] = "ok";
+    module.exports.F = F;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    module.exports.S = _sym;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+==== usage.js (1 errors) ====
+    const x = require("./lateBoundAssignmentDeclarationSupport7.js");
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    const y = x.F["my-fake-sym"];
+    const z = x.F[x.S];

@@ -1,0 +1,23 @@
+common.cts(5,39): error TS1005: ')' expected.
+common.cts(5,68): error TS1005: ';' expected.
+common.cts(5,82): error TS1128: Declaration or statement expected.
+
+
+==== typeOnlyESMImportFromCJS.ts (0 errors) ====
+    
+==== module.mts (0 errors) ====
+    export {};
+    
+==== common.cts (3 errors) ====
+    import type {} from "./module.mts";
+    import type {} from "./module.mts" with { "resolution-mode": "import" };
+    import type {} from "./module.mts" with { "resolution-mode": "require" };
+    type _1 = typeof import("./module.mts");
+    type _2 = typeof import("./module.mts", { with: { "resolution-mode": "import" } });
+                                          ~
+!!! error TS1005: ')' expected.
+                                                                       ~
+!!! error TS1005: ';' expected.
+                                                                                     ~
+!!! error TS1128: Declaration or statement expected.
+    type _3 = typeof import("./module.mts", { with: { "resolution-mode": "require" } });

@@ -1,17 +1,17 @@
 error TS2451: Cannot redeclare block-scoped variable 'c'.
-classExpressions/classExpression3.ts(1,15): error TS2304: Cannot find name 'extends'.
-classExpressions/classExpression3.ts(1,23): error TS1005: '{' expected.
-classExpressions/classExpression3.ts(1,29): error TS1005: ';' expected.
-classExpressions/classExpression3.ts(1,37): error TS1005: ';' expected.
-classExpressions/classExpression3.ts(1,43): error TS1005: ';' expected.
-classExpressions/classExpression3.ts(1,45): error TS1005: ';' expected.
-classExpressions/classExpression3.ts(1,53): error TS1005: ',' expected.
-classExpressions/classExpression3.ts(1,53): error TS1182: A destructuring declaration must have an initializer.
-classExpressions/classExpression3.ts(1,63): error TS1005: ',' expected.
+classExpression3.ts(1,15): error TS2304: Cannot find name 'extends'.
+classExpression3.ts(1,23): error TS1005: '{' expected.
+classExpression3.ts(1,29): error TS1005: ';' expected.
+classExpression3.ts(1,37): error TS1005: ';' expected.
+classExpression3.ts(1,43): error TS1005: ';' expected.
+classExpression3.ts(1,45): error TS1005: ';' expected.
+classExpression3.ts(1,53): error TS1005: ',' expected.
+classExpression3.ts(1,53): error TS1182: A destructuring declaration must have an initializer.
+classExpression3.ts(1,63): error TS1005: ',' expected.
 
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'c'.
-==== classExpressions/classExpression3.ts (9 errors) ====
+==== classExpression3.ts (9 errors) ====
     let C = class extends class extends class { a = 1 } { b = 2 } { c = 3 };
                   ~~~~~~~
 !!! error TS2304: Cannot find name 'extends'.

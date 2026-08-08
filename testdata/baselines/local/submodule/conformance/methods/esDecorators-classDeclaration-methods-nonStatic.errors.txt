@@ -1,0 +1,18 @@
+esDecorators-classDeclaration-methods-nonStatic.ts(7,27): error TS1003: Identifier expected.
+esDecorators-classDeclaration-methods-nonStatic.ts(9,1): error TS1128: Declaration or statement expected.
+
+
+==== esDecorators-classDeclaration-methods-nonStatic.ts (2 errors) ====
+    declare let dec: any;
+    
+    const method3 = "method3";
+    
+    class C {
+        @dec(1) method1() {}
+        @dec(2) ["method2"]() {}
+                              ~
+!!! error TS1003: Identifier expected.
+        @dec(3) [method3]() {}
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

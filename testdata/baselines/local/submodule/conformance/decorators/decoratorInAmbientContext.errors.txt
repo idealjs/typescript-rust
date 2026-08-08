@@ -1,0 +1,16 @@
+decoratorInAmbientContext.ts(5,24): error TS1005: ';' expected.
+decoratorInAmbientContext.ts(6,24): error TS1005: ';' expected.
+
+
+==== decoratorInAmbientContext.ts (2 errors) ====
+    declare function decorator(target: any, key: any): any;
+    
+    const b = Symbol('b');
+    class Foo {
+        @decorator declare a: number;
+                           ~
+!!! error TS1005: ';' expected.
+        @decorator declare [b]: number;
+                           ~
+!!! error TS1005: ';' expected.
+    }

@@ -1,0 +1,8 @@
+parserClassDeclaration6.ts(1,17): error TS2304: Cannot find name 'A'.
+
+
+==== parserClassDeclaration6.ts (1 errors) ====
+    class C extends A, B {
+                    ~
+!!! error TS2304: Cannot find name 'A'.
+    }

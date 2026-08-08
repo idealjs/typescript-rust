@@ -1,0 +1,66 @@
+callGenericFunctionWithZeroTypeArguments.ts(3,33): error TS2322: Type 'null' is not assignable to type 'T'.
+callGenericFunctionWithZeroTypeArguments.ts(6,11): error TS2304: Cannot find name 'T'.
+callGenericFunctionWithZeroTypeArguments.ts(6,17): error TS2304: Cannot find name 'T'.
+callGenericFunctionWithZeroTypeArguments.ts(6,21): error TS2304: Cannot find name 'T'.
+callGenericFunctionWithZeroTypeArguments.ts(10,10): error TS2349: This expression is not callable.
+callGenericFunctionWithZeroTypeArguments.ts(13,13): error TS2304: Cannot find name 'T'.
+callGenericFunctionWithZeroTypeArguments.ts(13,17): error TS2304: Cannot find name 'T'.
+callGenericFunctionWithZeroTypeArguments.ts(27,16): error TS2322: Type 'null' is not assignable to type 'T'.
+callGenericFunctionWithZeroTypeArguments.ts(30,23): error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+
+
+==== callGenericFunctionWithZeroTypeArguments.ts (9 errors) ====
+    // valid invocations of generic functions with no explicit type arguments provided 
+    
+    function f<T>(x: T): T { return null; }
+                                    ~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'T'.
+    var r = f(1);
+    
+    var f2 = <T>(x: T): T => { return null; }
+              ~
+!!! error TS2304: Cannot find name 'T'.
+                    ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+    var r2 = f2(1);
+    
+    var f3: { <T>(x: T): T; }
+    var r3 = f3(1);
+             ~~
+!!! error TS2349: This expression is not callable.
+    
+    class C {
+        f<T>(x: T): T {
+                ~
+!!! error TS2304: Cannot find name 'T'.
+                    ~
+!!! error TS2304: Cannot find name 'T'.
+            return null;
+        }
+    }
+    var r4 = (new C()).f(1);
+    
+    interface I {
+        f<T>(x: T): T;
+    }
+    var i: I;
+    var r5 = i.f(1);
+    
+    class C2<T> {
+        f(x: T): T {
+            return null;
+                   ~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'T'.
+        }
+    }
+    var r6 = (new C2()).f(1);
+                          ~
+!!! error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+    
+    interface I2<T> {
+        f(x: T): T;
+    }
+    var i2: I2<number>;
+    var r7 = i2.f(1);

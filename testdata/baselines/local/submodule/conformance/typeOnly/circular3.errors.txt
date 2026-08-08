@@ -1,0 +1,47 @@
+/a.ts(2,13): error TS1003: Identifier expected.
+/a.ts(2,15): error TS1005: '=' expected.
+/a.ts(2,17): error TS1005: ';' expected.
+/a.ts(2,17): error TS2304: Cannot find name 'as'.
+/a.ts(2,20): error TS1005: ';' expected.
+/a.ts(2,22): error TS1128: Declaration or statement expected.
+/b.ts(2,13): error TS1003: Identifier expected.
+/b.ts(2,15): error TS1005: '=' expected.
+/b.ts(2,17): error TS1005: ';' expected.
+/b.ts(2,17): error TS2304: Cannot find name 'as'.
+/b.ts(2,20): error TS1005: ';' expected.
+/b.ts(2,22): error TS1128: Declaration or statement expected.
+
+
+==== circular3.ts (0 errors) ====
+    
+==== /a.ts (6 errors) ====
+    import type { A } from './b';
+    export type { A as B };
+                ~
+!!! error TS1003: Identifier expected.
+                  ~
+!!! error TS1005: '=' expected.
+                    ~~
+!!! error TS1005: ';' expected.
+                    ~~
+!!! error TS2304: Cannot find name 'as'.
+                       ~
+!!! error TS1005: ';' expected.
+                         ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== /b.ts (6 errors) ====
+    import type { B } from './a';
+    export type { B as A };
+                ~
+!!! error TS1003: Identifier expected.
+                  ~
+!!! error TS1005: '=' expected.
+                    ~~
+!!! error TS1005: ';' expected.
+                    ~~
+!!! error TS2304: Cannot find name 'as'.
+                       ~
+!!! error TS1005: ';' expected.
+                         ~
+!!! error TS1128: Declaration or statement expected.

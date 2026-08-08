@@ -1,0 +1,30 @@
+controlFlowIteration.ts(6,13): error TS2454: Variable 'cond' is used before being assigned.
+controlFlowIteration.ts(11,19): error TS2339: Property 'length' does not exist on type 'string'.
+controlFlowIteration.ts(14,19): error TS2339: Property 'length' does not exist on type 'string | never'.
+
+
+==== controlFlowIteration.ts (3 errors) ====
+    let cond: boolean;
+    
+    function ff() {
+        let x: string | undefined;
+        while (true) {
+            if (cond) {
+                ~~~~
+!!! error TS2454: Variable 'cond' is used before being assigned.
+                x = "";
+            }
+            else {
+                if (x) {
+                    x.length;
+                      ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type 'string'.
+                }
+                if (x) {
+                    x.length;
+                      ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type 'string | never'.
+                }
+            }
+        }
+    }

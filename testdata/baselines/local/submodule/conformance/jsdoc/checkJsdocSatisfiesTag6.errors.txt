@@ -1,0 +1,25 @@
+/a.js(11,17): error TS2339: Property 'toFixed' does not exist on type 'number'.
+/a.js(14,11): error TS2339: Property 'y' does not exist on type '{ x: number }'.
+
+
+==== checkJsdocSatisfiesTag6.ts (0 errors) ====
+    
+==== /a.js (2 errors) ====
+    /**
+     * @typedef {Object} Point2d
+     * @property {number} x
+     * @property {number} y
+     */
+    
+    // Undesirable behavior today with type annotation
+    const a = /** @satisfies {Partial<Point2d>} */ ({ x: 10 });
+    
+    // Should OK
+    console.log(a.x.toFixed());
+                    ~~~~~~~
+!!! error TS2339: Property 'toFixed' does not exist on type 'number'.
+    
+    // Should error
+    let p = a.y;
+              ~
+!!! error TS2339: Property 'y' does not exist on type '{ x: number }'.

@@ -1,0 +1,19 @@
+a.js(3,14): error TS2339: Property 'p' does not exist on type 'object'.
+a.js(8,14): error TS2339: Property 'p' does not exist on type '{ m: () => any }'.
+
+
+==== a.js (2 errors) ====
+    class Base {
+        constructor() {
+            this.p = 1
+                 ~
+!!! error TS2339: Property 'p' does not exist on type 'object'.
+        }
+    }
+    class Derived extends Base {
+        m() {
+            this.p = 1
+                 ~
+!!! error TS2339: Property 'p' does not exist on type '{ m: () => any }'.
+        }
+    }

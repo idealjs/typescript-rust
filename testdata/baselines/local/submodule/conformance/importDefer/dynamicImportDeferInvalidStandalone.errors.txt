@@ -8,7 +8,7 @@ b.ts(7,8): error TS1005: ';' expected.
 b.ts(7,8): error TS2304: Cannot find name 'defer'.
 
 
-==== importDefer/dynamicImportDeferInvalidStandalone.ts (0 errors) ====
+==== dynamicImportDeferInvalidStandalone.ts (0 errors) ====
     
 ==== b.ts (8 errors) ====
     import.defer;

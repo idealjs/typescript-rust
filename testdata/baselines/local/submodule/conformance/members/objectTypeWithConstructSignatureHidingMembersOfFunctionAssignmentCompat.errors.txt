@@ -1,0 +1,20 @@
+objectTypeWithConstructSignatureHidingMembersOfFunctionAssignmentCompat.ts(6,16): error TS2304: Cannot find name 'Object'.
+
+
+==== objectTypeWithConstructSignatureHidingMembersOfFunctionAssignmentCompat.ts (1 errors) ====
+    interface I {
+        new(): any;
+    }
+    
+    declare var i: I;
+    declare var f: Object;
+                   ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    f = i;
+    i = f;
+    
+    declare var a: {
+        new(): any
+    }
+    f = a;
+    a = f;

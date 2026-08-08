@@ -1,0 +1,57 @@
+callWithSpread2.ts(23,16): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+callWithSpread2.ts(24,10): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+callWithSpread2.ts(33,11): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+callWithSpread2.ts(34,11): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+callWithSpread2.ts(35,11): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+callWithSpread2.ts(36,17): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+
+
+==== callWithSpread2.ts (6 errors) ====
+    declare function all(a?: number, b?: number): void;
+    declare function weird(a?: number | string, b?: number | string): void;
+    declare function prefix(s: string, a?: number, b?: number): void;
+    declare function rest(s: string, a?: number, b?: number,  ...rest: number[]): void;
+    declare function normal(s: string): void;
+    declare function thunk(): string;
+    declare function prefix2(s: string, n: number, a?: number, b?: number): void;
+    
+    declare var ns: number[];
+    declare var mixed: (number | string)[];
+    declare var tuple: [number, string];
+    
+    // good
+    all(...ns)
+    weird(...ns)
+    weird(...mixed)
+    weird(...tuple)
+    prefix("a", ...ns)
+    rest("d", ...ns)
+    
+    
+    // extra arguments
+    normal("g", ...ns)
+                   ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    thunk(...ns)
+             ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    
+    // bad
+    all(...mixed)
+    all(...tuple)
+    prefix("b", ...mixed)
+    prefix("c", ...tuple)
+    rest("e", ...mixed)
+    rest("f", ...tuple)
+    prefix(...ns) // required parameters are required
+              ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    prefix(...mixed)
+              ~~~~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    prefix(...tuple)
+              ~~~~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    prefix2("g", ...ns);
+                    ~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.

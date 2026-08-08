@@ -1,0 +1,31 @@
+FunctionPropertyAssignments2_es6.ts(1,11): error TS1003: Identifier expected.
+FunctionPropertyAssignments2_es6.ts(1,11): error TS2304: Cannot find name '*'.
+FunctionPropertyAssignments2_es6.ts(1,12): error TS1005: ',' expected.
+FunctionPropertyAssignments2_es6.ts(1,12): error TS2304: Cannot find name '('.
+FunctionPropertyAssignments2_es6.ts(1,13): error TS1005: ',' expected.
+FunctionPropertyAssignments2_es6.ts(1,13): error TS2304: Cannot find name ')'.
+FunctionPropertyAssignments2_es6.ts(1,15): error TS1005: ',' expected.
+FunctionPropertyAssignments2_es6.ts(1,15): error TS2304: Cannot find name '{'.
+FunctionPropertyAssignments2_es6.ts(1,19): error TS1128: Declaration or statement expected.
+
+
+==== FunctionPropertyAssignments2_es6.ts (9 errors) ====
+    var v = { *() { } }
+              ~
+!!! error TS1003: Identifier expected.
+              ~
+!!! error TS2304: Cannot find name '*'.
+               ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS2304: Cannot find name '('.
+                ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS2304: Cannot find name ')'.
+                  ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS2304: Cannot find name '{'.
+                      ~
+!!! error TS1128: Declaration or statement expected.

@@ -1,0 +1,49 @@
+esDecorators-classExpression-namedEvaluation.10.ts(6,24): error TS1012: Unexpected token.
+esDecorators-classExpression-namedEvaluation.10.ts(6,25): error TS1005: ';' expected.
+esDecorators-classExpression-namedEvaluation.10.ts(6,29): error TS1005: ';' expected.
+esDecorators-classExpression-namedEvaluation.10.ts(6,35): error TS1005: ';' expected.
+esDecorators-classExpression-namedEvaluation.10.ts(6,41): error TS1128: Declaration or statement expected.
+
+
+==== esDecorators-classExpression-namedEvaluation.10.ts (5 errors) ====
+    declare let dec: any, f: any;
+    
+    // 10.2.1.3 RS: EvaluateBody
+    //   Initializer : `=` AssignmentExpression
+    
+    { class C { static x = @dec class {}; } }
+                           ~
+!!! error TS1012: Unexpected token.
+                            ~~~
+!!! error TS1005: ';' expected.
+                                ~~~~~
+!!! error TS1005: ';' expected.
+                                      ~
+!!! error TS1005: ';' expected.
+                                            ~
+!!! error TS1128: Declaration or statement expected.
+    { class C { static "x" = @dec class {}; } }
+    { class C { static 0 = @dec class {}; } }
+    { class C { static ["x"] = @dec class {}; } }
+    { class C { static [0] = @dec class {}; } }
+    // @ts-ignore
+    { class C { static [f()] = @dec class {}; } }
+    
+    // __proto__ is not special in a class field
+    { class C { static __proto__ = @dec class {}; } }
+    { class C { static "__proto__" = @dec class {}; } }
+    
+    { class C { static x = class { @dec y: any }; } }
+    { class C { static "x" = class { @dec y: any }; } }
+    { class C { static 0 = class { @dec y: any }; } }
+    { class C { static ["x"] = class { @dec y: any }; } }
+    { class C { static [0] = class { @dec y: any }; } }
+    // @ts-ignore
+    { class C { static [f()] = @dec class {}; } }
+    
+    // __proto__ is not special in a class field
+    { class C { static __proto__ = class { @dec y: any }; } }
+    { class C { static "__proto__" = class { @dec y: any }; } }
+    
+    // ensure nested named evaluation happens when field is also transformed
+    { class C { @dec static x = @dec class {}; } }

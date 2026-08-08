@@ -1,0 +1,41 @@
+symbolProperty61.ts(10,25): error TS1005: ',' expected.
+symbolProperty61.ts(13,19): error TS2339: Property '_val' does not exist on type '{ subscribe: (next: (val: T) => void) => any }'.
+symbolProperty61.ts(29,6): error TS2554: Expected 2 arguments, but got 1.
+
+
+==== symbolProperty61.ts (3 errors) ====
+    declare global {
+      interface SymbolConstructor {
+        readonly obs: symbol
+      }
+    }
+    
+    const observable: typeof Symbol.obs = Symbol.obs
+    
+    export class MyObservable<T> {
+        constructor(private _val: T) {}
+                            ~~~~
+!!! error TS1005: ',' expected.
+    
+        subscribe(next: (val: T) => void) {
+            next(this._val)
+                      ~~~~
+!!! error TS2339: Property '_val' does not exist on type '{ subscribe: (next: (val: T) => void) => any }'.
+        }
+    
+        [observable]() {
+            return this
+        }
+    }
+    
+    type InteropObservable<T> = {
+        [Symbol.obs]: () => { subscribe(next: (val: T) => void): void }
+    }
+    
+    function from<T>(obs: InteropObservable<T>) {
+        return obs[Symbol.obs]()
+    }
+    
+    from(new MyObservable(42))
+         ~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.

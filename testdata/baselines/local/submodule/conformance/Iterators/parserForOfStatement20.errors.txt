@@ -1,0 +1,7 @@
+parserForOfStatement20.ts(1,22): error TS1005: ',' expected.
+
+
+==== parserForOfStatement20.ts (1 errors) ====
+    for (var of = 0 in of) { }
+                         ~
+!!! error TS1005: ',' expected.

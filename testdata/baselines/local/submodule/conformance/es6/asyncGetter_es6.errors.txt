@@ -1,7 +1,7 @@
-es6/asyncGetter_es6.ts(2,13): error TS1005: ';' expected.
+asyncGetter_es6.ts(2,13): error TS1005: ';' expected.
 
 
-==== es6/asyncGetter_es6.ts (1 errors) ====
+==== asyncGetter_es6.ts (1 errors) ====
     class C {
       async get foo() {
                 ~~~

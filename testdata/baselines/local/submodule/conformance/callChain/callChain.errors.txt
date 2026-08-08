@@ -1,0 +1,107 @@
+callChain.ts(2,1): error TS2349: This expression is not callable.
+callChain.ts(3,1): error TS2349: This expression is not callable.
+callChain.ts(4,1): error TS2349: This expression is not callable.
+callChain.ts(5,1): error TS2349: This expression is not callable.
+callChain.ts(12,5): error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
+callChain.ts(13,5): error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
+callChain.ts(14,5): error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
+callChain.ts(15,5): error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
+callChain.ts(18,1): error TS2349: This expression is not callable.
+callChain.ts(19,1): error TS2349: This expression is not callable.
+callChain.ts(20,1): error TS2349: This expression is not callable.
+callChain.ts(21,1): error TS2349: This expression is not callable.
+callChain.ts(22,1): error TS2349: This expression is not callable.
+callChain.ts(23,1): error TS2349: This expression is not callable.
+callChain.ts(24,1): error TS2349: This expression is not callable.
+callChain.ts(25,1): error TS2349: This expression is not callable.
+callChain.ts(31,43): error TS2304: Cannot find name 'T'.
+callChain.ts(31,49): error TS2304: Cannot find name 'T'.
+callChain.ts(31,55): error TS2304: Cannot find name 'T'.
+callChain.ts(33,31): error TS2349: This expression is not callable.
+callChain.ts(37,1): error TS2349: This expression is not callable.
+
+
+==== callChain.ts (21 errors) ====
+    declare const o1: undefined | ((...args: any[]) => number);
+    o1?.();
+    ~~
+!!! error TS2349: This expression is not callable.
+    o1?.(1);
+    ~~
+!!! error TS2349: This expression is not callable.
+    o1?.(...[1, 2]);
+    ~~
+!!! error TS2349: This expression is not callable.
+    o1?.(1, ...[2, 3], 4);
+    ~~
+!!! error TS2349: This expression is not callable.
+    
+    declare const o2: undefined | { b: (...args: any[]) => number };
+    o2?.b();
+    o2?.b(1);
+    o2?.b(...[1, 2]);
+    o2?.b(1, ...[2, 3], 4);
+    o2?.["b"]();
+        ~~~~~
+!!! error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
+    o2?.["b"](1);
+        ~~~~~
+!!! error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
+    o2?.["b"](...[1, 2]);
+        ~~~~~
+!!! error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
+    o2?.["b"](1, ...[2, 3], 4);
+        ~~~~~
+!!! error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
+    
+    declare const o3: { b: ((...args: any[]) => { c: string }) | undefined };
+    o3.b?.().c;
+    ~~~~
+!!! error TS2349: This expression is not callable.
+    o3.b?.(1).c;
+    ~~~~
+!!! error TS2349: This expression is not callable.
+    o3.b?.(...[1, 2]).c;
+    ~~~~
+!!! error TS2349: This expression is not callable.
+    o3.b?.(1, ...[2, 3], 4).c;
+    ~~~~
+!!! error TS2349: This expression is not callable.
+    o3.b?.()["c"];
+    ~~~~
+!!! error TS2349: This expression is not callable.
+    o3.b?.(1)["c"];
+    ~~~~
+!!! error TS2349: This expression is not callable.
+    o3.b?.(...[1, 2])["c"];
+    ~~~~
+!!! error TS2349: This expression is not callable.
+    o3.b?.(1, ...[2, 3], 4)["c"];
+    ~~~~
+!!! error TS2349: This expression is not callable.
+    o3["b"]?.().c;
+    o3["b"]?.(1).c;
+    o3["b"]?.(...[1, 2]).c;
+    o3["b"]?.(1, ...[2, 3], 4).c;
+    
+    declare const o4: undefined | (<T>(f: (a: T) => T) => T);
+                                              ~
+!!! error TS2304: Cannot find name 'T'.
+                                                    ~
+!!! error TS2304: Cannot find name 'T'.
+                                                          ~
+!!! error TS2304: Cannot find name 'T'.
+    declare function incr(x: number): number;
+    const v: number | undefined = o4?.(incr);
+                                  ~~
+!!! error TS2349: This expression is not callable.
+    
+    // GH#33744
+    declare const o5: <T>() => undefined | (() => void);
+    o5<number>()?.();
+    ~~~~~~~~~~~~
+!!! error TS2349: This expression is not callable.
+    
+    // GH#36031
+    o2?.b()!.toString;
+    o2?.b()!.toString!;

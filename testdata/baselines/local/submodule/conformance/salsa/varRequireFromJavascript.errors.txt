@@ -1,0 +1,37 @@
+ex.js(4,14): error TS2339: Property 'n' does not exist on type '{ m: () => any }'.
+ex.js(7,21): error TS2339: Property 'n' does not exist on type '{ m: () => any }'.
+use.js(1,10): error TS2304: Cannot find name 'require'.
+
+
+==== ex.js (2 errors) ====
+    export class Crunch {
+        /** @param {number} n */
+        constructor(n) {
+            this.n = n
+                 ~
+!!! error TS2339: Property 'n' does not exist on type '{ m: () => any }'.
+        }
+        m() {
+            return this.n
+                        ~
+!!! error TS2339: Property 'n' does not exist on type '{ m: () => any }'.
+        }
+    }
+    
+==== use.js (1 errors) ====
+    var ex = require('./ex')
+             ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    
+    // values work
+    var crunch = new ex.Crunch(1);
+    crunch.n
+    
+    
+    // types work
+    /**
+     * @param {ex.Crunch} wrap
+     */
+    function f(wrap) {
+        wrap.n
+    }

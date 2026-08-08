@@ -1,0 +1,17 @@
+a.ts(2,17): error TS2304: Cannot find name 'Foo'.
+
+
+==== umd6.ts (0 errors) ====
+    
+==== foo.d.ts (0 errors) ====
+    declare namespace Thing {
+    	export function fn(): number;
+    }
+    export = Thing;
+    export as namespace Foo;
+    
+==== a.ts (1 errors) ====
+    /// <reference path="foo.d.ts" />
+    let y: number = Foo.fn();
+                    ~~~
+!!! error TS2304: Cannot find name 'Foo'.

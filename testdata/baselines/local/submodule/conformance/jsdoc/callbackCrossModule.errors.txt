@@ -1,0 +1,30 @@
+mod1.js(5,7): error TS1003: Identifier expected.
+mod1.js(5,8): error TS1005: ';' expected.
+mod1.js(5,8): error TS2304: Cannot find name 'exports'.
+
+
+==== mod1.js (3 errors) ====
+    /** @callback Con - some kind of continuation
+     * @param {object | undefined} error
+     * @return {any} I don't even know what this should return
+     */
+    module.exports = C
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    function C() {
+        this.p = 1
+    }
+    
+==== use.js (0 errors) ====
+    /** @param {import('./mod1').Con} k */
+    function f(k) {
+        if (1 === 2 - 1) {
+            // I guess basic math works!
+        }
+        return k({ ok: true})
+    }
+    

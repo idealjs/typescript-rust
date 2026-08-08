@@ -1,0 +1,14 @@
+usage.js(3,22): error TS2304: Cannot find name 'Fooa'.
+
+
+==== cls.js (0 errors) ====
+    export default class Foo {}
+    
+==== usage.js (1 errors) ====
+    import {default as Fooa} from "./cls";
+    
+    export const x = new Fooa();
+                         ~~~~
+!!! error TS2304: Cannot find name 'Fooa'.
+    
+    export {default as Foob} from "./cls";

@@ -1,0 +1,20 @@
+parserClassDeclaration5.ts(1,17): error TS2304: Cannot find name 'A'.
+parserClassDeclaration5.ts(1,30): error TS2304: Cannot find name 'B'.
+parserClassDeclaration5.ts(1,32): error TS1005: '{' expected.
+parserClassDeclaration5.ts(1,43): error TS1005: ';' expected.
+parserClassDeclaration5.ts(1,45): error TS1005: ';' expected.
+
+
+==== parserClassDeclaration5.ts (5 errors) ====
+    class C extends A implements B implements C {
+                    ~
+!!! error TS2304: Cannot find name 'A'.
+                                 ~
+!!! error TS2304: Cannot find name 'B'.
+                                   ~~~~~~~~~~
+!!! error TS1005: '{' expected.
+                                              ~
+!!! error TS1005: ';' expected.
+                                                ~
+!!! error TS1005: ';' expected.
+    }

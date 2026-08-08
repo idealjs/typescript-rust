@@ -1,0 +1,11 @@
+forgottenNew.ts(5,14): error TS2349: This expression is not callable.
+
+
+==== forgottenNew.ts (1 errors) ====
+    namespace Tools {
+        export class NullLogger { }
+    }
+    
+    var logger = Tools.NullLogger();
+                 ~~~~~~~~~~~~~~~~
+!!! error TS2349: This expression is not callable.

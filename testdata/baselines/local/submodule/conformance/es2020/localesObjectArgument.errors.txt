@@ -1,0 +1,192 @@
+localesObjectArgument.ts(1,18): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(2,18): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(3,18): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(5,17): error TS2304: Cannot find name 'Date'.
+localesObjectArgument.ts(19,5): error TS2339: Property 'toLocaleString' does not exist on type '1000'.
+localesObjectArgument.ts(20,5): error TS2339: Property 'toLocaleString' does not exist on type '1000'.
+localesObjectArgument.ts(22,8): error TS2339: Property 'toLocaleString' does not exist on type 'bigint'.
+localesObjectArgument.ts(23,8): error TS2339: Property 'toLocaleString' does not exist on type 'bigint'.
+localesObjectArgument.ts(25,5): error TS2339: Property 'toLocaleLowerCase' does not exist on type '""'.
+localesObjectArgument.ts(26,5): error TS2339: Property 'toLocaleLowerCase' does not exist on type '""'.
+localesObjectArgument.ts(27,5): error TS2339: Property 'toLocaleUpperCase' does not exist on type '""'.
+localesObjectArgument.ts(28,5): error TS2339: Property 'toLocaleUpperCase' does not exist on type '""'.
+localesObjectArgument.ts(29,5): error TS2339: Property 'localeCompare' does not exist on type '""'.
+localesObjectArgument.ts(30,5): error TS2339: Property 'localeCompare' does not exist on type '""'.
+localesObjectArgument.ts(32,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(33,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(34,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(35,1): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(36,1): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(37,1): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(39,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(40,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(41,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(42,1): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(43,1): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(44,1): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(46,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(47,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(48,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(49,1): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(50,1): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(52,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(53,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(54,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(55,1): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(56,1): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(57,1): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(59,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(60,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(61,5): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(62,1): error TS2304: Cannot find name 'Intl'.
+localesObjectArgument.ts(63,1): error TS2304: Cannot find name 'Intl'.
+
+
+==== localesObjectArgument.ts (42 errors) ====
+    const enUS = new Intl.Locale("en-US");
+                     ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    const deDE = new Intl.Locale("de-DE");
+                     ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    const jaJP = new Intl.Locale("ja-JP");
+                     ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    
+    const now = new Date();
+                    ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    const num = 1000;
+    const bigint = 123456789123456789n;
+    const str = "";
+    
+    const readonlyLocales: Readonly<string[]> = ['de-DE', 'ja-JP'];
+    
+    now.toLocaleString(enUS);
+    now.toLocaleDateString(enUS);
+    now.toLocaleTimeString(enUS);
+    now.toLocaleString([deDE, jaJP]);
+    now.toLocaleDateString([deDE, jaJP]);
+    now.toLocaleTimeString([deDE, jaJP]);
+    
+    num.toLocaleString(enUS);
+        ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'toLocaleString' does not exist on type '1000'.
+    num.toLocaleString([deDE, jaJP]);
+        ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'toLocaleString' does not exist on type '1000'.
+    
+    bigint.toLocaleString(enUS);
+           ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'toLocaleString' does not exist on type 'bigint'.
+    bigint.toLocaleString([deDE, jaJP]);
+           ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'toLocaleString' does not exist on type 'bigint'.
+    
+    str.toLocaleLowerCase(enUS);
+        ~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'toLocaleLowerCase' does not exist on type '""'.
+    str.toLocaleLowerCase([deDE, jaJP]);
+        ~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'toLocaleLowerCase' does not exist on type '""'.
+    str.toLocaleUpperCase(enUS);
+        ~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'toLocaleUpperCase' does not exist on type '""'.
+    str.toLocaleUpperCase([deDE, jaJP]);
+        ~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'toLocaleUpperCase' does not exist on type '""'.
+    str.localeCompare(str, enUS);
+        ~~~~~~~~~~~~~
+!!! error TS2339: Property 'localeCompare' does not exist on type '""'.
+    str.localeCompare(str, [deDE, jaJP]);
+        ~~~~~~~~~~~~~
+!!! error TS2339: Property 'localeCompare' does not exist on type '""'.
+    
+    new Intl.PluralRules(enUS);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    new Intl.PluralRules([deDE, jaJP]);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    new Intl.PluralRules(readonlyLocales);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    Intl.PluralRules.supportedLocalesOf(enUS);
+    ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    Intl.PluralRules.supportedLocalesOf([deDE, jaJP]);
+    ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    Intl.PluralRules.supportedLocalesOf(readonlyLocales);
+    ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    
+    new Intl.RelativeTimeFormat(enUS);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    new Intl.RelativeTimeFormat([deDE, jaJP]);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    new Intl.RelativeTimeFormat(readonlyLocales);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    Intl.RelativeTimeFormat.supportedLocalesOf(enUS);
+    ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    Intl.RelativeTimeFormat.supportedLocalesOf([deDE, jaJP]);
+    ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    Intl.RelativeTimeFormat.supportedLocalesOf(readonlyLocales);
+    ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    
+    new Intl.Collator(enUS);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    new Intl.Collator([deDE, jaJP]);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    new Intl.Collator(readonlyLocales);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    Intl.Collator.supportedLocalesOf(enUS);
+    ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    Intl.Collator.supportedLocalesOf([deDE, jaJP]);
+    ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    
+    new Intl.DateTimeFormat(enUS);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    new Intl.DateTimeFormat([deDE, jaJP]);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    new Intl.DateTimeFormat(readonlyLocales);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    Intl.DateTimeFormat.supportedLocalesOf(enUS);
+    ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    Intl.DateTimeFormat.supportedLocalesOf([deDE, jaJP]);
+    ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    Intl.DateTimeFormat.supportedLocalesOf(readonlyLocales);
+    ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    
+    new Intl.NumberFormat(enUS);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    new Intl.NumberFormat([deDE, jaJP]);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    new Intl.NumberFormat(readonlyLocales);
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    Intl.NumberFormat.supportedLocalesOf(enUS);
+    ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    Intl.NumberFormat.supportedLocalesOf(readonlyLocales);
+    ~~~~
+!!! error TS2304: Cannot find name 'Intl'.

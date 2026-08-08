@@ -1,0 +1,33 @@
+controlFlowAssignmentExpression.ts(5,7): error TS2339: Property 'length' does not exist on type '""'.
+controlFlowAssignmentExpression.ts(9,10): error TS2454: Variable 'obj' is used before being assigned.
+controlFlowAssignmentExpression.ts(9,28): error TS2339: Property 'length' does not exist on type '""'.
+controlFlowAssignmentExpression.ts(17,18): error TS2454: Variable 'o' is used before being assigned.
+
+
+==== controlFlowAssignmentExpression.ts (4 errors) ====
+    let x: string | boolean | number;
+    let obj: any;
+    
+    x = "";
+    x = x.length;
+          ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type '""'.
+    x; // number
+    
+    x = true;
+    (x = "", obj).foo = (x = x.length);
+             ~~~
+!!! error TS2454: Variable 'obj' is used before being assigned.
+                               ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type '""'.
+    x; // number
+    
+    // https://github.com/microsoft/TypeScript/issues/35484
+    type D = { done: true, value: 1 } | { done: false, value: 2 };
+    declare function fn(): D;
+    let o: D;
+    if ((o = fn()).done) {
+        const y: 1 = o.value;
+                     ~
+!!! error TS2454: Variable 'o' is used before being assigned.
+    }

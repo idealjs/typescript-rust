@@ -1,0 +1,10 @@
+generatorTypeCheck7.ts(4,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
+
+
+==== generatorTypeCheck7.ts (1 errors) ====
+    interface WeirdIter extends IterableIterator<number> {
+        hello: string;
+    }
+    function* g1(): WeirdIter { }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2366: Function lacks ending return statement and return type does not include 'undefined'.

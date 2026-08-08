@@ -1,0 +1,8 @@
+parserErrorRecovery_ParameterList2.ts(2,2): error TS1005: ')' expected.
+
+
+==== parserErrorRecovery_ParameterList2.ts (1 errors) ====
+    function f(a, {
+    }
+     
+!!! error TS1005: ')' expected.

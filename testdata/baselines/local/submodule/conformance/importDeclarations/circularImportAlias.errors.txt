@@ -1,0 +1,57 @@
+circularImportAlias.ts(4,12): error TS1005: '{' expected.
+circularImportAlias.ts(4,21): error TS1003: Identifier expected.
+circularImportAlias.ts(4,24): error TS1003: Identifier expected.
+circularImportAlias.ts(5,29): error TS1003: Identifier expected.
+circularImportAlias.ts(5,32): error TS1003: Identifier expected.
+circularImportAlias.ts(6,11): error TS1003: Identifier expected.
+circularImportAlias.ts(6,19): error TS1003: Identifier expected.
+circularImportAlias.ts(12,12): error TS1005: '{' expected.
+circularImportAlias.ts(12,21): error TS1003: Identifier expected.
+circularImportAlias.ts(12,24): error TS1003: Identifier expected.
+circularImportAlias.ts(16,15): error TS2339: Property 'a' does not exist on type 'B'.
+circularImportAlias.ts(18,1): error TS1005: '}' expected.
+
+
+==== circularImportAlias.ts (12 errors) ====
+    // expected no error
+    
+    namespace B {
+        export import a = A;
+               ~~~~~~
+!!! error TS1005: '{' expected.
+                        ~
+!!! error TS1003: Identifier expected.
+                           ~
+!!! error TS1003: Identifier expected.
+        export class D extends a.C {
+                                ~
+!!! error TS1003: Identifier expected.
+                                   ~
+!!! error TS1003: Identifier expected.
+            id: number;
+              ~
+!!! error TS1003: Identifier expected.
+                      ~
+!!! error TS1003: Identifier expected.
+        }
+    }
+    
+    namespace A {
+        export class C { name: string }
+        export import b = B;
+               ~~~~~~
+!!! error TS1005: '{' expected.
+                        ~
+!!! error TS1003: Identifier expected.
+                           ~
+!!! error TS1003: Identifier expected.
+    }
+    
+    var c: { name: string };
+    var c = new B.a.C();
+                  ~
+!!! error TS2339: Property 'a' does not exist on type 'B'.
+    
+    
+    
+!!! error TS1005: '}' expected.

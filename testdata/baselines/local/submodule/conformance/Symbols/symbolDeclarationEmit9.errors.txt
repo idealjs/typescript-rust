@@ -1,0 +1,27 @@
+symbolDeclarationEmit9.ts(2,32): error TS1005: ',' expected.
+symbolDeclarationEmit9.ts(2,32): error TS2304: Cannot find name '('.
+symbolDeclarationEmit9.ts(2,33): error TS1005: ',' expected.
+symbolDeclarationEmit9.ts(2,33): error TS2304: Cannot find name ')'.
+symbolDeclarationEmit9.ts(2,35): error TS1005: ',' expected.
+symbolDeclarationEmit9.ts(2,35): error TS2304: Cannot find name '{'.
+symbolDeclarationEmit9.ts(3,1): error TS1128: Declaration or statement expected.
+
+
+==== symbolDeclarationEmit9.ts (7 errors) ====
+    var obj = {
+        [Symbol.isConcatSpreadable]() { }
+                                   ~
+!!! error TS1005: ',' expected.
+                                   ~
+!!! error TS2304: Cannot find name '('.
+                                    ~
+!!! error TS1005: ',' expected.
+                                    ~
+!!! error TS2304: Cannot find name ')'.
+                                      ~
+!!! error TS1005: ',' expected.
+                                      ~
+!!! error TS2304: Cannot find name '{'.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

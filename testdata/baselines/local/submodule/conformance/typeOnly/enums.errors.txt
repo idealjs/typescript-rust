@@ -1,0 +1,49 @@
+/a.ts(11,13): error TS1003: Identifier expected.
+/a.ts(11,15): error TS1005: '=' expected.
+/a.ts(11,26): error TS1128: Declaration or statement expected.
+/b.ts(9,13): error TS1003: Identifier expected.
+/b.ts(9,15): error TS1005: '=' expected.
+/b.ts(9,24): error TS1128: Declaration or statement expected.
+
+
+==== /a.ts (3 errors) ====
+    enum SyntaxKind {
+      ImportClause,
+      ExportDeclaration
+    }
+    
+    const enum SymbolFlags {
+      Type = "Type",
+      Value = "Value"
+    }
+    
+    export type { SyntaxKind };
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~~~~~~~~
+!!! error TS1005: '=' expected.
+                             ~
+!!! error TS1128: Declaration or statement expected.
+    export { SymbolFlags };
+    
+==== /b.ts (3 errors) ====
+    import type { SyntaxKind, SymbolFlags } from './a';
+    
+    SyntaxKind.ImportClause;
+    SymbolFlags.Type;
+    let kind: SyntaxKind.ImportClause;
+    let flags: SymbolFlags;
+    
+    type TypeFlag = SymbolFlags.Type;
+    export type { TypeFlag };
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~~~~~~
+!!! error TS1005: '=' expected.
+                           ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== /c.ts (0 errors) ====
+    import { SymbolFlags } from './a';
+    import type { TypeFlag } from './b';
+    const flags: TypeFlag = SymbolFlags.Type;

@@ -1,0 +1,86 @@
+staticIndexSignature4.ts(2,23): error TS1005: ']' expected.
+staticIndexSignature4.ts(2,31): error TS1005: ';' expected.
+staticIndexSignature4.ts(3,23): error TS1005: ']' expected.
+staticIndexSignature4.ts(3,31): error TS1005: ';' expected.
+staticIndexSignature4.ts(7,14): error TS1005: ']' expected.
+staticIndexSignature4.ts(7,22): error TS1005: ';' expected.
+staticIndexSignature4.ts(8,14): error TS1005: ']' expected.
+staticIndexSignature4.ts(8,22): error TS1005: ';' expected.
+staticIndexSignature4.ts(19,7): error TS2339: Property 'a' does not exist on type 'object'.
+staticIndexSignature4.ts(19,13): error TS2339: Property 'a' does not exist on type 'object'.
+staticIndexSignature4.ts(22,7): error TS2339: Property 'a' does not exist on type 'object'.
+staticIndexSignature4.ts(22,13): error TS2339: Property 'a' does not exist on type 'object'.
+staticIndexSignature4.ts(25,7): error TS2339: Property 'a' does not exist on type 'object'.
+staticIndexSignature4.ts(27,7): error TS2339: Property 'a' does not exist on type 'object'.
+staticIndexSignature4.ts(30,13): error TS2339: Property 'a' does not exist on type 'object'.
+staticIndexSignature4.ts(33,13): error TS2339: Property 'a' does not exist on type 'object'.
+
+
+==== staticIndexSignature4.ts (16 errors) ====
+    class B {
+        static readonly [s: string]: number;
+                          ~
+!!! error TS1005: ']' expected.
+                                  ~
+!!! error TS1005: ';' expected.
+        static readonly [s: number]: 42 | 233
+                          ~
+!!! error TS1005: ']' expected.
+                                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class D {
+        static [s: string]: number;
+                 ~
+!!! error TS1005: ']' expected.
+                         ~
+!!! error TS1005: ';' expected.
+        static [s: number]: 42 | 233
+                 ~
+!!! error TS1005: ']' expected.
+                         ~
+!!! error TS1005: ';' expected.
+    }
+    
+    interface IB {
+        static [s: string]: number;
+        static [s: number]: 42 | 233;
+    }
+    
+    declare const v: number
+    declare const i: IB
+    if (v === 0) {
+        B.a = D.a
+          ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+                ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+        B[2] = D[2]
+    } else if (v === 1) {
+        D.a = B.a
+          ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+                ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+        D[2] = B[2]
+    } else if (v === 2) {
+        B.a = i.a
+          ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+        B[2] = i[2]
+        D.a = i.a
+          ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+        D[2] = i [2]
+    } else if (v === 3) {
+        i.a = B.a
+                ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+        i[2] = B[2]
+    } else if (v === 4) {
+        i.a = D.a
+                ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+        i[2] = B[2]
+    }

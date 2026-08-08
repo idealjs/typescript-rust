@@ -1,0 +1,13 @@
+index.d.ts(4,25): error TS1109: Expression expected.
+index.d.ts(4,33): error TS1005: '{' expected.
+
+
+==== index.d.ts (2 errors) ====
+    // await keyword allowed as identifier in a declaration file
+    export {};
+    declare const await: any;
+    declare class C extends await {}
+                            ~~~~~
+!!! error TS1109: Expression expected.
+                                    
+!!! error TS1005: '{' expected.

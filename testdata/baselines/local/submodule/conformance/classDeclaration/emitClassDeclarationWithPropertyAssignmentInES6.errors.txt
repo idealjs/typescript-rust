@@ -1,0 +1,31 @@
+emitClassDeclarationWithPropertyAssignmentInES6.ts(22,9): error TS2349: This expression is not callable.
+
+
+==== emitClassDeclarationWithPropertyAssignmentInES6.ts (1 errors) ====
+    ﻿// @target:es6
+    class C {
+        x: string = "Hello world";
+    }
+    
+    class D {
+        x: string = "Hello world";
+        y: number;
+        constructor() {
+            this.y = 10;
+        }
+    }
+    
+    class E extends D{
+        z: boolean = true;
+    }
+    
+    class F extends D{
+        z: boolean = true;
+        j: string;
+        constructor() {
+            super();
+         ~~~~~
+!!! error TS2349: This expression is not callable.
+            this.j = "HI";
+        }
+    }

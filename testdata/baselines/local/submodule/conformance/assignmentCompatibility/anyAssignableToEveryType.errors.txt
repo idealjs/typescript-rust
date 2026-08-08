@@ -1,0 +1,69 @@
+anyAssignableToEveryType.ts(18,8): error TS2304: Cannot find name 'Date'.
+anyAssignableToEveryType.ts(21,8): error TS2304: Cannot find name 'Object'.
+anyAssignableToEveryType.ts(31,15): error TS2304: Cannot find name 'T'.
+anyAssignableToEveryType.ts(31,21): error TS2304: Cannot find name 'T'.
+anyAssignableToEveryType.ts(32,8): error TS2304: Cannot find name 'Number'.
+anyAssignableToEveryType.ts(33,8): error TS2304: Cannot find name 'String'.
+anyAssignableToEveryType.ts(35,44): error TS2304: Cannot find name 'Date'.
+
+
+==== anyAssignableToEveryType.ts (7 errors) ====
+    var a: any;
+    
+    class C {
+        foo: string;
+    }
+    var ac: C;
+    interface I {
+        foo: string;
+    }
+    var ai: I;
+    
+    enum E { A }
+    var ae: E;
+    
+    var b: number = a;
+    var c: string = a;
+    var d: boolean = a;
+    var e: Date = a;
+           ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    var f: any = a;
+    var g: void = a;
+    var h: Object = a;
+           ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    var i: {} = a;
+    var j: () => {} = a;
+    var k: Function = a;
+    var l: (x: number) => string = a;
+    ac = a;
+    ai = a;
+    ae = a;
+    var m: number[] = a;
+    var n: { foo: string } = a;
+    var o: <T>(x: T) => T = a;
+                  ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+    var p: Number = a;
+           ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
+    var q: String = a;
+           ~~~~~~
+!!! error TS2304: Cannot find name 'String'.
+    
+    function foo<T, U /*extends T*/, V extends Date>(x: T, y: U, z: V) {
+                                               ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        x = a;
+        y = a;
+        z = a;
+    }
+    
+    //function foo<T, U extends T, V extends Date>(x: T, y: U, z: V) {
+    //    x = a;
+    //    y = a;
+    //    z = a;
+    //}

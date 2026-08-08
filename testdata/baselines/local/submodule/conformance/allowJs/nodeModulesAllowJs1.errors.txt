@@ -1,0 +1,1545 @@
+index.cjs(26,6): error TS2304: Cannot find name 'm1'.
+index.cjs(27,6): error TS2304: Cannot find name 'm2'.
+index.cjs(28,6): error TS2304: Cannot find name 'm3'.
+index.cjs(29,6): error TS2304: Cannot find name 'm4'.
+index.cjs(30,6): error TS2304: Cannot find name 'm5'.
+index.cjs(31,6): error TS2304: Cannot find name 'm6'.
+index.cjs(32,6): error TS2304: Cannot find name 'm7'.
+index.cjs(33,6): error TS2304: Cannot find name 'm8'.
+index.cjs(34,6): error TS2304: Cannot find name 'm9'.
+index.cjs(35,6): error TS2304: Cannot find name 'm10'.
+index.cjs(36,6): error TS2304: Cannot find name 'm11'.
+index.cjs(37,6): error TS2304: Cannot find name 'm12'.
+index.cjs(38,6): error TS2304: Cannot find name 'm13'.
+index.cjs(39,6): error TS2304: Cannot find name 'm14'.
+index.cjs(40,6): error TS2304: Cannot find name 'm15'.
+index.cjs(41,6): error TS2304: Cannot find name 'm16'.
+index.cjs(42,6): error TS2304: Cannot find name 'm17'.
+index.cjs(43,6): error TS2304: Cannot find name 'm18'.
+index.cjs(44,6): error TS2304: Cannot find name 'm19'.
+index.cjs(45,6): error TS2304: Cannot find name 'm20'.
+index.cjs(46,6): error TS2304: Cannot find name 'm21'.
+index.cjs(47,6): error TS2304: Cannot find name 'm22'.
+index.cjs(48,6): error TS2304: Cannot find name 'm23'.
+index.cjs(62,6): error TS2304: Cannot find name 'm24'.
+index.cjs(63,6): error TS2304: Cannot find name 'm25'.
+index.cjs(64,6): error TS2304: Cannot find name 'm26'.
+index.cjs(65,6): error TS2304: Cannot find name 'm27'.
+index.cjs(66,6): error TS2304: Cannot find name 'm28'.
+index.cjs(67,6): error TS2304: Cannot find name 'm29'.
+index.cjs(68,6): error TS2304: Cannot find name 'm30'.
+index.cjs(69,6): error TS2304: Cannot find name 'm31'.
+index.cjs(70,6): error TS2304: Cannot find name 'm32'.
+index.cjs(71,6): error TS2304: Cannot find name 'm33'.
+index.cjs(72,6): error TS2304: Cannot find name 'm34'.
+index.cjs(75,14): error TS2304: Cannot find name 'import'.
+index.cjs(76,14): error TS2304: Cannot find name 'import'.
+index.cjs(77,14): error TS2304: Cannot find name 'import'.
+index.cjs(78,14): error TS2304: Cannot find name 'import'.
+index.cjs(79,14): error TS2304: Cannot find name 'import'.
+index.cjs(80,14): error TS2304: Cannot find name 'import'.
+index.cjs(81,14): error TS2304: Cannot find name 'import'.
+index.cjs(82,14): error TS2304: Cannot find name 'import'.
+index.cjs(83,14): error TS2304: Cannot find name 'import'.
+index.cjs(84,14): error TS2304: Cannot find name 'import'.
+index.cjs(85,14): error TS2304: Cannot find name 'import'.
+index.js(25,6): error TS2304: Cannot find name 'm1'.
+index.js(26,6): error TS2304: Cannot find name 'm2'.
+index.js(27,6): error TS2304: Cannot find name 'm3'.
+index.js(28,6): error TS2304: Cannot find name 'm4'.
+index.js(29,6): error TS2304: Cannot find name 'm5'.
+index.js(30,6): error TS2304: Cannot find name 'm6'.
+index.js(31,6): error TS2304: Cannot find name 'm7'.
+index.js(32,6): error TS2304: Cannot find name 'm8'.
+index.js(33,6): error TS2304: Cannot find name 'm9'.
+index.js(34,6): error TS2304: Cannot find name 'm10'.
+index.js(35,6): error TS2304: Cannot find name 'm11'.
+index.js(36,6): error TS2304: Cannot find name 'm12'.
+index.js(37,6): error TS2304: Cannot find name 'm13'.
+index.js(38,6): error TS2304: Cannot find name 'm14'.
+index.js(39,6): error TS2304: Cannot find name 'm15'.
+index.js(40,6): error TS2304: Cannot find name 'm16'.
+index.js(41,6): error TS2304: Cannot find name 'm17'.
+index.js(42,6): error TS2304: Cannot find name 'm18'.
+index.js(43,6): error TS2304: Cannot find name 'm19'.
+index.js(44,6): error TS2304: Cannot find name 'm20'.
+index.js(45,6): error TS2304: Cannot find name 'm21'.
+index.js(46,6): error TS2304: Cannot find name 'm22'.
+index.js(47,6): error TS2304: Cannot find name 'm23'.
+index.js(61,6): error TS2304: Cannot find name 'm24'.
+index.js(62,6): error TS2304: Cannot find name 'm25'.
+index.js(63,6): error TS2304: Cannot find name 'm26'.
+index.js(64,6): error TS2304: Cannot find name 'm27'.
+index.js(65,6): error TS2304: Cannot find name 'm28'.
+index.js(66,6): error TS2304: Cannot find name 'm29'.
+index.js(67,6): error TS2304: Cannot find name 'm30'.
+index.js(68,6): error TS2304: Cannot find name 'm31'.
+index.js(69,6): error TS2304: Cannot find name 'm32'.
+index.js(70,6): error TS2304: Cannot find name 'm33'.
+index.js(71,6): error TS2304: Cannot find name 'm34'.
+index.js(74,14): error TS2304: Cannot find name 'import'.
+index.js(75,14): error TS2304: Cannot find name 'import'.
+index.js(76,14): error TS2304: Cannot find name 'import'.
+index.js(77,14): error TS2304: Cannot find name 'import'.
+index.js(78,14): error TS2304: Cannot find name 'import'.
+index.js(79,14): error TS2304: Cannot find name 'import'.
+index.js(80,14): error TS2304: Cannot find name 'import'.
+index.js(81,14): error TS2304: Cannot find name 'import'.
+index.js(82,14): error TS2304: Cannot find name 'import'.
+index.js(83,14): error TS2304: Cannot find name 'import'.
+index.js(84,14): error TS2304: Cannot find name 'import'.
+index.mjs(25,6): error TS2304: Cannot find name 'm1'.
+index.mjs(26,6): error TS2304: Cannot find name 'm2'.
+index.mjs(27,6): error TS2304: Cannot find name 'm3'.
+index.mjs(28,6): error TS2304: Cannot find name 'm4'.
+index.mjs(29,6): error TS2304: Cannot find name 'm5'.
+index.mjs(30,6): error TS2304: Cannot find name 'm6'.
+index.mjs(31,6): error TS2304: Cannot find name 'm7'.
+index.mjs(32,6): error TS2304: Cannot find name 'm8'.
+index.mjs(33,6): error TS2304: Cannot find name 'm9'.
+index.mjs(34,6): error TS2304: Cannot find name 'm10'.
+index.mjs(35,6): error TS2304: Cannot find name 'm11'.
+index.mjs(36,6): error TS2304: Cannot find name 'm12'.
+index.mjs(37,6): error TS2304: Cannot find name 'm13'.
+index.mjs(38,6): error TS2304: Cannot find name 'm14'.
+index.mjs(39,6): error TS2304: Cannot find name 'm15'.
+index.mjs(40,6): error TS2304: Cannot find name 'm16'.
+index.mjs(41,6): error TS2304: Cannot find name 'm17'.
+index.mjs(42,6): error TS2304: Cannot find name 'm18'.
+index.mjs(43,6): error TS2304: Cannot find name 'm19'.
+index.mjs(44,6): error TS2304: Cannot find name 'm20'.
+index.mjs(45,6): error TS2304: Cannot find name 'm21'.
+index.mjs(46,6): error TS2304: Cannot find name 'm22'.
+index.mjs(47,6): error TS2304: Cannot find name 'm23'.
+index.mjs(61,6): error TS2304: Cannot find name 'm24'.
+index.mjs(62,6): error TS2304: Cannot find name 'm25'.
+index.mjs(63,6): error TS2304: Cannot find name 'm26'.
+index.mjs(64,6): error TS2304: Cannot find name 'm27'.
+index.mjs(65,6): error TS2304: Cannot find name 'm28'.
+index.mjs(66,6): error TS2304: Cannot find name 'm29'.
+index.mjs(67,6): error TS2304: Cannot find name 'm30'.
+index.mjs(68,6): error TS2304: Cannot find name 'm31'.
+index.mjs(69,6): error TS2304: Cannot find name 'm32'.
+index.mjs(70,6): error TS2304: Cannot find name 'm33'.
+index.mjs(71,6): error TS2304: Cannot find name 'm34'.
+index.mjs(74,14): error TS2304: Cannot find name 'import'.
+index.mjs(75,14): error TS2304: Cannot find name 'import'.
+index.mjs(76,14): error TS2304: Cannot find name 'import'.
+index.mjs(77,14): error TS2304: Cannot find name 'import'.
+index.mjs(78,14): error TS2304: Cannot find name 'import'.
+index.mjs(79,14): error TS2304: Cannot find name 'import'.
+index.mjs(80,14): error TS2304: Cannot find name 'import'.
+index.mjs(81,14): error TS2304: Cannot find name 'import'.
+index.mjs(82,14): error TS2304: Cannot find name 'import'.
+index.mjs(83,14): error TS2304: Cannot find name 'import'.
+index.mjs(84,14): error TS2304: Cannot find name 'import'.
+package.json(2,11): error TS1005: ';' expected.
+
+
+==== index.js (45 errors) ====
+    // cjs format file
+    const x = 1;
+    export {x};
+               
+!!! error TS2304: Cannot find name 'm1'.
+               
+!!! error TS2304: Cannot find name 'm2'.
+               
+!!! error TS2304: Cannot find name 'm3'.
+               
+!!! error TS2304: Cannot find name 'm4'.
+               
+!!! error TS2304: Cannot find name 'm5'.
+               
+!!! error TS2304: Cannot find name 'm6'.
+               
+!!! error TS2304: Cannot find name 'm7'.
+               
+!!! error TS2304: Cannot find name 'm8'.
+               
+!!! error TS2304: Cannot find name 'm9'.
+               
+!!! error TS2304: Cannot find name 'm10'.
+               
+!!! error TS2304: Cannot find name 'm11'.
+               
+!!! error TS2304: Cannot find name 'm12'.
+               
+!!! error TS2304: Cannot find name 'm13'.
+               
+!!! error TS2304: Cannot find name 'm14'.
+               
+!!! error TS2304: Cannot find name 'm15'.
+               
+!!! error TS2304: Cannot find name 'm16'.
+               
+!!! error TS2304: Cannot find name 'm17'.
+               
+!!! error TS2304: Cannot find name 'm18'.
+               
+!!! error TS2304: Cannot find name 'm19'.
+               
+!!! error TS2304: Cannot find name 'm20'.
+               
+!!! error TS2304: Cannot find name 'm21'.
+               
+!!! error TS2304: Cannot find name 'm22'.
+               
+!!! error TS2304: Cannot find name 'm23'.
+               
+!!! error TS2304: Cannot find name 'm24'.
+               
+!!! error TS2304: Cannot find name 'm25'.
+               
+!!! error TS2304: Cannot find name 'm26'.
+               
+!!! error TS2304: Cannot find name 'm27'.
+               
+!!! error TS2304: Cannot find name 'm28'.
+               
+!!! error TS2304: Cannot find name 'm29'.
+               
+!!! error TS2304: Cannot find name 'm30'.
+               
+!!! error TS2304: Cannot find name 'm31'.
+               
+!!! error TS2304: Cannot find name 'm32'.
+               
+!!! error TS2304: Cannot find name 'm33'.
+               
+!!! error TS2304: Cannot find name 'm34'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+==== index.cjs (45 errors) ====
+    // cjs format file
+    const x = 1;
+    export {x};
+               
+!!! error TS2304: Cannot find name 'm1'.
+               
+!!! error TS2304: Cannot find name 'm2'.
+               
+!!! error TS2304: Cannot find name 'm3'.
+               
+!!! error TS2304: Cannot find name 'm4'.
+               
+!!! error TS2304: Cannot find name 'm5'.
+               
+!!! error TS2304: Cannot find name 'm6'.
+               
+!!! error TS2304: Cannot find name 'm7'.
+               
+!!! error TS2304: Cannot find name 'm8'.
+               
+!!! error TS2304: Cannot find name 'm9'.
+               
+!!! error TS2304: Cannot find name 'm10'.
+               
+!!! error TS2304: Cannot find name 'm11'.
+               
+!!! error TS2304: Cannot find name 'm12'.
+               
+!!! error TS2304: Cannot find name 'm13'.
+               
+!!! error TS2304: Cannot find name 'm14'.
+               
+!!! error TS2304: Cannot find name 'm15'.
+               
+!!! error TS2304: Cannot find name 'm16'.
+               
+!!! error TS2304: Cannot find name 'm17'.
+               
+!!! error TS2304: Cannot find name 'm18'.
+               
+!!! error TS2304: Cannot find name 'm19'.
+               
+!!! error TS2304: Cannot find name 'm20'.
+               
+!!! error TS2304: Cannot find name 'm21'.
+               
+!!! error TS2304: Cannot find name 'm22'.
+               
+!!! error TS2304: Cannot find name 'm23'.
+               
+!!! error TS2304: Cannot find name 'm24'.
+               
+!!! error TS2304: Cannot find name 'm25'.
+               
+!!! error TS2304: Cannot find name 'm26'.
+               
+!!! error TS2304: Cannot find name 'm27'.
+               
+!!! error TS2304: Cannot find name 'm28'.
+               
+!!! error TS2304: Cannot find name 'm29'.
+               
+!!! error TS2304: Cannot find name 'm30'.
+               
+!!! error TS2304: Cannot find name 'm31'.
+               
+!!! error TS2304: Cannot find name 'm32'.
+               
+!!! error TS2304: Cannot find name 'm33'.
+               
+!!! error TS2304: Cannot find name 'm34'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+==== index.mjs (45 errors) ====
+    // esm format file
+    const x = 1;
+    export {x};
+               
+!!! error TS2304: Cannot find name 'm1'.
+               
+!!! error TS2304: Cannot find name 'm2'.
+               
+!!! error TS2304: Cannot find name 'm3'.
+               
+!!! error TS2304: Cannot find name 'm4'.
+               
+!!! error TS2304: Cannot find name 'm5'.
+               
+!!! error TS2304: Cannot find name 'm6'.
+               
+!!! error TS2304: Cannot find name 'm7'.
+               
+!!! error TS2304: Cannot find name 'm8'.
+               
+!!! error TS2304: Cannot find name 'm9'.
+               
+!!! error TS2304: Cannot find name 'm10'.
+               
+!!! error TS2304: Cannot find name 'm11'.
+               
+!!! error TS2304: Cannot find name 'm12'.
+               
+!!! error TS2304: Cannot find name 'm13'.
+               
+!!! error TS2304: Cannot find name 'm14'.
+               
+!!! error TS2304: Cannot find name 'm15'.
+               
+!!! error TS2304: Cannot find name 'm16'.
+               
+!!! error TS2304: Cannot find name 'm17'.
+               
+!!! error TS2304: Cannot find name 'm18'.
+               
+!!! error TS2304: Cannot find name 'm19'.
+               
+!!! error TS2304: Cannot find name 'm20'.
+               
+!!! error TS2304: Cannot find name 'm21'.
+               
+!!! error TS2304: Cannot find name 'm22'.
+               
+!!! error TS2304: Cannot find name 'm23'.
+               
+!!! error TS2304: Cannot find name 'm24'.
+               
+!!! error TS2304: Cannot find name 'm25'.
+               
+!!! error TS2304: Cannot find name 'm26'.
+               
+!!! error TS2304: Cannot find name 'm27'.
+               
+!!! error TS2304: Cannot find name 'm28'.
+               
+!!! error TS2304: Cannot find name 'm29'.
+               
+!!! error TS2304: Cannot find name 'm30'.
+               
+!!! error TS2304: Cannot find name 'm31'.
+               
+!!! error TS2304: Cannot find name 'm32'.
+               
+!!! error TS2304: Cannot find name 'm33'.
+               
+!!! error TS2304: Cannot find name 'm34'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+==== index.js (45 errors) ====
+    // cjs format file
+    const x = 1;
+    export {x};
+               
+!!! error TS2304: Cannot find name 'm1'.
+               
+!!! error TS2304: Cannot find name 'm2'.
+               
+!!! error TS2304: Cannot find name 'm3'.
+               
+!!! error TS2304: Cannot find name 'm4'.
+               
+!!! error TS2304: Cannot find name 'm5'.
+               
+!!! error TS2304: Cannot find name 'm6'.
+               
+!!! error TS2304: Cannot find name 'm7'.
+               
+!!! error TS2304: Cannot find name 'm8'.
+               
+!!! error TS2304: Cannot find name 'm9'.
+               
+!!! error TS2304: Cannot find name 'm10'.
+               
+!!! error TS2304: Cannot find name 'm11'.
+               
+!!! error TS2304: Cannot find name 'm12'.
+               
+!!! error TS2304: Cannot find name 'm13'.
+               
+!!! error TS2304: Cannot find name 'm14'.
+               
+!!! error TS2304: Cannot find name 'm15'.
+               
+!!! error TS2304: Cannot find name 'm16'.
+               
+!!! error TS2304: Cannot find name 'm17'.
+               
+!!! error TS2304: Cannot find name 'm18'.
+               
+!!! error TS2304: Cannot find name 'm19'.
+               
+!!! error TS2304: Cannot find name 'm20'.
+               
+!!! error TS2304: Cannot find name 'm21'.
+               
+!!! error TS2304: Cannot find name 'm22'.
+               
+!!! error TS2304: Cannot find name 'm23'.
+               
+!!! error TS2304: Cannot find name 'm24'.
+               
+!!! error TS2304: Cannot find name 'm25'.
+               
+!!! error TS2304: Cannot find name 'm26'.
+               
+!!! error TS2304: Cannot find name 'm27'.
+               
+!!! error TS2304: Cannot find name 'm28'.
+               
+!!! error TS2304: Cannot find name 'm29'.
+               
+!!! error TS2304: Cannot find name 'm30'.
+               
+!!! error TS2304: Cannot find name 'm31'.
+               
+!!! error TS2304: Cannot find name 'm32'.
+               
+!!! error TS2304: Cannot find name 'm33'.
+               
+!!! error TS2304: Cannot find name 'm34'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+==== index.cjs (45 errors) ====
+    // cjs format file
+    const x = 1;
+    export {x};
+               
+!!! error TS2304: Cannot find name 'm1'.
+               
+!!! error TS2304: Cannot find name 'm2'.
+               
+!!! error TS2304: Cannot find name 'm3'.
+               
+!!! error TS2304: Cannot find name 'm4'.
+               
+!!! error TS2304: Cannot find name 'm5'.
+               
+!!! error TS2304: Cannot find name 'm6'.
+               
+!!! error TS2304: Cannot find name 'm7'.
+               
+!!! error TS2304: Cannot find name 'm8'.
+               
+!!! error TS2304: Cannot find name 'm9'.
+               
+!!! error TS2304: Cannot find name 'm10'.
+               
+!!! error TS2304: Cannot find name 'm11'.
+               
+!!! error TS2304: Cannot find name 'm12'.
+               
+!!! error TS2304: Cannot find name 'm13'.
+               
+!!! error TS2304: Cannot find name 'm14'.
+               
+!!! error TS2304: Cannot find name 'm15'.
+               
+!!! error TS2304: Cannot find name 'm16'.
+               
+!!! error TS2304: Cannot find name 'm17'.
+               
+!!! error TS2304: Cannot find name 'm18'.
+               
+!!! error TS2304: Cannot find name 'm19'.
+               
+!!! error TS2304: Cannot find name 'm20'.
+               
+!!! error TS2304: Cannot find name 'm21'.
+               
+!!! error TS2304: Cannot find name 'm22'.
+               
+!!! error TS2304: Cannot find name 'm23'.
+               
+!!! error TS2304: Cannot find name 'm24'.
+               
+!!! error TS2304: Cannot find name 'm25'.
+               
+!!! error TS2304: Cannot find name 'm26'.
+               
+!!! error TS2304: Cannot find name 'm27'.
+               
+!!! error TS2304: Cannot find name 'm28'.
+               
+!!! error TS2304: Cannot find name 'm29'.
+               
+!!! error TS2304: Cannot find name 'm30'.
+               
+!!! error TS2304: Cannot find name 'm31'.
+               
+!!! error TS2304: Cannot find name 'm32'.
+               
+!!! error TS2304: Cannot find name 'm33'.
+               
+!!! error TS2304: Cannot find name 'm34'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+==== index.mjs (45 errors) ====
+    // esm format file
+    const x = 1;
+    export {x};
+               
+!!! error TS2304: Cannot find name 'm1'.
+               
+!!! error TS2304: Cannot find name 'm2'.
+               
+!!! error TS2304: Cannot find name 'm3'.
+               
+!!! error TS2304: Cannot find name 'm4'.
+               
+!!! error TS2304: Cannot find name 'm5'.
+               
+!!! error TS2304: Cannot find name 'm6'.
+               
+!!! error TS2304: Cannot find name 'm7'.
+               
+!!! error TS2304: Cannot find name 'm8'.
+               
+!!! error TS2304: Cannot find name 'm9'.
+               
+!!! error TS2304: Cannot find name 'm10'.
+               
+!!! error TS2304: Cannot find name 'm11'.
+               
+!!! error TS2304: Cannot find name 'm12'.
+               
+!!! error TS2304: Cannot find name 'm13'.
+               
+!!! error TS2304: Cannot find name 'm14'.
+               
+!!! error TS2304: Cannot find name 'm15'.
+               
+!!! error TS2304: Cannot find name 'm16'.
+               
+!!! error TS2304: Cannot find name 'm17'.
+               
+!!! error TS2304: Cannot find name 'm18'.
+               
+!!! error TS2304: Cannot find name 'm19'.
+               
+!!! error TS2304: Cannot find name 'm20'.
+               
+!!! error TS2304: Cannot find name 'm21'.
+               
+!!! error TS2304: Cannot find name 'm22'.
+               
+!!! error TS2304: Cannot find name 'm23'.
+               
+!!! error TS2304: Cannot find name 'm24'.
+               
+!!! error TS2304: Cannot find name 'm25'.
+               
+!!! error TS2304: Cannot find name 'm26'.
+               
+!!! error TS2304: Cannot find name 'm27'.
+               
+!!! error TS2304: Cannot find name 'm28'.
+               
+!!! error TS2304: Cannot find name 'm29'.
+               
+!!! error TS2304: Cannot find name 'm30'.
+               
+!!! error TS2304: Cannot find name 'm31'.
+               
+!!! error TS2304: Cannot find name 'm32'.
+               
+!!! error TS2304: Cannot find name 'm33'.
+               
+!!! error TS2304: Cannot find name 'm34'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+==== index.js (45 errors) ====
+    // esm format file
+    const x = 1;
+    export {x};
+               
+!!! error TS2304: Cannot find name 'm1'.
+               
+!!! error TS2304: Cannot find name 'm2'.
+               
+!!! error TS2304: Cannot find name 'm3'.
+               
+!!! error TS2304: Cannot find name 'm4'.
+               
+!!! error TS2304: Cannot find name 'm5'.
+               
+!!! error TS2304: Cannot find name 'm6'.
+               
+!!! error TS2304: Cannot find name 'm7'.
+               
+!!! error TS2304: Cannot find name 'm8'.
+               
+!!! error TS2304: Cannot find name 'm9'.
+               
+!!! error TS2304: Cannot find name 'm10'.
+               
+!!! error TS2304: Cannot find name 'm11'.
+               
+!!! error TS2304: Cannot find name 'm12'.
+               
+!!! error TS2304: Cannot find name 'm13'.
+               
+!!! error TS2304: Cannot find name 'm14'.
+               
+!!! error TS2304: Cannot find name 'm15'.
+               
+!!! error TS2304: Cannot find name 'm16'.
+               
+!!! error TS2304: Cannot find name 'm17'.
+               
+!!! error TS2304: Cannot find name 'm18'.
+               
+!!! error TS2304: Cannot find name 'm19'.
+               
+!!! error TS2304: Cannot find name 'm20'.
+               
+!!! error TS2304: Cannot find name 'm21'.
+               
+!!! error TS2304: Cannot find name 'm22'.
+               
+!!! error TS2304: Cannot find name 'm23'.
+               
+!!! error TS2304: Cannot find name 'm24'.
+               
+!!! error TS2304: Cannot find name 'm25'.
+               
+!!! error TS2304: Cannot find name 'm26'.
+               
+!!! error TS2304: Cannot find name 'm27'.
+               
+!!! error TS2304: Cannot find name 'm28'.
+               
+!!! error TS2304: Cannot find name 'm29'.
+               
+!!! error TS2304: Cannot find name 'm30'.
+               
+!!! error TS2304: Cannot find name 'm31'.
+               
+!!! error TS2304: Cannot find name 'm32'.
+               
+!!! error TS2304: Cannot find name 'm33'.
+               
+!!! error TS2304: Cannot find name 'm34'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+==== index.cjs (45 errors) ====
+    // cjs format file
+    const x = 1;
+    export {x};
+               
+!!! error TS2304: Cannot find name 'm1'.
+               
+!!! error TS2304: Cannot find name 'm2'.
+               
+!!! error TS2304: Cannot find name 'm3'.
+               
+!!! error TS2304: Cannot find name 'm4'.
+               
+!!! error TS2304: Cannot find name 'm5'.
+               
+!!! error TS2304: Cannot find name 'm6'.
+               
+!!! error TS2304: Cannot find name 'm7'.
+               
+!!! error TS2304: Cannot find name 'm8'.
+               
+!!! error TS2304: Cannot find name 'm9'.
+               
+!!! error TS2304: Cannot find name 'm10'.
+               
+!!! error TS2304: Cannot find name 'm11'.
+               
+!!! error TS2304: Cannot find name 'm12'.
+               
+!!! error TS2304: Cannot find name 'm13'.
+               
+!!! error TS2304: Cannot find name 'm14'.
+               
+!!! error TS2304: Cannot find name 'm15'.
+               
+!!! error TS2304: Cannot find name 'm16'.
+               
+!!! error TS2304: Cannot find name 'm17'.
+               
+!!! error TS2304: Cannot find name 'm18'.
+               
+!!! error TS2304: Cannot find name 'm19'.
+               
+!!! error TS2304: Cannot find name 'm20'.
+               
+!!! error TS2304: Cannot find name 'm21'.
+               
+!!! error TS2304: Cannot find name 'm22'.
+               
+!!! error TS2304: Cannot find name 'm23'.
+               
+!!! error TS2304: Cannot find name 'm24'.
+               
+!!! error TS2304: Cannot find name 'm25'.
+               
+!!! error TS2304: Cannot find name 'm26'.
+               
+!!! error TS2304: Cannot find name 'm27'.
+               
+!!! error TS2304: Cannot find name 'm28'.
+               
+!!! error TS2304: Cannot find name 'm29'.
+               
+!!! error TS2304: Cannot find name 'm30'.
+               
+!!! error TS2304: Cannot find name 'm31'.
+               
+!!! error TS2304: Cannot find name 'm32'.
+               
+!!! error TS2304: Cannot find name 'm33'.
+               
+!!! error TS2304: Cannot find name 'm34'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+==== index.mjs (45 errors) ====
+    // esm format file
+    const x = 1;
+    export {x};
+               
+!!! error TS2304: Cannot find name 'm1'.
+               
+!!! error TS2304: Cannot find name 'm2'.
+               
+!!! error TS2304: Cannot find name 'm3'.
+               
+!!! error TS2304: Cannot find name 'm4'.
+               
+!!! error TS2304: Cannot find name 'm5'.
+               
+!!! error TS2304: Cannot find name 'm6'.
+               
+!!! error TS2304: Cannot find name 'm7'.
+               
+!!! error TS2304: Cannot find name 'm8'.
+               
+!!! error TS2304: Cannot find name 'm9'.
+               
+!!! error TS2304: Cannot find name 'm10'.
+               
+!!! error TS2304: Cannot find name 'm11'.
+               
+!!! error TS2304: Cannot find name 'm12'.
+               
+!!! error TS2304: Cannot find name 'm13'.
+               
+!!! error TS2304: Cannot find name 'm14'.
+               
+!!! error TS2304: Cannot find name 'm15'.
+               
+!!! error TS2304: Cannot find name 'm16'.
+               
+!!! error TS2304: Cannot find name 'm17'.
+               
+!!! error TS2304: Cannot find name 'm18'.
+               
+!!! error TS2304: Cannot find name 'm19'.
+               
+!!! error TS2304: Cannot find name 'm20'.
+               
+!!! error TS2304: Cannot find name 'm21'.
+               
+!!! error TS2304: Cannot find name 'm22'.
+               
+!!! error TS2304: Cannot find name 'm23'.
+               
+!!! error TS2304: Cannot find name 'm24'.
+               
+!!! error TS2304: Cannot find name 'm25'.
+               
+!!! error TS2304: Cannot find name 'm26'.
+               
+!!! error TS2304: Cannot find name 'm27'.
+               
+!!! error TS2304: Cannot find name 'm28'.
+               
+!!! error TS2304: Cannot find name 'm29'.
+               
+!!! error TS2304: Cannot find name 'm30'.
+               
+!!! error TS2304: Cannot find name 'm31'.
+               
+!!! error TS2304: Cannot find name 'm32'.
+               
+!!! error TS2304: Cannot find name 'm33'.
+               
+!!! error TS2304: Cannot find name 'm34'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+               
+!!! error TS2304: Cannot find name 'import'.
+==== index.js (45 errors) ====
+    import * as m1 from "./index.js";
+    import * as m2 from "./index.mjs";
+    import * as m3 from "./index.cjs";
+    import * as m4 from "./subfolder/index.js";
+    import * as m5 from "./subfolder/index.mjs";
+    import * as m6 from "./subfolder/index.cjs";
+    import * as m7 from "./subfolder2/index.js";
+    import * as m8 from "./subfolder2/index.mjs";
+    import * as m9 from "./subfolder2/index.cjs";
+    import * as m10 from "./subfolder2/another/index.js";
+    import * as m11 from "./subfolder2/another/index.mjs";
+    import * as m12 from "./subfolder2/another/index.cjs";
+    // The next ones shouldn't all work - esm format files have no index resolution or extension resolution
+    import * as m13 from "./";
+    import * as m14 from "./index";
+    import * as m15 from "./subfolder";
+    import * as m16 from "./subfolder/";
+    import * as m17 from "./subfolder/index";
+    import * as m18 from "./subfolder2";
+    import * as m19 from "./subfolder2/";
+    import * as m20 from "./subfolder2/index";
+    import * as m21 from "./subfolder2/another";
+    import * as m22 from "./subfolder2/another/";
+    import * as m23 from "./subfolder2/another/index";
+    void m1;
+         ~~
+!!! error TS2304: Cannot find name 'm1'.
+    void m2;
+         ~~
+!!! error TS2304: Cannot find name 'm2'.
+    void m3;
+         ~~
+!!! error TS2304: Cannot find name 'm3'.
+    void m4;
+         ~~
+!!! error TS2304: Cannot find name 'm4'.
+    void m5;
+         ~~
+!!! error TS2304: Cannot find name 'm5'.
+    void m6;
+         ~~
+!!! error TS2304: Cannot find name 'm6'.
+    void m7;
+         ~~
+!!! error TS2304: Cannot find name 'm7'.
+    void m8;
+         ~~
+!!! error TS2304: Cannot find name 'm8'.
+    void m9;
+         ~~
+!!! error TS2304: Cannot find name 'm9'.
+    void m10;
+         ~~~
+!!! error TS2304: Cannot find name 'm10'.
+    void m11;
+         ~~~
+!!! error TS2304: Cannot find name 'm11'.
+    void m12;
+         ~~~
+!!! error TS2304: Cannot find name 'm12'.
+    void m13;
+         ~~~
+!!! error TS2304: Cannot find name 'm13'.
+    void m14;
+         ~~~
+!!! error TS2304: Cannot find name 'm14'.
+    void m15;
+         ~~~
+!!! error TS2304: Cannot find name 'm15'.
+    void m16;
+         ~~~
+!!! error TS2304: Cannot find name 'm16'.
+    void m17;
+         ~~~
+!!! error TS2304: Cannot find name 'm17'.
+    void m18;
+         ~~~
+!!! error TS2304: Cannot find name 'm18'.
+    void m19;
+         ~~~
+!!! error TS2304: Cannot find name 'm19'.
+    void m20;
+         ~~~
+!!! error TS2304: Cannot find name 'm20'.
+    void m21;
+         ~~~
+!!! error TS2304: Cannot find name 'm21'.
+    void m22;
+         ~~~
+!!! error TS2304: Cannot find name 'm22'.
+    void m23;
+         ~~~
+!!! error TS2304: Cannot find name 'm23'.
+    
+    // These should _mostly_ work - `import = require` always desugars to require calls, which do have extension and index resolution (but can't load anything that resolves to esm!)
+    import m24 = require("./");
+    import m25 = require("./index");
+    import m26 = require("./subfolder");
+    import m27 = require("./subfolder/");
+    import m28 = require("./subfolder/index");
+    import m29 = require("./subfolder2");
+    import m30 = require("./subfolder2/");
+    import m31 = require("./subfolder2/index");
+    import m32 = require("./subfolder2/another");
+    import m33 = require("./subfolder2/another/");
+    import m34 = require("./subfolder2/another/index");
+    void m24;
+         ~~~
+!!! error TS2304: Cannot find name 'm24'.
+    void m25;
+         ~~~
+!!! error TS2304: Cannot find name 'm25'.
+    void m26;
+         ~~~
+!!! error TS2304: Cannot find name 'm26'.
+    void m27;
+         ~~~
+!!! error TS2304: Cannot find name 'm27'.
+    void m28;
+         ~~~
+!!! error TS2304: Cannot find name 'm28'.
+    void m29;
+         ~~~
+!!! error TS2304: Cannot find name 'm29'.
+    void m30;
+         ~~~
+!!! error TS2304: Cannot find name 'm30'.
+    void m31;
+         ~~~
+!!! error TS2304: Cannot find name 'm31'.
+    void m32;
+         ~~~
+!!! error TS2304: Cannot find name 'm32'.
+    void m33;
+         ~~~
+!!! error TS2304: Cannot find name 'm33'.
+    void m34;
+         ~~~
+!!! error TS2304: Cannot find name 'm34'.
+    
+    // These shouldn't work - dynamic `import()` always uses the esm resolver, which does not have extension resolution
+    const _m35 = import("./");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m36 = import("./index");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m37 = import("./subfolder");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m38 = import("./subfolder/");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m39 = import("./subfolder/index");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m40 = import("./subfolder2");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m41 = import("./subfolder2/");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m42 = import("./subfolder2/index");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m43 = import("./subfolder2/another");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m44 = import("./subfolder2/another/");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m45 = import("./subfolder2/another/index");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    // esm format file
+    const x = 1;
+    export {x};
+==== index.cjs (45 errors) ====
+    // ESM-format imports below should issue errors
+    import * as m1 from "./index.js";
+    import * as m2 from "./index.mjs";
+    import * as m3 from "./index.cjs";
+    import * as m4 from "./subfolder/index.js";
+    import * as m5 from "./subfolder/index.mjs";
+    import * as m6 from "./subfolder/index.cjs";
+    import * as m7 from "./subfolder2/index.js";
+    import * as m8 from "./subfolder2/index.mjs";
+    import * as m9 from "./subfolder2/index.cjs";
+    import * as m10 from "./subfolder2/another/index.js";
+    import * as m11 from "./subfolder2/another/index.mjs";
+    import * as m12 from "./subfolder2/another/index.cjs";
+    // The next ones should _mostly_ work - cjs format files have index resolution and extension resolution (except for those which resolve to an esm format file)
+    import * as m13 from "./";
+    import * as m14 from "./index";
+    import * as m15 from "./subfolder";
+    import * as m16 from "./subfolder/";
+    import * as m17 from "./subfolder/index";
+    import * as m18 from "./subfolder2";
+    import * as m19 from "./subfolder2/";
+    import * as m20 from "./subfolder2/index";
+    import * as m21 from "./subfolder2/another";
+    import * as m22 from "./subfolder2/another/";
+    import * as m23 from "./subfolder2/another/index";
+    void m1;
+         ~~
+!!! error TS2304: Cannot find name 'm1'.
+    void m2;
+         ~~
+!!! error TS2304: Cannot find name 'm2'.
+    void m3;
+         ~~
+!!! error TS2304: Cannot find name 'm3'.
+    void m4;
+         ~~
+!!! error TS2304: Cannot find name 'm4'.
+    void m5;
+         ~~
+!!! error TS2304: Cannot find name 'm5'.
+    void m6;
+         ~~
+!!! error TS2304: Cannot find name 'm6'.
+    void m7;
+         ~~
+!!! error TS2304: Cannot find name 'm7'.
+    void m8;
+         ~~
+!!! error TS2304: Cannot find name 'm8'.
+    void m9;
+         ~~
+!!! error TS2304: Cannot find name 'm9'.
+    void m10;
+         ~~~
+!!! error TS2304: Cannot find name 'm10'.
+    void m11;
+         ~~~
+!!! error TS2304: Cannot find name 'm11'.
+    void m12;
+         ~~~
+!!! error TS2304: Cannot find name 'm12'.
+    void m13;
+         ~~~
+!!! error TS2304: Cannot find name 'm13'.
+    void m14;
+         ~~~
+!!! error TS2304: Cannot find name 'm14'.
+    void m15;
+         ~~~
+!!! error TS2304: Cannot find name 'm15'.
+    void m16;
+         ~~~
+!!! error TS2304: Cannot find name 'm16'.
+    void m17;
+         ~~~
+!!! error TS2304: Cannot find name 'm17'.
+    void m18;
+         ~~~
+!!! error TS2304: Cannot find name 'm18'.
+    void m19;
+         ~~~
+!!! error TS2304: Cannot find name 'm19'.
+    void m20;
+         ~~~
+!!! error TS2304: Cannot find name 'm20'.
+    void m21;
+         ~~~
+!!! error TS2304: Cannot find name 'm21'.
+    void m22;
+         ~~~
+!!! error TS2304: Cannot find name 'm22'.
+    void m23;
+         ~~~
+!!! error TS2304: Cannot find name 'm23'.
+    
+    // These should _mostly_ work - `import = require` always desugars to require calls, which do have extension and index resolution (but can't load anything that resolves to esm!)
+    import m24 = require("./");
+    import m25 = require("./index");
+    import m26 = require("./subfolder");
+    import m27 = require("./subfolder/");
+    import m28 = require("./subfolder/index");
+    import m29 = require("./subfolder2");
+    import m30 = require("./subfolder2/");
+    import m31 = require("./subfolder2/index");
+    import m32 = require("./subfolder2/another");
+    import m33 = require("./subfolder2/another/");
+    import m34 = require("./subfolder2/another/index");
+    void m24;
+         ~~~
+!!! error TS2304: Cannot find name 'm24'.
+    void m25;
+         ~~~
+!!! error TS2304: Cannot find name 'm25'.
+    void m26;
+         ~~~
+!!! error TS2304: Cannot find name 'm26'.
+    void m27;
+         ~~~
+!!! error TS2304: Cannot find name 'm27'.
+    void m28;
+         ~~~
+!!! error TS2304: Cannot find name 'm28'.
+    void m29;
+         ~~~
+!!! error TS2304: Cannot find name 'm29'.
+    void m30;
+         ~~~
+!!! error TS2304: Cannot find name 'm30'.
+    void m31;
+         ~~~
+!!! error TS2304: Cannot find name 'm31'.
+    void m32;
+         ~~~
+!!! error TS2304: Cannot find name 'm32'.
+    void m33;
+         ~~~
+!!! error TS2304: Cannot find name 'm33'.
+    void m34;
+         ~~~
+!!! error TS2304: Cannot find name 'm34'.
+    
+    // These shouldn't work - dynamic `import()` always uses the esm resolver, which does not have extension resolution
+    const _m35 = import("./");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m36 = import("./index");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m37 = import("./subfolder");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m38 = import("./subfolder/");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m39 = import("./subfolder/index");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m40 = import("./subfolder2");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m41 = import("./subfolder2/");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m42 = import("./subfolder2/index");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m43 = import("./subfolder2/another");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m44 = import("./subfolder2/another/");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m45 = import("./subfolder2/another/index");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    // cjs format file
+    const x = 1;
+    export {x};
+==== index.mjs (45 errors) ====
+    import * as m1 from "./index.js";
+    import * as m2 from "./index.mjs";
+    import * as m3 from "./index.cjs";
+    import * as m4 from "./subfolder/index.js";
+    import * as m5 from "./subfolder/index.mjs";
+    import * as m6 from "./subfolder/index.cjs";
+    import * as m7 from "./subfolder2/index.js";
+    import * as m8 from "./subfolder2/index.mjs";
+    import * as m9 from "./subfolder2/index.cjs";
+    import * as m10 from "./subfolder2/another/index.js";
+    import * as m11 from "./subfolder2/another/index.mjs";
+    import * as m12 from "./subfolder2/another/index.cjs";
+    // The next ones should all fail - esm format files have no index resolution or extension resolution
+    import * as m13 from "./";
+    import * as m14 from "./index";
+    import * as m15 from "./subfolder";
+    import * as m16 from "./subfolder/";
+    import * as m17 from "./subfolder/index";
+    import * as m18 from "./subfolder2";
+    import * as m19 from "./subfolder2/";
+    import * as m20 from "./subfolder2/index";
+    import * as m21 from "./subfolder2/another";
+    import * as m22 from "./subfolder2/another/";
+    import * as m23 from "./subfolder2/another/index";
+    void m1;
+         ~~
+!!! error TS2304: Cannot find name 'm1'.
+    void m2;
+         ~~
+!!! error TS2304: Cannot find name 'm2'.
+    void m3;
+         ~~
+!!! error TS2304: Cannot find name 'm3'.
+    void m4;
+         ~~
+!!! error TS2304: Cannot find name 'm4'.
+    void m5;
+         ~~
+!!! error TS2304: Cannot find name 'm5'.
+    void m6;
+         ~~
+!!! error TS2304: Cannot find name 'm6'.
+    void m7;
+         ~~
+!!! error TS2304: Cannot find name 'm7'.
+    void m8;
+         ~~
+!!! error TS2304: Cannot find name 'm8'.
+    void m9;
+         ~~
+!!! error TS2304: Cannot find name 'm9'.
+    void m10;
+         ~~~
+!!! error TS2304: Cannot find name 'm10'.
+    void m11;
+         ~~~
+!!! error TS2304: Cannot find name 'm11'.
+    void m12;
+         ~~~
+!!! error TS2304: Cannot find name 'm12'.
+    void m13;
+         ~~~
+!!! error TS2304: Cannot find name 'm13'.
+    void m14;
+         ~~~
+!!! error TS2304: Cannot find name 'm14'.
+    void m15;
+         ~~~
+!!! error TS2304: Cannot find name 'm15'.
+    void m16;
+         ~~~
+!!! error TS2304: Cannot find name 'm16'.
+    void m17;
+         ~~~
+!!! error TS2304: Cannot find name 'm17'.
+    void m18;
+         ~~~
+!!! error TS2304: Cannot find name 'm18'.
+    void m19;
+         ~~~
+!!! error TS2304: Cannot find name 'm19'.
+    void m20;
+         ~~~
+!!! error TS2304: Cannot find name 'm20'.
+    void m21;
+         ~~~
+!!! error TS2304: Cannot find name 'm21'.
+    void m22;
+         ~~~
+!!! error TS2304: Cannot find name 'm22'.
+    void m23;
+         ~~~
+!!! error TS2304: Cannot find name 'm23'.
+    
+    // These should _mostly_ work - `import = require` always desugars to require calls, which do have extension and index resolution (but can't load anything that resolves to esm!)
+    import m24 = require("./");
+    import m25 = require("./index");
+    import m26 = require("./subfolder");
+    import m27 = require("./subfolder/");
+    import m28 = require("./subfolder/index");
+    import m29 = require("./subfolder2");
+    import m30 = require("./subfolder2/");
+    import m31 = require("./subfolder2/index");
+    import m32 = require("./subfolder2/another");
+    import m33 = require("./subfolder2/another/");
+    import m34 = require("./subfolder2/another/index");
+    void m24;
+         ~~~
+!!! error TS2304: Cannot find name 'm24'.
+    void m25;
+         ~~~
+!!! error TS2304: Cannot find name 'm25'.
+    void m26;
+         ~~~
+!!! error TS2304: Cannot find name 'm26'.
+    void m27;
+         ~~~
+!!! error TS2304: Cannot find name 'm27'.
+    void m28;
+         ~~~
+!!! error TS2304: Cannot find name 'm28'.
+    void m29;
+         ~~~
+!!! error TS2304: Cannot find name 'm29'.
+    void m30;
+         ~~~
+!!! error TS2304: Cannot find name 'm30'.
+    void m31;
+         ~~~
+!!! error TS2304: Cannot find name 'm31'.
+    void m32;
+         ~~~
+!!! error TS2304: Cannot find name 'm32'.
+    void m33;
+         ~~~
+!!! error TS2304: Cannot find name 'm33'.
+    void m34;
+         ~~~
+!!! error TS2304: Cannot find name 'm34'.
+    
+    // These shouldn't work - dynamic `import()` always uses the esm resolver, which does not have extension resolution
+    const _m35 = import("./");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m36 = import("./index");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m37 = import("./subfolder");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m38 = import("./subfolder/");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m39 = import("./subfolder/index");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m40 = import("./subfolder2");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m41 = import("./subfolder2/");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m42 = import("./subfolder2/index");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m43 = import("./subfolder2/another");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m44 = import("./subfolder2/another/");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const _m45 = import("./subfolder2/another/index");
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    
+    // esm format file
+    const x = 1;
+    export {x};
+==== package.json (1 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+        "type": "module"
+    }
+==== package.json (1 errors) ====
+    {
+        "type": "commonjs"
+              ~
+!!! error TS1005: ';' expected.
+    }
+==== package.json (1 errors) ====
+    {
+    }
+     
+!!! error TS1005: ';' expected.
+==== package.json (1 errors) ====
+    {
+        "type": "module"
+              ~
+!!! error TS1005: ';' expected.
+    }

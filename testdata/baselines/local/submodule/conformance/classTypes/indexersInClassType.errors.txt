@@ -1,13 +1,13 @@
-classTypes/indexersInClassType.ts(2,7): error TS1005: ']' expected.
-classTypes/indexersInClassType.ts(2,15): error TS1005: ';' expected.
-classTypes/indexersInClassType.ts(2,18): error TS2304: Cannot find name 'Date'.
-classTypes/indexersInClassType.ts(3,7): error TS1005: ']' expected.
-classTypes/indexersInClassType.ts(3,15): error TS1005: ';' expected.
-classTypes/indexersInClassType.ts(3,18): error TS2304: Cannot find name 'Object'.
-classTypes/indexersInClassType.ts(4,8): error TS2304: Cannot find name 'Date'.
+indexersInClassType.ts(2,7): error TS1005: ']' expected.
+indexersInClassType.ts(2,15): error TS1005: ';' expected.
+indexersInClassType.ts(2,18): error TS2304: Cannot find name 'Date'.
+indexersInClassType.ts(3,7): error TS1005: ']' expected.
+indexersInClassType.ts(3,15): error TS1005: ';' expected.
+indexersInClassType.ts(3,18): error TS2304: Cannot find name 'Object'.
+indexersInClassType.ts(4,8): error TS2304: Cannot find name 'Date'.
 
 
-==== classTypes/indexersInClassType.ts (7 errors) ====
+==== indexersInClassType.ts (7 errors) ====
     class C {
         [x: number]: Date;
           ~

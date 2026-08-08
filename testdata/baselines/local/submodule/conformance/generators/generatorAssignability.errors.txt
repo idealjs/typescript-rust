@@ -1,10 +1,10 @@
-generators/generatorAssignability.ts(5,19): error TS2304: Cannot find name 'AsyncGenerator'.
-generators/generatorAssignability.ts(6,19): error TS2304: Cannot find name 'AsyncGenerator'.
-generators/generatorAssignability.ts(7,19): error TS2304: Cannot find name 'AsyncGenerator'.
-generators/generatorAssignability.ts(49,23): error TS2304: Cannot find name 'AsyncGenerator'.
+generatorAssignability.ts(5,19): error TS2304: Cannot find name 'AsyncGenerator'.
+generatorAssignability.ts(6,19): error TS2304: Cannot find name 'AsyncGenerator'.
+generatorAssignability.ts(7,19): error TS2304: Cannot find name 'AsyncGenerator'.
+generatorAssignability.ts(49,23): error TS2304: Cannot find name 'AsyncGenerator'.
 
 
-==== generators/generatorAssignability.ts (4 errors) ====
+==== generatorAssignability.ts (4 errors) ====
     declare let _: any;
     declare const g1: Generator<number, void, string>;
     declare const g2: Generator<number, void, undefined>;

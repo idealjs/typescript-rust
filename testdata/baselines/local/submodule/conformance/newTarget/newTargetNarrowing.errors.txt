@@ -1,0 +1,15 @@
+newTargetNarrowing.ts(9,3): error TS2339: Property 'marked' does not exist on type '() => void'.
+
+
+==== newTargetNarrowing.ts (1 errors) ====
+    function foo(x: true) { }
+    
+    function f() {
+      if (new.target.marked === true) {
+        foo(new.target.marked);
+      }
+    }
+    
+    f.marked = true;
+      ~~~~~~
+!!! error TS2339: Property 'marked' does not exist on type '() => void'.

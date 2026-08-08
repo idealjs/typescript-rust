@@ -1,0 +1,60 @@
+index.cts(3,5): error TS1003: Identifier expected.
+index.cts(3,6): error TS1005: '=' expected.
+index.mts(3,5): error TS1003: Identifier expected.
+index.mts(3,6): error TS1005: '=' expected.
+index.ts(3,5): error TS1003: Identifier expected.
+index.ts(3,6): error TS1005: '=' expected.
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+package.json(4,11): error TS1005: ';' expected.
+package.json(5,14): error TS1005: ';' expected.
+package.json(6,14): error TS1005: ';' expected.
+package.json(7,16): error TS1005: ';' expected.
+
+
+==== index.ts (2 errors) ====
+    // esm format file
+    import * as type from "#type";
+    type;
+        ~
+!!! error TS1003: Identifier expected.
+         
+!!! error TS1005: '=' expected.
+==== index.mts (2 errors) ====
+    // esm format file
+    import * as type from "#type";
+    type;
+        ~
+!!! error TS1003: Identifier expected.
+         
+!!! error TS1005: '=' expected.
+==== index.cts (2 errors) ====
+    // esm format file
+    import * as type from "#type";
+    type;
+        ~
+!!! error TS1003: Identifier expected.
+         
+!!! error TS1005: '=' expected.
+==== package.json (6 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+                 ~
+!!! error TS1005: ';' expected.
+        "type": "module",
+              ~
+!!! error TS1005: ';' expected.
+        "exports": "./index.cjs",
+                 ~
+!!! error TS1005: ';' expected.
+        "imports": {
+                 ~
+!!! error TS1005: ';' expected.
+            "#type": "package"
+                   ~
+!!! error TS1005: ';' expected.
+        }
+    }

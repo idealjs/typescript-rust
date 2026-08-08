@@ -1,0 +1,10 @@
+optionalChainingInArrow.ts(4,12): error TS2339: Property 'filter' does not exist on type 'string[]'.
+
+
+==== optionalChainingInArrow.ts (1 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/41814
+    const test = (names: string[]) =>
+        // single-line comment
+        names?.filter(x => x);
+               ~~~~~~
+!!! error TS2339: Property 'filter' does not exist on type 'string[]'.

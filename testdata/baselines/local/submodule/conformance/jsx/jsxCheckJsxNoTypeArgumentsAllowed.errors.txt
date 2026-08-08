@@ -1,0 +1,24 @@
+error TS6053: File 'react.d.ts' not found.
+file.jsx(5,74): error TS1005: '</' expected.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.
+==== component.d.ts (0 errors) ====
+    import * as React from "react";
+    export declare class MyComp<P> extends React.Component<P, {}> {
+        internalProp: P;
+    }
+    
+    export interface Prop {
+        a: number,
+        b: string
+    }
+    
+==== file.jsx (1 errors) ====
+    /// <reference path="/.lib/react.d.ts" />
+    import { MyComp, Prop } from "./component";
+    import * as React from "react";
+    
+    let x = <MyComp<Prop> a={10} b="hi" />; // error, no type arguments in js
+                                                                             
+!!! error TS1005: '</' expected.

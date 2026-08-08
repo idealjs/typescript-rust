@@ -1,0 +1,133 @@
+errorSuperCalls.ts(4,9): error TS2349: This expression is not callable.
+errorSuperCalls.ts(9,9): error TS2349: This expression is not callable.
+errorSuperCalls.ts(13,9): error TS1005: ';' expected.
+errorSuperCalls.ts(14,9): error TS2349: This expression is not callable.
+errorSuperCalls.ts(17,9): error TS1005: ';' expected.
+errorSuperCalls.ts(18,9): error TS2349: This expression is not callable.
+errorSuperCalls.ts(26,9): error TS2349: This expression is not callable.
+errorSuperCalls.ts(30,16): error TS2349: This expression is not callable.
+errorSuperCalls.ts(33,16): error TS1005: ';' expected.
+errorSuperCalls.ts(34,9): error TS2349: This expression is not callable.
+errorSuperCalls.ts(37,16): error TS1005: ';' expected.
+errorSuperCalls.ts(38,9): error TS2349: This expression is not callable.
+errorSuperCalls.ts(46,9): error TS2349: This expression is not callable.
+errorSuperCalls.ts(47,9): error TS2349: This expression is not callable.
+errorSuperCalls.ts(62,9): error TS2349: This expression is not callable.
+errorSuperCalls.ts(66,9): error TS1005: ';' expected.
+errorSuperCalls.ts(67,9): error TS2349: This expression is not callable.
+errorSuperCalls.ts(70,9): error TS1005: ';' expected.
+errorSuperCalls.ts(71,9): error TS2349: This expression is not callable.
+
+
+==== errorSuperCalls.ts (19 errors) ====
+    //super call in class constructor with no base type
+    class NoBase {
+        constructor() {
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    
+        //super call in class member function with no base type
+        fn() {
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    
+        //super call in class accessor (get and set) with no base type
+        get foo() {
+            ~~~
+!!! error TS1005: ';' expected.
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            return null;
+        }
+        set foo(v) {
+            ~~~
+!!! error TS1005: ';' expected.
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    
+        //super call in class member initializer with no base type
+        p = super();
+    
+        //super call in static class member function with no base type
+        static fn() {
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    
+        //super call in static class member initializer with no base type
+        static k = super();
+                   ~~~~~
+!!! error TS2349: This expression is not callable.
+    
+        //super call in static class accessor (get and set) with no base type
+        static get q() {
+                   ~
+!!! error TS1005: ';' expected.
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            return null;
+        }
+        static set q(n) {
+                   ~
+!!! error TS1005: ';' expected.
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    class Base<T> { private n: T; }
+    class Derived<T> extends Base<T> {
+        //super call with type arguments 
+        constructor() {
+            super<string>();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    
+    class OtherBase {
+        private n: string;
+    }
+    
+    class OtherDerived extends OtherBase {
+        //super call in class member initializer of derived type
+        t = super();
+    
+        fn() {
+            //super call in class member function of derived type
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    
+        //super call in class accessor (get and set) of derived type
+        get foo() {
+            ~~~
+!!! error TS1005: ';' expected.
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            return null;
+        }
+        set foo(n) {
+            ~~~
+!!! error TS1005: ';' expected.
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }

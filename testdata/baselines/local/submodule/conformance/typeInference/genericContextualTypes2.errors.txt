@@ -1,0 +1,51 @@
+genericContextualTypes2.ts(31,34): error TS2345: Argument of type '{ context: { count: 0 }; entry: { type: "xstate.assign"; exec: (arg: TContext, meta: { action: (ctx: TContext) => void }) => void } }' is not assignable to parameter of type '{ context: TContext; entry: { type: "xstate.assign"; exec: (arg: TContext, meta: { action: (ctx: TContext) => void }) => void } }'.
+
+
+==== genericContextualTypes2.ts (1 errors) ====
+    type LowInfer<T> = T & {};
+    
+    type PartialAssigner<TContext, TKey extends keyof TContext> = (
+      context: TContext
+    ) => TContext[TKey];
+    
+    type PropertyAssigner<TContext> = {
+      [K in keyof TContext]?: PartialAssigner<TContext, K> | TContext[K];
+    };
+    
+    type Meta<TContext> = {
+      action: (ctx: TContext) => void
+    }
+    
+    interface AssignAction<TContext> {
+      type: "xstate.assign";
+      exec: (arg: TContext, meta: Meta<TContext>) => void;
+    }
+    
+    declare function assign<TContext>(
+      assignment: PropertyAssigner<LowInfer<TContext>>
+    ): AssignAction<TContext>;
+    
+    type Config<TContext> = {
+      context: TContext;
+      entry?: AssignAction<TContext>;
+    };
+    
+    declare function createMachine<TContext>(config: Config<TContext>): void;
+    
+    createMachine<{ count: number }>({
+                                     ~
+      context: {
+    ~~~~~~~~~~~~
+        count: 0,
+    ~~~~~~~~~~~~~
+      },
+    ~~~~
+      entry: assign({
+    ~~~~~~~~~~~~~~~~~
+        count: (ctx: { count: number }) => ++ctx.count,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      }),
+    ~~~~~
+    });
+    ~
+!!! error TS2345: Argument of type '{ context: { count: 0 }; entry: { type: "xstate.assign"; exec: (arg: TContext, meta: { action: (ctx: TContext) => void }) => void } }' is not assignable to parameter of type '{ context: TContext; entry: { type: "xstate.assign"; exec: (arg: TContext, meta: { action: (ctx: TContext) => void }) => void } }'.

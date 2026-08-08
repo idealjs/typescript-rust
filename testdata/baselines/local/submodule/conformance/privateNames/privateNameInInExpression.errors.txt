@@ -2,46 +2,46 @@ error TS2451: Cannot redeclare block-scoped variable 'field'.
 error TS2451: Cannot redeclare block-scoped variable 'field'.
 error TS2451: Cannot redeclare block-scoped variable 'field'.
 error TS2451: Cannot redeclare block-scoped variable 'field'.
-privateNames/privateNameInInExpression.ts(2,5): error TS1003: Identifier expected.
-privateNames/privateNameInInExpression.ts(2,5): error TS1127: Invalid character.
-privateNames/privateNameInInExpression.ts(2,6): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(3,12): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(3,12): error TS1127: Invalid character.
-privateNames/privateNameInInExpression.ts(3,13): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(4,5): error TS1003: Identifier expected.
-privateNames/privateNameInInExpression.ts(4,5): error TS1127: Invalid character.
-privateNames/privateNameInInExpression.ts(4,6): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(5,12): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(5,12): error TS1127: Invalid character.
-privateNames/privateNameInInExpression.ts(5,13): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(8,19): error TS1012: Unexpected token.
-privateNames/privateNameInInExpression.ts(8,19): error TS1127: Invalid character.
-privateNames/privateNameInInExpression.ts(8,20): error TS1005: ',' expected.
-privateNames/privateNameInInExpression.ts(8,26): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(8,29): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(10,19): error TS1012: Unexpected token.
-privateNames/privateNameInInExpression.ts(10,19): error TS1127: Invalid character.
-privateNames/privateNameInInExpression.ts(10,20): error TS1005: ',' expected.
-privateNames/privateNameInInExpression.ts(10,26): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(10,29): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(12,19): error TS1012: Unexpected token.
-privateNames/privateNameInInExpression.ts(12,19): error TS1127: Invalid character.
-privateNames/privateNameInInExpression.ts(12,20): error TS1005: ',' expected.
-privateNames/privateNameInInExpression.ts(12,26): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(14,19): error TS1012: Unexpected token.
-privateNames/privateNameInInExpression.ts(14,19): error TS1127: Invalid character.
-privateNames/privateNameInInExpression.ts(14,20): error TS1005: ',' expected.
-privateNames/privateNameInInExpression.ts(14,26): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(16,19): error TS1012: Unexpected token.
-privateNames/privateNameInInExpression.ts(16,19): error TS1127: Invalid character.
-privateNames/privateNameInInExpression.ts(16,20): error TS1005: ',' expected.
-privateNames/privateNameInInExpression.ts(16,26): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(18,23): error TS1012: Unexpected token.
-privateNames/privateNameInInExpression.ts(18,23): error TS1127: Invalid character.
-privateNames/privateNameInInExpression.ts(18,24): error TS1005: ')' expected.
-privateNames/privateNameInInExpression.ts(18,41): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(18,43): error TS1005: ';' expected.
-privateNames/privateNameInInExpression.ts(19,5): error TS1128: Declaration or statement expected.
+privateNameInInExpression.ts(2,5): error TS1003: Identifier expected.
+privateNameInInExpression.ts(2,5): error TS1127: Invalid character.
+privateNameInInExpression.ts(2,6): error TS1005: ';' expected.
+privateNameInInExpression.ts(3,12): error TS1005: ';' expected.
+privateNameInInExpression.ts(3,12): error TS1127: Invalid character.
+privateNameInInExpression.ts(3,13): error TS1005: ';' expected.
+privateNameInInExpression.ts(4,5): error TS1003: Identifier expected.
+privateNameInInExpression.ts(4,5): error TS1127: Invalid character.
+privateNameInInExpression.ts(4,6): error TS1005: ';' expected.
+privateNameInInExpression.ts(5,12): error TS1005: ';' expected.
+privateNameInInExpression.ts(5,12): error TS1127: Invalid character.
+privateNameInInExpression.ts(5,13): error TS1005: ';' expected.
+privateNameInInExpression.ts(8,19): error TS1012: Unexpected token.
+privateNameInInExpression.ts(8,19): error TS1127: Invalid character.
+privateNameInInExpression.ts(8,20): error TS1005: ',' expected.
+privateNameInInExpression.ts(8,26): error TS1005: ';' expected.
+privateNameInInExpression.ts(8,29): error TS1005: ';' expected.
+privateNameInInExpression.ts(10,19): error TS1012: Unexpected token.
+privateNameInInExpression.ts(10,19): error TS1127: Invalid character.
+privateNameInInExpression.ts(10,20): error TS1005: ',' expected.
+privateNameInInExpression.ts(10,26): error TS1005: ';' expected.
+privateNameInInExpression.ts(10,29): error TS1005: ';' expected.
+privateNameInInExpression.ts(12,19): error TS1012: Unexpected token.
+privateNameInInExpression.ts(12,19): error TS1127: Invalid character.
+privateNameInInExpression.ts(12,20): error TS1005: ',' expected.
+privateNameInInExpression.ts(12,26): error TS1005: ';' expected.
+privateNameInInExpression.ts(14,19): error TS1012: Unexpected token.
+privateNameInInExpression.ts(14,19): error TS1127: Invalid character.
+privateNameInInExpression.ts(14,20): error TS1005: ',' expected.
+privateNameInInExpression.ts(14,26): error TS1005: ';' expected.
+privateNameInInExpression.ts(16,19): error TS1012: Unexpected token.
+privateNameInInExpression.ts(16,19): error TS1127: Invalid character.
+privateNameInInExpression.ts(16,20): error TS1005: ',' expected.
+privateNameInInExpression.ts(16,26): error TS1005: ';' expected.
+privateNameInInExpression.ts(18,23): error TS1012: Unexpected token.
+privateNameInInExpression.ts(18,23): error TS1127: Invalid character.
+privateNameInInExpression.ts(18,24): error TS1005: ')' expected.
+privateNameInInExpression.ts(18,41): error TS1005: ';' expected.
+privateNameInInExpression.ts(18,43): error TS1005: ';' expected.
+privateNameInInExpression.ts(19,5): error TS1128: Declaration or statement expected.
 
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'field'.
@@ -51,7 +51,7 @@ privateNames/privateNameInInExpression.ts(19,5): error TS1128: Declaration or st
 !!! error TS2451: Cannot redeclare block-scoped variable 'field'.
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'field'.
-==== privateNames/privateNameInInExpression.ts (40 errors) ====
+==== privateNameInInExpression.ts (40 errors) ====
     class Foo {
         #field = 1;
         ~

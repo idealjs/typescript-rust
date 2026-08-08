@@ -1,0 +1,38 @@
+lateBoundAssignmentDeclarationSupport3.js(5,1): error TS2304: Cannot find name 'Object'.
+lateBoundAssignmentDeclarationSupport3.js(5,23): error TS2304: Cannot find name 'module'.
+lateBoundAssignmentDeclarationSupport3.js(6,1): error TS2304: Cannot find name 'Object'.
+lateBoundAssignmentDeclarationSupport3.js(6,23): error TS2304: Cannot find name 'module'.
+lateBoundAssignmentDeclarationSupport3.js(7,7): error TS1003: Identifier expected.
+lateBoundAssignmentDeclarationSupport3.js(7,8): error TS1005: ';' expected.
+lateBoundAssignmentDeclarationSupport3.js(7,8): error TS2304: Cannot find name 'exports'.
+usage.js(1,11): error TS2304: Cannot find name 'require'.
+
+
+==== lateBoundAssignmentDeclarationSupport3.js (7 errors) ====
+    // currently unsupported
+    const _sym = Symbol();
+    const _str = "my-fake-sym";
+    
+    Object.defineProperty(module.exports, _sym, { value: "ok" });
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                          ~~~~~~
+!!! error TS2304: Cannot find name 'module'.
+    Object.defineProperty(module.exports, _str, { value: "ok" });
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                          ~~~~~~
+!!! error TS2304: Cannot find name 'module'.
+    module.exports.S = _sym;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+==== usage.js (1 errors) ====
+    const x = require("./lateBoundAssignmentDeclarationSupport3.js");
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    const y = x["my-fake-sym"];
+    const z = x[x.S];

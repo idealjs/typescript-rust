@@ -1,0 +1,15 @@
+TypeGuardWithArrayUnion.ts(6,28): error TS2304: Cannot find name 'Array'.
+
+
+==== TypeGuardWithArrayUnion.ts (1 errors) ====
+    class Message {
+        value: string;
+    }
+    
+    function saySize(message: Message | Message[]) {
+        if (message instanceof Array) {
+                               ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+            return message.length;  // Should have type Message[] here
+        }
+    }

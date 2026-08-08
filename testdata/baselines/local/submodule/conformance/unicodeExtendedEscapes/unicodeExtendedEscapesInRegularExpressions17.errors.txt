@@ -1,0 +1,15 @@
+unicodeExtendedEscapesInRegularExpressions17.ts(3,14): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+unicodeExtendedEscapesInRegularExpressions17.ts(3,19): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+unicodeExtendedEscapesInRegularExpressions17.ts(3,24): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+
+
+==== unicodeExtendedEscapesInRegularExpressions17.ts (3 errors) ====
+    ﻿// @target: es5,es6
+    
+    var x = /\u{r}\u{n}\u{t}/gu;
+              ~
+!!! error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+                   ~
+!!! error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+                        ~
+!!! error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?

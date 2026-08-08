@@ -1,0 +1,144 @@
+esDecorators-classExpression-commentPreservation.ts(6,1): error TS1012: Unexpected token.
+esDecorators-classExpression-commentPreservation.ts(6,2): error TS1005: ')' expected.
+esDecorators-classExpression-commentPreservation.ts(23,9): error TS1005: ';' expected.
+esDecorators-classExpression-commentPreservation.ts(30,9): error TS1005: ';' expected.
+esDecorators-classExpression-commentPreservation.ts(51,12): error TS1005: ';' expected.
+esDecorators-classExpression-commentPreservation.ts(51,12): error TS1127: Invalid character.
+esDecorators-classExpression-commentPreservation.ts(51,13): error TS1005: ';' expected.
+esDecorators-classExpression-commentPreservation.ts(58,16): error TS1005: ';' expected.
+esDecorators-classExpression-commentPreservation.ts(58,16): error TS1127: Invalid character.
+esDecorators-classExpression-commentPreservation.ts(58,17): error TS1005: ';' expected.
+esDecorators-classExpression-commentPreservation.ts(65,16): error TS1005: ';' expected.
+esDecorators-classExpression-commentPreservation.ts(65,16): error TS1127: Invalid character.
+esDecorators-classExpression-commentPreservation.ts(65,17): error TS1005: ';' expected.
+esDecorators-classExpression-commentPreservation.ts(72,12): error TS1005: ';' expected.
+esDecorators-classExpression-commentPreservation.ts(72,12): error TS1127: Invalid character.
+esDecorators-classExpression-commentPreservation.ts(72,13): error TS1005: ';' expected.
+esDecorators-classExpression-commentPreservation.ts(79,21): error TS1005: ';' expected.
+esDecorators-classExpression-commentPreservation.ts(79,21): error TS1127: Invalid character.
+esDecorators-classExpression-commentPreservation.ts(79,22): error TS1005: ';' expected.
+esDecorators-classExpression-commentPreservation.ts(81,1): error TS1128: Declaration or statement expected.
+
+
+==== esDecorators-classExpression-commentPreservation.ts (20 errors) ====
+    declare var dec: any;
+    
+    /*1*/
+    (
+    /*2*/
+    @dec
+    ~
+!!! error TS1012: Unexpected token.
+     ~~~
+!!! error TS1005: ')' expected.
+    /*3*/
+    @dec
+    /*4*/
+    class C {
+        /*5*/
+        @dec
+        /*6*/
+        @dec
+        /*7*/
+        method() {}
+    
+        /*8*/
+        @dec
+        /*9*/
+        @dec
+        /*10*/
+        get x() { return 1; }
+            ~
+!!! error TS1005: ';' expected.
+    
+        /*11*/
+        @dec
+        /*12*/
+        @dec
+        /*13*/
+        set x(value: number) { }
+            ~
+!!! error TS1005: ';' expected.
+    
+        /*14*/
+        @dec
+        /*15*/
+        @dec
+        /*16*/
+        y = 1;
+    
+        /*17*/
+        @dec
+        /*18*/
+        @dec
+        /*19*/
+        accessor z = 1;
+    
+        /*20*/
+        @dec
+        /*21*/
+        @dec
+        /*22*/
+        static #method() {}
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~~~~
+!!! error TS1005: ';' expected.
+    
+        /*23*/
+        @dec
+        /*24*/
+        @dec
+        /*25*/
+        static get #x() { return 1; }
+                   ~
+!!! error TS1005: ';' expected.
+                   ~
+!!! error TS1127: Invalid character.
+                    ~
+!!! error TS1005: ';' expected.
+    
+        /*26*/
+        @dec
+        /*27*/
+        @dec
+        /*28*/
+        static set #x(value: number) { }
+                   ~
+!!! error TS1005: ';' expected.
+                   ~
+!!! error TS1127: Invalid character.
+                    ~
+!!! error TS1005: ';' expected.
+    
+        /*29*/
+        @dec
+        /*30*/
+        @dec
+        /*31*/
+        static #y = 1;
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~
+!!! error TS1005: ';' expected.
+    
+        /*32*/
+        @dec
+        /*33*/
+        @dec
+        /*34*/
+        static accessor #z = 1;
+                        ~
+!!! error TS1005: ';' expected.
+                        ~
+!!! error TS1127: Invalid character.
+                         ~
+!!! error TS1005: ';' expected.
+    }
+    );
+    ~
+!!! error TS1128: Declaration or statement expected.

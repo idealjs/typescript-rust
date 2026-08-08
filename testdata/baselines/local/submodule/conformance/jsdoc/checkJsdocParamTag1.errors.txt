@@ -1,0 +1,22 @@
+0.js(8,1): error TS2554: Expected 2 arguments, but got 0.
+0.js(9,1): error TS2554: Expected 2 arguments, but got 1.
+
+
+==== checkJsdocParamTag1.ts (0 errors) ====
+    ﻿// @target: es2015
+    
+==== 0.js (2 errors) ====
+    // @ts-check
+    /**
+     * @param {number=} n
+     * @param {string} [s]
+     */
+    function foo(n, s) {}
+    
+    foo();
+    ~~~
+!!! error TS2554: Expected 2 arguments, but got 0.
+    foo(1);
+    ~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    foo(1, "hi");

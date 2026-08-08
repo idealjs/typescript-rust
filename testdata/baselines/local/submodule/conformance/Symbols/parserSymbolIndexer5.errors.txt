@@ -1,0 +1,15 @@
+parserSymbolIndexer5.ts(2,7): error TS1005: ']' expected.
+parserSymbolIndexer5.ts(2,9): error TS2304: Cannot find name 'symbol'.
+parserSymbolIndexer5.ts(2,15): error TS1005: ',' expected.
+
+
+==== parserSymbolIndexer5.ts (3 errors) ====
+    var x = {
+        [s: symbol]: ""
+          ~
+!!! error TS1005: ']' expected.
+            ~~~~~~
+!!! error TS2304: Cannot find name 'symbol'.
+                  ~
+!!! error TS1005: ',' expected.
+    }

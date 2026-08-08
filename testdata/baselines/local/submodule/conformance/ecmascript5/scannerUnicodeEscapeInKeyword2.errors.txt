@@ -1,0 +1,154 @@
+file1.ts(1,5): error TS1127: Invalid character.
+file1.ts(1,5): error TS1134: Variable declaration expected.
+file1.ts(3,5): error TS1127: Invalid character.
+file1.ts(3,5): error TS1128: Declaration or statement expected.
+file1.ts(3,16): error TS1005: ';' expected.
+file1.ts(6,5): error TS1127: Invalid character.
+file1.ts(6,5): error TS1134: Variable declaration expected.
+file1.ts(8,5): error TS1127: Invalid character.
+file1.ts(8,5): error TS1128: Declaration or statement expected.
+file1.ts(8,16): error TS1005: ';' expected.
+file1.ts(11,9): error TS1005: '=' expected.
+file1.ts(11,9): error TS1127: Invalid character.
+file1.ts(11,10): error TS1005: ';' expected.
+file1.ts(11,10): error TS2304: Cannot find name 'u0065'.
+file1.ts(13,4): error TS1005: ';' expected.
+file1.ts(13,4): error TS1127: Invalid character.
+file1.ts(13,5): error TS2304: Cannot find name 'u0065'.
+file1.ts(13,11): error TS1005: ';' expected.
+file1.ts(13,11): error TS2304: Cannot find name 'notok'.
+file2.ts(1,1): error TS1127: Invalid character.
+file2.ts(1,1): error TS1128: Declaration or statement expected.
+file2.ts(1,3): error TS1005: ';' expected.
+file2.ts(1,4): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+file2.ts(1,9): error TS2304: Cannot find name 'ar'.
+file2.ts(1,12): error TS1005: ';' expected.
+file2.ts(1,12): error TS2304: Cannot find name 'x'.
+file2.ts(3,5): error TS1127: Invalid character.
+file2.ts(3,5): error TS1134: Variable declaration expected.
+file2.ts(3,7): error TS1005: ',' expected.
+file2.ts(3,7): error TS1182: A destructuring declaration must have an initializer.
+file2.ts(3,8): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+file2.ts(3,12): error TS1005: ':' expected.
+file2.ts(3,13): error TS1005: ',' expected.
+file2.ts(3,22): error TS1005: ',' expected.
+file2.ts(4,7): error TS1005: ',' expected.
+file2.ts(4,16): error TS1005: ',' expected.
+file2.ts(4,20): error TS1005: ',' expected.
+file2.ts(4,21): error TS1180: Property destructuring pattern expected.
+
+
+==== file1.ts (19 errors) ====
+    var \u0061wait = 12; // ok
+        ~
+!!! error TS1127: Invalid character.
+        ~
+!!! error TS1134: Variable declaration expected.
+    async function main() {
+        \u0061wait 12; // not ok
+        ~
+!!! error TS1127: Invalid character.
+        ~
+!!! error TS1128: Declaration or statement expected.
+                   ~~
+!!! error TS1005: ';' expected.
+    }
+    
+    var \u0079ield = 12; // ok
+        ~
+!!! error TS1127: Invalid character.
+        ~
+!!! error TS1134: Variable declaration expected.
+    function *gen() {
+        \u0079ield 12; //not ok
+        ~
+!!! error TS1127: Invalid character.
+        ~
+!!! error TS1128: Declaration or statement expected.
+                   ~~
+!!! error TS1005: ';' expected.
+    }
+    
+    type typ\u0065 = 12; // ok
+            ~
+!!! error TS1005: '=' expected.
+            ~
+!!! error TS1127: Invalid character.
+             ~~~~~
+!!! error TS1005: ';' expected.
+             ~~~~~
+!!! error TS2304: Cannot find name 'u0065'.
+    
+    typ\u0065 notok = 0; // not ok
+       ~
+!!! error TS1005: ';' expected.
+       ~
+!!! error TS1127: Invalid character.
+        ~~~~~
+!!! error TS2304: Cannot find name 'u0065'.
+              ~~~~~
+!!! error TS1005: ';' expected.
+              ~~~~~
+!!! error TS2304: Cannot find name 'notok'.
+    
+    export {};
+==== file2.ts (19 errors) ====
+    \u{0076}ar x = "hello"; // not ok
+    ~
+!!! error TS1127: Invalid character.
+    ~
+!!! error TS1128: Declaration or statement expected.
+      ~
+!!! error TS1005: ';' expected.
+       ~~~~
+!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+            ~~
+!!! error TS2304: Cannot find name 'ar'.
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS2304: Cannot find name 'x'.
+    
+    var \u{0061}wait = 12; // ok
+        ~
+!!! error TS1127: Invalid character.
+        ~
+!!! error TS1134: Variable declaration expected.
+          ~
+!!! error TS1005: ',' expected.
+          ~~~~~~~~~~~~~~~~~~~~~~
+           ~~~~
+!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+               ~
+!!! error TS1005: ':' expected.
+                ~~~~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1005: ',' expected.
+    async function main() {
+    ~~~~~~~~~~~~~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+          ~~~~~~~~
+!!! error TS1005: ',' expected.
+                   ~~~~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS1180: Property destructuring pattern expected.
+        \u{0061}wait 12; // not ok
+    }
+    
+    var \u{0079}ield = 12; // ok
+    function *gen() {
+        \u{0079}ield 12; //not ok
+    }
+    
+    type typ\u{0065} = 12; // ok
+    
+    typ\u{0065} notok = 0; // not ok
+    
+    export {};
+    
+    const a = {def\u0061ult: 12}; // OK, `default` not in keyword position
+    // chrome and jsc may still error on this, ref https://bugs.chromium.org/p/chromium/issues/detail?id=993000 and https://bugs.webkit.org/show_bug.cgi?id=200638

@@ -1,0 +1,12 @@
+index.ts(2,29): error TS2304: Cannot find name 'import'.
+
+
+==== something.ts (0 errors) ====
+    export = 42;
+    
+==== index.ts (1 errors) ====
+    export = async function() {
+        const something = await import("./something");
+                                ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    };

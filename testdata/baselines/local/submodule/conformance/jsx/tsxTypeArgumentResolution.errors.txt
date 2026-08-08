@@ -1,0 +1,303 @@
+error TS6053: File 'react.d.ts' not found.
+file.tsx(22,19): error TS17001: JSX elements cannot have multiple attributes with the same name.
+file.tsx(24,19): error TS17001: JSX elements cannot have multiple attributes with the same name.
+file.tsx(30,13): error TS1005: '...' expected.
+file.tsx(30,22): error TS2304: Cannot find name 'OK'.
+file.tsx(32,1): error TS1005: '}' expected.
+file.tsx(32,13): error TS1005: '...' expected.
+file.tsx(32,16): error TS1012: Unexpected token.
+file.tsx(32,18): error TS1005: '}' expected.
+file.tsx(34,23): error TS2304: Cannot find name 'P'.
+file.tsx(34,35): error TS1005: '...' expected.
+file.tsx(34,35): error TS2304: Cannot find name 'a'.
+file.tsx(34,36): error TS1005: '}' expected.
+file.tsx(34,53): error TS17000: JSX attributes must only be assigned a non-empty 'expression'.
+file.tsx(34,81): error TS2304: Cannot find name 'P'.
+file.tsx(34,90): error TS1005: '...' expected.
+file.tsx(35,20): error TS2304: Cannot find name 'P'.
+file.tsx(35,23): error TS2304: Cannot find name 'P2'.
+file.tsx(35,26): error TS1005: ',' expected.
+file.tsx(35,26): error TS2304: Cannot find name ';'.
+file.tsx(37,1): error TS1005: '}' expected.
+file.tsx(37,6): error TS2304: Cannot find name 'MyComp2'.
+file.tsx(37,15): error TS1005: '...' expected.
+file.tsx(37,15): error TS2304: Cannot find name 'a'.
+file.tsx(37,16): error TS1005: '}' expected.
+file.tsx(37,27): error TS17001: JSX elements cannot have multiple attributes with the same name.
+file.tsx(39,6): error TS2304: Cannot find name 'MyComp2'.
+file.tsx(39,15): error TS1005: '...' expected.
+file.tsx(39,15): error TS2304: Cannot find name 'a'.
+file.tsx(39,16): error TS1005: '}' expected.
+file.tsx(39,27): error TS17001: JSX elements cannot have multiple attributes with the same name.
+file.tsx(41,6): error TS2304: Cannot find name 'MyComp2'.
+file.tsx(43,6): error TS2304: Cannot find name 'MyComp2'.
+file.tsx(45,6): error TS2304: Cannot find name 'MyComp2'.
+file.tsx(45,15): error TS1005: '...' expected.
+file.tsx(45,15): error TS2304: Cannot find name 'a'.
+file.tsx(45,16): error TS1005: '}' expected.
+file.tsx(45,28): error TS1005: '...' expected.
+file.tsx(45,28): error TS2304: Cannot find name 'b'.
+file.tsx(45,29): error TS1005: '}' expected.
+file.tsx(45,29): error TS17001: JSX elements cannot have multiple attributes with the same name.
+file.tsx(47,6): error TS2304: Cannot find name 'MyComp2'.
+file.tsx(47,15): error TS1005: '...' expected.
+file.tsx(47,15): error TS2304: Cannot find name 'a'.
+file.tsx(47,16): error TS1005: '}' expected.
+file.tsx(47,28): error TS1005: '...' expected.
+file.tsx(47,28): error TS2304: Cannot find name 'b'.
+file.tsx(47,29): error TS1005: '}' expected.
+file.tsx(47,29): error TS17001: JSX elements cannot have multiple attributes with the same name.
+file.tsx(49,6): error TS2304: Cannot find name 'MyComp2'.
+file.tsx(49,15): error TS1005: '...' expected.
+file.tsx(49,15): error TS2304: Cannot find name 'a'.
+file.tsx(49,16): error TS1005: '}' expected.
+file.tsx(49,28): error TS1005: '...' expected.
+file.tsx(49,28): error TS2304: Cannot find name 'b'.
+file.tsx(49,29): error TS1005: '}' expected.
+file.tsx(49,29): error TS17001: JSX elements cannot have multiple attributes with the same name.
+file.tsx(51,6): error TS2304: Cannot find name 'MyComp2'.
+file.tsx(51,15): error TS1005: '...' expected.
+file.tsx(51,15): error TS2304: Cannot find name 'a'.
+file.tsx(51,16): error TS1005: '}' expected.
+file.tsx(51,28): error TS1005: '...' expected.
+file.tsx(51,28): error TS2304: Cannot find name 'b'.
+file.tsx(51,29): error TS1005: '}' expected.
+file.tsx(51,29): error TS17001: JSX elements cannot have multiple attributes with the same name.
+file.tsx(53,6): error TS2304: Cannot find name 'MyComp2'.
+file.tsx(53,15): error TS1005: '...' expected.
+file.tsx(53,15): error TS2304: Cannot find name 'a'.
+file.tsx(53,16): error TS1005: '}' expected.
+file.tsx(53,28): error TS1005: '...' expected.
+file.tsx(53,28): error TS2304: Cannot find name 'b'.
+file.tsx(53,29): error TS1005: '}' expected.
+file.tsx(53,29): error TS17001: JSX elements cannot have multiple attributes with the same name.
+file.tsx(55,6): error TS2304: Cannot find name 'MyComp2'.
+file.tsx(55,15): error TS1005: '...' expected.
+file.tsx(55,15): error TS2304: Cannot find name 'a'.
+file.tsx(55,16): error TS1005: '}' expected.
+file.tsx(55,28): error TS1005: '...' expected.
+file.tsx(55,28): error TS2304: Cannot find name 'b'.
+file.tsx(55,29): error TS1005: '}' expected.
+file.tsx(55,29): error TS17001: JSX elements cannot have multiple attributes with the same name.
+file.tsx(55,74): error TS1005: '</' expected.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.
+==== file.tsx (81 errors) ====
+    /// <reference path="/.lib/react.d.ts" />
+    
+    import React = require('react');
+    
+    interface Prop {
+        a: number,
+        b: string
+    }
+    
+    declare class MyComp<P> extends React.Component<P, {}> {
+        internalProp: P;
+    }
+    
+    let x = <MyComp<Prop> a={10} b="hi" />; // OK
+    
+    x = <MyComp<Prop> a={10} b="hi"></MyComp>; // OK
+    
+    x = <MyComp<Prop> a={10} b={20} />; // error
+    
+    x = <MyComp<Prop> a={10} b={20}></MyComp>; // error
+    
+    x = <MyComp<Prop, Prop> a={10} b="hi" />; // error
+                      ~~~~
+!!! error TS17001: JSX elements cannot have multiple attributes with the same name.
+    
+    x = <MyComp<Prop, Prop> a={10} b="hi"></MyComp>; // error
+                      ~~~~
+!!! error TS17001: JSX elements cannot have multiple attributes with the same name.
+    
+    x = <MyComp<> a={10} b="hi" />; // error
+    
+    x = <MyComp<> a={10} b="hi"></MyComp>; // error
+    
+    x= <MyComp<{}> /> // OK
+                ~
+!!! error TS1005: '...' expected.
+                         ~~
+!!! error TS2304: Cannot find name 'OK'.
+    
+    x= <MyComp<{}>></MyComp> // OK
+    ~
+!!! error TS1005: '}' expected.
+                ~
+!!! error TS1005: '...' expected.
+                   ~~
+!!! error TS1012: Unexpected token.
+                     ~~~~~~
+!!! error TS1005: '}' expected.
+    
+    declare class MyComp2<P extends { a: string }, P2 = {}> extends React.Component<P & P2, {}> {
+                          ~
+!!! error TS2304: Cannot find name 'P'.
+                                      ~
+!!! error TS1005: '...' expected.
+                                      ~
+!!! error TS2304: Cannot find name 'a'.
+                                       ~
+!!! error TS1005: '}' expected.
+                                                        ~~
+!!! error TS17000: JSX attributes must only be assigned a non-empty 'expression'.
+                                                                                    ~
+!!! error TS2304: Cannot find name 'P'.
+                                                                                             ~
+!!! error TS1005: '...' expected.
+        internalProp: [P, P2];
+                       ~
+!!! error TS2304: Cannot find name 'P'.
+                          ~~
+!!! error TS2304: Cannot find name 'P2'.
+                             ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS2304: Cannot find name ';'.
+    }
+    x = <MyComp2<{a: string, b: string}> a="a" b="b" />; // OK
+    ~
+!!! error TS1005: '}' expected.
+         ~~~~~~~
+!!! error TS2304: Cannot find name 'MyComp2'.
+                  ~
+!!! error TS1005: '...' expected.
+                  ~
+!!! error TS2304: Cannot find name 'a'.
+                   ~
+!!! error TS1005: '}' expected.
+                              ~
+!!! error TS17001: JSX elements cannot have multiple attributes with the same name.
+    
+    x = <MyComp2<{a: string, b: string}> a="a" b="b"></MyComp2>; // OK
+         ~~~~~~~
+!!! error TS2304: Cannot find name 'MyComp2'.
+                  ~
+!!! error TS1005: '...' expected.
+                  ~
+!!! error TS2304: Cannot find name 'a'.
+                   ~
+!!! error TS1005: '}' expected.
+                              ~
+!!! error TS17001: JSX elements cannot have multiple attributes with the same name.
+    
+    x = <MyComp2<Prop> a={10} b="hi" />; // error
+         ~~~~~~~
+!!! error TS2304: Cannot find name 'MyComp2'.
+    
+    x = <MyComp2<Prop> a={10} b="hi"></MyComp2>; // error
+         ~~~~~~~
+!!! error TS2304: Cannot find name 'MyComp2'.
+    
+    x = <MyComp2<{a: string}, {b: string}> a="hi" b="hi" />; // OK
+         ~~~~~~~
+!!! error TS2304: Cannot find name 'MyComp2'.
+                  ~
+!!! error TS1005: '...' expected.
+                  ~
+!!! error TS2304: Cannot find name 'a'.
+                   ~
+!!! error TS1005: '}' expected.
+                               ~
+!!! error TS1005: '...' expected.
+                               ~
+!!! error TS2304: Cannot find name 'b'.
+                                ~
+!!! error TS1005: '}' expected.
+                                ~
+!!! error TS17001: JSX elements cannot have multiple attributes with the same name.
+    
+    x = <MyComp2<{a: string}, {b: string}> a="hi" b="hi"></MyComp2>; // OK
+         ~~~~~~~
+!!! error TS2304: Cannot find name 'MyComp2'.
+                  ~
+!!! error TS1005: '...' expected.
+                  ~
+!!! error TS2304: Cannot find name 'a'.
+                   ~
+!!! error TS1005: '}' expected.
+                               ~
+!!! error TS1005: '...' expected.
+                               ~
+!!! error TS2304: Cannot find name 'b'.
+                                ~
+!!! error TS1005: '}' expected.
+                                ~
+!!! error TS17001: JSX elements cannot have multiple attributes with the same name.
+    
+    x = <MyComp2<{a: string}, {b: string}, Prop> a="hi" b="hi" />; // error
+         ~~~~~~~
+!!! error TS2304: Cannot find name 'MyComp2'.
+                  ~
+!!! error TS1005: '...' expected.
+                  ~
+!!! error TS2304: Cannot find name 'a'.
+                   ~
+!!! error TS1005: '}' expected.
+                               ~
+!!! error TS1005: '...' expected.
+                               ~
+!!! error TS2304: Cannot find name 'b'.
+                                ~
+!!! error TS1005: '}' expected.
+                                ~
+!!! error TS17001: JSX elements cannot have multiple attributes with the same name.
+    
+    x = <MyComp2<{a: string}, {b: string}, Prop> a="hi" b="hi"></MyComp2>; // error
+         ~~~~~~~
+!!! error TS2304: Cannot find name 'MyComp2'.
+                  ~
+!!! error TS1005: '...' expected.
+                  ~
+!!! error TS2304: Cannot find name 'a'.
+                   ~
+!!! error TS1005: '}' expected.
+                               ~
+!!! error TS1005: '...' expected.
+                               ~
+!!! error TS2304: Cannot find name 'b'.
+                                ~
+!!! error TS1005: '}' expected.
+                                ~
+!!! error TS17001: JSX elements cannot have multiple attributes with the same name.
+    
+    x = <MyComp2<{a: string}, {b: number}> a="hi" b="hi" />; // error
+         ~~~~~~~
+!!! error TS2304: Cannot find name 'MyComp2'.
+                  ~
+!!! error TS1005: '...' expected.
+                  ~
+!!! error TS2304: Cannot find name 'a'.
+                   ~
+!!! error TS1005: '}' expected.
+                               ~
+!!! error TS1005: '...' expected.
+                               ~
+!!! error TS2304: Cannot find name 'b'.
+                                ~
+!!! error TS1005: '}' expected.
+                                ~
+!!! error TS17001: JSX elements cannot have multiple attributes with the same name.
+    
+    x = <MyComp2<{a: string}, {b: number}> a="hi" b="hi"></MyComp2>; // error
+         ~~~~~~~
+!!! error TS2304: Cannot find name 'MyComp2'.
+                  ~
+!!! error TS1005: '...' expected.
+                  ~
+!!! error TS2304: Cannot find name 'a'.
+                   ~
+!!! error TS1005: '}' expected.
+                               ~
+!!! error TS1005: '...' expected.
+                               ~
+!!! error TS2304: Cannot find name 'b'.
+                                ~
+!!! error TS1005: '}' expected.
+                                ~
+!!! error TS17001: JSX elements cannot have multiple attributes with the same name.
+                                                                             
+!!! error TS1005: '</' expected.

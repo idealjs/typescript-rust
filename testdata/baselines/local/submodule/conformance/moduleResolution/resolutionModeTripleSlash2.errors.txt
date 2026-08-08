@@ -1,0 +1,62 @@
+/app.ts(2,1): error TS2304: Cannot find name 'MODULE'.
+/app.ts(3,1): error TS2304: Cannot find name 'SCRIPT'.
+/app.ts(5,12): error TS2304: Cannot find name 'SCRIPT'.
+/node_modules/@types/foo/package.json(2,9): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(3,12): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(4,12): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(5,8): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(6,15): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(7,16): error TS1005: ';' expected.
+
+
+==== resolutionModeTripleSlash2.ts (0 errors) ====
+    
+==== /node_modules/@types/foo/package.json (6 errors) ====
+    {
+      "name": "@types/foo",
+            ~
+!!! error TS1005: ';' expected.
+      "version": "1.0.0",
+               ~
+!!! error TS1005: ';' expected.
+      "exports": {
+               ~
+!!! error TS1005: ';' expected.
+        ".": {
+           ~
+!!! error TS1005: ';' expected.
+          "import": "./index.d.mts",
+                  ~
+!!! error TS1005: ';' expected.
+          "require": "./index.d.cts"
+                   ~
+!!! error TS1005: ';' expected.
+        }
+      }
+    }
+    
+==== /node_modules/@types/foo/index.d.mts (0 errors) ====
+    export {};
+    declare global {
+      const MODULE: any;
+    }
+    
+==== /node_modules/@types/foo/index.d.cts (0 errors) ====
+    export {};
+    declare global {
+      const SCRIPT: any;
+    }
+    
+==== /app.ts (3 errors) ====
+    /// <reference types="foo" resolution-mode="require" />
+    MODULE; // error
+    ~~~~~~
+!!! error TS2304: Cannot find name 'MODULE'.
+    SCRIPT; // ok
+    ~~~~~~
+!!! error TS2304: Cannot find name 'SCRIPT'.
+    function foo() {
+        return SCRIPT;
+               ~~~~~~
+!!! error TS2304: Cannot find name 'SCRIPT'.
+    }

@@ -1,0 +1,46 @@
+1.ts(2,10): error TS2304: Cannot find name 'import'.
+1.ts(7,17): error TS2304: Cannot find name 'import'.
+1.ts(10,16): error TS2304: Cannot find name 'import'.
+1.ts(15,27): error TS2304: Cannot find name 'import'.
+1.ts(21,27): error TS2304: Cannot find name 'import'.
+
+
+==== importCallExpressionES5System.ts (0 errors) ====
+    ﻿// @module: system
+==== 0.ts (0 errors) ====
+    export function foo() { return "foo"; }
+    
+==== 1.ts (5 errors) ====
+    import("./0");
+    var p1 = import("./0");
+             ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    p1.then(zero => {
+        return zero.foo();
+    });
+    
+    export var p2 = import("./0");
+                    ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    
+    function foo() {
+        const p2 = import("./0");
+                   ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    }
+    
+    class C {
+        method() {
+            const loadAsync = import ("./0");
+                              ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+        }
+    }
+    
+    export class D {
+        method() {
+            const loadAsync = import ("./0");
+                              ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+        }
+    }

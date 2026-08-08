@@ -1,0 +1,64 @@
+keyofAndForIn.ts(6,10): error TS2454: Variable 'k1' is used before being assigned.
+keyofAndForIn.ts(6,19): error TS1005: ';' expected.
+keyofAndForIn.ts(7,22): error TS2454: Variable 'k1' is used before being assigned.
+keyofAndForIn.ts(17,10): error TS2454: Variable 'k1' is used before being assigned.
+keyofAndForIn.ts(17,19): error TS1005: ';' expected.
+keyofAndForIn.ts(18,22): error TS2454: Variable 'k1' is used before being assigned.
+keyofAndForIn.ts(28,10): error TS2454: Variable 'k1' is used before being assigned.
+keyofAndForIn.ts(28,19): error TS1005: ';' expected.
+keyofAndForIn.ts(29,22): error TS2454: Variable 'k1' is used before being assigned.
+
+
+==== keyofAndForIn.ts (9 errors) ====
+    // Repro from #12513
+    
+    function f1<K extends string, T>(obj: { [P in K]: T }, k: K) {
+        const b = k in obj;
+        let k1: K;
+        for (k1 in obj) {
+             ~~
+!!! error TS2454: Variable 'k1' is used before being assigned.
+                      ~
+!!! error TS1005: ';' expected.
+            let x1 = obj[k1];
+                         ~~
+!!! error TS2454: Variable 'k1' is used before being assigned.
+        }
+        for (let k2 in obj) {
+            let x2 = obj[k2];
+        }
+    }
+    
+    function f2<T>(obj: { [P in keyof T]: T[P] }, k: keyof T) {
+        const b = k in obj;
+        let k1: keyof T;
+        for (k1 in obj) {
+             ~~
+!!! error TS2454: Variable 'k1' is used before being assigned.
+                      ~
+!!! error TS1005: ';' expected.
+            let x1 = obj[k1];
+                         ~~
+!!! error TS2454: Variable 'k1' is used before being assigned.
+        }
+        for (let k2 in obj) {
+            let x2 = obj[k2];
+        }
+    }
+    
+    function f3<T, K extends keyof T>(obj: { [P in K]: T[P] }, k: K) {
+        const b = k in obj;
+        let k1: K;
+        for (k1 in obj) {
+             ~~
+!!! error TS2454: Variable 'k1' is used before being assigned.
+                      ~
+!!! error TS1005: ';' expected.
+            let x1 = obj[k1];
+                         ~~
+!!! error TS2454: Variable 'k1' is used before being assigned.
+        }
+        for (let k2 in obj) {
+            let x2 = obj[k2];
+        }
+    }

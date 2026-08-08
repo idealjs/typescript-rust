@@ -1,0 +1,141 @@
+undefinedIsSubtypeOfEverything.ts(20,10): error TS2304: Cannot find name 'String'.
+undefinedIsSubtypeOfEverything.ts(29,10): error TS2304: Cannot find name 'Number'.
+undefinedIsSubtypeOfEverything.ts(38,10): error TS2304: Cannot find name 'Boolean'.
+undefinedIsSubtypeOfEverything.ts(43,10): error TS2304: Cannot find name 'RegExp'.
+undefinedIsSubtypeOfEverything.ts(47,10): error TS2304: Cannot find name 'Date'.
+undefinedIsSubtypeOfEverything.ts(114,10): error TS2304: Cannot find name 'Object'.
+
+
+==== undefinedIsSubtypeOfEverything.ts (6 errors) ====
+    // undefined is a subtype of every other types, no errors expected below
+    
+    class Base {
+        foo: typeof undefined;
+    } 
+    
+    class D0 extends Base {
+        foo: any;
+    }
+    
+    class DA extends Base {
+        foo: typeof undefined; 
+    }
+    
+    class D1 extends Base {
+        foo: string;
+    }
+    
+    class D1A extends Base {
+        foo: String;
+             ~~~~~~
+!!! error TS2304: Cannot find name 'String'.
+    }
+    
+    
+    class D2 extends Base {
+        foo: number;
+    }
+    
+    class D2A extends Base {
+        foo: Number;
+             ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
+    }
+    
+    
+    class D3 extends Base {
+        foo: boolean;
+    }
+    
+    class D3A extends Base {
+        foo: Boolean;
+             ~~~~~~~
+!!! error TS2304: Cannot find name 'Boolean'.
+    }
+    
+    
+    class D4 extends Base {
+        foo: RegExp;
+             ~~~~~~
+!!! error TS2304: Cannot find name 'RegExp'.
+    }
+    
+    class D5 extends Base {
+        foo: Date;
+             ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    }
+    
+    
+    class D6 extends Base {
+        foo: number[];
+    }
+    
+    class D7 extends Base {
+        foo: { bar: number };
+    }
+    
+    
+    class D8 extends Base {
+        foo: D7;
+    }
+    
+    interface I1 {
+        bar: string;
+    }
+    class D9 extends Base {
+        foo: I1;
+    }
+    
+    
+    class D10 extends Base {
+        foo: () => number;
+    }
+    
+    enum E { A }
+    class D11 extends Base {
+        foo: E;
+    }
+    
+    function f() { }
+    namespace f {
+        export var bar = 1;
+    }
+    class D12 extends Base {
+        foo: typeof f;
+    }
+    
+    
+    class c { baz: string }
+    namespace c {
+        export var bar = 1;
+    }
+    class D13 extends Base {
+        foo: typeof c;
+    }
+    
+    
+    class D14<T> extends Base {
+        foo: T;
+    }
+    
+    
+    class D15<T, U> extends Base {
+        foo: U;
+    }
+    
+    //class D15<T, U extends T> extends Base {
+    //    foo: U;
+    //}
+    
+    
+    class D16 extends Base {
+        foo: Object;
+             ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    }
+    
+    
+    class D17 extends Base {
+        foo: {};
+    }

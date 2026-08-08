@@ -1,8 +1,8 @@
-classAbstractKeyword/classAbstractInstantiations2.ts(10,5): error TS2511: Cannot create an instance of an abstract class.
-classAbstractKeyword/classAbstractInstantiations2.ts(23,15): error TS2448: Block-scoped variable 'C' used before its declaration.
+classAbstractInstantiations2.ts(10,5): error TS2511: Cannot create an instance of an abstract class.
+classAbstractInstantiations2.ts(23,15): error TS2448: Block-scoped variable 'C' used before its declaration.
 
 
-==== classAbstractKeyword/classAbstractInstantiations2.ts (2 errors) ====
+==== classAbstractInstantiations2.ts (2 errors) ====
     class A {
         // ...
     }

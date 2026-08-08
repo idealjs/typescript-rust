@@ -1,0 +1,15 @@
+b.ts(1,1): error TS2448: Block-scoped variable 'foo' used before its declaration.
+
+
+==== jsdocVariadicType.ts (0 errors) ====
+    
+==== a.js (0 errors) ====
+    /**
+     * @type {function(boolean, string, ...*):void}
+     */
+    const foo = function (a, b, ...r) { };
+    
+==== b.ts (1 errors) ====
+    foo(false, '');
+    ~~~
+!!! error TS2448: Block-scoped variable 'foo' used before its declaration.

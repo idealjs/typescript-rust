@@ -1,0 +1,17 @@
+jsdocParseErrorsInTypescript.ts(2,27): error TS1012: Unexpected token.
+jsdocParseErrorsInTypescript.ts(2,29): error TS1005: ',' expected.
+jsdocParseErrorsInTypescript.ts(2,29): error TS1016: A required parameter cannot follow an optional parameter.
+jsdocParseErrorsInTypescript.ts(2,32): error TS1005: ')' expected.
+
+
+==== jsdocParseErrorsInTypescript.ts (4 errors) ====
+    // parse error (blocks grammar errors from checker)
+    function parse1(n: number=) { }
+                              ~
+!!! error TS1012: Unexpected token.
+                                ~
+!!! error TS1005: ',' expected.
+                                ~~~
+!!! error TS1016: A required parameter cannot follow an optional parameter.
+                                   
+!!! error TS1005: ')' expected.

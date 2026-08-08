@@ -1,0 +1,57 @@
+error TS2300: Duplicate identifier 'Foo'.
+a.ts(2,5): error TS1003: Identifier expected.
+a.ts(2,5): error TS1127: Invalid character.
+a.ts(2,6): error TS1005: ';' expected.
+a.ts(4,15): error TS1003: Identifier expected.
+a.ts(4,15): error TS1127: Invalid character.
+a.ts(4,16): error TS1005: ';' expected.
+b.ts(2,5): error TS1003: Identifier expected.
+b.ts(2,5): error TS1127: Invalid character.
+b.ts(2,6): error TS1005: ';' expected.
+main.ts(4,15): error TS2304: Cannot find name 'A'.
+main.ts(5,15): error TS2304: Cannot find name 'B'.
+
+
+!!! error TS2300: Duplicate identifier 'Foo'.
+==== a.ts (6 errors) ====
+    export class Foo {
+        #x;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        copy(other: import("./b").Foo) {
+            other.#x; // error
+                  ~
+!!! error TS1003: Identifier expected.
+                  ~
+!!! error TS1127: Invalid character.
+                   ~
+!!! error TS1005: ';' expected.
+        }
+    }
+        
+==== b.ts (3 errors) ====
+    export class Foo {
+        #x;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+    }
+    
+==== main.ts (2 errors) ====
+    import { Foo as A } from "./a";
+    import { Foo as B } from "./b";
+    
+    const a = new A();
+                  ~
+!!! error TS2304: Cannot find name 'A'.
+    const b = new B();
+                  ~
+!!! error TS2304: Cannot find name 'B'.
+    a.copy(b); // error

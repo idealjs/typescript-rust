@@ -1,0 +1,75 @@
+error TS2300: Duplicate identifier 'C'.
+esDecorators-emitDecoratorMetadata.ts(11,9): error TS1005: ';' expected.
+esDecorators-emitDecoratorMetadata.ts(20,16): error TS1005: ';' expected.
+esDecorators-emitDecoratorMetadata.ts(26,2): error TS1012: Unexpected token.
+esDecorators-emitDecoratorMetadata.ts(26,3): error TS1005: ')' expected.
+esDecorators-emitDecoratorMetadata.ts(26,7): error TS1005: ';' expected.
+esDecorators-emitDecoratorMetadata.ts(33,9): error TS1005: ';' expected.
+esDecorators-emitDecoratorMetadata.ts(42,16): error TS1005: ';' expected.
+esDecorators-emitDecoratorMetadata.ts(46,2): error TS1128: Declaration or statement expected.
+
+
+!!! error TS2300: Duplicate identifier 'C'.
+==== esDecorators-emitDecoratorMetadata.ts (8 errors) ====
+    declare let dec: any;
+    
+    @dec
+    class C {
+        constructor(x: number) {}
+    
+        @dec
+        method(x: number) {}
+    
+        @dec
+        set x(x: number) {}
+            ~
+!!! error TS1005: ';' expected.
+    
+        @dec
+        y: number;
+    
+        @dec
+        static method(x: number) {}
+    
+        @dec
+        static set x(x: number) {}
+                   ~
+!!! error TS1005: ';' expected.
+    
+        @dec
+        static y: number;
+    }
+    
+    (@dec class C {
+     ~
+!!! error TS1012: Unexpected token.
+      ~~~
+!!! error TS1005: ')' expected.
+          ~~~~~
+!!! error TS1005: ';' expected.
+        constructor(x: number) {}
+    
+        @dec
+        method(x: number) {}
+    
+        @dec
+        set x(x: number) {}
+            ~
+!!! error TS1005: ';' expected.
+    
+        @dec
+        y: number;
+    
+        @dec
+        static method(x: number) {}
+    
+        @dec
+        static set x(x: number) {}
+                   ~
+!!! error TS1005: ';' expected.
+    
+        @dec
+        static y: number;
+    });
+     ~
+!!! error TS1128: Declaration or statement expected.

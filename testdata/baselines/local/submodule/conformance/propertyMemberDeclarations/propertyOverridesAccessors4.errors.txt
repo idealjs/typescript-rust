@@ -1,0 +1,16 @@
+propertyOverridesAccessors4.ts(2,9): error TS1005: ';' expected.
+propertyOverridesAccessors4.ts(3,9): error TS1005: ';' expected.
+
+
+==== propertyOverridesAccessors4.ts (2 errors) ====
+    declare class Animal {
+        get sound(): string
+            ~~~~~
+!!! error TS1005: ';' expected.
+        set sound(val: string)
+            ~~~~~
+!!! error TS1005: ';' expected.
+    }
+    class Lion extends Animal {
+        sound = 'RAWR!' // error here
+    }

@@ -1,0 +1,103 @@
+for-inStatements.ts(2,19): error TS1005: ';' expected.
+for-inStatements.ts(5,17): error TS1005: ';' expected.
+for-inStatements.ts(12,15): error TS2349: This expression is not callable.
+for-inStatements.ts(15,19): error TS2304: Cannot find name 'Date'.
+for-inStatements.ts(26,23): error TS2304: Cannot find name 'T'.
+for-inStatements.ts(39,28): error TS2339: Property 'baz' does not exist on type '{ biz: () => any }'.
+for-inStatements.ts(40,28): error TS2339: Property 'baz' does not exist on type '{ biz: () => any }'.
+
+
+==== for-inStatements.ts (7 errors) ====
+    var aString: string;
+    for (aString in {}) { }
+                      ~
+!!! error TS1005: ';' expected.
+    
+    var anAny: any;
+    for (anAny in {}) { }
+                    ~
+!!! error TS1005: ';' expected.
+    
+    for (var x in {}) { }
+    for (var x in []) { }
+    for (var x in [1, 2, 3, 4, 5]) { }
+    
+    function fn(): any { }
+    for (var x in fn()) { }
+                  ~~
+!!! error TS2349: This expression is not callable.
+    
+    for (var x in /[a-z]/) { }
+    for (var x in new Date()) { }
+                      ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    
+    var c: any, d: any, e: any;
+    
+    for (var x in c || d) { }
+    for (var x in e ? c : d) { }
+    for (var x in 42 ? c : d) { }
+    for (var x in '' ? c : d) { }
+    for (var x in 42 ? d[x] : c[x]) { }
+    for (var x in c[d]) { }
+    
+    for (var x in (<T>(x: T) => x)) { }
+                          ~
+!!! error TS2304: Cannot find name 'T'.
+    for (var x in function (x: string, y: number) { return x + y }) { }
+    
+    class A {
+        biz() {
+            for (var x in this.biz()) { }
+            for (var x in this.biz) { }
+            for (var x in this) { }
+            return null;
+        }
+    
+        static baz() {
+            for (var x in this) { }
+            for (var x in this.baz) { }
+                               ~~~
+!!! error TS2339: Property 'baz' does not exist on type '{ biz: () => any }'.
+            for (var x in this.baz()) { }
+                               ~~~
+!!! error TS2339: Property 'baz' does not exist on type '{ biz: () => any }'.
+    
+            return null;
+        }
+    }
+    
+    class B extends A {
+        boz() {
+            for (var x in this.biz()) { }
+            for (var x in this.biz) { }
+            for (var x in this) { }
+    
+            for (var x in super.biz) { }
+            for (var x in super.biz()) { }
+            return null;
+        }
+    }
+    
+    interface I {
+        id: number;
+        [idx: number]: I;
+    }
+    var i: I;
+    
+    for (var x in i[42]) { } 
+    
+    
+    namespace M {
+        export class X<T> {
+            name:string
+        }
+    }
+    
+    for (var x in M) { }
+    for (var x in M.X) { }
+    
+    enum Color { Red, Blue }
+    
+    for (var x in Color) { }
+    for (var x in Color.Blue) { }

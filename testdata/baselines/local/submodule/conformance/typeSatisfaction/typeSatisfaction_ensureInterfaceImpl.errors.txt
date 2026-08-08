@@ -1,0 +1,55 @@
+typeSatisfaction_ensureInterfaceImpl.ts(6,5): error TS2304: Cannot find name 'start'.
+typeSatisfaction_ensureInterfaceImpl.ts(6,10): error TS1005: ',' expected.
+typeSatisfaction_ensureInterfaceImpl.ts(6,10): error TS2304: Cannot find name '('.
+typeSatisfaction_ensureInterfaceImpl.ts(6,11): error TS1005: ',' expected.
+typeSatisfaction_ensureInterfaceImpl.ts(6,11): error TS2304: Cannot find name ')'.
+typeSatisfaction_ensureInterfaceImpl.ts(6,13): error TS1005: ',' expected.
+typeSatisfaction_ensureInterfaceImpl.ts(6,13): error TS2304: Cannot find name '{'.
+typeSatisfaction_ensureInterfaceImpl.ts(7,5): error TS2304: Cannot find name 'move'.
+typeSatisfaction_ensureInterfaceImpl.ts(7,10): error TS2304: Cannot find name 'd'.
+typeSatisfaction_ensureInterfaceImpl.ts(7,13): error TS1005: ',' expected.
+typeSatisfaction_ensureInterfaceImpl.ts(7,13): error TS1182: A destructuring declaration must have an initializer.
+typeSatisfaction_ensureInterfaceImpl.ts(10,9): error TS1005: ',' expected.
+typeSatisfaction_ensureInterfaceImpl.ts(10,10): error TS1134: Variable declaration expected.
+
+
+==== typeSatisfaction_ensureInterfaceImpl.ts (13 errors) ====
+    type Movable = {
+        move(distance: number): void;
+    };
+    
+    const car = {
+        start() { },
+        ~~~~~
+!!! error TS2304: Cannot find name 'start'.
+             ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS2304: Cannot find name '('.
+              ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS2304: Cannot find name ')'.
+                ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS2304: Cannot find name '{'.
+        move(d) {
+        ~~~~
+!!! error TS2304: Cannot find name 'move'.
+             ~
+!!! error TS2304: Cannot find name 'd'.
+                ~
+!!! error TS1005: ',' expected.
+                ~
+            // d should be number
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        },
+    ~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+        stop() { }
+            ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1134: Variable declaration expected.
+    } satisfies Movable & Record<string, unknown>;

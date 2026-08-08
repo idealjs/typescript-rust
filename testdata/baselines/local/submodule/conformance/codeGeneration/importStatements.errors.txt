@@ -1,0 +1,52 @@
+importStatements.ts(3,28): error TS1005: ',' expected.
+importStatements.ts(3,46): error TS1005: ',' expected.
+importStatements.ts(6,25): error TS2554: Expected 4 arguments, but got 2.
+importStatements.ts(26,17): error TS2304: Cannot find name 'a'.
+importStatements.ts(32,17): error TS2304: Cannot find name 'a'.
+
+
+==== importStatements.ts (5 errors) ====
+    namespace A {
+        export class Point {
+            constructor(public x: number, public y: number) { }
+                               ~
+!!! error TS1005: ',' expected.
+                                                 ~
+!!! error TS1005: ',' expected.
+        }
+    
+        export var Origin = new Point(0, 0);
+                            ~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 4 arguments, but got 2.
+    }
+    
+    // no code gen expected
+    namespace B {
+        import a = A; //Error generates 'var <Alias> = <EntityName>;'
+    }
+    
+    // no code gen expected
+    namespace C {
+        import a = A; //Error generates 'var <Alias> = <EntityName>;'
+        var m: typeof a;
+        var p: a.Point;
+        var p = {x:0, y:0 };
+    }
+    
+    // code gen expected
+    namespace D {
+        import a = A;
+    
+        var p = new a.Point(1, 1);
+                    ~
+!!! error TS2304: Cannot find name 'a'.
+    }
+    
+    namespace E {
+        import a = A;
+        export function xDist(x: a.Point) {
+            return (a.Origin.x - x.x);
+                    ~
+!!! error TS2304: Cannot find name 'a'.
+        }
+    }

@@ -1,0 +1,37 @@
+file.tsx(11,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(18,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(25,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+
+
+==== file.tsx (3 errors) ====
+    declare namespace JSX {
+    	interface Element { something; }
+    	interface IntrinsicElements { }
+    }
+    
+    interface Obj1 {
+    	new(n: string): { x: number };
+    	new(n: number): { y: string };
+    }
+    declare var Obj1: Obj1;
+    <Obj1 />; // Error, return type is not an object type
+    ~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    
+    interface Obj2 {
+    	(n: string): { x: number };
+    	(n: number): { y: string };
+    }
+    declare var Obj2: Obj2;
+    <Obj2 />; // Error, return type is not an object type
+    ~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    
+    interface Obj3 {
+    	(n: string): { x: number };
+    	(n: number): { x: number; y: string };
+    }
+    declare var Obj3: Obj3;
+    <Obj3 x={42} />; // OK
+    ~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.

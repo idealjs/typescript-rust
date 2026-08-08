@@ -1,21 +1,21 @@
-classStaticBlock/classStaticBlock16.ts(3,3): error TS1003: Identifier expected.
-classStaticBlock/classStaticBlock16.ts(3,3): error TS1127: Invalid character.
-classStaticBlock/classStaticBlock16.ts(3,4): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock16.ts(5,10): error TS1003: Identifier expected.
-classStaticBlock/classStaticBlock16.ts(5,10): error TS1127: Invalid character.
-classStaticBlock/classStaticBlock16.ts(5,11): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock16.ts(8,10): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock16.ts(10,28): error TS1003: Identifier expected.
-classStaticBlock/classStaticBlock16.ts(10,28): error TS1127: Invalid character.
-classStaticBlock/classStaticBlock16.ts(10,29): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock16.ts(11,18): error TS2304: Cannot find name 'D'.
-classStaticBlock/classStaticBlock16.ts(11,28): error TS1003: Identifier expected.
-classStaticBlock/classStaticBlock16.ts(11,28): error TS1127: Invalid character.
-classStaticBlock/classStaticBlock16.ts(11,29): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock16.ts(13,1): error TS1128: Declaration or statement expected.
+classStaticBlock16.ts(3,3): error TS1003: Identifier expected.
+classStaticBlock16.ts(3,3): error TS1127: Invalid character.
+classStaticBlock16.ts(3,4): error TS1005: ';' expected.
+classStaticBlock16.ts(5,10): error TS1003: Identifier expected.
+classStaticBlock16.ts(5,10): error TS1127: Invalid character.
+classStaticBlock16.ts(5,11): error TS1005: ';' expected.
+classStaticBlock16.ts(8,10): error TS1005: ';' expected.
+classStaticBlock16.ts(10,28): error TS1003: Identifier expected.
+classStaticBlock16.ts(10,28): error TS1127: Invalid character.
+classStaticBlock16.ts(10,29): error TS1005: ';' expected.
+classStaticBlock16.ts(11,18): error TS2304: Cannot find name 'D'.
+classStaticBlock16.ts(11,28): error TS1003: Identifier expected.
+classStaticBlock16.ts(11,28): error TS1127: Invalid character.
+classStaticBlock16.ts(11,29): error TS1005: ';' expected.
+classStaticBlock16.ts(13,1): error TS1128: Declaration or statement expected.
 
 
-==== classStaticBlock/classStaticBlock16.ts (15 errors) ====
+==== classStaticBlock16.ts (15 errors) ====
     let getX: (c: C) => number;
     class C {
       #x = 1

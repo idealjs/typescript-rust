@@ -1,0 +1,50 @@
+typeGuardNesting.ts(2,13): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(2,41): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(2,62): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(3,30): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(3,56): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(4,30): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(4,57): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(5,31): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(5,58): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(6,31): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(6,57): error TS2454: Variable 'strOrBool' is used before being assigned.
+
+
+==== typeGuardNesting.ts (11 errors) ====
+    let strOrBool: string|boolean;
+    if ((typeof strOrBool === 'boolean' && !strOrBool) || typeof strOrBool === 'string') {
+                ~~~~~~~~~
+!!! error TS2454: Variable 'strOrBool' is used before being assigned.
+                                            ~~~~~~~~~
+!!! error TS2454: Variable 'strOrBool' is used before being assigned.
+                                                                 ~~~~~~~~~
+!!! error TS2454: Variable 'strOrBool' is used before being assigned.
+    	let label: string = (typeof strOrBool === 'string') ? strOrBool : "string";
+    	                            ~~~~~~~~~
+!!! error TS2454: Variable 'strOrBool' is used before being assigned.
+    	                                                      ~~~~~~~~~
+!!! error TS2454: Variable 'strOrBool' is used before being assigned.
+    	let bool: boolean = (typeof strOrBool === 'boolean') ? strOrBool : false;
+    	                            ~~~~~~~~~
+!!! error TS2454: Variable 'strOrBool' is used before being assigned.
+    	                                                       ~~~~~~~~~
+!!! error TS2454: Variable 'strOrBool' is used before being assigned.
+    	let label2: string = (typeof strOrBool !== 'boolean') ? strOrBool : "string";
+    	                             ~~~~~~~~~
+!!! error TS2454: Variable 'strOrBool' is used before being assigned.
+    	                                                        ~~~~~~~~~
+!!! error TS2454: Variable 'strOrBool' is used before being assigned.
+    	let bool2: boolean = (typeof strOrBool !== 'string') ? strOrBool : false;
+    	                             ~~~~~~~~~
+!!! error TS2454: Variable 'strOrBool' is used before being assigned.
+    	                                                       ~~~~~~~~~
+!!! error TS2454: Variable 'strOrBool' is used before being assigned.
+    }
+    
+    if ((typeof strOrBool !== 'string' && !strOrBool) || typeof strOrBool !== 'boolean') {
+    	let label: string = (typeof strOrBool === 'string') ? strOrBool : "string";
+    	let bool: boolean = (typeof strOrBool === 'boolean') ? strOrBool : false;
+    	let label2: string = (typeof strOrBool !== 'boolean') ? strOrBool : "string";
+    	let bool2: boolean = (typeof strOrBool !== 'string') ? strOrBool : false;
+    }

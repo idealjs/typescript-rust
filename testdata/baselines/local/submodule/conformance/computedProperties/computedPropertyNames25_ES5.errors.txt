@@ -1,0 +1,43 @@
+computedPropertyNames25_ES5.ts(9,26): error TS1005: ',' expected.
+computedPropertyNames25_ES5.ts(9,26): error TS2304: Cannot find name '('.
+computedPropertyNames25_ES5.ts(9,27): error TS1005: ',' expected.
+computedPropertyNames25_ES5.ts(9,27): error TS2304: Cannot find name ')'.
+computedPropertyNames25_ES5.ts(9,29): error TS1005: ',' expected.
+computedPropertyNames25_ES5.ts(9,29): error TS2304: Cannot find name '{'.
+computedPropertyNames25_ES5.ts(10,10): error TS1003: Identifier expected.
+computedPropertyNames25_ES5.ts(11,16): error TS1005: ';' expected.
+computedPropertyNames25_ES5.ts(13,1): error TS1128: Declaration or statement expected.
+
+
+==== computedPropertyNames25_ES5.ts (9 errors) ====
+    class Base {
+        bar() {
+            return 0;
+        }
+    }
+    class C extends Base {
+        foo() {
+            var obj = {
+                [super.bar()]() { }
+                             ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS2304: Cannot find name '('.
+                              ~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS2304: Cannot find name ')'.
+                                ~
+!!! error TS1005: ',' expected.
+                                ~
+!!! error TS2304: Cannot find name '{'.
+            };
+             ~
+!!! error TS1003: Identifier expected.
+            return 0;
+                   ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

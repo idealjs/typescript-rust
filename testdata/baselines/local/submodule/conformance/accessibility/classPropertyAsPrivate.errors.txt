@@ -1,14 +1,14 @@
-accessibility/classPropertyAsPrivate.ts(3,17): error TS1005: ';' expected.
-accessibility/classPropertyAsPrivate.ts(4,17): error TS1005: ';' expected.
-accessibility/classPropertyAsPrivate.ts(8,24): error TS1005: ';' expected.
-accessibility/classPropertyAsPrivate.ts(9,24): error TS1005: ';' expected.
-accessibility/classPropertyAsPrivate.ts(20,3): error TS2339: Property 'a' does not exist on type 'object'.
-accessibility/classPropertyAsPrivate.ts(21,3): error TS2339: Property 'b' does not exist on type 'object'.
-accessibility/classPropertyAsPrivate.ts(22,3): error TS2339: Property 'b' does not exist on type 'object'.
-accessibility/classPropertyAsPrivate.ts(23,3): error TS2339: Property 'foo' does not exist on type 'object'.
+classPropertyAsPrivate.ts(3,17): error TS1005: ';' expected.
+classPropertyAsPrivate.ts(4,17): error TS1005: ';' expected.
+classPropertyAsPrivate.ts(8,24): error TS1005: ';' expected.
+classPropertyAsPrivate.ts(9,24): error TS1005: ';' expected.
+classPropertyAsPrivate.ts(20,3): error TS2339: Property 'a' does not exist on type 'object'.
+classPropertyAsPrivate.ts(21,3): error TS2339: Property 'b' does not exist on type 'object'.
+classPropertyAsPrivate.ts(22,3): error TS2339: Property 'b' does not exist on type 'object'.
+classPropertyAsPrivate.ts(23,3): error TS2339: Property 'foo' does not exist on type 'object'.
 
 
-==== accessibility/classPropertyAsPrivate.ts (8 errors) ====
+==== classPropertyAsPrivate.ts (8 errors) ====
     class C {
         private x: string;
         private get y() { return null; }

@@ -1,0 +1,33 @@
+decoratorOnClassMethodThisParameter.ts(1,30): error TS2304: Cannot find name 'Object'.
+decoratorOnClassMethodThisParameter.ts(4,12): error TS1138: Parameter declaration expected.
+decoratorOnClassMethodThisParameter.ts(4,17): error TS1005: ',' expected.
+decoratorOnClassMethodThisParameter.ts(8,12): error TS1138: Parameter declaration expected.
+decoratorOnClassMethodThisParameter.ts(8,17): error TS1005: ',' expected.
+decoratorOnClassMethodThisParameter.ts(8,30): error TS1138: Parameter declaration expected.
+decoratorOnClassMethodThisParameter.ts(8,35): error TS1005: ',' expected.
+
+
+==== decoratorOnClassMethodThisParameter.ts (7 errors) ====
+    declare function dec(target: Object, propertyKey: string | symbol, parameterIndex: number): void;
+                                 ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    
+    class C {
+        method(@dec this: C) {}
+               ~
+!!! error TS1138: Parameter declaration expected.
+                    ~~~~
+!!! error TS1005: ',' expected.
+    }
+    
+    class C2 {
+        method(@dec allowed: C2, @dec this: C2) {}
+               ~
+!!! error TS1138: Parameter declaration expected.
+                    ~~~~~~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1138: Parameter declaration expected.
+                                      ~~~~
+!!! error TS1005: ',' expected.
+    }

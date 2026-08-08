@@ -1,0 +1,23 @@
+main.ts(7,10): error TS1003: Identifier expected.
+main.ts(7,10): error TS1127: Invalid character.
+main.ts(7,11): error TS1005: ';' expected.
+
+
+==== main.ts (3 errors) ====
+    export {}
+    
+    declare var dec: any;
+    
+    // needs: __esDecorate, __runInitializers
+    class C {
+        @dec #x: any;
+             ~
+!!! error TS1003: Identifier expected.
+             ~
+!!! error TS1127: Invalid character.
+              ~
+!!! error TS1005: ';' expected.
+    }
+    
+==== tslib.d.ts (0 errors) ====
+    export {}

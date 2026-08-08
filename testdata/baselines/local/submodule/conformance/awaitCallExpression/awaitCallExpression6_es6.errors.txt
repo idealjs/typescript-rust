@@ -1,7 +1,7 @@
-awaitCallExpression/awaitCallExpression6_es6.ts(11,15): error TS2339: Property 'fn' does not exist on type 'object'.
+awaitCallExpression6_es6.ts(11,15): error TS2339: Property 'fn' does not exist on type 'object'.
 
 
-==== awaitCallExpression/awaitCallExpression6_es6.ts (1 errors) ====
+==== awaitCallExpression6_es6.ts (1 errors) ====
     declare var a: boolean;
     declare var p: Promise<boolean>;
     declare function fn(arg0: boolean, arg1: boolean, arg2: boolean): void;

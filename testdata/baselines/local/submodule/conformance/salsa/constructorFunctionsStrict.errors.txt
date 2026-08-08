@@ -1,0 +1,33 @@
+a.js(5,3): error TS2339: Property 'prototype' does not exist on type '(x: any) => void'.
+a.js(8,13): error TS2351: This expression is not constructable.
+a.js(20,13): error TS2351: This expression is not constructable.
+
+
+==== a.js (3 errors) ====
+    /** @param {number} x */
+    function C(x) {
+        this.x = x
+    }
+    C.prototype.m = function() {
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '(x: any) => void'.
+        this.y = 12
+    }
+    var c = new C(1)
+                ~
+!!! error TS2351: This expression is not constructable.
+    c.x = undefined // should error
+    c.y = undefined // ok
+    
+    /** @param {number} x */
+    function A(x) {
+        if (!(this instanceof A)) {
+            return new A(x)
+        }
+        this.x = x
+    }
+    var k = A(1)
+    var j = new A(2)
+                ~
+!!! error TS2351: This expression is not constructable.
+    k.x === j.x

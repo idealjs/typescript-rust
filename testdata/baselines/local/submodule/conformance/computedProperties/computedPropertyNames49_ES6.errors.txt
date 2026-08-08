@@ -1,0 +1,98 @@
+computedPropertyNames49_ES6.ts(3,5): error TS2304: Cannot find name 'get'.
+computedPropertyNames49_ES6.ts(3,9): error TS1005: ',' expected.
+computedPropertyNames49_ES6.ts(3,16): error TS1005: ',' expected.
+computedPropertyNames49_ES6.ts(3,16): error TS2304: Cannot find name '('.
+computedPropertyNames49_ES6.ts(3,17): error TS1005: ',' expected.
+computedPropertyNames49_ES6.ts(3,17): error TS2304: Cannot find name ')'.
+computedPropertyNames49_ES6.ts(3,19): error TS1005: ',' expected.
+computedPropertyNames49_ES6.ts(3,19): error TS2304: Cannot find name '{'.
+computedPropertyNames49_ES6.ts(4,9): error TS1005: ',' expected.
+computedPropertyNames49_ES6.ts(4,9): error TS2304: Cannot find name 'throw'.
+computedPropertyNames49_ES6.ts(4,15): error TS1005: ',' expected.
+computedPropertyNames49_ES6.ts(4,17): error TS1005: ',' expected.
+computedPropertyNames49_ES6.ts(6,5): error TS2304: Cannot find name 'get'.
+computedPropertyNames49_ES6.ts(6,19): error TS1005: ',' expected.
+computedPropertyNames49_ES6.ts(6,19): error TS1182: A destructuring declaration must have an initializer.
+computedPropertyNames49_ES6.ts(7,16): error TS1005: ',' expected.
+computedPropertyNames49_ES6.ts(7,18): error TS1005: ':' expected.
+computedPropertyNames49_ES6.ts(9,9): error TS1005: ',' expected.
+computedPropertyNames49_ES6.ts(9,10): error TS1181: Array element destructuring pattern expected.
+computedPropertyNames49_ES6.ts(9,12): error TS1181: Array element destructuring pattern expected.
+computedPropertyNames49_ES6.ts(9,14): error TS1181: Array element destructuring pattern expected.
+computedPropertyNames49_ES6.ts(9,16): error TS1005: ',' expected.
+computedPropertyNames49_ES6.ts(9,17): error TS1134: Variable declaration expected.
+
+
+==== computedPropertyNames49_ES6.ts (23 errors) ====
+    var x = {
+        p1: 10,
+        get [1 + 1]() {
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+            ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS2304: Cannot find name '('.
+                    ~
+!!! error TS1005: ',' expected.
+                    ~
+!!! error TS2304: Cannot find name ')'.
+                      ~
+!!! error TS1005: ',' expected.
+                      ~
+!!! error TS2304: Cannot find name '{'.
+            throw 10;
+            ~~~~~
+!!! error TS1005: ',' expected.
+            ~~~~~
+!!! error TS2304: Cannot find name 'throw'.
+                  ~~
+!!! error TS1005: ',' expected.
+                    ~
+!!! error TS1005: ',' expected.
+        },
+        get [1 + 1]() {
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+                      ~
+!!! error TS1005: ',' expected.
+                      ~
+            return 10;
+    ~~~~~~~~~~~~~~~~~~
+                   ~~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1005: ':' expected.
+        },
+    ~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+        set [1 + 1]() {
+            ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1181: Array element destructuring pattern expected.
+               ~
+!!! error TS1181: Array element destructuring pattern expected.
+                 ~
+!!! error TS1181: Array element destructuring pattern expected.
+                   ~
+!!! error TS1005: ',' expected.
+                    ~
+!!! error TS1134: Variable declaration expected.
+            // just throw
+            throw 10;
+        },
+        get foo() {
+            if (1 == 1) {
+                return 10;
+            }
+        },
+        get foo() {
+            if (2 == 2) {
+                return 20;
+            }
+        },
+        p2: 20
+    }

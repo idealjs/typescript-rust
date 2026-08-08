@@ -1,0 +1,28 @@
+callSignatureWithoutAnnotationsOrBody.ts(18,10): error TS2349: This expression is not callable.
+callSignatureWithoutAnnotationsOrBody.ts(19,12): error TS2339: Property 'f' does not exist on type 'object'.
+
+
+==== callSignatureWithoutAnnotationsOrBody.ts (2 errors) ====
+    // Call signatures without a return type annotation and function body return 'any'
+    
+    function foo(x) { }
+    var r = foo(1); // void since there's a body
+    
+    interface I {
+        ();
+        f();
+    }
+    var i: I;
+    var r2 = i();
+    var r3 = i.f();
+    
+    var a: {
+        ();
+        f();
+    };
+    var r4 = a();
+             ~
+!!! error TS2349: This expression is not callable.
+    var r5 = a.f();
+               ~
+!!! error TS2339: Property 'f' does not exist on type 'object'.

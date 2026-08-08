@@ -1,10 +1,10 @@
-constructorFunctionTypes/classWithBaseClassButNoConstructor.ts(11,16): error TS2554: Expected 0 arguments, but got 1.
-constructorFunctionTypes/classWithBaseClassButNoConstructor.ts(23,16): error TS2554: Expected 0 arguments, but got 1.
-constructorFunctionTypes/classWithBaseClassButNoConstructor.ts(32,16): error TS2554: Expected 0 arguments, but got 1.
-constructorFunctionTypes/classWithBaseClassButNoConstructor.ts(40,16): error TS2554: Expected 0 arguments, but got 1.
+classWithBaseClassButNoConstructor.ts(11,16): error TS2554: Expected 0 arguments, but got 1.
+classWithBaseClassButNoConstructor.ts(23,16): error TS2554: Expected 0 arguments, but got 1.
+classWithBaseClassButNoConstructor.ts(32,16): error TS2554: Expected 0 arguments, but got 1.
+classWithBaseClassButNoConstructor.ts(40,16): error TS2554: Expected 0 arguments, but got 1.
 
 
-==== constructorFunctionTypes/classWithBaseClassButNoConstructor.ts (4 errors) ====
+==== classWithBaseClassButNoConstructor.ts (4 errors) ====
     class Base {
         constructor(x: number) { }
     }

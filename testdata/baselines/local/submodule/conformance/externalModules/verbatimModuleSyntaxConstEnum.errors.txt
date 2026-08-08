@@ -1,0 +1,23 @@
+verbatimModuleSyntaxConstEnum.ts(1,19): error TS1005: ',' expected.
+verbatimModuleSyntaxConstEnum.ts(1,21): error TS1005: ',' expected.
+verbatimModuleSyntaxConstEnum.ts(1,21): error TS1182: A destructuring declaration must have an initializer.
+verbatimModuleSyntaxConstEnum.ts(3,1): error TS1012: Unexpected token.
+verbatimModuleSyntaxConstEnum.ts(3,2): error TS1005: '}' expected.
+
+
+==== verbatimModuleSyntaxConstEnum.ts (5 errors) ====
+    export const enum E {
+                      ~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS1005: ',' expected.
+                        ~
+        A = 1,
+    ~~~~~~~~~~
+    }
+    ~
+!!! error TS1182: A destructuring declaration must have an initializer.
+    ~
+!!! error TS1012: Unexpected token.
+     
+!!! error TS1005: '}' expected.

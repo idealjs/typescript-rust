@@ -1,0 +1,25 @@
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+
+
+==== index.d.ts (0 errors) ====
+    /// <reference path="fs.d.ts" />
+==== fs.d.ts (0 errors) ====
+    declare module "fs" {
+        interface FSWatcher {}
+    }
+==== package.json (2 errors) ====
+    {
+        "name": "@types/node",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "1.0.0"
+                 ~
+!!! error TS1005: ';' expected.
+    }
+==== main.ts (0 errors) ====
+    /// <reference types="node" />
+    import { FSWatcher } from "fs";
+    export function f() {
+        return {} as FSWatcher;
+    }

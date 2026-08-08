@@ -1,0 +1,29 @@
+a.tsx(9,3): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+a.tsx(9,3): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+a.tsx(13,3): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+a.tsx(13,3): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+
+
+==== a.tsx (4 errors) ====
+    declare const React: any
+    declare namespace JSX {
+        interface IntrinsicElements {
+            [k: string]: any
+        }
+    }
+    
+    const a = (
+      <public-foo></public-foo>
+      ~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+      ~~~~~~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    );
+    
+    const b = (
+      <public></public>
+      ~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+      ~~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    );

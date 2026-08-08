@@ -1,0 +1,32 @@
+intersectionTypeInference3.ts(9,18): error TS2304: Cannot find name 'Set'.
+intersectionTypeInference3.ts(10,18): error TS2304: Cannot find name 'Set'.
+intersectionTypeInference3.ts(12,12): error TS2304: Cannot find name 'Array'.
+intersectionTypeInference3.ts(12,33): error TS2304: Cannot find name 'Array'.
+
+
+==== intersectionTypeInference3.ts (4 errors) ====
+    // Repro from #19682
+    
+    type Nominal<Kind extends string, Type> = Type & {
+        [Symbol.species]: Kind;
+    };
+    
+    type A = Nominal<'A', string>;
+    
+    declare const a: Set<A>;
+                     ~~~
+!!! error TS2304: Cannot find name 'Set'.
+    declare const b: Set<A>;
+                     ~~~
+!!! error TS2304: Cannot find name 'Set'.
+    
+    const c1 = Array.from(a).concat(Array.from(b));
+               ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+                                    ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    
+    // Simpler repro
+    
+    declare function from<T>(): T[];
+    const c2: ReadonlyArray<A> = from();

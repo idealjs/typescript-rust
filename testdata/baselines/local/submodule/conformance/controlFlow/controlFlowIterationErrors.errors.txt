@@ -1,0 +1,121 @@
+controlFlowIterationErrors.ts(4,14): error TS2339: Property 'length' does not exist on type 'string'.
+controlFlowIterationErrors.ts(10,12): error TS2454: Variable 'cond' is used before being assigned.
+controlFlowIterationErrors.ts(20,12): error TS2454: Variable 'cond' is used before being assigned.
+controlFlowIterationErrors.ts(33,12): error TS2454: Variable 'cond' is used before being assigned.
+controlFlowIterationErrors.ts(43,12): error TS2454: Variable 'cond' is used before being assigned.
+controlFlowIterationErrors.ts(57,12): error TS2454: Variable 'cond' is used before being assigned.
+controlFlowIterationErrors.ts(66,12): error TS2454: Variable 'cond' is used before being assigned.
+controlFlowIterationErrors.ts(75,12): error TS2454: Variable 'cond' is used before being assigned.
+controlFlowIterationErrors.ts(85,12): error TS2454: Variable 'cond' is used before being assigned.
+
+
+==== controlFlowIterationErrors.ts (9 errors) ====
+    let cond: boolean;
+    
+    function len(s: string) {
+        return s.length;
+                 ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type 'string'.
+    }
+    
+    function f1() {
+        let x: string | number | boolean;
+        x = "";
+        while (cond) {
+               ~~~~
+!!! error TS2454: Variable 'cond' is used before being assigned.
+            x = len(x);
+            x;
+        }
+        x;
+    }
+    
+    function f2() {
+        let x: string | number | boolean;
+        x = "";
+        while (cond) {
+               ~~~~
+!!! error TS2454: Variable 'cond' is used before being assigned.
+            x;
+            x = len(x);
+        }
+        x;
+    }
+    
+    declare function foo(x: string): number;
+    declare function foo(x: number): string;
+    
+    function g1() {
+        let x: string | number | boolean;
+        x = "";
+        while (cond) {
+               ~~~~
+!!! error TS2454: Variable 'cond' is used before being assigned.
+            x = foo(x);
+            x;
+        }
+        x;
+    }
+    
+    function g2() {
+        let x: string | number | boolean;
+        x = "";
+        while (cond) {
+               ~~~~
+!!! error TS2454: Variable 'cond' is used before being assigned.
+            x;
+            x = foo(x);
+        }
+        x;
+    }
+    
+    function asNumber(x: string | number): number {
+        return +x;
+    }
+    
+    function h1() {
+        let x: string | number | boolean;
+        x = "0";
+        while (cond) {
+               ~~~~
+!!! error TS2454: Variable 'cond' is used before being assigned.
+            x = +x + 1;
+            x;
+        }
+    }
+    
+    function h2() {
+        let x: string | number | boolean;
+        x = "0";
+        while (cond) {
+               ~~~~
+!!! error TS2454: Variable 'cond' is used before being assigned.
+            x = asNumber(x) + 1;
+            x;
+        }
+    }
+    
+    function h3() {
+        let x: string | number | boolean;
+        x = "0";
+        while (cond) {
+               ~~~~
+!!! error TS2454: Variable 'cond' is used before being assigned.
+            let y = asNumber(x);
+            x = y + 1;
+            x;
+        }
+    }
+    
+    function h4() {
+        let x: string | number | boolean;
+        x = "0";
+        while (cond) {
+               ~~~~
+!!! error TS2454: Variable 'cond' is used before being assigned.
+            x;
+            let y = asNumber(x);
+            x = y + 1;
+            x;
+        }
+    }

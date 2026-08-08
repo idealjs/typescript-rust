@@ -1,0 +1,152 @@
+index.js(17,9): error TS1005: ';' expected.
+index.js(22,9): error TS1005: ';' expected.
+index.js(27,9): error TS1005: ';' expected.
+index.js(32,9): error TS1005: ';' expected.
+index.js(40,9): error TS1005: ';' expected.
+index.js(45,9): error TS1005: ';' expected.
+index.js(50,9): error TS1005: ';' expected.
+index.js(55,9): error TS1005: ';' expected.
+index.js(60,9): error TS1005: ';' expected.
+index.js(65,9): error TS1005: ';' expected.
+index.js(70,9): error TS1005: ';' expected.
+index.js(75,9): error TS1005: ';' expected.
+index.js(83,9): error TS1005: ';' expected.
+index.js(88,9): error TS1005: ';' expected.
+index.js(93,9): error TS1005: ';' expected.
+index.js(98,9): error TS1005: ';' expected.
+
+
+==== index.js (16 errors) ====
+    class С1 {
+        /** @type {string=} */
+        p1 = undefined;
+    
+        /** @type {string | undefined} */
+        p2 = undefined;
+    
+        /** @type {?string} */
+        p3 = null;
+    
+        /** @type {string | null} */
+        p4 = null;
+    }
+    
+    class С2 {
+        /** @type {string=} */
+        get p1() {
+            ~~
+!!! error TS1005: ';' expected.
+            return undefined;
+        }
+    
+        /** @type {string | undefined} */
+        get p2() {
+            ~~
+!!! error TS1005: ';' expected.
+            return undefined;
+        }
+    
+        /** @type {?string} */
+        get p3() {
+            ~~
+!!! error TS1005: ';' expected.
+            return null;
+        }
+    
+        /** @type {string | null} */
+        get p4() {
+            ~~
+!!! error TS1005: ';' expected.
+            return null;
+        }
+    }
+    
+    
+    class С3 {
+        /** @type {string=} */
+        get p1() {
+            ~~
+!!! error TS1005: ';' expected.
+            return undefined;
+        }
+    
+        /** @param {string=} value */
+        set p1(value) {
+            ~~
+!!! error TS1005: ';' expected.
+            this.p1 = value;
+        }
+    
+        /** @type {string | undefined} */
+        get p2() {
+            ~~
+!!! error TS1005: ';' expected.
+            return undefined;
+        }
+    
+        /** @param {string | undefined} value */
+        set p2(value) {
+            ~~
+!!! error TS1005: ';' expected.
+            this.p2 = value;
+        }
+    
+        /** @type {?string} */
+        get p3() {
+            ~~
+!!! error TS1005: ';' expected.
+            return null;
+        }
+    
+        /** @param {?string} value */
+        set p3(value) {
+            ~~
+!!! error TS1005: ';' expected.
+            this.p3 = value;
+        }
+    
+        /** @type {string | null} */
+        get p4() {
+            ~~
+!!! error TS1005: ';' expected.
+            return null;
+        }
+    
+        /** @param {string | null} value */
+        set p4(value) {
+            ~~
+!!! error TS1005: ';' expected.
+            this.p4 = value;
+        }
+    }
+    
+    
+    class С4 {
+        /** @param {string=} value */
+        set p1(value) {
+            ~~
+!!! error TS1005: ';' expected.
+            this.p1 = value;
+        }
+    
+        /** @param {string | undefined} value */
+        set p2(value) {
+            ~~
+!!! error TS1005: ';' expected.
+            this.p2 = value;
+        }
+    
+        /** @param {?string} value */
+        set p3(value) {
+            ~~
+!!! error TS1005: ';' expected.
+            this.p3 = value;
+        }
+    
+        /** @param {string | null} value */
+        set p4(value) {
+            ~~
+!!! error TS1005: ';' expected.
+            this.p4 = value;
+        }
+    }

@@ -1,0 +1,51 @@
+moduleExportAliasDuplicateAlias.js(1,7): error TS1003: Identifier expected.
+moduleExportAliasDuplicateAlias.js(1,8): error TS1005: ';' expected.
+moduleExportAliasDuplicateAlias.js(1,8): error TS2304: Cannot find name 'exports'.
+moduleExportAliasDuplicateAlias.js(3,7): error TS1003: Identifier expected.
+moduleExportAliasDuplicateAlias.js(3,8): error TS1005: ';' expected.
+moduleExportAliasDuplicateAlias.js(3,8): error TS2304: Cannot find name 'exports'.
+moduleExportAliasDuplicateAlias.js(4,7): error TS1003: Identifier expected.
+moduleExportAliasDuplicateAlias.js(4,8): error TS1005: ';' expected.
+moduleExportAliasDuplicateAlias.js(4,8): error TS2304: Cannot find name 'exports'.
+moduleExportAliasDuplicateAlias.js(5,7): error TS1003: Identifier expected.
+moduleExportAliasDuplicateAlias.js(5,8): error TS1005: ';' expected.
+moduleExportAliasDuplicateAlias.js(5,8): error TS2304: Cannot find name 'exports'.
+test.js(1,19): error TS2304: Cannot find name 'require'.
+
+
+==== moduleExportAliasDuplicateAlias.js (12 errors) ====
+    module.exports.apply = undefined;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    function a() { }
+    module.exports.apply = a;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    module.exports.apply = a;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    module.exports.apply()
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    
+==== test.js (1 errors) ====
+    const { apply } = require('./moduleExportAliasDuplicateAlias')
+                      ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    apply()

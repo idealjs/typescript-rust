@@ -1,12 +1,12 @@
-node_modules/ext/package.json(2,11): error TS1005: ';' expected.
-node_modules/ext/package.json(3,14): error TS1005: ';' expected.
-node_modules/ext/package.json(4,12): error TS1005: ';' expected.
-node_modules/ext/package.json(5,20): error TS1005: ';' expected.
-node_modules/ext/package.json(6,20): error TS1005: ';' expected.
-node_modules/ext/package.json(6,28): error TS1005: ';' expected.
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+package.json(4,12): error TS1005: ';' expected.
+package.json(5,20): error TS1005: ';' expected.
+package.json(6,20): error TS1005: ';' expected.
+package.json(6,28): error TS1005: ';' expected.
 
 
-==== node_modules/ext/package.json (6 errors) ====
+==== package.json (6 errors) ====
     {
         "name": "ext",
               ~
@@ -28,18 +28,18 @@ node_modules/ext/package.json(6,28): error TS1005: ';' expected.
         }
     }
     
-==== node_modules/ext/index.d.ts (0 errors) ====
+==== index.d.ts (0 errors) ====
     export interface A {}
     export function fa(): A;
     
-==== node_modules/ext/other.d.ts (0 errors) ====
+==== other.d.ts (0 errors) ====
     export interface B {}
     export function fb(): B;
     
-==== node_modules/ext/ts3.1/index.d.ts (0 errors) ====
+==== index.d.ts (0 errors) ====
     export * from "../";
     
-==== node_modules/ext/ts3.1/other.d.ts (0 errors) ====
+==== other.d.ts (0 errors) ====
     export * from "../other";
     
 ==== main.ts (0 errors) ====

@@ -1,11 +1,11 @@
-instanceAndStaticMembers/typeOfThisInStaticMembers9.ts(6,48): error TS2339: Property 'f' does not exist on type 'object'.
-instanceAndStaticMembers/typeOfThisInStaticMembers9.ts(7,62): error TS2339: Property 'f' does not exist on type 'object'.
-instanceAndStaticMembers/typeOfThisInStaticMembers9.ts(11,26): error TS2339: Property 'f' does not exist on type 'object'.
-instanceAndStaticMembers/typeOfThisInStaticMembers9.ts(14,23): error TS2339: Property 'f' does not exist on type '{ a: number; method: () => any }'.
-instanceAndStaticMembers/typeOfThisInStaticMembers9.ts(16,30): error TS2339: Property 'f' does not exist on type '{ a: number; method: () => any }'.
+typeOfThisInStaticMembers9.ts(6,48): error TS2339: Property 'f' does not exist on type 'object'.
+typeOfThisInStaticMembers9.ts(7,62): error TS2339: Property 'f' does not exist on type 'object'.
+typeOfThisInStaticMembers9.ts(11,26): error TS2339: Property 'f' does not exist on type 'object'.
+typeOfThisInStaticMembers9.ts(14,23): error TS2339: Property 'f' does not exist on type '{ a: number; method: () => any }'.
+typeOfThisInStaticMembers9.ts(16,30): error TS2339: Property 'f' does not exist on type '{ a: number; method: () => any }'.
 
 
-==== instanceAndStaticMembers/typeOfThisInStaticMembers9.ts (5 errors) ====
+==== typeOfThisInStaticMembers9.ts (5 errors) ====
     class C {
         static f = 1
     }

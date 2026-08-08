@@ -1,0 +1,215 @@
+callSignaturesWithAccessibilityModifiersOnParameters.ts(3,21): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(3,32): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(4,29): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(4,40): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(5,27): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(5,38): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(6,22): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(7,11): error TS2304: Cannot find name 'T'.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(7,21): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(7,24): error TS2304: Cannot find name 'T'.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(7,30): error TS2304: Cannot find name 'T'.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(9,23): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(9,41): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(10,31): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(10,49): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(11,28): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(11,46): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(12,19): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(12,37): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(13,11): error TS2304: Cannot find name 'T'.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(13,22): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(13,25): error TS2304: Cannot find name 'T'.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(13,35): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(13,38): error TS2304: Cannot find name 'T'.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(16,16): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(16,27): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(17,17): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(17,36): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(18,20): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(18,23): error TS2304: Cannot find name 'T'.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(18,34): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(18,37): error TS2304: Cannot find name 'T'.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(22,14): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(22,24): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(23,14): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(23,32): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(24,17): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(24,27): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(25,16): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(26,27): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(30,16): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(30,27): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(31,18): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(31,36): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(35,8): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(35,8): error TS2304: Cannot find name '('.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(35,9): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(35,9): error TS2304: Cannot find name 'public'.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(35,16): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(35,20): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(35,20): error TS2304: Cannot find name ')'.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(35,22): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(35,22): error TS2304: Cannot find name '{'.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(36,6): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(36,17): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(36,20): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(36,40): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(36,49): error TS1005: ',' expected.
+
+
+==== callSignaturesWithAccessibilityModifiersOnParameters.ts (58 errors) ====
+    // Call signature parameters do not allow accessibility modifiers
+    
+    function foo(public x, private y) { }
+                        ~
+!!! error TS1005: ',' expected.
+                                   ~
+!!! error TS1005: ',' expected.
+    var f = function foo(public x, private y) { }
+                                ~
+!!! error TS1005: ',' expected.
+                                           ~
+!!! error TS1005: ',' expected.
+    var f2 = function (public x, private y) { }
+                              ~
+!!! error TS1005: ',' expected.
+                                         ~
+!!! error TS1005: ',' expected.
+    var f3 = (x, private y) => { }
+                         ~
+!!! error TS1005: ',' expected.
+    var f4 = <T>(public x: T, y: T) => { }
+              ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS2304: Cannot find name 'T'.
+                                 ~
+!!! error TS2304: Cannot find name 'T'.
+    
+    function foo2(private x: string, public y: number) { }
+                          ~
+!!! error TS1005: ',' expected.
+                                            ~
+!!! error TS1005: ',' expected.
+    var f5 = function foo(private x: string, public y: number) { }
+                                  ~
+!!! error TS1005: ',' expected.
+                                                    ~
+!!! error TS1005: ',' expected.
+    var f6 = function (private x: string, public y: number) { }
+                               ~
+!!! error TS1005: ',' expected.
+                                                 ~
+!!! error TS1005: ',' expected.
+    var f7 = (private x: string, public y: number) => { }
+                      ~
+!!! error TS1005: ',' expected.
+                                        ~
+!!! error TS1005: ',' expected.
+    var f8 = <T>(private x: T, public y: T) => { }
+              ~
+!!! error TS2304: Cannot find name 'T'.
+                         ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS2304: Cannot find name 'T'.
+                                      ~
+!!! error TS1005: ',' expected.
+                                         ~
+!!! error TS2304: Cannot find name 'T'.
+    
+    class C {
+        foo(public x, private y) { }
+                   ~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1005: ',' expected.
+        foo2(public x: number, private y: string) { }
+                    ~
+!!! error TS1005: ',' expected.
+                                       ~
+!!! error TS1005: ',' expected.
+        foo3<T>(public x: T, private y: T) { }
+                       ~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS2304: Cannot find name 'T'.
+                                     ~
+!!! error TS1005: ',' expected.
+                                        ~
+!!! error TS2304: Cannot find name 'T'.
+    }
+    
+    interface I {
+        (private x, public y);
+                 ~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS1005: ',' expected.
+        (private x: string, public y: number);
+                 ~
+!!! error TS1005: ',' expected.
+                                   ~
+!!! error TS1005: ',' expected.
+        foo(private x, public y);
+                    ~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1005: ',' expected.
+        foo(public x: number, y: string);
+                   ~
+!!! error TS1005: ',' expected.
+        foo3<T>(x: T, private y: T);
+                              ~
+!!! error TS1005: ',' expected.
+    }
+    
+    var a: {
+        foo(public x, private y);
+                   ~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1005: ',' expected.
+        foo2(private x: number, public y: string);
+                     ~
+!!! error TS1005: ',' expected.
+                                       ~
+!!! error TS1005: ',' expected.
+    };
+    
+    var b = {
+        foo(public x, y) { },
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '('.
+            ~~~~~~
+!!! error TS1005: ',' expected.
+            ~~~~~~
+!!! error TS2304: Cannot find name 'public'.
+                   ~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS2304: Cannot find name ')'.
+                         ~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS2304: Cannot find name '{'.
+        a: function foo(x: number, private y: string) { },
+         ~
+!!! error TS1005: ',' expected.
+                    ~~~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS1005: ',' expected.
+                                           ~
+!!! error TS1005: ',' expected.
+                                                    ~
+!!! error TS1005: ',' expected.
+        b: <T>(public x: T, private y: T) => { }
+    }

@@ -1,0 +1,57 @@
+/node_modules/@types/foo/package.json(2,11): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(3,14): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(4,14): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(5,12): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(6,21): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(7,22): error TS1005: ';' expected.
+
+
+==== importTag17.ts (0 errors) ====
+    
+==== /node_modules/@types/foo/package.json (6 errors) ====
+    {
+        "name": "@types/foo",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "1.0.0",
+                 ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            ".": {
+               ~
+!!! error TS1005: ';' expected.
+                "import": "./index.d.mts",
+                        ~
+!!! error TS1005: ';' expected.
+                "require": "./index.d.cts"
+                         ~
+!!! error TS1005: ';' expected.
+            }
+        }
+    }
+    
+==== /node_modules/@types/foo/index.d.mts (0 errors) ====
+    export declare const Import: "module";
+    
+==== /node_modules/@types/foo/index.d.cts (0 errors) ====
+    export declare const Require: "script";
+    
+==== /a.js (0 errors) ====
+    /** @import { Import } from 'foo' with { 'resolution-mode': 'import' } */
+    /** @import { Require } from 'foo' with { 'resolution-mode': 'require' } */
+    
+    /**
+     * @returns { Import }
+     */
+    export function f1() {
+        return 1;
+    }
+    
+    /**
+     * @returns { Require }
+     */
+    export function f2() {
+        return 1;
+    }

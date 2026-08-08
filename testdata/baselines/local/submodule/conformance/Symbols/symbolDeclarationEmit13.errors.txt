@@ -1,0 +1,13 @@
+symbolDeclarationEmit13.ts(2,9): error TS1005: ';' expected.
+symbolDeclarationEmit13.ts(3,9): error TS1005: ';' expected.
+
+
+==== symbolDeclarationEmit13.ts (2 errors) ====
+    class C {
+        get [Symbol.toPrimitive]() { return ""; }
+            ~
+!!! error TS1005: ';' expected.
+        set [Symbol.toStringTag](x) { }
+            ~
+!!! error TS1005: ';' expected.
+    }

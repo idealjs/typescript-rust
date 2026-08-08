@@ -1,0 +1,65 @@
+destructuringParameterProperties2.ts(3,25): error TS1005: ',' expected.
+destructuringParameterProperties2.ts(3,44): error TS1005: ',' expected.
+destructuringParameterProperties2.ts(4,59): error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+destructuringParameterProperties2.ts(4,83): error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+destructuringParameterProperties2.ts(5,18): error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+destructuringParameterProperties2.ts(10,21): error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+destructuringParameterProperties2.ts(14,21): error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+destructuringParameterProperties2.ts(18,21): error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+destructuringParameterProperties2.ts(22,9): error TS2554: Expected 4 arguments, but got 2.
+destructuringParameterProperties2.ts(25,9): error TS2554: Expected 4 arguments, but got 2.
+destructuringParameterProperties2.ts(28,9): error TS2554: Expected 4 arguments, but got 2.
+
+
+==== destructuringParameterProperties2.ts (11 errors) ====
+    ﻿// @module: commonjs
+    class C1 {
+        constructor(private k: number, private [a, b, c]: [number, string, boolean]) {
+                         ~
+!!! error TS1005: ',' expected.
+                                            ~
+!!! error TS1005: ',' expected.
+            if ((b === undefined && c === undefined) || (this.b === undefined && this.c === undefined)) {
+                                                           ~
+!!! error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+                                                                                   ~
+!!! error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+                this.a = a || k;
+                  ~
+!!! error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+            }
+        }
+    
+        public getA() {
+            return this.a
+                     ~
+!!! error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+        }
+    
+        public getB() {
+            return this.b
+                     ~
+!!! error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+        }
+    
+        public getC() {
+            return this.c;
+                     ~
+!!! error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+        }
+    }
+    
+    var x = new C1(undefined, [0, undefined, ""]);
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 4 arguments, but got 2.
+    var [x_a, x_b, x_c] = [x.getA(), x.getB(), x.getC()];
+    
+    var y = new C1(10, [0, "", true]);
+         ~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 4 arguments, but got 2.
+    var [y_a, y_b, y_c] = [y.getA(), y.getB(), y.getC()];
+    
+    var z = new C1(10, [undefined, "", null]);
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 4 arguments, but got 2.
+    var [z_a, z_b, z_c] = [z.getA(), z.getB(), z.getC()];

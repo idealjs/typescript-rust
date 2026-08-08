@@ -1,0 +1,117 @@
+mappedTypeInferenceErrors.ts(7,77): error TS2304: Cannot find name 'ThisType'.
+mappedTypeInferenceErrors.ts(9,5): error TS2345: Argument of type '{ props: { x: 10; y: 20 }; computed: { bar: any; (: any; ): any; {: any; let: any; z: any; =: any; this: any; .: any; bar: any; ;: any; return: any; 42: 42; ;: any }; baz: 42 }' is not assignable to parameter of type '{ props: P; computed: any } & error'.
+mappedTypeInferenceErrors.ts(12,9): error TS2304: Cannot find name 'bar'.
+mappedTypeInferenceErrors.ts(12,12): error TS1005: ',' expected.
+mappedTypeInferenceErrors.ts(12,12): error TS2304: Cannot find name '('.
+mappedTypeInferenceErrors.ts(12,13): error TS1005: ',' expected.
+mappedTypeInferenceErrors.ts(12,16): error TS2304: Cannot find name 'number'.
+mappedTypeInferenceErrors.ts(12,23): error TS1005: ',' expected.
+mappedTypeInferenceErrors.ts(12,23): error TS2304: Cannot find name '{'.
+mappedTypeInferenceErrors.ts(13,13): error TS1005: ',' expected.
+mappedTypeInferenceErrors.ts(13,13): error TS2304: Cannot find name 'let'.
+mappedTypeInferenceErrors.ts(13,17): error TS1005: ',' expected.
+mappedTypeInferenceErrors.ts(13,17): error TS2304: Cannot find name 'z'.
+mappedTypeInferenceErrors.ts(13,19): error TS1005: ',' expected.
+mappedTypeInferenceErrors.ts(13,19): error TS2304: Cannot find name '='.
+mappedTypeInferenceErrors.ts(13,21): error TS1005: ',' expected.
+mappedTypeInferenceErrors.ts(13,21): error TS2304: Cannot find name 'this'.
+mappedTypeInferenceErrors.ts(13,25): error TS1005: ',' expected.
+mappedTypeInferenceErrors.ts(13,25): error TS2304: Cannot find name '.'.
+mappedTypeInferenceErrors.ts(13,26): error TS1005: ',' expected.
+mappedTypeInferenceErrors.ts(13,26): error TS2304: Cannot find name 'bar'.
+mappedTypeInferenceErrors.ts(13,29): error TS1005: ',' expected.
+mappedTypeInferenceErrors.ts(13,29): error TS2304: Cannot find name ';'.
+mappedTypeInferenceErrors.ts(14,13): error TS1005: ',' expected.
+mappedTypeInferenceErrors.ts(14,13): error TS2304: Cannot find name 'return'.
+mappedTypeInferenceErrors.ts(14,20): error TS1005: ',' expected.
+mappedTypeInferenceErrors.ts(14,22): error TS1005: ',' expected.
+mappedTypeInferenceErrors.ts(14,22): error TS2304: Cannot find name ';'.
+mappedTypeInferenceErrors.ts(18,1): error TS1005: ',' expected.
+
+
+==== mappedTypeInferenceErrors.ts (29 errors) ====
+    // Repro from #19316
+    
+    type ComputedOf<T> = {
+        [K in keyof T]: () => T[K];
+    }
+    
+    declare function foo<P, C>(options: { props: P, computed: ComputedOf<C> } & ThisType<P & C>): void;
+                                                                                ~~~~~~~~
+!!! error TS2304: Cannot find name 'ThisType'.
+    
+    foo({
+        ~
+        props: { x: 10, y: 20 },
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        computed: {
+    ~~~~~~~~~~~~~~~
+            bar(): number {
+    ~~~~~~~~~~~~~~~~~~~~~~~
+            ~~~
+!!! error TS2304: Cannot find name 'bar'.
+               ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS2304: Cannot find name '('.
+                ~
+!!! error TS1005: ',' expected.
+                   ~~~~~~
+!!! error TS2304: Cannot find name 'number'.
+                          ~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS2304: Cannot find name '{'.
+                let z = this.bar;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                ~~~
+!!! error TS1005: ',' expected.
+                ~~~
+!!! error TS2304: Cannot find name 'let'.
+                    ~
+!!! error TS1005: ',' expected.
+                    ~
+!!! error TS2304: Cannot find name 'z'.
+                      ~
+!!! error TS1005: ',' expected.
+                      ~
+!!! error TS2304: Cannot find name '='.
+                        ~~~~
+!!! error TS1005: ',' expected.
+                        ~~~~
+!!! error TS2304: Cannot find name 'this'.
+                            ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS2304: Cannot find name '.'.
+                             ~~~
+!!! error TS1005: ',' expected.
+                             ~~~
+!!! error TS2304: Cannot find name 'bar'.
+                                ~
+!!! error TS1005: ',' expected.
+                                ~
+!!! error TS2304: Cannot find name ';'.
+                return 42;
+    ~~~~~~~~~~~~~~~~~~~~~~
+                ~~~~~~
+!!! error TS1005: ',' expected.
+                ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                       ~~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS2304: Cannot find name ';'.
+            },
+    ~~~~~~~~~~
+            baz: 42
+    ~~~~~~~~~~~~~~~
+        }
+    ~~~~~
+    });
+    
+!!! error TS2345: Argument of type '{ props: { x: 10; y: 20 }; computed: { bar: any; (: any; ): any; {: any; let: any; z: any; =: any; this: any; .: any; bar: any; ;: any; return: any; 42: 42; ;: any }; baz: 42 }' is not assignable to parameter of type '{ props: P; computed: any } & error'.
+    ~
+!!! error TS1005: ',' expected.

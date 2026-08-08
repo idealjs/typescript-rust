@@ -1,0 +1,48 @@
+parserMissingLambdaOpenBrace1.ts(2,42): error TS2304: Cannot find name 'Query'.
+parserMissingLambdaOpenBrace1.ts(3,16): error TS2304: Cannot find name 'fromDoWhile'.
+parserMissingLambdaOpenBrace1.ts(4,13): error TS2304: Cannot find name 'var'.
+parserMissingLambdaOpenBrace1.ts(4,17): error TS1005: ',' expected.
+parserMissingLambdaOpenBrace1.ts(4,17): error TS2304: Cannot find name 'index'.
+parserMissingLambdaOpenBrace1.ts(4,26): error TS1005: ')' expected.
+parserMissingLambdaOpenBrace1.ts(5,13): error TS7027: Unreachable code detected.
+parserMissingLambdaOpenBrace1.ts(5,25): error TS2339: Property 'doWhile' does not exist on type '{ where: (filter: error) => error; ): any }'.
+parserMissingLambdaOpenBrace1.ts(5,64): error TS2304: Cannot find name 'test'.
+parserMissingLambdaOpenBrace1.ts(5,75): error TS2304: Cannot find name 'index'.
+parserMissingLambdaOpenBrace1.ts(6,10): error TS1003: Identifier expected.
+parserMissingLambdaOpenBrace1.ts(8,1): error TS1128: Declaration or statement expected.
+
+
+==== parserMissingLambdaOpenBrace1.ts (12 errors) ====
+    class C {
+        where(filter: Iterator<T, boolean>): Query<T> {
+                                             ~~~~~
+!!! error TS2304: Cannot find name 'Query'.
+            return fromDoWhile(test =>
+                   ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'fromDoWhile'.
+                var index = 0;
+                ~~~
+!!! error TS2304: Cannot find name 'var'.
+                    ~~~~~
+!!! error TS1005: ',' expected.
+                    ~~~~~
+!!! error TS2304: Cannot find name 'index'.
+                             ~
+!!! error TS1005: ')' expected.
+                return this.doWhile((item, i) => filter(item, i) ? test(item, index++) : true);
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                            ~~~~~~~
+!!! error TS2339: Property 'doWhile' does not exist on type '{ where: (filter: error) => error; ): any }'.
+                                                                   ~~~~
+!!! error TS2304: Cannot find name 'test'.
+                                                                              ~~~~~
+!!! error TS2304: Cannot find name 'index'.
+            });
+    ~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+             ~
+!!! error TS1003: Identifier expected.
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

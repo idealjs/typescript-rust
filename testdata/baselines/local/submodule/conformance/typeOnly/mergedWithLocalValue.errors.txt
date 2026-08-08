@@ -1,0 +1,11 @@
+error TS2300: Duplicate identifier 'A'.
+
+
+!!! error TS2300: Duplicate identifier 'A'.
+==== a.ts (0 errors) ====
+    export type A = "a";
+    
+==== b.ts (0 errors) ====
+    import type { A } from "./a";
+    const A: A = "a";
+    A.toUpperCase();

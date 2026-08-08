@@ -1,0 +1,21 @@
+ArrowFunction1.ts(1,13): error TS1003: Identifier expected.
+ArrowFunction1.ts(1,13): error TS2304: Cannot find name ')'.
+ArrowFunction1.ts(1,15): error TS1005: ',' expected.
+ArrowFunction1.ts(3,2): error TS1005: ',' expected.
+ArrowFunction1.ts(3,3): error TS1005: ')' expected.
+
+
+==== ArrowFunction1.ts (5 errors) ====
+    var v = (a: ) => {
+                ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS2304: Cannot find name ')'.
+                  ~~
+!!! error TS1005: ',' expected.
+       
+    };
+     ~
+!!! error TS1005: ',' expected.
+      
+!!! error TS1005: ')' expected.

@@ -1,0 +1,19 @@
+scannerUnicodeEscapeInKeyword1.ts(1,1): error TS1127: Invalid character.
+scannerUnicodeEscapeInKeyword1.ts(1,1): error TS1128: Declaration or statement expected.
+scannerUnicodeEscapeInKeyword1.ts(1,2): error TS2304: Cannot find name 'u0076ar'.
+scannerUnicodeEscapeInKeyword1.ts(1,10): error TS1005: ';' expected.
+scannerUnicodeEscapeInKeyword1.ts(1,10): error TS2304: Cannot find name 'x'.
+
+
+==== scannerUnicodeEscapeInKeyword1.ts (5 errors) ====
+    \u0076ar x = "hello";
+    ~
+!!! error TS1127: Invalid character.
+    ~
+!!! error TS1128: Declaration or statement expected.
+     ~~~~~~~
+!!! error TS2304: Cannot find name 'u0076ar'.
+             ~
+!!! error TS1005: ';' expected.
+             ~
+!!! error TS2304: Cannot find name 'x'.

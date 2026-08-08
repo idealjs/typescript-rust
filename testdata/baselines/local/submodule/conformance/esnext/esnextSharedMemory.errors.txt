@@ -1,0 +1,11 @@
+esnextSharedMemory.ts(1,1): error TS2304: Cannot find name 'Atomics'.
+esnextSharedMemory.ts(2,1): error TS2304: Cannot find name 'Atomics'.
+
+
+==== esnextSharedMemory.ts (2 errors) ====
+    Atomics.pause();
+    ~~~~~~~
+!!! error TS2304: Cannot find name 'Atomics'.
+    Atomics.pause(1);
+    ~~~~~~~
+!!! error TS2304: Cannot find name 'Atomics'.

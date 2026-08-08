@@ -1,0 +1,46 @@
+symbolProperty19.ts(3,25): error TS1005: ',' expected.
+symbolProperty19.ts(3,25): error TS2304: Cannot find name '('.
+symbolProperty19.ts(3,26): error TS1005: ',' expected.
+symbolProperty19.ts(3,26): error TS2304: Cannot find name ')'.
+symbolProperty19.ts(3,28): error TS1005: ',' expected.
+symbolProperty19.ts(3,28): error TS2304: Cannot find name '{'.
+symbolProperty19.ts(3,30): error TS1005: ',' expected.
+symbolProperty19.ts(3,30): error TS2304: Cannot find name 'return'.
+symbolProperty19.ts(3,37): error TS1005: ',' expected.
+symbolProperty19.ts(3,37): error TS2304: Cannot find name '{'.
+symbolProperty19.ts(3,39): error TS1005: ',' expected.
+symbolProperty19.ts(3,55): error TS1128: Declaration or statement expected.
+
+
+==== symbolProperty19.ts (12 errors) ====
+    var i = {
+        [Symbol.iterator]: { p: null },
+        [Symbol.toStringTag]() { return { p: undefined }; }
+                            ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS2304: Cannot find name '('.
+                             ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS2304: Cannot find name ')'.
+                               ~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS2304: Cannot find name '{'.
+                                 ~~~~~~
+!!! error TS1005: ',' expected.
+                                 ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                                        ~
+!!! error TS1005: ',' expected.
+                                        ~
+!!! error TS2304: Cannot find name '{'.
+                                          ~
+!!! error TS1005: ',' expected.
+                                                          ~
+!!! error TS1128: Declaration or statement expected.
+    }
+    
+    var it = i[Symbol.iterator];
+    var str = i[Symbol.toStringTag]();

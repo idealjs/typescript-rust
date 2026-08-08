@@ -1,0 +1,29 @@
+lit.ts(3,13): error TS1003: Identifier expected.
+lit.ts(3,14): error TS1005: '=' expected.
+lit.ts(3,31): error TS1128: Declaration or statement expected.
+
+
+==== typeofImportTypeOnlyExport.ts (0 errors) ====
+    
+==== button.ts (0 errors) ====
+    import {classMap} from './lit.js';
+    export const c = classMap();
+    
+==== lit.ts (3 errors) ====
+    class ClassMapDirective {}
+    
+    export type {ClassMapDirective};
+                ~
+!!! error TS1003: Identifier expected.
+                 ~~~~~~~~~~~~~~~~~
+!!! error TS1005: '=' expected.
+                                  ~
+!!! error TS1128: Declaration or statement expected.
+    
+    export const directive =
+      <C>(class_: C) =>
+      () => ({
+        directive: class_,
+      });
+    
+    export const classMap = directive(ClassMapDirective);

@@ -1,0 +1,33 @@
+a.js(6,19): error TS2304: Cannot find name 'l'.
+a.js(6,46): error TS1005: '>' expected.
+a.js(19,9): error TS2554: Expected 0 arguments, but got 3.
+
+
+==== decls.d.ts (0 errors) ====
+    declare function factory(type: string): {};
+==== a.js (3 errors) ====
+    /**
+     * @param {string} first
+     */
+    function concat(/* first, second, ... */) {
+      var s = ''
+      for (var i = 0, l = arguments.length; i < l; i++) {
+                      ~
+!!! error TS2304: Cannot find name 'l'.
+                                                 ~
+!!! error TS1005: '>' expected.
+        s += arguments[i]
+      }
+      return s
+    }
+    
+    /**
+     * @param {...string} strings
+     */
+    function correct() {
+        arguments
+    }
+    
+    correct(1,2,3) // oh no
+            ~~~~~
+!!! error TS2554: Expected 0 arguments, but got 3.

@@ -1,0 +1,67 @@
+typeParameterUsedAsTypeParameterConstraint.ts(5,12): error TS2322: Type 'U' is not assignable to type 'T'.
+typeParameterUsedAsTypeParameterConstraint.ts(10,12): error TS2322: Type 'U' is not assignable to type 'T'.
+typeParameterUsedAsTypeParameterConstraint.ts(15,12): error TS2322: Type 'U' is not assignable to type 'T'.
+typeParameterUsedAsTypeParameterConstraint.ts(20,12): error TS2322: Type 'U' is not assignable to type 'T'.
+typeParameterUsedAsTypeParameterConstraint.ts(23,12): error TS1005: '>' expected.
+typeParameterUsedAsTypeParameterConstraint.ts(23,14): error TS1005: ',' expected.
+typeParameterUsedAsTypeParameterConstraint.ts(23,16): error TS1005: ',' expected.
+typeParameterUsedAsTypeParameterConstraint.ts(23,24): error TS1005: ',' expected.
+typeParameterUsedAsTypeParameterConstraint.ts(23,25): error TS1005: ',' expected.
+typeParameterUsedAsTypeParameterConstraint.ts(23,26): error TS1134: Variable declaration expected.
+typeParameterUsedAsTypeParameterConstraint.ts(23,37): error TS1005: ',' expected.
+
+
+==== typeParameterUsedAsTypeParameterConstraint.ts (11 errors) ====
+    // Type parameters are in scope in their own and other type parameter lists
+    
+    function foo<T, U extends T>(x: T, y: U): T {
+        x = y;
+        return y;
+               ~
+!!! error TS2322: Type 'U' is not assignable to type 'T'.
+    }
+    
+    function foo2<U extends T, T>(x: T, y: U): T {
+        x = y;
+        return y;
+               ~
+!!! error TS2322: Type 'U' is not assignable to type 'T'.
+    }
+    
+    var f = function <T, U extends T>(x: T, y: U): T {
+        x = y;
+        return y;
+               ~
+!!! error TS2322: Type 'U' is not assignable to type 'T'.
+    }
+    
+    var f2 = function <U extends T, T>(x: T, y: U): T {
+        x = y;
+        return y;
+               ~
+!!! error TS2322: Type 'U' is not assignable to type 'T'.
+    }
+    
+    var f3 = <T, U extends T>(x: T, y: U): T => {
+               ~
+!!! error TS1005: '>' expected.
+                 ~
+!!! error TS1005: ',' expected.
+                   ~~~~~~~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1134: Variable declaration expected.
+                                        ~
+!!! error TS1005: ',' expected.
+        x = y;
+        return y;
+    }
+    
+    var f4 = <U extends T, T>(x: T, y: U): T => {
+        x = y;
+        return y;
+    }

@@ -1,14 +1,14 @@
-classStaticBlock/classStaticBlockUseBeforeDef3.ts(2,12): error TS1005: ';' expected.
-classStaticBlock/classStaticBlockUseBeforeDef3.ts(3,10): error TS1005: ';' expected.
-classStaticBlock/classStaticBlockUseBeforeDef3.ts(3,11): error TS1005: ';' expected.
-classStaticBlock/classStaticBlockUseBeforeDef3.ts(6,5): error TS2304: Cannot find name 'static'.
-classStaticBlock/classStaticBlockUseBeforeDef3.ts(6,12): error TS1005: ';' expected.
-classStaticBlock/classStaticBlockUseBeforeDef3.ts(6,12): error TS2304: Cannot find name 'doSomething'.
-classStaticBlock/classStaticBlockUseBeforeDef3.ts(6,26): error TS1005: ';' expected.
-classStaticBlock/classStaticBlockUseBeforeDef3.ts(9,1): error TS1128: Declaration or statement expected.
+classStaticBlockUseBeforeDef3.ts(2,12): error TS1005: ';' expected.
+classStaticBlockUseBeforeDef3.ts(3,10): error TS1005: ';' expected.
+classStaticBlockUseBeforeDef3.ts(3,11): error TS1005: ';' expected.
+classStaticBlockUseBeforeDef3.ts(6,5): error TS2304: Cannot find name 'static'.
+classStaticBlockUseBeforeDef3.ts(6,12): error TS1005: ';' expected.
+classStaticBlockUseBeforeDef3.ts(6,12): error TS2304: Cannot find name 'doSomething'.
+classStaticBlockUseBeforeDef3.ts(6,26): error TS1005: ';' expected.
+classStaticBlockUseBeforeDef3.ts(9,1): error TS1128: Declaration or statement expected.
 
 
-==== classStaticBlock/classStaticBlockUseBeforeDef3.ts (8 errors) ====
+==== classStaticBlockUseBeforeDef3.ts (8 errors) ====
     class A {
         static {
                ~

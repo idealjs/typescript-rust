@@ -1,0 +1,19 @@
+stringLiteralTypesOverloads05.ts(12,12): error TS2322: Type 'undefined' is not assignable to type '{ moose: object }'.
+
+
+==== stringLiteralTypesOverloads05.ts (1 errors) ====
+    ﻿// @target: es2015
+    
+    interface Animal { animal: {} };
+    interface Dog extends Animal { dog: {} }
+    interface Cat extends Animal { cat: {} }
+    interface Moose extends Animal { moose: {} }
+    
+    function doThing(x: "dog"): Dog;
+    function doThing(x: "cat"): Cat;
+    function doThing(x: string): Animal;
+    function doThing(x: string, y?: string): Moose {
+        return undefined;
+            ~~~~~~~~~
+!!! error TS2322: Type 'undefined' is not assignable to type '{ moose: object }'.
+    }

@@ -1,0 +1,17 @@
+esDecorators-classDeclaration-fields-nonStaticPrivateAccessor.ts(4,19): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-nonStaticPrivateAccessor.ts(4,19): error TS1127: Invalid character.
+esDecorators-classDeclaration-fields-nonStaticPrivateAccessor.ts(4,20): error TS1005: ';' expected.
+
+
+==== esDecorators-classDeclaration-fields-nonStaticPrivateAccessor.ts (3 errors) ====
+    declare let dec: any;
+    
+    class C {
+        @dec accessor #field1 = 0;
+                      ~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1127: Invalid character.
+                       ~~~~~~
+!!! error TS1005: ';' expected.
+    }

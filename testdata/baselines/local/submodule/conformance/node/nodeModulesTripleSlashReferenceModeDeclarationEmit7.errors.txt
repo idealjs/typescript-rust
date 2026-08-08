@@ -1,0 +1,88 @@
+/node_modules/pkg/package.json(2,11): error TS1005: ';' expected.
+/node_modules/pkg/package.json(3,14): error TS1005: ';' expected.
+/node_modules/pkg/package.json(4,14): error TS1005: ';' expected.
+/node_modules/pkg/package.json(5,17): error TS1005: ';' expected.
+/node_modules/pkg/package.json(6,18): error TS1005: ';' expected.
+/package.json(2,14): error TS1005: ';' expected.
+/package.json(3,11): error TS1005: ';' expected.
+/sub1/package.json(2,14): error TS1005: ';' expected.
+/sub1/package.json(3,11): error TS1005: ';' expected.
+/sub1/uses.ts(2,16): error TS2304: Cannot find name 'getInterI'.
+/sub2/package.json(2,14): error TS1005: ';' expected.
+/sub2/package.json(3,11): error TS1005: ';' expected.
+/sub2/uses.ts(2,16): error TS2304: Cannot find name 'getInterR'.
+
+
+==== /node_modules/pkg/package.json (5 errors) ====
+    {
+        "name": "pkg",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "0.0.1",
+                 ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            "import": "./import.js",
+                    ~
+!!! error TS1005: ';' expected.
+            "require": "./require.js"
+                     ~
+!!! error TS1005: ';' expected.
+        }
+    }
+==== /node_modules/pkg/import.d.ts (0 errors) ====
+    export {};
+    declare global {
+        interface ImportInterface { _i: any; }
+        function getInterI(): ImportInterface;
+    }
+==== /node_modules/pkg/require.d.ts (0 errors) ====
+    export {};
+    declare global {
+        interface RequireInterface { _r: any; }
+        function getInterR(): RequireInterface;
+    }
+==== /sub1/uses.ts (1 errors) ====
+    /// <reference types="pkg" preserve="true" />
+    export default getInterI();
+                   ~~~~~~~~~
+!!! error TS2304: Cannot find name 'getInterI'.
+==== /sub1/package.json (2 errors) ====
+    {
+        "private": true,
+                 ~
+!!! error TS1005: ';' expected.
+        "type": "module"
+              ~
+!!! error TS1005: ';' expected.
+    }
+==== /sub2/uses.ts (1 errors) ====
+    /// <reference types="pkg" preserve="true" />
+    export default getInterR();
+                   ~~~~~~~~~
+!!! error TS2304: Cannot find name 'getInterR'.
+==== /sub2/package.json (2 errors) ====
+    {
+        "private": true,
+                 ~
+!!! error TS1005: ';' expected.
+        "type": "commonjs"
+              ~
+!!! error TS1005: ';' expected.
+    }
+==== /package.json (2 errors) ====
+    {
+        "private": true,
+                 ~
+!!! error TS1005: ';' expected.
+        "type": "module"
+              ~
+!!! error TS1005: ';' expected.
+    }
+==== /index.ts (0 errors) ====
+    // only an esm file can `import` both kinds of files
+    import obj1 from "./sub1/uses.js"
+    import obj2 from "./sub2/uses.js"
+    export default [obj1, obj2.default] as const;

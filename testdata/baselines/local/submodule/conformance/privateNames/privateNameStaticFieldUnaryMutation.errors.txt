@@ -1,0 +1,216 @@
+error TS2451: Cannot redeclare block-scoped variable 'test'.
+error TS2451: Cannot redeclare block-scoped variable 'test'.
+error TS2451: Cannot redeclare block-scoped variable 'test'.
+privateNameStaticFieldUnaryMutation.ts(2,12): error TS1005: ';' expected.
+privateNameStaticFieldUnaryMutation.ts(2,12): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(2,13): error TS1005: ';' expected.
+privateNameStaticFieldUnaryMutation.ts(4,11): error TS1003: Identifier expected.
+privateNameStaticFieldUnaryMutation.ts(4,11): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(4,12): error TS1005: ';' expected.
+privateNameStaticFieldUnaryMutation.ts(5,11): error TS1003: Identifier expected.
+privateNameStaticFieldUnaryMutation.ts(5,11): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(5,12): error TS1005: ';' expected.
+privateNameStaticFieldUnaryMutation.ts(6,13): error TS1003: Identifier expected.
+privateNameStaticFieldUnaryMutation.ts(6,13): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(6,14): error TS1005: ';' expected.
+privateNameStaticFieldUnaryMutation.ts(7,13): error TS1003: Identifier expected.
+privateNameStaticFieldUnaryMutation.ts(7,13): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(7,14): error TS1005: ';' expected.
+privateNameStaticFieldUnaryMutation.ts(8,21): error TS1003: Identifier expected.
+privateNameStaticFieldUnaryMutation.ts(8,21): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(8,22): error TS1005: ',' expected.
+privateNameStaticFieldUnaryMutation.ts(8,26): error TS1005: ',' expected.
+privateNameStaticFieldUnaryMutation.ts(9,21): error TS1003: Identifier expected.
+privateNameStaticFieldUnaryMutation.ts(9,21): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(9,22): error TS1005: ',' expected.
+privateNameStaticFieldUnaryMutation.ts(9,26): error TS1005: ',' expected.
+privateNameStaticFieldUnaryMutation.ts(10,23): error TS1003: Identifier expected.
+privateNameStaticFieldUnaryMutation.ts(10,23): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(10,24): error TS1005: ',' expected.
+privateNameStaticFieldUnaryMutation.ts(11,23): error TS1003: Identifier expected.
+privateNameStaticFieldUnaryMutation.ts(11,23): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(11,24): error TS1005: ',' expected.
+privateNameStaticFieldUnaryMutation.ts(12,16): error TS1003: Identifier expected.
+privateNameStaticFieldUnaryMutation.ts(12,16): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(12,17): error TS1005: ';' expected.
+privateNameStaticFieldUnaryMutation.ts(12,17): error TS2588: Cannot assign to 'test' because it is a constant.
+privateNameStaticFieldUnaryMutation.ts(12,29): error TS1003: Identifier expected.
+privateNameStaticFieldUnaryMutation.ts(12,29): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(12,30): error TS1005: ')' expected.
+privateNameStaticFieldUnaryMutation.ts(12,39): error TS1005: '>' expected.
+privateNameStaticFieldUnaryMutation.ts(12,45): error TS1003: Identifier expected.
+privateNameStaticFieldUnaryMutation.ts(12,45): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(12,46): error TS1005: ';' expected.
+privateNameStaticFieldUnaryMutation.ts(12,50): error TS1005: ';' expected.
+privateNameStaticFieldUnaryMutation.ts(12,52): error TS1005: ';' expected.
+privateNameStaticFieldUnaryMutation.ts(13,16): error TS1003: Identifier expected.
+privateNameStaticFieldUnaryMutation.ts(13,16): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(13,16): error TS2339: Property '#' does not exist on type 'object'.
+privateNameStaticFieldUnaryMutation.ts(13,17): error TS1005: ';' expected.
+privateNameStaticFieldUnaryMutation.ts(13,17): error TS2304: Cannot find name 'test'.
+privateNameStaticFieldUnaryMutation.ts(13,29): error TS1003: Identifier expected.
+privateNameStaticFieldUnaryMutation.ts(13,29): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(13,29): error TS2339: Property '#' does not exist on type 'object'.
+privateNameStaticFieldUnaryMutation.ts(13,30): error TS1005: ')' expected.
+privateNameStaticFieldUnaryMutation.ts(13,30): error TS2304: Cannot find name 'test'.
+privateNameStaticFieldUnaryMutation.ts(13,39): error TS1005: '>' expected.
+privateNameStaticFieldUnaryMutation.ts(13,43): error TS1003: Identifier expected.
+privateNameStaticFieldUnaryMutation.ts(13,43): error TS1127: Invalid character.
+privateNameStaticFieldUnaryMutation.ts(13,43): error TS2339: Property '#' does not exist on type 'object'.
+privateNameStaticFieldUnaryMutation.ts(13,44): error TS1005: ';' expected.
+privateNameStaticFieldUnaryMutation.ts(13,44): error TS2304: Cannot find name 'test'.
+privateNameStaticFieldUnaryMutation.ts(13,50): error TS1005: ';' expected.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'test'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'test'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'test'.
+==== privateNameStaticFieldUnaryMutation.ts (59 errors) ====
+    class C {
+        static #test: number = 24;
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~~
+!!! error TS1005: ';' expected.
+        constructor() {
+            C.#test++;
+              ~
+!!! error TS1003: Identifier expected.
+              ~
+!!! error TS1127: Invalid character.
+               ~~~~
+!!! error TS1005: ';' expected.
+            C.#test--;
+              ~
+!!! error TS1003: Identifier expected.
+              ~
+!!! error TS1127: Invalid character.
+               ~~~~
+!!! error TS1005: ';' expected.
+            ++C.#test;
+                ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1127: Invalid character.
+                 ~~~~
+!!! error TS1005: ';' expected.
+            --C.#test;
+                ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1127: Invalid character.
+                 ~~~~
+!!! error TS1005: ';' expected.
+            const a = C.#test++;
+                        ~
+!!! error TS1003: Identifier expected.
+                        ~
+!!! error TS1127: Invalid character.
+                         ~~~~
+!!! error TS1005: ',' expected.
+                             ~~
+!!! error TS1005: ',' expected.
+            const b = C.#test--;
+                        ~
+!!! error TS1003: Identifier expected.
+                        ~
+!!! error TS1127: Invalid character.
+                         ~~~~
+!!! error TS1005: ',' expected.
+                             ~~
+!!! error TS1005: ',' expected.
+            const c = ++C.#test;
+                          ~
+!!! error TS1003: Identifier expected.
+                          ~
+!!! error TS1127: Invalid character.
+                           ~~~~
+!!! error TS1005: ',' expected.
+            const d = --C.#test;
+                          ~
+!!! error TS1003: Identifier expected.
+                          ~
+!!! error TS1127: Invalid character.
+                           ~~~~
+!!! error TS1005: ',' expected.
+            for (C.#test = 0; C.#test < 10; ++C.#test) {}
+                   ~
+!!! error TS1003: Identifier expected.
+                   ~
+!!! error TS1127: Invalid character.
+                    ~~~~
+!!! error TS1005: ';' expected.
+                    ~~~~
+!!! error TS2588: Cannot assign to 'test' because it is a constant.
+                                ~
+!!! error TS1003: Identifier expected.
+                                ~
+!!! error TS1127: Invalid character.
+                                 ~~~~
+!!! error TS1005: ')' expected.
+                                          ~
+!!! error TS1005: '>' expected.
+                                                ~
+!!! error TS1003: Identifier expected.
+                                                ~
+!!! error TS1127: Invalid character.
+                                                 ~~~~
+!!! error TS1005: ';' expected.
+                                                     ~
+!!! error TS1005: ';' expected.
+                                                       ~
+!!! error TS1005: ';' expected.
+            for (C.#test = 0; C.#test < 10; C.#test++) {}
+                   ~
+!!! error TS1003: Identifier expected.
+                   ~
+!!! error TS1127: Invalid character.
+                   ~
+!!! error TS2339: Property '#' does not exist on type 'object'.
+                    ~~~~
+!!! error TS1005: ';' expected.
+                    ~~~~
+!!! error TS2304: Cannot find name 'test'.
+                                ~
+!!! error TS1003: Identifier expected.
+                                ~
+!!! error TS1127: Invalid character.
+                                ~
+!!! error TS2339: Property '#' does not exist on type 'object'.
+                                 ~~~~
+!!! error TS1005: ')' expected.
+                                 ~~~~
+!!! error TS2304: Cannot find name 'test'.
+                                          ~
+!!! error TS1005: '>' expected.
+                                              ~
+!!! error TS1003: Identifier expected.
+                                              ~
+!!! error TS1127: Invalid character.
+                                              ~
+!!! error TS2339: Property '#' does not exist on type 'object'.
+                                               ~~~~
+!!! error TS1005: ';' expected.
+                                               ~~~~
+!!! error TS2304: Cannot find name 'test'.
+                                                     ~
+!!! error TS1005: ';' expected.
+        }
+        test() {
+            this.getClass().#test++;
+            this.getClass().#test--;
+            ++this.getClass().#test;
+            --this.getClass().#test;
+            const a = this.getClass().#test++;
+            const b = this.getClass().#test--;
+            const c = ++this.getClass().#test;
+            const d = --this.getClass().#test;
+            for (this.getClass().#test = 0; this.getClass().#test < 10; ++this.getClass().#test) {}
+            for (this.getClass().#test = 0; this.getClass().#test < 10; this.getClass().#test++) {}
+        }
+        getClass() { return C; }
+    }

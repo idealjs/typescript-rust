@@ -1,0 +1,20 @@
+bitwiseNotOperatorInvalidOperations.ts(5,10): error TS1005: ',' expected.
+bitwiseNotOperatorInvalidOperations.ts(11,9): error TS1012: Unexpected token.
+
+
+==== bitwiseNotOperatorInvalidOperations.ts (2 errors) ====
+    // Unary operator ~
+    var q;
+    
+    // operand before ~
+    var a = q~;  //expect error
+             ~
+!!! error TS1005: ',' expected.
+    
+    // multiple operands after ~
+    var mul = ~[1, 2, "abc"], "";  //expect error
+    
+    // miss an operand
+    var b =~;
+            ~
+!!! error TS1012: Unexpected token.

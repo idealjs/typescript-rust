@@ -1,0 +1,50 @@
+ModuleWithExportedAndNonExportedFunctions.ts(8,16): error TS2322: Type 'null' is not assignable to type 'U'.
+ModuleWithExportedAndNonExportedFunctions.ts(16,16): error TS2322: Type 'null' is not assignable to type 'U'.
+ModuleWithExportedAndNonExportedFunctions.ts(24,20): error TS2304: Cannot find name 'T'.
+ModuleWithExportedAndNonExportedFunctions.ts(24,26): error TS2304: Cannot find name 'U'.
+ModuleWithExportedAndNonExportedFunctions.ts(28,13): error TS2339: Property 'fn2' does not exist on type 'A'.
+ModuleWithExportedAndNonExportedFunctions.ts(29,14): error TS2339: Property 'fng2' does not exist on type 'A'.
+
+
+==== ModuleWithExportedAndNonExportedFunctions.ts (6 errors) ====
+    namespace A {
+    
+        export function fn(s: string) {
+            return true;
+        }
+    
+        export function fng<T, U>(s: T): U {
+            return null;
+                   ~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'U'.
+        }
+    
+        function fn2(s: string) {
+            return false;
+        }
+    
+        function fng2<T, U>(s: T): U {
+            return null;
+                   ~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'U'.
+        }
+    }
+    
+    // these should not be errors since the functions are exported
+    var fn: (s: string) => boolean;
+    var fn = A.fn;
+    
+    var fng: <T, U>(s: T) => U;
+                       ~
+!!! error TS2304: Cannot find name 'T'.
+                             ~
+!!! error TS2304: Cannot find name 'U'.
+    var fng = A.fng; // bug 838015
+    
+    // these should be errors since the functions are not exported
+    var fn2 = A.fn2;
+                ~~~
+!!! error TS2339: Property 'fn2' does not exist on type 'A'.
+    var fng2 = A.fng2;
+                 ~~~~
+!!! error TS2339: Property 'fng2' does not exist on type 'A'.

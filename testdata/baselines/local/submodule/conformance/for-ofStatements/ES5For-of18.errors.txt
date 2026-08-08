@@ -1,0 +1,14 @@
+error TS2451: Cannot redeclare block-scoped variable 'v'.
+ES5For-of18.ts(2,5): error TS2448: Block-scoped variable 'v' used before its declaration.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'v'.
+==== ES5For-of18.ts (1 errors) ====
+    for (let v of []) {
+        v;
+        ~
+!!! error TS2448: Block-scoped variable 'v' used before its declaration.
+    }
+    for (let v of []) {
+        v;
+    }

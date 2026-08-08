@@ -1,0 +1,40 @@
+module.ts(3,33): error TS2351: This expression is not constructable.
+simple.ts(2,31): error TS2351: This expression is not constructable.
+simple.ts(2,31): error TS2448: Block-scoped variable 'A' used before its declaration.
+
+
+==== module.ts (1 errors) ====
+    namespace X.Y {
+        export namespace Point {
+            export var Origin = new Point(0, 0);
+                                    ~~~~~
+!!! error TS2351: This expression is not constructable.
+        }
+    }
+    
+==== classPoint.ts (0 errors) ====
+    namespace X.Y {
+        // duplicate identifier
+        export class Point {
+            constructor(x: number, y: number) {
+                this.x = x;
+                this.y = y;
+            }
+            x: number;
+            y: number;
+        }
+    }
+    
+==== simple.ts (2 errors) ====
+    namespace A {
+        export var Instance = new A();
+                                  ~
+!!! error TS2351: This expression is not constructable.
+                                  ~
+!!! error TS2448: Block-scoped variable 'A' used before its declaration.
+    }
+    
+    // duplicate identifier
+    class A {
+        id: string;
+    }

@@ -1,0 +1,36 @@
+interfaceExtendingClassWithPrivates2.ts(26,12): error TS2339: Property 'x' does not exist on type '{ z: string }'.
+interfaceExtendingClassWithPrivates2.ts(27,12): error TS2339: Property 'y' does not exist on type '{ z: string }'.
+
+
+==== interfaceExtendingClassWithPrivates2.ts (2 errors) ====
+    class Foo {
+        private x!: string;
+    }
+    
+    class Bar {
+        private x!: string;
+    }
+    
+    interface I3 extends Foo, Bar { // error
+    }
+    
+    interface I4 extends Foo, Bar { // error
+        x: string;
+    }
+    
+    class Baz {
+        private y!: string;
+    }
+    
+    interface I5 extends Foo, Baz {
+        z: string;
+    }
+    
+    declare var i: I5;
+    var r: string = i.z;
+    var r2 = i.x; // error
+               ~
+!!! error TS2339: Property 'x' does not exist on type '{ z: string }'.
+    var r3 = i.y; // error
+               ~
+!!! error TS2339: Property 'y' does not exist on type '{ z: string }'.

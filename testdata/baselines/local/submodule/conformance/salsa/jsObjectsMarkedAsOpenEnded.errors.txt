@@ -1,0 +1,70 @@
+a.js(2,10): error TS2339: Property 'a' does not exist on type 'object'.
+a.js(7,14): error TS2339: Property 'member' does not exist on type '{ initializedMember: object }'.
+a.js(8,14): error TS2339: Property 'member' does not exist on type '{ initializedMember: object }'.
+a.js(16,14): error TS2339: Property 'a' does not exist on type 'object'.
+b.ts(1,10): error TS2339: Property 'a' does not exist on type 'object'.
+b.ts(2,6): error TS2448: Block-scoped variable 'C' used before its declaration.
+b.ts(2,11): error TS2339: Property 'member' does not exist on type '{ initializedMember: object }'.
+b.ts(3,29): error TS2339: Property 'a' does not exist on type 'object'.
+b.ts(4,14): error TS2339: Property 'a' does not exist on type 'object'.
+b.ts(5,8): error TS2339: Property 'a' does not exist on type 'object'.
+b.ts(6,10): error TS2339: Property 'a' does not exist on type 'object'.
+
+
+==== jsObjectsMarkedAsOpenEnded.ts (0 errors) ====
+    
+==== a.js (4 errors) ====
+    var variable = {};
+    variable.a = 0;
+             ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+    
+    class C {
+        initializedMember = {};
+        constructor() {
+            this.member = {};
+                 ~~~~~~
+!!! error TS2339: Property 'member' does not exist on type '{ initializedMember: object }'.
+            this.member.a = 0;
+                 ~~~~~~
+!!! error TS2339: Property 'member' does not exist on type '{ initializedMember: object }'.
+        }
+    }
+    
+    var obj = {
+        property: {}
+    };
+    
+    obj.property.a = 0;
+                 ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+    
+    var arr = [{}];
+    
+    function getObj() {
+        return {};
+    }
+    
+    
+==== b.ts (7 errors) ====
+    variable.a = 1;
+             ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+    (new C()).member.a = 1;
+         ~
+!!! error TS2448: Block-scoped variable 'C' used before its declaration.
+              ~~~~~~
+!!! error TS2339: Property 'member' does not exist on type '{ initializedMember: object }'.
+    (new C()).initializedMember.a = 1;
+                                ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+    obj.property.a = 1;
+                 ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+    arr[0].a = 1;
+           ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+    getObj().a = 1;
+             ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+    

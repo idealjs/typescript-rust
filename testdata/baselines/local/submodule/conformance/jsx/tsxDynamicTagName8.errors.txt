@@ -1,0 +1,24 @@
+app.tsx(8,8): error TS2304: Cannot find name 'this'.
+
+
+==== tsxDynamicTagName8.tsx (0 errors) ====
+    
+==== react.d.ts (0 errors) ====
+    declare module 'react' {
+    	class Component<T, U> { }
+    }
+    
+==== app.tsx (1 errors) ====
+    import * as React from 'react';
+    
+    export class Text extends React.Component<{}, {}> {
+      _tagName: string = 'div';
+    
+      render() {
+        return (
+          <this._tagName> Hello world </this._tagName>
+           ~~~~
+!!! error TS2304: Cannot find name 'this'.
+        );
+      }
+    }

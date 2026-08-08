@@ -1,0 +1,319 @@
+nullPropertyName.ts(3,5): error TS2339: Property 'x' does not exist on type '() => void'.
+nullPropertyName.ts(4,5): error TS2339: Property 'y' does not exist on type '() => void'.
+nullPropertyName.ts(7,5): error TS2339: Property 'break' does not exist on type '() => void'.
+nullPropertyName.ts(8,5): error TS2339: Property 'case' does not exist on type '() => void'.
+nullPropertyName.ts(9,5): error TS2339: Property 'catch' does not exist on type '() => void'.
+nullPropertyName.ts(10,5): error TS2339: Property 'class' does not exist on type '() => void'.
+nullPropertyName.ts(11,5): error TS2339: Property 'const' does not exist on type '() => void'.
+nullPropertyName.ts(12,5): error TS2339: Property 'continue' does not exist on type '() => void'.
+nullPropertyName.ts(13,5): error TS2339: Property 'debugger' does not exist on type '() => void'.
+nullPropertyName.ts(14,5): error TS2339: Property 'default' does not exist on type '() => void'.
+nullPropertyName.ts(15,5): error TS2339: Property 'delete' does not exist on type '() => void'.
+nullPropertyName.ts(16,5): error TS2339: Property 'do' does not exist on type '() => void'.
+nullPropertyName.ts(17,5): error TS2339: Property 'else' does not exist on type '() => void'.
+nullPropertyName.ts(18,5): error TS2339: Property 'enum' does not exist on type '() => void'.
+nullPropertyName.ts(19,5): error TS2339: Property 'export' does not exist on type '() => void'.
+nullPropertyName.ts(20,5): error TS2339: Property 'extends' does not exist on type '() => void'.
+nullPropertyName.ts(21,5): error TS2339: Property 'false' does not exist on type '() => void'.
+nullPropertyName.ts(22,5): error TS2339: Property 'finally' does not exist on type '() => void'.
+nullPropertyName.ts(23,5): error TS2339: Property 'for' does not exist on type '() => void'.
+nullPropertyName.ts(24,5): error TS2339: Property 'function' does not exist on type '() => void'.
+nullPropertyName.ts(25,5): error TS2339: Property 'if' does not exist on type '() => void'.
+nullPropertyName.ts(26,5): error TS2339: Property 'import' does not exist on type '() => void'.
+nullPropertyName.ts(27,5): error TS2339: Property 'in' does not exist on type '() => void'.
+nullPropertyName.ts(28,5): error TS2339: Property 'instanceof' does not exist on type '() => void'.
+nullPropertyName.ts(29,5): error TS2339: Property 'new' does not exist on type '() => void'.
+nullPropertyName.ts(30,5): error TS2339: Property 'null' does not exist on type '() => void'.
+nullPropertyName.ts(31,5): error TS2339: Property 'return' does not exist on type '() => void'.
+nullPropertyName.ts(32,5): error TS2339: Property 'super' does not exist on type '() => void'.
+nullPropertyName.ts(33,5): error TS2339: Property 'switch' does not exist on type '() => void'.
+nullPropertyName.ts(34,5): error TS2339: Property 'this' does not exist on type '() => void'.
+nullPropertyName.ts(35,5): error TS2339: Property 'throw' does not exist on type '() => void'.
+nullPropertyName.ts(36,5): error TS2339: Property 'true' does not exist on type '() => void'.
+nullPropertyName.ts(37,5): error TS2339: Property 'try' does not exist on type '() => void'.
+nullPropertyName.ts(38,5): error TS2339: Property 'typeof' does not exist on type '() => void'.
+nullPropertyName.ts(39,5): error TS2339: Property 'var' does not exist on type '() => void'.
+nullPropertyName.ts(40,5): error TS2339: Property 'void' does not exist on type '() => void'.
+nullPropertyName.ts(41,5): error TS2339: Property 'while' does not exist on type '() => void'.
+nullPropertyName.ts(42,5): error TS2339: Property 'with' does not exist on type '() => void'.
+nullPropertyName.ts(43,5): error TS2339: Property 'implements' does not exist on type '() => void'.
+nullPropertyName.ts(44,5): error TS2339: Property 'interface' does not exist on type '() => void'.
+nullPropertyName.ts(45,5): error TS2339: Property 'let' does not exist on type '() => void'.
+nullPropertyName.ts(46,5): error TS2339: Property 'package' does not exist on type '() => void'.
+nullPropertyName.ts(47,5): error TS2339: Property 'private' does not exist on type '() => void'.
+nullPropertyName.ts(48,5): error TS2339: Property 'protected' does not exist on type '() => void'.
+nullPropertyName.ts(49,5): error TS2339: Property 'public' does not exist on type '() => void'.
+nullPropertyName.ts(50,5): error TS2339: Property 'static' does not exist on type '() => void'.
+nullPropertyName.ts(51,5): error TS2339: Property 'yield' does not exist on type '() => void'.
+nullPropertyName.ts(52,5): error TS2339: Property 'abstract' does not exist on type '() => void'.
+nullPropertyName.ts(53,5): error TS2339: Property 'as' does not exist on type '() => void'.
+nullPropertyName.ts(54,5): error TS2339: Property 'asserts' does not exist on type '() => void'.
+nullPropertyName.ts(55,5): error TS2339: Property 'any' does not exist on type '() => void'.
+nullPropertyName.ts(56,5): error TS2339: Property 'async' does not exist on type '() => void'.
+nullPropertyName.ts(57,5): error TS2339: Property 'await' does not exist on type '() => void'.
+nullPropertyName.ts(58,5): error TS2339: Property 'boolean' does not exist on type '() => void'.
+nullPropertyName.ts(59,5): error TS2339: Property 'constructor' does not exist on type '() => void'.
+nullPropertyName.ts(60,5): error TS2339: Property 'declare' does not exist on type '() => void'.
+nullPropertyName.ts(61,5): error TS2339: Property 'get' does not exist on type '() => void'.
+nullPropertyName.ts(62,5): error TS2339: Property 'infer' does not exist on type '() => void'.
+nullPropertyName.ts(63,5): error TS2339: Property 'is' does not exist on type '() => void'.
+nullPropertyName.ts(64,5): error TS2339: Property 'keyof' does not exist on type '() => void'.
+nullPropertyName.ts(65,5): error TS2339: Property 'module' does not exist on type '() => void'.
+nullPropertyName.ts(66,5): error TS2339: Property 'namespace' does not exist on type '() => void'.
+nullPropertyName.ts(67,5): error TS2339: Property 'never' does not exist on type '() => void'.
+nullPropertyName.ts(68,5): error TS2339: Property 'readonly' does not exist on type '() => void'.
+nullPropertyName.ts(69,5): error TS2339: Property 'require' does not exist on type '() => void'.
+nullPropertyName.ts(70,5): error TS2339: Property 'number' does not exist on type '() => void'.
+nullPropertyName.ts(71,5): error TS2339: Property 'object' does not exist on type '() => void'.
+nullPropertyName.ts(72,5): error TS2339: Property 'set' does not exist on type '() => void'.
+nullPropertyName.ts(73,5): error TS2339: Property 'string' does not exist on type '() => void'.
+nullPropertyName.ts(74,5): error TS2339: Property 'symbol' does not exist on type '() => void'.
+nullPropertyName.ts(75,5): error TS2339: Property 'type' does not exist on type '() => void'.
+nullPropertyName.ts(76,5): error TS2339: Property 'undefined' does not exist on type '() => void'.
+nullPropertyName.ts(77,5): error TS2339: Property 'unique' does not exist on type '() => void'.
+nullPropertyName.ts(78,5): error TS2339: Property 'unknown' does not exist on type '() => void'.
+nullPropertyName.ts(79,5): error TS2339: Property 'from' does not exist on type '() => void'.
+nullPropertyName.ts(80,5): error TS2339: Property 'global' does not exist on type '() => void'.
+nullPropertyName.ts(81,5): error TS2339: Property 'bigint' does not exist on type '() => void'.
+nullPropertyName.ts(82,5): error TS2339: Property 'of' does not exist on type '() => void'.
+
+
+==== nullPropertyName.ts (78 errors) ====
+    function foo() {}
+    // properties
+    foo.x = 1;
+        ~
+!!! error TS2339: Property 'x' does not exist on type '() => void'.
+    foo.y = 1;
+        ~
+!!! error TS2339: Property 'y' does not exist on type '() => void'.
+    
+    // keywords
+    foo.break = 1;
+        ~~~~~
+!!! error TS2339: Property 'break' does not exist on type '() => void'.
+    foo.case = 1;
+        ~~~~
+!!! error TS2339: Property 'case' does not exist on type '() => void'.
+    foo.catch = 1;
+        ~~~~~
+!!! error TS2339: Property 'catch' does not exist on type '() => void'.
+    foo.class = 1;
+        ~~~~~
+!!! error TS2339: Property 'class' does not exist on type '() => void'.
+    foo.const = 1;
+        ~~~~~
+!!! error TS2339: Property 'const' does not exist on type '() => void'.
+    foo.continue = 1;
+        ~~~~~~~~
+!!! error TS2339: Property 'continue' does not exist on type '() => void'.
+    foo.debugger = 1;
+        ~~~~~~~~
+!!! error TS2339: Property 'debugger' does not exist on type '() => void'.
+    foo.default = 1;
+        ~~~~~~~
+!!! error TS2339: Property 'default' does not exist on type '() => void'.
+    foo.delete = 1;
+        ~~~~~~
+!!! error TS2339: Property 'delete' does not exist on type '() => void'.
+    foo.do = 1;
+        ~~
+!!! error TS2339: Property 'do' does not exist on type '() => void'.
+    foo.else = 1;
+        ~~~~
+!!! error TS2339: Property 'else' does not exist on type '() => void'.
+    foo.enum = 1;
+        ~~~~
+!!! error TS2339: Property 'enum' does not exist on type '() => void'.
+    foo.export = 1;
+        ~~~~~~
+!!! error TS2339: Property 'export' does not exist on type '() => void'.
+    foo.extends = 1;
+        ~~~~~~~
+!!! error TS2339: Property 'extends' does not exist on type '() => void'.
+    foo.false = 1;
+        ~~~~~
+!!! error TS2339: Property 'false' does not exist on type '() => void'.
+    foo.finally = 1;
+        ~~~~~~~
+!!! error TS2339: Property 'finally' does not exist on type '() => void'.
+    foo.for = 1;
+        ~~~
+!!! error TS2339: Property 'for' does not exist on type '() => void'.
+    foo.function = 1;
+        ~~~~~~~~
+!!! error TS2339: Property 'function' does not exist on type '() => void'.
+    foo.if = 1;
+        ~~
+!!! error TS2339: Property 'if' does not exist on type '() => void'.
+    foo.import = 1;
+        ~~~~~~
+!!! error TS2339: Property 'import' does not exist on type '() => void'.
+    foo.in = 1;
+        ~~
+!!! error TS2339: Property 'in' does not exist on type '() => void'.
+    foo.instanceof = 1;
+        ~~~~~~~~~~
+!!! error TS2339: Property 'instanceof' does not exist on type '() => void'.
+    foo.new = 1;
+        ~~~
+!!! error TS2339: Property 'new' does not exist on type '() => void'.
+    foo.null = 1;
+        ~~~~
+!!! error TS2339: Property 'null' does not exist on type '() => void'.
+    foo.return = 1;
+        ~~~~~~
+!!! error TS2339: Property 'return' does not exist on type '() => void'.
+    foo.super = 1;
+        ~~~~~
+!!! error TS2339: Property 'super' does not exist on type '() => void'.
+    foo.switch = 1;
+        ~~~~~~
+!!! error TS2339: Property 'switch' does not exist on type '() => void'.
+    foo.this = 1;
+        ~~~~
+!!! error TS2339: Property 'this' does not exist on type '() => void'.
+    foo.throw = 1;
+        ~~~~~
+!!! error TS2339: Property 'throw' does not exist on type '() => void'.
+    foo.true = 1;
+        ~~~~
+!!! error TS2339: Property 'true' does not exist on type '() => void'.
+    foo.try = 1;
+        ~~~
+!!! error TS2339: Property 'try' does not exist on type '() => void'.
+    foo.typeof = 1;
+        ~~~~~~
+!!! error TS2339: Property 'typeof' does not exist on type '() => void'.
+    foo.var = 1;
+        ~~~
+!!! error TS2339: Property 'var' does not exist on type '() => void'.
+    foo.void = 1;
+        ~~~~
+!!! error TS2339: Property 'void' does not exist on type '() => void'.
+    foo.while = 1;
+        ~~~~~
+!!! error TS2339: Property 'while' does not exist on type '() => void'.
+    foo.with = 1;
+        ~~~~
+!!! error TS2339: Property 'with' does not exist on type '() => void'.
+    foo.implements = 1;
+        ~~~~~~~~~~
+!!! error TS2339: Property 'implements' does not exist on type '() => void'.
+    foo.interface = 1;
+        ~~~~~~~~~
+!!! error TS2339: Property 'interface' does not exist on type '() => void'.
+    foo.let = 1;
+        ~~~
+!!! error TS2339: Property 'let' does not exist on type '() => void'.
+    foo.package = 1;
+        ~~~~~~~
+!!! error TS2339: Property 'package' does not exist on type '() => void'.
+    foo.private = 1;
+        ~~~~~~~
+!!! error TS2339: Property 'private' does not exist on type '() => void'.
+    foo.protected = 1;
+        ~~~~~~~~~
+!!! error TS2339: Property 'protected' does not exist on type '() => void'.
+    foo.public = 1;
+        ~~~~~~
+!!! error TS2339: Property 'public' does not exist on type '() => void'.
+    foo.static = 1;
+        ~~~~~~
+!!! error TS2339: Property 'static' does not exist on type '() => void'.
+    foo.yield = 1;
+        ~~~~~
+!!! error TS2339: Property 'yield' does not exist on type '() => void'.
+    foo.abstract = 1;
+        ~~~~~~~~
+!!! error TS2339: Property 'abstract' does not exist on type '() => void'.
+    foo.as = 1;
+        ~~
+!!! error TS2339: Property 'as' does not exist on type '() => void'.
+    foo.asserts = 1;
+        ~~~~~~~
+!!! error TS2339: Property 'asserts' does not exist on type '() => void'.
+    foo.any = 1;
+        ~~~
+!!! error TS2339: Property 'any' does not exist on type '() => void'.
+    foo.async = 1;
+        ~~~~~
+!!! error TS2339: Property 'async' does not exist on type '() => void'.
+    foo.await = 1;
+        ~~~~~
+!!! error TS2339: Property 'await' does not exist on type '() => void'.
+    foo.boolean = 1;
+        ~~~~~~~
+!!! error TS2339: Property 'boolean' does not exist on type '() => void'.
+    foo.constructor = 1;
+        ~~~~~~~~~~~
+!!! error TS2339: Property 'constructor' does not exist on type '() => void'.
+    foo.declare = 1;
+        ~~~~~~~
+!!! error TS2339: Property 'declare' does not exist on type '() => void'.
+    foo.get = 1;
+        ~~~
+!!! error TS2339: Property 'get' does not exist on type '() => void'.
+    foo.infer = 1;
+        ~~~~~
+!!! error TS2339: Property 'infer' does not exist on type '() => void'.
+    foo.is = 1;
+        ~~
+!!! error TS2339: Property 'is' does not exist on type '() => void'.
+    foo.keyof = 1;
+        ~~~~~
+!!! error TS2339: Property 'keyof' does not exist on type '() => void'.
+    foo.module = 1;
+        ~~~~~~
+!!! error TS2339: Property 'module' does not exist on type '() => void'.
+    foo.namespace = 1;
+        ~~~~~~~~~
+!!! error TS2339: Property 'namespace' does not exist on type '() => void'.
+    foo.never = 1;
+        ~~~~~
+!!! error TS2339: Property 'never' does not exist on type '() => void'.
+    foo.readonly = 1;
+        ~~~~~~~~
+!!! error TS2339: Property 'readonly' does not exist on type '() => void'.
+    foo.require = 1;
+        ~~~~~~~
+!!! error TS2339: Property 'require' does not exist on type '() => void'.
+    foo.number = 1;
+        ~~~~~~
+!!! error TS2339: Property 'number' does not exist on type '() => void'.
+    foo.object = 1;
+        ~~~~~~
+!!! error TS2339: Property 'object' does not exist on type '() => void'.
+    foo.set = 1;
+        ~~~
+!!! error TS2339: Property 'set' does not exist on type '() => void'.
+    foo.string = 1;
+        ~~~~~~
+!!! error TS2339: Property 'string' does not exist on type '() => void'.
+    foo.symbol = 1;
+        ~~~~~~
+!!! error TS2339: Property 'symbol' does not exist on type '() => void'.
+    foo.type = 1;
+        ~~~~
+!!! error TS2339: Property 'type' does not exist on type '() => void'.
+    foo.undefined = 1;
+        ~~~~~~~~~
+!!! error TS2339: Property 'undefined' does not exist on type '() => void'.
+    foo.unique = 1;
+        ~~~~~~
+!!! error TS2339: Property 'unique' does not exist on type '() => void'.
+    foo.unknown = 1;
+        ~~~~~~~
+!!! error TS2339: Property 'unknown' does not exist on type '() => void'.
+    foo.from = 1;
+        ~~~~
+!!! error TS2339: Property 'from' does not exist on type '() => void'.
+    foo.global = 1;
+        ~~~~~~
+!!! error TS2339: Property 'global' does not exist on type '() => void'.
+    foo.bigint = 1;
+        ~~~~~~
+!!! error TS2339: Property 'bigint' does not exist on type '() => void'.
+    foo.of = 1;
+        ~~
+!!! error TS2339: Property 'of' does not exist on type '() => void'.

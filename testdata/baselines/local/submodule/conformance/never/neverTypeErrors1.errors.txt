@@ -1,0 +1,70 @@
+error TS2451: Cannot redeclare block-scoped variable 'n'.
+neverTypeErrors1.ts(9,5): error TS2349: This expression is not callable.
+neverTypeErrors1.ts(13,5): error TS1135: Argument expression expected.
+neverTypeErrors1.ts(17,12): error TS2322: Type '1' is not assignable to type 'never'.
+neverTypeErrors1.ts(20,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
+neverTypeErrors1.ts(27,9): error TS2322: Type 'any[]' is not assignable to type 'never[]'.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'n'.
+==== neverTypeErrors1.ts (5 errors) ====
+    function f1() {
+        let x: never;
+        x = 1;
+        x = "abc";
+        x = false;
+        x = undefined;
+        x = null;
+        x = {};
+        x();
+        ~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    function f2(): never {
+        return;
+        ~~~~~~~
+    }
+    
+!!! error TS1135: Argument expression expected.
+    
+    function f3(): never {
+        return 1;
+               ~
+!!! error TS2322: Type '1' is not assignable to type 'never'.
+    }
+    
+    function f4(): never {
+    ~~~~~~~~~~~~~~~~~~~~~~
+    }
+    ~
+    
+    
+    for (const n of f4()) {}
+    
+!!! error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
+    for (const n in f4()) {}
+    
+    function f5() {
+        let x: never[] = [];  // Ok
+            ~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'any[]' is not assignable to type 'never[]'.
+    }
+    
+    // Repro from #46032
+    
+    interface A {
+        foo: "a";
+    }
+    
+    interface B {
+        foo: "b";
+    }
+    
+    type Union = A & B;
+    
+    function func(): { value: Union[] } {
+        return {
+            value: [],
+        };
+    }

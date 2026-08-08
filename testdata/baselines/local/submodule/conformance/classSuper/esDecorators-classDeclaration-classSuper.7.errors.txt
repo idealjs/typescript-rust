@@ -1,0 +1,54 @@
+esDecorators-classDeclaration-classSuper.7.ts(5,3): error TS2349: This expression is not callable.
+esDecorators-classDeclaration-classSuper.7.ts(29,13): error TS1005: ';' expected.
+esDecorators-classDeclaration-classSuper.7.ts(33,3): error TS2349: This expression is not callable.
+esDecorators-classDeclaration-classSuper.7.ts(38,13): error TS1005: ';' expected.
+
+
+==== esDecorators-classDeclaration-classSuper.7.ts (4 errors) ====
+    class A {}
+    class B extends A {
+    	public constructor() {
+    		'inject';
+    		super();
+    		~~~~~
+!!! error TS2349: This expression is not callable.
+    		const a = 1;
+    		const b = 1;
+    	}
+    
+    	@foo
+    	public m(): void {}
+    }
+    
+    function foo(method: any, _context: any): any {
+    	return function (this: any) {
+    		method.call(this);
+    	};
+    }
+    
+    new B();
+    
+    // https://github.com/microsoft/TypeScript/issues/53448
+    class C {
+    	public constructor() {
+    		this.val;
+    	}
+    
+    	@foo
+    	public get val(): number { return 3; }
+    	           ~~~
+!!! error TS1005: ';' expected.
+    }
+    class D extends A {
+    	public constructor() {
+    		super();
+    		~~~~~
+!!! error TS2349: This expression is not callable.
+    		this.val;
+    	}
+    
+    	@foo
+    	public get val(): number { return 3; }
+    	           ~~~
+!!! error TS1005: ';' expected.
+    }

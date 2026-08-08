@@ -1,0 +1,29 @@
+propertyAccessWidening.ts(5,43): error TS2339: Property 'concat' does not exist on type '{ cells: any }[]'.
+propertyAccessWidening.ts(10,19): error TS2349: This expression is not callable.
+
+
+==== propertyAccessWidening.ts (2 errors) ====
+    // Repro from #31762
+    
+    function g1(headerNames: any) {
+        let t = [{ hasLineBreak: false, cells: [] }];
+        const table = [{cells: headerNames }].concat(t);
+                                              ~~~~~~
+!!! error TS2339: Property 'concat' does not exist on type '{ cells: any }[]'.
+    }
+    
+    function g2(headerNames: any) {
+        let t = [{ hasLineBreak: false, cells: [] }];
+        const table = [{cells: headerNames }]["concat"](t);
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    // Object in property or element access is widened when target of assignment
+    
+    function foo(options?: { a: string, b: number }) {
+        let x1 = (options || {}).a;     // Object type not widened
+        let x2 = (options || {})["a"];  // Object type not widened
+        (options || {}).a = 1;          // Object type widened, error
+        (options || {})["a"] = 1;       // Object type widened, error
+    }

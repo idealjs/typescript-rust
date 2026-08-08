@@ -1,0 +1,162 @@
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(26,19): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(27,19): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(28,19): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(29,19): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(31,19): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(32,19): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(33,19): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(34,19): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(70,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(75,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(81,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(86,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(92,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(97,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(103,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(108,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+
+
+==== comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts (16 errors) ====
+    class Base {
+        public a: string;
+    }
+    
+    class Derived extends Base {
+        public b: string;
+    }
+    
+    class C {
+        public c: string;
+    }
+    
+    declare var a1: { [a: string]: string };
+    declare var b1: { [b: string]: number };
+    
+    declare var a2: { [index: string]: Base };
+    declare var b2: { [index: string]: C };
+    
+    declare var a3: { [index: number]: Base };
+    declare var b3: { [index: number]: C };
+    
+    declare var a4: { [index: number]: Derived };
+    declare var b4: { [index: string]: Base };
+    
+    // operator <
+    var r1a1 = a1 < b1;
+                      ~
+!!! error TS1005: '>' expected.
+    var r1a2 = a2 < b2;
+                      ~
+!!! error TS1005: '>' expected.
+    var r1a3 = a3 < b3;
+                      ~
+!!! error TS1005: '>' expected.
+    var r1a4 = a4 < b4;
+                      ~
+!!! error TS1005: '>' expected.
+    
+    var r1b1 = b1 < a1;
+                      ~
+!!! error TS1005: '>' expected.
+    var r1b2 = b2 < a2;
+                      ~
+!!! error TS1005: '>' expected.
+    var r1b3 = b3 < a3;
+                      ~
+!!! error TS1005: '>' expected.
+    var r1b4 = b4 < a4;
+                      ~
+!!! error TS1005: '>' expected.
+    
+    // operator >
+    var r2a1 = a1 > b1;
+    var r2a2 = a2 > b2;
+    var r2a3 = a3 > b3;
+    var r2a4 = a4 > b4;
+    
+    var r2b1 = b1 > a1;
+    var r2b2 = b2 > a2;
+    var r2b3 = b3 > a3;
+    var r2b4 = b4 > a4;
+    
+    // operator <=
+    var r3a1 = a1 <= b1;
+    var r3a2 = a2 <= b2;
+    var r3a3 = a3 <= b3;
+    var r3a4 = a4 <= b4;
+    
+    var r3b1 = b1 <= a1;
+    var r3b2 = b2 <= a2;
+    var r3b3 = b3 <= a3;
+    var r3b4 = b4 <= a4;
+    
+    // operator >=
+    var r4a1 = a1 >= b1;
+    var r4a2 = a2 >= b2;
+    var r4a3 = a3 >= b3;
+    var r4a4 = a4 >= b4;
+    
+    var r4b1 = b1 >= a1;
+    var r4b2 = b2 >= a2;
+    var r4b3 = b3 >= a3;
+    var r4b4 = b4 >= a4;
+    
+    // operator ==
+    var r5a1 = a1 == b1;
+               ~~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+    var r5a2 = a2 == b2;
+    var r5a3 = a3 == b3;
+    var r5a4 = a4 == b4;
+    
+    var r5b1 = b1 == a1;
+               ~~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+    var r5b2 = b2 == a2;
+    var r5b3 = b3 == a3;
+    var r5b4 = b4 == a4;
+    
+    // operator !=
+    var r6a1 = a1 != b1;
+               ~~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+    var r6a2 = a2 != b2;
+    var r6a3 = a3 != b3;
+    var r6a4 = a4 != b4;
+    
+    var r6b1 = b1 != a1;
+               ~~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+    var r6b2 = b2 != a2;
+    var r6b3 = b3 != a3;
+    var r6b4 = b4 != a4;
+    
+    // operator ===
+    var r7a1 = a1 === b1;
+               ~~~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+    var r7a2 = a2 === b2;
+    var r7a3 = a3 === b3;
+    var r7a4 = a4 === b4;
+    
+    var r7b1 = b1 === a1;
+               ~~~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+    var r7b2 = b2 === a2;
+    var r7b3 = b3 === a3;
+    var r7b4 = b4 === a4;
+    
+    // operator !==
+    var r8a1 = a1 !== b1;
+               ~~~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+    var r8a2 = a2 !== b2;
+    var r8a3 = a3 !== b3;
+    var r8a4 = a4 !== b4;
+    
+    var r8b1 = b1 !== a1;
+               ~~~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+    var r8b2 = b2 !== a2;
+    var r8b3 = b3 !== a3;
+    var r8b4 = b4 !== a4;

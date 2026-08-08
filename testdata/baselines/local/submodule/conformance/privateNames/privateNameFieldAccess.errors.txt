@@ -1,12 +1,12 @@
-privateNames/privateNameFieldAccess.ts(2,5): error TS1003: Identifier expected.
-privateNames/privateNameFieldAccess.ts(2,5): error TS1127: Invalid character.
-privateNames/privateNameFieldAccess.ts(2,6): error TS1005: ';' expected.
-privateNames/privateNameFieldAccess.ts(4,26): error TS1003: Identifier expected.
-privateNames/privateNameFieldAccess.ts(4,26): error TS1127: Invalid character.
-privateNames/privateNameFieldAccess.ts(4,27): error TS1005: ',' expected.
+privateNameFieldAccess.ts(2,5): error TS1003: Identifier expected.
+privateNameFieldAccess.ts(2,5): error TS1127: Invalid character.
+privateNameFieldAccess.ts(2,6): error TS1005: ';' expected.
+privateNameFieldAccess.ts(4,26): error TS1003: Identifier expected.
+privateNameFieldAccess.ts(4,26): error TS1127: Invalid character.
+privateNameFieldAccess.ts(4,27): error TS1005: ',' expected.
 
 
-==== privateNames/privateNameFieldAccess.ts (6 errors) ====
+==== privateNameFieldAccess.ts (6 errors) ====
     class A {
         #myField = "hello world";
         ~

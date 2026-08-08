@@ -1,0 +1,99 @@
+esDecorators-classDeclaration-sourceMap.ts(12,9): error TS1005: ';' expected.
+esDecorators-classDeclaration-sourceMap.ts(16,9): error TS1005: ';' expected.
+esDecorators-classDeclaration-sourceMap.ts(28,12): error TS1005: ';' expected.
+esDecorators-classDeclaration-sourceMap.ts(28,12): error TS1127: Invalid character.
+esDecorators-classDeclaration-sourceMap.ts(28,13): error TS1005: ';' expected.
+esDecorators-classDeclaration-sourceMap.ts(32,16): error TS1005: ';' expected.
+esDecorators-classDeclaration-sourceMap.ts(32,16): error TS1127: Invalid character.
+esDecorators-classDeclaration-sourceMap.ts(32,17): error TS1005: ';' expected.
+esDecorators-classDeclaration-sourceMap.ts(36,16): error TS1005: ';' expected.
+esDecorators-classDeclaration-sourceMap.ts(36,16): error TS1127: Invalid character.
+esDecorators-classDeclaration-sourceMap.ts(36,17): error TS1005: ';' expected.
+esDecorators-classDeclaration-sourceMap.ts(40,12): error TS1005: ';' expected.
+esDecorators-classDeclaration-sourceMap.ts(40,12): error TS1127: Invalid character.
+esDecorators-classDeclaration-sourceMap.ts(40,13): error TS1005: ';' expected.
+esDecorators-classDeclaration-sourceMap.ts(44,21): error TS1005: ';' expected.
+esDecorators-classDeclaration-sourceMap.ts(44,21): error TS1127: Invalid character.
+esDecorators-classDeclaration-sourceMap.ts(44,22): error TS1005: ';' expected.
+
+
+==== esDecorators-classDeclaration-sourceMap.ts (17 errors) ====
+    declare var dec: any;
+    
+    @dec
+    @dec
+    class C {
+        @dec
+        @dec
+        method() {}
+    
+        @dec
+        @dec
+        get x() { return 1; }
+            ~
+!!! error TS1005: ';' expected.
+    
+        @dec
+        @dec
+        set x(value: number) { }
+            ~
+!!! error TS1005: ';' expected.
+    
+        @dec
+        @dec
+        y = 1;
+    
+        @dec
+        @dec
+        accessor z = 1;
+    
+        @dec
+        @dec
+        static #method() {}
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~~~~
+!!! error TS1005: ';' expected.
+    
+        @dec
+        @dec
+        static get #x() { return 1; }
+                   ~
+!!! error TS1005: ';' expected.
+                   ~
+!!! error TS1127: Invalid character.
+                    ~
+!!! error TS1005: ';' expected.
+    
+        @dec
+        @dec
+        static set #x(value: number) { }
+                   ~
+!!! error TS1005: ';' expected.
+                   ~
+!!! error TS1127: Invalid character.
+                    ~
+!!! error TS1005: ';' expected.
+    
+        @dec
+        @dec
+        static #y = 1;
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~
+!!! error TS1005: ';' expected.
+    
+        @dec
+        @dec
+        static accessor #z = 1;
+                        ~
+!!! error TS1005: ';' expected.
+                        ~
+!!! error TS1127: Invalid character.
+                         ~
+!!! error TS1005: ';' expected.
+    }

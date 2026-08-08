@@ -1,0 +1,38 @@
+a.tsx(3,1): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+a.tsx(4,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+a.tsx(4,15): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+a.tsx(5,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+a.tsx(5,15): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+a.tsx(6,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+a.tsx(6,15): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+a.tsx(6,17): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+a.tsx(7,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+
+
+==== a.tsx (9 errors) ====
+    declare var React: any;
+    
+    <div>
+    ~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+        <div attr=<div /> />
+        ~~~~~~~~~~~~~~~~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+                  ~~~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+        <div attr=<div>foo</div> />
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+                  ~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+        <div attr=<><div>foo</div></> />
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+                  ~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+                    ~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+        <div attr= />
+        ~~~~~~~~~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+    </div>

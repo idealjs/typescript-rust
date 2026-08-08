@@ -1,0 +1,56 @@
+exponentiationOperatorWithTypeParameter.ts(3,10): error TS1005: ',' expected.
+exponentiationOperatorWithTypeParameter.ts(3,11): error TS1134: Variable declaration expected.
+exponentiationOperatorWithTypeParameter.ts(4,10): error TS1005: ',' expected.
+exponentiationOperatorWithTypeParameter.ts(4,11): error TS1134: Variable declaration expected.
+exponentiationOperatorWithTypeParameter.ts(5,10): error TS1005: ',' expected.
+exponentiationOperatorWithTypeParameter.ts(5,11): error TS1134: Variable declaration expected.
+exponentiationOperatorWithTypeParameter.ts(6,10): error TS1005: ',' expected.
+exponentiationOperatorWithTypeParameter.ts(6,11): error TS1134: Variable declaration expected.
+exponentiationOperatorWithTypeParameter.ts(7,10): error TS1005: ',' expected.
+exponentiationOperatorWithTypeParameter.ts(7,11): error TS1134: Variable declaration expected.
+exponentiationOperatorWithTypeParameter.ts(7,13): error TS1182: A destructuring declaration must have an initializer.
+
+
+==== exponentiationOperatorWithTypeParameter.ts (11 errors) ====
+    // type parameter type is not valid for arithmetic operand
+    function foo<T>(t: T) {
+        var a!: any;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var b!: boolean;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var c!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var d!: string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var e!: {};
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+                ~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+    
+        var r1a1 = a ** t;
+        var r2a1 = t ** a;
+        var r1b1 = b ** t;
+        var r2b1 = t ** b;
+        var r1c1 = c ** t;
+        var r2c1 = t ** c;
+        var r1d1 = d ** t;
+        var r2d1 = t ** d;
+        var r1e1 = e ** t;
+        var r2e1 = t ** d;
+        var r1f1 = t ** t;
+    }

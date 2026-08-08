@@ -1,0 +1,28 @@
+index.js(1,17): error TS2304: Cannot find name 'require'.
+index.js(5,7): error TS1003: Identifier expected.
+index.js(5,8): error TS1005: ';' expected.
+index.js(5,8): error TS2304: Cannot find name 'exports'.
+
+
+==== something.ts (0 errors) ====
+    export const o = {
+        a: 1,
+        m: 1
+    }
+    
+==== index.js (4 errors) ====
+    const{ a, m } = require("./something").o;
+                    ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    
+    const thing = a + m
+    
+    module.exports = {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        thing
+    };

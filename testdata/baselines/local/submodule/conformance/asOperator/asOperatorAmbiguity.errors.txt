@@ -1,7 +1,7 @@
-asOperator/asOperatorAmbiguity.ts(7,14): error TS2339: Property 'm' does not exist on type '{ x: { m: string } }'.
+asOperatorAmbiguity.ts(7,14): error TS2339: Property 'm' does not exist on type '{ x: { m: string } }'.
 
 
-==== asOperator/asOperatorAmbiguity.ts (1 errors) ====
+==== asOperatorAmbiguity.ts (1 errors) ====
     interface A<T> { x: T; }
     interface B { m: string; }
     

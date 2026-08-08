@@ -1,0 +1,58 @@
+accessorWithMismatchedAccessibilityModifiers.ts(2,9): error TS1005: ';' expected.
+accessorWithMismatchedAccessibilityModifiers.ts(5,17): error TS1005: ';' expected.
+accessorWithMismatchedAccessibilityModifiers.ts(10,19): error TS1005: ';' expected.
+accessorWithMismatchedAccessibilityModifiers.ts(13,17): error TS1005: ';' expected.
+accessorWithMismatchedAccessibilityModifiers.ts(18,19): error TS1005: ';' expected.
+accessorWithMismatchedAccessibilityModifiers.ts(20,9): error TS1005: ';' expected.
+accessorWithMismatchedAccessibilityModifiers.ts(26,26): error TS1005: ';' expected.
+accessorWithMismatchedAccessibilityModifiers.ts(28,16): error TS1005: ';' expected.
+
+
+==== accessorWithMismatchedAccessibilityModifiers.ts (8 errors) ====
+    class C {
+        get x() {
+            ~
+!!! error TS1005: ';' expected.
+            return 1;
+        }
+        private set x(v) {
+                    ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+    class D {
+        protected get x() {
+                      ~
+!!! error TS1005: ';' expected.
+            return 1;
+        }
+        private set x(v) {
+                    ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+    class E {
+        protected set x(v) {
+                      ~
+!!! error TS1005: ';' expected.
+        }
+        get x() {
+            ~
+!!! error TS1005: ';' expected.
+            return 1;
+        }
+    }
+    
+    class F {
+        protected static set x(v) {
+                             ~
+!!! error TS1005: ';' expected.
+        }
+        static get x() {
+                   ~
+!!! error TS1005: ';' expected.
+            return 1;
+        }
+    }

@@ -1,0 +1,57 @@
+index.cts(4,22): error TS2304: Cannot find name 'ns'.
+index.cts(5,22): error TS2304: Cannot find name 'ns'.
+index.mts(4,22): error TS2304: Cannot find name 'ns'.
+index.mts(5,22): error TS2304: Cannot find name 'ns'.
+index.ts(4,22): error TS2304: Cannot find name 'ns'.
+index.ts(5,22): error TS2304: Cannot find name 'ns'.
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+package.json(4,11): error TS1005: ';' expected.
+package.json(5,14): error TS1005: ';' expected.
+
+
+==== index.ts (2 errors) ====
+    import pkg from "./package.json" with { type: "json" };
+    export const name = pkg.name;
+    import * as ns from "./package.json" with { type: "json" };
+    export const thing = ns;
+                         ~~
+!!! error TS2304: Cannot find name 'ns'.
+    export const name2 = ns.default.name;
+                         ~~
+!!! error TS2304: Cannot find name 'ns'.
+==== index.cts (2 errors) ====
+    import pkg from "./package.json";
+    export const name = pkg.name;
+    import * as ns from "./package.json";
+    export const thing = ns;
+                         ~~
+!!! error TS2304: Cannot find name 'ns'.
+    export const name2 = ns.default.name;
+                         ~~
+!!! error TS2304: Cannot find name 'ns'.
+==== index.mts (2 errors) ====
+    import pkg from "./package.json" with { type: "json" };
+    export const name = pkg.name;
+    import * as ns from "./package.json" with { type: "json" };
+    export const thing = ns;
+                         ~~
+!!! error TS2304: Cannot find name 'ns'.
+    export const name2 = ns.default.name;
+                         ~~
+!!! error TS2304: Cannot find name 'ns'.
+==== package.json (4 errors) ====
+    {
+        "name": "pkg",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "0.0.1",
+                 ~
+!!! error TS1005: ';' expected.
+        "type": "module",
+              ~
+!!! error TS1005: ';' expected.
+        "default": "misedirection"
+                 ~
+!!! error TS1005: ';' expected.
+    }

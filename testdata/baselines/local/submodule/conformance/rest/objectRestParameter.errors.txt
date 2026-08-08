@@ -1,0 +1,41 @@
+objectRestParameter.ts(6,26): error TS1012: Unexpected token.
+objectRestParameter.ts(6,29): error TS1005: ',' expected.
+objectRestParameter.ts(12,9): error TS1005: ';' expected.
+objectRestParameter.ts(16,27): error TS1012: Unexpected token.
+objectRestParameter.ts(16,30): error TS1005: ',' expected.
+objectRestParameter.ts(18,1): error TS2554: Expected 1 arguments, but got 0.
+
+
+==== objectRestParameter.ts (6 errors) ====
+    function cloneAgain({ a, ...clone }: { a: number, b: string }): void {
+    }
+    
+    declare function suddenly(f: (a: { x: { z, ka }, y: string }) => void);
+    suddenly(({ x: a, ...rest }) => rest.y);
+    suddenly(({ x: { z = 12, ...nested }, ...rest } = { x: { z: 1, ka: 1 }, y: 'noo' }) => rest.y + nested.ka);
+                             ~~~
+!!! error TS1012: Unexpected token.
+                                ~~~~~~
+!!! error TS1005: ',' expected.
+    
+    class C {
+        m({ a, ...clone }: { a: number, b: string}): void {
+            // actually, never mind, don't clone
+        }
+        set p({ a, ...clone }: { a: number, b: string}) {
+            ~
+!!! error TS1005: ';' expected.
+            // actually, never mind, don't clone
+        }
+    }
+    function foobar({ bar={}, ...opts }: any = {}) {
+                              ~~~
+!!! error TS1012: Unexpected token.
+                                 ~~~~
+!!! error TS1005: ',' expected.
+    }
+    foobar();
+    ~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    foobar({ baz: 'hello' });
+    foobar({ bar: { greeting: 'hello' } });

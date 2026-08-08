@@ -1,0 +1,14 @@
+usingDeclarations.7.ts(3,12): error TS2304: Cannot find name 'b'.
+usingDeclarations.7.ts(4,11): error TS2304: Cannot find name 'c'.
+
+
+==== usingDeclarations.7.ts (2 errors) ====
+    {
+        using a = null,
+              {b} = null,
+               ~
+!!! error TS2304: Cannot find name 'b'.
+              c = null;
+              ~
+!!! error TS2304: Cannot find name 'c'.
+    }

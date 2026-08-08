@@ -1,0 +1,16 @@
+parserTypeAssertionInObjectCreationExpression1.ts(1,5): error TS1012: Unexpected token.
+parserTypeAssertionInObjectCreationExpression1.ts(1,6): error TS1005: ';' expected.
+parserTypeAssertionInObjectCreationExpression1.ts(1,6): error TS2304: Cannot find name 'T'.
+parserTypeAssertionInObjectCreationExpression1.ts(1,8): error TS2304: Cannot find name 'Foo'.
+
+
+==== parserTypeAssertionInObjectCreationExpression1.ts (4 errors) ====
+    new <T>Foo()
+        ~
+!!! error TS1012: Unexpected token.
+         ~
+!!! error TS1005: ';' expected.
+         ~
+!!! error TS2304: Cannot find name 'T'.
+           ~~~
+!!! error TS2304: Cannot find name 'Foo'.

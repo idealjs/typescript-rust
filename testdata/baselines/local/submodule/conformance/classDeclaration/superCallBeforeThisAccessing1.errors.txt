@@ -1,0 +1,22 @@
+superCallBeforeThisAccessing1.ts(10,9): error TS2349: This expression is not callable.
+
+
+==== superCallBeforeThisAccessing1.ts (1 errors) ====
+    ﻿// @strict: false
+    declare var Factory: any
+    
+    class Base {
+        constructor(c) { }
+    }
+    class D extends Base {
+        private _t;
+        constructor() {
+            super(i);
+         ~~~~~
+!!! error TS2349: This expression is not callable.
+            var s = {
+                t: this._t
+            }
+            var i = Factory.create(s);
+        }
+    }

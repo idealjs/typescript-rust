@@ -1,0 +1,90 @@
+error TS2451: Cannot redeclare block-scoped variable 'a'.
+error TS2451: Cannot redeclare block-scoped variable 'renamed'.
+error TS2451: Cannot redeclare block-scoped variable 'renamed'.
+error TS2451: Cannot redeclare block-scoped variable 'justA'.
+error TS2451: Cannot redeclare block-scoped variable 'justA'.
+error TS2451: Cannot redeclare block-scoped variable 'renamed'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'removed'.
+error TS2451: Cannot redeclare block-scoped variable 'o'.
+objectRest.ts(24,9): error TS1005: ';' expected.
+objectRest.ts(25,9): error TS1005: ';' expected.
+objectRest.ts(26,9): error TS1005: ';' expected.
+objectRest.ts(46,41): error TS1012: Unexpected token.
+objectRest.ts(46,44): error TS1005: ',' expected.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'a'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'renamed'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'renamed'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'justA'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'justA'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'renamed'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'removed'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'o'.
+==== objectRest.ts (5 errors) ====
+    var o = { a: 1, b: 'no' }
+    var { ...clone } = o;
+    var { a, ...justB } = o;
+    var { a, b: renamed, ...empty } = o;
+    var { ['b']: renamed, ...justA } = o;
+    var { 'b': renamed, ...justA } = o;
+    var { b: { '0': n, '1': oooo }, ...justA } = o;
+    
+    let o2 = { c: 'terrible idea?', d: 'yes' };
+    var { d: renamed, ...d } = o2;
+    
+    declare let nestedrest: { x: number, n1: { y: number, n2: { z: number, n3: { n4: number } } }, rest: number, restrest: number };
+    var { x, n1: { y, n2: { z, n3: { ...nr } } }, ...restrest } = nestedrest;
+    
+    declare let complex: { x: { ka, ki }, y: number };
+    var { x: { ka, ...nested }, y: other, ...rest } = complex;
+    ({x: { ka, ...nested }, y: other, ...rest} = complex);
+    var { x, ...fresh } = { x: 1, y: 2 };
+    ({ x, ...fresh } = { x: 1, y: 2 });
+    
+    class Removable {
+        private x!: number;
+        protected y!: number;
+        set z(value: number) { }
+            ~
+!!! error TS1005: ';' expected.
+        get both(): number { return 12 }
+            ~~~~
+!!! error TS1005: ';' expected.
+        set both(value: number) { }
+            ~~~~
+!!! error TS1005: ';' expected.
+        m() { }
+        removed!: string;
+        remainder!: string;
+    }
+    interface I {
+        m(): void;
+        removed: string;
+        remainder: string;
+    }
+    var removable = new Removable();
+    var { removed, ...removableRest } = removable;
+    var i: I = removable;
+    var { removed, ...removableRest2 } = i;
+    
+    let computed = 'b';
+    let computed2 = 'a';
+    var { [computed]: stillNotGreat, [computed2]: soSo,  ...o } = o;
+    ({ [computed]: stillNotGreat, [computed2]: soSo, ...o } = o);
+    
+    var noContextualType = ({ aNumber = 12, ...notEmptyObject }) => aNumber + notEmptyObject.anythingGoes;
+                                            ~~~
+!!! error TS1012: Unexpected token.
+                                               ~~~~~~~~~~~~~~
+!!! error TS1005: ',' expected.

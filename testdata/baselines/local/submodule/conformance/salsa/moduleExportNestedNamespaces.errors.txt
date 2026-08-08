@@ -1,0 +1,60 @@
+mod.js(1,7): error TS1003: Identifier expected.
+mod.js(1,8): error TS1005: ';' expected.
+mod.js(1,8): error TS2304: Cannot find name 'exports'.
+mod.js(2,7): error TS1003: Identifier expected.
+mod.js(2,8): error TS1005: ';' expected.
+mod.js(2,8): error TS2304: Cannot find name 'exports'.
+mod.js(5,7): error TS1003: Identifier expected.
+mod.js(5,8): error TS1005: ';' expected.
+mod.js(5,8): error TS2304: Cannot find name 'exports'.
+use.js(3,13): error TS2304: Cannot find name 's'.
+use.js(5,19): error TS2304: Cannot find name 's'.
+
+
+==== mod.js (9 errors) ====
+    module.exports.n = {};
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    module.exports.n.K = function C() {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        this.x = 10;
+    }
+    module.exports.Classic = class {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        constructor() {
+            this.p = 1
+        }
+    }
+    
+==== use.js (2 errors) ====
+    import * as s from './mod'
+    
+    var k = new s.n.K()
+                ~
+!!! error TS2304: Cannot find name 's'.
+    k.x
+    var classic = new s.Classic()
+                      ~
+!!! error TS2304: Cannot find name 's'.
+    
+    
+    /** @param {s.n.K} c
+        @param {s.Classic} classic */
+    function f(c, classic) {
+        c.x
+        classic.p
+    }

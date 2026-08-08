@@ -1,14 +1,17 @@
-error TS6053: File 'a.json' not found.
-error TS6053: File 'b.ts' not found.
+a.json(1,8): error TS1005: ';' expected.
+b.ts(7,45): error TS1005: ')' expected.
+b.ts(9,9): error TS1003: Identifier expected.
+b.ts(9,11): error TS1005: '=' expected.
+b.ts(10,4): error TS1128: Declaration or statement expected.
+b.ts(11,2): error TS1128: Declaration or statement expected.
 
 
-!!! error TS6053: File '/.src/a.json' not found.
-
-!!! error TS6053: File '/.src/b.ts' not found.
-==== ./a.json (0 errors) ====
+==== a.json (1 errors) ====
     { "key": "value" }
+           ~
+!!! error TS1005: ';' expected.
     
-==== ./b.ts (0 errors) ====
+==== b.ts (5 errors) ====
     declare global {
         interface ImportAttributes {
             type: "json"
@@ -16,10 +19,20 @@ error TS6053: File 'b.ts' not found.
     }
     
     export type Test1 = typeof import("./a.json", {
+                                                ~
+!!! error TS1005: ')' expected.
       with: {
         type: "json"
+            ~
+!!! error TS1003: Identifier expected.
+              ~~~~~~
+!!! error TS1005: '=' expected.
       },
+       ~
+!!! error TS1128: Declaration or statement expected.
     });
+     ~
+!!! error TS1128: Declaration or statement expected.
     
     export type Test2 = typeof import("./a.json", {
       with: {

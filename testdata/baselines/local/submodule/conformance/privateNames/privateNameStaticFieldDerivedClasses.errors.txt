@@ -1,0 +1,81 @@
+privateNameStaticFieldDerivedClasses.ts(2,12): error TS1005: ';' expected.
+privateNameStaticFieldDerivedClasses.ts(2,12): error TS1127: Invalid character.
+privateNameStaticFieldDerivedClasses.ts(2,13): error TS1005: ';' expected.
+privateNameStaticFieldDerivedClasses.ts(4,17): error TS1003: Identifier expected.
+privateNameStaticFieldDerivedClasses.ts(4,17): error TS1127: Invalid character.
+privateNameStaticFieldDerivedClasses.ts(4,18): error TS1005: ';' expected.
+privateNameStaticFieldDerivedClasses.ts(4,18): error TS2304: Cannot find name 'derivedProp'.
+privateNameStaticFieldDerivedClasses.ts(5,14): error TS1003: Identifier expected.
+privateNameStaticFieldDerivedClasses.ts(5,14): error TS1127: Invalid character.
+privateNameStaticFieldDerivedClasses.ts(5,15): error TS1005: ';' expected.
+privateNameStaticFieldDerivedClasses.ts(9,12): error TS1005: ';' expected.
+privateNameStaticFieldDerivedClasses.ts(9,12): error TS1127: Invalid character.
+privateNameStaticFieldDerivedClasses.ts(9,13): error TS1005: ';' expected.
+privateNameStaticFieldDerivedClasses.ts(11,17): error TS1003: Identifier expected.
+privateNameStaticFieldDerivedClasses.ts(11,17): error TS1127: Invalid character.
+privateNameStaticFieldDerivedClasses.ts(11,18): error TS1005: ';' expected.
+privateNameStaticFieldDerivedClasses.ts(12,14): error TS1003: Identifier expected.
+privateNameStaticFieldDerivedClasses.ts(12,14): error TS1127: Invalid character.
+privateNameStaticFieldDerivedClasses.ts(12,14): error TS2339: Property '#' does not exist on type 'object'.
+privateNameStaticFieldDerivedClasses.ts(12,15): error TS1005: ';' expected.
+privateNameStaticFieldDerivedClasses.ts(12,15): error TS2304: Cannot find name 'prop'.
+
+
+==== privateNameStaticFieldDerivedClasses.ts (21 errors) ====
+    class Base {
+        static #prop: number = 123;
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~~
+!!! error TS1005: ';' expected.
+        static method(x: Derived) {
+            Derived.#derivedProp // error
+                    ~
+!!! error TS1003: Identifier expected.
+                    ~
+!!! error TS1127: Invalid character.
+                     ~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+                     ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'derivedProp'.
+            Base.#prop  = 10;
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~~
+!!! error TS1005: ';' expected.
+        }
+    }
+    class Derived extends Base {
+        static #derivedProp: number = 10;
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+        static method(x: Derived) {
+            Derived.#derivedProp
+                    ~
+!!! error TS1003: Identifier expected.
+                    ~
+!!! error TS1127: Invalid character.
+                     ~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+            Base.#prop  = 10; // error
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                 ~
+!!! error TS2339: Property '#' does not exist on type 'object'.
+                  ~~~~
+!!! error TS1005: ';' expected.
+                  ~~~~
+!!! error TS2304: Cannot find name 'prop'.
+        }
+    }
+    

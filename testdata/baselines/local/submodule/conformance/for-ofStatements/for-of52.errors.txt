@@ -1,0 +1,7 @@
+error TS2451: Cannot redeclare block-scoped variable 'v'.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'v'.
+==== for-of52.ts (0 errors) ====
+    ﻿//@target: ES6
+    for (let [v, v] of [[]]) {}

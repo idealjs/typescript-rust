@@ -1,7 +1,7 @@
-classAbstractKeyword/classAbstractFactoryFunction.ts(9,16): error TS2511: Cannot create an instance of an abstract class.
+classAbstractFactoryFunction.ts(9,16): error TS2511: Cannot create an instance of an abstract class.
 
 
-==== classAbstractKeyword/classAbstractFactoryFunction.ts (1 errors) ====
+==== classAbstractFactoryFunction.ts (1 errors) ====
     class A {}
     abstract class B extends A {}
     

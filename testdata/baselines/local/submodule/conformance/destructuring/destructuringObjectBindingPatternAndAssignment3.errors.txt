@@ -1,0 +1,47 @@
+error TS2451: Cannot redeclare block-scoped variable '}'.
+destructuringObjectBindingPatternAndAssignment3.ts(3,7): error TS1005: ',' expected.
+destructuringObjectBindingPatternAndAssignment3.ts(3,15): error TS1005: ',' expected.
+destructuringObjectBindingPatternAndAssignment3.ts(4,30): error TS2353: Object literal may only specify known properties, and 'i' does not exist in type 'string | number'.
+destructuringObjectBindingPatternAndAssignment3.ts(5,35): error TS2353: Object literal may only specify known properties, and 'i1' does not exist in type 'string | number | object'.
+destructuringObjectBindingPatternAndAssignment3.ts(7,5): error TS1182: A destructuring declaration must have an initializer.
+destructuringObjectBindingPatternAndAssignment3.ts(7,7): error TS1005: ':' expected.
+destructuringObjectBindingPatternAndAssignment3.ts(7,16): error TS1005: ',' expected.
+destructuringObjectBindingPatternAndAssignment3.ts(8,5): error TS1005: ',' expected.
+destructuringObjectBindingPatternAndAssignment3.ts(8,12): error TS1005: ':' expected.
+destructuringObjectBindingPatternAndAssignment3.ts(8,29): error TS1005: ',' expected.
+destructuringObjectBindingPatternAndAssignment3.ts(8,30): error TS1005: '}' expected.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable '}'.
+==== destructuringObjectBindingPatternAndAssignment3.ts (11 errors) ====
+    ﻿// @target: es2015
+    // Error
+    var {h?} = { h?: 1 };
+       ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1005: ',' expected.
+    var {i}: string | number = { i: 2 };
+                              ~
+!!! error TS2353: Object literal may only specify known properties, and 'i' does not exist in type 'string | number'.
+    var {i1}: string | number| {} = { i1: 2 };
+                                   ~~
+!!! error TS2353: Object literal may only specify known properties, and 'i1' does not exist in type 'string | number | object'.
+    var { f2: {f21} = { f212: "string" } }: any = undefined;
+    var {1} = { 1 };
+     ~~~~~~~~~~~~~~~
+       ~
+!!! error TS1005: ':' expected.
+                ~
+!!! error TS1005: ',' expected.
+    var {"prop"} = { "prop": 1 };
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+     ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS1005: ':' expected.
+                             ~
+!!! error TS1005: ',' expected.
+                              
+!!! error TS1005: '}' expected.

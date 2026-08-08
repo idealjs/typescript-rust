@@ -1,9 +1,9 @@
-privateNames/privateNameEnum.ts(2,5): error TS1003: Identifier expected.
-privateNames/privateNameEnum.ts(2,5): error TS1127: Invalid character.
-privateNames/privateNameEnum.ts(2,6): error TS1005: ',' expected.
+privateNameEnum.ts(2,5): error TS1003: Identifier expected.
+privateNameEnum.ts(2,5): error TS1127: Invalid character.
+privateNameEnum.ts(2,6): error TS1005: ',' expected.
 
 
-==== privateNames/privateNameEnum.ts (3 errors) ====
+==== privateNameEnum.ts (3 errors) ====
     enum E {
         #x
         ~

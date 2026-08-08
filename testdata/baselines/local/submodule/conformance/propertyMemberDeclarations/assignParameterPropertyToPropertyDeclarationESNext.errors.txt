@@ -1,0 +1,92 @@
+assignParameterPropertyToPropertyDeclarationESNext.ts(8,14): error TS2339: Property 'foo' does not exist on type '{ qux: any; bar: any; quiz: any; quench: any; quanch: any; m1: () => any; m3: () => void; quim: any; baz: any; quid: any; m2: () => any }'.
+assignParameterPropertyToPropertyDeclarationESNext.ts(11,24): error TS1005: ',' expected.
+assignParameterPropertyToPropertyDeclarationESNext.ts(16,14): error TS2339: Property 'foo' does not exist on type '{ qux: any; bar: any; quiz: any; quench: any; quanch: any; m1: () => any; m3: () => void; quim: any; baz: any; quid: any; m2: () => any }'.
+assignParameterPropertyToPropertyDeclarationESNext.ts(25,34): error TS2339: Property 'foo2' does not exist on type '{ bar: () => number; foo1: "" }'.
+assignParameterPropertyToPropertyDeclarationESNext.ts(27,24): error TS1005: ',' expected.
+assignParameterPropertyToPropertyDeclarationESNext.ts(31,19): error TS2304: Cannot find name 'extends'.
+assignParameterPropertyToPropertyDeclarationESNext.ts(31,27): error TS1005: '{' expected.
+assignParameterPropertyToPropertyDeclarationESNext.ts(31,29): error TS1005: ';' expected.
+assignParameterPropertyToPropertyDeclarationESNext.ts(37,19): error TS2304: Cannot find name 'extends'.
+assignParameterPropertyToPropertyDeclarationESNext.ts(37,27): error TS1005: '{' expected.
+assignParameterPropertyToPropertyDeclarationESNext.ts(37,29): error TS1005: ';' expected.
+assignParameterPropertyToPropertyDeclarationESNext.ts(40,24): error TS1005: ',' expected.
+assignParameterPropertyToPropertyDeclarationESNext.ts(43,24): error TS1005: ',' expected.
+
+
+==== assignParameterPropertyToPropertyDeclarationESNext.ts (13 errors) ====
+    class C {
+        qux = this.bar // should error
+        bar = this.foo // should error
+        quiz = this.bar // ok
+        quench = this.m1() // ok
+        quanch = this.m3() // should error
+        m1() {
+            this.foo // ok
+                 ~~~
+!!! error TS2339: Property 'foo' does not exist on type '{ qux: any; bar: any; quiz: any; quench: any; quanch: any; m1: () => any; m3: () => void; quim: any; baz: any; quid: any; m2: () => any }'.
+        }
+        m3 = function() { }
+        constructor(public foo: string) {}
+                           ~~~
+!!! error TS1005: ',' expected.
+        quim = this.baz // should error
+        baz = this.foo; // should error
+        quid = this.baz // ok
+        m2() {
+            this.foo // ok
+                 ~~~
+!!! error TS2339: Property 'foo' does not exist on type '{ qux: any; bar: any; quiz: any; quench: any; quanch: any; m1: () => any; m3: () => void; quim: any; baz: any; quid: any; m2: () => any }'.
+        }
+    }
+    
+    class D extends C {
+        quill = this.foo // ok
+    }
+    
+    class E {
+        bar = () => this.foo1 + this.foo2; // both ok
+                                     ~~~~
+!!! error TS2339: Property 'foo2' does not exist on type '{ bar: () => number; foo1: "" }'.
+        foo1 = '';
+        constructor(public foo2: string) {}
+                           ~~~~
+!!! error TS1005: ',' expected.
+    }
+    
+    class F {
+        Inner = class extends F {
+                      ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                              ~
+!!! error TS1005: '{' expected.
+                                ~
+!!! error TS1005: ';' expected.
+            p2 = this.p1
+        }
+        p1 = 0
+    }
+    class G {
+        Inner = class extends G {
+                      ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                              ~
+!!! error TS1005: '{' expected.
+                                ~
+!!! error TS1005: ';' expected.
+            p2 = this.p1
+        }
+        constructor(public p1: number) {}
+                           ~~
+!!! error TS1005: ',' expected.
+    }
+    class H {
+        constructor(public p1: C) {}
+                           ~~
+!!! error TS1005: ',' expected.
+    
+        public p2 = () => {
+            return this.p1.foo;
+        }
+    
+        public p3 = () => this.p1.foo;
+    }

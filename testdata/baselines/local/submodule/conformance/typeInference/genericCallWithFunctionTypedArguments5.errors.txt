@@ -1,0 +1,63 @@
+genericCallWithFunctionTypedArguments5.ts(4,19): error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+genericCallWithFunctionTypedArguments5.ts(7,18): error TS2304: Cannot find name 'T'.
+genericCallWithFunctionTypedArguments5.ts(7,24): error TS2304: Cannot find name 'T'.
+genericCallWithFunctionTypedArguments5.ts(10,21): error TS2304: Cannot find name 'T'.
+genericCallWithFunctionTypedArguments5.ts(10,27): error TS2304: Cannot find name 'T'.
+genericCallWithFunctionTypedArguments5.ts(10,33): error TS2304: Cannot find name 'T'.
+genericCallWithFunctionTypedArguments5.ts(11,14): error TS2345: Argument of type '{ cb: (x: string, y: number) => string }' is not assignable to parameter of type '{ cb: (t: T) => U }'.
+genericCallWithFunctionTypedArguments5.ts(14,19): error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+genericCallWithFunctionTypedArguments5.ts(14,25): error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+genericCallWithFunctionTypedArguments5.ts(19,21): error TS2304: Cannot find name 'T'.
+genericCallWithFunctionTypedArguments5.ts(19,27): error TS2304: Cannot find name 'T'.
+genericCallWithFunctionTypedArguments5.ts(20,14): error TS2345: Argument of type '{ cb: (x: string) => string }' is not assignable to parameter of type '{ cb: (t: T) => U }'.
+genericCallWithFunctionTypedArguments5.ts(21,14): error TS2345: Argument of type '{ cb: () => string }' is not assignable to parameter of type '{ cb: (t: T) => U }'.
+
+
+==== genericCallWithFunctionTypedArguments5.ts (13 errors) ====
+    // Generic call with parameter of object type with member of function type of n args passed object whose associated member is call signature with n+1 args
+    
+    function foo<T, U>(arg: { cb: (t: T) => U }) {
+        return arg.cb(null);
+                      ~~~~
+!!! error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+    }
+    
+    var arg = { cb: <T>(x: T) => '' };
+                     ~
+!!! error TS2304: Cannot find name 'T'.
+                           ~
+!!! error TS2304: Cannot find name 'T'.
+    var r = foo(arg); // {}
+    // more args not allowed
+    var r2 = foo({ cb: <T>(x: T, y: T) => '' }); // error
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+                              ~
+!!! error TS2304: Cannot find name 'T'.
+                                    ~
+!!! error TS2304: Cannot find name 'T'.
+    var r3 = foo({ cb: (x: string, y: number) => '' }); // error
+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ cb: (x: string, y: number) => string }' is not assignable to parameter of type '{ cb: (t: T) => U }'.
+    
+    function foo2<T, U>(arg: { cb: (t: T, t2: T) => U }) {
+        return arg.cb(null, null);
+                      ~~~~
+!!! error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+                            ~~~~
+!!! error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+    }
+    
+    // fewer args ok
+    var r4 = foo(arg); // {}
+    var r5 = foo({ cb: <T>(x: T) => '' }); // {}
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+                              ~
+!!! error TS2304: Cannot find name 'T'.
+    var r6 = foo({ cb: (x: string) => '' }); // string
+                 ~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ cb: (x: string) => string }' is not assignable to parameter of type '{ cb: (t: T) => U }'.
+    var r7 = foo({ cb: () => '' }); // string
+                 ~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ cb: () => string }' is not assignable to parameter of type '{ cb: (t: T) => U }'.

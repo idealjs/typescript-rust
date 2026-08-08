@@ -1,0 +1,14 @@
+esDecorators-classDeclaration-parameterProperties.ts(4,25): error TS1005: ',' expected.
+
+
+==== esDecorators-classDeclaration-parameterProperties.ts (1 errors) ====
+    declare var bound: any;
+    
+    class C {
+        constructor(private message: string) {}
+                            ~~~~~~~
+!!! error TS1005: ',' expected.
+    
+        @bound speak() {
+        }
+    }

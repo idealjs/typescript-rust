@@ -1,0 +1,35 @@
+esDecorators-classDeclaration-classSuper.4.ts(11,22): error TS2339: Property 'method' does not exist on type '{ ``: any }'.
+esDecorators-classDeclaration-classSuper.4.ts(14,22): error TS2339: Property 'method' does not exist on type '{ ``: any }'.
+esDecorators-classDeclaration-classSuper.4.ts(14,28): error TS1005: ';' expected.
+esDecorators-classDeclaration-classSuper.4.ts(15,31): error TS1005: ';' expected.
+esDecorators-classDeclaration-classSuper.4.ts(16,29): error TS1005: ';' expected.
+
+
+==== esDecorators-classDeclaration-classSuper.4.ts (5 errors) ====
+    declare var dec: any;
+    
+    declare class Base {
+        static method(...args: any[]): number;
+    }
+    
+    const method = "method";
+    
+    @dec
+    class C extends Base {
+        static a = super.method();
+                         ~~~~~~
+!!! error TS2339: Property 'method' does not exist on type '{ ``: any }'.
+        static b = super["method"]();
+        static c = super[method]();
+        static d = super.method``;
+                         ~~~~~~
+!!! error TS2339: Property 'method' does not exist on type '{ ``: any }'.
+                               ~~
+!!! error TS1005: ';' expected.
+        static e = super["method"]``;
+                                  ~~
+!!! error TS1005: ';' expected.
+        static f = super[method]``;
+                                ~~
+!!! error TS1005: ';' expected.
+    }

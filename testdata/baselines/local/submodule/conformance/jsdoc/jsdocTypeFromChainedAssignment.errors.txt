@@ -1,0 +1,43 @@
+a.js(7,3): error TS2339: Property 'prototype' does not exist on type '() => void'.
+a.js(7,19): error TS2339: Property 'prototype' does not exist on type '() => void'.
+a.js(11,3): error TS2339: Property 's' does not exist on type '() => void'.
+a.js(11,9): error TS2339: Property 't' does not exist on type '() => void'.
+a.js(14,13): error TS2351: This expression is not constructable.
+a.js(17,3): error TS2339: Property 's' does not exist on type '() => void'.
+a.js(18,3): error TS2339: Property 't' does not exist on type '() => void'.
+
+
+==== a.js (7 errors) ====
+    function A () {
+        this.x = 1
+        /** @type {1} */
+        this.first = this.second = 1
+    }
+    /** @param {number} n */
+    A.prototype.y = A.prototype.z = function f(n) {
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+                      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+        return n + this.x
+    }
+    /** @param {number} m */
+    A.s = A.t = function g(m) {
+      ~
+!!! error TS2339: Property 's' does not exist on type '() => void'.
+            ~
+!!! error TS2339: Property 't' does not exist on type '() => void'.
+        return m + this.x
+    }
+    var a = new A()
+                ~
+!!! error TS2351: This expression is not constructable.
+    a.y('no') // error
+    a.z('not really') // error
+    A.s('still no') // error
+      ~
+!!! error TS2339: Property 's' does not exist on type '() => void'.
+    A.t('not here either') // error
+      ~
+!!! error TS2339: Property 't' does not exist on type '() => void'.
+    a.first = 10 // error: '10' isn't assignable to '1'

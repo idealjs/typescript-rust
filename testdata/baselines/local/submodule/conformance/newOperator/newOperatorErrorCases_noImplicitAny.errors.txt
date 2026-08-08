@@ -1,0 +1,20 @@
+newOperatorErrorCases_noImplicitAny.ts(2,5): error TS2351: This expression is not constructable.
+newOperatorErrorCases_noImplicitAny.ts(5,5): error TS2351: This expression is not constructable.
+newOperatorErrorCases_noImplicitAny.ts(8,5): error TS2351: This expression is not constructable.
+
+
+==== newOperatorErrorCases_noImplicitAny.ts (3 errors) ====
+    function fnNumber(this: void): number { return 90; }
+    new fnNumber(); // Error
+        ~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    function fnVoid(this: void): void {}
+    new fnVoid(); // Error
+        ~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    function functionVoidNoThis(): void {}
+    new functionVoidNoThis(); // Error
+        ~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.

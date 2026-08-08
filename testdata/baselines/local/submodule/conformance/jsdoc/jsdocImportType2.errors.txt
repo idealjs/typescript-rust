@@ -1,0 +1,34 @@
+mod1.js(2,7): error TS1003: Identifier expected.
+mod1.js(2,8): error TS1005: ';' expected.
+mod1.js(2,24): error TS2304: Cannot find name 'Chunk'.
+
+
+==== types.d.ts (0 errors) ====
+    declare function require(name: string): any;
+    declare var exports: any;
+    declare var module: { exports: any };
+==== mod1.js (3 errors) ====
+    /// <reference path='./types.d.ts'/>
+    module.exports = class Chunk {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+                           ~~~~~
+!!! error TS2304: Cannot find name 'Chunk'.
+        constructor() {
+            this.chunk = 1;
+        }
+    }
+    
+==== use.js (0 errors) ====
+    /// <reference path='./types.d.ts'/>
+    /** @typedef {import("./mod1")} C
+     * @type {C} */
+    var c;
+    c.chunk;
+    
+    const D = require("./mod1");
+    /** @type {D} */
+    var d;
+    d.chunk;

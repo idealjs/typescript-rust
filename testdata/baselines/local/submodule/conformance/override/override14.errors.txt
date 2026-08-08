@@ -1,0 +1,13 @@
+override14.ts(6,13): error TS1005: ';' expected.
+
+
+==== override14.ts (1 errors) ====
+    class Foo {
+        property = 1
+    }
+    
+    class SubFoo extends Foo {
+        declare property: number
+                ~~~~~~~~
+!!! error TS1005: ';' expected.
+    }

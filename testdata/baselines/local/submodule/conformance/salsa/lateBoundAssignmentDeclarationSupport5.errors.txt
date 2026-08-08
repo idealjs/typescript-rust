@@ -1,0 +1,50 @@
+lateBoundAssignmentDeclarationSupport5.js(7,3): error TS2339: Property 'prototype' does not exist on type '() => void'.
+lateBoundAssignmentDeclarationSupport5.js(11,19): error TS2351: This expression is not constructable.
+lateBoundAssignmentDeclarationSupport5.js(14,7): error TS1003: Identifier expected.
+lateBoundAssignmentDeclarationSupport5.js(14,8): error TS1005: ';' expected.
+lateBoundAssignmentDeclarationSupport5.js(14,8): error TS2304: Cannot find name 'exports'.
+lateBoundAssignmentDeclarationSupport5.js(15,7): error TS1003: Identifier expected.
+lateBoundAssignmentDeclarationSupport5.js(15,8): error TS1005: ';' expected.
+lateBoundAssignmentDeclarationSupport5.js(15,8): error TS2304: Cannot find name 'exports'.
+usage.js(1,11): error TS2304: Cannot find name 'require'.
+
+
+==== lateBoundAssignmentDeclarationSupport5.js (8 errors) ====
+    // currently unsupported
+    const _sym = Symbol();
+    const _str = "my-fake-sym";
+    
+    function F() {
+    }
+    F.prototype = {
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+        [_sym]: "ok",
+        [_str]: "ok"
+    }
+    const inst =  new F();
+                      ~
+!!! error TS2351: This expression is not constructable.
+    const _y = inst[_str];
+    const _z = inst[_sym];
+    module.exports.F = F;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    module.exports.S = _sym;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+==== usage.js (1 errors) ====
+    const x = require("./lateBoundAssignmentDeclarationSupport5.js");
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    const inst =  new x.F();
+    const y = inst["my-fake-sym"];
+    const z = inst[x.S];

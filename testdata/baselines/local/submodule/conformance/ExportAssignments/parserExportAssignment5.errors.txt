@@ -1,0 +1,9 @@
+parserExportAssignment5.ts(2,14): error TS2304: Cannot find name 'A'.
+
+
+==== parserExportAssignment5.ts (1 errors) ====
+    namespace M {
+        export = A;
+                 ~
+!!! error TS2304: Cannot find name 'A'.
+    }

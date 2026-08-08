@@ -1,0 +1,31 @@
+axios.js(9,7): error TS1003: Identifier expected.
+axios.js(9,8): error TS1005: ';' expected.
+axios.js(9,8): error TS2304: Cannot find name 'exports'.
+axios.js(10,7): error TS1003: Identifier expected.
+axios.js(10,8): error TS1005: ';' expected.
+axios.js(10,8): error TS2304: Cannot find name 'exports'.
+
+
+==== axios.js (6 errors) ====
+    class Axios {
+        constructor() {
+        }
+        m() { }
+    }
+    var axios = new Axios();
+    // none of the 3 references should have a use-before-def error
+    axios.m()
+    module.exports = axios;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    module.exports.default = axios;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.

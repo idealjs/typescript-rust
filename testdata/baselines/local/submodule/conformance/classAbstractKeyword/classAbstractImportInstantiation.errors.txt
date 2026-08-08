@@ -1,8 +1,8 @@
-classAbstractKeyword/classAbstractImportInstantiation.ts(4,9): error TS2511: Cannot create an instance of an abstract class.
-classAbstractKeyword/classAbstractImportInstantiation.ts(9,5): error TS2304: Cannot find name 'myA'.
+classAbstractImportInstantiation.ts(4,9): error TS2511: Cannot create an instance of an abstract class.
+classAbstractImportInstantiation.ts(9,5): error TS2304: Cannot find name 'myA'.
 
 
-==== classAbstractKeyword/classAbstractImportInstantiation.ts (2 errors) ====
+==== classAbstractImportInstantiation.ts (2 errors) ====
     namespace M {
         export abstract class A {}
         

@@ -1,0 +1,99 @@
+functionConstraintSatisfaction2.ts(6,16): error TS2554: Expected 1 arguments, but got 2.
+functionConstraintSatisfaction2.ts(7,8): error TS2554: Expected 1 arguments, but got 2.
+functionConstraintSatisfaction2.ts(24,15): error TS2345: Argument of type '(x: string[]) => string[]' is not assignable to parameter of type '(x: string) => string'.
+functionConstraintSatisfaction2.ts(25,15): error TS2345: Argument of type 'object' is not assignable to parameter of type '(x: string) => string'.
+functionConstraintSatisfaction2.ts(26,15): error TS2345: Argument of type 'object' is not assignable to parameter of type '(x: string) => string'.
+functionConstraintSatisfaction2.ts(27,16): error TS2304: Cannot find name 'U'.
+functionConstraintSatisfaction2.ts(27,22): error TS2304: Cannot find name 'U'.
+functionConstraintSatisfaction2.ts(28,17): error TS2304: Cannot find name 'U'.
+functionConstraintSatisfaction2.ts(28,18): error TS1005: '>' expected.
+functionConstraintSatisfaction2.ts(28,20): error TS1005: ',' expected.
+functionConstraintSatisfaction2.ts(28,20): error TS2304: Cannot find name 'V'.
+functionConstraintSatisfaction2.ts(28,20): error TS2554: Expected 1 arguments, but got 2.
+functionConstraintSatisfaction2.ts(28,26): error TS2304: Cannot find name 'U'.
+functionConstraintSatisfaction2.ts(28,32): error TS2304: Cannot find name 'V'.
+functionConstraintSatisfaction2.ts(29,16): error TS2345: Argument of type 'object' is not assignable to parameter of type '(x: string) => string'.
+functionConstraintSatisfaction2.ts(30,16): error TS2345: Argument of type 'object' is not assignable to parameter of type '(x: string) => string'.
+functionConstraintSatisfaction2.ts(34,16): error TS2345: Argument of type '{ foo: string }' is not assignable to parameter of type '(x: string) => string'.
+functionConstraintSatisfaction2.ts(37,10): error TS2345: Argument of type 'T' is not assignable to parameter of type '(x: string) => string'.
+functionConstraintSatisfaction2.ts(38,10): error TS2345: Argument of type 'U' is not assignable to parameter of type '(x: string) => string'.
+
+
+==== functionConstraintSatisfaction2.ts (19 errors) ====
+    // satisfaction of a constraint to Function, all of these invocations are errors unless otherwise noted
+    
+    function foo<T extends Function>(x: T): T { return x; }
+    
+    foo(1);
+    foo(() => { }, 1);
+                   ~
+!!! error TS2554: Expected 1 arguments, but got 2.
+    foo(1, () => { });
+           ~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 2.
+    
+    function foo2<T extends (x: string) => string>(x: T): T { return x; }
+    
+    class C {
+        foo: string;
+    }
+    
+    declare var b: { new (x: string): string };
+    
+    class C2<T> {
+        foo: T;
+    }
+    
+    declare var b2: { new <T>(x: T): T };
+    
+    var r = foo2(new Function());
+    var r2 = foo2((x: string[]) => x);
+                  ~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(x: string[]) => string[]' is not assignable to parameter of type '(x: string) => string'.
+    var r6 = foo2(C);
+                  ~
+!!! error TS2345: Argument of type 'object' is not assignable to parameter of type '(x: string) => string'.
+    var r7 = foo2(b);
+                  ~
+!!! error TS2345: Argument of type 'object' is not assignable to parameter of type '(x: string) => string'.
+    var r8 = foo2(<U>(x: U) => x); // no error expected
+                   ~
+!!! error TS2304: Cannot find name 'U'.
+                         ~
+!!! error TS2304: Cannot find name 'U'.
+    var r11 = foo2(<U, V>(x: U, y: V) => x);
+                    ~
+!!! error TS2304: Cannot find name 'U'.
+                     ~
+!!! error TS1005: '>' expected.
+                       ~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS2304: Cannot find name 'V'.
+                       ~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 2.
+                             ~
+!!! error TS2304: Cannot find name 'U'.
+                                   ~
+!!! error TS2304: Cannot find name 'V'.
+    var r13 = foo2(C2);
+                   ~~
+!!! error TS2345: Argument of type 'object' is not assignable to parameter of type '(x: string) => string'.
+    var r14 = foo2(b2);
+                   ~~
+!!! error TS2345: Argument of type 'object' is not assignable to parameter of type '(x: string) => string'.
+    
+    interface F2 extends Function { foo: string; }
+    declare var f2: F2;
+    var r16 = foo2(f2);
+                   ~~
+!!! error TS2345: Argument of type '{ foo: string }' is not assignable to parameter of type '(x: string) => string'.
+    
+    function fff<T extends { (): void }, U extends T>(x: T, y: U) {
+        foo2(x);
+             ~
+!!! error TS2345: Argument of type 'T' is not assignable to parameter of type '(x: string) => string'.
+        foo2(y);
+             ~
+!!! error TS2345: Argument of type 'U' is not assignable to parameter of type '(x: string) => string'.
+    }

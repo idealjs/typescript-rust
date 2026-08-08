@@ -1,0 +1,7 @@
+float16Array.ts(1,21): error TS2304: Cannot find name 'Float16Array'.
+
+
+==== float16Array.ts (1 errors) ====
+    const float16 = new Float16Array(4);
+                        ~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'Float16Array'.

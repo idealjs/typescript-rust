@@ -1,0 +1,28 @@
+a.ts(1,16): error TS2304: Cannot find name 'interface'.
+a.ts(1,26): error TS1005: ';' expected.
+a.ts(1,26): error TS2304: Cannot find name 'Foo'.
+a.ts(1,30): error TS1005: ';' expected.
+
+
+==== importTag16.ts (0 errors) ====
+    
+==== a.ts (4 errors) ====
+    export default interface Foo {}
+                   ~~~~~~~~~
+!!! error TS2304: Cannot find name 'interface'.
+                             ~~~
+!!! error TS1005: ';' expected.
+                             ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+                                 ~
+!!! error TS1005: ';' expected.
+    export interface I {}
+    
+==== b.js (0 errors) ====
+    /** @import Foo, { I } from "./a" */
+    
+    /**
+     * @param {Foo} a
+     * @param {I} b
+     */
+    export function foo(a, b) {}

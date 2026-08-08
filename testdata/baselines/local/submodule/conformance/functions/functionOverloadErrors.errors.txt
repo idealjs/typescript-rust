@@ -1,8 +1,8 @@
-functions/functionOverloadErrors.ts(12,18): error TS2304: Cannot find name 'Array'.
-functions/functionOverloadErrors.ts(45,25): error TS2304: Cannot find name 'Date'.
+functionOverloadErrors.ts(12,18): error TS2304: Cannot find name 'Array'.
+functionOverloadErrors.ts(45,25): error TS2304: Cannot find name 'Date'.
 
 
-==== functions/functionOverloadErrors.ts (2 errors) ====
+==== functionOverloadErrors.ts (2 errors) ====
     //Function overload signature with initializer
     function fn1(x = 3);
     function fn1() { }

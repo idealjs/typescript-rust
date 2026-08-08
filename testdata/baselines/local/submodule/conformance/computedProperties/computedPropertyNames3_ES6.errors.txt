@@ -1,0 +1,24 @@
+computedPropertyNames3_ES6.ts(5,9): error TS1005: ';' expected.
+computedPropertyNames3_ES6.ts(6,9): error TS1005: ';' expected.
+computedPropertyNames3_ES6.ts(7,16): error TS1005: ';' expected.
+computedPropertyNames3_ES6.ts(8,16): error TS1005: ';' expected.
+
+
+==== computedPropertyNames3_ES6.ts (4 errors) ====
+    var id;
+    class C {
+        [0 + 1]() { }
+        static [() => { }]() { }
+        get [delete id]() { }
+            ~
+!!! error TS1005: ';' expected.
+        set [[0, 1]](v) { }
+            ~
+!!! error TS1005: ';' expected.
+        static get [<String>""]() { }
+                   ~
+!!! error TS1005: ';' expected.
+        static set [id.toString()](v) { }
+                   ~
+!!! error TS1005: ';' expected.
+    }

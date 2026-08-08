@@ -1,0 +1,24 @@
+initializationOrdering1.ts(8,26): error TS1005: ',' expected.
+initializationOrdering1.ts(15,1): error TS2554: Expected 2 arguments, but got 1.
+
+
+==== initializationOrdering1.ts (2 errors) ====
+    class Helper {
+        create(): boolean {
+            return true
+        }
+    }
+    
+    export class Broken {
+        constructor(readonly facade: Helper) {
+                             ~~~~~~
+!!! error TS1005: ',' expected.
+            console.log(this.bug)
+        }
+        bug = this.facade.create()
+    
+    }
+    
+    new Broken(new Helper)
+    ~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.

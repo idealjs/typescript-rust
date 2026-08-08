@@ -1,0 +1,369 @@
+strictPropertyInitialization.ts(8,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(8,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(8,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(9,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(9,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(9,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(10,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(10,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(10,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(11,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(11,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(11,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(22,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(22,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(22,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(23,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(23,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(23,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(24,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(24,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(24,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(25,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(25,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(25,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(43,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(43,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(43,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(44,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(44,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(44,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(45,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(45,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(45,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(52,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(52,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(52,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(55,14): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(55,14): error TS1127: Invalid character.
+strictPropertyInitialization.ts(55,15): error TS1005: ';' expected.
+strictPropertyInitialization.ts(63,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(63,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(63,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(69,14): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(69,14): error TS1127: Invalid character.
+strictPropertyInitialization.ts(69,15): error TS1005: ';' expected.
+strictPropertyInitialization.ts(75,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(75,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(75,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(79,18): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(79,18): error TS1127: Invalid character.
+strictPropertyInitialization.ts(79,19): error TS1005: ';' expected.
+strictPropertyInitialization.ts(83,14): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(83,14): error TS1127: Invalid character.
+strictPropertyInitialization.ts(83,15): error TS1005: ';' expected.
+strictPropertyInitialization.ts(111,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(111,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(111,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(115,23): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(115,23): error TS1127: Invalid character.
+strictPropertyInitialization.ts(115,24): error TS1005: ';' expected.
+strictPropertyInitialization.ts(117,14): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(117,14): error TS1127: Invalid character.
+strictPropertyInitialization.ts(117,15): error TS1005: ';' expected.
+strictPropertyInitialization.ts(128,5): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(128,5): error TS1127: Invalid character.
+strictPropertyInitialization.ts(128,6): error TS1005: ';' expected.
+strictPropertyInitialization.ts(131,14): error TS1003: Identifier expected.
+strictPropertyInitialization.ts(131,14): error TS1127: Invalid character.
+strictPropertyInitialization.ts(131,15): error TS1005: ';' expected.
+
+
+==== strictPropertyInitialization.ts (69 errors) ====
+    // Properties with non-undefined types require initialization
+    
+    class C1 {
+        a: number;  // Error
+        b: number | undefined;
+        c: number | null;  // Error
+        d?: number;
+        #f: number; //Error
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        #g: number | undefined;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        #h: number | null; //Error
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        #i?: number;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+    }
+    
+    // No strict initialization checks in ambient contexts
+    
+    declare class C2 {
+        a: number;
+        b: number | undefined;
+        c: number | null;
+        d?: number;
+        
+        #f: number;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        #g: number | undefined;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        #h: number | null;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        #i?: number;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+    }
+    
+    // No strict initialization checks for static members
+    
+    class C3 {
+        static a: number;
+        static b: number | undefined;
+        static c: number | null;
+        static d?: number;
+    }
+    
+    // Initializer satisfies strict initialization check
+    
+    class C4 {
+        a = 0;
+        b: number = 0;
+        c: string = "abc";
+        #d = 0
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        #e: number = 0
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        #f: string= "abc"
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+    }
+    
+    // Assignment in constructor satisfies strict initialization check
+    
+    class C5 {
+        a: number;
+        #b: number;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        constructor() {
+            this.a = 0;
+            this.#b = 0;
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+    // All code paths must contain assignment
+    
+    class C6 {
+        a: number;  // Error
+        #b: number
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        constructor(cond: boolean) {
+            if (cond) {
+                return;
+            }
+            this.a = 0;
+            this.#b = 0;
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+    class C7 {
+        a: number;
+        #b: number;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        constructor(cond: boolean) {
+            if (cond) {
+                this.a = 1;
+                this.#b = 1;
+                     ~
+!!! error TS1003: Identifier expected.
+                     ~
+!!! error TS1127: Invalid character.
+                      ~
+!!! error TS1005: ';' expected.
+                return;
+            }
+            this.a = 0;
+            this.#b = 1;
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+    // Properties with string literal names aren't checked
+    
+    class C8 {
+        a: number;  // Error
+        "b": number;
+        0: number;
+    }
+    
+    // No strict initialization checks for abstract members
+    
+    abstract class C9 {
+        abstract a: number;
+        abstract b: number | undefined;
+        abstract c: number | null;
+        abstract d?: number;
+    }
+    
+    // Properties with non-undefined types must be assigned before they can be accessed
+    // within their constructor
+    
+    class C10 {
+        a: number;
+        b: number;
+        c?: number;
+        #d: number;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        constructor() {
+            let x = this.a;  // Error
+            this.a = this.b;  // Error
+            this.b = this.#d //Error
+                          ~
+!!! error TS1003: Identifier expected.
+                          ~
+!!! error TS1127: Invalid character.
+                           ~
+!!! error TS1005: ';' expected.
+            this.b = x;
+            this.#d = x;
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~
+!!! error TS1005: ';' expected.
+            let y = this.c;
+        }
+    }
+    
+    // Property is considered initialized by type any even though value could be undefined
+    
+    declare function someValue(): any;
+    
+    class C11 {
+        a: number;
+        #b: number;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        constructor() {
+            this.a = someValue();
+            this.#b = someValue();
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+    const a = 'a';
+    const b = Symbol();
+    
+    class C12 {
+        [a]: number;
+        [b]: number;
+        ['c']: number;
+    
+        constructor() {
+            this[a] = 1;
+            this[b] = 1;
+            this['c'] = 1;
+        }
+    }
+    
+    enum E {
+        A = "A",
+        B = "B"
+    }
+    class C13 {
+        [E.A]: number;
+        constructor() {
+            this[E.A] = 1;
+        }
+    }

@@ -1,17 +1,23 @@
-asyncArrowFunction/asyncArrowFunction5_es6.ts(1,11): error TS2304: Cannot find name 'async'.
-asyncArrowFunction/asyncArrowFunction5_es6.ts(1,23): error TS1012: Unexpected token.
-asyncArrowFunction/asyncArrowFunction5_es6.ts(1,24): error TS1005: ',' expected.
-asyncArrowFunction/asyncArrowFunction5_es6.ts(2,2): error TS1005: ')' expected.
+asyncArrowFunction5_es6.ts(1,11): error TS2304: Cannot find name 'async'.
+asyncArrowFunction5_es6.ts(1,18): error TS2304: Cannot find name 'await'.
+asyncArrowFunction5_es6.ts(1,24): error TS1005: ',' expected.
+asyncArrowFunction5_es6.ts(1,33): error TS1005: ',' expected.
+asyncArrowFunction5_es6.ts(1,38): error TS1005: ',' expected.
+asyncArrowFunction5_es6.ts(1,40): error TS1005: ';' expected.
 
 
-==== asyncArrowFunction/asyncArrowFunction5_es6.ts (4 errors) ====
+==== asyncArrowFunction5_es6.ts (6 errors) ====
     var foo = async (await): Promise<void> => {
               ~~~~~
 !!! error TS2304: Cannot find name 'async'.
-                          ~
-!!! error TS1012: Unexpected token.
+                     ~~~~~
+!!! error TS2304: Cannot find name 'await'.
                            ~
 !!! error TS1005: ',' expected.
+                                    ~
+!!! error TS1005: ',' expected.
+                                         ~
+!!! error TS1005: ',' expected.
+                                           ~~
+!!! error TS1005: ';' expected.
     }
-     
-!!! error TS1005: ')' expected.

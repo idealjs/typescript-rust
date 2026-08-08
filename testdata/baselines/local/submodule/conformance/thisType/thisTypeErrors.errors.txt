@@ -1,0 +1,139 @@
+thisTypeErrors.ts(41,9): error TS2304: Cannot find name 'g'.
+thisTypeErrors.ts(41,10): error TS1005: ',' expected.
+thisTypeErrors.ts(41,10): error TS2304: Cannot find name '('.
+thisTypeErrors.ts(41,11): error TS1005: ',' expected.
+thisTypeErrors.ts(41,18): error TS1005: ',' expected.
+thisTypeErrors.ts(41,26): error TS1005: ',' expected.
+thisTypeErrors.ts(41,26): error TS2304: Cannot find name '{'.
+thisTypeErrors.ts(42,13): error TS1005: ',' expected.
+thisTypeErrors.ts(42,13): error TS2304: Cannot find name 'return'.
+thisTypeErrors.ts(42,20): error TS1005: ',' expected.
+thisTypeErrors.ts(42,29): error TS1005: ',' expected.
+thisTypeErrors.ts(42,29): error TS2304: Cannot find name ';'.
+thisTypeErrors.ts(45,5): error TS2304: Cannot find name 'f'.
+thisTypeErrors.ts(45,9): error TS1005: ';' expected.
+thisTypeErrors.ts(50,13): error TS2304: Cannot find name 'h'.
+thisTypeErrors.ts(50,14): error TS1005: ',' expected.
+thisTypeErrors.ts(50,14): error TS2304: Cannot find name '('.
+thisTypeErrors.ts(50,15): error TS1005: ',' expected.
+thisTypeErrors.ts(50,22): error TS1005: ',' expected.
+thisTypeErrors.ts(50,30): error TS1005: ',' expected.
+thisTypeErrors.ts(50,30): error TS2304: Cannot find name '{'.
+thisTypeErrors.ts(51,17): error TS1005: ',' expected.
+thisTypeErrors.ts(51,17): error TS2304: Cannot find name 'return'.
+thisTypeErrors.ts(51,24): error TS1005: ',' expected.
+thisTypeErrors.ts(51,33): error TS1005: ',' expected.
+thisTypeErrors.ts(51,33): error TS2304: Cannot find name ';'.
+thisTypeErrors.ts(54,5): error TS1128: Declaration or statement expected.
+
+
+==== thisTypeErrors.ts (27 errors) ====
+    var x1: this;
+    var x2: { a: this };
+    var x3: this[];
+    
+    function f1(x: this): this {
+        var y: this;
+        return this;
+    }
+    
+    interface I1 {
+        a: { x: this };
+        b: { (): this };
+        c: { new (): this };
+        d: { [x: string]: this };
+        e: { f(x: this): this };
+    }
+    
+    class C1 {
+        a: { x: this };
+        b: { (): this };
+        c: { new (): this };
+        d: { [x: string]: this };
+        e: { f(x: this): this };
+    }
+    
+    class C2 {
+        static x: this;
+        static y = <this>undefined;
+        static foo(x: this): this {
+            return undefined;
+        }
+    }
+    
+    namespace N1 {
+        export var x: this;
+        export var y = this;
+    }
+    
+    class C3 {
+        x1 = {
+            g(x: this): this {
+            ~
+!!! error TS2304: Cannot find name 'g'.
+             ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS2304: Cannot find name '('.
+              ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS2304: Cannot find name '{'.
+                return undefined;
+                ~~~~~~
+!!! error TS1005: ',' expected.
+                ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                       ~~~~~~~~~
+!!! error TS1005: ',' expected.
+                                ~
+!!! error TS1005: ',' expected.
+                                ~
+!!! error TS2304: Cannot find name ';'.
+            }
+        }
+        f() {
+        ~
+!!! error TS2304: Cannot find name 'f'.
+            ~
+!!! error TS1005: ';' expected.
+            function g(x: this): this {
+                return undefined;
+            }
+            let x2 = {
+                h(x: this): this {
+                ~
+!!! error TS2304: Cannot find name 'h'.
+                 ~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS2304: Cannot find name '('.
+                  ~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS2304: Cannot find name '{'.
+                    return undefined;
+                    ~~~~~~
+!!! error TS1005: ',' expected.
+                    ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                           ~~~~~~~~~
+!!! error TS1005: ',' expected.
+                                    ~
+!!! error TS1005: ',' expected.
+                                    ~
+!!! error TS2304: Cannot find name ';'.
+                }
+            }
+        }
+        ~
+!!! error TS1128: Declaration or statement expected.
+    }

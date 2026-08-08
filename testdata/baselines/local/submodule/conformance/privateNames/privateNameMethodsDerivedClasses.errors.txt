@@ -1,0 +1,44 @@
+privateNameMethodsDerivedClasses.ts(2,5): error TS1003: Identifier expected.
+privateNameMethodsDerivedClasses.ts(2,5): error TS1127: Invalid character.
+privateNameMethodsDerivedClasses.ts(2,6): error TS1005: ';' expected.
+privateNameMethodsDerivedClasses.ts(4,23): error TS1003: Identifier expected.
+privateNameMethodsDerivedClasses.ts(4,23): error TS1127: Invalid character.
+privateNameMethodsDerivedClasses.ts(4,24): error TS1005: ',' expected.
+privateNameMethodsDerivedClasses.ts(9,23): error TS1003: Identifier expected.
+privateNameMethodsDerivedClasses.ts(9,23): error TS1127: Invalid character.
+privateNameMethodsDerivedClasses.ts(9,24): error TS1005: ',' expected.
+privateNameMethodsDerivedClasses.ts(9,24): error TS2304: Cannot find name 'prop'.
+
+
+==== privateNameMethodsDerivedClasses.ts (10 errors) ====
+    class Base {
+        #prop(): number{ return  123; }
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~
+!!! error TS1005: ';' expected.
+        static method(x: Derived) {
+            console.log(x.#prop());
+                          ~
+!!! error TS1003: Identifier expected.
+                          ~
+!!! error TS1127: Invalid character.
+                           ~~~~
+!!! error TS1005: ',' expected.
+        }
+    }
+    class Derived extends Base {
+        static method(x: Derived) {
+            console.log(x.#prop());
+                          ~
+!!! error TS1003: Identifier expected.
+                          ~
+!!! error TS1127: Invalid character.
+                           ~~~~
+!!! error TS1005: ',' expected.
+                           ~~~~
+!!! error TS2304: Cannot find name 'prop'.
+        }
+    }

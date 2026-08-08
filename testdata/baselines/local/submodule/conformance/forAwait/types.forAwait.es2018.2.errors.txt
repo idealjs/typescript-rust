@@ -1,0 +1,35 @@
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+types.forAwait.es2018.2.ts(8,16): error TS2454: Variable 'y' is used before being assigned.
+types.forAwait.es2018.2.ts(10,16): error TS2454: Variable 'z' is used before being assigned.
+types.forAwait.es2018.2.ts(12,16): error TS2454: Variable 'z' is used before being assigned.
+types.forAwait.es2018.2.ts(16,10): error TS2454: Variable 'y' is used before being assigned.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+==== types.forAwait.es2018.2.ts (4 errors) ====
+    declare const asyncIterable: AsyncIterable<number>;
+    declare const iterable: Iterable<number>;
+    async function f() {
+        let y: number;
+        let z: string;
+        for await (const x of {}) {
+        }
+        for await (y of {}) {
+                   ~
+!!! error TS2454: Variable 'y' is used before being assigned.
+        }
+        for await (z of asyncIterable) {
+                   ~
+!!! error TS2454: Variable 'z' is used before being assigned.
+        }
+        for await (z of iterable) {
+                   ~
+!!! error TS2454: Variable 'z' is used before being assigned.
+        }
+        for (const x of asyncIterable) {
+        }
+        for (y of asyncIterable) {
+             ~
+!!! error TS2454: Variable 'y' is used before being assigned.
+        }
+    }

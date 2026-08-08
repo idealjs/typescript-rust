@@ -1,0 +1,61 @@
+objectSpreadNegativeParse.ts(1,15): error TS2304: Cannot find name 'o'.
+objectSpreadNegativeParse.ts(1,18): error TS1012: Unexpected token.
+objectSpreadNegativeParse.ts(1,19): error TS1005: ':' expected.
+objectSpreadNegativeParse.ts(2,1): error TS1005: ',' expected.
+objectSpreadNegativeParse.ts(2,1): error TS2304: Cannot find name 'let'.
+objectSpreadNegativeParse.ts(2,5): error TS1005: ',' expected.
+objectSpreadNegativeParse.ts(2,5): error TS2304: Cannot find name 'o8'.
+objectSpreadNegativeParse.ts(2,8): error TS1005: ',' expected.
+objectSpreadNegativeParse.ts(2,8): error TS2304: Cannot find name '='.
+objectSpreadNegativeParse.ts(2,10): error TS1005: ',' expected.
+objectSpreadNegativeParse.ts(2,10): error TS2304: Cannot find name '{'.
+objectSpreadNegativeParse.ts(2,12): error TS1005: ',' expected.
+objectSpreadNegativeParse.ts(2,15): error TS1012: Unexpected token.
+objectSpreadNegativeParse.ts(2,16): error TS1005: ',' expected.
+objectSpreadNegativeParse.ts(2,16): error TS2304: Cannot find name 'o'.
+objectSpreadNegativeParse.ts(3,28): error TS1005: ',' expected.
+objectSpreadNegativeParse.ts(3,28): error TS2304: Cannot find name '{'.
+objectSpreadNegativeParse.ts(3,31): error TS1128: Declaration or statement expected.
+
+
+==== objectSpreadNegativeParse.ts (18 errors) ====
+    let o7 = { ...o? };
+                  ~
+!!! error TS2304: Cannot find name 'o'.
+                     ~
+!!! error TS1012: Unexpected token.
+                      ~
+!!! error TS1005: ':' expected.
+    let o8 = { ...*o };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'let'.
+        ~~
+!!! error TS1005: ',' expected.
+        ~~
+!!! error TS2304: Cannot find name 'o8'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '='.
+             ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS2304: Cannot find name '{'.
+               ~~~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1012: Unexpected token.
+                   ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS2304: Cannot find name 'o'.
+    let o9 = { ...matchMedia() { }};
+                               ~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS2304: Cannot find name '{'.
+                                  ~
+!!! error TS1128: Declaration or statement expected.
+    let o10 = { ...get x() { return 12; }};

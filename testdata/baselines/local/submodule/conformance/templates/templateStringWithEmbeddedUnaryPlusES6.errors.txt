@@ -1,0 +1,8 @@
+templateStringWithEmbeddedUnaryPlusES6.ts(2,17): error TS2304: Cannot find name 'Infinity'.
+
+
+==== templateStringWithEmbeddedUnaryPlusES6.ts (1 errors) ====
+    ﻿// @target: ES6
+    var x = `abc${ +Infinity }def`;
+                 ~~~~~~~~
+!!! error TS2304: Cannot find name 'Infinity'.

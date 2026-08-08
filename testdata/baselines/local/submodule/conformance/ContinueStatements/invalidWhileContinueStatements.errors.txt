@@ -1,0 +1,66 @@
+invalidWhileContinueStatements.ts(4,1): error TS1104: A 'continue' statement can only be used within an enclosing iteration statement.
+invalidWhileContinueStatements.ts(8,14): error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+invalidWhileContinueStatements.ts(27,5): error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+invalidWhileContinueStatements.ts(28,5): error TS7027: Unreachable code detected.
+invalidWhileContinueStatements.ts(37,5): error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+
+
+==== invalidWhileContinueStatements.ts (5 errors) ====
+    // All errors
+    
+    // naked continue not allowed
+    continue;
+    ~~~~~~~~~
+    
+    
+    // non-existent label
+    ~~~~~~~~~~~~~~~~~~~~~
+    ONE:
+    
+!!! error TS1104: A 'continue' statement can only be used within an enclosing iteration statement.
+    while (true) continue TWO;
+                 ~~~~~~~~~~~~~
+    
+    
+    // continue from inside function
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    TWO:
+    
+!!! error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+    while (true){
+        var x = () => {
+            continue TWO;
+        }
+    }
+    
+    THREE:
+    while (true) {
+        var fn = function () {
+            continue THREE;
+        }
+    }
+    
+    // continue forward
+    while (true) {
+        continue FIVE;
+        ~~~~~~~~~~~~~~
+        FIVE:
+    ~~~~
+!!! error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+        ~~~~~
+        while (true) { }
+    ~~~~~~~~~~~~~~~~~~~~
+    }
+    
+!!! error TS7027: Unreachable code detected.
+    
+    // label on non-loop statement
+    NINE:
+    var y = 12;
+    
+    while (true) {
+        continue NINE;
+        ~~~~~~~~~~~~~~
+    }
+    
+!!! error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.

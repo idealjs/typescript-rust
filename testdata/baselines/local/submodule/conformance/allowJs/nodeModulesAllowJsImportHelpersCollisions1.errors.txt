@@ -1,0 +1,45 @@
+index.js(3,1): error TS2304: Cannot find name '_fs'.
+index.js(5,1): error TS2304: Cannot find name 'fs'.
+package.json(2,11): error TS1005: ';' expected.
+
+
+==== index.js (2 errors) ====
+    // cjs format file
+    import {default as _fs} from "fs";
+    _fs.readFile;
+    ~~~
+!!! error TS2304: Cannot find name '_fs'.
+    import * as fs from "fs";
+    fs.readFile;
+    ~~
+!!! error TS2304: Cannot find name 'fs'.
+==== index.js (2 errors) ====
+    // esm format file
+    import {default as _fs} from "fs";
+    _fs.readFile;
+    ~~~
+!!! error TS2304: Cannot find name '_fs'.
+    import * as fs from "fs";
+    fs.readFile;
+    ~~
+!!! error TS2304: Cannot find name 'fs'.
+==== package.json (1 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+        "type": "module"
+    }
+==== package.json (1 errors) ====
+    {
+        "type": "commonjs"
+              ~
+!!! error TS1005: ';' expected.
+    }
+==== types.d.ts (0 errors) ====
+    declare module "fs";
+    declare module "tslib" {
+        export {};
+        // intentionally missing all helpers
+    }

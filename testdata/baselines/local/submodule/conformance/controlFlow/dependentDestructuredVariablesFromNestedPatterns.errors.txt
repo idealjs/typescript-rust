@@ -1,0 +1,69 @@
+dependentDestructuredVariablesFromNestedPatterns.ts(1,34): error TS2304: Cannot find name 'Error'.
+dependentDestructuredVariablesFromNestedPatterns.ts(11,46): error TS2304: Cannot find name 'Error'.
+dependentDestructuredVariablesFromNestedPatterns.ts(25,25): error TS2304: Cannot find name 'Error'.
+dependentDestructuredVariablesFromNestedPatterns.ts(25,31): error TS2304: Cannot find name 'String'.
+dependentDestructuredVariablesFromNestedPatterns.ts(39,46): error TS2304: Cannot find name 'Error'.
+dependentDestructuredVariablesFromNestedPatterns.ts(40,7): error TS2304: Cannot find name 'Math'.
+
+
+==== dependentDestructuredVariablesFromNestedPatterns.ts (6 errors) ====
+    function test1(arg: [[undefined, Error] | [number, undefined]]) {
+                                     ~~~~~
+!!! error TS2304: Cannot find name 'Error'.
+      const [[p1, p1Error]] = arg;
+    
+      if (p1Error) {
+        return;
+      }
+    
+      p1;
+    }
+    
+    function test2([[p1, p1Error]]: [[undefined, Error] | [number, undefined]]) {
+                                                 ~~~~~
+!!! error TS2304: Cannot find name 'Error'.
+      if (p1Error) {
+        return;
+      }
+    
+      p1;
+    }
+    
+    async function myAllSettled<T extends readonly unknown[]>(fn: () => T) {
+      const promises = await Promise.allSettled(fn());
+    
+      return promises.map((result) =>
+        result.status === "fulfilled"
+          ? [result.value, undefined]
+          : [undefined, new Error(String(result.reason))],
+                            ~~~~~
+!!! error TS2304: Cannot find name 'Error'.
+                                  ~~~~~~
+!!! error TS2304: Cannot find name 'String'.
+      ) as { [K in keyof T]: [Awaited<T[K]>, undefined] | [undefined, Error] };
+    }
+    
+    async function test3() {
+      const [[p1, p1Error], _] = await myAllSettled(
+        () => [Promise.resolve(0), Promise.reject(1)] as const,
+      );
+    
+      if (p1Error) return;
+    
+      p1;
+    }
+    
+    function test4([[p1, p1Error]]: [[undefined, Error] | [number, undefined]]) {
+                                                 ~~~~~
+!!! error TS2304: Cannot find name 'Error'.
+      if (Math.random()) {
+          ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+        p1 = undefined;
+      }
+      if (p1Error) {
+        return;
+      }
+    
+      p1;
+    }

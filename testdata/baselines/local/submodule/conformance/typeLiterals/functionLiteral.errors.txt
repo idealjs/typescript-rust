@@ -1,0 +1,22 @@
+functionLiteral.ts(10,30): error TS2304: Cannot find name 'T'.
+functionLiteral.ts(10,36): error TS2304: Cannot find name 'T'.
+
+
+==== functionLiteral.ts (2 errors) ====
+    // basic valid forms of function literals
+    
+    var x = () => 1;
+    var x: {
+        (): number;
+    }
+    
+    var y: { (x: string): string; };
+    var y: (x: string) => string;
+    var y2: { <T>(x: T): T; } = <T>(x: T) => x
+                                 ~
+!!! error TS2304: Cannot find name 'T'.
+                                       ~
+!!! error TS2304: Cannot find name 'T'.
+    
+    var z: { new (x: number): number; };
+    var z: new (x: number) => number;

@@ -1,0 +1,153 @@
+typeFromPropertyAssignment36.ts(4,7): error TS2339: Property 'e' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(5,7): error TS2339: Property 'e' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(8,11): error TS2339: Property 'q' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(11,7): error TS2339: Property 'q' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(13,11): error TS2339: Property 'q' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(16,11): error TS2339: Property 'q' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(18,7): error TS2339: Property 'q' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(20,11): error TS2339: Property 'r' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(23,11): error TS2339: Property 'r' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(25,7): error TS2339: Property 'r' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(27,11): error TS2339: Property 's' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(36,3): error TS2339: Property 'e' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(37,3): error TS2339: Property 'e' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(40,7): error TS2339: Property 'q' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(42,3): error TS2339: Property 'q' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(44,7): error TS2339: Property 'q' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(47,7): error TS2339: Property 'q' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(49,3): error TS2339: Property 'q' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(51,7): error TS2339: Property 'r' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(54,7): error TS2339: Property 'r' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(56,3): error TS2339: Property 'r' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(62,7): error TS2339: Property 'expando' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(64,3): error TS2339: Property 'expando' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(67,7): error TS2339: Property 'both' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(70,7): error TS2339: Property 'both' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(72,3): error TS2339: Property 'both' does not exist on type '() => void'.
+
+
+==== typeFromPropertyAssignment36.ts (26 errors) ====
+    function f(b: boolean) {
+        function d() {
+        }
+        d.e = 12
+          ~
+!!! error TS2339: Property 'e' does not exist on type '() => void'.
+        d.e
+          ~
+!!! error TS2339: Property 'e' does not exist on type '() => void'.
+    
+        if (b) {
+            d.q = false
+              ~
+!!! error TS2339: Property 'q' does not exist on type '() => void'.
+        }
+        // error d.q might not be assigned
+        d.q
+          ~
+!!! error TS2339: Property 'q' does not exist on type '() => void'.
+        if (b) {
+            d.q = false
+              ~
+!!! error TS2339: Property 'q' does not exist on type '() => void'.
+        }
+        else {
+            d.q = true
+              ~
+!!! error TS2339: Property 'q' does not exist on type '() => void'.
+        }
+        d.q
+          ~
+!!! error TS2339: Property 'q' does not exist on type '() => void'.
+        if (b) {
+            d.r = 1
+              ~
+!!! error TS2339: Property 'r' does not exist on type '() => void'.
+        }
+        else {
+            d.r = 2
+              ~
+!!! error TS2339: Property 'r' does not exist on type '() => void'.
+        }
+        d.r
+          ~
+!!! error TS2339: Property 'r' does not exist on type '() => void'.
+        if (b) {
+            d.s = 'hi'
+              ~
+!!! error TS2339: Property 's' does not exist on type '() => void'.
+        }
+        return d
+    }
+    // OK to access possibly-unassigned properties outside the initialising scope
+    var test = f(true).s
+    
+    function d() {
+    }
+    d.e = 12
+      ~
+!!! error TS2339: Property 'e' does not exist on type '() => void'.
+    d.e
+      ~
+!!! error TS2339: Property 'e' does not exist on type '() => void'.
+    
+    if (!!false) {
+        d.q = false
+          ~
+!!! error TS2339: Property 'q' does not exist on type '() => void'.
+    }
+    d.q
+      ~
+!!! error TS2339: Property 'q' does not exist on type '() => void'.
+    if (!!false) {
+        d.q = false
+          ~
+!!! error TS2339: Property 'q' does not exist on type '() => void'.
+    }
+    else {
+        d.q = true
+          ~
+!!! error TS2339: Property 'q' does not exist on type '() => void'.
+    }
+    d.q
+      ~
+!!! error TS2339: Property 'q' does not exist on type '() => void'.
+    if (!!false) {
+        d.r = 1
+          ~
+!!! error TS2339: Property 'r' does not exist on type '() => void'.
+    }
+    else {
+        d.r = 2
+          ~
+!!! error TS2339: Property 'r' does not exist on type '() => void'.
+    }
+    d.r
+      ~
+!!! error TS2339: Property 'r' does not exist on type '() => void'.
+    
+    // test function expressions too
+    const g = function() {
+    }
+    if (!!false) {
+        g.expando = 1
+          ~~~~~~~
+!!! error TS2339: Property 'expando' does not exist on type '() => void'.
+    }
+    g.expando // error
+      ~~~~~~~
+!!! error TS2339: Property 'expando' does not exist on type '() => void'.
+    
+    if (!!false) {
+        g.both = 'hi'
+          ~~~~
+!!! error TS2339: Property 'both' does not exist on type '() => void'.
+    }
+    else {
+        g.both = 0
+          ~~~~
+!!! error TS2339: Property 'both' does not exist on type '() => void'.
+    }
+    g.both
+      ~~~~
+!!! error TS2339: Property 'both' does not exist on type '() => void'.

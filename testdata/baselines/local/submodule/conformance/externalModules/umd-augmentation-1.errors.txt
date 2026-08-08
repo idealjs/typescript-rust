@@ -1,0 +1,46 @@
+b.ts(3,13): error TS2304: Cannot find name 'm'.
+b.ts(4,17): error TS2304: Cannot find name 'm'.
+
+
+==== umd-augmentation-1.ts (0 errors) ====
+    
+==== index.d.ts (0 errors) ====
+    export as namespace Math2d;
+    
+    export interface Point {
+    	x: number;
+    	y: number;
+    }
+    
+    export class Vector implements Point {
+    	x: number;
+    	y: number;
+    	constructor(x: number, y: number);
+    
+    	translate(dx: number, dy: number): Vector;
+    }
+    
+    export function getLength(p: Vector): number;
+    
+==== math2d-augment.d.ts (0 errors) ====
+    import * as Math2d from 'math2d';
+    // Augment the module
+    declare module 'math2d' {
+    	// Add a method to the class
+    	interface Vector {
+    		reverse(): Math2d.Point;
+    	}
+    }
+    
+==== b.ts (2 errors) ====
+    /// <reference path="math2d-augment.d.ts" />
+    import * as m from 'math2d';
+    let v = new m.Vector(3, 2);
+                ~
+!!! error TS2304: Cannot find name 'm'.
+    let magnitude = m.getLength(v);
+                    ~
+!!! error TS2304: Cannot find name 'm'.
+    let p: m.Point = v.translate(5, 5);
+    p = v.reverse();
+    var t = p.x;

@@ -1,0 +1,18 @@
+templateLiteralTypes8.ts(8,5): error TS2322: Type 'string' is not assignable to type '`${"a" | "b"}`'.
+templateLiteralTypes8.ts(9,5): error TS2322: Type 'string' is not assignable to type '`${"a" | "b"}`'.
+
+
+==== templateLiteralTypes8.ts (2 errors) ====
+    const enum E {
+      a = "a",
+      b = "b",
+    }
+    
+    type Stringify<T extends string> = `${T}`;
+    
+    let z1: `${E}` = "a";
+        ~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'string' is not assignable to type '`${"a" | "b"}`'.
+    let z2: Stringify<E> = "a";
+        ~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'string' is not assignable to type '`${"a" | "b"}`'.

@@ -1,15 +1,15 @@
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(7,19): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(8,19): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(13,26): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(14,26): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(23,19): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(24,19): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(29,26): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(30,26): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(33,32): error TS2349: This expression is not callable.
+derivedClassOverridesProtectedMembers.ts(7,19): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers.ts(8,19): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers.ts(13,26): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers.ts(14,26): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers.ts(23,19): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers.ts(24,19): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers.ts(29,26): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers.ts(30,26): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers.ts(33,32): error TS2349: This expression is not callable.
 
 
-==== inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts (9 errors) ====
+==== derivedClassOverridesProtectedMembers.ts (9 errors) ====
     var x: { foo: string; }
     var y: { foo: string; bar: string; }
     

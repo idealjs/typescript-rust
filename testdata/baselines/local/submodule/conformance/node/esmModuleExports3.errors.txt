@@ -8,7 +8,7 @@
 /importer-cts.cts(8,5): error TS2304: Cannot find name 'Foo3'.
 
 
-==== node/esmModuleExports3.ts (0 errors) ====
+==== esmModuleExports3.ts (0 errors) ====
     
 ==== /importer-cjs.cjs (1 errors) ====
     const Foo = require("./exporter.mjs");

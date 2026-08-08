@@ -1,0 +1,32 @@
+bug24730.js(2,4): error TS2339: Property 'TreeElement' does not exist on type 'object'.
+bug24730.js(7,4): error TS2339: Property 'context' does not exist on type 'object'.
+bug24730.js(7,21): error TS2339: Property 'TreeElement' does not exist on type 'object'.
+bug24730.js(11,14): error TS2339: Property 'doesNotExist' does not exist on type '{ onpopulate: () => any }'.
+bug24730.js(12,14): error TS2339: Property 'treeOutline' does not exist on type '{ onpopulate: () => any }'.
+
+
+==== bug24730.js (5 errors) ====
+    var UI = {}
+    UI.TreeElement = class {
+       ~~~~~~~~~~~
+!!! error TS2339: Property 'TreeElement' does not exist on type 'object'.
+        constructor() {
+            this.treeOutline = 12
+        }
+    };
+    UI.context = new UI.TreeElement()
+       ~~~~~~~
+!!! error TS2339: Property 'context' does not exist on type 'object'.
+                        ~~~~~~~~~~~
+!!! error TS2339: Property 'TreeElement' does not exist on type 'object'.
+    
+    class C extends UI.TreeElement {
+        onpopulate() {
+            this.doesNotExist
+                 ~~~~~~~~~~~~
+!!! error TS2339: Property 'doesNotExist' does not exist on type '{ onpopulate: () => any }'.
+            this.treeOutline.doesntExistEither()
+                 ~~~~~~~~~~~
+!!! error TS2339: Property 'treeOutline' does not exist on type '{ onpopulate: () => any }'.
+        }
+    };

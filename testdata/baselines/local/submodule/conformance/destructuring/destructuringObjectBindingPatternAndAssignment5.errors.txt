@@ -1,0 +1,14 @@
+destructuringObjectBindingPatternAndAssignment5.ts(4,8): error TS2454: Variable 'x' is used before being assigned.
+destructuringObjectBindingPatternAndAssignment5.ts(4,14): error TS2454: Variable 'y' is used before being assigned.
+
+
+==== destructuringObjectBindingPatternAndAssignment5.ts (2 errors) ====
+    function a () {
+        let x: number;
+        let y: any
+        ({ x, ...y } = ({ } as any));
+           ~
+!!! error TS2454: Variable 'x' is used before being assigned.
+                 ~
+!!! error TS2454: Variable 'y' is used before being assigned.
+    }

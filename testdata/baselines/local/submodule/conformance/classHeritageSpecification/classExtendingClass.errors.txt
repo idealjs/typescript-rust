@@ -1,8 +1,8 @@
-classHeritageSpecification/classExtendingClass.ts(15,12): error TS2339: Property 'other' does not exist on type 'object'.
-classHeritageSpecification/classExtendingClass.ts(31,13): error TS2339: Property 'other' does not exist on type 'object'.
+classExtendingClass.ts(15,12): error TS2339: Property 'other' does not exist on type 'object'.
+classExtendingClass.ts(31,13): error TS2339: Property 'other' does not exist on type 'object'.
 
 
-==== classHeritageSpecification/classExtendingClass.ts (2 errors) ====
+==== classExtendingClass.ts (2 errors) ====
     class C {
         foo: string;
         thing() { }

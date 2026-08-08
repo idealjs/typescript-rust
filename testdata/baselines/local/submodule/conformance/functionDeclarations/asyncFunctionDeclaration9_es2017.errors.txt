@@ -1,8 +1,8 @@
-functionDeclarations/asyncFunctionDeclaration9_es2017.ts(2,19): error TS1012: Unexpected token.
-functionDeclarations/asyncFunctionDeclaration9_es2017.ts(2,20): error TS1005: ']' expected.
+asyncFunctionDeclaration9_es2017.ts(2,19): error TS1012: Unexpected token.
+asyncFunctionDeclaration9_es2017.ts(2,20): error TS1005: ']' expected.
 
 
-==== functionDeclarations/asyncFunctionDeclaration9_es2017.ts (2 errors) ====
+==== asyncFunctionDeclaration9_es2017.ts (2 errors) ====
     async function foo(): Promise<void> {
       var v = { [await]: foo }
                       ~

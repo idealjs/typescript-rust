@@ -1,0 +1,127 @@
+privateNamesAndGenericClasses-2.ts(2,5): error TS1003: Identifier expected.
+privateNamesAndGenericClasses-2.ts(2,5): error TS1127: Invalid character.
+privateNamesAndGenericClasses-2.ts(2,6): error TS1005: ';' expected.
+privateNamesAndGenericClasses-2.ts(3,5): error TS1003: Identifier expected.
+privateNamesAndGenericClasses-2.ts(3,5): error TS1127: Invalid character.
+privateNamesAndGenericClasses-2.ts(3,6): error TS1005: ';' expected.
+privateNamesAndGenericClasses-2.ts(4,19): error TS1003: Identifier expected.
+privateNamesAndGenericClasses-2.ts(4,19): error TS1127: Invalid character.
+privateNamesAndGenericClasses-2.ts(4,20): error TS1005: ';' expected.
+privateNamesAndGenericClasses-2.ts(4,20): error TS7027: Unreachable code detected.
+privateNamesAndGenericClasses-2.ts(7,12): error TS1003: Identifier expected.
+privateNamesAndGenericClasses-2.ts(7,12): error TS1127: Invalid character.
+privateNamesAndGenericClasses-2.ts(7,13): error TS1005: ';' expected.
+privateNamesAndGenericClasses-2.ts(8,16): error TS1003: Identifier expected.
+privateNamesAndGenericClasses-2.ts(8,16): error TS1127: Invalid character.
+privateNamesAndGenericClasses-2.ts(8,17): error TS1005: ';' expected.
+privateNamesAndGenericClasses-2.ts(10,9): error TS1005: ';' expected.
+privateNamesAndGenericClasses-2.ts(11,12): error TS1003: Identifier expected.
+privateNamesAndGenericClasses-2.ts(11,12): error TS1127: Invalid character.
+privateNamesAndGenericClasses-2.ts(11,13): error TS1005: ';' expected.
+privateNamesAndGenericClasses-2.ts(14,9): error TS1005: ';' expected.
+privateNamesAndGenericClasses-2.ts(15,19): error TS1003: Identifier expected.
+privateNamesAndGenericClasses-2.ts(15,19): error TS1127: Invalid character.
+privateNamesAndGenericClasses-2.ts(15,20): error TS1005: ';' expected.
+privateNamesAndGenericClasses-2.ts(15,20): error TS7027: Unreachable code detected.
+privateNamesAndGenericClasses-2.ts(19,15): error TS2345: Argument of type '3' is not assignable to parameter of type 'T'.
+privateNamesAndGenericClasses-2.ts(20,15): error TS2345: Argument of type '"hello"' is not assignable to parameter of type 'T'.
+privateNamesAndGenericClasses-2.ts(23,7): error TS2322: Type '() => T' is not assignable to type 'number'.
+privateNamesAndGenericClasses-2.ts(24,3): error TS1003: Identifier expected.
+privateNamesAndGenericClasses-2.ts(24,3): error TS1127: Invalid character.
+privateNamesAndGenericClasses-2.ts(24,4): error TS1005: ';' expected.
+privateNamesAndGenericClasses-2.ts(24,4): error TS2304: Cannot find name 'foo'.
+
+
+==== privateNamesAndGenericClasses-2.ts (32 errors) ====
+    class C<T> {
+        #foo: T;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~
+!!! error TS1005: ';' expected.
+        #bar(): T {
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~
+!!! error TS1005: ';' expected.
+          return this.#foo;
+                      ~
+!!! error TS1003: Identifier expected.
+                      ~
+!!! error TS1127: Invalid character.
+                       ~~~
+!!! error TS1005: ';' expected.
+                       ~~~~
+        }
+    ~~~~
+!!! error TS7027: Unreachable code detected.
+        constructor(t: T) {
+          this.#foo = t;
+               ~
+!!! error TS1003: Identifier expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~
+!!! error TS1005: ';' expected.
+          t = this.#bar();
+                   ~
+!!! error TS1003: Identifier expected.
+                   ~
+!!! error TS1127: Invalid character.
+                    ~~~
+!!! error TS1005: ';' expected.
+        }
+        set baz(t: T) {
+            ~~~
+!!! error TS1005: ';' expected.
+          this.#foo = t;
+               ~
+!!! error TS1003: Identifier expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~
+!!! error TS1005: ';' expected.
+    
+        }
+        get baz(): T {
+            ~~~
+!!! error TS1005: ';' expected.
+          return this.#foo;
+                      ~
+!!! error TS1003: Identifier expected.
+                      ~
+!!! error TS1127: Invalid character.
+                       ~~~
+!!! error TS1005: ';' expected.
+                       ~~~~
+        }
+    ~~~~
+!!! error TS7027: Unreachable code detected.
+    }
+    
+    let a = new C(3);
+                  ~
+!!! error TS2345: Argument of type '3' is not assignable to parameter of type 'T'.
+    let b = new C("hello");
+                  ~~~~~~~
+!!! error TS2345: Argument of type '"hello"' is not assignable to parameter of type 'T'.
+    
+    a.baz = 5                                 // OK
+    const x: number = a.baz                   // OK
+          ~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '() => T' is not assignable to type 'number'.
+    a.#foo;                                   // Error
+      ~
+!!! error TS1003: Identifier expected.
+      ~
+!!! error TS1127: Invalid character.
+       ~~~
+!!! error TS1005: ';' expected.
+       ~~~
+!!! error TS2304: Cannot find name 'foo'.
+    a = b;                                    // Error
+    b = a;                                    // Error

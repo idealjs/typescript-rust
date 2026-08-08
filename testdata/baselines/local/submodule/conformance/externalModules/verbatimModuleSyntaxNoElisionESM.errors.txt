@@ -1,0 +1,63 @@
+error TS2300: Duplicate identifier 'a'.
+error TS2300: Duplicate identifier 'A'.
+error TS2300: Duplicate identifier 'A'.
+/b.ts(7,13): error TS1003: Identifier expected.
+/b.ts(7,15): error TS1005: '=' expected.
+/b.ts(7,17): error TS1005: ';' expected.
+/b.ts(7,17): error TS2304: Cannot find name 'as'.
+/b.ts(7,20): error TS1005: ';' expected.
+/b.ts(7,20): error TS2304: Cannot find name 'A3'.
+/b.ts(7,23): error TS1128: Declaration or statement expected.
+
+
+!!! error TS2300: Duplicate identifier 'a'.
+
+!!! error TS2300: Duplicate identifier 'A'.
+
+!!! error TS2300: Duplicate identifier 'A'.
+==== /a.ts (0 errors) ====
+    export const a = 0;
+    export type A = typeof a;
+    export class AClass {}
+    
+==== /b.ts (7 errors) ====
+    import { a, A, AClass } from "./a";
+    import type { a as aValue, A as AType } from "./a";
+    import { type A as AType2 } from "./a";
+    
+    export { A };
+    export { A as A2 } from "./a";
+    export type { A as A3 } from "./a";
+                ~
+!!! error TS1003: Identifier expected.
+                  ~
+!!! error TS1005: '=' expected.
+                    ~~
+!!! error TS1005: ';' expected.
+                    ~~
+!!! error TS2304: Cannot find name 'as'.
+                       ~~
+!!! error TS1005: ';' expected.
+                       ~~
+!!! error TS2304: Cannot find name 'A3'.
+                          ~
+!!! error TS1128: Declaration or statement expected.
+    export { type A as A4 } from "./a";
+    export type { AClass } from "./a";
+    
+==== /c.ts (0 errors) ====
+    import { AClass } from "./b";
+    
+==== /main4.ts (0 errors) ====
+    export default 1; // ok
+    
+==== /main5.ts (0 errors) ====
+    export default class C {} // ok
+    
+==== /main6.ts (0 errors) ====
+    interface I {}
+    export default I; // error
+    
+==== /main7.ts (0 errors) ====
+    import type C from "./main5";
+    export default C; // error

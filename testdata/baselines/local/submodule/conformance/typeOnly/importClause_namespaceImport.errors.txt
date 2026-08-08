@@ -1,0 +1,26 @@
+/b.ts(2,1): error TS2304: Cannot find name 'types'.
+/b.ts(3,1): error TS2304: Cannot find name 'types'.
+/b.ts(8,13): error TS2304: Cannot find name 'types'.
+
+
+==== /a.ts (0 errors) ====
+    export class A { a!: string }
+    export class B { b!: number }
+    export type C<T> = T;
+    export const Value = {};
+    
+==== /b.ts (3 errors) ====
+    import type * as types from './a';
+    types;
+    ~~~~~
+!!! error TS2304: Cannot find name 'types'.
+    types.Value;
+    ~~~~~
+!!! error TS2304: Cannot find name 'types'.
+    let v: types.Value;
+    const a: types.A = {};
+    const b: types.B = {};
+    const c: types.C<string> = "";
+    const d = { types };
+                ~~~~~
+!!! error TS2304: Cannot find name 'types'.

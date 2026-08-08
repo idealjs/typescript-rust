@@ -1,0 +1,27 @@
+react-consumer.tsx(5,15): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+react-consumer.tsx(5,15): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+
+
+==== tsxReactEmit5.tsx (0 errors) ====
+    
+==== file.tsx (0 errors) ====
+    declare namespace JSX {
+    	interface Element { }
+    	interface IntrinsicElements {
+    		[s: string]: any;
+    	}
+    }
+    
+==== test.d.ts (0 errors) ====
+    export var React;
+    
+==== react-consumer.tsx (2 errors) ====
+    import {React} from "./test";
+    // Should emit test_1.React.createElement
+    //  and React.__spread
+    var foo: any;
+    var spread1 = <div x='' {...foo} y='' />;
+                  ~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+                  ~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.

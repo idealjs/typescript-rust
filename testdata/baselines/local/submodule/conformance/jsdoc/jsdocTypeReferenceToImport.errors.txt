@@ -1,0 +1,28 @@
+jsdocTypeReferenceToImport.js(1,11): error TS2304: Cannot find name 'require'.
+jsdocTypeReferenceToImport.js(2,11): error TS2304: Cannot find name 'require'.
+
+
+==== jsdocTypeReferenceToImport.ts (0 errors) ====
+    // #34802
+==== jsdocTypeReferenceToImport.js (2 errors) ====
+    const C = require('./ex').C;
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    const D = require('./ex')?.C;
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    /** @type {C} c */
+    var c = new C()
+    c.start
+    c.end
+    
+    /** @type {D} c */
+    var d = new D()
+    d.start
+    d.end
+    
+==== ex.d.ts (0 errors) ====
+    export class C {
+        start: number
+        end: number
+    }

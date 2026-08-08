@@ -1,0 +1,20 @@
+async.js(1,1): error TS2304: Cannot find name 'exports'.
+async.js(2,7): error TS1003: Identifier expected.
+async.js(2,8): error TS1005: ';' expected.
+async.js(2,8): error TS2304: Cannot find name 'exports'.
+async.js(2,18): error TS2304: Cannot find name 'exports'.
+
+
+==== async.js (5 errors) ====
+    exports.default = { m: 1, a: 1 }
+    ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    module.exports = exports['default'];
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+                     ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.

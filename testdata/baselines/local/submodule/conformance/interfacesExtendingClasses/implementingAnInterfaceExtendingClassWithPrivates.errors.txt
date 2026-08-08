@@ -1,0 +1,33 @@
+implementingAnInterfaceExtendingClassWithPrivates.ts(9,1): error TS2420: Class 'Bar' incorrectly implements interface '{ y: number }'.
+
+
+==== implementingAnInterfaceExtendingClassWithPrivates.ts (1 errors) ====
+    class Foo {
+        private x: string;
+    }
+    
+    interface I extends Foo {
+        y: number;
+    }
+    
+    class Bar implements I { // error
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+    ~
+    
+    
+    class Bar2 implements I { // error
+    
+!!! error TS2420: Class 'Bar' incorrectly implements interface '{ y: number }'.
+        y: number;
+    }
+    
+    class Bar3 implements I { // error
+        x: string;
+        y: number;
+    }
+    
+    class Bar4 implements I { // error
+        private x: string;
+        y: number;
+    }

@@ -1,0 +1,10 @@
+parserExportAssignment8.ts(1,10): error TS2304: Cannot find name 'B'.
+
+
+==== parserExportAssignment8.ts (1 errors) ====
+    export = B;
+             ~
+!!! error TS2304: Cannot find name 'B'.
+    
+    export class C {
+    }

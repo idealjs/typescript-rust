@@ -1,0 +1,82 @@
+error TS2300: Duplicate identifier 'C'.
+/a.ts(4,19): error TS1005: ',' expected.
+/a.ts(4,21): error TS1005: ',' expected.
+/a.ts(4,21): error TS1182: A destructuring declaration must have an initializer.
+/f.ts(4,8): error TS2304: Cannot find name 'D'.
+
+
+!!! error TS2300: Duplicate identifier 'C'.
+==== importsNotUsedAsValues_error.ts (0 errors) ====
+    
+==== /a.ts (3 errors) ====
+    export default class {}
+    export class A {}
+    export type B = {};
+    export const enum C { One, Two }
+                      ~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS1005: ',' expected.
+                        ~~~~~~~~~~~~
+    
+    
+!!! error TS1182: A destructuring declaration must have an initializer.
+==== /b.ts (0 errors) ====
+    import { A, B } from './a'; // Error
+    declare let a: A;
+    declare let b: B;
+    console.log(a, b);
+    
+==== /c.ts (0 errors) ====
+    import Default, * as named from './a'; // Error
+    declare let a: Default;
+    declare let b: named.B;
+    console.log(a, b);
+    
+==== /d.ts (0 errors) ====
+    import Default, { A } from './a';
+    const a = A;
+    declare let b: Default;
+    console.log(a, b);
+    
+==== /e.ts (0 errors) ====
+    import { A, B } from './a'; // noUnusedLocals error only
+    
+==== /f.ts (1 errors) ====
+    import { C } from './a';
+    import type { C as D } from './a';
+    C.One;
+    let c: D = C.Two;
+           ~
+!!! error TS2304: Cannot find name 'D'.
+    let d: D.Two = C.Two;
+    console.log(c, d);
+    
+==== /g.ts (0 errors) ====
+    import { C } from './a';
+    declare let c: C;
+    declare let d: C.Two;
+    console.log(c, d);
+    
+==== /h.ts (0 errors) ====
+    class H {}
+    export = H;
+    
+==== /i.ts (0 errors) ====
+    import H = require('./h'); // Error
+    let h: H = {};
+    console.log(h);
+    
+==== /j.ts (0 errors) ====
+    import H = require('./h'); // noUnusedLocals error only
+    
+==== /k.ts (0 errors) ====
+    const enum K { One, Two }
+    export = K;
+    
+==== /l.ts (0 errors) ====
+    import K = require('./k');
+    K.One;
+    
+==== /j.ts (0 errors) ====
+    // Sad face https://github.com/microsoft/TypeScript/blob/6b04f5039429b9d412696fe2febe39ecc69ad365/src/testRunner/compilerRunner.ts#L207

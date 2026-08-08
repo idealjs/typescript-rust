@@ -1,0 +1,16 @@
+parser512097.ts(1,12): error TS2304: Cannot find name 'aa'.
+parser512097.ts(1,14): error TS1005: ',' expected.
+parser512097.ts(1,14): error TS2304: Cannot find name ';'.
+
+
+==== parser512097.ts (3 errors) ====
+    var tt = { aa; }
+               ~~
+!!! error TS2304: Cannot find name 'aa'.
+                 ~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS2304: Cannot find name ';'.
+    
+    if (true) {
+    }

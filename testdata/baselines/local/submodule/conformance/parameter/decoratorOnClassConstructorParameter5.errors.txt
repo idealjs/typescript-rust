@@ -1,0 +1,25 @@
+decoratorOnClassConstructorParameter5.ts(8,9): error TS1138: Parameter declaration expected.
+decoratorOnClassConstructorParameter5.ts(8,15): error TS1005: ',' expected.
+decoratorOnClassConstructorParameter5.ts(8,23): error TS1005: ',' expected.
+decoratorOnClassConstructorParameter5.ts(8,32): error TS1005: ',' expected.
+
+
+==== decoratorOnClassConstructorParameter5.ts (4 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/44931
+    interface IFoo { }
+    declare const IFoo: any;
+    class BulkEditPreviewProvider {
+        static readonly Schema = 'vscode-bulkeditpreview';
+        static emptyPreview = { scheme: BulkEditPreviewProvider.Schema };
+        constructor(
+            @IFoo private readonly _modeService: IFoo,
+            ~
+!!! error TS1138: Parameter declaration expected.
+                  ~~~~~~~
+!!! error TS1005: ',' expected.
+                          ~~~~~~~~
+!!! error TS1005: ',' expected.
+                                   ~~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+        ) { }
+    }

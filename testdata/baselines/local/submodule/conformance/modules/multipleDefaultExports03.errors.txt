@@ -1,0 +1,10 @@
+error TS2300: Duplicate identifier 'C'.
+
+
+!!! error TS2300: Duplicate identifier 'C'.
+==== multipleDefaultExports03.ts (0 errors) ====
+    export default class C {
+    }
+    
+    export default class C {
+    }

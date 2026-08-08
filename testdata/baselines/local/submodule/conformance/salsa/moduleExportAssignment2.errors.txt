@@ -1,0 +1,30 @@
+npm.js(1,11): error TS2304: Cannot find name 'module'.
+npm.js(3,7): error TS1003: Identifier expected.
+npm.js(3,8): error TS1005: ';' expected.
+npm.js(3,8): error TS2304: Cannot find name 'exports'.
+npm.js(5,11): error TS1003: Identifier expected.
+npm.js(5,12): error TS1005: ';' expected.
+npm.js(5,12): error TS2304: Cannot find name 'exports'.
+
+
+==== npm.js (7 errors) ====
+    var npm = module.exports = function (tree) {
+              ~~~~~~
+!!! error TS2304: Cannot find name 'module'.
+    }
+    module.exports.asReadInstalled = function (tree) {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        npm(tree) // both references should be callable
+        module.exports(tree)
+              ~
+!!! error TS1003: Identifier expected.
+               ~~~~~~~
+!!! error TS1005: ';' expected.
+               ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    }

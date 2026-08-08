@@ -1,0 +1,11 @@
+foo_1.ts(2,13): error TS2339: Property 'foo' does not exist on type 'number'.
+
+
+==== foo_0.ts (0 errors) ====
+    export var foo = 42;
+    
+==== foo_1.ts (1 errors) ====
+    import foo = require('./test/foo_0');
+    var x = foo.foo + 42;
+                ~~~
+!!! error TS2339: Property 'foo' does not exist on type 'number'.

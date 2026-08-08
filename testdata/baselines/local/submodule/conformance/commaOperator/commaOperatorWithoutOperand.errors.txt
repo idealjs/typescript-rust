@@ -1,0 +1,68 @@
+commaOperatorWithoutOperand.ts(5,21): error TS2304: Cannot find name 'Object'.
+commaOperatorWithoutOperand.ts(9,7): error TS1012: Unexpected token.
+commaOperatorWithoutOperand.ts(9,8): error TS1005: ')' expected.
+commaOperatorWithoutOperand.ts(10,11): error TS1012: Unexpected token.
+commaOperatorWithoutOperand.ts(10,12): error TS1005: ')' expected.
+commaOperatorWithoutOperand.ts(11,10): error TS1012: Unexpected token.
+commaOperatorWithoutOperand.ts(11,11): error TS1005: ')' expected.
+commaOperatorWithoutOperand.ts(12,10): error TS1012: Unexpected token.
+commaOperatorWithoutOperand.ts(12,11): error TS1005: ')' expected.
+commaOperatorWithoutOperand.ts(13,10): error TS1012: Unexpected token.
+commaOperatorWithoutOperand.ts(13,11): error TS1005: ')' expected.
+commaOperatorWithoutOperand.ts(16,2): error TS1012: Unexpected token.
+commaOperatorWithoutOperand.ts(16,4): error TS1005: ')' expected.
+commaOperatorWithoutOperand.ts(16,7): error TS1005: ';' expected.
+
+
+==== commaOperatorWithoutOperand.ts (14 errors) ====
+    declare var ANY: any;
+    declare var BOOLEAN: boolean;
+    declare var NUMBER: number;
+    declare var STRING: string;
+    declare var OBJECT: Object;
+                        ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    
+    // Expect to have compiler errors
+    // Missing the second operand
+    (ANY, );
+          ~
+!!! error TS1012: Unexpected token.
+           ~
+!!! error TS1005: ')' expected.
+    (BOOLEAN, );
+              ~
+!!! error TS1012: Unexpected token.
+               ~
+!!! error TS1005: ')' expected.
+    (NUMBER, );
+             ~
+!!! error TS1012: Unexpected token.
+              ~
+!!! error TS1005: ')' expected.
+    (STRING, );
+             ~
+!!! error TS1012: Unexpected token.
+              ~
+!!! error TS1005: ')' expected.
+    (OBJECT, );
+             ~
+!!! error TS1012: Unexpected token.
+              ~
+!!! error TS1005: ')' expected.
+    
+    // Missing the first operand
+    (, ANY);
+     ~
+!!! error TS1012: Unexpected token.
+       ~~~
+!!! error TS1005: ')' expected.
+          ~
+!!! error TS1005: ';' expected.
+    (, BOOLEAN);
+    (, NUMBER);
+    (, STRING);
+    (, OBJECT);
+    
+    // Missing all operands
+    ( , );

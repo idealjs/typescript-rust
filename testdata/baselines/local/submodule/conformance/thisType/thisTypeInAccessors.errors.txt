@@ -1,0 +1,116 @@
+thisTypeInAccessors.ts(8,5): error TS2304: Cannot find name 'get'.
+thisTypeInAccessors.ts(8,9): error TS1005: ',' expected.
+thisTypeInAccessors.ts(8,9): error TS2448: Block-scoped variable 'x' used before its declaration.
+thisTypeInAccessors.ts(8,10): error TS1005: ',' expected.
+thisTypeInAccessors.ts(8,10): error TS2304: Cannot find name '('.
+thisTypeInAccessors.ts(8,11): error TS1005: ',' expected.
+thisTypeInAccessors.ts(8,20): error TS1005: ',' expected.
+thisTypeInAccessors.ts(8,23): error TS2304: Cannot find name 'number'.
+thisTypeInAccessors.ts(8,30): error TS1005: ',' expected.
+thisTypeInAccessors.ts(8,30): error TS2304: Cannot find name '{'.
+thisTypeInAccessors.ts(8,32): error TS1005: ',' expected.
+thisTypeInAccessors.ts(8,32): error TS2304: Cannot find name 'return'.
+thisTypeInAccessors.ts(8,39): error TS1005: ',' expected.
+thisTypeInAccessors.ts(8,39): error TS2448: Block-scoped variable 'this' used before its declaration.
+thisTypeInAccessors.ts(8,39): error TS2454: Variable 'this' is used before being assigned.
+thisTypeInAccessors.ts(8,43): error TS1005: ',' expected.
+thisTypeInAccessors.ts(8,43): error TS2304: Cannot find name '.'.
+thisTypeInAccessors.ts(8,44): error TS1005: ',' expected.
+thisTypeInAccessors.ts(8,44): error TS2448: Block-scoped variable 'n' used before its declaration.
+thisTypeInAccessors.ts(8,44): error TS2454: Variable 'n' is used before being assigned.
+thisTypeInAccessors.ts(8,45): error TS1005: ',' expected.
+thisTypeInAccessors.ts(8,45): error TS2304: Cannot find name ';'.
+thisTypeInAccessors.ts(9,5): error TS2304: Cannot find name 'set'.
+thisTypeInAccessors.ts(9,9): error TS1005: ',' expected.
+thisTypeInAccessors.ts(9,10): error TS1005: ',' expected.
+thisTypeInAccessors.ts(9,31): error TS1005: ',' expected.
+
+
+==== thisTypeInAccessors.ts (26 errors) ====
+    interface Foo {
+        n: number;
+        x: number;
+    }
+    
+    const explicit = {
+        n: 12,
+        get x(this: Foo): number { return this.n; },
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+            ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS2448: Block-scoped variable 'x' used before its declaration.
+             ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS2304: Cannot find name '('.
+              ~~~~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS1005: ',' expected.
+                          ~~~~~~
+!!! error TS2304: Cannot find name 'number'.
+                                 ~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS2304: Cannot find name '{'.
+                                   ~~~~~~
+!!! error TS1005: ',' expected.
+                                   ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                                          ~~~~
+!!! error TS1005: ',' expected.
+                                          ~~~~
+!!! error TS2448: Block-scoped variable 'this' used before its declaration.
+                                          ~~~~
+!!! error TS2454: Variable 'this' is used before being assigned.
+                                              ~
+!!! error TS1005: ',' expected.
+                                              ~
+!!! error TS2304: Cannot find name '.'.
+                                               ~
+!!! error TS1005: ',' expected.
+                                               ~
+!!! error TS2448: Block-scoped variable 'n' used before its declaration.
+                                               ~
+!!! error TS2454: Variable 'n' is used before being assigned.
+                                                ~
+!!! error TS1005: ',' expected.
+                                                ~
+!!! error TS2304: Cannot find name ';'.
+        set x(this: Foo, n: number) { this.n = n; }
+        ~~~
+!!! error TS2304: Cannot find name 'set'.
+            ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+                                  ~
+!!! error TS1005: ',' expected.
+    }
+    const copiedFromGetter = {
+        n: 14,
+        get x(this: Foo): number { return this.n; },
+        set x(n) { this.n = n; }
+    }
+    const copiedFromSetter = {
+        n: 15,
+        get x() { return this.n },
+        set x(this: Foo, n: number) { this.n = n; }
+    }
+    const copiedFromGetterUnannotated = {
+        n: 16,
+        get x(this: Foo) { return this.n },
+        set x(this, n) { this.n = n; }
+    }
+    
+    class Explicit {
+        n = 17;
+        get x(this: Foo): number { return this.n; }
+        set x(this: Foo, n: number) { this.n = n; }
+    }
+    class Contextual {
+        n = 21;
+        get x() { return this.n } // inside a class, so already correct
+    }

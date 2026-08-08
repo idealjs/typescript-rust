@@ -1,0 +1,268 @@
+subtypesOfTypeParameterWithRecursiveConstraints.ts(62,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(62,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(67,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(67,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(72,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(72,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(77,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(77,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(82,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(82,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(87,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(87,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(92,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(92,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(97,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(97,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(102,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(102,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(114,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(114,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(119,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(119,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(124,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(124,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(129,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(129,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(134,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(134,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(139,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(139,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(144,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(144,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(149,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(149,19): error TS1005: ';' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(154,11): error TS1005: ']' expected.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(154,19): error TS1005: ';' expected.
+
+
+==== subtypesOfTypeParameterWithRecursiveConstraints.ts (36 errors) ====
+    // checking whether other types are subtypes of type parameters with constraints
+    
+    class Foo<T> { foo: T; }
+    function f<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>>(t: T, u: U, v: V) {
+        // ok
+        var r1 = true ? t : u;
+        var r1 = true ? u : t;
+    
+        // ok
+        var r2 = true ? t : v;
+        var r2 = true ? v : t;
+    
+        // ok
+        var r3 = true ? v : u;
+        var r3 = true ? u : v;
+    
+        // ok
+        var r4 = true ? t : new Foo<T>();
+        var r4 = true ? new Foo<T>() : t;
+    
+        // ok
+        var r5 = true ? u : new Foo<T>();
+        var r5 = true ? new Foo<T>() : u;
+    
+        // ok
+        var r6 = true ? v : new Foo<T>();
+        var r6 = true ? new Foo<T>() : v;
+    
+    
+        // ok
+        var r7 = true ? t : new Foo<U>();
+        var r7 = true ? new Foo<U>() : t;
+    
+        // ok
+        var r8 = true ? u : new Foo<U>();
+        var r8 = true ? new Foo<U>() : u;
+    
+        // ok
+        var r9 = true ? v : new Foo<U>();
+        var r9 = true ? new Foo<U>() : v;
+    
+    
+        // ok
+        var r10 = true ? t : new Foo<V>();
+        var r10 = true ? new Foo<V>() : t;
+    
+        // ok
+        var r11 = true ? u : new Foo<V>();
+        var r11 = true ? new Foo<V>() : u;
+    
+        // ok
+        var r12 = true ? v : new Foo<V>();
+        var r12 = true ? new Foo<V>() : v;
+    }
+    
+    namespace M1 {
+        class Base<T> {
+            foo: T;
+        }
+    
+        class D1<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<T> {
+            [x: string]: T;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: T
+        }
+    
+        class D2<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<T> {
+            [x: string]: T;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: U
+        }
+    
+        class D3<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<T> {
+            [x: string]: T;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: V
+        }
+    
+        class D4<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<U> {
+            [x: string]: U;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: T
+        }
+    
+        class D5<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<U> {
+            [x: string]: U;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: U
+        }
+    
+        class D6<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<U> {
+            [x: string]: U;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: V
+        }
+    
+        class D7<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<V> {
+            [x: string]: V;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: T
+        }
+    
+        class D8<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<V> {
+            [x: string]: V;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: U
+        }
+    
+        class D9<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<V> {
+            [x: string]: V;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: V
+        }
+    }
+    
+    
+    namespace M2 {
+        class Base2<T> {
+            foo: Foo<T>;
+        }
+    
+        class D1<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<T> {
+            [x: string]: T;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: T
+        }
+    
+        class D2<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<T> {
+            [x: string]: T;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: U
+        }
+    
+        class D3<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<T> {
+            [x: string]: T;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: V
+        }
+    
+        class D4<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<U> {
+            [x: string]: U;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: T
+        }
+    
+        class D5<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<U> {
+            [x: string]: U;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: U
+        }
+    
+        class D6<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<U> {
+            [x: string]: U;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: V
+        }
+    
+        class D7<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<V> {
+            [x: string]: V;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: T
+        }
+    
+        class D8<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<V> {
+            [x: string]: V;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: U
+        }
+    
+        class D9<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<V> {
+            [x: string]: V;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+            foo: V
+        }
+    }

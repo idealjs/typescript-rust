@@ -1,0 +1,8 @@
+templateStringInNewExpression.ts(2,5): error TS2351: This expression is not constructable.
+
+
+==== templateStringInNewExpression.ts (1 errors) ====
+    ﻿// @target: es2015
+    new `abc${0}abc`(`hello ${0} world`, `   `, `1${2}3`);
+     ~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.

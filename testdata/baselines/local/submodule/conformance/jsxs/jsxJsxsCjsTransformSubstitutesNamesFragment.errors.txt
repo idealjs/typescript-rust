@@ -1,0 +1,37 @@
+error TS6053: File 'react16.d.ts' not found.
+jsxJsxsCjsTransformSubstitutesNamesFragment.tsx(2,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+jsxJsxsCjsTransformSubstitutesNamesFragment.tsx(2,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+jsxJsxsCjsTransformSubstitutesNamesFragment.tsx(3,3): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+jsxJsxsCjsTransformSubstitutesNamesFragment.tsx(3,3): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxJsxsCjsTransformSubstitutesNamesFragment.tsx(3,3): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+jsxJsxsCjsTransformSubstitutesNamesFragment.tsx(5,3): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+jsxJsxsCjsTransformSubstitutesNamesFragment.tsx(5,3): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxJsxsCjsTransformSubstitutesNamesFragment.tsx(5,3): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.
+==== jsxJsxsCjsTransformSubstitutesNamesFragment.tsx (8 errors) ====
+    /// <reference path="/.lib/react16.d.ts" />
+    const a = <>
+              ~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+              ~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+      <p></p>
+      ~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+      ~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+      ~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+      text
+      <div></div>
+      ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+      ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+      ~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+    </>
+    
+    export {};

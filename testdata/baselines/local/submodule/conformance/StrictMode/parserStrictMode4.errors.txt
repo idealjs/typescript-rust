@@ -1,0 +1,8 @@
+parserStrictMode4.ts(2,1): error TS2304: Cannot find name 'arguments'.
+
+
+==== parserStrictMode4.ts (1 errors) ====
+    "use strict";
+    arguments = 1;
+    ~~~~~~~~~
+!!! error TS2304: Cannot find name 'arguments'.

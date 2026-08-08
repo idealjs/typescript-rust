@@ -1,0 +1,18 @@
+typeGuardsInGlobal.ts(8,16): error TS2339: Property 'length' does not exist on type 'string'.
+
+
+==== typeGuardsInGlobal.ts (1 errors) ====
+    // Note that type guards affect types of variables and parameters only and 
+    // have no effect on members of objects such as properties. 
+    
+    // variables in global
+    var num: number;
+    var var1: string | number;
+    if (typeof var1 === "string") {
+        num = var1.length; // string
+                   ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type 'string'.
+    }
+    else {
+        num = var1; // number
+    }

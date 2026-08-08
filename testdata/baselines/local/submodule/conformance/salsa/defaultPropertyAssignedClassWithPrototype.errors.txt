@@ -1,0 +1,45 @@
+bug39167.js(2,6): error TS2339: Property 'K' does not exist on type 'object'.
+bug39167.js(2,15): error TS2339: Property 'K' does not exist on type 'object'.
+bug39167.js(5,6): error TS2339: Property 'K' does not exist on type 'object'.
+bug39167.js(6,5): error TS2304: Cannot find name 'add'.
+bug39167.js(6,8): error TS1005: ',' expected.
+bug39167.js(6,8): error TS2304: Cannot find name '('.
+bug39167.js(6,9): error TS1005: ',' expected.
+bug39167.js(6,9): error TS2304: Cannot find name ')'.
+bug39167.js(6,11): error TS1005: ',' expected.
+bug39167.js(6,11): error TS2304: Cannot find name '{'.
+bug39167.js(7,1): error TS1128: Declaration or statement expected.
+
+
+==== bug39167.js (11 errors) ====
+    var test = {};
+    test.K = test.K ||
+         ~
+!!! error TS2339: Property 'K' does not exist on type 'object'.
+                  ~
+!!! error TS2339: Property 'K' does not exist on type 'object'.
+        function () {}
+    
+    test.K.prototype = {
+         ~
+!!! error TS2339: Property 'K' does not exist on type 'object'.
+        add() {}
+        ~~~
+!!! error TS2304: Cannot find name 'add'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '('.
+            ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS2304: Cannot find name ')'.
+              ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS2304: Cannot find name '{'.
+    };
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+    new test.K().add;

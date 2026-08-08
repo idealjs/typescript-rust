@@ -1,10 +1,10 @@
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingProtectedStatic.ts(7,26): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingProtectedStatic.ts(8,26): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingProtectedStatic.ts(18,24): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingProtectedStatic.ts(19,24): error TS1005: ';' expected.
+derivedClassWithPrivateStaticShadowingProtectedStatic.ts(7,26): error TS1005: ';' expected.
+derivedClassWithPrivateStaticShadowingProtectedStatic.ts(8,26): error TS1005: ';' expected.
+derivedClassWithPrivateStaticShadowingProtectedStatic.ts(18,24): error TS1005: ';' expected.
+derivedClassWithPrivateStaticShadowingProtectedStatic.ts(19,24): error TS1005: ';' expected.
 
 
-==== inheritanceAndOverriding/derivedClassWithPrivateStaticShadowingProtectedStatic.ts (4 errors) ====
+==== derivedClassWithPrivateStaticShadowingProtectedStatic.ts (4 errors) ====
     class Base {
         protected static x: string;
         protected static fn(): string {

@@ -1,0 +1,48 @@
+component.ts(32,11): error TS1005: ';' expected.
+
+
+==== computedPropertyName.ts (0 errors) ====
+    
+==== framework-hooks.ts (0 errors) ====
+    export const onInit = Symbol("onInit");
+    
+==== component.ts (1 errors) ====
+    import type { onInit } from "./framework-hooks";
+    
+    interface Component {
+      [onInit]?(): void;
+    }
+    
+    type T = {
+      [onInit]: any;
+    }
+    
+    const o = {
+      [onInit]: 0 // Error
+    };
+    
+    class C {
+      [onInit]: any; // Error (because class fields)
+    }
+    
+    class D {
+      [onInit] = 0; // Error
+    }
+    
+    class E {
+      [onInit]() {} // Error
+    }
+    
+    abstract class F {
+      abstract [onInit](): void;
+    }
+    
+    class G {
+      declare [onInit]: any;
+              ~
+!!! error TS1005: ';' expected.
+    }
+    
+    declare class H {
+      [onInit]: any;
+    }

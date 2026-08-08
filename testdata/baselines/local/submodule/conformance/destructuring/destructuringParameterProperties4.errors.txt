@@ -1,0 +1,63 @@
+destructuringParameterProperties4.ts(4,25): error TS1005: ',' expected.
+destructuringParameterProperties4.ts(4,41): error TS1005: ',' expected.
+destructuringParameterProperties4.ts(5,59): error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+destructuringParameterProperties4.ts(5,83): error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+destructuringParameterProperties4.ts(6,18): error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+destructuringParameterProperties4.ts(11,21): error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+destructuringParameterProperties4.ts(15,21): error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+destructuringParameterProperties4.ts(19,21): error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+destructuringParameterProperties4.ts(25,24): error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any; doSomethingWithSuperProperties: () => any }'.
+destructuringParameterProperties4.ts(25,34): error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any; doSomethingWithSuperProperties: () => any }'.
+destructuringParameterProperties4.ts(25,44): error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any; doSomethingWithSuperProperties: () => any }'.
+
+
+==== destructuringParameterProperties4.ts (11 errors) ====
+    ﻿// @target: es6
+    
+    class C1<T, U, V> {
+        constructor(private k: T, protected [a, b, c]: [T,U,V]) {
+                         ~
+!!! error TS1005: ',' expected.
+                                         ~
+!!! error TS1005: ',' expected.
+            if ((b === undefined && c === undefined) || (this.b === undefined && this.c === undefined)) {
+                                                           ~
+!!! error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+                                                                                   ~
+!!! error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+                this.a = a || k;
+                  ~
+!!! error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+            }
+        }
+    
+        public getA() {
+            return this.a
+                     ~
+!!! error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+        }
+    
+        public getB() {
+            return this.b
+                     ~
+!!! error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+        }
+    
+        public getC() {
+            return this.c;
+                     ~
+!!! error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+        }
+    }
+    
+    class C2 extends C1<number, string, boolean> {
+        public doSomethingWithSuperProperties() {
+            return `${this.a} ${this.b} ${this.c}`;
+                        ~
+!!! error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any; doSomethingWithSuperProperties: () => any }'.
+                                  ~
+!!! error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any; doSomethingWithSuperProperties: () => any }'.
+                                            ~
+!!! error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any; doSomethingWithSuperProperties: () => any }'.
+        }
+    }

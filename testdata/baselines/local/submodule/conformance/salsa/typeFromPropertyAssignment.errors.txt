@@ -1,0 +1,23 @@
+a.js(1,19): error TS2304: Cannot find name 'O'.
+a.js(4,21): error TS2304: Cannot find name 'I'.
+
+
+==== a.js (2 errors) ====
+    var Outer = class O {
+                      ~
+!!! error TS2304: Cannot find name 'O'.
+        m(x, y) { }
+    }
+    Outer.Inner = class I {
+                        ~
+!!! error TS2304: Cannot find name 'I'.
+        n(a, b) { }
+    
+    }
+    /** @type {Outer} */
+    var si
+    si.m
+    /** @type {Outer.Inner} */
+    var oi
+    oi.n
+    

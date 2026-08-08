@@ -1,0 +1,253 @@
+source.js(8,24): error TS2304: Cannot find name 'Array'.
+source.js(11,5): error TS2339: Property 'prototype' does not exist on type '(len: any) => void'.
+source.js(15,5): error TS2304: Cannot find name 'dot'.
+source.js(15,8): error TS1005: ',' expected.
+source.js(15,8): error TS2304: Cannot find name '('.
+source.js(15,9): error TS1005: ',' expected.
+source.js(15,9): error TS2304: Cannot find name 'other'.
+source.js(15,14): error TS1005: ',' expected.
+source.js(15,14): error TS2304: Cannot find name ')'.
+source.js(15,16): error TS1005: ',' expected.
+source.js(15,16): error TS2304: Cannot find name '{'.
+source.js(16,9): error TS1005: ',' expected.
+source.js(16,9): error TS2304: Cannot find name 'if'.
+source.js(16,12): error TS1005: ',' expected.
+source.js(16,12): error TS2304: Cannot find name '('.
+source.js(16,13): error TS1005: ',' expected.
+source.js(16,13): error TS2304: Cannot find name 'other'.
+source.js(16,18): error TS1005: ',' expected.
+source.js(16,18): error TS2304: Cannot find name '.'.
+source.js(16,19): error TS1005: ',' expected.
+source.js(16,19): error TS2304: Cannot find name 'storage'.
+source.js(16,26): error TS1005: ',' expected.
+source.js(16,26): error TS2304: Cannot find name '.'.
+source.js(16,27): error TS1005: ',' expected.
+source.js(16,27): error TS2304: Cannot find name 'length'.
+source.js(16,34): error TS1005: ',' expected.
+source.js(16,34): error TS2304: Cannot find name '!=='.
+source.js(16,38): error TS1005: ',' expected.
+source.js(16,38): error TS2304: Cannot find name 'this'.
+source.js(16,42): error TS1005: ',' expected.
+source.js(16,42): error TS2304: Cannot find name '.'.
+source.js(16,43): error TS1005: ',' expected.
+source.js(16,43): error TS2304: Cannot find name 'storage'.
+source.js(16,50): error TS1005: ',' expected.
+source.js(16,50): error TS2304: Cannot find name '.'.
+source.js(16,51): error TS1005: ',' expected.
+source.js(16,51): error TS2304: Cannot find name 'length'.
+source.js(16,57): error TS1005: ',' expected.
+source.js(16,57): error TS2304: Cannot find name ')'.
+source.js(16,59): error TS1005: ',' expected.
+source.js(16,59): error TS2304: Cannot find name '{'.
+source.js(17,13): error TS1005: ',' expected.
+source.js(17,13): error TS2304: Cannot find name 'throw'.
+source.js(17,19): error TS1005: ',' expected.
+source.js(17,19): error TS2304: Cannot find name 'new'.
+source.js(17,23): error TS1005: ',' expected.
+source.js(17,23): error TS2304: Cannot find name 'Error'.
+source.js(17,28): error TS1005: ',' expected.
+source.js(17,28): error TS2304: Cannot find name '('.
+source.js(17,29): error TS1005: ',' expected.
+source.js(17,29): error TS2304: Cannot find name '`Dot product only applicable for vectors of equal length`'.
+source.js(17,86): error TS1005: ',' expected.
+source.js(17,86): error TS2304: Cannot find name ')'.
+source.js(17,87): error TS1005: ',' expected.
+source.js(17,87): error TS2304: Cannot find name ';'.
+source.js(20,33): error TS1005: '>' expected.
+source.js(20,34): error TS1005: ')' expected.
+source.js(20,34): error TS2304: Cannot find name 'storage'.
+source.js(20,53): error TS1005: ';' expected.
+
+
+==== source.js (59 errors) ====
+    /**
+     * @param {number} len
+     */
+    export function Vec(len) {
+        /**
+         * @type {number[]}
+         */
+        this.storage = new Array(len);
+                           ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    }
+    
+    Vec.prototype = {
+        ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '(len: any) => void'.
+        /**
+         * @param {Vec} other
+         */
+        dot(other) {
+        ~~~
+!!! error TS2304: Cannot find name 'dot'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '('.
+            ~~~~~
+!!! error TS1005: ',' expected.
+            ~~~~~
+!!! error TS2304: Cannot find name 'other'.
+                 ~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS2304: Cannot find name ')'.
+                   ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS2304: Cannot find name '{'.
+            if (other.storage.length !== this.storage.length) {
+            ~~
+!!! error TS1005: ',' expected.
+            ~~
+!!! error TS2304: Cannot find name 'if'.
+               ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS2304: Cannot find name '('.
+                ~~~~~
+!!! error TS1005: ',' expected.
+                ~~~~~
+!!! error TS2304: Cannot find name 'other'.
+                     ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS2304: Cannot find name '.'.
+                      ~~~~~~~
+!!! error TS1005: ',' expected.
+                      ~~~~~~~
+!!! error TS2304: Cannot find name 'storage'.
+                             ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS2304: Cannot find name '.'.
+                              ~~~~~~
+!!! error TS1005: ',' expected.
+                              ~~~~~~
+!!! error TS2304: Cannot find name 'length'.
+                                     ~~~
+!!! error TS1005: ',' expected.
+                                     ~~~
+!!! error TS2304: Cannot find name '!=='.
+                                         ~~~~
+!!! error TS1005: ',' expected.
+                                         ~~~~
+!!! error TS2304: Cannot find name 'this'.
+                                             ~
+!!! error TS1005: ',' expected.
+                                             ~
+!!! error TS2304: Cannot find name '.'.
+                                              ~~~~~~~
+!!! error TS1005: ',' expected.
+                                              ~~~~~~~
+!!! error TS2304: Cannot find name 'storage'.
+                                                     ~
+!!! error TS1005: ',' expected.
+                                                     ~
+!!! error TS2304: Cannot find name '.'.
+                                                      ~~~~~~
+!!! error TS1005: ',' expected.
+                                                      ~~~~~~
+!!! error TS2304: Cannot find name 'length'.
+                                                            ~
+!!! error TS1005: ',' expected.
+                                                            ~
+!!! error TS2304: Cannot find name ')'.
+                                                              ~
+!!! error TS1005: ',' expected.
+                                                              ~
+!!! error TS2304: Cannot find name '{'.
+                throw new Error(`Dot product only applicable for vectors of equal length`);
+                ~~~~~
+!!! error TS1005: ',' expected.
+                ~~~~~
+!!! error TS2304: Cannot find name 'throw'.
+                      ~~~
+!!! error TS1005: ',' expected.
+                      ~~~
+!!! error TS2304: Cannot find name 'new'.
+                          ~~~~~
+!!! error TS1005: ',' expected.
+                          ~~~~~
+!!! error TS2304: Cannot find name 'Error'.
+                               ~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS2304: Cannot find name '('.
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name '`Dot product only applicable for vectors of equal length`'.
+                                                                                         ~
+!!! error TS1005: ',' expected.
+                                                                                         ~
+!!! error TS2304: Cannot find name ')'.
+                                                                                          ~
+!!! error TS1005: ',' expected.
+                                                                                          ~
+!!! error TS2304: Cannot find name ';'.
+            }
+            let sum = 0;
+            for (let i = 0; i < this.storage.length; i++) {
+                                    ~
+!!! error TS1005: '>' expected.
+                                     ~~~~~~~
+!!! error TS1005: ')' expected.
+                                     ~~~~~~~
+!!! error TS2304: Cannot find name 'storage'.
+                                                        ~
+!!! error TS1005: ';' expected.
+                sum += (this.storage[i] * other.storage[i]);
+            }
+            return sum;
+        },
+        magnitude() {
+            let sum = 0;
+            for (let i = 0; i < this.storage.length; i++) {
+                sum += (this.storage[i] ** 2);
+            }
+            return Math.sqrt(sum);
+        }
+    }
+    
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    export function Point2D(x, y) {
+        if (!(this instanceof Point2D)) {
+            return new Point2D(x, y);
+        }
+        Vec.call(this, 2);
+        this.x = x;
+        this.y = y;
+    }
+    
+    Point2D.prototype = {
+        __proto__: Vec,
+        get x() {
+            return this.storage[0];
+        },
+        /**
+         * @param {number} x
+         */
+        set x(x) {
+            this.storage[0] = x;
+        },
+        get y() {
+            return this.storage[1];
+        },
+        /**
+         * @param {number} y
+         */
+        set y(y) {
+            this.storage[1] = y;
+        }
+    };
+    
+==== referencer.js (0 errors) ====
+    import {Point2D} from "./source";
+    
+    export const origin = new Point2D(0, 0);
+    // export const res = Point2D(2, 3).dot(origin); // TODO: when __proto__ works, validate this

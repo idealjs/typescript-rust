@@ -1,0 +1,10 @@
+error TS2451: Cannot redeclare block-scoped variable 'v'.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'v'.
+==== for-of55.ts (0 errors) ====
+    ﻿//@target: ES6
+    let v = [1];
+    for (let v of v) {
+        v;
+    }

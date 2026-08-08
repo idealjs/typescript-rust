@@ -1,0 +1,48 @@
+functionLiteralForOverloads.ts(3,5): error TS2322: Type '(x: any) => any' is not assignable to type 'object'.
+functionLiteralForOverloads.ts(8,5): error TS2322: Type '(x: any) => any' is not assignable to type 'object'.
+functionLiteralForOverloads.ts(13,5): error TS2322: Type '(x: any) => any' is not assignable to type 'object'.
+functionLiteralForOverloads.ts(18,5): error TS2322: Type '(x: any) => any' is not assignable to type 'object'.
+
+
+==== functionLiteralForOverloads.ts (4 errors) ====
+    // basic uses of function literals with overloads
+    
+    var f: {
+        ~~~~
+        (x: string): string;
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+        (x: number): number;
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+    } = (x) => x;
+    ~~~~~~~~~~~~
+!!! error TS2322: Type '(x: any) => any' is not assignable to type 'object'.
+    
+    var f2: {
+        ~~~~~
+        <T>(x: string): string;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        <T>(x: number): number;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    } = (x) => x;
+    ~~~~~~~~~~~~
+!!! error TS2322: Type '(x: any) => any' is not assignable to type 'object'.
+    
+    var f3: {
+        ~~~~~
+        <T>(x: T): string;
+    ~~~~~~~~~~~~~~~~~~~~~~
+        <T>(x: T): number;
+    ~~~~~~~~~~~~~~~~~~~~~~
+    } = (x) => x;
+    ~~~~~~~~~~~~
+!!! error TS2322: Type '(x: any) => any' is not assignable to type 'object'.
+    
+    var f4: {
+        ~~~~~
+        <T>(x: string): T;
+    ~~~~~~~~~~~~~~~~~~~~~~
+        <T>(x: number): T;
+    ~~~~~~~~~~~~~~~~~~~~~~
+    } = (x) => x;
+    ~~~~~~~~~~~~
+!!! error TS2322: Type '(x: any) => any' is not assignable to type 'object'.

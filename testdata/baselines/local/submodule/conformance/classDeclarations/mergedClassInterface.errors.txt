@@ -19,7 +19,7 @@ file1.ts(36,4): error TS2339: Property 'x2' does not exist on type '{ x3: number
 !!! error TS2300: Duplicate identifier 'C5'.
 
 !!! error TS2300: Duplicate identifier 'C5'.
-==== classDeclarations/mergedClassInterface.ts (0 errors) ====
+==== mergedClassInterface.ts (0 errors) ====
     
 ==== file1.ts (2 errors) ====
     declare class C1 { }

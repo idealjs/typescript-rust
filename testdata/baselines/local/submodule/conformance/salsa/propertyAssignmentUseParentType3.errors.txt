@@ -1,0 +1,36 @@
+propertyAssignmentUseParentType3.ts(6,6): error TS2339: Property 'toFixed' does not exist on type '() => number'.
+propertyAssignmentUseParentType3.ts(11,6): error TS2339: Property 'join' does not exist on type '() => any[]'.
+propertyAssignmentUseParentType3.ts(16,6): error TS2339: Property 'trim' does not exist on type '() => string'.
+propertyAssignmentUseParentType3.ts(21,6): error TS2339: Property 'x' does not exist on type '() => { x: number }'.
+
+
+==== propertyAssignmentUseParentType3.ts (4 errors) ====
+    // don't use the parent type if it's a function declaration (#33741)
+    
+    function foo1(): number {
+        return 123;
+    }
+    foo1.toFixed = "";
+         ~~~~~~~
+!!! error TS2339: Property 'toFixed' does not exist on type '() => number'.
+    
+    function foo2(): any[] {
+        return [];
+    }
+    foo2.join = "";
+         ~~~~
+!!! error TS2339: Property 'join' does not exist on type '() => any[]'.
+    
+    function foo3(): string {
+        return "";
+    }
+    foo3.trim = "";
+         ~~~~
+!!! error TS2339: Property 'trim' does not exist on type '() => string'.
+    
+    function foo4(): ({x: number}) {
+        return {x: 123};
+    }
+    foo4.x = "456";
+         ~
+!!! error TS2339: Property 'x' does not exist on type '() => { x: number }'.

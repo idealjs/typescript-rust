@@ -1,9 +1,9 @@
-override/override11.ts(6,27): error TS1005: ',' expected.
-override/override11.ts(6,34): error TS1005: ',' expected.
-override/override11.ts(7,9): error TS2349: This expression is not callable.
+override11.ts(6,27): error TS1005: ',' expected.
+override11.ts(6,34): error TS1005: ',' expected.
+override11.ts(7,9): error TS2349: This expression is not callable.
 
 
-==== override/override11.ts (3 errors) ====
+==== override11.ts (3 errors) ====
     class Base {
         foo = 1;
     }

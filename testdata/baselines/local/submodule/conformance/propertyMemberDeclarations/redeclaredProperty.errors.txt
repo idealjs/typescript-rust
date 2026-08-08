@@ -1,0 +1,19 @@
+redeclaredProperty.ts(10,5): error TS2349: This expression is not callable.
+
+
+==== redeclaredProperty.ts (1 errors) ====
+    class Base {
+      b = 1;
+    }
+    
+    class Derived extends Base {
+      b;
+      d = this.b;
+    
+      constructor() {
+        super();
+        ~~~~~
+!!! error TS2349: This expression is not callable.
+        this.b = 2;
+      }
+    }

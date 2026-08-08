@@ -1,0 +1,128 @@
+callSignaturesWithParameterInitializers.ts(8,1): error TS2554: Expected 1 arguments, but got 0.
+callSignaturesWithParameterInitializers.ts(10,1): error TS2554: Expected 1 arguments, but got 0.
+callSignaturesWithParameterInitializers.ts(11,1): error TS2554: Expected 2 arguments, but got 1.
+callSignaturesWithParameterInitializers.ts(29,1): error TS2554: Expected 1 arguments, but got 0.
+callSignaturesWithParameterInitializers.ts(31,1): error TS2554: Expected 2 arguments, but got 1.
+callSignaturesWithParameterInitializers.ts(40,1): error TS2349: This expression is not callable.
+callSignaturesWithParameterInitializers.ts(41,1): error TS2349: This expression is not callable.
+callSignaturesWithParameterInitializers.ts(42,3): error TS2339: Property 'foo' does not exist on type 'object'.
+callSignaturesWithParameterInitializers.ts(43,3): error TS2339: Property 'foo' does not exist on type 'object'.
+callSignaturesWithParameterInitializers.ts(46,8): error TS1005: ',' expected.
+callSignaturesWithParameterInitializers.ts(46,8): error TS2304: Cannot find name '('.
+callSignaturesWithParameterInitializers.ts(46,9): error TS1005: ',' expected.
+callSignaturesWithParameterInitializers.ts(46,11): error TS1005: ',' expected.
+callSignaturesWithParameterInitializers.ts(46,11): error TS2304: Cannot find name '='.
+callSignaturesWithParameterInitializers.ts(46,13): error TS1005: ',' expected.
+callSignaturesWithParameterInitializers.ts(46,14): error TS1005: ',' expected.
+callSignaturesWithParameterInitializers.ts(46,14): error TS2304: Cannot find name ')'.
+callSignaturesWithParameterInitializers.ts(46,16): error TS1005: ',' expected.
+callSignaturesWithParameterInitializers.ts(46,16): error TS2304: Cannot find name '{'.
+callSignaturesWithParameterInitializers.ts(47,6): error TS1005: ',' expected.
+callSignaturesWithParameterInitializers.ts(47,17): error TS1005: ',' expected.
+callSignaturesWithParameterInitializers.ts(47,20): error TS1005: ',' expected.
+callSignaturesWithParameterInitializers.ts(47,37): error TS1005: ',' expected.
+
+
+==== callSignaturesWithParameterInitializers.ts (23 errors) ====
+    // Optional parameters allow initializers only in implementation signatures
+    
+    function foo(x = 1) { }
+    var f = function foo(x = 1) { }
+    var f2 = (x: number, y = 1) => { }
+    
+    foo(1);
+    foo();
+    ~~~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    f(1);
+    f();
+    ~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    f2(1);
+    ~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    f2(1, 2);
+    
+    class C {
+        foo(x = 1) { }
+    }
+    
+    declare var c: C;
+    c.foo();
+    c.foo(1);
+    
+    // these are errors
+    interface I {
+        (x = 1);
+        foo(x: number, y = 1);
+    }
+    
+    declare var i: I;
+    i();
+    ~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    i(1);
+    i.foo(1);
+    ~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    i.foo(1, 2);
+    
+    // these are errors
+    declare var a: {
+        (x = 1);
+        foo(x = 1);
+    }
+    
+    a();
+    ~
+!!! error TS2349: This expression is not callable.
+    a(1);
+    ~
+!!! error TS2349: This expression is not callable.
+    a.foo();
+      ~~~
+!!! error TS2339: Property 'foo' does not exist on type 'object'.
+    a.foo(1);
+      ~~~
+!!! error TS2339: Property 'foo' does not exist on type 'object'.
+    
+    var b = {
+        foo(x = 1) { },
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '('.
+            ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS2304: Cannot find name '='.
+                ~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS2304: Cannot find name ')'.
+                   ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS2304: Cannot find name '{'.
+        a: function foo(x: number, y = 1) { },
+         ~
+!!! error TS1005: ',' expected.
+                    ~~~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS1005: ',' expected.
+                                        ~
+!!! error TS1005: ',' expected.
+        b: (x = 1) => { }
+    }
+    
+    b.foo();
+    b.foo(1);
+    b.a(1);
+    b.a(1, 2);
+    b.b();
+    b.b(1);

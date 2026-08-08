@@ -1,0 +1,204 @@
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(2,5): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(2,5): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(2,6): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(3,39): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(3,39): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(3,40): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(4,33): error TS2304: Cannot find name 'Inner'.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(5,9): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(5,9): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(5,10): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(7,35): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(7,35): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(7,36): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(11,39): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(11,39): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(11,40): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(12,29): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(12,29): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(12,30): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(19,43): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(19,43): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(19,44): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(20,33): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(20,33): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(20,34): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(28,5): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(28,5): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(28,6): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(29,31): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(29,31): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(29,32): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(30,26): error TS2304: Cannot find name 'Inner'.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(31,9): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(31,9): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(31,10): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(33,34): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(33,34): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(33,35): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(37,38): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(37,38): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(37,39): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(38,29): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(38,29): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(38,30): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(45,42): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(45,42): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(45,43): error TS1005: ';' expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(46,33): error TS1003: Identifier expected.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(46,33): error TS1127: Invalid character.
+privateNameWhenNotUseDefineForClassFieldsInEsNext.ts(46,34): error TS1005: ';' expected.
+
+
+==== privateNameWhenNotUseDefineForClassFieldsInEsNext.ts (50 errors) ====
+    class TestWithStatics {
+        #prop = 0
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~
+!!! error TS1005: ';' expected.
+        static dd = new TestWithStatics().#prop; // OK
+                                          ~
+!!! error TS1003: Identifier expected.
+                                          ~
+!!! error TS1127: Invalid character.
+                                           ~~~~
+!!! error TS1005: ';' expected.
+        static ["X_ z_ zz"] = class Inner {
+                                    ~~~~~
+!!! error TS2304: Cannot find name 'Inner'.
+            #foo  = 10
+            ~
+!!! error TS1003: Identifier expected.
+            ~
+!!! error TS1127: Invalid character.
+             ~~~
+!!! error TS1005: ';' expected.
+            m() {
+                new TestWithStatics().#prop // OK
+                                      ~
+!!! error TS1003: Identifier expected.
+                                      ~
+!!! error TS1127: Invalid character.
+                                       ~~~~
+!!! error TS1005: ';' expected.
+            }
+            static C = class InnerInner {
+                m() {
+                    new TestWithStatics().#prop // OK
+                                          ~
+!!! error TS1003: Identifier expected.
+                                          ~
+!!! error TS1127: Invalid character.
+                                           ~~~~
+!!! error TS1005: ';' expected.
+                    new Inner().#foo; // OK
+                                ~
+!!! error TS1003: Identifier expected.
+                                ~
+!!! error TS1127: Invalid character.
+                                 ~~~
+!!! error TS1005: ';' expected.
+                }
+            }
+    
+            static M(){
+                return class {
+                    m() {
+                        new TestWithStatics().#prop // OK
+                                              ~
+!!! error TS1003: Identifier expected.
+                                              ~
+!!! error TS1127: Invalid character.
+                                               ~~~~
+!!! error TS1005: ';' expected.
+                        new Inner().#foo; // OK
+                                    ~
+!!! error TS1003: Identifier expected.
+                                    ~
+!!! error TS1127: Invalid character.
+                                     ~~~
+!!! error TS1005: ';' expected.
+                    }
+                }
+            }
+        }
+    }
+    
+    class TestNonStatics {
+        #prop = 0
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~
+!!! error TS1005: ';' expected.
+        dd = new TestNonStatics().#prop; // OK
+                                  ~
+!!! error TS1003: Identifier expected.
+                                  ~
+!!! error TS1127: Invalid character.
+                                   ~~~~
+!!! error TS1005: ';' expected.
+        ["X_ z_ zz"] = class Inner {
+                             ~~~~~
+!!! error TS2304: Cannot find name 'Inner'.
+            #foo  = 10
+            ~
+!!! error TS1003: Identifier expected.
+            ~
+!!! error TS1127: Invalid character.
+             ~~~
+!!! error TS1005: ';' expected.
+            m() {
+                new TestNonStatics().#prop // Ok
+                                     ~
+!!! error TS1003: Identifier expected.
+                                     ~
+!!! error TS1127: Invalid character.
+                                      ~~~~
+!!! error TS1005: ';' expected.
+            }
+            C = class InnerInner {
+                m() {
+                    new TestNonStatics().#prop // Ok
+                                         ~
+!!! error TS1003: Identifier expected.
+                                         ~
+!!! error TS1127: Invalid character.
+                                          ~~~~
+!!! error TS1005: ';' expected.
+                    new Inner().#foo; // Ok
+                                ~
+!!! error TS1003: Identifier expected.
+                                ~
+!!! error TS1127: Invalid character.
+                                 ~~~
+!!! error TS1005: ';' expected.
+                }
+            }
+    
+            static M(){
+                return class {
+                    m() {
+                        new TestNonStatics().#prop // OK
+                                             ~
+!!! error TS1003: Identifier expected.
+                                             ~
+!!! error TS1127: Invalid character.
+                                              ~~~~
+!!! error TS1005: ';' expected.
+                        new Inner().#foo; // OK
+                                    ~
+!!! error TS1003: Identifier expected.
+                                    ~
+!!! error TS1127: Invalid character.
+                                     ~~~
+!!! error TS1005: ';' expected.
+                    }
+                }
+            }
+        }
+    }

@@ -1,0 +1,33 @@
+fileJs.js(1,1): error TS2304: Cannot find name 'x'.
+fileJs.js(1,20): error TS2304: Cannot find name 'z'.
+fileJs.js(1,28): error TS2304: Cannot find name 'z'.
+fileJs.js(2,1): error TS1005: ':' expected.
+fileTs.ts(1,1): error TS2304: Cannot find name 'x'.
+fileTs.ts(1,20): error TS2304: Cannot find name 'z'.
+fileTs.ts(1,28): error TS2304: Cannot find name 'z'.
+fileTs.ts(1,32): error TS1005: ':' expected.
+
+
+==== parserArrowFunctionExpression8.ts (0 errors) ====
+    
+==== fileJs.js (4 errors) ====
+    x ? y => ({ y }) : z => ({ z }) // Legal JS
+    ~
+!!! error TS2304: Cannot find name 'x'.
+                       ~
+!!! error TS2304: Cannot find name 'z'.
+                               ~
+!!! error TS2304: Cannot find name 'z'.
+    
+    
+!!! error TS1005: ':' expected.
+==== fileTs.ts (4 errors) ====
+    x ? y => ({ y }) : z => ({ z })
+    ~
+!!! error TS2304: Cannot find name 'x'.
+                       ~
+!!! error TS2304: Cannot find name 'z'.
+                               ~
+!!! error TS2304: Cannot find name 'z'.
+                                   
+!!! error TS1005: ':' expected.

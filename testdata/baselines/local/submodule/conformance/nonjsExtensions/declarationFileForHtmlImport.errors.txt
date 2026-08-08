@@ -1,0 +1,33 @@
+file.ts(3,50): error TS2304: Cannot find name 'mod'.
+file.ts(5,18): error TS2304: Cannot find name 'mod'.
+file.ts(6,31): error TS2304: Cannot find name 'mod'.
+
+
+==== component.d.html.ts (0 errors) ====
+    // html modules were proposed at https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md
+    
+    // per proposal, `default` is user-defined, but if not present, will be the document of the imported module
+    declare var doc: Document;
+    export default doc;
+    
+    // all other exports are just whatever was exported in module script blocks in the html file
+    export const blogPost: Element;
+    
+    export class HTML5Element extends HTMLElement {
+        connectedCallback(): void;
+    }
+    
+==== file.ts (3 errors) ====
+    import * as mod from "./component.html";
+    
+    window.customElements.define("my-html5-element", mod.HTML5Element);
+                                                     ~~~
+!!! error TS2304: Cannot find name 'mod'.
+    
+    if (document !== mod.default) {
+                     ~~~
+!!! error TS2304: Cannot find name 'mod'.
+        document.body.appendChild(mod.blogPost);
+                                  ~~~
+!!! error TS2304: Cannot find name 'mod'.
+    }

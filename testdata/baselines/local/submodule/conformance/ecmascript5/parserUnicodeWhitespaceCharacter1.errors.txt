@@ -1,0 +1,10 @@
+parserUnicodeWhitespaceCharacter1.ts(1,16): error TS1127: Invalid character.
+parserUnicodeWhitespaceCharacter1.ts(1,16): error TS1128: Declaration or statement expected.
+
+
+==== parserUnicodeWhitespaceCharacter1.ts (2 errors) ====
+    function foo(){　}
+                   ~
+!!! error TS1127: Invalid character.
+                   ~
+!!! error TS1128: Declaration or statement expected.

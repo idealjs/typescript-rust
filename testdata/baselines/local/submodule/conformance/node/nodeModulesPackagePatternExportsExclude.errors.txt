@@ -1,0 +1,258 @@
+index.cts(5,1): error TS2304: Cannot find name 'cjsi'.
+index.cts(6,1): error TS2304: Cannot find name 'mjsi'.
+index.cts(7,1): error TS2304: Cannot find name 'typei'.
+index.cts(11,1): error TS2304: Cannot find name 'cjsi2'.
+index.cts(12,1): error TS2304: Cannot find name 'mjsi2'.
+index.cts(13,1): error TS2304: Cannot find name 'typei2'.
+index.mts(5,1): error TS2304: Cannot find name 'cjsi'.
+index.mts(6,1): error TS2304: Cannot find name 'mjsi'.
+index.mts(7,1): error TS2304: Cannot find name 'typei'.
+index.mts(11,1): error TS2304: Cannot find name 'cjsi2'.
+index.mts(12,1): error TS2304: Cannot find name 'mjsi2'.
+index.mts(13,1): error TS2304: Cannot find name 'typei2'.
+index.ts(5,1): error TS2304: Cannot find name 'cjsi'.
+index.ts(6,1): error TS2304: Cannot find name 'mjsi'.
+index.ts(7,1): error TS2304: Cannot find name 'typei'.
+index.ts(11,1): error TS2304: Cannot find name 'cjsi2'.
+index.ts(12,1): error TS2304: Cannot find name 'mjsi2'.
+index.ts(13,1): error TS2304: Cannot find name 'typei2'.
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+package.json(4,14): error TS1005: ';' expected.
+package.json(5,18): error TS1005: ';' expected.
+package.json(6,26): error TS1005: ';' expected.
+package.json(7,18): error TS1005: ';' expected.
+package.json(8,26): error TS1005: ';' expected.
+package.json(9,17): error TS1005: ';' expected.
+package.json(10,25): error TS1005: ';' expected.
+test.d.cts(7,16): error TS1003: Identifier expected.
+test.d.cts(7,17): error TS1005: '}' expected.
+test.d.mts(7,16): error TS1003: Identifier expected.
+test.d.mts(7,17): error TS1005: '}' expected.
+test.d.ts(7,16): error TS1003: Identifier expected.
+test.d.ts(7,17): error TS1005: '}' expected.
+
+
+==== index.ts (6 errors) ====
+    // esm format file
+    import * as cjsi from "inner/cjs/exclude/index";
+    import * as mjsi from "inner/mjs/exclude/index";
+    import * as typei from "inner/js/exclude/index";
+    cjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'cjsi'.
+    mjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'mjsi'.
+    typei;
+    ~~~~~
+!!! error TS2304: Cannot find name 'typei'.
+    import * as cjsi2 from "inner/cjs/index";
+    import * as mjsi2 from "inner/mjs/index";
+    import * as typei2 from "inner/js/index";
+    cjsi2;
+    ~~~~~
+!!! error TS2304: Cannot find name 'cjsi2'.
+    mjsi2;
+    ~~~~~
+!!! error TS2304: Cannot find name 'mjsi2'.
+    typei2;
+    ~~~~~~
+!!! error TS2304: Cannot find name 'typei2'.
+==== index.mts (6 errors) ====
+    // esm format file
+    import * as cjsi from "inner/cjs/exclude/index";
+    import * as mjsi from "inner/mjs/exclude/index";
+    import * as typei from "inner/js/exclude/index";
+    cjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'cjsi'.
+    mjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'mjsi'.
+    typei;
+    ~~~~~
+!!! error TS2304: Cannot find name 'typei'.
+    import * as cjsi2 from "inner/cjs/index";
+    import * as mjsi2 from "inner/mjs/index";
+    import * as typei2 from "inner/js/index";
+    cjsi2;
+    ~~~~~
+!!! error TS2304: Cannot find name 'cjsi2'.
+    mjsi2;
+    ~~~~~
+!!! error TS2304: Cannot find name 'mjsi2'.
+    typei2;
+    ~~~~~~
+!!! error TS2304: Cannot find name 'typei2'.
+==== index.cts (6 errors) ====
+    // cjs format file
+    import * as cjsi from "inner/cjs/exclude/index";
+    import * as mjsi from "inner/mjs/exclude/index";
+    import * as typei from "inner/js/exclude/index";
+    cjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'cjsi'.
+    mjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'mjsi'.
+    typei;
+    ~~~~~
+!!! error TS2304: Cannot find name 'typei'.
+    import * as cjsi2 from "inner/cjs/index";
+    import * as mjsi2 from "inner/mjs/index";
+    import * as typei2 from "inner/js/index";
+    cjsi2;
+    ~~~~~
+!!! error TS2304: Cannot find name 'cjsi2'.
+    mjsi2;
+    ~~~~~
+!!! error TS2304: Cannot find name 'mjsi2'.
+    typei2;
+    ~~~~~~
+!!! error TS2304: Cannot find name 'typei2'.
+==== index.d.ts (0 errors) ====
+    // cjs format file
+    export const implicitCjsSource = true;
+==== test.d.ts (2 errors) ====
+    // cjs format file
+    import * as cjs from "inner/cjs/exclude/index";
+    import * as mjs from "inner/mjs/exclude/index";
+    import * as type from "inner/js/exclude/index";
+    export { cjs };
+    export { mjs };
+           ~
+!!! error TS1003: Identifier expected.
+            
+!!! error TS1005: '}' expected.
+    export { type };
+==== index.d.mts (0 errors) ====
+    // esm format file
+    export const mjsSource = true;
+==== test.d.mts (2 errors) ====
+    // esm format file
+    import * as cjs from "inner/cjs/exclude/index";
+    import * as mjs from "inner/mjs/exclude/index";
+    import * as type from "inner/js/exclude/index";
+    export { cjs };
+    export { mjs };
+           ~
+!!! error TS1003: Identifier expected.
+            
+!!! error TS1005: '}' expected.
+    export { type };
+==== index.d.cts (0 errors) ====
+    // cjs format file
+    export const cjsSource = true;
+==== test.d.cts (2 errors) ====
+    // cjs format file
+    import * as cjs from "inner/cjs/exclude/index";
+    import * as mjs from "inner/mjs/exclude/index";
+    import * as type from "inner/js/exclude/index";
+    export { cjs };
+    export { mjs };
+           ~
+!!! error TS1003: Identifier expected.
+            
+!!! error TS1005: '}' expected.
+    export { type };
+==== index.d.ts (0 errors) ====
+    // cjs format file
+    export const implicitCjsSource = true;
+==== test.d.ts (2 errors) ====
+    // cjs format file
+    import * as cjs from "inner/cjs/index";
+    import * as mjs from "inner/mjs/index";
+    import * as type from "inner/js/index";
+    export { cjs };
+    export { mjs };
+    export { type };
+                   ~
+!!! error TS1003: Identifier expected.
+                    
+!!! error TS1005: '}' expected.
+==== index.d.mts (0 errors) ====
+    // esm format file
+    export const mjsSource = true;
+==== test.d.mts (2 errors) ====
+    // esm format file
+    import * as cjs from "inner/cjs/index";
+    import * as mjs from "inner/mjs/index";
+    import * as type from "inner/js/index";
+    export { cjs };
+    export { mjs };
+    export { type };
+                   ~
+!!! error TS1003: Identifier expected.
+                    
+!!! error TS1005: '}' expected.
+==== index.d.cts (0 errors) ====
+    // cjs format file
+    export const cjsSource = true;
+==== test.d.cts (2 errors) ====
+    // cjs format file
+    import * as cjs from "inner/cjs/index";
+    import * as mjs from "inner/mjs/index";
+    import * as type from "inner/js/index";
+    export { cjs };
+    export { mjs };
+    export { type };
+                   ~
+!!! error TS1003: Identifier expected.
+                    
+!!! error TS1005: '}' expected.
+==== package.json (9 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+               ~
+!!! error TS1005: ';' expected.
+        "type": "module"
+               ~
+!!! error TS1005: ';' expected.
+    }
+     
+!!! error TS1005: ';' expected.
+     
+!!! error TS1005: ';' expected.
+     
+!!! error TS1005: ';' expected.
+     
+!!! error TS1005: ';' expected.
+     
+!!! error TS1005: ';' expected.
+     
+!!! error TS1005: ';' expected.
+==== package.json (9 errors) ====
+    {
+        "name": "inner",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+                 ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            "./cjs/*": "./*.cjs",
+                     ~
+!!! error TS1005: ';' expected.
+            "./cjs/exclude/*": null,
+                             ~
+!!! error TS1005: ';' expected.
+            "./mjs/*": "./*.mjs",
+                     ~
+!!! error TS1005: ';' expected.
+            "./mjs/exclude/*": null,
+                             ~
+!!! error TS1005: ';' expected.
+            "./js/*": "./*.js",
+                    ~
+!!! error TS1005: ';' expected.
+            "./js/exclude/*": null
+                            ~
+!!! error TS1005: ';' expected.
+        }
+    } 

@@ -1,0 +1,44 @@
+base.js(9,13): error TS2339: Property 'Base' does not exist on type '() => object'.
+base.js(11,7): error TS1003: Identifier expected.
+base.js(11,8): error TS1005: ';' expected.
+base.js(11,8): error TS2304: Cannot find name 'exports'.
+
+
+==== base.js (4 errors) ====
+    class Base {
+        constructor() {}
+    }
+    
+    const BaseFactory = () => {
+        return new Base();
+    };
+    
+    BaseFactory.Base = Base;
+                ~~~~
+!!! error TS2339: Property 'Base' does not exist on type '() => object'.
+    
+    module.exports = BaseFactory;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    
+==== file.js (0 errors) ====
+    /** @typedef {import('./base')} BaseFactory */
+    /**
+     * @callback BaseFactoryFactory
+     * @param {import('./base')} factory
+     */
+    /** @enum {import('./base')} */
+    const couldntThinkOfAny = {}
+    
+    /**
+     *
+     * @param {InstanceType<BaseFactory["Base"]>} base
+     * @returns {InstanceType<BaseFactory["Base"]>}
+     */
+    const test = (base) => {
+        return base;
+    };

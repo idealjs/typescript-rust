@@ -1,0 +1,9 @@
+thisTypeOptionalCall.ts(2,16): error TS2339: Property 'bind' does not exist on type '((this: T, args: A) => R) | undefined'.
+
+
+==== thisTypeOptionalCall.ts (1 errors) ====
+    function maybeBind<T, A extends any[], R>(obj: T, fn: ((this: T, ...args: A) => R) | undefined): ((...args: A) => R) | undefined {
+        return fn?.bind(obj);
+                   ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '((this: T, args: A) => R) | undefined'.
+    }

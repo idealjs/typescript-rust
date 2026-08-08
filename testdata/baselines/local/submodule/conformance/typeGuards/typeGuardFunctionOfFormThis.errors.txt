@@ -1,0 +1,188 @@
+typeGuardFunctionOfFormThis.ts(11,20): error TS1003: Identifier expected.
+typeGuardFunctionOfFormThis.ts(15,22): error TS1003: Identifier expected.
+typeGuardFunctionOfFormThis.ts(29,7): error TS2339: Property 'isLeader' does not exist on type 'object'.
+typeGuardFunctionOfFormThis.ts(30,7): error TS2339: Property 'lead' does not exist on type 'object'.
+typeGuardFunctionOfFormThis.ts(32,12): error TS2339: Property 'isFollower' does not exist on type 'object'.
+typeGuardFunctionOfFormThis.ts(33,7): error TS2339: Property 'follow' does not exist on type 'object'.
+typeGuardFunctionOfFormThis.ts(78,11): error TS2339: Property 'defend' does not exist on type '{ isElite: () => boolean; isMedic: () => boolean }'.
+typeGuardFunctionOfFormThis.ts(81,11): error TS2339: Property 'heal' does not exist on type '{ isElite: () => boolean; isMedic: () => boolean }'.
+typeGuardFunctionOfFormThis.ts(102,20): error TS2339: Property 'broken' does not exist on type 'object'.
+typeGuardFunctionOfFormThis.ts(105,20): error TS2339: Property 'spoiled' does not exist on type 'object'.
+typeGuardFunctionOfFormThis.ts(110,18): error TS2339: Property 'isFollower' does not exist on type 'object'.
+typeGuardFunctionOfFormThis.ts(111,16): error TS2339: Property 'isLeader' does not exist on type 'object'.
+typeGuardFunctionOfFormThis.ts(114,76): error TS1003: Identifier expected.
+typeGuardFunctionOfFormThis.ts(115,82): error TS1003: Identifier expected.
+typeGuardFunctionOfFormThis.ts(132,11): error TS2339: Property 'follow' does not exist on type '{ isLeader: () => boolean; ;: any; isFollower: () => boolean; ;: any }'.
+
+
+==== typeGuardFunctionOfFormThis.ts (15 errors) ====
+    class RoyalGuard {
+        isLeader(): this is LeadGuard {
+            return this instanceof LeadGuard;
+        }
+        isFollower(): this is FollowerGuard {
+            return this instanceof FollowerGuard;
+        }
+    }
+    
+    class LeadGuard extends RoyalGuard {
+        lead(): void {};
+                       ~
+!!! error TS1003: Identifier expected.
+    }
+    
+    class FollowerGuard extends RoyalGuard {
+        follow(): void {};
+                         ~
+!!! error TS1003: Identifier expected.
+    }
+    
+    let a: RoyalGuard = new FollowerGuard();
+    if (a.isLeader()) {
+        a.lead();
+    }
+    else if (a.isFollower()) {
+        a.follow();
+    }
+    
+    interface GuardInterface extends RoyalGuard {}
+    
+    let b: GuardInterface;
+    if (b.isLeader()) {
+          ~~~~~~~~
+!!! error TS2339: Property 'isLeader' does not exist on type 'object'.
+        b.lead();
+          ~~~~
+!!! error TS2339: Property 'lead' does not exist on type 'object'.
+    }
+    else if (b.isFollower()) {
+               ~~~~~~~~~~
+!!! error TS2339: Property 'isFollower' does not exist on type 'object'.
+        b.follow();
+          ~~~~~~
+!!! error TS2339: Property 'follow' does not exist on type 'object'.
+    }
+    
+    // if (((a.isLeader)())) {
+    //     a.lead();
+    // }
+    // else if (((a).isFollower())) {
+    //     a.follow();
+    // }
+    
+    // if (((a["isLeader"])())) {
+    //     a.lead();
+    // }
+    // else if (((a)["isFollower"]())) {
+    //     a.follow();
+    // }
+    
+    var holder2 = {a};
+    
+    if (holder2.a.isLeader()) {
+        holder2.a;
+    }
+    else {
+        holder2.a;
+    }
+    
+    class ArrowGuard {
+        isElite = (): this is ArrowElite => {
+            return this instanceof ArrowElite;
+        }
+        isMedic = (): this is ArrowMedic => {
+            return this instanceof ArrowMedic;
+        }
+    }
+    
+    class ArrowElite extends ArrowGuard {
+        defend(): void {}
+    }
+    
+    class ArrowMedic extends ArrowGuard {
+        heal(): void {}
+    }
+    
+    let guard = new ArrowGuard();
+    if (guard.isElite()) {
+        guard.defend();
+              ~~~~~~
+!!! error TS2339: Property 'defend' does not exist on type '{ isElite: () => boolean; isMedic: () => boolean }'.
+    }
+    else if (guard.isMedic()) {
+        guard.heal();
+              ~~~~
+!!! error TS2339: Property 'heal' does not exist on type '{ isElite: () => boolean; isMedic: () => boolean }'.
+    }
+    
+    interface Supplies {
+        spoiled: boolean;
+    }
+    
+    interface Sundries {
+        broken: boolean;
+    }
+    
+    interface Crate<T> {
+        contents: T;
+        volume: number;
+        isSupplies(): this is Crate<Supplies>;
+        isSundries(): this is Crate<Sundries>;
+    }
+    
+    let crate: Crate<{}>;
+    
+    if (crate.isSundries()) {
+        crate.contents.broken = true;
+                       ~~~~~~
+!!! error TS2339: Property 'broken' does not exist on type 'object'.
+    }
+    else if (crate.isSupplies()) {
+        crate.contents.spoiled = true;
+                       ~~~~~~~
+!!! error TS2339: Property 'spoiled' does not exist on type 'object'.
+    }
+    
+    // Matching guards should be assignable
+    
+    a.isFollower = b.isFollower;
+                     ~~~~~~~~~~
+!!! error TS2339: Property 'isFollower' does not exist on type 'object'.
+    a.isLeader = b.isLeader;
+                   ~~~~~~~~
+!!! error TS2339: Property 'isLeader' does not exist on type 'object'.
+    
+    class MimicGuard {
+        isLeader(): this is MimicLeader { return this instanceof MimicLeader; };
+                                                                               ~
+!!! error TS1003: Identifier expected.
+        isFollower(): this is MimicFollower { return this instanceof MimicFollower; };
+                                                                                     ~
+!!! error TS1003: Identifier expected.
+    }
+    
+    class MimicLeader extends MimicGuard {
+        lead(): void {}
+    }
+    
+    class MimicFollower extends MimicGuard {
+        follow(): void {}
+    }
+    
+    let mimic = new MimicGuard();
+    
+    a.isLeader = mimic.isLeader;
+    a.isFollower = mimic.isFollower;
+    
+    if (mimic.isFollower()) {
+        mimic.follow();
+              ~~~~~~
+!!! error TS2339: Property 'follow' does not exist on type '{ isLeader: () => boolean; ;: any; isFollower: () => boolean; ;: any }'.
+        mimic.isFollower = a.isFollower;
+    }
+    
+    
+    interface MimicGuardInterface {
+        isLeader(): this is LeadGuard;
+        isFollower(): this is FollowerGuard;
+    }

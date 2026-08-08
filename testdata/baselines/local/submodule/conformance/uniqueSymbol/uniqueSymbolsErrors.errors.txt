@@ -1,0 +1,123 @@
+uniqueSymbolsErrors.ts(3,15): error TS1182: A destructuring declaration must have an initializer.
+uniqueSymbolsErrors.ts(24,42): error TS1135: Argument expression expected.
+uniqueSymbolsErrors.ts(26,56): error TS1135: Argument expression expected.
+uniqueSymbolsErrors.ts(29,9): error TS1005: ';' expected.
+uniqueSymbolsErrors.ts(29,42): error TS1135: Argument expression expected.
+uniqueSymbolsErrors.ts(30,9): error TS1005: ';' expected.
+uniqueSymbolsErrors.ts(35,55): error TS1135: Argument expression expected.
+uniqueSymbolsErrors.ts(37,69): error TS1135: Argument expression expected.
+uniqueSymbolsErrors.ts(40,16): error TS1005: ';' expected.
+uniqueSymbolsErrors.ts(40,55): error TS1135: Argument expression expected.
+uniqueSymbolsErrors.ts(41,16): error TS1005: ';' expected.
+
+
+==== uniqueSymbolsErrors.ts (11 errors) ====
+    // declarations
+    declare const invalidUniqueType: unique number;
+    declare const {}: unique symbol;
+                  ~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+    declare let invalidLetType: unique symbol;
+    declare var invalidVarType: unique symbol;
+    
+    // function arguments and return types
+    declare function invalidArgType(arg: unique symbol): void;
+    declare function invalidRestArgType(...arg: (unique symbol)[]): void;
+    declare function invalidReturnType(): unique symbol;
+    declare function invalidThisType(this: unique symbol): void;
+    declare function invalidTypePredicate(n: any): n is unique symbol;
+    declare function invalidTypeParameterConstraint<T extends unique symbol>(): void;
+    declare function invalidTypeParameterDefault<T = unique symbol>(): void;
+    
+    // classes
+    class InvalidClass {
+        constructor(invalidConstructorArgType: unique symbol) {}
+    
+        readonly invalidReadonlyPropertyType: unique symbol;
+        invalidPropertyType: unique symbol;
+        invalidArgType(arg: unique symbol): void { return; }
+        invalidRestArgType(...args: (unique symbol)[]): void { return; }
+        invalidReturnType(): unique symbol { return; }
+                                             ~~~~~~~~
+!!! error TS1135: Argument expression expected.
+        invalidThisType(this: unique symbol): void { return; }
+        invalidTypePredicate(n: any): n is unique symbol { return; }
+                                                           ~~~~~~~~
+!!! error TS1135: Argument expression expected.
+        invalidTypeParameterConstraint<T extends unique symbol>(): void { return; }
+        invalidTypeParameterDefault<T = unique symbol>(): void { return; }
+        get invalidGetter(): unique symbol { return; }
+            ~~~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+                                             ~~~~~~~~
+!!! error TS1135: Argument expression expected.
+        set invalidSetter(arg: unique symbol) { return; }
+            ~~~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+    
+        static invalidStaticPropertyType: unique symbol;
+        static invalidStaticArgType(arg: unique symbol): void { return; }
+        static invalidStaticRestArgType(...args: (unique symbol)[]): void { return; }
+        static invalidStaticReturnType(): unique symbol { return; }
+                                                          ~~~~~~~~
+!!! error TS1135: Argument expression expected.
+        static invalidStaticThisType(this: unique symbol): void { return; }
+        static invalidStaticTypePredicate(n: any): n is unique symbol { return; }
+                                                                        ~~~~~~~~
+!!! error TS1135: Argument expression expected.
+        static invalidStaticTypeParameterConstraint<T extends unique symbol>(): void { return; }
+        static invalidStaticTypeParameterDefault<T = unique symbol>(): void { return; }
+        static get invalidStaticGetter(): unique symbol { return; }
+                   ~~~~~~~~~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+                                                          ~~~~~~~~
+!!! error TS1135: Argument expression expected.
+        static set invalidStaticSetter(arg: unique symbol) { return; }
+                   ~~~~~~~~~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+    }
+    
+    // interfaces
+    interface InvalidInterface {
+        invalidPropertyType: unique symbol;
+        invalidArgType(arg: unique symbol): void;
+        invalidRestArgType(...args: (unique symbol)[]): void;
+        invalidReturnType(): unique symbol;
+        invalidThisType(this: unique symbol);
+        invalidTypePredicate(n: any): n is unique symbol
+        invalidTypeParameterConstraint<T extends unique symbol>(): void;
+        invalidTypeParameterDefault<T = unique symbol>(): void;
+    }
+    
+    // type literals
+    type InvalidTypeLiteral = {
+        invalidPropertyType: unique symbol;
+        invalidArgType(arg: unique symbol): void;
+        invalidRestArgType(...args: (unique symbol)[]): void;
+        invalidReturnType(): unique symbol;
+        invalidThisType(this: unique symbol);
+        invalidTypePredicate(n: any): n is unique symbol
+        invalidTypeParameterConstraint<T extends unique symbol>(): void;
+        invalidTypeParameterDefault<T = unique symbol>(): void;
+    };
+    
+    // type alias
+    type InvalidAlias = unique symbol;
+    type InvalidAliasTypeParameterConstraint<T extends unique symbol> = never;
+    type InvalidAliasTypeParameterDefault<T extends unique symbol> = never;
+    
+    // type references
+    declare const invalidTypeArgument: Promise<unique symbol>;
+    declare const invalidArrayType: (unique symbol)[];
+    declare const invalidTupleType: [unique symbol];
+    
+    // mapped types
+    declare const invalidMappedType: { [P in string]: unique symbol };
+    
+    // unions/intersection
+    declare const invalidUnion: unique symbol | unique symbol;
+    declare const invalidIntersection: unique symbol | unique symbol;
+    
+    // initializer assignability
+    // https://github.com/Microsoft/TypeScript/issues/21584
+    const shouldNotBeAssignable: string = Symbol();

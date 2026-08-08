@@ -1,11 +1,11 @@
-asyncArrowFunction/asyncArrowFunction1_es2017.ts(1,11): error TS2304: Cannot find name 'async'.
-asyncArrowFunction/asyncArrowFunction1_es2017.ts(1,19): error TS1005: ',' expected.
-asyncArrowFunction/asyncArrowFunction1_es2017.ts(1,28): error TS1005: ',' expected.
-asyncArrowFunction/asyncArrowFunction1_es2017.ts(1,33): error TS1005: ',' expected.
-asyncArrowFunction/asyncArrowFunction1_es2017.ts(1,35): error TS1005: ';' expected.
+asyncArrowFunction1_es2017.ts(1,11): error TS2304: Cannot find name 'async'.
+asyncArrowFunction1_es2017.ts(1,19): error TS1005: ',' expected.
+asyncArrowFunction1_es2017.ts(1,28): error TS1005: ',' expected.
+asyncArrowFunction1_es2017.ts(1,33): error TS1005: ',' expected.
+asyncArrowFunction1_es2017.ts(1,35): error TS1005: ';' expected.
 
 
-==== asyncArrowFunction/asyncArrowFunction1_es2017.ts (5 errors) ====
+==== asyncArrowFunction1_es2017.ts (5 errors) ====
     var foo = async (): Promise<void> => {
               ~~~~~
 !!! error TS2304: Cannot find name 'async'.

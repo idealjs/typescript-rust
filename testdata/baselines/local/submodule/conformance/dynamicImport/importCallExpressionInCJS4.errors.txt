@@ -1,0 +1,19 @@
+2.ts(4,7): error TS2339: Property 'print' does not exist on type 'object'.
+
+
+==== importCallExpressionInCJS4.ts (0 errors) ====
+    ﻿// @module: commonjs
+==== 0.ts (0 errors) ====
+    export class B {
+        print() { return "I am B"}
+    }
+    
+==== 2.ts (1 errors) ====
+    async function foo() {
+        class C extends (await import("./0")).B {}
+        var c = new C();
+        c.print();
+          ~~~~~
+!!! error TS2339: Property 'print' does not exist on type 'object'.
+    }
+    foo();

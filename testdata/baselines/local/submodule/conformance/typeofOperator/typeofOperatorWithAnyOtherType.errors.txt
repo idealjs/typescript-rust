@@ -1,0 +1,128 @@
+typeofOperatorWithAnyOtherType.ts(10,10): error TS1005: ',' expected.
+typeofOperatorWithAnyOtherType.ts(10,11): error TS1134: Variable declaration expected.
+typeofOperatorWithAnyOtherType.ts(16,14): error TS1005: ',' expected.
+typeofOperatorWithAnyOtherType.ts(16,15): error TS1134: Variable declaration expected.
+typeofOperatorWithAnyOtherType.ts(21,17): error TS1005: ',' expected.
+typeofOperatorWithAnyOtherType.ts(21,18): error TS1134: Variable declaration expected.
+typeofOperatorWithAnyOtherType.ts(44,33): error TS2339: Property 'foo' does not exist on type 'object'.
+typeofOperatorWithAnyOtherType.ts(65,6): error TS1005: ',' expected.
+typeofOperatorWithAnyOtherType.ts(65,7): error TS1134: Variable declaration expected.
+typeofOperatorWithAnyOtherType.ts(66,6): error TS1005: ',' expected.
+typeofOperatorWithAnyOtherType.ts(66,7): error TS1134: Variable declaration expected.
+typeofOperatorWithAnyOtherType.ts(66,12): error TS1005: ',' expected.
+typeofOperatorWithAnyOtherType.ts(66,12): error TS1182: A destructuring declaration must have an initializer.
+typeofOperatorWithAnyOtherType.ts(67,6): error TS1005: ',' expected.
+typeofOperatorWithAnyOtherType.ts(67,7): error TS1134: Variable declaration expected.
+typeofOperatorWithAnyOtherType.ts(67,9): error TS1134: Variable declaration expected.
+typeofOperatorWithAnyOtherType.ts(67,10): error TS1134: Variable declaration expected.
+
+
+==== typeofOperatorWithAnyOtherType.ts (17 errors) ====
+    // typeof  operator on any type
+    
+    declare var ANY: any;
+    declare var ANY1;
+    var ANY2: any[] = ["", ""];
+    declare var obj: () => {};
+    var obj1 = { x: "a", y: () => { }};
+    
+    function foo(): any {
+        var a!: any;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        return a;
+    }
+    class A {
+        public a: any;
+        static foo() {
+            var a!: any;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+            return a;
+        }
+    }
+    namespace M {
+        export var n!: any;
+                    ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1134: Variable declaration expected.
+    }
+    var objA = new A();
+    
+    // any type var
+    var ResultIsString1 = typeof ANY1;
+    var ResultIsString2 = typeof ANY2;
+    var ResultIsString3 = typeof A;
+    var ResultIsString4 = typeof M;
+    var ResultIsString5 = typeof obj;
+    var ResultIsString6 = typeof obj1;
+    
+    // any type literal
+    var ResultIsString7 = typeof undefined;
+    var ResultIsString8 = typeof null;
+    var ResultIsString9 = typeof {};
+    
+    // any type expressions
+    var ResultIsString10 = typeof ANY2[0];
+    var ResultIsString11 = typeof objA.a;
+    var ResultIsString12 = typeof obj1.x;
+    var ResultIsString13 = typeof M.n;
+    var ResultIsString14 = typeof foo();
+    var ResultIsString15 = typeof A.foo();
+                                    ~~~
+!!! error TS2339: Property 'foo' does not exist on type 'object'.
+    var ResultIsString16 = typeof (ANY + ANY1);
+    var ResultIsString17 = typeof (null + undefined);
+    var ResultIsString18 = typeof (null + null);
+    var ResultIsString19 = typeof (undefined + undefined);
+    
+    // multiple typeof  operators
+    var ResultIsString20 = typeof typeof ANY;
+    var ResultIsString21 = typeof typeof typeof (ANY + ANY1);
+    
+    // miss assignment operators
+    typeof ANY;
+    typeof ANY1;
+    typeof ANY2[0];
+    typeof ANY, ANY1;
+    typeof obj1;
+    typeof obj1.x;
+    typeof objA.a;
+    typeof M.n;
+    
+    // use typeof in type query
+    var z!: any;
+         ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS1134: Variable declaration expected.
+    var x!: any[];
+         ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS1134: Variable declaration expected.
+               ~
+!!! error TS1005: ',' expected.
+               ~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+    var r!: () => any;
+         ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS1134: Variable declaration expected.
+            ~
+!!! error TS1134: Variable declaration expected.
+             ~
+!!! error TS1134: Variable declaration expected.
+    z: typeof ANY;
+    x: typeof ANY2;
+    r: typeof foo;
+    z: typeof objA.a;
+    z: typeof A.foo;
+    z: typeof M.n;
+    z: typeof obj1.x;

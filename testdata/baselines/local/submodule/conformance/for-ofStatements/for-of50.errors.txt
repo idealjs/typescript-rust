@@ -1,0 +1,12 @@
+for-of50.ts(2,15): error TS2304: Cannot find name 'Map'.
+
+
+==== for-of50.ts (1 errors) ====
+    ﻿//@target: ES6
+    var map = new Map([["", true]]);
+               ~~~
+!!! error TS2304: Cannot find name 'Map'.
+    for (const [k, v] of map) {
+        k;
+        v;
+    }

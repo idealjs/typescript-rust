@@ -1,11 +1,11 @@
-constructorDeclarations/classConstructorParametersAccessibility.ts(2,24): error TS1005: ',' expected.
-constructorDeclarations/classConstructorParametersAccessibility.ts(9,25): error TS1005: ',' expected.
-constructorDeclarations/classConstructorParametersAccessibility.ts(16,27): error TS1005: ',' expected.
-constructorDeclarations/classConstructorParametersAccessibility.ts(22,9): error TS2349: This expression is not callable.
-constructorDeclarations/classConstructorParametersAccessibility.ts(23,14): error TS2339: Property 'p' does not exist on type 'object'.
+classConstructorParametersAccessibility.ts(2,24): error TS1005: ',' expected.
+classConstructorParametersAccessibility.ts(9,25): error TS1005: ',' expected.
+classConstructorParametersAccessibility.ts(16,27): error TS1005: ',' expected.
+classConstructorParametersAccessibility.ts(22,9): error TS2349: This expression is not callable.
+classConstructorParametersAccessibility.ts(23,14): error TS2339: Property 'p' does not exist on type 'object'.
 
 
-==== constructorDeclarations/classConstructorParametersAccessibility.ts (5 errors) ====
+==== classConstructorParametersAccessibility.ts (5 errors) ====
     class C1 {
         constructor(public x: number) { }
                            ~

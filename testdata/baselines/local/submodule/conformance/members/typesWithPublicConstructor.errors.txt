@@ -1,0 +1,28 @@
+typesWithPublicConstructor.ts(8,23): error TS2339: Property 'constructor' does not exist on type 'object'.
+typesWithPublicConstructor.ts(15,10): error TS2554: Expected 1 arguments, but got 0.
+typesWithPublicConstructor.ts(16,34): error TS2339: Property 'constructor' does not exist on type 'object'.
+
+
+==== typesWithPublicConstructor.ts (3 errors) ====
+    // public is allowed on a constructor but is not meaningful
+    
+    class C {
+        public constructor() { }
+    }
+    
+    var c = new C();
+    var r: () => void = c.constructor;
+                          ~~~~~~~~~~~
+!!! error TS2339: Property 'constructor' does not exist on type 'object'.
+    
+    class C2 {
+        public constructor(x: number);
+        public constructor(x: any) { }
+    }
+    
+    var c2 = new C2();
+             ~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    var r2: (x: number) => void = c2.constructor;
+                                     ~~~~~~~~~~~
+!!! error TS2339: Property 'constructor' does not exist on type 'object'.

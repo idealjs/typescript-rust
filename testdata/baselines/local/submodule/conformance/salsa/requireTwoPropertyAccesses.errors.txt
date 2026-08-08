@@ -1,0 +1,25 @@
+mod.js(1,7): error TS1003: Identifier expected.
+mod.js(1,8): error TS1005: ';' expected.
+mod.js(1,8): error TS2304: Cannot find name 'exports'.
+requireTwoPropertyAccesses.js(1,15): error TS2304: Cannot find name 'require'.
+
+
+==== requireTwoPropertyAccesses.ts (0 errors) ====
+    // @declaration
+==== mod.js (3 errors) ====
+    module.exports = {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        x: {
+            y: "value"
+        }
+    }
+==== requireTwoPropertyAccesses.js (1 errors) ====
+    const value = require("./mod").x.y
+                  ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    console.log(value)

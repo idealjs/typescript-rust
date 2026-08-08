@@ -1,32 +1,32 @@
-privateNames/privateNameBadAssignment.ts(1,1): error TS2304: Cannot find name 'exports'.
-privateNames/privateNameBadAssignment.ts(1,9): error TS1003: Identifier expected.
-privateNames/privateNameBadAssignment.ts(1,9): error TS1127: Invalid character.
-privateNames/privateNameBadAssignment.ts(1,10): error TS1005: ';' expected.
-privateNames/privateNameBadAssignment.ts(1,10): error TS2304: Cannot find name 'nope'.
-privateNames/privateNameBadAssignment.ts(3,3): error TS2339: Property 'prototype' does not exist on type '() => void'.
-privateNames/privateNameBadAssignment.ts(3,13): error TS1003: Identifier expected.
-privateNames/privateNameBadAssignment.ts(3,13): error TS1127: Invalid character.
-privateNames/privateNameBadAssignment.ts(3,14): error TS1005: ';' expected.
-privateNames/privateNameBadAssignment.ts(3,14): error TS2304: Cannot find name 'no'.
-privateNames/privateNameBadAssignment.ts(6,3): error TS1003: Identifier expected.
-privateNames/privateNameBadAssignment.ts(6,3): error TS1127: Invalid character.
-privateNames/privateNameBadAssignment.ts(6,3): error TS2339: Property '#' does not exist on type 'object'.
-privateNames/privateNameBadAssignment.ts(6,4): error TS1005: ';' expected.
-privateNames/privateNameBadAssignment.ts(6,4): error TS2304: Cannot find name 'foo'.
-privateNames/privateNameBadAssignment.ts(9,5): error TS1003: Identifier expected.
-privateNames/privateNameBadAssignment.ts(9,5): error TS1127: Invalid character.
-privateNames/privateNameBadAssignment.ts(9,6): error TS1005: ';' expected.
-privateNames/privateNameBadAssignment.ts(11,9): error TS2304: Cannot find name 'exports'.
-privateNames/privateNameBadAssignment.ts(11,17): error TS1003: Identifier expected.
-privateNames/privateNameBadAssignment.ts(11,17): error TS1127: Invalid character.
-privateNames/privateNameBadAssignment.ts(11,18): error TS1005: ';' expected.
-privateNames/privateNameBadAssignment.ts(12,14): error TS1003: Identifier expected.
-privateNames/privateNameBadAssignment.ts(12,14): error TS1127: Invalid character.
-privateNames/privateNameBadAssignment.ts(12,15): error TS1005: ';' expected.
-privateNames/privateNameBadAssignment.ts(12,15): error TS2304: Cannot find name 'foo'.
+privateNameBadAssignment.ts(1,1): error TS2304: Cannot find name 'exports'.
+privateNameBadAssignment.ts(1,9): error TS1003: Identifier expected.
+privateNameBadAssignment.ts(1,9): error TS1127: Invalid character.
+privateNameBadAssignment.ts(1,10): error TS1005: ';' expected.
+privateNameBadAssignment.ts(1,10): error TS2304: Cannot find name 'nope'.
+privateNameBadAssignment.ts(3,3): error TS2339: Property 'prototype' does not exist on type '() => void'.
+privateNameBadAssignment.ts(3,13): error TS1003: Identifier expected.
+privateNameBadAssignment.ts(3,13): error TS1127: Invalid character.
+privateNameBadAssignment.ts(3,14): error TS1005: ';' expected.
+privateNameBadAssignment.ts(3,14): error TS2304: Cannot find name 'no'.
+privateNameBadAssignment.ts(6,3): error TS1003: Identifier expected.
+privateNameBadAssignment.ts(6,3): error TS1127: Invalid character.
+privateNameBadAssignment.ts(6,3): error TS2339: Property '#' does not exist on type 'object'.
+privateNameBadAssignment.ts(6,4): error TS1005: ';' expected.
+privateNameBadAssignment.ts(6,4): error TS2304: Cannot find name 'foo'.
+privateNameBadAssignment.ts(9,5): error TS1003: Identifier expected.
+privateNameBadAssignment.ts(9,5): error TS1127: Invalid character.
+privateNameBadAssignment.ts(9,6): error TS1005: ';' expected.
+privateNameBadAssignment.ts(11,9): error TS2304: Cannot find name 'exports'.
+privateNameBadAssignment.ts(11,17): error TS1003: Identifier expected.
+privateNameBadAssignment.ts(11,17): error TS1127: Invalid character.
+privateNameBadAssignment.ts(11,18): error TS1005: ';' expected.
+privateNameBadAssignment.ts(12,14): error TS1003: Identifier expected.
+privateNameBadAssignment.ts(12,14): error TS1127: Invalid character.
+privateNameBadAssignment.ts(12,15): error TS1005: ';' expected.
+privateNameBadAssignment.ts(12,15): error TS2304: Cannot find name 'foo'.
 
 
-==== privateNames/privateNameBadAssignment.ts (26 errors) ====
+==== privateNameBadAssignment.ts (26 errors) ====
     exports.#nope = 1;           // Error (outside class body)
     ~~~~~~~
 !!! error TS2304: Cannot find name 'exports'.

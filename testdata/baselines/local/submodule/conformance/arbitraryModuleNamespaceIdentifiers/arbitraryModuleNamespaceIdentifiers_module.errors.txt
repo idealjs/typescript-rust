@@ -1,0 +1,88 @@
+error TS2300: Duplicate identifier 'stringliteral'.
+error TS2300: Duplicate identifier 'stringliteral'.
+error TS2300: Duplicate identifier 'stringliteral'.
+error TS2300: Duplicate identifier 'stringliteral'.
+error TS2300: Duplicate identifier 'stringliteral'.
+arbitraryModuleNamespaceIdentifiers_module.ts(6,5): error TS2304: Cannot find name 'valueX'.
+arbitraryModuleNamespaceIdentifiers_module.ts(10,5): error TS2304: Cannot find name 'valueY'.
+arbitraryModuleNamespaceIdentifiers_module.ts(14,5): error TS2304: Cannot find name 'valueZ'.
+arbitraryModuleNamespaceIdentifiers_module.ts(15,5): error TS2304: Cannot find name 'valueZ'.
+arbitraryModuleNamespaceIdentifiers_module.ts(16,5): error TS2304: Cannot find name 'valueZ'.
+arbitraryModuleNamespaceIdentifiers_module.ts(16,23): error TS2304: Cannot find name 'valueZ'.
+arbitraryModuleNamespaceIdentifiers_module.ts(20,19): error TS2304: Cannot find name 'typeA'.
+arbitraryModuleNamespaceIdentifiers_module.ts(24,21): error TS2304: Cannot find name 'typeB'.
+arbitraryModuleNamespaceIdentifiers_module.ts(26,13): error TS1003: Identifier expected.
+arbitraryModuleNamespaceIdentifiers_module.ts(26,15): error TS1005: '=' expected.
+arbitraryModuleNamespaceIdentifiers_module.ts(26,18): error TS1005: ';' expected.
+arbitraryModuleNamespaceIdentifiers_module.ts(26,24): error TS1005: ';' expected.
+arbitraryModuleNamespaceIdentifiers_module.ts(26,24): error TS2304: Cannot find name 'from'.
+arbitraryModuleNamespaceIdentifiers_module.ts(26,29): error TS1005: ';' expected.
+
+
+!!! error TS2300: Duplicate identifier 'stringliteral'.
+
+!!! error TS2300: Duplicate identifier 'stringliteral'.
+
+!!! error TS2300: Duplicate identifier 'stringliteral'.
+
+!!! error TS2300: Duplicate identifier 'stringliteral'.
+
+!!! error TS2300: Duplicate identifier 'stringliteral'.
+==== arbitraryModuleNamespaceIdentifiers_module.ts (14 errors) ====
+    const someValue = "someValue";
+    type someType = "someType";
+    
+    export { someValue as "<X>" };
+    import { "<X>" as valueX } from "./arbitraryModuleNamespaceIdentifiers_module";
+    if (valueX !== "someValue") throw "should be someValue";
+        ~~~~~~
+!!! error TS2304: Cannot find name 'valueX'.
+    
+    export { "<X>" as "<Y>" } from "./arbitraryModuleNamespaceIdentifiers_module";
+    import { "<Y>" as valueY } from "./arbitraryModuleNamespaceIdentifiers_module";
+    if (valueY !== "someValue") throw "should be someValue";
+        ~~~~~~
+!!! error TS2304: Cannot find name 'valueY'.
+    
+    export * as "<Z>" from "./arbitraryModuleNamespaceIdentifiers_module";
+    import { "<Z>" as valueZ } from "./arbitraryModuleNamespaceIdentifiers_module";
+    if (valueZ["<X>"] !== "someValue") throw "should be someValue";
+        ~~~~~~
+!!! error TS2304: Cannot find name 'valueZ'.
+    if (valueZ["<Y>"] !== "someValue") throw "should be someValue";
+        ~~~~~~
+!!! error TS2304: Cannot find name 'valueZ'.
+    if (valueZ["<Z>"] !== valueZ) throw "should be export namespace";
+        ~~~~~~
+!!! error TS2304: Cannot find name 'valueZ'.
+                          ~~~~~~
+!!! error TS2304: Cannot find name 'valueZ'.
+    
+    export { type someType as "<A>" };
+    import { type "<A>" as typeA } from "./arbitraryModuleNamespaceIdentifiers_module";
+    const importTest: typeA = "expect error about someType";
+                      ~~~~~
+!!! error TS2304: Cannot find name 'typeA'.
+    
+    export { type "<A>" as "<B>" } from "./arbitraryModuleNamespaceIdentifiers_module";
+    import { type "<B>" as typeB } from "./arbitraryModuleNamespaceIdentifiers_module";
+    const reimportTest: typeB = "expect error about someType";
+                        ~~~~~
+!!! error TS2304: Cannot find name 'typeB'.
+    
+    export type * as "<C>" from "./arbitraryModuleNamespaceIdentifiers_module";
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~
+!!! error TS1005: '=' expected.
+                     ~~~~~
+!!! error TS1005: ';' expected.
+                           ~~~~
+!!! error TS1005: ';' expected.
+                           ~~~~
+!!! error TS2304: Cannot find name 'from'.
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+    import { type "<C>" as typeC } from "./arbitraryModuleNamespaceIdentifiers_module";
+    export type otherType = "otherType";
+    const importStarTestA: typeC.otherType = "expect error about otherType";

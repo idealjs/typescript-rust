@@ -1,0 +1,133 @@
+a.js(12,10): error TS2339: Property 'prototype' does not exist on type '() => void'.
+a.js(17,5): error TS2304: Cannot find name 'get'.
+a.js(17,8): error TS1005: ',' expected.
+a.js(17,8): error TS2304: Cannot find name '('.
+a.js(17,9): error TS1005: ',' expected.
+a.js(17,9): error TS2304: Cannot find name 'key'.
+a.js(17,12): error TS1005: ',' expected.
+a.js(17,12): error TS2304: Cannot find name ')'.
+a.js(17,14): error TS1005: ',' expected.
+a.js(17,14): error TS2304: Cannot find name '{'.
+a.js(18,9): error TS1005: ',' expected.
+a.js(18,9): error TS2304: Cannot find name 'return'.
+a.js(18,16): error TS1005: ',' expected.
+a.js(18,16): error TS2304: Cannot find name 'this'.
+a.js(18,20): error TS1005: ',' expected.
+a.js(18,20): error TS2304: Cannot find name '.'.
+a.js(18,21): error TS1005: ',' expected.
+a.js(18,21): error TS2304: Cannot find name '_map'.
+a.js(18,25): error TS1005: ',' expected.
+a.js(18,35): error TS1005: ',' expected.
+a.js(18,35): error TS2304: Cannot find name ';'.
+a.js(20,1): error TS1128: Declaration or statement expected.
+
+
+==== a.js (22 errors) ====
+    /**
+     * Should work for function declarations
+     * @constructor
+     * @template {string} K
+     * @template V
+     */
+    function Multimap() {
+        /** @type {Object<string, V>} TODO: Remove the prototype from the fresh object */
+        this._map = {};
+    };
+    
+    Multimap.prototype = {
+             ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+        /**
+         * @param {K} key the key ok
+         * @returns {V} the value ok
+         */
+        get(key) {
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '('.
+            ~~~
+!!! error TS1005: ',' expected.
+            ~~~
+!!! error TS2304: Cannot find name 'key'.
+               ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS2304: Cannot find name ')'.
+                 ~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS2304: Cannot find name '{'.
+            return this._map[key + ''];
+            ~~~~~~
+!!! error TS1005: ',' expected.
+            ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                   ~~~~
+!!! error TS1005: ',' expected.
+                   ~~~~
+!!! error TS2304: Cannot find name 'this'.
+                       ~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS2304: Cannot find name '.'.
+                        ~~~~
+!!! error TS1005: ',' expected.
+                        ~~~~
+!!! error TS2304: Cannot find name '_map'.
+                            ~
+!!! error TS1005: ',' expected.
+                                      ~
+!!! error TS1005: ',' expected.
+                                      ~
+!!! error TS2304: Cannot find name ';'.
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+    /**
+     * Should work for initialisers too
+     * @constructor
+     * @template {string} K
+     * @template V
+     */
+    var Multimap2 = function() {
+        /** @type {Object<string, V>} TODO: Remove the prototype from the fresh object */
+        this._map = {};
+    };
+    
+    Multimap2.prototype = {
+        /**
+         * @param {K} key the key ok
+         * @returns {V} the value ok
+         */
+        get: function(key) {
+            return this._map[key + ''];
+        }
+    }
+    
+    var Ns = {};
+    /**
+     * Should work for expando-namespaced initialisers too
+     * @constructor
+     * @template {string} K
+     * @template V
+     */
+    Ns.Multimap3 = function() {
+        /** @type {Object<string, V>} TODO: Remove the prototype from the fresh object */
+        this._map = {};
+    };
+    
+    Ns.Multimap3.prototype = {
+        /**
+         * @param {K} key the key ok
+         * @returns {V} the value ok
+         */
+        get(key) {
+            return this._map[key + ''];
+        }
+    }
+    

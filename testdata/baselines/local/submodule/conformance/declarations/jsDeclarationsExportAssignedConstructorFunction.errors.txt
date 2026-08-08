@@ -1,0 +1,29 @@
+jsDeclarationsExportAssignedConstructorFunction.js(2,7): error TS1003: Identifier expected.
+jsDeclarationsExportAssignedConstructorFunction.js(2,8): error TS1005: ';' expected.
+jsDeclarationsExportAssignedConstructorFunction.js(2,8): error TS2304: Cannot find name 'exports'.
+jsDeclarationsExportAssignedConstructorFunction.js(5,7): error TS1003: Identifier expected.
+jsDeclarationsExportAssignedConstructorFunction.js(5,8): error TS1005: ';' expected.
+jsDeclarationsExportAssignedConstructorFunction.js(5,8): error TS2304: Cannot find name 'exports'.
+
+
+==== jsDeclarationsExportAssignedConstructorFunction.js (6 errors) ====
+    /** @constructor */
+    module.exports.MyClass = function() {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        this.x = 1
+    }
+    module.exports.MyClass.prototype = {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        a: function() {
+        }
+    }

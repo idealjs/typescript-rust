@@ -1,0 +1,39 @@
+mixinAccessors3.ts(2,16): error TS2304: Cannot find name 'extends'.
+mixinAccessors3.ts(2,24): error TS1005: '{' expected.
+mixinAccessors3.ts(2,35): error TS1005: ';' expected.
+mixinAccessors3.ts(3,9): error TS1005: ';' expected.
+mixinAccessors3.ts(10,7): error TS1005: ';' expected.
+mixinAccessors3.ts(15,7): error TS1005: ';' expected.
+
+
+==== mixinAccessors3.ts (6 errors) ====
+    function mixin<T extends { new (...args: any[]): {} }>(superclass: T) {
+      return class extends superclass {
+                   ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                           ~~~~~~~~~~
+!!! error TS1005: '{' expected.
+                                      ~
+!!! error TS1005: ';' expected.
+        get name() {
+            ~~~~
+!!! error TS1005: ';' expected.
+          return "";
+        }
+      };
+    }
+    
+    class BaseClass {
+      set name(v: string) {}
+          ~~~~
+!!! error TS1005: ';' expected.
+    }
+    
+    // error
+    class MyClass extends mixin(BaseClass) { 
+      get name() {
+          ~~~~
+!!! error TS1005: ';' expected.
+        return "";
+      }
+    }

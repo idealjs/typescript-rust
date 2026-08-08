@@ -1,0 +1,61 @@
+privateStaticNameShadowing.ts(2,12): error TS1005: ';' expected.
+privateStaticNameShadowing.ts(2,12): error TS1127: Invalid character.
+privateStaticNameShadowing.ts(2,13): error TS1005: ';' expected.
+privateStaticNameShadowing.ts(2,19): error TS1003: Identifier expected.
+privateStaticNameShadowing.ts(2,19): error TS1127: Invalid character.
+privateStaticNameShadowing.ts(2,20): error TS1005: ';' expected.
+privateStaticNameShadowing.ts(4,9): error TS1003: Identifier expected.
+privateStaticNameShadowing.ts(4,9): error TS1127: Invalid character.
+privateStaticNameShadowing.ts(4,10): error TS1005: ';' expected.
+privateStaticNameShadowing.ts(6,12): error TS1005: ';' expected.
+privateStaticNameShadowing.ts(6,12): error TS1127: Invalid character.
+privateStaticNameShadowing.ts(6,13): error TS1005: ';' expected.
+privateStaticNameShadowing.ts(9,9): error TS1003: Identifier expected.
+privateStaticNameShadowing.ts(9,9): error TS1127: Invalid character.
+privateStaticNameShadowing.ts(9,10): error TS1005: ';' expected.
+
+
+==== privateStaticNameShadowing.ts (15 errors) ====
+    class X {
+        static #f = X.#m();
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1003: Identifier expected.
+                      ~
+!!! error TS1127: Invalid character.
+                       ~
+!!! error TS1005: ';' expected.
+        constructor() {
+          X.#m();
+            ~
+!!! error TS1003: Identifier expected.
+            ~
+!!! error TS1127: Invalid character.
+             ~
+!!! error TS1005: ';' expected.
+        }
+        static #m() {
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~
+!!! error TS1005: ';' expected.
+          const X: any = {}; // shadow the class
+          const _a: any = {}; // shadow the first generated var
+          X.#m(); // Should check with X as the receiver with _b as the class constructor 
+            ~
+!!! error TS1003: Identifier expected.
+            ~
+!!! error TS1127: Invalid character.
+             ~
+!!! error TS1005: ';' expected.
+          return 1;
+        }
+      }
+      

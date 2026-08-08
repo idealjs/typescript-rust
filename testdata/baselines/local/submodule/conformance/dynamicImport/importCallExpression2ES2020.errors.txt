@@ -1,0 +1,21 @@
+2.ts(8,5): error TS2304: Cannot find name 'import'.
+
+
+==== importCallExpression2ES2020.ts (0 errors) ====
+    ﻿// @module: es2020
+==== 0.ts (0 errors) ====
+    export class B {
+        print() { return "I am B"}
+    }
+    
+==== 2.ts (1 errors) ====
+    function foo(x: Promise<any>) {
+        x.then(value => {
+            let b = new value.B();
+            b.print();
+        })
+    }
+    
+    foo(import("./0"));
+        ~~~~~~
+!!! error TS2304: Cannot find name 'import'.

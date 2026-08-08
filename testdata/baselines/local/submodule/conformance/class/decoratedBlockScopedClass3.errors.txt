@@ -1,0 +1,31 @@
+a.ts(11,5): error TS2339: Property 'func' does not exist on type 'object'.
+a.ts(20,9): error TS2339: Property 'func' does not exist on type 'object'.
+
+
+==== a.ts (2 errors) ====
+    function decorator() {
+        return (target: new (...args: any[]) => any) => {}
+    }
+    
+    @decorator()
+    class Foo {
+        public static func(): Foo {
+            return new Foo();
+        }
+    }
+    Foo.func();
+        ~~~~
+!!! error TS2339: Property 'func' does not exist on type 'object'.
+    
+    try {
+        @decorator()
+        class Foo {
+            public static func(): Foo {
+                return new Foo();
+            }
+        }
+        Foo.func();
+            ~~~~
+!!! error TS2339: Property 'func' does not exist on type 'object'.
+    }
+    catch (e) {}

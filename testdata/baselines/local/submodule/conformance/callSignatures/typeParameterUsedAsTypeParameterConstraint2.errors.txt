@@ -1,0 +1,92 @@
+typeParameterUsedAsTypeParameterConstraint2.ts(8,20): error TS2322: Type 'U' is not assignable to type 'T'.
+typeParameterUsedAsTypeParameterConstraint2.ts(17,20): error TS2322: Type 'U' is not assignable to type 'T'.
+typeParameterUsedAsTypeParameterConstraint2.ts(26,20): error TS2322: Type 'U' is not assignable to type 'T'.
+typeParameterUsedAsTypeParameterConstraint2.ts(35,20): error TS2322: Type 'U' is not assignable to type 'T'.
+typeParameterUsedAsTypeParameterConstraint2.ts(40,12): error TS1005: '>' expected.
+typeParameterUsedAsTypeParameterConstraint2.ts(40,14): error TS1005: ',' expected.
+typeParameterUsedAsTypeParameterConstraint2.ts(40,16): error TS1005: ',' expected.
+typeParameterUsedAsTypeParameterConstraint2.ts(40,24): error TS1005: ',' expected.
+typeParameterUsedAsTypeParameterConstraint2.ts(40,25): error TS1005: ',' expected.
+typeParameterUsedAsTypeParameterConstraint2.ts(40,26): error TS1134: Variable declaration expected.
+typeParameterUsedAsTypeParameterConstraint2.ts(40,37): error TS1005: ',' expected.
+
+
+==== typeParameterUsedAsTypeParameterConstraint2.ts (11 errors) ====
+    // Type parameters are in scope in their own and other type parameter lists
+    // Nested local functions
+    
+    function foo<T, U extends T>(x: T, y: U) {
+        function bar<V extends T, W extends U>() {
+            function baz<X extends W, Y extends V>(a: X, b: Y): T {
+                x = y;
+                return y;
+                       ~
+!!! error TS2322: Type 'U' is not assignable to type 'T'.
+            }
+        }
+    }
+    
+    function foo2<U extends T, T>(x: T, y: U) {
+        function bar<V extends T, W extends U>() {
+            function baz<X extends W, Y extends V>(a: X, b: Y): T {
+                x = y;
+                return y;
+                       ~
+!!! error TS2322: Type 'U' is not assignable to type 'T'.
+            }
+        }
+    }
+    
+    var f = function <T, U extends T>(x: T, y: U) {
+        function bar<V extends T, W extends U>() {
+            var g = function <X extends W, Y extends V>(a: X, b: Y): T {
+                x = y;
+                return y;
+                       ~
+!!! error TS2322: Type 'U' is not assignable to type 'T'.
+            }
+        }
+    }
+    
+    var f2 = function <U extends T, T>(x: T, y: U) {
+        function bar<V extends T, W extends U>() {
+            var g = function baz<X extends W, Y extends V>(a: X, b: Y): T {
+                x = y;
+                return y;
+                       ~
+!!! error TS2322: Type 'U' is not assignable to type 'T'.
+            }
+        }
+    }
+    
+    var f3 = <T, U extends T>(x: T, y: U) => {
+               ~
+!!! error TS1005: '>' expected.
+                 ~
+!!! error TS1005: ',' expected.
+                   ~~~~~~~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1134: Variable declaration expected.
+                                        ~
+!!! error TS1005: ',' expected.
+        function bar<V extends T, W extends U>() {
+            var g = <X extends W, Y extends V>(a: X, b: Y): T => {
+                x = y;
+                return y;
+            }
+        }
+    }
+    
+    var f4 = <U extends T, T>(x: T, y: U) => {
+        function bar<V extends T, W extends U>() {
+            var g = <X extends W, Y extends V>(a: X, b: Y): T => {
+                x = y;
+                return y;
+            }
+        }
+    }

@@ -1,0 +1,65 @@
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+types.forAwait.es2018.1.ts(12,16): error TS2454: Variable 'y' is used before being assigned.
+types.forAwait.es2018.1.ts(14,16): error TS2454: Variable 'y' is used before being assigned.
+types.forAwait.es2018.1.ts(16,16): error TS2454: Variable 'y' is used before being assigned.
+types.forAwait.es2018.1.ts(27,16): error TS2454: Variable 'y' is used before being assigned.
+types.forAwait.es2018.1.ts(29,16): error TS2454: Variable 'y' is used before being assigned.
+types.forAwait.es2018.1.ts(31,16): error TS2454: Variable 'y' is used before being assigned.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+==== types.forAwait.es2018.1.ts (6 errors) ====
+    declare const asyncIterable: AsyncIterable<number>;
+    declare const iterable: Iterable<number>;
+    declare const iterableOfPromise: Iterable<Promise<number>>;
+    async function f1() {
+        let y: number;
+        for await (const x of asyncIterable) {
+        }
+        for await (const x of iterable) {
+        }
+        for await (const x of iterableOfPromise) {
+        }
+        for await (y of asyncIterable) {
+                   ~
+!!! error TS2454: Variable 'y' is used before being assigned.
+        }
+        for await (y of iterable) {
+                   ~
+!!! error TS2454: Variable 'y' is used before being assigned.
+        }
+        for await (y of iterableOfPromise) {
+                   ~
+!!! error TS2454: Variable 'y' is used before being assigned.
+        }
+    }
+    async function * f2() {
+        let y: number;
+        for await (const x of asyncIterable) {
+        }
+        for await (const x of iterable) {
+        }
+        for await (const x of iterableOfPromise) {
+        }
+        for await (y of asyncIterable) {
+                   ~
+!!! error TS2454: Variable 'y' is used before being assigned.
+        }
+        for await (y of iterable) {
+                   ~
+!!! error TS2454: Variable 'y' is used before being assigned.
+        }
+        for await (y of iterableOfPromise) {
+                   ~
+!!! error TS2454: Variable 'y' is used before being assigned.
+        }
+    }

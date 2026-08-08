@@ -1,14 +1,14 @@
-accessibility/classPropertyIsPublicByDefault.ts(3,9): error TS1005: ';' expected.
-accessibility/classPropertyIsPublicByDefault.ts(4,9): error TS1005: ';' expected.
-accessibility/classPropertyIsPublicByDefault.ts(8,16): error TS1005: ';' expected.
-accessibility/classPropertyIsPublicByDefault.ts(9,16): error TS1005: ';' expected.
-accessibility/classPropertyIsPublicByDefault.ts(19,3): error TS2339: Property 'a' does not exist on type 'object'.
-accessibility/classPropertyIsPublicByDefault.ts(20,3): error TS2339: Property 'b' does not exist on type 'object'.
-accessibility/classPropertyIsPublicByDefault.ts(21,3): error TS2339: Property 'b' does not exist on type 'object'.
-accessibility/classPropertyIsPublicByDefault.ts(22,3): error TS2339: Property 'foo' does not exist on type 'object'.
+classPropertyIsPublicByDefault.ts(3,9): error TS1005: ';' expected.
+classPropertyIsPublicByDefault.ts(4,9): error TS1005: ';' expected.
+classPropertyIsPublicByDefault.ts(8,16): error TS1005: ';' expected.
+classPropertyIsPublicByDefault.ts(9,16): error TS1005: ';' expected.
+classPropertyIsPublicByDefault.ts(19,3): error TS2339: Property 'a' does not exist on type 'object'.
+classPropertyIsPublicByDefault.ts(20,3): error TS2339: Property 'b' does not exist on type 'object'.
+classPropertyIsPublicByDefault.ts(21,3): error TS2339: Property 'b' does not exist on type 'object'.
+classPropertyIsPublicByDefault.ts(22,3): error TS2339: Property 'foo' does not exist on type 'object'.
 
 
-==== accessibility/classPropertyIsPublicByDefault.ts (8 errors) ====
+==== classPropertyIsPublicByDefault.ts (8 errors) ====
     class C {
         x: string;
         get y() { return null; }

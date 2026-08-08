@@ -1,0 +1,21 @@
+destructuringAssignabilityCheck.ts(13,7): error TS2322: Type 'number' is not assignable to type 'undefined'.
+
+
+==== destructuringAssignabilityCheck.ts (1 errors) ====
+    const [] = {}; // should be error
+    const {} = undefined; // error correctly
+    (([]) => 0)({}); // should be error
+    (({}) => 0)(undefined); // should be error
+    
+    function foo({}: undefined) {
+        return 0
+    }
+    function bar([]: {}) {
+        return 0
+    }
+    
+    const { }: undefined = 1
+          ~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'number' is not assignable to type 'undefined'.
+    
+    const []: {} = {}

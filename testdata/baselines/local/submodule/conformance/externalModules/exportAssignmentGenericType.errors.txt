@@ -1,0 +1,15 @@
+foo_1.ts(2,13): error TS2304: Cannot find name 'foo'.
+
+
+==== foo_0.ts (0 errors) ====
+    class Foo<T>{
+    	test: T;
+    }
+    export = Foo;
+    
+==== foo_1.ts (1 errors) ====
+    import foo = require("./foo_0");
+    var x = new foo<number>();
+                ~~~
+!!! error TS2304: Cannot find name 'foo'.
+    var y:number = x.test;

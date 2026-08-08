@@ -1,0 +1,33 @@
+/types.ts(1,16): error TS2304: Cannot find name 'interface'.
+/types.ts(1,26): error TS1005: ';' expected.
+/types.ts(1,26): error TS2304: Cannot find name 'Foo'.
+/types.ts(1,30): error TS1005: ';' expected.
+/types.ts(2,8): error TS2304: Cannot find name 'number'.
+
+
+==== importTag3.ts (0 errors) ====
+    
+==== /types.ts (5 errors) ====
+    export default interface Foo {
+                   ~~~~~~~~~
+!!! error TS2304: Cannot find name 'interface'.
+                             ~~~
+!!! error TS1005: ';' expected.
+                             ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+                                 ~
+!!! error TS1005: ';' expected.
+        a: number;
+           ~~~~~~
+!!! error TS2304: Cannot find name 'number'.
+    }
+    
+==== /foo.js (0 errors) ====
+    /**
+     * @import Foo from "./types"
+     */
+    
+    /**
+     * @param { Foo } foo
+     */
+    export function f(foo) {}

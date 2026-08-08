@@ -1,0 +1,177 @@
+propertyAccessOnTypeParameterWithConstraints2.ts(61,10): error TS2349: This expression is not callable.
+propertyAccessOnTypeParameterWithConstraints2.ts(62,11): error TS2349: This expression is not callable.
+propertyAccessOnTypeParameterWithConstraints2.ts(65,11): error TS2349: This expression is not callable.
+propertyAccessOnTypeParameterWithConstraints2.ts(66,11): error TS2349: This expression is not callable.
+propertyAccessOnTypeParameterWithConstraints2.ts(69,11): error TS2304: Cannot find name 'U'.
+propertyAccessOnTypeParameterWithConstraints2.ts(69,22): error TS1005: '?' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(69,24): error TS1005: ':' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(69,35): error TS1005: '?' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(69,36): error TS1005: ':' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(71,18): error TS1003: Identifier expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(71,21): error TS1003: Identifier expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(73,1): error TS1005: '>' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,1): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,1): error TS2304: Cannot find name 'var'.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,5): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,5): error TS2304: Cannot find name 'r4'.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,8): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,8): error TS2304: Cannot find name '='.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,10): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,11): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,11): error TS2304: Cannot find name '.'.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,12): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,12): error TS2304: Cannot find name 'foo'.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,15): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,15): error TS2304: Cannot find name '('.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,16): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,22): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,22): error TS2304: Cannot find name ')'.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,23): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,23): error TS2304: Cannot find name ';'.
+propertyAccessOnTypeParameterWithConstraints2.ts(81,84): error TS1005: '}' expected.
+
+
+==== propertyAccessOnTypeParameterWithConstraints2.ts (31 errors) ====
+    // generic types should behave as if they have properties of their constraint type
+    
+    class A {
+        foo(): string { return ''; }
+    }
+    
+    class B extends A {
+        bar(): string {
+            return '';
+        }
+    }
+    
+    class C<U extends A, T extends A> {
+        f() {
+            var x: U;
+            var a = x['foo'](); // should be string
+            return a + x.foo();
+        }
+    
+        g(x: U) {
+            var a = x['foo'](); // should be string
+            return a + x.foo();
+        }
+    }
+    //class C<U extends T, T extends A> {
+    //    f() {
+    //        var x: U;
+    //        var a = x['foo'](); // should be string
+    //        return a + x.foo();
+    //    }
+    
+    //    g(x: U) {
+    //        var a = x['foo'](); // should be string
+    //        return a + x.foo();
+    //    }
+    //}
+    
+    var r1 = (new C<B, A>()).f();
+    var r1b = (new C<B, A>()).g(new B());
+    
+    interface I<U extends A, T extends A> {
+        foo: U;
+    }
+    //interface I<U extends T, T extends A> {
+    //    foo: U;
+    //}
+    var i: I<B, A>;
+    var r2 = i.foo.foo();
+    var r2b = i.foo['foo']();
+    
+    var a: {
+        <U extends A, T extends A>(): U;
+        <U extends A, T extends A>(x: U): U;
+        <U extends A, T extends A>(x: U, y: T): U;
+    }
+    //var a: {
+    //    <U extends T, T extends A>(): U;
+    //    <U extends T, T extends A>(x: U): U;
+    //    <U extends T, T extends A>(x: U, y: T): U;
+    //}
+    var r3 = a<A, A>().foo(); 
+             ~
+!!! error TS2349: This expression is not callable.
+    var r3b = a()['foo']();
+              ~
+!!! error TS2349: This expression is not callable.
+    // parameter supplied for type argument inference to succeed
+    var aB = new B();
+    var r3c = a(aB, aB).foo(); 
+              ~
+!!! error TS2349: This expression is not callable.
+    var r3d = a(aB, aB)['foo']();
+              ~
+!!! error TS2349: This expression is not callable.
+    
+    var b = {
+        foo: <U extends A, T extends A>(x: U, y: T) => {
+              ~
+!!! error TS2304: Cannot find name 'U'.
+                         ~
+!!! error TS1005: '?' expected.
+                           ~
+!!! error TS1005: ':' expected.
+                                      ~
+!!! error TS1005: '?' expected.
+                                       ~
+!!! error TS1005: ':' expected.
+            var a = x['foo'](); // should be string
+            return a + x.foo();
+                     ~
+!!! error TS1003: Identifier expected.
+                        ~
+!!! error TS1003: Identifier expected.
+        }
+    }
+    ~
+!!! error TS1005: '>' expected.
+    //var b = {
+    //    foo: <U extends T, T extends A>(x: U, y: T) => {
+    //        var a = x['foo'](); // should be string
+    //        return a + x.foo();
+    //    }
+    //}
+    
+    var r4 = b.foo(aB, aB); // no inferences for T so constraint isn't satisfied, error
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+        ~~
+!!! error TS2304: Cannot find name 'r4'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '='.
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS2304: Cannot find name '.'.
+               ~~~
+!!! error TS1005: ',' expected.
+               ~~~
+!!! error TS2304: Cannot find name 'foo'.
+                  ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS2304: Cannot find name '('.
+                   ~~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS2304: Cannot find name ')'.
+                          ~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS2304: Cannot find name ';'.
+                                                                                       
+!!! error TS1005: '}' expected.

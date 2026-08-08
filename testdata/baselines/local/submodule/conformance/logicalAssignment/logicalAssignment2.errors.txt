@@ -1,0 +1,48 @@
+logicalAssignment2.ts(24,7): error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+logicalAssignment2.ts(24,32): error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+logicalAssignment2.ts(25,7): error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+logicalAssignment2.ts(25,32): error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+logicalAssignment2.ts(26,7): error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+logicalAssignment2.ts(26,32): error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+
+
+==== logicalAssignment2.ts (6 errors) ====
+    interface A {
+        foo: {
+            bar(): {
+                baz: 0 | 1 | 42 | undefined | ''
+            }
+            baz: 0 | 1 | 42 | undefined | ''
+        }
+        baz: 0 | 1 | 42 | undefined | ''
+    }
+    
+    declare const result: A
+    declare const a: A
+    declare const b: A
+    declare const c: A
+    
+    a.baz &&= result.baz
+    b.baz ||= result.baz
+    c.baz ??= result.baz
+    
+    a.foo["baz"] &&= result.foo.baz
+    b.foo["baz"] ||= result.foo.baz
+    c.foo["baz"] ??= result.foo.baz
+    
+    a.foo.bar().baz &&= result.foo.bar().baz
+          ~~~
+!!! error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+                                   ~~~
+!!! error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+    b.foo.bar().baz ||= result.foo.bar().baz
+          ~~~
+!!! error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+                                   ~~~
+!!! error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+    c.foo.bar().baz ??= result.foo.bar().baz
+          ~~~
+!!! error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+                                   ~~~
+!!! error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+    

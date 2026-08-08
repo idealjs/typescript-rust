@@ -1,0 +1,44 @@
+controlFlowInstanceofExtendsFunction.ts(25,15): error TS2339: Property 'now' does not exist on type 'object'.
+controlFlowInstanceofExtendsFunction.ts(26,15): error TS2339: Property 'now' does not exist on type 'object'.
+controlFlowInstanceofExtendsFunction.ts(28,30): error TS2304: Cannot find name 'Math'.
+
+
+==== controlFlowInstanceofExtendsFunction.ts (3 errors) ====
+    declare global {
+        interface Function {
+            now(): string;
+        }
+    }
+    
+    Function.prototype.now = function () {
+        return "now"
+    }
+    
+    class X {
+        static now() {
+            return {}
+        }
+    
+        why() {
+    
+        }
+    }
+    
+    class Y {
+    
+    }
+    
+    console.log(X.now()) // works as expected
+                  ~~~
+!!! error TS2339: Property 'now' does not exist on type 'object'.
+    console.log(Y.now()) // works as expected
+                  ~~~
+!!! error TS2339: Property 'now' does not exist on type 'object'.
+    
+    export const x: X | number = Math.random() > 0.5 ? new X() : 1
+                                 ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+    
+    if (x instanceof X) {
+        x.why() // should compile
+    }

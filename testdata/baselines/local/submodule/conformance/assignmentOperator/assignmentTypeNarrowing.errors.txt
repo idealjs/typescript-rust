@@ -1,0 +1,55 @@
+assignmentTypeNarrowing.ts(1,36): error TS2304: Cannot find name 'RegExp'.
+assignmentTypeNarrowing.ts(18,5): error TS1005: ',' expected.
+assignmentTypeNarrowing.ts(18,5): error TS2304: Cannot find name '='.
+assignmentTypeNarrowing.ts(18,7): error TS1005: ',' expected.
+assignmentTypeNarrowing.ts(26,11): error TS2454: Variable 'a' is used before being assigned.
+assignmentTypeNarrowing.ts(34,5): error TS2339: Property 'push' does not exist on type '{ x: "ok" } | { x: "ok" }[]'.
+
+
+==== assignmentTypeNarrowing.ts (6 errors) ====
+    let x: string | number | boolean | RegExp;
+                                       ~~~~~~
+!!! error TS2304: Cannot find name 'RegExp'.
+    
+    x = "";
+    x; // string
+    
+    [x] = [true];
+    x; // boolean
+    
+    [x = ""] = [1];
+    x; // string | number
+    
+    ({x} = {x: true});
+    x; // boolean
+    
+    ({y: x} = {y: 1});
+    x; // number
+    
+    ({x = ""} = {x: true});
+        ~
+!!! error TS1005: ',' expected.
+        ~
+!!! error TS2304: Cannot find name '='.
+          ~~
+!!! error TS1005: ',' expected.
+    x; // string | boolean
+    
+    ({y: x = /a/} = {y: 1});
+    x; // number | RegExp
+    
+    let a: string[];
+    
+    for (x of a) {
+              ~
+!!! error TS2454: Variable 'a' is used before being assigned.
+        x; // string
+    }
+    
+    // Repro from #26405
+    
+    type AOrArrA<T> = T | T[];
+    const arr: AOrArrA<{x?: "ok"}> = [{ x: "ok" }]; // weak type
+    arr.push({ x: "ok" });
+        ~~~~
+!!! error TS2339: Property 'push' does not exist on type '{ x: "ok" } | { x: "ok" }[]'.

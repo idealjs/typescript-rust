@@ -1,0 +1,23 @@
+abstractProperty.ts(13,19): error TS1005: ';' expected.
+abstractProperty.ts(13,39): error TS1003: Identifier expected.
+
+
+==== abstractProperty.ts (2 errors) ====
+    abstract class A {
+        protected abstract x: string;
+        public foo() {
+            console.log(this.x);
+        }
+    }
+    
+    class B extends A {
+        protected x = 'B.x';
+    }
+    
+    class C extends A {
+        protected get x() { return 'C.x' };
+                      ~
+!!! error TS1005: ';' expected.
+                                          ~
+!!! error TS1003: Identifier expected.
+    }

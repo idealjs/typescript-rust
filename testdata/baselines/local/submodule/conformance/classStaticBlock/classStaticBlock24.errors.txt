@@ -1,10 +1,10 @@
-classStaticBlock/classStaticBlock24.ts(3,10): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock24.ts(4,6): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock24.ts(4,7): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock24.ts(6,1): error TS1128: Declaration or statement expected.
+classStaticBlock24.ts(3,10): error TS1005: ';' expected.
+classStaticBlock24.ts(4,6): error TS1005: ';' expected.
+classStaticBlock24.ts(4,7): error TS1005: ';' expected.
+classStaticBlock24.ts(6,1): error TS1128: Declaration or statement expected.
 
 
-==== classStaticBlock/classStaticBlock24.ts (4 errors) ====
+==== classStaticBlock24.ts (4 errors) ====
     export class C {
       static x: number;
       static {

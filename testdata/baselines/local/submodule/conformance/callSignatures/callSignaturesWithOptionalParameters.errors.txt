@@ -1,0 +1,111 @@
+callSignaturesWithOptionalParameters.ts(38,1): error TS2349: This expression is not callable.
+callSignaturesWithOptionalParameters.ts(39,1): error TS2349: This expression is not callable.
+callSignaturesWithOptionalParameters.ts(40,3): error TS2339: Property 'foo' does not exist on type 'object'.
+callSignaturesWithOptionalParameters.ts(41,3): error TS2339: Property 'foo' does not exist on type 'object'.
+callSignaturesWithOptionalParameters.ts(44,8): error TS1005: ',' expected.
+callSignaturesWithOptionalParameters.ts(44,8): error TS2304: Cannot find name '('.
+callSignaturesWithOptionalParameters.ts(44,9): error TS1005: ',' expected.
+callSignaturesWithOptionalParameters.ts(44,10): error TS1005: ',' expected.
+callSignaturesWithOptionalParameters.ts(44,19): error TS1005: ',' expected.
+callSignaturesWithOptionalParameters.ts(44,19): error TS2304: Cannot find name ')'.
+callSignaturesWithOptionalParameters.ts(44,21): error TS1005: ',' expected.
+callSignaturesWithOptionalParameters.ts(44,21): error TS2304: Cannot find name '{'.
+callSignaturesWithOptionalParameters.ts(45,6): error TS1005: ',' expected.
+callSignaturesWithOptionalParameters.ts(45,17): error TS1005: ',' expected.
+callSignaturesWithOptionalParameters.ts(45,20): error TS1005: ',' expected.
+callSignaturesWithOptionalParameters.ts(45,33): error TS1005: ',' expected.
+callSignaturesWithOptionalParameters.ts(45,34): error TS1134: Variable declaration expected.
+callSignaturesWithOptionalParameters.ts(45,42): error TS1005: ',' expected.
+
+
+==== callSignaturesWithOptionalParameters.ts (18 errors) ====
+    // Optional parameters should be valid in all the below casts
+    
+    function foo(x?: number) { }
+    var f = function foo(x?: number) { }
+    var f2 = (x: number, y?: number) => { }
+    
+    foo(1);
+    foo();
+    f(1);
+    f();
+    f2(1);
+    f2(1, 2);
+    
+    class C {
+        foo(x?: number) { }
+    }
+    
+    var c: C;
+    c.foo();
+    c.foo(1);
+    
+    interface I {
+        (x?: number);
+        foo(x: number, y?: number);
+    }
+    
+    var i: I;
+    i();
+    i(1);
+    i.foo(1);
+    i.foo(1, 2);
+    
+    var a: {
+        (x?: number);
+        foo(x?: number);
+    }
+    
+    a();
+    ~
+!!! error TS2349: This expression is not callable.
+    a(1);
+    ~
+!!! error TS2349: This expression is not callable.
+    a.foo();
+      ~~~
+!!! error TS2339: Property 'foo' does not exist on type 'object'.
+    a.foo(1);
+      ~~~
+!!! error TS2339: Property 'foo' does not exist on type 'object'.
+    
+    var b = {
+        foo(x?: number) { },
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '('.
+            ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+                      ~
+!!! error TS1005: ',' expected.
+                      ~
+!!! error TS2304: Cannot find name ')'.
+                        ~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS2304: Cannot find name '{'.
+        a: function foo(x: number, y?: number) { },
+         ~
+!!! error TS1005: ',' expected.
+                    ~~~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS1005: ',' expected.
+                                    ~
+!!! error TS1005: ',' expected.
+                                     ~
+!!! error TS1134: Variable declaration expected.
+                                             ~
+!!! error TS1005: ',' expected.
+        b: (x?: number) => { }
+    }
+    
+    b.foo();
+    b.foo(1);
+    b.a(1);
+    b.a(1, 2);
+    b.b();
+    b.b(1);

@@ -1,0 +1,15 @@
+parserStrictMode14.ts(2,1): error TS2304: Cannot find name 'with'.
+parserStrictMode14.ts(2,7): error TS2304: Cannot find name 'a'.
+parserStrictMode14.ts(2,10): error TS1005: ';' expected.
+
+
+==== parserStrictMode14.ts (3 errors) ====
+    "use strict";
+    with (a) {
+    ~~~~
+!!! error TS2304: Cannot find name 'with'.
+          ~
+!!! error TS2304: Cannot find name 'a'.
+             ~
+!!! error TS1005: ';' expected.
+    }

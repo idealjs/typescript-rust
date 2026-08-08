@@ -1,0 +1,28 @@
+a.ts(4,16): error TS2304: Cannot find name 'Foo'.
+a.ts(7,14): error TS2304: Cannot find name 'Foo'.
+
+
+==== umd8.ts (0 errors) ====
+    
+==== foo.d.ts (0 errors) ====
+    declare class Thing {
+    	foo(): number;
+    }
+    declare namespace Thing {
+    	interface SubThing { }
+    }
+    export = Thing;
+    export as namespace Foo;
+    
+==== a.ts (2 errors) ====
+    /// <reference path="foo.d.ts" />
+    import * as ff from './foo';
+    
+    declare let y: Foo; // OK in type position
+                   ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+    y.foo();
+    declare let z: Foo.SubThing; // OK in ns position
+    let x: any = Foo; // Not OK in value position
+                 ~~~
+!!! error TS2304: Cannot find name 'Foo'.

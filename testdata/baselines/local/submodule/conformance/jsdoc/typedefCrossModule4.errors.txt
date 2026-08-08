@@ -1,0 +1,16 @@
+mod3.js(3,7): error TS1003: Identifier expected.
+mod3.js(3,8): error TS1005: ';' expected.
+mod3.js(3,8): error TS2304: Cannot find name 'exports'.
+
+
+==== mod3.js (3 errors) ====
+    /** @typedef {number} Foo */
+    class Bar { }
+    module.exports = { Foo: Bar };
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    

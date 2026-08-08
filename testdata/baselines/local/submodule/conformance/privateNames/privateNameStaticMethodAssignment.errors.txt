@@ -1,0 +1,80 @@
+privateNameStaticMethodAssignment.ts(2,12): error TS1005: ';' expected.
+privateNameStaticMethodAssignment.ts(2,12): error TS1127: Invalid character.
+privateNameStaticMethodAssignment.ts(2,13): error TS1005: ';' expected.
+privateNameStaticMethodAssignment.ts(2,25): error TS1003: Identifier expected.
+privateNameStaticMethodAssignment.ts(4,12): error TS1003: Identifier expected.
+privateNameStaticMethodAssignment.ts(4,12): error TS1127: Invalid character.
+privateNameStaticMethodAssignment.ts(4,13): error TS1005: ';' expected.
+privateNameStaticMethodAssignment.ts(5,11): error TS1003: Identifier expected.
+privateNameStaticMethodAssignment.ts(5,11): error TS1127: Invalid character.
+privateNameStaticMethodAssignment.ts(5,12): error TS1005: ';' expected.
+privateNameStaticMethodAssignment.ts(6,11): error TS1003: Identifier expected.
+privateNameStaticMethodAssignment.ts(6,11): error TS1127: Invalid character.
+privateNameStaticMethodAssignment.ts(6,12): error TS1005: ';' expected.
+privateNameStaticMethodAssignment.ts(7,18): error TS1003: Identifier expected.
+privateNameStaticMethodAssignment.ts(7,18): error TS1127: Invalid character.
+privateNameStaticMethodAssignment.ts(7,19): error TS1005: ',' expected.
+privateNameStaticMethodAssignment.ts(8,20): error TS1003: Identifier expected.
+privateNameStaticMethodAssignment.ts(8,20): error TS1127: Invalid character.
+privateNameStaticMethodAssignment.ts(8,21): error TS1005: ',' expected.
+privateNameStaticMethodAssignment.ts(9,11): error TS1003: Identifier expected.
+privateNameStaticMethodAssignment.ts(9,11): error TS1127: Invalid character.
+privateNameStaticMethodAssignment.ts(9,12): error TS1005: ';' expected.
+
+
+==== privateNameStaticMethodAssignment.ts (22 errors) ====
+    class A3 {
+        static #method() { };
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~~~~
+!!! error TS1005: ';' expected.
+                            ~
+!!! error TS1003: Identifier expected.
+        constructor(a: typeof A3, b: any) {
+            A3.#method = () => {} // Error, not writable 
+               ~
+!!! error TS1003: Identifier expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~~~~
+!!! error TS1005: ';' expected.
+            a.#method = () => { }; // Error, not writable 
+              ~
+!!! error TS1003: Identifier expected.
+              ~
+!!! error TS1127: Invalid character.
+               ~~~~~~
+!!! error TS1005: ';' expected.
+            b.#method =  () => { } //Error, not writable 
+              ~
+!!! error TS1003: Identifier expected.
+              ~
+!!! error TS1127: Invalid character.
+               ~~~~~~
+!!! error TS1005: ';' expected.
+            ({ x: A3.#method } = { x: () => {}}); //Error, not writable 
+                     ~
+!!! error TS1003: Identifier expected.
+                     ~
+!!! error TS1127: Invalid character.
+                      ~~~~~~
+!!! error TS1005: ',' expected.
+            let x = A3.#method;
+                       ~
+!!! error TS1003: Identifier expected.
+                       ~
+!!! error TS1127: Invalid character.
+                        ~~~~~~
+!!! error TS1005: ',' expected.
+            b.#method++ //Error, not writable 
+              ~
+!!! error TS1003: Identifier expected.
+              ~
+!!! error TS1127: Invalid character.
+               ~~~~~~
+!!! error TS1005: ';' expected.
+        }
+    }

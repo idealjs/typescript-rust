@@ -1,0 +1,40 @@
+esDecorators-classExpression-namedEvaluation.5.ts(6,6): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.5.ts(6,6): error TS2304: Cannot find name '='.
+esDecorators-classExpression-namedEvaluation.5.ts(6,8): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.5.ts(6,8): error TS2304: Cannot find name '@'.
+esDecorators-classExpression-namedEvaluation.5.ts(6,9): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.5.ts(6,13): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.5.ts(6,13): error TS2304: Cannot find name 'class'.
+esDecorators-classExpression-namedEvaluation.5.ts(6,19): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.5.ts(6,19): error TS2304: Cannot find name '{'.
+esDecorators-classExpression-namedEvaluation.5.ts(6,23): error TS1005: ')' expected.
+
+
+==== esDecorators-classExpression-namedEvaluation.5.ts (10 errors) ====
+    declare let dec: any, obj: any, x: any;
+    
+    // 13.15.5.3 RS: PropertyDestructuringAssignmentEvaluation
+    //   AssignmentProperty : IdentifierReference Initializer?
+    
+    ({ x = @dec class { } } = obj);
+         ~
+!!! error TS1005: ',' expected.
+         ~
+!!! error TS2304: Cannot find name '='.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '@'.
+            ~~~
+!!! error TS1005: ',' expected.
+                ~~~~~
+!!! error TS1005: ',' expected.
+                ~~~~~
+!!! error TS2304: Cannot find name 'class'.
+                      ~
+!!! error TS1005: ',' expected.
+                      ~
+!!! error TS2304: Cannot find name '{'.
+                          ~
+!!! error TS1005: ')' expected.
+    ({ x = class { @dec y: any; } } = obj);

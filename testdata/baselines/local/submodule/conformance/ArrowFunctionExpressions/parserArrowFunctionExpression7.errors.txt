@@ -1,0 +1,75 @@
+parserArrowFunctionExpression7.ts(2,2): error TS2304: Cannot find name 'async'.
+parserArrowFunctionExpression7.ts(2,8): error TS1005: ',' expected.
+parserArrowFunctionExpression7.ts(2,8): error TS2304: Cannot find name 'm'.
+parserArrowFunctionExpression7.ts(2,9): error TS1005: ',' expected.
+parserArrowFunctionExpression7.ts(2,9): error TS2304: Cannot find name '('.
+parserArrowFunctionExpression7.ts(2,10): error TS1005: ',' expected.
+parserArrowFunctionExpression7.ts(2,10): error TS2304: Cannot find name ')'.
+parserArrowFunctionExpression7.ts(2,12): error TS1005: ',' expected.
+parserArrowFunctionExpression7.ts(2,12): error TS2304: Cannot find name '{'.
+parserArrowFunctionExpression7.ts(3,3): error TS1005: ',' expected.
+parserArrowFunctionExpression7.ts(3,3): error TS2304: Cannot find name 'for'.
+parserArrowFunctionExpression7.ts(3,7): error TS1005: ',' expected.
+parserArrowFunctionExpression7.ts(3,7): error TS2304: Cannot find name '('.
+parserArrowFunctionExpression7.ts(3,8): error TS1005: ',' expected.
+parserArrowFunctionExpression7.ts(3,8): error TS2304: Cannot find name ';'.
+parserArrowFunctionExpression7.ts(3,9): error TS1005: ',' expected.
+parserArrowFunctionExpression7.ts(3,9): error TS2304: Cannot find name ';'.
+parserArrowFunctionExpression7.ts(3,10): error TS1005: ',' expected.
+parserArrowFunctionExpression7.ts(3,10): error TS2304: Cannot find name ')'.
+parserArrowFunctionExpression7.ts(3,12): error TS1005: ',' expected.
+parserArrowFunctionExpression7.ts(3,12): error TS2304: Cannot find name '{'.
+parserArrowFunctionExpression7.ts(5,2): error TS1005: ')' expected.
+
+
+==== parserArrowFunctionExpression7.ts (22 errors) ====
+    ({
+    	async m() {
+    	~~~~~
+!!! error TS2304: Cannot find name 'async'.
+    	      ~
+!!! error TS1005: ',' expected.
+    	      ~
+!!! error TS2304: Cannot find name 'm'.
+    	       ~
+!!! error TS1005: ',' expected.
+    	       ~
+!!! error TS2304: Cannot find name '('.
+    	        ~
+!!! error TS1005: ',' expected.
+    	        ~
+!!! error TS2304: Cannot find name ')'.
+    	          ~
+!!! error TS1005: ',' expected.
+    	          ~
+!!! error TS2304: Cannot find name '{'.
+    		for (;;) {
+    		~~~
+!!! error TS1005: ',' expected.
+    		~~~
+!!! error TS2304: Cannot find name 'for'.
+    		    ~
+!!! error TS1005: ',' expected.
+    		    ~
+!!! error TS2304: Cannot find name '('.
+    		     ~
+!!! error TS1005: ',' expected.
+    		     ~
+!!! error TS2304: Cannot find name ';'.
+    		      ~
+!!! error TS1005: ',' expected.
+    		      ~
+!!! error TS2304: Cannot find name ';'.
+    		       ~
+!!! error TS1005: ',' expected.
+    		       ~
+!!! error TS2304: Cannot find name ')'.
+    		         ~
+!!! error TS1005: ',' expected.
+    		         ~
+!!! error TS2304: Cannot find name '{'.
+    		}
+    	}
+    	~
+!!! error TS1005: ')' expected.
+    });

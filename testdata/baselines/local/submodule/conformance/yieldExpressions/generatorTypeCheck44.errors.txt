@@ -1,0 +1,52 @@
+generatorTypeCheck44.ts(3,9): error TS2304: Cannot find name 'get'.
+generatorTypeCheck44.ts(3,13): error TS1005: ',' expected.
+generatorTypeCheck44.ts(3,22): error TS1005: ',' expected.
+generatorTypeCheck44.ts(3,22): error TS2304: Cannot find name '('.
+generatorTypeCheck44.ts(3,23): error TS1005: ',' expected.
+generatorTypeCheck44.ts(3,23): error TS2304: Cannot find name ')'.
+generatorTypeCheck44.ts(3,25): error TS1005: ',' expected.
+generatorTypeCheck44.ts(3,25): error TS2304: Cannot find name '{'.
+generatorTypeCheck44.ts(4,13): error TS1005: ',' expected.
+generatorTypeCheck44.ts(4,13): error TS2304: Cannot find name 'return'.
+generatorTypeCheck44.ts(4,20): error TS1005: ',' expected.
+generatorTypeCheck44.ts(4,21): error TS1005: ',' expected.
+generatorTypeCheck44.ts(4,21): error TS2304: Cannot find name ';'.
+generatorTypeCheck44.ts(7,1): error TS1128: Declaration or statement expected.
+
+
+==== generatorTypeCheck44.ts (14 errors) ====
+    function* g() {
+        let x = {
+            get [yield 0]() {
+            ~~~
+!!! error TS2304: Cannot find name 'get'.
+                ~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS2304: Cannot find name '('.
+                          ~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS2304: Cannot find name ')'.
+                            ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS2304: Cannot find name '{'.
+                return 0;
+                ~~~~~~
+!!! error TS1005: ',' expected.
+                ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                       ~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS2304: Cannot find name ';'.
+            }
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

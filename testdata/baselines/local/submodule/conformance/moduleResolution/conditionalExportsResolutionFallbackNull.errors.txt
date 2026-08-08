@@ -1,0 +1,40 @@
+/node_modules/dep/package.json(2,9): error TS1005: ';' expected.
+/node_modules/dep/package.json(3,12): error TS1005: ';' expected.
+/node_modules/dep/package.json(4,12): error TS1005: ';' expected.
+/node_modules/dep/package.json(5,8): error TS1005: ';' expected.
+/node_modules/dep/package.json(6,17): error TS1005: ';' expected.
+/node_modules/dep/package.json(7,16): error TS1005: ';' expected.
+
+
+==== conditionalExportsResolutionFallbackNull.ts (0 errors) ====
+    // We fixed https://github.com/microsoft/TypeScript/issues/50762 for `null` only
+    
+==== /node_modules/dep/package.json (6 errors) ====
+    {
+      "name": "dep",
+            ~
+!!! error TS1005: ';' expected.
+      "version": "1.0.0",
+               ~
+!!! error TS1005: ';' expected.
+      "exports": {
+               ~
+!!! error TS1005: ';' expected.
+        ".": {
+           ~
+!!! error TS1005: ';' expected.
+            "import": null,
+                    ~
+!!! error TS1005: ';' expected.
+            "types": "./dist/index.d.ts"
+                   ~
+!!! error TS1005: ';' expected.
+        }
+      }
+    }
+    
+==== /node_modules/dep/dist/index.d.ts (0 errors) ====
+    export {};
+    
+==== /index.mts (0 errors) ====
+    import {} from "dep"; // Cannot find module 'dep'.

@@ -1,0 +1,34 @@
+file.tsx(8,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(9,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+
+
+==== tsxAttributeResolution9.tsx (0 errors) ====
+    
+==== react.d.ts (0 errors) ====
+    declare namespace JSX {
+    	interface Element { }
+    	interface IntrinsicElements {
+    	}
+    	interface ElementAttributesProperty {
+    		props;
+    	}
+    }
+    
+    interface Props {  
+      foo: string;
+    }
+    
+==== file.tsx (2 errors) ====
+    export class MyComponent {  
+      render() {
+      }
+    
+      props: { foo: string; }
+    }
+    
+    <MyComponent foo="bar" />; // ok  
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    <MyComponent foo={0} />; // should be an error
+    ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.

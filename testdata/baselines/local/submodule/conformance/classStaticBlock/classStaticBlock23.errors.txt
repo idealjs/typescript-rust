@@ -1,13 +1,13 @@
-classStaticBlock/classStaticBlock23.ts(1,24): error TS2339: Property 'map' does not exist on type 'number[]'.
-classStaticBlock/classStaticBlock23.ts(4,10): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock23.ts(5,9): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock23.ts(5,22): error TS1005: ',' expected.
-classStaticBlock/classStaticBlock23.ts(5,25): error TS1005: ',' expected.
-classStaticBlock/classStaticBlock23.ts(5,28): error TS1005: ',' expected.
-classStaticBlock/classStaticBlock23.ts(9,1): error TS1128: Declaration or statement expected.
+classStaticBlock23.ts(1,24): error TS2339: Property 'map' does not exist on type 'number[]'.
+classStaticBlock23.ts(4,10): error TS1005: ';' expected.
+classStaticBlock23.ts(5,9): error TS1005: ';' expected.
+classStaticBlock23.ts(5,22): error TS1005: ',' expected.
+classStaticBlock23.ts(5,25): error TS1005: ',' expected.
+classStaticBlock23.ts(5,28): error TS1005: ',' expected.
+classStaticBlock23.ts(9,1): error TS1128: Declaration or statement expected.
 
 
-==== classStaticBlock/classStaticBlock23.ts (7 errors) ====
+==== classStaticBlock23.ts (7 errors) ====
     const nums = [1, 2, 3].map(n => Promise.resolve(n))
                            ~~~
 !!! error TS2339: Property 'map' does not exist on type 'number[]'.

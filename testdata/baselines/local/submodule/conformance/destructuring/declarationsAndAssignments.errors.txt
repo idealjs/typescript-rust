@@ -1,0 +1,649 @@
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'y'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'y'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'y'.
+error TS2451: Cannot redeclare block-scoped variable 'a'.
+error TS2451: Cannot redeclare block-scoped variable 'b'.
+error TS2451: Cannot redeclare block-scoped variable 'a'.
+error TS2451: Cannot redeclare block-scoped variable 'b'.
+error TS2451: Cannot redeclare block-scoped variable 'a'.
+error TS2451: Cannot redeclare block-scoped variable 'b'.
+error TS2451: Cannot redeclare block-scoped variable 'a'.
+error TS2451: Cannot redeclare block-scoped variable 'b'.
+error TS2451: Cannot redeclare block-scoped variable 'a'.
+error TS2451: Cannot redeclare block-scoped variable 'b'.
+error TS2451: Cannot redeclare block-scoped variable 'number'.
+error TS2451: Cannot redeclare block-scoped variable 'number'.
+error TS2451: Cannot redeclare block-scoped variable 'number'.
+error TS2451: Cannot redeclare block-scoped variable 'number'.
+error TS2451: Cannot redeclare block-scoped variable 'number'.
+error TS2451: Cannot redeclare block-scoped variable 'number'.
+error TS2451: Cannot redeclare block-scoped variable 'a3'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'a2'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'y'.
+error TS2451: Cannot redeclare block-scoped variable 'a1'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'y'.
+error TS2451: Cannot redeclare block-scoped variable 'z'.
+error TS2451: Cannot redeclare block-scoped variable 'a0'.
+error TS2451: Cannot redeclare block-scoped variable 'number'.
+error TS2451: Cannot redeclare block-scoped variable 'string'.
+error TS2451: Cannot redeclare block-scoped variable 'boolean'.
+error TS2451: Cannot redeclare block-scoped variable 'string'.
+error TS2451: Cannot redeclare block-scoped variable 'boolean'.
+error TS2451: Cannot redeclare block-scoped variable 'boolean'.
+error TS2451: Cannot redeclare block-scoped variable 'a0'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'a1'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'y'.
+error TS2451: Cannot redeclare block-scoped variable 'a2'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'y'.
+error TS2451: Cannot redeclare block-scoped variable 'z'.
+error TS2451: Cannot redeclare block-scoped variable 'a3'.
+declarationsAndAssignments.ts(7,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(7,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(8,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(8,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(16,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(16,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(16,20): error TS1005: ',' expected.
+declarationsAndAssignments.ts(17,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(17,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(17,20): error TS1005: ',' expected.
+declarationsAndAssignments.ts(18,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(18,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(18,20): error TS1005: ',' expected.
+declarationsAndAssignments.ts(26,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(26,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(27,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(27,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(31,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(31,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(32,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(32,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(37,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(37,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(38,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(38,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(39,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(39,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(44,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(44,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(45,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(45,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(46,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(46,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(51,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(51,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(52,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(52,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(57,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(57,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(58,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(58,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(82,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(82,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(83,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(83,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(88,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(88,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(89,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(89,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(90,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(90,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(91,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(91,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(100,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(100,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(101,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(101,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(102,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(102,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(132,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(132,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(133,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(133,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(134,11): error TS1005: ',' expected.
+declarationsAndAssignments.ts(134,12): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(134,20): error TS1005: ',' expected.
+declarationsAndAssignments.ts(134,20): error TS1182: A destructuring declaration must have an initializer.
+declarationsAndAssignments.ts(152,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(152,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(153,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(153,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(154,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(154,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(155,11): error TS1005: ',' expected.
+declarationsAndAssignments.ts(155,12): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(155,14): error TS1182: A destructuring declaration must have an initializer.
+declarationsAndAssignments.ts(156,11): error TS1005: ',' expected.
+declarationsAndAssignments.ts(156,12): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(156,14): error TS1182: A destructuring declaration must have an initializer.
+declarationsAndAssignments.ts(157,11): error TS1005: ',' expected.
+declarationsAndAssignments.ts(157,12): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(157,14): error TS1182: A destructuring declaration must have an initializer.
+declarationsAndAssignments.ts(158,11): error TS1005: ',' expected.
+declarationsAndAssignments.ts(158,12): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(158,14): error TS1182: A destructuring declaration must have an initializer.
+declarationsAndAssignments.ts(170,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(170,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(171,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(171,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(172,10): error TS1005: ',' expected.
+declarationsAndAssignments.ts(172,11): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(173,11): error TS1005: ',' expected.
+declarationsAndAssignments.ts(173,12): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(173,14): error TS1182: A destructuring declaration must have an initializer.
+declarationsAndAssignments.ts(174,11): error TS1005: ',' expected.
+declarationsAndAssignments.ts(174,12): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(174,14): error TS1182: A destructuring declaration must have an initializer.
+declarationsAndAssignments.ts(175,11): error TS1005: ',' expected.
+declarationsAndAssignments.ts(175,12): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(175,14): error TS1182: A destructuring declaration must have an initializer.
+declarationsAndAssignments.ts(176,11): error TS1005: ',' expected.
+declarationsAndAssignments.ts(176,12): error TS1134: Variable declaration expected.
+declarationsAndAssignments.ts(176,14): error TS1182: A destructuring declaration must have an initializer.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'y'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'y'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'y'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'a'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'b'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'a'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'b'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'a'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'b'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'a'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'b'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'a'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'b'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'number'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'number'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'number'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'number'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'number'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'number'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'a3'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'a2'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'y'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'a1'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'y'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'z'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'a0'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'number'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'string'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'boolean'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'string'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'boolean'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'boolean'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'a0'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'a1'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'y'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'a2'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'y'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'z'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'a3'.
+==== declarationsAndAssignments.ts (103 errors) ====
+    function f0() {
+        var [] = [1, "hello"];
+        var [x] = [1, "hello"];
+        var [x, y] = [1, "hello"];
+        var [x, y, z] = [1, "hello"];
+        var [,, x] = [0, 1, 2];
+        var x!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var y!: string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+    }
+    
+    function f1() {
+        var a = [1, "hello"];
+        var [x] = a;
+        var [x, y] = a;
+        var [x, y, z] = a;
+        var x!: number | string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+                       ~
+!!! error TS1005: ',' expected.
+        var y!: number | string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+                       ~
+!!! error TS1005: ',' expected.
+        var z!: number | string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+                       ~
+!!! error TS1005: ',' expected.
+    }
+    
+    function f2() {
+        var { } = { x: 5, y: "hello" };       // Ok, empty binding pattern means nothing
+        var { x } = { x: 5, y: "hello" };     // Error, no y in target
+        var { y } = { x: 5, y: "hello" };     // Error, no x in target
+        var { x, y } = { x: 5, y: "hello" };
+        var x!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var y!: string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var { x: a } = { x: 5, y: "hello" };  // Error, no y in target
+        var { y: b } = { x: 5, y: "hello" };  // Error, no x in target
+        var { x: a, y: b } = { x: 5, y: "hello" };
+        var a!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var b!: string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+    }
+    
+    function f3() {
+        var [x, [y, [z]]] = [1, ["hello", [true]]];
+        var x!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var y!: string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var z!: boolean;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+    }
+    
+    function f4() {
+        var { a: x, b: { a: y, b: { a: z }}} = { a: 1, b: { a: "hello", b: { a: true } } };
+        var x!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var y!: string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var z!: boolean;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+    }
+    
+    function f6() {
+        var [x = 0, y = ""] = [1, "hello"];
+        var x!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var y!: string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+    }
+    
+    function f7() {
+        var [x = 0, y = 1] = [1, "hello"];  // Error, initializer for y must be string
+        var x!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var y!: string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+    }
+    
+    function f8() {
+        var [a, b, c] = [];   // Error, [] is an empty tuple
+        var [d, e, f] = [1];  // Error, [1] is a tuple
+    }
+    
+    function f9() {
+        var [a, b] = {};                // Error, not array type
+        var [c, d] = { 0: 10, 1: 20 };  // Error, not array type
+        var [e, f] = [10, 20];
+    }
+    
+    function f10() {
+        var { a, b } = {};  // Error
+        var { a, b } = [];  // Error
+    }
+    
+    function f11() {
+        var { x: a, y: b } = { x: 10, y: "hello" };
+        var { 0: a, 1: b } = { 0: 10, 1: "hello" };
+        var { "<": a, ">": b } = { "<": 10, ">": "hello" };
+        var { 0: a, 1: b } = [10, "hello"];
+        var a!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var b!: string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+    }
+    
+    function f12() {
+        var [a, [b, { x, y: c }] = ["abc", { x: 10, y: false }]] = [1, ["hello", { x: 5, y: true }]];
+        var a!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var b!: string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var x!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var c!: boolean;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+    }
+    
+    function f13() {
+        var [x, y] = [1, "hello"];
+        var [a, b] = [[x, y], { x: x, y: y }];
+    }
+    
+    function f14([a = 1, [b = "hello", { x, y: c = false }]]) {
+        var a!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var b!: string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var c!: boolean;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+    }
+    f14([2, ["abc", { x: 0, y: true }]]);
+    f14([2, ["abc", { x: 0 }]]);
+    f14([2, ["abc", { y: false }]]);  // Error, no x
+    
+    namespace M {
+        export var [a, b] = [1, 2];
+    }
+    
+    function f15() {
+        var a = "hello";
+        var b = 1;
+        var c = true;
+        return { a, b, c };
+    }
+    
+    function f16() {
+        var { a, b, c } = f15();
+    }
+    
+    function f17({ a = "", b = 0, c = false }) {
+    }
+    
+    f17({});
+    f17({ a: "hello" });
+    f17({ c: true });
+    f17(f15());
+    
+    function f18() {
+        var a!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var b!: string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var aa!: number[];
+              ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1134: Variable declaration expected.
+                       ~
+!!! error TS1005: ',' expected.
+                       ~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+        ({ a, b } = { a, b });
+        ({ a, b } = { b, a });
+        [aa[0], b] = [a, b];
+        [a, b] = [b, a];  // Error
+        [a = 1, b = "abc"] = [2, "def"];
+    }
+    
+    function f19() {
+        var a, b;
+        [a, b] = [1, 2];
+        [a, b] = [b, a];
+        ({ a, b } = { b, a });
+        [[a, b] = [1, 2]] = [[2, 3]];
+        var x = ([a, b] = [1, 2]);
+    }
+    
+    function f20(v: [number, number, number]) {
+        var x!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var y!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var z!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var a0!: [];
+              ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1134: Variable declaration expected.
+                 ~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+        var a1!: [number];
+              ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1134: Variable declaration expected.
+                 ~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+        var a2!: [number, number];
+              ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1134: Variable declaration expected.
+                 ~~~~~~~~~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+        var a3!: [number, number, number];
+              ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1134: Variable declaration expected.
+                 ~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+        var [...a3] = v;
+        var [x, ...a2] = v;
+        var [x, y, ...a1] = v;
+        var [x, y, z, ...a0] = v;
+        [...a3] = v;
+        [x, ...a2] = v;
+        [x, y, ...a1] = v;
+        [x, y, z, ...a0] = v;
+    }
+    
+    function f21(v: [number, string, boolean]) {
+        var x!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var y!: string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var z!: boolean;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var a0!: [number, string, boolean];
+              ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1134: Variable declaration expected.
+                 ~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+        var a1!: [string, boolean];
+              ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1134: Variable declaration expected.
+                 ~~~~~~~~~~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+        var a2!: [boolean];
+              ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1134: Variable declaration expected.
+                 ~~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+        var a3!: [];
+              ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1134: Variable declaration expected.
+                 ~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+        var [...a0] = v;
+        var [x, ...a1] = v;
+        var [x, y, ...a2] = v;
+        var [x, y, z, ...a3] = v;
+        [...a0] = v;
+        [x, ...a1] = v;
+        [x, y, ...a2] = v;
+        [x, y, z, ...a3] = v;
+    }

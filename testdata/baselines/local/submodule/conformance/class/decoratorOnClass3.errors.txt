@@ -1,0 +1,15 @@
+decoratorOnClass3.ts(4,1): error TS1005: '{' expected.
+decoratorOnClass3.ts(5,9): error TS1003: Identifier expected.
+
+
+==== decoratorOnClass3.ts (2 errors) ====
+    declare function dec<T>(target: T): T;
+    
+    export
+    @dec
+    ~
+!!! error TS1005: '{' expected.
+    class C {
+            ~
+!!! error TS1003: Identifier expected.
+    }

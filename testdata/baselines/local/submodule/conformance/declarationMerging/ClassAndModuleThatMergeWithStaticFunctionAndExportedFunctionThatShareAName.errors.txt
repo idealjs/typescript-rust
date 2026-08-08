@@ -1,10 +1,10 @@
-DeclarationMerging/ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.ts(2,24): error TS1005: ',' expected.
-DeclarationMerging/ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.ts(2,42): error TS1005: ',' expected.
-DeclarationMerging/ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.ts(14,28): error TS1005: ',' expected.
-DeclarationMerging/ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.ts(14,46): error TS1005: ',' expected.
+ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.ts(2,24): error TS1005: ',' expected.
+ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.ts(2,42): error TS1005: ',' expected.
+ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.ts(14,28): error TS1005: ',' expected.
+ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.ts(14,46): error TS1005: ',' expected.
 
 
-==== DeclarationMerging/ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.ts (4 errors) ====
+==== ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.ts (4 errors) ====
     class Point {
         constructor(public x: number, public y: number) { }
                            ~

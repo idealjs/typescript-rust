@@ -1,0 +1,16 @@
+superCallBeforeThisAccessing6.ts(8,9): error TS2349: This expression is not callable.
+
+
+==== superCallBeforeThisAccessing6.ts (1 errors) ====
+    ﻿// @target: es2015
+    class Base {
+        constructor(c) { }
+    }
+    class D extends Base {
+        private _t;
+        constructor() {
+            super(this); 
+         ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }

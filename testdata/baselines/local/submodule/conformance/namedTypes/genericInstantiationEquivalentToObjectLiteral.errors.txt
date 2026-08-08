@@ -1,0 +1,29 @@
+genericInstantiationEquivalentToObjectLiteral.ts(11,3): error TS2345: Argument of type '{ first: string; second: number }' is not assignable to parameter of type '{ first: T; second: U }'.
+genericInstantiationEquivalentToObjectLiteral.ts(12,3): error TS2345: Argument of type '{ first: string; second: number }' is not assignable to parameter of type '{ first: T; second: U }'.
+genericInstantiationEquivalentToObjectLiteral.ts(13,4): error TS2345: Argument of type '{ first: string; second: number }' is not assignable to parameter of type '{ first: T; second: U }'.
+genericInstantiationEquivalentToObjectLiteral.ts(14,4): error TS2345: Argument of type '{ first: string; second: number }' is not assignable to parameter of type '{ first: T; second: U }'.
+
+
+==== genericInstantiationEquivalentToObjectLiteral.ts (4 errors) ====
+    interface Pair<T1, T2> { first: T1; second: T2; }
+    var x: Pair<string, number>
+    var y: { first: string; second: number; }
+    
+    x = y;
+    y = x;
+    
+    declare function f<T, U>(x: Pair<T, U>);
+    declare function f2<T, U>(x: { first: T; second: U; });
+    
+    f(x);
+      ~
+!!! error TS2345: Argument of type '{ first: string; second: number }' is not assignable to parameter of type '{ first: T; second: U }'.
+    f(y);
+      ~
+!!! error TS2345: Argument of type '{ first: string; second: number }' is not assignable to parameter of type '{ first: T; second: U }'.
+    f2(x);
+       ~
+!!! error TS2345: Argument of type '{ first: string; second: number }' is not assignable to parameter of type '{ first: T; second: U }'.
+    f2(y);
+       ~
+!!! error TS2345: Argument of type '{ first: string; second: number }' is not assignable to parameter of type '{ first: T; second: U }'.

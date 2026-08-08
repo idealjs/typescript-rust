@@ -1,0 +1,15 @@
+b.js(1,3): error TS2339: Property 'prototype' does not exist on type 'C'.
+b.js(2,3): error TS2339: Property 'bar' does not exist on type 'C'.
+
+
+==== a.d.ts (0 errors) ====
+    declare namespace C {
+        function bar(): void
+    }
+==== b.js (2 errors) ====
+    C.prototype = {};
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'C'.
+    C.bar = 2;
+      ~~~
+!!! error TS2339: Property 'bar' does not exist on type 'C'.

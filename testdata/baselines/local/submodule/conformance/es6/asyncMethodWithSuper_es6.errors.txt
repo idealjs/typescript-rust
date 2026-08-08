@@ -1,18 +1,18 @@
-es6/asyncMethodWithSuper_es6.ts(127,11): error TS1003: Identifier expected.
-es6/asyncMethodWithSuper_es6.ts(127,13): error TS1005: ';' expected.
-es6/asyncMethodWithSuper_es6.ts(141,11): error TS1003: Identifier expected.
-es6/asyncMethodWithSuper_es6.ts(141,13): error TS1005: ';' expected.
-es6/asyncMethodWithSuper_es6.ts(157,11): error TS1003: Identifier expected.
-es6/asyncMethodWithSuper_es6.ts(157,13): error TS1005: ';' expected.
-es6/asyncMethodWithSuper_es6.ts(171,11): error TS1003: Identifier expected.
-es6/asyncMethodWithSuper_es6.ts(171,13): error TS1005: ';' expected.
-es6/asyncMethodWithSuper_es6.ts(190,9): error TS1005: ';' expected.
-es6/asyncMethodWithSuper_es6.ts(191,9): error TS1005: ';' expected.
-es6/asyncMethodWithSuper_es6.ts(194,16): error TS1005: ';' expected.
-es6/asyncMethodWithSuper_es6.ts(195,16): error TS1005: ';' expected.
+asyncMethodWithSuper_es6.ts(127,11): error TS1003: Identifier expected.
+asyncMethodWithSuper_es6.ts(127,13): error TS1005: ';' expected.
+asyncMethodWithSuper_es6.ts(141,11): error TS1003: Identifier expected.
+asyncMethodWithSuper_es6.ts(141,13): error TS1005: ';' expected.
+asyncMethodWithSuper_es6.ts(157,11): error TS1003: Identifier expected.
+asyncMethodWithSuper_es6.ts(157,13): error TS1005: ';' expected.
+asyncMethodWithSuper_es6.ts(171,11): error TS1003: Identifier expected.
+asyncMethodWithSuper_es6.ts(171,13): error TS1005: ';' expected.
+asyncMethodWithSuper_es6.ts(190,9): error TS1005: ';' expected.
+asyncMethodWithSuper_es6.ts(191,9): error TS1005: ';' expected.
+asyncMethodWithSuper_es6.ts(194,16): error TS1005: ';' expected.
+asyncMethodWithSuper_es6.ts(195,16): error TS1005: ';' expected.
 
 
-==== es6/asyncMethodWithSuper_es6.ts (12 errors) ====
+==== asyncMethodWithSuper_es6.ts (12 errors) ====
     class A {
         x() {
         }

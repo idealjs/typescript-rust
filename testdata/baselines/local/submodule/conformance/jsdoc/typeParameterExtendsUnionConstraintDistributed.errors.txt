@@ -1,0 +1,14 @@
+typeParameterExtendsUnionConstraintDistributed.ts(2,47): error TS2322: Type 'T' is not assignable to type '1 | 2 & T'.
+typeParameterExtendsUnionConstraintDistributed.ts(5,76): error TS2322: Type 'T & U' is not assignable to type '1 | 2 | 2 | 3 & T & U'.
+
+
+==== typeParameterExtendsUnionConstraintDistributed.ts (2 errors) ====
+    type A = 1 | 2;
+    function f<T extends A>(a: T): A & T { return a; } // Shouldn't error
+                                                  ~
+!!! error TS2322: Type 'T' is not assignable to type '1 | 2 & T'.
+    
+    type B = 2 | 3;
+    function f2<T extends A, U extends B>(ab: T & U): (A | B) & T & U { return ab; } // Also shouldn't error
+                                                                               ~~
+!!! error TS2322: Type 'T & U' is not assignable to type '1 | 2 | 2 | 3 & T & U'.

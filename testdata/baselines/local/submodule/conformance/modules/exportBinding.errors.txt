@@ -1,0 +1,20 @@
+exportConsts.ts(3,16): error TS2448: Block-scoped variable 'x' used before its declaration.
+
+
+==== exportConsts.ts (1 errors) ====
+    export { x }
+    export { x as xx }
+    export default x;
+                   ~
+!!! error TS2448: Block-scoped variable 'x' used before its declaration.
+    
+    const x = 'x'
+    
+    export { Y as Z }
+    class Y {}
+    
+==== exportVars.ts (0 errors) ====
+    export { y }
+    export { y as yy }
+    export default y;
+    var y = 'y'

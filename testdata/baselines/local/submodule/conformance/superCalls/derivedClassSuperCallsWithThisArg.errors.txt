@@ -1,13 +1,13 @@
-superCalls/derivedClassSuperCallsWithThisArg.ts(8,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperCallsWithThisArg.ts(13,24): error TS1005: ',' expected.
-superCalls/derivedClassSuperCallsWithThisArg.ts(14,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperCallsWithThisArg.ts(19,24): error TS1005: ',' expected.
-superCalls/derivedClassSuperCallsWithThisArg.ts(20,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperCallsWithThisArg.ts(25,24): error TS1005: ',' expected.
-superCalls/derivedClassSuperCallsWithThisArg.ts(26,9): error TS2349: This expression is not callable.
+derivedClassSuperCallsWithThisArg.ts(8,9): error TS2349: This expression is not callable.
+derivedClassSuperCallsWithThisArg.ts(13,24): error TS1005: ',' expected.
+derivedClassSuperCallsWithThisArg.ts(14,9): error TS2349: This expression is not callable.
+derivedClassSuperCallsWithThisArg.ts(19,24): error TS1005: ',' expected.
+derivedClassSuperCallsWithThisArg.ts(20,9): error TS2349: This expression is not callable.
+derivedClassSuperCallsWithThisArg.ts(25,24): error TS1005: ',' expected.
+derivedClassSuperCallsWithThisArg.ts(26,9): error TS2349: This expression is not callable.
 
 
-==== superCalls/derivedClassSuperCallsWithThisArg.ts (7 errors) ====
+==== derivedClassSuperCallsWithThisArg.ts (7 errors) ====
     class Base {
         x: string;
         constructor(a) { }

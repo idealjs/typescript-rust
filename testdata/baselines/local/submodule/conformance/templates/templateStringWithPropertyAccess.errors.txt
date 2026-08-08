@@ -1,0 +1,8 @@
+templateStringWithPropertyAccess.ts(2,14): error TS2339: Property 'indexOf' does not exist on type 'string'.
+
+
+==== templateStringWithPropertyAccess.ts (1 errors) ====
+    ﻿// @target: es2015
+    `abc${0}abc`.indexOf(`abc`);
+              ~~~~~~~
+!!! error TS2339: Property 'indexOf' does not exist on type 'string'.

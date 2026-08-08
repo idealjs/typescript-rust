@@ -1,0 +1,110 @@
+index.ts(24,9): error TS1005: ';' expected.
+index.ts(25,9): error TS1005: ';' expected.
+index.ts(31,5): error TS2304: Cannot find name 'await'.
+index.ts(31,10): error TS1005: ',' expected.
+index.ts(31,10): error TS2304: Cannot find name '('.
+index.ts(31,11): error TS1005: ',' expected.
+index.ts(31,11): error TS2304: Cannot find name ')'.
+index.ts(31,13): error TS1005: ',' expected.
+index.ts(31,13): error TS2304: Cannot find name '{'.
+index.ts(32,1): error TS1005: ')' expected.
+
+
+==== index.ts (10 errors) ====
+    export const x = 1;
+    await x;
+    
+    // reparse element access as await
+    await [x];
+    await [x, x];
+    
+    // reparse call as await
+    declare function f(): number;
+    await (x);
+    await (f(), x);
+    await <number>(x);
+    await <number>(f(), x);
+    
+    // reparse tagged template as await
+    await ``;
+    await <string> ``;
+    
+    // member names should be ok
+    class C1 {
+        await() {}
+    }
+    class C2 {
+        get await() { return 1; }
+            ~~~~~
+!!! error TS1005: ';' expected.
+        set await(value) { }
+            ~~~~~
+!!! error TS1005: ';' expected.
+    }
+    class C3 {
+        await = 1;
+    }
+    ({
+        await() {}
+        ~~~~~
+!!! error TS2304: Cannot find name 'await'.
+             ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS2304: Cannot find name '('.
+              ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS2304: Cannot find name ')'.
+                ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS2304: Cannot find name '{'.
+    });
+    ~
+!!! error TS1005: ')' expected.
+    ({
+        get await() { return 1 },
+        set await(value) { }
+    });
+    ({
+        await: 1
+    });
+    
+    // property access name should be ok
+    C1.prototype.await;
+    
+    // await in decorators
+    declare const dec: any;
+    @(await dec)
+    class C {
+    }
+    
+    // await allowed in aliased import
+    import { await as _await } from "./other";
+    
+    // newlines
+    // await in throw
+    throw await
+        1;
+    
+    // await in var
+    let y = await
+        1;
+    
+    // await in expression statement;
+    await
+        1;
+    
+==== other.ts (0 errors) ====
+    const _await = 1;
+    
+    // await allowed in aliased export
+    export { _await as await };
+    
+    // for-await-of
+    const arr = [Promise.resolve()];
+    
+    for await (const item of arr) {
+      item;
+    }

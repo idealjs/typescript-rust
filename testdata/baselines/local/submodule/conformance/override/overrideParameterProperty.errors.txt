@@ -1,0 +1,71 @@
+overrideParameterProperty.ts(6,22): error TS1005: ',' expected.
+overrideParameterProperty.ts(6,31): error TS1005: ',' expected.
+overrideParameterProperty.ts(7,5): error TS2349: This expression is not callable.
+overrideParameterProperty.ts(13,24): error TS1005: ',' expected.
+overrideParameterProperty.ts(14,5): error TS2349: This expression is not callable.
+overrideParameterProperty.ts(20,24): error TS1005: ',' expected.
+overrideParameterProperty.ts(20,31): error TS1005: ',' expected.
+overrideParameterProperty.ts(21,5): error TS2349: This expression is not callable.
+overrideParameterProperty.ts(25,14): error TS1005: ',' expected.
+overrideParameterProperty.ts(29,22): error TS1005: ',' expected.
+overrideParameterProperty.ts(29,31): error TS1005: ',' expected.
+overrideParameterProperty.ts(30,5): error TS2349: This expression is not callable.
+
+
+==== overrideParameterProperty.ts (12 errors) ====
+    class Base {
+      p1!: string;
+    }
+    
+    class C1 extends Base {
+      constructor(public override p1: "hello") {
+                         ~~~~~~~~
+!!! error TS1005: ',' expected.
+                                  ~~
+!!! error TS1005: ',' expected.
+        super();
+        ~~~~~
+!!! error TS2349: This expression is not callable.
+        this.p1;
+      }
+    }
+    
+    class C2 extends Base {
+      constructor(override p1: "hello") {
+                           ~~
+!!! error TS1005: ',' expected.
+        super();
+        ~~~~~
+!!! error TS2349: This expression is not callable.
+        this.p1;
+      }
+    }
+    
+    class C3 extends Base {
+      constructor(override public p1: "hello") {
+                           ~~~~~~
+!!! error TS1005: ',' expected.
+                                  ~~
+!!! error TS1005: ',' expected.
+        super();
+        ~~~~~
+!!! error TS2349: This expression is not callable.
+        this.p1;
+      }
+    
+      m(override p1: "hello") {}
+                 ~~
+!!! error TS1005: ',' expected.
+    }
+    
+    class C4 extends Base {
+      constructor(public override p2: string) {
+                         ~~~~~~~~
+!!! error TS1005: ',' expected.
+                                  ~~
+!!! error TS1005: ',' expected.
+        super();
+        ~~~~~
+!!! error TS2349: This expression is not callable.
+      }
+    }

@@ -1,0 +1,50 @@
+arityAndOrderCompatibility01.ts(18,5): error TS2322: Type '[string, number]' is not assignable to type '[number, number, number]'.
+arityAndOrderCompatibility01.ts(21,5): error TS2322: Type '[string, number]' is not assignable to type '[string, number, number]'.
+arityAndOrderCompatibility01.ts(24,5): error TS2322: Type '[string, number]' is not assignable to type '[number]'.
+arityAndOrderCompatibility01.ts(30,5): error TS2322: Type '[string, number]' is not assignable to type '[number, string]'.
+
+
+==== arityAndOrderCompatibility01.ts (4 errors) ====
+    interface StrNum extends Array<string|number> {
+        0: string;
+        1: number;
+        length: 2;
+    }
+    
+    declare var x: [string, number];
+    declare var y: StrNum
+    declare var z: {
+        0: string;
+        1: number;
+        length: 2;
+    }
+    
+    var [a, b, c] = x;
+    var [d, e, f] = y;
+    var [g, h, i] = z;
+    var j1: [number, number, number] = x;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '[string, number]' is not assignable to type '[number, number, number]'.
+    var j2: [number, number, number] = y;
+    var j3: [number, number, number] = z;
+    var k1: [string, number, number] = x;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '[string, number]' is not assignable to type '[string, number, number]'.
+    var k2: [string, number, number] = y;
+    var k3: [string, number, number] = z;
+    var l1: [number] = x;
+        ~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '[string, number]' is not assignable to type '[number]'.
+    var l2: [number] = y;
+    var l3: [number] = z;
+    var m1: [string] = x;
+    var m2: [string] = y;
+    var m3: [string] = z;
+    var n1: [number, string] = x;
+        ~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '[string, number]' is not assignable to type '[number, string]'.
+    var n2: [number, string] = y;
+    var n3: [number, string] = z;
+    var o1: [string, number] = x;
+    var o2: [string, number] = y;
+    var o3: [string, number] = y;

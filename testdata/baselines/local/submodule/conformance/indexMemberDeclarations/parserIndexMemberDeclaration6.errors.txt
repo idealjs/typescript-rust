@@ -1,0 +1,12 @@
+parserIndexMemberDeclaration6.ts(2,13): error TS1005: ']' expected.
+parserIndexMemberDeclaration6.ts(2,21): error TS1005: ';' expected.
+
+
+==== parserIndexMemberDeclaration6.ts (2 errors) ====
+    class C {
+       static [x: string]: string;
+                ~
+!!! error TS1005: ']' expected.
+                        ~
+!!! error TS1005: ';' expected.
+    }

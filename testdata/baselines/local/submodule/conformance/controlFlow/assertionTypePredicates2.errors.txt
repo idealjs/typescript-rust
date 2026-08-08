@@ -1,0 +1,28 @@
+assertionTypePredicates2.js(14,47): error TS2304: Cannot find name 'TypeError'.
+
+
+==== assertionTypePredicates2.js (1 errors) ====
+    /**
+     * @typedef {{ x: number }} A
+     */
+    
+    /**
+     * @typedef { A & { y: number } } B
+     */
+    
+    /**
+     * @param {A} a
+     * @returns { asserts a is B }
+     */
+    const foo = (a) => {
+        if (/** @type { B } */ (a).y !== 0) throw TypeError();
+                                                  ~~~~~~~~~
+!!! error TS2304: Cannot find name 'TypeError'.
+        return undefined;
+    };
+    
+    export const main = () => {
+        /** @type { A } */
+        const a = { x: 1 };
+        foo(a);
+    };

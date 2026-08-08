@@ -1,0 +1,26 @@
+templateLiteralTypes6.ts(19,6): error TS2345: Argument of type 'string' is not assignable to parameter of type '`${Scope}:${Event}`'.
+
+
+==== templateLiteralTypes6.ts (1 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/56659
+    
+    type Registry = {
+      a: { a1: {} };
+      b: { b1: {} };
+    };
+    
+    type Keyof<T> = keyof T & string;
+    
+    declare function f1<
+      Scope extends Keyof<Registry>,
+      Event extends Keyof<Registry[Scope]>,
+    >(eventPath: `${Scope}:${Event}`): void;
+    
+    function f2<
+      Scope extends Keyof<Registry>,
+      Event extends Keyof<Registry[Scope]>,
+    >(scope: Scope, event: Event) {
+      f1(`${scope}:${event}`);
+         ~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type 'string' is not assignable to parameter of type '`${Scope}:${Event}`'.
+    }

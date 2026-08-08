@@ -1,0 +1,75 @@
+comparisonOperatorWithNoRelationshipObjectsOnOptionalProperty.ts(13,16): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipObjectsOnOptionalProperty.ts(14,16): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipObjectsOnOptionalProperty.ts(29,11): error TS2367: This comparison appears to be unintentional because the types '{ b?: number | undefined }' and '{ b?: string | undefined }' have no overlap.
+comparisonOperatorWithNoRelationshipObjectsOnOptionalProperty.ts(30,11): error TS2367: This comparison appears to be unintentional because the types '{ b?: string | undefined }' and '{ b?: number | undefined }' have no overlap.
+comparisonOperatorWithNoRelationshipObjectsOnOptionalProperty.ts(33,11): error TS2367: This comparison appears to be unintentional because the types '{ b?: number | undefined }' and '{ b?: string | undefined }' have no overlap.
+comparisonOperatorWithNoRelationshipObjectsOnOptionalProperty.ts(34,11): error TS2367: This comparison appears to be unintentional because the types '{ b?: string | undefined }' and '{ b?: number | undefined }' have no overlap.
+comparisonOperatorWithNoRelationshipObjectsOnOptionalProperty.ts(37,11): error TS2367: This comparison appears to be unintentional because the types '{ b?: number | undefined }' and '{ b?: string | undefined }' have no overlap.
+comparisonOperatorWithNoRelationshipObjectsOnOptionalProperty.ts(38,11): error TS2367: This comparison appears to be unintentional because the types '{ b?: string | undefined }' and '{ b?: number | undefined }' have no overlap.
+comparisonOperatorWithNoRelationshipObjectsOnOptionalProperty.ts(41,11): error TS2367: This comparison appears to be unintentional because the types '{ b?: number | undefined }' and '{ b?: string | undefined }' have no overlap.
+comparisonOperatorWithNoRelationshipObjectsOnOptionalProperty.ts(42,11): error TS2367: This comparison appears to be unintentional because the types '{ b?: string | undefined }' and '{ b?: number | undefined }' have no overlap.
+
+
+==== comparisonOperatorWithNoRelationshipObjectsOnOptionalProperty.ts (10 errors) ====
+    interface A1 {
+        b?: number;
+    }
+    
+    interface B1 {
+        b?: string;
+    }
+    
+    declare var a: A1;
+    declare var b: B1;
+    
+    // operator <
+    var ra1 = a < b;
+                   ~
+!!! error TS1005: '>' expected.
+    var ra2 = b < a;
+                   ~
+!!! error TS1005: '>' expected.
+    
+    // operator >
+    var rb1 = a > b;
+    var rb2 = b > a;
+    
+    // operator <=
+    var rc1 = a <= b;
+    var rc2 = b <= a;
+    
+    // operator >=
+    var rd1 = a >= b;
+    var rd2 = b >= a;
+    
+    // operator ==
+    var re1 = a == b;
+              ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '{ b?: number | undefined }' and '{ b?: string | undefined }' have no overlap.
+    var re2 = b == a;
+              ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '{ b?: string | undefined }' and '{ b?: number | undefined }' have no overlap.
+    
+    // operator !=
+    var rf1 = a != b;
+              ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '{ b?: number | undefined }' and '{ b?: string | undefined }' have no overlap.
+    var rf2 = b != a;
+              ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '{ b?: string | undefined }' and '{ b?: number | undefined }' have no overlap.
+    
+    // operator ===
+    var rg1 = a === b;
+              ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '{ b?: number | undefined }' and '{ b?: string | undefined }' have no overlap.
+    var rg2 = b === a;
+              ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '{ b?: string | undefined }' and '{ b?: number | undefined }' have no overlap.
+    
+    // operator !==
+    var rh1 = a !== b;
+              ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '{ b?: number | undefined }' and '{ b?: string | undefined }' have no overlap.
+    var rh2 = b !== a;
+              ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '{ b?: string | undefined }' and '{ b?: number | undefined }' have no overlap.

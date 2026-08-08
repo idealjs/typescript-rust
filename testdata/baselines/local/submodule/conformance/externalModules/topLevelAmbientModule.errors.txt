@@ -1,0 +1,14 @@
+foo_1.ts(3,9): error TS2304: Cannot find name 'foo'.
+
+
+==== foo_0.ts (0 errors) ====
+    declare module "foo" {
+    	export var x: number;
+    }
+    
+==== foo_1.ts (1 errors) ====
+    /// <reference path="foo_0.ts"/>
+    import foo = require("foo");
+    var z = foo.x + 10;
+            ~~~
+!!! error TS2304: Cannot find name 'foo'.

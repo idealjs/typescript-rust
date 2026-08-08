@@ -1,18 +1,18 @@
-superCalls/derivedClassParameterProperties.ts(10,9): error TS2349: This expression is not callable.
-superCalls/derivedClassParameterProperties.ts(15,24): error TS1005: ',' expected.
-superCalls/derivedClassParameterProperties.ts(17,9): error TS2349: This expression is not callable.
-superCalls/derivedClassParameterProperties.ts(22,24): error TS1005: ',' expected.
-superCalls/derivedClassParameterProperties.ts(23,9): error TS2349: This expression is not callable.
-superCalls/derivedClassParameterProperties.ts(32,9): error TS2349: This expression is not callable.
-superCalls/derivedClassParameterProperties.ts(39,9): error TS2349: This expression is not callable.
-superCalls/derivedClassParameterProperties.ts(49,9): error TS2349: This expression is not callable.
-superCalls/derivedClassParameterProperties.ts(59,9): error TS2349: This expression is not callable.
-superCalls/derivedClassParameterProperties.ts(67,9): error TS2349: This expression is not callable.
-superCalls/derivedClassParameterProperties.ts(82,9): error TS2349: This expression is not callable.
-superCalls/derivedClassParameterProperties.ts(90,9): error TS2349: This expression is not callable.
+derivedClassParameterProperties.ts(10,9): error TS2349: This expression is not callable.
+derivedClassParameterProperties.ts(15,24): error TS1005: ',' expected.
+derivedClassParameterProperties.ts(17,9): error TS2349: This expression is not callable.
+derivedClassParameterProperties.ts(22,24): error TS1005: ',' expected.
+derivedClassParameterProperties.ts(23,9): error TS2349: This expression is not callable.
+derivedClassParameterProperties.ts(32,9): error TS2349: This expression is not callable.
+derivedClassParameterProperties.ts(39,9): error TS2349: This expression is not callable.
+derivedClassParameterProperties.ts(49,9): error TS2349: This expression is not callable.
+derivedClassParameterProperties.ts(59,9): error TS2349: This expression is not callable.
+derivedClassParameterProperties.ts(67,9): error TS2349: This expression is not callable.
+derivedClassParameterProperties.ts(82,9): error TS2349: This expression is not callable.
+derivedClassParameterProperties.ts(90,9): error TS2349: This expression is not callable.
 
 
-==== superCalls/derivedClassParameterProperties.ts (12 errors) ====
+==== derivedClassParameterProperties.ts (12 errors) ====
     // ordering of super calls in derived constructors matters depending on other class contents
     
     class Base {

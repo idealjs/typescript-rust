@@ -6,12 +6,12 @@ error TS2300: Duplicate identifier 'DCI'.
 error TS2300: Duplicate identifier 'DIC'.
 error TS2300: Duplicate identifier 'DCC1'.
 error TS2300: Duplicate identifier 'DCC2'.
-classAbstractKeyword/classAbstractMergedDeclaration.ts(31,5): error TS2511: Cannot create an instance of an abstract class.
-classAbstractKeyword/classAbstractMergedDeclaration.ts(32,5): error TS2511: Cannot create an instance of an abstract class.
-classAbstractKeyword/classAbstractMergedDeclaration.ts(34,5): error TS2511: Cannot create an instance of an abstract class.
-classAbstractKeyword/classAbstractMergedDeclaration.ts(36,5): error TS2511: Cannot create an instance of an abstract class.
-classAbstractKeyword/classAbstractMergedDeclaration.ts(38,5): error TS2511: Cannot create an instance of an abstract class.
-classAbstractKeyword/classAbstractMergedDeclaration.ts(40,5): error TS2511: Cannot create an instance of an abstract class.
+classAbstractMergedDeclaration.ts(31,5): error TS2511: Cannot create an instance of an abstract class.
+classAbstractMergedDeclaration.ts(32,5): error TS2511: Cannot create an instance of an abstract class.
+classAbstractMergedDeclaration.ts(34,5): error TS2511: Cannot create an instance of an abstract class.
+classAbstractMergedDeclaration.ts(36,5): error TS2511: Cannot create an instance of an abstract class.
+classAbstractMergedDeclaration.ts(38,5): error TS2511: Cannot create an instance of an abstract class.
+classAbstractMergedDeclaration.ts(40,5): error TS2511: Cannot create an instance of an abstract class.
 
 
 !!! error TS2300: Duplicate identifier 'CI'.
@@ -29,7 +29,7 @@ classAbstractKeyword/classAbstractMergedDeclaration.ts(40,5): error TS2511: Cann
 !!! error TS2300: Duplicate identifier 'DCC1'.
 
 !!! error TS2300: Duplicate identifier 'DCC2'.
-==== classAbstractKeyword/classAbstractMergedDeclaration.ts (6 errors) ====
+==== classAbstractMergedDeclaration.ts (6 errors) ====
     abstract class CM {}
     namespace CM {}
     

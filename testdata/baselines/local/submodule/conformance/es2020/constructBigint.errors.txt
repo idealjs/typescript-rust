@@ -1,14 +1,14 @@
-es2020/constructBigint.ts(1,1): error TS2304: Cannot find name 'BigInt'.
-es2020/constructBigint.ts(2,1): error TS2304: Cannot find name 'BigInt'.
-es2020/constructBigint.ts(3,1): error TS2304: Cannot find name 'BigInt'.
-es2020/constructBigint.ts(4,1): error TS2304: Cannot find name 'BigInt'.
-es2020/constructBigint.ts(6,1): error TS2304: Cannot find name 'BigInt'.
-es2020/constructBigint.ts(7,1): error TS2304: Cannot find name 'BigInt'.
-es2020/constructBigint.ts(8,1): error TS2304: Cannot find name 'BigInt'.
-es2020/constructBigint.ts(9,1): error TS2304: Cannot find name 'BigInt'.
+constructBigint.ts(1,1): error TS2304: Cannot find name 'BigInt'.
+constructBigint.ts(2,1): error TS2304: Cannot find name 'BigInt'.
+constructBigint.ts(3,1): error TS2304: Cannot find name 'BigInt'.
+constructBigint.ts(4,1): error TS2304: Cannot find name 'BigInt'.
+constructBigint.ts(6,1): error TS2304: Cannot find name 'BigInt'.
+constructBigint.ts(7,1): error TS2304: Cannot find name 'BigInt'.
+constructBigint.ts(8,1): error TS2304: Cannot find name 'BigInt'.
+constructBigint.ts(9,1): error TS2304: Cannot find name 'BigInt'.
 
 
-==== es2020/constructBigint.ts (8 errors) ====
+==== constructBigint.ts (8 errors) ====
     BigInt(1);
     ~~~~~~
 !!! error TS2304: Cannot find name 'BigInt'.

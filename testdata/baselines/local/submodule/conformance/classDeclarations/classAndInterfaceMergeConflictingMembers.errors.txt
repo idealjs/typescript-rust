@@ -8,7 +8,7 @@ error TS2300: Duplicate identifier 'C3'.
 !!! error TS2300: Duplicate identifier 'C2'.
 
 !!! error TS2300: Duplicate identifier 'C3'.
-==== classDeclarations/classAndInterfaceMergeConflictingMembers.ts (0 errors) ====
+==== classAndInterfaceMergeConflictingMembers.ts (0 errors) ====
     declare class C1 {
         public x : number;
     }

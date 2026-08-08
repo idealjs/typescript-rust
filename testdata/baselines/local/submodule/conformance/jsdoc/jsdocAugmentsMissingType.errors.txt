@@ -1,0 +1,18 @@
+/a.js(1,32): error TS2339: Property 'x' does not exist on type 'object'.
+/a.js(5,14): error TS2339: Property 'x' does not exist on type '{ m: () => any }'.
+
+
+==== jsdocAugmentsMissingType.ts (0 errors) ====
+    
+==== /a.js (2 errors) ====
+    class A { constructor() { this.x = 0; } }
+                                   ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+    /** @augments */
+    class B extends A {
+        m() {
+            this.x
+                 ~
+!!! error TS2339: Property 'x' does not exist on type '{ m: () => any }'.
+        }
+    }

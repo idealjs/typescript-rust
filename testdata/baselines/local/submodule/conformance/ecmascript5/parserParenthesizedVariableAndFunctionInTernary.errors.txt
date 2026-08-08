@@ -1,0 +1,8 @@
+parserParenthesizedVariableAndFunctionInTernary.ts(2,19): error TS2454: Variable 'a' is used before being assigned.
+
+
+==== parserParenthesizedVariableAndFunctionInTernary.ts (1 errors) ====
+    let a: any;
+    const c = true ? (a) : function() {};
+                      ~
+!!! error TS2454: Variable 'a' is used before being assigned.

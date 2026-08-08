@@ -1,0 +1,13 @@
+emitArrowFunctionWhenUsingArguments16_ES6.ts(3,9): error TS2304: Cannot find name 'Math'.
+
+
+==== emitArrowFunctionWhenUsingArguments16_ES6.ts (1 errors) ====
+    function f() {
+        var arguments = "hello";
+        if (Math.random()) {
+            ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+            return () => arguments[0];
+        }
+        var arguments = "world";
+    }

@@ -1,0 +1,16 @@
+parserMemberAccessOffOfGenericType1.ts(1,9): error TS2304: Cannot find name 'List'.
+parserMemberAccessOffOfGenericType1.ts(1,21): error TS1005: ',' expected.
+parserMemberAccessOffOfGenericType1.ts(1,31): error TS1005: ',' expected.
+parserMemberAccessOffOfGenericType1.ts(1,32): error TS1134: Variable declaration expected.
+
+
+==== parserMemberAccessOffOfGenericType1.ts (4 errors) ====
+    var v = List<number>.makeChild();
+            ~~~~
+!!! error TS2304: Cannot find name 'List'.
+                        ~
+!!! error TS1005: ',' expected.
+                                  ~
+!!! error TS1005: ',' expected.
+                                   ~
+!!! error TS1134: Variable declaration expected.

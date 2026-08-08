@@ -1,0 +1,44 @@
+sharedMemory.ts(1,17): error TS2304: Cannot find name 'SharedArrayBuffer'.
+sharedMemory.ts(3,19): error TS2304: Cannot find name 'SharedArrayBuffer'.
+sharedMemory.ts(3,37): error TS2304: Cannot find name 'BigInt64Array'.
+sharedMemory.ts(4,19): error TS2304: Cannot find name 'BigInt64Array'.
+sharedMemory.ts(5,19): error TS2304: Cannot find name 'Atomics'.
+sharedMemory.ts(6,26): error TS2304: Cannot find name 'Atomics'.
+sharedMemory.ts(7,44): error TS2304: Cannot find name 'Atomics'.
+sharedMemory.ts(7,72): error TS2304: Cannot find name 'BigInt'.
+
+
+==== sharedMemory.ts (8 errors) ====
+    const sab = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * 1024);
+                    ~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'SharedArrayBuffer'.
+    const int32 = new Int32Array(sab);
+    const sab64 = new SharedArrayBuffer(BigInt64Array.BYTES_PER_ELEMENT * 1024);
+                      ~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'SharedArrayBuffer'.
+                                        ~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'BigInt64Array'.
+    const int64 = new BigInt64Array(sab64);
+                      ~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'BigInt64Array'.
+    const waitValue = Atomics.wait(int32, 0, 0);
+                      ~~~~~~~
+!!! error TS2304: Cannot find name 'Atomics'.
+    const { async, value } = Atomics.waitAsync(int32, 0, 0);
+                             ~~~~~~~
+!!! error TS2304: Cannot find name 'Atomics'.
+    const { async: async64, value: value64 } = Atomics.waitAsync(int64, 0, BigInt(0));
+                                               ~~~~~~~
+!!! error TS2304: Cannot find name 'Atomics'.
+                                                                           ~~~~~~
+!!! error TS2304: Cannot find name 'BigInt'.
+    
+    const main = async () => {
+        if (async) {
+            await value;
+        }
+        if (async64) {
+            await value64;
+        }
+    }
+    main();

@@ -1,0 +1,30 @@
+parserUnicode1.ts(2,7): error TS1127: Invalid character.
+parserUnicode1.ts(2,7): error TS1134: Variable declaration expected.
+parserUnicode1.ts(4,7): error TS2304: Cannot find name 'xx'.
+parserUnicode1.ts(6,5): error TS2304: Cannot find name '$ERROR'.
+parserUnicode1.ts(6,60): error TS2304: Cannot find name 'xx'.
+
+
+==== parserUnicode1.ts (5 errors) ====
+    try {
+      var \u0078x = 6;
+          ~
+!!! error TS1127: Invalid character.
+          ~
+!!! error TS1134: Variable declaration expected.
+    
+      if (xx !== 6) {
+          ~~
+!!! error TS2304: Cannot find name 'xx'.
+    
+        $ERROR('#6.1: var \\u0078x = 1; xx === 6. Actual: ' + (xx));
+        ~~~~~~
+!!! error TS2304: Cannot find name '$ERROR'.
+                                                               ~~
+!!! error TS2304: Cannot find name 'xx'.
+      }
+    }
+    catch (e) {
+        $ERROR('#6.2: var \\u0078x = 1; xx === 6. Actual: ' + (xx));
+    
+    }

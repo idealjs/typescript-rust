@@ -1,0 +1,24 @@
+spreadUnion3.ts(12,3): error TS2345: Argument of type 'undefined' is not assignable to parameter of type '{ a: number } | null'.
+
+
+==== spreadUnion3.ts (1 errors) ====
+    function f(x: { y: string } | undefined): { y: string } {
+        return { y: 123, ...x } // y: string | number
+    }
+    f(undefined)
+    
+    
+    function g(t?: { a: number } | null): void {
+        let b = { ...t };
+        let c: number = b.a;  // might not have 'a'
+    }
+    g()
+    g(undefined)
+      ~~~~~~~~~
+!!! error TS2345: Argument of type 'undefined' is not assignable to parameter of type '{ a: number } | null'.
+    g(null)
+    
+    // spreading nothing but null and undefined is not allowed
+    declare const nullAndUndefinedUnion: null | undefined;
+    var x = { ...nullAndUndefinedUnion, ...nullAndUndefinedUnion };
+    var y = { ...nullAndUndefinedUnion };

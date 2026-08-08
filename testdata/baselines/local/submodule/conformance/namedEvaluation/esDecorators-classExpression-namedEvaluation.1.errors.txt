@@ -1,0 +1,66 @@
+esDecorators-classExpression-namedEvaluation.1.ts(8,5): error TS1012: Unexpected token.
+esDecorators-classExpression-namedEvaluation.1.ts(8,6): error TS1005: ';' expected.
+esDecorators-classExpression-namedEvaluation.1.ts(8,10): error TS1005: ';' expected.
+esDecorators-classExpression-namedEvaluation.1.ts(14,7): error TS1012: Unexpected token.
+esDecorators-classExpression-namedEvaluation.1.ts(14,8): error TS1005: ';' expected.
+esDecorators-classExpression-namedEvaluation.1.ts(14,12): error TS1005: ';' expected.
+esDecorators-classExpression-namedEvaluation.1.ts(20,7): error TS1012: Unexpected token.
+esDecorators-classExpression-namedEvaluation.1.ts(20,8): error TS1005: ';' expected.
+esDecorators-classExpression-namedEvaluation.1.ts(20,12): error TS1005: ';' expected.
+esDecorators-classExpression-namedEvaluation.1.ts(26,7): error TS1012: Unexpected token.
+esDecorators-classExpression-namedEvaluation.1.ts(26,8): error TS1005: ';' expected.
+esDecorators-classExpression-namedEvaluation.1.ts(26,12): error TS1005: ';' expected.
+
+
+==== esDecorators-classExpression-namedEvaluation.1.ts (12 errors) ====
+    declare let dec: any;
+    
+    let x: any;
+    
+    // 13.15.2 RS: Evaluation
+    //  AssignmentExpression : LeftHandSideExpression `=` AssignmentExpression
+    
+    x = @dec class { };
+        ~
+!!! error TS1012: Unexpected token.
+         ~~~
+!!! error TS1005: ';' expected.
+             ~~~~~
+!!! error TS1005: ';' expected.
+    x = class { @dec y: any; };
+    
+    // 13.15.2 RS: Evaluation
+    //  AssignmentExpression : LeftHandSideExpression `&&=` AssignmentExpression
+    
+    x &&= @dec class { };
+          ~
+!!! error TS1012: Unexpected token.
+           ~~~
+!!! error TS1005: ';' expected.
+               ~~~~~
+!!! error TS1005: ';' expected.
+    x &&= class { @dec y: any; };
+    
+    // 13.15.2 RS: Evaluation
+    //  AssignmentExpression : LeftHandSideExpression `||=` AssignmentExpression
+    
+    x ||= @dec class { };
+          ~
+!!! error TS1012: Unexpected token.
+           ~~~
+!!! error TS1005: ';' expected.
+               ~~~~~
+!!! error TS1005: ';' expected.
+    x ||= class { @dec y: any; };
+    
+    // 13.15.2 RS: Evaluation
+    //  AssignmentExpression : LeftHandSideExpression `??=` AssignmentExpression
+    
+    x ??= @dec class { };
+          ~
+!!! error TS1012: Unexpected token.
+           ~~~
+!!! error TS1005: ';' expected.
+               ~~~~~
+!!! error TS1005: ';' expected.
+    x ??= class { @dec y: any; };

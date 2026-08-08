@@ -1,0 +1,68 @@
+decoratorOnClassAccessor8.ts(1,71): error TS2304: Cannot find name 'TypedPropertyDescriptor'.
+decoratorOnClassAccessor8.ts(1,100): error TS2304: Cannot find name 'TypedPropertyDescriptor'.
+decoratorOnClassAccessor8.ts(4,14): error TS1005: ';' expected.
+decoratorOnClassAccessor8.ts(5,9): error TS1005: ';' expected.
+decoratorOnClassAccessor8.ts(9,9): error TS1005: ';' expected.
+decoratorOnClassAccessor8.ts(10,14): error TS1005: ';' expected.
+decoratorOnClassAccessor8.ts(14,14): error TS1005: ';' expected.
+decoratorOnClassAccessor8.ts(15,9): error TS1005: ';' expected.
+decoratorOnClassAccessor8.ts(19,9): error TS1005: ';' expected.
+decoratorOnClassAccessor8.ts(20,14): error TS1005: ';' expected.
+decoratorOnClassAccessor8.ts(24,14): error TS1005: ';' expected.
+decoratorOnClassAccessor8.ts(28,14): error TS1005: ';' expected.
+
+
+==== decoratorOnClassAccessor8.ts (12 errors) ====
+    declare function dec<T>(target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<T>): TypedPropertyDescriptor<T>;
+                                                                          ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'TypedPropertyDescriptor'.
+                                                                                                       ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'TypedPropertyDescriptor'.
+    
+    class A {
+        @dec get x() { return 0; }
+                 ~
+!!! error TS1005: ';' expected.
+        set x(value: number) { }
+            ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class B {
+        get x() { return 0; }
+            ~
+!!! error TS1005: ';' expected.
+        @dec set x(value: number) { }
+                 ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class C {
+        @dec set x(value: number) { }
+                 ~
+!!! error TS1005: ';' expected.
+        get x() { return 0; }
+            ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class D {
+        set x(value: number) { }
+            ~
+!!! error TS1005: ';' expected.
+        @dec get x() { return 0; }
+                 ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class E {
+        @dec get x() { return 0; }
+                 ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class F {
+        @dec set x(value: number) { }
+                 ~
+!!! error TS1005: ';' expected.
+    }

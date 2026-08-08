@@ -1,13 +1,13 @@
-classStaticBlock/classStaticBlockUseBeforeDef2.ts(2,12): error TS1005: ';' expected.
-classStaticBlock/classStaticBlockUseBeforeDef2.ts(3,13): error TS1005: ';' expected.
-classStaticBlock/classStaticBlockUseBeforeDef2.ts(3,14): error TS1005: ';' expected.
-classStaticBlock/classStaticBlockUseBeforeDef2.ts(5,5): error TS2304: Cannot find name 'static'.
-classStaticBlock/classStaticBlockUseBeforeDef2.ts(5,12): error TS1005: ';' expected.
-classStaticBlock/classStaticBlockUseBeforeDef2.ts(5,12): error TS2304: Cannot find name 'x'.
-classStaticBlock/classStaticBlockUseBeforeDef2.ts(6,1): error TS1128: Declaration or statement expected.
+classStaticBlockUseBeforeDef2.ts(2,12): error TS1005: ';' expected.
+classStaticBlockUseBeforeDef2.ts(3,13): error TS1005: ';' expected.
+classStaticBlockUseBeforeDef2.ts(3,14): error TS1005: ';' expected.
+classStaticBlockUseBeforeDef2.ts(5,5): error TS2304: Cannot find name 'static'.
+classStaticBlockUseBeforeDef2.ts(5,12): error TS1005: ';' expected.
+classStaticBlockUseBeforeDef2.ts(5,12): error TS2304: Cannot find name 'x'.
+classStaticBlockUseBeforeDef2.ts(6,1): error TS1128: Declaration or statement expected.
 
 
-==== classStaticBlock/classStaticBlockUseBeforeDef2.ts (7 errors) ====
+==== classStaticBlockUseBeforeDef2.ts (7 errors) ====
     class C {
         static {
                ~

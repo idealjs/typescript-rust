@@ -1,0 +1,21 @@
+callChainInference.ts(12,5): error TS2554: Expected 2 arguments, but got 1.
+
+
+==== callChainInference.ts (1 errors) ====
+    // Repro from #42404
+    
+    interface Y {
+        foo<T>(this: T, arg: keyof T): void;
+        a: number;
+        b: string;
+    }
+    
+    declare const value: Y | undefined;
+    
+    if (value) {
+        value?.foo("a");
+        ~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    }
+    
+    value?.foo("a");

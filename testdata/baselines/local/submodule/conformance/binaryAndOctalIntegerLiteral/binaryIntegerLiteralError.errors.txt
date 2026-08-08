@@ -1,0 +1,19 @@
+binaryIntegerLiteralError.ts(3,17): error TS1005: ',' expected.
+binaryIntegerLiteralError.ts(4,17): error TS1005: ',' expected.
+
+
+==== binaryIntegerLiteralError.ts (2 errors) ====
+    ﻿// @target: es2015
+    // error
+    var bin1 = 0B1102110;
+                 ~~~~
+!!! error TS1005: ',' expected.
+    var bin1 = 0b11023410;
+                 ~~~~~
+!!! error TS1005: ',' expected.
+    
+    var obj1 = {
+        0b11010: "hi",
+        26: "Hello",
+        "26": "world",
+    };

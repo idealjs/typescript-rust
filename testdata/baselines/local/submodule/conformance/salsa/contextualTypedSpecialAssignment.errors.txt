@@ -1,0 +1,153 @@
+mod.js(3,7): error TS1003: Identifier expected.
+mod.js(3,8): error TS1005: ';' expected.
+mod.js(3,8): error TS2304: Cannot find name 'exports'.
+mod.js(5,5): error TS2304: Cannot find name 'm'.
+mod.js(5,6): error TS1005: ',' expected.
+mod.js(5,6): error TS2304: Cannot find name '('.
+mod.js(5,7): error TS1005: ',' expected.
+mod.js(5,7): error TS2304: Cannot find name 'n'.
+mod.js(5,8): error TS1005: ',' expected.
+mod.js(5,8): error TS2304: Cannot find name ')'.
+mod.js(5,10): error TS1005: ',' expected.
+mod.js(5,10): error TS2304: Cannot find name '{'.
+mod.js(6,1): error TS1128: Declaration or statement expected.
+test.js(9,4): error TS2339: Property 'x' does not exist on type 'object'.
+test.js(11,5): error TS2304: Cannot find name 'm'.
+test.js(11,6): error TS1005: ',' expected.
+test.js(11,6): error TS2304: Cannot find name '('.
+test.js(11,7): error TS1005: ',' expected.
+test.js(11,7): error TS2304: Cannot find name 'n'.
+test.js(11,8): error TS1005: ',' expected.
+test.js(11,8): error TS2304: Cannot find name ')'.
+test.js(11,10): error TS1005: ',' expected.
+test.js(11,10): error TS2304: Cannot find name '{'.
+test.js(12,1): error TS1128: Declaration or statement expected.
+
+
+==== test.js (11 errors) ====
+    /** @typedef {{
+        status: 'done'
+        m(n: number): void
+    }} DoneStatus */
+    
+    // property assignment
+    var ns = {}
+    /** @type {DoneStatus} */
+    ns.x = {
+       ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+        status: 'done',
+        m(n) { }
+        ~
+!!! error TS2304: Cannot find name 'm'.
+         ~
+!!! error TS1005: ',' expected.
+         ~
+!!! error TS2304: Cannot find name '('.
+          ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS2304: Cannot find name 'n'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name ')'.
+             ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS2304: Cannot find name '{'.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+    ns.x = {
+        status: 'done',
+        m(n) { }
+    }
+    ns.x
+    
+    
+    // this-property assignment
+    class Thing {
+        constructor() {
+            /** @type {DoneStatus} */
+            this.s = {
+                status: 'done',
+                m(n) { }
+            }
+        }
+    
+        fail() {
+            this.s = {
+                status: 'done',
+                m(n) { }
+            }
+        }
+    }
+    
+    // exports-property assignment
+    
+    /** @type {DoneStatus} */
+    exports.x = {
+        status: "done",
+        m(n) { }
+    }
+    exports.x
+    
+    /** @type {DoneStatus} */
+    module.exports.y = {
+        status: "done",
+        m(n) { }
+    }
+    module.exports.y
+    
+    // prototype-property assignment
+    /** @type {DoneStatus} */
+    Thing.prototype.x = {
+        status: 'done',
+        m(n) { }
+    }
+    Thing.prototype.x
+    
+    // prototype assignment
+    function F() {
+    }
+    /** @type {DoneStatus} */
+    F.prototype = {
+        status: "done",
+        m(n) { }
+    }
+    
+==== mod.js (13 errors) ====
+    // module.exports assignment
+    /** @type {{ status: 'done', m(n: number): void }} */
+    module.exports = {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        status: "done",
+        m(n) { }
+        ~
+!!! error TS2304: Cannot find name 'm'.
+         ~
+!!! error TS1005: ',' expected.
+         ~
+!!! error TS2304: Cannot find name '('.
+          ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS2304: Cannot find name 'n'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name ')'.
+             ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS2304: Cannot find name '{'.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

@@ -1,14 +1,14 @@
-accessibility/protectedClassPropertyAccessibleWithinClass.ts(5,19): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinClass.ts(6,19): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinClass.ts(10,26): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinClass.ts(11,26): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinClass.ts(19,19): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinClass.ts(20,19): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinClass.ts(24,26): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinClass.ts(25,26): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinClass.ts(5,19): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinClass.ts(6,19): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinClass.ts(10,26): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinClass.ts(11,26): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinClass.ts(19,19): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinClass.ts(20,19): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinClass.ts(24,26): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinClass.ts(25,26): error TS1005: ';' expected.
 
 
-==== accessibility/protectedClassPropertyAccessibleWithinClass.ts (8 errors) ====
+==== protectedClassPropertyAccessibleWithinClass.ts (8 errors) ====
     // no errors
     
     class C {

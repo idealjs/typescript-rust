@@ -1,0 +1,11 @@
+parserErrorRecovery_ParameterList4.ts(1,14): error TS1127: Invalid character.
+parserErrorRecovery_ParameterList4.ts(1,14): error TS1138: Parameter declaration expected.
+
+
+==== parserErrorRecovery_ParameterList4.ts (2 errors) ====
+    function f(a,¬) {
+                 ~
+!!! error TS1127: Invalid character.
+                 ~
+!!! error TS1138: Parameter declaration expected.
+    }

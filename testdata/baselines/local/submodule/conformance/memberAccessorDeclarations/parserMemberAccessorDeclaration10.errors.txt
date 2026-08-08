@@ -1,0 +1,12 @@
+parserMemberAccessorDeclaration10.ts(2,12): error TS1005: ';' expected.
+parserMemberAccessorDeclaration10.ts(2,16): error TS1005: ';' expected.
+
+
+==== parserMemberAccessorDeclaration10.ts (2 errors) ====
+    class C {
+        export get Foo() { }
+               ~~~
+!!! error TS1005: ';' expected.
+                   ~~~
+!!! error TS1005: ';' expected.
+    }

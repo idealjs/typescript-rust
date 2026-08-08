@@ -1,0 +1,17 @@
+callChain.2.ts(2,1): error TS2349: This expression is not callable.
+callChain.2.ts(8,1): error TS2349: This expression is not callable.
+
+
+==== callChain.2.ts (2 errors) ====
+    declare const o1: undefined | (() => number);
+    o1?.();
+    ~~
+!!! error TS2349: This expression is not callable.
+    
+    declare const o2: undefined | { b: () => number };
+    o2?.b();
+    
+    declare const o3: { b: (() => { c: string }) | undefined };
+    o3.b?.().c;
+    ~~~~
+!!! error TS2349: This expression is not callable.

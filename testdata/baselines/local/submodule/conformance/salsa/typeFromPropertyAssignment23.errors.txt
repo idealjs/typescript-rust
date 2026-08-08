@@ -1,0 +1,51 @@
+a.js(3,14): error TS2339: Property 'n' does not exist on type '{ foo: () => any }'.
+a.js(12,3): error TS2339: Property 'prototype' does not exist on type 'object'.
+a.js(16,3): error TS2339: Property 'prototype' does not exist on type 'object'.
+a.js(23,8): error TS2339: Property 'prototype' does not exist on type 'object'.
+a.js(24,8): error TS2339: Property 'prototype' does not exist on type 'object'.
+
+
+==== a.js (5 errors) ====
+    class B {
+        constructor () {
+            this.n = 1
+                 ~
+!!! error TS2339: Property 'n' does not exist on type '{ foo: () => any }'.
+        }
+        foo() {
+        }
+    }
+    
+    class C extends B { }
+    
+    // this override should be fine (even if it's a little odd)
+    C.prototype.foo = function() {
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+    }
+    
+    class D extends B { }
+    D.prototype.foo = () =>  {
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+        this.n = 'not checked, so no error'
+    }
+    
+    // post-class prototype assignments are trying to show that these properties are abstract
+    class Module {
+    }
+    Module.prototype.identifier = undefined
+           ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+    Module.prototype.size = null
+           ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+    
+    class NormalModule extends Module {
+        identifier() {
+            return 'normal'
+        }
+        size() {
+            return 0
+        }
+    }

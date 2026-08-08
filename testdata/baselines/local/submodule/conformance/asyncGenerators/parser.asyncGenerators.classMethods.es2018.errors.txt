@@ -1,0 +1,307 @@
+asyncGeneratorGetAccessorIsError.ts(2,11): error TS1003: Identifier expected.
+asyncGeneratorGetAccessorIsError.ts(2,13): error TS1005: ';' expected.
+asyncGeneratorGetAccessorIsError.ts(2,17): error TS1005: ';' expected.
+asyncGeneratorPropertyIsError.ts(2,11): error TS1003: Identifier expected.
+asyncGeneratorPropertyIsError.ts(2,13): error TS1005: ';' expected.
+asyncGeneratorSetAccessorIsError.ts(2,11): error TS1003: Identifier expected.
+asyncGeneratorSetAccessorIsError.ts(2,13): error TS1005: ';' expected.
+asyncGeneratorSetAccessorIsError.ts(2,17): error TS1005: ';' expected.
+awaitAsTypeIsOk.ts(3,11): error TS1003: Identifier expected.
+awaitAsTypeIsOk.ts(3,13): error TS1005: ';' expected.
+awaitInParameterInitializerIsError.ts(2,11): error TS1003: Identifier expected.
+awaitInParameterInitializerIsError.ts(2,13): error TS1005: ';' expected.
+awaitMethodNameIsOk.ts(2,11): error TS1003: Identifier expected.
+awaitMethodNameIsOk.ts(2,13): error TS1005: ';' expected.
+awaitMissingValueIsError.ts(2,11): error TS1003: Identifier expected.
+awaitMissingValueIsError.ts(2,13): error TS1005: ';' expected.
+awaitParameterIsError.ts(2,11): error TS1003: Identifier expected.
+awaitParameterIsError.ts(2,13): error TS1005: ';' expected.
+awaitWithValueIsOk.ts(2,11): error TS1003: Identifier expected.
+awaitWithValueIsOk.ts(2,13): error TS1005: ';' expected.
+methodIsOk.ts(2,11): error TS1003: Identifier expected.
+methodIsOk.ts(2,13): error TS1005: ';' expected.
+nestedAsyncGeneratorIsOk.ts(2,11): error TS1003: Identifier expected.
+nestedAsyncGeneratorIsOk.ts(2,13): error TS1005: ';' expected.
+nestedFunctionDeclarationNamedAwaitIsError.ts(2,11): error TS1003: Identifier expected.
+nestedFunctionDeclarationNamedAwaitIsError.ts(2,13): error TS1005: ';' expected.
+nestedFunctionDeclarationNamedYieldIsError.ts(2,11): error TS1003: Identifier expected.
+nestedFunctionDeclarationNamedYieldIsError.ts(2,13): error TS1005: ';' expected.
+nestedFunctionExpressionNamedAwaitIsError.ts(2,11): error TS1003: Identifier expected.
+nestedFunctionExpressionNamedAwaitIsError.ts(2,13): error TS1005: ';' expected.
+nestedFunctionExpressionNamedYieldIsError.ts(2,11): error TS1003: Identifier expected.
+nestedFunctionExpressionNamedYieldIsError.ts(2,13): error TS1005: ';' expected.
+yieldAsTypeIsStrictError.ts(3,11): error TS1003: Identifier expected.
+yieldAsTypeIsStrictError.ts(3,13): error TS1005: ';' expected.
+yieldInClassComputedPropertyIsError.ts(2,11): error TS1003: Identifier expected.
+yieldInClassComputedPropertyIsError.ts(2,13): error TS1005: ';' expected.
+yieldInNestedComputedPropertyIsOk.ts(2,11): error TS1003: Identifier expected.
+yieldInNestedComputedPropertyIsOk.ts(2,13): error TS1005: ';' expected.
+yieldInParameterInitializerIsError.ts(2,11): error TS1003: Identifier expected.
+yieldInParameterInitializerIsError.ts(2,13): error TS1005: ';' expected.
+yieldIsOk.ts(2,11): error TS1003: Identifier expected.
+yieldIsOk.ts(2,13): error TS1005: ';' expected.
+yieldMethodNameIsOk.ts(2,11): error TS1003: Identifier expected.
+yieldMethodNameIsOk.ts(2,13): error TS1005: ';' expected.
+yieldParameterIsError.ts(2,11): error TS1003: Identifier expected.
+yieldParameterIsError.ts(2,13): error TS1005: ';' expected.
+yieldStarMissingValueIsError.ts(2,11): error TS1003: Identifier expected.
+yieldStarMissingValueIsError.ts(2,13): error TS1005: ';' expected.
+yieldStarMissingValueIsError.ts(3,16): error TS1012: Unexpected token.
+yieldStarWithValueIsOk.ts(2,11): error TS1003: Identifier expected.
+yieldStarWithValueIsOk.ts(2,13): error TS1005: ';' expected.
+yieldWithValueIsOk.ts(2,11): error TS1003: Identifier expected.
+yieldWithValueIsOk.ts(2,13): error TS1005: ';' expected.
+
+
+==== methodIsOk.ts (2 errors) ====
+    class C1 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+        }
+    }
+==== awaitMethodNameIsOk.ts (2 errors) ====
+    class C2 {
+        async * await() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~~~~~
+!!! error TS1005: ';' expected.
+        }
+    }
+==== yieldMethodNameIsOk.ts (2 errors) ====
+    class C3 {
+        async * yield() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~~~~~
+!!! error TS1005: ';' expected.
+        }
+    }
+==== awaitParameterIsError.ts (2 errors) ====
+    class C4 {
+        async * f(await) {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+        }
+    }
+==== yieldParameterIsError.ts (2 errors) ====
+    class C5 {
+        async * f(yield) {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+        }
+    }
+==== awaitInParameterInitializerIsError.ts (2 errors) ====
+    class C6 {
+        async * f(a = await 1) {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+        }
+    }
+==== yieldInParameterInitializerIsError.ts (2 errors) ====
+    class C7 {
+        async * f(a = yield) {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+        }
+    }
+==== nestedAsyncGeneratorIsOk.ts (2 errors) ====
+    class C8 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+            async function * g() {
+            }
+        }
+    }
+==== nestedFunctionDeclarationNamedYieldIsError.ts (2 errors) ====
+    class C9 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+            function yield() {
+            }
+        }
+    }
+==== nestedFunctionExpressionNamedYieldIsError.ts (2 errors) ====
+    class C10 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+            const x = function yield() {
+            };
+        }
+    }
+==== nestedFunctionDeclarationNamedAwaitIsError.ts (2 errors) ====
+    class C11 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+            function await() {
+            }
+        }
+    }
+==== nestedFunctionExpressionNamedAwaitIsError.ts (2 errors) ====
+    class C12 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+            const x = function await() {
+            };
+        }
+    }
+==== yieldIsOk.ts (2 errors) ====
+    class C13 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+            yield;
+        }
+    }
+==== yieldWithValueIsOk.ts (2 errors) ====
+    class C14 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+            yield 1;
+        }
+    }
+==== yieldStarMissingValueIsError.ts (3 errors) ====
+    class C15 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+            yield *;
+                   ~
+!!! error TS1012: Unexpected token.
+        }
+    }
+==== yieldStarWithValueIsOk.ts (2 errors) ====
+    class C16 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+            yield * [];
+        }
+    }
+==== awaitWithValueIsOk.ts (2 errors) ====
+    class C17 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+            await 1;
+        }
+    }
+==== awaitMissingValueIsError.ts (2 errors) ====
+    class C18 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+            await;
+        }
+    }
+==== awaitAsTypeIsOk.ts (2 errors) ====
+    interface await {}
+    class C19 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+            let x: await;
+        }
+    }
+==== yieldAsTypeIsStrictError.ts (2 errors) ====
+    interface yield {}
+    class C20 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+            let x: yield;
+        }
+    }
+==== yieldInClassComputedPropertyIsError.ts (2 errors) ====
+    class C21 {
+        async * [yield]() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+        }
+    }
+==== yieldInNestedComputedPropertyIsOk.ts (2 errors) ====
+    class C22 {
+        async * f() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+            const x = { [yield]: 1 };
+        }
+    }
+==== asyncGeneratorGetAccessorIsError.ts (3 errors) ====
+    class C23 {
+        async * get x() {
+              ~
+!!! error TS1003: Identifier expected.
+                ~~~
+!!! error TS1005: ';' expected.
+                    ~
+!!! error TS1005: ';' expected.
+            return 1;
+        }
+    }
+==== asyncGeneratorSetAccessorIsError.ts (3 errors) ====
+    class C24 {
+        async * set x(value: number) {
+              ~
+!!! error TS1003: Identifier expected.
+                ~~~
+!!! error TS1005: ';' expected.
+                    ~
+!!! error TS1005: ';' expected.
+        }
+    }
+==== asyncGeneratorPropertyIsError.ts (2 errors) ====
+    class C25 {
+        async * x = 1;
+              ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1005: ';' expected.
+    }

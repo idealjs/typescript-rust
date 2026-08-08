@@ -1,0 +1,12 @@
+parserClassDeclarationIndexSignature1.ts(2,11): error TS1005: ']' expected.
+parserClassDeclarationIndexSignature1.ts(2,18): error TS1005: ';' expected.
+
+
+==== parserClassDeclarationIndexSignature1.ts (2 errors) ====
+    class C {
+        [index:number]:number
+              ~
+!!! error TS1005: ']' expected.
+                     ~
+!!! error TS1005: ';' expected.
+    }

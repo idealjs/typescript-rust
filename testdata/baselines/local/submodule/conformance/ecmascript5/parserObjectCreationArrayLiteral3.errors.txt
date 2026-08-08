@@ -1,0 +1,13 @@
+parserObjectCreationArrayLiteral3.ts(1,5): error TS2304: Cannot find name 'Foo'.
+parserObjectCreationArrayLiteral3.ts(1,9): error TS1012: Unexpected token.
+parserObjectCreationArrayLiteral3.ts(1,12): error TS1005: ']' expected.
+
+
+==== parserObjectCreationArrayLiteral3.ts (3 errors) ====
+    new Foo[]();
+        ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+            ~
+!!! error TS1012: Unexpected token.
+               ~
+!!! error TS1005: ']' expected.

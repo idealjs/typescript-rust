@@ -1,0 +1,18 @@
+main.ts(2,15): error TS1012: Unexpected token.
+main.ts(2,17): error TS1005: ',' expected.
+
+
+==== main.ts (2 errors) ====
+    export {};
+    const k = [1, , 2];
+                  ~
+!!! error TS1012: Unexpected token.
+                    ~
+!!! error TS1005: ',' expected.
+    const o = [3, ...k, 4];
+    
+==== tslib.d.ts (0 errors) ====
+    // this is a pre-TS4.4 versions of emit helper, which always forced array packing
+    declare module "tslib" {
+        function __spreadArray(to: any[], from: any[]): any[];
+    }

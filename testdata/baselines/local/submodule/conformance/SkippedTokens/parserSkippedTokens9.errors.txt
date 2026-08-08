@@ -1,0 +1,11 @@
+parserSkippedTokens9.ts(2,9): error TS1127: Invalid character.
+parserSkippedTokens9.ts(2,9): error TS1128: Declaration or statement expected.
+
+
+==== parserSkippedTokens9.ts (2 errors) ====
+    ; // existing trivia
+    /*foo*/ \ /*bar*/
+            ~
+!!! error TS1127: Invalid character.
+            ~
+!!! error TS1128: Declaration or statement expected.

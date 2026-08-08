@@ -1,9 +1,9 @@
-override/override1.ts(19,18): error TS2304: Cannot find name 'extends'.
-override/override1.ts(19,26): error TS1005: '{' expected.
-override/override1.ts(19,28): error TS1005: ';' expected.
+override1.ts(19,18): error TS2304: Cannot find name 'extends'.
+override1.ts(19,26): error TS1005: '{' expected.
+override1.ts(19,28): error TS1005: ';' expected.
 
 
-==== override/override1.ts (3 errors) ====
+==== override1.ts (3 errors) ====
     class B {
         foo (v: string) {}
         fooo (v: string) {}

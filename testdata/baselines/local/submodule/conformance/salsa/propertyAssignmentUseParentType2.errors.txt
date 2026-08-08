@@ -1,0 +1,25 @@
+propertyAssignmentUseParentType2.js(3,9): error TS2339: Property 'nuo' does not exist on type '() => boolean'.
+propertyAssignmentUseParentType2.js(8,12): error TS2339: Property 'nuo' does not exist on type '() => boolean'.
+propertyAssignmentUseParentType2.js(13,23): error TS2339: Property 'nuo' does not exist on type '() => boolean'.
+
+
+==== propertyAssignmentUseParentType2.js (3 errors) ====
+    /** @type {{ (): boolean; nuo: 789 }} */
+    export const inlined = () => true
+    inlined.nuo = 789
+            ~~~
+!!! error TS2339: Property 'nuo' does not exist on type '() => boolean'.
+    
+    /** @type {{ (): boolean; nuo: 789 }} */
+    export const duplicated = () => true
+    /** @type {789} */
+    duplicated.nuo = 789
+               ~~~
+!!! error TS2339: Property 'nuo' does not exist on type '() => boolean'.
+    
+    /** @type {{ (): boolean; nuo: 789 }} */
+    export const conflictingDuplicated = () => true
+    /** @type {1000} */
+    conflictingDuplicated.nuo = 789
+                          ~~~
+!!! error TS2339: Property 'nuo' does not exist on type '() => boolean'.

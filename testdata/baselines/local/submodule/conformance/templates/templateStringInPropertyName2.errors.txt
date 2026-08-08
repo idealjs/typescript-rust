@@ -1,0 +1,40 @@
+templateStringInPropertyName2.ts(3,5): error TS1003: Identifier expected.
+templateStringInPropertyName2.ts(3,5): error TS2304: Cannot find name '`abc${'.
+templateStringInPropertyName2.ts(3,12): error TS1005: ',' expected.
+templateStringInPropertyName2.ts(3,17): error TS1005: ',' expected.
+templateStringInPropertyName2.ts(3,21): error TS1005: ',' expected.
+templateStringInPropertyName2.ts(3,21): error TS1182: A destructuring declaration must have an initializer.
+templateStringInPropertyName2.ts(3,27): error TS1005: ':' expected.
+templateStringInPropertyName2.ts(3,28): error TS1005: ',' expected.
+templateStringInPropertyName2.ts(3,31): error TS1005: ',' expected.
+templateStringInPropertyName2.ts(3,31): error TS1160: Unterminated template literal.
+templateStringInPropertyName2.ts(4,2): error TS1005: '}' expected.
+
+
+==== templateStringInPropertyName2.ts (11 errors) ====
+    ﻿// @target: es2015
+    var x = {
+        `abc${ 123 }def${ 456 }ghi`: 321
+     ~~~~~~
+!!! error TS1003: Identifier expected.
+     ~~~~~~
+!!! error TS2304: Cannot find name '`abc${'.
+            ~~~
+!!! error TS1005: ',' expected.
+                 ~~~~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1005: ',' expected.
+                     ~~~~~~~~~~~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+                           ~
+!!! error TS1005: ':' expected.
+                            ~~~
+!!! error TS1005: ',' expected.
+                               ~~~~~~~~
+!!! error TS1005: ',' expected.
+                               ~~~~~~~~
+!!! error TS1160: Unterminated template literal.
+                                       
+!!! error TS1005: '}' expected.
+    }

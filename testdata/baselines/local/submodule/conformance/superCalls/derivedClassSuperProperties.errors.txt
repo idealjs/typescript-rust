@@ -1,64 +1,64 @@
-superCalls/derivedClassSuperProperties.ts(13,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(21,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(29,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(37,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(44,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(52,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(60,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(68,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(77,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(85,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(95,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(107,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(119,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(129,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(139,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(149,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(156,10): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(164,10): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(171,10): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(189,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(202,17): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(207,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(224,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(231,27): error TS2304: Cannot find name 'extends'.
-superCalls/derivedClassSuperProperties.ts(231,35): error TS1005: '{' expected.
-superCalls/derivedClassSuperProperties.ts(231,39): error TS1005: ';' expected.
-superCalls/derivedClassSuperProperties.ts(231,40): error TS1005: ';' expected.
-superCalls/derivedClassSuperProperties.ts(231,52): error TS1005: ';' expected.
-superCalls/derivedClassSuperProperties.ts(232,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(239,27): error TS2304: Cannot find name 'extends'.
-superCalls/derivedClassSuperProperties.ts(239,35): error TS1005: '{' expected.
-superCalls/derivedClassSuperProperties.ts(239,40): error TS1005: ';' expected.
-superCalls/derivedClassSuperProperties.ts(248,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(255,31): error TS2304: Cannot find name 'extends'.
-superCalls/derivedClassSuperProperties.ts(255,39): error TS1005: '{' expected.
-superCalls/derivedClassSuperProperties.ts(255,44): error TS1005: ';' expected.
-superCalls/derivedClassSuperProperties.ts(260,9): error TS2349: This expression is not callable.
-superCalls/derivedClassSuperProperties.ts(268,13): error TS2304: Cannot find name 'get'.
-superCalls/derivedClassSuperProperties.ts(268,17): error TS1005: ',' expected.
-superCalls/derivedClassSuperProperties.ts(268,21): error TS1005: ',' expected.
-superCalls/derivedClassSuperProperties.ts(268,21): error TS2304: Cannot find name '('.
-superCalls/derivedClassSuperProperties.ts(268,22): error TS1005: ',' expected.
-superCalls/derivedClassSuperProperties.ts(268,24): error TS1005: ',' expected.
-superCalls/derivedClassSuperProperties.ts(269,17): error TS1005: ',' expected.
-superCalls/derivedClassSuperProperties.ts(269,17): error TS2304: Cannot find name 'return'.
-superCalls/derivedClassSuperProperties.ts(269,24): error TS1005: ',' expected.
-superCalls/derivedClassSuperProperties.ts(269,24): error TS2304: Cannot find name 'true'.
-superCalls/derivedClassSuperProperties.ts(269,28): error TS1005: ',' expected.
-superCalls/derivedClassSuperProperties.ts(269,28): error TS2304: Cannot find name ';'.
-superCalls/derivedClassSuperProperties.ts(271,13): error TS2304: Cannot find name 'set'.
-superCalls/derivedClassSuperProperties.ts(271,17): error TS1005: ',' expected.
-superCalls/derivedClassSuperProperties.ts(271,21): error TS1005: ',' expected.
-superCalls/derivedClassSuperProperties.ts(271,27): error TS1005: ',' expected.
-superCalls/derivedClassSuperProperties.ts(271,29): error TS1005: ';' expected.
-superCalls/derivedClassSuperProperties.ts(272,21): error TS1005: ';' expected.
-superCalls/derivedClassSuperProperties.ts(272,22): error TS1005: ';' expected.
-superCalls/derivedClassSuperProperties.ts(272,30): error TS2304: Cannot find name 'param'.
-superCalls/derivedClassSuperProperties.ts(274,9): error TS1128: Declaration or statement expected.
+derivedClassSuperProperties.ts(13,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(21,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(29,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(37,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(44,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(52,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(60,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(68,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(77,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(85,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(95,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(107,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(119,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(129,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(139,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(149,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(156,10): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(164,10): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(171,10): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(189,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(202,17): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(207,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(224,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(231,27): error TS2304: Cannot find name 'extends'.
+derivedClassSuperProperties.ts(231,35): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(231,39): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(231,40): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(231,52): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(232,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(239,27): error TS2304: Cannot find name 'extends'.
+derivedClassSuperProperties.ts(239,35): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(239,40): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(248,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(255,31): error TS2304: Cannot find name 'extends'.
+derivedClassSuperProperties.ts(255,39): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(255,44): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(260,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(268,13): error TS2304: Cannot find name 'get'.
+derivedClassSuperProperties.ts(268,17): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(268,21): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(268,21): error TS2304: Cannot find name '('.
+derivedClassSuperProperties.ts(268,22): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(268,24): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(269,17): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(269,17): error TS2304: Cannot find name 'return'.
+derivedClassSuperProperties.ts(269,24): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(269,24): error TS2304: Cannot find name 'true'.
+derivedClassSuperProperties.ts(269,28): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(269,28): error TS2304: Cannot find name ';'.
+derivedClassSuperProperties.ts(271,13): error TS2304: Cannot find name 'set'.
+derivedClassSuperProperties.ts(271,17): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(271,21): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(271,27): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(271,29): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(272,21): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(272,22): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(272,30): error TS2304: Cannot find name 'param'.
+derivedClassSuperProperties.ts(274,9): error TS1128: Declaration or statement expected.
 
 
-==== superCalls/derivedClassSuperProperties.ts (58 errors) ====
+==== derivedClassSuperProperties.ts (58 errors) ====
     declare const decorate: any;
     
     class Base {

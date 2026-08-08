@@ -1,0 +1,61 @@
+stringLiteralTypesInImplementationSignatures.ts(22,8): error TS1005: ',' expected.
+stringLiteralTypesInImplementationSignatures.ts(22,8): error TS2304: Cannot find name '('.
+stringLiteralTypesInImplementationSignatures.ts(22,9): error TS1005: ',' expected.
+stringLiteralTypesInImplementationSignatures.ts(22,16): error TS1005: ',' expected.
+stringLiteralTypesInImplementationSignatures.ts(22,16): error TS2304: Cannot find name ')'.
+stringLiteralTypesInImplementationSignatures.ts(22,18): error TS1005: ',' expected.
+stringLiteralTypesInImplementationSignatures.ts(22,18): error TS2304: Cannot find name '{'.
+stringLiteralTypesInImplementationSignatures.ts(23,6): error TS1005: ',' expected.
+stringLiteralTypesInImplementationSignatures.ts(23,17): error TS1005: ',' expected.
+stringLiteralTypesInImplementationSignatures.ts(23,20): error TS1005: ',' expected.
+stringLiteralTypesInImplementationSignatures.ts(23,37): error TS1005: ',' expected.
+
+
+==== stringLiteralTypesInImplementationSignatures.ts (11 errors) ====
+    // String literal types are only valid in overload signatures
+    
+    function foo(x: 'hi') { }
+    var f = function foo(x: 'hi') { }
+    var f2 = (x: 'hi', y: 'hi') => { }
+    
+    class C {
+        foo(x: 'hi') { }
+    }
+    
+    interface I {
+        (x: 'hi');
+        foo(x: 'hi', y: 'hi');
+    }
+    
+    var a: {
+        (x: 'hi');
+        foo(x: 'hi');
+    }
+    
+    var b = {
+        foo(x: 'hi') { },
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '('.
+            ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS2304: Cannot find name ')'.
+                     ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS2304: Cannot find name '{'.
+        a: function foo(x: 'hi', y: 'hi') { },
+         ~
+!!! error TS1005: ',' expected.
+                    ~~~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS1005: ',' expected.
+                                        ~
+!!! error TS1005: ',' expected.
+        b: (x: 'hi') => { }
+    }

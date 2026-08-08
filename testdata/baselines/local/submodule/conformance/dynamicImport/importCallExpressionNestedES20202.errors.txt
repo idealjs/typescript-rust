@@ -1,0 +1,15 @@
+index.ts(2,18): error TS2304: Cannot find name 'import'.
+index.ts(2,32): error TS2304: Cannot find name 'import'.
+
+
+==== foo.ts (0 errors) ====
+    export default "./foo";
+    
+==== index.ts (2 errors) ====
+    async function foo() {
+        return await import((await import("./foo")).default);
+                     ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+                                   ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    }

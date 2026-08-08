@@ -1,0 +1,59 @@
+file.tsx(24,19): error TS2339: Property 'Test' does not exist on type 'TestMod'.
+file.tsx(25,10): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(28,10): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(28,19): error TS2339: Property 'Test' does not exist on type 'TestMod'.
+
+
+==== tsxAttributeResolution12.tsx (0 errors) ====
+    
+==== react.d.ts (0 errors) ====
+    declare namespace JSX {
+    	interface Element { }
+    	interface IntrinsicElements {
+    	}
+    	interface ElementAttributesProperty {
+    		props;
+    	}
+    	interface IntrinsicAttributes {
+    		ref?: string;
+    	}
+    }
+    
+==== file.tsx (4 errors) ====
+    declare class Component<P, S>  {
+    	constructor(props?: P, context?: any);
+    	setState(f: (prevState: S, props: P) => S, callback?: () => any): void;
+    	setState(state: S, callback?: () => any): void;
+    	forceUpdate(callBack?: () => any): void;
+    	render(): JSX.Element;
+    	props: P;
+    	state: S;
+    	context: {};
+    }
+    
+    
+    interface ComponentClass<P> {
+    	new (props?: P, context?: any): Component<P, any>;
+    }
+    
+    declare namespace TestMod {
+    	interface TestClass extends ComponentClass<{reqd: any}> {
+    	}
+    	var Test: TestClass;
+    }
+    
+    // Errors correctly
+    const T = TestMod.Test;
+                      ~~~~
+!!! error TS2339: Property 'Test' does not exist on type 'TestMod'.
+    var t1 = <T />;
+             ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    
+    // Should error
+    var t2 = <TestMod.Test />;
+             ~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+                      ~~~~
+!!! error TS2339: Property 'Test' does not exist on type 'TestMod'.
+    

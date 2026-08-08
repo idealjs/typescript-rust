@@ -1,12 +1,12 @@
-indexMemberDeclarations/privateIndexer.ts(4,15): error TS1005: ']' expected.
-indexMemberDeclarations/privateIndexer.ts(4,23): error TS1005: ';' expected.
-indexMemberDeclarations/privateIndexer.ts(8,15): error TS1005: ']' expected.
-indexMemberDeclarations/privateIndexer.ts(8,23): error TS1005: ';' expected.
-indexMemberDeclarations/privateIndexer.ts(12,15): error TS1005: ']' expected.
-indexMemberDeclarations/privateIndexer.ts(12,23): error TS1005: ';' expected.
+privateIndexer.ts(4,15): error TS1005: ']' expected.
+privateIndexer.ts(4,23): error TS1005: ';' expected.
+privateIndexer.ts(8,15): error TS1005: ']' expected.
+privateIndexer.ts(8,23): error TS1005: ';' expected.
+privateIndexer.ts(12,15): error TS1005: ']' expected.
+privateIndexer.ts(12,23): error TS1005: ';' expected.
 
 
-==== indexMemberDeclarations/privateIndexer.ts (6 errors) ====
+==== privateIndexer.ts (6 errors) ====
     // private indexers not allowed
     
     class C {

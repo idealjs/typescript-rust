@@ -1,0 +1,17 @@
+autoAccessor7.ts(10,9): error TS1005: ';' expected.
+
+
+==== autoAccessor7.ts (1 errors) ====
+    abstract class C1 {
+        abstract accessor a: any;
+    }
+    
+    class C2 extends C1 {
+        accessor a = 1;
+    }
+    
+    class C3 extends C1 {
+        get a() { return 1; }
+            ~
+!!! error TS1005: ';' expected.
+    }

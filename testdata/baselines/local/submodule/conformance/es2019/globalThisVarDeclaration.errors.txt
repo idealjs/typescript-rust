@@ -1,0 +1,44 @@
+actual.ts(4,12): error TS2339: Property 'a' does not exist on type 'globalThis'.
+actual.ts(5,12): error TS2339: Property 'b' does not exist on type 'globalThis'.
+b.js(4,12): error TS2339: Property 'a' does not exist on type 'globalThis'.
+b.js(5,12): error TS2339: Property 'b' does not exist on type 'globalThis'.
+
+
+==== b.js (2 errors) ====
+    var a = 10;
+    this.a;
+    this.b;
+    globalThis.a;
+               ~
+!!! error TS2339: Property 'a' does not exist on type 'globalThis'.
+    globalThis.b;
+               ~
+!!! error TS2339: Property 'b' does not exist on type 'globalThis'.
+    
+    // DOM access is not supported until the index signature is handled more strictly
+    self.a;
+    self.b;
+    window.a;
+    window.b;
+    top.a;
+    top.b;
+    
+==== actual.ts (2 errors) ====
+    var b = 10;
+    this.a;
+    this.b;
+    globalThis.a;
+               ~
+!!! error TS2339: Property 'a' does not exist on type 'globalThis'.
+    globalThis.b;
+               ~
+!!! error TS2339: Property 'b' does not exist on type 'globalThis'.
+    
+    // same here -- no DOM access to globalThis yet
+    self.a;
+    self.b;
+    window.a;
+    window.b;
+    top.a;
+    top.b;
+    

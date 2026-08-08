@@ -1,26 +1,26 @@
-es2020/es2020IntlAPIs.ts(3,18): error TS2304: Cannot find name 'Date'.
-es2020/es2020IntlAPIs.ts(7,12): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(7,60): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(18,18): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(26,18): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(32,34): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(33,45): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(43,13): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(45,5): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(46,5): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(46,21): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(48,5): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(49,5): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(50,5): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(51,18): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(53,34): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(54,18): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(55,13): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(56,13): error TS2304: Cannot find name 'Intl'.
-es2020/es2020IntlAPIs.ts(57,13): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(3,18): error TS2304: Cannot find name 'Date'.
+es2020IntlAPIs.ts(7,12): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(7,60): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(18,18): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(26,18): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(32,34): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(33,45): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(43,13): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(45,5): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(46,5): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(46,21): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(48,5): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(49,5): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(50,5): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(51,18): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(53,34): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(54,18): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(55,13): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(56,13): error TS2304: Cannot find name 'Intl'.
+es2020IntlAPIs.ts(57,13): error TS2304: Cannot find name 'Intl'.
 
 
-==== es2020/es2020IntlAPIs.ts (20 errors) ====
+==== es2020IntlAPIs.ts (20 errors) ====
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation
     const count = 26254.39;
     const date = new Date("2012-05-24");

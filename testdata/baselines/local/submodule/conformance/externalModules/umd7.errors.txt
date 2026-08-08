@@ -1,0 +1,15 @@
+a.ts(2,17): error TS2304: Cannot find name 'Foo'.
+
+
+==== umd7.ts (0 errors) ====
+    
+==== foo.d.ts (0 errors) ====
+    declare function Thing(): number;
+    export = Thing;
+    export as namespace Foo;
+    
+==== a.ts (1 errors) ====
+    /// <reference path="foo.d.ts" />
+    let y: number = Foo();
+                    ~~~
+!!! error TS2304: Cannot find name 'Foo'.

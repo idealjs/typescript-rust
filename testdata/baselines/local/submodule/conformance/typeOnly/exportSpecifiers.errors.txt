@@ -1,0 +1,46 @@
+/exports.ts(4,16): error TS1003: Identifier expected.
+/exports.ts(5,8): error TS1003: Identifier expected.
+/exports.ts(9,13): error TS1003: Identifier expected.
+/exports.ts(9,15): error TS1005: '=' expected.
+/exports.ts(9,20): error TS1005: ';' expected.
+/exports.ts(9,42): error TS1128: Declaration or statement expected.
+/imports.ts(2,5): error TS1003: Identifier expected.
+/imports.ts(3,1): error TS1005: '=' expected.
+
+
+==== exportSpecifiers.ts (0 errors) ====
+    
+==== /imports.ts (2 errors) ====
+    import { type, as, something, foo, bar } from "./exports.js";
+    type;
+        ~
+!!! error TS1003: Identifier expected.
+    as; // Error (used in emitting position)
+    ~~
+!!! error TS1005: '=' expected.
+    something; // Error (used in emitting position)
+    foo; // Error (used in emitting position)
+    bar; // Error (used in emitting position)
+    
+==== /exports.ts (6 errors) ====
+    const type = 0;
+    const as = 0;
+    const something = 0;
+    export { type };
+                   ~
+!!! error TS1003: Identifier expected.
+    export { type as };
+           ~
+!!! error TS1003: Identifier expected.
+    export { type something };
+    export { type type as foo };
+    export { type as as bar };
+    export type { type something as whatever }; // Error
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~~
+!!! error TS1005: '=' expected.
+                       ~~~~~~~~~
+!!! error TS1005: ';' expected.
+                                             ~
+!!! error TS1128: Declaration or statement expected.

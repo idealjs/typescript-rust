@@ -1,0 +1,43 @@
+jsDeclarationsExportAssignedConstructorFunctionWithSub.js(4,7): error TS1003: Identifier expected.
+jsDeclarationsExportAssignedConstructorFunctionWithSub.js(4,8): error TS1005: ';' expected.
+jsDeclarationsExportAssignedConstructorFunctionWithSub.js(4,8): error TS2304: Cannot find name 'exports'.
+jsDeclarationsExportAssignedConstructorFunctionWithSub.js(7,7): error TS1003: Identifier expected.
+jsDeclarationsExportAssignedConstructorFunctionWithSub.js(7,8): error TS1005: ';' expected.
+jsDeclarationsExportAssignedConstructorFunctionWithSub.js(7,8): error TS2304: Cannot find name 'exports'.
+jsDeclarationsExportAssignedConstructorFunctionWithSub.js(8,25): error TS2304: Cannot find name 'module'.
+jsDeclarationsExportAssignedConstructorFunctionWithSub.js(10,7): error TS1003: Identifier expected.
+jsDeclarationsExportAssignedConstructorFunctionWithSub.js(10,8): error TS1005: ';' expected.
+jsDeclarationsExportAssignedConstructorFunctionWithSub.js(10,8): error TS2304: Cannot find name 'exports'.
+
+
+==== jsDeclarationsExportAssignedConstructorFunctionWithSub.js (10 errors) ====
+    /**
+     * @param {number} p
+     */
+    module.exports = function (p) {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        this.t = 12 + p;
+    }
+    module.exports.Sub = function() {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        this.instance = new module.exports(10);
+                            ~~~~~~
+!!! error TS2304: Cannot find name 'module'.
+    }
+    module.exports.Sub.prototype = { }
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.

@@ -1,0 +1,21 @@
+awaitUsingDeclarationsWithAsyncIteratorObject.ts(2,20): error TS2304: Cannot find name 'AsyncIteratorObject'.
+awaitUsingDeclarationsWithAsyncIteratorObject.ts(3,19): error TS2304: Cannot find name 'AsyncGenerator'.
+
+
+==== awaitUsingDeclarationsWithAsyncIteratorObject.ts (2 errors) ====
+    declare const ai: AsyncIterator<string, undefined>;
+    declare const aio: AsyncIteratorObject<string, undefined, unknown>;
+                       ~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'AsyncIteratorObject'.
+    declare const ag: AsyncGenerator<string, void>;
+                      ~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'AsyncGenerator'.
+    
+    async function f() {
+        // should pass
+        await using it0 = aio;
+        await using it1 = ag;
+    
+        // should fail
+        await using it2 = ai;
+    }

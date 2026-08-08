@@ -1,9 +1,9 @@
-asyncGenerators/asyncGeneratorPromiseNextType.ts(5,29): error TS2304: Cannot find name 'AsyncGenerator'.
-asyncGenerators/asyncGeneratorPromiseNextType.ts(10,21): error TS2339: Property 'push' does not exist on type 'error[]'.
-asyncGenerators/asyncGeneratorPromiseNextType.ts(30,21): error TS2339: Property 'push' does not exist on type 'error[]'.
+asyncGeneratorPromiseNextType.ts(5,29): error TS2304: Cannot find name 'AsyncGenerator'.
+asyncGeneratorPromiseNextType.ts(10,21): error TS2339: Property 'push' does not exist on type 'error[]'.
+asyncGeneratorPromiseNextType.ts(30,21): error TS2339: Property 'push' does not exist on type 'error[]'.
 
 
-==== asyncGenerators/asyncGeneratorPromiseNextType.ts (3 errors) ====
+==== asyncGeneratorPromiseNextType.ts (3 errors) ====
     // https://github.com/microsoft/TypeScript/issues/44808
     
     type Result = {message: string}

@@ -1,0 +1,25 @@
+privateNameStaticFieldInitializer.ts(2,12): error TS1005: ';' expected.
+privateNameStaticFieldInitializer.ts(2,12): error TS1127: Invalid character.
+privateNameStaticFieldInitializer.ts(2,13): error TS1005: ';' expected.
+privateNameStaticFieldInitializer.ts(3,12): error TS1005: ';' expected.
+privateNameStaticFieldInitializer.ts(3,12): error TS1127: Invalid character.
+privateNameStaticFieldInitializer.ts(3,13): error TS1005: ';' expected.
+
+
+==== privateNameStaticFieldInitializer.ts (6 errors) ====
+    class A {
+        static #field = 10;
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~~~
+!!! error TS1005: ';' expected.
+        static #uninitialized;
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+    }

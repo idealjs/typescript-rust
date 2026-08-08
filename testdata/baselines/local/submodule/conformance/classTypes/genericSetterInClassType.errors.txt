@@ -1,21 +1,21 @@
-classTypes/genericSetterInClassType.ts(3,13): error TS1005: ';' expected.
-classTypes/genericSetterInClassType.ts(6,13): error TS1005: ';' expected.
-classTypes/genericSetterInClassType.ts(13,9): error TS1003: Identifier expected.
-classTypes/genericSetterInClassType.ts(13,9): error TS1127: Invalid character.
-classTypes/genericSetterInClassType.ts(13,10): error TS1005: ';' expected.
-classTypes/genericSetterInClassType.ts(15,13): error TS1005: ';' expected.
-classTypes/genericSetterInClassType.ts(16,25): error TS1003: Identifier expected.
-classTypes/genericSetterInClassType.ts(16,25): error TS1127: Invalid character.
-classTypes/genericSetterInClassType.ts(16,26): error TS1005: ';' expected.
-classTypes/genericSetterInClassType.ts(16,26): error TS7027: Unreachable code detected.
-classTypes/genericSetterInClassType.ts(19,13): error TS1005: ';' expected.
-classTypes/genericSetterInClassType.ts(20,18): error TS1003: Identifier expected.
-classTypes/genericSetterInClassType.ts(20,18): error TS1127: Invalid character.
-classTypes/genericSetterInClassType.ts(20,19): error TS1005: ';' expected.
-classTypes/genericSetterInClassType.ts(24,9): error TS2349: This expression is not callable.
+genericSetterInClassType.ts(3,13): error TS1005: ';' expected.
+genericSetterInClassType.ts(6,13): error TS1005: ';' expected.
+genericSetterInClassType.ts(13,9): error TS1003: Identifier expected.
+genericSetterInClassType.ts(13,9): error TS1127: Invalid character.
+genericSetterInClassType.ts(13,10): error TS1005: ';' expected.
+genericSetterInClassType.ts(15,13): error TS1005: ';' expected.
+genericSetterInClassType.ts(16,25): error TS1003: Identifier expected.
+genericSetterInClassType.ts(16,25): error TS1127: Invalid character.
+genericSetterInClassType.ts(16,26): error TS1005: ';' expected.
+genericSetterInClassType.ts(16,26): error TS7027: Unreachable code detected.
+genericSetterInClassType.ts(19,13): error TS1005: ';' expected.
+genericSetterInClassType.ts(20,18): error TS1003: Identifier expected.
+genericSetterInClassType.ts(20,18): error TS1127: Invalid character.
+genericSetterInClassType.ts(20,19): error TS1005: ';' expected.
+genericSetterInClassType.ts(24,9): error TS2349: This expression is not callable.
 
 
-==== classTypes/genericSetterInClassType.ts (15 errors) ====
+==== genericSetterInClassType.ts (15 errors) ====
     namespace Generic {
         class C<T> {
             get y(): T {

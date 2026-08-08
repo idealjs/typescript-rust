@@ -1,0 +1,33 @@
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+package.json(4,11): error TS1005: ';' expected.
+package.json(5,14): error TS1005: ';' expected.
+
+
+==== index.js (0 errors) ====
+    // esm format file
+    import * as self from "package";
+    self;
+==== index.mjs (0 errors) ====
+    // esm format file
+    import * as self from "package";
+    self;
+==== index.cjs (0 errors) ====
+    // esm format file
+    import * as self from "package";
+    self;
+==== package.json (4 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+                 ~
+!!! error TS1005: ';' expected.
+        "type": "module",
+              ~
+!!! error TS1005: ';' expected.
+        "exports": "./index.js"
+                 ~
+!!! error TS1005: ';' expected.
+    }

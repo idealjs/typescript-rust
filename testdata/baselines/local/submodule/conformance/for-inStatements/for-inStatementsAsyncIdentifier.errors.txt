@@ -1,0 +1,8 @@
+for-inStatementsAsyncIdentifier.ts(2,29): error TS1005: ';' expected.
+
+
+==== for-inStatementsAsyncIdentifier.ts (1 errors) ====
+    var async;
+    for (async in { a: 1, b: 2 }) {}
+                                ~
+!!! error TS1005: ';' expected.

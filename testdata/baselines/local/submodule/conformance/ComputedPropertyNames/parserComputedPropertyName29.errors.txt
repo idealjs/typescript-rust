@@ -1,0 +1,11 @@
+parserComputedPropertyName29.ts(3,11): error TS2304: Cannot find name 'id'.
+
+
+==== parserComputedPropertyName29.ts (1 errors) ====
+    class C {
+        // yes ASI
+        [e] = id++
+              ~~
+!!! error TS2304: Cannot find name 'id'.
+        [e2]: number
+    }

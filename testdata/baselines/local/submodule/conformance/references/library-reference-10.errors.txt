@@ -1,0 +1,23 @@
+/foo/consumer.ts(2,3): error TS2339: Property 'foo' does not exist on type 'object'.
+/foo/types/jquery/package.json(2,14): error TS1005: ';' expected.
+
+
+==== library-reference-10.ts (0 errors) ====
+    // package.json in a primary reference can refer to another file
+    
+==== /foo/types/jquery/package.json (1 errors) ====
+    {
+        "typings": "jquery.d.ts"
+                 ~
+!!! error TS1005: ';' expected.
+    }
+    
+==== /foo/types/jquery/jquery.d.ts (0 errors) ====
+    declare var $: { foo(): void };
+    
+    
+==== /foo/consumer.ts (1 errors) ====
+    /// <reference types="jquery" />
+    $.foo();
+      ~~~
+!!! error TS2339: Property 'foo' does not exist on type 'object'.

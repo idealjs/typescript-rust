@@ -1,0 +1,31 @@
+test.ts(1,93): error TS2304: Cannot find name 'T'.
+test.ts(1,93): error TS2304: Cannot find name 'U'.
+test.ts(1,93): error TS2304: Cannot find name 'V'.
+
+
+==== a.js (0 errors) ====
+    /**
+     * @template {{ a: number, b: string }} T,U A Comment
+     * @template {{ c: boolean }} V uh ... are comments even supported??
+     * @template W
+     * @template X That last one had no comment
+     * @typedef {{ t: T, u: U, v: V, w: W, x: X }} Everything
+     */
+    
+    /** @type {Everything<{ a: number, b: 'hi', c: never }, undefined, { c: true, d: 1 }, number, string>} */
+    var tuvwx;
+    
+    /** @type {Everything<{ a: number  }, undefined, { c: 1, d: 1 }, number, string>} */
+    var wrong;
+    
+    /** @type {Everything<{ a: number  }>} */
+    var insufficient;
+    
+==== test.ts (3 errors) ====
+    declare var actually: Everything<{ a: number  }, undefined, { c: 1, d: 1 }, number, string>;
+                                                                                                
+!!! error TS2304: Cannot find name 'T'.
+                                                                                                
+!!! error TS2304: Cannot find name 'U'.
+                                                                                                
+!!! error TS2304: Cannot find name 'V'.

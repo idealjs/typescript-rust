@@ -1,0 +1,9 @@
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+==== parserForOfStatement25.ts (0 errors) ====
+    // repro from https://github.com/microsoft/TypeScript/issues/54769
+    
+    for (let [x = 'a' in {}] of [[]]) console.log(x)
+    for (let {x = 'a' in {}} of [{}]) console.log(x)

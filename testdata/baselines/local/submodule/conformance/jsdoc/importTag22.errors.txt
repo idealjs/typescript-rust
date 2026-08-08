@@ -1,0 +1,87 @@
+package.json(2,9): error TS1005: ';' expected.
+package.json(3,12): error TS1005: ';' expected.
+package.json(4,10): error TS1005: ';' expected.
+package.json(5,19): error TS1005: ';' expected.
+package.json(6,22): error TS1005: ';' expected.
+package.json(7,24): error TS1005: ';' expected.
+package.json(8,12): error TS1128: Declaration or statement expected.
+package.json(9,19): error TS1005: ';' expected.
+package.json(10,21): error TS1005: ';' expected.
+package.json(11,24): error TS1005: ';' expected.
+package.json(12,26): error TS1005: ';' expected.
+package.json(13,28): error TS1005: ';' expected.
+package.json(15,12): error TS1128: Declaration or statement expected.
+package.json(16,20): error TS1005: ';' expected.
+package.json(17,8): error TS1128: Declaration or statement expected.
+package.json(18,12): error TS1005: ';' expected.
+package.json(19,11): error TS1005: ';' expected.
+
+
+==== importTag22.ts (0 errors) ====
+    
+==== package.json (17 errors) ====
+    {
+      "name": "tslib",
+            ~
+!!! error TS1005: ';' expected.
+      "exports": {
+               ~
+!!! error TS1005: ';' expected.
+          ".": {
+             ~
+!!! error TS1005: ';' expected.
+              "module": {
+                      ~
+!!! error TS1005: ';' expected.
+                  "types": "./modules/index.d.ts",
+                         ~
+!!! error TS1005: ';' expected.
+                  "default": "./tslib.es6.mjs"
+                           ~
+!!! error TS1005: ';' expected.
+              },
+               ~
+!!! error TS1128: Declaration or statement expected.
+              "import": {
+                      ~
+!!! error TS1005: ';' expected.
+                  "node": "./modules/index.js",
+                        ~
+!!! error TS1005: ';' expected.
+                  "default": {
+                           ~
+!!! error TS1005: ';' expected.
+                      "types": "./modules/index.d.ts",
+                             ~
+!!! error TS1005: ';' expected.
+                      "default": "./tslib.es6.mjs"
+                               ~
+!!! error TS1005: ';' expected.
+                  }
+              },
+               ~
+!!! error TS1128: Declaration or statement expected.
+              "default": "./tslib.js"
+                       ~
+!!! error TS1005: ';' expected.
+          },
+           ~
+!!! error TS1128: Declaration or statement expected.
+          "./*": "./*",
+               ~
+!!! error TS1005: ';' expected.
+          "./": "./"
+              ~
+!!! error TS1005: ';' expected.
+      }
+    }
+    
+==== index.d.ts (0 errors) ====
+    export {};
+    
+==== tslib.d.ts (0 errors) ====
+    export {};
+    
+==== test.ts (0 errors) ====
+    /** @import * as tslib from "tslib" */
+    type T = typeof tslib

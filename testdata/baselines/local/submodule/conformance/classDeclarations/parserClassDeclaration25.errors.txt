@@ -1,0 +1,17 @@
+parserClassDeclaration25.ts(5,1): error TS2420: Class 'List' incorrectly implements interface '{ data: () => T; next: () => string }'.
+
+
+==== parserClassDeclaration25.ts (1 errors) ====
+    interface IList<T> {
+        data(): T;
+        next(): string;
+    }
+    class List<U> implements IList<U> {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        data(): U;
+    ~~~~~~~~~~~~~~
+        next(): string;
+    ~~~~~~~~~~~~~~~~~~~
+    }
+    ~
+!!! error TS2420: Class 'List' incorrectly implements interface '{ data: () => T; next: () => string }'.

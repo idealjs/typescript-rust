@@ -1,47 +1,47 @@
-privateNames/privateNameFieldDestructuredBinding.ts(2,5): error TS1003: Identifier expected.
-privateNames/privateNameFieldDestructuredBinding.ts(2,5): error TS1127: Invalid character.
-privateNames/privateNameFieldDestructuredBinding.ts(2,6): error TS1005: ';' expected.
-privateNames/privateNameFieldDestructuredBinding.ts(12,20): error TS1003: Identifier expected.
-privateNames/privateNameFieldDestructuredBinding.ts(12,20): error TS1127: Invalid character.
-privateNames/privateNameFieldDestructuredBinding.ts(12,21): error TS1005: ',' expected.
-privateNames/privateNameFieldDestructuredBinding.ts(12,28): error TS2454: Variable 'y' is used before being assigned.
-privateNames/privateNameFieldDestructuredBinding.ts(13,16): error TS1003: Identifier expected.
-privateNames/privateNameFieldDestructuredBinding.ts(13,16): error TS1127: Invalid character.
-privateNames/privateNameFieldDestructuredBinding.ts(13,17): error TS1005: ',' expected.
-privateNames/privateNameFieldDestructuredBinding.ts(13,24): error TS2454: Variable 'y' is used before being assigned.
-privateNames/privateNameFieldDestructuredBinding.ts(14,20): error TS1003: Identifier expected.
-privateNames/privateNameFieldDestructuredBinding.ts(14,20): error TS1127: Invalid character.
-privateNames/privateNameFieldDestructuredBinding.ts(14,21): error TS1005: ',' expected.
-privateNames/privateNameFieldDestructuredBinding.ts(14,37): error TS1003: Identifier expected.
-privateNames/privateNameFieldDestructuredBinding.ts(14,37): error TS1127: Invalid character.
-privateNames/privateNameFieldDestructuredBinding.ts(14,38): error TS1005: ',' expected.
-privateNames/privateNameFieldDestructuredBinding.ts(15,15): error TS1003: Identifier expected.
-privateNames/privateNameFieldDestructuredBinding.ts(15,15): error TS1127: Invalid character.
-privateNames/privateNameFieldDestructuredBinding.ts(15,16): error TS1005: ',' expected.
-privateNames/privateNameFieldDestructuredBinding.ts(15,29): error TS1003: Identifier expected.
-privateNames/privateNameFieldDestructuredBinding.ts(15,29): error TS1127: Invalid character.
-privateNames/privateNameFieldDestructuredBinding.ts(15,30): error TS1005: ',' expected.
-privateNames/privateNameFieldDestructuredBinding.ts(16,20): error TS1003: Identifier expected.
-privateNames/privateNameFieldDestructuredBinding.ts(16,20): error TS1127: Invalid character.
-privateNames/privateNameFieldDestructuredBinding.ts(16,21): error TS1005: ',' expected.
-privateNames/privateNameFieldDestructuredBinding.ts(16,27): error TS1005: ',' expected.
-privateNames/privateNameFieldDestructuredBinding.ts(16,27): error TS2304: Cannot find name '='.
-privateNames/privateNameFieldDestructuredBinding.ts(16,29): error TS1005: ',' expected.
-privateNames/privateNameFieldDestructuredBinding.ts(16,41): error TS1003: Identifier expected.
-privateNames/privateNameFieldDestructuredBinding.ts(16,41): error TS1127: Invalid character.
-privateNames/privateNameFieldDestructuredBinding.ts(16,42): error TS1005: ',' expected.
-privateNames/privateNameFieldDestructuredBinding.ts(17,15): error TS1003: Identifier expected.
-privateNames/privateNameFieldDestructuredBinding.ts(17,15): error TS1127: Invalid character.
-privateNames/privateNameFieldDestructuredBinding.ts(17,16): error TS1005: ',' expected.
-privateNames/privateNameFieldDestructuredBinding.ts(18,27): error TS1003: Identifier expected.
-privateNames/privateNameFieldDestructuredBinding.ts(18,27): error TS1127: Invalid character.
-privateNames/privateNameFieldDestructuredBinding.ts(18,28): error TS1005: ',' expected.
-privateNames/privateNameFieldDestructuredBinding.ts(21,13): error TS1003: Identifier expected.
-privateNames/privateNameFieldDestructuredBinding.ts(21,13): error TS1127: Invalid character.
-privateNames/privateNameFieldDestructuredBinding.ts(21,14): error TS1005: ',' expected.
+privateNameFieldDestructuredBinding.ts(2,5): error TS1003: Identifier expected.
+privateNameFieldDestructuredBinding.ts(2,5): error TS1127: Invalid character.
+privateNameFieldDestructuredBinding.ts(2,6): error TS1005: ';' expected.
+privateNameFieldDestructuredBinding.ts(12,20): error TS1003: Identifier expected.
+privateNameFieldDestructuredBinding.ts(12,20): error TS1127: Invalid character.
+privateNameFieldDestructuredBinding.ts(12,21): error TS1005: ',' expected.
+privateNameFieldDestructuredBinding.ts(12,28): error TS2454: Variable 'y' is used before being assigned.
+privateNameFieldDestructuredBinding.ts(13,16): error TS1003: Identifier expected.
+privateNameFieldDestructuredBinding.ts(13,16): error TS1127: Invalid character.
+privateNameFieldDestructuredBinding.ts(13,17): error TS1005: ',' expected.
+privateNameFieldDestructuredBinding.ts(13,24): error TS2454: Variable 'y' is used before being assigned.
+privateNameFieldDestructuredBinding.ts(14,20): error TS1003: Identifier expected.
+privateNameFieldDestructuredBinding.ts(14,20): error TS1127: Invalid character.
+privateNameFieldDestructuredBinding.ts(14,21): error TS1005: ',' expected.
+privateNameFieldDestructuredBinding.ts(14,37): error TS1003: Identifier expected.
+privateNameFieldDestructuredBinding.ts(14,37): error TS1127: Invalid character.
+privateNameFieldDestructuredBinding.ts(14,38): error TS1005: ',' expected.
+privateNameFieldDestructuredBinding.ts(15,15): error TS1003: Identifier expected.
+privateNameFieldDestructuredBinding.ts(15,15): error TS1127: Invalid character.
+privateNameFieldDestructuredBinding.ts(15,16): error TS1005: ',' expected.
+privateNameFieldDestructuredBinding.ts(15,29): error TS1003: Identifier expected.
+privateNameFieldDestructuredBinding.ts(15,29): error TS1127: Invalid character.
+privateNameFieldDestructuredBinding.ts(15,30): error TS1005: ',' expected.
+privateNameFieldDestructuredBinding.ts(16,20): error TS1003: Identifier expected.
+privateNameFieldDestructuredBinding.ts(16,20): error TS1127: Invalid character.
+privateNameFieldDestructuredBinding.ts(16,21): error TS1005: ',' expected.
+privateNameFieldDestructuredBinding.ts(16,27): error TS1005: ',' expected.
+privateNameFieldDestructuredBinding.ts(16,27): error TS2304: Cannot find name '='.
+privateNameFieldDestructuredBinding.ts(16,29): error TS1005: ',' expected.
+privateNameFieldDestructuredBinding.ts(16,41): error TS1003: Identifier expected.
+privateNameFieldDestructuredBinding.ts(16,41): error TS1127: Invalid character.
+privateNameFieldDestructuredBinding.ts(16,42): error TS1005: ',' expected.
+privateNameFieldDestructuredBinding.ts(17,15): error TS1003: Identifier expected.
+privateNameFieldDestructuredBinding.ts(17,15): error TS1127: Invalid character.
+privateNameFieldDestructuredBinding.ts(17,16): error TS1005: ',' expected.
+privateNameFieldDestructuredBinding.ts(18,27): error TS1003: Identifier expected.
+privateNameFieldDestructuredBinding.ts(18,27): error TS1127: Invalid character.
+privateNameFieldDestructuredBinding.ts(18,28): error TS1005: ',' expected.
+privateNameFieldDestructuredBinding.ts(21,13): error TS1003: Identifier expected.
+privateNameFieldDestructuredBinding.ts(21,13): error TS1127: Invalid character.
+privateNameFieldDestructuredBinding.ts(21,14): error TS1005: ',' expected.
 
 
-==== privateNames/privateNameFieldDestructuredBinding.ts (41 errors) ====
+==== privateNameFieldDestructuredBinding.ts (41 errors) ====
     class A {
         #field = 1;
         ~

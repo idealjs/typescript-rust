@@ -1,0 +1,16 @@
+voidOperatorInvalidOperations.ts(4,15): error TS1005: ',' expected.
+voidOperatorInvalidOperations.ts(7,17): error TS1012: Unexpected token.
+
+
+==== voidOperatorInvalidOperations.ts (2 errors) ====
+    // Unary operator void
+    
+    // operand before void
+    var ANY = ANY void ;    //expect error
+                  ~~~~
+!!! error TS1005: ',' expected.
+    
+    // miss an operand
+    var ANY1 = void ;
+                    ~
+!!! error TS1012: Unexpected token.

@@ -1,0 +1,26 @@
+typeofTypeParameter.ts(2,10): error TS1005: ',' expected.
+typeofTypeParameter.ts(2,11): error TS1134: Variable declaration expected.
+typeofTypeParameter.ts(2,20): error TS1005: ',' expected.
+typeofTypeParameter.ts(3,10): error TS1005: ',' expected.
+typeofTypeParameter.ts(3,11): error TS1134: Variable declaration expected.
+typeofTypeParameter.ts(3,20): error TS1005: ',' expected.
+
+
+==== typeofTypeParameter.ts (6 errors) ====
+    function f<T>(x: T): T {
+        var a!: typeof x;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+                       ~
+!!! error TS1005: ',' expected.
+        var y!: typeof T;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+                       ~
+!!! error TS1005: ',' expected.
+        return a;
+    }

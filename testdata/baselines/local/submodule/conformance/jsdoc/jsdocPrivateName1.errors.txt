@@ -1,0 +1,16 @@
+jsdocPrivateName1.js(3,5): error TS1003: Identifier expected.
+jsdocPrivateName1.js(3,5): error TS1127: Invalid character.
+jsdocPrivateName1.js(3,6): error TS1005: ';' expected.
+
+
+==== jsdocPrivateName1.js (3 errors) ====
+    class A {
+        /** @type {boolean} some number value */
+        #foo = 3 // Error because not assignable to boolean
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~
+!!! error TS1005: ';' expected.
+    }

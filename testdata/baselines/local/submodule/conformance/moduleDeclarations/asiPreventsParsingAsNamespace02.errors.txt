@@ -1,0 +1,11 @@
+error TS2300: Duplicate identifier 'm'.
+
+
+!!! error TS2300: Duplicate identifier 'm'.
+==== asiPreventsParsingAsNamespace02.ts (0 errors) ====
+    var module: number;
+    var m: string;
+    
+    module       // this is the identifier 'namespace'
+    m            // this is the identifier 'm'
+    { }          // this is a block body

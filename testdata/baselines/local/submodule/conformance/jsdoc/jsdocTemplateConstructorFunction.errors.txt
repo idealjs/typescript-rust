@@ -1,0 +1,33 @@
+templateTagOnConstructorFunctions.js(18,5): error TS2339: Property 'prototype' does not exist on type '(t: any) => void'.
+templateTagOnConstructorFunctions.js(22,13): error TS2351: This expression is not constructable.
+
+
+==== templateTagOnConstructorFunctions.js (2 errors) ====
+    /**
+     * @template U
+     * @typedef {(u: U) => U} Id
+     */
+    /**
+     * @param {T} t
+     * @template T
+     */
+    function Zet(t) {
+        /** @type {T} */
+        this.u
+        this.t = t
+    }
+    /**
+     * @param {T} v
+     * @param {Id<T>} id
+     */
+    Zet.prototype.add = function(v, id) {
+        ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '(t: any) => void'.
+        this.u = v || this.t
+        return id(this.u)
+    }
+    var z = new Zet(1)
+                ~~~
+!!! error TS2351: This expression is not constructable.
+    z.t = 2
+    z.u = false

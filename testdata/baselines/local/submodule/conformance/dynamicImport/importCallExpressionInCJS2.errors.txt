@@ -1,0 +1,27 @@
+2.ts(4,19): error TS2304: Cannot find name 'import'.
+2.ts(10,9): error TS2304: Cannot find name 'import'.
+
+
+==== importCallExpressionInCJS2.ts (0 errors) ====
+    ﻿// @module: commonjs
+==== 0.ts (0 errors) ====
+    export function foo() { return "foo"; }
+    
+==== 1.ts (0 errors) ====
+    export function backup() { return "backup"; }
+    
+==== 2.ts (2 errors) ====
+    async function compute(promise: Promise<any>) {
+        let j = await promise;
+        if (!j) {
+            j = await import("./1");
+                      ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+            return j.backup();
+        }
+        return j.foo();
+    }
+    
+    compute(import("./0"));
+            ~~~~~~
+!!! error TS2304: Cannot find name 'import'.

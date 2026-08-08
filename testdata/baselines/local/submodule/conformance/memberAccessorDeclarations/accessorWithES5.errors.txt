@@ -1,0 +1,66 @@
+accessorWithES5.ts(2,9): error TS1005: ';' expected.
+accessorWithES5.ts(8,9): error TS1005: ';' expected.
+accessorWithES5.ts(13,5): error TS2304: Cannot find name 'get'.
+accessorWithES5.ts(13,9): error TS1005: ',' expected.
+accessorWithES5.ts(13,9): error TS2304: Cannot find name 'a'.
+accessorWithES5.ts(13,10): error TS1005: ',' expected.
+accessorWithES5.ts(13,10): error TS2304: Cannot find name '('.
+accessorWithES5.ts(13,11): error TS1005: ',' expected.
+accessorWithES5.ts(13,11): error TS2304: Cannot find name ')'.
+accessorWithES5.ts(13,13): error TS1005: ',' expected.
+accessorWithES5.ts(13,13): error TS2304: Cannot find name '{'.
+accessorWithES5.ts(13,15): error TS1005: ',' expected.
+accessorWithES5.ts(13,15): error TS2304: Cannot find name 'return'.
+accessorWithES5.ts(13,22): error TS1005: ',' expected.
+accessorWithES5.ts(14,1): error TS1128: Declaration or statement expected.
+
+
+==== accessorWithES5.ts (15 errors) ====
+    class C {
+        get x() {
+            ~
+!!! error TS1005: ';' expected.
+            return 1;
+        }
+    }
+    
+    class D {
+        set x(v) {
+            ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+    var x = {
+        get a() { return 1 }
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+            ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS2304: Cannot find name 'a'.
+             ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS2304: Cannot find name '('.
+              ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS2304: Cannot find name ')'.
+                ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS2304: Cannot find name '{'.
+                  ~~~~~~
+!!! error TS1005: ',' expected.
+                  ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                         ~
+!!! error TS1005: ',' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+    var y = {
+        set b(v) { }
+    }

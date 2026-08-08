@@ -1,0 +1,10 @@
+parserNotRegex1.ts(1,7): error TS2304: Cannot find name 'a'.
+
+
+==== parserNotRegex1.ts (1 errors) ====
+      if (a.indexOf(-(4/3)))      // We should not get a regex here because of the / in the comment.
+          ~
+!!! error TS2304: Cannot find name 'a'.
+      {
+        return true;
+      }

@@ -1,0 +1,7 @@
+parserArrayLiteralExpression12.ts(1,12): error TS1012: Unexpected token.
+
+
+==== parserArrayLiteralExpression12.ts (1 errors) ====
+    var v = [1,,,1];
+               ~
+!!! error TS1012: Unexpected token.

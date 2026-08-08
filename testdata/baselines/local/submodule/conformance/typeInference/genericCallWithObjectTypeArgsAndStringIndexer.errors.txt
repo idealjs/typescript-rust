@@ -1,0 +1,56 @@
+genericCallWithObjectTypeArgsAndStringIndexer.ts(7,23): error TS2304: Cannot find name 'Date'.
+genericCallWithObjectTypeArgsAndStringIndexer.ts(15,27): error TS2304: Cannot find name 'Date'.
+genericCallWithObjectTypeArgsAndStringIndexer.ts(18,12): error TS2304: Cannot find name 'Date'.
+genericCallWithObjectTypeArgsAndStringIndexer.ts(21,27): error TS2304: Cannot find name 'Date'.
+genericCallWithObjectTypeArgsAndStringIndexer.ts(21,43): error TS2304: Cannot find name 'Date'.
+genericCallWithObjectTypeArgsAndStringIndexer.ts(24,12): error TS2304: Cannot find name 'Date'.
+
+
+==== genericCallWithObjectTypeArgsAndStringIndexer.ts (6 errors) ====
+    // Type inference infers from indexers in target type, no errors expected
+    
+    function foo<T>(x: T) {
+        return x;
+    }
+    
+    var a: { [x: string]: Date };
+                          ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    var r = foo(a);
+    
+    function other<T>(arg: T) {
+        var b: { [x: string]: T };
+        var r2 = foo(b); // T
+    }
+    
+    function other2<T extends Date>(arg: T) {
+                              ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        var b: { [x: string]: T };
+        var r2 = foo(b);
+        var d: Date = r2['hm']; // ok
+               ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    }
+    
+    function other3<T extends Date, U extends Date>(arg: T) {
+                              ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+                                              ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        var b: { [x: string]: T };
+        var r2 = foo(b);
+        var d: Date = r2['hm']; // ok
+               ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        // BUG 821629
+        //var u: U = r2['hm']; // ok
+    }
+    
+    //function other3<T extends U, U extends Date>(arg: T) {
+    //    var b: { [x: string]: T };
+    //    var r2 = foo(b);
+    //    var d: Date = r2['hm']; // ok
+    //    // BUG 821629
+    //    //var u: U = r2['hm']; // ok
+    //}

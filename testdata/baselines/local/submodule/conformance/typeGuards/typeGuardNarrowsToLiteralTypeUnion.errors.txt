@@ -1,0 +1,22 @@
+typeGuardNarrowsToLiteralTypeUnion.ts(5,11): error TS2454: Variable 'value' is used before being assigned.
+typeGuardNarrowsToLiteralTypeUnion.ts(6,12): error TS2454: Variable 'value' is used before being assigned.
+typeGuardNarrowsToLiteralTypeUnion.ts(8,12): error TS2454: Variable 'value' is used before being assigned.
+
+
+==== typeGuardNarrowsToLiteralTypeUnion.ts (3 errors) ====
+    declare function isFoo(value: string) : value is ("foo" | "bar");
+    declare function doThis(value: "foo" | "bar"): void;
+    declare function doThat(value: string) : void;
+    let value: string;
+    if (isFoo(value)) {
+              ~~~~~
+!!! error TS2454: Variable 'value' is used before being assigned.
+        doThis(value);
+               ~~~~~
+!!! error TS2454: Variable 'value' is used before being assigned.
+    } else {
+        doThat(value);
+               ~~~~~
+!!! error TS2454: Variable 'value' is used before being assigned.
+    }
+    

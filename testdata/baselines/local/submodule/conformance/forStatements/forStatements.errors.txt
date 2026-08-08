@@ -1,0 +1,76 @@
+forStatements.ts(22,54): error TS2339: Property 'toString' does not exist on type 'number'.
+forStatements.ts(27,16): error TS2304: Cannot find name 'Date'.
+forStatements.ts(27,27): error TS2304: Cannot find name 'Date'.
+forStatements.ts(28,19): error TS2304: Cannot find name 'Object'.
+forStatements.ts(28,32): error TS2304: Cannot find name 'Object'.
+forStatements.ts(34,30): error TS2351: This expression is not constructable.
+forStatements.ts(35,25): error TS2351: This expression is not constructable.
+forStatements.ts(36,40): error TS2351: This expression is not constructable.
+forStatements.ts(38,52): error TS2351: This expression is not constructable.
+
+
+==== forStatements.ts (9 errors) ====
+    interface I {
+        id: number;
+    }
+    
+    class C implements I {
+        id: number;
+    }
+    
+    class D<T>{
+        source: T;
+        recurse: D<T>;
+        wrapped: D<D<T>>
+    }
+    
+    function F(x: string): number { return 42; }
+    
+    namespace M {
+        export class A {
+            name: string;
+        }
+    
+        export function F2(x: number): string { return x.toString(); }
+                                                         ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'number'.
+    }
+    
+    for(var aNumber: number = 9.9;;){} 
+    for(var aString: string = 'this is a string';;){}
+    for(var aDate: Date = new Date(12);;){}
+                   ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+                              ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    for(var anObject: Object = new Object();;){}
+                      ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                                   ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    
+    for(var anAny: any = null;;){}
+    for(var aSecondAny: any = undefined;;){}
+    for(var aVoid: void = undefined;;){}
+    
+    for(var anInterface: I = new C();;){}
+                                 ~
+!!! error TS2351: This expression is not constructable.
+    for(var aClass: C = new C();;){}
+                            ~
+!!! error TS2351: This expression is not constructable.
+    for(var aGenericClass: D<string> = new D<string>();;){}
+                                           ~
+!!! error TS2351: This expression is not constructable.
+    for(var anObjectLiteral: I = { id: 12 };;){}
+    for(var anOtherObjectLiteral: { id: number } = new C();;){}
+                                                       ~
+!!! error TS2351: This expression is not constructable.
+    
+    for(var aFunction: typeof F = F;;){}
+    for(var anOtherFunction: (x: string) => number = F;;){}
+    for(var aLambda: typeof F = (x) => 2;;){}
+    
+    for(var aModule: typeof M = M;;){}
+    for(var aClassInModule: M.A = new M.A();;){}
+    for(var aFunctionInModule: typeof M.F2 = (x) => 'this is a string';;){}

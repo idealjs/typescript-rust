@@ -1,0 +1,96 @@
+types.asyncGenerators.es2018.2.ts(10,29): error TS2304: Cannot find name 'AsyncIterableIterator'.
+types.asyncGenerators.es2018.2.ts(13,29): error TS2304: Cannot find name 'AsyncIterableIterator'.
+types.asyncGenerators.es2018.2.ts(16,29): error TS2304: Cannot find name 'AsyncIterableIterator'.
+types.asyncGenerators.es2018.2.ts(37,41): error TS2304: Cannot find name 'AsyncIterableIterator'.
+types.asyncGenerators.es2018.2.ts(40,41): error TS2304: Cannot find name 'AsyncIterableIterator'.
+types.asyncGenerators.es2018.2.ts(43,41): error TS2304: Cannot find name 'AsyncIterableIterator'.
+
+
+==== types.asyncGenerators.es2018.2.ts (6 errors) ====
+    async function * inferReturnType1() {
+        yield* {};
+    }
+    async function * inferReturnType2() {
+        yield* inferReturnType2();
+    }
+    async function * inferReturnType3() {
+        yield* Promise.resolve([1, 2]);
+    }
+    const assignability1: () => AsyncIterableIterator<number> = async function * () {
+                                ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'AsyncIterableIterator'.
+        yield "a";
+    };
+    const assignability2: () => AsyncIterableIterator<number> = async function * () {
+                                ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'AsyncIterableIterator'.
+        yield* ["a", "b"];
+    };
+    const assignability3: () => AsyncIterableIterator<number> = async function * () {
+                                ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'AsyncIterableIterator'.
+        yield* (async function * () { yield "a"; })();
+    };
+    const assignability4: () => AsyncIterable<number> = async function * () {
+        yield "a";
+    };
+    const assignability5: () => AsyncIterable<number> = async function * () {
+        yield* ["a", "b"];
+    };
+    const assignability6: () => AsyncIterable<number> = async function * () {
+        yield* (async function * () { yield "a"; })();
+    };
+    const assignability7: () => AsyncIterator<number> = async function * () {
+        yield "a";
+    };
+    const assignability8: () => AsyncIterator<number> = async function * () {
+        yield* ["a", "b"];
+    };
+    const assignability9: () => AsyncIterator<number> = async function * () {
+        yield* (async function * () { yield "a"; })();
+    };
+    async function * explicitReturnType1(): AsyncIterableIterator<number> {
+                                            ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'AsyncIterableIterator'.
+        yield "a";
+    }
+    async function * explicitReturnType2(): AsyncIterableIterator<number> {
+                                            ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'AsyncIterableIterator'.
+        yield* ["a", "b"];
+    }
+    async function * explicitReturnType3(): AsyncIterableIterator<number> {
+                                            ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'AsyncIterableIterator'.
+        yield* (async function * () { yield "a"; })();
+    }
+    async function * explicitReturnType4(): AsyncIterable<number> {
+        yield "a";
+    }
+    async function * explicitReturnType5(): AsyncIterable<number> {
+        yield* ["a", "b"];
+    }
+    async function * explicitReturnType6(): AsyncIterable<number> {
+        yield* (async function * () { yield "a"; })();
+    }
+    async function * explicitReturnType7(): AsyncIterator<number> {
+        yield "a";
+    }
+    async function * explicitReturnType8(): AsyncIterator<number> {
+        yield* ["a", "b"];
+    }
+    async function * explicitReturnType9(): AsyncIterator<number> {
+        yield* (async function * () { yield "a"; })();
+    }
+    async function * explicitReturnType10(): IterableIterator<number> {
+        yield 1;
+    }
+    async function * explicitReturnType11(): Iterable<number> {
+        yield 1;
+    }
+    async function * explicitReturnType12(): Iterator<number> {
+        yield 1;
+    }
+    async function * yieldStar() {
+        yield* {};
+    }

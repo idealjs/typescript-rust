@@ -1,0 +1,34 @@
+objectTypesWithOptionalProperties.ts(24,5): error TS2304: Cannot find name 'x'.
+objectTypesWithOptionalProperties.ts(24,6): error TS1005: ',' expected.
+
+
+==== objectTypesWithOptionalProperties.ts (2 errors) ====
+    // Basic uses of optional properties
+    
+    var a: {
+        x?: number; // ok
+    }
+    
+    interface I {
+        x?: number; // ok
+    }
+    
+    class C {
+        x?: number; // ok
+    }
+    
+    interface I2<T> {
+        x?: T; // ok
+    }
+    
+    class C2<T> {
+        x?: T; // ok
+    }
+    
+    var b = {
+        x?: 1 // error
+        ~
+!!! error TS2304: Cannot find name 'x'.
+         ~
+!!! error TS1005: ',' expected.
+    }

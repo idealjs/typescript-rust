@@ -1,0 +1,17 @@
+globalThisReadonlyProperties.ts(1,12): error TS2339: Property 'globalThis' does not exist on type 'globalThis'.
+globalThisReadonlyProperties.ts(4,12): error TS2339: Property 'x' does not exist on type 'globalThis'.
+globalThisReadonlyProperties.ts(5,12): error TS2339: Property 'y' does not exist on type 'globalThis'.
+
+
+==== globalThisReadonlyProperties.ts (3 errors) ====
+    globalThis.globalThis = 1 as any // should error
+               ~~~~~~~~~~
+!!! error TS2339: Property 'globalThis' does not exist on type 'globalThis'.
+    var x = 1
+    const y = 2
+    globalThis.x = 3
+               ~
+!!! error TS2339: Property 'x' does not exist on type 'globalThis'.
+    globalThis.y = 4 // should error
+               ~
+!!! error TS2339: Property 'y' does not exist on type 'globalThis'.

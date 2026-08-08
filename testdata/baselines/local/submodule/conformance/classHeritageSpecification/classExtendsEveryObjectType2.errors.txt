@@ -1,7 +1,7 @@
-classHeritageSpecification/classExtendsEveryObjectType2.ts(1,31): error TS1005: ',' expected.
+classExtendsEveryObjectType2.ts(1,31): error TS1005: ',' expected.
 
 
-==== classHeritageSpecification/classExtendsEveryObjectType2.ts (1 errors) ====
+==== classExtendsEveryObjectType2.ts (1 errors) ====
     class C2 extends { foo: string; } { } // error
                                   ~
 !!! error TS1005: ',' expected.

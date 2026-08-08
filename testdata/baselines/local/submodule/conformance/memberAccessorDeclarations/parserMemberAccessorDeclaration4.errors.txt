@@ -1,0 +1,9 @@
+parserMemberAccessorDeclaration4.ts(2,7): error TS1005: ';' expected.
+
+
+==== parserMemberAccessorDeclaration4.ts (1 errors) ====
+    class C {
+      set a(i) { }
+          ~
+!!! error TS1005: ';' expected.
+    }

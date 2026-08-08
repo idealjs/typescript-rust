@@ -1,0 +1,22 @@
+decoratorOnFunctionExpression.ts(3,9): error TS1012: Unexpected token.
+decoratorOnFunctionExpression.ts(3,10): error TS1005: ',' expected.
+decoratorOnFunctionExpression.ts(3,14): error TS1005: ',' expected.
+decoratorOnFunctionExpression.ts(3,23): error TS1005: ',' expected.
+decoratorOnFunctionExpression.ts(3,24): error TS1134: Variable declaration expected.
+
+
+==== decoratorOnFunctionExpression.ts (5 errors) ====
+    declare function dec<T>(target: T): T;
+    
+    var F = @dec function () {
+            ~
+!!! error TS1012: Unexpected token.
+             ~~~
+!!! error TS1005: ',' expected.
+                 ~~~~~~~~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS1134: Variable declaration expected.
+    }

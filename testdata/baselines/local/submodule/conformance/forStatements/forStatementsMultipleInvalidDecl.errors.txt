@@ -1,0 +1,86 @@
+forStatementsMultipleInvalidDecl.ts(27,54): error TS2339: Property 'toString' does not exist on type 'number'.
+forStatementsMultipleInvalidDecl.ts(34,18): error TS2351: This expression is not constructable.
+forStatementsMultipleInvalidDecl.ts(35,18): error TS2351: This expression is not constructable.
+forStatementsMultipleInvalidDecl.ts(39,18): error TS2351: This expression is not constructable.
+forStatementsMultipleInvalidDecl.ts(40,18): error TS2351: This expression is not constructable.
+forStatementsMultipleInvalidDecl.ts(47,21): error TS2351: This expression is not constructable.
+forStatementsMultipleInvalidDecl.ts(47,30): error TS2351: This expression is not constructable.
+forStatementsMultipleInvalidDecl.ts(47,40): error TS2351: This expression is not constructable.
+forStatementsMultipleInvalidDecl.ts(49,21): error TS2351: This expression is not constructable.
+forStatementsMultipleInvalidDecl.ts(50,21): error TS2304: Cannot find name 'Array'.
+
+
+==== forStatementsMultipleInvalidDecl.ts (10 errors) ====
+    interface I {
+        id: number;
+    }
+    
+    class C implements I {
+        id: number;
+        valid: boolean;
+    }
+    
+    class C2 extends C {
+        name: string;
+    }
+    
+    class D<T>{
+        source: T;
+        recurse: D<T>;
+        wrapped: D<D<T>>
+    }
+    
+    function F(x: string): number { return 42; }
+    
+    namespace M {
+        export class A {
+            name: string;
+        }
+    
+        export function F2(x: number): string { return x.toString(); }
+                                                         ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'number'.
+    }
+    
+    // all of these are errors
+    for( var a: any;;){}
+    for( var a = 1;;){}
+    for( var a = 'a string';;){}
+    for( var a = new C();;){}
+                     ~
+!!! error TS2351: This expression is not constructable.
+    for( var a = new D<string>();;){}
+                     ~
+!!! error TS2351: This expression is not constructable.
+    for( var a = M;;){}
+    
+    for( var b: I;;){}
+    for( var b = new C();;){}
+                     ~
+!!! error TS2351: This expression is not constructable.
+    for( var b = new C2();;){}
+                     ~~
+!!! error TS2351: This expression is not constructable.
+    
+    for(var f = F;;){}
+    for( var f = (x: number) => '';;){}
+    
+    for(var arr: string[];;){}
+    for( var arr = [1, 2, 3, 4];;){}
+    for( var arr = [new C(), new C2(), new D<string>()];;){}
+                        ~
+!!! error TS2351: This expression is not constructable.
+                                 ~~
+!!! error TS2351: This expression is not constructable.
+                                           ~
+!!! error TS2351: This expression is not constructable.
+    
+    for(var arr2 = [new D<string>()];;){}
+                        ~
+!!! error TS2351: This expression is not constructable.
+    for( var arr2 = new Array<D<number>>();;){}
+                        ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    
+    for(var m: typeof M;;){}
+    for( var m = M.A;;){}

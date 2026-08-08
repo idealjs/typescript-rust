@@ -1,0 +1,27 @@
+numericNamedPropertyDuplicates.ts(20,5): error TS1005: ',' expected.
+
+
+==== numericNamedPropertyDuplicates.ts (1 errors) ====
+    class C {
+        1: number;
+        1.0: number;
+        static 2: number;
+        static 2: number;
+    }
+    
+    interface I {
+        2: number;
+        2.: number;
+    }
+    
+    var a: {
+        1: number;
+        1: number;
+    }
+    
+    var b = {
+        2: 1
+        2: 1
+        ~
+!!! error TS1005: ',' expected.
+    }

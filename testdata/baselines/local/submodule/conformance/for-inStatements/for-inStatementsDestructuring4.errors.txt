@@ -1,0 +1,8 @@
+for-inStatementsDestructuring4.ts(2,18): error TS1005: ';' expected.
+
+
+==== for-inStatementsDestructuring4.ts (1 errors) ====
+    var a, b;
+    for ({a, b} in []) { }
+                     ~
+!!! error TS1005: ';' expected.

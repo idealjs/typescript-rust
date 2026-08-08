@@ -1,0 +1,9 @@
+parserDoStatement1.d.ts(3,8): error TS2304: Cannot find name 'e'.
+
+
+==== parserDoStatement1.d.ts (1 errors) ====
+    do {
+    }
+    while (e);
+           ~
+!!! error TS2304: Cannot find name 'e'.

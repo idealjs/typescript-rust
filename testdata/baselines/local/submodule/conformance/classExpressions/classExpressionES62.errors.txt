@@ -1,0 +1,8 @@
+classExpressionES62.ts(2,15): error TS2304: Cannot find name 'C'.
+
+
+==== classExpressionES62.ts (1 errors) ====
+    class D { }
+    var v = class C extends D {};
+                  ~
+!!! error TS2304: Cannot find name 'C'.

@@ -1,11 +1,11 @@
-classStaticBlock/classStaticBlock7.ts(2,12): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock7.ts(3,15): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock7.ts(4,15): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock7.ts(5,16): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock7.ts(7,1): error TS1128: Declaration or statement expected.
+classStaticBlock7.ts(2,12): error TS1005: ';' expected.
+classStaticBlock7.ts(3,15): error TS1005: ';' expected.
+classStaticBlock7.ts(4,15): error TS1005: ';' expected.
+classStaticBlock7.ts(5,16): error TS1005: ';' expected.
+classStaticBlock7.ts(7,1): error TS1128: Declaration or statement expected.
 
 
-==== classStaticBlock/classStaticBlock7.ts (5 errors) ====
+==== classStaticBlock7.ts (5 errors) ====
     class C {
         static {
                ~

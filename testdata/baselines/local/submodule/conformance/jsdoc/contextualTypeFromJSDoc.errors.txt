@@ -1,0 +1,33 @@
+index.js(17,9): error TS1005: ';' expected.
+index.js(18,9): error TS1005: ';' expected.
+
+
+==== index.js (2 errors) ====
+    /** @type {Array<[string, {x?:number, y?:number}]>} */
+    const arr = [
+        ['a', { x: 1 }],
+        ['b', { y: 2 }]
+    ];
+    
+    /** @return {Array<[string, {x?:number, y?:number}]>} */
+    function f() {
+        return [
+            ['a', { x: 1 }],
+            ['b', { y: 2 }]
+        ];
+    }
+    
+    class C {
+        /** @param {Array<[string, {x?:number, y?:number}]>} value */
+        set x(value) { }
+            ~
+!!! error TS1005: ';' expected.
+        get x() {
+            ~
+!!! error TS1005: ';' expected.
+            return [
+                ['a', { x: 1 }],
+                ['b', { y: 2 }]
+            ];
+        }
+    }

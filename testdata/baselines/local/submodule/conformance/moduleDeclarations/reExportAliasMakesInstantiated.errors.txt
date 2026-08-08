@@ -1,0 +1,49 @@
+reExportAliasMakesInstantiated.ts(9,8): error TS1005: '{' expected.
+reExportAliasMakesInstantiated.ts(9,21): error TS1003: Identifier expected.
+reExportAliasMakesInstantiated.ts(9,28): error TS1003: Identifier expected.
+reExportAliasMakesInstantiated.ts(9,34): error TS1003: Identifier expected.
+reExportAliasMakesInstantiated.ts(11,24): error TS1003: Identifier expected.
+reExportAliasMakesInstantiated.ts(12,14): error TS1003: Identifier expected.
+reExportAliasMakesInstantiated.ts(12,22): error TS1003: Identifier expected.
+reExportAliasMakesInstantiated.ts(13,10): error TS1003: Identifier expected.
+reExportAliasMakesInstantiated.ts(14,1): error TS1128: Declaration or statement expected.
+
+
+==== reExportAliasMakesInstantiated.ts (9 errors) ====
+    declare namespace pack1 {
+      const test1: string;
+      export { test1 };
+    }
+    declare namespace pack2 {
+      import test1 = pack1.test1;
+      export { test1 };
+    }
+    export import test1 = pack2.test1;
+           ~~~~~~
+!!! error TS1005: '{' expected.
+                        ~
+!!! error TS1003: Identifier expected.
+                               ~
+!!! error TS1003: Identifier expected.
+                                     ~
+!!! error TS1003: Identifier expected.
+    
+    declare namespace mod1 {
+                           ~
+!!! error TS1003: Identifier expected.
+      type test1 = string;
+                 ~
+!!! error TS1003: Identifier expected.
+                         ~
+!!! error TS1003: Identifier expected.
+      export { test1 };
+             ~
+!!! error TS1003: Identifier expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    declare namespace mod2 {
+      import test1 = mod1.test1;
+      export { test1 };
+    }
+    const test2 = mod2; // Possible false positive instantiation, but ok

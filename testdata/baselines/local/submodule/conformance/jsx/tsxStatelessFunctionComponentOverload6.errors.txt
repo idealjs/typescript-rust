@@ -1,0 +1,92 @@
+error TS6053: File 'react.d.ts' not found.
+file.tsx(50,28): error TS2454: Variable 'obj1' is used before being assigned.
+file.tsx(51,28): error TS2454: Variable 'obj1' is used before being assigned.
+file.tsx(54,29): error TS2304: Cannot find name 'onClick'.
+file.tsx(54,36): error TS1005: ',' expected.
+file.tsx(54,36): error TS2304: Cannot find name '('.
+file.tsx(54,37): error TS1005: ',' expected.
+file.tsx(54,37): error TS2304: Cannot find name ')'.
+file.tsx(54,39): error TS1005: ',' expected.
+file.tsx(54,39): error TS2304: Cannot find name '{'.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.
+==== file.tsx (9 errors) ====
+    /// <reference path="/.lib/react.d.ts" />
+    
+    import React = require('react')
+    
+    declare function log(...args: any[]): void;
+    
+    export interface ClickableProps {
+        children?: string;
+        className?: string;
+    }
+    
+    export interface ButtonProps extends ClickableProps {
+        onClick: React.MouseEventHandler<any>;
+    }
+    
+    export interface LinkProps extends ClickableProps {
+        to: string;
+    }
+    
+    export interface HyphenProps extends ClickableProps {
+        "data-format": string;
+    }
+    
+    let obj = {
+        children: "hi",
+        to: "boo"
+    }
+    let obj1: any;
+    let obj2 = {
+        onClick: () => {}
+    }
+    
+    export function MainButton(buttonProps: ButtonProps): JSX.Element;
+    export function MainButton(linkProps: LinkProps): JSX.Element;
+    export function MainButton(hyphenProps: HyphenProps): JSX.Element;
+    export function MainButton(props: ButtonProps | LinkProps | HyphenProps): JSX.Element {
+        const linkProps = props as LinkProps;
+        if(linkProps.to) {
+            return this._buildMainLink(props);
+        }
+    
+        return this._buildMainButton(props);
+    }
+    
+    // OK
+    const b0 = <MainButton to='/some/path'>GO</MainButton>;
+    const b1 = <MainButton onClick={(e) => {}}>Hello world</MainButton>;
+    const b2 = <MainButton {...obj} />;
+    const b3 = <MainButton {...{to: 10000}} {...obj} />;
+    const b4 = <MainButton {...obj1} />;  // any; just pick the first overload
+                               ~~~~
+!!! error TS2454: Variable 'obj1' is used before being assigned.
+    const b5 = <MainButton {...obj1} to="/to/somewhere" />;  // should pick the second overload
+                               ~~~~
+!!! error TS2454: Variable 'obj1' is used before being assigned.
+    const b6 = <MainButton {...obj2} />;
+    const b7 = <MainButton {...{onClick: () => { log("hi") }}} />;
+    const b8 = <MainButton {...{onClick() {}}} />;  // OK; method declaration get retained (See GitHub #13365)
+                                ~~~~~~~
+!!! error TS2304: Cannot find name 'onClick'.
+                                       ~
+!!! error TS1005: ',' expected.
+                                       ~
+!!! error TS2304: Cannot find name '('.
+                                        ~
+!!! error TS1005: ',' expected.
+                                        ~
+!!! error TS2304: Cannot find name ')'.
+                                          ~
+!!! error TS1005: ',' expected.
+                                          ~
+!!! error TS2304: Cannot find name '{'.
+    const b9 = <MainButton to='/some/path' extra-prop>GO</MainButton>;
+    const b10 = <MainButton to='/some/path' children="hi" ></MainButton>;
+    const b11 = <MainButton onClick={(e) => {}} className="hello" data-format>Hello world</MainButton>;
+    const b12 = <MainButton data-format="Hello world" />
+    
+    

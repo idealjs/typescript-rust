@@ -167,7 +167,7 @@ varInContainingScopeStaticField2.ts(5,22): error TS2339: Property 'w' does not e
 varInContainingScopeStaticField3.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
 
 
-==== instanceAndStaticMembers/superInStaticMembers1.ts (0 errors) ====
+==== superInStaticMembers1.ts (0 errors) ====
     
 ==== external.ts (3 errors) ====
     export class Reflect {}

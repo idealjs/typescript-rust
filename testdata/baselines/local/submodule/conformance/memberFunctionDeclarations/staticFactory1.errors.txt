@@ -1,0 +1,22 @@
+staticFactory1.ts(4,20): error TS2351: This expression is not constructable.
+staticFactory1.ts(11,17): error TS2339: Property 'create' does not exist on type 'object'.
+
+
+==== staticFactory1.ts (2 errors) ====
+    class Base {
+        foo() { return 1; }
+        static create() {
+            return new this();
+                       ~~~~
+!!! error TS2351: This expression is not constructable.
+        }
+    }
+    
+    class Derived extends Base {
+        foo() { return 2; }
+    }
+    var d = Derived.create(); 
+                    ~~~~~~
+!!! error TS2339: Property 'create' does not exist on type 'object'.
+    
+    d.foo();  

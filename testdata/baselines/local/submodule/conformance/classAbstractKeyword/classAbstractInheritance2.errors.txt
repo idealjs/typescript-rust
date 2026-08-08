@@ -1,9 +1,9 @@
-classAbstractKeyword/classAbstractInheritance2.ts(11,17): error TS2304: Cannot find name 'extends'.
-classAbstractKeyword/classAbstractInheritance2.ts(11,25): error TS1005: '{' expected.
-classAbstractKeyword/classAbstractInheritance2.ts(11,27): error TS1005: ';' expected.
+classAbstractInheritance2.ts(11,17): error TS2304: Cannot find name 'extends'.
+classAbstractInheritance2.ts(11,25): error TS1005: '{' expected.
+classAbstractInheritance2.ts(11,27): error TS1005: ';' expected.
 
 
-==== classAbstractKeyword/classAbstractInheritance2.ts (3 errors) ====
+==== classAbstractInheritance2.ts (3 errors) ====
     abstract class A {
         abstract m1(): number;
         abstract m2(): number;

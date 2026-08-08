@@ -1,0 +1,46 @@
+mixinAbstractClasses.ts(25,13): error TS2339: Property 'baseMethod' does not exist on type 'object'.
+mixinAbstractClasses.ts(26,13): error TS2339: Property 'mixinMethod' does not exist on type 'object'.
+mixinAbstractClasses.ts(34,13): error TS2339: Property 'mixinMethod' does not exist on type '{ abstractBaseMethod: () => any }'.
+
+
+==== mixinAbstractClasses.ts (3 errors) ====
+    interface Mixin {
+        mixinMethod(): void;
+    }
+    
+    function Mixin<TBaseClass extends abstract new (...args: any) => any>(baseClass: TBaseClass): TBaseClass & (abstract new (...args: any) => Mixin) {
+        abstract class MixinClass extends baseClass implements Mixin {
+            mixinMethod() {
+            }
+        }
+        return MixinClass;
+    }
+    
+    class ConcreteBase {
+        baseMethod() {}
+    }
+    
+    abstract class AbstractBase {
+        abstract abstractBaseMethod(): void;
+    }
+    
+    class DerivedFromConcrete extends Mixin(ConcreteBase) {
+    }
+    
+    const wasConcrete = new DerivedFromConcrete();
+    wasConcrete.baseMethod();
+                ~~~~~~~~~~
+!!! error TS2339: Property 'baseMethod' does not exist on type 'object'.
+    wasConcrete.mixinMethod();
+                ~~~~~~~~~~~
+!!! error TS2339: Property 'mixinMethod' does not exist on type 'object'.
+    
+    class DerivedFromAbstract extends Mixin(AbstractBase) {
+        abstractBaseMethod() {}
+    }
+    
+    const wasAbstract = new DerivedFromAbstract();
+    wasAbstract.abstractBaseMethod();
+    wasAbstract.mixinMethod();
+                ~~~~~~~~~~~
+!!! error TS2339: Property 'mixinMethod' does not exist on type '{ abstractBaseMethod: () => any }'.

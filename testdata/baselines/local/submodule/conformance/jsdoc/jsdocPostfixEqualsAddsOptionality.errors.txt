@@ -1,0 +1,30 @@
+a.js(7,1): error TS2554: Expected 1 arguments, but got 0.
+a.js(18,1): error TS2554: Expected 1 arguments, but got 0.
+
+
+==== a.js (2 errors) ====
+    /** @param {number=} a */
+    function f(a) {
+        a = 1
+        a = null // should not be allowed
+        a = undefined
+    }
+    f()
+    ~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    f(null) // should not be allowed
+    f(undefined)
+    f(1)
+    
+    /** @param {???!?number?=} a */
+    function g(a) {
+        a = 1
+        a = null
+        a = undefined
+    }
+    g()
+    ~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    g(null)
+    g(undefined)
+    g(1)

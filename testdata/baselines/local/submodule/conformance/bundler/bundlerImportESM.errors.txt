@@ -1,0 +1,18 @@
+/package.json(1,9): error TS1005: ';' expected.
+
+
+==== bundlerImportESM.ts (0 errors) ====
+    
+==== /esm.mts (0 errors) ====
+    export const esm = 0;
+    
+==== /not-actually-cjs.cts (0 errors) ====
+    import { esm } from "./esm.mjs";
+    
+==== /package.json (1 errors) ====
+    { "type": "commonjs" }
+            ~
+!!! error TS1005: ';' expected.
+    
+==== /still-not-cjs.ts (0 errors) ====
+    import { esm } from "./esm.mjs";

@@ -1,0 +1,20 @@
+foo_1.ts(3,18): error TS2339: Property 'green' does not exist on type '0 | 1 | 2'.
+
+
+==== foo_0.ts (0 errors) ====
+    enum foo {
+    	red, green, blue
+    }
+    namespace foo {
+    	export var answer = 42;
+    }
+    export = foo;
+    
+==== foo_1.ts (1 errors) ====
+    import foo = require("./foo_0");
+    var color: foo;
+    if(color === foo.green){
+                     ~~~~~
+!!! error TS2339: Property 'green' does not exist on type '0 | 1 | 2'.
+    	color = foo.answer;
+    }

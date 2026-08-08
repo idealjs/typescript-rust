@@ -1,0 +1,10 @@
+b.js(2,3): error TS2339: Property 'd' does not exist on type 'object'.
+
+
+==== a.d.ts (0 errors) ====
+    declare class A {}
+==== b.js (1 errors) ====
+    const A = { };
+    A.d = { };
+      ~
+!!! error TS2339: Property 'd' does not exist on type 'object'.

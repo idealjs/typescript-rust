@@ -1,0 +1,8 @@
+templateStringWithEmbeddedNewOperatorES6.ts(2,20): error TS2304: Cannot find name 'String'.
+
+
+==== templateStringWithEmbeddedNewOperatorES6.ts (1 errors) ====
+    ﻿// @target: ES6
+    var x = `abc${ new String("Hi") }def`;
+                    ~~~~~~
+!!! error TS2304: Cannot find name 'String'.

@@ -1,0 +1,14 @@
+controlFlowConditionalExpression.ts(4,1): error TS2454: Variable 'cond' is used before being assigned.
+controlFlowConditionalExpression.ts(5,1): error TS2454: Variable 'x' is used before being assigned.
+
+
+==== controlFlowConditionalExpression.ts (2 errors) ====
+    let x: string | number | boolean;
+    let cond: boolean;
+    
+    cond ? x = "" : x = 3;
+    ~~~~
+!!! error TS2454: Variable 'cond' is used before being assigned.
+    x; // string | number
+    ~
+!!! error TS2454: Variable 'x' is used before being assigned.

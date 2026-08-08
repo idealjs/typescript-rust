@@ -1,0 +1,29 @@
+index.js(6,7): error TS1003: Identifier expected.
+index.js(6,8): error TS1005: ';' expected.
+index.js(6,8): error TS2304: Cannot find name 'exports'.
+index.js(8,7): error TS1003: Identifier expected.
+index.js(8,8): error TS1005: ';' expected.
+index.js(8,8): error TS2304: Cannot find name 'exports'.
+
+
+==== index.js (6 errors) ====
+    class Foo {
+        static stat = 10;
+        member = 10;
+    }
+    
+    module.exports = new Foo();
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    
+    module.exports.additional = 20;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.

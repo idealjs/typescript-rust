@@ -11,7 +11,7 @@ error TS2300: Duplicate identifier 'C4'.
 !!! error TS2300: Duplicate identifier 'C3'.
 
 !!! error TS2300: Duplicate identifier 'C4'.
-==== classDeclarations/mergeClassInterfaceAndModule.ts (0 errors) ====
+==== mergeClassInterfaceAndModule.ts (0 errors) ====
     interface C1 {}
     declare class C1 {}
     namespace C1 {}

@@ -1,0 +1,68 @@
+plainJSBinderErrors.js(12,5): error TS1003: Identifier expected.
+plainJSBinderErrors.js(12,5): error TS1127: Invalid character.
+plainJSBinderErrors.js(12,6): error TS1005: ';' expected.
+plainJSBinderErrors.js(27,9): error TS2304: Cannot find name 'with'.
+plainJSBinderErrors.js(27,26): error TS1005: ';' expected.
+plainJSBinderErrors.js(28,20): error TS2304: Cannot find name 'toFixed'.
+plainJSBinderErrors.js(34,13): error TS1116: A 'break' statement can only jump to a label of an enclosing statement.
+plainJSBinderErrors.js(36,16): error TS2304: Cannot find name 'x'.
+
+
+==== plainJSBinderErrors.js (8 errors) ====
+    export default 12
+    export default 13
+    const await = 1
+    const yield = 2
+    async function f() {
+        const await = 3
+    }
+    function* g() {
+        const yield = 4
+    }
+    class C {
+        #constructor = 5
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+        deleted() {
+            function container(f) {
+                delete f
+            }
+            var g = 6
+            delete g
+            delete container
+        }
+        evalArguments() {
+            const eval = 7
+            const arguments = 8
+        }
+        withOctal() {
+            const redundant = 0o10
+            with (redundant) {
+            ~~~~
+!!! error TS2304: Cannot find name 'with'.
+                             ~
+!!! error TS1005: ';' expected.
+                return toFixed()
+                       ~~~~~~~
+!!! error TS2304: Cannot find name 'toFixed'.
+            }
+        }
+        label() {
+            for(;;) {
+                label: var x = 1
+                break label
+                ~~~~~~~~~~~
+            }
+    ~~~~~~~~
+!!! error TS1116: A 'break' statement can only jump to a label of an enclosing statement.
+            return x
+                   ~
+!!! error TS2304: Cannot find name 'x'.
+        }
+    }
+    const eval = 9
+    const arguments = 10

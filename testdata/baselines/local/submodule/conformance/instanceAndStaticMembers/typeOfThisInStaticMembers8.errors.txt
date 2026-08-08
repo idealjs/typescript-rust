@@ -1,11 +1,11 @@
-instanceAndStaticMembers/typeOfThisInStaticMembers8.ts(3,47): error TS2339: Property 'f' does not exist on type 'object'.
-instanceAndStaticMembers/typeOfThisInStaticMembers8.ts(4,61): error TS2339: Property 'f' does not exist on type 'object'.
-instanceAndStaticMembers/typeOfThisInStaticMembers8.ts(8,25): error TS2339: Property 'f' does not exist on type 'object'.
-instanceAndStaticMembers/typeOfThisInStaticMembers8.ts(11,22): error TS2339: Property 'f' does not exist on type '{ a: number; method: () => any }'.
-instanceAndStaticMembers/typeOfThisInStaticMembers8.ts(13,29): error TS2339: Property 'f' does not exist on type '{ a: number; method: () => any }'.
+typeOfThisInStaticMembers8.ts(3,47): error TS2339: Property 'f' does not exist on type 'object'.
+typeOfThisInStaticMembers8.ts(4,61): error TS2339: Property 'f' does not exist on type 'object'.
+typeOfThisInStaticMembers8.ts(8,25): error TS2339: Property 'f' does not exist on type 'object'.
+typeOfThisInStaticMembers8.ts(11,22): error TS2339: Property 'f' does not exist on type '{ a: number; method: () => any }'.
+typeOfThisInStaticMembers8.ts(13,29): error TS2339: Property 'f' does not exist on type '{ a: number; method: () => any }'.
 
 
-==== instanceAndStaticMembers/typeOfThisInStaticMembers8.ts (5 errors) ====
+==== typeOfThisInStaticMembers8.ts (5 errors) ====
     class C {
         static f = 1;
         static arrowFunctionBoundary = () => this.f + 1;

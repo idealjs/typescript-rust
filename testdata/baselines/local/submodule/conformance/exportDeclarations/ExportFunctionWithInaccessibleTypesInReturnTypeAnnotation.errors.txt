@@ -1,0 +1,27 @@
+ExportFunctionWithInaccessibleTypesInReturnTypeAnnotation.ts(9,28): error TS1005: ',' expected.
+ExportFunctionWithInaccessibleTypesInReturnTypeAnnotation.ts(9,49): error TS1005: ',' expected.
+ExportFunctionWithInaccessibleTypesInReturnTypeAnnotation.ts(13,16): error TS2554: Expected 4 arguments, but got 2.
+
+
+==== ExportFunctionWithInaccessibleTypesInReturnTypeAnnotation.ts (3 errors) ====
+    namespace A {
+    
+        export class Point {
+            x: number;
+            y: number;
+        }
+    
+        class Line {
+            constructor(public start: Point, public end: Point) { }
+                               ~~~~~
+!!! error TS1005: ',' expected.
+                                                    ~~~
+!!! error TS1005: ',' expected.
+        }
+    
+        export function fromOrigin(p: Point): Line {
+            return new Line({ x: 0, y: 0 }, p);
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 4 arguments, but got 2.
+        }
+    }

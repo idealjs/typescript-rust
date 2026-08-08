@@ -1,0 +1,23 @@
+a.js(4,7): error TS2339: Property 'Inner' does not exist on type '() => void'.
+a.js(4,21): error TS2304: Cannot find name 'I'.
+
+
+==== a.js (2 errors) ====
+    function Outer() {
+        this.y = 2
+    }
+    Outer.Inner = class I {
+          ~~~~~
+!!! error TS2339: Property 'Inner' does not exist on type '() => void'.
+                        ~
+!!! error TS2304: Cannot find name 'I'.
+        constructor() {
+            this.x = 1
+        }
+    }
+    /** @type {Outer} */
+    var ok
+    ok.y
+    /** @type {Outer.Inner} */
+    var oc
+    oc.x

@@ -1,0 +1,14 @@
+decoratorOnClassConstructorParameter1.ts(4,17): error TS1138: Parameter declaration expected.
+decoratorOnClassConstructorParameter1.ts(4,22): error TS1005: ',' expected.
+
+
+==== decoratorOnClassConstructorParameter1.ts (2 errors) ====
+    declare function dec(target: Function, propertyKey: string | symbol, parameterIndex: number): void;
+    
+    class C {
+        constructor(@dec p: number) {}
+                    ~
+!!! error TS1138: Parameter declaration expected.
+                         ~
+!!! error TS1005: ',' expected.
+    }

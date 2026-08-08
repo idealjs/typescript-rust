@@ -1,13 +1,13 @@
-additionalChecks/noPropertyAccessFromIndexSignature1.ts(11,6): error TS2304: Cannot find name 'k'.
-additionalChecks/noPropertyAccessFromIndexSignature1.ts(11,7): error TS1005: ']' expected.
-additionalChecks/noPropertyAccessFromIndexSignature1.ts(11,15): error TS1003: Identifier expected.
-additionalChecks/noPropertyAccessFromIndexSignature1.ts(32,3): error TS2339: Property 'bar' does not exist on type '{ foo: any; :: error; string: error; ]: string }'.
-additionalChecks/noPropertyAccessFromIndexSignature1.ts(37,4): error TS2339: Property '' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
-additionalChecks/noPropertyAccessFromIndexSignature1.ts(40,4): error TS2339: Property 'bar' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
-additionalChecks/noPropertyAccessFromIndexSignature1.ts(41,4): error TS2339: Property '' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
+noPropertyAccessFromIndexSignature1.ts(11,6): error TS2304: Cannot find name 'k'.
+noPropertyAccessFromIndexSignature1.ts(11,7): error TS1005: ']' expected.
+noPropertyAccessFromIndexSignature1.ts(11,15): error TS1003: Identifier expected.
+noPropertyAccessFromIndexSignature1.ts(32,3): error TS2339: Property 'bar' does not exist on type '{ foo: any; :: error; string: error; ]: string }'.
+noPropertyAccessFromIndexSignature1.ts(37,4): error TS2339: Property '' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
+noPropertyAccessFromIndexSignature1.ts(40,4): error TS2339: Property 'bar' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
+noPropertyAccessFromIndexSignature1.ts(41,4): error TS2339: Property '' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
 
 
-==== additionalChecks/noPropertyAccessFromIndexSignature1.ts (7 errors) ====
+==== noPropertyAccessFromIndexSignature1.ts (7 errors) ====
     interface A {
         foo: string
     }

@@ -1,0 +1,49 @@
+error TS2300: Duplicate identifier 'A'.
+/b.ts(1,13): error TS1003: Identifier expected.
+/b.ts(1,15): error TS1005: '=' expected.
+/b.ts(1,20): error TS1005: ';' expected.
+/f.ts(2,13): error TS1003: Identifier expected.
+/f.ts(2,15): error TS1005: '=' expected.
+/f.ts(2,20): error TS1005: ';' expected.
+
+
+!!! error TS2300: Duplicate identifier 'A'.
+==== /a.ts (0 errors) ====
+    export type A = number;
+    
+==== /b.ts (3 errors) ====
+    export type * from "./a";
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~~
+!!! error TS1005: '=' expected.
+                       ~~~~~
+!!! error TS1005: ';' expected.
+    
+==== /c.ts (0 errors) ====
+    import { A } from "./b";
+    const A = 1;
+    export { A };
+    
+==== /d.ts (0 errors) ====
+    import { A } from "./c";
+    A; // Ok
+    type _ = A;
+    
+==== /e.ts (0 errors) ====
+    export const A = 1;
+    
+==== /f.ts (3 errors) ====
+    export * from "./e";
+    export type * from "./a"; // Collision error
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~~
+!!! error TS1005: '=' expected.
+                       ~~~~~
+!!! error TS1005: ';' expected.
+    
+==== /g.ts (0 errors) ====
+    import { A } from "./f";
+    A;
+    type _ = A; // Follow-on from collision error

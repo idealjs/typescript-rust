@@ -1,0 +1,24 @@
+test.tsx(6,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+test.tsx(6,7): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+test.tsx(6,22): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+test.tsx(6,33): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+test.tsx(6,39): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+
+
+==== test.tsx (5 errors) ====
+    declare namespace JSX { interface Element { } }
+    declare var React: any;
+    
+    declare var Foo, Bar, baz;
+    
+    <Foo> <Bar> q </Bar> <Bar/>   s <Bar/><Bar/></Foo>;
+    ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+          ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+                         ~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+                                    ~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+                                          ~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.

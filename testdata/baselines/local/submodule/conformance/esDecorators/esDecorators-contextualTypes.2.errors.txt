@@ -1,0 +1,39 @@
+esDecorators-contextualTypes.2.ts(16,18): error TS2304: Cannot find name 'ClassMethodDecoratorContext'.
+esDecorators-contextualTypes.2.ts(27,27): error TS2339: Property 'apply' does not exist on type '(this: This, args: Args) => Return'.
+
+
+==== esDecorators-contextualTypes.2.ts (2 errors) ====
+    class C {
+        @boundMethodLogger("Yadda", /*bound*/ true)
+        foo() {
+            this.fooHelper();
+        }
+    
+        fooHelper() {
+            console.log("Behold! The actual method implementation!")
+        }
+    };
+    export { C };
+    
+    function boundMethodLogger<This, Args extends any[], Return>(source: string, bound = true) {
+        return function loggedDecorator(
+            target: (this: This, ...args: Args) => Return,
+            context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'ClassMethodDecoratorContext'.
+        ): ((this: This, ...args: Args) => Return) {
+    
+            if (bound) {
+                context.addInitializer(function () {
+                    (this as any)[context.name] = (this as any)[context.name].bind(this);
+                });
+            }
+    
+            return function (this, ...args) {
+                console.log(`<${source}>: I'm logging stuff from ${context.name.toString()}!`);
+                return target.apply(this, args);
+                              ~~~~~
+!!! error TS2339: Property 'apply' does not exist on type '(this: This, args: Args) => Return'.
+            }
+        }
+    }

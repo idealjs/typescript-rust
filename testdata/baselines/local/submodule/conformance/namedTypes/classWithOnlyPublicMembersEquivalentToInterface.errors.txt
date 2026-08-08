@@ -1,0 +1,61 @@
+classWithOnlyPublicMembersEquivalentToInterface.ts(5,42): error TS2322: Type 'null' is not assignable to type 'number'.
+classWithOnlyPublicMembersEquivalentToInterface.ts(6,16): error TS1005: ';' expected.
+classWithOnlyPublicMembersEquivalentToInterface.ts(7,16): error TS1005: ';' expected.
+classWithOnlyPublicMembersEquivalentToInterface.ts(8,7): error TS1005: ']' expected.
+classWithOnlyPublicMembersEquivalentToInterface.ts(8,15): error TS1005: ';' expected.
+classWithOnlyPublicMembersEquivalentToInterface.ts(8,18): error TS2304: Cannot find name 'Object'.
+classWithOnlyPublicMembersEquivalentToInterface.ts(9,7): error TS1005: ']' expected.
+classWithOnlyPublicMembersEquivalentToInterface.ts(9,15): error TS1005: ';' expected.
+classWithOnlyPublicMembersEquivalentToInterface.ts(9,18): error TS2304: Cannot find name 'Object'.
+classWithOnlyPublicMembersEquivalentToInterface.ts(17,18): error TS2304: Cannot find name 'Object'.
+classWithOnlyPublicMembersEquivalentToInterface.ts(18,18): error TS2304: Cannot find name 'Object'.
+
+
+==== classWithOnlyPublicMembersEquivalentToInterface.ts (11 errors) ====
+    // no errors expected
+    
+    class C {
+        public x: string;
+        public y(a: number): number { return null; }
+                                             ~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'number'.
+        public get z() { return 1; }
+                   ~
+!!! error TS1005: ';' expected.
+        public set z(v) { }
+                   ~
+!!! error TS1005: ';' expected.
+        [x: string]: Object;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+                     ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        [x: number]: Object;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+                     ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        0: number;
+    }
+    
+    interface I {
+        x: string;
+        y(b: number): number;
+        z: number;
+        [x: string]: Object;
+                     ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        [x: number]: Object;
+                     ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        0: number;
+    }
+    
+    var c: C;
+    var i: I;
+    c = i;
+    i = c;

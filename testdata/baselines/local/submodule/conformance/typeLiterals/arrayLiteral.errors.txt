@@ -1,0 +1,30 @@
+arrayLiteral.ts(4,13): error TS2304: Cannot find name 'Array'.
+arrayLiteral.ts(8,13): error TS2304: Cannot find name 'Array'.
+arrayLiteral.ts(11,24): error TS2304: Cannot find name 'Array'.
+arrayLiteral.ts(15,24): error TS2304: Cannot find name 'Array'.
+
+
+==== arrayLiteral.ts (4 errors) ====
+    // valid uses of array literals
+    
+    var x = [];
+    var x = new Array(1);
+                ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    
+    var y = [1];
+    var y = [1, 2];
+    var y = new Array<number>();
+                ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    
+    var x2: number[] = [];
+    var x2: number[] = new Array(1);
+                           ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    
+    var y2: number[] = [1];
+    var y2: number[] = [1, 2];
+    var y2: number[] = new Array<number>();
+                           ~~~~~
+!!! error TS2304: Cannot find name 'Array'.

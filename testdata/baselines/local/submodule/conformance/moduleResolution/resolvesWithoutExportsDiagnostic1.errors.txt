@@ -1,0 +1,127 @@
+/node_modules/@types/bar/package.json(2,11): error TS1005: ';' expected.
+/node_modules/@types/bar/package.json(3,14): error TS1005: ';' expected.
+/node_modules/@types/bar/package.json(4,12): error TS1005: ';' expected.
+/node_modules/@types/bar/package.json(5,14): error TS1005: ';' expected.
+/node_modules/@types/bar/package.json(6,12): error TS1005: ';' expected.
+/node_modules/@types/bar/package.json(7,22): error TS1005: ';' expected.
+/node_modules/bar/package.json(2,11): error TS1005: ';' expected.
+/node_modules/bar/package.json(3,14): error TS1005: ';' expected.
+/node_modules/bar/package.json(4,11): error TS1005: ';' expected.
+/node_modules/bar/package.json(5,14): error TS1005: ';' expected.
+/node_modules/bar/package.json(6,12): error TS1005: ';' expected.
+/node_modules/bar/package.json(7,21): error TS1005: ';' expected.
+/node_modules/bar/package.json(8,22): error TS1005: ';' expected.
+/node_modules/foo/package.json(2,11): error TS1005: ';' expected.
+/node_modules/foo/package.json(3,14): error TS1005: ';' expected.
+/node_modules/foo/package.json(4,11): error TS1005: ';' expected.
+/node_modules/foo/package.json(5,12): error TS1005: ';' expected.
+/node_modules/foo/package.json(6,14): error TS1005: ';' expected.
+/node_modules/foo/package.json(7,12): error TS1005: ';' expected.
+/node_modules/foo/package.json(8,21): error TS1005: ';' expected.
+/node_modules/foo/package.json(9,22): error TS1005: ';' expected.
+
+
+==== resolvesWithoutExportsDiagnostic1.ts (0 errors) ====
+    
+==== /node_modules/foo/package.json (8 errors) ====
+    {
+        "name": "foo",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "1.0.0",
+                 ~
+!!! error TS1005: ';' expected.
+        "main": "index.js",
+              ~
+!!! error TS1005: ';' expected.
+        "types": "index.d.ts",
+               ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            ".": {
+               ~
+!!! error TS1005: ';' expected.
+                "import": "./index.mjs",
+                        ~
+!!! error TS1005: ';' expected.
+                "require": "./index.js"
+                         ~
+!!! error TS1005: ';' expected.
+            }
+        }
+    }
+    
+==== /node_modules/foo/index.js (0 errors) ====
+    module.exports = { foo: 1 };
+    
+==== /node_modules/foo/index.mjs (0 errors) ====
+    export const foo = 1;
+    
+==== /node_modules/foo/index.d.ts (0 errors) ====
+    export declare const foo: number;
+    
+==== /node_modules/@types/bar/package.json (6 errors) ====
+    {
+        "name": "@types/bar",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "1.0.0",
+                 ~
+!!! error TS1005: ';' expected.
+        "types": "index.d.ts",
+               ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            ".": {
+               ~
+!!! error TS1005: ';' expected.
+                "require": "./index.d.ts"
+                         ~
+!!! error TS1005: ';' expected.
+            }
+        }
+    }
+    
+==== /node_modules/@types/bar/index.d.ts (0 errors) ====
+    export declare const bar: number;
+    
+==== /node_modules/bar/package.json (7 errors) ====
+    {
+        "name": "bar",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "1.0.0",
+                 ~
+!!! error TS1005: ';' expected.
+        "main": "index.js",
+              ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            ".": {
+               ~
+!!! error TS1005: ';' expected.
+                "import": "./index.mjs",
+                        ~
+!!! error TS1005: ';' expected.
+                "require": "./index.js"
+                         ~
+!!! error TS1005: ';' expected.
+            }
+        }
+    }
+    
+==== /node_modules/bar/index.js (0 errors) ====
+    module.exports = { bar: 1 };
+    
+==== /node_modules/bar/index.mjs (0 errors) ====
+    export const bar = 1;
+    
+==== /index.mts (0 errors) ====
+    import { foo } from "foo";
+    import { bar } from "bar";

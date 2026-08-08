@@ -1,12 +1,12 @@
-functionDeclarations/asyncFunctionDeclaration7_es6.ts(3,31): error TS1012: Unexpected token.
-functionDeclarations/asyncFunctionDeclaration7_es6.ts(3,32): error TS1005: ',' expected.
-functionDeclarations/asyncFunctionDeclaration7_es6.ts(3,34): error TS1016: A required parameter cannot follow an optional parameter.
-functionDeclarations/asyncFunctionDeclaration7_es6.ts(3,41): error TS1005: ',' expected.
-functionDeclarations/asyncFunctionDeclaration7_es6.ts(3,46): error TS1005: ',' expected.
-functionDeclarations/asyncFunctionDeclaration7_es6.ts(5,1): error TS1005: ',' expected.
+asyncFunctionDeclaration7_es6.ts(3,31): error TS1012: Unexpected token.
+asyncFunctionDeclaration7_es6.ts(3,32): error TS1005: ',' expected.
+asyncFunctionDeclaration7_es6.ts(3,34): error TS1016: A required parameter cannot follow an optional parameter.
+asyncFunctionDeclaration7_es6.ts(3,41): error TS1005: ',' expected.
+asyncFunctionDeclaration7_es6.ts(3,46): error TS1005: ',' expected.
+asyncFunctionDeclaration7_es6.ts(5,1): error TS1005: ',' expected.
 
 
-==== functionDeclarations/asyncFunctionDeclaration7_es6.ts (6 errors) ====
+==== asyncFunctionDeclaration7_es6.ts (6 errors) ====
     async function bar(): Promise<void> {
       // 'await' here is an identifier, and not a yield expression.
       async function foo(a = await): Promise<void> {

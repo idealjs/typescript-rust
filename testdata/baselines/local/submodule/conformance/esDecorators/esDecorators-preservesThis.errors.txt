@@ -1,0 +1,48 @@
+esDecorators-preservesThis.ts(4,45): error TS2304: Cannot find name 'T'.
+esDecorators-preservesThis.ts(4,53): error TS2304: Cannot find name 'DecoratorContext'.
+esDecorators-preservesThis.ts(4,72): error TS2304: Cannot find name 'T'.
+
+
+==== esDecorators-preservesThis.ts (3 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/53752
+    
+    declare class DecoratorProvider {
+        decorate<T>(this: DecoratorProvider, v: T, ctx: DecoratorContext): T;
+                                                ~
+!!! error TS2304: Cannot find name 'T'.
+                                                        ~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'DecoratorContext'.
+                                                                           ~
+!!! error TS2304: Cannot find name 'T'.
+    }
+    
+    declare const instance: DecoratorProvider;
+    
+    // preserve `this` for access
+    class C {
+        @instance.decorate
+        method1() { }
+    
+        @(instance["decorate"])
+        method2() { }
+    
+        // even in parens
+        @((instance.decorate))
+        method3() { }
+    }
+    
+    // preserve `this` for `super` access
+    class D extends DecoratorProvider {
+        m() {
+            class C {
+                @(super.decorate)
+                method1() { }
+    
+                @(super["decorate"])
+                method2() { }
+    
+                @((super.decorate))
+                method3() { }
+            }
+        }
+    }

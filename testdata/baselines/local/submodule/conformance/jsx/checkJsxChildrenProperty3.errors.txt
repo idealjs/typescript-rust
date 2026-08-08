@@ -1,0 +1,55 @@
+error TS6053: File 'react.d.ts' not found.
+file.tsx(15,21): error TS2339: Property 'state' does not exist on type '{ render: () => any }'.
+file.tsx(16,20): error TS2339: Property 'props' does not exist on type '{ render: () => any }'.
+file.tsx(16,40): error TS2339: Property 'state' does not exist on type '{ render: () => any }'.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.
+==== file.tsx (3 errors) ====
+    /// <reference path="/.lib/react.d.ts" />
+    
+    import React = require('react');
+    
+    interface IUser {
+        Name: string;
+    }
+    
+    interface IFetchUserProps {
+        children: (user: IUser) => JSX.Element;
+    }
+    
+    class FetchUser extends React.Component<IFetchUserProps, any> {
+        render() {
+            return this.state
+                        ~~~~~
+!!! error TS2339: Property 'state' does not exist on type '{ render: () => any }'.
+                ? this.props.children(this.state.result)
+                       ~~~~~
+!!! error TS2339: Property 'props' does not exist on type '{ render: () => any }'.
+                                           ~~~~~
+!!! error TS2339: Property 'state' does not exist on type '{ render: () => any }'.
+                : null;
+        }
+    }
+    
+    // Ok
+    function UserName0() {
+        return (
+            <FetchUser>
+                { user => (
+                    <h1>{ user.Name }</h1>
+                ) }
+            </FetchUser>
+        );
+    }
+    
+    function UserName1() {
+        return (
+            <FetchUser>
+    
+                { user => (
+                    <h1>{ user.Name }</h1>
+                ) }
+            </FetchUser>
+        );
+    }

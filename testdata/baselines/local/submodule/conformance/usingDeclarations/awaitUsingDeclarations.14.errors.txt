@@ -1,0 +1,32 @@
+awaitUsingDeclarations.14.ts(2,12): error TS1005: ';' expected.
+awaitUsingDeclarations.14.ts(3,15): error TS1005: ';' expected.
+awaitUsingDeclarations.14.ts(3,21): error TS1005: ';' expected.
+awaitUsingDeclarations.14.ts(4,9): error TS1003: Identifier expected.
+awaitUsingDeclarations.14.ts(5,19): error TS1005: ';' expected.
+awaitUsingDeclarations.14.ts(5,25): error TS1005: ';' expected.
+awaitUsingDeclarations.14.ts(7,5): error TS1128: Declaration or statement expected.
+
+
+==== awaitUsingDeclarations.14.ts (7 errors) ====
+    class C {
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            await using x = null;
+                  ~~~~~
+!!! error TS1005: ';' expected.
+                        ~
+!!! error TS1005: ';' expected.
+            {
+            ~
+!!! error TS1003: Identifier expected.
+                await using y = null;
+                      ~~~~~
+!!! error TS1005: ';' expected.
+                            ~
+!!! error TS1005: ';' expected.
+            }
+        }
+        ~
+!!! error TS1128: Declaration or statement expected.
+    }

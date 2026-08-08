@@ -1,0 +1,7 @@
+parser645086_2.ts(1,14): error TS1005: ',' expected.
+
+
+==== parser645086_2.ts (1 errors) ====
+    var v = /[^]/]/
+                 ~
+!!! error TS1005: ',' expected.

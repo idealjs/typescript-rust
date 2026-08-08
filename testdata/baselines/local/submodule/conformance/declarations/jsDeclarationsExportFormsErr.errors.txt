@@ -1,0 +1,36 @@
+bar.js(2,10): error TS2304: Cannot find name 'ns'.
+bin.js(2,7): error TS1003: Identifier expected.
+bin.js(2,8): error TS1005: ';' expected.
+bin.js(2,8): error TS2304: Cannot find name 'exports'.
+bin.js(2,18): error TS2304: Cannot find name 'ns'.
+
+
+==== cls.js (0 errors) ====
+    export class Foo {}
+    
+==== bar.js (1 errors) ====
+    import ns = require("./cls");
+    export = ns; // TS Only
+             ~~
+!!! error TS2304: Cannot find name 'ns'.
+    
+==== bin.js (4 errors) ====
+    import * as ns from "./cls";
+    module.exports = ns; // We refuse to bind cjs module exports assignments in the same file we find an import in
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+                     ~~
+!!! error TS2304: Cannot find name 'ns'.
+    
+==== globalNs.js (0 errors) ====
+    export * from "./cls";
+    export as namespace GLO; // TS Only
+    
+==== includeAll.js (0 errors) ====
+    import "./bar";
+    import "./bin";
+    import "./globalNs";

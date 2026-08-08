@@ -1,0 +1,31 @@
+strictTupleLength.ts(6,18): error TS2339: Property 'length' does not exist on type '[]'.
+strictTupleLength.ts(7,18): error TS2339: Property 'length' does not exist on type '[number]'.
+strictTupleLength.ts(8,18): error TS2339: Property 'length' does not exist on type '[number, number]'.
+
+
+==== strictTupleLength.ts (3 errors) ====
+    declare var t0: [];
+    declare var t1: [number];
+    declare var t2: [number, number];
+    declare var arr: number[];
+    
+    var len0: 0 = t0.length;
+                     ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type '[]'.
+    var len1: 1 = t1.length;
+                     ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type '[number]'.
+    var len2: 2 = t2.length;
+                     ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type '[number, number]'.
+    var lena: number = arr.length;
+    
+    var t1 = t2; // error
+    var t2 = t1; // error
+    
+    type A<T extends any[]> = T['length'];
+    declare var b: A<[boolean]>;
+    var c: 1 = b;
+    
+    t1 = arr; // error with or without strict
+    arr = t1; // ok with or without strict

@@ -1,0 +1,29 @@
+/a.ts(2,13): error TS1003: Identifier expected.
+/a.ts(2,15): error TS1005: '=' expected.
+/a.ts(2,17): error TS1128: Declaration or statement expected.
+
+
+==== exportDeclaration.ts (0 errors) ====
+    
+==== /a.ts (3 errors) ====
+    class A {}
+    export type { A };
+                ~
+!!! error TS1003: Identifier expected.
+                  ~
+!!! error TS1005: '=' expected.
+                    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== /b.ts (0 errors) ====
+    import { A } from './a';
+    declare const a: A;
+    new A();
+    
+==== /c.ts (0 errors) ====
+    import type { A } from './a';
+    export = A;
+    
+==== /d.ts (0 errors) ====
+    import { A } from './a';
+    export = A;

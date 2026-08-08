@@ -1,0 +1,27 @@
+referencer.js(7,12): error TS2304: Cannot find name 'Math'.
+
+
+==== source.js (0 errors) ====
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    export function Point(x, y) {
+        if (!(this instanceof Point)) {
+            return new Point(x, y);
+        }
+        this.x = x;
+        this.y = y;
+    }
+    
+==== referencer.js (1 errors) ====
+    import {Point} from "./source";
+    
+    /**
+     * @param {Point} p
+     */
+    export function magnitude(p) {
+        return Math.sqrt(p.x ** 2 + p.y ** 2);
+               ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+    }

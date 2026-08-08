@@ -1,0 +1,20 @@
+destructuringObjectAssignmentPatternWithNestedSpread.ts(1,49): error TS2304: Cannot find name 'd'.
+destructuringObjectAssignmentPatternWithNestedSpread.ts(1,50): error TS1005: ',' expected.
+destructuringObjectAssignmentPatternWithNestedSpread.ts(2,7): error TS2454: Variable 'a' is used before being assigned.
+destructuringObjectAssignmentPatternWithNestedSpread.ts(2,13): error TS2454: Variable 'b' is used before being assigned.
+destructuringObjectAssignmentPatternWithNestedSpread.ts(2,18): error TS2304: Cannot find name 'd'.
+
+
+==== destructuringObjectAssignmentPatternWithNestedSpread.ts (5 errors) ====
+    let a: any, b: any, c: any = {x: {a: 1, y: 2}}, d: any;
+                                                    ~
+!!! error TS2304: Cannot find name 'd'.
+                                                     ~
+!!! error TS1005: ',' expected.
+    ({x: {a, ...b} = d} = c);
+          ~
+!!! error TS2454: Variable 'a' is used before being assigned.
+                ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+                     ~
+!!! error TS2304: Cannot find name 'd'.

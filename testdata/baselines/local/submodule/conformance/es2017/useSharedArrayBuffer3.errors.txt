@@ -1,7 +1,7 @@
-es2017/useSharedArrayBuffer3.ts(1,16): error TS2304: Cannot find name 'SharedArrayBuffer'.
+useSharedArrayBuffer3.ts(1,16): error TS2304: Cannot find name 'SharedArrayBuffer'.
 
 
-==== es2017/useSharedArrayBuffer3.ts (1 errors) ====
+==== useSharedArrayBuffer3.ts (1 errors) ====
     var foge = new SharedArrayBuffer(1024);
                    ~~~~~~~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'SharedArrayBuffer'.

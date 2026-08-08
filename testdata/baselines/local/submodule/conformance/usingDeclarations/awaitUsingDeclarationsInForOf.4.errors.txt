@@ -1,0 +1,23 @@
+awaitUsingDeclarationsInForOf.4.ts(4,14): error TS2304: Cannot find name 'using'.
+awaitUsingDeclarationsInForOf.4.ts(4,23): error TS2304: Cannot find name 'of'.
+awaitUsingDeclarationsInForOf.4.ts(4,26): error TS1005: ')' expected.
+awaitUsingDeclarationsInForOf.4.ts(4,26): error TS2304: Cannot find name 'of'.
+awaitUsingDeclarationsInForOf.4.ts(4,28): error TS1005: ';' expected.
+
+
+==== awaitUsingDeclarationsInForOf.4.ts (5 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/55555
+    
+    {
+      for (await using of of of) {};
+                 ~~~~~
+!!! error TS2304: Cannot find name 'using'.
+                          ~~
+!!! error TS2304: Cannot find name 'of'.
+                             ~~
+!!! error TS1005: ')' expected.
+                             ~~
+!!! error TS2304: Cannot find name 'of'.
+                               ~
+!!! error TS1005: ';' expected.
+    }

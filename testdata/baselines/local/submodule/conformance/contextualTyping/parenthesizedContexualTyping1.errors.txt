@@ -1,0 +1,124 @@
+parenthesizedContexualTyping1.ts(7,13): error TS2345: Argument of type '(x: T) => T' is not assignable to parameter of type '(x: T) => T'.
+parenthesizedContexualTyping1.ts(7,21): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+parenthesizedContexualTyping1.ts(8,23): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+parenthesizedContexualTyping1.ts(9,25): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+parenthesizedContexualTyping1.ts(10,27): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+parenthesizedContexualTyping1.ts(12,29): error TS2554: Expected 2 arguments, but got 3.
+parenthesizedContexualTyping1.ts(13,33): error TS2554: Expected 2 arguments, but got 3.
+parenthesizedContexualTyping1.ts(14,37): error TS2554: Expected 2 arguments, but got 3.
+parenthesizedContexualTyping1.ts(15,39): error TS2554: Expected 2 arguments, but got 3.
+parenthesizedContexualTyping1.ts(18,14): error TS2304: Cannot find name 'Math'.
+parenthesizedContexualTyping1.ts(18,34): error TS1005: '>' expected.
+parenthesizedContexualTyping1.ts(18,62): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+parenthesizedContexualTyping1.ts(19,13): error TS2345: Argument of type '((x: any, x: any) => error) | any' is not assignable to parameter of type '(x: T) => T'.
+parenthesizedContexualTyping1.ts(19,14): error TS2304: Cannot find name 'Math'.
+parenthesizedContexualTyping1.ts(19,34): error TS1005: '>' expected.
+parenthesizedContexualTyping1.ts(19,39): error TS1005: ',' expected.
+parenthesizedContexualTyping1.ts(19,50): error TS1005: ')' expected.
+parenthesizedContexualTyping1.ts(19,62): error TS1005: ':' expected.
+parenthesizedContexualTyping1.ts(19,66): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+parenthesizedContexualTyping1.ts(20,14): error TS2304: Cannot find name 'Math'.
+parenthesizedContexualTyping1.ts(20,34): error TS1005: '>' expected.
+parenthesizedContexualTyping1.ts(20,39): error TS1005: ',' expected.
+parenthesizedContexualTyping1.ts(20,50): error TS1005: ')' expected.
+parenthesizedContexualTyping1.ts(20,62): error TS1005: ':' expected.
+parenthesizedContexualTyping1.ts(20,74): error TS2554: Expected 2 arguments, but got 3.
+parenthesizedContexualTyping1.ts(21,15): error TS2304: Cannot find name 'Math'.
+parenthesizedContexualTyping1.ts(21,35): error TS1005: '>' expected.
+parenthesizedContexualTyping1.ts(21,38): error TS1138: Parameter declaration expected.
+parenthesizedContexualTyping1.ts(21,41): error TS1005: ',' expected.
+parenthesizedContexualTyping1.ts(21,46): error TS1005: '=>' expected.
+parenthesizedContexualTyping1.ts(21,84): error TS2554: Expected 2 arguments, but got 3.
+
+
+==== parenthesizedContexualTyping1.ts (31 errors) ====
+    function fun<T>(g: (x: T) => T, x: T): T;
+    function fun<T>(g: (x: T) => T, h: (y: T) => T, x: T): T;
+    function fun<T>(g: (x: T) => T, x: T): T {
+        return g(x);
+    }
+    
+    var a = fun(x => x, 10);
+                ~~~~~~
+!!! error TS2345: Argument of type '(x: T) => T' is not assignable to parameter of type '(x: T) => T'.
+                        ~~
+!!! error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+    var b = fun((x => x), 10);
+                          ~~
+!!! error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+    var c = fun(((x => x)), 10);
+                            ~~
+!!! error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+    var d = fun((((x => x))), 10);
+                              ~~
+!!! error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+    
+    var e = fun(x => x, x => x, 10);
+                                ~~
+!!! error TS2554: Expected 2 arguments, but got 3.
+    var f = fun((x => x), (x => x), 10);
+                                    ~~
+!!! error TS2554: Expected 2 arguments, but got 3.
+    var g = fun(((x => x)), ((x => x)), 10);
+                                        ~~
+!!! error TS2554: Expected 2 arguments, but got 3.
+    var h = fun((((x => x))), ((x => x)), 10);
+                                          ~~
+!!! error TS2554: Expected 2 arguments, but got 3.
+    
+    // Ternaries in parens
+    var i = fun((Math.random() < 0.5 ? x => x : x => undefined), 10);
+                 ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                                     ~
+!!! error TS1005: '>' expected.
+                                                                 ~~
+!!! error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+    var j = fun((Math.random() < 0.5 ? (x => x) : (x => undefined)), 10);
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '((x: any, x: any) => error) | any' is not assignable to parameter of type '(x: T) => T'.
+                 ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                                     ~
+!!! error TS1005: '>' expected.
+                                          ~~
+!!! error TS1005: ',' expected.
+                                                     ~~
+!!! error TS1005: ')' expected.
+                                                                 ~
+!!! error TS1005: ':' expected.
+                                                                     ~~
+!!! error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+    var k = fun((Math.random() < 0.5 ? (x => x) : (x => undefined)), x => x, 10);
+                 ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                                     ~
+!!! error TS1005: '>' expected.
+                                          ~~
+!!! error TS1005: ',' expected.
+                                                     ~~
+!!! error TS1005: ')' expected.
+                                                                 ~
+!!! error TS1005: ':' expected.
+                                                                             ~~
+!!! error TS2554: Expected 2 arguments, but got 3.
+    var l = fun(((Math.random() < 0.5 ? ((x => x)) : ((x => undefined)))), ((x => x)), 10);
+                  ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                                      ~
+!!! error TS1005: '>' expected.
+                                         ~
+!!! error TS1138: Parameter declaration expected.
+                                            ~~
+!!! error TS1005: ',' expected.
+                                                 ~
+!!! error TS1005: '=>' expected.
+                                                                                       ~~
+!!! error TS2554: Expected 2 arguments, but got 3.
+    
+    var lambda1: (x: number) => number = x => x;
+    var lambda2: (x: number) => number = (x => x);
+    
+    type ObjType = { x: (p: number) => string; y: (p: string) => number };
+    var obj1: ObjType = { x: x => (x, undefined), y: y => (y, undefined) };
+    var obj2: ObjType = ({ x: x => (x, undefined), y: y => (y, undefined) });

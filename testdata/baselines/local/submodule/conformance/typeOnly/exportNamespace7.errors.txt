@@ -1,0 +1,43 @@
+/b.ts(1,13): error TS1003: Identifier expected.
+/b.ts(1,15): error TS1005: '=' expected.
+/b.ts(1,20): error TS1005: ';' expected.
+/d.ts(1,13): error TS1003: Identifier expected.
+/d.ts(1,15): error TS1005: '=' expected.
+/d.ts(1,20): error TS1005: ';' expected.
+
+
+==== /a.ts (0 errors) ====
+    export class A {}
+    export class B {}
+    export class C {}
+    
+==== /b.ts (3 errors) ====
+    export type * from "./a";
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~~
+!!! error TS1005: '=' expected.
+                       ~~~~~
+!!! error TS1005: ';' expected.
+    export class C {}
+    
+==== /c.ts (0 errors) ====
+    import { A, B, C } from "./b";
+    let _: A = new A();  // Error
+    let __: B = new B(); // Error
+    let ___: C = new C(); // Ok
+    
+==== /d.ts (3 errors) ====
+    export type * from "./b";
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~~
+!!! error TS1005: '=' expected.
+                       ~~~~~
+!!! error TS1005: ';' expected.
+    
+==== /e.ts (0 errors) ====
+    import { A, B, C } from "./d";
+    let _: A = new A();   // Error
+    let __: B = new B();  // Error
+    let ___: C = new C(); // Error

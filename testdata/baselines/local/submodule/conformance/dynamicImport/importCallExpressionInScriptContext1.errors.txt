@@ -1,0 +1,13 @@
+1.ts(1,10): error TS2304: Cannot find name 'import'.
+
+
+==== importCallExpressionInScriptContext1.ts (0 errors) ====
+    
+==== 0.ts (0 errors) ====
+    export function foo() { return "foo"; }
+    
+==== 1.ts (1 errors) ====
+    var p1 = import("./0");
+             ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    function arguments() { } // this is allow as the file doesn't have implicit "use strict"

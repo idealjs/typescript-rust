@@ -1,0 +1,53 @@
+error TS2451: Cannot redeclare block-scoped variable 'path'.
+error TS2451: Cannot redeclare block-scoped variable 'foo'.
+a.tsx(3,26): error TS1005: '>' expected.
+a.tsx(3,27): error TS1005: ',' expected.
+a.tsx(3,31): error TS1005: ',' expected.
+a.tsx(4,29): error TS1005: '>' expected.
+a.tsx(4,31): error TS1005: ',' expected.
+a.tsx(4,35): error TS1005: ',' expected.
+a.tsx(5,12): error TS2304: Cannot find name 'A'.
+a.tsx(5,21): error TS1005: '>' expected.
+a.tsx(5,22): error TS1005: ',' expected.
+a.tsx(5,25): error TS1005: ',' expected.
+a.tsx(6,21): error TS1005: '>' expected.
+a.tsx(6,22): error TS1005: ',' expected.
+a.tsx(6,25): error TS1005: ',' expected.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'path'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'foo'.
+==== a.tsx (13 errors) ====
+    declare var React: any;
+    
+    const a = <svg:path></svg:path>;
+                             ~
+!!! error TS1005: '>' expected.
+                              ~~~~
+!!! error TS1005: ',' expected.
+                                  ~
+!!! error TS1005: ',' expected.
+    const b = <svg : path></svg : path>;
+                                ~
+!!! error TS1005: '>' expected.
+                                  ~~~~
+!!! error TS1005: ',' expected.
+                                      ~
+!!! error TS1005: ',' expected.
+    const c = <A:foo></A:foo>;
+               ~
+!!! error TS2304: Cannot find name 'A'.
+                        ~
+!!! error TS1005: '>' expected.
+                         ~~~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS1005: ',' expected.
+    const d = <a:foo></a:foo>;
+                        ~
+!!! error TS1005: '>' expected.
+                         ~~~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS1005: ',' expected.

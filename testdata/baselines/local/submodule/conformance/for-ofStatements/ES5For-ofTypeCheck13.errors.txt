@@ -1,0 +1,13 @@
+ES5For-ofTypeCheck13.ts(1,15): error TS2304: Cannot find name 'Set'.
+ES5For-ofTypeCheck13.ts(1,33): error TS2304: Cannot find name 'Set'.
+
+
+==== ES5For-ofTypeCheck13.ts (2 errors) ====
+    const strSet: Set<string> = new Set()
+                  ~~~
+!!! error TS2304: Cannot find name 'Set'.
+                                    ~~~
+!!! error TS2304: Cannot find name 'Set'.
+    strSet.add('Hello')
+    strSet.add('World')
+    for (const str of strSet) { }

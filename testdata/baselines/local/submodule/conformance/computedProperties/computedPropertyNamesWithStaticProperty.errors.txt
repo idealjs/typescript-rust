@@ -1,0 +1,39 @@
+computedPropertyNamesWithStaticProperty.ts(3,9): error TS1005: ';' expected.
+computedPropertyNamesWithStaticProperty.ts(6,9): error TS1005: ';' expected.
+computedPropertyNamesWithStaticProperty.ts(12,8): error TS2304: Cannot find name 'C2'.
+computedPropertyNamesWithStaticProperty.ts(14,9): error TS1005: ';' expected.
+computedPropertyNamesWithStaticProperty.ts(17,9): error TS1005: ';' expected.
+
+
+==== computedPropertyNamesWithStaticProperty.ts (5 errors) ====
+    class C1 {
+        static staticProp = 10;
+        get [C1.staticProp]() {
+            ~
+!!! error TS1005: ';' expected.
+            return "hello";
+        }
+        set [C1.staticProp](x: string) {
+            ~
+!!! error TS1005: ';' expected.
+            var y = x;
+        }
+        [C1.staticProp]() { }
+    }
+    
+    (class C2 {
+           ~~
+!!! error TS2304: Cannot find name 'C2'.
+        static staticProp = 10;
+        get [C2.staticProp]() {
+            ~
+!!! error TS1005: ';' expected.
+            return "hello";
+        }
+        set [C2.staticProp](x: string) {
+            ~
+!!! error TS1005: ';' expected.
+            var y = x;
+        }
+        [C2.staticProp]() { }
+    })

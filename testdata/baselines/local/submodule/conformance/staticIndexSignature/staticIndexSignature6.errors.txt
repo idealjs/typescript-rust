@@ -1,0 +1,32 @@
+staticIndexSignature6.ts(3,18): error TS1005: ']' expected.
+staticIndexSignature6.ts(3,26): error TS1005: ';' expected.
+staticIndexSignature6.ts(4,18): error TS1005: ']' expected.
+staticIndexSignature6.ts(4,26): error TS1005: ';' expected.
+
+
+==== staticIndexSignature6.ts (4 errors) ====
+    function foo () {
+        return class<T> {
+            static [s: string]: number
+                     ~
+!!! error TS1005: ']' expected.
+                             ~
+!!! error TS1005: ';' expected.
+            static [s: number]: 42
+                     ~
+!!! error TS1005: ']' expected.
+                             ~
+!!! error TS1005: ';' expected.
+    
+            foo(v: T) { return v }
+        }
+    }
+    
+    const C = foo()
+    C.a;
+    C.a = 1;
+    C[2];
+    C[2] = 42;
+    
+    const c = new C<number>();
+    c.foo(1);

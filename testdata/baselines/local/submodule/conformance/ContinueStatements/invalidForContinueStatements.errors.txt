@@ -1,0 +1,65 @@
+invalidForContinueStatements.ts(4,1): error TS1104: A 'continue' statement can only be used within an enclosing iteration statement.
+invalidForContinueStatements.ts(8,9): error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+invalidForContinueStatements.ts(27,5): error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+invalidForContinueStatements.ts(28,5): error TS7027: Unreachable code detected.
+invalidForContinueStatements.ts(36,5): error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+
+
+==== invalidForContinueStatements.ts (5 errors) ====
+    // All errors
+    
+    // naked continue not allowed
+    continue;
+    ~~~~~~~~~
+    
+    
+    // non-existent label
+    ~~~~~~~~~~~~~~~~~~~~~
+    ONE:
+    
+!!! error TS1104: A 'continue' statement can only be used within an enclosing iteration statement.
+    for(;;) continue TWO;
+            ~~~~~~~~~~~~~
+    
+    
+    // continue from inside function
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    TWO:
+    
+!!! error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+    for(;;) {
+        var x = () => {
+            continue TWO;
+        }
+    }
+    
+    THREE:
+    for(;;) {
+        var fn = function () {
+            continue THREE;
+        }
+    }
+    
+    // continue forward
+    for(;;) {
+        continue FIVE;
+        ~~~~~~~~~~~~~~
+        FIVE:
+    ~~~~
+!!! error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+        ~~~~~
+        for (; ;) { }
+    ~~~~~~~~~~~~~~~~~
+    }
+    
+!!! error TS7027: Unreachable code detected.
+    // label on non-loop statement
+    NINE:
+    var y = 12;
+    
+    for(;;) {
+        continue NINE;
+        ~~~~~~~~~~~~~~
+    }
+    
+!!! error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.

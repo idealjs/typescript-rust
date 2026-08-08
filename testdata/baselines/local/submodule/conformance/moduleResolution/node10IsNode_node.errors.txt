@@ -1,0 +1,38 @@
+/node_modules/fancy-lib/package.json(2,11): error TS1005: ';' expected.
+/node_modules/fancy-lib/package.json(3,14): error TS1005: ';' expected.
+/node_modules/fancy-lib/package.json(4,11): error TS1005: ';' expected.
+/node_modules/fancy-lib/package.json(5,14): error TS1005: ';' expected.
+/node_modules/fancy-lib/package.json(6,12): error TS1005: ';' expected.
+
+
+==== node10IsNode_node.ts (0 errors) ====
+    
+==== /node_modules/fancy-lib/package.json (5 errors) ====
+    {
+        "name": "fancy-lib",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "1.0.0",
+                 ~
+!!! error TS1005: ';' expected.
+        "main": "index.js",
+              ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            ".": "./definitely-not-index.js"
+               ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+==== /node_modules/fancy-lib/index.d.ts (0 errors) ====
+    export declare const fancy: "feast";
+    
+==== /node_modules/fancy-lib/definitely-not-index.d.ts (0 errors) ====
+    export declare const fancy: "ketchup";
+    
+==== /main.ts (0 errors) ====
+    import { fancy } from "fancy-lib";
+    fancy;

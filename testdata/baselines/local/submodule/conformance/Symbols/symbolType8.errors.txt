@@ -1,0 +1,21 @@
+symbolType8.ts(2,6): error TS1005: '>' expected.
+symbolType8.ts(3,6): error TS1005: '>' expected.
+
+
+==== symbolType8.ts (2 errors) ====
+    var s = Symbol.for("compare");
+    s < s;
+         ~
+!!! error TS1005: '>' expected.
+    s < 0;
+         ~
+!!! error TS1005: '>' expected.
+    s > s;
+    s > 0;
+    s <= s;
+    s <= 0;
+    s >= s;
+    s >= 0;
+    
+    0 >= (s || 0);
+    (s || 0) >= s;

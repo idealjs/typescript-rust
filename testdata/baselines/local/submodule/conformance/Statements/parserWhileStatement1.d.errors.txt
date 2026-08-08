@@ -1,0 +1,8 @@
+parserWhileStatement1.d.ts(1,8): error TS2304: Cannot find name 'e'.
+
+
+==== parserWhileStatement1.d.ts (1 errors) ====
+    while (e) {
+           ~
+!!! error TS2304: Cannot find name 'e'.
+    }

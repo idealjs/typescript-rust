@@ -1,0 +1,48 @@
+bug24703.js(2,8): error TS2339: Property 'I' does not exist on type 'object'.
+bug24703.js(7,8): error TS2339: Property 'O' does not exist on type 'object'.
+bug24703.js(7,18): error TS2304: Cannot find name 'extends'.
+bug24703.js(7,26): error TS1005: '{' expected.
+bug24703.js(7,32): error TS1005: ';' expected.
+bug24703.js(7,33): error TS1005: ';' expected.
+bug24703.js(7,35): error TS1005: ';' expected.
+bug24703.js(13,20): error TS2339: Property 'O' does not exist on type 'object'.
+bug24703.js(14,20): error TS2339: Property 'I' does not exist on type 'object'.
+
+
+==== bug24703.js (9 errors) ====
+    var Common = {};
+    Common.I = class {
+           ~
+!!! error TS2339: Property 'I' does not exist on type 'object'.
+        constructor() {
+            this.i = 1
+        }
+    }
+    Common.O = class extends Common.I {
+           ~
+!!! error TS2339: Property 'O' does not exist on type 'object'.
+                     ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                             ~~~~~~
+!!! error TS1005: '{' expected.
+                                   ~
+!!! error TS1005: ';' expected.
+                                    ~
+!!! error TS1005: ';' expected.
+                                      ~
+!!! error TS1005: ';' expected.
+        constructor() {
+            super()
+            this.o = 2
+        }
+    }
+    var o = new Common.O()
+                       ~
+!!! error TS2339: Property 'O' does not exist on type 'object'.
+    var i = new Common.I()
+                       ~
+!!! error TS2339: Property 'I' does not exist on type 'object'.
+    o.i
+    o.o
+    i.i
+    

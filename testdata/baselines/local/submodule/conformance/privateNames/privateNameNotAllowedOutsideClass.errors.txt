@@ -1,0 +1,10 @@
+privateNameNotAllowedOutsideClass.ts(1,7): error TS1127: Invalid character.
+privateNameNotAllowedOutsideClass.ts(1,7): error TS1134: Variable declaration expected.
+
+
+==== privateNameNotAllowedOutsideClass.ts (2 errors) ====
+    const #foo = 3;
+          ~
+!!! error TS1127: Invalid character.
+          ~
+!!! error TS1134: Variable declaration expected.

@@ -57,10 +57,26 @@ fn compile_test_case(content: &TestCaseContent) -> CompilationOutput {
     let mut file_names: Vec<String> = Vec::new();
     let mut input_files: Vec<(String, String)> = Vec::new();
     for unit in &content.units {
-        let abs_path = normalize_abs_path(&unit.name, &content.current_directory);
+        // Single-file tests should be placed under /.src/ (matching TS harness
+        // convention) so that remove_test_path_prefixes strips the prefix and
+        // produces just "filename.ts" in baseline output.
+        // Multi-file tests (@filename: /a.ts) use absolute paths directly.
+        let abs_path = if unit.name.starts_with('/') {
+            unit.name.clone()
+        } else {
+            // Strip any parent directory from the clean_name and place under /.src/
+            let basename = Path::new(&unit.name)
+                .file_name()
+                .map(|f| f.to_string_lossy().to_string())
+                .unwrap_or_else(|| unit.name.clone());
+            format!("{SRC_FOLDER}/{basename}")
+        };
         let _ = fs.write_file(&abs_path, &unit.content);
         file_names.push(abs_path.clone());
-        input_files.push((unit.name.clone(), unit.content.clone()));
+        // Store the baseline-facing name (what appears in error output after
+        // removeTestPathPrefixes strips /.src/).
+        let baseline_name = abs_path.clone();
+        input_files.push((baseline_name, unit.content.clone()));
     }
 
     let mut options = CompilerOptions::default();
@@ -560,6 +576,19 @@ fn process_batch(
                         fail += 1;
                         fails.push(format!("DIFF: {clean_name}"));
                     }
+                    // Also write local baseline for inspection.
+                    let baseline_name = format!(
+                        "{}.errors.txt",
+                        Path::new(&clean_name).with_extension("").to_string_lossy()
+                    );
+                    let local_path = baseline::local_root()
+                        .join("submodule")
+                        .join(suite_name)
+                        .join(&baseline_name);
+                    if let Some(parent) = local_path.parent() {
+                        let _ = std::fs::create_dir_all(parent);
+                    }
+                    let _ = std::fs::write(&local_path, &error_baseline);
                     continue;
                 }
 

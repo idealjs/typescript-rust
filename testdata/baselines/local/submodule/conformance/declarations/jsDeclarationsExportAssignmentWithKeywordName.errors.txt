@@ -1,0 +1,20 @@
+index.js(2,7): error TS1003: Identifier expected.
+index.js(2,8): error TS1005: ';' expected.
+index.js(2,8): error TS2304: Cannot find name 'exports'.
+
+
+==== index.js (3 errors) ====
+    var x = 12;
+    module.exports = {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        extends: 'base',
+        more: {
+            others: ['strs']
+        },
+        x
+    };

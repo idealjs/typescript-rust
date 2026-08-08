@@ -1,0 +1,24 @@
+1.ts(1,9): error TS2304: Cannot find name 'import'.
+1.ts(1,16): error TS1005: ',' expected.
+1.ts(1,16): error TS1182: A destructuring declaration must have an initializer.
+1.ts(1,24): error TS1005: ',' expected.
+1.ts(1,29): error TS1005: ',' expected.
+
+
+==== importCallExpressionIncorrect2.ts (0 errors) ====
+    ﻿// @module: es2020
+==== 0.ts (0 errors) ====
+    export function foo() { return "foo"; }
+    
+==== 1.ts (5 errors) ====
+    var x = import { foo } from './0';
+            ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+                   ~
+!!! error TS1005: ',' expected.
+                   ~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+                           ~~~~
+!!! error TS1005: ',' expected.
+                                ~~~~~
+!!! error TS1005: ',' expected.

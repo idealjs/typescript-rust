@@ -1,0 +1,53 @@
+getSetAccessorContextualTyping.ts(7,9): error TS1005: ';' expected.
+getSetAccessorContextualTyping.ts(8,9): error TS1005: ';' expected.
+getSetAccessorContextualTyping.ts(12,9): error TS1005: ';' expected.
+getSetAccessorContextualTyping.ts(13,9): error TS1005: ';' expected.
+getSetAccessorContextualTyping.ts(17,9): error TS1005: ';' expected.
+getSetAccessorContextualTyping.ts(18,9): error TS1005: ';' expected.
+getSetAccessorContextualTyping.ts(22,9): error TS1005: ';' expected.
+getSetAccessorContextualTyping.ts(23,9): error TS1005: ';' expected.
+
+
+==== getSetAccessorContextualTyping.ts (8 errors) ====
+    ﻿// @target: es5, es2015
+    // In the body of a get accessor with no return type annotation,
+    // if a matching set accessor exists and that set accessor has a parameter type annotation,
+    // return expressions are contextually typed by the type given in the set accessor's parameter type annotation.
+    
+    class C {
+        set X(x: number) { }
+         ~
+!!! error TS1005: ';' expected.
+        get X() {
+         ~
+!!! error TS1005: ';' expected.
+            return "string";  // Error; get contextual type by set accessor parameter type annotation
+        }
+    
+        set Y(y) { }
+         ~
+!!! error TS1005: ';' expected.
+        get Y() {
+         ~
+!!! error TS1005: ';' expected.
+            return true;
+        }
+    
+        set W(w) { }
+         ~
+!!! error TS1005: ';' expected.
+        get W(): boolean {
+         ~
+!!! error TS1005: ';' expected.
+            return true;
+        }
+    
+        set Z(z: number) { }
+         ~
+!!! error TS1005: ';' expected.
+        get Z() {
+         ~
+!!! error TS1005: ';' expected.
+            return 1;
+        }
+    }

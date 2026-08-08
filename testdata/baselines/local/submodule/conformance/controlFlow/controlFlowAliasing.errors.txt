@@ -1,40 +1,40 @@
-controlFlow/controlFlowAliasing.ts(45,12): error TS2322: Type 'number | null | undefined | number' is not assignable to type 'number | null'.
-controlFlow/controlFlowAliasing.ts(51,13): error TS2322: Type 'string | number' is not assignable to type 'string'.
-controlFlow/controlFlowAliasing.ts(59,13): error TS2322: Type 'number' is not assignable to type 'string'.
-controlFlow/controlFlowAliasing.ts(66,13): error TS2322: Type 'string | number' is not assignable to type 'string'.
-controlFlow/controlFlowAliasing.ts(74,13): error TS2322: Type 'number' is not assignable to type 'string'.
-controlFlow/controlFlowAliasing.ts(91,13): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(94,13): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(101,13): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(104,13): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(112,13): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(115,13): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(144,19): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(147,19): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(154,19): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(157,19): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(177,13): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(180,13): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(187,13): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(190,13): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(197,13): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(200,13): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(207,25): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(214,26): error TS1005: ',' expected.
-controlFlow/controlFlowAliasing.ts(215,44): error TS2339: Property 'x' does not exist on type 'object'.
-controlFlow/controlFlowAliasing.ts(219,22): error TS2339: Property 'x' does not exist on type 'object'.
-controlFlow/controlFlowAliasing.ts(226,26): error TS1005: ',' expected.
-controlFlow/controlFlowAliasing.ts(227,44): error TS2339: Property 'x' does not exist on type 'object'.
-controlFlow/controlFlowAliasing.ts(232,22): error TS2339: Property 'x' does not exist on type 'object'.
-controlFlow/controlFlowAliasing.ts(236,18): error TS2339: Property 'x' does not exist on type 'object'.
-controlFlow/controlFlowAliasing.ts(247,22): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(248,29): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlow/controlFlowAliasing.ts(280,5): error TS2448: Block-scoped variable 'a' used before its declaration.
-controlFlow/controlFlowAliasing.ts(295,28): error TS2339: Property 'isDefined' does not exist on type 'object'.
-controlFlow/controlFlowAliasing.ts(298,13): error TS2322: Type 'number | undefined' is not assignable to type 'number'.
+controlFlowAliasing.ts(45,12): error TS2322: Type 'number | null | undefined | number' is not assignable to type 'number | null'.
+controlFlowAliasing.ts(51,13): error TS2322: Type 'string | number' is not assignable to type 'string'.
+controlFlowAliasing.ts(59,13): error TS2322: Type 'number' is not assignable to type 'string'.
+controlFlowAliasing.ts(66,13): error TS2322: Type 'string | number' is not assignable to type 'string'.
+controlFlowAliasing.ts(74,13): error TS2322: Type 'number' is not assignable to type 'string'.
+controlFlowAliasing.ts(91,13): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(94,13): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(101,13): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(104,13): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(112,13): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(115,13): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(144,19): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(147,19): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(154,19): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(157,19): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(177,13): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(180,13): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(187,13): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(190,13): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(197,13): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(200,13): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(207,25): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(214,26): error TS1005: ',' expected.
+controlFlowAliasing.ts(215,44): error TS2339: Property 'x' does not exist on type 'object'.
+controlFlowAliasing.ts(219,22): error TS2339: Property 'x' does not exist on type 'object'.
+controlFlowAliasing.ts(226,26): error TS1005: ',' expected.
+controlFlowAliasing.ts(227,44): error TS2339: Property 'x' does not exist on type 'object'.
+controlFlowAliasing.ts(232,22): error TS2339: Property 'x' does not exist on type 'object'.
+controlFlowAliasing.ts(236,18): error TS2339: Property 'x' does not exist on type 'object'.
+controlFlowAliasing.ts(247,22): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(248,29): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
+controlFlowAliasing.ts(280,5): error TS2448: Block-scoped variable 'a' used before its declaration.
+controlFlowAliasing.ts(295,28): error TS2339: Property 'isDefined' does not exist on type 'object'.
+controlFlowAliasing.ts(298,13): error TS2322: Type 'number | undefined' is not assignable to type 'number'.
 
 
-==== controlFlow/controlFlowAliasing.ts (34 errors) ====
+==== controlFlowAliasing.ts (34 errors) ====
     // Narrowing by aliased conditional expressions
     
     function f10(x: string | number) {

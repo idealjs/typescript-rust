@@ -1,16 +1,16 @@
-accessibility/protectedStaticClassPropertyAccessibleWithinSubclass.ts(13,14): error TS2339: Property 'x' does not exist on type 'object'.
-accessibility/protectedStaticClassPropertyAccessibleWithinSubclass.ts(22,14): error TS2339: Property 'x' does not exist on type 'object'.
-accessibility/protectedStaticClassPropertyAccessibleWithinSubclass.ts(23,18): error TS2339: Property 'x' does not exist on type 'object'.
-accessibility/protectedStaticClassPropertyAccessibleWithinSubclass.ts(32,14): error TS2339: Property 'x' does not exist on type 'object'.
-accessibility/protectedStaticClassPropertyAccessibleWithinSubclass.ts(33,18): error TS2339: Property 'x' does not exist on type 'object'.
-accessibility/protectedStaticClassPropertyAccessibleWithinSubclass.ts(34,18): error TS2339: Property 'x' does not exist on type 'object'.
-accessibility/protectedStaticClassPropertyAccessibleWithinSubclass.ts(40,6): error TS2339: Property 'x' does not exist on type 'object'.
-accessibility/protectedStaticClassPropertyAccessibleWithinSubclass.ts(41,10): error TS2339: Property 'x' does not exist on type 'object'.
-accessibility/protectedStaticClassPropertyAccessibleWithinSubclass.ts(42,10): error TS2339: Property 'x' does not exist on type 'object'.
-accessibility/protectedStaticClassPropertyAccessibleWithinSubclass.ts(43,10): error TS2339: Property 'x' does not exist on type 'object'.
+protectedStaticClassPropertyAccessibleWithinSubclass.ts(13,14): error TS2339: Property 'x' does not exist on type 'object'.
+protectedStaticClassPropertyAccessibleWithinSubclass.ts(22,14): error TS2339: Property 'x' does not exist on type 'object'.
+protectedStaticClassPropertyAccessibleWithinSubclass.ts(23,18): error TS2339: Property 'x' does not exist on type 'object'.
+protectedStaticClassPropertyAccessibleWithinSubclass.ts(32,14): error TS2339: Property 'x' does not exist on type 'object'.
+protectedStaticClassPropertyAccessibleWithinSubclass.ts(33,18): error TS2339: Property 'x' does not exist on type 'object'.
+protectedStaticClassPropertyAccessibleWithinSubclass.ts(34,18): error TS2339: Property 'x' does not exist on type 'object'.
+protectedStaticClassPropertyAccessibleWithinSubclass.ts(40,6): error TS2339: Property 'x' does not exist on type 'object'.
+protectedStaticClassPropertyAccessibleWithinSubclass.ts(41,10): error TS2339: Property 'x' does not exist on type 'object'.
+protectedStaticClassPropertyAccessibleWithinSubclass.ts(42,10): error TS2339: Property 'x' does not exist on type 'object'.
+protectedStaticClassPropertyAccessibleWithinSubclass.ts(43,10): error TS2339: Property 'x' does not exist on type 'object'.
 
 
-==== accessibility/protectedStaticClassPropertyAccessibleWithinSubclass.ts (10 errors) ====
+==== protectedStaticClassPropertyAccessibleWithinSubclass.ts (10 errors) ====
     class Base {
         protected static x: string;
         static staticMethod() {

@@ -1,0 +1,24 @@
+file2.tsx(5,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+
+
+==== tsxElementResolution19.tsx (0 errors) ====
+    
+==== react.d.ts (0 errors) ====
+    declare module "react" {
+    
+    }
+    
+==== file1.tsx (0 errors) ====
+    declare namespace JSX {
+        interface Element { }
+    }
+    export class MyClass { }
+    
+==== file2.tsx (1 errors) ====
+    // Should not elide React import
+    import * as React from 'react';
+    import {MyClass} from './file1';
+    
+    <MyClass />;
+    ~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.

@@ -1,0 +1,42 @@
+mixinAccessors1.ts(4,16): error TS2304: Cannot find name 'extends'.
+mixinAccessors1.ts(4,24): error TS1005: '{' expected.
+mixinAccessors1.ts(4,35): error TS1005: ';' expected.
+mixinAccessors1.ts(5,9): error TS1005: ';' expected.
+mixinAccessors1.ts(12,7): error TS1005: ';' expected.
+mixinAccessors1.ts(18,7): error TS1005: ';' expected.
+
+
+==== mixinAccessors1.ts (6 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/58790
+    
+    function mixin<T extends { new (...args: any[]): {} }>(superclass: T) {
+      return class extends superclass {
+                   ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                           ~~~~~~~~~~
+!!! error TS1005: '{' expected.
+                                      ~
+!!! error TS1005: ';' expected.
+        get validationTarget(): HTMLElement {
+            ~~~~~~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+          return document.createElement("input");
+        }
+      };
+    }
+    
+    class BaseClass {
+      get validationTarget(): HTMLElement {
+          ~~~~~~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+        return document.createElement("div");
+      }
+    }
+    
+    class MyClass extends mixin(BaseClass) {
+      get validationTarget(): HTMLElement {
+          ~~~~~~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+        return document.createElement("select");
+      }
+    }

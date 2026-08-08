@@ -1,0 +1,12 @@
+for-of43.ts(3,23): error TS1005: ',' expected.
+
+
+==== for-of43.ts (1 errors) ====
+    ﻿//@target: ES6
+    var array = [{ x: "", y: 0 }]
+    for (var {x: a = "", y: b = true} of array) {
+                       ~
+!!! error TS1005: ',' expected.
+        a;
+        b;
+    }

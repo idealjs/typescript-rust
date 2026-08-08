@@ -1,0 +1,30 @@
+/tsconfig.base.json(2,22): error TS1005: ';' expected.
+/tsconfig.base.json(3,26): error TS1005: ';' expected.
+/tsconfig.base.json(4,31): error TS1005: ';' expected.
+/tsconfig.base.json(5,33): error TS1005: ';' expected.
+/tsconfig.base.json(6,5): error TS1012: Unexpected token.
+/tsconfig.base.json(7,2): error TS1005: '}' expected.
+
+
+==== verbatimModuleSyntaxCompat3.ts (0 errors) ====
+    
+==== /tsconfig.base.json (6 errors) ====
+    {
+        "compilerOptions": {
+                         ~
+!!! error TS1005: ';' expected.
+            "isolatedModules": true,
+                             ~
+!!! error TS1005: ';' expected.
+            "preserveValueImports": true,
+                                  ~
+!!! error TS1005: ';' expected.
+            "importsNotUsedAsValues": "error",
+                                    ~
+!!! error TS1005: ';' expected.
+        }
+        ~
+!!! error TS1012: Unexpected token.
+    }
+     
+!!! error TS1005: '}' expected.

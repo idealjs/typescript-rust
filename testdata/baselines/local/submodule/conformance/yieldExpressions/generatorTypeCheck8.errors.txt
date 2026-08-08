@@ -1,0 +1,8 @@
+generatorTypeCheck8.ts(2,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
+
+
+==== generatorTypeCheck8.ts (1 errors) ====
+    interface BadGenerator extends Iterator<number>, Iterable<string> { }
+    function* g3(): BadGenerator { }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2366: Function lacks ending return statement and return type does not include 'undefined'.

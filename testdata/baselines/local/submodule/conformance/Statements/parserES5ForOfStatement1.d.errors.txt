@@ -1,0 +1,8 @@
+parserES5ForOfStatement1.d.ts(1,15): error TS2304: Cannot find name 'e'.
+
+
+==== parserES5ForOfStatement1.d.ts (1 errors) ====
+    for (var i of e) {
+                  ~
+!!! error TS2304: Cannot find name 'e'.
+    }

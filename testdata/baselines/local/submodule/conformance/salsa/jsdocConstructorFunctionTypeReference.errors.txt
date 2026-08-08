@@ -1,0 +1,19 @@
+jsdocConstructorFunctionTypeReference.js(5,11): error TS2339: Property 'prototype' does not exist on type '() => void'.
+
+
+==== jsdocConstructorFunctionTypeReference.js (1 errors) ====
+    var Validator = function VFunc() {
+        this.flags = "gim"
+    };
+    
+    Validator.prototype.num = 12
+              ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+    
+    /**
+     * @param {Validator} state
+     */
+    var validateRegExpFlags = function(state) {
+        return state.flags
+    };
+    

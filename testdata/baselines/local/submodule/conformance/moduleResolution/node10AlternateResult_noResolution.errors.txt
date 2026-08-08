@@ -4,7 +4,7 @@
 /node_modules/pkg/package.json(5,12): error TS1005: ';' expected.
 
 
-==== moduleResolution/node10AlternateResult_noResolution.ts (0 errors) ====
+==== node10AlternateResult_noResolution.ts (0 errors) ====
     
 ==== /node_modules/pkg/package.json (4 errors) ====
     {

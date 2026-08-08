@@ -1,0 +1,13 @@
+useSharedArrayBuffer6.ts(1,16): error TS2304: Cannot find name 'SharedArrayBuffer'.
+useSharedArrayBuffer6.ts(4,14): error TS2304: Cannot find name 'SharedArrayBuffer'.
+
+
+==== useSharedArrayBuffer6.ts (2 errors) ====
+    var foge = new SharedArrayBuffer(1024);
+                   ~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'SharedArrayBuffer'.
+    foge.length; // should error
+    
+    var length = SharedArrayBuffer.length;
+                 ~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'SharedArrayBuffer'.

@@ -1,0 +1,19 @@
+tsxDynamicTagName4.tsx(10,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxDynamicTagName4.tsx(10,2): error TS2604: JSX element type 'CustomTag' does not have any construct or call signatures.
+
+
+==== tsxDynamicTagName4.tsx (2 errors) ====
+    declare namespace JSX {
+    	interface Element { }
+    	interface IntrinsicElements {
+    		div: any
+    		h1: any
+    	}
+    }
+    
+    var CustomTag: "h1" = "h1";
+    <CustomTag> Hello World </CustomTag>
+    ~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+     ~~~~~~~~~
+!!! error TS2604: JSX element type 'CustomTag' does not have any construct or call signatures.

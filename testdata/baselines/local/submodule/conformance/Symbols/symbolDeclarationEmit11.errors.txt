@@ -1,0 +1,15 @@
+symbolDeclarationEmit11.ts(4,16): error TS1005: ';' expected.
+symbolDeclarationEmit11.ts(5,16): error TS1005: ';' expected.
+
+
+==== symbolDeclarationEmit11.ts (2 errors) ====
+    class C {
+        static [Symbol.iterator] = 0;
+        static [Symbol.isConcatSpreadable]() { }
+        static get [Symbol.toPrimitive]() { return ""; }
+                   ~
+!!! error TS1005: ';' expected.
+        static set [Symbol.toPrimitive](x) { }
+                   ~
+!!! error TS1005: ';' expected.
+    }

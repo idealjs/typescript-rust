@@ -1,0 +1,13 @@
+parserErrantEqualsGreaterThanAfterFunction2.ts(1,15): error TS2304: Cannot find name 'A'.
+parserErrantEqualsGreaterThanAfterFunction2.ts(1,18): error TS1005: ';' expected.
+parserErrantEqualsGreaterThanAfterFunction2.ts(1,21): error TS2304: Cannot find name 'p'.
+
+
+==== parserErrantEqualsGreaterThanAfterFunction2.ts (3 errors) ====
+    function f(p: A) => p;
+                  ~
+!!! error TS2304: Cannot find name 'A'.
+                     ~~
+!!! error TS1005: ';' expected.
+                        ~
+!!! error TS2304: Cannot find name 'p'.

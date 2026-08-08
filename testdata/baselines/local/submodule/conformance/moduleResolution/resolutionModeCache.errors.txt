@@ -1,0 +1,47 @@
+/node_modules/pkg/package.json(2,9): error TS1005: ';' expected.
+/node_modules/pkg/package.json(3,12): error TS1005: ';' expected.
+/node_modules/pkg/package.json(4,12): error TS1005: ';' expected.
+/node_modules/pkg/package.json(5,8): error TS1005: ';' expected.
+/node_modules/pkg/package.json(6,15): error TS1005: ';' expected.
+/node_modules/pkg/package.json(7,16): error TS1005: ';' expected.
+
+
+==== resolutionModeCache.ts (0 errors) ====
+    
+==== /node_modules/pkg/package.json (6 errors) ====
+    {
+      "name": "pkg",
+            ~
+!!! error TS1005: ';' expected.
+      "version": "1.0.0",
+               ~
+!!! error TS1005: ';' expected.
+      "exports": {
+               ~
+!!! error TS1005: ';' expected.
+        ".": {
+           ~
+!!! error TS1005: ';' expected.
+          "import": "./index.mjs",
+                  ~
+!!! error TS1005: ';' expected.
+          "require": "./index.js"
+                   ~
+!!! error TS1005: ';' expected.
+        }
+      }
+    }
+    
+==== /node_modules/pkg/index.d.mts (0 errors) ====
+    declare const _default: "esm";
+    export default _default;
+    
+==== /node_modules/pkg/index.d.ts (0 errors) ====
+    declare const _exports: "cjs";
+    export = _exports;
+    
+==== /index.ts (0 errors) ====
+    import type pkgRequire from "pkg" with { "resolution-mode": "require" };
+    import type pkgImport from "pkg" with { "resolution-mode": "import" };
+    pkgRequire;
+    pkgImport;

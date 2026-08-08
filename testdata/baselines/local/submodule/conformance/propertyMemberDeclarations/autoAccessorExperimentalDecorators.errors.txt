@@ -1,0 +1,44 @@
+autoAccessorExperimentalDecorators.ts(1,37): error TS2304: Cannot find name 'PropertyKey'.
+autoAccessorExperimentalDecorators.ts(1,56): error TS2304: Cannot find name 'PropertyDescriptor'.
+autoAccessorExperimentalDecorators.ts(13,14): error TS1005: ';' expected.
+autoAccessorExperimentalDecorators.ts(13,14): error TS1127: Invalid character.
+autoAccessorExperimentalDecorators.ts(13,15): error TS1005: ';' expected.
+autoAccessorExperimentalDecorators.ts(16,21): error TS1005: ';' expected.
+autoAccessorExperimentalDecorators.ts(16,21): error TS1127: Invalid character.
+autoAccessorExperimentalDecorators.ts(16,22): error TS1005: ';' expected.
+
+
+==== autoAccessorExperimentalDecorators.ts (8 errors) ====
+    declare var dec: (target: any, key: PropertyKey, desc: PropertyDescriptor) => void;
+                                        ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'PropertyKey'.
+                                                           ~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'PropertyDescriptor'.
+    
+    class C1 {
+        @dec
+        accessor a: any;
+    
+        @dec
+        static accessor b: any;
+    }
+    
+    class C2 {
+        @dec
+        accessor #a: any;
+                 ~
+!!! error TS1005: ';' expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~
+!!! error TS1005: ';' expected.
+    
+        @dec
+        static accessor #b: any;
+                        ~
+!!! error TS1005: ';' expected.
+                        ~
+!!! error TS1127: Invalid character.
+                         ~
+!!! error TS1005: ';' expected.
+    }

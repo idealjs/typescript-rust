@@ -1,0 +1,25 @@
+stringLiteralsAssignedToStringMappings.ts(1,16): error TS2304: Cannot find name 'Uppercase'.
+stringLiteralsAssignedToStringMappings.ts(9,16): error TS2304: Cannot find name 'Uppercase'.
+
+
+==== stringLiteralsAssignedToStringMappings.ts (2 errors) ====
+    declare var x: Uppercase<Lowercase<string>>;
+                   ~~~~~~~~~
+!!! error TS2304: Cannot find name 'Uppercase'.
+    
+    // good
+    x = "A";
+    
+    // bad
+    x = "a";
+    
+    declare var y: Uppercase<Lowercase<`${number}`>>;
+                   ~~~~~~~~~
+!!! error TS2304: Cannot find name 'Uppercase'.
+    
+    // good
+    y = "1";
+    
+    // bad
+    y = "a";
+    y = "A";

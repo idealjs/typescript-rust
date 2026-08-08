@@ -1,0 +1,68 @@
+computedPropertyNamesContextualType3_ES6.ts(6,13): error TS1005: ',' expected.
+computedPropertyNamesContextualType3_ES6.ts(6,13): error TS2304: Cannot find name '('.
+computedPropertyNamesContextualType3_ES6.ts(6,14): error TS1005: ',' expected.
+computedPropertyNamesContextualType3_ES6.ts(6,15): error TS1005: ',' expected.
+computedPropertyNamesContextualType3_ES6.ts(6,15): error TS2304: Cannot find name ')'.
+computedPropertyNamesContextualType3_ES6.ts(6,17): error TS1005: ',' expected.
+computedPropertyNamesContextualType3_ES6.ts(6,17): error TS2304: Cannot find name '{'.
+computedPropertyNamesContextualType3_ES6.ts(6,19): error TS1005: ',' expected.
+computedPropertyNamesContextualType3_ES6.ts(6,19): error TS2304: Cannot find name 'return'.
+computedPropertyNamesContextualType3_ES6.ts(6,26): error TS1005: ',' expected.
+computedPropertyNamesContextualType3_ES6.ts(6,27): error TS1005: ',' expected.
+computedPropertyNamesContextualType3_ES6.ts(6,27): error TS2304: Cannot find name '.'.
+computedPropertyNamesContextualType3_ES6.ts(6,28): error TS1005: ',' expected.
+computedPropertyNamesContextualType3_ES6.ts(6,28): error TS2304: Cannot find name 'length'.
+computedPropertyNamesContextualType3_ES6.ts(6,34): error TS1005: ',' expected.
+computedPropertyNamesContextualType3_ES6.ts(6,34): error TS2304: Cannot find name ';'.
+computedPropertyNamesContextualType3_ES6.ts(7,13): error TS1005: ',' expected.
+computedPropertyNamesContextualType3_ES6.ts(7,17): error TS1005: ';' expected.
+computedPropertyNamesContextualType3_ES6.ts(8,1): error TS1128: Declaration or statement expected.
+
+
+==== computedPropertyNamesContextualType3_ES6.ts (19 errors) ====
+    interface I {
+        [s: string]: (x: string) => number;
+    }
+    
+    var o: I = {
+        [+"foo"](y) { return y.length; },
+                ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS2304: Cannot find name '('.
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS2304: Cannot find name ')'.
+                    ~
+!!! error TS1005: ',' expected.
+                    ~
+!!! error TS2304: Cannot find name '{'.
+                      ~~~~~~
+!!! error TS1005: ',' expected.
+                      ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                             ~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS2304: Cannot find name '.'.
+                               ~~~~~~
+!!! error TS1005: ',' expected.
+                               ~~~~~~
+!!! error TS2304: Cannot find name 'length'.
+                                     ~
+!!! error TS1005: ',' expected.
+                                     ~
+!!! error TS2304: Cannot find name ';'.
+        [+"bar"]: y => y.length
+                ~
+!!! error TS1005: ',' expected.
+                    ~~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

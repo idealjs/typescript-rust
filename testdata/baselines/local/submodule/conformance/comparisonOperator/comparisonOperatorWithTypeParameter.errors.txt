@@ -1,0 +1,180 @@
+comparisonOperatorWithTypeParameter.ts(2,8): error TS2304: Cannot find name 'Object'.
+comparisonOperatorWithTypeParameter.ts(6,20): error TS1005: '>' expected.
+comparisonOperatorWithTypeParameter.ts(10,15): error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+comparisonOperatorWithTypeParameter.ts(11,15): error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+comparisonOperatorWithTypeParameter.ts(12,15): error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+comparisonOperatorWithTypeParameter.ts(13,15): error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+comparisonOperatorWithTypeParameter.ts(15,20): error TS1005: '>' expected.
+comparisonOperatorWithTypeParameter.ts(19,15): error TS2367: This comparison appears to be unintentional because the types 'U' and 'T' have no overlap.
+comparisonOperatorWithTypeParameter.ts(20,15): error TS2367: This comparison appears to be unintentional because the types 'U' and 'T' have no overlap.
+comparisonOperatorWithTypeParameter.ts(21,15): error TS2367: This comparison appears to be unintentional because the types 'U' and 'T' have no overlap.
+comparisonOperatorWithTypeParameter.ts(22,15): error TS2367: This comparison appears to be unintentional because the types 'U' and 'T' have no overlap.
+comparisonOperatorWithTypeParameter.ts(24,20): error TS1005: '>' expected.
+comparisonOperatorWithTypeParameter.ts(28,15): error TS2367: This comparison appears to be unintentional because the types 'T' and 'V' have no overlap.
+comparisonOperatorWithTypeParameter.ts(29,15): error TS2367: This comparison appears to be unintentional because the types 'T' and 'V' have no overlap.
+comparisonOperatorWithTypeParameter.ts(30,15): error TS2367: This comparison appears to be unintentional because the types 'T' and 'V' have no overlap.
+comparisonOperatorWithTypeParameter.ts(31,15): error TS2367: This comparison appears to be unintentional because the types 'T' and 'V' have no overlap.
+comparisonOperatorWithTypeParameter.ts(33,20): error TS1005: '>' expected.
+comparisonOperatorWithTypeParameter.ts(37,15): error TS2367: This comparison appears to be unintentional because the types 'V' and 'T' have no overlap.
+comparisonOperatorWithTypeParameter.ts(38,15): error TS2367: This comparison appears to be unintentional because the types 'V' and 'T' have no overlap.
+comparisonOperatorWithTypeParameter.ts(39,15): error TS2367: This comparison appears to be unintentional because the types 'V' and 'T' have no overlap.
+comparisonOperatorWithTypeParameter.ts(40,15): error TS2367: This comparison appears to be unintentional because the types 'V' and 'T' have no overlap.
+comparisonOperatorWithTypeParameter.ts(43,20): error TS1005: '>' expected.
+comparisonOperatorWithTypeParameter.ts(47,15): error TS2367: This comparison appears to be unintentional because the types 'T' and 'object' have no overlap.
+comparisonOperatorWithTypeParameter.ts(48,15): error TS2367: This comparison appears to be unintentional because the types 'T' and 'object' have no overlap.
+comparisonOperatorWithTypeParameter.ts(49,15): error TS2367: This comparison appears to be unintentional because the types 'T' and 'object' have no overlap.
+comparisonOperatorWithTypeParameter.ts(50,15): error TS2367: This comparison appears to be unintentional because the types 'T' and 'object' have no overlap.
+comparisonOperatorWithTypeParameter.ts(52,20): error TS1005: '>' expected.
+comparisonOperatorWithTypeParameter.ts(56,15): error TS2367: This comparison appears to be unintentional because the types 'object' and 'T' have no overlap.
+comparisonOperatorWithTypeParameter.ts(57,15): error TS2367: This comparison appears to be unintentional because the types 'object' and 'T' have no overlap.
+comparisonOperatorWithTypeParameter.ts(58,15): error TS2367: This comparison appears to be unintentional because the types 'object' and 'T' have no overlap.
+comparisonOperatorWithTypeParameter.ts(59,15): error TS2367: This comparison appears to be unintentional because the types 'object' and 'T' have no overlap.
+comparisonOperatorWithTypeParameter.ts(61,20): error TS1005: '>' expected.
+comparisonOperatorWithTypeParameter.ts(70,20): error TS1005: '>' expected.
+
+
+==== comparisonOperatorWithTypeParameter.ts (33 errors) ====
+    var a: {};
+    var b: Object;
+           ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    
+    function foo<T, U/* extends T*/, V/* extends U*/>(t: T, u: U, v: V) {
+        // errors
+        var ra1 = t < u;
+                       ~
+!!! error TS1005: '>' expected.
+        var ra2 = t > u;
+        var ra3 = t <= u;
+        var ra4 = t >= u;
+        var ra5 = t == u;
+                  ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+        var ra6 = t != u;
+                  ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+        var ra7 = t === u;
+                  ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+        var ra8 = t !== u;
+                  ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
+    
+        var rb1 = u < t;
+                       ~
+!!! error TS1005: '>' expected.
+        var rb2 = u > t;
+        var rb3 = u <= t;
+        var rb4 = u >= t;
+        var rb5 = u == t;
+                  ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'U' and 'T' have no overlap.
+        var rb6 = u != t;
+                  ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'U' and 'T' have no overlap.
+        var rb7 = u === t;
+                  ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'U' and 'T' have no overlap.
+        var rb8 = u !== t;
+                  ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'U' and 'T' have no overlap.
+    
+        var rc1 = t < v;
+                       ~
+!!! error TS1005: '>' expected.
+        var rc2 = t > v;
+        var rc3 = t <= v;
+        var rc4 = t >= v;
+        var rc5 = t == v;
+                  ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'V' have no overlap.
+        var rc6 = t != v;
+                  ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'V' have no overlap.
+        var rc7 = t === v;
+                  ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'V' have no overlap.
+        var rc8 = t !== v;
+                  ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'V' have no overlap.
+    
+        var rd1 = v < t;
+                       ~
+!!! error TS1005: '>' expected.
+        var rd2 = v > t;
+        var rd3 = v <= t;
+        var rd4 = v >= t;
+        var rd5 = v == t;
+                  ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'V' and 'T' have no overlap.
+        var rd6 = v != t;
+                  ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'V' and 'T' have no overlap.
+        var rd7 = v === t;
+                  ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'V' and 'T' have no overlap.
+        var rd8 = v !== t;
+                  ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'V' and 'T' have no overlap.
+    
+        // ok
+        var re1 = t < a;
+                       ~
+!!! error TS1005: '>' expected.
+        var re2 = t > a;
+        var re3 = t <= a;
+        var re4 = t >= a;
+        var re5 = t == a;
+                  ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'object' have no overlap.
+        var re6 = t != a;
+                  ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'object' have no overlap.
+        var re7 = t === a;
+                  ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'object' have no overlap.
+        var re8 = t !== a;
+                  ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and 'object' have no overlap.
+    
+        var rf1 = a < t;
+                       ~
+!!! error TS1005: '>' expected.
+        var rf2 = a > t;
+        var rf3 = a <= t;
+        var rf4 = a >= t;
+        var rf5 = a == t;
+                  ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'object' and 'T' have no overlap.
+        var rf6 = a != t;
+                  ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'object' and 'T' have no overlap.
+        var rf7 = a === t;
+                  ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'object' and 'T' have no overlap.
+        var rf8 = a !== t;
+                  ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'object' and 'T' have no overlap.
+    
+        var rg1 = t < b;
+                       ~
+!!! error TS1005: '>' expected.
+        var rg2 = t > b;
+        var rg3 = t <= b;
+        var rg4 = t >= b;
+        var rg5 = t == b;
+        var rg6 = t != b;
+        var rg7 = t === b;
+        var rg8 = t !== b;
+    
+        var rh1 = b < t;
+                       ~
+!!! error TS1005: '>' expected.
+        var rh2 = b > t;
+        var rh3 = b <= t;
+        var rh4 = b >= t;
+        var rh5 = b == t;
+        var rh6 = b != t;
+        var rh7 = b === t;
+        var rh8 = b !== t;
+    }

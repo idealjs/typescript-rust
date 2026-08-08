@@ -1,14 +1,14 @@
-classExpressions/classWithStaticFieldInParameterInitializer.2.ts(3,1): error TS2554: Expected 1 arguments, but got 0.
-classExpressions/classWithStaticFieldInParameterInitializer.2.ts(3,21): error TS1005: '{' expected.
-classExpressions/classWithStaticFieldInParameterInitializer.2.ts(3,23): error TS1005: ';' expected.
-classExpressions/classWithStaticFieldInParameterInitializer.2.ts(3,25): error TS1005: ';' expected.
-classExpressions/classWithStaticFieldInParameterInitializer.2.ts(6,1): error TS2554: Expected 2 arguments, but got 0.
-classExpressions/classWithStaticFieldInParameterInitializer.2.ts(6,21): error TS1005: '{' expected.
-classExpressions/classWithStaticFieldInParameterInitializer.2.ts(6,23): error TS1005: ';' expected.
-classExpressions/classWithStaticFieldInParameterInitializer.2.ts(6,25): error TS1005: ';' expected.
+classWithStaticFieldInParameterInitializer.2.ts(3,1): error TS2554: Expected 1 arguments, but got 0.
+classWithStaticFieldInParameterInitializer.2.ts(3,21): error TS1005: '{' expected.
+classWithStaticFieldInParameterInitializer.2.ts(3,23): error TS1005: ';' expected.
+classWithStaticFieldInParameterInitializer.2.ts(3,25): error TS1005: ';' expected.
+classWithStaticFieldInParameterInitializer.2.ts(6,1): error TS2554: Expected 2 arguments, but got 0.
+classWithStaticFieldInParameterInitializer.2.ts(6,21): error TS1005: '{' expected.
+classWithStaticFieldInParameterInitializer.2.ts(6,23): error TS1005: ';' expected.
+classWithStaticFieldInParameterInitializer.2.ts(6,25): error TS1005: ';' expected.
 
 
-==== classExpressions/classWithStaticFieldInParameterInitializer.2.ts (8 errors) ====
+==== classWithStaticFieldInParameterInitializer.2.ts (8 errors) ====
     // https://github.com/microsoft/TypeScript/issues/36295
     class C {}
     ((b = class extends C { static x = 1 }) => { var C; })();

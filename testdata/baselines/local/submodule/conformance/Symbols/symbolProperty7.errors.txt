@@ -1,0 +1,14 @@
+symbolProperty7.ts(5,9): error TS1005: ';' expected.
+
+
+==== symbolProperty7.ts (1 errors) ====
+    class C {
+        [Symbol()] = 0;
+        [Symbol()]: number;
+        [Symbol()]() { }
+        get [Symbol()]() {
+            ~
+!!! error TS1005: ';' expected.
+            return 0;
+        }
+    }

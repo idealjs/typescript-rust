@@ -1,0 +1,105 @@
+error TS2300: Duplicate identifier 'A'.
+error TS2451: Cannot redeclare block-scoped variable 'enum'.
+index.js(41,19): error TS1005: ',' expected.
+index.js(41,21): error TS1005: ',' expected.
+index.js(41,21): error TS1182: A destructuring declaration must have an initializer.
+index.js(55,19): error TS1005: ',' expected.
+index.js(55,21): error TS1005: ',' expected.
+index.js(55,21): error TS1182: A destructuring declaration must have an initializer.
+index.js(61,1): error TS1012: Unexpected token.
+index.js(61,2): error TS1005: '}' expected.
+
+
+!!! error TS2300: Duplicate identifier 'A'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'enum'.
+==== index.js (8 errors) ====
+    // Pretty much all of this should be an error, (since enums are forbidden in js),
+    // but we should be able to synthesize declarations from the symbols regardless
+    
+    export enum A {}
+    
+    export enum B {
+        Member
+    }
+    
+    enum C {}
+    
+    export { C };
+    
+    enum DD {}
+    
+    export { DD as D };
+    
+    export enum E {}
+    export { E as EE };
+    
+    export { F as FF };
+    export enum F {}
+    
+    export enum G {
+        A = 1,
+        B,
+        C
+    }
+    
+    export enum H {
+        A = "a",
+        B = "b"
+    }
+    
+    export enum I {
+        A = "a",
+        B = 0,
+        C
+    }
+    
+    export const enum J {
+                      ~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS1005: ',' expected.
+                        ~
+        A = 1,
+    ~~~~~~~~~~
+        B,
+    ~~~~~~
+        C
+    ~~~~~
+    }
+    ~
+    
+    
+    export enum K {
+    
+!!! error TS1182: A destructuring declaration must have an initializer.
+        None   = 0,
+        A = 1 << 0,
+        B = 1 << 1,
+        C = 1 << 2,
+        Mask = A | B | C,
+    }
+    
+    export const enum L {
+                      ~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS1005: ',' expected.
+                        ~
+        None   = 0,
+    ~~~~~~~~~~~~~~~
+        A = 1 << 0,
+    ~~~~~~~~~~~~~~~
+        B = 1 << 1,
+    ~~~~~~~~~~~~~~~
+        C = 1 << 2,
+    ~~~~~~~~~~~~~~~
+        Mask = A | B | C,
+    ~~~~~~~~~~~~~~~~~~~~~
+    }
+    ~
+!!! error TS1182: A destructuring declaration must have an initializer.
+    ~
+!!! error TS1012: Unexpected token.
+     
+!!! error TS1005: '}' expected.

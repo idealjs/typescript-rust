@@ -1,0 +1,23 @@
+intermediate.ts(1,13): error TS1003: Identifier expected.
+intermediate.ts(1,15): error TS1005: '=' expected.
+intermediate.ts(1,20): error TS1005: ';' expected.
+main.ts(2,39): error TS2304: Cannot find name 'intermediate'.
+
+
+==== main.ts (1 errors) ====
+    import * as intermediate from './intermediate'
+    const ghost: intermediate.Ghost = new intermediate.Ghost()
+                                          ~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'intermediate'.
+    
+==== intermediate.ts (3 errors) ====
+    export type * from './ghost'
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~~
+!!! error TS1005: '=' expected.
+                       ~~~~~~~~~
+!!! error TS1005: ';' expected.
+    
+==== ghost.ts (0 errors) ====
+    export class Ghost {}

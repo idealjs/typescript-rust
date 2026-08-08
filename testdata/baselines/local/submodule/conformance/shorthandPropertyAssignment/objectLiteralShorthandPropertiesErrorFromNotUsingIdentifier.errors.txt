@@ -1,0 +1,86 @@
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(5,5): error TS2304: Cannot find name 'get'.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(5,9): error TS1005: ',' expected.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(5,9): error TS2304: Cannot find name 'e'.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(6,5): error TS2304: Cannot find name 'set'.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(6,9): error TS1005: ',' expected.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(6,9): error TS2304: Cannot find name 'f'.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(7,5): error TS2304: Cannot find name 'this'.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(8,5): error TS2304: Cannot find name 'super'.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(9,5): error TS2304: Cannot find name 'var'.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(10,5): error TS2304: Cannot find name 'class'.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(11,5): error TS2304: Cannot find name 'typeof'.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(15,5): error TS2304: Cannot find name 'a'.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(15,6): error TS1005: ',' expected.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(15,6): error TS2304: Cannot find name '.'.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(15,7): error TS1005: ',' expected.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(15,7): error TS2304: Cannot find name 'b'.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(16,5): error TS2304: Cannot find name 'a'.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(16,6): error TS1005: ',' expected.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(17,5): error TS2304: Cannot find name 'a'.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(17,6): error TS1005: ',' expected.
+objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts(20,11): error TS2304: Cannot find name 'class'.
+
+
+==== objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts (21 errors) ====
+    // errors
+    var y = {
+        "stringLiteral",
+        42,
+        get e,
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+            ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS2304: Cannot find name 'e'.
+        set f,
+        ~~~
+!!! error TS2304: Cannot find name 'set'.
+            ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS2304: Cannot find name 'f'.
+        this,
+        ~~~~
+!!! error TS2304: Cannot find name 'this'.
+        super,
+        ~~~~~
+!!! error TS2304: Cannot find name 'super'.
+        var,
+        ~~~
+!!! error TS2304: Cannot find name 'var'.
+        class,
+        ~~~~~
+!!! error TS2304: Cannot find name 'class'.
+        typeof
+        ~~~~~~
+!!! error TS2304: Cannot find name 'typeof'.
+    };
+    
+    var x = {
+        a.b,
+        ~
+!!! error TS2304: Cannot find name 'a'.
+         ~
+!!! error TS1005: ',' expected.
+         ~
+!!! error TS2304: Cannot find name '.'.
+          ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS2304: Cannot find name 'b'.
+        a["ss"],
+        ~
+!!! error TS2304: Cannot find name 'a'.
+         ~
+!!! error TS1005: ',' expected.
+        a[1],
+        ~
+!!! error TS2304: Cannot find name 'a'.
+         ~
+!!! error TS1005: ',' expected.
+    };
+    
+    var v = { class };  // error
+              ~~~~~
+!!! error TS2304: Cannot find name 'class'.

@@ -1,0 +1,130 @@
+numericLiteralTypes3.ts(54,5): error TS2367: This comparison appears to be unintentional because the types '1' and '0' have no overlap.
+numericLiteralTypes3.ts(56,5): error TS2367: This comparison appears to be unintentional because the types '1' and '2' have no overlap.
+numericLiteralTypes3.ts(57,5): error TS2367: This comparison appears to be unintentional because the types '1' and '3' have no overlap.
+numericLiteralTypes3.ts(58,5): error TS2367: This comparison appears to be unintentional because the types '2 | 3' and '0' have no overlap.
+numericLiteralTypes3.ts(59,5): error TS2367: This comparison appears to be unintentional because the types '2 | 3' and '1' have no overlap.
+numericLiteralTypes3.ts(62,5): error TS2367: This comparison appears to be unintentional because the types '1 | 2 | 3' and '0' have no overlap.
+numericLiteralTypes3.ts(69,5): error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and '3' have no overlap.
+numericLiteralTypes3.ts(74,5): error TS2367: This comparison appears to be unintentional because the types '1' and '2 | 3' have no overlap.
+numericLiteralTypes3.ts(77,5): error TS2367: This comparison appears to be unintentional because the types '2 | 3' and '1' have no overlap.
+
+
+==== numericLiteralTypes3.ts (9 errors) ====
+    type A = 1;
+    type B = 2 | 3;
+    type C = 1 | 2 | 3;
+    type D = 0 | 1 | 2;
+    
+    function f1(a: A, b: B, c: C, d: D) {
+        a = a;
+        a = b;
+        a = c;
+        a = d;
+    }
+    
+    function f2(a: A, b: B, c: C, d: D) {
+        b = a;
+        b = b;
+        b = c;
+        b = d;
+    }
+    
+    function f3(a: A, b: B, c: C, d: D) {
+        c = a;
+        c = b;
+        c = c;
+        c = d;
+    }
+    
+    function f4(a: A, b: B, c: C, d: D) {
+        d = a;
+        d = b;
+        d = c;
+        d = d;
+    }
+    
+    function f5(a: A, b: B, c: C, d: D) {
+        a = 0;
+        a = 1;
+        a = 2;
+        a = 3;
+        b = 0;
+        b = 1;
+        b = 2;
+        b = 3;
+        c = 0;
+        c = 1;
+        c = 2;
+        c = 3;
+        d = 0;
+        d = 1;
+        d = 2;
+        d = 3;
+    }
+    
+    function f6(a: A, b: B, c: C, d: D) {
+        a === 0;
+        ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '1' and '0' have no overlap.
+        a === 1;
+        a === 2;
+        ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '1' and '2' have no overlap.
+        a === 3;
+        ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '1' and '3' have no overlap.
+        b === 0;
+        ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '2 | 3' and '0' have no overlap.
+        b === 1;
+        ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '2 | 3' and '1' have no overlap.
+        b === 2;
+        b === 3;
+        c === 0;
+        ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '1 | 2 | 3' and '0' have no overlap.
+        c === 1;
+        c === 2;
+        c === 3;
+        d === 0;
+        d === 1;
+        d === 2;
+        d === 3;
+        ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and '3' have no overlap.
+    }
+    
+    function f7(a: A, b: B, c: C, d: D) {
+        a === a;
+        a === b;
+        ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '1' and '2 | 3' have no overlap.
+        a === c;
+        a === d;
+        b === a;
+        ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '2 | 3' and '1' have no overlap.
+        b === b;
+        b === c;
+        b === d;
+        c === a;
+        c === b;
+        c === c;
+        c === d;
+        d === a;
+        d === b;
+        d === c;
+        d === d;
+    }
+    
+    function f8(x: 0 | 2 | 4) {
+        switch (x) {
+            case 0: return;
+            case 1: return;
+            case 2: return;
+            case 3: return;
+            case 4: return;
+            case 5: return;
+        }
+    }

@@ -1,0 +1,12 @@
+typeArgumentInferenceWithClassExpression2.ts(2,12): error TS2322: Type 'undefined' is not assignable to type 'T'.
+
+
+==== typeArgumentInferenceWithClassExpression2.ts (1 errors) ====
+    function foo<T>(x = class { prop: T }): T {
+        return undefined;
+               ~~~~~~~~~
+!!! error TS2322: Type 'undefined' is not assignable to type 'T'.
+    }
+    
+    // Should not infer string because it is a static property
+    foo(class { static prop = "hello" }).length;

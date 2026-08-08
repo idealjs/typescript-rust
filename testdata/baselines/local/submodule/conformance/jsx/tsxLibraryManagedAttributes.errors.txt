@@ -1,0 +1,208 @@
+tsxLibraryManagedAttributes.tsx(54,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(55,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(56,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(57,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(58,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(59,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(68,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(69,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(70,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(71,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(79,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(80,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(81,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(97,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(98,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(99,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(100,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(101,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(102,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(110,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(111,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(112,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(113,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(121,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(122,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(123,11): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxLibraryManagedAttributes.tsx(124,12): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+
+
+==== tsxLibraryManagedAttributes.tsx (27 errors) ====
+    type Defaultize<TProps, TDefaults> =
+        & {[K in Extract<keyof TProps, keyof TDefaults>]?: TProps[K]}
+        & {[K in Exclude<keyof TProps, keyof TDefaults>]: TProps[K]}
+        & Partial<TDefaults>;
+    
+    type InferredPropTypes<P> = {[K in keyof P]: P[K] extends PropTypeChecker<infer T, infer U> ? PropTypeChecker<T, U>[typeof checkedType] : {}};
+    
+    declare const checkedType: unique symbol;
+    interface PropTypeChecker<U, TRequired = false> {
+        (props: any, propName: string, componentName: string, location: any, propFullName: string): boolean;
+        isRequired: PropTypeChecker<U, true>;
+        [checkedType]: TRequired extends true ? U : U | null | undefined;
+    }
+    
+    declare namespace PropTypes {
+        export const number: PropTypeChecker<number>;
+        export const string: PropTypeChecker<string>;
+        export const node: PropTypeChecker<ReactNode>;
+    }
+    
+    type ReactNode = string | number | ReactComponent<{}, {}>;
+    
+    declare class ReactComponent<P={}, S={}> {
+        constructor(props: P);
+        props: P & Readonly<{children: ReactNode[]}>;
+        setState(s: Partial<S>): S;
+        render(): ReactNode;
+    }
+    
+    declare namespace JSX {
+        interface Element extends ReactComponent {}
+        interface IntrinsicElements {}
+        type LibraryManagedAttributes<TComponent, TProps> =
+            TComponent extends { defaultProps: infer D; propTypes: infer P; }
+                ? Defaultize<TProps & InferredPropTypes<P>, D>
+                : TComponent extends { defaultProps: infer D }
+                    ? Defaultize<TProps, D>
+                    : TComponent extends { propTypes: infer P }
+                        ? TProps & InferredPropTypes<P>
+                        : TProps;
+    }
+    
+    class Component extends ReactComponent {
+        static propTypes = {
+            foo: PropTypes.number,
+            bar: PropTypes.node,
+            baz: PropTypes.string.isRequired,
+        };
+        static defaultProps = {
+            foo: 42,
+        }
+    }
+    
+    const a = <Component foo={12} bar="yes" baz="yeah" />;
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const b = <Component foo={12} />; // Error, missing required prop bar
+              ~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const c = <Component bar="yes" baz="yeah" />;
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const d = <Component bar="yes" baz="yo" bat="ohno" />; // Error, baz not a valid prop
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const e = <Component foo={12} bar={null} baz="cool" />; // bar is nullable/undefinable since it's not marked `isRequired`
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const f = <Component foo={12} bar="yeah" baz={null} />; // Error, baz is _not_ nullable/undefinable since it's marked `isRequired`
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    
+    class JustPropTypes extends ReactComponent {
+        static propTypes = {
+            foo: PropTypes.number,
+            bar: PropTypes.node.isRequired,
+        };
+    }
+    
+    const g = <JustPropTypes foo={12} bar="ok" />;
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const h = <JustPropTypes foo="no" />; // error, wrong type
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const i = <JustPropTypes foo={null} bar="ok" />;
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const j = <JustPropTypes foo={12} bar={null} />; // error, bar is required
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    
+    class JustDefaultProps extends ReactComponent {
+        static defaultProps = {
+            foo: 42,
+        };
+    }
+    
+    const k = <JustDefaultProps foo={12} />;
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const l = <JustDefaultProps foo={12} bar="ok" />; // error, no prop named bar
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const m = <JustDefaultProps foo="no" />; // error, wrong type
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    
+    interface FooProps {
+        foo: string;
+    }
+    
+    class BothWithSpecifiedGeneric extends ReactComponent<FooProps> {
+        static propTypes = {
+            foo: PropTypes.string,
+            bar: PropTypes.node,
+            baz: PropTypes.number.isRequired,
+        };
+        static defaultProps = {
+            foo: "yo",
+        };
+    }
+    const n = <BothWithSpecifiedGeneric foo="fine" bar="yes" baz={12} />;
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const o = <BothWithSpecifiedGeneric foo="no" />; // Error, missing required prop bar
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const p = <BothWithSpecifiedGeneric bar="yes" baz={12} />;
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const q = <BothWithSpecifiedGeneric bar="yes" baz={12} bat="ohno" />; // Error, baz not a valid prop
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const r = <BothWithSpecifiedGeneric foo="no" bar={null} baz={0} />; // bar is nullable/undefinable since it's not marked `isRequired`
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const s = <BothWithSpecifiedGeneric foo="eh" bar="yeah" baz={null} />; // Error, baz is _not_ nullable/undefinable since it's marked `isRequired`
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    
+    class JustPropTypesWithSpecifiedGeneric extends ReactComponent<FooProps> {
+        static propTypes = {
+            foo: PropTypes.string,
+            bar: PropTypes.node.isRequired,
+        };
+    }
+    const t = <JustPropTypesWithSpecifiedGeneric foo="nice" bar="ok" />;
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const u = <JustPropTypesWithSpecifiedGeneric foo={12} />; // error, wrong type
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const v = <JustPropTypesWithSpecifiedGeneric foo={null} bar="ok" />; // generic overrides propTypes required-ness, null isn't valid
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const w = <JustPropTypesWithSpecifiedGeneric foo="cool" bar={null} />; // error, bar is required
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    
+    class JustDefaultPropsWithSpecifiedGeneric extends ReactComponent<FooProps> {
+        static defaultProps = {
+            foo: "no",
+        };
+    }
+    
+    const x = <JustDefaultPropsWithSpecifiedGeneric foo="eh" />;
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const y = <JustDefaultPropsWithSpecifiedGeneric foo="no" bar="ok" />; // error, no prop named bar
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const z = <JustDefaultPropsWithSpecifiedGeneric foo={12} />; // error, wrong type
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    const aa = <JustDefaultPropsWithSpecifiedGeneric />;
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.

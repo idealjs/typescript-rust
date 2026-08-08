@@ -1,0 +1,28 @@
+ExportInterfaceWithInaccessibleTypeInTypeParameterConstraint.ts(14,38): error TS2353: Object literal may only specify known properties, and 'x' does not exist in type '{ z: number }'.
+
+
+==== ExportInterfaceWithInaccessibleTypeInTypeParameterConstraint.ts (1 errors) ====
+    namespace A {
+    
+        interface Point {
+            x: number;
+            y: number;
+        }
+    
+        export var Origin: Point = { x: 0, y: 0 };
+    
+        export interface Point3d extends Point {
+            z: number;
+        }
+    
+        export var Origin3d: Point3d = { x: 0, y: 0, z: 0 };
+                                         ~
+!!! error TS2353: Object literal may only specify known properties, and 'x' does not exist in type '{ z: number }'.
+    
+        export interface Line<TPoint extends Point>{
+            new (start: TPoint, end: TPoint);
+    
+            start: TPoint;
+            end: TPoint;
+        }
+    }

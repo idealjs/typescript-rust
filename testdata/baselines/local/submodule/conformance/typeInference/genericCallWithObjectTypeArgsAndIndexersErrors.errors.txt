@@ -1,0 +1,36 @@
+genericCallWithObjectTypeArgsAndIndexersErrors.ts(9,22): error TS2304: Cannot find name 'Object'.
+genericCallWithObjectTypeArgsAndIndexersErrors.ts(15,40): error TS2304: Cannot find name 'Date'.
+genericCallWithObjectTypeArgsAndIndexersErrors.ts(17,22): error TS2304: Cannot find name 'Object'.
+
+
+==== genericCallWithObjectTypeArgsAndIndexersErrors.ts (3 errors) ====
+    // Type inference infers from indexers in target type, error cases
+    
+    function foo<T>(x: T) {
+        return x;
+    }
+    
+    function other<T>(arg: T) {
+        var b: {
+            [x: string]: Object;
+                         ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+            [x: number]: T; // ok, T is a subtype of Object because its apparent type is {}
+        };
+        var r2 = foo(b); // T
+    }
+    
+    function other3<T extends U, U extends Date>(arg: T) {
+                                           ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        var b: {
+            [x: string]: Object;
+                         ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+            [x: number]: T;
+        };
+        var r2 = foo(b);
+        var d = r2[1];
+        var e = r2['1'];
+        var u: U = r2[1]; // ok
+    }

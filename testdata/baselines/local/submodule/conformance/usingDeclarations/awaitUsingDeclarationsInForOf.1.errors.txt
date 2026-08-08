@@ -1,0 +1,73 @@
+awaitUsingDeclarationsInForOf.1.ts(2,16): error TS2304: Cannot find name 'using'.
+awaitUsingDeclarationsInForOf.1.ts(2,22): error TS1005: ';' expected.
+awaitUsingDeclarationsInForOf.1.ts(2,22): error TS2304: Cannot find name 'd1'.
+awaitUsingDeclarationsInForOf.1.ts(2,25): error TS1005: ';' expected.
+awaitUsingDeclarationsInForOf.1.ts(2,25): error TS2304: Cannot find name 'of'.
+awaitUsingDeclarationsInForOf.1.ts(2,31): error TS2304: Cannot find name 'async'.
+awaitUsingDeclarationsInForOf.1.ts(2,37): error TS1005: ',' expected.
+awaitUsingDeclarationsInForOf.1.ts(2,58): error TS1005: ',' expected.
+awaitUsingDeclarationsInForOf.1.ts(2,58): error TS2304: Cannot find name '('.
+awaitUsingDeclarationsInForOf.1.ts(2,59): error TS1005: ',' expected.
+awaitUsingDeclarationsInForOf.1.ts(2,59): error TS2304: Cannot find name ')'.
+awaitUsingDeclarationsInForOf.1.ts(2,61): error TS1005: ',' expected.
+awaitUsingDeclarationsInForOf.1.ts(2,61): error TS2304: Cannot find name '{'.
+awaitUsingDeclarationsInForOf.1.ts(2,64): error TS1005: ']' expected.
+awaitUsingDeclarationsInForOf.1.ts(2,85): error TS1005: ',' expected.
+awaitUsingDeclarationsInForOf.1.ts(2,85): error TS2304: Cannot find name '('.
+awaitUsingDeclarationsInForOf.1.ts(2,86): error TS1005: ',' expected.
+awaitUsingDeclarationsInForOf.1.ts(2,86): error TS2304: Cannot find name ')'.
+awaitUsingDeclarationsInForOf.1.ts(2,88): error TS1005: ',' expected.
+awaitUsingDeclarationsInForOf.1.ts(2,88): error TS2304: Cannot find name '{'.
+awaitUsingDeclarationsInForOf.1.ts(2,92): error TS1128: Declaration or statement expected.
+awaitUsingDeclarationsInForOf.1.ts(2,109): error TS1005: ';' expected.
+
+
+==== awaitUsingDeclarationsInForOf.1.ts (22 errors) ====
+    async function main() {
+        for (await using d1 of [{ async [Symbol.asyncDispose]() {} }, { [Symbol.dispose]() {} }, null, undefined]) {
+                   ~~~~~
+!!! error TS2304: Cannot find name 'using'.
+                         ~~
+!!! error TS1005: ';' expected.
+                         ~~
+!!! error TS2304: Cannot find name 'd1'.
+                            ~~
+!!! error TS1005: ';' expected.
+                            ~~
+!!! error TS2304: Cannot find name 'of'.
+                                  ~~~~~
+!!! error TS2304: Cannot find name 'async'.
+                                        ~
+!!! error TS1005: ',' expected.
+                                                             ~
+!!! error TS1005: ',' expected.
+                                                             ~
+!!! error TS2304: Cannot find name '('.
+                                                              ~
+!!! error TS1005: ',' expected.
+                                                              ~
+!!! error TS2304: Cannot find name ')'.
+                                                                ~
+!!! error TS1005: ',' expected.
+                                                                ~
+!!! error TS2304: Cannot find name '{'.
+                                                                   ~
+!!! error TS1005: ']' expected.
+                                                                                        ~
+!!! error TS1005: ',' expected.
+                                                                                        ~
+!!! error TS2304: Cannot find name '('.
+                                                                                         ~
+!!! error TS1005: ',' expected.
+                                                                                         ~
+!!! error TS2304: Cannot find name ')'.
+                                                                                           ~
+!!! error TS1005: ',' expected.
+                                                                                           ~
+!!! error TS2304: Cannot find name '{'.
+                                                                                               ~
+!!! error TS1128: Declaration or statement expected.
+                                                                                                                ~
+!!! error TS1005: ';' expected.
+        }
+    }

@@ -1,0 +1,41 @@
+parserUnterminatedGeneric2.ts(2,5): error TS2304: Cannot find name 'interfaceICompiledExpression'.
+parserUnterminatedGeneric2.ts(2,34): error TS1005: ';' expected.
+parserUnterminatedGeneric2.ts(3,10): error TS2304: Cannot find name 'context'.
+parserUnterminatedGeneric2.ts(3,17): error TS1005: ')' expected.
+parserUnterminatedGeneric2.ts(3,19): error TS2304: Cannot find name 'any'.
+parserUnterminatedGeneric2.ts(3,24): error TS2304: Cannot find name 'locals'.
+parserUnterminatedGeneric2.ts(3,31): error TS1012: Unexpected token.
+parserUnterminatedGeneric2.ts(3,33): error TS1005: ':' expected.
+parserUnterminatedGeneric2.ts(3,33): error TS2304: Cannot find name 'any'.
+parserUnterminatedGeneric2.ts(3,36): error TS1005: ';' expected.
+
+
+==== parserUnterminatedGeneric2.ts (10 errors) ====
+    declare namespace ng {
+        interfaceICompiledExpression {
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'interfaceICompiledExpression'.
+                                     ~
+!!! error TS1005: ';' expected.
+            (context: any, locals?: any): any;
+             ~~~~~~~
+!!! error TS2304: Cannot find name 'context'.
+                    ~
+!!! error TS1005: ')' expected.
+                      ~~~
+!!! error TS2304: Cannot find name 'any'.
+                           ~~~~~~
+!!! error TS2304: Cannot find name 'locals'.
+                                  ~
+!!! error TS1012: Unexpected token.
+                                    ~~~
+!!! error TS1005: ':' expected.
+                                    ~~~
+!!! error TS2304: Cannot find name 'any'.
+                                       ~
+!!! error TS1005: ';' expected.
+            assign(context: any, value: any): any;
+        }
+    
+        interface IQService {
+            all(promises: IPromise < any > []): IPromise<

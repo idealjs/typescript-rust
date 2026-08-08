@@ -1,0 +1,16 @@
+/tsconfig.base.json(2,22): error TS1005: ';' expected.
+/tsconfig.base.json(3,31): error TS1005: ';' expected.
+
+
+==== verbatimModuleSyntaxCompat4.ts (0 errors) ====
+    
+==== /tsconfig.base.json (2 errors) ====
+    {
+        "compilerOptions": {
+                         ~
+!!! error TS1005: ';' expected.
+            "verbatimModuleSyntax": true
+                                  ~
+!!! error TS1005: ';' expected.
+        }
+    }

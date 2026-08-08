@@ -1,63 +1,63 @@
-privateNames/privateNameAndAny.ts(2,5): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(2,5): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(2,6): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(3,12): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(3,12): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(3,13): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(4,12): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(4,12): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(4,13): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(6,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(6,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(6,16): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(7,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(7,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(7,16): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(8,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(8,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(8,16): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(9,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(9,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(9,16): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(9,16): error TS2304: Cannot find name 'bar'.
-privateNames/privateNameAndAny.ts(10,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(10,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(10,16): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(13,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(13,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(13,16): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(14,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(14,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(14,16): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(15,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(15,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(15,16): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(16,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(16,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(16,16): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(16,16): error TS2304: Cannot find name 'bar'.
-privateNames/privateNameAndAny.ts(17,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(17,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(17,16): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(20,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(20,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(20,16): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(21,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(21,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(21,16): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(22,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(22,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(22,16): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(23,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(23,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(23,16): error TS1005: ';' expected.
-privateNames/privateNameAndAny.ts(23,16): error TS2304: Cannot find name 'bar'.
-privateNames/privateNameAndAny.ts(24,15): error TS1003: Identifier expected.
-privateNames/privateNameAndAny.ts(24,15): error TS1127: Invalid character.
-privateNames/privateNameAndAny.ts(24,16): error TS1005: ';' expected.
+privateNameAndAny.ts(2,5): error TS1003: Identifier expected.
+privateNameAndAny.ts(2,5): error TS1127: Invalid character.
+privateNameAndAny.ts(2,6): error TS1005: ';' expected.
+privateNameAndAny.ts(3,12): error TS1005: ';' expected.
+privateNameAndAny.ts(3,12): error TS1127: Invalid character.
+privateNameAndAny.ts(3,13): error TS1005: ';' expected.
+privateNameAndAny.ts(4,12): error TS1005: ';' expected.
+privateNameAndAny.ts(4,12): error TS1127: Invalid character.
+privateNameAndAny.ts(4,13): error TS1005: ';' expected.
+privateNameAndAny.ts(6,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(6,15): error TS1127: Invalid character.
+privateNameAndAny.ts(6,16): error TS1005: ';' expected.
+privateNameAndAny.ts(7,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(7,15): error TS1127: Invalid character.
+privateNameAndAny.ts(7,16): error TS1005: ';' expected.
+privateNameAndAny.ts(8,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(8,15): error TS1127: Invalid character.
+privateNameAndAny.ts(8,16): error TS1005: ';' expected.
+privateNameAndAny.ts(9,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(9,15): error TS1127: Invalid character.
+privateNameAndAny.ts(9,16): error TS1005: ';' expected.
+privateNameAndAny.ts(9,16): error TS2304: Cannot find name 'bar'.
+privateNameAndAny.ts(10,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(10,15): error TS1127: Invalid character.
+privateNameAndAny.ts(10,16): error TS1005: ';' expected.
+privateNameAndAny.ts(13,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(13,15): error TS1127: Invalid character.
+privateNameAndAny.ts(13,16): error TS1005: ';' expected.
+privateNameAndAny.ts(14,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(14,15): error TS1127: Invalid character.
+privateNameAndAny.ts(14,16): error TS1005: ';' expected.
+privateNameAndAny.ts(15,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(15,15): error TS1127: Invalid character.
+privateNameAndAny.ts(15,16): error TS1005: ';' expected.
+privateNameAndAny.ts(16,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(16,15): error TS1127: Invalid character.
+privateNameAndAny.ts(16,16): error TS1005: ';' expected.
+privateNameAndAny.ts(16,16): error TS2304: Cannot find name 'bar'.
+privateNameAndAny.ts(17,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(17,15): error TS1127: Invalid character.
+privateNameAndAny.ts(17,16): error TS1005: ';' expected.
+privateNameAndAny.ts(20,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(20,15): error TS1127: Invalid character.
+privateNameAndAny.ts(20,16): error TS1005: ';' expected.
+privateNameAndAny.ts(21,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(21,15): error TS1127: Invalid character.
+privateNameAndAny.ts(21,16): error TS1005: ';' expected.
+privateNameAndAny.ts(22,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(22,15): error TS1127: Invalid character.
+privateNameAndAny.ts(22,16): error TS1005: ';' expected.
+privateNameAndAny.ts(23,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(23,15): error TS1127: Invalid character.
+privateNameAndAny.ts(23,16): error TS1005: ';' expected.
+privateNameAndAny.ts(23,16): error TS2304: Cannot find name 'bar'.
+privateNameAndAny.ts(24,15): error TS1003: Identifier expected.
+privateNameAndAny.ts(24,15): error TS1127: Invalid character.
+privateNameAndAny.ts(24,16): error TS1005: ';' expected.
 
 
-==== privateNames/privateNameAndAny.ts (57 errors) ====
+==== privateNameAndAny.ts (57 errors) ====
     class A {
         #foo = true;
         ~

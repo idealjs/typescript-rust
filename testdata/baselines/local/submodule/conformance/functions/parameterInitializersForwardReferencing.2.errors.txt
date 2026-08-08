@@ -1,0 +1,22 @@
+parameterInitializersForwardReferencing.2.ts(5,23): error TS1012: Unexpected token.
+parameterInitializersForwardReferencing.2.ts(5,26): error TS1005: ',' expected.
+
+
+==== parameterInitializersForwardReferencing.2.ts (2 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/36295
+    
+    function a(): any {}
+    
+    function b({ b = a(), ...x } = a()) {
+                          ~~~
+!!! error TS1012: Unexpected token.
+                             ~
+!!! error TS1005: ',' expected.
+        var a;
+    }
+    
+    const x = "";
+    
+    function c({ b, ...c } = a(), d = x) {
+        var x;
+    }

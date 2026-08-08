@@ -1,0 +1,82 @@
+genericCallWithOverloadedFunctionTypedArguments2.ts(14,21): error TS1005: '>' expected.
+genericCallWithOverloadedFunctionTypedArguments2.ts(14,23): error TS1005: ',' expected.
+genericCallWithOverloadedFunctionTypedArguments2.ts(14,23): error TS2304: Cannot find name 'U'.
+genericCallWithOverloadedFunctionTypedArguments2.ts(14,23): error TS2554: Expected 1 arguments, but got 2.
+genericCallWithOverloadedFunctionTypedArguments2.ts(14,29): error TS2304: Cannot find name 'T'.
+genericCallWithOverloadedFunctionTypedArguments2.ts(14,42): error TS1005: ',' expected.
+genericCallWithOverloadedFunctionTypedArguments2.ts(14,43): error TS1134: Variable declaration expected.
+genericCallWithOverloadedFunctionTypedArguments2.ts(22,20): error TS2304: Cannot find name 'T'.
+genericCallWithOverloadedFunctionTypedArguments2.ts(22,26): error TS2304: Cannot find name 'T'.
+genericCallWithOverloadedFunctionTypedArguments2.ts(28,21): error TS2304: Cannot find name 'T'.
+genericCallWithOverloadedFunctionTypedArguments2.ts(28,27): error TS2304: Cannot find name 'T'.
+genericCallWithOverloadedFunctionTypedArguments2.ts(28,33): error TS2304: Cannot find name 'T'.
+genericCallWithOverloadedFunctionTypedArguments2.ts(34,24): error TS2304: Cannot find name 'T'.
+genericCallWithOverloadedFunctionTypedArguments2.ts(34,30): error TS2304: Cannot find name 'T'.
+
+
+==== genericCallWithOverloadedFunctionTypedArguments2.ts (14 errors) ====
+    // Function typed arguments with multiple signatures must be passed an implementation that matches all of them
+    // Inferences are made quadratic-pairwise to and from these overload sets
+    
+    namespace NonGenericParameter {
+        declare var a: {
+            (x: boolean): boolean;
+            (x: string): string;
+        }
+    
+        function foo4(cb: typeof a) {
+            return cb;
+        }
+    
+        var r3 = foo4(<T, U>(x: T) => { var r!: U; return r }); // ok
+                        ~
+!!! error TS1005: '>' expected.
+                          ~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS2304: Cannot find name 'U'.
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 2.
+                                ~
+!!! error TS2304: Cannot find name 'T'.
+                                             ~
+!!! error TS1005: ',' expected.
+                                              ~
+!!! error TS1134: Variable declaration expected.
+    }
+    
+    namespace GenericParameter {
+        function foo5<T>(cb: { (x: T): string; (x: number): T }) {
+            return cb;
+        }
+    
+        var r6 = foo5(<T>(x: T) => x); // ok
+                       ~
+!!! error TS2304: Cannot find name 'T'.
+                             ~
+!!! error TS2304: Cannot find name 'T'.
+    
+        function foo6<T>(cb: { (x: T): string; (x: T, y?: T): string }) {
+            return cb;
+        }
+    
+        var r10 = foo6(<T>(x: T, y: T) => ''); // error
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+                              ~
+!!! error TS2304: Cannot find name 'T'.
+                                    ~
+!!! error TS2304: Cannot find name 'T'.
+    
+        function foo7<T>(x:T, cb: { (x: T): string; (x: T, y?: T): string }) {
+            return cb;
+        }
+    
+        var r13 = foo7(1, <T>(x: T) => x); // ok
+                           ~
+!!! error TS2304: Cannot find name 'T'.
+                                 ~
+!!! error TS2304: Cannot find name 'T'.
+        declare var a: { <T>(x: T): number; <T>(x: number): T; }
+        var r14 = foo7(1, a); // ok
+    }

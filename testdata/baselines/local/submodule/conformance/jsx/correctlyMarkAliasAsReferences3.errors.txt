@@ -1,0 +1,22 @@
+error TS6053: File 'react.d.ts' not found.
+0.tsx(8,30): error TS2304: Cannot find name 'cx'.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.
+==== correctlyMarkAliasAsReferences3.tsx (0 errors) ====
+    
+==== declaration.d.ts (0 errors) ====
+    declare module "classnames";
+    
+==== 0.tsx (1 errors) ====
+    /// <reference path="/.lib/react.d.ts" />
+    ///<reference path="declaration.d.ts" />
+    import * as cx from 'classnames';
+    import * as React from "react";
+    
+    let buttonProps;
+    let k = <button {...buttonProps}>
+                <span className={cx('class1', { class2: true })} />
+                                 ~~
+!!! error TS2304: Cannot find name 'cx'.
+            </button>;

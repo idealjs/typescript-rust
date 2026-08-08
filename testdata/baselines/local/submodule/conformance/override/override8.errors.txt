@@ -1,0 +1,54 @@
+override8.ts(6,24): error TS1005: ',' expected.
+override8.ts(6,42): error TS1005: ',' expected.
+override8.ts(7,9): error TS2349: This expression is not callable.
+override8.ts(12,24): error TS1005: ',' expected.
+override8.ts(18,24): error TS1005: ',' expected.
+override8.ts(19,9): error TS2349: This expression is not callable.
+override8.ts(27,9): error TS2349: This expression is not callable.
+
+
+==== override8.ts (7 errors) ====
+    class B {
+        a: string
+    }
+    
+    class D extends B {
+        constructor(public a: string, public b: string) {
+                           ~
+!!! error TS1005: ',' expected.
+                                             ~
+!!! error TS1005: ',' expected.
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    class BB {
+        constructor(public a: string) {
+                           ~
+!!! error TS1005: ',' expected.
+    
+        }
+    }
+    
+    class DD extends BB {
+        constructor(public a: string) {
+                           ~
+!!! error TS1005: ',' expected.
+            super(a)
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    class DDD extends BB {
+        public a: string;
+    
+        constructor(a: string) {
+            super(a)
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            this.a = a
+        }
+    }

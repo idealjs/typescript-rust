@@ -1,0 +1,281 @@
+index.cts(5,1): error TS2304: Cannot find name 'cjs'.
+index.cts(6,1): error TS2304: Cannot find name 'mjs'.
+index.cts(7,5): error TS1003: Identifier expected.
+index.cts(8,1): error TS1005: '=' expected.
+index.cts(8,8): error TS1005: '(' expected.
+index.cts(8,10): error TS1005: ')' expected.
+index.cts(8,10): error TS2304: Cannot find name 'as'.
+index.cts(8,13): error TS1005: ';' expected.
+index.cts(8,13): error TS2304: Cannot find name 'cjsi'.
+index.cts(8,18): error TS1005: ';' expected.
+index.cts(8,18): error TS2304: Cannot find name 'from'.
+index.cts(8,23): error TS1005: ';' expected.
+index.cts(11,1): error TS2304: Cannot find name 'cjsi'.
+index.cts(12,1): error TS2304: Cannot find name 'mjsi'.
+index.cts(13,1): error TS2304: Cannot find name 'typei'.
+index.mts(5,1): error TS2304: Cannot find name 'cjs'.
+index.mts(6,1): error TS2304: Cannot find name 'mjs'.
+index.mts(7,5): error TS1003: Identifier expected.
+index.mts(8,1): error TS1005: '=' expected.
+index.mts(8,8): error TS1005: '(' expected.
+index.mts(8,10): error TS1005: ')' expected.
+index.mts(8,10): error TS2304: Cannot find name 'as'.
+index.mts(8,13): error TS1005: ';' expected.
+index.mts(8,13): error TS2304: Cannot find name 'cjsi'.
+index.mts(8,18): error TS1005: ';' expected.
+index.mts(8,18): error TS2304: Cannot find name 'from'.
+index.mts(8,23): error TS1005: ';' expected.
+index.mts(11,1): error TS2304: Cannot find name 'cjsi'.
+index.mts(12,1): error TS2304: Cannot find name 'mjsi'.
+index.mts(13,1): error TS2304: Cannot find name 'typei'.
+index.ts(5,1): error TS2304: Cannot find name 'cjs'.
+index.ts(6,1): error TS2304: Cannot find name 'mjs'.
+index.ts(7,5): error TS1003: Identifier expected.
+index.ts(8,1): error TS1005: '=' expected.
+index.ts(8,8): error TS1005: '(' expected.
+index.ts(8,10): error TS1005: ')' expected.
+index.ts(8,10): error TS2304: Cannot find name 'as'.
+index.ts(8,13): error TS1005: ';' expected.
+index.ts(8,13): error TS2304: Cannot find name 'cjsi'.
+index.ts(8,18): error TS1005: ';' expected.
+index.ts(8,18): error TS2304: Cannot find name 'from'.
+index.ts(8,23): error TS1005: ';' expected.
+index.ts(11,1): error TS2304: Cannot find name 'cjsi'.
+index.ts(12,1): error TS2304: Cannot find name 'mjsi'.
+index.ts(13,1): error TS2304: Cannot find name 'typei'.
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+package.json(4,14): error TS1005: ';' expected.
+package.json(5,16): error TS1005: ';' expected.
+package.json(6,16): error TS1005: ';' expected.
+package.json(7,12): error TS1005: ';' expected.
+test.d.cts(7,16): error TS1003: Identifier expected.
+test.d.cts(7,17): error TS1005: '}' expected.
+test.d.mts(7,16): error TS1003: Identifier expected.
+test.d.mts(7,17): error TS1005: '}' expected.
+test.d.ts(7,16): error TS1003: Identifier expected.
+test.d.ts(7,17): error TS1005: '}' expected.
+
+
+==== index.ts (15 errors) ====
+    // esm format file
+    import * as cjs from "package/cjs";
+    import * as mjs from "package/mjs";
+    import * as type from "package";
+    cjs;
+    ~~~
+!!! error TS2304: Cannot find name 'cjs'.
+    mjs;
+    ~~~
+!!! error TS2304: Cannot find name 'mjs'.
+    type;
+        ~
+!!! error TS1003: Identifier expected.
+    import * as cjsi from "inner/cjs";
+    ~~~~~~
+!!! error TS1005: '=' expected.
+           ~
+!!! error TS1005: '(' expected.
+             ~~
+!!! error TS1005: ')' expected.
+             ~~
+!!! error TS2304: Cannot find name 'as'.
+                ~~~~
+!!! error TS1005: ';' expected.
+                ~~~~
+!!! error TS2304: Cannot find name 'cjsi'.
+                     ~~~~
+!!! error TS1005: ';' expected.
+                     ~~~~
+!!! error TS2304: Cannot find name 'from'.
+                          ~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+    import * as mjsi from "inner/mjs";
+    import * as typei from "inner";
+    cjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'cjsi'.
+    mjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'mjsi'.
+    typei;
+    ~~~~~
+!!! error TS2304: Cannot find name 'typei'.
+==== index.mts (15 errors) ====
+    // esm format file
+    import * as cjs from "package/cjs";
+    import * as mjs from "package/mjs";
+    import * as type from "package";
+    cjs;
+    ~~~
+!!! error TS2304: Cannot find name 'cjs'.
+    mjs;
+    ~~~
+!!! error TS2304: Cannot find name 'mjs'.
+    type;
+        ~
+!!! error TS1003: Identifier expected.
+    import * as cjsi from "inner/cjs";
+    ~~~~~~
+!!! error TS1005: '=' expected.
+           ~
+!!! error TS1005: '(' expected.
+             ~~
+!!! error TS1005: ')' expected.
+             ~~
+!!! error TS2304: Cannot find name 'as'.
+                ~~~~
+!!! error TS1005: ';' expected.
+                ~~~~
+!!! error TS2304: Cannot find name 'cjsi'.
+                     ~~~~
+!!! error TS1005: ';' expected.
+                     ~~~~
+!!! error TS2304: Cannot find name 'from'.
+                          ~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+    import * as mjsi from "inner/mjs";
+    import * as typei from "inner";
+    cjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'cjsi'.
+    mjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'mjsi'.
+    typei;
+    ~~~~~
+!!! error TS2304: Cannot find name 'typei'.
+==== index.cts (15 errors) ====
+    // cjs format file
+    import * as cjs from "package/cjs";
+    import * as mjs from "package/mjs";
+    import * as type from "package";
+    cjs;
+    ~~~
+!!! error TS2304: Cannot find name 'cjs'.
+    mjs;
+    ~~~
+!!! error TS2304: Cannot find name 'mjs'.
+    type;
+        ~
+!!! error TS1003: Identifier expected.
+    import * as cjsi from "inner/cjs";
+    ~~~~~~
+!!! error TS1005: '=' expected.
+           ~
+!!! error TS1005: '(' expected.
+             ~~
+!!! error TS1005: ')' expected.
+             ~~
+!!! error TS2304: Cannot find name 'as'.
+                ~~~~
+!!! error TS1005: ';' expected.
+                ~~~~
+!!! error TS2304: Cannot find name 'cjsi'.
+                     ~~~~
+!!! error TS1005: ';' expected.
+                     ~~~~
+!!! error TS2304: Cannot find name 'from'.
+                          ~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+    import * as mjsi from "inner/mjs";
+    import * as typei from "inner";
+    cjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'cjsi'.
+    mjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'mjsi'.
+    typei;
+    ~~~~~
+!!! error TS2304: Cannot find name 'typei'.
+==== index.d.ts (0 errors) ====
+    // cjs format file
+    export const implicitCjsSource = true;
+==== test.d.ts (2 errors) ====
+    // cjs format file
+    import * as cjs from "inner/cjs";
+    import * as mjs from "inner/mjs";
+    import * as type from "inner";
+    export { cjs };
+    export { mjs };
+    export { type };
+                   ~
+!!! error TS1003: Identifier expected.
+                    
+!!! error TS1005: '}' expected.
+==== index.d.mts (0 errors) ====
+    // esm format file
+    export const mjsSource = true;
+==== test.d.mts (2 errors) ====
+    // esm format file
+    import * as cjs from "inner/cjs";
+    import * as mjs from "inner/mjs";
+    import * as type from "inner";
+    export { cjs };
+    export { mjs };
+    export { type };
+                   ~
+!!! error TS1003: Identifier expected.
+                    
+!!! error TS1005: '}' expected.
+==== index.d.cts (0 errors) ====
+    // cjs format file
+    export const cjsSource = true;
+==== test.d.cts (2 errors) ====
+    // cjs format file
+    import * as cjs from "inner/cjs";
+    import * as mjs from "inner/mjs";
+    import * as type from "inner";
+    export { cjs };
+    export { mjs };
+    export { type };
+                   ~
+!!! error TS1003: Identifier expected.
+                    
+!!! error TS1005: '}' expected.
+==== package.json (6 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+               ~
+!!! error TS1005: ';' expected.
+        "type": "module",
+               ~
+!!! error TS1005: ';' expected.
+        "exports": {
+            ~
+!!! error TS1005: ';' expected.
+            "./cjs": "./index.cjs",
+                           ~
+!!! error TS1005: ';' expected.
+            "./mjs": "./index.mjs",
+                       ~
+!!! error TS1005: ';' expected.
+            ".": "./index.js"
+        }
+    }
+==== package.json (6 errors) ====
+    {
+        "name": "inner",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+                 ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            "./cjs": "./index.cjs",
+                   ~
+!!! error TS1005: ';' expected.
+            "./mjs": "./index.mjs",
+                   ~
+!!! error TS1005: ';' expected.
+            ".": "./index.js"
+               ~
+!!! error TS1005: ';' expected.
+        }
+    }

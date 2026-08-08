@@ -1,0 +1,19 @@
+main.ts(2,1): error TS2304: Cannot find name 'mod'.
+package.json(1,8): error TS1005: ';' expected.
+
+
+==== package.json (1 errors) ====
+    {"type": "module"}
+           ~
+!!! error TS1005: ';' expected.
+==== package.json (1 errors) ====
+    {"type": "commonjs"}
+           ~
+!!! error TS1005: ';' expected.
+==== native.d.node.ts (0 errors) ====
+    export function doNativeThing(flag: string): unknown;
+==== main.ts (1 errors) ====
+    import mod = require("./dir/native.node");
+    mod.doNativeThing("good");
+    ~~~
+!!! error TS2304: Cannot find name 'mod'.

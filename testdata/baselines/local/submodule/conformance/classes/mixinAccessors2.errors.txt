@@ -1,0 +1,25 @@
+mixinAccessors2.ts(2,16): error TS2304: Cannot find name 'extends'.
+mixinAccessors2.ts(2,24): error TS1005: '{' expected.
+mixinAccessors2.ts(2,35): error TS1005: ';' expected.
+
+
+==== mixinAccessors2.ts (3 errors) ====
+    function mixin<T extends { new (...args: any[]): {} }>(superclass: T) {
+      return class extends superclass {
+                   ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                           ~~~~~~~~~~
+!!! error TS1005: '{' expected.
+                                      ~
+!!! error TS1005: ';' expected.
+        accessor name = "";
+      };
+    }
+    
+    class BaseClass {
+      accessor name = "";
+    }
+    
+    class MyClass extends mixin(BaseClass) {
+      accessor name = "";
+    }

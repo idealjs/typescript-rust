@@ -1,0 +1,32 @@
+/a.js(21,13): error TS2339: Property 'a' does not exist on type 'object'.
+
+
+==== /a.js (1 errors) ====
+    export class C {
+        /**
+         * @template T
+         * @this {T}
+         * @return {T}
+         */
+        static a() {
+            return this;
+        }
+    
+        /**
+         * @template T
+         * @this {T}
+         * @return {T}
+         */
+        b() {
+            return this;
+        }
+    }
+    
+    const a = C.a();
+                ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+    a; // typeof C
+    
+    const c = new C();
+    const b = c.b();
+    b; // C

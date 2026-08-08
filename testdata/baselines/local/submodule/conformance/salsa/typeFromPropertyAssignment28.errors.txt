@@ -1,0 +1,26 @@
+a.js(2,32): error TS2339: Property 'p' does not exist on type 'object'.
+a.js(7,3): error TS2339: Property 'prototype' does not exist on type 'object'.
+a.js(10,3): error TS2339: Property 'p' does not exist on type 'object'.
+a.js(11,3): error TS2339: Property 'q' does not exist on type 'object'.
+
+
+==== a.js (4 errors) ====
+    // mixed prototype-assignment+class declaration
+    class C { constructor() { this.p = 1; } }
+                                   ~
+!!! error TS2339: Property 'p' does not exist on type 'object'.
+    // Property assignment does nothing.
+    // You have to use Object.defineProperty(C, "prototype", { q: 2 })
+    // and that only works on classes with no superclass.
+    // (Object.defineProperty isn't recognised as a JS special assignment right now.)
+    C.prototype = { q: 2 };
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+    
+    const c = new C()
+    c.p
+      ~
+!!! error TS2339: Property 'p' does not exist on type 'object'.
+    c.q
+      ~
+!!! error TS2339: Property 'q' does not exist on type 'object'.

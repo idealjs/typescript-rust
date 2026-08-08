@@ -1,0 +1,11 @@
+source.js(5,7): error TS2339: Property 'method' does not exist on type 'object'.
+
+
+==== source.js (1 errors) ====
+    export class Clazz {
+        static method() { }
+    }
+    
+    Clazz.method.prop = 5;
+          ~~~~~~
+!!! error TS2339: Property 'method' does not exist on type 'object'.

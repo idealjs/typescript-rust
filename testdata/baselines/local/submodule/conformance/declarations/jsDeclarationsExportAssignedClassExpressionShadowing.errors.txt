@@ -1,0 +1,36 @@
+index.js(2,18): error TS2448: Block-scoped variable 'Q' used before its declaration.
+index.js(7,7): error TS1003: Identifier expected.
+index.js(7,8): error TS1005: ';' expected.
+index.js(7,8): error TS2304: Cannot find name 'exports'.
+index.js(12,7): error TS1003: Identifier expected.
+index.js(12,8): error TS1005: ';' expected.
+index.js(12,8): error TS2304: Cannot find name 'exports'.
+
+
+==== index.js (7 errors) ====
+    class A {
+        member = new Q();
+                     ~
+!!! error TS2448: Block-scoped variable 'Q' used before its declaration.
+    }
+    class Q {
+        x = 42;
+    }
+    module.exports = class Q {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        constructor() {
+            this.x = new A();
+        }
+    }
+    module.exports.Another = Q;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.

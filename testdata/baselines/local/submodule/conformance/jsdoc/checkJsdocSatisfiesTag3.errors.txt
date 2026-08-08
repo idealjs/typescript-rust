@@ -1,0 +1,56 @@
+/a.js(3,5): error TS2304: Cannot find name 'f'.
+/a.js(3,6): error TS1005: ',' expected.
+/a.js(3,6): error TS2304: Cannot find name '('.
+/a.js(3,7): error TS1005: ',' expected.
+/a.js(3,7): error TS2304: Cannot find name 's'.
+/a.js(3,8): error TS1005: ',' expected.
+/a.js(3,8): error TS2304: Cannot find name ')'.
+/a.js(3,10): error TS1005: ',' expected.
+/a.js(3,10): error TS2304: Cannot find name '{'.
+/a.js(4,5): error TS2304: Cannot find name 'g'.
+/a.js(4,7): error TS2304: Cannot find name 's'.
+/a.js(4,10): error TS1005: ')' expected.
+/a.js(4,10): error TS1182: A destructuring declaration must have an initializer.
+/a.js(5,1): error TS1128: Declaration or statement expected.
+
+
+==== checkJsdocSatisfiesTag3.ts (0 errors) ====
+    
+==== /a.js (14 errors) ====
+    /** @type {{ f(s: string): void } & Record<string, unknown> }} */
+    let obj = /** @satisfies {{ g(s: string): void } & Record<string, unknown>} */ ({
+        f(s) { }, // "incorrect" implicit any on 's'
+        ~
+!!! error TS2304: Cannot find name 'f'.
+         ~
+!!! error TS1005: ',' expected.
+         ~
+!!! error TS2304: Cannot find name '('.
+          ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS2304: Cannot find name 's'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name ')'.
+             ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS2304: Cannot find name '{'.
+        g(s) { }
+        ~
+!!! error TS2304: Cannot find name 'g'.
+          ~
+!!! error TS2304: Cannot find name 's'.
+             ~
+!!! error TS1005: ')' expected.
+             ~~~
+    });
+    
+!!! error TS1182: A destructuring declaration must have an initializer.
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+    // This needs to not crash (outer node is not expression)
+    /** @satisfies {{ f(s: string): void }} */ ({ f(x) { } })

@@ -1,14 +1,14 @@
-accessibility/protectedClassPropertyAccessibleWithinNestedClass.ts(5,19): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinNestedClass.ts(6,19): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinNestedClass.ts(10,26): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinNestedClass.ts(11,26): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinNestedClass.ts(19,26): error TS2454: Variable 'x' is used before being assigned.
-accessibility/protectedClassPropertyAccessibleWithinNestedClass.ts(20,26): error TS2454: Variable 'x' is used before being assigned.
-accessibility/protectedClassPropertyAccessibleWithinNestedClass.ts(21,26): error TS2454: Variable 'x' is used before being assigned.
-accessibility/protectedClassPropertyAccessibleWithinNestedClass.ts(22,26): error TS2454: Variable 'x' is used before being assigned.
+protectedClassPropertyAccessibleWithinNestedClass.ts(5,19): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinNestedClass.ts(6,19): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinNestedClass.ts(10,26): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinNestedClass.ts(11,26): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinNestedClass.ts(19,26): error TS2454: Variable 'x' is used before being assigned.
+protectedClassPropertyAccessibleWithinNestedClass.ts(20,26): error TS2454: Variable 'x' is used before being assigned.
+protectedClassPropertyAccessibleWithinNestedClass.ts(21,26): error TS2454: Variable 'x' is used before being assigned.
+protectedClassPropertyAccessibleWithinNestedClass.ts(22,26): error TS2454: Variable 'x' is used before being assigned.
 
 
-==== accessibility/protectedClassPropertyAccessibleWithinNestedClass.ts (8 errors) ====
+==== protectedClassPropertyAccessibleWithinNestedClass.ts (8 errors) ====
     // no errors
     
     class C {

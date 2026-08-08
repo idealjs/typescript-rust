@@ -1,0 +1,89 @@
+typeParameterIndirectlyConstrainedToItself.ts(7,35): error TS2304: Cannot find name 'U'.
+typeParameterIndirectlyConstrainedToItself.ts(8,23): error TS2304: Cannot find name 'U'.
+typeParameterIndirectlyConstrainedToItself.ts(8,36): error TS2304: Cannot find name 'V'.
+typeParameterIndirectlyConstrainedToItself.ts(15,10): error TS2304: Cannot find name 'U'.
+typeParameterIndirectlyConstrainedToItself.ts(15,21): error TS1005: '?' expected.
+typeParameterIndirectlyConstrainedToItself.ts(15,23): error TS1005: ':' expected.
+typeParameterIndirectlyConstrainedToItself.ts(15,34): error TS1005: '?' expected.
+typeParameterIndirectlyConstrainedToItself.ts(15,35): error TS1005: ':' expected.
+typeParameterIndirectlyConstrainedToItself.ts(16,1): error TS1005: '>' expected.
+typeParameterIndirectlyConstrainedToItself.ts(16,1): error TS2304: Cannot find name 'var'.
+typeParameterIndirectlyConstrainedToItself.ts(16,5): error TS1005: ',' expected.
+typeParameterIndirectlyConstrainedToItself.ts(16,21): error TS2304: Cannot find name 'U'.
+typeParameterIndirectlyConstrainedToItself.ts(16,22): error TS1005: '?' expected.
+typeParameterIndirectlyConstrainedToItself.ts(16,24): error TS1005: ':' expected.
+typeParameterIndirectlyConstrainedToItself.ts(16,35): error TS1005: '?' expected.
+typeParameterIndirectlyConstrainedToItself.ts(16,37): error TS1005: ':' expected.
+typeParameterIndirectlyConstrainedToItself.ts(16,48): error TS1005: '?' expected.
+typeParameterIndirectlyConstrainedToItself.ts(16,49): error TS1005: ':' expected.
+typeParameterIndirectlyConstrainedToItself.ts(18,1): error TS1005: '>' expected.
+typeParameterIndirectlyConstrainedToItself.ts(18,7): error TS2304: Cannot find name 'D'.
+typeParameterIndirectlyConstrainedToItself.ts(23,28): error TS2304: Cannot find name 'S'.
+
+
+==== typeParameterIndirectlyConstrainedToItself.ts (21 errors) ====
+    class C<U extends T, T extends U> { }
+    class C2<T extends U, U extends V, V extends T> { }
+    
+    interface I<U extends T, T extends U> { }
+    interface I2<T extends U, U extends V, V extends T> { }
+    
+    function f<U extends T, T extends U>() { }
+                                      ~
+!!! error TS2304: Cannot find name 'U'.
+    function f2<T extends U, U extends V, V extends T>() { }
+                          ~
+!!! error TS2304: Cannot find name 'U'.
+                                       ~
+!!! error TS2304: Cannot find name 'V'.
+    
+    var a: {
+        <U extends T, T extends U>(): void;
+        <T extends U, U extends V, V extends T>(): void;
+    }
+    
+    var b = <U extends T, T extends U>() => { }
+             ~
+!!! error TS2304: Cannot find name 'U'.
+                        ~
+!!! error TS1005: '?' expected.
+                          ~
+!!! error TS1005: ':' expected.
+                                     ~
+!!! error TS1005: '?' expected.
+                                      ~
+!!! error TS1005: ':' expected.
+    var b2 = <T extends U, U extends V, V extends T>() => { }
+    ~~~
+!!! error TS1005: '>' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS2304: Cannot find name 'U'.
+                         ~
+!!! error TS1005: '?' expected.
+                           ~
+!!! error TS1005: ':' expected.
+                                      ~
+!!! error TS1005: '?' expected.
+                                        ~
+!!! error TS1005: ':' expected.
+                                                   ~
+!!! error TS1005: '?' expected.
+                                                    ~
+!!! error TS1005: ':' expected.
+    
+    class D<U extends T, T extends V, V extends T> { }
+    ~~~~~
+!!! error TS1005: '>' expected.
+          ~
+!!! error TS2304: Cannot find name 'D'.
+    
+    // Repro from #25740
+    
+    type Foo<T> = [T] extends [number] ? {} : {};
+    function foo<S extends Foo<S>>() {}
+                               ~
+!!! error TS2304: Cannot find name 'S'.

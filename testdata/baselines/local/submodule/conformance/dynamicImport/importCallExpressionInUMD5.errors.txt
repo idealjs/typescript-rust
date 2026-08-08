@@ -1,0 +1,16 @@
+1.ts(4,31): error TS2304: Cannot find name 'import'.
+
+
+==== importCallExpressionInUMD5.ts (0 errors) ====
+    ﻿// @module: umd
+==== 0.ts (0 errors) ====
+    export function foo() { return "foo"; }
+    
+==== 1.ts (1 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/36780
+    async function func() {
+        const packageName = '.';
+        const packageJson = await import(packageName + '/package.json');
+                                  ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    }

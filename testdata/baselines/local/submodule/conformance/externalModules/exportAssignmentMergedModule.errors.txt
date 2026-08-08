@@ -1,0 +1,37 @@
+foo_1.ts(2,17): error TS2304: Cannot find name 'foo'.
+foo_1.ts(3,6): error TS2304: Cannot find name 'foo'.
+foo_1.ts(4,2): error TS2304: Cannot find name 'foo'.
+foo_1.ts(4,20): error TS2304: Cannot find name 'foo'.
+
+
+==== foo_0.ts (0 errors) ====
+    namespace Foo {
+    	export function a(){
+    		return 5;
+    	}
+    	export var b = true;
+    }
+    namespace Foo {
+    	export function c(a: number){
+    		return a;
+    	}
+    	export namespace Test {
+    		export var answer = 42;
+    	}
+    }
+    export = Foo;
+    
+==== foo_1.ts (4 errors) ====
+    import foo = require("./foo_0");
+    var a: number = foo.a();
+                    ~~~
+!!! error TS2304: Cannot find name 'foo'.
+    if(!!foo.b){
+         ~~~
+!!! error TS2304: Cannot find name 'foo'.
+    	foo.Test.answer = foo.c(42);
+    	~~~
+!!! error TS2304: Cannot find name 'foo'.
+    	                  ~~~
+!!! error TS2304: Cannot find name 'foo'.
+    }

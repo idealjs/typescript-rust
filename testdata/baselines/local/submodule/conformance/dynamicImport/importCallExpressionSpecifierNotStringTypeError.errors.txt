@@ -1,0 +1,28 @@
+importCallExpressionSpecifierNotStringTypeError.ts(6,10): error TS2304: Cannot find name 'import'.
+importCallExpressionSpecifierNotStringTypeError.ts(7,12): error TS2304: Cannot find name 'import'.
+importCallExpressionSpecifierNotStringTypeError.ts(12,10): error TS2304: Cannot find name 'import'.
+importCallExpressionSpecifierNotStringTypeError.ts(13,10): error TS2304: Cannot find name 'import'.
+
+
+==== importCallExpressionSpecifierNotStringTypeError.ts (4 errors) ====
+    declare function getSpecifier(): boolean;
+    declare var whatToLoad: boolean;
+    
+    // Error specifier is not assignable to string
+    import(getSpecifier());
+    var p1 = import(getSpecifier());
+             ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    const p2 = import(whatToLoad ? getSpecifier() : "defaulPath")
+               ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    p1.then(zero => {
+        return zero.foo();  // ok, zero is any
+    });
+    
+    var p3 = import(["path1", "path2"]);
+             ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    var p4 = import(()=>"PathToModule");
+             ~~~~~~
+!!! error TS2304: Cannot find name 'import'.

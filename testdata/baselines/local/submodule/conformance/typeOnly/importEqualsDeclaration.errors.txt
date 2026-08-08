@@ -1,0 +1,26 @@
+/c.ts(4,3): error TS2339: Property 'prototype' does not exist on type 'object'.
+/c.ts(6,6): error TS2304: Cannot find name 'type'.
+
+
+==== importEqualsDeclaration.ts (0 errors) ====
+    
+==== /a.ts (0 errors) ====
+    class A { a!: string }
+    export = A;
+    
+==== /b.ts (0 errors) ====
+    class SomeClass {}
+    export = SomeClass;
+    
+==== /c.ts (2 errors) ====
+    import type A = require('./a'); // Ok
+    import type = require('./b');   // Ok
+    
+    A.prototype; // Error
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+    const a: A = { a: 'a' }; // Ok
+    void type; // Ok
+         ~~~~
+!!! error TS2304: Cannot find name 'type'.
+    export declare const AConstructor: typeof A; // Ok

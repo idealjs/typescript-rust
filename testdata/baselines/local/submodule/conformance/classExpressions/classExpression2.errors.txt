@@ -1,7 +1,7 @@
-classExpressions/classExpression2.ts(2,15): error TS2304: Cannot find name 'C'.
+classExpression2.ts(2,15): error TS2304: Cannot find name 'C'.
 
 
-==== classExpressions/classExpression2.ts (1 errors) ====
+==== classExpression2.ts (1 errors) ====
     class D { }
     var v = class C extends D {};
                   ~

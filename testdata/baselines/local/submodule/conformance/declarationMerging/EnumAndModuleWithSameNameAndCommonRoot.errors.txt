@@ -1,0 +1,31 @@
+EnumAndModuleWithSameNameAndCommonRoot.ts(8,28): error TS1005: ',' expected.
+EnumAndModuleWithSameNameAndCommonRoot.ts(8,46): error TS1005: ',' expected.
+EnumAndModuleWithSameNameAndCommonRoot.ts(13,18): error TS2339: Property 'Red' does not exist on type '0 | 1'.
+EnumAndModuleWithSameNameAndCommonRoot.ts(16,22): error TS2339: Property 'Point' does not exist on type '0 | 1'.
+
+
+==== EnumAndModuleWithSameNameAndCommonRoot.ts (4 errors) ====
+    enum enumdule {
+        Red, Blue
+    }
+    
+    namespace enumdule {
+    
+        export class Point {
+            constructor(public x: number, public y: number) { }
+                               ~
+!!! error TS1005: ',' expected.
+                                                 ~
+!!! error TS1005: ',' expected.
+        }
+    }
+    
+    var x: enumdule;
+    var x = enumdule.Red;
+                     ~~~
+!!! error TS2339: Property 'Red' does not exist on type '0 | 1'.
+    
+    var y: { x: number; y: number };
+    var y = new enumdule.Point(0, 0);
+                         ~~~~~
+!!! error TS2339: Property 'Point' does not exist on type '0 | 1'.

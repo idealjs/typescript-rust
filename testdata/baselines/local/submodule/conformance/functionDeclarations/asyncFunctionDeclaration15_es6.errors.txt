@@ -1,9 +1,9 @@
-functionDeclarations/asyncFunctionDeclaration15_es6.ts(6,7): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
-functionDeclarations/asyncFunctionDeclaration15_es6.ts(8,7): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
-functionDeclarations/asyncFunctionDeclaration15_es6.ts(9,23): error TS2304: Cannot find name 'PromiseLike'.
+asyncFunctionDeclaration15_es6.ts(6,7): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
+asyncFunctionDeclaration15_es6.ts(8,7): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
+asyncFunctionDeclaration15_es6.ts(9,23): error TS2304: Cannot find name 'PromiseLike'.
 
 
-==== functionDeclarations/asyncFunctionDeclaration15_es6.ts (3 errors) ====
+==== asyncFunctionDeclaration15_es6.ts (3 errors) ====
     declare class Thenable { then(): void; }
     declare let a: any;
     declare let obj: { then: string; };

@@ -1,10 +1,10 @@
-accessibility/protectedClassPropertyAccessibleWithinNestedSubclass.ts(7,19): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinNestedSubclass.ts(8,19): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinNestedSubclass.ts(11,26): error TS1005: ';' expected.
-accessibility/protectedClassPropertyAccessibleWithinNestedSubclass.ts(12,26): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinNestedSubclass.ts(7,19): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinNestedSubclass.ts(8,19): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinNestedSubclass.ts(11,26): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinNestedSubclass.ts(12,26): error TS1005: ';' expected.
 
 
-==== accessibility/protectedClassPropertyAccessibleWithinNestedSubclass.ts (4 errors) ====
+==== protectedClassPropertyAccessibleWithinNestedSubclass.ts (4 errors) ====
     class B {
         protected x: string;
         protected static x: string;

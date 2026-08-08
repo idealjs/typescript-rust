@@ -1,0 +1,29 @@
+a.tsx(11,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+a.tsx(11,2): error TS2454: Variable 'X' is used before being assigned.
+a.tsx(11,7): error TS1012: Unexpected token.
+a.tsx(11,10): error TS1005: '}' expected.
+a.tsx(11,10): error TS17001: JSX elements cannot have multiple attributes with the same name.
+
+
+==== a.tsx (5 errors) ====
+    declare const React: any
+    declare namespace JSX {
+        interface IntrinsicElements {
+            [k: string]: any
+        }
+    }
+    
+    const X: any
+    const a: any
+    
+    <X a={...a} />
+    ~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+     ~
+!!! error TS2454: Variable 'X' is used before being assigned.
+          ~~~
+!!! error TS1012: Unexpected token.
+             ~
+!!! error TS1005: '}' expected.
+             ~
+!!! error TS17001: JSX elements cannot have multiple attributes with the same name.

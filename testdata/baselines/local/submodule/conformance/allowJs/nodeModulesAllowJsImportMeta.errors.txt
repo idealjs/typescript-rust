@@ -1,0 +1,30 @@
+index.js(2,11): error TS2304: Cannot find name 'import'.
+package.json(2,11): error TS1005: ';' expected.
+
+
+==== index.js (1 errors) ====
+    // cjs format file
+    const x = import.meta.url;
+              ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    export {x};
+==== index.js (1 errors) ====
+    // esm format file
+    const x = import.meta.url;
+              ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    export {x};
+==== package.json (1 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+        "type": "module"
+    }
+==== package.json (1 errors) ====
+    {
+        "type": "commonjs"
+              ~
+!!! error TS1005: ';' expected.
+    }

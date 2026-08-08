@@ -1,0 +1,26 @@
+parser509534.ts(2,14): error TS2304: Cannot find name 'require'.
+parser509534.ts(3,7): error TS1003: Identifier expected.
+parser509534.ts(3,8): error TS1005: ';' expected.
+parser509534.ts(3,8): error TS2304: Cannot find name 'exports'.
+
+
+==== parser509534.ts (4 errors) ====
+    "use strict";
+    var config = require("../config");
+                 ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    module.exports.route = function (server) {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+     
+     // General Login Page
+     server.get(config.env.siteRoot + "/auth/login", function (req, res, next) {
+      
+      // TODO Should render login page that shows auth options
+      req.redirect("/auth/live");
+     });
+    }

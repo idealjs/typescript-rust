@@ -1,0 +1,12 @@
+nullishCoalescingOperator4.ts(2,22): error TS2339: Property 'toLowerCase' does not exist on type '"literal" | undefined | null'.
+nullishCoalescingOperator4.ts(3,22): error TS2339: Property 'toLocaleUpperCase' does not exist on type '"literal" | undefined | null'.
+
+
+==== nullishCoalescingOperator4.ts (2 errors) ====
+    declare const a1: 'literal' | undefined | null
+    const aa1 = a1 ?? a1.toLowerCase()
+                         ~~~~~~~~~~~
+!!! error TS2339: Property 'toLowerCase' does not exist on type '"literal" | undefined | null'.
+    const aa2 = a1 || a1.toLocaleUpperCase()
+                         ~~~~~~~~~~~~~~~~~
+!!! error TS2339: Property 'toLocaleUpperCase' does not exist on type '"literal" | undefined | null'.

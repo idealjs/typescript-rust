@@ -1,0 +1,91 @@
+assignmentCompatWithNumericIndexer.ts(8,7): error TS1005: ']' expected.
+assignmentCompatWithNumericIndexer.ts(8,15): error TS1005: ';' expected.
+assignmentCompatWithNumericIndexer.ts(22,11): error TS1005: ']' expected.
+assignmentCompatWithNumericIndexer.ts(22,19): error TS1005: ';' expected.
+assignmentCompatWithNumericIndexer.ts(26,11): error TS1005: ']' expected.
+assignmentCompatWithNumericIndexer.ts(26,19): error TS1005: ';' expected.
+assignmentCompatWithNumericIndexer.ts(30,14): error TS1005: ',' expected.
+assignmentCompatWithNumericIndexer.ts(30,15): error TS1134: Variable declaration expected.
+assignmentCompatWithNumericIndexer.ts(30,18): error TS1005: ',' expected.
+assignmentCompatWithNumericIndexer.ts(30,20): error TS1005: ',' expected.
+assignmentCompatWithNumericIndexer.ts(31,14): error TS1005: ',' expected.
+assignmentCompatWithNumericIndexer.ts(31,15): error TS1134: Variable declaration expected.
+assignmentCompatWithNumericIndexer.ts(31,17): error TS1182: A destructuring declaration must have an initializer.
+assignmentCompatWithNumericIndexer.ts(31,21): error TS1005: ']' expected.
+assignmentCompatWithNumericIndexer.ts(31,29): error TS1005: ',' expected.
+
+
+==== assignmentCompatWithNumericIndexer.ts (15 errors) ====
+    // Derived type indexer must be subtype of base type indexer
+    
+    interface Base { foo: string; }
+    interface Derived extends Base { bar: string; }
+    interface Derived2 extends Derived { baz: string; }
+    
+    class A {
+        [x: number]: Base;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    declare var a: A;
+    declare var b: { [x: number]: Derived; }
+    a = b;
+    b = a; // error
+    
+    declare var b2: { [x: number]: Derived2; }
+    a = b2;
+    b2 = a; // error
+    
+    namespace Generics {
+        class A<T extends Base> {
+            [x: number]: T;
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+        }
+    
+        class B extends A<Base> {
+            [x: number]: Derived; // ok
+              ~
+!!! error TS1005: ']' expected.
+                      ~
+!!! error TS1005: ';' expected.
+        }
+    
+        function foo<T extends Base>() {
+            var a!: A<T>;
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                     ~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS1005: ',' expected.
+            var b!: { [x: number]: Derived; }
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+                    ~~~~~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+                        ~
+!!! error TS1005: ']' expected.
+                                ~
+!!! error TS1005: ',' expected.
+            a = b; // error
+            b = a; // error
+    
+            var b2!: { [x: number]: Derived2; }
+            a = b2; // error
+            b2 = a; // error
+    
+            var b3!: { [x: number]: T; }
+            a = b3; // ok
+            b3 = a; // ok
+        }
+    }

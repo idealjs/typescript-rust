@@ -1,0 +1,53 @@
+destructuringInFunctionType.ts(6,23): error TS1005: ';' expected.
+destructuringInFunctionType.ts(6,30): error TS1012: Unexpected token.
+destructuringInFunctionType.ts(9,19): error TS1005: ';' expected.
+destructuringInFunctionType.ts(9,26): error TS1012: Unexpected token.
+destructuringInFunctionType.ts(12,34): error TS1005: ';' expected.
+destructuringInFunctionType.ts(12,41): error TS1012: Unexpected token.
+destructuringInFunctionType.ts(15,29): error TS1005: ';' expected.
+destructuringInFunctionType.ts(15,36): error TS1012: Unexpected token.
+destructuringInFunctionType.ts(20,21): error TS1005: ';' expected.
+destructuringInFunctionType.ts(20,24): error TS2304: Cannot find name 'string'.
+
+
+==== destructuringInFunctionType.ts (10 errors) ====
+    interface a { a }
+    interface b { b }
+    interface c { c }
+    
+    type T1 = ([a, b, c]);
+    type F1 = ([a, b, c]) => void;
+                          ~~
+!!! error TS1005: ';' expected.
+                                 ~
+!!! error TS1012: Unexpected token.
+    
+    type T2 = ({ a });
+    type F2 = ({ a }) => void;
+                      ~~
+!!! error TS1005: ';' expected.
+                             ~
+!!! error TS1012: Unexpected token.
+    
+    type T3 = ([{ a: b }, { b: a }]);
+    type F3 = ([{ a: b }, { b: a }]) => void;
+                                     ~~
+!!! error TS1005: ';' expected.
+                                            ~
+!!! error TS1012: Unexpected token.
+    
+    type T4 = ([{ a: [b, c] }]);
+    type F4 = ([{ a: [b, c] }]) => void;
+                                ~~
+!!! error TS1005: ';' expected.
+                                       ~
+!!! error TS1012: Unexpected token.
+    
+    type C1 = new ([{ a: [b, c] }]) => void;
+    
+    var v1 = ([a, b, c]) => "hello";
+    var v2: ([a, b, c]) => string;
+                        ~~
+!!! error TS1005: ';' expected.
+                           ~~~~~~
+!!! error TS2304: Cannot find name 'string'.

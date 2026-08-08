@@ -1,0 +1,12 @@
+privateNamesNotAllowedAsParameters.ts(2,12): error TS1127: Invalid character.
+privateNamesNotAllowedAsParameters.ts(2,12): error TS1138: Parameter declaration expected.
+
+
+==== privateNamesNotAllowedAsParameters.ts (2 errors) ====
+    class A {
+        setFoo(#foo: string) {}
+               ~
+!!! error TS1127: Invalid character.
+               ~
+!!! error TS1138: Parameter declaration expected.
+    }

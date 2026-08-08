@@ -1,0 +1,100 @@
+genericCallToOverloadedMethodWithOverloadedArguments.ts(23,38): error TS2345: Argument of type '(s: string) => { then: (cb: (x: number) => error) => error }' is not assignable to parameter of type '(x: number) => error'.
+genericCallToOverloadedMethodWithOverloadedArguments.ts(52,38): error TS2345: Argument of type '(s: string) => { then: (cb: (x: number) => error) => error; then: (cb: (x: number) => error, error: (error: any) => error) => error }' is not assignable to parameter of type '(x: number) => error'.
+genericCallToOverloadedMethodWithOverloadedArguments.ts(68,38): error TS2345: Argument of type '(s: string) => { then: (cb: (x: number) => error) => error; then: (cb: (x: number) => error, error: (error: any) => error) => error; then: (cb: (x: number) => error, error: (error: any) => U, progress: (preservation: any) => void) => error }' is not assignable to parameter of type '(x: number) => error'.
+genericCallToOverloadedMethodWithOverloadedArguments.ts(84,38): error TS2345: Argument of type '(b: boolean) => { then: (cb: (x: number) => error) => error; then: (cb: (x: number) => error, error: (error: any) => error) => error }' is not assignable to parameter of type '(x: number) => error'.
+
+
+==== genericCallToOverloadedMethodWithOverloadedArguments.ts (4 errors) ====
+    namespace m1 {
+        interface Promise<T> {
+            then<U>(cb: (x: T) => Promise<U>): Promise<U>;
+        }
+    
+        declare function testFunction(n: number): Promise<number>;
+    
+        declare var numPromise: Promise<number>;
+        var newPromise = numPromise.then(testFunction);
+    }
+    
+    //////////////////////////////////////
+    
+    namespace m2 {
+        interface Promise<T> {
+            then<U>(cb: (x: T) => Promise<U>): Promise<U>;
+        }
+    
+        declare function testFunction(n: number): Promise<number>;
+        declare function testFunction(s: string): Promise<string>;
+    
+        declare var numPromise: Promise<number>;
+        var newPromise = numPromise.then(testFunction);
+                                         ~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(s: string) => { then: (cb: (x: number) => error) => error }' is not assignable to parameter of type '(x: number) => error'.
+    }
+    
+    //////////////////////////////////////
+    
+    namespace m3 {
+        interface Promise<T> {
+            then<U>(cb: (x: T) => Promise<U>): Promise<U>;
+            then<U>(cb: (x: T) => Promise<U>, error?: (error: any) => Promise<U>): Promise<U>;
+        }
+    
+        declare function testFunction(n: number): Promise<number>;
+    
+        declare var numPromise: Promise<number>;
+        var newPromise = numPromise.then(testFunction);
+    }
+    
+    //////////////////////////////////////
+    
+    namespace m4 {
+        interface Promise<T> {
+            then<U>(cb: (x: T) => Promise<U>): Promise<U>;
+            then<U>(cb: (x: T) => Promise<U>, error?: (error: any) => Promise<U>): Promise<U>;
+        }
+    
+        declare function testFunction(n: number): Promise<number>;
+        declare function testFunction(s: string): Promise<string>;
+    
+        declare var numPromise: Promise<number>;
+        var newPromise = numPromise.then(testFunction);
+                                         ~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(s: string) => { then: (cb: (x: number) => error) => error; then: (cb: (x: number) => error, error: (error: any) => error) => error }' is not assignable to parameter of type '(x: number) => error'.
+    }
+    
+    //////////////////////////////////////
+    
+    namespace m5 {
+        interface Promise<T> {
+            then<U>(cb: (x: T) => Promise<U>): Promise<U>;
+            then<U>(cb: (x: T) => Promise<U>, error?: (error: any) => Promise<U>): Promise<U>;
+            then<U>(cb: (x: T) => Promise<U>, error?: (error: any) => U, progress?: (preservation: any) => void): Promise<U>;
+        }
+    
+        declare function testFunction(n: number): Promise<number>;
+        declare function testFunction(s: string): Promise<string>;
+    
+        declare var numPromise: Promise<number>;
+        var newPromise = numPromise.then(testFunction);
+                                         ~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(s: string) => { then: (cb: (x: number) => error) => error; then: (cb: (x: number) => error, error: (error: any) => error) => error; then: (cb: (x: number) => error, error: (error: any) => U, progress: (preservation: any) => void) => error }' is not assignable to parameter of type '(x: number) => error'.
+    }
+    
+    //////////////////////////////////////
+    
+    namespace m6 {
+        interface Promise<T> {
+            then<U>(cb: (x: T) => Promise<U>): Promise<U>;
+            then<U>(cb: (x: T) => Promise<U>, error?: (error: any) => Promise<U>): Promise<U>;
+        }
+    
+        declare function testFunction(n: number): Promise<number>;
+        declare function testFunction(s: string): Promise<string>;
+        declare function testFunction(b: boolean): Promise<boolean>;
+    
+        declare var numPromise: Promise<number>;
+        var newPromise = numPromise.then(testFunction);
+                                         ~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(b: boolean) => { then: (cb: (x: number) => error) => error; then: (cb: (x: number) => error, error: (error: any) => error) => error }' is not assignable to parameter of type '(x: number) => error'.
+    }

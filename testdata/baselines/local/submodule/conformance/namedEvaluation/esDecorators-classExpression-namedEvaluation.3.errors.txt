@@ -1,0 +1,64 @@
+esDecorators-classExpression-namedEvaluation.3.ts(6,11): error TS1012: Unexpected token.
+esDecorators-classExpression-namedEvaluation.3.ts(6,12): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.3.ts(6,16): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.3.ts(6,22): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.3.ts(6,22): error TS1182: A destructuring declaration must have an initializer.
+esDecorators-classExpression-namedEvaluation.3.ts(9,13): error TS1012: Unexpected token.
+esDecorators-classExpression-namedEvaluation.3.ts(9,14): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.3.ts(9,18): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.3.ts(9,24): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.3.ts(9,24): error TS1182: A destructuring declaration must have an initializer.
+esDecorators-classExpression-namedEvaluation.3.ts(15,12): error TS1012: Unexpected token.
+esDecorators-classExpression-namedEvaluation.3.ts(15,13): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.3.ts(15,17): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.3.ts(15,23): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.3.ts(15,23): error TS1182: A destructuring declaration must have an initializer.
+
+
+==== esDecorators-classExpression-namedEvaluation.3.ts (15 errors) ====
+    declare let dec: any;
+    
+    // 14.3.1.2 RS: Evaluation
+    //   LexicalBinding : BindingIdentifier Initializer
+    
+    { let x = @dec class { }; }
+              ~
+!!! error TS1012: Unexpected token.
+               ~~~
+!!! error TS1005: ',' expected.
+                   ~~~~~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1005: ',' expected.
+                         ~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+    { let x = class { @dec y: any; }; }
+    
+    { const x = @dec class { }; }
+                ~
+!!! error TS1012: Unexpected token.
+                 ~~~
+!!! error TS1005: ',' expected.
+                     ~~~~~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS1005: ',' expected.
+                           ~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+    { const x = class { @dec y: any; }; }
+    
+    // 14.3.2.1 RS: Evaluation
+    //   VariableDeclaration : BindingIdentifier Initializer
+    
+    { var x2 = @dec class { }; }
+               ~
+!!! error TS1012: Unexpected token.
+                ~~~
+!!! error TS1005: ',' expected.
+                    ~~~~~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS1005: ',' expected.
+                          ~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+    { var x1 = class { @dec y: any; }; }

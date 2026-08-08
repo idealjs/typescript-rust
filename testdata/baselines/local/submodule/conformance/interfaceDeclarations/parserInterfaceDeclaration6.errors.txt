@@ -1,0 +1,11 @@
+parserInterfaceDeclaration6.ts(1,8): error TS1005: '{' expected.
+parserInterfaceDeclaration6.ts(1,27): error TS1003: Identifier expected.
+
+
+==== parserInterfaceDeclaration6.ts (2 errors) ====
+    export export interface I {
+           ~~~~~~
+!!! error TS1005: '{' expected.
+                              ~
+!!! error TS1003: Identifier expected.
+    }

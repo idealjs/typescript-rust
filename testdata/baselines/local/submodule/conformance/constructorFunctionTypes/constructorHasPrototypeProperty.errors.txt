@@ -1,10 +1,10 @@
-constructorFunctionTypes/constructorHasPrototypeProperty.ts(10,15): error TS2339: Property 'prototype' does not exist on type 'object'.
-constructorFunctionTypes/constructorHasPrototypeProperty.ts(12,16): error TS2339: Property 'prototype' does not exist on type 'object'.
-constructorFunctionTypes/constructorHasPrototypeProperty.ts(27,15): error TS2339: Property 'prototype' does not exist on type 'object'.
-constructorFunctionTypes/constructorHasPrototypeProperty.ts(29,16): error TS2339: Property 'prototype' does not exist on type 'object'.
+constructorHasPrototypeProperty.ts(10,15): error TS2339: Property 'prototype' does not exist on type 'object'.
+constructorHasPrototypeProperty.ts(12,16): error TS2339: Property 'prototype' does not exist on type 'object'.
+constructorHasPrototypeProperty.ts(27,15): error TS2339: Property 'prototype' does not exist on type 'object'.
+constructorHasPrototypeProperty.ts(29,16): error TS2339: Property 'prototype' does not exist on type 'object'.
 
 
-==== constructorFunctionTypes/constructorHasPrototypeProperty.ts (4 errors) ====
+==== constructorHasPrototypeProperty.ts (4 errors) ====
     namespace NonGeneric {
         class C {
             foo: string;

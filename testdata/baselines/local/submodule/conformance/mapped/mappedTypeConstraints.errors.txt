@@ -1,0 +1,64 @@
+mappedTypeConstraints.ts(31,19): error TS2304: Cannot find name 'T'.
+mappedTypeConstraints.ts(31,40): error TS1005: '?' expected.
+mappedTypeConstraints.ts(31,41): error TS1005: ':' expected.
+mappedTypeConstraints.ts(32,9): error TS1003: Identifier expected.
+mappedTypeConstraints.ts(32,15): error TS1003: Identifier expected.
+mappedTypeConstraints.ts(32,24): error TS1005: '>' expected.
+mappedTypeConstraints.ts(32,26): error TS1005: ',' expected.
+mappedTypeConstraints.ts(33,5): error TS2304: Cannot find name 'rest'.
+mappedTypeConstraints.ts(34,1): error TS1128: Declaration or statement expected.
+
+
+==== mappedTypeConstraints.ts (9 errors) ====
+    function f0<T extends { a: string, b: string }>(obj: Pick<T, Extract<keyof T, 'b'>>) {
+        obj.b;
+    }
+    
+    function f1<T extends { a: string, b: string }>(obj: Pick<T, Exclude<keyof T, 'a'>>) {
+        obj.b;
+    }
+    
+    function f2<T extends { a: string, b: string }, U extends { b: string, c: string }>(obj: Pick<T | U, keyof (T | U)>) {
+        obj.b;
+    }
+    
+    function f3<T extends { a: string, b: string }, U extends { b: string, c: string }>(obj: Pick<T & U, keyof (T & U)>) {
+        obj.a;
+        obj.b;
+        obj.c;
+    }
+    
+    function f4<T extends { a: string, b: string }>(obj: Record<Exclude<keyof T, 'b'> | 'c', string>) {
+        obj.a;
+        obj.c;
+    }
+    
+    // Repro from #28821
+    
+    type TargetProps = {
+        foo: string,
+        bar: string
+    };
+    
+    const modifier = <T extends TargetProps>(targetProps: T) => {
+                      ~
+!!! error TS2304: Cannot find name 'T'.
+                                           ~
+!!! error TS1005: '?' expected.
+                                            ~
+!!! error TS1005: ':' expected.
+        let {bar, ...rest} = targetProps;
+            ~
+!!! error TS1003: Identifier expected.
+                  ~~~
+!!! error TS1003: Identifier expected.
+                           ~
+!!! error TS1005: '>' expected.
+                             ~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+        rest.foo;
+        ~~~~
+!!! error TS2304: Cannot find name 'rest'.
+    };
+    ~
+!!! error TS1128: Declaration or statement expected.

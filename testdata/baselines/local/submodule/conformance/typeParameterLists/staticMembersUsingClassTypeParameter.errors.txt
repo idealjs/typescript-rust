@@ -1,0 +1,30 @@
+staticMembersUsingClassTypeParameter.ts(3,15): error TS2302: Static members cannot reference class type parameters.
+staticMembersUsingClassTypeParameter.ts(8,15): error TS2302: Static members cannot reference class type parameters.
+staticMembersUsingClassTypeParameter.ts(12,20): error TS2304: Cannot find name 'Date'.
+staticMembersUsingClassTypeParameter.ts(13,15): error TS2302: Static members cannot reference class type parameters.
+
+
+==== staticMembersUsingClassTypeParameter.ts (4 errors) ====
+    // BUG 745747
+    class C<T> {
+        static x: T;
+                  ~
+!!! error TS2302: Static members cannot reference class type parameters.
+        static f(x: T) {}
+    }
+    
+    class C2<T, U> {
+        static x: U;
+                  ~
+!!! error TS2302: Static members cannot reference class type parameters.
+        static f(x: U) { }
+    }
+    
+    class C3<T extends Date> {
+                       ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        static x: T;
+                  ~
+!!! error TS2302: Static members cannot reference class type parameters.
+        static f(x: T) { }
+    }

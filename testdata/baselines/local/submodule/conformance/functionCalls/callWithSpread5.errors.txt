@@ -1,0 +1,16 @@
+callWithSpread5.ts(6,7): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+callWithSpread5.ts(7,7): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+
+
+==== callWithSpread5.ts (2 errors) ====
+    declare const x: number
+    declare const nnnu: [number, number, number?]
+    declare const nntnnnt: [number, number] | [number, number, number]
+    declare function fn(a: number, b: number, bb: number, ...c: number[]): number
+    
+    fn(...nnnu, x)
+          ~~~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    fn(...nntnnnt, x)
+          ~~~~~~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.

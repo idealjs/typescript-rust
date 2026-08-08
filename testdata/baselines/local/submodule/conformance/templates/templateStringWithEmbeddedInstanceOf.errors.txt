@@ -1,0 +1,8 @@
+templateStringWithEmbeddedInstanceOf.ts(2,35): error TS2304: Cannot find name 'String'.
+
+
+==== templateStringWithEmbeddedInstanceOf.ts (1 errors) ====
+    ﻿// @target: es2015
+    var x = `abc${ "hello" instanceof String }def`;
+                                   ~~~~~~
+!!! error TS2304: Cannot find name 'String'.

@@ -1,0 +1,13 @@
+parserEqualsGreaterThanAfterFunction2.ts(1,13): error TS1005: ',' expected.
+parserEqualsGreaterThanAfterFunction2.ts(1,17): error TS1005: ',' expected.
+parserEqualsGreaterThanAfterFunction2.ts(1,18): error TS1005: ')' expected.
+
+
+==== parserEqualsGreaterThanAfterFunction2.ts (3 errors) ====
+    function (a => b;
+                ~~
+!!! error TS1005: ',' expected.
+                    ~
+!!! error TS1005: ',' expected.
+                     
+!!! error TS1005: ')' expected.

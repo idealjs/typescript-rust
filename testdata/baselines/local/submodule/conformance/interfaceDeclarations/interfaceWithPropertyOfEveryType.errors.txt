@@ -1,0 +1,79 @@
+interfaceWithPropertyOfEveryType.ts(15,8): error TS2304: Cannot find name 'Object'.
+interfaceWithPropertyOfEveryType.ts(17,15): error TS2304: Cannot find name 'T'.
+interfaceWithPropertyOfEveryType.ts(17,21): error TS2304: Cannot find name 'T'.
+interfaceWithPropertyOfEveryType.ts(26,5): error TS2322: Type '{ a: 1; b: ""; c: true; d: object; e: null; f: number[]; g: object; h: (x: number) => number; i: error; j: { a: number; b: string; c: boolean; d: any; e: void; f: number[]; g: error; h: (x: number) => number; i: (x: error) => error; j: error; k: error; l: error; m: error; n: object; o: 0 }; k: { foo: string }; l: () => void; m: M; n: object; o: 0 }' is not assignable to type '{ a: number; b: string; c: boolean; d: any; e: void; f: number[]; g: error; h: (x: number) => number; i: (x: error) => error; j: error; k: error; l: error; m: error; n: object; o: 0 }'.
+interfaceWithPropertyOfEveryType.ts(35,9): error TS2304: Cannot find name 'T'.
+interfaceWithPropertyOfEveryType.ts(35,15): error TS2304: Cannot find name 'T'.
+
+
+==== interfaceWithPropertyOfEveryType.ts (6 errors) ====
+    class C { foo: string; }
+    function f1() { }
+    namespace M {
+        export var y = 1;
+    }
+    enum E { A }
+    
+    interface Foo {
+        a: number;
+        b: string;
+        c: boolean;
+        d: any;
+        e: void;
+        f: number[];
+        g: Object;
+           ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        h: (x: number) => number;
+        i: <T>(x: T) => T;
+                  ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
+        j: Foo;
+        k: C;
+        l: typeof f1;
+        m: typeof M;
+        n: {};
+        o: E;
+    }
+    
+    var a: Foo = {
+        ~~~~~~~~~~
+        a: 1,
+    ~~~~~~~~~
+        b: '',
+    ~~~~~~~~~~
+        c: true,
+    ~~~~~~~~~~~~
+        d: {},
+    ~~~~~~~~~~
+        e: null ,
+    ~~~~~~~~~~~~~
+        f: [1],
+    ~~~~~~~~~~~
+        g: {},
+    ~~~~~~~~~~
+        h: (x: number) => 1,
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+        i: <T>(x: T) => x,
+    ~~~~~~~~~~~~~~~~~~~~~~
+            ~
+!!! error TS2304: Cannot find name 'T'.
+                  ~
+!!! error TS2304: Cannot find name 'T'.
+        j: <Foo>null,
+    ~~~~~~~~~~~~~~~~~
+        k: new C(),
+    ~~~~~~~~~~~~~~~
+        l: f1,
+    ~~~~~~~~~~
+        m: M,
+    ~~~~~~~~~
+        n: {},
+    ~~~~~~~~~~
+        o: E.A
+    ~~~~~~~~~~
+    }
+    ~
+!!! error TS2322: Type '{ a: 1; b: ""; c: true; d: object; e: null; f: number[]; g: object; h: (x: number) => number; i: error; j: { a: number; b: string; c: boolean; d: any; e: void; f: number[]; g: error; h: (x: number) => number; i: (x: error) => error; j: error; k: error; l: error; m: error; n: object; o: 0 }; k: { foo: string }; l: () => void; m: M; n: object; o: 0 }' is not assignable to type '{ a: number; b: string; c: boolean; d: any; e: void; f: number[]; g: error; h: (x: number) => number; i: (x: error) => error; j: error; k: error; l: error; m: error; n: object; o: 0 }'.

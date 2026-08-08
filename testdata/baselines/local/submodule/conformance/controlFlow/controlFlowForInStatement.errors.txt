@@ -1,0 +1,32 @@
+controlFlowForInStatement.ts(1,36): error TS2304: Cannot find name 'RegExp'.
+controlFlowForInStatement.ts(6,15): error TS2454: Variable 'obj' is used before being assigned.
+controlFlowForInStatement.ts(8,9): error TS2454: Variable 'cond' is used before being assigned.
+controlFlowForInStatement.ts(12,9): error TS2454: Variable 'cond' is used before being assigned.
+
+
+==== controlFlowForInStatement.ts (4 errors) ====
+    let x: string | number | boolean | RegExp | Function;
+                                       ~~~~~~
+!!! error TS2304: Cannot find name 'RegExp'.
+    let obj: any;
+    let cond: boolean;
+    
+    x = /a/;
+    for (let y in obj) {
+                  ~~~
+!!! error TS2454: Variable 'obj' is used before being assigned.
+        x = y;
+        if (cond) {
+            ~~~~
+!!! error TS2454: Variable 'cond' is used before being assigned.
+            x = 42;
+            continue;
+        }
+        if (cond) {
+            ~~~~
+!!! error TS2454: Variable 'cond' is used before being assigned.
+            x = true;
+            break;
+        }
+    }
+    x; // RegExp | string | number | boolean

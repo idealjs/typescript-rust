@@ -1,0 +1,158 @@
+compoundAssignmentLHSIsValue.ts(58,9): error TS1128: Declaration or statement expected.
+compoundAssignmentLHSIsValue.ts(59,9): error TS1128: Declaration or statement expected.
+compoundAssignmentLHSIsValue.ts(68,9): error TS2349: This expression is not callable.
+compoundAssignmentLHSIsValue.ts(85,21): error TS1128: Declaration or statement expected.
+compoundAssignmentLHSIsValue.ts(86,21): error TS1128: Declaration or statement expected.
+compoundAssignmentLHSIsValue.ts(87,11): error TS1005: ';' expected.
+compoundAssignmentLHSIsValue.ts(88,11): error TS1005: ';' expected.
+compoundAssignmentLHSIsValue.ts(91,1): error TS2349: This expression is not callable.
+compoundAssignmentLHSIsValue.ts(92,1): error TS2349: This expression is not callable.
+compoundAssignmentLHSIsValue.ts(121,2): error TS2349: This expression is not callable.
+compoundAssignmentLHSIsValue.ts(122,2): error TS2349: This expression is not callable.
+
+
+==== compoundAssignmentLHSIsValue.ts (11 errors) ====
+    // expected error for all the LHS of compound assignments (arithmetic and addition)
+    var value: any;
+    
+    // this
+    class C {
+        constructor() {
+            this *= value;
+            this += value;
+        }
+        foo() {
+            this *= value;
+            this += value;
+        }
+        static sfoo() {
+            this *= value;
+            this += value;
+        }
+    }
+    
+    function foo() {
+        this *= value;
+        this += value;
+    }
+    
+    this *= value;
+    this += value;
+    
+    // identifiers: module, class, enum, function
+    namespace M { export var a; }
+    M *= value;
+    M += value;
+    
+    C *= value;
+    C += value;
+    
+    enum E { }
+    E *= value;
+    E += value;
+    
+    foo *= value;
+    foo += value;
+    
+    // literals
+    null *= value;
+    null += value;
+    true *= value;
+    true += value;
+    false *= value;
+    false += value;
+    0 *= value;
+    0 += value;
+    '' *= value;
+    '' += value;
+    /d+/ *= value;
+    /d+/ += value;
+    
+    // object literals
+    { a: 0} *= value;
+            ~~
+!!! error TS1128: Declaration or statement expected.
+    { a: 0} += value;
+            ~~
+!!! error TS1128: Declaration or statement expected.
+    
+    // array literals
+    ['', ''] *= value;
+    ['', ''] += value;
+    
+    // super
+    class Derived extends C {
+        constructor() {
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            super *= value;
+            super += value;
+        }
+    
+        foo() {
+            super *= value;
+            super += value;
+        }
+    
+        static sfoo() {
+            super *= value;
+            super += value;
+        }
+    }
+    
+    // function expression
+    function bar1() { } *= value;
+                        ~~
+!!! error TS1128: Declaration or statement expected.
+    function bar2() { } += value;
+                        ~~
+!!! error TS1128: Declaration or statement expected.
+    () => { } *= value;
+              ~~
+!!! error TS1005: ';' expected.
+    () => { } += value;
+              ~~
+!!! error TS1005: ';' expected.
+    
+    // function calls
+    foo() *= value;
+    ~~~
+!!! error TS2349: This expression is not callable.
+    foo() += value;
+    ~~~
+!!! error TS2349: This expression is not callable.
+    
+    // parentheses, the containted expression is value
+    (this) *= value;
+    (this) += value;
+    (M) *= value;
+    (M) += value;
+    (C) *= value;
+    (C) += value;
+    (E) *= value;
+    (E) += value;
+    (foo) *= value;
+    (foo) += value;
+    (null) *= value;
+    (null) += value;
+    (true) *= value;
+    (true) += value;
+    (0) *= value;
+    (0) += value;
+    ('') *= value;
+    ('') += value;
+    (/d+/) *= value;
+    (/d+/) += value;
+    ({}) *= value;
+    ({}) += value;
+    ([]) *= value;
+    ([]) += value;
+    (function baz1() { }) *= value;
+    (function baz2() { }) += value;
+    (foo()) *= value;
+     ~~~
+!!! error TS2349: This expression is not callable.
+    (foo()) += value;
+     ~~~
+!!! error TS2349: This expression is not callable.

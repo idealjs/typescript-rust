@@ -1,0 +1,57 @@
+file.tsx(11,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(17,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(23,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(25,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(26,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(32,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(33,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+
+
+==== file.tsx (7 errors) ====
+    declare namespace JSX {
+    	interface Element { }
+    	interface ElementAttributesProperty { pr: any; }
+    	interface IntrinsicElements { }
+    }
+    
+    interface Obj1type {
+    	new(n: string): any;
+    }
+    declare var Obj1: Obj1type;
+    <Obj1 x={10} />; // OK
+    ~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    
+    interface Obj2type {
+    	new(n: string): { q?: number; pr: any };
+    }
+    declare var Obj2: Obj2type;
+    <Obj2 x={10} />; // OK
+    ~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    
+    interface Obj3type {
+    	new(n: string): { x: number; };
+    }
+    declare var Obj3: Obj3type;
+    <Obj3 x={10} />; // Error
+    ~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    var attributes: any;
+    <Obj3 {...attributes} />; // Error
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    <Obj3 {...{}} />; // OK
+    ~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    
+    interface Obj4type {
+    	new(n: string): { x: number; pr: { x: number; } };
+    }
+    declare var Obj4: Obj4type;
+    <Obj4 x={10} />; // OK
+    ~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    <Obj4 x={'10'} />; // Error
+    ~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.

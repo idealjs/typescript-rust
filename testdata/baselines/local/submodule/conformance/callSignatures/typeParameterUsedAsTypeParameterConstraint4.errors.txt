@@ -1,0 +1,101 @@
+typeParameterUsedAsTypeParameterConstraint4.ts(5,8): error TS2304: Cannot find name 'W'.
+typeParameterUsedAsTypeParameterConstraint4.ts(6,25): error TS2304: Cannot find name 'W'.
+typeParameterUsedAsTypeParameterConstraint4.ts(19,43): error TS2304: Cannot find name 'V'.
+typeParameterUsedAsTypeParameterConstraint4.ts(20,47): error TS2304: Cannot find name 'X'.
+typeParameterUsedAsTypeParameterConstraint4.ts(23,20): error TS2322: Type 'U' is not assignable to type 'T'.
+typeParameterUsedAsTypeParameterConstraint4.ts(28,44): error TS2304: Cannot find name 'W'.
+typeParameterUsedAsTypeParameterConstraint4.ts(29,47): error TS2304: Cannot find name 'Y'.
+typeParameterUsedAsTypeParameterConstraint4.ts(32,20): error TS2322: Type 'U' is not assignable to type 'T'.
+typeParameterUsedAsTypeParameterConstraint4.ts(37,12): error TS1005: '>' expected.
+typeParameterUsedAsTypeParameterConstraint4.ts(37,14): error TS1005: ',' expected.
+typeParameterUsedAsTypeParameterConstraint4.ts(37,16): error TS1005: ',' expected.
+typeParameterUsedAsTypeParameterConstraint4.ts(37,24): error TS1005: ',' expected.
+typeParameterUsedAsTypeParameterConstraint4.ts(37,25): error TS1005: ',' expected.
+typeParameterUsedAsTypeParameterConstraint4.ts(37,26): error TS1134: Variable declaration expected.
+typeParameterUsedAsTypeParameterConstraint4.ts(37,37): error TS1005: ',' expected.
+
+
+==== typeParameterUsedAsTypeParameterConstraint4.ts (15 errors) ====
+    // Type parameters are in scope in their own and other type parameter lists
+    // Some negative cases
+    
+    class C<T, U extends T, V extends U> {
+        z: W; // error
+           ~
+!!! error TS2304: Cannot find name 'W'.
+        foo<W extends V>(x: W): T {
+                            ~
+!!! error TS2304: Cannot find name 'W'.
+            var r: T;
+            return x;
+        }
+    }
+    
+    interface I<T, U extends T, V extends U> {
+        x: T;
+        y: U;
+        z: W; // error
+        foo<W extends V>(x: W): T;
+    }
+    
+    function foo<T, U extends T>(x: T, y: U): V { // error
+                                              ~
+!!! error TS2304: Cannot find name 'V'.
+        function bar<V extends T, W extends U>(): X { // error
+                                                  ~
+!!! error TS2304: Cannot find name 'X'.
+            function baz<X extends W, Y extends V>(a: X, b: Y): T {
+                x = y;
+                return y;
+                       ~
+!!! error TS2322: Type 'U' is not assignable to type 'T'.
+            }
+        }
+    }
+    
+    function foo2<U extends T, T>(x: T, y: U): W { // error
+                                               ~
+!!! error TS2304: Cannot find name 'W'.
+        function bar<V extends T, W extends U>(): Y { // error
+                                                  ~
+!!! error TS2304: Cannot find name 'Y'.
+            function baz<X extends W, Y extends V>(a: X, b: Y): T {
+                x = y;
+                return y;
+                       ~
+!!! error TS2322: Type 'U' is not assignable to type 'T'.
+            }
+        }
+    }
+    
+    var f3 = <T, U extends T>(x: T, y: U) => {
+               ~
+!!! error TS1005: '>' expected.
+                 ~
+!!! error TS1005: ',' expected.
+                   ~~~~~~~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1134: Variable declaration expected.
+                                        ~
+!!! error TS1005: ',' expected.
+        function bar<V extends T, W extends U>(r: X, s: Y) { // error
+            var g = <X extends W, Y extends V>(a: X, b: Y): T => {
+                x = y;
+                return y;
+            }
+        }
+    }
+    
+    var f4 = <U extends T, T>(x: V, y: X) => { // error
+        function bar<V extends T, W extends U>() {
+            var g = <X extends W, Y extends V>(a: X, b: Y): T => {
+                x = y;
+                return y;
+            }
+        }
+    }

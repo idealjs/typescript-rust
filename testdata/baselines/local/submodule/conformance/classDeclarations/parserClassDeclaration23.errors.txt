@@ -1,0 +1,17 @@
+parserClassDeclaration23.ts(1,8): error TS1005: '{' expected.
+parserClassDeclaration23.ts(1,8): error TS1127: Invalid character.
+parserClassDeclaration23.ts(1,9): error TS1005: ';' expected.
+parserClassDeclaration23.ts(1,15): error TS1005: ';' expected.
+
+
+==== parserClassDeclaration23.ts (4 errors) ====
+    class C\u0032 {
+           ~
+!!! error TS1005: '{' expected.
+           ~
+!!! error TS1127: Invalid character.
+            ~~~~~
+!!! error TS1005: ';' expected.
+                  ~
+!!! error TS1005: ';' expected.
+    }

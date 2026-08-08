@@ -1,0 +1,30 @@
+taggedTemplateStringsWithManyCallAndMemberExpressionsES6.ts(14,21): error TS2351: This expression is not constructable.
+taggedTemplateStringsWithManyCallAndMemberExpressionsES6.ts(14,23): error TS1005: ',' expected.
+taggedTemplateStringsWithManyCallAndMemberExpressionsES6.ts(14,30): error TS1134: Variable declaration expected.
+taggedTemplateStringsWithManyCallAndMemberExpressionsES6.ts(14,32): error TS1128: Declaration or statement expected.
+
+
+==== taggedTemplateStringsWithManyCallAndMemberExpressionsES6.ts (4 errors) ====
+    ﻿// @target: ES6
+    interface I {
+        (strs: TemplateStringsArray, ...subs: number[]): I;
+        member: {
+            new (s: string): {
+                new (n: number): {
+                    new (): boolean;
+                }
+            }
+        };
+    }
+    var f: I;
+    
+    var x = new new new f `abc${ 0 }def`.member("hello")(42) === true;
+                     ~
+!!! error TS2351: This expression is not constructable.
+                       ~~~~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1134: Variable declaration expected.
+                                ~
+!!! error TS1128: Declaration or statement expected.
+    

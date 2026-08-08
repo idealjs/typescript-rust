@@ -1,0 +1,30 @@
+a.js(3,14): error TS2339: Property 'p' does not exist on type '{ m: () => any }'.
+a.js(8,9): error TS2349: This expression is not callable.
+a.js(10,14): error TS2339: Property 'p' does not exist on type '{ m: () => any; test: () => any }'.
+a.js(13,21): error TS2339: Property 'p' does not exist on type '{ m: () => any; test: () => any }'.
+
+
+==== a.js (4 errors) ====
+    class Base {
+        m() {
+            this.p = 1
+                 ~
+!!! error TS2339: Property 'p' does not exist on type '{ m: () => any }'.
+        }
+    }
+    class Derived extends Base {
+        constructor() {
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            // should be OK, and p should have type number from this assignment
+            this.p = 1
+                 ~
+!!! error TS2339: Property 'p' does not exist on type '{ m: () => any; test: () => any }'.
+        }
+        test() {
+            return this.p
+                        ~
+!!! error TS2339: Property 'p' does not exist on type '{ m: () => any; test: () => any }'.
+        }
+    }

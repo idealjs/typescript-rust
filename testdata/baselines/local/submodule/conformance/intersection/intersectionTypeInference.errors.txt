@@ -1,0 +1,45 @@
+intersectionTypeInference.ts(2,15): error TS1005: ',' expected.
+intersectionTypeInference.ts(2,16): error TS1134: Variable declaration expected.
+intersectionTypeInference.ts(2,20): error TS1005: ',' expected.
+intersectionTypeInference.ts(23,12): error TS2322: Type 'undefined' is not assignable to type 'T | U'.
+intersectionTypeInference.ts(26,13): error TS2345: Argument of type '{ a: "hello"; b: 42 }' is not assignable to parameter of type '{ a: T } & { b: U }'.
+
+
+==== intersectionTypeInference.ts (5 errors) ====
+    function extend<T, U>(obj1: T, obj2: U): T & U {
+        var result!: T & U;
+                  ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS1134: Variable declaration expected.
+                       ~
+!!! error TS1005: ',' expected.
+        obj1 = result;
+        obj2 = result;
+        result = obj1;  // Error
+        result = obj2;  // Error
+        return result;
+    }
+    
+    var x = extend({ a: "hello" }, { b: 42 });
+    var s = x.a;
+    var n = x.b;
+    
+    interface A<T> {
+        a: T;
+    }
+    
+    interface B<U> {
+        b: U;
+    }
+    
+    function foo<T, U>(obj: A<T> & B<U>): T | U {
+        return undefined;
+               ~~~~~~~~~
+!!! error TS2322: Type 'undefined' is not assignable to type 'T | U'.
+    }
+    
+    var z = foo({ a: "hello", b: 42 });
+                ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ a: "hello"; b: 42 }' is not assignable to parameter of type '{ a: T } & { b: U }'.
+    var z: string | number;

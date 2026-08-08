@@ -11,7 +11,7 @@ type-decls-valid.ts(2,22): error TS1005: ';' expected.
 type-decls-valid.ts(2,32): error TS1128: Declaration or statement expected.
 
 
-==== arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_syntax.ts (0 errors) ====
+==== arbitraryModuleNamespaceIdentifiers_syntax.ts (0 errors) ====
     
 ==== values-valid.ts (0 errors) ====
     export const foo = 123;

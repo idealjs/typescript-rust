@@ -1,0 +1,11 @@
+error TS6053: File 'react16.d.ts' not found.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.
+==== jsDeclarationsNonIdentifierInferredNames.jsx (0 errors) ====
+    /// <reference path="/.lib/react16.d.ts" />
+    import * as React from "react";
+    const dynPropName = "data-dyn";
+    export const ExampleFunctionalComponent = ({ "data-testid": dataTestId, [dynPropName]: dynProp }) => (
+        <>Hello</>
+    );

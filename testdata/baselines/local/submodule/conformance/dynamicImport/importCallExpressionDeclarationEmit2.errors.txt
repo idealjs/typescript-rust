@@ -1,0 +1,12 @@
+1.ts(1,10): error TS2304: Cannot find name 'import'.
+
+
+==== importCallExpressionDeclarationEmit2.ts (0 errors) ====
+    
+==== 0.ts (0 errors) ====
+    export function foo() { return "foo"; }
+    
+==== 1.ts (1 errors) ====
+    var p1 = import("./0");
+             ~~~~~~
+!!! error TS2304: Cannot find name 'import'.

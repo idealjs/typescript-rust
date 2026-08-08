@@ -1,0 +1,19 @@
+parserErrorRecovery_ArgumentList3.ts(2,4): error TS2304: Cannot find name 'bar'.
+parserErrorRecovery_ArgumentList3.ts(2,8): error TS2304: Cannot find name 'a'.
+parserErrorRecovery_ArgumentList3.ts(3,4): error TS2304: Cannot find name 'return'.
+parserErrorRecovery_ArgumentList3.ts(3,10): error TS1005: ')' expected.
+
+
+==== parserErrorRecovery_ArgumentList3.ts (4 errors) ====
+    function foo() {
+       bar(a,
+       ~~~
+!!! error TS2304: Cannot find name 'bar'.
+           ~
+!!! error TS2304: Cannot find name 'a'.
+       return;
+       ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+             ~
+!!! error TS1005: ')' expected.
+    }

@@ -1,9 +1,9 @@
-superCalls/derivedClassConstructorWithoutSuperCall.ts(18,24): error TS2349: This expression is not callable.
-superCalls/derivedClassConstructorWithoutSuperCall.ts(24,31): error TS2349: This expression is not callable.
-superCalls/derivedClassConstructorWithoutSuperCall.ts(30,17): error TS2349: This expression is not callable.
+derivedClassConstructorWithoutSuperCall.ts(18,24): error TS2349: This expression is not callable.
+derivedClassConstructorWithoutSuperCall.ts(24,31): error TS2349: This expression is not callable.
+derivedClassConstructorWithoutSuperCall.ts(30,17): error TS2349: This expression is not callable.
 
 
-==== superCalls/derivedClassConstructorWithoutSuperCall.ts (3 errors) ====
+==== derivedClassConstructorWithoutSuperCall.ts (3 errors) ====
     // derived class constructors must contain a super call
     
     class Base {

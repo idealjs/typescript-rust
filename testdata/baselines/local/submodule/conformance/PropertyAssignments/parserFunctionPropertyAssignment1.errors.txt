@@ -1,0 +1,28 @@
+parserFunctionPropertyAssignment1.ts(1,11): error TS2304: Cannot find name 'foo'.
+parserFunctionPropertyAssignment1.ts(1,14): error TS1005: ',' expected.
+parserFunctionPropertyAssignment1.ts(1,14): error TS2304: Cannot find name '('.
+parserFunctionPropertyAssignment1.ts(1,15): error TS1005: ',' expected.
+parserFunctionPropertyAssignment1.ts(1,15): error TS2304: Cannot find name ')'.
+parserFunctionPropertyAssignment1.ts(1,17): error TS1005: ',' expected.
+parserFunctionPropertyAssignment1.ts(1,17): error TS2304: Cannot find name '{'.
+parserFunctionPropertyAssignment1.ts(1,21): error TS1128: Declaration or statement expected.
+
+
+==== parserFunctionPropertyAssignment1.ts (8 errors) ====
+    var v = { foo() { } };
+              ~~~
+!!! error TS2304: Cannot find name 'foo'.
+                 ~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS2304: Cannot find name '('.
+                  ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS2304: Cannot find name ')'.
+                    ~
+!!! error TS1005: ',' expected.
+                    ~
+!!! error TS2304: Cannot find name '{'.
+                        ~
+!!! error TS1128: Declaration or statement expected.

@@ -1,0 +1,22 @@
+error TS6053: File 'react.d.ts' not found.
+file.tsx(12,29): error TS2339: Property 'props' does not exist on type '{ render: () => any }'.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.
+==== file.tsx (1 errors) ====
+    /// <reference path="/.lib/react.d.ts" />
+    
+    import React = require('react');
+    
+    class B1<T extends { x: string }> extends React.Component<T, {}> {
+        render() {
+            return <div>hi</div>; 
+        }
+    }
+    class B<U> extends React.Component<U, {}> {
+        render() {
+            return <B1 {...this.props} x="hi" />;
+                                ~~~~~
+!!! error TS2339: Property 'props' does not exist on type '{ render: () => any }'.
+        }
+    }

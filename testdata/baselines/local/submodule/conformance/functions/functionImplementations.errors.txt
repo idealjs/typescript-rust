@@ -1,29 +1,29 @@
-functions/functionImplementations.ts(64,4): error TS2345: Argument of type '4' is not assignable to parameter of type 'object'.
-functions/functionImplementations.ts(69,5): error TS7027: Unreachable code detected.
-functions/functionImplementations.ts(81,24): error TS7027: Unreachable code detected.
-functions/functionImplementations.ts(81,35): error TS2351: This expression is not constructable.
-functions/functionImplementations.ts(86,24): error TS7027: Unreachable code detected.
-functions/functionImplementations.ts(86,35): error TS2351: This expression is not constructable.
-functions/functionImplementations.ts(86,46): error TS7027: Unreachable code detected.
-functions/functionImplementations.ts(86,53): error TS2349: This expression is not callable.
-functions/functionImplementations.ts(123,5): error TS1135: Argument expression expected.
-functions/functionImplementations.ts(132,14): error TS1005: '>' expected.
-functions/functionImplementations.ts(137,5): error TS7027: Unreachable code detected.
-functions/functionImplementations.ts(137,16): error TS2351: This expression is not constructable.
-functions/functionImplementations.ts(141,5): error TS7027: Unreachable code detected.
-functions/functionImplementations.ts(141,16): error TS2351: This expression is not constructable.
-functions/functionImplementations.ts(142,5): error TS7027: Unreachable code detected.
-functions/functionImplementations.ts(142,16): error TS2351: This expression is not constructable.
-functions/functionImplementations.ts(146,5): error TS7027: Unreachable code detected.
-functions/functionImplementations.ts(146,16): error TS2351: This expression is not constructable.
-functions/functionImplementations.ts(150,5): error TS7027: Unreachable code detected.
-functions/functionImplementations.ts(150,16): error TS2351: This expression is not constructable.
-functions/functionImplementations.ts(154,5): error TS7027: Unreachable code detected.
-functions/functionImplementations.ts(155,5): error TS7027: Unreachable code detected.
-functions/functionImplementations.ts(155,16): error TS2351: This expression is not constructable.
+functionImplementations.ts(64,4): error TS2345: Argument of type '4' is not assignable to parameter of type 'object'.
+functionImplementations.ts(69,5): error TS7027: Unreachable code detected.
+functionImplementations.ts(81,24): error TS7027: Unreachable code detected.
+functionImplementations.ts(81,35): error TS2351: This expression is not constructable.
+functionImplementations.ts(86,24): error TS7027: Unreachable code detected.
+functionImplementations.ts(86,35): error TS2351: This expression is not constructable.
+functionImplementations.ts(86,46): error TS7027: Unreachable code detected.
+functionImplementations.ts(86,53): error TS2349: This expression is not callable.
+functionImplementations.ts(123,5): error TS1135: Argument expression expected.
+functionImplementations.ts(132,14): error TS1005: '>' expected.
+functionImplementations.ts(137,5): error TS7027: Unreachable code detected.
+functionImplementations.ts(137,16): error TS2351: This expression is not constructable.
+functionImplementations.ts(141,5): error TS7027: Unreachable code detected.
+functionImplementations.ts(141,16): error TS2351: This expression is not constructable.
+functionImplementations.ts(142,5): error TS7027: Unreachable code detected.
+functionImplementations.ts(142,16): error TS2351: This expression is not constructable.
+functionImplementations.ts(146,5): error TS7027: Unreachable code detected.
+functionImplementations.ts(146,16): error TS2351: This expression is not constructable.
+functionImplementations.ts(150,5): error TS7027: Unreachable code detected.
+functionImplementations.ts(150,16): error TS2351: This expression is not constructable.
+functionImplementations.ts(154,5): error TS7027: Unreachable code detected.
+functionImplementations.ts(155,5): error TS7027: Unreachable code detected.
+functionImplementations.ts(155,16): error TS2351: This expression is not constructable.
 
 
-==== functions/functionImplementations.ts (23 errors) ====
+==== functionImplementations.ts (23 errors) ====
     // FunctionExpression with no return type annotation and no return statement returns void
     var v: void = function () { } ();
     

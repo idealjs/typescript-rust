@@ -1,0 +1,413 @@
+subtypesOfTypeParameterWithConstraints.ts(8,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(8,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(13,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(13,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(18,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(18,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(23,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(23,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(32,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(32,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(37,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(37,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(42,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(42,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(49,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(49,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(54,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(54,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(59,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(59,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(66,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(66,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(71,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(71,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(76,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(76,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(83,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(84,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(84,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(84,18): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(88,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(89,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(89,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(93,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(94,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(94,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(98,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(99,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(99,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(105,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(106,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(106,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(106,18): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(110,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(111,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(111,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(115,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(116,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(116,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(120,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(121,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(121,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(127,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(128,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(128,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(128,18): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(132,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(133,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(133,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(137,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(138,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(138,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(142,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(143,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(143,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(150,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(150,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(150,18): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(151,10): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(154,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(155,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(155,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(156,10): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(159,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(160,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(160,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(161,10): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(164,47): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints.ts(165,7): error TS1005: ']' expected.
+subtypesOfTypeParameterWithConstraints.ts(165,15): error TS1005: ';' expected.
+subtypesOfTypeParameterWithConstraints.ts(166,10): error TS2304: Cannot find name 'Date'.
+
+
+==== subtypesOfTypeParameterWithConstraints.ts (81 errors) ====
+    // checking whether other types are subtypes of type parameters with constraints
+    
+    class C3<T> {
+        foo: T;
+    }
+    
+    class D1<T extends U, U> extends C3<T> {
+        [x: string]: T;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: T; // ok
+    }
+    
+    class D2<T extends U, U> extends C3<U> {
+        [x: string]: U;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: T; // ok
+    }
+    
+    class D3<T extends U, U> extends C3<T> {
+        [x: string]: T;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: U; // error
+    }
+    
+    class D4<T extends U, U> extends C3<U> {
+        [x: string]: U;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: U; // ok
+    }
+    
+    
+    // V > U > T
+    // test if T is subtype of T, U, V
+    // should all work
+    class D5<T extends U, U extends V, V> extends C3<T> {
+        [x: string]: T;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: T; // ok
+    }
+    
+    class D6<T extends U, U extends V, V> extends C3<U> {
+        [x: string]: U;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: T;
+    }
+    
+    class D7<T extends U, U extends V, V> extends C3<V> {
+        [x: string]: V;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: T; // ok
+    }
+    
+    // test if U is a subtype of T, U, V
+    // only a subtype of V and itself
+    class D8<T extends U, U extends V, V> extends C3<T> {
+        [x: string]: T;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: U; // error
+    }
+    
+    class D9<T extends U, U extends V, V> extends C3<U> {
+        [x: string]: U;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: U; // ok
+    }
+    
+    class D10<T extends U, U extends V, V> extends C3<V> {
+        [x: string]: V;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: U; // ok
+    }
+    
+    // test if V is a subtype of T, U, V
+    // only a subtype of itself
+    class D11<T extends U, U extends V, V> extends C3<T> {
+        [x: string]: T;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: V; // error
+    }
+    
+    class D12<T extends U, U extends V, V> extends C3<U> {
+        [x: string]: U;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: V; // error
+    }
+    
+    class D13<T extends U, U extends V, V> extends C3<V> {
+        [x: string]: V;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: V; // ok
+    }
+    
+    // Date > V > U > T
+    // test if T is subtype of T, U, V, Date
+    // should all work
+    class D14<T extends U, U extends V, V extends Date> extends C3<Date> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: Date;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+                     ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        foo: T; // ok
+    }
+    
+    class D15<T extends U, U extends V, V extends Date> extends C3<T> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: T;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: T; // ok
+    }
+    
+    class D16<T extends U, U extends V, V extends Date> extends C3<U> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: U;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: T;
+    }
+    
+    class D17<T extends U, U extends V, V extends Date> extends C3<V> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: V;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: T;
+    }
+    
+    // test if U is a subtype of T, U, V, Date
+    // only a subtype of V, Date and itself
+    class D18<T extends U, U extends V, V extends Date> extends C3<Date> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: Date;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+                     ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        foo: T; // ok
+    }
+    
+    class D19<T extends U, U extends V, V extends Date> extends C3<T> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: T;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: U; // error
+    }
+    
+    class D20<T extends U, U extends V, V extends Date> extends C3<U> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: U;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: U; // ok
+    }
+    
+    class D21<T extends U, U extends V, V extends Date> extends C3<V> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: V;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: U;
+    }
+    
+    // test if V is a subtype of T, U, V, Date
+    // only a subtype of itself and Date
+    class D22<T extends U, U extends V, V extends Date> extends C3<Date> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: Date;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+                     ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        foo: T; // ok
+    }
+    
+    class D23<T extends U, U extends V, V extends Date> extends C3<T> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: T;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: V; // error
+    }
+    
+    class D24<T extends U, U extends V, V extends Date> extends C3<U> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: U;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: V; // error
+    }
+    
+    class D25<T extends U, U extends V, V extends Date> extends C3<V> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: V;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: V; // ok
+    }
+    
+    // test if Date is a subtype of T, U, V, Date
+    // only a subtype of itself
+    class D26<T extends U, U extends V, V extends Date> extends C3<Date> {
+        [x: string]: Date;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+                     ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        foo: Date; // ok
+             ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    }
+    
+    class D27<T extends U, U extends V, V extends Date> extends C3<T> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: T;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: Date; // error
+             ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    }
+    
+    class D28<T extends U, U extends V, V extends Date> extends C3<U> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: U;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: Date; // error
+             ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    }
+    
+    class D29<T extends U, U extends V, V extends Date> extends C3<V> {
+                                                  ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        [x: string]: V;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        foo: Date; // error
+             ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    }

@@ -1,0 +1,12 @@
+YieldExpression5_es6.ts(3,1): error TS1012: Unexpected token.
+YieldExpression5_es6.ts(3,2): error TS1005: '}' expected.
+
+
+==== YieldExpression5_es6.ts (2 errors) ====
+    function* foo() {
+      yield*
+    }
+    ~
+!!! error TS1012: Unexpected token.
+     
+!!! error TS1005: '}' expected.

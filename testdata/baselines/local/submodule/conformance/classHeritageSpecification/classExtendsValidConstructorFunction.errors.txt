@@ -1,7 +1,7 @@
-classHeritageSpecification/classExtendsValidConstructorFunction.ts(3,13): error TS2351: This expression is not constructable.
+classExtendsValidConstructorFunction.ts(3,13): error TS2351: This expression is not constructable.
 
 
-==== classHeritageSpecification/classExtendsValidConstructorFunction.ts (1 errors) ====
+==== classExtendsValidConstructorFunction.ts (1 errors) ====
     function foo() { }
     
     var x = new foo(); // can be used as a constructor function

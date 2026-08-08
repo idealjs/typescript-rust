@@ -1,0 +1,30 @@
+/a.js(2,13): error TS1003: Identifier expected.
+/a.js(2,15): error TS1005: '=' expected.
+/a.js(2,17): error TS1128: Declaration or statement expected.
+
+
+==== grammarErrors.ts (0 errors) ====
+    
+==== /a.ts (0 errors) ====
+    export default class A {}
+    export class B {}
+    export class C {}
+    
+==== /b.ts (0 errors) ====
+    import type A, { B, C } from './a';
+    
+==== /a.js (3 errors) ====
+    import type A from './a';
+    export type { A };
+                ~
+!!! error TS1003: Identifier expected.
+                  ~
+!!! error TS1005: '=' expected.
+                    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== /c.ts (0 errors) ====
+    namespace ns {
+      export class Foo {}
+    }
+    import type Foo = ns.Foo;

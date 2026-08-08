@@ -1,0 +1,208 @@
+assignmentCompatWithCallSignatures5.ts(8,23): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(8,29): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(9,24): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(10,24): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(11,26): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(11,32): error TS2304: Cannot find name 'U'.
+assignmentCompatWithCallSignatures5.ts(12,32): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(12,38): error TS2304: Cannot find name 'U'.
+assignmentCompatWithCallSignatures5.ts(12,44): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(13,43): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(13,61): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(14,32): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(14,47): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(14,55): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(15,30): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(15,36): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(15,44): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(16,43): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(16,49): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(16,57): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(32,23): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(32,29): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(35,24): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(38,24): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(38,30): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(41,27): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(41,33): error TS2304: Cannot find name 'U'.
+assignmentCompatWithCallSignatures5.ts(44,33): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(44,39): error TS2304: Cannot find name 'U'.
+assignmentCompatWithCallSignatures5.ts(44,45): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(47,62): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(47,68): error TS2304: Cannot find name 'U'.
+assignmentCompatWithCallSignatures5.ts(47,74): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(50,35): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(50,50): error TS2304: Cannot find name 'U'.
+assignmentCompatWithCallSignatures5.ts(50,58): error TS2304: Cannot find name 'U'.
+assignmentCompatWithCallSignatures5.ts(53,33): error TS2304: Cannot find name 'U'.
+assignmentCompatWithCallSignatures5.ts(53,39): error TS2304: Cannot find name 'V'.
+assignmentCompatWithCallSignatures5.ts(53,48): error TS2304: Cannot find name 'U'.
+assignmentCompatWithCallSignatures5.ts(56,30): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(56,36): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(56,44): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(59,29): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(59,35): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(59,41): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(62,29): error TS2304: Cannot find name 'T'.
+assignmentCompatWithCallSignatures5.ts(62,35): error TS2304: Cannot find name 'T'.
+
+
+==== assignmentCompatWithCallSignatures5.ts (47 errors) ====
+    // checking assignment compat for function types. No errors in this file
+    
+    class Base { foo: string; }
+    class Derived extends Base { bar: string; }
+    class Derived2 extends Derived { baz: string; }
+    class OtherDerived extends Base { bing: string; }
+    
+    declare var a: <T>(x: T) => T[];
+                          ~
+!!! error TS2304: Cannot find name 'T'.
+                                ~
+!!! error TS2304: Cannot find name 'T'.
+    declare var a2: <T>(x: T) => string[];
+                           ~
+!!! error TS2304: Cannot find name 'T'.
+    declare var a3: <T>(x: T) => void;
+                           ~
+!!! error TS2304: Cannot find name 'T'.
+    declare var a4: <T,U>(x: T, y: U) => string;
+                             ~
+!!! error TS2304: Cannot find name 'T'.
+                                   ~
+!!! error TS2304: Cannot find name 'U'.
+    declare var a5: <T,U>(x: (arg: T) => U) => T;
+                                   ~
+!!! error TS2304: Cannot find name 'T'.
+                                         ~
+!!! error TS2304: Cannot find name 'U'.
+                                               ~
+!!! error TS2304: Cannot find name 'T'.
+    declare var a6: <T extends Base>(x: (arg: T) => Derived) => T;
+                                              ~
+!!! error TS2304: Cannot find name 'T'.
+                                                                ~
+!!! error TS2304: Cannot find name 'T'.
+    declare var a11: <T>(x: { foo: T }, y: { foo: T; bar: T }) => Base;
+                                   ~
+!!! error TS2304: Cannot find name 'T'.
+                                                  ~
+!!! error TS2304: Cannot find name 'T'.
+                                                          ~
+!!! error TS2304: Cannot find name 'T'.
+    declare var a15: <T>(x: { a: T; b: T }) => T[];
+                                 ~
+!!! error TS2304: Cannot find name 'T'.
+                                       ~
+!!! error TS2304: Cannot find name 'T'.
+                                               ~
+!!! error TS2304: Cannot find name 'T'.
+    declare var a16: <T extends Base>(x: { a: T; b: T }) => T[];
+                                              ~
+!!! error TS2304: Cannot find name 'T'.
+                                                    ~
+!!! error TS2304: Cannot find name 'T'.
+                                                            ~
+!!! error TS2304: Cannot find name 'T'.
+    declare var a17: {
+        <T extends Derived>(x: (a: T) => T): T[];
+        <T extends Base>(x: (a: T) => T): T[];        
+    };
+    declare var a18: {
+        (x: {
+            <T extends Derived>(a: T): T;
+            <T extends Base>(a: T): T;
+        }): any[];
+        (x: {
+            <T extends Derived2>(a: T): T;
+            <T extends Base>(a: T): T;
+        }): any[];
+    };
+    
+    declare var b: <T>(x: T) => T[]; 
+                          ~
+!!! error TS2304: Cannot find name 'T'.
+                                ~
+!!! error TS2304: Cannot find name 'T'.
+    a = b; // ok
+    b = a; // ok
+    declare var b2: <T>(x: T) => string[]; 
+                           ~
+!!! error TS2304: Cannot find name 'T'.
+    a2 = b2; // ok
+    b2 = a2; // ok
+    declare var b3: <T>(x: T) => T; 
+                           ~
+!!! error TS2304: Cannot find name 'T'.
+                                 ~
+!!! error TS2304: Cannot find name 'T'.
+    a3 = b3; // ok
+    b3 = a3; // ok
+    declare var b4: <T, U>(x: T, y: U) => string; 
+                              ~
+!!! error TS2304: Cannot find name 'T'.
+                                    ~
+!!! error TS2304: Cannot find name 'U'.
+    a4 = b4; // ok
+    b4 = a4; // ok
+    declare var b5: <T, U>(x: (arg: T) => U) => T; 
+                                    ~
+!!! error TS2304: Cannot find name 'T'.
+                                          ~
+!!! error TS2304: Cannot find name 'U'.
+                                                ~
+!!! error TS2304: Cannot find name 'T'.
+    a5 = b5; // ok
+    b5 = a5; // ok
+    declare var b6: <T extends Base, U extends Derived>(x: (arg: T) => U) => T; 
+                                                                 ~
+!!! error TS2304: Cannot find name 'T'.
+                                                                       ~
+!!! error TS2304: Cannot find name 'U'.
+                                                                             ~
+!!! error TS2304: Cannot find name 'T'.
+    a6 = b6; // ok
+    b6 = a6; // ok
+    declare var b11: <T, U>(x: { foo: T }, y: { foo: U; bar: U }) => Base; 
+                                      ~
+!!! error TS2304: Cannot find name 'T'.
+                                                     ~
+!!! error TS2304: Cannot find name 'U'.
+                                                             ~
+!!! error TS2304: Cannot find name 'U'.
+    a11 = b11; // ok
+    b11 = a11; // ok
+    declare var b15: <U, V>(x: { a: U; b: V; }) => U[]; 
+                                    ~
+!!! error TS2304: Cannot find name 'U'.
+                                          ~
+!!! error TS2304: Cannot find name 'V'.
+                                                   ~
+!!! error TS2304: Cannot find name 'U'.
+    a15 = b15; // ok, T = U, T = V
+    b15 = a15; // ok
+    declare var b16: <T>(x: { a: T; b: T }) => T[]; 
+                                 ~
+!!! error TS2304: Cannot find name 'T'.
+                                       ~
+!!! error TS2304: Cannot find name 'T'.
+                                               ~
+!!! error TS2304: Cannot find name 'T'.
+    a15 = b16; // ok
+    b15 = a16; // ok
+    declare var b17: <T>(x: (a: T) => T) => T[]; 
+                                ~
+!!! error TS2304: Cannot find name 'T'.
+                                      ~
+!!! error TS2304: Cannot find name 'T'.
+                                            ~
+!!! error TS2304: Cannot find name 'T'.
+    a17 = b17; // ok
+    b17 = a17; // ok
+    declare var b18: (x: <T>(a: T) => T) => any[]; 
+                                ~
+!!! error TS2304: Cannot find name 'T'.
+                                      ~
+!!! error TS2304: Cannot find name 'T'.
+    a18 = b18; // ok
+    b18 = a18; // ok

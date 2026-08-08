@@ -1,9 +1,9 @@
-generators/generatorReturnContextualType.ts(11,23): error TS2304: Cannot find name 'AsyncGenerator'.
-generators/generatorReturnContextualType.ts(19,23): error TS2304: Cannot find name 'AsyncGenerator'.
-generators/generatorReturnContextualType.ts(27,23): error TS2304: Cannot find name 'AsyncGenerator'.
+generatorReturnContextualType.ts(11,23): error TS2304: Cannot find name 'AsyncGenerator'.
+generatorReturnContextualType.ts(19,23): error TS2304: Cannot find name 'AsyncGenerator'.
+generatorReturnContextualType.ts(27,23): error TS2304: Cannot find name 'AsyncGenerator'.
 
 
-==== generators/generatorReturnContextualType.ts (3 errors) ====
+==== generatorReturnContextualType.ts (3 errors) ====
     // #35995
     
     function* f1(): Generator<any, { x: 'x' }, any> {

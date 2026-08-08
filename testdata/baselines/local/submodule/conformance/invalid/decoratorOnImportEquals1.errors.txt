@@ -1,0 +1,22 @@
+decoratorOnImportEquals1.ts(9,5): error TS2304: Cannot find name 'import'.
+decoratorOnImportEquals1.ts(9,12): error TS1005: ';' expected.
+decoratorOnImportEquals1.ts(9,12): error TS2304: Cannot find name 'X'.
+
+
+==== decoratorOnImportEquals1.ts (3 errors) ====
+    declare function dec<T>(target: T): T;
+    
+    namespace M1 {
+        export var X: number;
+    }
+    
+    namespace M2 {
+        @dec
+        import X = M1.X;
+        ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS2304: Cannot find name 'X'.
+    }

@@ -1,0 +1,14 @@
+exportNonLocalDeclarations.ts(2,13): error TS1003: Identifier expected.
+exportNonLocalDeclarations.ts(2,15): error TS1005: '=' expected.
+exportNonLocalDeclarations.ts(2,22): error TS1128: Declaration or statement expected.
+
+
+==== exportNonLocalDeclarations.ts (3 errors) ====
+    export { string };
+    export type { number };
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~~~~
+!!! error TS1005: '=' expected.
+                         ~
+!!! error TS1128: Declaration or statement expected.

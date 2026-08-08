@@ -1,0 +1,48 @@
+validNullAssignments.ts(1,5): error TS2322: Type 'null' is not assignable to type 'number'.
+validNullAssignments.ts(2,5): error TS2322: Type 'null' is not assignable to type 'boolean'.
+validNullAssignments.ts(3,5): error TS2322: Type 'null' is not assignable to type 'string'.
+validNullAssignments.ts(4,5): error TS2322: Type 'null' is not assignable to type 'void'.
+validNullAssignments.ts(25,5): error TS2322: Type 'null' is not assignable to type 'object'.
+
+
+==== validNullAssignments.ts (5 errors) ====
+    var a: number = null;
+        ~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'number'.
+    var b: boolean = null;
+        ~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'boolean'.
+    var c: string = null;
+        ~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'string'.
+    var d: void = null;
+        ~~~~~~~~~~~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'void'.
+    
+    var e: typeof undefined = null;
+    e = null; // ok
+    
+    enum E { A }
+    E.A = null; // error
+    
+    class C { foo: string }
+    var f: C;
+    f = null; // ok
+    C = null; // error
+    
+    interface I { foo: string }
+    var g: I;
+    g = null; // ok
+    I = null; // error
+    
+    namespace M { export var x = 1; }
+    M = null; // error
+    
+    var h: { f(): void } = null;
+        ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'null' is not assignable to type 'object'.
+    
+    function i<T>(a: T) {
+        a = null;
+    }
+    i = null; // error

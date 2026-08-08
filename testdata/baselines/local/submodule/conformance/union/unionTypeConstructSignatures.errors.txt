@@ -1,0 +1,206 @@
+unionTypeConstructSignatures.ts(2,33): error TS2304: Cannot find name 'Date'.
+unionTypeConstructSignatures.ts(9,17): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(10,20): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(15,20): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(16,5): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(17,5): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(20,5): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(21,5): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(22,5): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(25,5): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(26,5): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(27,5): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(30,5): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(31,5): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(32,5): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(35,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(36,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(37,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(38,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(41,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(42,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(43,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(44,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(47,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(48,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(49,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(50,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(53,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(54,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(55,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(56,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(57,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(60,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(61,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(62,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(63,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(64,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(67,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(68,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(69,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(70,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(71,16): error TS2351: This expression is not constructable.
+unionTypeConstructSignatures.ts(74,5): error TS2351: This expression is not constructable.
+
+
+==== unionTypeConstructSignatures.ts (43 errors) ====
+    ﻿// @target: es2015
+    declare var numOrDate: number | Date;
+                                 ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    declare var strOrBoolean: string | boolean;
+    declare var strOrNum: string | number;
+    
+    // If each type in U has construct signatures and the sets of construct signatures are identical ignoring return types,
+    // U has the same set of construct signatures, but with return types that are unions of the return types of the respective construct signatures from each type in U.
+    declare var unionOfDifferentReturnType: { new (a: number): number; } | { new (a: number): Date; };
+    numOrDate = new unionOfDifferentReturnType(10);
+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrBoolean = new unionOfDifferentReturnType("hello"); // error
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new unionOfDifferentReturnType1(true); // error in type of parameter
+    
+    declare var unionOfDifferentReturnType1: { new (a: number): number; new (a: string): string; } | { new (a: number): Date; new (a: string): boolean; };
+    numOrDate = new unionOfDifferentReturnType1(10);
+    strOrBoolean = new unionOfDifferentReturnType1("hello");
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new unionOfDifferentReturnType1(true); // error in type of parameter
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new unionOfDifferentReturnType1(); // error missing parameter
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    declare var unionOfDifferentParameterTypes: { new (a: number): number; } | { new (a: string): Date; };
+    new unionOfDifferentParameterTypes(10);// error - no call signatures
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new unionOfDifferentParameterTypes("hello");// error - no call signatures
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new unionOfDifferentParameterTypes();// error - no call signatures
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    declare var unionOfDifferentNumberOfSignatures: { new (a: number): number; } | { new (a: number): Date; new (a: string): boolean; };
+    new unionOfDifferentNumberOfSignatures(); // error - no call signatures
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new unionOfDifferentNumberOfSignatures(10); // error - no call signatures
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new unionOfDifferentNumberOfSignatures("hello"); // error - no call signatures
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    declare var unionWithDifferentParameterCount: { new (a: string): string; } | { new (a: string, b: number): number; };
+    new unionWithDifferentParameterCount();// needs more args
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new unionWithDifferentParameterCount("hello");// needs more args
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new unionWithDifferentParameterCount("hello", 10);// ok
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    declare var unionWithOptionalParameter1: { new (a: string, b?: number): string; } | { new (a: string, b?: number): number; };
+    strOrNum = new unionWithOptionalParameter1('hello');
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithOptionalParameter1('hello', 10);
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithOptionalParameter1('hello', "hello"); // error in parameter type
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithOptionalParameter1(); // error
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    declare var unionWithOptionalParameter2: { new (a: string, b?: number): string; } | { new (a: string, b: number): number };
+    strOrNum = new unionWithOptionalParameter2('hello'); // error no call signature
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithOptionalParameter2('hello', 10); // error no call signature
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithOptionalParameter2('hello', "hello"); // error no call signature
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithOptionalParameter2(); // error no call signature
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    declare var unionWithOptionalParameter3: { new (a: string, b?: number): string; } | { new (a: string): number; };
+    strOrNum = new unionWithOptionalParameter3('hello'); // error no call signature
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithOptionalParameter3('hello', 10); // ok
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithOptionalParameter3('hello', "hello"); // wrong type
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithOptionalParameter3(); // error no call signature
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    declare var unionWithRestParameter1: { new (a: string, ...b: number[]): string; } | { new (a: string, ...b: number[]): number };
+    strOrNum = new unionWithRestParameter1('hello');
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithRestParameter1('hello', 10);
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithRestParameter1('hello', 10, 11);
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithRestParameter1('hello', "hello"); // error in parameter type
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithRestParameter1(); // error
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    declare var unionWithRestParameter2: { new (a: string, ...b: number[]): string; } | { new (a: string, b: number): number };
+    strOrNum = new unionWithRestParameter2('hello'); // error no call signature
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithRestParameter2('hello', 10); // error no call signature
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithRestParameter2('hello', 10, 11); // error no call signature
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithRestParameter2('hello', "hello"); // error no call signature
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithRestParameter2(); // error no call signature
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    declare var unionWithRestParameter3: { new (a: string, ...b: number[]): string; } | { new (a: string): number };
+    strOrNum = new unionWithRestParameter3('hello'); // error no call signature
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithRestParameter3('hello', 10); // ok
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithRestParameter3('hello', 10, 11); // ok
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithRestParameter3('hello', "hello"); // wrong type
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    strOrNum = new unionWithRestParameter3(); // error no call signature
+                ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    declare var unionWithAbstractSignature: (abstract new (a: string) => string) | (new (a: string) => string);
+    new unionWithAbstractSignature('hello');
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.

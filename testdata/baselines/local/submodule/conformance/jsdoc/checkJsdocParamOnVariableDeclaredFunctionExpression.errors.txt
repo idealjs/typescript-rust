@@ -1,0 +1,24 @@
+0.js(16,29): error TS2304: Cannot find name 'two'.
+
+
+==== checkJsdocParamOnVariableDeclaredFunctionExpression.ts (0 errors) ====
+    
+==== 0.js (1 errors) ====
+    // @ts-check
+    /**
+     * @param {number=} n
+     * @param {string} [s]
+     */
+    var x = function foo(n, s) {}
+    var y;
+    /**
+     * @param {boolean!} b
+     */
+    y = function bar(b) {}
+    
+    /**
+     * @param {string} s
+     */
+    var one = function (s) { }, two = function (untyped) { };
+                                ~~~
+!!! error TS2304: Cannot find name 'two'.

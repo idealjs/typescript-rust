@@ -1,0 +1,15 @@
+topLevelVarHoistingSystem.ts(6,17): error TS2304: Cannot find name 'y'.
+
+
+==== topLevelVarHoistingSystem.ts (1 errors) ====
+    if (false) {
+        var y = 1;
+    }
+    
+    function f() {
+        console.log(y);
+                    ~
+!!! error TS2304: Cannot find name 'y'.
+    }
+    
+    export { y };

@@ -1,0 +1,27 @@
+negateOperatorInvalidOperations.ts(4,15): error TS2304: Cannot find name 'var'.
+negateOperatorInvalidOperations.ts(4,19): error TS1005: ',' expected.
+negateOperatorInvalidOperations.ts(4,25): error TS1005: ',' expected.
+negateOperatorInvalidOperations.ts(12,14): error TS1012: Unexpected token.
+
+
+==== negateOperatorInvalidOperations.ts (4 errors) ====
+    // Unary operator -
+    
+    // operand before -
+    var NUMBER1 = var NUMBER-;  //expect error
+                  ~~~
+!!! error TS2304: Cannot find name 'var'.
+                      ~~~~~~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS1005: ',' expected.
+    
+    // invalid expressions
+    var NUMBER2 = -(null - undefined);
+    var NUMBER3 = -(null - null);
+    var NUMBER4 = -(undefined - undefined);
+    
+    // miss operand
+    var NUMBER =-;
+                 ~
+!!! error TS1012: Unexpected token.

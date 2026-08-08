@@ -1,0 +1,21 @@
+a.json(1,8): error TS1005: ';' expected.
+
+
+==== importAttributes11.ts (0 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/62590
+    
+==== a.json (1 errors) ====
+    { "key": "value" }
+           ~
+!!! error TS1005: ';' expected.
+    
+==== b.mts (0 errors) ====
+    declare global {
+        interface ImportAttributes {
+            type: "json"
+        }
+    }
+    
+    import a
+    	from "./a.json"
+    	with {type: "json"}

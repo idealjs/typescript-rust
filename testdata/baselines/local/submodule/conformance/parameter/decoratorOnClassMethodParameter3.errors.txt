@@ -1,0 +1,35 @@
+decoratorOnClassMethodParameter3.ts(5,18): error TS1138: Parameter declaration expected.
+decoratorOnClassMethodParameter3.ts(5,22): error TS1005: ',' expected.
+decoratorOnClassMethodParameter3.ts(5,29): error TS1005: ',' expected.
+decoratorOnClassMethodParameter3.ts(5,36): error TS1005: ';' expected.
+decoratorOnClassMethodParameter3.ts(5,47): error TS1005: ';' expected.
+decoratorOnClassMethodParameter3.ts(5,49): error TS1005: ';' expected.
+decoratorOnClassMethodParameter3.ts(7,10): error TS2304: Cannot find name 'Class'.
+decoratorOnClassMethodParameter3.ts(8,1): error TS1128: Declaration or statement expected.
+
+
+==== decoratorOnClassMethodParameter3.ts (8 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/48509
+    declare function dec(a: any): any;
+    function fn(value: Promise<number>): any {
+      class Class {
+        async method(@dec(await value) arg: number) {}
+                     ~
+!!! error TS1138: Parameter declaration expected.
+                         ~
+!!! error TS1005: ',' expected.
+                                ~~~~~
+!!! error TS1005: ',' expected.
+                                       ~~~
+!!! error TS1005: ';' expected.
+                                                  ~
+!!! error TS1005: ';' expected.
+                                                    ~
+!!! error TS1005: ';' expected.
+      }
+      return Class
+             ~~~~~
+!!! error TS2304: Cannot find name 'Class'.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

@@ -1,0 +1,12 @@
+intlDurationFormat.ts(1,5): error TS2304: Cannot find name 'Intl'.
+
+
+==== intlDurationFormat.ts (1 errors) ====
+    new Intl.DurationFormat('en').format({
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+      years: 1,
+      hours: 20,
+      minutes: 15,
+      seconds: 35
+    });

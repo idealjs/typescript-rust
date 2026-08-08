@@ -1,0 +1,30 @@
+error TS2451: Cannot redeclare block-scoped variable 'dec'.
+main.ts(4,20): error TS1012: Unexpected token.
+main.ts(4,21): error TS1005: ')' expected.
+main.ts(4,25): error TS1005: ',' expected.
+main.ts(4,31): error TS1005: ',' expected.
+main.ts(4,31): error TS1182: A destructuring declaration must have an initializer.
+main.ts(4,33): error TS1005: ',' expected.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'dec'.
+==== main.ts (6 errors) ====
+    declare var dec: any;
+    
+    // uses __esDecorate, __runInitializers, __setFunctionName
+    export const C = ((@dec class {}));
+                       ~
+!!! error TS1012: Unexpected token.
+                        ~~~
+!!! error TS1005: ')' expected.
+                            ~~~~~
+!!! error TS1005: ',' expected.
+                                  ~
+!!! error TS1005: ',' expected.
+                                  ~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+                                    ~
+!!! error TS1005: ',' expected.
+    
+==== tslib.d.ts (0 errors) ====
+    export {}

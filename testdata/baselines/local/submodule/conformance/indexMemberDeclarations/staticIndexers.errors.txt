@@ -1,12 +1,12 @@
-indexMemberDeclarations/staticIndexers.ts(4,14): error TS1005: ']' expected.
-indexMemberDeclarations/staticIndexers.ts(4,22): error TS1005: ';' expected.
-indexMemberDeclarations/staticIndexers.ts(8,14): error TS1005: ']' expected.
-indexMemberDeclarations/staticIndexers.ts(8,22): error TS1005: ';' expected.
-indexMemberDeclarations/staticIndexers.ts(12,14): error TS1005: ']' expected.
-indexMemberDeclarations/staticIndexers.ts(12,22): error TS1005: ';' expected.
+staticIndexers.ts(4,14): error TS1005: ']' expected.
+staticIndexers.ts(4,22): error TS1005: ';' expected.
+staticIndexers.ts(8,14): error TS1005: ']' expected.
+staticIndexers.ts(8,22): error TS1005: ';' expected.
+staticIndexers.ts(12,14): error TS1005: ']' expected.
+staticIndexers.ts(12,22): error TS1005: ';' expected.
 
 
-==== indexMemberDeclarations/staticIndexers.ts (6 errors) ====
+==== staticIndexers.ts (6 errors) ====
     // static indexers not allowed
     
     class C {

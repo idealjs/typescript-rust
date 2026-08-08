@@ -1,0 +1,78 @@
+taggedTemplateStringsWithTagsTypedAsAnyES6.ts(3,3): error TS1005: ';' expected.
+taggedTemplateStringsWithTagsTypedAsAnyES6.ts(5,3): error TS1005: ';' expected.
+taggedTemplateStringsWithTagsTypedAsAnyES6.ts(7,7): error TS1005: ';' expected.
+taggedTemplateStringsWithTagsTypedAsAnyES6.ts(9,7): error TS1005: ';' expected.
+taggedTemplateStringsWithTagsTypedAsAnyES6.ts(11,3): error TS1005: ';' expected.
+taggedTemplateStringsWithTagsTypedAsAnyES6.ts(11,9): error TS2339: Property 'member' does not exist on type 'string'.
+taggedTemplateStringsWithTagsTypedAsAnyES6.ts(13,3): error TS1005: ';' expected.
+taggedTemplateStringsWithTagsTypedAsAnyES6.ts(13,23): error TS2339: Property 'member' does not exist on type 'string'.
+taggedTemplateStringsWithTagsTypedAsAnyES6.ts(15,3): error TS1005: ';' expected.
+taggedTemplateStringsWithTagsTypedAsAnyES6.ts(17,3): error TS1005: ';' expected.
+taggedTemplateStringsWithTagsTypedAsAnyES6.ts(19,3): error TS1005: ';' expected.
+taggedTemplateStringsWithTagsTypedAsAnyES6.ts(19,32): error TS1005: ';' expected.
+taggedTemplateStringsWithTagsTypedAsAnyES6.ts(21,3): error TS1005: ';' expected.
+taggedTemplateStringsWithTagsTypedAsAnyES6.ts(21,46): error TS1005: ';' expected.
+
+
+==== taggedTemplateStringsWithTagsTypedAsAnyES6.ts (14 errors) ====
+    ﻿// @target: ES6
+    var f: any;
+               
+    f `abc`
+    ~~~~
+!!! error TS1005: ';' expected.
+    
+    
+    f `abc${1}def${2}ghi`;
+    ~~~~~
+!!! error TS1005: ';' expected.
+    
+    f.g.h `abc`
+       ~~~~~
+!!! error TS1005: ';' expected.
+    
+    f.g.h `abc${1}def${2}ghi`;
+       ~~~~~~
+!!! error TS1005: ';' expected.
+    
+    
+    f `abc`.member
+    ~~~~
+!!! error TS1005: ';' expected.
+         ~~~~~~
+!!! error TS2339: Property 'member' does not exist on type 'string'.
+    
+    
+    f `abc${1}def${2}ghi`.member;
+    ~~~~~
+!!! error TS1005: ';' expected.
+                       ~~~~~~
+!!! error TS2339: Property 'member' does not exist on type 'string'.
+    
+    
+    f `abc`["member"];
+    ~~~~
+!!! error TS1005: ';' expected.
+    
+    
+    f `abc${1}def${2}ghi`["member"];
+    ~~~~~
+!!! error TS1005: ';' expected.
+    
+    
+    f `abc`["member"].someOtherTag `abc${1}def${2}ghi`;
+    ~~~~
+!!! error TS1005: ';' expected.
+                                ~~~~~~
+!!! error TS1005: ';' expected.
+    
+    
+    f `abc${1}def${2}ghi`["member"].someOtherTag `abc${1}def${2}ghi`;
+    ~~~~~
+!!! error TS1005: ';' expected.
+                                              ~~~~~~
+!!! error TS1005: ';' expected.
+    
+    f.thisIsNotATag(`abc`);
+    
+    f.thisIsNotATag(`abc${1}def${2}ghi`);

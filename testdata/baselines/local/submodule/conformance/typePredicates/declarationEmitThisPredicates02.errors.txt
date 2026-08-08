@@ -1,0 +1,90 @@
+declarationEmitThisPredicates02.ts(8,5): error TS2304: Cannot find name 'm'.
+declarationEmitThisPredicates02.ts(8,6): error TS1005: ',' expected.
+declarationEmitThisPredicates02.ts(8,6): error TS2304: Cannot find name '('.
+declarationEmitThisPredicates02.ts(8,7): error TS1005: ',' expected.
+declarationEmitThisPredicates02.ts(8,15): error TS1005: ',' expected.
+declarationEmitThisPredicates02.ts(8,15): error TS2304: Cannot find name 'is'.
+declarationEmitThisPredicates02.ts(8,18): error TS1005: ',' expected.
+declarationEmitThisPredicates02.ts(8,22): error TS1005: ',' expected.
+declarationEmitThisPredicates02.ts(8,22): error TS2304: Cannot find name '{'.
+declarationEmitThisPredicates02.ts(9,9): error TS1005: ',' expected.
+declarationEmitThisPredicates02.ts(9,9): error TS2304: Cannot find name 'let'.
+declarationEmitThisPredicates02.ts(9,13): error TS1005: ',' expected.
+declarationEmitThisPredicates02.ts(9,13): error TS2304: Cannot find name 'dis'.
+declarationEmitThisPredicates02.ts(9,17): error TS1005: ',' expected.
+declarationEmitThisPredicates02.ts(9,17): error TS2304: Cannot find name '='.
+declarationEmitThisPredicates02.ts(9,19): error TS1005: ',' expected.
+declarationEmitThisPredicates02.ts(9,19): error TS2304: Cannot find name 'this'.
+declarationEmitThisPredicates02.ts(9,24): error TS1005: ',' expected.
+declarationEmitThisPredicates02.ts(9,24): error TS2304: Cannot find name 'as'.
+declarationEmitThisPredicates02.ts(9,27): error TS1005: ',' expected.
+declarationEmitThisPredicates02.ts(9,27): error TS2304: Cannot find name '{'.
+declarationEmitThisPredicates02.ts(10,16): error TS2304: Cannot find name 'dis'.
+declarationEmitThisPredicates02.ts(10,33): error TS2304: Cannot find name 'dis'.
+declarationEmitThisPredicates02.ts(10,50): error TS2304: Cannot find name 'dis'.
+declarationEmitThisPredicates02.ts(11,5): error TS1128: Declaration or statement expected.
+
+
+==== declarationEmitThisPredicates02.ts (25 errors) ====
+    export interface Foo {
+        a: string;
+        b: number;
+        c: boolean;
+    }
+    
+    export const obj = {
+        m(): this is Foo {
+        ~
+!!! error TS2304: Cannot find name 'm'.
+         ~
+!!! error TS1005: ',' expected.
+         ~
+!!! error TS2304: Cannot find name '('.
+          ~
+!!! error TS1005: ',' expected.
+                  ~~
+!!! error TS1005: ',' expected.
+                  ~~
+!!! error TS2304: Cannot find name 'is'.
+                     ~~~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS2304: Cannot find name '{'.
+            let dis = this as {} as Foo;
+            ~~~
+!!! error TS1005: ',' expected.
+            ~~~
+!!! error TS2304: Cannot find name 'let'.
+                ~~~
+!!! error TS1005: ',' expected.
+                ~~~
+!!! error TS2304: Cannot find name 'dis'.
+                    ~
+!!! error TS1005: ',' expected.
+                    ~
+!!! error TS2304: Cannot find name '='.
+                      ~~~~
+!!! error TS1005: ',' expected.
+                      ~~~~
+!!! error TS2304: Cannot find name 'this'.
+                           ~~
+!!! error TS1005: ',' expected.
+                           ~~
+!!! error TS2304: Cannot find name 'as'.
+                              ~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS2304: Cannot find name '{'.
+            return dis.a != null && dis.b != null && dis.c != null;
+                   ~~~
+!!! error TS2304: Cannot find name 'dis'.
+                                    ~~~
+!!! error TS2304: Cannot find name 'dis'.
+                                                     ~~~
+!!! error TS2304: Cannot find name 'dis'.
+        }
+        ~
+!!! error TS1128: Declaration or statement expected.
+    }

@@ -1,0 +1,64 @@
+esDecorators-decoratorExpression.2.ts(21,6): error TS1005: ')' expected.
+esDecorators-decoratorExpression.2.ts(21,8): error TS1005: ';' expected.
+
+
+==== esDecorators-decoratorExpression.2.ts (2 errors) ====
+    declare let x: any;
+    declare let g: <T>(...args: any) => any;
+    declare let h: () => <T>(...args: any) => any;
+    
+    { @x! class C {} }
+    
+    { @x.y! class C {} }
+    
+    { @x!.y class C {} }
+    
+    { @g<number>() class C {} }
+    
+    { @(g<number>) class C {} }
+    
+    { @(h()<number>) class C {} }
+    
+    { @(x().y) class C {} }
+    
+    { @(x().y()) class C {} }
+    
+    { @(x``) class C {} }
+         ~~
+!!! error TS1005: ')' expected.
+           ~
+!!! error TS1005: ';' expected.
+    
+    { @(x.y``) class C {} }
+    
+    { @(x?.y!) class C {} }
+    
+    { @(x["y"]) class C {} }
+    
+    { @(x?.["y"]) class C {} }
+    
+    { class C { @x! m() {} } }
+    
+    { class C { @x.y! m() {} } }
+    
+    { class C { @x!.y m() {} } }
+    
+    { class C { @g<number>() m() {} } }
+    
+    { class C { @(g<number>) m() {} } }
+    
+    { class C { @(h()<number>) m() {} } }
+    
+    { class C { @(x().y) m() {} } }
+    
+    { class C { @(x().y()) m() {} } }
+    
+    { class C { @(x``) m() {} } }
+    
+    { class C { @(x.y``) m() {} } }
+    
+    { class C { @(x?.y!) m() {} } }
+    
+    { class C { @(x["y"]) m() {} } }
+    
+    { class C { @(x?.["y"]) m() {} } }

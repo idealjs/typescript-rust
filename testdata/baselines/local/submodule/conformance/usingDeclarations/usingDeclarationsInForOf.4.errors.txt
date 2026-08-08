@@ -1,0 +1,18 @@
+usingDeclarationsInForOf.4.ts(1,6): error TS2304: Cannot find name 'using'.
+usingDeclarationsInForOf.4.ts(1,15): error TS1012: Unexpected token.
+usingDeclarationsInForOf.4.ts(1,17): error TS1005: ')' expected.
+usingDeclarationsInForOf.4.ts(1,23): error TS1128: Declaration or statement expected.
+
+
+==== usingDeclarationsInForOf.4.ts (4 errors) ====
+    for (using of = null;;) break;
+         ~~~~~
+!!! error TS2304: Cannot find name 'using'.
+                  ~
+!!! error TS1012: Unexpected token.
+                    ~~~~
+!!! error TS1005: ')' expected.
+                          ~
+!!! error TS1128: Declaration or statement expected.
+    for (using of: null = null;;) break;
+    for (using of;;) break;

@@ -1,12 +1,12 @@
-pedantic/noUncheckedIndexedAccessDestructuring.ts(64,2): error TS1012: Unexpected token.
-pedantic/noUncheckedIndexedAccessDestructuring.ts(64,4): error TS1012: Unexpected token.
-pedantic/noUncheckedIndexedAccessDestructuring.ts(64,6): error TS1005: ',' expected.
-pedantic/noUncheckedIndexedAccessDestructuring.ts(68,8): error TS2454: Variable 'x' is used before being assigned.
-pedantic/noUncheckedIndexedAccessDestructuring.ts(68,11): error TS2454: Variable 'y' is used before being assigned.
-pedantic/noUncheckedIndexedAccessDestructuring.ts(71,8): error TS2454: Variable 'q' is used before being assigned.
+noUncheckedIndexedAccessDestructuring.ts(64,2): error TS1012: Unexpected token.
+noUncheckedIndexedAccessDestructuring.ts(64,4): error TS1012: Unexpected token.
+noUncheckedIndexedAccessDestructuring.ts(64,6): error TS1005: ',' expected.
+noUncheckedIndexedAccessDestructuring.ts(68,8): error TS2454: Variable 'x' is used before being assigned.
+noUncheckedIndexedAccessDestructuring.ts(68,11): error TS2454: Variable 'y' is used before being assigned.
+noUncheckedIndexedAccessDestructuring.ts(71,8): error TS2454: Variable 'q' is used before being assigned.
 
 
-==== pedantic/noUncheckedIndexedAccessDestructuring.ts (6 errors) ====
+==== noUncheckedIndexedAccessDestructuring.ts (6 errors) ====
     declare const strArray: string[];
     declare const strStrTuple: [string, string];
     

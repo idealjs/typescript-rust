@@ -1,0 +1,49 @@
+file.js(4,7): error TS1003: Identifier expected.
+file.js(4,8): error TS1005: ';' expected.
+file.js(4,8): error TS2304: Cannot find name 'exports'.
+package.json(2,11): error TS1005: ';' expected.
+
+
+==== index.js (0 errors) ====
+    // cjs format file
+    const a = {};
+    export = a;
+==== file.js (3 errors) ====
+    // cjs format file
+    const a = {};
+    module.exports = a;
+                       
+!!! error TS1003: Identifier expected.
+                       
+!!! error TS1005: ';' expected.
+                       
+!!! error TS2304: Cannot find name 'exports'.
+==== index.js (0 errors) ====
+    // esm format file
+    const a = {};
+    export = a;
+==== file.js (3 errors) ====
+    // esm format file
+    import "fs";
+    const a = {};
+    module.exports = a;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+==== package.json (1 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+        "type": "module"
+    }
+==== package.json (1 errors) ====
+    {
+        "type": "commonjs"
+              ~
+!!! error TS1005: ';' expected.
+    }

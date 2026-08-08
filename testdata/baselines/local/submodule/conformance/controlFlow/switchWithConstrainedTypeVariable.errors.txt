@@ -1,0 +1,18 @@
+switchWithConstrainedTypeVariable.ts(6,11): error TS2339: Property 'toLowerCase' does not exist on type '"a"'.
+
+
+==== switchWithConstrainedTypeVariable.ts (1 errors) ====
+    // Repro from #20840
+    
+    function function1<T extends 'a' | 'b'>(key: T) {
+      switch (key) {
+        case 'a':
+          key.toLowerCase();
+              ~~~~~~~~~~~
+!!! error TS2339: Property 'toLowerCase' does not exist on type '"a"'.
+          break;
+        default:
+          key.toLowerCase();
+          break;
+      }
+    }

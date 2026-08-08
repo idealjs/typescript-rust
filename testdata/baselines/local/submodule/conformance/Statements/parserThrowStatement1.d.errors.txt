@@ -1,0 +1,7 @@
+parserThrowStatement1.d.ts(1,7): error TS2304: Cannot find name 'e'.
+
+
+==== parserThrowStatement1.d.ts (1 errors) ====
+    throw e;
+          ~
+!!! error TS2304: Cannot find name 'e'.

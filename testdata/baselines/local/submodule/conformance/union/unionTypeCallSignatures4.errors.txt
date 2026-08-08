@@ -1,0 +1,77 @@
+unionTypeCallSignatures4.ts(9,1): error TS2349: This expression is not callable.
+unionTypeCallSignatures4.ts(10,1): error TS2349: This expression is not callable.
+unionTypeCallSignatures4.ts(11,1): error TS2349: This expression is not callable.
+unionTypeCallSignatures4.ts(14,1): error TS2349: This expression is not callable.
+unionTypeCallSignatures4.ts(15,1): error TS2349: This expression is not callable.
+unionTypeCallSignatures4.ts(16,1): error TS2349: This expression is not callable.
+unionTypeCallSignatures4.ts(19,1): error TS2349: This expression is not callable.
+unionTypeCallSignatures4.ts(20,1): error TS2349: This expression is not callable.
+unionTypeCallSignatures4.ts(21,1): error TS2349: This expression is not callable.
+unionTypeCallSignatures4.ts(24,1): error TS2349: This expression is not callable.
+unionTypeCallSignatures4.ts(25,1): error TS2349: This expression is not callable.
+unionTypeCallSignatures4.ts(26,1): error TS2349: This expression is not callable.
+
+
+==== unionTypeCallSignatures4.ts (12 errors) ====
+    ﻿// @target: es2015
+    type F1 = (a: string, b?: string) => void;
+    type F2 = (a: string, b?: string, c?: string) => void;
+    type F3 = (a: string, ...rest: string[]) => void;
+    type F4 = (a: string, b?: string, ...rest: string[]) => void;
+    type F5 = (a: string, b: string) => void;
+    
+    declare var f12: F1 | F2;
+                           ~~
+    f12("a");
+    
+!!! error TS2349: This expression is not callable.
+           ~~
+    f12("a", "b");
+    
+!!! error TS2349: This expression is not callable.
+                ~~
+    f12("a", "b", "c");  // ok
+    
+!!! error TS2349: This expression is not callable.
+    
+    declare var f34: F3 | F4;
+                           ~~
+    f34("a");
+    
+!!! error TS2349: This expression is not callable.
+           ~~
+    f34("a", "b");
+    
+!!! error TS2349: This expression is not callable.
+                ~~
+    f34("a", "b", "c");
+    
+!!! error TS2349: This expression is not callable.
+    
+    declare var f1234: F1 | F2 | F3 | F4;
+                                       ~~
+    f1234("a");
+    ~~
+!!! error TS2349: This expression is not callable.
+             ~~
+    f1234("a", "b");
+    ~~
+!!! error TS2349: This expression is not callable.
+                  ~~
+    f1234("a", "b", "c");  // ok
+    ~~
+!!! error TS2349: This expression is not callable.
+    
+    declare var f12345: F1 | F2 | F3 | F4 | F5;
+                                             ~~
+    f12345("a");  // error
+    ~~~
+!!! error TS2349: This expression is not callable.
+                        ~~
+    f12345("a", "b");
+    ~~~
+!!! error TS2349: This expression is not callable.
+                   ~~
+    f12345("a", "b", "c");  // error
+    ~~~
+!!! error TS2349: This expression is not callable.

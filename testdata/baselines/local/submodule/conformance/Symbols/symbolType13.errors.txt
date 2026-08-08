@@ -1,0 +1,15 @@
+symbolType13.ts(4,13): error TS1005: ';' expected.
+symbolType13.ts(5,12): error TS1005: ';' expected.
+
+
+==== symbolType13.ts (2 errors) ====
+    var s = Symbol();
+    var x: any;
+    
+    for (s in {}) { }
+                ~
+!!! error TS1005: ';' expected.
+    for (x in s) { }
+               ~
+!!! error TS1005: ';' expected.
+    for (var y in s) { }

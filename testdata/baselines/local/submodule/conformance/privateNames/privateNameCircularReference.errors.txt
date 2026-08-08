@@ -1,18 +1,18 @@
-privateNames/privateNameCircularReference.ts(2,5): error TS1003: Identifier expected.
-privateNames/privateNameCircularReference.ts(2,5): error TS1127: Invalid character.
-privateNames/privateNameCircularReference.ts(2,6): error TS1005: ';' expected.
-privateNames/privateNameCircularReference.ts(2,17): error TS1003: Identifier expected.
-privateNames/privateNameCircularReference.ts(2,17): error TS1127: Invalid character.
-privateNames/privateNameCircularReference.ts(2,18): error TS1005: ';' expected.
-privateNames/privateNameCircularReference.ts(3,5): error TS1003: Identifier expected.
-privateNames/privateNameCircularReference.ts(3,5): error TS1127: Invalid character.
-privateNames/privateNameCircularReference.ts(3,6): error TS1005: ';' expected.
-privateNames/privateNameCircularReference.ts(3,17): error TS1003: Identifier expected.
-privateNames/privateNameCircularReference.ts(3,17): error TS1127: Invalid character.
-privateNames/privateNameCircularReference.ts(3,18): error TS1005: ';' expected.
+privateNameCircularReference.ts(2,5): error TS1003: Identifier expected.
+privateNameCircularReference.ts(2,5): error TS1127: Invalid character.
+privateNameCircularReference.ts(2,6): error TS1005: ';' expected.
+privateNameCircularReference.ts(2,17): error TS1003: Identifier expected.
+privateNameCircularReference.ts(2,17): error TS1127: Invalid character.
+privateNameCircularReference.ts(2,18): error TS1005: ';' expected.
+privateNameCircularReference.ts(3,5): error TS1003: Identifier expected.
+privateNameCircularReference.ts(3,5): error TS1127: Invalid character.
+privateNameCircularReference.ts(3,6): error TS1005: ';' expected.
+privateNameCircularReference.ts(3,17): error TS1003: Identifier expected.
+privateNameCircularReference.ts(3,17): error TS1127: Invalid character.
+privateNameCircularReference.ts(3,18): error TS1005: ';' expected.
 
 
-==== privateNames/privateNameCircularReference.ts (12 errors) ====
+==== privateNameCircularReference.ts (12 errors) ====
     class A {
         #foo = this.#bar;
         ~

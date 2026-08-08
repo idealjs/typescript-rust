@@ -1,10 +1,10 @@
-privateNames/privateNameBadSuper.ts(3,3): error TS1003: Identifier expected.
-privateNames/privateNameBadSuper.ts(3,3): error TS1127: Invalid character.
-privateNames/privateNameBadSuper.ts(3,4): error TS1005: ';' expected.
-privateNames/privateNameBadSuper.ts(6,5): error TS2349: This expression is not callable.
+privateNameBadSuper.ts(3,3): error TS1003: Identifier expected.
+privateNameBadSuper.ts(3,3): error TS1127: Invalid character.
+privateNameBadSuper.ts(3,4): error TS1005: ';' expected.
+privateNameBadSuper.ts(6,5): error TS2349: This expression is not callable.
 
 
-==== privateNames/privateNameBadSuper.ts (4 errors) ====
+==== privateNameBadSuper.ts (4 errors) ====
     class B {};
     class A extends B {
       #x;

@@ -1,0 +1,10 @@
+parserForOfStatement21.ts(1,15): error TS1012: Unexpected token.
+parserForOfStatement21.ts(1,17): error TS1005: ')' expected.
+
+
+==== parserForOfStatement21.ts (2 errors) ====
+    for (var of of) { }
+                  ~
+!!! error TS1012: Unexpected token.
+                    ~
+!!! error TS1005: ')' expected.

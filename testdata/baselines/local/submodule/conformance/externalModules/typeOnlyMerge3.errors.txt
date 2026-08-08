@@ -1,0 +1,29 @@
+error TS2300: Duplicate identifier 'A'.
+a.ts(2,13): error TS1003: Identifier expected.
+a.ts(2,15): error TS1005: '=' expected.
+a.ts(2,17): error TS1128: Declaration or statement expected.
+
+
+!!! error TS2300: Duplicate identifier 'A'.
+==== a.ts (3 errors) ====
+    function A() {}
+    export type { A };
+                ~
+!!! error TS1003: Identifier expected.
+                  ~
+!!! error TS1005: '=' expected.
+                    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== b.ts (0 errors) ====
+    import { A } from "./a";
+    namespace A {
+      export const displayName = "A";
+    }
+    export { A };
+    
+==== c.ts (0 errors) ====
+    import { A } from "./b";
+    A;
+    A.displayName;
+    A();

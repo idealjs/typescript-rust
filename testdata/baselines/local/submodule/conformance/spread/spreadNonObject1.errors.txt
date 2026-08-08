@@ -1,0 +1,14 @@
+spreadNonObject1.ts(5,21): error TS2339: Property 'map' does not exist on type '`${number}`[]'.
+
+
+==== spreadNonObject1.ts (1 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/45493
+    
+    type S = `${number}`;
+    const b = {
+      c: (["4"] as S[]).map(function (s) {
+                        ~~~
+!!! error TS2339: Property 'map' does not exist on type '`${number}`[]'.
+        const a = { ...s, y: 6 };
+      }),
+    };

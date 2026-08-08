@@ -1,0 +1,16 @@
+parserUnfinishedTypeNameBeforeKeyword1.ts(2,11): error TS1005: ',' expected.
+parserUnfinishedTypeNameBeforeKeyword1.ts(2,23): error TS1005: ',' expected.
+parserUnfinishedTypeNameBeforeKeyword1.ts(2,23): error TS1182: A destructuring declaration must have an initializer.
+
+
+==== parserUnfinishedTypeNameBeforeKeyword1.ts (3 errors) ====
+    var x: TypeModule1.
+    namespace TypeModule2 {
+              ~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS1005: ',' expected.
+                          ~
+    }
+    ~
+!!! error TS1182: A destructuring declaration must have an initializer.

@@ -1,12 +1,12 @@
-privateNames/privateNameAmbientNoImplicitAny.ts(2,5): error TS1003: Identifier expected.
-privateNames/privateNameAmbientNoImplicitAny.ts(2,5): error TS1127: Invalid character.
-privateNames/privateNameAmbientNoImplicitAny.ts(2,6): error TS1005: ';' expected.
-privateNames/privateNameAmbientNoImplicitAny.ts(5,5): error TS1003: Identifier expected.
-privateNames/privateNameAmbientNoImplicitAny.ts(5,5): error TS1127: Invalid character.
-privateNames/privateNameAmbientNoImplicitAny.ts(5,6): error TS1005: ';' expected.
+privateNameAmbientNoImplicitAny.ts(2,5): error TS1003: Identifier expected.
+privateNameAmbientNoImplicitAny.ts(2,5): error TS1127: Invalid character.
+privateNameAmbientNoImplicitAny.ts(2,6): error TS1005: ';' expected.
+privateNameAmbientNoImplicitAny.ts(5,5): error TS1003: Identifier expected.
+privateNameAmbientNoImplicitAny.ts(5,5): error TS1127: Invalid character.
+privateNameAmbientNoImplicitAny.ts(5,6): error TS1005: ';' expected.
 
 
-==== privateNames/privateNameAmbientNoImplicitAny.ts (6 errors) ====
+==== privateNameAmbientNoImplicitAny.ts (6 errors) ====
     declare class A {
         #prop;
         ~

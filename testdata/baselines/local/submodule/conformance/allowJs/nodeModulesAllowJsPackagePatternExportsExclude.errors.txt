@@ -1,0 +1,159 @@
+index.cjs(5,1): error TS2304: Cannot find name 'cjsi'.
+index.cjs(6,1): error TS2304: Cannot find name 'mjsi'.
+index.cjs(7,1): error TS2304: Cannot find name 'typei'.
+index.d.cts(7,16): error TS1003: Identifier expected.
+index.d.cts(7,17): error TS1005: '}' expected.
+index.d.mts(7,16): error TS1003: Identifier expected.
+index.d.mts(7,17): error TS1005: '}' expected.
+index.d.ts(7,16): error TS1003: Identifier expected.
+index.d.ts(7,17): error TS1005: '}' expected.
+index.js(5,1): error TS2304: Cannot find name 'cjsi'.
+index.js(6,1): error TS2304: Cannot find name 'mjsi'.
+index.js(7,1): error TS2304: Cannot find name 'typei'.
+index.mjs(5,1): error TS2304: Cannot find name 'cjsi'.
+index.mjs(6,1): error TS2304: Cannot find name 'mjsi'.
+index.mjs(7,1): error TS2304: Cannot find name 'typei'.
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+package.json(4,14): error TS1005: ';' expected.
+package.json(5,18): error TS1005: ';' expected.
+package.json(6,26): error TS1005: ';' expected.
+package.json(7,18): error TS1005: ';' expected.
+package.json(8,26): error TS1005: ';' expected.
+package.json(9,17): error TS1005: ';' expected.
+package.json(10,25): error TS1005: ';' expected.
+
+
+==== index.js (3 errors) ====
+    // esm format file
+    import * as cjsi from "inner/cjs/exclude/index";
+    import * as mjsi from "inner/mjs/exclude/index";
+    import * as typei from "inner/js/exclude/index";
+    cjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'cjsi'.
+    mjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'mjsi'.
+    typei;
+    ~~~~~
+!!! error TS2304: Cannot find name 'typei'.
+==== index.mjs (3 errors) ====
+    // esm format file
+    import * as cjsi from "inner/cjs/exclude/index";
+    import * as mjsi from "inner/mjs/exclude/index";
+    import * as typei from "inner/js/exclude/index";
+    cjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'cjsi'.
+    mjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'mjsi'.
+    typei;
+    ~~~~~
+!!! error TS2304: Cannot find name 'typei'.
+==== index.cjs (3 errors) ====
+    // cjs format file
+    import * as cjsi from "inner/cjs/exclude/index";
+    import * as mjsi from "inner/mjs/exclude/index";
+    import * as typei from "inner/js/exclude/index";
+    cjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'cjsi'.
+    mjsi;
+    ~~~~
+!!! error TS2304: Cannot find name 'mjsi'.
+    typei;
+    ~~~~~
+!!! error TS2304: Cannot find name 'typei'.
+==== index.d.ts (2 errors) ====
+    // cjs format file
+    import * as cjs from "inner/cjs/exclude/index";
+    import * as mjs from "inner/mjs/exclude/index";
+    import * as type from "inner/js/exclude/index";
+    export { cjs };
+    export { mjs };
+    export { type };
+                   ~
+!!! error TS1003: Identifier expected.
+                    
+!!! error TS1005: '}' expected.
+==== index.d.mts (2 errors) ====
+    // esm format file
+    import * as cjs from "inner/cjs/exclude/index";
+    import * as mjs from "inner/mjs/exclude/index";
+    import * as type from "inner/js/exclude/index";
+    export { cjs };
+    export { mjs };
+    export { type };
+                   ~
+!!! error TS1003: Identifier expected.
+                    
+!!! error TS1005: '}' expected.
+==== index.d.cts (2 errors) ====
+    // cjs format file
+    import * as cjs from "inner/cjs/exclude/index";
+    import * as mjs from "inner/mjs/exclude/index";
+    import * as type from "inner/js/exclude/index";
+    export { cjs };
+    export { mjs };
+    export { type };
+                   ~
+!!! error TS1003: Identifier expected.
+                    
+!!! error TS1005: '}' expected.
+==== package.json (9 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+               ~
+!!! error TS1005: ';' expected.
+        "type": "module"
+               ~
+!!! error TS1005: ';' expected.
+    }
+     
+!!! error TS1005: ';' expected.
+     
+!!! error TS1005: ';' expected.
+     
+!!! error TS1005: ';' expected.
+     
+!!! error TS1005: ';' expected.
+     
+!!! error TS1005: ';' expected.
+     
+!!! error TS1005: ';' expected.
+==== package.json (9 errors) ====
+    {
+        "name": "inner",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+                 ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            "./cjs/*": "./*.cjs",
+                     ~
+!!! error TS1005: ';' expected.
+            "./cjs/exclude/*": null,
+                             ~
+!!! error TS1005: ';' expected.
+            "./mjs/*": "./*.mjs",
+                     ~
+!!! error TS1005: ';' expected.
+            "./mjs/exclude/*": null,
+                             ~
+!!! error TS1005: ';' expected.
+            "./js/*": "./*.js",
+                    ~
+!!! error TS1005: ';' expected.
+            "./js/exclude/*": null
+                            ~
+!!! error TS1005: ';' expected.
+        }
+    } 

@@ -1,0 +1,83 @@
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,5): error TS2304: Cannot find name 'get'.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,9): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,10): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,10): error TS2304: Cannot find name '('.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,11): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,11): error TS2304: Cannot find name ')'.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,13): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,13): error TS2304: Cannot find name '{'.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,9): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,9): error TS2304: Cannot find name 'return'.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,16): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,16): error TS2304: Cannot find name 'this'.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,20): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,20): error TS2304: Cannot find name '.'.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,21): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,21): error TS2304: Cannot find name '_0'.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,23): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,23): error TS2304: Cannot find name ';'.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(8,5): error TS2304: Cannot find name 'set'.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(8,9): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(8,10): error TS1134: Variable declaration expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(8,20): error TS1005: ',' expected.
+
+
+==== emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts (22 errors) ====
+    ﻿// @target: es5, es2015
+    
+    var object = {
+        _0: 2,
+        get 0() {
+     ~~~
+!!! error TS2304: Cannot find name 'get'.
+         ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS2304: Cannot find name '('.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name ')'.
+             ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS2304: Cannot find name '{'.
+            return this._0;
+         ~~~~~~
+!!! error TS1005: ',' expected.
+         ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                ~~~~
+!!! error TS1005: ',' expected.
+                ~~~~
+!!! error TS2304: Cannot find name 'this'.
+                    ~
+!!! error TS1005: ',' expected.
+                    ~
+!!! error TS2304: Cannot find name '.'.
+                     ~~
+!!! error TS1005: ',' expected.
+                     ~~
+!!! error TS2304: Cannot find name '_0'.
+                       ~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS2304: Cannot find name ';'.
+        },
+        set 0(x: number) {
+     ~~~
+!!! error TS2304: Cannot find name 'set'.
+         ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS1134: Variable declaration expected.
+                    ~
+!!! error TS1005: ',' expected.
+            this._0 = x;
+        },
+    }
+    object[0] **= object[0];
+    object[0] **= object[0] **= 2;
+    object[0] **= object[0] ** 2;

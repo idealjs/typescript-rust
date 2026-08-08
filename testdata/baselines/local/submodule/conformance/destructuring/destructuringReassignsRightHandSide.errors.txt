@@ -1,0 +1,13 @@
+error TS2451: Cannot redeclare block-scoped variable 'foo'.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'foo'.
+==== destructuringReassignsRightHandSide.ts (0 errors) ====
+    var foo: any = { foo: 1, bar: 2 };
+    var bar: any;
+    
+    // reassignment in destructuring pattern
+    ({ foo, bar } = foo);
+    
+    // reassignment in subsequent var
+    var { foo, baz } = foo;

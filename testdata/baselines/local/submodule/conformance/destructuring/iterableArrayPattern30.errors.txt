@@ -1,0 +1,7 @@
+iterableArrayPattern30.ts(1,34): error TS2304: Cannot find name 'Map'.
+
+
+==== iterableArrayPattern30.ts (1 errors) ====
+    const [[k1, v1], [k2, v2]] = new Map([["", true], ["hello", true]])
+                                     ~~~
+!!! error TS2304: Cannot find name 'Map'.

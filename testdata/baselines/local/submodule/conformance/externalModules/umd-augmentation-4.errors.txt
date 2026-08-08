@@ -1,0 +1,54 @@
+error TS6053: File 'node_modules/math2d/index.d.ts' not found.
+a.ts(3,13): error TS2304: Cannot find name 'Math2d'.
+a.ts(4,17): error TS2304: Cannot find name 'Math2d'.
+
+
+!!! error TS6053: File '/.src/node_modules/math2d/index.d.ts' not found.
+==== umd-augmentation-4.ts (0 errors) ====
+    
+==== index.d.ts (0 errors) ====
+    export as namespace Math2d;
+    
+    export = M2D;
+    
+    declare namespace M2D {
+    	interface Point {
+    		x: number;
+    		y: number;
+    	}
+    
+    	class Vector implements Point {
+    		x: number;
+    		y: number;
+    		constructor(x: number, y: number);
+    
+    		translate(dx: number, dy: number): Vector;
+    	}
+    
+    	function getLength(p: Vector): number;
+    
+    }
+    
+    
+==== math2d-augment.d.ts (0 errors) ====
+    import * as Math2d from 'math2d';
+    // Augment the module
+    declare module 'math2d' {
+    	// Add a method to the class
+    	interface Vector {
+    		reverse(): Math2d.Point;
+    	}
+    }
+    
+==== a.ts (2 errors) ====
+    /// <reference path="node_modules/math2d/index.d.ts" />
+    /// <reference path="math2d-augment.d.ts" />
+    let v = new Math2d.Vector(3, 2);
+                ~~~~~~
+!!! error TS2304: Cannot find name 'Math2d'.
+    let magnitude = Math2d.getLength(v);
+                    ~~~~~~
+!!! error TS2304: Cannot find name 'Math2d'.
+    let p: Math2d.Point = v.translate(5, 5);
+    p = v.reverse();
+    var t = p.x;

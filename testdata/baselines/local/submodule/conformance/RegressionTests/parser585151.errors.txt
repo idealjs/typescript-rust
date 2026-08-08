@@ -1,0 +1,9 @@
+parser585151.ts(2,7): error TS1005: ';' expected.
+
+
+==== parser585151.ts (1 errors) ====
+    class Foo2 {
+      var icecream = "chocolate";
+          ~~~~~~~~
+!!! error TS1005: ';' expected.
+    }

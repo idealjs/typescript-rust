@@ -1,0 +1,17 @@
+prototypePropertyAssignmentMergedTypeReference.js(5,3): error TS2339: Property 'prototype' does not exist on type '() => number'.
+
+
+==== prototypePropertyAssignmentMergedTypeReference.ts (0 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/33993
+==== prototypePropertyAssignmentMergedTypeReference.js (1 errors) ====
+    var f = function() {
+        return 12;
+    };
+    
+    f.prototype.a = "a";
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => number'.
+    
+    /** @type {new () => f} */
+    var x = f;
+    

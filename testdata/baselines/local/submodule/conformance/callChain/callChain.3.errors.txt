@@ -1,0 +1,31 @@
+callChain.3.ts(3,23): error TS2339: Property 'm' does not exist on type 'object | undefined'.
+callChain.3.ts(4,23): error TS2339: Property 'm' does not exist on type 'object | undefined'.
+callChain.3.ts(5,35): error TS2339: Property 'm' does not exist on type 'object | undefined'.
+callChain.3.ts(6,35): error TS2339: Property 'm' does not exist on type 'object | undefined'.
+callChain.3.ts(9,13): error TS2339: Property 'm' does not exist on type 'object | undefined'.
+callChain.3.ts(10,9): error TS2339: Property 'm' does not exist on type 'object'.
+
+
+==== callChain.3.ts (6 errors) ====
+    declare function absorb<T>(): T;
+    declare const a: { m?<T>(obj: {x: T}): T } | undefined;
+    const n1: number = a?.m?.({x: 12 }); // should be an error (`undefined` is not assignable to `number`)
+                          ~
+!!! error TS2339: Property 'm' does not exist on type 'object | undefined'.
+    const n2: number = a?.m?.({x: absorb()}); // likewise
+                          ~
+!!! error TS2339: Property 'm' does not exist on type 'object | undefined'.
+    const n3: number | undefined = a?.m?.({x: 12}); // should be ok
+                                      ~
+!!! error TS2339: Property 'm' does not exist on type 'object | undefined'.
+    const n4: number | undefined = a?.m?.({x: absorb()}); // likewise
+                                      ~
+!!! error TS2339: Property 'm' does not exist on type 'object | undefined'.
+    
+    // Also a test showing `!` vs `?` for good measure
+    let t1 = a?.m?.({x: 12});
+                ~
+!!! error TS2339: Property 'm' does not exist on type 'object | undefined'.
+    t1 = a!.m!({x: 12});
+            ~
+!!! error TS2339: Property 'm' does not exist on type 'object'.

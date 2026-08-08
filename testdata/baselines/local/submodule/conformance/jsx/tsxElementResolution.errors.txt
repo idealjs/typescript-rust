@@ -1,0 +1,44 @@
+tsxElementResolution.tsx(17,9): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxElementResolution.tsx(17,9): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxElementResolution.tsx(18,9): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxElementResolution.tsx(18,9): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxElementResolution.tsx(22,9): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxElementResolution.tsx(23,9): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+
+
+==== tsxElementResolution.tsx (6 errors) ====
+    declare namespace JSX {
+    	interface IntrinsicElements {
+    		foundFirst: { x: string };
+    		'string_named';
+    		'var';
+    	}
+    }
+    
+    class foundFirst { }
+    class Other {}
+    
+    namespace Dotted {
+    	export class Name { }
+    }
+    
+    // Should find the intrinsic element, not the class element
+    var a = <foundFirst  x="hello" />;
+            ~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+            ~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    var b = <string_named />;
+            ~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+            ~~~~~~~~~~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    // TODO: This should not be a parse error (should
+    //        parse a property name here, not identifier)
+    // var c = <var />;
+    var d = <Other />;
+            ~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    var e = <Dotted.Name />;
+            ~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.

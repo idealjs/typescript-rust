@@ -1,0 +1,66 @@
+other.js(5,5): error TS18048: 'one' is possibly 'undefined'.
+other.js(10,5): error TS18048: 'two' is possibly 'undefined'.
+prototypePropertyAssignmentMergeAcrossFiles2.js(2,4): error TS2339: Property 'One' does not exist on type 'object'.
+prototypePropertyAssignmentMergeAcrossFiles2.js(3,4): error TS2339: Property 'Two' does not exist on type 'object'.
+prototypePropertyAssignmentMergeAcrossFiles2.js(5,4): error TS2339: Property 'One' does not exist on type 'object'.
+prototypePropertyAssignmentMergeAcrossFiles2.js(6,3): error TS2304: Cannot find name 'ok'.
+prototypePropertyAssignmentMergeAcrossFiles2.js(6,5): error TS1005: ',' expected.
+prototypePropertyAssignmentMergeAcrossFiles2.js(6,5): error TS2304: Cannot find name '('.
+prototypePropertyAssignmentMergeAcrossFiles2.js(6,6): error TS1005: ',' expected.
+prototypePropertyAssignmentMergeAcrossFiles2.js(6,6): error TS2304: Cannot find name ')'.
+prototypePropertyAssignmentMergeAcrossFiles2.js(6,8): error TS1005: ',' expected.
+prototypePropertyAssignmentMergeAcrossFiles2.js(6,8): error TS2304: Cannot find name '{'.
+prototypePropertyAssignmentMergeAcrossFiles2.js(7,1): error TS1012: Unexpected token.
+prototypePropertyAssignmentMergeAcrossFiles2.js(8,4): error TS2339: Property 'Two' does not exist on type 'object'.
+
+
+==== prototypePropertyAssignmentMergeAcrossFiles2.js (12 errors) ====
+    var Ns = {}
+    Ns.One = function() {};
+       ~~~
+!!! error TS2339: Property 'One' does not exist on type 'object'.
+    Ns.Two = function() {};
+       ~~~
+!!! error TS2339: Property 'Two' does not exist on type 'object'.
+    
+    Ns.One.prototype = {
+       ~~~
+!!! error TS2339: Property 'One' does not exist on type 'object'.
+      ok() {},
+      ~~
+!!! error TS2304: Cannot find name 'ok'.
+        ~
+!!! error TS1005: ',' expected.
+        ~
+!!! error TS2304: Cannot find name '('.
+         ~
+!!! error TS1005: ',' expected.
+         ~
+!!! error TS2304: Cannot find name ')'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '{'.
+    };
+    ~
+!!! error TS1012: Unexpected token.
+    Ns.Two.prototype = {
+       ~~~
+!!! error TS2339: Property 'Two' does not exist on type 'object'.
+    }
+    
+==== other.js (2 errors) ====
+    /**
+     * @type {Ns.One}
+     */
+    var one = undefined;
+    one.wat;
+        ~~~
+!!! error TS18048: 'one' is possibly 'undefined'.
+    /**
+     * @type {Ns.Two}
+     */
+    var two = undefined;
+    two.wat;
+        ~~~
+!!! error TS18048: 'two' is possibly 'undefined'.

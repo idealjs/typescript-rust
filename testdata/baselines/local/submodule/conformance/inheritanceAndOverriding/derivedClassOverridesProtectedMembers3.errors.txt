@@ -1,24 +1,24 @@
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(7,9): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(8,9): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(13,16): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(14,16): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(24,32): error TS2349: This expression is not callable.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(29,32): error TS2349: This expression is not callable.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(33,19): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(34,32): error TS2349: This expression is not callable.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(38,19): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(39,32): error TS2349: This expression is not callable.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(44,32): error TS2349: This expression is not callable.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(49,32): error TS2349: This expression is not callable.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(54,32): error TS2349: This expression is not callable.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(58,26): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(59,32): error TS2349: This expression is not callable.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(63,26): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(64,32): error TS2349: This expression is not callable.
-inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(69,32): error TS2349: This expression is not callable.
+derivedClassOverridesProtectedMembers3.ts(7,9): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers3.ts(8,9): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers3.ts(13,16): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers3.ts(14,16): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers3.ts(24,32): error TS2349: This expression is not callable.
+derivedClassOverridesProtectedMembers3.ts(29,32): error TS2349: This expression is not callable.
+derivedClassOverridesProtectedMembers3.ts(33,19): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers3.ts(34,32): error TS2349: This expression is not callable.
+derivedClassOverridesProtectedMembers3.ts(38,19): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers3.ts(39,32): error TS2349: This expression is not callable.
+derivedClassOverridesProtectedMembers3.ts(44,32): error TS2349: This expression is not callable.
+derivedClassOverridesProtectedMembers3.ts(49,32): error TS2349: This expression is not callable.
+derivedClassOverridesProtectedMembers3.ts(54,32): error TS2349: This expression is not callable.
+derivedClassOverridesProtectedMembers3.ts(58,26): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers3.ts(59,32): error TS2349: This expression is not callable.
+derivedClassOverridesProtectedMembers3.ts(63,26): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers3.ts(64,32): error TS2349: This expression is not callable.
+derivedClassOverridesProtectedMembers3.ts(69,32): error TS2349: This expression is not callable.
 
 
-==== inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts (18 errors) ====
+==== derivedClassOverridesProtectedMembers3.ts (18 errors) ====
     var x: { foo: string; }
     var y: { foo: string; bar: string; }
     

@@ -1,0 +1,167 @@
+newWithSpreadES5.ts(34,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(35,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(36,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(39,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(40,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(43,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(44,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(45,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(48,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(49,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(50,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(53,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(54,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(55,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(58,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(59,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(60,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(63,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(64,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(65,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(93,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(94,5): error TS2351: This expression is not constructable.
+newWithSpreadES5.ts(95,5): error TS2351: This expression is not constructable.
+
+
+==== newWithSpreadES5.ts (23 errors) ====
+    function f(x: number, y: number, ...z: string[]) {
+    }
+    
+    function f2(...x: string[]) {}
+    
+    interface A {
+        f: {
+            new (x: number, y: number, ...z: string[]);
+        }
+    }
+    
+    class B {
+        constructor(x: number, y: number, ...z: string[]) {}
+    }
+    
+    interface C {
+        "a-b": typeof B;
+    }
+    
+    interface D {
+        1: typeof B;
+    }
+    
+    var a: string[];
+    var b: A;
+    var c: C;
+    var d: A[];
+    var e: { [key: string]: A };
+    var g: C[];
+    var h: { [key: string]: C };
+    var i: C[][];
+    
+    // Basic expression
+    new f(1, 2, "string");
+        ~
+!!! error TS2351: This expression is not constructable.
+    new f(1, 2, ...a);
+        ~
+!!! error TS2351: This expression is not constructable.
+    new f(1, 2, ...a, "string");
+        ~
+!!! error TS2351: This expression is not constructable.
+    
+    // Multiple spreads arguments
+    new f2(...a, ...a);
+        ~~
+!!! error TS2351: This expression is not constructable.
+    new f(1 ,2, ...a, ...a);
+        ~
+!!! error TS2351: This expression is not constructable.
+    
+    // Call expression
+    new f(1, 2, "string")();
+        ~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new f(1, 2, ...a)();
+        ~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new f(1, 2, ...a, "string")();
+        ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    // Property access expression
+    new b.f(1, 2, "string");
+        ~~~
+!!! error TS2351: This expression is not constructable.
+    new b.f(1, 2, ...a);
+        ~~~
+!!! error TS2351: This expression is not constructable.
+    new b.f(1, 2, ...a, "string"); 
+        ~~~
+!!! error TS2351: This expression is not constructable.
+    
+    // Parenthesised expression
+    new (b.f)(1, 2, "string");
+        ~~~~~
+!!! error TS2351: This expression is not constructable.
+    new (b.f)(1, 2, ...a);
+        ~~~~~
+!!! error TS2351: This expression is not constructable.
+    new (b.f)(1, 2, ...a, "string"); 
+        ~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    // Element access expression
+    new d[1].f(1, 2, "string");
+        ~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new d[1].f(1, 2, ...a);
+        ~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new d[1].f(1, 2, ...a, "string");
+        ~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    // Element access expression with a punctuated key
+    new e["a-b"].f(1, 2, "string");
+        ~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new e["a-b"].f(1, 2, ...a);
+        ~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new e["a-b"].f(1, 2, ...a, "string");
+        ~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    // Basic expression
+    new B(1, 2, "string");
+    new B(1, 2, ...a);
+    new B(1, 2, ...a, "string");
+    
+    // Property access expression
+    new c["a-b"](1, 2, "string");
+    new c["a-b"](1, 2, ...a);
+    new c["a-b"](1, 2, ...a, "string");
+    
+    // Parenthesised expression
+    new (c["a-b"])(1, 2, "string");
+    new (c["a-b"])(1, 2, ...a);
+    new (c["a-b"])(1, 2, ...a, "string");
+    
+    // Element access expression
+    new g[1]["a-b"](1, 2, "string");
+    new g[1]["a-b"](1, 2, ...a);
+    new g[1]["a-b"](1, 2, ...a, "string");
+    
+    // Element access expression with a punctuated key
+    new h["a-b"]["a-b"](1, 2, "string");
+    new h["a-b"]["a-b"](1, 2, ...a);
+    new h["a-b"]["a-b"](1, 2, ...a, "string");
+    
+    // Element access expression with a number
+    new i["a-b"][1](1, 2, "string");
+        ~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new i["a-b"][1](1, 2, ...a);
+        ~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    new i["a-b"][1](1, 2, ...a, "string");
+        ~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.

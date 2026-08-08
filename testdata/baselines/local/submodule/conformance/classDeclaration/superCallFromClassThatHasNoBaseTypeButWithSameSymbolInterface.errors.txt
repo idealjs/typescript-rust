@@ -1,0 +1,15 @@
+error TS2300: Duplicate identifier 'Foo'.
+superCallFromClassThatHasNoBaseTypeButWithSameSymbolInterface.ts(5,9): error TS2349: This expression is not callable.
+
+
+!!! error TS2300: Duplicate identifier 'Foo'.
+==== superCallFromClassThatHasNoBaseTypeButWithSameSymbolInterface.ts (1 errors) ====
+    interface Foo extends Array<number> {}
+    
+    class Foo {
+        constructor() {
+            super(); // error
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }

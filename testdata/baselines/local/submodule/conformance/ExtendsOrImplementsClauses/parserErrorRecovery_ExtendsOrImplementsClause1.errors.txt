@@ -1,0 +1,8 @@
+parserErrorRecovery_ExtendsOrImplementsClause1.ts(2,2): error TS1005: '{' expected.
+
+
+==== parserErrorRecovery_ExtendsOrImplementsClause1.ts (1 errors) ====
+    class C extends {
+    }
+     
+!!! error TS1005: '{' expected.

@@ -1,8 +1,8 @@
-asyncGenerators/asyncGeneratorParameterEvaluation.ts(7,11): error TS1003: Identifier expected.
-asyncGenerators/asyncGeneratorParameterEvaluation.ts(7,13): error TS1005: ';' expected.
+asyncGeneratorParameterEvaluation.ts(7,11): error TS1003: Identifier expected.
+asyncGeneratorParameterEvaluation.ts(7,13): error TS1005: ';' expected.
 
 
-==== asyncGenerators/asyncGeneratorParameterEvaluation.ts (2 errors) ====
+==== asyncGeneratorParameterEvaluation.ts (2 errors) ====
     // https://github.com/microsoft/TypeScript/issues/40410
     async function* f1(x, y = z) {}
     async function* f2({[z]: x}) {}

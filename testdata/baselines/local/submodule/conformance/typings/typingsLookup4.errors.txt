@@ -1,0 +1,47 @@
+/node_modules/@types/jquery/package.json(1,12): error TS1005: ';' expected.
+/node_modules/@types/kquery/package.json(1,12): error TS1005: ';' expected.
+/node_modules/@types/lquery/package.json(1,12): error TS1005: ';' expected.
+/node_modules/@types/mquery/package.json(1,12): error TS1005: ';' expected.
+
+
+==== typingsLookup4.ts (0 errors) ====
+    // A file extension is optional in typings entries.
+    
+==== /node_modules/@types/jquery/package.json (1 errors) ====
+    { "typings": "jquery.d.ts" }
+               ~
+!!! error TS1005: ';' expected.
+    
+==== /node_modules/@types/jquery/jquery.d.ts (0 errors) ====
+    export const j: number;
+    
+==== /node_modules/@types/kquery/package.json (1 errors) ====
+    { "typings": "kquery" }
+               ~
+!!! error TS1005: ';' expected.
+    
+==== /node_modules/@types/kquery/kquery.d.ts (0 errors) ====
+    export const k: number;
+    
+==== /node_modules/@types/lquery/package.json (1 errors) ====
+    { "typings": "lquery" }
+               ~
+!!! error TS1005: ';' expected.
+    
+==== /node_modules/@types/lquery/lquery.ts (0 errors) ====
+    export const l = 2;
+    
+==== /node_modules/@types/mquery/package.json (1 errors) ====
+    { "typings": "mquery" }
+               ~
+!!! error TS1005: ';' expected.
+    
+==== /node_modules/@types/mquery/mquery/index.tsx (0 errors) ====
+    export const m = 3;
+    
+==== /a.ts (0 errors) ====
+    import { j } from "jquery";
+    import { k } from "kquery";
+    import { l } from "lquery";
+    import { m } from "mquery";
+    j + k + l + m;

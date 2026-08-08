@@ -1,0 +1,31 @@
+parserErrorRecovery_ClassElement3.ts(2,4): error TS1127: Invalid character.
+parserErrorRecovery_ClassElement3.ts(2,4): error TS1128: Declaration or statement expected.
+parserErrorRecovery_ClassElement3.ts(6,9): error TS2304: Cannot find name 'E'.
+parserErrorRecovery_ClassElement3.ts(6,11): error TS1005: ';' expected.
+parserErrorRecovery_ClassElement3.ts(7,4): error TS1127: Invalid character.
+parserErrorRecovery_ClassElement3.ts(7,4): error TS1128: Declaration or statement expected.
+parserErrorRecovery_ClassElement3.ts(7,5): error TS1005: '}' expected.
+
+
+==== parserErrorRecovery_ClassElement3.ts (7 errors) ====
+    namespace M {
+       ¬
+       ~
+!!! error TS1127: Invalid character.
+       ~
+!!! error TS1128: Declaration or statement expected.
+       class C {
+       }
+       @
+       enum E {
+            ~
+!!! error TS2304: Cannot find name 'E'.
+              ~
+!!! error TS1005: ';' expected.
+       ¬
+       ~
+!!! error TS1127: Invalid character.
+       ~
+!!! error TS1128: Declaration or statement expected.
+        
+!!! error TS1005: '}' expected.

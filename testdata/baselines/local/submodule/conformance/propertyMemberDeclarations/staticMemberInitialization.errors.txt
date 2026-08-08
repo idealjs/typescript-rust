@@ -1,0 +1,12 @@
+staticMemberInitialization.ts(6,11): error TS2339: Property 'x' does not exist on type 'object'.
+
+
+==== staticMemberInitialization.ts (1 errors) ====
+    class C {
+        static x = 1;
+    }
+    
+    var c = new C();
+    var r = C.x;
+              ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.

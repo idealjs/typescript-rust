@@ -1,0 +1,10 @@
+parserAssignmentExpression1.ts(1,2): error TS2304: Cannot find name 'foo'.
+parserAssignmentExpression1.ts(1,11): error TS2304: Cannot find name 'bar'.
+
+
+==== parserAssignmentExpression1.ts (2 errors) ====
+    (foo()) = bar;
+     ~~~
+!!! error TS2304: Cannot find name 'foo'.
+              ~~~
+!!! error TS2304: Cannot find name 'bar'.

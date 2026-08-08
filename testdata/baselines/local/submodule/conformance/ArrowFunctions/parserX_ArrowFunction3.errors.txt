@@ -1,0 +1,15 @@
+parserX_ArrowFunction3.ts(1,14): error TS1003: Identifier expected.
+parserX_ArrowFunction3.ts(1,14): error TS2304: Cannot find name '=>'.
+parserX_ArrowFunction3.ts(1,17): error TS1005: '=>' expected.
+
+
+==== parserX_ArrowFunction3.ts (3 errors) ====
+    var v = (a): => {
+                 ~~
+!!! error TS1003: Identifier expected.
+                 ~~
+!!! error TS2304: Cannot find name '=>'.
+                    ~
+!!! error TS1005: '=>' expected.
+       
+    };

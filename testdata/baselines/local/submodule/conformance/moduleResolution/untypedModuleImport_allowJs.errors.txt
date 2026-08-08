@@ -1,0 +1,53 @@
+/node_modules/foo/index.js(1,1): error TS2304: Cannot find name 'exports'.
+/node_modules/foo/index.js(1,21): error TS2304: Cannot find name 'bar'.
+/node_modules/foo/index.js(1,24): error TS1005: ',' expected.
+/node_modules/foo/index.js(1,24): error TS2304: Cannot find name '('.
+/node_modules/foo/index.js(1,25): error TS1005: ',' expected.
+/node_modules/foo/index.js(1,25): error TS2304: Cannot find name ')'.
+/node_modules/foo/index.js(1,27): error TS1005: ',' expected.
+/node_modules/foo/index.js(1,27): error TS2304: Cannot find name '{'.
+/node_modules/foo/index.js(1,29): error TS1005: ',' expected.
+/node_modules/foo/index.js(1,29): error TS2304: Cannot find name 'return'.
+/node_modules/foo/index.js(1,36): error TS1005: ',' expected.
+/node_modules/foo/index.js(1,37): error TS1005: ',' expected.
+/node_modules/foo/index.js(1,37): error TS2304: Cannot find name ';'.
+/node_modules/foo/index.js(1,41): error TS1128: Declaration or statement expected.
+
+
+==== untypedModuleImport_allowJs.ts (0 errors) ====
+    // Same as untypedModuleImport.ts but with --allowJs, so the package will actually be typed.
+    
+==== /node_modules/foo/index.js (14 errors) ====
+    exports.default = { bar() { return 0; } }
+    ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+                        ~~~
+!!! error TS2304: Cannot find name 'bar'.
+                           ~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS2304: Cannot find name '('.
+                            ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS2304: Cannot find name ')'.
+                              ~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS2304: Cannot find name '{'.
+                                ~~~~~~
+!!! error TS1005: ',' expected.
+                                ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                                       ~
+!!! error TS1005: ',' expected.
+                                        ~
+!!! error TS1005: ',' expected.
+                                        ~
+!!! error TS2304: Cannot find name ';'.
+                                            ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== /a.ts (0 errors) ====
+    import foo from "foo";
+    foo.bar();

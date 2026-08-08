@@ -1,0 +1,13 @@
+taggedTemplateStringsWithTagNamedDeclare.ts(7,9): error TS1005: ';' expected.
+
+
+==== taggedTemplateStringsWithTagNamedDeclare.ts (1 errors) ====
+    ﻿// @target: es2015
+    
+    
+    function declare(x: any, ...ys: any[]) {
+    }
+    
+    declare `Hello ${0} world!`;
+         ~~~~~~~~~
+!!! error TS1005: ';' expected.

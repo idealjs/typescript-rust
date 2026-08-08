@@ -1,0 +1,71 @@
+discriminatedUnionTypes4.ts(19,13): error TS2304: Cannot find name 'Error'.
+discriminatedUnionTypes4.ts(28,11): error TS2345: Argument of type '{ type: `${error}`; meow: string } | { type: `${error}`; bark: string }' is not assignable to parameter of type 'never'.
+discriminatedUnionTypes4.ts(41,7): error TS2349: This expression is not callable.
+discriminatedUnionTypes4.ts(54,7): error TS2349: This expression is not callable.
+
+
+==== discriminatedUnionTypes4.ts (4 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/61207
+    
+    enum AnimalType {
+      cat = "cat",
+      dog = "dog",
+    }
+    
+    type Animal =
+      | {
+          type: `${AnimalType.cat}`;
+          meow: string;
+        }
+      | {
+          type: `${AnimalType.dog}`;
+          bark: string;
+        };
+    
+    function check(p: never) {
+      throw new Error("Error!");
+                ~~~~~
+!!! error TS2304: Cannot find name 'Error'.
+    }
+    
+    function action1(animal: Animal) {
+      if (animal.type === AnimalType.cat) {
+        console.log(animal.meow);
+      } else if (animal.type === AnimalType.dog) {
+        console.log(animal.bark);
+      } else {
+        check(animal);
+              ~~~~~~
+!!! error TS2345: Argument of type '{ type: `${error}`; meow: string } | { type: `${error}`; bark: string }' is not assignable to parameter of type 'never'.
+      }
+    }
+    
+    function action2(animal: Animal) {
+      switch (animal.type) {
+        case `${AnimalType.cat}`:
+          console.log(animal.meow);
+          break;
+        case `${AnimalType.dog}`:
+          console.log(animal.bark);
+          break;
+        default:
+          check(animal);
+          ~~~~~
+!!! error TS2349: This expression is not callable.
+      }
+    }
+    
+    function action3(animal: Animal) {
+      switch (animal.type) {
+        case AnimalType.cat:
+          console.log(animal.meow);
+          break;
+        case AnimalType.dog:
+          console.log(animal.bark);
+          break;
+        default:
+          check(animal);
+          ~~~~~
+!!! error TS2349: This expression is not callable.
+      }
+    }

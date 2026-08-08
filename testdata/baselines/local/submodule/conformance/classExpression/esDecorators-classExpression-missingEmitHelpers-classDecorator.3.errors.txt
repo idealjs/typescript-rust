@@ -1,0 +1,22 @@
+main.ts(4,17): error TS1012: Unexpected token.
+main.ts(4,18): error TS1005: ')' expected.
+main.ts(4,22): error TS1005: ';' expected.
+main.ts(4,30): error TS1128: Declaration or statement expected.
+
+
+==== main.ts (4 errors) ====
+    declare var dec: any;
+    
+    // uses __esDecorate, __runInitializers, __setFunctionName
+    export default (@dec class {});
+                    ~
+!!! error TS1012: Unexpected token.
+                     ~~~
+!!! error TS1005: ')' expected.
+                         ~~~~~
+!!! error TS1005: ';' expected.
+                                 ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== tslib.d.ts (0 errors) ====
+    export {}

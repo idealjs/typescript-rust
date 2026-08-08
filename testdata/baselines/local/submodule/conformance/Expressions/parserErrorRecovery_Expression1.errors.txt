@@ -1,0 +1,10 @@
+parserErrorRecovery_Expression1.ts(1,10): error TS1012: Unexpected token.
+parserErrorRecovery_Expression1.ts(1,15): error TS1005: ')' expected.
+
+
+==== parserErrorRecovery_Expression1.ts (2 errors) ====
+    var v = ()({});
+             ~
+!!! error TS1012: Unexpected token.
+                  ~
+!!! error TS1005: ')' expected.

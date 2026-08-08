@@ -1,0 +1,29 @@
+usingDeclarationsDeclarationEmit.1.ts(1,30): error TS1005: ',' expected.
+usingDeclarationsDeclarationEmit.1.ts(1,30): error TS2304: Cannot find name '('.
+usingDeclarationsDeclarationEmit.1.ts(1,31): error TS1005: ',' expected.
+usingDeclarationsDeclarationEmit.1.ts(1,31): error TS2304: Cannot find name ')'.
+usingDeclarationsDeclarationEmit.1.ts(1,33): error TS1005: ',' expected.
+usingDeclarationsDeclarationEmit.1.ts(1,33): error TS2304: Cannot find name '{'.
+usingDeclarationsDeclarationEmit.1.ts(1,36): error TS1128: Declaration or statement expected.
+
+
+==== usingDeclarationsDeclarationEmit.1.ts (7 errors) ====
+    using r1 = { [Symbol.dispose]() {} };
+                                 ~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS2304: Cannot find name '('.
+                                  ~
+!!! error TS1005: ',' expected.
+                                  ~
+!!! error TS2304: Cannot find name ')'.
+                                    ~
+!!! error TS1005: ',' expected.
+                                    ~
+!!! error TS2304: Cannot find name '{'.
+                                       ~
+!!! error TS1128: Declaration or statement expected.
+    export { r1 };
+    
+    await using r2 = { async [Symbol.asyncDispose]() {} };
+    export { r2 };

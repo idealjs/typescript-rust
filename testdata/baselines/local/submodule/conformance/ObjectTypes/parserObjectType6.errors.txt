@@ -1,0 +1,10 @@
+parserObjectType6.ts(2,7): error TS2304: Cannot find name 'B'.
+
+
+==== parserObjectType6.ts (1 errors) ====
+    var v: {
+       a: B
+          ~
+!!! error TS2304: Cannot find name 'B'.
+       [];
+    };

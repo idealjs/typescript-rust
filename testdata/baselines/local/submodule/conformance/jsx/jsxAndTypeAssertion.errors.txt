@@ -1,0 +1,41 @@
+jsxAndTypeAssertion.tsx(6,13): error TS2304: Cannot find name 'test'.
+jsxAndTypeAssertion.tsx(6,17): error TS1005: '}' expected.
+jsxAndTypeAssertion.tsx(10,32): error TS1005: '}' expected.
+jsxAndTypeAssertion.tsx(12,36): error TS1005: '}' expected.
+jsxAndTypeAssertion.tsx(14,45): error TS1005: '}' expected.
+jsxAndTypeAssertion.tsx(20,5): error TS1005: ':' expected.
+
+
+==== jsxAndTypeAssertion.tsx (6 errors) ====
+    declare var createElement: any;
+    
+    class foo {}
+    
+    var x: any;
+    x = <any> { test: <any></any> };
+                ~~~~
+!!! error TS2304: Cannot find name 'test'.
+                    ~
+!!! error TS1005: '}' expected.
+    
+    x = <any><any></any>;
+     
+    x = <foo>hello {<foo>{}} </foo>;
+                                   ~
+!!! error TS1005: '}' expected.
+    
+    x = <foo test={<foo>{}}>hello</foo>;
+                                       ~
+!!! error TS1005: '}' expected.
+    
+    x = <foo test={<foo>{}}>hello{<foo>{}}</foo>;
+                                                ~
+!!! error TS1005: '}' expected.
+    
+    x = <foo>x</foo>, x = <foo/>;
+    
+    <foo>{<foo><foo>{/foo/.test(x) ? <foo><foo></foo> : <foo><foo></foo>}</foo>}</foo>
+    
+        
+        
+!!! error TS1005: ':' expected.

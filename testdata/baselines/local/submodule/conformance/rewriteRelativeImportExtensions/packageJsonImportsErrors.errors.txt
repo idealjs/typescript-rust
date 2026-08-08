@@ -1,0 +1,60 @@
+/package.json(2,9): error TS1005: ';' expected.
+/package.json(3,9): error TS1005: ';' expected.
+/package.json(4,12): error TS1005: ';' expected.
+/package.json(5,14): error TS1005: ';' expected.
+/package.json(6,18): error TS1005: ';' expected.
+/package.json(7,4): error TS1128: Declaration or statement expected.
+/package.json(8,12): error TS1005: ';' expected.
+/package.json(9,13): error TS1005: ';' expected.
+/package.json(10,15): error TS1005: ';' expected.
+/package.json(11,16): error TS1005: ';' expected.
+
+
+==== packageJsonImportsErrors.ts (0 errors) ====
+    
+==== /package.json (10 errors) ====
+    {
+      "name": "pkg",
+            ~
+!!! error TS1005: ';' expected.
+      "type": "module",
+            ~
+!!! error TS1005: ';' expected.
+      "imports": {
+               ~
+!!! error TS1005: ';' expected.
+        "#foo.ts": "./foo.ts",
+                 ~
+!!! error TS1005: ';' expected.
+        "#internal/*": "./internal/*"
+                     ~
+!!! error TS1005: ';' expected.
+      },
+       ~
+!!! error TS1128: Declaration or statement expected.
+      "exports": {
+               ~
+!!! error TS1005: ';' expected.
+        "./*.ts": {
+                ~
+!!! error TS1005: ';' expected.
+          "source": "./*.ts",
+                  ~
+!!! error TS1005: ';' expected.
+          "default": "./*.js"
+                   ~
+!!! error TS1005: ';' expected.
+        }
+      }
+    }
+    
+==== /foo.ts (0 errors) ====
+    export {};
+    
+==== /internal/foo.ts (0 errors) ====
+    export {};
+    
+==== /index.ts (0 errors) ====
+    import {} from "#foo.ts"; // Ok
+    import {} from "#internal/foo.ts"; // Error
+    import {} from "pkg/foo.ts"; // Ok

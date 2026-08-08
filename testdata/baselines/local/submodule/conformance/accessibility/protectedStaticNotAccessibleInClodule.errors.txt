@@ -1,8 +1,8 @@
-accessibility/protectedStaticNotAccessibleInClodule.ts(9,22): error TS2339: Property 'foo' does not exist on type 'C'.
-accessibility/protectedStaticNotAccessibleInClodule.ts(10,22): error TS2339: Property 'bar' does not exist on type 'C'.
+protectedStaticNotAccessibleInClodule.ts(9,22): error TS2339: Property 'foo' does not exist on type 'C'.
+protectedStaticNotAccessibleInClodule.ts(10,22): error TS2339: Property 'bar' does not exist on type 'C'.
 
 
-==== accessibility/protectedStaticNotAccessibleInClodule.ts (2 errors) ====
+==== protectedStaticNotAccessibleInClodule.ts (2 errors) ====
     // Any attempt to access a private property member outside the class body that contains its declaration results in a compile-time error.
     
     class C {

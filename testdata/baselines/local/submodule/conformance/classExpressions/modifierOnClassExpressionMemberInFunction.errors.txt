@@ -1,7 +1,7 @@
-classExpressions/modifierOnClassExpressionMemberInFunction.ts(4,19): error TS2304: Cannot find name 'C'.
+modifierOnClassExpressionMemberInFunction.ts(4,19): error TS2304: Cannot find name 'C'.
 
 
-==== classExpressions/modifierOnClassExpressionMemberInFunction.ts (1 errors) ====
+==== modifierOnClassExpressionMemberInFunction.ts (1 errors) ====
     ﻿// @target: es2015
     
     function g() {

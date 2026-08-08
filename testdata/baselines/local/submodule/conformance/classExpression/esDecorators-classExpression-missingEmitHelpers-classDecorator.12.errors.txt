@@ -1,0 +1,26 @@
+main.ts(5,16): error TS1012: Unexpected token.
+main.ts(5,17): error TS1005: ',' expected.
+main.ts(5,17): error TS1016: A required parameter cannot follow an optional parameter.
+main.ts(5,21): error TS1005: ',' expected.
+main.ts(5,27): error TS1005: ',' expected.
+
+
+==== main.ts (5 errors) ====
+    export {};
+    declare var dec: any;
+    
+    // uses __esDecorate, __runInitializers, __setFunctionName
+    function f(C = @dec class {}) {}
+                   ~
+!!! error TS1012: Unexpected token.
+                    ~~~
+!!! error TS1005: ',' expected.
+                    ~~~
+!!! error TS1016: A required parameter cannot follow an optional parameter.
+                        ~~~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1005: ',' expected.
+    
+==== tslib.d.ts (0 errors) ====
+    export {}

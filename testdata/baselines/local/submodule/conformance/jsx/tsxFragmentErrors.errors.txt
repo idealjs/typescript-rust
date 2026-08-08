@@ -1,0 +1,26 @@
+file.tsx(9,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(9,7): error TS1005: '>' expected.
+file.tsx(11,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(11,17): error TS1005: '</' expected.
+
+
+==== file.tsx (4 errors) ====
+    declare namespace JSX {
+    	interface Element { }
+    	interface IntrinsicElements {
+    		[s: string]: any;
+    	}
+    }
+    declare var React: any;
+    
+    <>hi</div> // Error
+    ~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+          ~~~
+!!! error TS1005: '>' expected.
+    
+    <>eof   // Error
+    ~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+                    
+!!! error TS1005: '</' expected.

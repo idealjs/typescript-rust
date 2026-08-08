@@ -1,0 +1,31 @@
+index.js(5,3): error TS2339: Property 'prototype' does not exist on type '() => void'.
+index.js(6,15): error TS2351: This expression is not constructable.
+other.js(2,7): error TS1003: Identifier expected.
+other.js(2,8): error TS1005: ';' expected.
+
+
+==== node.d.ts (0 errors) ====
+    declare function require(id: string): any;
+    declare var module: any, exports: any;
+    
+==== index.js (2 errors) ====
+    const A = require("./other");
+    const a = new A().id;
+    
+    const B = function() { this.id = 1; }
+    B.prototype.m = function() { this.x = 2; }
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+    const b = new B();
+                  ~
+!!! error TS2351: This expression is not constructable.
+    b.id;
+    b.x;
+    
+==== other.js (2 errors) ====
+    function A() { this.id = 1; }
+    module.exports = A;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.

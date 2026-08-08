@@ -1,0 +1,148 @@
+propertyAccessOnTypeParameterWithConstraints.ts(4,19): error TS2304: Cannot find name 'Date'.
+propertyAccessOnTypeParameterWithConstraints.ts(17,10): error TS2304: Cannot find name 'Date'.
+propertyAccessOnTypeParameterWithConstraints.ts(24,10): error TS2349: This expression is not callable.
+propertyAccessOnTypeParameterWithConstraints.ts(25,11): error TS2349: This expression is not callable.
+propertyAccessOnTypeParameterWithConstraints.ts(28,11): error TS2304: Cannot find name 'T'.
+propertyAccessOnTypeParameterWithConstraints.ts(28,21): error TS2304: Cannot find name 'Date'.
+propertyAccessOnTypeParameterWithConstraints.ts(28,25): error TS1005: '?' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(28,26): error TS1005: ':' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(30,18): error TS1003: Identifier expected.
+propertyAccessOnTypeParameterWithConstraints.ts(30,21): error TS1003: Identifier expected.
+propertyAccessOnTypeParameterWithConstraints.ts(32,1): error TS1005: '>' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(34,1): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(34,1): error TS2304: Cannot find name 'var'.
+propertyAccessOnTypeParameterWithConstraints.ts(34,5): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(34,5): error TS2304: Cannot find name 'r4'.
+propertyAccessOnTypeParameterWithConstraints.ts(34,8): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(34,8): error TS2304: Cannot find name '='.
+propertyAccessOnTypeParameterWithConstraints.ts(34,10): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(34,11): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(34,11): error TS2304: Cannot find name '.'.
+propertyAccessOnTypeParameterWithConstraints.ts(34,12): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(34,12): error TS2304: Cannot find name 'foo'.
+propertyAccessOnTypeParameterWithConstraints.ts(34,15): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(34,15): error TS2304: Cannot find name '('.
+propertyAccessOnTypeParameterWithConstraints.ts(34,16): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(34,16): error TS2304: Cannot find name 'new'.
+propertyAccessOnTypeParameterWithConstraints.ts(34,20): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(34,20): error TS2304: Cannot find name 'Date'.
+propertyAccessOnTypeParameterWithConstraints.ts(34,24): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(34,24): error TS2304: Cannot find name '('.
+propertyAccessOnTypeParameterWithConstraints.ts(34,25): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(34,25): error TS2304: Cannot find name ')'.
+propertyAccessOnTypeParameterWithConstraints.ts(34,26): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(34,26): error TS2304: Cannot find name ')'.
+propertyAccessOnTypeParameterWithConstraints.ts(34,27): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints.ts(34,27): error TS2304: Cannot find name ';'.
+propertyAccessOnTypeParameterWithConstraints.ts(34,28): error TS1005: '}' expected.
+
+
+==== propertyAccessOnTypeParameterWithConstraints.ts (37 errors) ====
+    // generic types should behave as if they have properties of their constraint type
+    // no errors expected 
+    
+    class C<T extends Date> {
+                      ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        f() {
+            var x: T;
+            var a = x['getDate'](); // number
+            return a + x.getDate();
+        }
+    }
+    
+    var r = (new C<Date>()).f();
+    
+    interface I<T extends Date> {
+        foo: T;
+    }
+    var i: I<Date>;
+             ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    var r2 = i.foo.getDate();
+    var r2b = i.foo['getDate']();
+    
+    var a: {
+        <T extends Date>(): T;
+    }
+    var r3 = a<Date>().getDate();
+             ~
+!!! error TS2349: This expression is not callable.
+    var r3b = a()['getDate']();
+              ~
+!!! error TS2349: This expression is not callable.
+    
+    var b = {
+        foo: <T extends Date>(x: T) => {
+              ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+                            ~
+!!! error TS1005: '?' expected.
+                             ~
+!!! error TS1005: ':' expected.
+            var a = x['getDate'](); // number
+            return a + x.getDate();
+                     ~
+!!! error TS1003: Identifier expected.
+                        ~
+!!! error TS1003: Identifier expected.
+        }
+    }
+    ~
+!!! error TS1005: '>' expected.
+    
+    var r4 = b.foo(new Date());
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+        ~~
+!!! error TS2304: Cannot find name 'r4'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '='.
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS2304: Cannot find name '.'.
+               ~~~
+!!! error TS1005: ',' expected.
+               ~~~
+!!! error TS2304: Cannot find name 'foo'.
+                  ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS2304: Cannot find name '('.
+                   ~~~
+!!! error TS1005: ',' expected.
+                   ~~~
+!!! error TS2304: Cannot find name 'new'.
+                       ~~~~
+!!! error TS1005: ',' expected.
+                       ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+                           ~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS2304: Cannot find name '('.
+                            ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS2304: Cannot find name ')'.
+                             ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS2304: Cannot find name ')'.
+                              ~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS2304: Cannot find name ';'.
+                               
+!!! error TS1005: '}' expected.

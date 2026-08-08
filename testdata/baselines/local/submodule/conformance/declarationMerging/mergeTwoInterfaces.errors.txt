@@ -1,8 +1,8 @@
-declarationMerging/mergeTwoInterfaces.ts(41,16): error TS2339: Property 'foo' does not exist on type '{ bar: number }'.
-declarationMerging/mergeTwoInterfaces.ts(54,16): error TS2339: Property 'foo' does not exist on type '{ bar: string }'.
+mergeTwoInterfaces.ts(41,16): error TS2339: Property 'foo' does not exist on type '{ bar: number }'.
+mergeTwoInterfaces.ts(54,16): error TS2339: Property 'foo' does not exist on type '{ bar: string }'.
 
 
-==== declarationMerging/mergeTwoInterfaces.ts (2 errors) ====
+==== mergeTwoInterfaces.ts (2 errors) ====
     // two interfaces with the same root module should merge
     
     // basic case

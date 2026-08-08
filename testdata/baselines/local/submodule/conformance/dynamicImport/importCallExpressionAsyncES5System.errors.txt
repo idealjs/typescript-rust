@@ -1,0 +1,45 @@
+test.ts(2,23): error TS2304: Cannot find name 'import'.
+test.ts(7,27): error TS2304: Cannot find name 'import'.
+test.ts(13,27): error TS2304: Cannot find name 'import'.
+test.ts(20,31): error TS2304: Cannot find name 'import'.
+test.ts(26,23): error TS2304: Cannot find name 'import'.
+
+
+==== test.ts (5 errors) ====
+    export async function fn() {
+        const req = await import('./test') // ONE
+                          ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    }
+    
+    export class cl1 {
+        public async m() {
+            const req = await import('./test') // TWO
+                              ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+        }
+    }
+    
+    export const obj = {
+        m: async () => {
+            const req = await import('./test') // THREE
+                              ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+        }
+    }
+    
+    export class cl2 {
+        public p = {
+            m: async () => {
+                const req = await import('./test') // FOUR
+                                  ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+            }
+        }
+    }
+    
+    export const l = async () => {
+        const req = await import('./test') // FIVE
+                          ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    }

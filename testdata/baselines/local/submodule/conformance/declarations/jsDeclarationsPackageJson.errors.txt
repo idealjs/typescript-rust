@@ -1,0 +1,131 @@
+index.js(1,11): error TS2304: Cannot find name 'require'.
+index.js(2,7): error TS1003: Identifier expected.
+index.js(2,8): error TS1005: ';' expected.
+index.js(2,8): error TS2304: Cannot find name 'exports'.
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+package.json(4,18): error TS1005: ';' expected.
+package.json(5,11): error TS1005: ';' expected.
+package.json(6,10): error TS1005: ';' expected.
+package.json(7,12): error TS1005: ';' expected.
+package.json(8,5): error TS1012: Unexpected token.
+package.json(9,14): error TS1005: ';' expected.
+package.json(10,13): error TS1005: ';' expected.
+package.json(11,6): error TS1128: Declaration or statement expected.
+package.json(12,14): error TS1005: ';' expected.
+package.json(13,19): error TS1005: ';' expected.
+package.json(14,5): error TS1012: Unexpected token.
+package.json(15,22): error TS1005: ';' expected.
+package.json(16,16): error TS1005: ';' expected.
+package.json(17,5): error TS1012: Unexpected token.
+package.json(18,19): error TS1005: ';' expected.
+package.json(19,12): error TS1005: ';' expected.
+package.json(20,5): error TS1012: Unexpected token.
+package.json(21,17): error TS1005: ';' expected.
+package.json(22,15): error TS1005: ';' expected.
+package.json(25,13): error TS1005: ';' expected.
+package.json(26,14): error TS1005: ';' expected.
+package.json(27,15): error TS1005: ';' expected.
+package.json(28,13): error TS1005: ';' expected.
+package.json(29,10): error TS1005: ';' expected.
+package.json(32,3): error TS1005: '}' expected.
+
+
+==== index.js (4 errors) ====
+    const j = require("./package.json");
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    module.exports = j;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+==== package.json (27 errors) ====
+    {
+        "name": "pkg",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "0.1.0",
+                 ~
+!!! error TS1005: ';' expected.
+        "description": "A package",
+                     ~
+!!! error TS1005: ';' expected.
+        "main": "./dist/index.js",
+              ~
+!!! error TS1005: ';' expected.
+        "bin": {
+             ~
+!!! error TS1005: ';' expected.
+          "cli": "./bin/cli.js",
+               ~
+!!! error TS1005: ';' expected.
+        },
+        ~
+!!! error TS1012: Unexpected token.
+        "engines": {
+                 ~
+!!! error TS1005: ';' expected.
+          "node": ">=0"
+                ~
+!!! error TS1005: ';' expected.
+        },
+         ~
+!!! error TS1128: Declaration or statement expected.
+        "scripts": {
+                 ~
+!!! error TS1005: ';' expected.
+          "scriptname": "run && run again",
+                      ~
+!!! error TS1005: ';' expected.
+        },
+        ~
+!!! error TS1012: Unexpected token.
+        "devDependencies": {
+                         ~
+!!! error TS1005: ';' expected.
+          "@ns/dep": "0.1.2",
+                   ~
+!!! error TS1005: ';' expected.
+        },
+        ~
+!!! error TS1012: Unexpected token.
+        "dependencies": {
+                      ~
+!!! error TS1005: ';' expected.
+          "dep": "1.2.3",
+               ~
+!!! error TS1005: ';' expected.
+        },
+        ~
+!!! error TS1012: Unexpected token.
+        "repository": "microsoft/TypeScript",
+                    ~
+!!! error TS1005: ';' expected.
+        "keywords": [
+                  ~
+!!! error TS1005: ';' expected.
+          "kw"
+        ],
+        "author": "Auth",
+                ~
+!!! error TS1005: ';' expected.
+        "license": "See Licensce",
+                 ~
+!!! error TS1005: ';' expected.
+        "homepage": "https://site",
+                  ~
+!!! error TS1005: ';' expected.
+        "config": {
+                ~
+!!! error TS1005: ';' expected.
+          "o": ["a"]
+             ~
+!!! error TS1005: ';' expected.
+        }
+    }
+      
+      
+!!! error TS1005: '}' expected.

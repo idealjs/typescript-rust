@@ -1,0 +1,204 @@
+strictBindCallApply1.ts(8,15): error TS2339: Property 'bind' does not exist on type '(a: number, b: string) => string'.
+strictBindCallApply1.ts(9,15): error TS2339: Property 'bind' does not exist on type '(a: number, b: string) => string'.
+strictBindCallApply1.ts(10,15): error TS2339: Property 'bind' does not exist on type '(a: number, b: string) => string'.
+strictBindCallApply1.ts(11,15): error TS2339: Property 'bind' does not exist on type '(a: number, b: string) => string'.
+strictBindCallApply1.ts(13,22): error TS2339: Property 'bind' does not exist on type '(s: string) => number'.
+strictBindCallApply1.ts(14,19): error TS2339: Property 'bind' does not exist on type '(x: T) => T'.
+strictBindCallApply1.ts(16,15): error TS2339: Property 'call' does not exist on type '(a: number, b: string) => string'.
+strictBindCallApply1.ts(17,15): error TS2339: Property 'call' does not exist on type '(a: number, b: string) => string'.
+strictBindCallApply1.ts(18,15): error TS2339: Property 'call' does not exist on type '(a: number, b: string) => string'.
+strictBindCallApply1.ts(19,15): error TS2339: Property 'call' does not exist on type '(a: number, b: string) => string'.
+strictBindCallApply1.ts(21,15): error TS2339: Property 'apply' does not exist on type '(a: number, b: string) => string'.
+strictBindCallApply1.ts(22,15): error TS2339: Property 'apply' does not exist on type '(a: number, b: string) => string'.
+strictBindCallApply1.ts(23,15): error TS2339: Property 'apply' does not exist on type '(a: number, b: string) => string'.
+strictBindCallApply1.ts(24,15): error TS2339: Property 'apply' does not exist on type '(a: number, b: string) => string'.
+strictBindCallApply1.ts(32,19): error TS2304: Cannot find name 'T'.
+strictBindCallApply1.ts(32,23): error TS2304: Cannot find name 'T'.
+strictBindCallApply1.ts(59,13): error TS2339: Property 'bind' does not exist on type 'object'.
+strictBindCallApply1.ts(60,13): error TS2339: Property 'bind' does not exist on type 'object'.
+strictBindCallApply1.ts(61,13): error TS2339: Property 'bind' does not exist on type 'object'.
+strictBindCallApply1.ts(62,13): error TS2339: Property 'bind' does not exist on type 'object'.
+strictBindCallApply1.ts(64,3): error TS2339: Property 'call' does not exist on type 'object'.
+strictBindCallApply1.ts(65,3): error TS2339: Property 'call' does not exist on type 'object'.
+strictBindCallApply1.ts(66,3): error TS2339: Property 'call' does not exist on type 'object'.
+strictBindCallApply1.ts(67,3): error TS2339: Property 'call' does not exist on type 'object'.
+strictBindCallApply1.ts(69,3): error TS2339: Property 'apply' does not exist on type 'object'.
+strictBindCallApply1.ts(70,3): error TS2339: Property 'apply' does not exist on type 'object'.
+strictBindCallApply1.ts(71,3): error TS2339: Property 'apply' does not exist on type 'object'.
+strictBindCallApply1.ts(72,3): error TS2339: Property 'apply' does not exist on type 'object'.
+strictBindCallApply1.ts(75,14): error TS2339: Property 'bind' does not exist on type '(this: 1, args: T) => void'.
+strictBindCallApply1.ts(76,14): error TS2339: Property 'bind' does not exist on type '(this: 1, args: T) => void'.
+strictBindCallApply1.ts(80,14): error TS2339: Property 'bind' does not exist on type '(this: 1, args: <unknown type>) => void'.
+strictBindCallApply1.ts(81,14): error TS2339: Property 'bind' does not exist on type '(this: 1, args: <unknown type>) => void'.
+strictBindCallApply1.ts(87,17): error TS2339: Property 'bind' does not exist on type '(args: T) => void'.
+strictBindCallApply1.ts(95,17): error TS2339: Property 'bind' does not exist on type '(args: <unknown type>) => any'.
+
+
+==== strictBindCallApply1.ts (34 errors) ====
+    declare function foo(a: number, b: string): string;
+    
+    declare function overloaded(s: string): number;
+    declare function overloaded(n: number): string;
+    
+    declare function generic<T>(x: T): T;
+    
+    let f00 = foo.bind(undefined);
+                  ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '(a: number, b: string) => string'.
+    let f01 = foo.bind(undefined, 10);
+                  ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '(a: number, b: string) => string'.
+    let f02 = foo.bind(undefined, 10, "hello");
+                  ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '(a: number, b: string) => string'.
+    let f03 = foo.bind(undefined, 10, 20);  // Error
+                  ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '(a: number, b: string) => string'.
+    
+    let f04 = overloaded.bind(undefined);  // typeof overloaded
+                         ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '(s: string) => number'.
+    let f05 = generic.bind(undefined);  // typeof generic
+                      ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '(x: T) => T'.
+    
+    let c00 = foo.call(undefined, 10, "hello");
+                  ~~~~
+!!! error TS2339: Property 'call' does not exist on type '(a: number, b: string) => string'.
+    let c01 = foo.call(undefined, 10);  // Error
+                  ~~~~
+!!! error TS2339: Property 'call' does not exist on type '(a: number, b: string) => string'.
+    let c02 = foo.call(undefined, 10, 20);  // Error
+                  ~~~~
+!!! error TS2339: Property 'call' does not exist on type '(a: number, b: string) => string'.
+    let c03 = foo.call(undefined, 10, "hello", 30);  // Error
+                  ~~~~
+!!! error TS2339: Property 'call' does not exist on type '(a: number, b: string) => string'.
+    
+    let a00 = foo.apply(undefined, [10, "hello"]);
+                  ~~~~~
+!!! error TS2339: Property 'apply' does not exist on type '(a: number, b: string) => string'.
+    let a01 = foo.apply(undefined, [10]);  // Error
+                  ~~~~~
+!!! error TS2339: Property 'apply' does not exist on type '(a: number, b: string) => string'.
+    let a02 = foo.apply(undefined, [10, 20]);  // Error
+                  ~~~~~
+!!! error TS2339: Property 'apply' does not exist on type '(a: number, b: string) => string'.
+    let a03 = foo.apply(undefined, [10, "hello", 30]);  // Error
+                  ~~~~~
+!!! error TS2339: Property 'apply' does not exist on type '(a: number, b: string) => string'.
+    
+    class C {
+        constructor(a: number, b: string) {}
+        foo(this: this, a: number, b: string): string { return "" }
+        overloaded(s: string): number;
+        overloaded(n: number): string;
+        overloaded(x: any): any { return <any>undefined }
+        generic<T>(x: T): T { return x }
+                      ~
+!!! error TS2304: Cannot find name 'T'.
+                          ~
+!!! error TS2304: Cannot find name 'T'.
+    }
+    
+    declare let c: C;
+    declare let obj: {};
+    
+    let f10 = c.foo.bind(c);
+    let f11 = c.foo.bind(c, 10);
+    let f12 = c.foo.bind(c, 10, "hello");
+    let f13 = c.foo.bind(c, 10, 20);  // Error
+    let f14 = c.foo.bind(undefined);  // Error
+    
+    let f15 = c.overloaded.bind(c);  // typeof C.prototype.overloaded
+    let f16 = c.generic.bind(c);  // typeof C.prototype.generic
+    
+    let c10 = c.foo.call(c, 10, "hello");
+    let c11 = c.foo.call(c, 10);  // Error
+    let c12 = c.foo.call(c, 10, 20);  // Error
+    let c13 = c.foo.call(c, 10, "hello", 30);  // Error
+    let c14 = c.foo.call(undefined, 10, "hello");  // Error
+    
+    let a10 = c.foo.apply(c, [10, "hello"]);
+    let a11 = c.foo.apply(c, [10]);  // Error
+    let a12 = c.foo.apply(c, [10, 20]);  // Error
+    let a13 = c.foo.apply(c, [10, "hello", 30]);  // Error
+    let a14 = c.foo.apply(undefined, [10, "hello"]);  // Error
+    
+    let f20 = C.bind(undefined);
+                ~~~~
+!!! error TS2339: Property 'bind' does not exist on type 'object'.
+    let f21 = C.bind(undefined, 10);
+                ~~~~
+!!! error TS2339: Property 'bind' does not exist on type 'object'.
+    let f22 = C.bind(undefined, 10, "hello");
+                ~~~~
+!!! error TS2339: Property 'bind' does not exist on type 'object'.
+    let f23 = C.bind(undefined, 10, 20);  // Error
+                ~~~~
+!!! error TS2339: Property 'bind' does not exist on type 'object'.
+    
+    C.call(c, 10, "hello");
+      ~~~~
+!!! error TS2339: Property 'call' does not exist on type 'object'.
+    C.call(c, 10);  // Error
+      ~~~~
+!!! error TS2339: Property 'call' does not exist on type 'object'.
+    C.call(c, 10, 20);  // Error
+      ~~~~
+!!! error TS2339: Property 'call' does not exist on type 'object'.
+    C.call(c, 10, "hello", 30);  // Error
+      ~~~~
+!!! error TS2339: Property 'call' does not exist on type 'object'.
+    
+    C.apply(c, [10, "hello"]);
+      ~~~~~
+!!! error TS2339: Property 'apply' does not exist on type 'object'.
+    C.apply(c, [10]);  // Error
+      ~~~~~
+!!! error TS2339: Property 'apply' does not exist on type 'object'.
+    C.apply(c, [10, 20]);  // Error
+      ~~~~~
+!!! error TS2339: Property 'apply' does not exist on type 'object'.
+    C.apply(c, [10, "hello", 30]);  // Error
+      ~~~~~
+!!! error TS2339: Property 'apply' does not exist on type 'object'.
+    
+    function bar<T extends unknown[]>(callback: (this: 1, ...args: T) => void) {
+        callback.bind(1);
+                 ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '(this: 1, args: T) => void'.
+        callback.bind(2); // Error
+                 ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '(this: 1, args: T) => void'.
+    }
+    
+    function baz<T extends 1 | 2>(callback: (this: 1, ...args: T extends 1 ? [unknown] : [unknown, unknown]) => void) {
+        callback.bind(1);
+                 ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '(this: 1, args: <unknown type>) => void'.
+        callback.bind(2); // Error
+                 ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '(this: 1, args: <unknown type>) => void'.
+    }
+    
+    // Repro from #32964
+    class Foo<T extends unknown[]> {
+        constructor() {
+            this.fn.bind(this);
+                    ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '(args: T) => void'.
+        }
+    
+        fn(...args: T): void {}
+    }
+    
+    class Bar<T extends 1 | 2> {
+        constructor() {
+            this.fn.bind(this);
+                    ~~~~
+!!! error TS2339: Property 'bind' does not exist on type '(args: <unknown type>) => any'.
+        }
+    
+        fn(...args: T extends 1 ? [unknown] : [unknown, unknown]) {}
+    }

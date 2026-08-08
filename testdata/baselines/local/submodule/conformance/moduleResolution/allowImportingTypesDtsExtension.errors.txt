@@ -1,0 +1,27 @@
+/a.ts(2,13): error TS1003: Identifier expected.
+/a.ts(2,15): error TS1005: '=' expected.
+/a.ts(2,20): error TS1128: Declaration or statement expected.
+
+
+==== allowImportingTypesDtsExtension.ts (0 errors) ====
+    
+==== /types.d.ts (0 errors) ====
+    export declare type User = {
+        name: string;
+    }
+    
+==== /a.ts (3 errors) ====
+    import type { User } from "./types.d.ts";
+    export type { User } from "./types.d.ts";
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~~
+!!! error TS1005: '=' expected.
+                       ~
+!!! error TS1128: Declaration or statement expected.
+    
+    export const user: User = { name: "John" };
+    
+    export function getUser(): import("./types.d.ts").User {
+        return user;
+    }

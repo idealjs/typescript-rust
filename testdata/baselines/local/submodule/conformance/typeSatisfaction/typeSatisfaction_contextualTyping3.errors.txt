@@ -1,0 +1,26 @@
+typeSatisfaction_contextualTyping3.ts(18,1): error TS2554: Expected 1 arguments, but got 0.
+
+
+==== typeSatisfaction_contextualTyping3.ts (1 errors) ====
+    // see https://github.com/microsoft/TypeScript/issues/53920#issuecomment-1516616255
+    
+    const obj = {
+       foo: (param = "default") => param,
+    } satisfies {
+       [key: string]: (...params: any) => any;
+    };
+    
+    const obj2 = {
+       foo: (param = "default") => param,
+    } satisfies {
+       [key: string]: Function;
+    };
+    
+    type StringOrNumberFunc = (x: string | number) => any;
+    
+    const fn = ((x = "ok") => null) satisfies StringOrNumberFunc;
+    fn();
+    ~~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    fn(32);
+    

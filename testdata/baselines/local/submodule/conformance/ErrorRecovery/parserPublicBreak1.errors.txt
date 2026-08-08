@@ -1,0 +1,13 @@
+parserPublicBreak1.ts(1,1): error TS2304: Cannot find name 'public'.
+parserPublicBreak1.ts(1,8): error TS1005: ';' expected.
+parserPublicBreak1.ts(1,8): error TS1105: A 'break' statement can only be used within an enclosing iteration or switch statement.
+
+
+==== parserPublicBreak1.ts (3 errors) ====
+    public break;
+    ~~~~~~
+!!! error TS2304: Cannot find name 'public'.
+           ~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~
+!!! error TS1105: A 'break' statement can only be used within an enclosing iteration or switch statement.

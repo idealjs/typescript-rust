@@ -1,0 +1,18 @@
+file.tsx(9,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(9,2): error TS2304: Cannot find name 'A'.
+
+
+==== file.tsx (2 errors) ====
+    declare namespace JSX {
+    	interface Element { }
+    }
+    
+    declare namespace A.B.C {
+      var D: any;
+    }
+    
+    <A.B.C.D>foo</A . B . C.D>
+    ~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+     ~
+!!! error TS2304: Cannot find name 'A'.

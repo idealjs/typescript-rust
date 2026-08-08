@@ -1,0 +1,12 @@
+/node_modules/@types/angular2/package.json(1,12): error TS1005: ';' expected.
+
+
+==== typingsLookup2.ts (0 errors) ====
+    // This tests that an @types package with `"typings": null` is not automatically included.
+    // (If it were, this test would break because there are no typings to be found.)
+    
+==== /node_modules/@types/angular2/package.json (1 errors) ====
+    { "typings": null }
+               ~
+!!! error TS1005: ';' expected.
+    

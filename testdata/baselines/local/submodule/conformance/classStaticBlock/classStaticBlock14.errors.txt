@@ -1,27 +1,27 @@
-classStaticBlock/classStaticBlock14.ts(2,10): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock14.ts(2,10): error TS1127: Invalid character.
-classStaticBlock/classStaticBlock14.ts(2,11): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock14.ts(3,10): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock14.ts(3,10): error TS1127: Invalid character.
-classStaticBlock/classStaticBlock14.ts(3,11): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock14.ts(4,10): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock14.ts(4,10): error TS1127: Invalid character.
-classStaticBlock/classStaticBlock14.ts(4,11): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock14.ts(6,10): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock14.ts(7,3): error TS2304: Cannot find name 'static'.
-classStaticBlock/classStaticBlock14.ts(7,10): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock14.ts(8,3): error TS2304: Cannot find name 'static'.
-classStaticBlock/classStaticBlock14.ts(8,10): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock14.ts(9,3): error TS2304: Cannot find name 'static'.
-classStaticBlock/classStaticBlock14.ts(9,10): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock14.ts(10,3): error TS2304: Cannot find name 'static'.
-classStaticBlock/classStaticBlock14.ts(10,10): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock14.ts(11,3): error TS2304: Cannot find name 'static'.
-classStaticBlock/classStaticBlock14.ts(11,10): error TS1005: ';' expected.
-classStaticBlock/classStaticBlock14.ts(12,1): error TS1128: Declaration or statement expected.
+classStaticBlock14.ts(2,10): error TS1005: ';' expected.
+classStaticBlock14.ts(2,10): error TS1127: Invalid character.
+classStaticBlock14.ts(2,11): error TS1005: ';' expected.
+classStaticBlock14.ts(3,10): error TS1005: ';' expected.
+classStaticBlock14.ts(3,10): error TS1127: Invalid character.
+classStaticBlock14.ts(3,11): error TS1005: ';' expected.
+classStaticBlock14.ts(4,10): error TS1005: ';' expected.
+classStaticBlock14.ts(4,10): error TS1127: Invalid character.
+classStaticBlock14.ts(4,11): error TS1005: ';' expected.
+classStaticBlock14.ts(6,10): error TS1005: ';' expected.
+classStaticBlock14.ts(7,3): error TS2304: Cannot find name 'static'.
+classStaticBlock14.ts(7,10): error TS1005: ';' expected.
+classStaticBlock14.ts(8,3): error TS2304: Cannot find name 'static'.
+classStaticBlock14.ts(8,10): error TS1005: ';' expected.
+classStaticBlock14.ts(9,3): error TS2304: Cannot find name 'static'.
+classStaticBlock14.ts(9,10): error TS1005: ';' expected.
+classStaticBlock14.ts(10,3): error TS2304: Cannot find name 'static'.
+classStaticBlock14.ts(10,10): error TS1005: ';' expected.
+classStaticBlock14.ts(11,3): error TS2304: Cannot find name 'static'.
+classStaticBlock14.ts(11,10): error TS1005: ';' expected.
+classStaticBlock14.ts(12,1): error TS1128: Declaration or statement expected.
 
 
-==== classStaticBlock/classStaticBlock14.ts (21 errors) ====
+==== classStaticBlock14.ts (21 errors) ====
     class C {
       static #_1 = 1;
              ~

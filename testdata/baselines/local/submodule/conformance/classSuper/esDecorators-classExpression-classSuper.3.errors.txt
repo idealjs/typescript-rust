@@ -1,0 +1,135 @@
+esDecorators-classExpression-classSuper.3.ts(9,2): error TS1012: Unexpected token.
+esDecorators-classExpression-classSuper.3.ts(9,3): error TS1005: ')' expected.
+esDecorators-classExpression-classSuper.3.ts(11,12): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(12,14): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(12,15): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(13,14): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(13,15): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(14,14): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(14,15): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(14,17): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(14,20): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(15,14): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(15,15): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(15,16): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(16,14): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(16,15): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(16,16): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(17,9): error TS1003: Identifier expected.
+esDecorators-classExpression-classSuper.3.ts(17,11): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(17,16): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(17,17): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(18,9): error TS1003: Identifier expected.
+esDecorators-classExpression-classSuper.3.ts(18,11): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(18,16): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(18,17): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(19,9): error TS1003: Identifier expected.
+esDecorators-classExpression-classSuper.3.ts(19,10): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(19,12): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.3.ts(19,25): error TS1128: Declaration or statement expected.
+esDecorators-classExpression-classSuper.3.ts(19,35): error TS1128: Declaration or statement expected.
+
+
+==== esDecorators-classExpression-classSuper.3.ts (30 errors) ====
+    declare var dec: any;
+    
+    declare class Base {
+        static x: number;
+    }
+    
+    const x = "x";
+    
+    (@dec
+     ~
+!!! error TS1012: Unexpected token.
+      ~~~
+!!! error TS1005: ')' expected.
+    class C extends Base {
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            super.x;
+                 ~
+!!! error TS1005: ';' expected.
+                  ~
+!!! error TS1005: ';' expected.
+            super.x = 1;
+                 ~
+!!! error TS1005: ';' expected.
+                  ~
+!!! error TS1005: ';' expected.
+            super.x += 1;
+                 ~
+!!! error TS1005: ';' expected.
+                  ~
+!!! error TS1005: ';' expected.
+                    ~~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+            super.x++;
+                 ~
+!!! error TS1005: ';' expected.
+                  ~
+!!! error TS1005: ';' expected.
+                   ~~
+!!! error TS1005: ';' expected.
+            super.x--;
+                 ~
+!!! error TS1005: ';' expected.
+                  ~
+!!! error TS1005: ';' expected.
+                   ~~
+!!! error TS1005: ';' expected.
+            ++super.x;
+            ~~
+!!! error TS1003: Identifier expected.
+              ~~~~~
+!!! error TS1005: ';' expected.
+                   ~
+!!! error TS1005: ';' expected.
+                    ~
+!!! error TS1005: ';' expected.
+            --super.x;
+            ~~
+!!! error TS1003: Identifier expected.
+              ~~~~~
+!!! error TS1005: ';' expected.
+                   ~
+!!! error TS1005: ';' expected.
+                    ~
+!!! error TS1005: ';' expected.
+            ({ x: super.x } = { x: 1 });
+            ~
+!!! error TS1003: Identifier expected.
+             ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1005: ';' expected.
+                            ~
+!!! error TS1128: Declaration or statement expected.
+                                      ~
+!!! error TS1128: Declaration or statement expected.
+            [super.x] = [1];
+    
+            super["x"];
+            super["x"] = 1;
+            super["x"] += 1;
+            super["x"]++;
+            super["x"]--;
+            ++super["x"];
+            --super["x"];
+            ({ x: super["x"] } = { x: 1 });
+            [super["x"]] = [1];
+    
+            super[x];
+            super[x] = 1;
+            super[x] += 1;
+            super[x]++;
+            super[x]--;
+            ++super[x];
+            --super[x];
+            ({ x: super[x] } = { x: 1 });
+            [super[x]] = [1];
+        }
+    });

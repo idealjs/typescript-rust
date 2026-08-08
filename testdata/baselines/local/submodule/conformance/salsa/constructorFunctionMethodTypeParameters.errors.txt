@@ -1,0 +1,45 @@
+constructorFunctionMethodTypeParameters.js(15,5): error TS2339: Property 'prototype' does not exist on type '(t: any) => void'.
+constructorFunctionMethodTypeParameters.js(19,5): error TS2339: Property 'prototype' does not exist on type '(t: any) => void'.
+constructorFunctionMethodTypeParameters.js(30,13): error TS2351: This expression is not constructable.
+
+
+==== constructorFunctionMethodTypeParameters.js (3 errors) ====
+    /**
+     * @template {string} T
+     * @param {T} t
+     */
+    function Cls(t) {
+        this.t = t;
+    }
+    
+    /**
+     * @template {string} V
+     * @param {T} t
+     * @param {V} v
+     * @return {V}
+     */
+    Cls.prototype.topLevelComment = function (t, v) {
+        ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '(t: any) => void'.
+        return v
+    };
+    
+    Cls.prototype.nestedComment =
+        ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '(t: any) => void'.
+        /**
+         * @template {string} U
+         * @param {T} t
+         * @param {U} u
+         * @return {T}
+         */
+        function (t, u) {
+            return t
+        };
+    
+    var c = new Cls('a');
+                ~~~
+!!! error TS2351: This expression is not constructable.
+    const s = c.topLevelComment('a', 'b');
+    const t = c.nestedComment('a', 'b');
+    

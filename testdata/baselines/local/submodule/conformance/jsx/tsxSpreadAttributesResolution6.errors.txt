@@ -1,0 +1,24 @@
+error TS6053: File 'react.d.ts' not found.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.
+==== file.tsx (0 errors) ====
+    /// <reference path="/.lib/react.d.ts" />
+    
+    import React = require('react');
+    
+    type TextProps = { editable: false }
+                   | { editable: true, onEdit: (newText: string) => void };
+    
+    class TextComponent extends React.Component<TextProps, {}> {
+        render() {
+            return <span>Some Text..</span>;
+        }
+    }
+    
+    // Error
+    let x = <TextComponent editable={true} />
+    
+    const textProps: TextProps = {
+        editable: false
+    };

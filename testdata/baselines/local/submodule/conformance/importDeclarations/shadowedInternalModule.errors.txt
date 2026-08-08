@@ -1,0 +1,103 @@
+shadowedInternalModule.ts(42,10): error TS1005: '{' expected.
+shadowedInternalModule.ts(42,19): error TS1003: Identifier expected.
+shadowedInternalModule.ts(42,22): error TS1003: Identifier expected.
+shadowedInternalModule.ts(42,24): error TS1003: Identifier expected.
+shadowedInternalModule.ts(43,22): error TS1003: Identifier expected.
+shadowedInternalModule.ts(57,10): error TS1005: '{' expected.
+shadowedInternalModule.ts(57,19): error TS1003: Identifier expected.
+shadowedInternalModule.ts(57,22): error TS1003: Identifier expected.
+shadowedInternalModule.ts(57,24): error TS1003: Identifier expected.
+shadowedInternalModule.ts(58,17): error TS1003: Identifier expected.
+shadowedInternalModule.ts(58,25): error TS1003: Identifier expected.
+shadowedInternalModule.ts(64,2): error TS1005: '}' expected.
+
+
+==== shadowedInternalModule.ts (12 errors) ====
+    // all errors imported modules conflict with local variables
+    
+    namespace A {
+        export var Point = { x: 0, y: 0 }
+        export interface Point {
+            x: number;
+            y: number;
+        }
+    } 
+    
+    namespace B {
+        var A = { x: 0, y: 0 };
+        import Point = A;
+    }
+    
+    namespace X {
+        export namespace Y {
+            export interface Point{
+                x: number;
+                y: number
+            }
+        }
+    
+        export class Y {
+            name: string;
+        }
+    }
+    
+    namespace Z {
+        import Y = X.Y;
+    
+        var Y = 12;
+    }
+    
+    //
+    
+    namespace a {
+      export type A = number;
+    }
+    
+    namespace b {
+      export import A = a.A;
+             ~~~~~~
+!!! error TS1005: '{' expected.
+                      ~
+!!! error TS1003: Identifier expected.
+                         ~
+!!! error TS1003: Identifier expected.
+                           ~
+!!! error TS1003: Identifier expected.
+      export namespace A {}
+                         ~
+!!! error TS1003: Identifier expected.
+    }
+    
+    namespace c {
+      import any = b.A;
+    }
+    
+    //
+    
+    namespace q {
+      export const Q = {};
+    }
+    
+    namespace r {
+      export import Q = q.Q;
+             ~~~~~~
+!!! error TS1005: '{' expected.
+                      ~
+!!! error TS1003: Identifier expected.
+                         ~
+!!! error TS1003: Identifier expected.
+                           ~
+!!! error TS1003: Identifier expected.
+      export type Q = number;
+                    ~
+!!! error TS1003: Identifier expected.
+                            ~
+!!! error TS1003: Identifier expected.
+    }
+    
+    namespace s {
+      import Q = r.Q;
+      const Q = 0;
+    }
+     
+!!! error TS1005: '}' expected.

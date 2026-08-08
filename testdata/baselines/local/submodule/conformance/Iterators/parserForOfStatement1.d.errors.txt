@@ -1,0 +1,8 @@
+parserForOfStatement1.d.ts(1,15): error TS2304: Cannot find name 'e'.
+
+
+==== parserForOfStatement1.d.ts (1 errors) ====
+    for (var i of e) {
+                  ~
+!!! error TS2304: Cannot find name 'e'.
+    }

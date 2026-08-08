@@ -1,0 +1,25 @@
+awaitUsingDeclarationsInForOf.3.ts(2,16): error TS2304: Cannot find name 'using'.
+awaitUsingDeclarationsInForOf.3.ts(2,22): error TS1005: ';' expected.
+awaitUsingDeclarationsInForOf.3.ts(2,25): error TS1005: ';' expected.
+awaitUsingDeclarationsInForOf.3.ts(2,25): error TS2304: Cannot find name 'of'.
+awaitUsingDeclarationsInForOf.3.ts(2,29): error TS1012: Unexpected token.
+awaitUsingDeclarationsInForOf.3.ts(2,30): error TS1005: ']' expected.
+
+
+==== awaitUsingDeclarationsInForOf.3.ts (6 errors) ====
+    async function main() {
+        for (await using {} of []) {
+                   ~~~~~
+!!! error TS2304: Cannot find name 'using'.
+                         ~
+!!! error TS1005: ';' expected.
+                            ~~
+!!! error TS1005: ';' expected.
+                            ~~
+!!! error TS2304: Cannot find name 'of'.
+                                ~
+!!! error TS1012: Unexpected token.
+                                 ~
+!!! error TS1005: ']' expected.
+        }
+    }

@@ -1,0 +1,16 @@
+foo_1.ts(2,4): error TS2304: Cannot find name 'foo'.
+
+
+==== foo_0.ts (0 errors) ====
+    export class C1 {
+    	m1 = 42;
+    	static s1 = true;
+    }
+    
+==== foo_1.ts (1 errors) ====
+    import foo = require("./foo_0");
+    if(foo.C1.s1){
+       ~~~
+!!! error TS2304: Cannot find name 'foo'.
+    	// Should cause runtime import
+    }

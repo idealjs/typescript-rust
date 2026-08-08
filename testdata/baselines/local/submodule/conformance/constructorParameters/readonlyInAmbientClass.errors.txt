@@ -1,8 +1,8 @@
-constructorParameters/readonlyInAmbientClass.ts(2,23): error TS1005: ',' expected.
-constructorParameters/readonlyInAmbientClass.ts(3,18): error TS1005: ',' expected.
+readonlyInAmbientClass.ts(2,23): error TS1005: ',' expected.
+readonlyInAmbientClass.ts(3,18): error TS1005: ',' expected.
 
 
-==== constructorParameters/readonlyInAmbientClass.ts (2 errors) ====
+==== readonlyInAmbientClass.ts (2 errors) ====
     declare class C{
     	constructor(readonly x: number);
     	                     ~

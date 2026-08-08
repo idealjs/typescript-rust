@@ -1,0 +1,20 @@
+file1.js(5,5): error TS2351: This expression is not constructable.
+file2.js(2,11): error TS2339: Property 'prop' does not exist on type 'object'.
+
+
+==== constructorFunctionMergeWithClass.ts (0 errors) ====
+    
+==== file1.js (1 errors) ====
+    var SomeClass = function () {
+        this.otherProp = 0;
+    };
+    
+    new SomeClass();
+        ~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+==== file2.js (1 errors) ====
+    class SomeClass { }
+    SomeClass.prop = 0
+              ~~~~
+!!! error TS2339: Property 'prop' does not exist on type 'object'.

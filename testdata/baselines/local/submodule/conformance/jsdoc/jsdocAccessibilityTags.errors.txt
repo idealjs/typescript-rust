@@ -1,0 +1,127 @@
+jsdocAccessibilityTag.js(21,9): error TS1005: ';' expected.
+jsdocAccessibilityTag.js(23,9): error TS1005: ';' expected.
+jsdocAccessibilityTag.js(32,14): error TS2339: Property 'priv2' does not exist on type '{ h: () => any }'.
+jsdocAccessibilityTag.js(38,14): error TS2339: Property 'prot2' does not exist on type '{ h: () => any }'.
+jsdocAccessibilityTag.js(44,14): error TS2339: Property 'pub2' does not exist on type '{ h: () => any }'.
+jsdocAccessibilityTag.js(46,23): error TS2339: Property 'priv2' does not exist on type '{ h: () => any }'.
+jsdocAccessibilityTag.js(55,14): error TS2339: Property 'priv2' does not exist on type '{ h: () => any; n: () => any }'.
+jsdocAccessibilityTag.js(55,27): error TS2339: Property 'prot2' does not exist on type '{ h: () => any; n: () => any }'.
+jsdocAccessibilityTag.js(55,40): error TS2339: Property 'pub2' does not exist on type '{ h: () => any; n: () => any }'.
+jsdocAccessibilityTag.js(58,5): error TS2349: This expression is not callable.
+jsdocAccessibilityTag.js(58,20): error TS2349: This expression is not callable.
+jsdocAccessibilityTag.js(58,35): error TS2349: This expression is not callable.
+jsdocAccessibilityTag.js(59,5): error TS2349: This expression is not callable.
+jsdocAccessibilityTag.js(59,20): error TS2349: This expression is not callable.
+jsdocAccessibilityTag.js(59,35): error TS2349: This expression is not callable.
+jsdocAccessibilityTag.js(60,5): error TS2349: This expression is not callable.
+jsdocAccessibilityTag.js(60,21): error TS2349: This expression is not callable.
+jsdocAccessibilityTag.js(60,37): error TS2349: This expression is not callable.
+jsdocAccessibilityTag.js(61,5): error TS2349: This expression is not callable.
+jsdocAccessibilityTag.js(61,21): error TS2349: This expression is not callable.
+jsdocAccessibilityTag.js(61,37): error TS2349: This expression is not callable.
+
+
+==== jsdocAccessibilityTag.js (21 errors) ====
+    class A {
+        /**
+         * Ap docs
+         *
+         * @private
+         */
+        priv = 4;
+        /**
+         * Aq docs
+         *
+         * @protected
+         */
+        prot = 5;
+        /**
+         * Ar docs
+         *
+         * @public
+         */
+        pub = 6;
+        /** @public */
+        get ack() { return this.priv }
+            ~~~
+!!! error TS1005: ';' expected.
+        /** @private */
+        set ack(value) { }
+            ~~~
+!!! error TS1005: ';' expected.
+    }
+    class C {
+        constructor() {
+            /**
+             * Cp docs
+             *
+             * @private
+             */
+            this.priv2 = 1;
+                 ~~~~~
+!!! error TS2339: Property 'priv2' does not exist on type '{ h: () => any }'.
+            /**
+             * Cq docs
+             *
+             * @protected
+             */
+            this.prot2 = 2;
+                 ~~~~~
+!!! error TS2339: Property 'prot2' does not exist on type '{ h: () => any }'.
+            /**
+             * Cr docs
+             *
+             * @public
+             */
+            this.pub2 = 3;
+                 ~~~~
+!!! error TS2339: Property 'pub2' does not exist on type '{ h: () => any }'.
+        }
+        h() { return this.priv2 }
+                          ~~~~~
+!!! error TS2339: Property 'priv2' does not exist on type '{ h: () => any }'.
+    }
+    class B extends A {
+        m() {
+            this.priv + this.prot + this.pub
+        }
+    }
+    class D extends C {
+        n() {
+            this.priv2 + this.prot2 + this.pub2
+                 ~~~~~
+!!! error TS2339: Property 'priv2' does not exist on type '{ h: () => any; n: () => any }'.
+                              ~~~~~
+!!! error TS2339: Property 'prot2' does not exist on type '{ h: () => any; n: () => any }'.
+                                           ~~~~
+!!! error TS2339: Property 'pub2' does not exist on type '{ h: () => any; n: () => any }'.
+        }
+    }
+    new A().priv + new A().prot + new A().pub
+        ~
+!!! error TS2349: This expression is not callable.
+                       ~
+!!! error TS2349: This expression is not callable.
+                                      ~
+!!! error TS2349: This expression is not callable.
+    new B().priv + new B().prot + new B().pub
+        ~
+!!! error TS2349: This expression is not callable.
+                       ~
+!!! error TS2349: This expression is not callable.
+                                      ~
+!!! error TS2349: This expression is not callable.
+    new C().priv2 + new C().prot2 + new C().pub2
+        ~
+!!! error TS2349: This expression is not callable.
+                        ~
+!!! error TS2349: This expression is not callable.
+                                        ~
+!!! error TS2349: This expression is not callable.
+    new D().priv2 + new D().prot2 + new D().pub2
+        ~
+!!! error TS2349: This expression is not callable.
+                        ~
+!!! error TS2349: This expression is not callable.
+                                        ~
+!!! error TS2349: This expression is not callable.

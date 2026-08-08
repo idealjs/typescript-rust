@@ -1,0 +1,9 @@
+parserParameterList13.ts(2,17): error TS1005: ',' expected.
+
+
+==== parserParameterList13.ts (1 errors) ====
+    interface I {
+        new (public x);
+                    ~
+!!! error TS1005: ',' expected.
+    }

@@ -1,0 +1,47 @@
+error TS2300: Duplicate identifier 'RequireInterface'.
+error TS2300: Duplicate identifier 'RequireInterface'.
+/node_modules/pkg/package.json(2,11): error TS1005: ';' expected.
+/node_modules/pkg/package.json(3,14): error TS1005: ';' expected.
+/node_modules/pkg/package.json(4,14): error TS1005: ';' expected.
+/node_modules/pkg/package.json(5,17): error TS1005: ';' expected.
+/node_modules/pkg/package.json(6,18): error TS1005: ';' expected.
+
+
+!!! error TS2300: Duplicate identifier 'RequireInterface'.
+
+!!! error TS2300: Duplicate identifier 'RequireInterface'.
+==== /node_modules/pkg/package.json (5 errors) ====
+    {
+        "name": "pkg",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "0.0.1",
+                 ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            "import": "./import.js",
+                    ~
+!!! error TS1005: ';' expected.
+            "require": "./require.js"
+                     ~
+!!! error TS1005: ';' expected.
+        }
+    }
+==== /node_modules/pkg/import.d.ts (0 errors) ====
+    export interface ImportInterface {}
+==== /node_modules/pkg/require.d.ts (0 errors) ====
+    export interface RequireInterface {}
+==== /index.ts (0 errors) ====
+    // incorrect mode
+    import type { RequireInterface } from "pkg" with { "resolution-mode": "foobar" };
+    // not type-only
+    import { ImportInterface } from "pkg" with { "resolution-mode": "import" };
+    // not exclusively type-only
+    import {type RequireInterface as Req, RequireInterface as Req2} from "pkg" with { "resolution-mode": "require" };
+    
+    export interface LocalInterface extends RequireInterface, ImportInterface {}
+    
+    
+    

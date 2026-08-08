@@ -1,0 +1,57 @@
+usingDeclarations.11.ts(5,9): error TS2349: This expression is not callable.
+usingDeclarations.11.ts(10,9): error TS2349: This expression is not callable.
+usingDeclarations.11.ts(18,9): error TS2349: This expression is not callable.
+usingDeclarations.11.ts(22,24): error TS1005: ',' expected.
+usingDeclarations.11.ts(24,9): error TS2349: This expression is not callable.
+usingDeclarations.11.ts(29,24): error TS1005: ',' expected.
+usingDeclarations.11.ts(31,9): error TS2349: This expression is not callable.
+
+
+==== usingDeclarations.11.ts (7 errors) ====
+    class A {}
+    class C1 extends A {
+        constructor() {
+            using x = null;
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    class C2 extends A {
+        constructor() {
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            using x = null;
+        }
+    }
+    class C3 extends A {
+        y = 1;
+        constructor() {
+            using x = null;
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    class C4 extends A {
+        constructor(public y: number) {
+                           ~
+!!! error TS1005: ',' expected.
+            using x = null;
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    class C5 extends A {
+        z = 1;
+        constructor(public y: number) {
+                           ~
+!!! error TS1005: ',' expected.
+            using x = null;
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }

@@ -1,8 +1,8 @@
-VariableStatements/invalidMultipleVariableDeclarations.ts(27,54): error TS2339: Property 'toString' does not exist on type 'number'.
-VariableStatements/invalidMultipleVariableDeclarations.ts(50,16): error TS2304: Cannot find name 'Array'.
+invalidMultipleVariableDeclarations.ts(27,54): error TS2339: Property 'toString' does not exist on type 'number'.
+invalidMultipleVariableDeclarations.ts(50,16): error TS2304: Cannot find name 'Array'.
 
 
-==== VariableStatements/invalidMultipleVariableDeclarations.ts (2 errors) ====
+==== invalidMultipleVariableDeclarations.ts (2 errors) ====
     interface I {
         id: number;
     }

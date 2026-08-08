@@ -1,0 +1,15 @@
+objectBindingPatternKeywordIdentifiers03.ts(3,5): error TS1182: A destructuring declaration must have an initializer.
+objectBindingPatternKeywordIdentifiers03.ts(3,15): error TS1005: ':' expected.
+objectBindingPatternKeywordIdentifiers03.ts(3,31): error TS1005: '}' expected.
+
+
+==== objectBindingPatternKeywordIdentifiers03.ts (3 errors) ====
+    ﻿// @target: es2015
+    
+    var { "while" } = { while: 1 }
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+               ~
+!!! error TS1005: ':' expected.
+                               
+!!! error TS1005: '}' expected.

@@ -1,0 +1,24 @@
+bar.js(3,9): error TS2349: This expression is not callable.
+foo.ts(2,9): error TS1005: ';' expected.
+foo.ts(3,9): error TS1005: ';' expected.
+
+
+==== foo.ts (2 errors) ====
+    class Foo {
+        get p() { return 1 }
+            ~
+!!! error TS1005: ';' expected.
+        set p(value) { }
+            ~
+!!! error TS1005: ';' expected.
+    }
+    
+==== bar.js (1 errors) ====
+    class Bar extends Foo {
+        constructor() {
+            super()
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            this.p = 2
+        }
+    }

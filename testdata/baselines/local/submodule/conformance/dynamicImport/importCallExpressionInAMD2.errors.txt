@@ -1,0 +1,22 @@
+2.ts(9,5): error TS2304: Cannot find name 'import'.
+
+
+==== importCallExpressionInAMD2.ts (0 errors) ====
+    ﻿// @module: amd
+==== 0.ts (0 errors) ====
+    export class B {
+        print() { return "I am B"}
+    }
+    
+==== 2.ts (1 errors) ====
+    // We use Promise<any> for now as there is no way to specify shape of module object
+    function foo(x: Promise<any>) {
+        x.then(value => {
+            let b = new value.B();
+            b.print();
+        })
+    }
+    
+    foo(import("./0"));
+        ~~~~~~
+!!! error TS2304: Cannot find name 'import'.

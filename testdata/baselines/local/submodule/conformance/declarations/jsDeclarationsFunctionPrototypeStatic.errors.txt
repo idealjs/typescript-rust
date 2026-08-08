@@ -1,0 +1,34 @@
+source.js(1,7): error TS1003: Identifier expected.
+source.js(1,8): error TS1005: ';' expected.
+source.js(1,8): error TS2304: Cannot find name 'exports'.
+source.js(4,9): error TS2339: Property 'staticMethod' does not exist on type '() => void'.
+source.js(5,9): error TS2339: Property 'prototype' does not exist on type '() => void'.
+source.js(6,9): error TS2339: Property 'staticProperty' does not exist on type '() => void'.
+
+
+==== source.js (6 errors) ====
+    module.exports = MyClass;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    
+    function MyClass() {}
+    MyClass.staticMethod = function() {}
+            ~~~~~~~~~~~~
+!!! error TS2339: Property 'staticMethod' does not exist on type '() => void'.
+    MyClass.prototype.method = function() {}
+            ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+    MyClass.staticProperty = 123;
+            ~~~~~~~~~~~~~~
+!!! error TS2339: Property 'staticProperty' does not exist on type '() => void'.
+    
+    /**
+     * Callback to be invoked when test execution is complete.
+     *
+     * @callback DoneCB
+     * @param {number} failures - Number of failures that occurred.
+     */

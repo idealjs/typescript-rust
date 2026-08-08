@@ -1,0 +1,26 @@
+computedPropertyNames51_ES5.ts(1,31): error TS2304: Cannot find name 'T'.
+computedPropertyNames51_ES5.ts(2,10): error TS1005: ',' expected.
+computedPropertyNames51_ES5.ts(2,11): error TS1134: Variable declaration expected.
+computedPropertyNames51_ES5.ts(3,10): error TS1005: ',' expected.
+computedPropertyNames51_ES5.ts(3,11): error TS1134: Variable declaration expected.
+
+
+==== computedPropertyNames51_ES5.ts (5 errors) ====
+    function f<T, K extends keyof T>() {
+                                  ~
+!!! error TS2304: Cannot find name 'T'.
+        var t!: T;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var k!: K;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var v = {
+            [t]: 0,
+            [k]: 1
+        };
+    }

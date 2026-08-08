@@ -1,0 +1,17 @@
+symbolProperty34.ts(7,7): error TS1005: ']' expected.
+symbolProperty34.ts(7,15): error TS1005: ';' expected.
+
+
+==== symbolProperty34.ts (2 errors) ====
+    class C1 extends C2 {
+        [Symbol.toStringTag]() {
+            return { x: "" };
+        }
+    }
+    class C2 {
+        [s: symbol]: () => { x: number };
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+    }

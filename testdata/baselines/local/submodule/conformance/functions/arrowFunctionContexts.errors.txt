@@ -1,0 +1,133 @@
+arrowFunctionContexts.ts(2,1): error TS2304: Cannot find name 'with'.
+arrowFunctionContexts.ts(2,15): error TS1005: ';' expected.
+arrowFunctionContexts.ts(13,9): error TS2349: This expression is not callable.
+arrowFunctionContexts.ts(31,22): error TS2339: Property 'length' does not exist on type '() => any'.
+arrowFunctionContexts.ts(43,5): error TS2304: Cannot find name 'with'.
+arrowFunctionContexts.ts(43,19): error TS1005: ';' expected.
+arrowFunctionContexts.ts(54,13): error TS2349: This expression is not callable.
+arrowFunctionContexts.ts(72,26): error TS2339: Property 'length' does not exist on type '() => any'.
+arrowFunctionContexts.ts(84,17): error TS2304: Cannot find name 'T'.
+arrowFunctionContexts.ts(84,23): error TS2304: Cannot find name 'T'.
+arrowFunctionContexts.ts(86,17): error TS2304: Cannot find name 'T'.
+arrowFunctionContexts.ts(86,23): error TS2304: Cannot find name 'T'.
+
+
+==== arrowFunctionContexts.ts (12 errors) ====
+    // Arrow function used in with statement
+    with (window) {
+    ~~~~
+!!! error TS2304: Cannot find name 'with'.
+                  ~
+!!! error TS1005: ';' expected.
+        var p = () => this;
+    }
+    
+    // Arrow function as argument to super call
+    class Base {
+        constructor(n: any) { }
+    }
+    
+    class Derived extends Base {
+        constructor() {
+            super(() => this);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    // Arrow function as function argument
+    window.setTimeout(() => null, 100);
+    
+    // Arrow function as value in array literal
+    
+    var obj = (n: number) => '';
+    var obj: { (n: number): string; }; // OK
+    
+    var arr = [(n: number) => ''];
+    var arr: { (n: number): string; }[]; // Incorrect error here (bug 829597)
+    
+    // Arrow function as enum value
+    enum E {
+        x = () => 4, // Error expected
+        y = (() => this).length // error, can't use this in enum
+                         ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type '() => any'.
+    }
+    
+    // Arrow function as module variable initializer
+    namespace M {
+        export var a = (s) => '';
+        var b = (s) => s;
+    }
+    
+    // Repeat above for module members that are functions? (necessary to redo all of them?)
+    namespace M2 {
+        // Arrow function used in with statement
+        with (window) {
+        ~~~~
+!!! error TS2304: Cannot find name 'with'.
+                      ~
+!!! error TS1005: ';' expected.
+            var p = () => this;
+        }
+    
+        // Arrow function as argument to super call
+        class Base {
+            constructor(n: any) { }
+        }
+    
+        class Derived extends Base {
+            constructor() {
+                super(() => this);
+                ~~~~~
+!!! error TS2349: This expression is not callable.
+            }
+        }
+    
+        // Arrow function as function argument
+        window.setTimeout(() => null, 100);
+    
+        // Arrow function as value in array literal
+    
+        var obj = (n: number) => '';
+        var obj: { (n: number): string; }; // OK
+    
+        var arr = [(n: number) => ''];
+        var arr: { (n: number): string; }[]; // Incorrect error here (bug 829597)
+    
+        // Arrow function as enum value
+        enum E {
+            x = () => 4, // Error expected
+            y = (() => this).length
+                             ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type '() => any'.
+        }
+    
+        // Arrow function as module variable initializer
+        namespace M {
+            export var a = (s) => '';
+            var b = (s) => s;
+        }
+    
+    }
+    
+    // <Identifier>(ParamList) => { ... } is a generic arrow function
+    var generic1 = <T>(n: T) => [n];
+                    ~
+!!! error TS2304: Cannot find name 'T'.
+                          ~
+!!! error TS2304: Cannot find name 'T'.
+    var generic1: { <T>(n: T): T[] }; // Incorrect error, Bug 829597
+    var generic2 = <T>(n: T) => { return [n]; };
+                    ~
+!!! error TS2304: Cannot find name 'T'.
+                          ~
+!!! error TS2304: Cannot find name 'T'.
+    var generic2: { <T>(n: T): T[] };
+    
+    // <Identifier> ((ParamList) => { ... } ) is a type assertion to an arrow function
+    var asserted1 = <any>((n) => [n]);
+    var asserted1: any;
+    var asserted2 = <any>((n) => { return n; });
+    var asserted2: any;
+    

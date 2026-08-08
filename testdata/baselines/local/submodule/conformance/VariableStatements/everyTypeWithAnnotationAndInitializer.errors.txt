@@ -1,11 +1,11 @@
-VariableStatements/everyTypeWithAnnotationAndInitializer.ts(22,54): error TS2339: Property 'toString' does not exist on type 'number'.
-VariableStatements/everyTypeWithAnnotationAndInitializer.ts(27,12): error TS2304: Cannot find name 'Date'.
-VariableStatements/everyTypeWithAnnotationAndInitializer.ts(27,23): error TS2304: Cannot find name 'Date'.
-VariableStatements/everyTypeWithAnnotationAndInitializer.ts(28,15): error TS2304: Cannot find name 'Object'.
-VariableStatements/everyTypeWithAnnotationAndInitializer.ts(28,28): error TS2304: Cannot find name 'Object'.
+everyTypeWithAnnotationAndInitializer.ts(22,54): error TS2339: Property 'toString' does not exist on type 'number'.
+everyTypeWithAnnotationAndInitializer.ts(27,12): error TS2304: Cannot find name 'Date'.
+everyTypeWithAnnotationAndInitializer.ts(27,23): error TS2304: Cannot find name 'Date'.
+everyTypeWithAnnotationAndInitializer.ts(28,15): error TS2304: Cannot find name 'Object'.
+everyTypeWithAnnotationAndInitializer.ts(28,28): error TS2304: Cannot find name 'Object'.
 
 
-==== VariableStatements/everyTypeWithAnnotationAndInitializer.ts (5 errors) ====
+==== everyTypeWithAnnotationAndInitializer.ts (5 errors) ====
     interface I {
         id: number;
     }

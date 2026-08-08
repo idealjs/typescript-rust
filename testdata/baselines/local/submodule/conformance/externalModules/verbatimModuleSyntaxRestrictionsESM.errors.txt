@@ -1,0 +1,41 @@
+/ambient.d.ts(3,14): error TS2454: Variable '_export' is used before being assigned.
+/types.ts(2,13): error TS1003: Identifier expected.
+/types.ts(2,15): error TS1005: '=' expected.
+/types.ts(2,21): error TS1128: Declaration or statement expected.
+
+
+==== verbatimModuleSyntaxRestrictionsESM.ts (0 errors) ====
+    
+==== /decl.d.ts (0 errors) ====
+    declare class CJSy {}
+    export = CJSy;
+    
+==== /ambient.d.ts (1 errors) ====
+    declare module "ambient" {
+        const _export: number;
+        export = _export;
+                 ~~~~~~~
+!!! error TS2454: Variable '_export' is used before being assigned.
+    }
+    
+==== /types.ts (3 errors) ====
+    interface Typey {}
+    export type { Typey };
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~~~
+!!! error TS1005: '=' expected.
+                        ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== /main.ts (0 errors) ====
+    import CJSy = require("./decl"); // error
+    import type CJSy2 = require("./decl"); // ok I guess?
+    import CJSy3 from "./decl"; // ok in esModuleInterop
+    import * as types from "./types"; // ok
+    CJSy;
+    
+==== /ns.ts (0 errors) ====
+    export namespace ns {
+        export enum A {}
+    }

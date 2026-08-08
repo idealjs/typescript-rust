@@ -1,0 +1,42 @@
+index.js(1,13): error TS2304: Cannot find name 'require'.
+index.js(5,14): error TS2339: Property 'usage' does not exist on type 'object'.
+index.js(9,7): error TS1003: Identifier expected.
+index.js(9,8): error TS1005: ';' expected.
+index.js(9,8): error TS2304: Cannot find name 'exports'.
+obj.js(1,7): error TS1003: Identifier expected.
+obj.js(1,8): error TS1005: ';' expected.
+obj.js(1,8): error TS2304: Cannot find name 'exports'.
+
+
+==== obj.js (3 errors) ====
+    module.exports = class Obj {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        constructor() {
+            this.x = 12;
+        }
+    }
+==== index.js (5 errors) ====
+    const Obj = require("./obj");
+                ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    
+    class Container {
+        constructor() {
+            this.usage = new Obj();
+                 ~~~~~
+!!! error TS2339: Property 'usage' does not exist on type 'object'.
+        }
+    }
+    
+    module.exports = Container;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.

@@ -1,0 +1,137 @@
+exportImportAlias.ts(7,28): error TS1005: ',' expected.
+exportImportAlias.ts(7,46): error TS1005: ',' expected.
+exportImportAlias.ts(17,12): error TS1005: '{' expected.
+exportImportAlias.ts(17,21): error TS1003: Identifier expected.
+exportImportAlias.ts(17,24): error TS1003: Identifier expected.
+exportImportAlias.ts(20,19): error TS2339: Property 'a' does not exist on type 'C'.
+exportImportAlias.ts(21,42): error TS2339: Property 'a' does not exist on type 'C'.
+exportImportAlias.ts(32,32): error TS1005: ',' expected.
+exportImportAlias.ts(32,50): error TS1005: ',' expected.
+exportImportAlias.ts(40,12): error TS1005: '{' expected.
+exportImportAlias.ts(40,21): error TS1003: Identifier expected.
+exportImportAlias.ts(40,24): error TS1003: Identifier expected.
+exportImportAlias.ts(40,26): error TS1003: Identifier expected.
+exportImportAlias.ts(43,19): error TS2339: Property 'y' does not exist on type 'Z'.
+exportImportAlias.ts(44,42): error TS2339: Property 'y' does not exist on type 'Z'.
+exportImportAlias.ts(48,28): error TS1005: ',' expected.
+exportImportAlias.ts(61,12): error TS1005: '{' expected.
+exportImportAlias.ts(61,21): error TS1003: Identifier expected.
+exportImportAlias.ts(61,24): error TS1003: Identifier expected.
+exportImportAlias.ts(61,26): error TS1003: Identifier expected.
+exportImportAlias.ts(65,15): error TS2339: Property 'D' does not exist on type 'M'.
+exportImportAlias.ts(68,18): error TS1005: '}' expected.
+
+
+==== exportImportAlias.ts (22 errors) ====
+    // expect no errors here
+    
+    namespace A {
+    
+        export var x = 'hello world'
+        export class Point {
+            constructor(public x: number, public y: number) { }
+                               ~
+!!! error TS1005: ',' expected.
+                                                 ~
+!!! error TS1005: ',' expected.
+        }
+        export namespace B {
+            export interface Id {
+                name: string;
+            }
+        }
+    }
+    
+    namespace C {
+        export import a = A;
+               ~~~~~~
+!!! error TS1005: '{' expected.
+                        ~
+!!! error TS1003: Identifier expected.
+                           ~
+!!! error TS1003: Identifier expected.
+    }
+    
+    var a: string = C.a.x;
+                      ~
+!!! error TS2339: Property 'a' does not exist on type 'C'.
+    var b: { x: number; y: number; } = new C.a.Point(0, 0);
+                                             ~
+!!! error TS2339: Property 'a' does not exist on type 'C'.
+    var c: { name: string };
+    var c: C.a.B.Id;
+    
+    namespace X {
+        export function Y() {
+            return 42;
+        }
+    
+        export namespace Y {
+            export class Point {
+                constructor(public x: number, public y: number) { }
+                                   ~
+!!! error TS1005: ',' expected.
+                                                     ~
+!!! error TS1005: ',' expected.
+            }
+        }
+    }
+    
+    namespace Z {
+    
+        // 'y' should be a fundule here
+        export import y = X.Y;
+               ~~~~~~
+!!! error TS1005: '{' expected.
+                        ~
+!!! error TS1003: Identifier expected.
+                           ~
+!!! error TS1003: Identifier expected.
+                             ~
+!!! error TS1003: Identifier expected.
+    }
+    
+    var m: number = Z.y();
+                      ~
+!!! error TS2339: Property 'y' does not exist on type 'Z'.
+    var n: { x: number; y: number; } = new Z.y.Point(0, 0);
+                                             ~
+!!! error TS2339: Property 'y' does not exist on type 'Z'.
+    
+    namespace K {
+        export class L {
+            constructor(public name: string) { }
+                               ~~~~
+!!! error TS1005: ',' expected.
+        }
+    
+        export namespace L {
+            export var y = 12;
+            export interface Point {
+                x: number;
+                y: number;
+            }
+        }
+    }
+    
+    namespace M {
+        export import D = K.L;
+               ~~~~~~
+!!! error TS1005: '{' expected.
+                        ~
+!!! error TS1003: Identifier expected.
+                           ~
+!!! error TS1003: Identifier expected.
+                             ~
+!!! error TS1003: Identifier expected.
+    }
+    
+    var o: { name: string };
+    var o = new M.D('Hello');
+                  ~
+!!! error TS2339: Property 'D' does not exist on type 'M'.
+    
+    var p: { x: number; y: number; }
+    var p: M.D.Point;
+                     
+!!! error TS1005: '}' expected.

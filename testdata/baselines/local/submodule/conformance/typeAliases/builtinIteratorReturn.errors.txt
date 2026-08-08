@@ -1,0 +1,54 @@
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+builtinIteratorReturn.ts(2,20): error TS2304: Cannot find name 'Map'.
+builtinIteratorReturn.ts(3,20): error TS2304: Cannot find name 'Set'.
+builtinIteratorReturn.ts(5,12): error TS2349: This expression is not callable.
+builtinIteratorReturn.ts(6,18): error TS2339: Property 'values' does not exist on type 'number[]'.
+builtinIteratorReturn.ts(7,18): error TS2339: Property 'keys' does not exist on type 'number[]'.
+builtinIteratorReturn.ts(8,18): error TS2339: Property 'entries' does not exist on type 'number[]'.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+==== builtinIteratorReturn.ts (6 errors) ====
+    declare const array: number[];
+    declare const map: Map<string, number>;
+                       ~~~
+!!! error TS2304: Cannot find name 'Map'.
+    declare const set: Set<number>;
+                       ~~~
+!!! error TS2304: Cannot find name 'Set'.
+    
+    const i0 = array[Symbol.iterator]();
+               ~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2349: This expression is not callable.
+    const i1 = array.values();
+                     ~~~~~~
+!!! error TS2339: Property 'values' does not exist on type 'number[]'.
+    const i2 = array.keys();
+                     ~~~~
+!!! error TS2339: Property 'keys' does not exist on type 'number[]'.
+    const i3 = array.entries();
+                     ~~~~~~~
+!!! error TS2339: Property 'entries' does not exist on type 'number[]'.
+    for (const x of array);
+    
+    const i4 = map[Symbol.iterator]();
+    const i5 = map.values();
+    const i6 = map.keys();
+    const i7 = map.entries();
+    for (const x of map);
+    
+    const i8 = set[Symbol.iterator]();
+    const i9 = set.values();
+    const i10 = set.keys();
+    const i11 = set.entries();
+    for (const x of set);
+    
+    declare const i12: IterableIterator<number, undefined>;
+    declare const i13: IterableIterator<number, any>;
+    declare const i14: IterableIterator<number, boolean>;
+    declare const i15: Iterable<number, undefined>;
+    declare const i16: Iterable<number, any>;
+    declare const i17: Iterable<number, boolean>;

@@ -1,0 +1,17 @@
+bug24934.js(2,7): error TS1003: Identifier expected.
+bug24934.js(2,8): error TS1005: ';' expected.
+bug24934.js(2,8): error TS2304: Cannot find name 'exports'.
+
+
+==== bug24934.js (3 errors) ====
+    export function abc(a, b, c) { return 5; }
+    module.exports = { abc };
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+==== use.js (0 errors) ====
+    import { abc } from './bug24934';
+    abc(1, 2, 3);

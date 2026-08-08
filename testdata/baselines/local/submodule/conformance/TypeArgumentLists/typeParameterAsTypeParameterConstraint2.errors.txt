@@ -1,0 +1,39 @@
+typeParameterAsTypeParameterConstraint2.ts(6,8): error TS2345: Argument of type '""' is not assignable to parameter of type 'T'.
+typeParameterAsTypeParameterConstraint2.ts(7,8): error TS2345: Argument of type 'object' is not assignable to parameter of type 'T'.
+typeParameterAsTypeParameterConstraint2.ts(13,17): error TS2345: Argument of type '{ x: number }' is not assignable to parameter of type 'T'.
+typeParameterAsTypeParameterConstraint2.ts(16,9): error TS2345: Argument of type '{ length: "" }' is not assignable to parameter of type '{ length: T }'.
+typeParameterAsTypeParameterConstraint2.ts(17,9): error TS2345: Argument of type '{ length: object }' is not assignable to parameter of type '{ length: T }'.
+typeParameterAsTypeParameterConstraint2.ts(18,10): error TS2345: Argument of type 'string[]' is not assignable to parameter of type '{ length: T }'.
+
+
+==== typeParameterAsTypeParameterConstraint2.ts (6 errors) ====
+    // using a type parameter as a constraint for a type parameter is invalid
+    // these should be errors unless otherwise noted
+    
+    function foo<T, U extends T>(x: T, y: U): U { return y; } // this is now an error
+    
+    foo(1, '');
+           ~~
+!!! error TS2345: Argument of type '""' is not assignable to parameter of type 'T'.
+    foo(1, {});
+           ~~
+!!! error TS2345: Argument of type 'object' is not assignable to parameter of type 'T'.
+    
+    interface NumberVariant extends Number {
+        x: number;
+    }
+    var n: NumberVariant;
+    var r3 = foo(1, n);
+                    ~
+!!! error TS2345: Argument of type '{ x: number }' is not assignable to parameter of type 'T'.
+    
+    function foo2<T, U extends { length: T }>(x: T, y: U) { return y; } // this is now an error
+    foo2(1, { length: '' });
+            ~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ length: "" }' is not assignable to parameter of type '{ length: T }'.
+    foo2(1, { length: {} });
+            ~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ length: object }' is not assignable to parameter of type '{ length: T }'.
+    foo2([], ['']);
+             ~~~~
+!!! error TS2345: Argument of type 'string[]' is not assignable to parameter of type '{ length: T }'.

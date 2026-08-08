@@ -1,0 +1,25 @@
+equalityWithtNullishCoalescingAssignment.ts(4,9): error TS2367: This comparison appears to be unintentional because the types 'true' and 'false' have no overlap.
+equalityWithtNullishCoalescingAssignment.ts(13,9): error TS2367: This comparison appears to be unintentional because the types '1' and '0' have no overlap.
+
+
+==== equalityWithtNullishCoalescingAssignment.ts (2 errors) ====
+    function f1(a?: boolean): void {
+        a ??= true;
+    
+        if (a === false) {
+            ~~~~~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'true' and 'false' have no overlap.
+            console.log(a);
+        }
+    }
+    f1(false);
+    
+    function f2() {
+        let x: 0 | 1 | 2 | 3 = 0 as any;
+        x ??= 1;
+        if (x === 0) {
+            ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '1' and '0' have no overlap.
+            console.log(x);
+        }
+    }

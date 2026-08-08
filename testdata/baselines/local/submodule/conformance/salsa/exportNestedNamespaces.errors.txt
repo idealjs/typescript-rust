@@ -1,0 +1,44 @@
+mod.js(1,1): error TS2304: Cannot find name 'exports'.
+mod.js(2,1): error TS2304: Cannot find name 'exports'.
+mod.js(5,1): error TS2304: Cannot find name 'exports'.
+use.js(3,13): error TS2304: Cannot find name 's'.
+use.js(5,19): error TS2304: Cannot find name 's'.
+
+
+==== mod.js (3 errors) ====
+    exports.n = {};
+    ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    exports.n.K = function () {
+    ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        this.x = 10;
+    }
+    exports.Classic = class {
+    ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        constructor() {
+            this.p = 1
+        }
+    }
+    
+==== use.js (2 errors) ====
+    import * as s from './mod'
+    
+    var k = new s.n.K()
+                ~
+!!! error TS2304: Cannot find name 's'.
+    k.x
+    var classic = new s.Classic()
+                      ~
+!!! error TS2304: Cannot find name 's'.
+    
+    
+    /** @param {s.n.K} c
+        @param {s.Classic} classic */
+    function f(c, classic) {
+        c.x
+        classic.p
+    }
+    
+    

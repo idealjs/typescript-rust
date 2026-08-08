@@ -1,0 +1,59 @@
+/app.ts(2,34): error TS1005: ')' expected.
+/app.ts(2,63): error TS1005: ';' expected.
+/app.ts(2,77): error TS1128: Declaration or statement expected.
+/node_modules/@types/foo/package.json(2,9): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(3,12): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(4,12): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(5,8): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(6,15): error TS1005: ';' expected.
+/node_modules/@types/foo/package.json(7,16): error TS1005: ';' expected.
+
+
+==== resolutionModeImportType1.ts (0 errors) ====
+    
+==== /node_modules/@types/foo/package.json (6 errors) ====
+    {
+      "name": "@types/foo",
+            ~
+!!! error TS1005: ';' expected.
+      "version": "1.0.0",
+               ~
+!!! error TS1005: ';' expected.
+      "exports": {
+               ~
+!!! error TS1005: ';' expected.
+        ".": {
+           ~
+!!! error TS1005: ';' expected.
+          "import": "./index.d.mts",
+                  ~
+!!! error TS1005: ';' expected.
+          "require": "./index.d.cts"
+                   ~
+!!! error TS1005: ';' expected.
+        }
+      }
+    }
+    
+==== /node_modules/@types/foo/index.d.mts (0 errors) ====
+    export declare const x: "module";
+    
+==== /node_modules/@types/foo/index.d.cts (0 errors) ====
+    export declare const x: "script";
+    
+==== /app.ts (3 errors) ====
+    type Default = typeof import("foo").x;
+    type Import = typeof import("foo", { with: { "resolution-mode": "import" } }).x;
+                                     ~
+!!! error TS1005: ')' expected.
+                                                                  ~
+!!! error TS1005: ';' expected.
+                                                                                ~
+!!! error TS1128: Declaration or statement expected.
+    type Require = typeof import("foo", { with: { "resolution-mode": "require" } }).x;
+    // resolution-mode does not enforce file extension in `bundler`, just sets conditions
+    type ImportRelative = typeof import("./other", { with: { "resolution-mode": "import" } }).x;
+    type RequireRelative = typeof import("./other", { with: { "resolution-mode": "require" } }).x;
+    
+==== /other.ts (0 errors) ====
+    export const x = "other";

@@ -1,0 +1,29 @@
+/b.ts(1,13): error TS1003: Identifier expected.
+/b.ts(1,15): error TS1005: '=' expected.
+/b.ts(1,18): error TS1005: ';' expected.
+/b.ts(1,21): error TS1005: ';' expected.
+/b.ts(1,21): error TS2304: Cannot find name 'from'.
+/b.ts(1,26): error TS1005: ';' expected.
+
+
+==== /a.ts (0 errors) ====
+    export class A {}
+    
+==== /b.ts (6 errors) ====
+    export type * as ns from "./a";
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~
+!!! error TS1005: '=' expected.
+                     ~~
+!!! error TS1005: ';' expected.
+                        ~~~~
+!!! error TS1005: ';' expected.
+                        ~~~~
+!!! error TS2304: Cannot find name 'from'.
+                             ~~~~~
+!!! error TS1005: ';' expected.
+    
+==== /c.ts (0 errors) ====
+    import { ns } from "./b";
+    let _: ns.A = new ns.A(); // Error

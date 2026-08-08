@@ -1,0 +1,66 @@
+invalidForInContinueStatements.ts(4,1): error TS1104: A 'continue' statement can only be used within an enclosing iteration statement.
+invalidForInContinueStatements.ts(8,19): error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+invalidForInContinueStatements.ts(27,5): error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+invalidForInContinueStatements.ts(28,5): error TS7027: Unreachable code detected.
+invalidForInContinueStatements.ts(37,5): error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+
+
+==== invalidForInContinueStatements.ts (5 errors) ====
+    // All errors
+    
+    // naked continue not allowed
+    continue;
+    ~~~~~~~~~
+    
+    
+    // non-existent label
+    ~~~~~~~~~~~~~~~~~~~~~
+    ONE:
+    
+!!! error TS1104: A 'continue' statement can only be used within an enclosing iteration statement.
+    for (var x in {}) continue TWO;
+                      ~~~~~~~~~~~~~
+    
+    
+    // continue from inside function
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    TWO:
+    
+!!! error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+    for (var x in {}) {
+        var fn = () => {
+            continue TWO;
+        }
+    }
+    
+    THREE:
+    for (var x in {}) {
+        var fn = function () {
+            continue THREE;
+        }
+    }
+    
+    // continue forward
+    for (var x in {}) {
+        continue FIVE;
+        ~~~~~~~~~~~~~~
+        FIVE:
+    ~~~~
+!!! error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+        ~~~~~
+        for (var x in {}) { }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+    
+!!! error TS7027: Unreachable code detected.
+    
+    // label on non-loop statement
+    NINE:
+    var y = 12;
+    
+    for (var x in {}) {
+        continue NINE;
+        ~~~~~~~~~~~~~~
+    }
+    
+!!! error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.

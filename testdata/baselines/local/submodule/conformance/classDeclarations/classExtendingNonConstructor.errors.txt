@@ -1,14 +1,14 @@
-classDeclarations/classExtendingNonConstructor.ts(7,18): error TS1109: Expression expected.
-classDeclarations/classExtendingNonConstructor.ts(8,1): error TS1005: ',' expected.
-classDeclarations/classExtendingNonConstructor.ts(9,1): error TS1005: ',' expected.
-classDeclarations/classExtendingNonConstructor.ts(10,1): error TS1005: ',' expected.
-classDeclarations/classExtendingNonConstructor.ts(11,1): error TS1005: ',' expected.
-classDeclarations/classExtendingNonConstructor.ts(12,1): error TS1005: ',' expected.
-classDeclarations/classExtendingNonConstructor.ts(13,1): error TS1005: ',' expected.
-classDeclarations/classExtendingNonConstructor.ts(13,25): error TS1005: '{' expected.
+classExtendingNonConstructor.ts(7,18): error TS1109: Expression expected.
+classExtendingNonConstructor.ts(8,1): error TS1005: ',' expected.
+classExtendingNonConstructor.ts(9,1): error TS1005: ',' expected.
+classExtendingNonConstructor.ts(10,1): error TS1005: ',' expected.
+classExtendingNonConstructor.ts(11,1): error TS1005: ',' expected.
+classExtendingNonConstructor.ts(12,1): error TS1005: ',' expected.
+classExtendingNonConstructor.ts(13,1): error TS1005: ',' expected.
+classExtendingNonConstructor.ts(13,25): error TS1005: '{' expected.
 
 
-==== classDeclarations/classExtendingNonConstructor.ts (8 errors) ====
+==== classExtendingNonConstructor.ts (8 errors) ====
     var x: {};
     
     function foo() {

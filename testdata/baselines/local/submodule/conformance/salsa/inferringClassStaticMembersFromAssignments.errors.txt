@@ -1,0 +1,83 @@
+a.js(2,4): error TS2339: Property 'staticProp' does not exist on type 'object'.
+a.js(5,4): error TS2339: Property 'staticProp' does not exist on type '() => void'.
+a.js(11,4): error TS2339: Property 'staticProp' does not exist on type '() => void'.
+b.ts(4,9): error TS2304: Cannot find name 'a'.
+b.ts(5,9): error TS2304: Cannot find name 'a'.
+b.ts(6,9): error TS2304: Cannot find name 'a'.
+b.ts(7,9): error TS2304: Cannot find name 'a'.
+b.ts(10,12): error TS2339: Property 'staticProp' does not exist on type 'object'.
+b.ts(12,12): error TS2339: Property 'staticProp' does not exist on type '() => void'.
+b.ts(13,12): error TS2339: Property 'staticProp' does not exist on type '() => void'.
+global.js(2,4): error TS2339: Property 'staticProp' does not exist on type 'object'.
+global.js(5,4): error TS2339: Property 'staticProp' does not exist on type '() => void'.
+global.js(11,4): error TS2339: Property 'staticProp' does not exist on type '() => void'.
+
+
+==== inferringClassStaticMembersFromAssignments.ts (0 errors) ====
+    
+==== a.js (3 errors) ====
+    export class C1 { }
+    C1.staticProp = 0;
+       ~~~~~~~~~~
+!!! error TS2339: Property 'staticProp' does not exist on type 'object'.
+    
+    export function F1() { }
+    F1.staticProp = 0;
+       ~~~~~~~~~~
+!!! error TS2339: Property 'staticProp' does not exist on type '() => void'.
+    
+    export var C2 = class { };
+    C2.staticProp = 0;
+    
+    export let F2 = function () { };
+    F2.staticProp = 0;
+       ~~~~~~~~~~
+!!! error TS2339: Property 'staticProp' does not exist on type '() => void'.
+    
+==== global.js (3 errors) ====
+    class C3 { }
+    C3.staticProp = 0;
+       ~~~~~~~~~~
+!!! error TS2339: Property 'staticProp' does not exist on type 'object'.
+    
+    function F3() { }
+    F3.staticProp = 0;
+       ~~~~~~~~~~
+!!! error TS2339: Property 'staticProp' does not exist on type '() => void'.
+    
+    var C4 = class { };
+    C4.staticProp = 0;
+    
+    let F4 = function () { };
+    F4.staticProp = 0;
+       ~~~~~~~~~~
+!!! error TS2339: Property 'staticProp' does not exist on type '() => void'.
+    
+==== b.ts (7 errors) ====
+    import * as a from "./a";
+    var n: number;
+    
+    var n = a.C1.staticProp;
+            ~
+!!! error TS2304: Cannot find name 'a'.
+    var n = a.C2.staticProp;
+            ~
+!!! error TS2304: Cannot find name 'a'.
+    var n = a.F1.staticProp;
+            ~
+!!! error TS2304: Cannot find name 'a'.
+    var n = a.F2.staticProp;
+            ~
+!!! error TS2304: Cannot find name 'a'.
+    
+    
+    var n = C3.staticProp;
+               ~~~~~~~~~~
+!!! error TS2339: Property 'staticProp' does not exist on type 'object'.
+    var n = C4.staticProp;
+    var n = F3.staticProp;
+               ~~~~~~~~~~
+!!! error TS2339: Property 'staticProp' does not exist on type '() => void'.
+    var n = F4.staticProp;
+               ~~~~~~~~~~
+!!! error TS2339: Property 'staticProp' does not exist on type '() => void'.

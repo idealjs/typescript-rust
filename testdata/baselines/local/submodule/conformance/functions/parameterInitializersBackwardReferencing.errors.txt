@@ -1,0 +1,18 @@
+parameterInitializersBackwardReferencing.ts(4,17): error TS2304: Cannot find name 'b'.
+parameterInitializersBackwardReferencing.ts(8,17): error TS2304: Cannot find name 'b'.
+
+
+==== parameterInitializersBackwardReferencing.ts (2 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/38243
+    
+    function test0({ a = 0, b = a } = {}) {
+        return { a, b };
+                    ~
+!!! error TS2304: Cannot find name 'b'.
+    }
+    
+    function test1({ c: { a = 0, b = a } = {} } = {}) {
+        return { a, b };
+                    ~
+!!! error TS2304: Cannot find name 'b'.
+    }

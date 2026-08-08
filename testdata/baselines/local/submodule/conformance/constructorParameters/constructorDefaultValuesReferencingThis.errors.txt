@@ -1,8 +1,8 @@
-constructorParameters/constructorDefaultValuesReferencingThis.ts(11,24): error TS1005: ',' expected.
-constructorParameters/constructorDefaultValuesReferencingThis.ts(16,9): error TS2349: This expression is not callable.
+constructorDefaultValuesReferencingThis.ts(11,24): error TS1005: ',' expected.
+constructorDefaultValuesReferencingThis.ts(16,9): error TS2349: This expression is not callable.
 
 
-==== constructorParameters/constructorDefaultValuesReferencingThis.ts (2 errors) ====
+==== constructorDefaultValuesReferencingThis.ts (2 errors) ====
     class C {
         public baseProp = 1;
         constructor(x = this) { }

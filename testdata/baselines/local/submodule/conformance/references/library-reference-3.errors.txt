@@ -1,0 +1,14 @@
+/src/consumer.ts(2,3): error TS2339: Property 'foo' does not exist on type 'object'.
+
+
+==== library-reference-3.ts (0 errors) ====
+    // Secondary references are possible
+    
+==== /src/node_modules/jquery/index.d.ts (0 errors) ====
+    declare var $: { foo(): void };
+    
+==== /src/consumer.ts (1 errors) ====
+    /// <reference types="jquery" />
+    $.foo();
+      ~~~
+!!! error TS2339: Property 'foo' does not exist on type 'object'.

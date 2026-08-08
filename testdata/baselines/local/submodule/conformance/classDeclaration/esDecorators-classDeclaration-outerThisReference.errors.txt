@@ -1,0 +1,56 @@
+esDecorators-classDeclaration-outerThisReference.ts(31,5): error TS1003: Identifier expected.
+esDecorators-classDeclaration-outerThisReference.ts(31,5): error TS1127: Invalid character.
+esDecorators-classDeclaration-outerThisReference.ts(31,6): error TS1005: ';' expected.
+esDecorators-classDeclaration-outerThisReference.ts(33,28): error TS1003: Identifier expected.
+esDecorators-classDeclaration-outerThisReference.ts(33,28): error TS1127: Invalid character.
+esDecorators-classDeclaration-outerThisReference.ts(33,29): error TS1005: ',' expected.
+
+
+==== esDecorators-classDeclaration-outerThisReference.ts (6 errors) ====
+    declare let dec: any;
+    
+    declare let f: any;
+    
+    // `this` should point to the outer `this` in both cases.
+    @dec(this)
+    class A {
+        @dec(this)
+        b = 2;
+    }
+    
+    // `this` should point to the outer `this`, and maintain the correct evaluation order with respect to computed
+    // property names.
+    
+    @dec(this)
+    class B {
+        // @ts-ignore
+        [f(this)] = 1;
+    
+        @dec(this)
+        b = 2;
+    
+        // @ts-ignore
+        [f(this)] = 3;
+    }
+    
+    // The `this` transformation should ensure that decorators inside the class body have privileged access to
+    // private names.
+    @dec(this)
+    class C {
+        #a = 1;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+    
+        @dec(this, (x: C) => x.#a)
+                               ~
+!!! error TS1003: Identifier expected.
+                               ~
+!!! error TS1127: Invalid character.
+                                ~
+!!! error TS1005: ',' expected.
+        b = 2;
+    }

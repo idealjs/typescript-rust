@@ -1,18 +1,18 @@
-constructorDeclarations/classConstructorAccessibility.ts(2,31): error TS1005: ',' expected.
-constructorDeclarations/classConstructorAccessibility.ts(6,32): error TS1005: ',' expected.
-constructorDeclarations/classConstructorAccessibility.ts(10,34): error TS1005: ',' expected.
-constructorDeclarations/classConstructorAccessibility.ts(13,9): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility.ts(14,9): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility.ts(15,9): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility.ts(19,35): error TS1005: ',' expected.
-constructorDeclarations/classConstructorAccessibility.ts(23,36): error TS1005: ',' expected.
-constructorDeclarations/classConstructorAccessibility.ts(27,38): error TS1005: ',' expected.
-constructorDeclarations/classConstructorAccessibility.ts(30,13): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility.ts(31,13): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility.ts(32,13): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility.ts(2,31): error TS1005: ',' expected.
+classConstructorAccessibility.ts(6,32): error TS1005: ',' expected.
+classConstructorAccessibility.ts(10,34): error TS1005: ',' expected.
+classConstructorAccessibility.ts(13,9): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility.ts(14,9): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility.ts(15,9): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility.ts(19,35): error TS1005: ',' expected.
+classConstructorAccessibility.ts(23,36): error TS1005: ',' expected.
+classConstructorAccessibility.ts(27,38): error TS1005: ',' expected.
+classConstructorAccessibility.ts(30,13): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility.ts(31,13): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility.ts(32,13): error TS2554: Expected 2 arguments, but got 1.
 
 
-==== constructorDeclarations/classConstructorAccessibility.ts (12 errors) ====
+==== classConstructorAccessibility.ts (12 errors) ====
     class C {
         public constructor(public x: number) { }
                                   ~

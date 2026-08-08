@@ -1,0 +1,15 @@
+thisTypeInFunctions3.ts(2,37): error TS2304: Cannot find name 'TProp'.
+
+
+==== thisTypeInFunctions3.ts (1 errors) ====
+    declare class Base {
+        check<TProp extends this>(prop: TProp): boolean;
+                                        ~~~~~
+!!! error TS2304: Cannot find name 'TProp'.
+    }
+    
+    class Test extends Base {
+        m() {
+            this.check(this);
+        }
+    }

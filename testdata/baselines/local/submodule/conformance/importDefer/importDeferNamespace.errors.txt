@@ -1,0 +1,16 @@
+b.ts(3,1): error TS2304: Cannot find name 'aNs'.
+
+
+==== importDeferNamespace.ts (0 errors) ====
+    
+==== a.ts (0 errors) ====
+    export function foo() {
+        console.log("foo from a");
+    }
+    
+==== b.ts (1 errors) ====
+    import defer * as aNs from "./a.js";
+    
+    aNs.foo();
+    ~~~
+!!! error TS2304: Cannot find name 'aNs'.

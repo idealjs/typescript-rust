@@ -1,0 +1,22 @@
+2.ts(3,1): error TS2304: Cannot find name 'foo'.
+2.ts(4,1): error TS2304: Cannot find name 'foo'.
+
+
+==== 0.ts (0 errors) ====
+    export const a = 1;
+    export const b = 2;
+    
+==== 1.ts (0 errors) ====
+    export * as ns from './0';
+    ns.a;
+    ns.b;
+    
+==== 2.ts (2 errors) ====
+    import * as foo from './1'
+    
+    foo.ns.a;
+    ~~~
+!!! error TS2304: Cannot find name 'foo'.
+    foo.ns.b;
+    ~~~
+!!! error TS2304: Cannot find name 'foo'.

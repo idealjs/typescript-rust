@@ -1,0 +1,11 @@
+parserForInStatement2.ts(1,13): error TS1005: ',' expected.
+parserForInStatement2.ts(1,14): error TS1005: ',' expected.
+
+
+==== parserForInStatement2.ts (2 errors) ====
+    for (var in X) {
+                ~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS1005: ',' expected.
+    }

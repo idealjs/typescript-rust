@@ -1,0 +1,92 @@
+awaitMissingValueIsError.ts(2,10): error TS1012: Unexpected token.
+yieldStarMissingValueIsError.ts(2,12): error TS1012: Unexpected token.
+
+
+==== functionDeclarationIsOk.ts (0 errors) ====
+    async function * f1() {
+    }
+==== awaitNameIsOk.ts (0 errors) ====
+    async function * await() {
+    }
+==== yieldNameIsOk.ts (0 errors) ====
+    async function * yield() {
+    }
+==== awaitParameterIsError.ts (0 errors) ====
+    async function * f4(await) {
+    }
+==== yieldParameterIsError.ts (0 errors) ====
+    async function * f5(yield) {
+    }
+==== awaitInParameterInitializerIsError.ts (0 errors) ====
+    async function * f6(a = await 1) {
+    }
+==== yieldInParameterInitializerIsError.ts (0 errors) ====
+    async function * f7(a = yield) {
+    }
+==== nestedAsyncGeneratorIsOk.ts (0 errors) ====
+    async function * f8() {
+        async function * g() {
+        }
+    }
+==== nestedFunctionDeclarationNamedYieldIsError.ts (0 errors) ====
+    async function * f9() {
+        function yield() {
+        }
+    }
+==== nestedFunctionExpressionNamedYieldIsError.ts (0 errors) ====
+    async function * f10() {
+        const x = function yield() {
+        };
+    }
+==== nestedFunctionDeclarationNamedAwaitIsError.ts (0 errors) ====
+    async function * f11() {
+        function await() {
+        }
+    }
+==== nestedFunctionExpressionNamedAwaitIsError.ts (0 errors) ====
+    async function * f12() {
+        const x = function yield() {
+        };
+    }
+==== yieldIsOk.ts (0 errors) ====
+    async function * f13() {
+        yield;
+    }
+==== yieldWithValueIsOk.ts (0 errors) ====
+    async function * f14() {
+        yield 1;
+    }
+==== yieldStarMissingValueIsError.ts (1 errors) ====
+    async function * f15() {
+        yield *;
+               ~
+!!! error TS1012: Unexpected token.
+    }
+==== yieldStarWithValueIsOk.ts (0 errors) ====
+    async function * f16() {
+        yield * [];
+    }
+==== awaitWithValueIsOk.ts (0 errors) ====
+    async function * f17() {
+        await 1;
+    }
+==== awaitMissingValueIsError.ts (1 errors) ====
+    async function * f18() {
+        await;
+             ~
+!!! error TS1012: Unexpected token.
+    }
+==== awaitAsTypeIsOk.ts (0 errors) ====
+    interface await {}
+    async function * f19() {
+        let x: await;
+    }
+==== yieldAsTypeIsOk.ts (0 errors) ====
+    interface yield {}
+    async function * f20() {
+        let x: yield;
+    }
+==== yieldInNestedComputedPropertyIsOk.ts (0 errors) ====
+    async function * f21() {
+        const x = { [yield]: 1 };
+    }

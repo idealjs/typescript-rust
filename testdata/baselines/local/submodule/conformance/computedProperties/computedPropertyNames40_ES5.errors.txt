@@ -1,0 +1,19 @@
+computedPropertyNames40_ES5.ts(5,7): error TS1005: ']' expected.
+computedPropertyNames40_ES5.ts(5,15): error TS1005: ';' expected.
+
+
+==== computedPropertyNames40_ES5.ts (2 errors) ====
+    class Foo { x }
+    class Foo2 { x; y }
+    
+    class C {
+        [s: string]: () => Foo2;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+    
+        // Computed properties
+        [""]() { return new Foo }
+        [""]() { return new Foo2 }
+    }

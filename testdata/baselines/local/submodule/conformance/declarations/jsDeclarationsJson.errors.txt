@@ -1,0 +1,37 @@
+index.js(1,11): error TS2304: Cannot find name 'require'.
+index.js(2,7): error TS1003: Identifier expected.
+index.js(2,8): error TS1005: ';' expected.
+index.js(2,8): error TS2304: Cannot find name 'exports'.
+obj.json(2,8): error TS1005: ';' expected.
+obj.json(3,8): error TS1005: ';' expected.
+obj.json(4,10): error TS1005: ';' expected.
+obj.json(5,16): error TS1005: ';' expected.
+
+
+==== index.js (4 errors) ====
+    const j = require("./obj.json");
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    module.exports = j;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+==== obj.json (4 errors) ====
+    {
+        "x": 12,
+           ~
+!!! error TS1005: ';' expected.
+        "y": 12,
+           ~
+!!! error TS1005: ';' expected.
+        "obj": {
+             ~
+!!! error TS1005: ';' expected.
+            "items": [{"x": 12}, {"x": 12, "y": 12}, {"x": 0}, {"x": -1, "err": true}]
+                   ~
+!!! error TS1005: ';' expected.
+        }
+    }

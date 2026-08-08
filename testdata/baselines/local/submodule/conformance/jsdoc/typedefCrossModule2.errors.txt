@@ -1,0 +1,65 @@
+error TS2300: Duplicate identifier 'Foo'.
+mod1.js(7,1): error TS2304: Cannot find name 'exports'.
+mod1.js(10,7): error TS1003: Identifier expected.
+mod1.js(10,8): error TS1005: ';' expected.
+mod1.js(10,8): error TS2304: Cannot find name 'exports'.
+mod1.js(20,1): error TS2304: Cannot find name 'exports'.
+mod1.js(23,7): error TS1003: Identifier expected.
+mod1.js(23,8): error TS1005: ';' expected.
+mod1.js(23,8): error TS2304: Cannot find name 'exports'.
+use.js(1,11): error TS2304: Cannot find name 'require'.
+
+
+!!! error TS2300: Duplicate identifier 'Foo'.
+==== mod1.js (8 errors) ====
+    // error
+    
+    /** @typedef {number} Foo */
+    class Foo { } // should error
+    
+    /** @typedef {number} Bar */
+    exports.Bar = class { }
+    ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    
+    /** @typedef {number} Baz */
+    module.exports = {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        Baz: class { }
+    }
+    
+    // ok
+    
+    /** @typedef {number} Qux */
+    var Qux = 2;
+    
+    /** @typedef {number} Quid */
+    exports.Quid = 2;
+    ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    
+    /** @typedef {number} Quack */
+    module.exports = {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        Quack: 2
+    }
+    
+==== use.js (1 errors) ====
+    var mod = require('./mod1.js');
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    /** @type {import("./mod1.js").Baz} */
+    var b;
+    /** @type {mod.Baz} */
+    var bb;
+    var bbb = new mod.Baz();

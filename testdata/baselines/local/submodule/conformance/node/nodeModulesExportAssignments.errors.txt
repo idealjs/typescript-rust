@@ -1,0 +1,25 @@
+package.json(2,11): error TS1005: ';' expected.
+
+
+==== index.ts (0 errors) ====
+    // cjs format file
+    const a = {};
+    export = a;
+==== index.ts (0 errors) ====
+    // esm format file
+    const a = {};
+    export = a;
+==== package.json (1 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+        "type": "module"
+    }
+==== package.json (1 errors) ====
+    {
+        "type": "commonjs"
+              ~
+!!! error TS1005: ';' expected.
+    }

@@ -1,0 +1,186 @@
+privateNamesAndMethods.ts(2,5): error TS1003: Identifier expected.
+privateNamesAndMethods.ts(2,5): error TS1127: Invalid character.
+privateNamesAndMethods.ts(2,6): error TS1005: ';' expected.
+privateNamesAndMethods.ts(3,11): error TS1005: ';' expected.
+privateNamesAndMethods.ts(3,11): error TS1127: Invalid character.
+privateNamesAndMethods.ts(3,12): error TS1005: ';' expected.
+privateNamesAndMethods.ts(4,11): error TS1003: Identifier expected.
+privateNamesAndMethods.ts(4,12): error TS1005: ';' expected.
+privateNamesAndMethods.ts(4,12): error TS1127: Invalid character.
+privateNamesAndMethods.ts(4,13): error TS1005: ';' expected.
+privateNamesAndMethods.ts(7,5): error TS1003: Identifier expected.
+privateNamesAndMethods.ts(7,5): error TS1127: Invalid character.
+privateNamesAndMethods.ts(7,6): error TS1005: ';' expected.
+privateNamesAndMethods.ts(8,9): error TS1005: ';' expected.
+privateNamesAndMethods.ts(8,9): error TS1127: Invalid character.
+privateNamesAndMethods.ts(8,10): error TS1005: ';' expected.
+privateNamesAndMethods.ts(9,21): error TS1003: Identifier expected.
+privateNamesAndMethods.ts(9,21): error TS1127: Invalid character.
+privateNamesAndMethods.ts(9,22): error TS1005: ';' expected.
+privateNamesAndMethods.ts(9,22): error TS7027: Unreachable code detected.
+privateNamesAndMethods.ts(11,9): error TS1005: ';' expected.
+privateNamesAndMethods.ts(11,9): error TS1127: Invalid character.
+privateNamesAndMethods.ts(11,10): error TS1005: ';' expected.
+privateNamesAndMethods.ts(12,14): error TS1003: Identifier expected.
+privateNamesAndMethods.ts(12,14): error TS1127: Invalid character.
+privateNamesAndMethods.ts(12,15): error TS1005: ';' expected.
+privateNamesAndMethods.ts(15,14): error TS1003: Identifier expected.
+privateNamesAndMethods.ts(15,14): error TS1127: Invalid character.
+privateNamesAndMethods.ts(15,15): error TS1005: ';' expected.
+privateNamesAndMethods.ts(16,14): error TS1003: Identifier expected.
+privateNamesAndMethods.ts(16,14): error TS1127: Invalid character.
+privateNamesAndMethods.ts(16,15): error TS1005: ';' expected.
+privateNamesAndMethods.ts(17,14): error TS1003: Identifier expected.
+privateNamesAndMethods.ts(17,14): error TS1127: Invalid character.
+privateNamesAndMethods.ts(17,15): error TS1005: ';' expected.
+privateNamesAndMethods.ts(18,14): error TS1003: Identifier expected.
+privateNamesAndMethods.ts(18,14): error TS1127: Invalid character.
+privateNamesAndMethods.ts(18,15): error TS1005: ';' expected.
+privateNamesAndMethods.ts(18,27): error TS1003: Identifier expected.
+privateNamesAndMethods.ts(18,27): error TS1127: Invalid character.
+privateNamesAndMethods.ts(18,28): error TS1005: ';' expected.
+privateNamesAndMethods.ts(19,14): error TS1003: Identifier expected.
+privateNamesAndMethods.ts(19,14): error TS1127: Invalid character.
+privateNamesAndMethods.ts(19,15): error TS1005: ';' expected.
+privateNamesAndMethods.ts(24,5): error TS1003: Identifier expected.
+privateNamesAndMethods.ts(24,5): error TS1127: Invalid character.
+privateNamesAndMethods.ts(24,6): error TS1005: ';' expected.
+privateNamesAndMethods.ts(26,9): error TS2349: This expression is not callable.
+privateNamesAndMethods.ts(27,14): error TS1003: Identifier expected.
+privateNamesAndMethods.ts(27,14): error TS1127: Invalid character.
+privateNamesAndMethods.ts(27,15): error TS1005: ';' expected.
+
+
+==== privateNamesAndMethods.ts (51 errors) ====
+    class A {
+        #foo(a: number) {}
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~
+!!! error TS1005: ';' expected.
+        async #bar(a: number) {}
+              ~
+!!! error TS1005: ';' expected.
+              ~
+!!! error TS1127: Invalid character.
+               ~~~
+!!! error TS1005: ';' expected.
+        async *#baz(a: number) {
+              ~
+!!! error TS1003: Identifier expected.
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~
+!!! error TS1005: ';' expected.
+            return 3;
+        }
+        #_quux: number;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~~
+!!! error TS1005: ';' expected.
+        get #quux (): number {
+            ~
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS1127: Invalid character.
+             ~~~~
+!!! error TS1005: ';' expected.
+            return this.#_quux;
+                        ~
+!!! error TS1003: Identifier expected.
+                        ~
+!!! error TS1127: Invalid character.
+                         ~~~~~
+!!! error TS1005: ';' expected.
+                         ~~~~~~
+        }
+    ~~~~
+!!! error TS7027: Unreachable code detected.
+        set #quux (val: number) {
+            ~
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS1127: Invalid character.
+             ~~~~
+!!! error TS1005: ';' expected.
+            this.#_quux = val;
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~~~
+!!! error TS1005: ';' expected.
+        }
+        constructor () {
+            this.#foo(30);
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~
+!!! error TS1005: ';' expected.
+            this.#bar(30);
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~
+!!! error TS1005: ';' expected.
+            this.#baz(30);
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~
+!!! error TS1005: ';' expected.
+            this.#quux = this.#quux + 1;
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~~
+!!! error TS1005: ';' expected.
+                              ~
+!!! error TS1003: Identifier expected.
+                              ~
+!!! error TS1127: Invalid character.
+                               ~~~~
+!!! error TS1005: ';' expected.
+            this.#quux++;
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~~
+!!! error TS1005: ';' expected.
+     }
+    }
+    
+    class B extends A {
+        #foo(a: string) {}
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~
+!!! error TS1005: ';' expected.
+        constructor () {
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            this.#foo("str");
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~
+!!! error TS1005: ';' expected.
+        }
+    }

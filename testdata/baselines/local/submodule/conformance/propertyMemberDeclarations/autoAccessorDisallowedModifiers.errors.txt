@@ -1,0 +1,89 @@
+autoAccessorDisallowedModifiers.ts(4,13): error TS1005: ';' expected.
+autoAccessorDisallowedModifiers.ts(11,18): error TS1005: ';' expected.
+autoAccessorDisallowedModifiers.ts(12,18): error TS1005: ';' expected.
+autoAccessorDisallowedModifiers.ts(16,22): error TS1005: ';' expected.
+autoAccessorDisallowedModifiers.ts(27,1): error TS1275: 'accessor' modifier can only appear on a property declaration.
+autoAccessorDisallowedModifiers.ts(31,1): error TS1275: 'accessor' modifier can only appear on a property declaration.
+autoAccessorDisallowedModifiers.ts(33,1): error TS1275: 'accessor' modifier can only appear on a property declaration.
+autoAccessorDisallowedModifiers.ts(34,10): error TS2304: Cannot find name 'import'.
+autoAccessorDisallowedModifiers.ts(34,17): error TS1005: ';' expected.
+autoAccessorDisallowedModifiers.ts(35,10): error TS2304: Cannot find name 'import'.
+autoAccessorDisallowedModifiers.ts(35,17): error TS1005: ';' expected.
+autoAccessorDisallowedModifiers.ts(35,20): error TS2304: Cannot find name 'from'.
+autoAccessorDisallowedModifiers.ts(35,25): error TS1005: ';' expected.
+autoAccessorDisallowedModifiers.ts(38,10): error TS2304: Cannot find name 'import'.
+autoAccessorDisallowedModifiers.ts(38,17): error TS1005: ';' expected.
+autoAccessorDisallowedModifiers.ts(38,17): error TS2304: Cannot find name 'N2'.
+
+
+==== autoAccessorDisallowedModifiers.ts (16 errors) ====
+    abstract class C1 {
+        accessor accessor a: any;
+        readonly accessor b: any;
+        declare accessor c: any;
+                ~~~~~~~~
+!!! error TS1005: ';' expected.
+        accessor public d: any;
+        accessor private e: any;
+        accessor protected f: any;
+        accessor abstract g: any;
+        accessor static h: any;
+        accessor i() {}
+        accessor get j() { return false; }
+                     ~
+!!! error TS1005: ';' expected.
+        accessor set k(v: any) {}
+                     ~
+!!! error TS1005: ';' expected.
+        accessor constructor() {}
+        accessor l?: any;
+        accessor readonly m: any;
+        accessor declare n: any;
+                         ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class C2 extends C1 {
+        accessor override g: any;
+    }
+    
+    interface I1 {
+        accessor a: number;
+    }
+    
+    accessor class C3 {}
+    ~~~~~~~~
+!!! error TS1275: 'accessor' modifier can only appear on a property declaration.
+    accessor interface I2 {}
+    accessor namespace N1 {}
+    accessor enum E1 {}
+    accessor var V1: any;
+    ~~~~~~~~
+!!! error TS1275: 'accessor' modifier can only appear on a property declaration.
+    accessor type T1 = never;
+    accessor function F1() {}
+    ~~~~~~~~
+!!! error TS1275: 'accessor' modifier can only appear on a property declaration.
+    accessor import "x";
+             ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+                    ~~~
+!!! error TS1005: ';' expected.
+    accessor import {} from "x";
+             ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+                    ~
+!!! error TS1005: ';' expected.
+                       ~~~~
+!!! error TS2304: Cannot find name 'from'.
+                            ~~~
+!!! error TS1005: ';' expected.
+    accessor export { V1 };
+    accessor export default V1;
+    accessor import N2 = N1;
+             ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+                    ~~
+!!! error TS1005: ';' expected.
+                    ~~
+!!! error TS2304: Cannot find name 'N2'.

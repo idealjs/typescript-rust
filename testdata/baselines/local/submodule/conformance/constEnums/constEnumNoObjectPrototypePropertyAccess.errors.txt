@@ -1,13 +1,13 @@
-constEnums/constEnumNoObjectPrototypePropertyAccess.ts(5,19): error TS2339: Property 'constructor' does not exist on type 'Bebra'.
-constEnums/constEnumNoObjectPrototypePropertyAccess.ts(6,19): error TS2339: Property 'hasOwnProperty' does not exist on type 'Bebra'.
-constEnums/constEnumNoObjectPrototypePropertyAccess.ts(7,19): error TS2339: Property 'isPrototypeOf' does not exist on type 'Bebra'.
-constEnums/constEnumNoObjectPrototypePropertyAccess.ts(8,19): error TS2339: Property 'propertyIsEnumerable' does not exist on type 'Bebra'.
-constEnums/constEnumNoObjectPrototypePropertyAccess.ts(9,19): error TS2339: Property 'toLocaleString' does not exist on type 'Bebra'.
-constEnums/constEnumNoObjectPrototypePropertyAccess.ts(10,19): error TS2339: Property 'toString' does not exist on type 'Bebra'.
-constEnums/constEnumNoObjectPrototypePropertyAccess.ts(11,19): error TS2339: Property 'valueOf' does not exist on type 'Bebra'.
+constEnumNoObjectPrototypePropertyAccess.ts(5,19): error TS2339: Property 'constructor' does not exist on type 'Bebra'.
+constEnumNoObjectPrototypePropertyAccess.ts(6,19): error TS2339: Property 'hasOwnProperty' does not exist on type 'Bebra'.
+constEnumNoObjectPrototypePropertyAccess.ts(7,19): error TS2339: Property 'isPrototypeOf' does not exist on type 'Bebra'.
+constEnumNoObjectPrototypePropertyAccess.ts(8,19): error TS2339: Property 'propertyIsEnumerable' does not exist on type 'Bebra'.
+constEnumNoObjectPrototypePropertyAccess.ts(9,19): error TS2339: Property 'toLocaleString' does not exist on type 'Bebra'.
+constEnumNoObjectPrototypePropertyAccess.ts(10,19): error TS2339: Property 'toString' does not exist on type 'Bebra'.
+constEnumNoObjectPrototypePropertyAccess.ts(11,19): error TS2339: Property 'valueOf' does not exist on type 'Bebra'.
 
 
-==== constEnums/constEnumNoObjectPrototypePropertyAccess.ts (7 errors) ====
+==== constEnumNoObjectPrototypePropertyAccess.ts (7 errors) ====
     // https://github.com/microsoft/TypeScript/issues/55421
     
     const enum Bebra {}

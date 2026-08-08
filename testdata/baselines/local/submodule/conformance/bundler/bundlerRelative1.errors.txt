@@ -1,0 +1,37 @@
+/redirect/package.json(1,9): error TS1005: ';' expected.
+
+
+==== bundlerRelative1.ts (0 errors) ====
+    
+==== /dir/index.ts (0 errors) ====
+    export const x = 0;
+    
+==== /redirect/package.json (1 errors) ====
+    { "main": "../foo" }
+            ~
+!!! error TS1005: ';' expected.
+    
+==== /foo/index.ts (0 errors) ====
+    export const y = 0;
+    
+==== /types/esm.d.ts (0 errors) ====
+    declare const _: string;
+    export default _;
+    
+==== /types/cjs.d.ts (0 errors) ====
+    declare const _: string;
+    export = _;
+    
+==== /main.ts (0 errors) ====
+    import { x } from "./dir";
+    import {} from "./dir/index";
+    import {} from "./dir/index.js";
+    import {} from "./dir/index.ts";
+    
+    import { y } from "./redirect";
+    import {} from "./redirect/index";
+    
+    import a from "./types/esm";
+    import * as esm from "./types/esm";
+    import b from "./types/cjs";
+    import * as cjs from "./types/cjs";

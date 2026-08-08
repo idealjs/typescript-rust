@@ -1,9 +1,9 @@
-instanceAndStaticMembers/thisAndSuperInStaticMembers4.ts(11,17): error TS2349: This expression is not callable.
-instanceAndStaticMembers/thisAndSuperInStaticMembers4.ts(12,17): error TS2349: This expression is not callable.
-instanceAndStaticMembers/thisAndSuperInStaticMembers4.ts(14,23): error TS2339: Property '' does not exist on type '{ a: number; f: () => number; x: 1; y: any; z: any }'.
+thisAndSuperInStaticMembers4.ts(11,17): error TS2349: This expression is not callable.
+thisAndSuperInStaticMembers4.ts(12,17): error TS2349: This expression is not callable.
+thisAndSuperInStaticMembers4.ts(14,23): error TS2339: Property '' does not exist on type '{ a: number; f: () => number; x: 1; y: any; z: any }'.
 
 
-==== instanceAndStaticMembers/thisAndSuperInStaticMembers4.ts (3 errors) ====
+==== thisAndSuperInStaticMembers4.ts (3 errors) ====
     declare class B {
         static a: any;
         static f(): number;

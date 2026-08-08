@@ -1,0 +1,57 @@
+constraintSatisfactionWithEmptyObject.ts(4,24): error TS2304: Cannot find name 'Object'.
+constraintSatisfactionWithEmptyObject.ts(9,19): error TS2304: Cannot find name 'Object'.
+constraintSatisfactionWithEmptyObject.ts(10,24): error TS1005: ',' expected.
+constraintSatisfactionWithEmptyObject.ts(13,10): error TS2554: Expected 2 arguments, but got 1.
+constraintSatisfactionWithEmptyObject.ts(27,24): error TS1005: ',' expected.
+constraintSatisfactionWithEmptyObject.ts(30,10): error TS2554: Expected 2 arguments, but got 1.
+
+
+==== constraintSatisfactionWithEmptyObject.ts (6 errors) ====
+    // valid uses of a basic object constraint, no errors expected
+    
+    // Object constraint
+    function foo<T extends Object>(x: T) { }
+                           ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    var r = foo({});
+    var a = {};
+    var r = foo({});
+    
+    class C<T extends Object> {
+                      ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        constructor(public x: T) { }
+                           ~
+!!! error TS1005: ',' expected.
+    }
+    
+    var r2 = new C({});
+             ~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    
+    interface I<T extends Object> {
+        x: T;
+    }
+    var i: I<{}>;
+    
+    // {} constraint
+    function foo2<T extends {}>(x: T) { }
+    var r = foo2({});
+    var a = {};
+    var r = foo2({});
+    
+    class C2<T extends {}> {
+        constructor(public x: T) { }
+                           ~
+!!! error TS1005: ',' expected.
+    }
+    
+    var r2 = new C2({});
+             ~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    
+    interface I2<T extends {}> {
+        x: T;
+    }
+    var i2: I2<{}>;
+    

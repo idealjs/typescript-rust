@@ -1,0 +1,76 @@
+esDecorators-classDeclaration-classSuper.5.ts(11,22): error TS2339: Property 'x' does not exist on type 'object'.
+esDecorators-classDeclaration-classSuper.5.ts(12,22): error TS2339: Property 'x' does not exist on type 'object'.
+esDecorators-classDeclaration-classSuper.5.ts(13,22): error TS2339: Property 'x' does not exist on type 'object'.
+esDecorators-classDeclaration-classSuper.5.ts(14,22): error TS2339: Property 'x' does not exist on type 'object'.
+esDecorators-classDeclaration-classSuper.5.ts(15,22): error TS2339: Property 'x' does not exist on type 'object'.
+esDecorators-classDeclaration-classSuper.5.ts(16,24): error TS2339: Property 'x' does not exist on type 'object'.
+esDecorators-classDeclaration-classSuper.5.ts(17,24): error TS2339: Property 'x' does not exist on type 'object'.
+esDecorators-classDeclaration-classSuper.5.ts(18,28): error TS2339: Property 'x' does not exist on type 'object'.
+esDecorators-classDeclaration-classSuper.5.ts(19,23): error TS2339: Property 'x' does not exist on type 'object'.
+
+
+==== esDecorators-classDeclaration-classSuper.5.ts (9 errors) ====
+    declare var dec: any;
+    
+    declare class Base {
+        static x: number;
+    }
+    
+    const x = "x";
+    
+    @dec
+    class C1 extends Base {
+        static a = super.x;
+                         ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+        static b = super.x = 1;
+                         ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+        static c = super.x += 1;
+                         ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+        static d = super.x++;
+                         ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+        static e = super.x--;
+                         ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+        static f = ++super.x;
+                           ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+        static g = --super.x;
+                           ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+        static h = ({ x: super.x } = { x: 1 });
+                               ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+        static i = [super.x] = [1];
+                          ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+    }
+    
+    @dec
+    class C2 extends Base {
+        static a = super["x"];
+        static b = super["x"] = 1;
+        static c = super["x"] += 1;
+        static d = super["x"]++;
+        static e = super["x"]--;
+        static f = ++super["x"];
+        static g = --super["x"];
+        static h = ({ x: super["x"] } = { x: 1 });
+        static i = [super["x"]] = [1];
+    }
+    
+    @dec
+    class C3 extends Base {
+        static a = super[x];
+        static b = super[x] = 1;
+        static c = super[x] += 1;
+        static d = super[x]++;
+        static e = super[x]--;
+        static f = ++super[x];
+        static g = --super[x];
+        static h = ({ x: super[x] } = { x: 1 });
+        static i = [super[x]] = [1];
+    }

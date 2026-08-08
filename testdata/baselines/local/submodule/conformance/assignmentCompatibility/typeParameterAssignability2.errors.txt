@@ -1,0 +1,105 @@
+typeParameterAssignability2.ts(24,51): error TS2304: Cannot find name 'Date'.
+typeParameterAssignability2.ts(27,13): error TS2304: Cannot find name 'Date'.
+typeParameterAssignability2.ts(31,13): error TS2304: Cannot find name 'Date'.
+typeParameterAssignability2.ts(35,13): error TS2304: Cannot find name 'Date'.
+typeParameterAssignability2.ts(37,12): error TS2304: Cannot find name 'Date'.
+typeParameterAssignability2.ts(44,25): error TS2304: Cannot find name 'Date'.
+typeParameterAssignability2.ts(47,13): error TS2304: Cannot find name 'Date'.
+typeParameterAssignability2.ts(51,13): error TS2304: Cannot find name 'Date'.
+typeParameterAssignability2.ts(55,13): error TS2304: Cannot find name 'Date'.
+typeParameterAssignability2.ts(57,12): error TS2304: Cannot find name 'Date'.
+
+
+==== typeParameterAssignability2.ts (10 errors) ====
+    // type parameters are not assignable to one another unless directly or indirectly constrained to one another
+    
+    function foo<T, U extends T>(t: T, u: U) {
+        t = u; // error
+        u = t; // ok
+    }
+    
+    function foo2<T extends U, U>(t: T, u: U) {
+        t = u; // error
+        u = t; // ok
+    }
+    
+    function foo3<T extends U, U extends V, V>(t: T, u: U, v: V) {
+        t = u; // error
+        u = t;
+    
+        t = v; // error
+        v = t; // ok
+    
+        u = v; // error
+        v = u; // ok
+    }
+    
+    function foo4<T extends U, U extends V, V extends Date>(t: T, u: U, v: V) {
+                                                      ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        t = u; // error
+        t = v; // error
+        t = new Date(); // error
+                ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    
+        u = t;
+        u = v; // error
+        u = new Date(); // error
+                ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    
+        v = t;
+        v = u;
+        v = new Date(); // ok
+                ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    
+        var d: Date;
+               ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        d = t; // ok
+        d = u; // ok
+        d = v; // ok
+    }
+    
+    // same as foo4 with different type parameter ordering
+    function foo5<V extends Date, U extends V, T extends U>(t: T, u: U, v: V) {
+                            ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        t = u; // error
+        t = v; // error
+        t = new Date(); // error
+                ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    
+        u = t;
+        u = v; // error
+        u = new Date(); // error
+                ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    
+        v = t;
+        v = u;
+        v = new Date(); // ok
+                ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    
+        var d: Date;
+               ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        d = t; // ok
+        d = u; // ok
+        d = v; // ok
+    }
+    
+    function foo6<T extends U, U, V>(t: T, u: U, v: V) {
+        t = u; // error
+        t = v; // error
+    
+        u = t; // ok
+        u = v; // error
+    
+        v = t; // error
+        v = u; // error
+    }

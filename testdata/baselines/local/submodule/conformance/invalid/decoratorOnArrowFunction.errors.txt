@@ -1,0 +1,19 @@
+decoratorOnArrowFunction.ts(3,9): error TS1012: Unexpected token.
+decoratorOnArrowFunction.ts(3,10): error TS1005: ',' expected.
+decoratorOnArrowFunction.ts(3,14): error TS1005: ',' expected.
+decoratorOnArrowFunction.ts(3,15): error TS1134: Variable declaration expected.
+
+
+==== decoratorOnArrowFunction.ts (4 errors) ====
+    declare function dec<T>(target: T): T;
+    
+    var F = @dec () => {
+            ~
+!!! error TS1012: Unexpected token.
+             ~~~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1134: Variable declaration expected.
+    }

@@ -1,0 +1,25 @@
+b.ts(1,7): error TS1012: Unexpected token.
+b.ts(1,8): error TS1005: ';' expected.
+b.ts(1,8): error TS2304: Cannot find name 'foo'.
+b.ts(2,7): error TS1012: Unexpected token.
+b.ts(2,8): error TS1005: ';' expected.
+b.ts(2,8): error TS2304: Cannot find name 'foo'.
+
+
+==== importMetaPropertyInvalidInCall.ts (0 errors) ====
+    
+==== b.ts (6 errors) ====
+    import.foo();
+          ~
+!!! error TS1012: Unexpected token.
+           ~~~
+!!! error TS1005: ';' expected.
+           ~~~
+!!! error TS2304: Cannot find name 'foo'.
+    import.foo;
+          ~
+!!! error TS1012: Unexpected token.
+           ~~~
+!!! error TS1005: ';' expected.
+           ~~~
+!!! error TS2304: Cannot find name 'foo'.

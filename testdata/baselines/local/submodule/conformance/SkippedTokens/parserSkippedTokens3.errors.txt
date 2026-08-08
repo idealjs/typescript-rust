@@ -1,0 +1,16 @@
+parserSkippedTokens3.ts(1,1): error TS1127: Invalid character.
+parserSkippedTokens3.ts(1,1): error TS1128: Declaration or statement expected.
+parserSkippedTokens3.ts(1,5): error TS1127: Invalid character.
+parserSkippedTokens3.ts(1,5): error TS1128: Declaration or statement expected.
+
+
+==== parserSkippedTokens3.ts (4 errors) ====
+    \ ; \
+    ~
+!!! error TS1127: Invalid character.
+    ~
+!!! error TS1128: Declaration or statement expected.
+        ~
+!!! error TS1127: Invalid character.
+        ~
+!!! error TS1128: Declaration or statement expected.

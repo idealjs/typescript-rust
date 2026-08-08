@@ -1,0 +1,51 @@
+tsxAttributeErrors.tsx(14,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxAttributeErrors.tsx(14,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxAttributeErrors.tsx(17,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxAttributeErrors.tsx(17,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxAttributeErrors.tsx(21,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxAttributeErrors.tsx(21,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxAttributeErrors.tsx(24,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxAttributeErrors.tsx(24,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+
+
+==== tsxAttributeErrors.tsx (8 errors) ====
+    declare namespace JSX {
+    	interface Element { }
+    	interface IntrinsicElements {
+    		div: {
+    			text?: string;
+    			width?: number;
+    		}
+    
+    		span: any;
+    	}
+    }
+    
+    // Error, number is not assignable to string
+    <div text={42} />;
+    ~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~~~~~~~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    
+    // Error, string is not assignable to number
+    <div width={'foo'} />;
+    ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    
+    // Error, number is not assignable to string
+    var attribs = { text: 100 };
+    <div {...attribs} />;
+    ~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~~~~~~~~~~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    
+    // No errors here
+    <span foo='bar' bar={'foo'} />;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.

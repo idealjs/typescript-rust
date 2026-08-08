@@ -1,0 +1,29 @@
+/a/package.json(2,12): error TS1005: ';' expected.
+/a/package.json(3,20): error TS1005: ';' expected.
+/a/package.json(4,20): error TS1005: ';' expected.
+/a/package.json(4,28): error TS1005: ';' expected.
+
+
+==== typesVersions.emptyTypes.ts (0 errors) ====
+    
+==== /a/package.json (4 errors) ====
+    {
+        "types": "",
+               ~
+!!! error TS1005: ';' expected.
+        "typesVersions": {
+                       ~
+!!! error TS1005: ';' expected.
+            ">=3.1.0-0": { "*" : ["ts3.1/*"] }
+                       ~
+!!! error TS1005: ';' expected.
+                               ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+==== /a/ts3.1/index.d.ts (0 errors) ====
+    export const a = 0;
+    
+==== /b/user.ts (0 errors) ====
+    import { a } from "a";

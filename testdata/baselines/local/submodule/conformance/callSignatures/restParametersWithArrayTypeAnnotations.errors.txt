@@ -1,0 +1,112 @@
+restParametersWithArrayTypeAnnotations.ts(22,8): error TS1005: ',' expected.
+restParametersWithArrayTypeAnnotations.ts(22,8): error TS2304: Cannot find name '('.
+restParametersWithArrayTypeAnnotations.ts(22,9): error TS1005: ',' expected.
+restParametersWithArrayTypeAnnotations.ts(22,13): error TS1005: ',' expected.
+restParametersWithArrayTypeAnnotations.ts(22,13): error TS2304: Cannot find name ':'.
+restParametersWithArrayTypeAnnotations.ts(22,15): error TS1005: ',' expected.
+restParametersWithArrayTypeAnnotations.ts(22,15): error TS2304: Cannot find name 'number'.
+restParametersWithArrayTypeAnnotations.ts(22,21): error TS1005: ',' expected.
+restParametersWithArrayTypeAnnotations.ts(22,22): error TS1012: Unexpected token.
+restParametersWithArrayTypeAnnotations.ts(22,23): error TS1005: ']' expected.
+restParametersWithArrayTypeAnnotations.ts(22,23): error TS2304: Cannot find name ')'.
+restParametersWithArrayTypeAnnotations.ts(22,25): error TS1005: ',' expected.
+restParametersWithArrayTypeAnnotations.ts(22,25): error TS2304: Cannot find name '{'.
+restParametersWithArrayTypeAnnotations.ts(23,6): error TS1005: ',' expected.
+restParametersWithArrayTypeAnnotations.ts(23,17): error TS1005: ',' expected.
+restParametersWithArrayTypeAnnotations.ts(23,20): error TS1005: ',' expected.
+restParametersWithArrayTypeAnnotations.ts(23,21): error TS1134: Variable declaration expected.
+restParametersWithArrayTypeAnnotations.ts(23,37): error TS1134: Variable declaration expected.
+restParametersWithArrayTypeAnnotations.ts(23,51): error TS1005: ',' expected.
+
+
+==== restParametersWithArrayTypeAnnotations.ts (19 errors) ====
+    // Rest parameters must be an array type if they have a type annotation, errors only for the functions with 2 rest params
+    
+    function foo(...x: number[]) { }
+    var f = function foo(...x: number[]) { }
+    var f2 = (...x: number[], ...y: number[]) => { }
+    
+    class C {
+        foo(...x: number[]) { }
+    }
+    
+    interface I {
+        (...x: number[]);
+        foo(...x: number[], ...y: number[]);
+    }
+    
+    var a: {
+        (...x: number[]);
+        foo(...x: number[]);
+    }
+    
+    var b = {
+        foo(...x: number[]) { },
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '('.
+            ~~~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS2304: Cannot find name ':'.
+                  ~~~~~~
+!!! error TS1005: ',' expected.
+                  ~~~~~~
+!!! error TS2304: Cannot find name 'number'.
+                        ~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1012: Unexpected token.
+                          ~
+!!! error TS1005: ']' expected.
+                          ~
+!!! error TS2304: Cannot find name ')'.
+                            ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS2304: Cannot find name '{'.
+        a: function foo(...x: number[], ...y: number[]) { },
+         ~
+!!! error TS1005: ',' expected.
+                    ~~~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS1005: ',' expected.
+                        ~~~
+!!! error TS1134: Variable declaration expected.
+                                        ~~~
+!!! error TS1134: Variable declaration expected.
+                                                      ~
+!!! error TS1005: ',' expected.
+        b: (...x: number[]) => { }
+    }
+    
+    
+    
+    
+    function foo2(...x: Array<string>) { }
+    var f3 = function foo(...x: Array<string>) { }
+    var f4 = (...x: Array<string>, ...y: Array<string>) => { }
+    
+    class C2 {
+        foo(...x: Array<string>) { }
+    }
+    
+    interface I2 {
+        (...x: Array<string>);
+        foo(...x: Array<string>, ...y: Array<string>);
+    }
+    
+    var a2: {
+        (...x: Array<string>);
+        foo(...x: Array<string>);
+    }
+    
+    var b2 = {
+        foo(...x: Array<string>) { },
+        a: function foo(...x: Array<string>, ...y: Array<string>) { },
+        b: (...x: Array<string>) => { }
+    }

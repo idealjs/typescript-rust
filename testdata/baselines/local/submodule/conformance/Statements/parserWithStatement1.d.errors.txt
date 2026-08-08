@@ -1,0 +1,14 @@
+parserWithStatement1.d.ts(1,1): error TS2304: Cannot find name 'with'.
+parserWithStatement1.d.ts(1,7): error TS2304: Cannot find name 'foo'.
+parserWithStatement1.d.ts(1,12): error TS1005: ';' expected.
+
+
+==== parserWithStatement1.d.ts (3 errors) ====
+    with (foo) {
+    ~~~~
+!!! error TS2304: Cannot find name 'with'.
+          ~~~
+!!! error TS2304: Cannot find name 'foo'.
+               ~
+!!! error TS1005: ';' expected.
+    }

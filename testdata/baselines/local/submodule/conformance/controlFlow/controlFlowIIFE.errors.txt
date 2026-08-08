@@ -1,0 +1,103 @@
+controlFlowIIFE.ts(7,22): error TS2339: Property 'length' does not exist on type 'string | number'.
+controlFlowIIFE.ts(16,22): error TS2339: Property 'length' does not exist on type 'string | number'.
+controlFlowIIFE.ts(25,25): error TS2339: Property 'length' does not exist on type 'string | number'.
+controlFlowIIFE.ts(25,34): error TS2454: Variable 'y' is used before being assigned.
+controlFlowIIFE.ts(42,15): error TS2304: Cannot find name 'Error'.
+controlFlowIIFE.ts(45,10): error TS2339: Property 'slice' does not exist on type 'string | undefined'.
+controlFlowIIFE.ts(55,5): error TS2454: Variable 'v' is used before being assigned.
+controlFlowIIFE.ts(64,5): error TS2454: Variable 'v' is used before being assigned.
+controlFlowIIFE.ts(72,5): error TS2454: Variable 'v' is used before being assigned.
+
+
+==== controlFlowIIFE.ts (9 errors) ====
+    declare function getStringOrNumber(): string | number;
+    
+    function f1() {
+        let x = getStringOrNumber();
+        if (typeof x === "string") {
+            let n = function() {
+                return x.length;
+                         ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type 'string | number'.
+            }();
+        }
+    }
+    
+    function f2() {
+        let x = getStringOrNumber();
+        if (typeof x === "string") {
+            let n = (function() {
+                return x.length;
+                         ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type 'string | number'.
+            })();
+        }
+    }
+    
+    function f3() {
+        let x = getStringOrNumber();
+        let y: number;
+        if (typeof x === "string") {
+            let n = (z => x.length + y + z)(y = 1);
+                            ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type 'string | number'.
+                                     ~
+!!! error TS2454: Variable 'y' is used before being assigned.
+        }
+    }
+    
+    // Repros from #8381
+    
+    let maybeNumber: number | undefined;
+    (function () {
+        maybeNumber = 1;
+    })();
+    maybeNumber++;
+    if (maybeNumber !== undefined) {
+        maybeNumber++;
+    }
+    
+    let test: string | undefined;
+    if (!test) {
+        throw new Error('Test is not defined');
+                  ~~~~~
+!!! error TS2304: Cannot find name 'Error'.
+    }
+    (() => {
+        test.slice(1); // No error
+             ~~~~~
+!!! error TS2339: Property 'slice' does not exist on type 'string | undefined'.
+    })();
+    
+    // Repro from #23565
+    
+    function f4() {
+        let v: number;
+        (function() {
+            v = 1;
+        })();
+        v;
+        ~
+!!! error TS2454: Variable 'v' is used before being assigned.
+    }
+    
+    function f5() {
+        let v: number;
+        (function*() {
+            yield 1;
+            v = 1;
+        })();
+        v; // still undefined
+        ~
+!!! error TS2454: Variable 'v' is used before being assigned.
+    }
+    
+    function f6() {
+        let v: number;
+        (async function() {
+            v = await 1;
+        })();
+        v; // still undefined
+        ~
+!!! error TS2454: Variable 'v' is used before being assigned.
+    }

@@ -1,14 +1,14 @@
-accessibility/classPropertyAsProtected.ts(3,19): error TS1005: ';' expected.
-accessibility/classPropertyAsProtected.ts(4,19): error TS1005: ';' expected.
-accessibility/classPropertyAsProtected.ts(8,26): error TS1005: ';' expected.
-accessibility/classPropertyAsProtected.ts(9,26): error TS1005: ';' expected.
-accessibility/classPropertyAsProtected.ts(20,3): error TS2339: Property 'a' does not exist on type 'object'.
-accessibility/classPropertyAsProtected.ts(21,3): error TS2339: Property 'b' does not exist on type 'object'.
-accessibility/classPropertyAsProtected.ts(22,3): error TS2339: Property 'b' does not exist on type 'object'.
-accessibility/classPropertyAsProtected.ts(23,3): error TS2339: Property 'foo' does not exist on type 'object'.
+classPropertyAsProtected.ts(3,19): error TS1005: ';' expected.
+classPropertyAsProtected.ts(4,19): error TS1005: ';' expected.
+classPropertyAsProtected.ts(8,26): error TS1005: ';' expected.
+classPropertyAsProtected.ts(9,26): error TS1005: ';' expected.
+classPropertyAsProtected.ts(20,3): error TS2339: Property 'a' does not exist on type 'object'.
+classPropertyAsProtected.ts(21,3): error TS2339: Property 'b' does not exist on type 'object'.
+classPropertyAsProtected.ts(22,3): error TS2339: Property 'b' does not exist on type 'object'.
+classPropertyAsProtected.ts(23,3): error TS2339: Property 'foo' does not exist on type 'object'.
 
 
-==== accessibility/classPropertyAsProtected.ts (8 errors) ====
+==== classPropertyAsProtected.ts (8 errors) ====
     class C {
         protected x: string;
         protected get y() { return null; }

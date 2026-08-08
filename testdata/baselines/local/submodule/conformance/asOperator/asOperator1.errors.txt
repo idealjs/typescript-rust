@@ -1,8 +1,8 @@
-asOperator/asOperator1.ts(3,26): error TS2339: Property 'length' does not exist on type 'string'.
-asOperator/asOperator1.ts(4,9): error TS2304: Cannot find name 'Date'.
+asOperator1.ts(3,26): error TS2339: Property 'length' does not exist on type 'string'.
+asOperator1.ts(4,9): error TS2304: Cannot find name 'Date'.
 
 
-==== asOperator/asOperator1.ts (2 errors) ====
+==== asOperator1.ts (2 errors) ====
     var as = 43;
     var x = undefined as number;
     var y = (null as string).length;

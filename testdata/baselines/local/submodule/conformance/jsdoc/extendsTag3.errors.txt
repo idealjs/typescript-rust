@@ -1,0 +1,35 @@
+foo.js(14,9): error TS2349: This expression is not callable.
+foo.js(24,9): error TS2349: This expression is not callable.
+
+
+==== foo.js (2 errors) ====
+    /**
+     * @constructor
+     */
+    class A {
+        constructor() {}
+    }
+    
+    /**
+     * @extends {A}
+     * @constructor
+     */
+    class B extends A {
+        constructor() {
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    /**
+     * @extends { A }
+     * @constructor
+     */
+    class C extends A {
+        constructor() {
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }

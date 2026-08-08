@@ -1,0 +1,29 @@
+main.js(4,1): error TS2304: Cannot find name 'Object'.
+mod1.js(4,7): error TS1003: Identifier expected.
+mod1.js(4,8): error TS1005: ';' expected.
+mod1.js(4,8): error TS2304: Cannot find name 'exports'.
+
+
+==== mod1.js (3 errors) ====
+    class Alias {
+        bar() { return 1 }
+    }
+    module.exports = Alias;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    
+==== main.js (1 errors) ====
+    import A from './mod1'
+    A.prototype.foo = 0
+    A.prototype.func = function() { this._func = 0; }
+    Object.defineProperty(A.prototype, "def", { value: 0 });
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    new A().bar
+    new A().foo
+    new A().func()
+    new A().def

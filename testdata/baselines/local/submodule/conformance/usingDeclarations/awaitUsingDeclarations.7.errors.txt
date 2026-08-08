@@ -1,0 +1,14 @@
+awaitUsingDeclarations.7.ts(3,18): error TS2304: Cannot find name 'b'.
+awaitUsingDeclarations.7.ts(4,17): error TS2304: Cannot find name 'c'.
+
+
+==== awaitUsingDeclarations.7.ts (2 errors) ====
+    {
+        await using a = null,
+                    {b} = null,
+                     ~
+!!! error TS2304: Cannot find name 'b'.
+                    c = null;
+                    ~
+!!! error TS2304: Cannot find name 'c'.
+    }

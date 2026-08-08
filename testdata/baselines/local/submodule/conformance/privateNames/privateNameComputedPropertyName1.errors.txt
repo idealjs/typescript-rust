@@ -1,65 +1,65 @@
-privateNames/privateNameComputedPropertyName1.ts(2,5): error TS1003: Identifier expected.
-privateNames/privateNameComputedPropertyName1.ts(2,5): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName1.ts(2,6): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(3,5): error TS1003: Identifier expected.
-privateNames/privateNameComputedPropertyName1.ts(3,5): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName1.ts(3,6): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(5,14): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(5,14): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName1.ts(5,15): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(6,14): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(6,14): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName1.ts(6,15): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(8,5): error TS1003: Identifier expected.
-privateNames/privateNameComputedPropertyName1.ts(8,5): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName1.ts(8,6): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(11,14): error TS1003: Identifier expected.
-privateNames/privateNameComputedPropertyName1.ts(11,14): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName1.ts(11,15): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(12,14): error TS1003: Identifier expected.
-privateNames/privateNameComputedPropertyName1.ts(12,14): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName1.ts(12,15): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(17,15): error TS1182: A destructuring declaration must have an initializer.
-privateNames/privateNameComputedPropertyName1.ts(18,19): error TS1003: Identifier expected.
-privateNames/privateNameComputedPropertyName1.ts(18,19): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName1.ts(18,20): error TS1005: ']' expected.
-privateNames/privateNameComputedPropertyName1.ts(18,21): error TS1005: ',' expected.
-privateNames/privateNameComputedPropertyName1.ts(18,25): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(19,19): error TS1003: Identifier expected.
-privateNames/privateNameComputedPropertyName1.ts(19,19): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName1.ts(19,20): error TS1005: ']' expected.
-privateNames/privateNameComputedPropertyName1.ts(19,21): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(19,25): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(20,19): error TS1003: Identifier expected.
-privateNames/privateNameComputedPropertyName1.ts(20,19): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName1.ts(20,20): error TS1005: ']' expected.
-privateNames/privateNameComputedPropertyName1.ts(20,21): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(20,25): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(21,19): error TS1003: Identifier expected.
-privateNames/privateNameComputedPropertyName1.ts(21,19): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName1.ts(21,20): error TS1005: ']' expected.
-privateNames/privateNameComputedPropertyName1.ts(21,21): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(21,25): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(22,19): error TS1003: Identifier expected.
-privateNames/privateNameComputedPropertyName1.ts(22,19): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName1.ts(22,20): error TS1005: ']' expected.
-privateNames/privateNameComputedPropertyName1.ts(22,27): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(22,31): error TS1005: ';' expected.
-privateNames/privateNameComputedPropertyName1.ts(23,11): error TS1128: Declaration or statement expected.
-privateNames/privateNameComputedPropertyName1.ts(23,13): error TS2304: Cannot find name 'data'.
-privateNames/privateNameComputedPropertyName1.ts(24,21): error TS2448: Block-scoped variable 'a' used before its declaration.
-privateNames/privateNameComputedPropertyName1.ts(24,24): error TS2304: Cannot find name 'b'.
-privateNames/privateNameComputedPropertyName1.ts(24,27): error TS2304: Cannot find name 'c'.
-privateNames/privateNameComputedPropertyName1.ts(24,30): error TS2304: Cannot find name 'd'.
-privateNames/privateNameComputedPropertyName1.ts(24,33): error TS2304: Cannot find name 'e'.
-privateNames/privateNameComputedPropertyName1.ts(26,20): error TS2304: Cannot find name 'data'.
-privateNames/privateNameComputedPropertyName1.ts(26,30): error TS1003: Identifier expected.
-privateNames/privateNameComputedPropertyName1.ts(26,30): error TS1127: Invalid character.
-privateNames/privateNameComputedPropertyName1.ts(26,31): error TS1005: ']' expected.
-privateNames/privateNameComputedPropertyName1.ts(26,32): error TS1005: ',' expected.
+privateNameComputedPropertyName1.ts(2,5): error TS1003: Identifier expected.
+privateNameComputedPropertyName1.ts(2,5): error TS1127: Invalid character.
+privateNameComputedPropertyName1.ts(2,6): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(3,5): error TS1003: Identifier expected.
+privateNameComputedPropertyName1.ts(3,5): error TS1127: Invalid character.
+privateNameComputedPropertyName1.ts(3,6): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(5,14): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(5,14): error TS1127: Invalid character.
+privateNameComputedPropertyName1.ts(5,15): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(6,14): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(6,14): error TS1127: Invalid character.
+privateNameComputedPropertyName1.ts(6,15): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(8,5): error TS1003: Identifier expected.
+privateNameComputedPropertyName1.ts(8,5): error TS1127: Invalid character.
+privateNameComputedPropertyName1.ts(8,6): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(11,14): error TS1003: Identifier expected.
+privateNameComputedPropertyName1.ts(11,14): error TS1127: Invalid character.
+privateNameComputedPropertyName1.ts(11,15): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(12,14): error TS1003: Identifier expected.
+privateNameComputedPropertyName1.ts(12,14): error TS1127: Invalid character.
+privateNameComputedPropertyName1.ts(12,15): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(17,15): error TS1182: A destructuring declaration must have an initializer.
+privateNameComputedPropertyName1.ts(18,19): error TS1003: Identifier expected.
+privateNameComputedPropertyName1.ts(18,19): error TS1127: Invalid character.
+privateNameComputedPropertyName1.ts(18,20): error TS1005: ']' expected.
+privateNameComputedPropertyName1.ts(18,21): error TS1005: ',' expected.
+privateNameComputedPropertyName1.ts(18,25): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(19,19): error TS1003: Identifier expected.
+privateNameComputedPropertyName1.ts(19,19): error TS1127: Invalid character.
+privateNameComputedPropertyName1.ts(19,20): error TS1005: ']' expected.
+privateNameComputedPropertyName1.ts(19,21): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(19,25): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(20,19): error TS1003: Identifier expected.
+privateNameComputedPropertyName1.ts(20,19): error TS1127: Invalid character.
+privateNameComputedPropertyName1.ts(20,20): error TS1005: ']' expected.
+privateNameComputedPropertyName1.ts(20,21): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(20,25): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(21,19): error TS1003: Identifier expected.
+privateNameComputedPropertyName1.ts(21,19): error TS1127: Invalid character.
+privateNameComputedPropertyName1.ts(21,20): error TS1005: ']' expected.
+privateNameComputedPropertyName1.ts(21,21): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(21,25): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(22,19): error TS1003: Identifier expected.
+privateNameComputedPropertyName1.ts(22,19): error TS1127: Invalid character.
+privateNameComputedPropertyName1.ts(22,20): error TS1005: ']' expected.
+privateNameComputedPropertyName1.ts(22,27): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(22,31): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(23,11): error TS1128: Declaration or statement expected.
+privateNameComputedPropertyName1.ts(23,13): error TS2304: Cannot find name 'data'.
+privateNameComputedPropertyName1.ts(24,21): error TS2448: Block-scoped variable 'a' used before its declaration.
+privateNameComputedPropertyName1.ts(24,24): error TS2304: Cannot find name 'b'.
+privateNameComputedPropertyName1.ts(24,27): error TS2304: Cannot find name 'c'.
+privateNameComputedPropertyName1.ts(24,30): error TS2304: Cannot find name 'd'.
+privateNameComputedPropertyName1.ts(24,33): error TS2304: Cannot find name 'e'.
+privateNameComputedPropertyName1.ts(26,20): error TS2304: Cannot find name 'data'.
+privateNameComputedPropertyName1.ts(26,30): error TS1003: Identifier expected.
+privateNameComputedPropertyName1.ts(26,30): error TS1127: Invalid character.
+privateNameComputedPropertyName1.ts(26,31): error TS1005: ']' expected.
+privateNameComputedPropertyName1.ts(26,32): error TS1005: ',' expected.
 
 
-==== privateNames/privateNameComputedPropertyName1.ts (59 errors) ====
+==== privateNameComputedPropertyName1.ts (59 errors) ====
     class A {
         #a = 'a';
         ~

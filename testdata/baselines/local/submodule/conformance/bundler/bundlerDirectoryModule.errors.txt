@@ -1,0 +1,20 @@
+/lib/package.json(2,9): error TS1005: ';' expected.
+
+
+==== bundlerDirectoryModule.ts (0 errors) ====
+    
+==== /lib/package.json (1 errors) ====
+    {
+      "main": "./cjs/index.js"
+            ~
+!!! error TS1005: ';' expected.
+    }
+    
+==== /lib/cjs/index.js (0 errors) ====
+    export function test() {}
+    
+==== /lib/cjs/index.d.ts (0 errors) ====
+    export function test(): void;
+    
+==== /app/test.ts (0 errors) ====
+    import { test } from '../lib';

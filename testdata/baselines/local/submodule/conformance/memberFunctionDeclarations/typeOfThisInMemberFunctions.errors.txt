@@ -1,0 +1,37 @@
+typeOfThisInMemberFunctions.ts(22,19): error TS2304: Cannot find name 'Date'.
+
+
+==== typeOfThisInMemberFunctions.ts (1 errors) ====
+    class C {
+        foo() {
+            var r = this;
+        }
+    
+        static bar() {
+            var r2 = this;
+        }
+    }
+    
+    class D<T> {
+        x: T;
+        foo() {
+            var r = this;
+        }
+    
+        static bar() {
+            var r2 = this;
+        }
+    }
+    
+    class E<T extends Date> {
+                      ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+        x: T;
+        foo() {
+            var r = this;
+        }
+    
+        static bar() {
+            var r2 = this;
+        }
+    }

@@ -1,0 +1,29 @@
+typeParametersAvailableInNestedScope.ts(4,10): error TS2304: Cannot find name 'U'.
+typeParametersAvailableInNestedScope.ts(4,16): error TS2304: Cannot find name 'U'.
+
+
+==== typeParametersAvailableInNestedScope.ts (2 errors) ====
+    class C<T> {
+        data: T;
+    
+        x = <U>(a: U) => {
+             ~
+!!! error TS2304: Cannot find name 'U'.
+                   ~
+!!! error TS2304: Cannot find name 'U'.
+            var y: T;
+            return y;
+        }
+    
+        foo() {
+            function temp<U>(a: U) {
+                var y: T;
+                return y;
+            }
+            return temp(<T>null);
+        }
+    }
+    
+    var c = new C<number>();
+    c.data = c.x(null);
+    c.data = c.foo();

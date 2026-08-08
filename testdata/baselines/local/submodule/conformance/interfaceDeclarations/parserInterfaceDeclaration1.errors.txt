@@ -1,0 +1,11 @@
+parserInterfaceDeclaration1.ts(1,23): error TS1005: '{' expected.
+parserInterfaceDeclaration1.ts(1,33): error TS1003: Identifier expected.
+
+
+==== parserInterfaceDeclaration1.ts (2 errors) ====
+    interface I extends A extends B {
+                          ~~~~~~~
+!!! error TS1005: '{' expected.
+                                    ~
+!!! error TS1003: Identifier expected.
+    }

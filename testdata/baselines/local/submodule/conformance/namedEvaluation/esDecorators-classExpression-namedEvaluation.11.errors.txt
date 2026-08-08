@@ -1,0 +1,26 @@
+esDecorators-classExpression-namedEvaluation.11.ts(5,2): error TS1012: Unexpected token.
+esDecorators-classExpression-namedEvaluation.11.ts(5,3): error TS1005: ')' expected.
+esDecorators-classExpression-namedEvaluation.11.ts(5,7): error TS1005: ';' expected.
+esDecorators-classExpression-namedEvaluation.11.ts(5,15): error TS1128: Declaration or statement expected.
+
+
+==== esDecorators-classExpression-namedEvaluation.11.ts (4 errors) ====
+    declare let dec: any;
+    
+    // No NamedEvaluation, no class name
+    
+    (@dec class {});
+     ~
+!!! error TS1012: Unexpected token.
+      ~~~
+!!! error TS1005: ')' expected.
+          ~~~~~
+!!! error TS1005: ';' expected.
+                  ~
+!!! error TS1128: Declaration or statement expected.
+    (class { @dec y: any });
+    
+    // No NamedEvaluation, class name
+    
+    (@dec class C {});
+    (class C { @dec y: any });

@@ -1,21 +1,21 @@
-privateNames/privateNameInLhsReceiverExpression.ts(2,5): error TS1003: Identifier expected.
-privateNames/privateNameInLhsReceiverExpression.ts(2,5): error TS1127: Invalid character.
-privateNames/privateNameInLhsReceiverExpression.ts(2,6): error TS1005: ';' expected.
-privateNames/privateNameInLhsReceiverExpression.ts(4,26): error TS1003: Identifier expected.
-privateNames/privateNameInLhsReceiverExpression.ts(4,26): error TS1127: Invalid character.
-privateNames/privateNameInLhsReceiverExpression.ts(4,27): error TS1005: ';' expected.
-privateNames/privateNameInLhsReceiverExpression.ts(4,61): error TS1003: Identifier expected.
-privateNames/privateNameInLhsReceiverExpression.ts(4,61): error TS1127: Invalid character.
-privateNames/privateNameInLhsReceiverExpression.ts(4,62): error TS1005: ';' expected.
-privateNames/privateNameInLhsReceiverExpression.ts(5,26): error TS1003: Identifier expected.
-privateNames/privateNameInLhsReceiverExpression.ts(5,26): error TS1127: Invalid character.
-privateNames/privateNameInLhsReceiverExpression.ts(5,27): error TS1005: ';' expected.
-privateNames/privateNameInLhsReceiverExpression.ts(5,61): error TS1003: Identifier expected.
-privateNames/privateNameInLhsReceiverExpression.ts(5,61): error TS1127: Invalid character.
-privateNames/privateNameInLhsReceiverExpression.ts(5,62): error TS1005: ';' expected.
+privateNameInLhsReceiverExpression.ts(2,5): error TS1003: Identifier expected.
+privateNameInLhsReceiverExpression.ts(2,5): error TS1127: Invalid character.
+privateNameInLhsReceiverExpression.ts(2,6): error TS1005: ';' expected.
+privateNameInLhsReceiverExpression.ts(4,26): error TS1003: Identifier expected.
+privateNameInLhsReceiverExpression.ts(4,26): error TS1127: Invalid character.
+privateNameInLhsReceiverExpression.ts(4,27): error TS1005: ';' expected.
+privateNameInLhsReceiverExpression.ts(4,61): error TS1003: Identifier expected.
+privateNameInLhsReceiverExpression.ts(4,61): error TS1127: Invalid character.
+privateNameInLhsReceiverExpression.ts(4,62): error TS1005: ';' expected.
+privateNameInLhsReceiverExpression.ts(5,26): error TS1003: Identifier expected.
+privateNameInLhsReceiverExpression.ts(5,26): error TS1127: Invalid character.
+privateNameInLhsReceiverExpression.ts(5,27): error TS1005: ';' expected.
+privateNameInLhsReceiverExpression.ts(5,61): error TS1003: Identifier expected.
+privateNameInLhsReceiverExpression.ts(5,61): error TS1127: Invalid character.
+privateNameInLhsReceiverExpression.ts(5,62): error TS1005: ';' expected.
 
 
-==== privateNames/privateNameInLhsReceiverExpression.ts (15 errors) ====
+==== privateNameInLhsReceiverExpression.ts (15 errors) ====
     class Test {
         #y = 123;
         ~

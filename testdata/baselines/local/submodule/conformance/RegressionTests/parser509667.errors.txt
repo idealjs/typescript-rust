@@ -1,0 +1,38 @@
+parser509667.ts(4,4): error TS1003: Identifier expected.
+parser509667.ts(4,4): error TS2339: Property '}' does not exist on type '{ f1: () => any }'.
+parser509667.ts(6,4): error TS1005: ')' expected.
+parser509667.ts(6,4): error TS2304: Cannot find name 'f2'.
+parser509667.ts(6,9): error TS1005: ';' expected.
+parser509667.ts(9,4): error TS2304: Cannot find name 'f3'.
+parser509667.ts(9,9): error TS1005: ';' expected.
+parser509667.ts(11,2): error TS1005: '}' expected.
+
+
+==== parser509667.ts (8 errors) ====
+    class Foo {
+       f1() {
+          if (this.
+       }
+       ~
+!!! error TS1003: Identifier expected.
+       ~
+!!! error TS2339: Property '}' does not exist on type '{ f1: () => any }'.
+    
+       f2() {
+       ~~
+!!! error TS1005: ')' expected.
+       ~~
+!!! error TS2304: Cannot find name 'f2'.
+            ~
+!!! error TS1005: ';' expected.
+       }
+    
+       f3() {
+       ~~
+!!! error TS2304: Cannot find name 'f3'.
+            ~
+!!! error TS1005: ';' expected.
+       }
+    }
+     
+!!! error TS1005: '}' expected.

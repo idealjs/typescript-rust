@@ -1,10 +1,10 @@
-declarationMerging/mergeThreeInterfaces.ts(54,16): error TS2339: Property 'foo' does not exist on type '{ baz: boolean }'.
-declarationMerging/mergeThreeInterfaces.ts(56,16): error TS2339: Property 'bar' does not exist on type '{ baz: boolean }'.
-declarationMerging/mergeThreeInterfaces.ts(73,16): error TS2339: Property 'foo' does not exist on type '{ baz: string }'.
-declarationMerging/mergeThreeInterfaces.ts(75,16): error TS2339: Property 'bar' does not exist on type '{ baz: string }'.
+mergeThreeInterfaces.ts(54,16): error TS2339: Property 'foo' does not exist on type '{ baz: boolean }'.
+mergeThreeInterfaces.ts(56,16): error TS2339: Property 'bar' does not exist on type '{ baz: boolean }'.
+mergeThreeInterfaces.ts(73,16): error TS2339: Property 'foo' does not exist on type '{ baz: string }'.
+mergeThreeInterfaces.ts(75,16): error TS2339: Property 'bar' does not exist on type '{ baz: string }'.
 
 
-==== declarationMerging/mergeThreeInterfaces.ts (4 errors) ====
+==== mergeThreeInterfaces.ts (4 errors) ====
     // interfaces with the same root module should merge
     
     // basic case

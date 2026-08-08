@@ -1,0 +1,83 @@
+additionOperatorWithTypeParameter.ts(5,10): error TS1005: ',' expected.
+additionOperatorWithTypeParameter.ts(5,11): error TS1134: Variable declaration expected.
+additionOperatorWithTypeParameter.ts(6,10): error TS1005: ',' expected.
+additionOperatorWithTypeParameter.ts(6,11): error TS1134: Variable declaration expected.
+additionOperatorWithTypeParameter.ts(7,10): error TS1005: ',' expected.
+additionOperatorWithTypeParameter.ts(7,11): error TS1134: Variable declaration expected.
+additionOperatorWithTypeParameter.ts(8,10): error TS1005: ',' expected.
+additionOperatorWithTypeParameter.ts(8,11): error TS1134: Variable declaration expected.
+additionOperatorWithTypeParameter.ts(9,10): error TS1005: ',' expected.
+additionOperatorWithTypeParameter.ts(9,11): error TS1134: Variable declaration expected.
+additionOperatorWithTypeParameter.ts(10,10): error TS1005: ',' expected.
+additionOperatorWithTypeParameter.ts(10,11): error TS1134: Variable declaration expected.
+additionOperatorWithTypeParameter.ts(11,10): error TS1005: ',' expected.
+additionOperatorWithTypeParameter.ts(11,11): error TS1134: Variable declaration expected.
+
+
+==== additionOperatorWithTypeParameter.ts (14 errors) ====
+    // type parameter type is not a valid operand of addition operator
+    enum E { a, b }
+    
+    function foo<T, U>(t: T, u: U) {
+        let a!: any;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        let b!: boolean;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        let c!: number;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        let d!: string;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        let e!: Object;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        let g!: E;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        let f!: void;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+    
+        // type parameter as left operand
+        var r1: any = t + a; // ok, one operand is any
+        var r2 = t + b;
+        var r3 = t + c;
+        var r4 = t + d; // ok, one operand is string
+        var r5 = t + e;
+        var r6 = t + g;
+        var r7 = t + f;
+    
+        // type parameter as right operand
+        var r8 = a + t; // ok, one operand is any
+        var r9 = b + t;
+        var r10 = c + t;
+        var r11 = d + t; // ok, one operand is string
+        var r12 = e + t;
+        var r13 = g + t;
+        var r14 = f + t;
+    
+        // other cases
+        var r15 = t + null;
+        var r16 = t + undefined;
+        var r17 = t + t;
+        var r18 = t + u;
+        var r19 = t + (() => { });
+        var r20 = t + [];
+    }

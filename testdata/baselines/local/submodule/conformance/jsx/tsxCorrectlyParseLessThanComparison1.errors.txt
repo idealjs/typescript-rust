@@ -1,0 +1,35 @@
+tsxCorrectlyParseLessThanComparison1.tsx(16,18): error TS2339: Property 'props' does not exist on type '{ render: () => error }'.
+tsxCorrectlyParseLessThanComparison1.tsx(16,30): error TS1005: '>' expected.
+tsxCorrectlyParseLessThanComparison1.tsx(17,21): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxCorrectlyParseLessThanComparison1.tsx(17,21): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+
+
+==== tsxCorrectlyParseLessThanComparison1.tsx (4 errors) ====
+    ﻿// @target: es2015
+    declare namespace JSX {
+        interface Element {
+            div: string;
+        }
+    }
+    declare namespace React {
+        class Component<P, S> {
+            constructor(props?: P, context?: any);
+            props: P;
+        }
+    }
+    
+    export class ShortDetails extends React.Component<{ id: number }, {}> {
+        public render(): JSX.Element {
+            if (this.props.id < 1) {
+                  ~~~~~
+!!! error TS2339: Property 'props' does not exist on type '{ render: () => error }'.
+                              ~
+!!! error TS1005: '>' expected.
+                return (<div></div>);
+                     ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+                     ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+            }
+        }
+    }

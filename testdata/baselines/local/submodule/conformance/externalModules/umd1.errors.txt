@@ -1,0 +1,21 @@
+a.ts(2,1): error TS2304: Cannot find name 'Foo'.
+a.ts(4,17): error TS2454: Variable 'x' is used before being assigned.
+
+
+==== umd1.ts (0 errors) ====
+    
+==== foo.d.ts (0 errors) ====
+    export var x: number;
+    export function fn(): void;
+    export interface Thing { n: typeof x }
+    export as namespace Foo;
+    
+==== a.ts (2 errors) ====
+    /// <reference path="foo.d.ts" />
+    Foo.fn();
+    ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+    let x: Foo.Thing;
+    let y: number = x.n;
+                    ~
+!!! error TS2454: Variable 'x' is used before being assigned.

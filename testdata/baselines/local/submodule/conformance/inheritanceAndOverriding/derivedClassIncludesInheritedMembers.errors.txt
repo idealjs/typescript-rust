@@ -1,21 +1,21 @@
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(4,9): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(5,9): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(9,16): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(10,16): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(18,30): error TS2554: Expected 0 arguments, but got 1.
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(23,18): error TS2339: Property 'r' does not exist on type 'object'.
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(24,18): error TS2339: Property 's' does not exist on type 'object'.
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(25,18): error TS2339: Property 't' does not exist on type 'object'.
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(26,9): error TS2339: Property 't' does not exist on type 'object'.
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(29,7): error TS1005: ']' expected.
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(29,15): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(29,18): error TS2304: Cannot find name 'Object'.
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(30,7): error TS1005: ']' expected.
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(30,15): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(30,18): error TS2304: Cannot find name 'Date'.
+derivedClassIncludesInheritedMembers.ts(4,9): error TS1005: ';' expected.
+derivedClassIncludesInheritedMembers.ts(5,9): error TS1005: ';' expected.
+derivedClassIncludesInheritedMembers.ts(9,16): error TS1005: ';' expected.
+derivedClassIncludesInheritedMembers.ts(10,16): error TS1005: ';' expected.
+derivedClassIncludesInheritedMembers.ts(18,30): error TS2554: Expected 0 arguments, but got 1.
+derivedClassIncludesInheritedMembers.ts(23,18): error TS2339: Property 'r' does not exist on type 'object'.
+derivedClassIncludesInheritedMembers.ts(24,18): error TS2339: Property 's' does not exist on type 'object'.
+derivedClassIncludesInheritedMembers.ts(25,18): error TS2339: Property 't' does not exist on type 'object'.
+derivedClassIncludesInheritedMembers.ts(26,9): error TS2339: Property 't' does not exist on type 'object'.
+derivedClassIncludesInheritedMembers.ts(29,7): error TS1005: ']' expected.
+derivedClassIncludesInheritedMembers.ts(29,15): error TS1005: ';' expected.
+derivedClassIncludesInheritedMembers.ts(29,18): error TS2304: Cannot find name 'Object'.
+derivedClassIncludesInheritedMembers.ts(30,7): error TS1005: ']' expected.
+derivedClassIncludesInheritedMembers.ts(30,15): error TS1005: ';' expected.
+derivedClassIncludesInheritedMembers.ts(30,18): error TS2304: Cannot find name 'Date'.
 
 
-==== inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts (15 errors) ====
+==== derivedClassIncludesInheritedMembers.ts (15 errors) ====
     class Base {
         a: string;
         b() { }

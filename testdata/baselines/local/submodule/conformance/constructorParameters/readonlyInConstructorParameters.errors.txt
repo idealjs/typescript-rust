@@ -1,13 +1,13 @@
-constructorParameters/readonlyInConstructorParameters.ts(2,26): error TS1005: ',' expected.
-constructorParameters/readonlyInConstructorParameters.ts(4,5): error TS2349: This expression is not callable.
-constructorParameters/readonlyInConstructorParameters.ts(7,26): error TS1005: ',' expected.
-constructorParameters/readonlyInConstructorParameters.ts(7,33): error TS1005: ',' expected.
-constructorParameters/readonlyInConstructorParameters.ts(11,25): error TS1005: ',' expected.
-constructorParameters/readonlyInConstructorParameters.ts(11,34): error TS1005: ',' expected.
-constructorParameters/readonlyInConstructorParameters.ts(13,5): error TS2349: This expression is not callable.
+readonlyInConstructorParameters.ts(2,26): error TS1005: ',' expected.
+readonlyInConstructorParameters.ts(4,5): error TS2349: This expression is not callable.
+readonlyInConstructorParameters.ts(7,26): error TS1005: ',' expected.
+readonlyInConstructorParameters.ts(7,33): error TS1005: ',' expected.
+readonlyInConstructorParameters.ts(11,25): error TS1005: ',' expected.
+readonlyInConstructorParameters.ts(11,34): error TS1005: ',' expected.
+readonlyInConstructorParameters.ts(13,5): error TS2349: This expression is not callable.
 
 
-==== constructorParameters/readonlyInConstructorParameters.ts (7 errors) ====
+==== readonlyInConstructorParameters.ts (7 errors) ====
     class C {
         constructor(readonly x: number) {}
                              ~

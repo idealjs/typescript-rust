@@ -1,0 +1,115 @@
+error TS2451: Cannot redeclare block-scoped variable 'param'.
+controlFlowBindingElement.ts(4,11): error TS1182: A destructuring declaration must have an initializer.
+controlFlowBindingElement.ts(6,5): error TS1012: Unexpected token.
+controlFlowBindingElement.ts(6,13): error TS1005: ',' expected.
+controlFlowBindingElement.ts(8,12): error TS1005: ',' expected.
+controlFlowBindingElement.ts(8,16): error TS1005: ',' expected.
+controlFlowBindingElement.ts(8,22): error TS1005: ',' expected.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'param'.
+==== controlFlowBindingElement.ts (6 errors) ====
+    {
+        const data =  { param: 'value' };
+    
+        const {
+              ~
+            param = (() => { throw new Error('param is not defined') })(),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        } = data;
+    ~~~~~~~~~~~~~
+        ~
+!!! error TS1012: Unexpected token.
+                ~
+!!! error TS1005: ',' expected.
+        
+    ~~~~
+        console.log(param); // should not trigger 'Unreachable code detected.'    
+    ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+               ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1005: ',' expected.
+    }
+    
+    
+    {
+        const data =  { param: 'value' };
+    
+        let foo: string | undefined = "";
+        const {
+            param = (() => { throw new Error('param is not defined') })(),
+        } = data;
+        
+        foo;  // should be string  
+    }
+    
+    {
+        const data =  { param: 'value' };
+    
+        let foo: string | undefined = "";
+        const {
+            param = (() => { foo = undefined })(),
+        } = data;
+        
+        foo;  // should be string | undefined
+    }
+    
+    {
+        const data =  { param: 'value' };
+    
+        let foo: string | undefined = "";
+        const {
+            param = (() => { return "" + 1 })(),
+        } = data;
+        
+        foo;  // should be string
+    }
+    
+    {
+        interface Window {
+            window: Window;
+        }
+    
+        let foo: string | undefined;
+        let window = {} as Window;
+        window.window = window;
+    
+        const { [(() => { foo = ""; return 'window' as const })()]:
+            { [(() => { return 'window' as const })()]: bar } } = window;
+    
+        foo;  // should be string
+    }
+    
+    {
+        interface Window {
+            window: Window;
+        }
+    
+        let foo: string | undefined;
+        let window = {} as Window;
+        window.window = window;
+    
+        const { [(() => {  return 'window' as const })()]:
+            { [(() => { foo = ""; return 'window' as const })()]: bar } } = window;
+    
+        foo;  // should be string
+    }
+    
+    {
+        interface Window {
+            window: Window;
+        }
+    
+        let foo: string | undefined;
+        let window = {} as Window;
+        window.window = window;
+    
+        const { [(() => { return 'window' as const })()]:
+            { [(() => { return 'window' as const })()]: bar = (() => { foo = ""; return window; })() } } = window;
+    
+        foo;  // should be string | undefined
+    }

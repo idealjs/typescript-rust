@@ -1,0 +1,7 @@
+error TS2300: Duplicate identifier 'A'.
+
+
+!!! error TS2300: Duplicate identifier 'A'.
+==== typeAliasesDoNotMerge.ts (0 errors) ====
+    export type A = {}
+    type A = {}

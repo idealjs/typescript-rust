@@ -1,0 +1,11 @@
+parserForStatement8.ts(1,14): error TS2304: Cannot find name 'b'.
+parserForStatement8.ts(1,15): error TS1005: ';' expected.
+
+
+==== parserForStatement8.ts (2 errors) ====
+    for (this in b) {
+                 ~
+!!! error TS2304: Cannot find name 'b'.
+                  ~
+!!! error TS1005: ';' expected.
+    }

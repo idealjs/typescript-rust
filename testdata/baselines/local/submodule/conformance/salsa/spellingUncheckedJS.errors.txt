@@ -1,0 +1,90 @@
+other.js(3,1): error TS2304: Cannot find name 'Jon'.
+spellingUncheckedJS.js(2,1): error TS2304: Cannot find name 'inmodule'.
+spellingUncheckedJS.js(6,5): error TS2304: Cannot find name 'locale'.
+spellingUncheckedJS.js(8,5): error TS2304: Cannot find name 'localf'.
+spellingUncheckedJS.js(16,21): error TS2339: Property 'none' does not exist on type '{ non: "oui"; methode: () => any }'.
+spellingUncheckedJS.js(22,22): error TS2339: Property 'none' does not exist on type '{ non: "oui"; methode: () => any }'.
+spellingUncheckedJS.js(30,8): error TS2339: Property 'spaaaace' does not exist on type '{ spaaace: number }'.
+spellingUncheckedJS.js(31,8): error TS2339: Property 'spaace' does not exist on type '{ spaaace: number }'.
+spellingUncheckedJS.js(32,8): error TS2339: Property 'fresh' does not exist on type '{ spaaace: number }'.
+spellingUncheckedJS.js(34,5): error TS2304: Cannot find name 'Date'.
+spellingUncheckedJS.js(37,14): error TS2304: Cannot find name 'setIntegral'.
+spellingUncheckedJS.js(38,1): error TS2304: Cannot find name 'AudioBuffin'.
+spellingUncheckedJS.js(40,1): error TS2304: Cannot find name 'Jon'.
+
+
+==== spellingUncheckedJS.js (12 errors) ====
+    export var inModule = 1
+    inmodule.toFixed()
+    ~~~~~~~~
+!!! error TS2304: Cannot find name 'inmodule'.
+    
+    function f() {
+        var locals = 2 + true
+        locale.toFixed()
+        ~~~~~~
+!!! error TS2304: Cannot find name 'locale'.
+        // @ts-expect-error
+        localf.toExponential()
+        ~~~~~~
+!!! error TS2304: Cannot find name 'localf'.
+        // @ts-expect-error
+        "this is fine"
+    }
+    class Classe {
+        non = 'oui'
+        methode() {
+            // no error on 'this' references
+            return this.none
+                        ~~~~
+!!! error TS2339: Property 'none' does not exist on type '{ non: "oui"; methode: () => any }'.
+        }
+    }
+    class Derivee extends Classe {
+        methode() {
+            // no error on 'super' references
+            return super.none
+                         ~~~~
+!!! error TS2339: Property 'none' does not exist on type '{ non: "oui"; methode: () => any }'.
+        }
+    }
+    
+    
+    var object = {
+        spaaace: 3
+    }
+    object.spaaaace // error on read
+           ~~~~~~~~
+!!! error TS2339: Property 'spaaaace' does not exist on type '{ spaaace: number }'.
+    object.spaace = 12 // error on write
+           ~~~~~~
+!!! error TS2339: Property 'spaace' does not exist on type '{ spaaace: number }'.
+    object.fresh = 12 // OK
+           ~~~~~
+!!! error TS2339: Property 'fresh' does not exist on type '{ spaaace: number }'.
+    other.puuuce // OK, from another file
+    new Date().getGMTDate() // OK, from another file
+        ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    
+    // No suggestions for globals from other files
+    const atoc = setIntegral(() => console.log('ok'), 500)
+                 ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'setIntegral'.
+    AudioBuffin // etc
+    ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'AudioBuffin'.
+    Jimmy
+    Jon
+    ~~~
+!!! error TS2304: Cannot find name 'Jon'.
+    
+==== other.js (1 errors) ====
+    var Jimmy = 1
+    var John = 2
+    Jon // error, it's from the same file
+    ~~~
+!!! error TS2304: Cannot find name 'Jon'.
+    var other = {
+        puuce: 4
+    }

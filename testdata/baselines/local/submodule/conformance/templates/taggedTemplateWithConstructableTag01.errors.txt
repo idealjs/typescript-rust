@@ -1,0 +1,9 @@
+taggedTemplateWithConstructableTag01.ts(3,9): error TS1005: ';' expected.
+
+
+==== taggedTemplateWithConstructableTag01.ts (1 errors) ====
+    class CtorTag { }
+    
+    CtorTag `Hello world!`;
+            ~~~~~~~~~~~~~~
+!!! error TS1005: ';' expected.

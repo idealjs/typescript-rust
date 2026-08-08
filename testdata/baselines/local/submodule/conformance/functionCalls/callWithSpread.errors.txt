@@ -1,0 +1,72 @@
+callWithSpread.ts(50,9): error TS2349: This expression is not callable.
+callWithSpread.ts(51,9): error TS2349: This expression is not callable.
+callWithSpread.ts(54,19): error TS2554: Expected 0 arguments, but got 2.
+callWithSpread.ts(55,28): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+
+
+==== callWithSpread.ts (4 errors) ====
+    interface X {
+        foo(x: number, y: number, ...z: string[]): X;
+    }
+    
+    function foo(x: number, y: number, ...z: string[]) {
+    }
+    
+    var a: string[];
+    var z: number[];
+    var obj: X;
+    var xa: X[];
+    
+    foo(1, 2, "abc");
+    foo(1, 2, ...a);
+    foo(1, 2, ...a, "abc");
+    
+    obj.foo(1, 2, "abc");
+    obj.foo(1, 2, ...a);
+    obj.foo(1, 2, ...a, "abc");
+    
+    obj.foo(1, 2, ...a).foo(1, 2, "abc");
+    obj.foo(1, 2, ...a).foo(1, 2, ...a);
+    obj.foo(1, 2, ...a).foo(1, 2, ...a, "abc");
+    
+    (obj.foo)(1, 2, "abc");
+    (obj.foo)(1, 2, ...a);
+    (obj.foo)(1, 2, ...a, "abc");
+    
+    ((obj.foo)(1, 2, ...a).foo)(1, 2, "abc");
+    ((obj.foo)(1, 2, ...a).foo)(1, 2, ...a);
+    ((obj.foo)(1, 2, ...a).foo)(1, 2, ...a, "abc");
+    
+    xa[1].foo(1, 2, "abc");
+    xa[1].foo(1, 2, ...a);
+    xa[1].foo(1, 2, ...a, "abc");
+    
+    (<Function>xa[1].foo)(...[1, 2, "abc"]);
+    
+    class C {
+        constructor(x: number, y: number, ...z: string[]) {
+            this.foo(x, y);
+            this.foo(x, y, ...z);
+        }
+        foo(x: number, y: number, ...z: string[]) {
+        }
+    }
+    
+    class D extends C {
+        constructor() {
+            super(1, 2);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            super(1, 2, ...a);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+        foo() {
+            super.foo(1, 2);
+                      ~~~~
+!!! error TS2554: Expected 0 arguments, but got 2.
+            super.foo(1, 2, ...a);
+                               ~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+        }
+    }

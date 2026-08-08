@@ -1,0 +1,169 @@
+discriminatedUnionTypes1.ts(24,16): error TS2304: Cannot find name 'Math'.
+discriminatedUnionTypes1.ts(38,31): error TS2304: Cannot find name 'Math'.
+discriminatedUnionTypes1.ts(43,15): error TS2304: Cannot find name 'Error'.
+discriminatedUnionTypes1.ts(50,31): error TS2304: Cannot find name 'Math'.
+discriminatedUnionTypes1.ts(51,25): error TS2349: This expression is not callable.
+discriminatedUnionTypes1.ts(59,31): error TS2304: Cannot find name 'Math'.
+discriminatedUnionTypes1.ts(61,12): error TS2349: This expression is not callable.
+discriminatedUnionTypes1.ts(139,23): error TS2304: Cannot find name 'Error'.
+
+
+==== discriminatedUnionTypes1.ts (8 errors) ====
+    interface Square {
+        kind: "square";
+        size: number;
+    }
+    
+    interface Rectangle {
+        kind: "rectangle";
+        width: number;
+        height: number;
+    }
+    
+    interface Circle {
+        kind: "circle";
+        radius: number;
+    }
+    
+    type Shape = Square | Rectangle | Circle;
+    
+    function area1(s: Shape) {
+        if (s.kind === "square") {
+            return s.size * s.size;
+        }
+        else if (s.kind === "circle") {
+            return Math.PI * s.radius * s.radius;
+                   ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+        }
+        else if (s.kind === "rectangle") {
+            return s.width * s.height;
+        }
+        else {
+            return 0;
+        }
+    }
+    
+    function area2(s: Shape) {
+        switch (s.kind) {
+            case "square": return s.size * s.size;
+            case "rectangle": return s.width * s.height;
+            case "circle": return Math.PI * s.radius * s.radius;
+                                  ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+        }
+    }
+    
+    function assertNever(x: never): never {
+        throw new Error("Unexpected object: " + x);
+                  ~~~~~
+!!! error TS2304: Cannot find name 'Error'.
+    }
+    
+    function area3(s: Shape) {
+        switch (s.kind) {
+            case "square": return s.size * s.size;
+            case "rectangle": return s.width * s.height;
+            case "circle": return Math.PI * s.radius * s.radius;
+                                  ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+            default: return assertNever(s);
+                            ~~~~~~~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    function area4(s: Shape) {
+        switch (s.kind) {
+            case "square": return s.size * s.size;
+            case "rectangle": return s.width * s.height;
+            case "circle": return Math.PI * s.radius * s.radius;
+                                  ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+        }
+        return assertNever(s);
+               ~~~~~~~~~~~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    type Message =
+        { kind: "A", x: string } |
+        { kind: "B" | "C", y: number } |
+        { kind: "D" };
+    
+    function f1(m: Message) {
+        if (m.kind === "A") {
+            m;  // { kind: "A", x: string }
+        }
+        else if (m.kind === "D") {
+            m;  // { kind: "D" }
+        }
+        else {
+            m;  // { kind: "B" | "C", y: number }
+        }
+    }
+    
+    function f2(m: Message) {
+        if (m.kind === "A") {
+            return;
+        }
+        m;  // { kind: "B" | "C", y: number } | { kind: "D" }
+    }
+    
+    function f3(m: Message) {
+        if (m.kind === "X") {
+            m;  // never
+        }
+    }
+    
+    function f4(m: Message, x: "A" | "D") {
+        if (m.kind == x) {
+            m;  // { kind: "A", x: string } | { kind: "D" }
+        }
+    }
+    
+    function f5(m: Message) {
+        switch (m.kind) {
+            case "A":
+                m;  // { kind: "A", x: string }
+                break;
+            case "D":
+                m;  // { kind: "D" }
+                break;
+            default:
+                m;  // { kind: "B" | "C", y: number }
+        }
+    }
+    
+    function f6(m: Message) {
+        switch (m.kind) {
+            case "A":
+                m;  // { kind: "A", x: string }
+            case "D":
+                m;  // { kind: "A", x: string } | { kind: "D" }
+                break;
+            default:
+                m;  // { kind: "B" | "C", y: number }
+        }
+    }
+    
+    function f7(m: Message) {
+        switch (m.kind) {
+            case "A":
+            case "B":
+                return;
+        }
+        m;  // { kind: "B" | "C", y: number } | { kind: "D" }
+    }
+    
+    function f8(m: Message) {
+        switch (m.kind) {
+            case "A":
+                return;
+            case "D":
+                throw new Error();
+                          ~~~~~
+!!! error TS2304: Cannot find name 'Error'.
+        }
+        m;  // { kind: "B" | "C", y: number }
+    }

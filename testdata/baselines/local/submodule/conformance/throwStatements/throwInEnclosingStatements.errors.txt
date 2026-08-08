@@ -1,0 +1,99 @@
+throwInEnclosingStatements.ts(5,8): error TS2304: Cannot find name 'T'.
+throwInEnclosingStatements.ts(16,14): error TS1005: '>' expected.
+throwInEnclosingStatements.ts(27,13): error TS1005: '>' expected.
+throwInEnclosingStatements.ts(42,5): error TS2304: Cannot find name 'biz'.
+throwInEnclosingStatements.ts(42,8): error TS1005: ',' expected.
+throwInEnclosingStatements.ts(42,8): error TS2304: Cannot find name '('.
+throwInEnclosingStatements.ts(42,9): error TS1005: ',' expected.
+throwInEnclosingStatements.ts(42,9): error TS2304: Cannot find name ')'.
+throwInEnclosingStatements.ts(42,11): error TS1005: ',' expected.
+throwInEnclosingStatements.ts(42,11): error TS2304: Cannot find name '{'.
+throwInEnclosingStatements.ts(43,9): error TS1005: ',' expected.
+throwInEnclosingStatements.ts(43,9): error TS2304: Cannot find name 'throw'.
+throwInEnclosingStatements.ts(43,15): error TS1005: ',' expected.
+throwInEnclosingStatements.ts(43,15): error TS2304: Cannot find name 'this'.
+throwInEnclosingStatements.ts(43,19): error TS1005: ',' expected.
+throwInEnclosingStatements.ts(43,19): error TS2304: Cannot find name ';'.
+throwInEnclosingStatements.ts(45,1): error TS1128: Declaration or statement expected.
+
+
+==== throwInEnclosingStatements.ts (17 errors) ====
+    function fn(x) {
+        throw x;
+    }
+    
+    <T>(x: T) => { throw x; }
+           ~
+!!! error TS2304: Cannot find name 'T'.
+    
+    var y: string;
+    switch (y) {
+        case 'a':
+            throw y;
+        default:
+            throw y;
+    }
+    
+    var z = 0;
+    while (z < 10) {
+                 ~
+!!! error TS1005: '>' expected.
+        throw z;
+    }
+    
+    for (var i = 0; ;) { throw i; }
+    
+    for (var idx in {}) { throw idx; }
+    
+    do { throw null; }while(true)
+    
+    var j = 0;
+    while (j < 0) { throw j; }
+                ~
+!!! error TS1005: '>' expected.
+    
+    class C<T> {
+        private value: T;
+        biz() {
+            throw this.value;
+        }
+    
+        constructor() {
+            throw this;
+        }
+    }
+    
+    var aa = {
+        id:12,
+        biz() {
+        ~~~
+!!! error TS2304: Cannot find name 'biz'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '('.
+            ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS2304: Cannot find name ')'.
+              ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS2304: Cannot find name '{'.
+            throw this;
+            ~~~~~
+!!! error TS1005: ',' expected.
+            ~~~~~
+!!! error TS2304: Cannot find name 'throw'.
+                  ~~~~
+!!! error TS1005: ',' expected.
+                  ~~~~
+!!! error TS2304: Cannot find name 'this'.
+                      ~
+!!! error TS1005: ',' expected.
+                      ~
+!!! error TS2304: Cannot find name ';'.
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

@@ -1,0 +1,87 @@
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(4,24): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(4,35): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(5,24): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(5,35): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(9,25): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(10,24): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(14,25): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(15,25): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(19,17): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(20,17): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(24,18): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(25,18): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(29,17): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(30,17): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(34,18): error TS1005: ',' expected.
+constructSignatureWithAccessibilityModifiersOnParameters2.ts(35,18): error TS1005: ',' expected.
+
+
+==== constructSignatureWithAccessibilityModifiersOnParameters2.ts (16 errors) ====
+    // Parameter properties are not valid in overloads of constructors
+    
+    class C {
+        constructor(public x, private y);
+                           ~
+!!! error TS1005: ',' expected.
+                                      ~
+!!! error TS1005: ',' expected.
+        constructor(public x, private y) { }
+                           ~
+!!! error TS1005: ',' expected.
+                                      ~
+!!! error TS1005: ',' expected.
+    }
+    
+    class C2 {
+        constructor(private x);
+                            ~
+!!! error TS1005: ',' expected.
+        constructor(public x) { }
+                           ~
+!!! error TS1005: ',' expected.
+    }
+    
+    class C3 {
+        constructor(private x);
+                            ~
+!!! error TS1005: ',' expected.
+        constructor(private y) { }
+                            ~
+!!! error TS1005: ',' expected.
+    }
+    
+    interface I {
+        new (public x);
+                    ~
+!!! error TS1005: ',' expected.
+        new (public x);
+                    ~
+!!! error TS1005: ',' expected.
+    }
+    
+    interface I2 {
+        new (private x);
+                     ~
+!!! error TS1005: ',' expected.
+        new (private x);
+                     ~
+!!! error TS1005: ',' expected.
+    }
+    
+    var a: {
+        new (public x);
+                    ~
+!!! error TS1005: ',' expected.
+        new (public y);
+                    ~
+!!! error TS1005: ',' expected.
+    }
+    
+    var b: {
+        new (private x);
+                     ~
+!!! error TS1005: ',' expected.
+        new (private y);
+                     ~
+!!! error TS1005: ',' expected.
+    }

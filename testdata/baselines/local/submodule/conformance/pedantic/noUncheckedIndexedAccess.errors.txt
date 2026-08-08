@@ -1,27 +1,27 @@
 error TS2451: Cannot redeclare block-scoped variable 'string'.
-pedantic/noUncheckedIndexedAccess.ts(90,7): error TS2322: Type 'string[][]' is not assignable to type 'string'.
-pedantic/noUncheckedIndexedAccess.ts(95,14): error TS2304: Cannot find name 'Key'.
-pedantic/noUncheckedIndexedAccess.ts(95,48): error TS1005: '?' expected.
-pedantic/noUncheckedIndexedAccess.ts(95,49): error TS1005: ':' expected.
-pedantic/noUncheckedIndexedAccess.ts(95,59): error TS1005: '=>' expected.
-pedantic/noUncheckedIndexedAccess.ts(95,61): error TS1005: ',' expected.
-pedantic/noUncheckedIndexedAccess.ts(95,68): error TS1005: ';' expected.
-pedantic/noUncheckedIndexedAccess.ts(95,81): error TS2304: Cannot find name 'key'.
-pedantic/noUncheckedIndexedAccess.ts(96,14): error TS2304: Cannot find name 'Key'.
-pedantic/noUncheckedIndexedAccess.ts(96,48): error TS1005: '?' expected.
-pedantic/noUncheckedIndexedAccess.ts(96,49): error TS1005: ':' expected.
-pedantic/noUncheckedIndexedAccess.ts(96,59): error TS1005: '=>' expected.
-pedantic/noUncheckedIndexedAccess.ts(96,61): error TS1005: ',' expected.
-pedantic/noUncheckedIndexedAccess.ts(96,68): error TS1005: ';' expected.
-pedantic/noUncheckedIndexedAccess.ts(96,81): error TS2304: Cannot find name 'key'.
-pedantic/noUncheckedIndexedAccess.ts(97,14): error TS2304: Cannot find name 'Key'.
-pedantic/noUncheckedIndexedAccess.ts(97,48): error TS1005: '?' expected.
-pedantic/noUncheckedIndexedAccess.ts(97,49): error TS1005: ':' expected.
-pedantic/noUncheckedIndexedAccess.ts(100,2): error TS1005: '>' expected.
+noUncheckedIndexedAccess.ts(90,7): error TS2322: Type 'string[][]' is not assignable to type 'string'.
+noUncheckedIndexedAccess.ts(95,14): error TS2304: Cannot find name 'Key'.
+noUncheckedIndexedAccess.ts(95,48): error TS1005: '?' expected.
+noUncheckedIndexedAccess.ts(95,49): error TS1005: ':' expected.
+noUncheckedIndexedAccess.ts(95,59): error TS1005: '=>' expected.
+noUncheckedIndexedAccess.ts(95,61): error TS1005: ',' expected.
+noUncheckedIndexedAccess.ts(95,68): error TS1005: ';' expected.
+noUncheckedIndexedAccess.ts(95,81): error TS2304: Cannot find name 'key'.
+noUncheckedIndexedAccess.ts(96,14): error TS2304: Cannot find name 'Key'.
+noUncheckedIndexedAccess.ts(96,48): error TS1005: '?' expected.
+noUncheckedIndexedAccess.ts(96,49): error TS1005: ':' expected.
+noUncheckedIndexedAccess.ts(96,59): error TS1005: '=>' expected.
+noUncheckedIndexedAccess.ts(96,61): error TS1005: ',' expected.
+noUncheckedIndexedAccess.ts(96,68): error TS1005: ';' expected.
+noUncheckedIndexedAccess.ts(96,81): error TS2304: Cannot find name 'key'.
+noUncheckedIndexedAccess.ts(97,14): error TS2304: Cannot find name 'Key'.
+noUncheckedIndexedAccess.ts(97,48): error TS1005: '?' expected.
+noUncheckedIndexedAccess.ts(97,49): error TS1005: ':' expected.
+noUncheckedIndexedAccess.ts(100,2): error TS1005: '>' expected.
 
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'string'.
-==== pedantic/noUncheckedIndexedAccess.ts (19 errors) ====
+==== noUncheckedIndexedAccess.ts (19 errors) ====
     type CheckBooleanOnly<T extends boolean> = any;
     // Validate CheckBooleanOnly works - should error
     type T_ERR1 = CheckBooleanOnly<boolean | undefined>;

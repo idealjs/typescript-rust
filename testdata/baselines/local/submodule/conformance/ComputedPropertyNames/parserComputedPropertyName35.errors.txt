@@ -1,0 +1,12 @@
+parserComputedPropertyName35.ts(2,7): error TS1005: ']' expected.
+parserComputedPropertyName35.ts(2,10): error TS1005: ',' expected.
+
+
+==== parserComputedPropertyName35.ts (2 errors) ====
+    var x = {
+        [0, 1]: { }
+          ~
+!!! error TS1005: ']' expected.
+             ~
+!!! error TS1005: ',' expected.
+    }

@@ -1,0 +1,69 @@
+typeParameterDirectlyConstrainedToItself.ts(9,22): error TS2304: Cannot find name 'T'.
+typeParameterDirectlyConstrainedToItself.ts(17,10): error TS2304: Cannot find name 'T'.
+typeParameterDirectlyConstrainedToItself.ts(17,20): error TS2304: Cannot find name 'T'.
+typeParameterDirectlyConstrainedToItself.ts(17,21): error TS1005: '?' expected.
+typeParameterDirectlyConstrainedToItself.ts(17,22): error TS1005: ':' expected.
+typeParameterDirectlyConstrainedToItself.ts(18,1): error TS1005: '>' expected.
+typeParameterDirectlyConstrainedToItself.ts(18,1): error TS2304: Cannot find name 'var'.
+typeParameterDirectlyConstrainedToItself.ts(18,5): error TS1005: ',' expected.
+typeParameterDirectlyConstrainedToItself.ts(18,11): error TS2304: Cannot find name 'T'.
+typeParameterDirectlyConstrainedToItself.ts(18,12): error TS1005: '>' expected.
+typeParameterDirectlyConstrainedToItself.ts(18,14): error TS1005: ',' expected.
+typeParameterDirectlyConstrainedToItself.ts(18,16): error TS1005: ',' expected.
+typeParameterDirectlyConstrainedToItself.ts(18,24): error TS1005: ',' expected.
+typeParameterDirectlyConstrainedToItself.ts(18,25): error TS1005: ',' expected.
+typeParameterDirectlyConstrainedToItself.ts(18,26): error TS1134: Variable declaration expected.
+typeParameterDirectlyConstrainedToItself.ts(18,27): error TS1134: Variable declaration expected.
+
+
+==== typeParameterDirectlyConstrainedToItself.ts (16 errors) ====
+    // all of the below should be errors
+    
+    class C<T extends T> { } 
+    class C2<T, U extends U> { } 
+    
+    interface I<T extends T> { }
+    interface I2<T, U extends U> { }
+    
+    function f<T extends T>() { }
+                         ~
+!!! error TS2304: Cannot find name 'T'.
+    function f2<T, U extends U>() { }
+    
+    var a: {
+        <T extends T>(): void;
+        <T, U extends U>(): void;
+    }
+    
+    var b = <T extends T>() => { }
+             ~
+!!! error TS2304: Cannot find name 'T'.
+                       ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS1005: '?' expected.
+                         ~
+!!! error TS1005: ':' expected.
+    var b2 = <T, U extends U>() => { }
+    ~~~
+!!! error TS1005: '>' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS2304: Cannot find name 'T'.
+               ~
+!!! error TS1005: '>' expected.
+                 ~
+!!! error TS1005: ',' expected.
+                   ~~~~~~~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1134: Variable declaration expected.
+                              ~
+!!! error TS1134: Variable declaration expected.

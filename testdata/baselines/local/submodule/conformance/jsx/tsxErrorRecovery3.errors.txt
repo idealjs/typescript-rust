@@ -1,0 +1,36 @@
+file1.tsx(3,1): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file1.tsx(3,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+file1.tsx(4,6): error TS1005: ';' expected.
+file1.tsx(5,1): error TS1012: Unexpected token.
+file2.tsx(1,9): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file2.tsx(1,9): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+file2.tsx(1,25): error TS1005: ',' expected.
+file2.tsx(1,30): error TS1005: ',' expected.
+
+
+==== tsxErrorRecovery3.tsx (0 errors) ====
+    
+==== file1.tsx (4 errors) ====
+    declare namespace JSX { interface Element { } }
+    
+    <div></div>
+    ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+    <div></div>
+         ~~
+!!! error TS1005: ';' expected.
+    
+    
+!!! error TS1012: Unexpected token.
+==== file2.tsx (4 errors) ====
+    var x = <div></div><div></div>
+            ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+            ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+                            ~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.

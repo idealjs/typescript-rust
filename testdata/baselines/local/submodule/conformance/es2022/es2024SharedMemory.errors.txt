@@ -1,14 +1,14 @@
-es2022/es2024SharedMemory.ts(5,17): error TS2304: Cannot find name 'SharedArrayBuffer'.
-es2022/es2024SharedMemory.ts(7,19): error TS2304: Cannot find name 'SharedArrayBuffer'.
-es2022/es2024SharedMemory.ts(7,37): error TS2304: Cannot find name 'BigInt64Array'.
-es2022/es2024SharedMemory.ts(8,19): error TS2304: Cannot find name 'BigInt64Array'.
-es2022/es2024SharedMemory.ts(9,19): error TS2304: Cannot find name 'Atomics'.
-es2022/es2024SharedMemory.ts(10,26): error TS2304: Cannot find name 'Atomics'.
-es2022/es2024SharedMemory.ts(11,44): error TS2304: Cannot find name 'Atomics'.
-es2022/es2024SharedMemory.ts(11,72): error TS2304: Cannot find name 'BigInt'.
+es2024SharedMemory.ts(5,17): error TS2304: Cannot find name 'SharedArrayBuffer'.
+es2024SharedMemory.ts(7,19): error TS2304: Cannot find name 'SharedArrayBuffer'.
+es2024SharedMemory.ts(7,37): error TS2304: Cannot find name 'BigInt64Array'.
+es2024SharedMemory.ts(8,19): error TS2304: Cannot find name 'BigInt64Array'.
+es2024SharedMemory.ts(9,19): error TS2304: Cannot find name 'Atomics'.
+es2024SharedMemory.ts(10,26): error TS2304: Cannot find name 'Atomics'.
+es2024SharedMemory.ts(11,44): error TS2304: Cannot find name 'Atomics'.
+es2024SharedMemory.ts(11,72): error TS2304: Cannot find name 'BigInt'.
 
 
-==== es2022/es2024SharedMemory.ts (8 errors) ====
+==== es2024SharedMemory.ts (8 errors) ====
     // ES2024 Atomics.waitAsync was included in the ES2022 type file due to a mistake.
     // This test file checks if it fails successfully.
     // https://github.com/microsoft/TypeScript/pull/58573#issuecomment-2119347142

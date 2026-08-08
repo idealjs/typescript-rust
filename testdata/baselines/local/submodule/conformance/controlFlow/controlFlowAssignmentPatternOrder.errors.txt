@@ -1,0 +1,187 @@
+controlFlowAssignmentPatternOrder.ts(6,19): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(7,11): error TS2322: Type '0 | 1 | 9' is not assignable to type '0'.
+controlFlowAssignmentPatternOrder.ts(7,19): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(12,13): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(13,11): error TS2322: Type '0 | 1 | 9' is not assignable to type '9'.
+controlFlowAssignmentPatternOrder.ts(13,19): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(18,19): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(19,11): error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+controlFlowAssignmentPatternOrder.ts(19,23): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(24,13): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(25,11): error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+controlFlowAssignmentPatternOrder.ts(25,23): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(31,19): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(32,11): error TS2322: Type '0 | 1 | 9' is not assignable to type '0'.
+controlFlowAssignmentPatternOrder.ts(32,19): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(37,13): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(38,11): error TS2322: Type '0 | 1 | 9' is not assignable to type '9'.
+controlFlowAssignmentPatternOrder.ts(38,19): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(43,19): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(44,11): error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+controlFlowAssignmentPatternOrder.ts(44,23): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(49,13): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(50,11): error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+controlFlowAssignmentPatternOrder.ts(50,23): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(56,24): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(57,11): error TS2322: Type '0 | 1 | 9' is not assignable to type '0'.
+controlFlowAssignmentPatternOrder.ts(57,19): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(62,18): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(63,11): error TS2322: Type '0 | 1 | 9' is not assignable to type '9'.
+controlFlowAssignmentPatternOrder.ts(63,19): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(68,24): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(69,11): error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+controlFlowAssignmentPatternOrder.ts(69,23): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(74,18): error TS2454: Variable 'b' is used before being assigned.
+controlFlowAssignmentPatternOrder.ts(75,11): error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+controlFlowAssignmentPatternOrder.ts(75,23): error TS2454: Variable 'b' is used before being assigned.
+
+
+==== controlFlowAssignmentPatternOrder.ts (36 errors) ====
+    // https://github.com/microsoft/TypeScript/pull/41094#issuecomment-716044363
+    declare function f(): void;
+    {
+        let a: 0 | 1 = 0;
+        let b: 0 | 1 | 9;
+        [{ [(a = 1)]: b } = [9, a] as const] = [];
+                      ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+        const bb: 0 = b;
+              ~~~~~~~~~
+!!! error TS2322: Type '0 | 1 | 9' is not assignable to type '0'.
+                      ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+    }
+    {
+        let a: 0 | 1 = 1;
+        let b: 0 | 1 | 9;
+        [{ [a]: b } = [9, a = 0] as const] = [];
+                ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+        const bb: 9 = b;
+              ~~~~~~~~~
+!!! error TS2322: Type '0 | 1 | 9' is not assignable to type '9'.
+                      ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+    }
+    {
+        let a: 0 | 1 = 0;
+        let b: 0 | 1 | 8 | 9;
+        [{ [(a = 1)]: b } = [9, a] as const] = [[9, 8] as const];
+                      ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+        const bb: 0 | 8 = b;
+              ~~~~~~~~~~~~~
+!!! error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+                          ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+    }
+    {
+        let a: 0 | 1 = 1;
+        let b: 0 | 1 | 8 | 9;
+        [{ [a]: b } = [a = 0, 9] as const] = [[8, 9] as const];
+                ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+        const bb: 0 | 8 = b;
+              ~~~~~~~~~~~~~
+!!! error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+                          ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+    }
+    // same as above but on left of a binary expression
+    {
+        let a: 0 | 1 = 0;
+        let b: 0 | 1 | 9;
+        [{ [(a = 1)]: b } = [9, a] as const] = [], f();
+                      ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+        const bb: 0 = b;
+              ~~~~~~~~~
+!!! error TS2322: Type '0 | 1 | 9' is not assignable to type '0'.
+                      ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+    }
+    {
+        let a: 0 | 1 = 1;
+        let b: 0 | 1 | 9;
+        [{ [a]: b } = [9, a = 0] as const] = [], f();
+                ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+        const bb: 9 = b;
+              ~~~~~~~~~
+!!! error TS2322: Type '0 | 1 | 9' is not assignable to type '9'.
+                      ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+    }
+    {
+        let a: 0 | 1 = 0;
+        let b: 0 | 1 | 8 | 9;
+        [{ [(a = 1)]: b } = [9, a] as const] = [[9, 8] as const], f();
+                      ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+        const bb: 0 | 8 = b;
+              ~~~~~~~~~~~~~
+!!! error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+                          ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+    }
+    {
+        let a: 0 | 1 = 1;
+        let b: 0 | 1 | 8 | 9;
+        [{ [a]: b } = [a = 0, 9] as const] = [[8, 9] as const], f();
+                ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+        const bb: 0 | 8 = b;
+              ~~~~~~~~~~~~~
+!!! error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+                          ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+    }
+    // same as above but on right of a binary expression
+    {
+        let a: 0 | 1 = 0;
+        let b: 0 | 1 | 9;
+        f(), [{ [(a = 1)]: b } = [9, a] as const] = [];
+                           ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+        const bb: 0 = b;
+              ~~~~~~~~~
+!!! error TS2322: Type '0 | 1 | 9' is not assignable to type '0'.
+                      ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+    }
+    {
+        let a: 0 | 1 = 1;
+        let b: 0 | 1 | 9;
+        f(), [{ [a]: b } = [9, a = 0] as const] = [];
+                     ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+        const bb: 9 = b;
+              ~~~~~~~~~
+!!! error TS2322: Type '0 | 1 | 9' is not assignable to type '9'.
+                      ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+    }
+    {
+        let a: 0 | 1 = 0;
+        let b: 0 | 1 | 8 | 9;
+        f(), [{ [(a = 1)]: b } = [9, a] as const] = [[9, 8] as const];
+                           ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+        const bb: 0 | 8 = b;
+              ~~~~~~~~~~~~~
+!!! error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+                          ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+    }
+    {
+        let a: 0 | 1 = 1;
+        let b: 0 | 1 | 8 | 9;
+        f(), [{ [a]: b } = [a = 0, 9] as const] = [[8, 9] as const];
+                     ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+        const bb: 0 | 8 = b;
+              ~~~~~~~~~~~~~
+!!! error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+                          ~
+!!! error TS2454: Variable 'b' is used before being assigned.
+    }

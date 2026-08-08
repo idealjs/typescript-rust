@@ -1,0 +1,16 @@
+assignmentCompatWithGenericCallSignatures.ts(3,39): error TS2304: Cannot find name 'S'.
+assignmentCompatWithGenericCallSignatures.ts(4,37): error TS2304: Cannot find name 'T'.
+
+
+==== assignmentCompatWithGenericCallSignatures.ts (2 errors) ====
+    // some complex cases of assignment compat of generic signatures that stress contextual signature instantiation
+    
+    var f: <S extends { p: string }[]>(x: S) => void
+                                          ~
+!!! error TS2304: Cannot find name 'S'.
+    var g: <T extends { p: string }>(x: T[]) => void
+                                        ~
+!!! error TS2304: Cannot find name 'T'.
+    
+    f = g; // ok
+    g = f; // ok

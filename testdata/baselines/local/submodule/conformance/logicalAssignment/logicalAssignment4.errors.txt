@@ -1,0 +1,75 @@
+logicalAssignment4.ts(26,29): error TS18048: 'thing' is possibly 'undefined'.
+logicalAssignment4.ts(27,19): error TS18048: 'thing' is possibly 'undefined'.
+logicalAssignment4.ts(32,19): error TS18048: 'thing' is possibly 'undefined'.
+logicalAssignment4.ts(33,26): error TS18048: 'defaultValue' is possibly 'undefined'.
+logicalAssignment4.ts(38,19): error TS18048: 'thing' is possibly 'undefined'.
+logicalAssignment4.ts(39,26): error TS18048: 'defaultValue' is possibly 'undefined'.
+logicalAssignment4.ts(44,19): error TS18048: 'thing' is possibly 'undefined'.
+logicalAssignment4.ts(45,26): error TS18048: 'defaultValue' is possibly 'undefined'.
+
+
+==== logicalAssignment4.ts (8 errors) ====
+    function foo1(results: number[] | undefined) {
+        (results ||= []).push(100);
+    }
+    
+    function foo2(results: number[] | undefined) {
+        (results ??= []).push(100);
+    }
+    
+    function foo3(results: number[] | undefined) {
+        results ||= [];
+        results.push(100);
+    }
+    
+    function foo4(results: number[] | undefined) {
+        results ??= [];
+        results.push(100);
+    }
+    
+    interface ThingWithOriginal {
+        name: string;
+        original?: ThingWithOriginal
+    }
+    declare const v: number
+    function doSomethingWithAlias(thing: ThingWithOriginal | undefined, defaultValue: ThingWithOriginal | undefined) {
+        if (v === 1) {
+            if (thing &&= thing.original) {
+                                ~~~~~~~~
+!!! error TS18048: 'thing' is possibly 'undefined'.
+                thing.name;
+                      ~~~~
+!!! error TS18048: 'thing' is possibly 'undefined'.
+            }
+        }
+        else if (v === 2) {
+            if (thing &&= defaultValue) {
+                thing.name;
+                      ~~~~
+!!! error TS18048: 'thing' is possibly 'undefined'.
+                defaultValue.name
+                             ~~~~
+!!! error TS18048: 'defaultValue' is possibly 'undefined'.
+            }
+        }
+        else if (v === 3) {
+            if (thing ||= defaultValue) {
+                thing.name;
+                      ~~~~
+!!! error TS18048: 'thing' is possibly 'undefined'.
+                defaultValue.name;
+                             ~~~~
+!!! error TS18048: 'defaultValue' is possibly 'undefined'.
+            }
+        }
+        else {
+            if (thing ??= defaultValue) {
+                thing.name;
+                      ~~~~
+!!! error TS18048: 'thing' is possibly 'undefined'.
+                defaultValue.name;
+                             ~~~~
+!!! error TS18048: 'defaultValue' is possibly 'undefined'.
+            }
+        }
+    }

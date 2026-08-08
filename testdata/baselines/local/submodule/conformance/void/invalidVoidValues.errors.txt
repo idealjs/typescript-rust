@@ -1,0 +1,53 @@
+invalidVoidValues.ts(18,7): error TS2304: Cannot find name 'f'.
+invalidVoidValues.ts(18,8): error TS1005: ',' expected.
+invalidVoidValues.ts(18,8): error TS2304: Cannot find name '('.
+invalidVoidValues.ts(18,9): error TS1005: ',' expected.
+invalidVoidValues.ts(18,9): error TS2304: Cannot find name ')'.
+invalidVoidValues.ts(18,11): error TS1005: ',' expected.
+invalidVoidValues.ts(18,11): error TS2304: Cannot find name '{'.
+invalidVoidValues.ts(18,14): error TS1128: Declaration or statement expected.
+
+
+==== invalidVoidValues.ts (8 errors) ====
+    var x: void;
+    x = 1;
+    x = '';
+    x = true;
+    
+    enum E { A }
+    x = E;
+    x = E.A;
+    
+    class C { foo!: string }
+    declare var a: C;
+    x = a;
+    
+    interface I { foo: string }
+    declare var b: I;
+    x = b;
+    
+    x = { f() {} }
+          ~
+!!! error TS2304: Cannot find name 'f'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '('.
+            ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS2304: Cannot find name ')'.
+              ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS2304: Cannot find name '{'.
+                 ~
+!!! error TS1128: Declaration or statement expected.
+    
+    namespace M { export var x = 1; }
+    x = M;
+    
+    function f<T>(a: T) {
+        x = a;
+    }
+    x = f;

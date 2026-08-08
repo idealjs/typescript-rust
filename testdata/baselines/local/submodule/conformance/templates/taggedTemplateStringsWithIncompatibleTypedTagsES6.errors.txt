@@ -1,0 +1,93 @@
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(8,7): error TS1005: ']' expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(8,15): error TS1003: Identifier expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(13,3): error TS1005: ';' expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(15,3): error TS1005: ';' expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(17,3): error TS1005: ';' expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(17,9): error TS2339: Property 'member' does not exist on type 'string'.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(19,3): error TS1005: ';' expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(19,23): error TS2339: Property 'member' does not exist on type 'string'.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(21,3): error TS1005: ';' expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(23,3): error TS1005: ';' expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(25,3): error TS1005: ';' expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(25,19): error TS1005: ';' expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(27,3): error TS1005: ';' expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(27,40): error TS1005: ';' expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(29,3): error TS1005: ';' expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(29,50): error TS1005: ';' expected.
+
+
+==== taggedTemplateStringsWithIncompatibleTypedTagsES6.ts (16 errors) ====
+    ﻿// @target: ES6
+    interface I {
+        (stringParts: TemplateStringsArray, ...rest: boolean[]): I;
+        g: I;
+        h: I;
+        member: I;
+        thisIsNotATag(x: string): void
+        [x: number]: I;
+       ~
+!!! error TS1005: ']' expected.
+               ~
+!!! error TS1003: Identifier expected.
+    }
+    
+    declare var f: I;
+    
+    
+    f `abc`
+    ~~~~
+!!! error TS1005: ';' expected.
+    
+    
+    f `abc${1}def${2}ghi`;
+    ~~~~~
+!!! error TS1005: ';' expected.
+    
+    
+    f `abc`.member
+    ~~~~
+!!! error TS1005: ';' expected.
+         ~~~~~~
+!!! error TS2339: Property 'member' does not exist on type 'string'.
+    
+    
+    f `abc${1}def${2}ghi`.member;
+    ~~~~~
+!!! error TS1005: ';' expected.
+                       ~~~~~~
+!!! error TS2339: Property 'member' does not exist on type 'string'.
+    
+    
+    f `abc`["member"];
+    ~~~~
+!!! error TS1005: ';' expected.
+    
+    
+    f `abc${1}def${2}ghi`["member"];
+    ~~~~~
+!!! error TS1005: ';' expected.
+    
+    
+    f `abc`[0].member `abc${1}def${2}ghi`;
+    ~~~~
+!!! error TS1005: ';' expected.
+                   ~~~~~~
+!!! error TS1005: ';' expected.
+    
+    
+    f `abc${1}def${2}ghi`["member"].member `abc${1}def${2}ghi`;
+    ~~~~~
+!!! error TS1005: ';' expected.
+                                        ~~~~~~
+!!! error TS1005: ';' expected.
+    
+    
+    f `abc${ true }def${ true }ghi`["member"].member `abc${ 1 }def${ 2 }ghi`;
+    ~~~~~
+!!! error TS1005: ';' expected.
+                                                  ~~~~~~
+!!! error TS1005: ';' expected.
+    
+    f.thisIsNotATag(`abc`);
+    
+    f.thisIsNotATag(`abc${1}def${2}ghi`);

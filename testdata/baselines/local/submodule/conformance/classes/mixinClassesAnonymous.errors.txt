@@ -1,0 +1,157 @@
+mixinClassesAnonymous.ts(4,24): error TS1005: ',' expected.
+mixinClassesAnonymous.ts(4,42): error TS1005: ',' expected.
+mixinClassesAnonymous.ts(8,46): error TS1005: ',' expected.
+mixinClassesAnonymous.ts(9,9): error TS2349: This expression is not callable.
+mixinClassesAnonymous.ts(13,47): error TS1005: '?' expected.
+mixinClassesAnonymous.ts(13,48): error TS1005: ':' expected.
+mixinClassesAnonymous.ts(13,92): error TS1005: '?' expected.
+mixinClassesAnonymous.ts(15,13): error TS1003: Identifier expected.
+mixinClassesAnonymous.ts(16,28): error TS1003: Identifier expected.
+mixinClassesAnonymous.ts(16,31): error TS1003: Identifier expected.
+mixinClassesAnonymous.ts(16,37): error TS1003: Identifier expected.
+mixinClassesAnonymous.ts(16,43): error TS1003: Identifier expected.
+mixinClassesAnonymous.ts(18,1): error TS1005: ':' expected.
+mixinClassesAnonymous.ts(20,1): error TS1005: '>' expected.
+mixinClassesAnonymous.ts(24,13): error TS2349: This expression is not callable.
+mixinClassesAnonymous.ts(31,16): error TS2304: Cannot find name 'Tagged'.
+mixinClassesAnonymous.ts(32,16): error TS2304: Cannot find name 'Tagged'.
+mixinClassesAnonymous.ts(32,23): error TS2349: This expression is not callable.
+mixinClassesAnonymous.ts(50,9): error TS2349: This expression is not callable.
+mixinClassesAnonymous.ts(51,14): error TS2339: Property '_tag' does not exist on type '{ test: () => any }'.
+mixinClassesAnonymous.ts(54,14): error TS2339: Property 'print' does not exist on type '{ test: () => any }'.
+mixinClassesAnonymous.ts(60,22): error TS2304: Cannot find name 'CT'.
+mixinClassesAnonymous.ts(60,52): error TS1005: '?' expected.
+mixinClassesAnonymous.ts(60,53): error TS1005: ':' expected.
+mixinClassesAnonymous.ts(61,31): error TS1003: Identifier expected.
+mixinClassesAnonymous.ts(62,25): error TS1005: '(' expected.
+mixinClassesAnonymous.ts(62,29): error TS1005: ',' expected.
+mixinClassesAnonymous.ts(62,31): error TS1005: '=>' expected.
+mixinClassesAnonymous.ts(63,6): error TS1005: '>' expected.
+mixinClassesAnonymous.ts(64,1): error TS1128: Declaration or statement expected.
+
+
+==== mixinClassesAnonymous.ts (30 errors) ====
+    type Constructor<T> = new(...args: any[]) => T;
+    
+    class Base {
+        constructor(public x: number, public y: number) {}
+                           ~
+!!! error TS1005: ',' expected.
+                                             ~
+!!! error TS1005: ',' expected.
+    }
+    
+    class Derived extends Base {
+        constructor(x: number, y: number, public z: number) {
+                                                 ~
+!!! error TS1005: ',' expected.
+            super(x, y);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    const Printable = <T extends Constructor<Base>>(superClass: T) => class extends superClass {
+                                                  ~
+!!! error TS1005: '?' expected.
+                                                   ~
+!!! error TS1005: ':' expected.
+                                                                                               ~
+!!! error TS1005: '?' expected.
+        static message = "hello";
+        print() {
+                ~
+!!! error TS1003: Identifier expected.
+            const output = this.x + "," + this.y;
+                               ~
+!!! error TS1003: Identifier expected.
+                                  ~
+!!! error TS1003: Identifier expected.
+                                        ~
+!!! error TS1003: Identifier expected.
+                                              ~
+!!! error TS1003: Identifier expected.
+        }
+    }
+    ~
+!!! error TS1005: ':' expected.
+    
+    function Tagged<T extends Constructor<{}>>(superClass: T) {
+    ~~~~~~~~
+!!! error TS1005: '>' expected.
+        class C extends superClass {
+            _tag: string;
+            constructor(...args: any[]) {
+                super(...args);
+                ~~~~~
+!!! error TS2349: This expression is not callable.
+                this._tag = "hello";
+            }
+        }
+        return C;
+    }
+    
+    const Thing1 = Tagged(Derived);
+                   ~~~~~~
+!!! error TS2304: Cannot find name 'Tagged'.
+    const Thing2 = Tagged(Printable(Derived));
+                   ~~~~~~
+!!! error TS2304: Cannot find name 'Tagged'.
+                          ~~~~~~~~~
+!!! error TS2349: This expression is not callable.
+    Thing2.message;
+    
+    function f1() {
+        const thing = new Thing1(1, 2, 3);
+        thing.x;
+        thing._tag;
+    }
+    
+    function f2() {
+        const thing = new Thing2(1, 2, 3);
+        thing.x;
+        thing._tag;
+        thing.print();
+    }
+    
+    class Thing3 extends Thing2 {
+        constructor(tag: string) {
+            super(10, 20, 30);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            this._tag = tag;
+                 ~~~~
+!!! error TS2339: Property '_tag' does not exist on type '{ test: () => any }'.
+        }
+        test() {
+            this.print();
+                 ~~~~~
+!!! error TS2339: Property 'print' does not exist on type '{ test: () => any }'.
+        }
+    }
+    
+    // Repro from #13805
+    
+    const Timestamped = <CT extends Constructor<object>>(Base: CT) => {
+                         ~~
+!!! error TS2304: Cannot find name 'CT'.
+                                                       ~
+!!! error TS1005: '?' expected.
+                                                        ~
+!!! error TS1005: ':' expected.
+        return class extends Base {
+                                  ~
+!!! error TS1003: Identifier expected.
+            timestamp = new Date();
+                            ~~~~
+!!! error TS1005: '(' expected.
+                                ~
+!!! error TS1005: ',' expected.
+                                  ~
+!!! error TS1005: '=>' expected.
+        };
+         ~
+!!! error TS1005: '>' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

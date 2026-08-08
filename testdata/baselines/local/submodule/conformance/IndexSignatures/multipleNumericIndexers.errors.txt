@@ -1,0 +1,58 @@
+multipleNumericIndexers.ts(4,7): error TS1005: ']' expected.
+multipleNumericIndexers.ts(4,15): error TS1005: ';' expected.
+multipleNumericIndexers.ts(5,7): error TS1005: ']' expected.
+multipleNumericIndexers.ts(5,15): error TS1005: ';' expected.
+multipleNumericIndexers.ts(24,7): error TS1005: ']' expected.
+multipleNumericIndexers.ts(24,15): error TS1005: ';' expected.
+multipleNumericIndexers.ts(25,7): error TS1005: ']' expected.
+multipleNumericIndexers.ts(25,15): error TS1005: ';' expected.
+
+
+==== multipleNumericIndexers.ts (8 errors) ====
+    // Multiple indexers of the same type are an error
+    
+    class C {
+        [x: number]: string;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        [x: number]: string;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    interface I {
+        [x: number]: string;
+        [x: number]: string;
+    }
+    
+    var a: {
+        [x: number]: string;
+        [x: number]: string;
+    }
+    
+    var b: {
+        [x: number]: string;
+        [x: number]: string
+    } = { 1: '', "2": '' }
+    
+    class C2<T> {
+        [x: number]: string;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        [x: number]: string;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    interface I<T> {
+        [x: number]: string;
+        [x: number]: string;
+    }

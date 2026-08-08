@@ -1,0 +1,48 @@
+lib.js(14,7): error TS1003: Identifier expected.
+lib.js(14,8): error TS1005: ';' expected.
+lib.js(14,8): error TS2304: Cannot find name 'exports'.
+main.js(1,43): error TS2304: Cannot find name 'require'.
+main.js(3,7): error TS1003: Identifier expected.
+main.js(3,8): error TS1005: ';' expected.
+main.js(3,8): error TS2304: Cannot find name 'exports'.
+
+
+==== lib.js (3 errors) ====
+    /**
+     * @param {string} a
+     */
+    function bar(a) {
+        return a + a;
+    }
+    
+    class SomeClass {
+        a() {
+            return 1;
+        }
+    }
+    
+    module.exports = {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        bar,
+        SomeClass
+    }
+==== main.js (4 errors) ====
+    const { SomeClass, SomeClass: Another } = require('./lib');
+                                              ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    
+    module.exports = {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        SomeClass,
+        Another
+    }

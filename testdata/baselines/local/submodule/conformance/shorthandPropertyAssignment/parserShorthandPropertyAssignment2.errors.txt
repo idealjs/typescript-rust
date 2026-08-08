@@ -1,0 +1,7 @@
+parserShorthandPropertyAssignment2.ts(1,11): error TS2304: Cannot find name 'class'.
+
+
+==== parserShorthandPropertyAssignment2.ts (1 errors) ====
+    var v = { class };
+              ~~~~~
+!!! error TS2304: Cannot find name 'class'.

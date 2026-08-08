@@ -1,0 +1,11 @@
+parserInterfaceDeclaration4.ts(1,1): error TS2304: Cannot find name 'static'.
+parserInterfaceDeclaration4.ts(1,8): error TS1005: ';' expected.
+
+
+==== parserInterfaceDeclaration4.ts (2 errors) ====
+    static interface I {
+    ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+           ~~~~~~~~~
+!!! error TS1005: ';' expected.
+    }

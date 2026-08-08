@@ -1,0 +1,12 @@
+accessorsOverrideProperty7.ts(5,9): error TS1005: ';' expected.
+
+
+==== accessorsOverrideProperty7.ts (1 errors) ====
+    abstract class A {
+        abstract p = 'yep'
+    }
+    class B extends A {
+        get p() { return 'oh no' } // error
+            ~
+!!! error TS1005: ';' expected.
+    }

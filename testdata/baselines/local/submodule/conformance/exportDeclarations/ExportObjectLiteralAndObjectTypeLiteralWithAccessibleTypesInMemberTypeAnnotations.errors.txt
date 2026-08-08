@@ -1,0 +1,25 @@
+ExportObjectLiteralAndObjectTypeLiteralWithAccessibleTypesInMemberTypeAnnotations.ts(4,28): error TS1005: ',' expected.
+ExportObjectLiteralAndObjectTypeLiteralWithAccessibleTypesInMemberTypeAnnotations.ts(4,46): error TS1005: ',' expected.
+ExportObjectLiteralAndObjectTypeLiteralWithAccessibleTypesInMemberTypeAnnotations.ts(9,33): error TS2554: Expected 4 arguments, but got 2.
+ExportObjectLiteralAndObjectTypeLiteralWithAccessibleTypesInMemberTypeAnnotations.ts(9,55): error TS2554: Expected 4 arguments, but got 2.
+
+
+==== ExportObjectLiteralAndObjectTypeLiteralWithAccessibleTypesInMemberTypeAnnotations.ts (4 errors) ====
+    namespace A {
+    
+        class Point {
+            constructor(public x: number, public y: number) { }
+                               ~
+!!! error TS1005: ',' expected.
+                                                 ~
+!!! error TS1005: ',' expected.
+        }
+    
+        export var Origin: Point = { x: 0, y: 0 };
+    
+        export var Unity = { start: new Point(0, 0), end: new Point(1, 0) };
+                                    ~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 4 arguments, but got 2.
+                                                          ~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 4 arguments, but got 2.
+    }

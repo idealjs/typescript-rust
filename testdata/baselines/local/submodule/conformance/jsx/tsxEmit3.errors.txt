@@ -1,0 +1,57 @@
+file.tsx(18,7): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(22,8): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(25,8): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(32,9): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+file.tsx(38,7): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+
+
+==== file.tsx (5 errors) ====
+    declare namespace JSX {
+    	interface Element { }
+    	interface IntrinsicElements { }
+    }
+    
+    namespace M {
+    	export class Foo { constructor() { } }
+    	export namespace S {
+    		export class Bar { }
+    
+    		// Emit Foo
+    		// Foo, <Foo />;
+    	}
+    }
+    
+    namespace M {
+    	// Emit M.Foo
+    	Foo, <Foo />;
+    	     ~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    
+    	export namespace S {
+    		// Emit M.Foo
+    		Foo, <Foo />;
+    		     ~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    
+    		// Emit S.Bar
+    		Bar, <Bar />;
+    		     ~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    	}
+    
+    }
+    
+    namespace M {
+    	// Emit M.S.Bar
+    	S.Bar, <S.Bar />;
+    	       ~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    }
+    
+    namespace M {
+    	var M = 100;
+    	// Emit M_1.Foo
+    	Foo, <Foo />;
+    	     ~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+    }

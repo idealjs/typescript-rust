@@ -1,0 +1,29 @@
+derivedTypeAccessesHiddenBaseCallViaSuperPropertyAccess.ts(3,16): error TS2322: Type 'null' is not assignable to type '{ a: number }'.
+derivedTypeAccessesHiddenBaseCallViaSuperPropertyAccess.ts(9,16): error TS2322: Type 'null' is not assignable to type '{ a: number; b: number }'.
+derivedTypeAccessesHiddenBaseCallViaSuperPropertyAccess.ts(13,27): error TS2345: Argument of type '{ a: 1 }' is not assignable to parameter of type '{ a: number; b: number }'.
+
+
+==== derivedTypeAccessesHiddenBaseCallViaSuperPropertyAccess.ts (3 errors) ====
+    class Base {
+        foo(x: { a: number }): { a: number } {
+            return null;
+                   ~~~~
+!!! error TS2322: Type 'null' is not assignable to type '{ a: number }'.
+        }
+    }
+    
+    class Derived extends Base {
+        foo(x: { a: number; b: number }): { a: number; b: number } {
+            return null;
+                   ~~~~
+!!! error TS2322: Type 'null' is not assignable to type '{ a: number; b: number }'.
+        }
+    
+        bar() {
+            var r = super.foo({ a: 1 }); // { a: number }
+                              ~~~~~~~~
+!!! error TS2345: Argument of type '{ a: 1 }' is not assignable to parameter of type '{ a: number; b: number }'.
+            var r2 = super.foo({ a: 1, b: 2 }); // { a: number }
+            var r3 = this.foo({ a: 1, b: 2 }); // { a: number; b: number; }
+        }
+    }

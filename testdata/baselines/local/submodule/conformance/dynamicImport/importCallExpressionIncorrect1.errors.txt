@@ -1,0 +1,19 @@
+1.ts(2,8): error TS1005: '=' expected.
+1.ts(2,10): error TS1005: ';' expected.
+1.ts(2,14): error TS1128: Declaration or statement expected.
+
+
+==== importCallExpressionIncorrect1.ts (0 errors) ====
+    ﻿// @module: es2020
+==== 0.ts (0 errors) ====
+    export function foo() { return "foo"; }
+    
+==== 1.ts (3 errors) ====
+    import
+    import { foo } from './0';
+           ~
+!!! error TS1005: '=' expected.
+             ~~~
+!!! error TS1005: ';' expected.
+                 ~
+!!! error TS1128: Declaration or statement expected.

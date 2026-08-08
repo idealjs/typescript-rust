@@ -1,0 +1,87 @@
+decoratorOnClassMethod19.ts(5,5): error TS1003: Identifier expected.
+decoratorOnClassMethod19.ts(5,5): error TS1127: Invalid character.
+decoratorOnClassMethod19.ts(5,6): error TS1005: ';' expected.
+decoratorOnClassMethod19.ts(7,29): error TS1003: Identifier expected.
+decoratorOnClassMethod19.ts(7,29): error TS1127: Invalid character.
+decoratorOnClassMethod19.ts(7,30): error TS1005: ',' expected.
+decoratorOnClassMethod19.ts(12,5): error TS1003: Identifier expected.
+decoratorOnClassMethod19.ts(12,5): error TS1127: Invalid character.
+decoratorOnClassMethod19.ts(12,6): error TS1005: ';' expected.
+decoratorOnClassMethod19.ts(14,7): error TS1138: Parameter declaration expected.
+decoratorOnClassMethod19.ts(14,17): error TS1005: ',' expected.
+decoratorOnClassMethod19.ts(14,18): error TS1138: Parameter declaration expected.
+decoratorOnClassMethod19.ts(14,26): error TS1005: ';' expected.
+decoratorOnClassMethod19.ts(14,29): error TS1005: ';' expected.
+decoratorOnClassMethod19.ts(14,30): error TS1005: ';' expected.
+decoratorOnClassMethod19.ts(14,31): error TS1005: ';' expected.
+decoratorOnClassMethod19.ts(14,31): error TS1127: Invalid character.
+decoratorOnClassMethod19.ts(14,32): error TS1005: ';' expected.
+decoratorOnClassMethod19.ts(14,33): error TS1005: ';' expected.
+decoratorOnClassMethod19.ts(14,35): error TS1005: ';' expected.
+decoratorOnClassMethod19.ts(14,36): error TS1005: ';' expected.
+decoratorOnClassMethod19.ts(14,38): error TS1005: ';' expected.
+decoratorOnClassMethod19.ts(15,1): error TS1128: Declaration or statement expected.
+
+
+==== decoratorOnClassMethod19.ts (23 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/48515
+    declare var decorator: any;
+    
+    class C1 {
+        #x
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+    
+        @decorator((x: C1) => x.#x)
+                                ~
+!!! error TS1003: Identifier expected.
+                                ~
+!!! error TS1127: Invalid character.
+                                 ~
+!!! error TS1005: ',' expected.
+        y() {}
+    }
+    
+    class C2 {
+        #x
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+    
+        y(@decorator((x: C2) => x.#x) p) {}
+          ~
+!!! error TS1138: Parameter declaration expected.
+                    ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1138: Parameter declaration expected.
+                             ~~
+!!! error TS1005: ';' expected.
+                                ~
+!!! error TS1005: ';' expected.
+                                 ~
+!!! error TS1005: ';' expected.
+                                  ~
+!!! error TS1005: ';' expected.
+                                  ~
+!!! error TS1127: Invalid character.
+                                   ~
+!!! error TS1005: ';' expected.
+                                    ~
+!!! error TS1005: ';' expected.
+                                      ~
+!!! error TS1005: ';' expected.
+                                       ~
+!!! error TS1005: ';' expected.
+                                         ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

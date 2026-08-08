@@ -1,0 +1,65 @@
+error TS6053: File 'react.d.ts' not found.
+a.ts(5,7): error TS2339: Property 'push' does not exist on type 'string[]'.
+a.ts(9,7): error TS2339: Property 'push' does not exist on type 'string[]'.
+a.ts(13,7): error TS2339: Property 'push' does not exist on type 'string[]'.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.
+==== a.ts (3 errors) ====
+    export const texts: string[] = [];
+    
+    /**
+     @ts-ignore */
+    texts.push(100);
+          ~~~~
+!!! error TS2339: Property 'push' does not exist on type 'string[]'.
+    
+    /**
+     @ts-expect-error */
+    texts.push(100);
+          ~~~~
+!!! error TS2339: Property 'push' does not exist on type 'string[]'.
+    
+    /**
+     @ts-expect-error */
+    texts.push("100");
+          ~~~~
+!!! error TS2339: Property 'push' does not exist on type 'string[]'.
+    
+==== b.tsx (0 errors) ====
+    /// <reference path="/.lib/react.d.ts" />
+    import * as React from "react";
+    
+    export function MyComponent(props: { foo: string }) {
+      return <div />;
+    }
+    
+    let x = (
+      <div>
+        {/*
+       @ts-ignore */}
+        <MyComponent foo={100} />
+    
+        {/*@ts-ignore*/}
+        <MyComponent foo={100} />
+    
+        {/*
+       @ts-expect-error */}
+        <MyComponent foo={100} />
+    
+        {/*
+       // @ts-expect-error */}
+        <MyComponent foo={100} />
+    
+        {/*
+       * @ts-expect-error */}
+        <MyComponent foo={100} />
+    
+        {/*@ts-expect-error*/}
+        <MyComponent foo={100} />
+    
+        {/*
+       @ts-expect-error */}
+        <MyComponent foo={"hooray"} />
+      </div>
+    );

@@ -1,8 +1,8 @@
-constructorDeclarations/constructorWithExpressionLessReturn.ts(15,24): error TS1005: ',' expected.
-constructorDeclarations/constructorWithExpressionLessReturn.ts(21,24): error TS1005: ',' expected.
+constructorWithExpressionLessReturn.ts(15,24): error TS1005: ',' expected.
+constructorWithExpressionLessReturn.ts(21,24): error TS1005: ',' expected.
 
 
-==== constructorDeclarations/constructorWithExpressionLessReturn.ts (2 errors) ====
+==== constructorWithExpressionLessReturn.ts (2 errors) ====
     class C {
         constructor() {
             return;

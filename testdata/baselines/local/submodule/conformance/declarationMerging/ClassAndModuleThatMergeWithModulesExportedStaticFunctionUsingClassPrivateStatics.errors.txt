@@ -1,7 +1,7 @@
-DeclarationMerging/ClassAndModuleThatMergeWithModulesExportedStaticFunctionUsingClassPrivateStatics.ts(11,24): error TS2339: Property 'sfn' does not exist on type 'clodule'.
+ClassAndModuleThatMergeWithModulesExportedStaticFunctionUsingClassPrivateStatics.ts(11,24): error TS2339: Property 'sfn' does not exist on type 'clodule'.
 
 
-==== DeclarationMerging/ClassAndModuleThatMergeWithModulesExportedStaticFunctionUsingClassPrivateStatics.ts (1 errors) ====
+==== ClassAndModuleThatMergeWithModulesExportedStaticFunctionUsingClassPrivateStatics.ts (1 errors) ====
     class clodule<T> {
         id: string;
         value: T;

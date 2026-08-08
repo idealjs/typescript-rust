@@ -1,7 +1,7 @@
-classHeritageSpecification/classExtendsEveryObjectType.ts(6,31): error TS1005: ',' expected.
+classExtendsEveryObjectType.ts(6,31): error TS1005: ',' expected.
 
 
-==== classHeritageSpecification/classExtendsEveryObjectType.ts (1 errors) ====
+==== classExtendsEveryObjectType.ts (1 errors) ====
     interface I {
         foo: string;
     }

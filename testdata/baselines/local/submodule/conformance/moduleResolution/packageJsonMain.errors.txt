@@ -1,0 +1,45 @@
+/a.ts(4,1): error TS2304: Cannot find name 'foo'.
+/a.ts(4,7): error TS2304: Cannot find name 'bar'.
+/a.ts(4,13): error TS2304: Cannot find name 'baz'.
+/node_modules/bar/package.json(1,9): error TS1005: ';' expected.
+/node_modules/baz/package.json(1,9): error TS1005: ';' expected.
+/node_modules/foo/package.json(1,9): error TS1005: ';' expected.
+
+
+==== packageJsonMain.ts (0 errors) ====
+    
+==== /node_modules/foo/package.json (1 errors) ====
+    { "main": "oof" }
+            ~
+!!! error TS1005: ';' expected.
+    
+==== /node_modules/foo/oof.js (0 errors) ====
+    module.exports = 0;
+    
+==== /node_modules/bar/package.json (1 errors) ====
+    { "main": "rab.js" }
+            ~
+!!! error TS1005: ';' expected.
+    
+==== /node_modules/bar/rab.js (0 errors) ====
+    module.exports = 0;
+    
+==== /node_modules/baz/package.json (1 errors) ====
+    { "main": "zab" }
+            ~
+!!! error TS1005: ';' expected.
+    
+==== /node_modules/baz/zab/index.js (0 errors) ====
+    module.exports = 0;
+    
+==== /a.ts (3 errors) ====
+    import foo = require("foo");
+    import bar = require("bar");
+    import baz = require("baz");
+    foo + bar + baz;
+    ~~~
+!!! error TS2304: Cannot find name 'foo'.
+          ~~~
+!!! error TS2304: Cannot find name 'bar'.
+                ~~~
+!!! error TS2304: Cannot find name 'baz'.

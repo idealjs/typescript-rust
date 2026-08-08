@@ -1,0 +1,92 @@
+error TS6053: File 'react16.d.ts' not found.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(5,3): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(5,3): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(5,3): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(6,5): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(6,5): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(6,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(11,3): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(11,3): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(11,3): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(12,5): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(12,5): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(12,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(13,5): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(13,5): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(13,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(18,3): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(18,3): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(18,3): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(19,13): error TS2339: Property 'map' does not exist on type 'number[]'.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(19,22): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(19,22): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxJsxsCjsTransformNestedSelfClosingChild.tsx(19,22): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.
+==== jsxJsxsCjsTransformNestedSelfClosingChild.tsx (22 errors) ====
+    /// <reference path="/.lib/react16.d.ts" />
+    import type * as React from 'react';
+    
+    console.log(
+      <div>
+      ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+      ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+      ~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+        <div />
+        ~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+        ~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+        ~~~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+      </div>
+    )
+    
+    console.log(
+      <div>
+      ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+      ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+      ~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+        <div />
+        ~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+        ~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+        ~~~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+        <div />
+        ~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+        ~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+        ~~~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+      </div>
+    )
+    
+    console.log(
+      <div>
+      ~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+      ~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+      ~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+        {[1, 2].map(i => <div key={i}>{i}</div>)}
+                ~~~
+!!! error TS2339: Property 'map' does not exist on type 'number[]'.
+                         ~~~~~~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+                         ~~~~~~~~~~~~~
+!!! error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+                         ~~~~~~~~~~~~~
+!!! error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+      </div>
+    )

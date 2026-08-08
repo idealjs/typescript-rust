@@ -1,0 +1,10 @@
+assignFromNumberInterface.ts(2,16): error TS2304: Cannot find name 'Number'.
+
+
+==== assignFromNumberInterface.ts (1 errors) ====
+    var x = 1;
+    declare var a: Number;
+                   ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
+    x = a;
+    a = x;

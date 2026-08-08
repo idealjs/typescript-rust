@@ -1,0 +1,126 @@
+parenthesizedContexualTyping2.ts(12,12): error TS2322: Type 'undefined' is not assignable to type 'T'.
+parenthesizedContexualTyping2.ts(15,30): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'T'.
+parenthesizedContexualTyping2.ts(15,55): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+parenthesizedContexualTyping2.ts(16,57): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+parenthesizedContexualTyping2.ts(17,59): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+parenthesizedContexualTyping2.ts(18,61): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+parenthesizedContexualTyping2.ts(20,30): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'T'.
+parenthesizedContexualTyping2.ts(20,97): error TS2554: Expected 2 arguments, but got 3.
+parenthesizedContexualTyping2.ts(21,100): error TS2554: Expected 2 arguments, but got 3.
+parenthesizedContexualTyping2.ts(22,104): error TS2554: Expected 2 arguments, but got 3.
+parenthesizedContexualTyping2.ts(23,106): error TS2554: Expected 2 arguments, but got 3.
+parenthesizedContexualTyping2.ts(26,14): error TS2304: Cannot find name 'Math'.
+parenthesizedContexualTyping2.ts(26,34): error TS1005: '>' expected.
+parenthesizedContexualTyping2.ts(26,96): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+parenthesizedContexualTyping2.ts(27,13): error TS2345: Argument of type '((x: any, : any) => any) | any' is not assignable to parameter of type '(x: (p: T) => T) => error'.
+parenthesizedContexualTyping2.ts(27,14): error TS2304: Cannot find name 'Math'.
+parenthesizedContexualTyping2.ts(27,34): error TS1005: '>' expected.
+parenthesizedContexualTyping2.ts(27,39): error TS1005: ',' expected.
+parenthesizedContexualTyping2.ts(27,45): error TS1005: ',' expected.
+parenthesizedContexualTyping2.ts(27,52): error TS1005: ',' expected.
+parenthesizedContexualTyping2.ts(27,53): error TS1180: Property destructuring pattern expected.
+parenthesizedContexualTyping2.ts(27,63): error TS1005: ',' expected.
+parenthesizedContexualTyping2.ts(27,64): error TS1005: '=>' expected.
+parenthesizedContexualTyping2.ts(27,66): error TS1005: ':' expected.
+parenthesizedContexualTyping2.ts(27,66): error TS2304: Cannot find name 'return'.
+parenthesizedContexualTyping2.ts(27,73): error TS1005: ')' expected.
+parenthesizedContexualTyping2.ts(27,73): error TS2304: Cannot find name 'x'.
+parenthesizedContexualTyping2.ts(27,74): error TS1005: ')' expected.
+parenthesizedContexualTyping2.ts(27,76): error TS1128: Declaration or statement expected.
+
+
+==== parenthesizedContexualTyping2.ts (29 errors) ====
+    // These tests ensure that in cases where it may *appear* that a value has a type,
+    // they actually are properly being contextually typed. The way we test this is
+    // that we invoke contextually typed arguments with type arguments.
+    // Since 'any' cannot be invoked with type arguments, we should get errors
+    // back if contextual typing is not taking effect.
+    
+    type FuncType = (x: <T>(p: T) => T) => typeof x;
+    
+    function fun<T>(f: FuncType, x: T): T;
+    function fun<T>(f: FuncType, g: FuncType, x: T): T;
+    function fun<T>(...rest: any[]): T {
+        return undefined;
+               ~~~~~~~~~
+!!! error TS2322: Type 'undefined' is not assignable to type 'T'.
+    }
+    
+    var a = fun(x => { x<number>(undefined); return x; }, 10);
+                                 ~~~~~~~~~
+!!! error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'T'.
+                                                          ~~
+!!! error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+    var b = fun((x => { x<number>(undefined); return x; }), 10);
+                                                            ~~
+!!! error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+    var c = fun(((x => { x<number>(undefined); return x; })), 10);
+                                                              ~~
+!!! error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+    var d = fun((((x => { x<number>(undefined); return x; }))), 10);
+                                                                ~~
+!!! error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+    
+    var e = fun(x => { x<number>(undefined); return x; }, x => { x<number>(undefined); return x; }, 10);
+                                 ~~~~~~~~~
+!!! error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'T'.
+                                                                                                    ~~
+!!! error TS2554: Expected 2 arguments, but got 3.
+    var f = fun((x => { x<number>(undefined); return x; }),(x => { x<number>(undefined); return x; }), 10);
+                                                                                                       ~~
+!!! error TS2554: Expected 2 arguments, but got 3.
+    var g = fun(((x => { x<number>(undefined); return x; })),((x => { x<number>(undefined); return x; })), 10);
+                                                                                                           ~~
+!!! error TS2554: Expected 2 arguments, but got 3.
+    var h = fun((((x => { x<number>(undefined); return x; }))),((x => { x<number>(undefined); return x; })), 10);
+                                                                                                             ~~
+!!! error TS2554: Expected 2 arguments, but got 3.
+    
+    // Ternaries in parens
+    var i = fun((Math.random() < 0.5 ? x => { x<number>(undefined); return x; } : x => undefined), 10);
+                 ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                                     ~
+!!! error TS1005: '>' expected.
+                                                                                                   ~~
+!!! error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+    var j = fun((Math.random() < 0.5 ? (x => { x<number>(undefined); return x; }) : (x => undefined)), 10);
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '((x: any, : any) => any) | any' is not assignable to parameter of type '(x: (p: T) => T) => error'.
+                 ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                                     ~
+!!! error TS1005: '>' expected.
+                                          ~~
+!!! error TS1005: ',' expected.
+                                                ~
+!!! error TS1005: ',' expected.
+                                                       ~
+!!! error TS1005: ',' expected.
+                                                        ~
+!!! error TS1180: Property destructuring pattern expected.
+                                                                  ~
+!!! error TS1005: ',' expected.
+                                                                   ~
+!!! error TS1005: '=>' expected.
+                                                                     ~~~~~~
+!!! error TS1005: ':' expected.
+                                                                     ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                                                                            ~
+!!! error TS1005: ')' expected.
+                                                                            ~
+!!! error TS2304: Cannot find name 'x'.
+                                                                             ~
+!!! error TS1005: ')' expected.
+                                                                               ~
+!!! error TS1128: Declaration or statement expected.
+    var k = fun((Math.random() < 0.5 ? (x => { x<number>(undefined); return x; }) : (x => undefined)), x => { x<number>(undefined); return x; }, 10);
+    var l = fun(((Math.random() < 0.5 ? ((x => { x<number>(undefined); return x; })) : ((x => undefined)))),((x => { x<number>(undefined); return x; })), 10);
+    
+    var lambda1: FuncType = x => { x<number>(undefined); return x; };
+    var lambda2: FuncType = (x => { x<number>(undefined); return x; });
+    
+    type ObjType = { x: (p: number) => string; y: (p: string) => number };
+    var obj1: ObjType = { x: x => (x, undefined), y: y => (y, undefined) };
+    var obj2: ObjType = ({ x: x => (x, undefined), y: y => (y, undefined) });

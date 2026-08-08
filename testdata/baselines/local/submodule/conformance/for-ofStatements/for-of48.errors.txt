@@ -1,0 +1,29 @@
+for-of48.ts(5,12): error TS1005: ',' expected.
+for-of48.ts(5,12): error TS2304: Cannot find name '='.
+for-of48.ts(5,14): error TS1005: ',' expected.
+for-of48.ts(5,15): error TS1005: ',' expected.
+for-of48.ts(5,15): error TS2304: Cannot find name '.'.
+for-of48.ts(5,16): error TS1005: ',' expected.
+
+
+==== for-of48.ts (6 errors) ====
+    ﻿//@target: ES6
+    var x: string, y: number;
+    var array = [{ x: "", y: true }]
+    enum E { x }
+    for ({x, y = E.x} of array) {
+            ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS2304: Cannot find name '='.
+              ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS2304: Cannot find name '.'.
+                ~
+!!! error TS1005: ',' expected.
+        x;
+        y;
+    }

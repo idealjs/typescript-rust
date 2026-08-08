@@ -1,0 +1,222 @@
+error TS6053: File 'react16.d.ts' not found.
+intraExpressionInferencesJsx.tsx(33,3): error TS2304: Cannot find name 'animations'.
+intraExpressionInferencesJsx.tsx(33,3): error TS18007: JSX expressions may not use the comma operator. Did you mean to write an array?
+intraExpressionInferencesJsx.tsx(34,3): error TS2304: Cannot find name 'style'.
+intraExpressionInferencesJsx.tsx(35,1): error TS1012: Unexpected token.
+intraExpressionInferencesJsx.tsx(35,2): error TS1005: '}' expected.
+intraExpressionInferencesJsx.tsx(50,15): error TS18007: JSX expressions may not use the comma operator. Did you mean to write an array?
+intraExpressionInferencesJsx.tsx(55,7): error TS2304: Cannot find name 'func'.
+intraExpressionInferencesJsx.tsx(55,11): error TS1005: ',' expected.
+intraExpressionInferencesJsx.tsx(55,11): error TS2304: Cannot find name '('.
+intraExpressionInferencesJsx.tsx(55,12): error TS1005: ',' expected.
+intraExpressionInferencesJsx.tsx(55,12): error TS2304: Cannot find name ')'.
+intraExpressionInferencesJsx.tsx(55,14): error TS1005: ',' expected.
+intraExpressionInferencesJsx.tsx(55,14): error TS2304: Cannot find name '{'.
+intraExpressionInferencesJsx.tsx(56,9): error TS1005: ',' expected.
+intraExpressionInferencesJsx.tsx(56,9): error TS2304: Cannot find name 'return'.
+intraExpressionInferencesJsx.tsx(56,16): error TS1005: ',' expected.
+intraExpressionInferencesJsx.tsx(56,16): error TS2304: Cannot find name '{'.
+intraExpressionInferencesJsx.tsx(57,11): error TS1005: ',' expected.
+intraExpressionInferencesJsx.tsx(58,10): error TS1005: ',' expected.
+intraExpressionInferencesJsx.tsx(58,10): error TS2304: Cannot find name ';'.
+intraExpressionInferencesJsx.tsx(60,5): error TS1012: Unexpected token.
+intraExpressionInferencesJsx.tsx(61,3): error TS1012: Unexpected token.
+intraExpressionInferencesJsx.tsx(87,3): error TS2304: Cannot find name 'a'.
+intraExpressionInferencesJsx.tsx(87,4): error TS1005: '}' expected.
+intraExpressionInferencesJsx.tsx(92,3): error TS2304: Cannot find name 'return'.
+intraExpressionInferencesJsx.tsx(92,15): error TS1005: '>' expected.
+intraExpressionInferencesJsx.tsx(92,16): error TS1012: Unexpected token.
+intraExpressionInferencesJsx.tsx(92,17): error TS1005: '}' expected.
+intraExpressionInferencesJsx.tsx(95,2): error TS2304: Cannot find name 'Foo'.
+intraExpressionInferencesJsx.tsx(100,2): error TS2304: Cannot find name 'Foo'.
+intraExpressionInferencesJsx.tsx(105,2): error TS2304: Cannot find name 'Foo'.
+intraExpressionInferencesJsx.tsx(108,7): error TS1005: '</' expected.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.
+==== intraExpressionInferencesJsx.tsx (32 errors) ====
+    /// <reference path="/.lib/react16.d.ts" />
+    
+    // repro from #52798
+    
+    type A = {
+      a: boolean;
+    };
+    
+    type B = {
+      b: string;
+    };
+    
+    type C = {
+      c: number;
+    };
+    
+    type Animations = {
+      [key: string]: { value: number } & (
+        | ({ kind: "a"; func?(): Partial<A> } & A)
+        | ({ kind: "b"; func?(): Partial<B> } & B)
+        | ({ kind: "c"; func?(): Partial<C> } & C)
+      );
+    };
+    
+    type StyleParam<T extends Animations> = Record<keyof T, string>;
+    
+    type AnimatedViewProps<T extends Animations> = {
+      style: (animationsValues: StyleParam<T>) => string;
+      animations: T;
+    };
+    
+    const Component = <T extends Animations>({
+      animations,
+      ~~~~~~~~~~
+!!! error TS2304: Cannot find name 'animations'.
+      ~~~~~~~~~~~
+      style,
+    ~~~~~~~~
+      ~~~~~
+!!! error TS2304: Cannot find name 'style'.
+    }: AnimatedViewProps<T>) => <></>;
+    ~
+!!! error TS18007: JSX expressions may not use the comma operator. Did you mean to write an array?
+    ~
+!!! error TS1012: Unexpected token.
+     ~
+!!! error TS1005: '}' expected.
+    
+    <Component
+      animations={{
+        test: {
+          kind: "a",
+          value: 1,
+          a: true,
+        },
+      }}
+      style={(anim) => {
+        return "";
+      }}
+    />;
+    <Component
+      animations={{
+                  ~
+        test: {
+    ~~~~~~~~~~~
+          kind: "a",
+    ~~~~~~~~~~~~~~~~
+          value: 1,
+    ~~~~~~~~~~~~~~~
+          a: true,
+    ~~~~~~~~~~~~~~
+          func() {
+    ~~~~~~~~~~~~~~
+          ~~~~
+!!! error TS2304: Cannot find name 'func'.
+              ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS2304: Cannot find name '('.
+               ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS2304: Cannot find name ')'.
+                 ~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS2304: Cannot find name '{'.
+            return {
+    ~~~~~~~~~~~~~~~~
+            ~~~~~~
+!!! error TS1005: ',' expected.
+            ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                   ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS2304: Cannot find name '{'.
+              a: true,
+    ~~~~~~~~~~~~~~~~~~
+              ~
+!!! error TS1005: ',' expected.
+            };
+    ~~~~~~~~~~
+             ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS2304: Cannot find name ';'.
+          },
+    ~~~~~~~~
+        },
+    ~~~~~~
+        ~
+!!! error TS1012: Unexpected token.
+      }}
+    ~~~
+!!! error TS18007: JSX expressions may not use the comma operator. Did you mean to write an array?
+      ~
+!!! error TS1012: Unexpected token.
+      style={(anim) => {
+        return "";
+      }}
+    />;
+    <Component
+      animations={{
+        test: {
+          kind: "a",
+          value: 1,
+          a: true,
+          func: () => {
+            return {
+              a: true,
+            };
+          },
+        },
+      }}
+      style={(anim) => {
+        return "";
+      }}
+    />;
+    
+    // repro from #52786
+    
+    interface Props<T> {
+      a: (x: string) => T;
+      ~
+!!! error TS2304: Cannot find name 'a'.
+       ~
+!!! error TS1005: '}' expected.
+      b: (arg: T) => void;
+    }
+    
+    function Foo<T>(props: Props<T>) {
+      return <div />;
+      ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                  ~
+!!! error TS1005: '>' expected.
+                   ~
+!!! error TS1012: Unexpected token.
+                    ~
+!!! error TS1005: '}' expected.
+    }
+    
+    <Foo
+     ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+      a={() => 10}
+      b={(arg) => { arg.toString(); }}
+    />;
+    
+    <Foo
+     ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+      a={(x) => 10}
+      b={(arg) => { arg.toString(); }}
+    />;
+    
+    <Foo {...{
+     ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+      a: (x) => 10,
+      b: (arg) => { arg.toString(); },
+    }} />;
+          
+!!! error TS1005: '</' expected.

@@ -1,9 +1,9 @@
-Symbols/symbolDeclarationEmit12.ts(7,20): error TS2322: Type 'undefined' is not assignable to type 'object'.
-Symbols/symbolDeclarationEmit12.ts(9,13): error TS1005: ';' expected.
-Symbols/symbolDeclarationEmit12.ts(10,13): error TS1005: ';' expected.
+symbolDeclarationEmit12.ts(7,20): error TS2322: Type 'undefined' is not assignable to type 'object'.
+symbolDeclarationEmit12.ts(9,13): error TS1005: ';' expected.
+symbolDeclarationEmit12.ts(10,13): error TS1005: ';' expected.
 
 
-==== Symbols/symbolDeclarationEmit12.ts (3 errors) ====
+==== symbolDeclarationEmit12.ts (3 errors) ====
     namespace M {
         interface I { }
         export class C {

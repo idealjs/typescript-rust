@@ -1,0 +1,51 @@
+input.js(6,7): error TS2339: Property 'prototype' does not exist on type '() => void'.
+input.js(9,7): error TS2339: Property 'prototype' does not exist on type '() => void'.
+input.js(10,7): error TS2339: Property 'prototype' does not exist on type '() => void'.
+input.js(11,7): error TS2339: Property 'prototype' does not exist on type '() => void'.
+input.js(12,7): error TS2339: Property 'prototype' does not exist on type '() => void'.
+input.js(13,7): error TS2339: Property 'prototype' does not exist on type '() => void'.
+input.js(14,7): error TS2339: Property 'prototype' does not exist on type '() => void'.
+input.js(15,7): error TS2339: Property 'prototype' does not exist on type '() => void'.
+input.js(16,7): error TS2339: Property 'prototype' does not exist on type '() => void'.
+input.js(17,7): error TS2339: Property 'prototype' does not exist on type '() => void'.
+
+
+==== input.js (10 errors) ====
+    function Class()
+    {
+    }
+    
+    // error: 'Class' doesn't have property 'notPresent'
+    Class.prototype.containsError = function () { return this.notPresent; };
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+    
+    // lots of methods that return this, which caused out-of-memory in #9527
+    Class.prototype.m1 = function (a, b, c, d, tx, ty) { return this; };
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+    Class.prototype.m2 = function (x, y) { return this; };
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+    Class.prototype.m3 = function (x, y) { return this; };
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+    Class.prototype.m4 = function (angle) { return this; };
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+    Class.prototype.m5 = function (matrix) { return this; };
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+    Class.prototype.m6 = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY) { return this; };
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+    Class.prototype.m7 = function(matrix) { return this; };
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+    Class.prototype.m8 = function() { return this; };
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+    Class.prototype.m9 = function () { return this; };
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+    

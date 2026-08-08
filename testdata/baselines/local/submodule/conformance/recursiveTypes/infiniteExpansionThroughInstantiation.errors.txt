@@ -1,0 +1,38 @@
+infiniteExpansionThroughInstantiation.ts(20,18): error TS1005: ',' expected.
+infiniteExpansionThroughInstantiation.ts(20,19): error TS1134: Variable declaration expected.
+infiniteExpansionThroughInstantiation.ts(20,30): error TS1005: ',' expected.
+infiniteExpansionThroughInstantiation.ts(20,32): error TS1005: ',' expected.
+
+
+==== infiniteExpansionThroughInstantiation.ts (4 errors) ====
+    // instantiating a derived type can cause an infinitely expanding type reference to be generated
+    
+    interface List<T> {
+        data: T;
+        next: List<T>;
+        owner: OwnerList<T>;
+    }
+    
+    // will have an owner property that is an infinitely expanding type reference
+    interface OwnerList<U> extends List<List<U>> {
+        name: string;
+    }
+    
+    declare var list: List<string>;
+    declare var ownerList: OwnerList<string>;
+    list = ownerList; 
+    
+    function other<T>(x: T) {
+        var list: List<T>;
+        var ownerList!: OwnerList<T>;
+                     ~
+!!! error TS1005: ',' expected.
+                      ~
+!!! error TS1134: Variable declaration expected.
+                                 ~
+!!! error TS1005: ',' expected.
+                                   ~
+!!! error TS1005: ',' expected.
+        list = ownerList; 
+    
+    }

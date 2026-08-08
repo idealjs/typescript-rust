@@ -1,0 +1,39 @@
+foo3.ts(1,16): error TS2304: Cannot find name 'Foo3'.
+foo6.ts(1,14): error TS1012: Unexpected token.
+foo7.ts(1,10): error TS2304: Cannot find name 'Date'.
+foo7.ts(1,18): error TS2304: Cannot find name 'String'.
+
+
+==== foo1.ts (0 errors) ====
+    var x = 10;
+    export = typeof x; // Ok
+    
+==== foo2.ts (0 errors) ====
+    export = "sausages"; // Ok
+    
+==== foo3.ts (1 errors) ====
+    export = class Foo3 {}; // Error, not an expression
+                   ~~~~
+!!! error TS2304: Cannot find name 'Foo3'.
+    
+==== foo4.ts (0 errors) ====
+    export = true; // Ok
+    
+==== foo5.ts (0 errors) ====
+    export = undefined; // Valid.  undefined is an identifier in JavaScript/TypeScript
+    
+==== foo6.ts (1 errors) ====
+    export = void; // Error, void operator requires an argument
+                 ~
+!!! error TS1012: Unexpected token.
+    
+==== foo7.ts (2 errors) ====
+    export = Date || String; // Ok
+             ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+                     ~~~~~~
+!!! error TS2304: Cannot find name 'String'.
+    
+==== foo8.ts (0 errors) ====
+    export = null; // Ok
+    

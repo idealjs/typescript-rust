@@ -1,0 +1,94 @@
+thisTypeInAccessorsNegative.ts(10,5): error TS2304: Cannot find name 'get'.
+thisTypeInAccessorsNegative.ts(10,9): error TS1005: ',' expected.
+thisTypeInAccessorsNegative.ts(10,9): error TS2448: Block-scoped variable 'x' used before its declaration.
+thisTypeInAccessorsNegative.ts(10,10): error TS1005: ',' expected.
+thisTypeInAccessorsNegative.ts(10,10): error TS2304: Cannot find name '('.
+thisTypeInAccessorsNegative.ts(10,11): error TS1005: ',' expected.
+thisTypeInAccessorsNegative.ts(10,20): error TS1005: ',' expected.
+thisTypeInAccessorsNegative.ts(10,20): error TS2304: Cannot find name ')'.
+thisTypeInAccessorsNegative.ts(10,22): error TS1005: ',' expected.
+thisTypeInAccessorsNegative.ts(10,22): error TS2304: Cannot find name '{'.
+thisTypeInAccessorsNegative.ts(10,24): error TS1005: ',' expected.
+thisTypeInAccessorsNegative.ts(10,24): error TS2304: Cannot find name 'return'.
+thisTypeInAccessorsNegative.ts(10,31): error TS1005: ',' expected.
+thisTypeInAccessorsNegative.ts(10,31): error TS2448: Block-scoped variable 'this' used before its declaration.
+thisTypeInAccessorsNegative.ts(10,31): error TS2454: Variable 'this' is used before being assigned.
+thisTypeInAccessorsNegative.ts(10,35): error TS1005: ',' expected.
+thisTypeInAccessorsNegative.ts(10,35): error TS2304: Cannot find name '.'.
+thisTypeInAccessorsNegative.ts(10,36): error TS1005: ',' expected.
+thisTypeInAccessorsNegative.ts(10,36): error TS2448: Block-scoped variable 'n' used before its declaration.
+thisTypeInAccessorsNegative.ts(10,37): error TS1005: ',' expected.
+thisTypeInAccessorsNegative.ts(10,37): error TS2304: Cannot find name ';'.
+thisTypeInAccessorsNegative.ts(11,5): error TS2304: Cannot find name 'set'.
+thisTypeInAccessorsNegative.ts(11,9): error TS1005: ',' expected.
+thisTypeInAccessorsNegative.ts(11,10): error TS1005: ',' expected.
+thisTypeInAccessorsNegative.ts(11,23): error TS1005: ',' expected.
+
+
+==== thisTypeInAccessorsNegative.ts (25 errors) ====
+    interface Foo {
+        n: number;
+        x: number;
+    }
+    interface Bar {
+        wrong: "place" | "time" | "method" | "technique";
+    }
+    const mismatch = {
+        n: 13,
+        get x(this: Foo) { return this.n; },
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+            ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS2448: Block-scoped variable 'x' used before its declaration.
+             ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS2304: Cannot find name '('.
+              ~~~~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS1005: ',' expected.
+                       ~
+!!! error TS2304: Cannot find name ')'.
+                         ~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS2304: Cannot find name '{'.
+                           ~~~~~~
+!!! error TS1005: ',' expected.
+                           ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                                  ~~~~
+!!! error TS1005: ',' expected.
+                                  ~~~~
+!!! error TS2448: Block-scoped variable 'this' used before its declaration.
+                                  ~~~~
+!!! error TS2454: Variable 'this' is used before being assigned.
+                                      ~
+!!! error TS1005: ',' expected.
+                                      ~
+!!! error TS2304: Cannot find name '.'.
+                                       ~
+!!! error TS1005: ',' expected.
+                                       ~
+!!! error TS2448: Block-scoped variable 'n' used before its declaration.
+                                        ~
+!!! error TS1005: ',' expected.
+                                        ~
+!!! error TS2304: Cannot find name ';'.
+        set x(this: Bar, n) { this.wrong = "method"; }
+        ~~~
+!!! error TS2304: Cannot find name 'set'.
+            ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS1005: ',' expected.
+    }
+    const contextual: Foo = {
+        n: 16,
+        get x() { return this.n; }
+    }

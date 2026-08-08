@@ -1,0 +1,33 @@
+index.js(3,7): error TS1003: Identifier expected.
+index.js(3,8): error TS1005: ';' expected.
+index.js(3,8): error TS2304: Cannot find name 'exports'.
+mod1.js(8,7): error TS1003: Identifier expected.
+mod1.js(8,8): error TS1005: ';' expected.
+mod1.js(8,8): error TS2304: Cannot find name 'exports'.
+
+
+==== mod1.js (3 errors) ====
+    /**
+     * @typedef {{x: number}} Item
+     */
+    /**
+     * @type {Item};
+     */
+    const x = {x: 12};
+    module.exports = x;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+==== index.js (3 errors) ====
+    /** @type {(typeof import("./folder/mod1"))[]} */
+    const items = [{x: 12}];
+    module.exports = items;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.

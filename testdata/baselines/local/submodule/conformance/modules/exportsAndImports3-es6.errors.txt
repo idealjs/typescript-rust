@@ -1,0 +1,64 @@
+error TS2300: Duplicate identifier 'C'.
+t1.ts(10,19): error TS1005: ',' expected.
+t1.ts(10,21): error TS1005: ',' expected.
+t1.ts(10,21): error TS1182: A destructuring declaration must have an initializer.
+t1.ts(21,8): error TS1005: '{' expected.
+t1.ts(21,17): error TS1003: Identifier expected.
+t1.ts(21,20): error TS1003: Identifier expected.
+t1.ts(21,22): error TS1003: Identifier expected.
+t1.ts(23,8): error TS1003: Identifier expected.
+
+
+!!! error TS2300: Duplicate identifier 'C'.
+==== exportsAndImports3-es6.ts (0 errors) ====
+    
+==== t1.ts (8 errors) ====
+    export var v = 1;
+    export function f() { }
+    export class C {
+    }
+    export interface I {
+    }
+    export enum E {
+        A, B, C
+    }
+    export const enum D {
+                      ~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS1005: ',' expected.
+                        ~
+        A, B, C
+    ~~~~~~~~~~~
+    }
+    ~
+    export namespace M {
+    
+!!! error TS1182: A destructuring declaration must have an initializer.
+        export var x;
+    }
+    export namespace N {
+        export interface I {
+        }
+    }
+    export type T = number;
+    export import a = M.x;
+           ~~~~~~
+!!! error TS1005: '{' expected.
+                    ~
+!!! error TS1003: Identifier expected.
+                       ~
+!!! error TS1003: Identifier expected.
+                         ~
+!!! error TS1003: Identifier expected.
+    
+    export { v as v1, f as f1, C as C1, I as I1, E as E1, D as D1, M as M1, N as N1, T as T1, a as a1 };
+           ~
+!!! error TS1003: Identifier expected.
+    
+==== t2.ts (0 errors) ====
+    export { v1 as v, f1 as f, C1 as C, I1 as I, E1 as E, D1 as D, M1 as M, N1 as N, T1 as T, a1 as a } from "./t1";
+    
+==== t3.ts (0 errors) ====
+    import { v1 as v, f1 as f, C1 as C, I1 as I, E1 as E, D1 as D, M1 as M, N1 as N, T1 as T, a1 as a } from "./t1";
+    export { v, f, C, I, E, D, M, N, T, a };

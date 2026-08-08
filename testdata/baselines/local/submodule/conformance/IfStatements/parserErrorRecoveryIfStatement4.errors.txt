@@ -1,0 +1,33 @@
+parserErrorRecoveryIfStatement4.ts(3,9): error TS2304: Cannot find name 'a'.
+parserErrorRecoveryIfStatement4.ts(4,3): error TS1012: Unexpected token.
+parserErrorRecoveryIfStatement4.ts(5,3): error TS2304: Cannot find name 'f2'.
+parserErrorRecoveryIfStatement4.ts(5,8): error TS1005: ';' expected.
+parserErrorRecoveryIfStatement4.ts(7,3): error TS2304: Cannot find name 'f3'.
+parserErrorRecoveryIfStatement4.ts(7,8): error TS1005: ';' expected.
+parserErrorRecoveryIfStatement4.ts(9,2): error TS1005: '}' expected.
+
+
+==== parserErrorRecoveryIfStatement4.ts (7 errors) ====
+    class Foo {
+      f1() {
+        if (a.b)
+            ~
+!!! error TS2304: Cannot find name 'a'.
+      }
+      ~
+!!! error TS1012: Unexpected token.
+      f2() {
+      ~~
+!!! error TS2304: Cannot find name 'f2'.
+           ~
+!!! error TS1005: ';' expected.
+      }
+      f3() {
+      ~~
+!!! error TS2304: Cannot find name 'f3'.
+           ~
+!!! error TS1005: ';' expected.
+      }
+    }
+     
+!!! error TS1005: '}' expected.

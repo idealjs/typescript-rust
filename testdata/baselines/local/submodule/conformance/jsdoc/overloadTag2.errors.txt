@@ -1,0 +1,84 @@
+overloadTag2.js(2,5): error TS1003: Identifier expected.
+overloadTag2.js(2,5): error TS1127: Invalid character.
+overloadTag2.js(2,6): error TS1005: ';' expected.
+overloadTag2.js(3,5): error TS1003: Identifier expected.
+overloadTag2.js(3,5): error TS1127: Invalid character.
+overloadTag2.js(3,6): error TS1005: ';' expected.
+overloadTag2.js(26,14): error TS1003: Identifier expected.
+overloadTag2.js(26,14): error TS1127: Invalid character.
+overloadTag2.js(26,15): error TS1005: ';' expected.
+overloadTag2.js(27,14): error TS1003: Identifier expected.
+overloadTag2.js(27,14): error TS1127: Invalid character.
+overloadTag2.js(27,15): error TS1005: ';' expected.
+overloadTag2.js(30,9): error TS2554: Expected 2 arguments, but got 0.
+overloadTag2.js(31,9): error TS2554: Expected 2 arguments, but got 1.
+overloadTag2.js(32,9): error TS2554: Expected 2 arguments, but got 1.
+
+
+==== overloadTag2.js (15 errors) ====
+    export class Foo {
+        #a = true ? 1 : "1"
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        #b
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+    
+        /**
+         * Should not have an implicit any error, because constructor's return type is always implicit
+         * @constructor
+         * @overload
+         * @param {string} a
+         * @param {number} b
+         */
+        /**
+         * @constructor
+         * @overload
+         * @param {number} a
+         */
+        /**
+         * @constructor
+         * @overload
+         * @param {string} a
+         *//**
+         * @constructor
+         * @param {number | string} a
+         */
+        constructor(a, b) {
+            this.#a = a
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~
+!!! error TS1005: ';' expected.
+            this.#b = b
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    var a = new Foo()
+            ~~~~~~~~~
+    var b = new Foo('str')
+    
+!!! error TS2554: Expected 2 arguments, but got 0.
+            ~~~~~~~~~~~~~~
+    var c = new Foo(2)
+    
+!!! error TS2554: Expected 2 arguments, but got 1.
+            ~~~~~~~~~~
+    var d = new Foo('str', 2)
+    
+!!! error TS2554: Expected 2 arguments, but got 1.

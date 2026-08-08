@@ -1,0 +1,43 @@
+error TS6053: File 'react.d.ts' not found.
+file.tsx(6,15): error TS2304: Cannot find name 'extends'.
+file.tsx(6,23): error TS1005: '{' expected.
+file.tsx(6,28): error TS1005: ';' expected.
+file.tsx(6,29): error TS1005: ';' expected.
+file.tsx(6,52): error TS1005: '(' expected.
+file.tsx(7,10): error TS1005: ',' expected.
+file.tsx(7,16): error TS1005: ',' expected.
+file.tsx(7,17): error TS1180: Property destructuring pattern expected.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.
+==== file.tsx (8 errors) ====
+    /// <reference path="/.lib/react.d.ts" />
+    
+    import React = require('react');
+    
+    export function makeP<P>(Ctor: React.ComponentClass<P>) {
+    	return class extends React.PureComponent<P, void> {
+    	             ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+    	                     ~~~~~
+!!! error TS1005: '{' expected.
+    	                          ~
+!!! error TS1005: ';' expected.
+    	                           ~~~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+    	                                                  ~
+!!! error TS1005: '(' expected.
+    		public render(): JSX.Element {
+    		       ~~~~~~
+!!! error TS1005: ',' expected.
+    		             ~
+!!! error TS1005: ',' expected.
+    		              ~
+!!! error TS1180: Property destructuring pattern expected.
+    			return (
+    				<Ctor {...this.props } />
+    			);
+    		}
+    	};
+    }
+    

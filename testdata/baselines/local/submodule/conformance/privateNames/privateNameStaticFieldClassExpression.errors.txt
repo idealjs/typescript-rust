@@ -1,0 +1,81 @@
+privateNameStaticFieldClassExpression.ts(2,12): error TS1005: ';' expected.
+privateNameStaticFieldClassExpression.ts(2,12): error TS1127: Invalid character.
+privateNameStaticFieldClassExpression.ts(2,13): error TS1005: ';' expected.
+privateNameStaticFieldClassExpression.ts(5,19): error TS1003: Identifier expected.
+privateNameStaticFieldClassExpression.ts(5,19): error TS1127: Invalid character.
+privateNameStaticFieldClassExpression.ts(5,20): error TS1005: ';' expected.
+privateNameStaticFieldClassExpression.ts(10,12): error TS1005: ';' expected.
+privateNameStaticFieldClassExpression.ts(10,12): error TS1127: Invalid character.
+privateNameStaticFieldClassExpression.ts(10,13): error TS1005: ';' expected.
+privateNameStaticFieldClassExpression.ts(10,26): error TS2304: Cannot find name 'Foo'.
+privateNameStaticFieldClassExpression.ts(15,23): error TS1003: Identifier expected.
+privateNameStaticFieldClassExpression.ts(15,23): error TS1127: Invalid character.
+privateNameStaticFieldClassExpression.ts(15,24): error TS1005: ',' expected.
+privateNameStaticFieldClassExpression.ts(16,11): error TS1003: Identifier expected.
+privateNameStaticFieldClassExpression.ts(16,11): error TS1127: Invalid character.
+privateNameStaticFieldClassExpression.ts(16,12): error TS1005: ';' expected.
+privateNameStaticFieldClassExpression.ts(17,15): error TS1003: Identifier expected.
+privateNameStaticFieldClassExpression.ts(17,15): error TS1127: Invalid character.
+privateNameStaticFieldClassExpression.ts(17,16): error TS1005: ';' expected.
+
+
+==== privateNameStaticFieldClassExpression.ts (19 errors) ====
+    class B {
+        static #foo = class {
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~
+!!! error TS1005: ';' expected.
+            constructor() {
+                console.log("hello");
+                new B.#foo2();
+                      ~
+!!! error TS1003: Identifier expected.
+                      ~
+!!! error TS1127: Invalid character.
+                       ~~~~
+!!! error TS1005: ';' expected.
+            }
+            static test = 123;
+            field = 10;
+        };
+        static #foo2 = class Foo {
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~~
+!!! error TS1005: ';' expected.
+                             ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+            static otherClass = 123;
+        };
+    
+        m() {
+            console.log(B.#foo.test)
+                          ~
+!!! error TS1003: Identifier expected.
+                          ~
+!!! error TS1127: Invalid character.
+                           ~~~
+!!! error TS1005: ',' expected.
+            B.#foo.test = 10;
+              ~
+!!! error TS1003: Identifier expected.
+              ~
+!!! error TS1127: Invalid character.
+               ~~~
+!!! error TS1005: ';' expected.
+            new B.#foo().field;
+                  ~
+!!! error TS1003: Identifier expected.
+                  ~
+!!! error TS1127: Invalid character.
+                   ~~~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+    

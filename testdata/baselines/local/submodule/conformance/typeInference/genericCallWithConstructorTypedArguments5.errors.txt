@@ -1,0 +1,63 @@
+genericCallWithConstructorTypedArguments5.ts(4,23): error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+genericCallWithConstructorTypedArguments5.ts(7,34): error TS2304: Cannot find name 'T'.
+genericCallWithConstructorTypedArguments5.ts(8,13): error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
+genericCallWithConstructorTypedArguments5.ts(10,36): error TS2304: Cannot find name 'T'.
+genericCallWithConstructorTypedArguments5.ts(10,42): error TS2304: Cannot find name 'T'.
+genericCallWithConstructorTypedArguments5.ts(11,14): error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
+genericCallWithConstructorTypedArguments5.ts(13,14): error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
+genericCallWithConstructorTypedArguments5.ts(16,23): error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+genericCallWithConstructorTypedArguments5.ts(16,29): error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+genericCallWithConstructorTypedArguments5.ts(20,14): error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
+genericCallWithConstructorTypedArguments5.ts(22,14): error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
+genericCallWithConstructorTypedArguments5.ts(24,14): error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
+
+
+==== genericCallWithConstructorTypedArguments5.ts (12 errors) ====
+    // Generic call with parameter of object type with member of function type of n args passed object whose associated member is call signature with n+1 args
+    
+    function foo<T, U>(arg: { cb: new(t: T) => U }) {
+        return new arg.cb(null);
+                          ~~~~
+!!! error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+    }
+    
+    declare var arg: { cb: new<T>(x: T) => string };
+                                     ~
+!!! error TS2304: Cannot find name 'T'.
+    var r = foo(arg); // {}
+                ~~~
+!!! error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
+    // more args not allowed
+    declare var arg2: { cb: new <T>(x: T, y: T) => string };
+                                       ~
+!!! error TS2304: Cannot find name 'T'.
+                                             ~
+!!! error TS2304: Cannot find name 'T'.
+    var r2 = foo(arg2); // error
+                 ~~~~
+!!! error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
+    declare var arg3: { cb: new (x: string, y: number) => string };
+    var r3 = foo(arg3); // error
+                 ~~~~
+!!! error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
+    
+    function foo2<T, U>(arg: { cb: new(t: T, t2: T) => U }) {
+        return new arg.cb(null, null);
+                          ~~~~
+!!! error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+                                ~~~~
+!!! error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+    }
+    
+    // fewer args ok
+    var r4 = foo(arg); // {}
+                 ~~~
+!!! error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
+    declare var arg4: { cb: new (x: string) => string };
+    var r6 = foo(arg4); // string
+                 ~~~~
+!!! error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
+    declare var arg5: { cb: new () => string };
+    var r7 = foo(arg5); // string
+                 ~~~~
+!!! error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.

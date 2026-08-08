@@ -1,0 +1,25 @@
+otherc.cts(2,15): error TS2304: Cannot find name 'import'.
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+package.json(4,11): error TS1005: ';' expected.
+
+
+==== index.ts (0 errors) ====
+    import json from "./package.json" with { type: "json" };
+==== otherc.cts (1 errors) ====
+    import json from "./package.json" with { type: "json" }; // should error, cjs mode imports don't support attributes
+    const json2 = import("./package.json", { with: { type: "json" } }); // should be fine
+                  ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+==== package.json (3 errors) ====
+    {
+        "name": "pkg",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+                 ~
+!!! error TS1005: ';' expected.
+        "type": "module"
+              ~
+!!! error TS1005: ';' expected.
+    }

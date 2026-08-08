@@ -1,0 +1,7 @@
+parserStrictMode6-negative.ts(1,1): error TS2304: Cannot find name 'eval'.
+
+
+==== parserStrictMode6-negative.ts (1 errors) ====
+    eval++;
+    ~~~~
+!!! error TS2304: Cannot find name 'eval'.

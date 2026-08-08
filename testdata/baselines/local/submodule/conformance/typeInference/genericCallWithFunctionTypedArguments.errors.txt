@@ -1,0 +1,123 @@
+genericCallWithFunctionTypedArguments.ts(5,14): error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+genericCallWithFunctionTypedArguments.ts(8,14): error TS2304: Cannot find name 'U'.
+genericCallWithFunctionTypedArguments.ts(8,20): error TS2304: Cannot find name 'U'.
+genericCallWithFunctionTypedArguments.ts(9,23): error TS2304: Cannot find name 'U'.
+genericCallWithFunctionTypedArguments.ts(9,29): error TS2304: Cannot find name 'U'.
+genericCallWithFunctionTypedArguments.ts(10,14): error TS2345: Argument of type '(x: T) => string' is not assignable to parameter of type '(a: T) => T'.
+genericCallWithFunctionTypedArguments.ts(16,15): error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+genericCallWithFunctionTypedArguments.ts(16,18): error TS2345: Argument of type '(a: Z) => string' is not assignable to parameter of type '(a: T) => U'.
+genericCallWithFunctionTypedArguments.ts(17,15): error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+genericCallWithFunctionTypedArguments.ts(17,18): error TS2345: Argument of type '(a: T) => string' is not assignable to parameter of type '(a: T) => U'.
+genericCallWithFunctionTypedArguments.ts(18,36): error TS2304: Cannot find name 'Z'.
+genericCallWithFunctionTypedArguments.ts(18,42): error TS2304: Cannot find name 'Z'.
+genericCallWithFunctionTypedArguments.ts(24,19): error TS2304: Cannot find name 'Z'.
+genericCallWithFunctionTypedArguments.ts(24,25): error TS2304: Cannot find name 'Z'.
+genericCallWithFunctionTypedArguments.ts(26,15): error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+genericCallWithFunctionTypedArguments.ts(26,18): error TS2345: Argument of type '(a: T) => string' is not assignable to parameter of type '(a: T) => U'.
+genericCallWithFunctionTypedArguments.ts(27,31): error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+genericCallWithFunctionTypedArguments.ts(27,34): error TS2345: Argument of type '(a: T) => string' is not assignable to parameter of type '(a: T) => U'.
+genericCallWithFunctionTypedArguments.ts(30,20): error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+genericCallWithFunctionTypedArguments.ts(30,23): error TS2345: Argument of type '(x: T) => string' is not assignable to parameter of type '(a: T) => U'.
+genericCallWithFunctionTypedArguments.ts(31,20): error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+genericCallWithFunctionTypedArguments.ts(31,23): error TS2345: Argument of type '(x: T) => string' is not assignable to parameter of type '(a: T) => U'.
+genericCallWithFunctionTypedArguments.ts(33,20): error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+genericCallWithFunctionTypedArguments.ts(33,23): error TS2345: Argument of type '(x: T) => string' is not assignable to parameter of type '(a: T) => U'.
+genericCallWithFunctionTypedArguments.ts(34,21): error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+genericCallWithFunctionTypedArguments.ts(34,24): error TS2345: Argument of type '(x: T) => string' is not assignable to parameter of type '(a: T) => U'.
+genericCallWithFunctionTypedArguments.ts(35,20): error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+genericCallWithFunctionTypedArguments.ts(35,23): error TS2345: Argument of type '(a: T) => string' is not assignable to parameter of type '(a: T) => U'.
+
+
+==== genericCallWithFunctionTypedArguments.ts (28 errors) ====
+    // Generic functions used as arguments for function typed parameters are not used to make inferences from
+    // Using function arguments, no errors expected
+    
+    function foo<T>(x: (a: T) => T) {
+        return x(null);
+                 ~~~~
+!!! error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+    }
+    
+    var r = foo(<U>(x: U) => ''); // {}
+                 ~
+!!! error TS2304: Cannot find name 'U'.
+                       ~
+!!! error TS2304: Cannot find name 'U'.
+    var r2 = foo<string>(<U>(x: U) => ''); // string 
+                          ~
+!!! error TS2304: Cannot find name 'U'.
+                                ~
+!!! error TS2304: Cannot find name 'U'.
+    var r3 = foo(x => ''); // {}
+                 ~~~~~~~
+!!! error TS2345: Argument of type '(x: T) => string' is not assignable to parameter of type '(a: T) => T'.
+    
+    function foo2<T, U>(x: T, cb: (a: T) => U) {
+        return cb(x);
+    }
+    
+    var r4 = foo2(1, function <Z>(a: Z) { return '' }); // string, contextual signature instantiation is applied to generic functions
+                  ~
+!!! error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(a: Z) => string' is not assignable to parameter of type '(a: T) => U'.
+    var r5 = foo2(1, (a) => ''); // string
+                  ~
+!!! error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+                     ~~~~~~~~~
+!!! error TS2345: Argument of type '(a: T) => string' is not assignable to parameter of type '(a: T) => U'.
+    var r6 = foo2<string, number>('', <Z>(a: Z) => 1);
+                                       ~
+!!! error TS2304: Cannot find name 'Z'.
+                                             ~
+!!! error TS2304: Cannot find name 'Z'.
+    
+    function foo3<T, U>(x: T, cb: (a: T) => U, y: U) {
+        return cb(x);
+    }
+    
+    var r7 = foo3(1, <Z>(a: Z) => '', ''); // string
+                      ~
+!!! error TS2304: Cannot find name 'Z'.
+                            ~
+!!! error TS2304: Cannot find name 'Z'.
+    
+    var r8 = foo3(1, function (a) { return '' }, 1); // error
+                  ~
+!!! error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(a: T) => string' is not assignable to parameter of type '(a: T) => U'.
+    var r9 = foo3<number, string>(1, (a) => '', ''); // string
+                                  ~
+!!! error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+                                     ~~~~~~~~~
+!!! error TS2345: Argument of type '(a: T) => string' is not assignable to parameter of type '(a: T) => U'.
+    
+    function other<T, U>(t: T, u: U) {
+        var r10 = foo2(1, (x: T) => ''); // error
+                       ~
+!!! error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+                          ~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(x: T) => string' is not assignable to parameter of type '(a: T) => U'.
+        var r10 = foo2(1, (x) => ''); // string
+                       ~
+!!! error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+                          ~~~~~~~~~
+!!! error TS2345: Argument of type '(x: T) => string' is not assignable to parameter of type '(a: T) => U'.
+    
+        var r11 = foo3(1, (x: T) => '', ''); // error
+                       ~
+!!! error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+                          ~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(x: T) => string' is not assignable to parameter of type '(a: T) => U'.
+        var r11b = foo3(1, (x: T) => '', 1); // error
+                        ~
+!!! error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+                           ~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(x: T) => string' is not assignable to parameter of type '(a: T) => U'.
+        var r12 = foo3(1, function (a) { return '' }, 1); // error
+                       ~
+!!! error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '(a: T) => string' is not assignable to parameter of type '(a: T) => U'.
+    }

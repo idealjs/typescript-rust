@@ -1,0 +1,21 @@
+invalidBinaryIntegerLiteralAndOctalIntegerLiteral.ts(3,16): error TS1005: ',' expected.
+invalidBinaryIntegerLiteralAndOctalIntegerLiteral.ts(4,17): error TS1005: ',' expected.
+invalidBinaryIntegerLiteralAndOctalIntegerLiteral.ts(5,15): error TS1005: ',' expected.
+invalidBinaryIntegerLiteralAndOctalIntegerLiteral.ts(6,15): error TS1005: ',' expected.
+
+
+==== invalidBinaryIntegerLiteralAndOctalIntegerLiteral.ts (4 errors) ====
+    ﻿// @target: es2015
+    // Error
+    var binary = 0b21010;
+                ~~~~~
+!!! error TS1005: ',' expected.
+    var binary1 = 0B21010;
+                 ~~~~~
+!!! error TS1005: ',' expected.
+    var octal = 0o81010;
+               ~~~~~
+!!! error TS1005: ',' expected.
+    var octal = 0O91010;
+               ~~~~~
+!!! error TS1005: ',' expected.

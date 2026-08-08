@@ -1,0 +1,66 @@
+/node_modules/dual/package.json(2,9): error TS1005: ';' expected.
+/node_modules/dual/package.json(3,12): error TS1005: ';' expected.
+/node_modules/dual/package.json(4,9): error TS1005: ';' expected.
+/node_modules/dual/package.json(5,9): error TS1005: ';' expected.
+/node_modules/dual/package.json(6,10): error TS1005: ';' expected.
+/node_modules/dual/package.json(7,12): error TS1005: ';' expected.
+/node_modules/dual/package.json(8,8): error TS1005: ';' expected.
+/node_modules/dual/package.json(9,15): error TS1005: ';' expected.
+/node_modules/dual/package.json(10,16): error TS1005: ';' expected.
+
+
+==== bundlerNodeModules1.ts (0 errors) ====
+    
+==== /node_modules/dual/package.json (9 errors) ====
+    {
+      "name": "dual",
+            ~
+!!! error TS1005: ';' expected.
+      "version": "1.0.0",
+               ~
+!!! error TS1005: ';' expected.
+      "type": "module",
+            ~
+!!! error TS1005: ';' expected.
+      "main": "index.cjs",
+            ~
+!!! error TS1005: ';' expected.
+      "types": "index.d.cts",
+             ~
+!!! error TS1005: ';' expected.
+      "exports": {
+               ~
+!!! error TS1005: ';' expected.
+        ".": {
+           ~
+!!! error TS1005: ';' expected.
+          "import": "./index.js",
+                  ~
+!!! error TS1005: ';' expected.
+          "require": "./index.cjs"
+                   ~
+!!! error TS1005: ';' expected.
+        }
+      }
+    }
+    
+==== /node_modules/dual/index.js (0 errors) ====
+    export const esm = 0;
+    
+==== /node_modules/dual/index.d.ts (0 errors) ====
+    export const esm: number;
+    
+==== /node_modules/dual/index.cjs (0 errors) ====
+    exports.cjs = 0;
+    
+==== /node_modules/dual/index.d.cts (0 errors) ====
+    export const cjs: number;
+    
+==== /main.ts (0 errors) ====
+    import { esm, cjs } from "dual";
+    
+==== /main.mts (0 errors) ====
+    import { esm, cjs } from "dual";
+    
+==== /main.cts (0 errors) ====
+    import { esm, cjs } from "dual";

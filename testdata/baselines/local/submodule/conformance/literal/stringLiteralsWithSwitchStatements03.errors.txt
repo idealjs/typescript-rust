@@ -1,0 +1,33 @@
+stringLiteralsWithSwitchStatements03.ts(11,11): error TS2349: This expression is not callable.
+
+
+==== stringLiteralsWithSwitchStatements03.ts (1 errors) ====
+    ﻿// @target: es2015
+    declare let x: "foo";
+    declare let y: "foo" | "bar";
+    declare let z: "bar";
+    
+    declare function randBool(): boolean;
+    
+    switch (x) {
+        case randBool() ? "foo" : "baz":
+            break;
+        case (randBool() ? ("bar") : "baz" ? "bar" : "baz"):
+           ~~~~~~~~
+!!! error TS2349: This expression is not callable.
+            break;
+        case (("bar")):
+            break;
+        case (x, y, ("baz")):
+            x;
+            y;
+            break;
+        case (("foo" || ("bar"))):
+            break;
+        case (("bar" || ("baz"))):
+            break;
+        case z || "baz":
+        case "baz" || z:
+            z;
+            break;
+    }

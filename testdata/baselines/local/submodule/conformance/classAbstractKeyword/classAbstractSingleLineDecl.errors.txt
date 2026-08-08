@@ -1,9 +1,9 @@
-classAbstractKeyword/classAbstractSingleLineDecl.ts(3,1): error TS2304: Cannot find name 'abstract'.
-classAbstractKeyword/classAbstractSingleLineDecl.ts(6,1): error TS2304: Cannot find name 'abstract'.
-classAbstractKeyword/classAbstractSingleLineDecl.ts(10,5): error TS2511: Cannot create an instance of an abstract class.
+classAbstractSingleLineDecl.ts(3,1): error TS2304: Cannot find name 'abstract'.
+classAbstractSingleLineDecl.ts(6,1): error TS2304: Cannot find name 'abstract'.
+classAbstractSingleLineDecl.ts(10,5): error TS2511: Cannot create an instance of an abstract class.
 
 
-==== classAbstractKeyword/classAbstractSingleLineDecl.ts (3 errors) ====
+==== classAbstractSingleLineDecl.ts (3 errors) ====
     abstract class A {}
     
     abstract

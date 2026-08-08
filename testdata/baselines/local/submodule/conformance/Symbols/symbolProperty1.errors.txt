@@ -1,18 +1,18 @@
-Symbols/symbolProperty1.ts(4,8): error TS1005: ',' expected.
-Symbols/symbolProperty1.ts(4,8): error TS2304: Cannot find name '('.
-Symbols/symbolProperty1.ts(4,9): error TS1005: ',' expected.
-Symbols/symbolProperty1.ts(4,9): error TS2304: Cannot find name ')'.
-Symbols/symbolProperty1.ts(4,11): error TS1005: ',' expected.
-Symbols/symbolProperty1.ts(4,11): error TS2304: Cannot find name '{'.
-Symbols/symbolProperty1.ts(5,5): error TS2304: Cannot find name 'get'.
-Symbols/symbolProperty1.ts(5,15): error TS1005: ',' expected.
-Symbols/symbolProperty1.ts(5,15): error TS1182: A destructuring declaration must have an initializer.
-Symbols/symbolProperty1.ts(6,16): error TS1005: ',' expected.
-Symbols/symbolProperty1.ts(6,17): error TS1005: ':' expected.
-Symbols/symbolProperty1.ts(8,1): error TS1128: Declaration or statement expected.
+symbolProperty1.ts(4,8): error TS1005: ',' expected.
+symbolProperty1.ts(4,8): error TS2304: Cannot find name '('.
+symbolProperty1.ts(4,9): error TS1005: ',' expected.
+symbolProperty1.ts(4,9): error TS2304: Cannot find name ')'.
+symbolProperty1.ts(4,11): error TS1005: ',' expected.
+symbolProperty1.ts(4,11): error TS2304: Cannot find name '{'.
+symbolProperty1.ts(5,5): error TS2304: Cannot find name 'get'.
+symbolProperty1.ts(5,15): error TS1005: ',' expected.
+symbolProperty1.ts(5,15): error TS1182: A destructuring declaration must have an initializer.
+symbolProperty1.ts(6,16): error TS1005: ',' expected.
+symbolProperty1.ts(6,17): error TS1005: ':' expected.
+symbolProperty1.ts(8,1): error TS1128: Declaration or statement expected.
 
 
-==== Symbols/symbolProperty1.ts (12 errors) ====
+==== symbolProperty1.ts (12 errors) ====
     var s: symbol;
     var x = {
         [s]: 0,

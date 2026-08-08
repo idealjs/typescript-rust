@@ -1,7 +1,7 @@
-arrayLiterals/arrayLiterals.ts(21,21): error TS2304: Cannot find name 'Array'.
+arrayLiterals.ts(21,21): error TS2304: Cannot find name 'Array'.
 
 
-==== arrayLiterals/arrayLiterals.ts (1 errors) ====
+==== arrayLiterals.ts (1 errors) ====
     // Empty array literal with no contextual type has type Undefined[]
     
     var arr1= [[], [1], ['']];

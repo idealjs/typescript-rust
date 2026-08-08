@@ -1,0 +1,11 @@
+parserSuperExpression2.ts(3,5): error TS2349: This expression is not callable.
+
+
+==== parserSuperExpression2.ts (1 errors) ====
+    class C {
+      M() {
+        super<T>(0);
+        ~~~~~
+!!! error TS2349: This expression is not callable.
+      }
+    }

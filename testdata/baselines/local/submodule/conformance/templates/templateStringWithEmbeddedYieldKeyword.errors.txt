@@ -1,0 +1,20 @@
+templateStringWithEmbeddedYieldKeyword.ts(2,15): error TS1005: '(' expected.
+templateStringWithEmbeddedYieldKeyword.ts(4,9): error TS1005: ',' expected.
+templateStringWithEmbeddedYieldKeyword.ts(4,34): error TS1005: ',' expected.
+templateStringWithEmbeddedYieldKeyword.ts(5,2): error TS1005: ')' expected.
+
+
+==== templateStringWithEmbeddedYieldKeyword.ts (4 errors) ====
+    ﻿// @target: es2015
+    function* gen {
+               ~
+!!! error TS1005: '(' expected.
+        // Once this is supported, yield *must* be parenthesized.
+        var x = `abc${ yield 10 }def`;
+         ~
+!!! error TS1005: ',' expected.
+                                  ~
+!!! error TS1005: ',' expected.
+                                     
+!!! error TS1005: ')' expected.
+    }

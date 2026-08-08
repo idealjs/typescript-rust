@@ -1,8 +1,8 @@
-controlFlow/controlFlowBinaryOrExpression.ts(5,1): error TS2454: Variable 'x' is used before being assigned.
-controlFlow/controlFlowBinaryOrExpression.ts(8,1): error TS2454: Variable 'cond' is used before being assigned.
+controlFlowBinaryOrExpression.ts(5,1): error TS2454: Variable 'x' is used before being assigned.
+controlFlowBinaryOrExpression.ts(8,1): error TS2454: Variable 'cond' is used before being assigned.
 
 
-==== controlFlow/controlFlowBinaryOrExpression.ts (2 errors) ====
+==== controlFlowBinaryOrExpression.ts (2 errors) ====
     let x: string | number | boolean;
     let cond: boolean;
     

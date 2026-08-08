@@ -1,0 +1,52 @@
+parserErrantSemicolonInClass1.ts(9,21): error TS1003: Identifier expected.
+parserErrantSemicolonInClass1.ts(12,16): error TS1005: ';' expected.
+parserErrantSemicolonInClass1.ts(15,16): error TS1005: ';' expected.
+parserErrantSemicolonInClass1.ts(18,23): error TS1005: ';' expected.
+parserErrantSemicolonInClass1.ts(24,24): error TS1005: ';' expected.
+
+
+==== parserErrantSemicolonInClass1.ts (5 errors) ====
+    class a {
+        //constructor ();
+        constructor (n: number);
+        constructor (s: string);
+        constructor (ns: any) {
+    
+        }
+    
+        public pgF() { };
+                        ~
+!!! error TS1003: Identifier expected.
+    
+        public pv;
+        public get d() {
+                   ~
+!!! error TS1005: ';' expected.
+            return 30;
+        }
+        public set d() {
+                   ~
+!!! error TS1005: ';' expected.
+        }
+    
+        public static get p2() {
+                          ~~
+!!! error TS1005: ';' expected.
+            return { x: 30, y: 40 };
+        }
+    
+        private static d2() {
+        }
+        private static get p3() {
+                           ~~
+!!! error TS1005: ';' expected.
+            return "string";
+        }
+        private pv3;
+    
+        private foo(n: number): string;
+        private foo(s: string): string;
+        private foo(ns: any) {
+            return ns.toString();
+        }
+    }

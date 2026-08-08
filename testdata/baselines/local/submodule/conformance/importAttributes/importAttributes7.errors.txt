@@ -1,0 +1,23 @@
+/b.ts(4,15): error TS2304: Cannot find name 'import'.
+
+
+==== importAttributes7.ts (0 errors) ====
+    
+==== /a.ts (0 errors) ====
+    export default {
+        a: "a",
+        b: "b",
+        1: "1",
+    }
+    
+==== /b.ts (1 errors) ====
+    import a from "./a" with { a: "a", "b": "b" };
+    
+    export async function f() {
+        const a = import("./a", {
+                  ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+            with: { a: "a", "b": "b" },
+        });
+        a;
+    }

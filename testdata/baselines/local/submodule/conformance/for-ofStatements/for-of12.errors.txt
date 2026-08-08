@@ -1,0 +1,9 @@
+for-of12.ts(3,19): error TS2339: Property 'values' does not exist on type 'any[]'.
+
+
+==== for-of12.ts (1 errors) ====
+    ﻿//@target: ES6
+    var v: string;
+    for (v of [0, ""].values()) { }
+                   ~~~~~~
+!!! error TS2339: Property 'values' does not exist on type 'any[]'.

@@ -1,0 +1,41 @@
+parserStrictMode12.ts(2,11): error TS2304: Cannot find name 'set'.
+parserStrictMode12.ts(2,15): error TS1005: ',' expected.
+parserStrictMode12.ts(2,15): error TS2304: Cannot find name 'foo'.
+parserStrictMode12.ts(2,18): error TS1005: ',' expected.
+parserStrictMode12.ts(2,18): error TS2304: Cannot find name '('.
+parserStrictMode12.ts(2,19): error TS1005: ',' expected.
+parserStrictMode12.ts(2,19): error TS2304: Cannot find name 'eval'.
+parserStrictMode12.ts(2,23): error TS1005: ',' expected.
+parserStrictMode12.ts(2,23): error TS2304: Cannot find name ')'.
+parserStrictMode12.ts(2,25): error TS1005: ',' expected.
+parserStrictMode12.ts(2,25): error TS2304: Cannot find name '{'.
+parserStrictMode12.ts(2,29): error TS1128: Declaration or statement expected.
+
+
+==== parserStrictMode12.ts (12 errors) ====
+    "use strict";
+    var v = { set foo(eval) { } }
+              ~~~
+!!! error TS2304: Cannot find name 'set'.
+                  ~~~
+!!! error TS1005: ',' expected.
+                  ~~~
+!!! error TS2304: Cannot find name 'foo'.
+                     ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS2304: Cannot find name '('.
+                      ~~~~
+!!! error TS1005: ',' expected.
+                      ~~~~
+!!! error TS2304: Cannot find name 'eval'.
+                          ~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS2304: Cannot find name ')'.
+                            ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS2304: Cannot find name '{'.
+                                ~
+!!! error TS1128: Declaration or statement expected.

@@ -1,14 +1,11 @@
-error TS6053: File 'a.ts' not found.
-error TS6053: File 'b.ts' not found.
+b.ts(8,6): error TS2304: Cannot find name 'ns'.
+b.ts(11,11): error TS2304: Cannot find name 'import'.
 
 
-!!! error TS6053: File '/.src/a.ts' not found.
-
-!!! error TS6053: File '/.src/b.ts' not found.
-==== ./a.ts (0 errors) ====
+==== a.ts (0 errors) ====
     export default {};
     
-==== ./b.ts (0 errors) ====
+==== b.ts (2 errors) ====
     declare global {
         interface  ImportAttributes {
             type: "json"
@@ -17,9 +14,13 @@ error TS6053: File 'b.ts' not found.
     
     import * as ns from "./a" with { type: "not-json" };
     void ns;
+         ~~
+!!! error TS2304: Cannot find name 'ns'.
     
     async function f() {
         await import("./a", {
+              ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
             with: {
                 type: "not-json",
             },

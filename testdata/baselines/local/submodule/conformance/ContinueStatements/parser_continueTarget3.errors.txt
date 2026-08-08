@@ -1,0 +1,12 @@
+parser_continueTarget3.ts(4,3): error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.
+
+
+==== parser_continueTarget3.ts (1 errors) ====
+    target1:
+    target2:
+    while (true) {
+      continue target1;
+      ~~~~~~~~~~~~~~~~~
+    }
+    
+!!! error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.

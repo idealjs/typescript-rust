@@ -1,0 +1,17 @@
+test.ts(3,16): error TS2339: Property 'Origin' does not exist on type '() => { x: number; y: number }'.
+
+
+==== module.d.ts (0 errors) ====
+    declare namespace Point {
+        export var Origin: { x: number; y: number; }
+    }
+    
+==== function.d.ts (0 errors) ====
+    declare function Point(): { x: number; y: number; }
+    
+==== test.ts (1 errors) ====
+    var cl: { x: number; y: number; }
+    var cl = Point();
+    var cl = Point.Origin;
+                   ~~~~~~
+!!! error TS2339: Property 'Origin' does not exist on type '() => { x: number; y: number }'.

@@ -1,0 +1,17 @@
+ExportVariableOfGenericTypeWithInaccessibleTypeAsTypeArgument.ts(6,22): error TS2304: Cannot find name 'Array'.
+ExportVariableOfGenericTypeWithInaccessibleTypeAsTypeArgument.ts(7,28): error TS2304: Cannot find name 'Array'.
+
+
+==== ExportVariableOfGenericTypeWithInaccessibleTypeAsTypeArgument.ts (2 errors) ====
+    namespace A {
+        class B {
+            id: number;
+        }
+    
+        export var beez: Array<B>;
+                         ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+        export var beez2 = new Array<B>();
+                               ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    }

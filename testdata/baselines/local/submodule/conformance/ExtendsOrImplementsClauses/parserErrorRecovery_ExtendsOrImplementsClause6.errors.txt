@@ -1,0 +1,7 @@
+parserErrorRecovery_ExtendsOrImplementsClause6.ts(1,24): error TS1005: '{' expected.
+
+
+==== parserErrorRecovery_ExtendsOrImplementsClause6.ts (1 errors) ====
+    interface I extends { }
+                           
+!!! error TS1005: '{' expected.

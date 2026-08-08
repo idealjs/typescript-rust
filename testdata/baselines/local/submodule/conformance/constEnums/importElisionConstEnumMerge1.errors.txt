@@ -1,0 +1,37 @@
+error TS2300: Duplicate identifier 'Enum'.
+enum.ts(1,19): error TS1005: ',' expected.
+enum.ts(1,24): error TS1005: ',' expected.
+enum.ts(1,24): error TS1182: A destructuring declaration must have an initializer.
+enum.ts(3,1): error TS1012: Unexpected token.
+enum.ts(4,1): error TS1005: '}' expected.
+
+
+!!! error TS2300: Duplicate identifier 'Enum'.
+==== enum.ts (5 errors) ====
+    export const enum Enum {
+                      ~~~~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS1005: ',' expected.
+                           ~
+      One = 1,
+    ~~~~~~~~~~
+    }
+    ~
+    ~
+!!! error TS1012: Unexpected token.
+    
+    
+!!! error TS1182: A destructuring declaration must have an initializer.
+    
+!!! error TS1005: '}' expected.
+==== merge.ts (0 errors) ====
+    import { Enum } from "./enum";
+    namespace Enum {
+      export type Foo = number;
+    }
+    export { Enum };
+    
+==== index.ts (0 errors) ====
+    import { Enum } from "./merge";
+    Enum.One;

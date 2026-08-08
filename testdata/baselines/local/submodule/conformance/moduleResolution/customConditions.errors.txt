@@ -1,0 +1,51 @@
+/node_modules/lodash/package.json(2,11): error TS1005: ';' expected.
+/node_modules/lodash/package.json(3,14): error TS1005: ';' expected.
+/node_modules/lodash/package.json(4,11): error TS1005: ';' expected.
+/node_modules/lodash/package.json(5,14): error TS1005: ';' expected.
+/node_modules/lodash/package.json(6,18): error TS1005: ';' expected.
+/node_modules/lodash/package.json(7,18): error TS1005: ';' expected.
+/node_modules/lodash/package.json(8,18): error TS1005: ';' expected.
+
+
+==== customConditions.ts (0 errors) ====
+    
+==== /node_modules/lodash/package.json (7 errors) ====
+    {
+        "name": "lodash",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "1.0.0",
+                 ~
+!!! error TS1005: ';' expected.
+        "main": "index.js",
+              ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            "browser": "./browser.js",
+                     ~
+!!! error TS1005: ';' expected.
+            "webpack": "./webpack.js",
+                     ~
+!!! error TS1005: ';' expected.
+            "default": "./index.js"
+                     ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+==== /node_modules/lodash/index.d.ts (0 errors) ====
+    declare const _: "index";
+    export = _;
+    
+==== /node_modules/lodash/browser.d.ts (0 errors) ====
+    declare const _: "browser";
+    export default _;
+    
+==== /node_modules/lodash/webpack.d.ts (0 errors) ====
+    declare const _: "webpack";
+    export = _;
+    
+==== /index.ts (0 errors) ====
+    import _ from "lodash";

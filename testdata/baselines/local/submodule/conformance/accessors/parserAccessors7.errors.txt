@@ -1,0 +1,40 @@
+parserAccessors7.ts(1,11): error TS2304: Cannot find name 'get'.
+parserAccessors7.ts(1,15): error TS1005: ',' expected.
+parserAccessors7.ts(1,15): error TS2304: Cannot find name 'foo'.
+parserAccessors7.ts(1,18): error TS1005: ',' expected.
+parserAccessors7.ts(1,18): error TS2304: Cannot find name '('.
+parserAccessors7.ts(1,19): error TS1005: ',' expected.
+parserAccessors7.ts(1,22): error TS2304: Cannot find name 'number'.
+parserAccessors7.ts(1,28): error TS1005: ',' expected.
+parserAccessors7.ts(1,28): error TS2304: Cannot find name ')'.
+parserAccessors7.ts(1,30): error TS1005: ',' expected.
+parserAccessors7.ts(1,30): error TS2304: Cannot find name '{'.
+parserAccessors7.ts(1,34): error TS1128: Declaration or statement expected.
+
+
+==== parserAccessors7.ts (12 errors) ====
+    var v = { get foo(v: number) { } };
+              ~~~
+!!! error TS2304: Cannot find name 'get'.
+                  ~~~
+!!! error TS1005: ',' expected.
+                  ~~~
+!!! error TS2304: Cannot find name 'foo'.
+                     ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS2304: Cannot find name '('.
+                      ~
+!!! error TS1005: ',' expected.
+                         ~~~~~~
+!!! error TS2304: Cannot find name 'number'.
+                               ~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS2304: Cannot find name ')'.
+                                 ~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS2304: Cannot find name '{'.
+                                     ~
+!!! error TS1128: Declaration or statement expected.

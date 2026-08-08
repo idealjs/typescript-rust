@@ -1,0 +1,10 @@
+parserGreaterThanTokenAmbiguity20.ts(3,4): error TS1012: Unexpected token.
+
+
+==== parserGreaterThanTokenAmbiguity20.ts (1 errors) ====
+    1
+    // Before
+    >>>= // after
+       ~
+!!! error TS1012: Unexpected token.
+    2;

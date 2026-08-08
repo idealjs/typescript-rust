@@ -1,0 +1,53 @@
+esDecorators-classExpression-namedEvaluation.4.ts(6,14): error TS1012: Unexpected token.
+esDecorators-classExpression-namedEvaluation.4.ts(6,15): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.4.ts(6,19): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.4.ts(6,25): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.4.ts(12,9): error TS1182: A destructuring declaration must have an initializer.
+esDecorators-classExpression-namedEvaluation.4.ts(12,15): error TS1012: Unexpected token.
+esDecorators-classExpression-namedEvaluation.4.ts(12,16): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.4.ts(12,20): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.4.ts(12,26): error TS1005: ',' expected.
+esDecorators-classExpression-namedEvaluation.4.ts(12,32): error TS1128: Declaration or statement expected.
+esDecorators-classExpression-namedEvaluation.4.ts(12,39): error TS1128: Declaration or statement expected.
+
+
+==== esDecorators-classExpression-namedEvaluation.4.ts (11 errors) ====
+    declare let dec: any, obj: any;
+    
+    // 8.6.3 RS: IteratorBindingInitialization
+    //  SingleNameBinding : BindingIdentifier Initializer?
+    
+    { const [x = @dec class { }] = obj; }
+                 ~
+!!! error TS1012: Unexpected token.
+                  ~~~
+!!! error TS1005: ',' expected.
+                      ~~~~~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS1005: ',' expected.
+    { const [x = class { @dec y: any; }] = obj; }
+    
+    // 14.3.3.3 RS: KeyedBindingInitialization
+    //  SingleNameBinding : BindingIdentifier Initializer?
+    
+    { const { x = @dec class { } } = obj; }
+            ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+                  ~
+!!! error TS1012: Unexpected token.
+                   ~~~
+!!! error TS1005: ',' expected.
+                       ~~~~~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+                                   ~
+!!! error TS1128: Declaration or statement expected.
+                                          ~
+!!! error TS1128: Declaration or statement expected.
+    { const { x = class { @dec y: any; } } = obj; }
+    
+    { const { y: x = @dec class { } } = obj; }
+    { const { y: x = class { @dec y: any; } } = obj; }
+    

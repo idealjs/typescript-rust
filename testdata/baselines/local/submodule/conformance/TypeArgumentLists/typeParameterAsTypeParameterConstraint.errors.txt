@@ -1,0 +1,59 @@
+typeParameterAsTypeParameterConstraint.ts(6,16): error TS2345: Argument of type '2' is not assignable to parameter of type 'T'.
+typeParameterAsTypeParameterConstraint.ts(7,13): error TS2345: Argument of type 'object' is not assignable to parameter of type 'number'.
+typeParameterAsTypeParameterConstraint.ts(7,17): error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+typeParameterAsTypeParameterConstraint.ts(18,17): error TS2345: Argument of type '{ bar: number }' is not assignable to parameter of type 'T'.
+typeParameterAsTypeParameterConstraint.ts(19,24): error TS2345: Argument of type '{ x: 2; y: 3 }' is not assignable to parameter of type 'T'.
+typeParameterAsTypeParameterConstraint.ts(22,9): error TS2345: Argument of type '""' is not assignable to parameter of type '{ length: T }'.
+typeParameterAsTypeParameterConstraint.ts(23,10): error TS2345: Argument of type '{ length: 2 }' is not assignable to parameter of type '{ length: T }'.
+typeParameterAsTypeParameterConstraint.ts(24,9): error TS2345: Argument of type '{ width: 3; length: 2 }' is not assignable to parameter of type '{ length: T }'.
+typeParameterAsTypeParameterConstraint.ts(25,9): error TS2345: Argument of type 'any[]' is not assignable to parameter of type '{ length: T }'.
+typeParameterAsTypeParameterConstraint.ts(26,9): error TS2345: Argument of type 'string[]' is not assignable to parameter of type '{ length: T }'.
+
+
+==== typeParameterAsTypeParameterConstraint.ts (10 errors) ====
+    // using a type parameter as a constraint for a type parameter is valid
+    // no errors expected except illegal constraints
+    
+    function foo<T, U extends T>(x: T, y: U): U { return y; }
+    
+    var r = foo(1, 2);
+                   ~
+!!! error TS2345: Argument of type '2' is not assignable to parameter of type 'T'.
+    var r = foo({}, 1);
+                ~~
+!!! error TS2345: Argument of type 'object' is not assignable to parameter of type 'number'.
+                    ~
+!!! error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+    
+    interface A {
+        foo: string;
+    }
+    interface B extends A {
+        bar: number;
+    }
+    var a: A;
+    var b: B;
+    
+    var r2 = foo(a, b);
+                    ~
+!!! error TS2345: Argument of type '{ bar: number }' is not assignable to parameter of type 'T'.
+    var r3 = foo({ x: 1 }, { x: 2, y: 3 });
+                           ~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ x: 2; y: 3 }' is not assignable to parameter of type 'T'.
+    
+    function foo2<T, U extends { length: T }>(x: T, y: U) { return y; }
+    foo2(1, '');
+            ~~
+!!! error TS2345: Argument of type '""' is not assignable to parameter of type '{ length: T }'.
+    foo2({}, { length: 2 }); 
+             ~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ length: 2 }' is not assignable to parameter of type '{ length: T }'.
+    foo2(1, { width: 3, length: 2 }); 
+            ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ width: 3; length: 2 }' is not assignable to parameter of type '{ length: T }'.
+    foo2(1, []);
+            ~~
+!!! error TS2345: Argument of type 'any[]' is not assignable to parameter of type '{ length: T }'.
+    foo2(1, ['']);
+            ~~~~
+!!! error TS2345: Argument of type 'string[]' is not assignable to parameter of type '{ length: T }'.

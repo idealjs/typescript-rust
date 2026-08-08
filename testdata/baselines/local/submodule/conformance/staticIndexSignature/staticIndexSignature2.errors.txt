@@ -1,0 +1,29 @@
+staticIndexSignature2.ts(2,23): error TS1005: ']' expected.
+staticIndexSignature2.ts(2,31): error TS1005: ';' expected.
+staticIndexSignature2.ts(3,23): error TS1005: ']' expected.
+staticIndexSignature2.ts(3,31): error TS1005: ';' expected.
+staticIndexSignature2.ts(7,3): error TS2339: Property 'bar' does not exist on type 'object'.
+
+
+==== staticIndexSignature2.ts (5 errors) ====
+    class C {
+        static readonly [s: string]: number;
+                          ~
+!!! error TS1005: ']' expected.
+                                  ~
+!!! error TS1005: ';' expected.
+        static readonly [s: number]: 42
+                          ~
+!!! error TS1005: ']' expected.
+                                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    C["foo"] = 1
+    C.bar = 2;
+      ~~~
+!!! error TS2339: Property 'bar' does not exist on type 'object'.
+    const foo = C["foo"]
+    C[42] = 42
+    C[2] = 2;
+    const bar = C[42] 

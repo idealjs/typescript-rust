@@ -1,0 +1,35 @@
+b.ts(5,14): error TS1005: '{' expected.
+b.ts(5,25): error TS1003: Identifier expected.
+b.ts(5,28): error TS1003: Identifier expected.
+b.ts(5,32): error TS1003: Identifier expected.
+b.ts(9,1): error TS1005: '}' expected.
+
+
+==== leaveOptionalParameterAsWritten.ts (0 errors) ====
+    
+==== a.ts (0 errors) ====
+    export interface Foo {}
+    
+==== b.ts (5 errors) ====
+    import * as a from "./a";
+    declare global {
+      namespace teams {
+        export namespace calling {
+          export import Foo = a.Foo;
+                 ~~~~~~
+!!! error TS1005: '{' expected.
+                            ~
+!!! error TS1003: Identifier expected.
+                               ~
+!!! error TS1003: Identifier expected.
+                                   ~
+!!! error TS1003: Identifier expected.
+        }
+      }
+    }
+    
+    
+!!! error TS1005: '}' expected.
+==== c.ts (0 errors) ====
+    type Foo = teams.calling.Foo;
+    export const bar = (p?: Foo) => {}

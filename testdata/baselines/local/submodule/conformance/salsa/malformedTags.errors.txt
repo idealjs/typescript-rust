@@ -1,0 +1,14 @@
+myFile02.js(6,15): error TS2304: Cannot find name 'Array'.
+
+
+==== malformedTags.ts (0 errors) ====
+    
+==== myFile02.js (1 errors) ====
+    /**
+     * Checks if `value` is classified as an `Array` object.
+     *
+     * @type Function
+     */
+    var isArray = Array.isArray;
+                  ~~~~~
+!!! error TS2304: Cannot find name 'Array'.

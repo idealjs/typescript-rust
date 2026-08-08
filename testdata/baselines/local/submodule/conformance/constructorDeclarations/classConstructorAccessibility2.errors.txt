@@ -1,27 +1,27 @@
-constructorDeclarations/classConstructorAccessibility2.ts(2,31): error TS1005: ',' expected.
-constructorDeclarations/classConstructorAccessibility2.ts(7,34): error TS1005: ',' expected.
-constructorDeclarations/classConstructorAccessibility2.ts(12,32): error TS1005: ',' expected.
-constructorDeclarations/classConstructorAccessibility2.ts(18,24): error TS1005: ',' expected.
-constructorDeclarations/classConstructorAccessibility2.ts(18,37): error TS2349: This expression is not callable.
-constructorDeclarations/classConstructorAccessibility2.ts(20,28): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility2.ts(21,35): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility2.ts(25,24): error TS1005: ',' expected.
-constructorDeclarations/classConstructorAccessibility2.ts(25,37): error TS2349: This expression is not callable.
-constructorDeclarations/classConstructorAccessibility2.ts(27,28): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility2.ts(28,35): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility2.ts(32,24): error TS1005: ',' expected.
-constructorDeclarations/classConstructorAccessibility2.ts(32,37): error TS2349: This expression is not callable.
-constructorDeclarations/classConstructorAccessibility2.ts(34,28): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility2.ts(35,35): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility2.ts(38,10): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility2.ts(39,10): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility2.ts(40,10): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility2.ts(42,10): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility2.ts(43,10): error TS2554: Expected 2 arguments, but got 1.
-constructorDeclarations/classConstructorAccessibility2.ts(44,10): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility2.ts(2,31): error TS1005: ',' expected.
+classConstructorAccessibility2.ts(7,34): error TS1005: ',' expected.
+classConstructorAccessibility2.ts(12,32): error TS1005: ',' expected.
+classConstructorAccessibility2.ts(18,24): error TS1005: ',' expected.
+classConstructorAccessibility2.ts(18,37): error TS2349: This expression is not callable.
+classConstructorAccessibility2.ts(20,28): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility2.ts(21,35): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility2.ts(25,24): error TS1005: ',' expected.
+classConstructorAccessibility2.ts(25,37): error TS2349: This expression is not callable.
+classConstructorAccessibility2.ts(27,28): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility2.ts(28,35): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility2.ts(32,24): error TS1005: ',' expected.
+classConstructorAccessibility2.ts(32,37): error TS2349: This expression is not callable.
+classConstructorAccessibility2.ts(34,28): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility2.ts(35,35): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility2.ts(38,10): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility2.ts(39,10): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility2.ts(40,10): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility2.ts(42,10): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility2.ts(43,10): error TS2554: Expected 2 arguments, but got 1.
+classConstructorAccessibility2.ts(44,10): error TS2554: Expected 2 arguments, but got 1.
 
 
-==== constructorDeclarations/classConstructorAccessibility2.ts (21 errors) ====
+==== classConstructorAccessibility2.ts (21 errors) ====
     class BaseA {
         public constructor(public x: number) { }
                                   ~

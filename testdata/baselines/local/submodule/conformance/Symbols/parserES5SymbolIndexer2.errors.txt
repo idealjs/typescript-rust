@@ -1,0 +1,12 @@
+parserES5SymbolIndexer2.ts(2,7): error TS1005: ']' expected.
+parserES5SymbolIndexer2.ts(2,15): error TS1005: ';' expected.
+
+
+==== parserES5SymbolIndexer2.ts (2 errors) ====
+    class C {
+        [s: symbol]: string;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+    }

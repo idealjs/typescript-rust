@@ -1,17 +1,17 @@
-directives/ts-expect-error.ts(2,5): error TS2322: Type 'string' is not assignable to type 'number'.
-directives/ts-expect-error.ts(6,5): error TS2322: Type 'string' is not assignable to type 'number'.
-directives/ts-expect-error.ts(15,5): error TS2322: Type 'string' is not assignable to type 'number'.
-directives/ts-expect-error.ts(19,5): error TS2322: Type 'string' is not assignable to type 'number'.
-directives/ts-expect-error.ts(31,5): error TS2322: Type 'string' is not assignable to type 'number'.
-directives/ts-expect-error.ts(36,2): error TS2367: This comparison appears to be unintentional because the types 'true' and 'false' have no overlap.
-directives/ts-expect-error.ts(37,2): error TS2367: This comparison appears to be unintentional because the types 'true' and 'false' have no overlap.
-directives/ts-expect-error.ts(39,2): error TS2367: This comparison appears to be unintentional because the types 'true' and 'false' have no overlap.
-directives/ts-expect-error.ts(40,2): error TS2367: This comparison appears to be unintentional because the types 'true' and 'false' have no overlap.
-directives/ts-expect-error.ts(43,5): error TS2322: Type 'string' is not assignable to type 'number'.
-directives/ts-expect-error.ts(47,5): error TS2322: Type 'string' is not assignable to type 'number'.
+ts-expect-error.ts(2,5): error TS2322: Type 'string' is not assignable to type 'number'.
+ts-expect-error.ts(6,5): error TS2322: Type 'string' is not assignable to type 'number'.
+ts-expect-error.ts(15,5): error TS2322: Type 'string' is not assignable to type 'number'.
+ts-expect-error.ts(19,5): error TS2322: Type 'string' is not assignable to type 'number'.
+ts-expect-error.ts(31,5): error TS2322: Type 'string' is not assignable to type 'number'.
+ts-expect-error.ts(36,2): error TS2367: This comparison appears to be unintentional because the types 'true' and 'false' have no overlap.
+ts-expect-error.ts(37,2): error TS2367: This comparison appears to be unintentional because the types 'true' and 'false' have no overlap.
+ts-expect-error.ts(39,2): error TS2367: This comparison appears to be unintentional because the types 'true' and 'false' have no overlap.
+ts-expect-error.ts(40,2): error TS2367: This comparison appears to be unintentional because the types 'true' and 'false' have no overlap.
+ts-expect-error.ts(43,5): error TS2322: Type 'string' is not assignable to type 'number'.
+ts-expect-error.ts(47,5): error TS2322: Type 'string' is not assignable to type 'number'.
 
 
-==== directives/ts-expect-error.ts (11 errors) ====
+==== ts-expect-error.ts (11 errors) ====
     // @ts-expect-error additional commenting
     var invalidCommentedFancySingle: number = 'nope';
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

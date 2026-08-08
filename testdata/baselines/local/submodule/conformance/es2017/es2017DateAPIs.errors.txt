@@ -1,0 +1,7 @@
+es2017DateAPIs.ts(1,1): error TS2304: Cannot find name 'Date'.
+
+
+==== es2017DateAPIs.ts (1 errors) ====
+    Date.UTC(2017);
+    ~~~~
+!!! error TS2304: Cannot find name 'Date'.

@@ -1,0 +1,39 @@
+esDecorators-classDeclaration-fields-staticAccessor.ts(14,12): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticAccessor.ts(15,13): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticAccessor.ts(15,14): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticAccessor.ts(16,13): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticAccessor.ts(16,14): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-staticAccessor.ts(18,1): error TS1128: Declaration or statement expected.
+
+
+==== esDecorators-classDeclaration-fields-staticAccessor.ts (6 errors) ====
+    declare let dec: any;
+    
+    const field3 = "field3";
+    
+    class C {
+        @dec(1) static accessor field1 = 1;
+        @dec(2) static accessor ["field2"] = 2;
+        @dec(3) static accessor [field3] = 3;
+    }
+    
+    @dec
+    class D {
+        static accessor field1 = 1;
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            this.field1;
+                ~
+!!! error TS1005: ';' expected.
+                 ~~~~~~
+!!! error TS1005: ';' expected.
+            this.field1 = 1;
+                ~
+!!! error TS1005: ';' expected.
+                 ~~~~~~
+!!! error TS1005: ';' expected.
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

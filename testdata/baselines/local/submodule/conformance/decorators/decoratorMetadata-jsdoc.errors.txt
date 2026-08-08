@@ -1,0 +1,25 @@
+decoratorMetadata-jsdoc.ts(5,15): error TS1005: ';' expected.
+decoratorMetadata-jsdoc.ts(7,15): error TS1005: ';' expected.
+decoratorMetadata-jsdoc.ts(9,9): error TS1003: Identifier expected.
+decoratorMetadata-jsdoc.ts(9,9): error TS2304: Cannot find name '*'.
+
+
+==== decoratorMetadata-jsdoc.ts (4 errors) ====
+    declare var decorator: any;
+    
+    class X {
+        @decorator()
+        a?: string?;
+                  ~
+!!! error TS1005: ';' expected.
+        @decorator()
+        b?: string!;
+                  ~
+!!! error TS1005: ';' expected.
+        @decorator()
+        c?: *;
+            ~
+!!! error TS1003: Identifier expected.
+            ~
+!!! error TS2304: Cannot find name '*'.
+    }

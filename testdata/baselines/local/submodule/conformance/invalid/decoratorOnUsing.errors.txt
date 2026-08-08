@@ -1,0 +1,25 @@
+decoratorOnUsing.ts(4,1): error TS2304: Cannot find name 'using'.
+decoratorOnUsing.ts(4,7): error TS1005: ';' expected.
+decoratorOnUsing.ts(7,1): error TS2304: Cannot find name 'using'.
+decoratorOnUsing.ts(7,7): error TS1005: ';' expected.
+decoratorOnUsing.ts(7,7): error TS2304: Cannot find name 'x'.
+
+
+==== decoratorOnUsing.ts (5 errors) ====
+    declare function dec<T>(target: T): T;
+    
+    @dec
+    using 1
+    ~~~~~
+!!! error TS2304: Cannot find name 'using'.
+          ~
+!!! error TS1005: ';' expected.
+    
+    @dec
+    using x
+    ~~~~~
+!!! error TS2304: Cannot find name 'using'.
+          ~
+!!! error TS1005: ';' expected.
+          ~
+!!! error TS2304: Cannot find name 'x'.

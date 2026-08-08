@@ -1,0 +1,32 @@
+error TS6053: File 'react.d.ts' not found.
+file.tsx(11,39): error TS2339: Property 'props' does not exist on type '{ render: () => any }'.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.
+==== file.tsx (1 errors) ====
+    /// <reference path="/.lib/react.d.ts" />
+    
+    import React = require('react');
+    
+    interface ComponentProps {
+        AnyComponent: React.StatelessComponent<any> | React.ComponentClass<any>;
+    }
+    
+    class MyComponent extends React.Component<ComponentProps, {}> {
+        render() {
+            const { AnyComponent } = this.props;
+                                          ~~~~~
+!!! error TS2339: Property 'props' does not exist on type '{ render: () => any }'.
+            return (<AnyComponent />);
+        }
+    }
+    
+    // Stateless Component As Props
+    <MyComponent AnyComponent={() => <button>test</button>}/>
+    
+    // Component Class as Props
+    class MyButtonComponent extends React.Component<{},{}> {
+    }
+    
+    <MyComponent AnyComponent={MyButtonComponent} />
+    

@@ -1,0 +1,73 @@
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+for-inStatementsArray.ts(1,8): error TS2304: Cannot find name 'Date'.
+for-inStatementsArray.ts(5,16): error TS2448: Block-scoped variable 'x' used before its declaration.
+for-inStatementsArray.ts(6,17): error TS2448: Block-scoped variable 'x' used before its declaration.
+for-inStatementsArray.ts(7,17): error TS2448: Block-scoped variable 'x' used before its declaration.
+for-inStatementsArray.ts(8,16): error TS2448: Block-scoped variable 'x' used before its declaration.
+for-inStatementsArray.ts(9,17): error TS2448: Block-scoped variable 'x' used before its declaration.
+for-inStatementsArray.ts(10,17): error TS2448: Block-scoped variable 'x' used before its declaration.
+for-inStatementsArray.ts(25,12): error TS1005: ';' expected.
+for-inStatementsArray.ts(26,16): error TS1005: ';' expected.
+for-inStatementsArray.ts(36,12): error TS1005: ';' expected.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+==== for-inStatementsArray.ts (10 errors) ====
+    let a: Date[];
+           ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    let b: boolean[];
+    
+    for (let x in a) {
+        let a1 = a[x];
+                   ~
+!!! error TS2448: Block-scoped variable 'x' used before its declaration.
+        let a2 = a[(x)];
+                    ~
+!!! error TS2448: Block-scoped variable 'x' used before its declaration.
+        let a3 = a[+x];
+                    ~
+!!! error TS2448: Block-scoped variable 'x' used before its declaration.
+        let b1 = b[x];
+                   ~
+!!! error TS2448: Block-scoped variable 'x' used before its declaration.
+        let b2 = b[(x)];
+                    ~
+!!! error TS2448: Block-scoped variable 'x' used before its declaration.
+        let b3 = b[+x];
+                    ~
+!!! error TS2448: Block-scoped variable 'x' used before its declaration.
+    }
+    
+    for (let x in a) {
+        for (let y in a) {
+            for (let z in a) {
+                let a1 = a[x];
+                let a2 = a[y];
+                let a3 = a[z];
+            }
+        }
+    }
+    
+    let i: string;
+    let j: string;
+    for (i in a) {
+               ~
+!!! error TS1005: ';' expected.
+        for (j in b) {
+                   ~
+!!! error TS1005: ';' expected.
+            let a1 = a[i];
+            let a2 = a[j];
+        }
+    }
+    
+    var s: string;
+    for (var s in a) {
+        let a1 = a[s];
+    }
+    for (s in a) {
+               ~
+!!! error TS1005: ';' expected.
+        let a1 = a[s];
+    }

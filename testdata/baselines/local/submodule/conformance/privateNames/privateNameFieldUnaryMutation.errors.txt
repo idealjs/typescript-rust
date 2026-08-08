@@ -1,62 +1,62 @@
 error TS2451: Cannot redeclare block-scoped variable 'test'.
 error TS2451: Cannot redeclare block-scoped variable 'test'.
 error TS2451: Cannot redeclare block-scoped variable 'test'.
-privateNames/privateNameFieldUnaryMutation.ts(2,5): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(2,5): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(2,6): error TS1005: ';' expected.
-privateNames/privateNameFieldUnaryMutation.ts(4,14): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(4,14): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(4,15): error TS1005: ';' expected.
-privateNames/privateNameFieldUnaryMutation.ts(5,14): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(5,14): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(5,15): error TS1005: ';' expected.
-privateNames/privateNameFieldUnaryMutation.ts(6,16): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(6,16): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(6,17): error TS1005: ';' expected.
-privateNames/privateNameFieldUnaryMutation.ts(7,16): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(7,16): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(7,17): error TS1005: ';' expected.
-privateNames/privateNameFieldUnaryMutation.ts(8,24): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(8,24): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(8,25): error TS1005: ',' expected.
-privateNames/privateNameFieldUnaryMutation.ts(8,29): error TS1005: ',' expected.
-privateNames/privateNameFieldUnaryMutation.ts(9,24): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(9,24): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(9,25): error TS1005: ',' expected.
-privateNames/privateNameFieldUnaryMutation.ts(9,29): error TS1005: ',' expected.
-privateNames/privateNameFieldUnaryMutation.ts(10,26): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(10,26): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(10,27): error TS1005: ',' expected.
-privateNames/privateNameFieldUnaryMutation.ts(11,26): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(11,26): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(11,27): error TS1005: ',' expected.
-privateNames/privateNameFieldUnaryMutation.ts(12,19): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(12,19): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(12,20): error TS1005: ';' expected.
-privateNames/privateNameFieldUnaryMutation.ts(12,20): error TS2588: Cannot assign to 'test' because it is a constant.
-privateNames/privateNameFieldUnaryMutation.ts(12,35): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(12,35): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(12,36): error TS1005: ')' expected.
-privateNames/privateNameFieldUnaryMutation.ts(12,45): error TS1005: '>' expected.
-privateNames/privateNameFieldUnaryMutation.ts(12,54): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(12,54): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(12,55): error TS1005: ';' expected.
-privateNames/privateNameFieldUnaryMutation.ts(12,59): error TS1005: ';' expected.
-privateNames/privateNameFieldUnaryMutation.ts(12,61): error TS1005: ';' expected.
-privateNames/privateNameFieldUnaryMutation.ts(13,19): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(13,19): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(13,20): error TS1005: ';' expected.
-privateNames/privateNameFieldUnaryMutation.ts(13,20): error TS2304: Cannot find name 'test'.
-privateNames/privateNameFieldUnaryMutation.ts(13,35): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(13,35): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(13,36): error TS1005: ')' expected.
-privateNames/privateNameFieldUnaryMutation.ts(13,36): error TS2304: Cannot find name 'test'.
-privateNames/privateNameFieldUnaryMutation.ts(13,45): error TS1005: '>' expected.
-privateNames/privateNameFieldUnaryMutation.ts(13,52): error TS1003: Identifier expected.
-privateNames/privateNameFieldUnaryMutation.ts(13,52): error TS1127: Invalid character.
-privateNames/privateNameFieldUnaryMutation.ts(13,53): error TS1005: ';' expected.
-privateNames/privateNameFieldUnaryMutation.ts(13,53): error TS2304: Cannot find name 'test'.
-privateNames/privateNameFieldUnaryMutation.ts(13,59): error TS1005: ';' expected.
+privateNameFieldUnaryMutation.ts(2,5): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(2,5): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(2,6): error TS1005: ';' expected.
+privateNameFieldUnaryMutation.ts(4,14): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(4,14): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(4,15): error TS1005: ';' expected.
+privateNameFieldUnaryMutation.ts(5,14): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(5,14): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(5,15): error TS1005: ';' expected.
+privateNameFieldUnaryMutation.ts(6,16): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(6,16): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(6,17): error TS1005: ';' expected.
+privateNameFieldUnaryMutation.ts(7,16): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(7,16): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(7,17): error TS1005: ';' expected.
+privateNameFieldUnaryMutation.ts(8,24): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(8,24): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(8,25): error TS1005: ',' expected.
+privateNameFieldUnaryMutation.ts(8,29): error TS1005: ',' expected.
+privateNameFieldUnaryMutation.ts(9,24): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(9,24): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(9,25): error TS1005: ',' expected.
+privateNameFieldUnaryMutation.ts(9,29): error TS1005: ',' expected.
+privateNameFieldUnaryMutation.ts(10,26): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(10,26): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(10,27): error TS1005: ',' expected.
+privateNameFieldUnaryMutation.ts(11,26): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(11,26): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(11,27): error TS1005: ',' expected.
+privateNameFieldUnaryMutation.ts(12,19): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(12,19): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(12,20): error TS1005: ';' expected.
+privateNameFieldUnaryMutation.ts(12,20): error TS2588: Cannot assign to 'test' because it is a constant.
+privateNameFieldUnaryMutation.ts(12,35): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(12,35): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(12,36): error TS1005: ')' expected.
+privateNameFieldUnaryMutation.ts(12,45): error TS1005: '>' expected.
+privateNameFieldUnaryMutation.ts(12,54): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(12,54): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(12,55): error TS1005: ';' expected.
+privateNameFieldUnaryMutation.ts(12,59): error TS1005: ';' expected.
+privateNameFieldUnaryMutation.ts(12,61): error TS1005: ';' expected.
+privateNameFieldUnaryMutation.ts(13,19): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(13,19): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(13,20): error TS1005: ';' expected.
+privateNameFieldUnaryMutation.ts(13,20): error TS2304: Cannot find name 'test'.
+privateNameFieldUnaryMutation.ts(13,35): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(13,35): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(13,36): error TS1005: ')' expected.
+privateNameFieldUnaryMutation.ts(13,36): error TS2304: Cannot find name 'test'.
+privateNameFieldUnaryMutation.ts(13,45): error TS1005: '>' expected.
+privateNameFieldUnaryMutation.ts(13,52): error TS1003: Identifier expected.
+privateNameFieldUnaryMutation.ts(13,52): error TS1127: Invalid character.
+privateNameFieldUnaryMutation.ts(13,53): error TS1005: ';' expected.
+privateNameFieldUnaryMutation.ts(13,53): error TS2304: Cannot find name 'test'.
+privateNameFieldUnaryMutation.ts(13,59): error TS1005: ';' expected.
 
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'test'.
@@ -64,7 +64,7 @@ privateNames/privateNameFieldUnaryMutation.ts(13,59): error TS1005: ';' expected
 !!! error TS2451: Cannot redeclare block-scoped variable 'test'.
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'test'.
-==== privateNames/privateNameFieldUnaryMutation.ts (56 errors) ====
+==== privateNameFieldUnaryMutation.ts (56 errors) ====
     class C {
         #test: number = 24;
         ~

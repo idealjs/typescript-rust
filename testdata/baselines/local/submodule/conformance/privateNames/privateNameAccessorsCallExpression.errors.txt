@@ -1,51 +1,51 @@
 error TS2451: Cannot redeclare block-scoped variable 'arr'.
-privateNames/privateNameAccessorsCallExpression.ts(2,9): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(2,9): error TS1127: Invalid character.
-privateNames/privateNameAccessorsCallExpression.ts(2,10): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(3,9): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(3,9): error TS1127: Invalid character.
-privateNames/privateNameAccessorsCallExpression.ts(3,10): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(6,14): error TS1003: Identifier expected.
-privateNames/privateNameAccessorsCallExpression.ts(6,14): error TS1127: Invalid character.
-privateNames/privateNameAccessorsCallExpression.ts(6,15): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(7,27): error TS1003: Identifier expected.
-privateNames/privateNameAccessorsCallExpression.ts(7,27): error TS1127: Invalid character.
-privateNames/privateNameAccessorsCallExpression.ts(7,28): error TS1005: ',' expected.
-privateNames/privateNameAccessorsCallExpression.ts(9,18): error TS1003: Identifier expected.
-privateNames/privateNameAccessorsCallExpression.ts(9,18): error TS1127: Invalid character.
-privateNames/privateNameAccessorsCallExpression.ts(9,19): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(12,14): error TS1003: Identifier expected.
-privateNames/privateNameAccessorsCallExpression.ts(12,14): error TS1127: Invalid character.
-privateNames/privateNameAccessorsCallExpression.ts(12,15): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(13,28): error TS1003: Identifier expected.
-privateNames/privateNameAccessorsCallExpression.ts(13,28): error TS1127: Invalid character.
-privateNames/privateNameAccessorsCallExpression.ts(13,29): error TS1005: ',' expected.
-privateNames/privateNameAccessorsCallExpression.ts(13,39): error TS1005: ',' expected.
-privateNames/privateNameAccessorsCallExpression.ts(13,40): error TS1134: Variable declaration expected.
-privateNames/privateNameAccessorsCallExpression.ts(13,41): error TS1134: Variable declaration expected.
-privateNames/privateNameAccessorsCallExpression.ts(13,43): error TS1134: Variable declaration expected.
-privateNames/privateNameAccessorsCallExpression.ts(13,51): error TS1134: Variable declaration expected.
-privateNames/privateNameAccessorsCallExpression.ts(13,52): error TS1134: Variable declaration expected.
-privateNames/privateNameAccessorsCallExpression.ts(14,15): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(14,26): error TS1003: Identifier expected.
-privateNames/privateNameAccessorsCallExpression.ts(14,26): error TS1127: Invalid character.
-privateNames/privateNameAccessorsCallExpression.ts(14,27): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(14,37): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(14,44): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(14,46): error TS2304: Cannot find name 'middle$'.
-privateNames/privateNameAccessorsCallExpression.ts(14,53): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(14,56): error TS2304: Cannot find name 'tail'.
-privateNames/privateNameAccessorsCallExpression.ts(14,60): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(15,40): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(15,40): error TS2304: Cannot find name 'test$'.
-privateNames/privateNameAccessorsCallExpression.ts(15,45): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(15,48): error TS2304: Cannot find name 'and$'.
-privateNames/privateNameAccessorsCallExpression.ts(15,52): error TS1005: ';' expected.
-privateNames/privateNameAccessorsCallExpression.ts(15,55): error TS1160: Unterminated template literal.
+privateNameAccessorsCallExpression.ts(2,9): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(2,9): error TS1127: Invalid character.
+privateNameAccessorsCallExpression.ts(2,10): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(3,9): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(3,9): error TS1127: Invalid character.
+privateNameAccessorsCallExpression.ts(3,10): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(6,14): error TS1003: Identifier expected.
+privateNameAccessorsCallExpression.ts(6,14): error TS1127: Invalid character.
+privateNameAccessorsCallExpression.ts(6,15): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(7,27): error TS1003: Identifier expected.
+privateNameAccessorsCallExpression.ts(7,27): error TS1127: Invalid character.
+privateNameAccessorsCallExpression.ts(7,28): error TS1005: ',' expected.
+privateNameAccessorsCallExpression.ts(9,18): error TS1003: Identifier expected.
+privateNameAccessorsCallExpression.ts(9,18): error TS1127: Invalid character.
+privateNameAccessorsCallExpression.ts(9,19): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(12,14): error TS1003: Identifier expected.
+privateNameAccessorsCallExpression.ts(12,14): error TS1127: Invalid character.
+privateNameAccessorsCallExpression.ts(12,15): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(13,28): error TS1003: Identifier expected.
+privateNameAccessorsCallExpression.ts(13,28): error TS1127: Invalid character.
+privateNameAccessorsCallExpression.ts(13,29): error TS1005: ',' expected.
+privateNameAccessorsCallExpression.ts(13,39): error TS1005: ',' expected.
+privateNameAccessorsCallExpression.ts(13,40): error TS1134: Variable declaration expected.
+privateNameAccessorsCallExpression.ts(13,41): error TS1134: Variable declaration expected.
+privateNameAccessorsCallExpression.ts(13,43): error TS1134: Variable declaration expected.
+privateNameAccessorsCallExpression.ts(13,51): error TS1134: Variable declaration expected.
+privateNameAccessorsCallExpression.ts(13,52): error TS1134: Variable declaration expected.
+privateNameAccessorsCallExpression.ts(14,15): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(14,26): error TS1003: Identifier expected.
+privateNameAccessorsCallExpression.ts(14,26): error TS1127: Invalid character.
+privateNameAccessorsCallExpression.ts(14,27): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(14,37): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(14,44): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(14,46): error TS2304: Cannot find name 'middle$'.
+privateNameAccessorsCallExpression.ts(14,53): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(14,56): error TS2304: Cannot find name 'tail'.
+privateNameAccessorsCallExpression.ts(14,60): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(15,40): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(15,40): error TS2304: Cannot find name 'test$'.
+privateNameAccessorsCallExpression.ts(15,45): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(15,48): error TS2304: Cannot find name 'and$'.
+privateNameAccessorsCallExpression.ts(15,52): error TS1005: ';' expected.
+privateNameAccessorsCallExpression.ts(15,55): error TS1160: Unterminated template literal.
 
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'arr'.
-==== privateNames/privateNameAccessorsCallExpression.ts (43 errors) ====
+==== privateNameAccessorsCallExpression.ts (43 errors) ====
     class A {
         get #fieldFunc() {  return function() { this.x = 10; } }
             ~

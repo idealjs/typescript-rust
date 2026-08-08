@@ -1,0 +1,62 @@
+/node_modules/acorn-walk/package.json(2,9): error TS1005: ';' expected.
+/node_modules/acorn-walk/package.json(3,12): error TS1005: ';' expected.
+/node_modules/acorn-walk/package.json(4,9): error TS1005: ';' expected.
+/node_modules/acorn-walk/package.json(5,10): error TS1005: ';' expected.
+/node_modules/acorn-walk/package.json(6,12): error TS1005: ';' expected.
+/node_modules/acorn-walk/package.json(7,8): error TS1005: ';' expected.
+/node_modules/acorn-walk/package.json(15,21): error TS1005: ';' expected.
+
+
+==== selfNameModuleAugmentation.ts (0 errors) ====
+    // The correct behavior for this test would be for both the module augmentation
+    // and the import to resolve to `walk.mjs` (triggering at least one implicit any
+    // error, I think?). However, https://github.com/microsoft/TypeScript/issues/50762
+    // causes the import to resolve through the `default` condition, replacing `.js`
+    // with `.d.ts` to find `walk.d.ts`. While this is incorrect, it's important that
+    // the module augmentation, which resolves through self-name resolution, resolves
+    // to the same module as the external import.
+    
+==== /node_modules/acorn-walk/package.json (7 errors) ====
+    {
+      "name": "acorn-walk",
+            ~
+!!! error TS1005: ';' expected.
+      "version": "8.2.0",
+               ~
+!!! error TS1005: ';' expected.
+      "main": "dist/walk.js",
+            ~
+!!! error TS1005: ';' expected.
+      "types": "dist/walk.d.ts",
+             ~
+!!! error TS1005: ';' expected.
+      "exports": {
+               ~
+!!! error TS1005: ';' expected.
+        ".": [
+           ~
+!!! error TS1005: ';' expected.
+          {
+              "import": "./dist/walk.mjs",
+              "require": "./dist/walk.js",
+              "default": "./dist/walk.js"
+          },
+          "./dist/walk.js"
+        ],
+        "./package.json": "./package.json"
+                        ~
+!!! error TS1005: ';' expected.
+      }
+    }
+    
+==== /node_modules/acorn-walk/dist/walk.d.ts (0 errors) ====
+    export {};
+    declare module 'acorn-walk' {
+      export function simple(node: any, visitors: any, base?: any, state?: any): any;
+    }
+    
+==== /node_modules/acorn-walk/dist/walk.mjs (0 errors) ====
+    export {};
+    
+==== /index.ts (0 errors) ====
+    import { simple } from 'acorn-walk';

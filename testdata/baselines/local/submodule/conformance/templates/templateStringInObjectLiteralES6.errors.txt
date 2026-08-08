@@ -1,0 +1,11 @@
+templateStringInObjectLiteralES6.ts(4,5): error TS1003: Identifier expected.
+
+
+==== templateStringInObjectLiteralES6.ts (1 errors) ====
+    ﻿// @target: ES6
+    var x = {
+        a: `abc${ 123 }def`,
+        `b`: 321
+     ~~~
+!!! error TS1003: Identifier expected.
+    }

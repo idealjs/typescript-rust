@@ -1,0 +1,18 @@
+nullishCoalescingOperator8.ts(5,14): error TS2339: Property 'm' does not exist on type '{ p: string | undefined }'.
+nullishCoalescingOperator8.ts(6,14): error TS2339: Property 'm' does not exist on type '{ p: string | undefined }'.
+nullishCoalescingOperator8.ts(6,30): error TS2339: Property 'm' does not exist on type '{ p: string | undefined }'.
+
+
+==== nullishCoalescingOperator8.ts (3 errors) ====
+    declare const a: { p: string | undefined, m(): string | undefined };
+    declare const b: { p: string | undefined, m(): string | undefined };
+    
+    const n1 = a.p ?? "default";
+    const n2 = a.m() ?? "default";
+                 ~
+!!! error TS2339: Property 'm' does not exist on type '{ p: string | undefined }'.
+    const n3 = a.m() ?? b.p ?? b.m() ?? "default";;
+                 ~
+!!! error TS2339: Property 'm' does not exist on type '{ p: string | undefined }'.
+                                 ~
+!!! error TS2339: Property 'm' does not exist on type '{ p: string | undefined }'.

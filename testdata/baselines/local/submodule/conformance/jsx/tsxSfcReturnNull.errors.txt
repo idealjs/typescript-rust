@@ -1,0 +1,17 @@
+error TS6053: File 'react.d.ts' not found.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.
+==== file.tsx (0 errors) ====
+    /// <reference path="/.lib/react.d.ts" />
+    
+    import React = require('react');
+    
+    const Foo = (props: any) => null;
+    
+    function Greet(x: {name?: string}) {
+    	return null;
+    }
+    
+    const foo = <Foo />;
+    const G = <Greet />;

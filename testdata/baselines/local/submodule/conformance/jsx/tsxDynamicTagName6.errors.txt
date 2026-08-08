@@ -1,0 +1,18 @@
+tsxDynamicTagName6.tsx(9,13): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+tsxDynamicTagName6.tsx(9,14): error TS2604: JSX element type '' does not have any construct or call signatures.
+
+
+==== tsxDynamicTagName6.tsx (2 errors) ====
+    declare namespace JSX {
+    	interface Element { }
+    	interface IntrinsicElements {
+    		div: any
+    	}
+    }
+    
+    const t = {tag:'h1'}
+    const foo = <t.tag/>  // No error
+                ~~~~~~~~
+!!! error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
+                 ~~~~~
+!!! error TS2604: JSX element type '' does not have any construct or call signatures.

@@ -1,0 +1,85 @@
+expando.ts(4,14): error TS2339: Property 'p1' does not exist on type '(n: number) => number'.
+expando.ts(5,14): error TS2339: Property 'm' does not exist on type '(n: number) => number'.
+expando.ts(8,14): error TS2339: Property 'p4' does not exist on type '(n: number) => number'.
+expando.ts(9,14): error TS2339: Property 'p5' does not exist on type '(n: number) => number'.
+expando.ts(10,14): error TS2339: Property 'p6' does not exist on type '(n: number) => number'.
+expando.ts(11,14): error TS2339: Property 'p7' does not exist on type '(n: number) => number'.
+expando.ts(12,14): error TS2339: Property 'p8' does not exist on type '(n: number) => number'.
+expando.ts(13,14): error TS2339: Property 'p9' does not exist on type '(n: number) => number'.
+expando.ts(14,22): error TS2339: Property 'p1' does not exist on type '(n: number) => number'.
+expando.ts(14,40): error TS2339: Property 'p2' does not exist on type '(n: number) => number'.
+expando.ts(14,58): error TS2339: Property 'p3' does not exist on type '(n: number) => number'.
+expando.ts(14,76): error TS2339: Property 'p4' does not exist on type '(n: number) => number'.
+expando.ts(14,94): error TS2339: Property 'p5' does not exist on type '(n: number) => number'.
+expando.ts(14,112): error TS2339: Property 'p6' does not exist on type '(n: number) => number'.
+expando.ts(14,130): error TS2339: Property 'p7' does not exist on type '(n: number) => number'.
+expando.ts(14,148): error TS2339: Property 'p8' does not exist on type '(n: number) => number'.
+expando.ts(14,166): error TS2339: Property 'p9' does not exist on type '(n: number) => number'.
+expando.ts(14,184): error TS2339: Property 'm' does not exist on type '(n: number) => number'.
+
+
+==== expando.ts (18 errors) ====
+    function ExpandoMerge(n: number) {
+        return n;
+    }
+    ExpandoMerge.p1 = 111
+                 ~~
+!!! error TS2339: Property 'p1' does not exist on type '(n: number) => number'.
+    ExpandoMerge.m = function(n: number) {
+                 ~
+!!! error TS2339: Property 'm' does not exist on type '(n: number) => number'.
+        return n + 1;
+    }
+    ExpandoMerge.p4 = 44444;
+                 ~~
+!!! error TS2339: Property 'p4' does not exist on type '(n: number) => number'.
+    ExpandoMerge.p5 = 555555;
+                 ~~
+!!! error TS2339: Property 'p5' does not exist on type '(n: number) => number'.
+    ExpandoMerge.p6 = 66666;
+                 ~~
+!!! error TS2339: Property 'p6' does not exist on type '(n: number) => number'.
+    ExpandoMerge.p7 = 777777;
+                 ~~
+!!! error TS2339: Property 'p7' does not exist on type '(n: number) => number'.
+    ExpandoMerge.p8 = false; // type error
+                 ~~
+!!! error TS2339: Property 'p8' does not exist on type '(n: number) => number'.
+    ExpandoMerge.p9 = false; // type error
+                 ~~
+!!! error TS2339: Property 'p9' does not exist on type '(n: number) => number'.
+    var n = ExpandoMerge.p1 + ExpandoMerge.p2 + ExpandoMerge.p3 + ExpandoMerge.p4 + ExpandoMerge.p5 + ExpandoMerge.p6 + ExpandoMerge.p7 + ExpandoMerge.p8 + ExpandoMerge.p9 + ExpandoMerge.m(12) + ExpandoMerge(1001);
+                         ~~
+!!! error TS2339: Property 'p1' does not exist on type '(n: number) => number'.
+                                           ~~
+!!! error TS2339: Property 'p2' does not exist on type '(n: number) => number'.
+                                                             ~~
+!!! error TS2339: Property 'p3' does not exist on type '(n: number) => number'.
+                                                                               ~~
+!!! error TS2339: Property 'p4' does not exist on type '(n: number) => number'.
+                                                                                                 ~~
+!!! error TS2339: Property 'p5' does not exist on type '(n: number) => number'.
+                                                                                                                   ~~
+!!! error TS2339: Property 'p6' does not exist on type '(n: number) => number'.
+                                                                                                                                     ~~
+!!! error TS2339: Property 'p7' does not exist on type '(n: number) => number'.
+                                                                                                                                                       ~~
+!!! error TS2339: Property 'p8' does not exist on type '(n: number) => number'.
+                                                                                                                                                                         ~~
+!!! error TS2339: Property 'p9' does not exist on type '(n: number) => number'.
+                                                                                                                                                                                           ~
+!!! error TS2339: Property 'm' does not exist on type '(n: number) => number'.
+    
+==== ns.ts (0 errors) ====
+    namespace ExpandoMerge {
+        export var p3 = 333;
+        export var p4 = 4;
+        export var p5 = 5;
+        export let p6 = 6;
+        export let p7 = 7;
+        export var p8 = 6;
+        export let p9 = 7;
+    }
+    namespace ExpandoMerge {
+        export var p2 = 222;
+    }

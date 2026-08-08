@@ -1,7 +1,7 @@
-es2018/useRegexpGroups.ts(15,17): error TS2339: Property 'match' does not exist on type '"foo"'.
+useRegexpGroups.ts(15,17): error TS2339: Property 'match' does not exist on type '"foo"'.
 
 
-==== es2018/useRegexpGroups.ts (1 errors) ====
+==== useRegexpGroups.ts (1 errors) ====
     let re = /(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/u;
     let result = re.exec("2015-01-02");
     

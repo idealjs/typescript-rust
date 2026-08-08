@@ -1,0 +1,39 @@
+parenthesizedTypes.ts(15,8): error TS2304: Cannot find name 'Array'.
+parenthesizedTypes.ts(16,8): error TS2304: Cannot find name 'Array'.
+parenthesizedTypes.ts(17,9): error TS2304: Cannot find name 'Array'.
+
+
+==== parenthesizedTypes.ts (3 errors) ====
+    var a: string;
+    var a: (string);
+    var a: ((string) | string | (((string))));
+    var a: ((((((((((((((((((((((((((((((((((((((((string))))))))))))))))))))))))))))))))))))))));
+    
+    var b: (x: string) => string;
+    var b: ((x: (string)) => (string));
+    
+    var c: string[] | number[];
+    var c: (string)[] | (number)[];
+    var c: ((string)[]) | ((number)[]);
+    
+    var d: (((x: string) => string) | ((x: number) => number))[];
+    var d: ({ (x: string): string } | { (x: number): number })[];
+    var d: Array<((x: string) => string) | ((x: number) => number)>;
+           ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    var d: Array<{ (x: string): string } | { (x: number): number }>;
+           ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    var d: (Array<{ (x: string): string } | { (x: number): number }>);
+            ~~~~~
+!!! error TS2304: Cannot find name 'Array'.
+    
+    var e: typeof a[];
+    var e: (typeof a)[];
+    
+    var f: (string) => string;
+    var f: (string: any) => string;
+    
+    var g: [string, string];
+    var g: [(string), string];
+    var g: [(string), (((typeof a)))];

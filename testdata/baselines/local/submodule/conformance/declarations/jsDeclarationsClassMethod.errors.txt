@@ -1,0 +1,78 @@
+jsDeclarationsClassMethod.js(19,4): error TS2339: Property 'prototype' does not exist on type '() => void'.
+jsDeclarationsClassMethod.js(29,4): error TS2339: Property 'staticProp' does not exist on type '() => void'.
+jsDeclarationsClassMethod.js(51,4): error TS2339: Property 'prototype' does not exist on type 'object'.
+jsDeclarationsClassMethod.js(61,4): error TS2339: Property 'staticProp' does not exist on type 'object'.
+
+
+==== jsDeclarationsClassMethod.js (4 errors) ====
+    function C1() {
+        /**
+         * A comment prop
+         * @param {number} x
+         * @param {number} y
+         * @returns {number}
+         */
+        this.prop = function (x, y) {
+            return x + y;
+        }
+    }
+    
+    /**
+     * A comment method
+     * @param {number} x
+     * @param {number} y
+     * @returns {number}
+     */
+    C1.prototype.method = function (x, y) {
+       ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
+        return x + y;
+    }
+    
+    /**
+     * A comment staticProp
+     * @param {number} x
+     * @param {number} y
+     * @returns {number}
+     */
+    C1.staticProp = function (x, y) {
+       ~~~~~~~~~~
+!!! error TS2339: Property 'staticProp' does not exist on type '() => void'.
+        return x + y;
+    }
+    
+    class C2 {
+        /**
+         * A comment method1
+         * @param {number} x
+         * @param {number} y
+         * @returns {number}
+         */
+        method1(x, y) {
+            return x + y;
+        }
+    }
+    
+    /**
+     * A comment method2
+     * @param {number} x
+     * @param {number} y
+     * @returns {number}
+     */
+    C2.prototype.method2 = function (x, y) {
+       ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+        return x + y;
+    }
+    
+    /**
+     * A comment staticProp
+     * @param {number} x
+     * @param {number} y
+     * @returns {number}
+     */
+    C2.staticProp = function (x, y) {
+       ~~~~~~~~~~
+!!! error TS2339: Property 'staticProp' does not exist on type 'object'.
+        return x + y;
+    }

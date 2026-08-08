@@ -1,0 +1,174 @@
+error TS2451: Cannot redeclare block-scoped variable 'g'.
+error TS2451: Cannot redeclare block-scoped variable 'number'.
+error TS2451: Cannot redeclare block-scoped variable 'number'.
+instantiationExpressionErrors.ts(6,14): error TS2339: Property 'g' does not exist on type 'object'.
+instantiationExpressionErrors.ts(7,21): error TS1005: ',' expected.
+instantiationExpressionErrors.ts(8,21): error TS1005: ',' expected.
+instantiationExpressionErrors.ts(8,23): error TS1005: ',' expected.
+instantiationExpressionErrors.ts(8,30): error TS1005: ',' expected.
+instantiationExpressionErrors.ts(13,21): error TS1005: ',' expected.
+instantiationExpressionErrors.ts(13,21): error TS1182: A destructuring declaration must have an initializer.
+instantiationExpressionErrors.ts(13,22): error TS1181: Array element destructuring pattern expected.
+instantiationExpressionErrors.ts(18,22): error TS2448: Block-scoped variable 'number' used before its declaration.
+instantiationExpressionErrors.ts(18,29): error TS1012: Unexpected token.
+instantiationExpressionErrors.ts(23,15): error TS1003: Identifier expected.
+instantiationExpressionErrors.ts(23,15): error TS2339: Property '<' does not exist on type 'object'.
+instantiationExpressionErrors.ts(23,16): error TS1005: ',' expected.
+instantiationExpressionErrors.ts(23,22): error TS1005: ',' expected.
+instantiationExpressionErrors.ts(24,15): error TS1003: Identifier expected.
+instantiationExpressionErrors.ts(24,15): error TS2339: Property '<' does not exist on type 'object'.
+instantiationExpressionErrors.ts(24,16): error TS1005: ',' expected.
+instantiationExpressionErrors.ts(24,22): error TS1005: ',' expected.
+instantiationExpressionErrors.ts(24,23): error TS1134: Variable declaration expected.
+instantiationExpressionErrors.ts(24,24): error TS1134: Variable declaration expected.
+
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'g'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'number'.
+
+!!! error TS2451: Cannot redeclare block-scoped variable 'number'.
+==== instantiationExpressionErrors.ts (20 errors) ====
+    declare let f: { <T>(): T, g<U>(): U };
+    
+    // Type arguments in member expressions
+    
+    const a1 = f<number>;  // { (): number; g<U>(): U; }
+    const a2 = f.g<number>;  // () => number
+                 ~
+!!! error TS2339: Property 'g' does not exist on type 'object'.
+    const a3 = f<number>.g;  // <U>() => U
+                        ~
+!!! error TS1005: ',' expected.
+    const a4 = f<number>.g<number>;  // () => number
+                        ~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: ',' expected.
+    const a5 = f['g']<number>;  // () => number
+    
+    // `[` is an expression starter and cannot immediately follow a type argument list
+    
+    const a6 = f<number>['g'];  // Error
+                        ~
+!!! error TS1005: ',' expected.
+                        ~~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+                         ~~~
+!!! error TS1181: Array element destructuring pattern expected.
+    const a7 = (f<number>)['g'];
+    
+    // An `<` cannot immediately follow a type argument list
+    
+    const a8 = f<number><number>;  // Relational operator error
+                         ~~~~~~
+!!! error TS2448: Block-scoped variable 'number' used before its declaration.
+                                ~
+!!! error TS1012: Unexpected token.
+    const a9 = (f<number>)<number>;  // Error, no applicable signatures
+    
+    // Type arguments with `?.` token
+    
+    const b1 = f?.<number>;  // Error, `(` expected
+                  ~
+!!! error TS1003: Identifier expected.
+                  ~
+!!! error TS2339: Property '<' does not exist on type 'object'.
+                   ~~~~~~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1005: ',' expected.
+    const b2 = f?.<number>();
+                  ~
+!!! error TS1003: Identifier expected.
+                  ~
+!!! error TS2339: Property '<' does not exist on type 'object'.
+                   ~~~~~~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS1134: Variable declaration expected.
+                           ~
+!!! error TS1134: Variable declaration expected.
+    const b3 = f<number>?.();
+    const b4 = f<number>?.<number>();  // Error, expected no type arguments
+    
+    // Instantiation expression and binary operators
+    
+    declare let g: (<T>(x: T) => T) | undefined;
+    
+    const c1 = g<string> || ((x: string) => x);
+    const c2 = g<string> ?? ((x: string) => x);
+    const c3 = g<string> && ((x: string) => x);
+    
+    // Parsed as function call, even though this differs from JavaScript
+    
+    const x1 = f<true>
+    (true);
+    
+    // Parsed as relational expressions
+    
+    const r1 = f < true > true;
+    const r2 = f < true > +1;
+    const r3 = f < true > -1;
+    
+    // All of the following are parsed as instantiation expressions
+    
+    const x2 = f<true>
+    true;
+    
+    const x3 = f<true>;
+    true;
+    
+    const x4 = f<true>
+    if (true) {}
+    
+    const x5 = f<true>
+    let yy = 0;
+    
+    const x6 = f<true>
+    interface I {}
+    
+    let x10 = f<true>
+    this.bar()
+    
+    let x11 = f<true>
+    function bar() {}
+    
+    let x12 = f<true>
+    class C {}
+    
+    let x13 = f<true>
+    bar()
+    
+    let x14 = f<true>
+    void bar()
+    
+    class C1 {
+        static specialFoo = f<string>
+        static bar = 123
+    }
+    
+    class C2 {
+        public specialFoo = f<string>
+        public bar = 123
+    }
+    
+    class C3 {
+        private specialFoo = f<string>
+        private bar = 123
+    }
+    
+    class C4 {
+        protected specialFoo = f<string>
+        protected bar = 123
+    }
+    
+    // Repro from #49551
+    
+    const enum MyVer { v1 = 1, v2 = 2 }
+    let ver = 21
+    const a = ver < (MyVer.v1 >= MyVer.v2 ? MyVer.v1 : MyVer.v2)

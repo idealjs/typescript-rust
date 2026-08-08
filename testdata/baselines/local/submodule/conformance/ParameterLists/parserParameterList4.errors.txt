@@ -1,0 +1,8 @@
+parserParameterList4.ts(1,19): error TS1005: ',' expected.
+
+
+==== parserParameterList4.ts (1 errors) ====
+    function F(public A) {
+                      ~
+!!! error TS1005: ',' expected.
+    }

@@ -1,22 +1,22 @@
-controlFlow/assertionTypePredicates1.ts(16,29): error TS2304: Cannot find name 'Error'.
-controlFlow/assertionTypePredicates1.ts(29,14): error TS2339: Property 'length' does not exist on type 'string'.
-controlFlow/assertionTypePredicates1.ts(54,11): error TS2339: Property 'length' does not exist on type 'string'.
-controlFlow/assertionTypePredicates1.ts(58,11): error TS2339: Property 'length' does not exist on type 'string | string | undefined'.
-controlFlow/assertionTypePredicates1.ts(68,7): error TS2339: Property 'length' does not exist on type 'string'.
-controlFlow/assertionTypePredicates1.ts(79,11): error TS2339: Property 'length' does not exist on type 'string'.
-controlFlow/assertionTypePredicates1.ts(83,11): error TS2339: Property 'length' does not exist on type 'string | string | undefined'.
-controlFlow/assertionTypePredicates1.ts(98,19): error TS2304: Cannot find name 'Error'.
-controlFlow/assertionTypePredicates1.ts(105,19): error TS2304: Cannot find name 'Error'.
-controlFlow/assertionTypePredicates1.ts(109,19): error TS2304: Cannot find name 'Error'.
-controlFlow/assertionTypePredicates1.ts(119,18): error TS2339: Property 'z' does not exist on type '{ assert: (value: unknown) => void; isTest2: () => boolean; assertIsTest2: () => void; assertThis: () => void; bar: () => any; foo: (x: unknown) => any; baz: (x: number) => any }'.
-controlFlow/assertionTypePredicates1.ts(122,14): error TS2339: Property 'z' does not exist on type '{ assert: (value: unknown) => void; isTest2: () => boolean; assertIsTest2: () => void; assertThis: () => void; bar: () => any; foo: (x: unknown) => any; baz: (x: number) => any }'.
-controlFlow/assertionTypePredicates1.ts(162,9): error TS1005: ';' expected.
-controlFlow/assertionTypePredicates1.ts(163,9): error TS1005: ';' expected.
-controlFlow/assertionTypePredicates1.ts(164,9): error TS1005: ';' expected.
-controlFlow/assertionTypePredicates1.ts(165,9): error TS1005: ';' expected.
+assertionTypePredicates1.ts(16,29): error TS2304: Cannot find name 'Error'.
+assertionTypePredicates1.ts(29,14): error TS2339: Property 'length' does not exist on type 'string'.
+assertionTypePredicates1.ts(54,11): error TS2339: Property 'length' does not exist on type 'string'.
+assertionTypePredicates1.ts(58,11): error TS2339: Property 'length' does not exist on type 'string | string | undefined'.
+assertionTypePredicates1.ts(68,7): error TS2339: Property 'length' does not exist on type 'string'.
+assertionTypePredicates1.ts(79,11): error TS2339: Property 'length' does not exist on type 'string'.
+assertionTypePredicates1.ts(83,11): error TS2339: Property 'length' does not exist on type 'string | string | undefined'.
+assertionTypePredicates1.ts(98,19): error TS2304: Cannot find name 'Error'.
+assertionTypePredicates1.ts(105,19): error TS2304: Cannot find name 'Error'.
+assertionTypePredicates1.ts(109,19): error TS2304: Cannot find name 'Error'.
+assertionTypePredicates1.ts(119,18): error TS2339: Property 'z' does not exist on type '{ assert: (value: unknown) => void; isTest2: () => boolean; assertIsTest2: () => void; assertThis: () => void; bar: () => any; foo: (x: unknown) => any; baz: (x: number) => any }'.
+assertionTypePredicates1.ts(122,14): error TS2339: Property 'z' does not exist on type '{ assert: (value: unknown) => void; isTest2: () => boolean; assertIsTest2: () => void; assertThis: () => void; bar: () => any; foo: (x: unknown) => any; baz: (x: number) => any }'.
+assertionTypePredicates1.ts(162,9): error TS1005: ';' expected.
+assertionTypePredicates1.ts(163,9): error TS1005: ';' expected.
+assertionTypePredicates1.ts(164,9): error TS1005: ';' expected.
+assertionTypePredicates1.ts(165,9): error TS1005: ';' expected.
 
 
-==== controlFlow/assertionTypePredicates1.ts (16 errors) ====
+==== assertionTypePredicates1.ts (16 errors) ====
     declare function isString(value: unknown): value is string;
     declare function isArrayOfStrings(value: unknown): value is string[];
     

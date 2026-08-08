@@ -1,0 +1,57 @@
+symbolProperty20.ts(8,25): error TS1005: ',' expected.
+symbolProperty20.ts(8,25): error TS2304: Cannot find name '('.
+symbolProperty20.ts(8,26): error TS1005: ',' expected.
+symbolProperty20.ts(8,26): error TS2304: Cannot find name 'n'.
+symbolProperty20.ts(8,27): error TS1005: ',' expected.
+symbolProperty20.ts(8,27): error TS2304: Cannot find name ')'.
+symbolProperty20.ts(8,29): error TS1005: ',' expected.
+symbolProperty20.ts(8,29): error TS2304: Cannot find name '{'.
+symbolProperty20.ts(8,31): error TS1005: ',' expected.
+symbolProperty20.ts(8,31): error TS2304: Cannot find name 'return'.
+symbolProperty20.ts(8,38): error TS1005: ',' expected.
+symbolProperty20.ts(8,38): error TS2304: Cannot find name 'n'.
+symbolProperty20.ts(8,39): error TS1005: ',' expected.
+symbolProperty20.ts(8,39): error TS2304: Cannot find name ';'.
+symbolProperty20.ts(9,1): error TS1128: Declaration or statement expected.
+
+
+==== symbolProperty20.ts (15 errors) ====
+    interface I {
+        [Symbol.iterator]: (s: string) => string;
+        [Symbol.toStringTag](s: number): number;
+    }
+    
+    var i: I = {
+        [Symbol.iterator]: s => s,
+        [Symbol.toStringTag](n) { return n; }
+                            ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS2304: Cannot find name '('.
+                             ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS2304: Cannot find name 'n'.
+                              ~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS2304: Cannot find name ')'.
+                                ~
+!!! error TS1005: ',' expected.
+                                ~
+!!! error TS2304: Cannot find name '{'.
+                                  ~~~~~~
+!!! error TS1005: ',' expected.
+                                  ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                                         ~
+!!! error TS1005: ',' expected.
+                                         ~
+!!! error TS2304: Cannot find name 'n'.
+                                          ~
+!!! error TS1005: ',' expected.
+                                          ~
+!!! error TS2304: Cannot find name ';'.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

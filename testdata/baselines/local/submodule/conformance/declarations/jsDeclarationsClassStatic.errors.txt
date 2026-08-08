@@ -1,0 +1,49 @@
+source.js(2,13): error TS1005: ';' expected.
+source.js(9,9): error TS2339: Property 'statische' does not exist on type 'object'.
+source.js(15,7): error TS1003: Identifier expected.
+source.js(15,8): error TS1005: ';' expected.
+source.js(15,8): error TS2304: Cannot find name 'exports'.
+source.js(16,7): error TS1003: Identifier expected.
+source.js(16,8): error TS1005: ';' expected.
+source.js(16,8): error TS2304: Cannot find name 'exports'.
+
+
+==== source.js (8 errors) ====
+    class Handler {
+    	static get OPTIONS() {
+    	           ~~~~~~~
+!!! error TS1005: ';' expected.
+    		return 1;
+    	}
+    
+    	process() {
+    	}
+    }
+    Handler.statische = function() { }
+            ~~~~~~~~~
+!!! error TS2339: Property 'statische' does not exist on type 'object'.
+    const Strings = {
+        a: "A",
+        b: "B"
+    }
+    
+    module.exports = Handler;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    module.exports.Strings = Strings
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    
+    /**
+     * @typedef {Object} HandlerOptions
+     * @property {String} name
+     * Should be able to export a type alias at the same time.
+     */

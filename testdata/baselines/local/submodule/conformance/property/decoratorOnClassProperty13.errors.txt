@@ -1,0 +1,11 @@
+decoratorOnClassProperty13.ts(1,62): error TS2304: Cannot find name 'PropertyDescriptor'.
+
+
+==== decoratorOnClassProperty13.ts (1 errors) ====
+    declare function dec(target: any, propertyKey: string, desc: PropertyDescriptor): void;
+                                                                 ~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'PropertyDescriptor'.
+    
+    class C {
+        @dec accessor prop;
+    }

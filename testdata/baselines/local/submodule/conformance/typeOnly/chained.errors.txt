@@ -1,0 +1,40 @@
+/a.ts(2,13): error TS1003: Identifier expected.
+/a.ts(2,15): error TS1005: '=' expected.
+/a.ts(2,17): error TS1005: ';' expected.
+/a.ts(2,17): error TS2304: Cannot find name 'as'.
+/a.ts(2,20): error TS1005: ';' expected.
+/a.ts(2,20): error TS2304: Cannot find name 'B'.
+/a.ts(2,22): error TS1128: Declaration or statement expected.
+
+
+==== /a.ts (7 errors) ====
+    class A { a!: string }
+    export type { A as B };
+                ~
+!!! error TS1003: Identifier expected.
+                  ~
+!!! error TS1005: '=' expected.
+                    ~~
+!!! error TS1005: ';' expected.
+                    ~~
+!!! error TS2304: Cannot find name 'as'.
+                       ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS2304: Cannot find name 'B'.
+                         ~
+!!! error TS1128: Declaration or statement expected.
+    export type Z = A;
+    
+==== /b.ts (0 errors) ====
+    import { Z as Y } from './a';
+    export { B as C } from './a';
+    
+==== /c.ts (0 errors) ====
+    import type { C } from './b';
+    export { C as D };
+    
+==== /d.ts (0 errors) ====
+    import { D } from './c';
+    new D();
+    const d: D = {};

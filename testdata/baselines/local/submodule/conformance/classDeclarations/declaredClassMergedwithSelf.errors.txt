@@ -8,7 +8,7 @@ error TS2300: Duplicate identifier 'C2'.
 !!! error TS2300: Duplicate identifier 'C2'.
 
 !!! error TS2300: Duplicate identifier 'C2'.
-==== classDeclarations/declaredClassMergedwithSelf.ts (0 errors) ====
+==== declaredClassMergedwithSelf.ts (0 errors) ====
     
 ==== file1.ts (0 errors) ====
     declare class C1 {}

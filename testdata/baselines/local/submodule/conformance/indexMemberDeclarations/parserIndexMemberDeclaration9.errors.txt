@@ -1,0 +1,15 @@
+parserIndexMemberDeclaration9.ts(2,11): error TS1005: ';' expected.
+parserIndexMemberDeclaration9.ts(2,13): error TS1005: ']' expected.
+parserIndexMemberDeclaration9.ts(2,21): error TS1005: ';' expected.
+
+
+==== parserIndexMemberDeclaration9.ts (3 errors) ====
+    class C {
+       export [x: string]: string;
+              ~
+!!! error TS1005: ';' expected.
+                ~
+!!! error TS1005: ']' expected.
+                        ~
+!!! error TS1005: ';' expected.
+    }

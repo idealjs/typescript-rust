@@ -1,7 +1,7 @@
-arrayLiterals/arrayLiterals3.ts(33,5): error TS2739: Type 'any[]' is missing the following properties from type '{ 0: number[] | string[]; 1: number[] | string[] }': 0, 1
+arrayLiterals3.ts(33,5): error TS2739: Type 'any[]' is missing the following properties from type '{ 0: number[] | string[]; 1: number[] | string[] }': 0, 1
 
 
-==== arrayLiterals/arrayLiterals3.ts (1 errors) ====
+==== arrayLiterals3.ts (1 errors) ====
     ﻿// @target: es2015
     // Each element expression in a non-empty array literal is processed as follows:
     //    - If the array literal contains no spread elements, and if the array literal is contextually typed (section 4.19)

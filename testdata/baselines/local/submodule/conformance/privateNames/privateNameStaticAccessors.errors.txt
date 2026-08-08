@@ -1,0 +1,79 @@
+privateNameStaticAccessors.ts(2,16): error TS1005: ';' expected.
+privateNameStaticAccessors.ts(2,16): error TS1127: Invalid character.
+privateNameStaticAccessors.ts(2,17): error TS1005: ';' expected.
+privateNameStaticAccessors.ts(3,16): error TS1005: ';' expected.
+privateNameStaticAccessors.ts(3,16): error TS1127: Invalid character.
+privateNameStaticAccessors.ts(3,17): error TS1005: ';' expected.
+privateNameStaticAccessors.ts(5,16): error TS1005: ';' expected.
+privateNameStaticAccessors.ts(5,16): error TS1127: Invalid character.
+privateNameStaticAccessors.ts(5,17): error TS1005: ';' expected.
+privateNameStaticAccessors.ts(8,12): error TS1003: Identifier expected.
+privateNameStaticAccessors.ts(8,12): error TS1127: Invalid character.
+privateNameStaticAccessors.ts(8,13): error TS1005: ';' expected.
+privateNameStaticAccessors.ts(9,12): error TS1003: Identifier expected.
+privateNameStaticAccessors.ts(9,12): error TS1127: Invalid character.
+privateNameStaticAccessors.ts(9,13): error TS1005: ';' expected.
+privateNameStaticAccessors.ts(10,24): error TS1003: Identifier expected.
+privateNameStaticAccessors.ts(10,24): error TS1127: Invalid character.
+privateNameStaticAccessors.ts(10,25): error TS1005: ',' expected.
+privateNameStaticAccessors.ts(11,24): error TS1003: Identifier expected.
+privateNameStaticAccessors.ts(11,24): error TS1127: Invalid character.
+privateNameStaticAccessors.ts(11,25): error TS1005: ',' expected.
+
+
+==== privateNameStaticAccessors.ts (21 errors) ====
+    class A1 {
+        static get #prop() { return ""; }
+                   ~
+!!! error TS1005: ';' expected.
+                   ~
+!!! error TS1127: Invalid character.
+                    ~~~~
+!!! error TS1005: ';' expected.
+        static set #prop(param: string) { }
+                   ~
+!!! error TS1005: ';' expected.
+                   ~
+!!! error TS1127: Invalid character.
+                    ~~~~
+!!! error TS1005: ';' expected.
+    
+        static get #roProp() { return ""; }
+                   ~
+!!! error TS1005: ';' expected.
+                   ~
+!!! error TS1127: Invalid character.
+                    ~~~~~~
+!!! error TS1005: ';' expected.
+    
+        constructor(name: string) {
+            A1.#prop = "";
+               ~
+!!! error TS1003: Identifier expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~~
+!!! error TS1005: ';' expected.
+            A1.#roProp = ""; // Error
+               ~
+!!! error TS1003: Identifier expected.
+               ~
+!!! error TS1127: Invalid character.
+                ~~~~~~
+!!! error TS1005: ';' expected.
+            console.log(A1.#prop);
+                           ~
+!!! error TS1003: Identifier expected.
+                           ~
+!!! error TS1127: Invalid character.
+                            ~~~~
+!!! error TS1005: ',' expected.
+            console.log(A1.#roProp);
+                           ~
+!!! error TS1003: Identifier expected.
+                           ~
+!!! error TS1127: Invalid character.
+                            ~~~~~~
+!!! error TS1005: ',' expected.
+        }
+    }

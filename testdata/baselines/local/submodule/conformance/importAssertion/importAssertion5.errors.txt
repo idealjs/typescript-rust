@@ -1,7 +1,7 @@
-importAssertion/importAssertion5.ts(1,36): error TS1005: '}' expected.
+importAssertion5.ts(1,36): error TS1005: '}' expected.
 
 
-==== importAssertion/importAssertion5.ts (1 errors) ====
+==== importAssertion5.ts (1 errors) ====
     import * as f from "./first" with {
                                        
 !!! error TS1005: '}' expected.

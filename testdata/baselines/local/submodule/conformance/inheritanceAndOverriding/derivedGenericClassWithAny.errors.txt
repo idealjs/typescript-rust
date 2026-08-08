@@ -1,12 +1,12 @@
-inheritanceAndOverriding/derivedGenericClassWithAny.ts(3,9): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedGenericClassWithAny.ts(3,25): error TS2322: Type 'null' is not assignable to type 'T'.
-inheritanceAndOverriding/derivedGenericClassWithAny.ts(5,16): error TS2322: Type 'null' is not assignable to type 'T'.
-inheritanceAndOverriding/derivedGenericClassWithAny.ts(11,9): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedGenericClassWithAny.ts(19,16): error TS1005: ';' expected.
-inheritanceAndOverriding/derivedGenericClassWithAny.ts(30,9): error TS1005: ';' expected.
+derivedGenericClassWithAny.ts(3,9): error TS1005: ';' expected.
+derivedGenericClassWithAny.ts(3,25): error TS2322: Type 'null' is not assignable to type 'T'.
+derivedGenericClassWithAny.ts(5,16): error TS2322: Type 'null' is not assignable to type 'T'.
+derivedGenericClassWithAny.ts(11,9): error TS1005: ';' expected.
+derivedGenericClassWithAny.ts(19,16): error TS1005: ';' expected.
+derivedGenericClassWithAny.ts(30,9): error TS1005: ';' expected.
 
 
-==== inheritanceAndOverriding/derivedGenericClassWithAny.ts (6 errors) ====
+==== derivedGenericClassWithAny.ts (6 errors) ====
     class C<T extends number> {
         x: T;
         get X(): T { return null; }

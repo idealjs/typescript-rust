@@ -1,0 +1,20 @@
+parser536727.ts(6,5): error TS2345: Argument of type '(x: string) => number' is not assignable to parameter of type '(x: string) => string'.
+parser536727.ts(7,5): error TS2345: Argument of type '() => (x: string) => number' is not assignable to parameter of type '(x: string) => string'.
+parser536727.ts(8,5): error TS2345: Argument of type '() => (x: string) => number' is not assignable to parameter of type '(x: string) => string'.
+
+
+==== parser536727.ts (3 errors) ====
+    function foo(f: (x: string) => string) {
+        return f("");
+    }
+    var g = (x: string) => x + "blah";
+    var x = () => g;
+    foo(g);
+        ~
+!!! error TS2345: Argument of type '(x: string) => number' is not assignable to parameter of type '(x: string) => string'.
+    foo(() => g);
+        ~~~~~~~
+!!! error TS2345: Argument of type '() => (x: string) => number' is not assignable to parameter of type '(x: string) => string'.
+    foo(x);
+        ~
+!!! error TS2345: Argument of type '() => (x: string) => number' is not assignable to parameter of type '(x: string) => string'.

@@ -1,9 +1,9 @@
-ambient/ambientDeclarations.ts(58,12): error TS2339: Property 'B' does not exist on type 'E3'.
-ambient/ambientDeclarations.ts(67,12): error TS2339: Property 'x' does not exist on type 'M1'.
-ambient/ambientDeclarations.ts(68,12): error TS2339: Property 'fn' does not exist on type 'M1'.
+ambientDeclarations.ts(58,12): error TS2339: Property 'B' does not exist on type 'E3'.
+ambientDeclarations.ts(67,12): error TS2339: Property 'x' does not exist on type 'M1'.
+ambientDeclarations.ts(68,12): error TS2339: Property 'fn' does not exist on type 'M1'.
 
 
-==== ambient/ambientDeclarations.ts (3 errors) ====
+==== ambientDeclarations.ts (3 errors) ====
     // Ambient variable without type annotation
     declare var n;
     

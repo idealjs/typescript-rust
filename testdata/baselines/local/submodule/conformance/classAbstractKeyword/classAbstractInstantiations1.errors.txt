@@ -1,10 +1,10 @@
-classAbstractKeyword/classAbstractInstantiations1.ts(11,5): error TS2511: Cannot create an instance of an abstract class.
-classAbstractKeyword/classAbstractInstantiations1.ts(12,5): error TS2511: Cannot create an instance of an abstract class.
-classAbstractKeyword/classAbstractInstantiations1.ts(12,7): error TS2554: Expected 0 arguments, but got 1.
-classAbstractKeyword/classAbstractInstantiations1.ts(14,5): error TS2511: Cannot create an instance of an abstract class.
+classAbstractInstantiations1.ts(11,5): error TS2511: Cannot create an instance of an abstract class.
+classAbstractInstantiations1.ts(12,5): error TS2511: Cannot create an instance of an abstract class.
+classAbstractInstantiations1.ts(12,7): error TS2554: Expected 0 arguments, but got 1.
+classAbstractInstantiations1.ts(14,5): error TS2511: Cannot create an instance of an abstract class.
 
 
-==== classAbstractKeyword/classAbstractInstantiations1.ts (4 errors) ====
+==== classAbstractInstantiations1.ts (4 errors) ====
     //
     // Calling new with (non)abstract classes.
     //

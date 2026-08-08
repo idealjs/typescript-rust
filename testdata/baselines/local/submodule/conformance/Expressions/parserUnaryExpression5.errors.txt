@@ -1,0 +1,7 @@
+parserUnaryExpression5.ts(1,11): error TS2304: Cannot find name 'foo'.
+
+
+==== parserUnaryExpression5.ts (1 errors) ====
+    ++ delete foo.bar
+              ~~~
+!!! error TS2304: Cannot find name 'foo'.

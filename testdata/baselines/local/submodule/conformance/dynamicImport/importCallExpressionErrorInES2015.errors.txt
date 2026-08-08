@@ -1,0 +1,21 @@
+1.ts(2,10): error TS2304: Cannot find name 'import'.
+1.ts(8,16): error TS2304: Cannot find name 'import'.
+
+
+==== 0.ts (0 errors) ====
+    export function foo() { return "foo"; }
+    
+==== 1.ts (2 errors) ====
+    import("./0");
+    var p1 = import("./0");
+             ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    p1.then(zero => {
+        return zero.foo();
+    })
+    
+    function foo() {
+        const p2 = import("./0");
+                   ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    }

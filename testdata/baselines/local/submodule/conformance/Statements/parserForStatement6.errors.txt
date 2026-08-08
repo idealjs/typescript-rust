@@ -1,0 +1,14 @@
+parserForStatement6.ts(1,6): error TS2304: Cannot find name 'foo'.
+parserForStatement6.ts(1,15): error TS2304: Cannot find name 'b'.
+parserForStatement6.ts(1,16): error TS1005: ';' expected.
+
+
+==== parserForStatement6.ts (3 errors) ====
+    for (foo() in b) {
+         ~~~
+!!! error TS2304: Cannot find name 'foo'.
+                  ~
+!!! error TS2304: Cannot find name 'b'.
+                   ~
+!!! error TS1005: ';' expected.
+    }

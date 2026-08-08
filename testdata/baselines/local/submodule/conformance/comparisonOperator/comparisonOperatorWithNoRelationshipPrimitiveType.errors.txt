@@ -1,0 +1,494 @@
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(10,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(11,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(12,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(13,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(15,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(16,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(17,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(18,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(20,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(21,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(22,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(23,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(25,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(26,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(27,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(28,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(30,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(31,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(32,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(33,17): error TS1005: '>' expected.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(114,12): error TS2367: This comparison appears to be unintentional because the types 'number' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(115,12): error TS2367: This comparison appears to be unintentional because the types 'number' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(116,12): error TS2367: This comparison appears to be unintentional because the types 'number' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(119,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'number' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(120,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(121,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(122,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and '0 | 1 | 2' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(124,12): error TS2367: This comparison appears to be unintentional because the types 'string' and 'number' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(125,12): error TS2367: This comparison appears to be unintentional because the types 'string' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(126,12): error TS2367: This comparison appears to be unintentional because the types 'string' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(127,12): error TS2367: This comparison appears to be unintentional because the types 'string' and '0 | 1 | 2' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(129,12): error TS2367: This comparison appears to be unintentional because the types 'void' and 'number' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(130,12): error TS2367: This comparison appears to be unintentional because the types 'void' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(131,12): error TS2367: This comparison appears to be unintentional because the types 'void' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(132,12): error TS2367: This comparison appears to be unintentional because the types 'void' and '0 | 1 | 2' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(135,12): error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(136,12): error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(137,12): error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(140,12): error TS2367: This comparison appears to be unintentional because the types 'number' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(141,12): error TS2367: This comparison appears to be unintentional because the types 'number' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(142,12): error TS2367: This comparison appears to be unintentional because the types 'number' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(145,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'number' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(146,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(147,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(148,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and '0 | 1 | 2' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(150,12): error TS2367: This comparison appears to be unintentional because the types 'string' and 'number' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(151,12): error TS2367: This comparison appears to be unintentional because the types 'string' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(152,12): error TS2367: This comparison appears to be unintentional because the types 'string' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(153,12): error TS2367: This comparison appears to be unintentional because the types 'string' and '0 | 1 | 2' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(155,12): error TS2367: This comparison appears to be unintentional because the types 'void' and 'number' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(156,12): error TS2367: This comparison appears to be unintentional because the types 'void' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(157,12): error TS2367: This comparison appears to be unintentional because the types 'void' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(158,12): error TS2367: This comparison appears to be unintentional because the types 'void' and '0 | 1 | 2' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(161,12): error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(162,12): error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(163,12): error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(166,12): error TS2367: This comparison appears to be unintentional because the types 'number' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(167,12): error TS2367: This comparison appears to be unintentional because the types 'number' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(168,12): error TS2367: This comparison appears to be unintentional because the types 'number' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(171,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'number' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(172,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(173,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(174,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and '0 | 1 | 2' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(176,12): error TS2367: This comparison appears to be unintentional because the types 'string' and 'number' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(177,12): error TS2367: This comparison appears to be unintentional because the types 'string' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(178,12): error TS2367: This comparison appears to be unintentional because the types 'string' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(179,12): error TS2367: This comparison appears to be unintentional because the types 'string' and '0 | 1 | 2' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(181,12): error TS2367: This comparison appears to be unintentional because the types 'void' and 'number' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(182,12): error TS2367: This comparison appears to be unintentional because the types 'void' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(183,12): error TS2367: This comparison appears to be unintentional because the types 'void' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(184,12): error TS2367: This comparison appears to be unintentional because the types 'void' and '0 | 1 | 2' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(187,12): error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(188,12): error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(189,12): error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(192,12): error TS2367: This comparison appears to be unintentional because the types 'number' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(193,12): error TS2367: This comparison appears to be unintentional because the types 'number' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(194,12): error TS2367: This comparison appears to be unintentional because the types 'number' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(197,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'number' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(198,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(199,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(200,12): error TS2367: This comparison appears to be unintentional because the types 'boolean' and '0 | 1 | 2' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(202,12): error TS2367: This comparison appears to be unintentional because the types 'string' and 'number' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(203,12): error TS2367: This comparison appears to be unintentional because the types 'string' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(204,12): error TS2367: This comparison appears to be unintentional because the types 'string' and 'void' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(205,12): error TS2367: This comparison appears to be unintentional because the types 'string' and '0 | 1 | 2' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(207,12): error TS2367: This comparison appears to be unintentional because the types 'void' and 'number' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(208,12): error TS2367: This comparison appears to be unintentional because the types 'void' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(209,12): error TS2367: This comparison appears to be unintentional because the types 'void' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(210,12): error TS2367: This comparison appears to be unintentional because the types 'void' and '0 | 1 | 2' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(213,12): error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'boolean' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(214,12): error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'string' have no overlap.
+comparisonOperatorWithNoRelationshipPrimitiveType.ts(215,12): error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'void' have no overlap.
+
+
+==== comparisonOperatorWithNoRelationshipPrimitiveType.ts (92 errors) ====
+    enum E { a, b, c }
+    
+    declare var a: number;
+    declare var b: boolean;
+    declare var c: string;
+    declare var d: void;
+    declare var e: E;
+    
+    // operator <
+    var r1a1 = a < b;
+                    ~
+!!! error TS1005: '>' expected.
+    var r1a1 = a < c;
+                    ~
+!!! error TS1005: '>' expected.
+    var r1a1 = a < d;
+                    ~
+!!! error TS1005: '>' expected.
+    var r1a1 = a < e; // no error, expected
+                    ~
+!!! error TS1005: '>' expected.
+    
+    var r1b1 = b < a;
+                    ~
+!!! error TS1005: '>' expected.
+    var r1b1 = b < c;
+                    ~
+!!! error TS1005: '>' expected.
+    var r1b1 = b < d;
+                    ~
+!!! error TS1005: '>' expected.
+    var r1b1 = b < e;
+                    ~
+!!! error TS1005: '>' expected.
+    
+    var r1c1 = c < a;
+                    ~
+!!! error TS1005: '>' expected.
+    var r1c1 = c < b;
+                    ~
+!!! error TS1005: '>' expected.
+    var r1c1 = c < d;
+                    ~
+!!! error TS1005: '>' expected.
+    var r1c1 = c < e;
+                    ~
+!!! error TS1005: '>' expected.
+    
+    var r1d1 = d < a;
+                    ~
+!!! error TS1005: '>' expected.
+    var r1d1 = d < b;
+                    ~
+!!! error TS1005: '>' expected.
+    var r1d1 = d < c;
+                    ~
+!!! error TS1005: '>' expected.
+    var r1d1 = d < e;
+                    ~
+!!! error TS1005: '>' expected.
+    
+    var r1e1 = e < a; // no error, expected
+                    ~
+!!! error TS1005: '>' expected.
+    var r1e1 = e < b;
+                    ~
+!!! error TS1005: '>' expected.
+    var r1e1 = e < c;
+                    ~
+!!! error TS1005: '>' expected.
+    var r1e1 = e < d;
+                    ~
+!!! error TS1005: '>' expected.
+    
+    // operator >
+    var r2a1 = a > b;
+    var r2a1 = a > c;
+    var r2a1 = a > d;
+    var r2a1 = a > e; // no error, expected
+    
+    var r2b1 = b > a;
+    var r2b1 = b > c;
+    var r2b1 = b > d;
+    var r2b1 = b > e;
+    
+    var r2c1 = c > a;
+    var r2c1 = c > b;
+    var r2c1 = c > d;
+    var r2c1 = c > e;
+    
+    var r2d1 = d > a;
+    var r2d1 = d > b;
+    var r2d1 = d > c;
+    var r2d1 = d > e;
+    
+    var r2e1 = e > a; // no error, expected
+    var r2e1 = e > b;
+    var r2e1 = e > c;
+    var r2e1 = e > d;
+    
+    // operator <=
+    var r3a1 = a <= b;
+    var r3a1 = a <= c;
+    var r3a1 = a <= d;
+    var r3a1 = a <= e; // no error, expected
+    
+    var r3b1 = b <= a;
+    var r3b1 = b <= c;
+    var r3b1 = b <= d;
+    var r3b1 = b <= e;
+    
+    var r3c1 = c <= a;
+    var r3c1 = c <= b;
+    var r3c1 = c <= d;
+    var r3c1 = c <= e;
+    
+    var r3d1 = d <= a;
+    var r3d1 = d <= b;
+    var r3d1 = d <= c;
+    var r3d1 = d <= e;
+    
+    var r3e1 = e <= a; // no error, expected
+    var r3e1 = e <= b;
+    var r3e1 = e <= c;
+    var r3e1 = e <= d;
+    
+    // operator >=
+    var r4a1 = a >= b;
+    var r4a1 = a >= c;
+    var r4a1 = a >= d;
+    var r4a1 = a >= e; // no error, expected
+    
+    var r4b1 = b >= a;
+    var r4b1 = b >= c;
+    var r4b1 = b >= d;
+    var r4b1 = b >= e;
+    
+    var r4c1 = c >= a;
+    var r4c1 = c >= b;
+    var r4c1 = c >= d;
+    var r4c1 = c >= e;
+    
+    var r4d1 = d >= a;
+    var r4d1 = d >= b;
+    var r4d1 = d >= c;
+    var r4d1 = d >= e;
+    
+    var r4e1 = e >= a; // no error, expected
+    var r4e1 = e >= b;
+    var r4e1 = e >= c;
+    var r4e1 = e >= d;
+    
+    // operator ==
+    var r5a1 = a == b;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'number' and 'boolean' have no overlap.
+    var r5a1 = a == c;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'number' and 'string' have no overlap.
+    var r5a1 = a == d;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'number' and 'void' have no overlap.
+    var r5a1 = a == e; // no error, expected
+    
+    var r5b1 = b == a;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'number' have no overlap.
+    var r5b1 = b == c;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'string' have no overlap.
+    var r5b1 = b == d;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'void' have no overlap.
+    var r5b1 = b == e;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and '0 | 1 | 2' have no overlap.
+    
+    var r5c1 = c == a;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and 'number' have no overlap.
+    var r5c1 = c == b;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and 'boolean' have no overlap.
+    var r5c1 = c == d;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and 'void' have no overlap.
+    var r5c1 = c == e;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and '0 | 1 | 2' have no overlap.
+    
+    var r5d1 = d == a;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and 'number' have no overlap.
+    var r5d1 = d == b;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and 'boolean' have no overlap.
+    var r5d1 = d == c;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and 'string' have no overlap.
+    var r5d1 = d == e;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and '0 | 1 | 2' have no overlap.
+    
+    var r5e1 = e == a; // no error, expected
+    var r5e1 = e == b;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'boolean' have no overlap.
+    var r5e1 = e == c;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'string' have no overlap.
+    var r5e1 = e == d;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'void' have no overlap.
+    
+    // operator !=
+    var r6a1 = a != b;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'number' and 'boolean' have no overlap.
+    var r6a1 = a != c;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'number' and 'string' have no overlap.
+    var r6a1 = a != d;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'number' and 'void' have no overlap.
+    var r6a1 = a != e; // no error, expected
+    
+    var r6b1 = b != a;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'number' have no overlap.
+    var r6b1 = b != c;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'string' have no overlap.
+    var r6b1 = b != d;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'void' have no overlap.
+    var r6b1 = b != e;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and '0 | 1 | 2' have no overlap.
+    
+    var r6c1 = c != a;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and 'number' have no overlap.
+    var r6c1 = c != b;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and 'boolean' have no overlap.
+    var r6c1 = c != d;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and 'void' have no overlap.
+    var r6c1 = c != e;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and '0 | 1 | 2' have no overlap.
+    
+    var r6d1 = d != a;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and 'number' have no overlap.
+    var r6d1 = d != b;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and 'boolean' have no overlap.
+    var r6d1 = d != c;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and 'string' have no overlap.
+    var r6d1 = d != e;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and '0 | 1 | 2' have no overlap.
+    
+    var r6e1 = e != a; // no error, expected
+    var r6e1 = e != b;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'boolean' have no overlap.
+    var r6e1 = e != c;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'string' have no overlap.
+    var r6e1 = e != d;
+               ~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'void' have no overlap.
+    
+    // operator ===
+    var r7a1 = a === b;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'number' and 'boolean' have no overlap.
+    var r7a1 = a === c;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'number' and 'string' have no overlap.
+    var r7a1 = a === d;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'number' and 'void' have no overlap.
+    var r7a1 = a === e; // no error, expected
+    
+    var r7b1 = b === a;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'number' have no overlap.
+    var r7b1 = b === c;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'string' have no overlap.
+    var r7b1 = b === d;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'void' have no overlap.
+    var r7b1 = b === e;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and '0 | 1 | 2' have no overlap.
+    
+    var r7c1 = c === a;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and 'number' have no overlap.
+    var r7c1 = c === b;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and 'boolean' have no overlap.
+    var r7c1 = c === d;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and 'void' have no overlap.
+    var r7c1 = c === e;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and '0 | 1 | 2' have no overlap.
+    
+    var r7d1 = d === a;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and 'number' have no overlap.
+    var r7d1 = d === b;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and 'boolean' have no overlap.
+    var r7d1 = d === c;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and 'string' have no overlap.
+    var r7d1 = d === e;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and '0 | 1 | 2' have no overlap.
+    
+    var r7e1 = e === a; // no error, expected
+    var r7e1 = e === b;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'boolean' have no overlap.
+    var r7e1 = e === c;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'string' have no overlap.
+    var r7e1 = e === d;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'void' have no overlap.
+    
+    // operator !==
+    var r8a1 = a !== b;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'number' and 'boolean' have no overlap.
+    var r8a1 = a !== c;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'number' and 'string' have no overlap.
+    var r8a1 = a !== d;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'number' and 'void' have no overlap.
+    var r8a1 = a !== e; // no error, expected
+    
+    var r8b1 = b !== a;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'number' have no overlap.
+    var r8b1 = b !== c;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'string' have no overlap.
+    var r8b1 = b !== d;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'void' have no overlap.
+    var r8b1 = b !== e;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'boolean' and '0 | 1 | 2' have no overlap.
+    
+    var r8c1 = c !== a;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and 'number' have no overlap.
+    var r8c1 = c !== b;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and 'boolean' have no overlap.
+    var r8c1 = c !== d;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and 'void' have no overlap.
+    var r8c1 = c !== e;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'string' and '0 | 1 | 2' have no overlap.
+    
+    var r8d1 = d !== a;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and 'number' have no overlap.
+    var r8d1 = d !== b;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and 'boolean' have no overlap.
+    var r8d1 = d !== c;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and 'string' have no overlap.
+    var r8d1 = d !== e;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'void' and '0 | 1 | 2' have no overlap.
+    
+    var r8e1 = e !== a; // no error, expected
+    var r8e1 = e !== b;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'boolean' have no overlap.
+    var r8e1 = e !== c;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'string' have no overlap.
+    var r8e1 = e !== d;
+               ~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types '0 | 1 | 2' and 'void' have no overlap.

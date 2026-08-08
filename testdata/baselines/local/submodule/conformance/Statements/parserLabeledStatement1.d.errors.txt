@@ -1,0 +1,8 @@
+parserLabeledStatement1.d.ts(2,3): error TS2304: Cannot find name 'bar'.
+
+
+==== parserLabeledStatement1.d.ts (1 errors) ====
+    foo:
+      bar();
+      ~~~
+!!! error TS2304: Cannot find name 'bar'.

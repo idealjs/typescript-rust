@@ -1,0 +1,87 @@
+labeledStatementDeclarationListInLoopNoCrash4.ts(7,12): error TS2339: Property 'classFormat' does not exist on type '{ parseButton: (button: any) => any }'.
+labeledStatementDeclarationListInLoopNoCrash4.ts(13,12): error TS1005: ',' expected.
+labeledStatementDeclarationListInLoopNoCrash4.ts(13,12): error TS2304: Cannot find name 'font'.
+labeledStatementDeclarationListInLoopNoCrash4.ts(13,21): error TS1005: ',' expected.
+labeledStatementDeclarationListInLoopNoCrash4.ts(13,23): error TS2304: Cannot find name 'var'.
+labeledStatementDeclarationListInLoopNoCrash4.ts(13,41): error TS2304: Cannot find name '$'.
+labeledStatementDeclarationListInLoopNoCrash4.ts(13,42): error TS1005: ',' expected.
+labeledStatementDeclarationListInLoopNoCrash4.ts(13,53): error TS2304: Cannot find name 'fontSize'.
+labeledStatementDeclarationListInLoopNoCrash4.ts(13,62): error TS1005: ',' expected.
+labeledStatementDeclarationListInLoopNoCrash4.ts(14,12): error TS1005: ',' expected.
+labeledStatementDeclarationListInLoopNoCrash4.ts(14,12): error TS2304: Cannot find name 'height'.
+labeledStatementDeclarationListInLoopNoCrash4.ts(14,18): error TS1005: ',' expected.
+labeledStatementDeclarationListInLoopNoCrash4.ts(14,20): error TS2304: Cannot find name 'var'.
+labeledStatementDeclarationListInLoopNoCrash4.ts(14,24): error TS1005: ',' expected.
+labeledStatementDeclarationListInLoopNoCrash4.ts(14,24): error TS2304: Cannot find name 'foo'.
+labeledStatementDeclarationListInLoopNoCrash4.ts(14,27): error TS1005: ',' expected.
+labeledStatementDeclarationListInLoopNoCrash4.ts(14,27): error TS1160: Unterminated template literal.
+labeledStatementDeclarationListInLoopNoCrash4.ts(19,2): error TS1005: ')' expected.
+
+
+==== labeledStatementDeclarationListInLoopNoCrash4.ts (18 errors) ====
+    export class ParseThemeData {
+      parseButton(button: any) {
+        const {type, size} = button;
+        for (let item of type) {
+          const fontType = item.type;
+          const style = (state: string) => `color: var(--button-${fontType}-${state}-font-color)`;
+          this.classFormat(`${style('active')});
+               ~~~~~~~~~~~
+!!! error TS2339: Property 'classFormat' does not exist on type '{ parseButton: (button: any) => any }'.
+        }
+        for (let item of size) {
+          const fontType = item.type;
+          this.classFormat(
+            [
+              `font-size: var(--button-size-${fontType}-fontSize)`,
+               ~~~~
+!!! error TS1005: ',' expected.
+               ~~~~
+!!! error TS2304: Cannot find name 'font'.
+                        ~
+!!! error TS1005: ',' expected.
+                          ~~~
+!!! error TS2304: Cannot find name 'var'.
+                                            ~
+!!! error TS2304: Cannot find name '$'.
+                                             ~
+!!! error TS1005: ',' expected.
+                                                        ~~~~~~~~
+!!! error TS2304: Cannot find name 'fontSize'.
+                                                                 ~~
+              `height: var foo`,
+    ~~~~~~~~~~~
+!!! error TS1005: ',' expected.
+               ~~~~~~
+!!! error TS1005: ',' expected.
+               ~~~~~~
+!!! error TS2304: Cannot find name 'height'.
+                     ~
+!!! error TS1005: ',' expected.
+                       ~~~
+!!! error TS2304: Cannot find name 'var'.
+                           ~~~
+!!! error TS1005: ',' expected.
+                           ~~~
+!!! error TS2304: Cannot find name 'foo'.
+                              ~~
+                              ~~
+            ].join(';')
+    ~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~
+          );
+    ~~~~~~~~
+    ~~~~~~~~
+        }
+    ~~~~~
+    ~~~~~
+      }
+    ~~~
+    ~~~
+    }
+    ~
+!!! error TS1005: ',' expected.
+    ~
+!!! error TS1160: Unterminated template literal.
+     
+!!! error TS1005: ')' expected.

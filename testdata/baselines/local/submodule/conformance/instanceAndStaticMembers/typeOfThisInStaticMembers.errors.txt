@@ -1,8 +1,8 @@
-instanceAndStaticMembers/typeOfThisInStaticMembers.ts(11,11): error TS2339: Property 'bar' does not exist on type 'object'.
-instanceAndStaticMembers/typeOfThisInStaticMembers.ts(28,13): error TS2339: Property 'bar' does not exist on type 'object'.
+typeOfThisInStaticMembers.ts(11,11): error TS2339: Property 'bar' does not exist on type 'object'.
+typeOfThisInStaticMembers.ts(28,13): error TS2339: Property 'bar' does not exist on type 'object'.
 
 
-==== instanceAndStaticMembers/typeOfThisInStaticMembers.ts (2 errors) ====
+==== typeOfThisInStaticMembers.ts (2 errors) ====
     class C {
         constructor(x: number) { }
         static foo: number;

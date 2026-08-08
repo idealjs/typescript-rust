@@ -1,0 +1,14 @@
+inferringClassMembersFromAssignments8.ts(7,13): error TS2351: This expression is not constructable.
+
+
+==== inferringClassMembersFromAssignments8.ts (1 errors) ====
+    // no inference in TS files, even for `this` aliases:
+    
+    var app = function() {
+        var _this = this;
+        _this.swap = function() { }
+    }
+    var a = new app()
+                ~~~
+!!! error TS2351: This expression is not constructable.
+    a

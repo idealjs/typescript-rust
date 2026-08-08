@@ -1,0 +1,89 @@
+esDecorators-privateFieldAccess.ts(3,13): error TS1003: Identifier expected.
+esDecorators-privateFieldAccess.ts(3,13): error TS1127: Invalid character.
+esDecorators-privateFieldAccess.ts(3,14): error TS1005: ',' expected.
+esDecorators-privateFieldAccess.ts(5,5): error TS1003: Identifier expected.
+esDecorators-privateFieldAccess.ts(5,5): error TS1127: Invalid character.
+esDecorators-privateFieldAccess.ts(5,6): error TS1005: ';' expected.
+esDecorators-privateFieldAccess.ts(7,28): error TS1003: Identifier expected.
+esDecorators-privateFieldAccess.ts(7,28): error TS1127: Invalid character.
+esDecorators-privateFieldAccess.ts(7,29): error TS1005: ',' expected.
+esDecorators-privateFieldAccess.ts(11,18): error TS1003: Identifier expected.
+esDecorators-privateFieldAccess.ts(11,18): error TS1127: Invalid character.
+esDecorators-privateFieldAccess.ts(11,19): error TS1005: ',' expected.
+esDecorators-privateFieldAccess.ts(13,5): error TS1003: Identifier expected.
+esDecorators-privateFieldAccess.ts(13,5): error TS1127: Invalid character.
+esDecorators-privateFieldAccess.ts(13,6): error TS1005: ';' expected.
+esDecorators-privateFieldAccess.ts(17,5): error TS1003: Identifier expected.
+esDecorators-privateFieldAccess.ts(17,5): error TS1127: Invalid character.
+esDecorators-privateFieldAccess.ts(17,6): error TS1005: ';' expected.
+esDecorators-privateFieldAccess.ts(19,25): error TS1003: Identifier expected.
+esDecorators-privateFieldAccess.ts(19,25): error TS1127: Invalid character.
+esDecorators-privateFieldAccess.ts(19,26): error TS1005: ',' expected.
+
+
+==== esDecorators-privateFieldAccess.ts (21 errors) ====
+    declare let dec: any;
+    
+    @dec(x => x.#foo) // error
+                ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1127: Invalid character.
+                 ~~~
+!!! error TS1005: ',' expected.
+    class A {
+        #foo = 3;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~
+!!! error TS1005: ';' expected.
+    
+        @dec(this, (x: A) => x.#foo) // ok
+                               ~
+!!! error TS1003: Identifier expected.
+                               ~
+!!! error TS1127: Invalid character.
+                                ~~~
+!!! error TS1005: ',' expected.
+        m() {}
+    }
+    
+    @dec((x: B) => x.#foo) // error
+                     ~
+!!! error TS1003: Identifier expected.
+                     ~
+!!! error TS1127: Invalid character.
+                      ~~~
+!!! error TS1005: ',' expected.
+    class B {
+        #foo = 3;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~
+!!! error TS1005: ';' expected.
+    }
+    
+    class C {
+        #foo = 2;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~
+!!! error TS1005: ';' expected.
+        m() {
+            @dec(() => this.#foo) // ok
+                            ~
+!!! error TS1003: Identifier expected.
+                            ~
+!!! error TS1127: Invalid character.
+                             ~~~
+!!! error TS1005: ',' expected.
+            class D {}
+            return D;
+        }
+    }

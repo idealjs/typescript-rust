@@ -1,8 +1,8 @@
-constEnums/constEnumPropertyAccess1.ts(26,9): error TS1005: ';' expected.
-constEnums/constEnumPropertyAccess1.ts(29,9): error TS1005: ';' expected.
+constEnumPropertyAccess1.ts(26,9): error TS1005: ';' expected.
+constEnumPropertyAccess1.ts(29,9): error TS1005: ';' expected.
 
 
-==== constEnums/constEnumPropertyAccess1.ts (2 errors) ====
+==== constEnumPropertyAccess1.ts (2 errors) ====
     ﻿// @declaration: true
     
     // constant enum declarations are completely erased in the emitted JavaScript code.

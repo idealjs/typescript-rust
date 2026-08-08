@@ -1,0 +1,14 @@
+parserComputedPropertyName31.ts(4,9): error TS1005: ';' expected.
+parserComputedPropertyName31.ts(4,11): error TS1005: ';' expected.
+
+
+==== parserComputedPropertyName31.ts (2 errors) ====
+    class C {
+        // yes ASI
+        [e]: number
+        [e2]: number
+            ~
+!!! error TS1005: ';' expected.
+              ~~~~~~
+!!! error TS1005: ';' expected.
+    }

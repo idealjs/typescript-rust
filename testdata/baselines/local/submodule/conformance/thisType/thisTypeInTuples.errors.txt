@@ -1,0 +1,20 @@
+thisTypeInTuples.ts(6,11): error TS2339: Property 'slice' does not exist on type '[number, string]'.
+thisTypeInTuples.ts(7,11): error TS2339: Property 'slice' does not exist on type '[number, string]'.
+thisTypeInTuples.ts(8,11): error TS2339: Property 'slice' does not exist on type '[number, string]'.
+
+
+==== thisTypeInTuples.ts (3 errors) ====
+    interface Array<T> {
+        slice(): this;
+    }
+    
+    let t: [number, string] = [42, "hello"];
+    let a = t.slice();
+              ~~~~~
+!!! error TS2339: Property 'slice' does not exist on type '[number, string]'.
+    let b = t.slice(1);
+              ~~~~~
+!!! error TS2339: Property 'slice' does not exist on type '[number, string]'.
+    let c = t.slice(0, 1);
+              ~~~~~
+!!! error TS2339: Property 'slice' does not exist on type '[number, string]'.

@@ -1,0 +1,53 @@
+objectTypeWithCallSignatureHidingMembersOfExtendedFunction.ts(18,13): error TS2339: Property 'arguments' does not exist on type '() => void'.
+objectTypeWithCallSignatureHidingMembersOfExtendedFunction.ts(19,13): error TS2339: Property 'data' does not exist on type '() => void'.
+objectTypeWithCallSignatureHidingMembersOfExtendedFunction.ts(28,39): error TS2339: Property 'apply' does not exist on type 'object'.
+objectTypeWithCallSignatureHidingMembersOfExtendedFunction.ts(29,63): error TS2339: Property 'call' does not exist on type 'object'.
+objectTypeWithCallSignatureHidingMembersOfExtendedFunction.ts(30,13): error TS2339: Property 'arguments' does not exist on type 'object'.
+objectTypeWithCallSignatureHidingMembersOfExtendedFunction.ts(31,13): error TS2339: Property 'data' does not exist on type 'object'.
+
+
+==== objectTypeWithCallSignatureHidingMembersOfExtendedFunction.ts (6 errors) ====
+    // object types with call signatures can override members of Function
+    // no errors expected below 
+    
+    interface Function {
+        data: number;
+        [x: string]: Object;
+    }
+    
+    interface I {
+        (): void;
+        apply(a: any, b?: any): void;
+        call(thisArg: number, ...argArray: number[]): any;
+    }
+    
+    var i: I;
+    var r1: (a: any, b?: any) => void = i.apply;
+    var r1b: (thisArg: number, ...argArray: number[]) => void = i.call;
+    var r1c = i.arguments;
+                ~~~~~~~~~
+!!! error TS2339: Property 'arguments' does not exist on type '() => void'.
+    var r1d = i.data;
+                ~~~~
+!!! error TS2339: Property 'data' does not exist on type '() => void'.
+    var r1e = i['hm']; // should be Object
+    
+    var x: {
+        (): void;
+        apply(a: any, b?: any): void;
+        call(thisArg: number, ...argArray: number[]): any;
+    }
+    
+    var r2: (a: any, b?: any) => void = x.apply;
+                                          ~~~~~
+!!! error TS2339: Property 'apply' does not exist on type 'object'.
+    var r2b: (thisArg: number, ...argArray: number[]) => void = x.call;
+                                                                  ~~~~
+!!! error TS2339: Property 'call' does not exist on type 'object'.
+    var r2c = x.arguments;
+                ~~~~~~~~~
+!!! error TS2339: Property 'arguments' does not exist on type 'object'.
+    var r2d = x.data;
+                ~~~~
+!!! error TS2339: Property 'data' does not exist on type 'object'.
+    var r2e = x['hm']; // should be Object

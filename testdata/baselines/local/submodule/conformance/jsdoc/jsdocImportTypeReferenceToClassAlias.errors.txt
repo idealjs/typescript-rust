@@ -1,0 +1,23 @@
+mod1.js(4,7): error TS1003: Identifier expected.
+mod1.js(4,8): error TS1005: ';' expected.
+mod1.js(4,8): error TS2304: Cannot find name 'exports'.
+
+
+==== mod1.js (3 errors) ====
+    class C {
+        s() { }
+    }
+    module.exports.C = C
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+    
+==== test.js (0 errors) ====
+    /** @typedef {import('./mod1').C} X */
+    /** @param {X} c */
+    function demo(c) {
+        c.s
+    }

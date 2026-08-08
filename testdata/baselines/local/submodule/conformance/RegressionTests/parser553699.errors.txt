@@ -1,0 +1,14 @@
+parser553699.ts(3,21): error TS2304: Cannot find name 'public'.
+
+
+==== parser553699.ts (1 errors) ====
+    class Foo {
+      constructor() { }
+      public banana (x: public) { }
+                        ~~~~~~
+!!! error TS2304: Cannot find name 'public'.
+    }
+    
+    class Bar {
+      constructor(c: Bar) { }
+    }

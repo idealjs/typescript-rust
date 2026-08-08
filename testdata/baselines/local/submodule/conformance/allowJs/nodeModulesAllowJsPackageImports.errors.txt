@@ -1,0 +1,98 @@
+index.cjs(5,1): error TS2304: Cannot find name 'cjs'.
+index.cjs(6,1): error TS2304: Cannot find name 'mjs'.
+index.cjs(7,5): error TS1003: Identifier expected.
+index.cjs(7,6): error TS1005: '=' expected.
+index.js(5,1): error TS2304: Cannot find name 'cjs'.
+index.js(6,1): error TS2304: Cannot find name 'mjs'.
+index.js(7,5): error TS1003: Identifier expected.
+index.js(7,6): error TS1005: '=' expected.
+index.mjs(5,1): error TS2304: Cannot find name 'cjs'.
+index.mjs(6,1): error TS2304: Cannot find name 'mjs'.
+index.mjs(7,5): error TS1003: Identifier expected.
+index.mjs(7,6): error TS1005: '=' expected.
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+package.json(4,11): error TS1005: ';' expected.
+package.json(5,14): error TS1005: ';' expected.
+package.json(6,14): error TS1005: ';' expected.
+package.json(7,15): error TS1005: ';' expected.
+package.json(8,15): error TS1005: ';' expected.
+package.json(9,16): error TS1005: ';' expected.
+
+
+==== index.js (4 errors) ====
+    // esm format file
+    import * as cjs from "#cjs";
+    import * as mjs from "#mjs";
+    import * as type from "#type";
+    cjs;
+    ~~~
+!!! error TS2304: Cannot find name 'cjs'.
+    mjs;
+    ~~~
+!!! error TS2304: Cannot find name 'mjs'.
+    type;
+        ~
+!!! error TS1003: Identifier expected.
+         
+!!! error TS1005: '=' expected.
+==== index.mjs (4 errors) ====
+    // esm format file
+    import * as cjs from "#cjs";
+    import * as mjs from "#mjs";
+    import * as type from "#type";
+    cjs;
+    ~~~
+!!! error TS2304: Cannot find name 'cjs'.
+    mjs;
+    ~~~
+!!! error TS2304: Cannot find name 'mjs'.
+    type;
+        ~
+!!! error TS1003: Identifier expected.
+         
+!!! error TS1005: '=' expected.
+==== index.cjs (4 errors) ====
+    // esm format file
+    import * as cjs from "#cjs";
+    import * as mjs from "#mjs";
+    import * as type from "#type";
+    cjs;
+    ~~~
+!!! error TS2304: Cannot find name 'cjs'.
+    mjs;
+    ~~~
+!!! error TS2304: Cannot find name 'mjs'.
+    type;
+        ~
+!!! error TS1003: Identifier expected.
+         
+!!! error TS1005: '=' expected.
+==== package.json (8 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+                 ~
+!!! error TS1005: ';' expected.
+        "type": "module",
+              ~
+!!! error TS1005: ';' expected.
+        "exports": "./index.js",
+                 ~
+!!! error TS1005: ';' expected.
+        "imports": {
+                 ~
+!!! error TS1005: ';' expected.
+            "#cjs": "./index.cjs",
+                  ~
+!!! error TS1005: ';' expected.
+            "#mjs": "./index.mjs",
+                  ~
+!!! error TS1005: ';' expected.
+            "#type": "./index.js"
+                   ~
+!!! error TS1005: ';' expected.
+        }
+    }

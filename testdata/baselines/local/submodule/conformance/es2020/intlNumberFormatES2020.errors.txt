@@ -1,0 +1,47 @@
+intlNumberFormatES2020.ts(2,46): error TS2304: Cannot find name 'Intl'.
+intlNumberFormatES2020.ts(5,5): error TS2304: Cannot find name 'Intl'.
+intlNumberFormatES2020.ts(8,5): error TS2304: Cannot find name 'Intl'.
+intlNumberFormatES2020.ts(11,40): error TS2304: Cannot find name 'Intl'.
+intlNumberFormatES2020.ts(14,35): error TS2304: Cannot find name 'Intl'.
+intlNumberFormatES2020.ts(17,32): error TS2304: Cannot find name 'Intl'.
+intlNumberFormatES2020.ts(20,5): error TS2304: Cannot find name 'Intl'.
+
+
+==== intlNumberFormatES2020.ts (7 errors) ====
+    // New/updated resolved options in ES2020
+    const { notation, style, signDisplay } = new Intl.NumberFormat('en-NZ').resolvedOptions();
+                                                 ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    
+    // Empty options
+    new Intl.NumberFormat('en-NZ', {});
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    
+    // Override numbering system
+    new Intl.NumberFormat('en-NZ', { numberingSystem: 'arab' });
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    
+    // Currency
+    const { currency, currencySign } = new Intl.NumberFormat('en-NZ', { style: 'currency', currency: 'NZD', currencySign: 'accounting' }).resolvedOptions();
+                                           ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    
+    // Units
+    const { unit, unitDisplay } = new Intl.NumberFormat('en-NZ', { style: 'unit', unit: 'kilogram', unitDisplay: 'narrow' }).resolvedOptions();
+                                      ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    
+    // Compact
+    const { compactDisplay } = new Intl.NumberFormat('en-NZ', { notation: 'compact', compactDisplay: 'long' }).resolvedOptions();
+                                   ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    
+    // Sign display
+    new Intl.NumberFormat('en-NZ', { signDisplay: 'always' });
+        ~~~~
+!!! error TS2304: Cannot find name 'Intl'.
+    
+    // New additions to NumberFormatPartTypes
+    const types: Intl.NumberFormatPartTypes[] = [ 'compact', 'unit', 'unknown' ];

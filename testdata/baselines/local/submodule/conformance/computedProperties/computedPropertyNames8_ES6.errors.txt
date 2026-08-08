@@ -1,0 +1,23 @@
+computedPropertyNames8_ES6.ts(2,10): error TS1005: ',' expected.
+computedPropertyNames8_ES6.ts(2,11): error TS1134: Variable declaration expected.
+computedPropertyNames8_ES6.ts(3,10): error TS1005: ',' expected.
+computedPropertyNames8_ES6.ts(3,11): error TS1134: Variable declaration expected.
+
+
+==== computedPropertyNames8_ES6.ts (4 errors) ====
+    function f<T, U extends string>() {
+        var t!: T;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var u!: U;
+             ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1134: Variable declaration expected.
+        var v = {
+            [t]: 0,
+            [u]: 1
+        };
+    }

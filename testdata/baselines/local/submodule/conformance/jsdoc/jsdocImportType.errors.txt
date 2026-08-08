@@ -1,0 +1,35 @@
+mod1.js(4,14): error TS2339: Property 'chunk' does not exist on type 'object'.
+mod1.js(7,7): error TS1003: Identifier expected.
+mod1.js(7,8): error TS1005: ';' expected.
+
+
+==== types.d.ts (0 errors) ====
+    declare function require(name: string): any;
+    declare var exports: any;
+    declare var module: { exports: any };
+==== mod1.js (3 errors) ====
+    /// <reference path='./types.d.ts'/>
+    class Chunk {
+        constructor() {
+            this.chunk = 1;
+                 ~~~~~
+!!! error TS2339: Property 'chunk' does not exist on type 'object'.
+        }
+    }
+    module.exports = Chunk;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+    
+==== use.js (0 errors) ====
+    /// <reference path='./types.d.ts'/>
+    /** @typedef {import("./mod1")} C
+     * @type {C} */
+    var c;
+    c.chunk;
+    
+    const D = require("./mod1");
+    /** @type {D} */
+    var d;
+    d.chunk;

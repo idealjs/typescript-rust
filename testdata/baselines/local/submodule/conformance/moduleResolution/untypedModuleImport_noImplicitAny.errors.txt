@@ -1,0 +1,19 @@
+/node_modules/foo/package.json(1,9): error TS1005: ';' expected.
+/node_modules/foo/package.json(1,27): error TS1005: ';' expected.
+
+
+==== untypedModuleImport_noImplicitAny.ts (0 errors) ====
+    // This tests that `--noImplicitAny` disables untyped modules.
+    
+==== /node_modules/foo/package.json (2 errors) ====
+    { "name": "foo", "version": "1.2.3" }
+            ~
+!!! error TS1005: ';' expected.
+                              ~
+!!! error TS1005: ';' expected.
+    
+==== /node_modules/foo/index.js (0 errors) ====
+    This file is not processed.
+    
+==== /a.ts (0 errors) ====
+    import * as foo from "foo";

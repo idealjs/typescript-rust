@@ -1,0 +1,12 @@
+generatorInAmbientContext1.ts(2,5): error TS1003: Identifier expected.
+generatorInAmbientContext1.ts(2,6): error TS1005: ';' expected.
+
+
+==== generatorInAmbientContext1.ts (2 errors) ====
+    declare class C {
+        *generator(): any;
+        ~
+!!! error TS1003: Identifier expected.
+         ~~~~~~~~~
+!!! error TS1005: ';' expected.
+    }

@@ -1,0 +1,177 @@
+index.js(2,9): error TS1005: ';' expected.
+index.js(11,9): error TS1005: ';' expected.
+index.js(16,9): error TS1005: ';' expected.
+index.js(19,9): error TS1005: ';' expected.
+index.js(24,1): error TS2304: Cannot find name 'Object'.
+index.js(24,25): error TS2339: Property 'prototype' does not exist on type 'object'.
+index.js(25,5): error TS2304: Cannot find name 'get'.
+index.js(25,8): error TS1005: ',' expected.
+index.js(25,8): error TS2304: Cannot find name '('.
+index.js(25,9): error TS1005: ',' expected.
+index.js(25,9): error TS2304: Cannot find name ')'.
+index.js(25,11): error TS1005: ',' expected.
+index.js(25,11): error TS2304: Cannot find name '{'.
+index.js(26,9): error TS1005: ',' expected.
+index.js(26,9): error TS2304: Cannot find name 'return'.
+index.js(26,16): error TS1005: ',' expected.
+index.js(26,18): error TS1005: ',' expected.
+index.js(26,18): error TS2304: Cannot find name ';'.
+index.js(28,1): error TS1005: ',' expected.
+
+
+==== index.js (19 errors) ====
+    export class A {
+        get x() {
+            ~
+!!! error TS1005: ';' expected.
+            return 12;
+        }
+    }
+    
+    export class B {
+        /**
+         * @param {number} _arg
+         */
+        set x(_arg) {
+            ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+    export class C {
+        get x() {
+            ~
+!!! error TS1005: ';' expected.
+            return 12;
+        }
+        set x(_arg) {
+            ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+    export class D {}
+    Object.defineProperty(D.prototype, "x", {
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                            ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+        get() {
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2304: Cannot find name '('.
+            ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS2304: Cannot find name ')'.
+              ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS2304: Cannot find name '{'.
+            return 12;
+            ~~~~~~
+!!! error TS1005: ',' expected.
+            ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                   ~~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS2304: Cannot find name ';'.
+        }
+    });
+    ~
+!!! error TS1005: ',' expected.
+    
+    export class E {}
+    Object.defineProperty(E.prototype, "x", {
+        /**
+         * @param {number} _arg
+         */
+        set(_arg) {}
+    });
+    
+    export class F {}
+    Object.defineProperty(F.prototype, "x", {
+        get() {
+            return 12;
+        },
+        /**
+         * @param {number} _arg
+         */
+        set(_arg) {}
+    });
+    
+    export class G {}
+    Object.defineProperty(G.prototype, "x", {
+        /**
+         * @param {number[]} args
+         */
+        set(...args) {}
+    });
+    
+    export class H {}
+    Object.defineProperty(H.prototype, "x", {
+        set() {}
+    });
+    
+    
+    export class I {}
+    Object.defineProperty(I.prototype, "x", {
+        /**
+         * @param {number} v
+         */
+        set: (v) => {}
+    });
+    
+    /**
+     * @param {number} v
+     */
+    const jSetter = (v) => {}
+    export class J {}
+    Object.defineProperty(J.prototype, "x", {
+        set: jSetter
+    });
+    
+    /**
+     * @param {number} v
+     */
+    const kSetter1 = (v) => {}
+    /**
+     * @param {number} v
+     */
+    const kSetter2 = (v) => {}
+    export class K {}
+    Object.defineProperty(K.prototype, "x", {
+        set: Math.random() ? kSetter1 : kSetter2
+    });
+    
+    /**
+     * @param {number} v
+     */
+    const lSetter1 = (v) => {}
+    /**
+     * @param {string} v
+     */
+    const lSetter2 = (v) => {}
+    export class L {}
+    Object.defineProperty(L.prototype, "x", {
+        set: Math.random() ? lSetter1 : lSetter2
+    });
+    
+    /**
+     * @param {number | boolean} v
+     */
+    const mSetter1 = (v) => {}
+    /**
+     * @param {string | boolean} v
+     */
+    const mSetter2 = (v) => {}
+    export class M {}
+    Object.defineProperty(M.prototype, "x", {
+        set: Math.random() ? mSetter1 : mSetter2
+    });

@@ -1,0 +1,80 @@
+invalidTryStatements.ts(2,5): error TS2304: Cannot find name 'catch'.
+invalidTryStatements.ts(2,11): error TS2304: Cannot find name 'x'.
+invalidTryStatements.ts(2,14): error TS1005: ';' expected.
+invalidTryStatements.ts(4,5): error TS2304: Cannot find name 'finally'.
+invalidTryStatements.ts(4,13): error TS1005: ';' expected.
+invalidTryStatements.ts(6,12): error TS1005: 'finally' expected.
+invalidTryStatements.ts(10,5): error TS2304: Cannot find name 'finally'.
+invalidTryStatements.ts(10,13): error TS1005: ';' expected.
+invalidTryStatements.ts(11,5): error TS2304: Cannot find name 'catch'.
+invalidTryStatements.ts(11,12): error TS2304: Cannot find name 'x'.
+invalidTryStatements.ts(11,15): error TS1005: ';' expected.
+invalidTryStatements.ts(15,5): error TS2304: Cannot find name 'finally'.
+invalidTryStatements.ts(15,13): error TS1005: ';' expected.
+invalidTryStatements.ts(17,5): error TS2304: Cannot find name 'catch'.
+invalidTryStatements.ts(17,12): error TS2304: Cannot find name 'x'.
+invalidTryStatements.ts(17,15): error TS1005: ';' expected.
+invalidTryStatements.ts(19,20): error TS1003: Identifier expected.
+invalidTryStatements.ts(19,22): error TS1005: ')' expected.
+invalidTryStatements.ts(20,2): error TS1005: '}' expected.
+
+
+==== invalidTryStatements.ts (19 errors) ====
+    function fn() {
+        catch(x) { } // error missing try
+        ~~~~~
+!!! error TS2304: Cannot find name 'catch'.
+              ~
+!!! error TS2304: Cannot find name 'x'.
+                 ~
+!!! error TS1005: ';' expected.
+    
+        finally { } // potential error; can be absorbed by the 'catch'
+        ~~~~~~~
+!!! error TS2304: Cannot find name 'finally'.
+                ~
+!!! error TS1005: ';' expected.
+    
+        try { }; // error missing finally
+               ~
+!!! error TS1005: 'finally' expected.
+    }
+    
+    function fn2() {
+        finally { } // error missing try
+        ~~~~~~~
+!!! error TS2304: Cannot find name 'finally'.
+                ~
+!!! error TS1005: ';' expected.
+        catch (x) { } // error missing try
+        ~~~~~
+!!! error TS2304: Cannot find name 'catch'.
+               ~
+!!! error TS2304: Cannot find name 'x'.
+                  ~
+!!! error TS1005: ';' expected.
+        
+        try { } finally { } // statement is here, so the 'catch' clause above doesn't absorb errors from the 'finally' clause below
+    
+        finally { } // error missing try
+        ~~~~~~~
+!!! error TS2304: Cannot find name 'finally'.
+                ~
+!!! error TS1005: ';' expected.
+        
+        catch (x) { } // error missing try
+        ~~~~~
+!!! error TS2304: Cannot find name 'catch'.
+               ~
+!!! error TS2304: Cannot find name 'x'.
+                  ~
+!!! error TS1005: ';' expected.
+    
+        try { } catch () { } // error missing catch binding
+                       ~
+!!! error TS1003: Identifier expected.
+                         ~
+!!! error TS1005: ')' expected.
+    }
+     
+!!! error TS1005: '}' expected.

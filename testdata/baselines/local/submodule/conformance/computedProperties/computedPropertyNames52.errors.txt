@@ -1,0 +1,16 @@
+computedPropertyNames52.js(2,23): error TS1005: '>' expected.
+computedPropertyNames52.js(3,22): error TS2304: Cannot find name 'C'.
+
+
+==== computedPropertyNames52.js (2 errors) ====
+    const array = [];
+    for (let i = 0; i < 10; ++i) {
+                          ~
+!!! error TS1005: '>' expected.
+        array.push(class C {
+                         ~
+!!! error TS2304: Cannot find name 'C'.
+            [i] = () => C;
+            static [i] = 100;
+        })
+    }

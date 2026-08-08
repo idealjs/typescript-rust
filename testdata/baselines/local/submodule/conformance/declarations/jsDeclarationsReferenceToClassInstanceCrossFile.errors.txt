@@ -1,0 +1,70 @@
+index.js(1,21): error TS2304: Cannot find name 'require'.
+index.js(9,14): error TS2339: Property 'objects' does not exist on type '{ addRectangle: () => any }'.
+index.js(18,14): error TS2339: Property 'objects' does not exist on type '{ addRectangle: () => any }'.
+index.js(23,7): error TS1003: Identifier expected.
+index.js(23,8): error TS1005: ';' expected.
+index.js(23,8): error TS2304: Cannot find name 'exports'.
+rectangle.js(7,7): error TS1003: Identifier expected.
+rectangle.js(7,8): error TS1005: ';' expected.
+rectangle.js(7,8): error TS2304: Cannot find name 'exports'.
+test.js(1,18): error TS2304: Cannot find name 'require'.
+
+
+==== rectangle.js (3 errors) ====
+    class Rectangle {
+        constructor() {
+            console.log("I'm a rectangle!");
+        }
+    }
+    
+    module.exports = { Rectangle };
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+==== index.js (6 errors) ====
+    const {Rectangle} = require('./rectangle');
+                        ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    
+    class Render {
+        constructor() {
+            /**
+             * Object list
+             * @type {Rectangle[]}
+             */
+            this.objects = [];
+                 ~~~~~~~
+!!! error TS2339: Property 'objects' does not exist on type '{ addRectangle: () => any }'.
+        }
+        /**
+         * Adds a rectangle
+         * 
+         * @returns {Rectangle} the rect
+         */
+        addRectangle() {
+            const obj = new Rectangle();
+            this.objects.push(obj);
+                 ~~~~~~~
+!!! error TS2339: Property 'objects' does not exist on type '{ addRectangle: () => any }'.
+            return obj;
+        }
+    }
+    
+    module.exports = { Render };
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+==== test.js (1 errors) ====
+    const {Render} = require("./index");
+                     ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    let render = new Render();
+    
+    render.addRectangle();
+    console.log("Objects", render.objects);

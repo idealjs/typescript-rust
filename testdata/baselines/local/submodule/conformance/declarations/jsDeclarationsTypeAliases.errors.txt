@@ -1,0 +1,60 @@
+mixed.js(14,7): error TS1003: Identifier expected.
+mixed.js(14,8): error TS1005: ';' expected.
+mixed.js(14,8): error TS2304: Cannot find name 'exports'.
+
+
+==== index.js (0 errors) ====
+    export {}; // flag file as module
+    /**
+     * @typedef {string | number | symbol} PropName 
+     */
+    
+    /**
+     * Callback
+     *
+     * @callback NumberToStringCb
+     * @param {number} a
+     * @returns {string}
+     */
+    
+    /**
+     * @template T
+     * @typedef {T & {name: string}} MixinName 
+     */
+    
+    /**
+     * Identity function
+     *
+     * @template T
+     * @callback Identity
+     * @param {T} x
+     * @returns {T}
+     */
+    
+==== mixed.js (3 errors) ====
+    /**
+     * @typedef {{x: string} | number | LocalThing | ExportedThing} SomeType
+     */
+    /**
+     * @param {number} x
+     * @returns {SomeType}
+     */
+    function doTheThing(x) {
+        return {x: ""+x};
+    }
+    class ExportedThing {
+        z = "ok"
+    }
+    module.exports = {
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
+        doTheThing,
+        ExportedThing,
+    };
+    class LocalThing {
+        y = "ok"
+    }

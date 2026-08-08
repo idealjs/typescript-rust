@@ -1,0 +1,47 @@
+argument.js(10,9): error TS1005: ';' expected.
+argument.js(17,5): error TS1003: Identifier expected.
+argument.js(17,6): error TS1005: ';' expected.
+
+
+==== supplement.d.ts (0 errors) ====
+    export { };
+    declare module "./argument.js" {
+        interface Argument {
+            idlType: any;
+            default: null;
+        }
+    }
+==== base.js (0 errors) ====
+    export class Base {
+        constructor() { }
+    
+        toJSON() {
+            const json = { type: undefined, name: undefined, inheritance: undefined };
+            return json;
+        }
+    }
+==== argument.js (3 errors) ====
+    import { Base } from "./base.js";
+    export class Argument extends Base {
+        /**
+         * @param {*} tokeniser
+         */
+        static parse(tokeniser) {
+            return;
+        }
+    
+        get type() {
+            ~~~~
+!!! error TS1005: ';' expected.
+            return "argument";
+        }
+    
+        /**
+         * @param {*} defs
+         */
+        *validate(defs) { }
+        ~
+!!! error TS1003: Identifier expected.
+         ~~~~~~~~
+!!! error TS1005: ';' expected.
+    }

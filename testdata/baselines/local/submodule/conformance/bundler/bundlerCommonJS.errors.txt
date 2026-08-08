@@ -8,7 +8,7 @@
 /requires.ts(2,1): error TS2304: Cannot find name 'pkg'.
 
 
-==== bundler/bundlerCommonJS.ts (0 errors) ====
+==== bundlerCommonJS.ts (0 errors) ====
     
 ==== /node_modules/pkg/package.json (5 errors) ====
     {

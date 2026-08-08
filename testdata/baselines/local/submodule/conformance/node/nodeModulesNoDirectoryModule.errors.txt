@@ -1,0 +1,39 @@
+/node_modules/i-have-a-dir-and-main/package.json(2,9): error TS1005: ';' expected.
+/node_modules/i-have-a-dir-and-main/package.json(3,12): error TS1005: ';' expected.
+/node_modules/i-have-a-dir-and-main/package.json(4,9): error TS1005: ';' expected.
+/node_modules/i-have-a-dir-and-main/package.json(5,9): error TS1005: ';' expected.
+/package.json(1,9): error TS1005: ';' expected.
+
+
+==== nodeModulesNoDirectoryModule.ts (0 errors) ====
+    
+==== /node_modules/i-have-a-dir-and-main/package.json (4 errors) ====
+    {
+      "name": "i-have-a-dir-and-main",
+            ~
+!!! error TS1005: ';' expected.
+      "version": "1.0.0",
+               ~
+!!! error TS1005: ';' expected.
+      "type": "module",
+            ~
+!!! error TS1005: ';' expected.
+      "main": "dist/index.js"
+            ~
+!!! error TS1005: ';' expected.
+    }
+    
+==== /node_modules/i-have-a-dir-and-main/dist/index.d.ts (0 errors) ====
+    export declare const a = 1;
+    
+==== /node_modules/i-have-a-dir-and-main/dist/dir/index.d.ts (0 errors) ====
+    export declare const b = 2;
+    
+==== /package.json (1 errors) ====
+    { "type": "module" }
+            ~
+!!! error TS1005: ';' expected.
+    
+==== /index.ts (0 errors) ====
+    import 'i-have-a-dir-and-main' // ok
+    import 'i-have-a-dir-and-main/dist/dir' // error
