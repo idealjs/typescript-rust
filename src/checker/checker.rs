@@ -5416,12 +5416,30 @@ impl Checker {
         // Heritage clauses contain type references (e.g., `extends Foo`).
         // For `implements` clauses, verify that the class's instance type
         // is assignable to each implemented interface; otherwise emit
-        // TS2420. `extends` clauses are type-level and skipped here (the
-        // base-class members are merged separately).
+        // TS2420.
         let data = match &node.data {
             crate::ast::NodeData::HeritageClause(d) => d,
             _ => return,
         };
+        if data.token == SyntaxKind::ExtendsKeyword {
+            // For `extends` clauses, resolve the base class expression as a
+            // type reference (suppressing false TS2304 for global names like
+            // `Object` that are resolvable in type position). The base-class
+            // instance type is built separately in `build_class_instance_type_with_base`.
+            // Here we just try to resolve the expression to suppress TS2304.
+            for type_ref in data.types.iter() {
+                if let crate::ast::NodeData::ExpressionWithTypeArguments(ewa) = &type_ref.data {
+                    // Try to resolve the expression as a type reference.
+                    // This populates type_node_links without emitting TS2304.
+                    self.suppress_cannot_find_name_in_type_nodes += 1;
+                    let _ = self.get_type_from_type_node(&ewa.expression);
+                    self.suppress_cannot_find_name_in_type_nodes = self
+                        .suppress_cannot_find_name_in_type_nodes
+                        .saturating_sub(1);
+                }
+            }
+            return;
+        }
         if data.token != SyntaxKind::ImplementsKeyword {
             return;
         }
@@ -6531,6 +6549,12 @@ impl Checker {
         // Skip property access right-hand sides (e.g., `x.foo` — `foo` is a
         // property name, not a reference).
         if is_property_access_name(node) {
+            return;
+        }
+
+        // If we're inside a type node (e.g., heritage clause expression),
+        // suppress TS2304 to avoid false positives for global names.
+        if self.suppress_cannot_find_name_in_type_nodes > 0 {
             return;
         }
 
