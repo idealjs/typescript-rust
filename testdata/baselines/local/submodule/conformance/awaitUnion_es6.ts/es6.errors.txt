@@ -1,5 +1,0 @@
-/.src/awaitUnion_es6.ts/es6(2,16): error TS2304: Cannot find name 'PromiseLike'.
-/.src/awaitUnion_es6.ts/es6(2,38): error TS2304: Cannot find name 'PromiseLike'.
-/.src/awaitUnion_es6.ts/es6(3,16): error TS2304: Cannot find name 'PromiseLike'.
-/.src/awaitUnion_es6.ts/es6(4,25): error TS2304: Cannot find name 'PromiseLike'.
-/.src/awaitUnion_es6.ts/es6(5,25): error TS2304: Cannot find name 'PromiseLike'.

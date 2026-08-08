@@ -18,13 +18,14 @@ use std::time::{Duration, Instant};
 
 use regex::Regex;
 
+use tsox::ast::Diagnostic;
 use tsox::bundled::BundledFS;
 use tsox::compiler::{CompilerHostImpl, Program, ProgramOptions};
 use tsox::core::compiler_options::{
     CompilerOptions, JsxEmit, ModuleKind, ModuleResolutionKind, ScriptTarget,
 };
 use tsox::core::tristate::Tristate;
-use tsox::diagnosticwriter::format_diagnostic;
+use tsox::diagnosticwriter::{format_diagnostic, line_and_character};
 use tsox::testutil::baseline;
 use tsox::testutil::test_case_parser::{TestCaseContent, parse_test_files};
 use tsox::tsoptions::ParsedCommandLine;
@@ -47,16 +48,19 @@ const SKIPPED_TESTS: &[&str] = &[
 ];
 
 struct CompilationOutput {
-    diagnostics: Vec<String>,
+    diagnostics: Vec<Diagnostic>,
+    input_files: Vec<(String, String)>, // (unit_name, content)
 }
 
 fn compile_test_case(content: &TestCaseContent) -> CompilationOutput {
     let mut fs = InMemoryFS::new();
     let mut file_names: Vec<String> = Vec::new();
+    let mut input_files: Vec<(String, String)> = Vec::new();
     for unit in &content.units {
         let abs_path = normalize_abs_path(&unit.name, &content.current_directory);
         let _ = fs.write_file(&abs_path, &unit.content);
-        file_names.push(abs_path);
+        file_names.push(abs_path.clone());
+        input_files.push((unit.name.clone(), unit.content.clone()));
     }
 
     let mut options = CompilerOptions::default();
@@ -93,28 +97,225 @@ fn compile_test_case(content: &TestCaseContent) -> CompilationOutput {
         host: Arc::new(host),
     }));
 
-    let pretty = false;
-    let locale = None;
-    let mut diagnostics: Vec<String> = Vec::new();
+    let _pretty = false;
+    let mut diagnostics: Vec<Diagnostic> = Vec::new();
     for d in program.get_diagnostics_to_report() {
-        diagnostics.push(format_diagnostic(&d, pretty, locale));
+        diagnostics.push((*d).clone());
     }
     for d in &program.get_semantic_diagnostics() {
-        diagnostics.push(format_diagnostic(d, pretty, locale));
+        diagnostics.push(d.clone());
     }
 
-    CompilationOutput { diagnostics }
+    CompilationOutput {
+        diagnostics,
+        input_files,
+    }
 }
 
+/// Remove `/.src/`, `/.ts/`, `/.lib/` path prefixes from text.
+/// Mirrors Go's `removeTestPathPrefixes`.
+fn remove_test_path_prefixes(text: &str) -> String {
+    text.replace("/.src/", "")
+        .replace("/.ts/", "")
+        .replace("/.lib/", "")
+}
+
+const CRLF: &str = "\r\n";
+
+/// Generate a TS-format error baseline string, mirroring Go's
+/// `GetErrorBaseline` / `iterateErrorBaseline` in error_baseline.go.
+///
+/// Structure:
+/// 1. Summary section: one line per diagnostic
+/// 2. Two blank lines
+/// 3. For each input file: `==== filename (N errors) ====`, source
+///    lines with 4-space indent, squiggle markers, `!!! error TSxxxx:`
 fn format_error_baseline(output: &CompilationOutput) -> String {
     if output.diagnostics.is_empty() {
         return String::new();
     }
+
+    let locale = None;
     let mut result = String::new();
-    for diag in &output.diagnostics {
-        result.push_str(diag);
-        result.push('\n');
+
+    // Part 1: Summary — one line per diagnostic, sorted by (file, pos, code)
+    let mut diags = output.diagnostics.clone();
+    diags.sort_by(|a, b| {
+        let a_file = a.file.as_ref().map(|f| f.file_name.as_str()).unwrap_or("");
+        let b_file = b.file.as_ref().map(|f| f.file_name.as_str()).unwrap_or("");
+        let cmp = a_file.cmp(b_file);
+        if cmp != std::cmp::Ordering::Equal {
+            return cmp;
+        }
+        let cmp = a.loc.pos().cmp(&b.loc.pos());
+        if cmp != std::cmp::Ordering::Equal {
+            return cmp;
+        }
+        a.code.cmp(&b.code)
+    });
+
+    for diag in &diags {
+        let line = format_diagnostic(diag, false, locale);
+        let normalized = remove_test_path_prefixes(&line);
+        result.push_str(&normalized);
+        result.push_str(CRLF);
     }
+    result.push_str(CRLF);
+    result.push_str(CRLF);
+
+    // Part 2: Global errors (no file)
+    let mut first = true;
+    for diag in &diags {
+        if diag.file.is_none() {
+            if !first {
+                result.push_str(CRLF);
+            }
+            first = false;
+            let msg = tsox::diagnosticwriter::message_text(diag, locale);
+            for line in msg.lines() {
+                if line.is_empty() {
+                    continue;
+                }
+                result.push_str(&format!(
+                    "!!! {} TS{}: {}",
+                    diag.category.name(),
+                    diag.code,
+                    line
+                ));
+                result.push_str(CRLF);
+            }
+        }
+    }
+
+    // Part 3: Per-file interleaved source + squiggles
+    for (unit_name, content) in &output.input_files {
+        let normalized_name = remove_test_path_prefixes(unit_name);
+
+        // Filter diagnostics for this file
+        let file_diags: Vec<&Diagnostic> = diags
+            .iter()
+            .filter(|d| {
+                if let Some(file) = &d.file {
+                    let dn = remove_test_path_prefixes(&file.file_name);
+                    dn == normalized_name
+                } else {
+                    false
+                }
+            })
+            .collect();
+
+        result.push_str(&format!(
+            "==== {} ({} errors) ====",
+            normalized_name,
+            file_diags.len()
+        ));
+        result.push_str(CRLF);
+
+        // Split content into lines
+        let lines: Vec<&str> = content.split('\n').collect();
+
+        // Compute line starts
+        let mut line_starts: Vec<usize> = vec![0];
+        for (i, ch) in content.char_indices() {
+            if ch == '\n' {
+                line_starts.push(i + 1);
+            }
+        }
+
+        for (line_idx, line) in lines.iter().enumerate() {
+            // Strip trailing \r
+            let line = line.strip_suffix('\r').unwrap_or(line);
+
+            let this_line_start = *line_starts.get(line_idx).unwrap_or(&0);
+            let next_line_start = if line_idx == lines.len() - 1 {
+                content.len()
+            } else {
+                *line_starts.get(line_idx + 1).unwrap_or(&content.len())
+            };
+
+            // Emit the source line
+            result.push_str("    ");
+            result.push_str(line);
+            result.push_str(CRLF);
+
+            // Emit squiggles for errors on this line
+            for diag in &file_diags {
+                let err_start = diag.loc.pos();
+                let err_end = err_start + diag.loc.len();
+
+                // Does this error start or continue on this line?
+                if err_end >= this_line_start
+                    && (err_start < next_line_start || line_idx == lines.len() - 1)
+                {
+                    let relative_offset = err_start as i64 - this_line_start as i64;
+                    let length = (err_end - err_start) as i64
+                        - (this_line_start as i64 - err_start as i64).max(0);
+                    let squiggle_start = (relative_offset).max(0) as usize;
+
+                    // Build squiggle line
+                    result.push_str("    ");
+                    let prefix = &line[..squiggle_start.min(line.len())];
+                    // Replace non-whitespace with spaces
+                    for ch in prefix.chars() {
+                        result.push(if ch.is_whitespace() { ch } else { ' ' });
+                    }
+                    let squiggle_end = (squiggle_start + length as usize)
+                        .min(line.len())
+                        .max(squiggle_start);
+                    let squiggle_count = line
+                        [squiggle_start.min(line.len())..squiggle_end.min(line.len())]
+                        .chars()
+                        .count();
+                    for _ in 0..squiggle_count {
+                        result.push('~');
+                    }
+                    result.push_str(CRLF);
+
+                    // Emit error message if this is where the error ends
+                    if line_idx == lines.len() - 1 || next_line_start > err_end {
+                        let msg = tsox::diagnosticwriter::message_text(diag, locale);
+                        for msg_line in msg.lines() {
+                            if msg_line.is_empty() {
+                                continue;
+                            }
+                            result.push_str(&format!(
+                                "!!! {} TS{}: {}",
+                                diag.category.name(),
+                                diag.code,
+                                msg_line
+                            ));
+                            result.push_str(CRLF);
+                        }
+                        // Related information
+                        for info in &diag.related_information {
+                            let info_loc = if let Some(info_file) = &info.file {
+                                let (l, c) = line_and_character(
+                                    &info_file.line_map,
+                                    &info_file.text,
+                                    info.loc.pos(),
+                                );
+                                format!(
+                                    " {}({},{})",
+                                    remove_test_path_prefixes(&info_file.file_name),
+                                    l + 1,
+                                    c + 1
+                                )
+                            } else {
+                                String::new()
+                            };
+                            let info_msg = tsox::diagnosticwriter::message_text(info, locale);
+                            result.push_str(&format!(
+                                "!!! related TS{}{}: {}",
+                                info.code, info_loc, info_msg
+                            ));
+                            result.push_str(CRLF);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     result
 }
 

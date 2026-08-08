@@ -1,9 +1,0 @@
-/.src/constAssertions.ts/typeAssertions(37,37): error TS1005: ',' expected.
-/.src/constAssertions.ts/typeAssertions(37,38): error TS1005: ',' expected.
-/.src/constAssertions.ts/typeAssertions(37,40): error TS1005: ',' expected.
-/.src/constAssertions.ts/typeAssertions(37,54): error TS1005: ',' expected.
-/.src/constAssertions.ts/typeAssertions(37,56): error TS1134: Variable declaration expected.
-/.src/constAssertions.ts/typeAssertions(37,58): error TS1128: Declaration or statement expected.
-/.src/constAssertions.ts/typeAssertions(37,37): error TS2304: Cannot find name '('.
-/.src/constAssertions.ts/typeAssertions(37,38): error TS2304: Cannot find name ')'.
-/.src/constAssertions.ts/typeAssertions(37,40): error TS2304: Cannot find name '{'.

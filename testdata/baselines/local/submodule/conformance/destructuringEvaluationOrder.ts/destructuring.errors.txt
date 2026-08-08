@@ -1,3 +1,0 @@
-/.src/destructuringEvaluationOrder.ts/destructuring(14,49): error TS1012: Unexpected token.
-/.src/destructuringEvaluationOrder.ts/destructuring(14,52): error TS1005: ',' expected.
-/.src/destructuringEvaluationOrder.ts/destructuring(3,36): error TS2339: Property 'push' does not exist on type 'any[]'.

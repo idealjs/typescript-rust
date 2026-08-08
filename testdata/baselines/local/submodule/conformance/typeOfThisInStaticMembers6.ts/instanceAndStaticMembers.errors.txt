@@ -1,1 +1,0 @@
-/.src/typeOfThisInStaticMembers6.ts/instanceAndStaticMembers(6,16): error TS2349: This expression is not callable.

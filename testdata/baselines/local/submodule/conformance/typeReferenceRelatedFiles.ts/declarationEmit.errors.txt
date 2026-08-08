@@ -1,2 +1,0 @@
-/.src/node_modules/@types/node/package.json(2,11): error TS1005: ';' expected.
-/.src/node_modules/@types/node/package.json(3,14): error TS1005: ';' expected.

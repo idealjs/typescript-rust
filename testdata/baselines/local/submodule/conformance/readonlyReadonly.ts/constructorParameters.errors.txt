@@ -1,2 +1,0 @@
-/.src/readonlyReadonly.ts/constructorParameters(3,26): error TS1005: ',' expected.
-/.src/readonlyReadonly.ts/constructorParameters(3,35): error TS1005: ',' expected.

@@ -1,1 +1,0 @@
-/.src/exponentiationOperatorWithNullValueAndInvalidOperands.ts/exponentiationOperator(6,16): error TS2304: Cannot find name 'Object'.

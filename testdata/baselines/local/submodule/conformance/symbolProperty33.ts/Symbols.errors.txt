@@ -1,2 +1,0 @@
-/.src/symbolProperty33.ts/Symbols(7,7): error TS1005: ']' expected.
-/.src/symbolProperty33.ts/Symbols(7,15): error TS1005: ';' expected.

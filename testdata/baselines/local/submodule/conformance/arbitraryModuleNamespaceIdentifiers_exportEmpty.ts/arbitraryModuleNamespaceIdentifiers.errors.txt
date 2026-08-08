@@ -1,1 +1,0 @@
-/.src/arbitraryModuleNamespaceIdentifiers_exportEmpty.ts/arbitraryModuleNamespaceIdentifiers(6,41): error TS2304: Cannot find name 'foo'.

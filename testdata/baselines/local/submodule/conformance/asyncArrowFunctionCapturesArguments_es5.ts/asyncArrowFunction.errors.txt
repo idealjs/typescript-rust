@@ -1,1 +1,0 @@
-/.src/asyncArrowFunctionCapturesArguments_es5.ts/asyncArrowFunction(4,40): error TS2339: Property 'apply' does not exist on type '() => void'.

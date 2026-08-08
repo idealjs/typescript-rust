@@ -1,8 +1,0 @@
-/.src/ambientAccessors.ts/memberAccessorDeclarations(3,16): error TS1005: ';' expected.
-/.src/ambientAccessors.ts/memberAccessorDeclarations(4,16): error TS1005: ';' expected.
-/.src/ambientAccessors.ts/memberAccessorDeclarations(6,24): error TS1005: ';' expected.
-/.src/ambientAccessors.ts/memberAccessorDeclarations(7,24): error TS1005: ';' expected.
-/.src/ambientAccessors.ts/memberAccessorDeclarations(9,9): error TS1005: ';' expected.
-/.src/ambientAccessors.ts/memberAccessorDeclarations(10,9): error TS1005: ';' expected.
-/.src/ambientAccessors.ts/memberAccessorDeclarations(12,17): error TS1005: ';' expected.
-/.src/ambientAccessors.ts/memberAccessorDeclarations(13,17): error TS1005: ';' expected.

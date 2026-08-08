@@ -1,2 +1,0 @@
-/.src/decoratorOnClass5.ts/class(1,43): error TS2304: Cannot find name 'T'.
-/.src/decoratorOnClass5.ts/class(1,37): error TS2304: Cannot find name 'T'.

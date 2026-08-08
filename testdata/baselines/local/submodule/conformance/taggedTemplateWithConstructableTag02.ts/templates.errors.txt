@@ -1,1 +1,0 @@
-/.src/taggedTemplateWithConstructableTag02.ts/templates(6,5): error TS1005: ';' expected.

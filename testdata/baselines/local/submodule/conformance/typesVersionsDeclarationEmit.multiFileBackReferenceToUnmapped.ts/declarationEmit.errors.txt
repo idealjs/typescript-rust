@@ -1,8 +1,0 @@
-/.src/node_modules/ext/package.json(2,11): error TS1005: ';' expected.
-/.src/node_modules/ext/package.json(3,14): error TS1005: ';' expected.
-/.src/node_modules/ext/package.json(4,12): error TS1005: ';' expected.
-/.src/node_modules/ext/package.json(5,20): error TS1005: ';' expected.
-/.src/node_modules/ext/package.json(6,20): error TS1005: ';' expected.
-/.src/node_modules/ext/package.json(7,21): error TS1005: ';' expected.
-/.src/main.ts(5,20): error TS2304: Cannot find name 'fa2'.
-error TS2300: Duplicate identifier 'fa'.

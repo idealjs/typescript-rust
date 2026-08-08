@@ -1,8 +1,0 @@
-/.src/autoAccessorExperimentalDecorators.ts/propertyMemberDeclarations(13,14): error TS1005: ';' expected.
-/.src/autoAccessorExperimentalDecorators.ts/propertyMemberDeclarations(13,15): error TS1005: ';' expected.
-/.src/autoAccessorExperimentalDecorators.ts/propertyMemberDeclarations(16,21): error TS1005: ';' expected.
-/.src/autoAccessorExperimentalDecorators.ts/propertyMemberDeclarations(16,22): error TS1005: ';' expected.
-/.src/autoAccessorExperimentalDecorators.ts/propertyMemberDeclarations(13,14): error TS1127: Invalid character.
-/.src/autoAccessorExperimentalDecorators.ts/propertyMemberDeclarations(16,21): error TS1127: Invalid character.
-/.src/autoAccessorExperimentalDecorators.ts/propertyMemberDeclarations(1,37): error TS2304: Cannot find name 'PropertyKey'.
-/.src/autoAccessorExperimentalDecorators.ts/propertyMemberDeclarations(1,56): error TS2304: Cannot find name 'PropertyDescriptor'.

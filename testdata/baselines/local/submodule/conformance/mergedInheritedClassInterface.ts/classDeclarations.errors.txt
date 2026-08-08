@@ -1,2 +1,0 @@
-error TS2300: Duplicate identifier 'Child'.
-error TS2300: Duplicate identifier 'ChildNoBaseClass'.

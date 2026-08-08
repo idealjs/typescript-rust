@@ -1,5 +1,0 @@
-/.src/destructuringParameterDeclaration1ES5.ts/destructuring(49,1): error TS2554: Expected 1 arguments, but got 0.
-/.src/destructuringParameterDeclaration1ES5.ts/destructuring(87,1): error TS2554: Expected 1 arguments, but got 0.
-error TS2451: Cannot redeclare block-scoped variable 'a'.
-error TS2451: Cannot redeclare block-scoped variable 'b'.
-error TS2451: Cannot redeclare block-scoped variable 'c'.

@@ -1,1 +1,0 @@
-/.src/asyncFunctionDeclaration13_es5.ts/functionDeclarations(3,11): error TS2304: Cannot find name 'await'.

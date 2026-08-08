@@ -1,1 +1,0 @@
-/.src/contextuallyTypedFunctionExpressionsAndReturnAnnotations.ts/functions(5,15): error TS2339: Property 'charAt' does not exist on type 'string'.

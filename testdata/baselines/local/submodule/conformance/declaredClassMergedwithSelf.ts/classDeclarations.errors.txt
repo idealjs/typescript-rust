@@ -1,3 +1,0 @@
-error TS2300: Duplicate identifier 'C1'.
-error TS2300: Duplicate identifier 'C2'.
-error TS2300: Duplicate identifier 'C2'.

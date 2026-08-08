@@ -1,3 +1,0 @@
-/.src/asyncFunctionDeclaration8_es6.ts/functionDeclarations(1,17): error TS1012: Unexpected token.
-/.src/asyncFunctionDeclaration8_es6.ts/functionDeclarations(1,18): error TS1005: ']' expected.
-/.src/asyncFunctionDeclaration8_es6.ts/functionDeclarations(1,20): error TS2304: Cannot find name 'foo'.

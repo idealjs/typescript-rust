@@ -1,2 +1,0 @@
-/.src/symbolType13.ts/Symbols(4,13): error TS1005: ';' expected.
-/.src/symbolType13.ts/Symbols(5,12): error TS1005: ';' expected.

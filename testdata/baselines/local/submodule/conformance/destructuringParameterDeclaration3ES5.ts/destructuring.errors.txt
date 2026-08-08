@@ -1,4 +1,0 @@
-/.src/destructuringParameterDeclaration3ES5.ts/destructuring(15,19): error TS2304: Cannot find name 'Array'.
-/.src/destructuringParameterDeclaration3ES5.ts/destructuring(9,20): error TS2304: Cannot find name 'Array'.
-/.src/destructuringParameterDeclaration3ES5.ts/destructuring(11,25): error TS2304: Cannot find name 'Array'.
-/.src/destructuringParameterDeclaration3ES5.ts/destructuring(42,25): error TS2304: Cannot find name 'Number'.

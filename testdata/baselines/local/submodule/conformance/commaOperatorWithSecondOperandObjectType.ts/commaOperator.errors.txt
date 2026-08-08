@@ -1,5 +1,0 @@
-/.src/commaOperatorWithSecondOperandObjectType.ts/commaOperator(5,13): error TS2304: Cannot find name 'Object'.
-/.src/commaOperatorWithSecondOperandObjectType.ts/commaOperator(30,15): error TS2304: Cannot find name 'Date'.
-/.src/commaOperatorWithSecondOperandObjectType.ts/commaOperator(31,8): error TS2339: Property 'toLowerCase' does not exist on type 'string'.
-/.src/commaOperatorWithSecondOperandObjectType.ts/commaOperator(37,39): error TS2304: Cannot find name 'Date'.
-/.src/commaOperatorWithSecondOperandObjectType.ts/commaOperator(38,32): error TS2339: Property 'toLowerCase' does not exist on type 'string'.

@@ -1,4 +1,0 @@
-/.src/superCalls.ts/superCalls(12,24): error TS1005: ',' expected.
-/.src/superCalls.ts/superCalls(13,9): error TS2349: This expression is not callable.
-/.src/superCalls.ts/superCalls(15,17): error TS2349: This expression is not callable.
-/.src/superCalls.ts/superCalls(27,9): error TS2349: This expression is not callable.

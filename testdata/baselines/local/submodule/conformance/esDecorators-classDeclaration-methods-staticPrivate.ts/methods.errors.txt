@@ -1,6 +1,0 @@
-/.src/esDecorators-classDeclaration-methods-staticPrivate.ts/methods(4,17): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-methods-staticPrivate.ts/methods(4,18): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-methods-staticPrivate.ts/methods(9,12): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-methods-staticPrivate.ts/methods(9,13): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-methods-staticPrivate.ts/methods(4,17): error TS1127: Invalid character.
-/.src/esDecorators-classDeclaration-methods-staticPrivate.ts/methods(9,12): error TS1127: Invalid character.

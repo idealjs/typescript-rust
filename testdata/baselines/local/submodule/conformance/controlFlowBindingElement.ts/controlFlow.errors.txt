@@ -1,7 +1,0 @@
-/.src/controlFlowBindingElement.ts/controlFlow(6,5): error TS1012: Unexpected token.
-/.src/controlFlowBindingElement.ts/controlFlow(6,13): error TS1005: ',' expected.
-/.src/controlFlowBindingElement.ts/controlFlow(8,12): error TS1005: ',' expected.
-/.src/controlFlowBindingElement.ts/controlFlow(8,16): error TS1005: ',' expected.
-/.src/controlFlowBindingElement.ts/controlFlow(8,22): error TS1005: ',' expected.
-/.src/controlFlowBindingElement.ts/controlFlow(4,11): error TS1182: A destructuring declaration must have an initializer.
-error TS2451: Cannot redeclare block-scoped variable 'param'.

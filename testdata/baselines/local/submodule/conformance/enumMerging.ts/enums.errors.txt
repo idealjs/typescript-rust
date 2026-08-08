@@ -1,7 +1,0 @@
-/.src/enumMerging.ts/enums(26,19): error TS2339: Property 'length' does not exist on type '"foo"'.
-/.src/enumMerging.ts/enums(26,37): error TS2339: Property 'length' does not exist on type '"foo"'.
-/.src/enumMerging.ts/enums(26,55): error TS2339: Property 'length' does not exist on type '"foo"'.
-/.src/enumMerging.ts/enums(30,19): error TS2339: Property 'length' does not exist on type '"foo"'.
-/.src/enumMerging.ts/enums(30,37): error TS2339: Property 'length' does not exist on type '"foo"'.
-/.src/enumMerging.ts/enums(30,55): error TS2339: Property 'length' does not exist on type '"foo"'.
-/.src/enumMerging.ts/enums(64,17): error TS2339: Property 'Red' does not exist on type 'Color'.

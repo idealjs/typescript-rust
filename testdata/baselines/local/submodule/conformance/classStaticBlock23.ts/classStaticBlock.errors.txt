@@ -1,7 +1,0 @@
-/.src/classStaticBlock23.ts/classStaticBlock(4,10): error TS1005: ';' expected.
-/.src/classStaticBlock23.ts/classStaticBlock(5,9): error TS1005: ';' expected.
-/.src/classStaticBlock23.ts/classStaticBlock(5,22): error TS1005: ',' expected.
-/.src/classStaticBlock23.ts/classStaticBlock(5,25): error TS1005: ',' expected.
-/.src/classStaticBlock23.ts/classStaticBlock(5,28): error TS1005: ',' expected.
-/.src/classStaticBlock23.ts/classStaticBlock(9,1): error TS1128: Declaration or statement expected.
-/.src/classStaticBlock23.ts/classStaticBlock(1,24): error TS2339: Property 'map' does not exist on type 'number[]'.

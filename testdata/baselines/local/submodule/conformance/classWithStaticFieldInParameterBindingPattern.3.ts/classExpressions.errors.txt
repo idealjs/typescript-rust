@@ -1,8 +1,0 @@
-/.src/classWithStaticFieldInParameterBindingPattern.3.ts/classExpressions(3,20): error TS1005: '{' expected.
-/.src/classWithStaticFieldInParameterBindingPattern.3.ts/classExpressions(3,22): error TS1005: ';' expected.
-/.src/classWithStaticFieldInParameterBindingPattern.3.ts/classExpressions(3,24): error TS1005: ';' expected.
-/.src/classWithStaticFieldInParameterBindingPattern.3.ts/classExpressions(6,20): error TS1005: '{' expected.
-/.src/classWithStaticFieldInParameterBindingPattern.3.ts/classExpressions(6,22): error TS1005: ';' expected.
-/.src/classWithStaticFieldInParameterBindingPattern.3.ts/classExpressions(6,24): error TS1005: ';' expected.
-/.src/classWithStaticFieldInParameterBindingPattern.3.ts/classExpressions(3,1): error TS2554: Expected 1 arguments, but got 0.
-/.src/classWithStaticFieldInParameterBindingPattern.3.ts/classExpressions(6,1): error TS2554: Expected 2 arguments, but got 0.

@@ -1,8 +1,0 @@
-/.src/protectedClassPropertyAccessibleWithinNestedClass.ts/accessibility(5,19): error TS1005: ';' expected.
-/.src/protectedClassPropertyAccessibleWithinNestedClass.ts/accessibility(6,19): error TS1005: ';' expected.
-/.src/protectedClassPropertyAccessibleWithinNestedClass.ts/accessibility(10,26): error TS1005: ';' expected.
-/.src/protectedClassPropertyAccessibleWithinNestedClass.ts/accessibility(11,26): error TS1005: ';' expected.
-/.src/protectedClassPropertyAccessibleWithinNestedClass.ts/accessibility(19,26): error TS2454: Variable 'x' is used before being assigned.
-/.src/protectedClassPropertyAccessibleWithinNestedClass.ts/accessibility(20,26): error TS2454: Variable 'x' is used before being assigned.
-/.src/protectedClassPropertyAccessibleWithinNestedClass.ts/accessibility(21,26): error TS2454: Variable 'x' is used before being assigned.
-/.src/protectedClassPropertyAccessibleWithinNestedClass.ts/accessibility(22,26): error TS2454: Variable 'x' is used before being assigned.

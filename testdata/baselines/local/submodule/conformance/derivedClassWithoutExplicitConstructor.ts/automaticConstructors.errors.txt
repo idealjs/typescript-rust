@@ -1,4 +1,0 @@
-/.src/derivedClassWithoutExplicitConstructor.ts/automaticConstructors(12,22): error TS2554: Expected 0 arguments, but got 1.
-/.src/derivedClassWithoutExplicitConstructor.ts/automaticConstructors(19,19): error TS2304: Cannot find name 'Date'.
-/.src/derivedClassWithoutExplicitConstructor.ts/automaticConstructors(25,20): error TS2304: Cannot find name 'Date'.
-/.src/derivedClassWithoutExplicitConstructor.ts/automaticConstructors(25,16): error TS2554: Expected 0 arguments, but got 1.

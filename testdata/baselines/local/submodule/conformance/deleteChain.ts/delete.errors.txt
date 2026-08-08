@@ -1,4 +1,0 @@
-/.src/deleteChain.ts/delete(19,11): error TS2339: Property 'b' does not exist on type 'object'.
-/.src/deleteChain.ts/delete(20,12): error TS2339: Property 'b' does not exist on type 'object'.
-/.src/deleteChain.ts/delete(23,14): error TS2339: Property '' does not exist on type '{ c: { d: { e: string } } }'.
-/.src/deleteChain.ts/delete(24,15): error TS2339: Property '' does not exist on type '{ c: { d: { e: string } } }'.

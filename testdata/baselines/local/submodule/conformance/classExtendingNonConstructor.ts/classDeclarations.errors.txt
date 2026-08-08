@@ -1,8 +1,0 @@
-/.src/classExtendingNonConstructor.ts/classDeclarations(7,18): error TS1109: Expression expected.
-/.src/classExtendingNonConstructor.ts/classDeclarations(8,1): error TS1005: ',' expected.
-/.src/classExtendingNonConstructor.ts/classDeclarations(9,1): error TS1005: ',' expected.
-/.src/classExtendingNonConstructor.ts/classDeclarations(10,1): error TS1005: ',' expected.
-/.src/classExtendingNonConstructor.ts/classDeclarations(11,1): error TS1005: ',' expected.
-/.src/classExtendingNonConstructor.ts/classDeclarations(12,1): error TS1005: ',' expected.
-/.src/classExtendingNonConstructor.ts/classDeclarations(13,1): error TS1005: ',' expected.
-/.src/classExtendingNonConstructor.ts/classDeclarations(13,25): error TS1005: '{' expected.

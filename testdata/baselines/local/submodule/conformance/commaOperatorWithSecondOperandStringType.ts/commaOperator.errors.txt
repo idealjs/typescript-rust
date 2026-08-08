@@ -1,7 +1,0 @@
-/.src/commaOperatorWithSecondOperandStringType.ts/commaOperator(5,13): error TS2304: Cannot find name 'Object'.
-/.src/commaOperatorWithSecondOperandStringType.ts/commaOperator(25,11): error TS2304: Cannot find name 'Date'.
-/.src/commaOperatorWithSecondOperandStringType.ts/commaOperator(28,20): error TS2339: Property 'toString' does not exist on type 'number'.
-/.src/commaOperatorWithSecondOperandStringType.ts/commaOperator(29,14): error TS2304: Cannot find name 'Object'.
-/.src/commaOperatorWithSecondOperandStringType.ts/commaOperator(32,34): error TS2304: Cannot find name 'Date'.
-/.src/commaOperatorWithSecondOperandStringType.ts/commaOperator(35,44): error TS2339: Property 'toString' does not exist on type 'number'.
-/.src/commaOperatorWithSecondOperandStringType.ts/commaOperator(36,29): error TS2304: Cannot find name 'Object'.

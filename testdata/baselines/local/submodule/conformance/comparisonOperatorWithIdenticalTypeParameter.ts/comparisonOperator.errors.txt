@@ -1,1 +1,0 @@
-/.src/comparisonOperatorWithIdenticalTypeParameter.ts/comparisonOperator(2,19): error TS1005: '>' expected.

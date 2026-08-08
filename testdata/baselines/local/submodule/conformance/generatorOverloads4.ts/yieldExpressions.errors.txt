@@ -1,2 +1,0 @@
-/.src/generatorOverloads4.ts/yieldExpressions(4,5): error TS1003: Identifier expected.
-/.src/generatorOverloads4.ts/yieldExpressions(4,6): error TS1005: ';' expected.

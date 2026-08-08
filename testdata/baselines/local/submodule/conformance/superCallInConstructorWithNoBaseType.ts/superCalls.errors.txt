@@ -1,3 +1,0 @@
-/.src/superCallInConstructorWithNoBaseType.ts/superCalls(8,31): error TS1005: ',' expected.
-/.src/superCallInConstructorWithNoBaseType.ts/superCalls(3,9): error TS2349: This expression is not callable.
-/.src/superCallInConstructorWithNoBaseType.ts/superCalls(9,9): error TS2349: This expression is not callable.

@@ -1,2 +1,0 @@
-/.src/superPropertyInConstructorBeforeSuperCall.ts/superCalls(8,9): error TS2349: This expression is not callable.
-/.src/superPropertyInConstructorBeforeSuperCall.ts/superCalls(13,9): error TS2349: This expression is not callable.

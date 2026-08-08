@@ -1,1 +1,0 @@
-/.src/iterableArrayPattern30.ts/destructuring(1,34): error TS2304: Cannot find name 'Map'.

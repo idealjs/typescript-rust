@@ -1,2 +1,0 @@
-/.src/ambientExternalModuleMerging_use.ts(3,9): error TS2304: Cannot find name 'M'.
-/.src/ambientExternalModuleMerging_use.ts(4,9): error TS2304: Cannot find name 'M'.

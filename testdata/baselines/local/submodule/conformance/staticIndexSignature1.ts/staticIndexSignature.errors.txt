@@ -1,5 +1,0 @@
-/.src/staticIndexSignature1.ts/staticIndexSignature(2,14): error TS1005: ']' expected.
-/.src/staticIndexSignature1.ts/staticIndexSignature(2,22): error TS1005: ';' expected.
-/.src/staticIndexSignature1.ts/staticIndexSignature(3,14): error TS1005: ']' expected.
-/.src/staticIndexSignature1.ts/staticIndexSignature(3,22): error TS1005: ';' expected.
-/.src/staticIndexSignature1.ts/staticIndexSignature(7,3): error TS2339: Property 'bar' does not exist on type 'object'.

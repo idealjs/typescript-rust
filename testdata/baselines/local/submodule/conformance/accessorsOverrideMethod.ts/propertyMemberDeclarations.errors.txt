@@ -1,1 +1,0 @@
-/.src/accessorsOverrideMethod.ts/propertyMemberDeclarations(5,9): error TS1005: ';' expected.

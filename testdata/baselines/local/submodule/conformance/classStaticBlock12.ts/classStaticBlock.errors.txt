@@ -1,9 +1,0 @@
-/.src/classStaticBlock12.ts/classStaticBlock(2,10): error TS1005: ';' expected.
-/.src/classStaticBlock12.ts/classStaticBlock(2,11): error TS1005: ';' expected.
-/.src/classStaticBlock12.ts/classStaticBlock(4,10): error TS1005: ';' expected.
-/.src/classStaticBlock12.ts/classStaticBlock(5,6): error TS1005: ';' expected.
-/.src/classStaticBlock12.ts/classStaticBlock(5,7): error TS1005: ';' expected.
-/.src/classStaticBlock12.ts/classStaticBlock(5,8): error TS1005: ';' expected.
-/.src/classStaticBlock12.ts/classStaticBlock(7,1): error TS1128: Declaration or statement expected.
-/.src/classStaticBlock12.ts/classStaticBlock(2,10): error TS1127: Invalid character.
-/.src/classStaticBlock12.ts/classStaticBlock(5,7): error TS1127: Invalid character.

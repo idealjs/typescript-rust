@@ -1,2 +1,0 @@
-/.src/classBodyWithStatements.ts/classBody(2,9): error TS1005: ';' expected.
-/.src/classBodyWithStatements.ts/classBody(6,14): error TS1005: ';' expected.

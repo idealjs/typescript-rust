@@ -1,2 +1,0 @@
-/.src/generatorInAmbientContext3.d.ts/yieldExpressions(2,5): error TS1003: Identifier expected.
-/.src/generatorInAmbientContext3.d.ts/yieldExpressions(2,6): error TS1005: ';' expected.

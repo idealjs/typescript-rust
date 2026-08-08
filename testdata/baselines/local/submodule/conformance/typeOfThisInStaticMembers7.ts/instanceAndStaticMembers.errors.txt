@@ -1,4 +1,0 @@
-/.src/typeOfThisInStaticMembers7.ts/instanceAndStaticMembers(3,21): error TS2339: Property 'a' does not exist on type 'object'.
-/.src/typeOfThisInStaticMembers7.ts/instanceAndStaticMembers(8,21): error TS2339: Property 'c' does not exist on type 'object'.
-/.src/typeOfThisInStaticMembers7.ts/instanceAndStaticMembers(9,27): error TS2339: Property 'a' does not exist on type 'object'.
-/.src/typeOfThisInStaticMembers7.ts/instanceAndStaticMembers(9,38): error TS2339: Property 'c' does not exist on type 'object'.

@@ -1,2 +1,0 @@
-/.src/typeOfThisInStaticMembers.ts/instanceAndStaticMembers(11,11): error TS2339: Property 'bar' does not exist on type 'object'.
-/.src/typeOfThisInStaticMembers.ts/instanceAndStaticMembers(28,13): error TS2339: Property 'bar' does not exist on type 'object'.

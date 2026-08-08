@@ -1,1 +1,0 @@
-/.src/controlFlowDeleteOperator.ts/controlFlow(2,9): error TS2741: Property 'a' is missing in type '{ b: 1 }' but required in type '{ a: number | string; b: number | string }'.

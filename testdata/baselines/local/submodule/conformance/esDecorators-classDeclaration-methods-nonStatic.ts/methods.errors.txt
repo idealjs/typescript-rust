@@ -1,2 +1,0 @@
-/.src/esDecorators-classDeclaration-methods-nonStatic.ts/methods(7,27): error TS1003: Identifier expected.
-/.src/esDecorators-classDeclaration-methods-nonStatic.ts/methods(9,1): error TS1128: Declaration or statement expected.

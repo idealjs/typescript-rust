@@ -1,4 +1,0 @@
-/.src/conditionalOperatorConditionIsNumberType.ts/conditonalOperator(8,28): error TS2304: Cannot find name 'Object'.
-/.src/conditionalOperatorConditionIsNumberType.ts/conditonalOperator(14,28): error TS2304: Cannot find name 'Object'.
-/.src/conditionalOperatorConditionIsNumberType.ts/conditonalOperator(38,10): error TS2339: Property 'length' does not exist on type '"string"'.
-/.src/conditionalOperatorConditionIsNumberType.ts/conditonalOperator(60,32): error TS2339: Property 'length' does not exist on type '"string"'.

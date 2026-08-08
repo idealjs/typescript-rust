@@ -1,1 +1,0 @@
-/.src/emitArrowFunctionWhenUsingArguments17.ts/arrowFunction(3,9): error TS2304: Cannot find name 'Math'.

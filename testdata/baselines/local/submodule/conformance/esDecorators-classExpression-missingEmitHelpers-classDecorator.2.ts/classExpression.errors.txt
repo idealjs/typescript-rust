@@ -1,8 +1,0 @@
-/.src/main.ts(4,18): error TS1012: Unexpected token.
-/.src/main.ts(4,19): error TS1005: ',' expected.
-/.src/main.ts(4,23): error TS1005: ',' expected.
-/.src/main.ts(4,29): error TS1005: ',' expected.
-/.src/main.ts(4,31): error TS1005: ',' expected.
-/.src/main.ts(4,31): error TS1182: A destructuring declaration must have an initializer.
-error TS2451: Cannot redeclare block-scoped variable 'dec'.
-error TS2451: Cannot redeclare block-scoped variable 'C'.

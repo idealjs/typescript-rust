@@ -1,4 +1,0 @@
-/.src/privateNameBadSuper.ts/privateNames(3,3): error TS1003: Identifier expected.
-/.src/privateNameBadSuper.ts/privateNames(3,4): error TS1005: ';' expected.
-/.src/privateNameBadSuper.ts/privateNames(3,3): error TS1127: Invalid character.
-/.src/privateNameBadSuper.ts/privateNames(6,5): error TS2349: This expression is not callable.

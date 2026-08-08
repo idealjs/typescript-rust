@@ -1,5 +1,0 @@
-/.src/classConstructorParametersAccessibility.ts/constructorDeclarations(2,24): error TS1005: ',' expected.
-/.src/classConstructorParametersAccessibility.ts/constructorDeclarations(9,25): error TS1005: ',' expected.
-/.src/classConstructorParametersAccessibility.ts/constructorDeclarations(16,27): error TS1005: ',' expected.
-/.src/classConstructorParametersAccessibility.ts/constructorDeclarations(22,9): error TS2349: This expression is not callable.
-/.src/classConstructorParametersAccessibility.ts/constructorDeclarations(23,14): error TS2339: Property 'p' does not exist on type 'object'.

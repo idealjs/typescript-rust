@@ -1,9 +1,0 @@
-/.src/esDecorators-classDeclaration-classSuper.5.ts/classSuper(11,22): error TS2339: Property 'x' does not exist on type 'object'.
-/.src/esDecorators-classDeclaration-classSuper.5.ts/classSuper(12,22): error TS2339: Property 'x' does not exist on type 'object'.
-/.src/esDecorators-classDeclaration-classSuper.5.ts/classSuper(13,22): error TS2339: Property 'x' does not exist on type 'object'.
-/.src/esDecorators-classDeclaration-classSuper.5.ts/classSuper(14,22): error TS2339: Property 'x' does not exist on type 'object'.
-/.src/esDecorators-classDeclaration-classSuper.5.ts/classSuper(15,22): error TS2339: Property 'x' does not exist on type 'object'.
-/.src/esDecorators-classDeclaration-classSuper.5.ts/classSuper(16,24): error TS2339: Property 'x' does not exist on type 'object'.
-/.src/esDecorators-classDeclaration-classSuper.5.ts/classSuper(17,24): error TS2339: Property 'x' does not exist on type 'object'.
-/.src/esDecorators-classDeclaration-classSuper.5.ts/classSuper(18,28): error TS2339: Property 'x' does not exist on type 'object'.
-/.src/esDecorators-classDeclaration-classSuper.5.ts/classSuper(19,23): error TS2339: Property 'x' does not exist on type 'object'.

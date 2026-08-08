@@ -1,3 +1,0 @@
-/.src/destructuringParameterDeclaration8.ts/destructuring(5,11): error TS1005: ',' expected.
-/.src/destructuringParameterDeclaration8.ts/destructuring(5,13): error TS1180: Property destructuring pattern expected.
-/.src/destructuringParameterDeclaration8.ts/destructuring(6,1): error TS1005: ',' expected.

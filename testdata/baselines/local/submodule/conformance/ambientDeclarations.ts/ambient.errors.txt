@@ -1,3 +1,0 @@
-/.src/ambientDeclarations.ts/ambient(58,12): error TS2339: Property 'B' does not exist on type 'E3'.
-/.src/ambientDeclarations.ts/ambient(67,12): error TS2339: Property 'x' does not exist on type 'M1'.
-/.src/ambientDeclarations.ts/ambient(68,12): error TS2339: Property 'fn' does not exist on type 'M1'.

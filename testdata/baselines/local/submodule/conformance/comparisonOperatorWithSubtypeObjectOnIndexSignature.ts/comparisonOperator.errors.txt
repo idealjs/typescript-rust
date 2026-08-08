@@ -1,8 +1,0 @@
-/.src/comparisonOperatorWithSubtypeObjectOnIndexSignature.ts/comparisonOperator(22,19): error TS1005: '>' expected.
-/.src/comparisonOperatorWithSubtypeObjectOnIndexSignature.ts/comparisonOperator(23,19): error TS1005: '>' expected.
-/.src/comparisonOperatorWithSubtypeObjectOnIndexSignature.ts/comparisonOperator(24,19): error TS1005: '>' expected.
-/.src/comparisonOperatorWithSubtypeObjectOnIndexSignature.ts/comparisonOperator(25,19): error TS1005: '>' expected.
-/.src/comparisonOperatorWithSubtypeObjectOnIndexSignature.ts/comparisonOperator(27,19): error TS1005: '>' expected.
-/.src/comparisonOperatorWithSubtypeObjectOnIndexSignature.ts/comparisonOperator(28,19): error TS1005: '>' expected.
-/.src/comparisonOperatorWithSubtypeObjectOnIndexSignature.ts/comparisonOperator(29,19): error TS1005: '>' expected.
-/.src/comparisonOperatorWithSubtypeObjectOnIndexSignature.ts/comparisonOperator(30,19): error TS1005: '>' expected.

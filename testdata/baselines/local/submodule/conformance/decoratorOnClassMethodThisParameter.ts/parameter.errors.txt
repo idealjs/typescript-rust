@@ -1,7 +1,0 @@
-/.src/decoratorOnClassMethodThisParameter.ts/parameter(4,12): error TS1138: Parameter declaration expected.
-/.src/decoratorOnClassMethodThisParameter.ts/parameter(4,17): error TS1005: ',' expected.
-/.src/decoratorOnClassMethodThisParameter.ts/parameter(8,12): error TS1138: Parameter declaration expected.
-/.src/decoratorOnClassMethodThisParameter.ts/parameter(8,17): error TS1005: ',' expected.
-/.src/decoratorOnClassMethodThisParameter.ts/parameter(8,30): error TS1138: Parameter declaration expected.
-/.src/decoratorOnClassMethodThisParameter.ts/parameter(8,35): error TS1005: ',' expected.
-/.src/decoratorOnClassMethodThisParameter.ts/parameter(1,30): error TS2304: Cannot find name 'Object'.

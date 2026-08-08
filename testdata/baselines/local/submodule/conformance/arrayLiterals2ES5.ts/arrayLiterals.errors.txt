@@ -1,6 +1,0 @@
-/.src/arrayLiterals2ES5.ts/arrayLiterals(11,11): error TS1012: Unexpected token.
-/.src/arrayLiterals2ES5.ts/arrayLiterals(13,11): error TS1012: Unexpected token.
-/.src/arrayLiterals2ES5.ts/arrayLiterals(13,15): error TS1012: Unexpected token.
-/.src/arrayLiterals2ES5.ts/arrayLiterals(13,17): error TS1005: ',' expected.
-/.src/arrayLiterals2ES5.ts/arrayLiterals(14,11): error TS1012: Unexpected token.
-/.src/arrayLiterals2ES5.ts/arrayLiterals(16,18): error TS1012: Unexpected token.

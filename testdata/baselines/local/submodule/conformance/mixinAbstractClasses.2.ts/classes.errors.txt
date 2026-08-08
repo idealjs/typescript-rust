@@ -1,1 +1,0 @@
-/.src/mixinAbstractClasses.2.ts/classes(25,5): error TS2351: This expression is not constructable.

@@ -1,2 +1,0 @@
-/.src/controlFlowElementAccess2.ts/controlFlow(7,21): error TS2339: Property 'prop' does not exist on type 'boolean | { prop: string }'.
-/.src/controlFlowElementAccess2.ts/controlFlow(10,21): error TS2339: Property 'prop' does not exist on type 'boolean | { prop: string }'.

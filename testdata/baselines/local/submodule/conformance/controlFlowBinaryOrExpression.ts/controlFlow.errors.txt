@@ -1,2 +1,0 @@
-/.src/controlFlowBinaryOrExpression.ts/controlFlow(5,1): error TS2454: Variable 'x' is used before being assigned.
-/.src/controlFlowBinaryOrExpression.ts/controlFlow(8,1): error TS2454: Variable 'cond' is used before being assigned.

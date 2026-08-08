@@ -1,6 +1,0 @@
-/.src/privateNameStaticMethodInStaticFieldInit.ts/privateNames(2,18): error TS1003: Identifier expected.
-/.src/privateNameStaticMethodInStaticFieldInit.ts/privateNames(2,19): error TS1005: ';' expected.
-/.src/privateNameStaticMethodInStaticFieldInit.ts/privateNames(3,12): error TS1005: ';' expected.
-/.src/privateNameStaticMethodInStaticFieldInit.ts/privateNames(3,13): error TS1005: ';' expected.
-/.src/privateNameStaticMethodInStaticFieldInit.ts/privateNames(2,18): error TS1127: Invalid character.
-/.src/privateNameStaticMethodInStaticFieldInit.ts/privateNames(3,12): error TS1127: Invalid character.

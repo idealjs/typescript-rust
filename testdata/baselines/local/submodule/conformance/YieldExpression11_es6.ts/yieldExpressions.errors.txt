@@ -1,2 +1,0 @@
-/.src/YieldExpression11_es6.ts/yieldExpressions(2,3): error TS1003: Identifier expected.
-/.src/YieldExpression11_es6.ts/yieldExpressions(2,4): error TS1005: ';' expected.

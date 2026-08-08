@@ -1,5 +1,0 @@
-/.src/computedPropertyNamesWithStaticProperty.ts/computedProperties(3,9): error TS1005: ';' expected.
-/.src/computedPropertyNamesWithStaticProperty.ts/computedProperties(6,9): error TS1005: ';' expected.
-/.src/computedPropertyNamesWithStaticProperty.ts/computedProperties(14,9): error TS1005: ';' expected.
-/.src/computedPropertyNamesWithStaticProperty.ts/computedProperties(17,9): error TS1005: ';' expected.
-/.src/computedPropertyNamesWithStaticProperty.ts/computedProperties(12,8): error TS2304: Cannot find name 'C2'.

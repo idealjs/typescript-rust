@@ -1,1 +1,0 @@
-/.src/modifierOnClassExpressionMemberInFunction.ts/classExpressions(4,19): error TS2304: Cannot find name 'C'.

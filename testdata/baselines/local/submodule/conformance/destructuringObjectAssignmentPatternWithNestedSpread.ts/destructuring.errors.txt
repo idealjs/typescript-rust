@@ -1,5 +1,0 @@
-/.src/destructuringObjectAssignmentPatternWithNestedSpread.ts/destructuring(1,50): error TS1005: ',' expected.
-/.src/destructuringObjectAssignmentPatternWithNestedSpread.ts/destructuring(1,49): error TS2304: Cannot find name 'd'.
-/.src/destructuringObjectAssignmentPatternWithNestedSpread.ts/destructuring(2,7): error TS2454: Variable 'a' is used before being assigned.
-/.src/destructuringObjectAssignmentPatternWithNestedSpread.ts/destructuring(2,13): error TS2454: Variable 'b' is used before being assigned.
-/.src/destructuringObjectAssignmentPatternWithNestedSpread.ts/destructuring(2,18): error TS2304: Cannot find name 'd'.

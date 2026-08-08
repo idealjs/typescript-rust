@@ -1,1 +1,0 @@
-/.src/assignSharedArrayBufferToArrayBuffer.ts/es2017(1,28): error TS2304: Cannot find name 'SharedArrayBuffer'.

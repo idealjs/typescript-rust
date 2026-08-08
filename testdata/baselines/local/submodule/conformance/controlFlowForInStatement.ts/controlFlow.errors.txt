@@ -1,4 +1,0 @@
-/.src/controlFlowForInStatement.ts/controlFlow(1,36): error TS2304: Cannot find name 'RegExp'.
-/.src/controlFlowForInStatement.ts/controlFlow(6,15): error TS2454: Variable 'obj' is used before being assigned.
-/.src/controlFlowForInStatement.ts/controlFlow(8,9): error TS2454: Variable 'cond' is used before being assigned.
-/.src/controlFlowForInStatement.ts/controlFlow(12,9): error TS2454: Variable 'cond' is used before being assigned.

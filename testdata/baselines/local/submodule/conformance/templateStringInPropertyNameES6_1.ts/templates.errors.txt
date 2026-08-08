@@ -1,1 +1,0 @@
-/.src/templateStringInPropertyNameES6_1.ts/templates(3,5): error TS1003: Identifier expected.

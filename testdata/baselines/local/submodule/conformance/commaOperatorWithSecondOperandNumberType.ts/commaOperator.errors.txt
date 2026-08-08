@@ -1,3 +1,0 @@
-/.src/commaOperatorWithSecondOperandNumberType.ts/commaOperator(5,13): error TS2304: Cannot find name 'Object'.
-/.src/commaOperatorWithSecondOperandNumberType.ts/commaOperator(27,8): error TS2339: Property 'trim' does not exist on type 'string'.
-/.src/commaOperatorWithSecondOperandNumberType.ts/commaOperator(34,32): error TS2339: Property 'trim' does not exist on type 'string'.

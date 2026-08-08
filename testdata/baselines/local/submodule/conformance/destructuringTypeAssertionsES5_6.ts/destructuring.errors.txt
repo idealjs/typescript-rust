@@ -1,1 +1,0 @@
-/.src/destructuringTypeAssertionsES5_6.ts/destructuring(1,22): error TS2304: Cannot find name 'Foo'.

@@ -1,3 +1,0 @@
-/.src/objectLiteralShorthandPropertiesAssignmentErrorFromMissingIdentifier.ts/shorthandPropertyAssignment(5,43): error TS2353: Object literal may only specify known properties, and 'name' does not exist in type '{ b: string; id: number }'.
-/.src/objectLiteralShorthandPropertiesAssignmentErrorFromMissingIdentifier.ts/shorthandPropertyAssignment(6,79): error TS2322: Type '{ name: string; id: number }' is not assignable to type '{ name: number; id: string }'.
-/.src/objectLiteralShorthandPropertiesAssignmentErrorFromMissingIdentifier.ts/shorthandPropertyAssignment(9,5): error TS2322: Type '{ name: number; id: string }' is not assignable to type '{ name: string; id: number }'.

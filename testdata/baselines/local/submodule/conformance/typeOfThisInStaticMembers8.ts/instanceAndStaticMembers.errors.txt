@@ -1,5 +1,0 @@
-/.src/typeOfThisInStaticMembers8.ts/instanceAndStaticMembers(3,47): error TS2339: Property 'f' does not exist on type 'object'.
-/.src/typeOfThisInStaticMembers8.ts/instanceAndStaticMembers(4,61): error TS2339: Property 'f' does not exist on type 'object'.
-/.src/typeOfThisInStaticMembers8.ts/instanceAndStaticMembers(8,25): error TS2339: Property 'f' does not exist on type 'object'.
-/.src/typeOfThisInStaticMembers8.ts/instanceAndStaticMembers(11,22): error TS2339: Property 'f' does not exist on type '{ a: number; method: () => any }'.
-/.src/typeOfThisInStaticMembers8.ts/instanceAndStaticMembers(13,29): error TS2339: Property 'f' does not exist on type '{ a: number; method: () => any }'.

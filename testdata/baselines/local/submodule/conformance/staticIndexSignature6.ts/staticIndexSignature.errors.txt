@@ -1,4 +1,0 @@
-/.src/staticIndexSignature6.ts/staticIndexSignature(3,18): error TS1005: ']' expected.
-/.src/staticIndexSignature6.ts/staticIndexSignature(3,26): error TS1005: ';' expected.
-/.src/staticIndexSignature6.ts/staticIndexSignature(4,18): error TS1005: ']' expected.
-/.src/staticIndexSignature6.ts/staticIndexSignature(4,26): error TS1005: ';' expected.

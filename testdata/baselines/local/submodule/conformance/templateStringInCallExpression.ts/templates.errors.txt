@@ -1,1 +1,0 @@
-/.src/templateStringInCallExpression.ts/templates(2,1): error TS2349: This expression is not callable.

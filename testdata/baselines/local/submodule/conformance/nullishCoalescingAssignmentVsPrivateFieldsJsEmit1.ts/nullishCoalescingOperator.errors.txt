@@ -1,7 +1,0 @@
-/.src/nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts/nullishCoalescingOperator(4,3): error TS1003: Identifier expected.
-/.src/nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts/nullishCoalescingOperator(4,4): error TS1005: ';' expected.
-/.src/nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts/nullishCoalescingOperator(7,10): error TS1003: Identifier expected.
-/.src/nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts/nullishCoalescingOperator(7,11): error TS1005: ';' expected.
-/.src/nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts/nullishCoalescingOperator(4,3): error TS1127: Invalid character.
-/.src/nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts/nullishCoalescingOperator(7,10): error TS1127: Invalid character.
-/.src/nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts/nullishCoalescingOperator(12,13): error TS2304: Cannot find name 'Error'.

@@ -1,3 +1,0 @@
-/.src/strictModeOctalLiterals.ts/literals(2,14): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
-/.src/strictModeOctalLiterals.ts/literals(4,16): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
-/.src/strictModeOctalLiterals.ts/literals(4,21): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.

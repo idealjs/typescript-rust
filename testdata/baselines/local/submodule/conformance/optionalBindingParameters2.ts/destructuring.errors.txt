@@ -1,1 +1,0 @@
-/.src/optionalBindingParameters2.ts/destructuring(9,5): error TS2345: Argument of type '{ x: false; y: 0; z: "" }' is not assignable to parameter of type '{ x: string; y: number; z: boolean }'.

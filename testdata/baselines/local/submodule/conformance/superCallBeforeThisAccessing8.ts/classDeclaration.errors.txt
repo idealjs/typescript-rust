@@ -1,1 +1,0 @@
-/.src/superCallBeforeThisAccessing8.ts/classDeclaration(9,16): error TS2349: This expression is not callable.

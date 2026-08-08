@@ -1,8 +1,0 @@
-/.src/decoratorOnClassMethodParameter3.ts/parameter(5,18): error TS1138: Parameter declaration expected.
-/.src/decoratorOnClassMethodParameter3.ts/parameter(5,22): error TS1005: ',' expected.
-/.src/decoratorOnClassMethodParameter3.ts/parameter(5,29): error TS1005: ',' expected.
-/.src/decoratorOnClassMethodParameter3.ts/parameter(5,36): error TS1005: ';' expected.
-/.src/decoratorOnClassMethodParameter3.ts/parameter(5,47): error TS1005: ';' expected.
-/.src/decoratorOnClassMethodParameter3.ts/parameter(5,49): error TS1005: ';' expected.
-/.src/decoratorOnClassMethodParameter3.ts/parameter(8,1): error TS1128: Declaration or statement expected.
-/.src/decoratorOnClassMethodParameter3.ts/parameter(7,10): error TS2304: Cannot find name 'Class'.

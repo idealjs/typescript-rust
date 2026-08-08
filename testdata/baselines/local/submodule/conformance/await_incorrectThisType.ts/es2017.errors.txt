@@ -1,3 +1,0 @@
-/.src/await_incorrectThisType.ts/es2017(6,21): error TS1005: ')' expected.
-/.src/await_incorrectThisType.ts/es2017(6,24): error TS1005: ',' expected.
-/.src/await_incorrectThisType.ts/es2017(6,20): error TS2304: Cannot find name 'e'.

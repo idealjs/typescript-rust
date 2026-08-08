@@ -1,2 +1,0 @@
-/.src/typeOfThisInStaticMembers5.ts/instanceAndStaticMembers(4,26): error TS1005: ',' expected.
-/.src/typeOfThisInStaticMembers5.ts/instanceAndStaticMembers(2,31): error TS2351: This expression is not constructable.

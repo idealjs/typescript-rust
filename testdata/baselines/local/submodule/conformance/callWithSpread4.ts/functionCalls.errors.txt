@@ -1,4 +1,0 @@
-/.src/callWithSpread4.ts/functionCalls(15,32): error TS2304: Cannot find name 'AsyncGenerator'.
-/.src/callWithSpread4.ts/functionCalls(16,1): error TS2349: This expression is not callable.
-/.src/callWithSpread4.ts/functionCalls(27,9): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
-/.src/callWithSpread4.ts/functionCalls(29,1): error TS2349: This expression is not callable.

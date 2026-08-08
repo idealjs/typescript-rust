@@ -1,9 +1,0 @@
-/.src/privateNameComputedPropertyName4.ts/privateNames(3,12): error TS1005: ';' expected.
-/.src/privateNameComputedPropertyName4.ts/privateNames(3,13): error TS1005: ';' expected.
-/.src/privateNameComputedPropertyName4.ts/privateNames(7,12): error TS1005: ';' expected.
-/.src/privateNameComputedPropertyName4.ts/privateNames(7,13): error TS1005: ';' expected.
-/.src/privateNameComputedPropertyName4.ts/privateNames(11,12): error TS1005: ';' expected.
-/.src/privateNameComputedPropertyName4.ts/privateNames(11,13): error TS1005: ';' expected.
-/.src/privateNameComputedPropertyName4.ts/privateNames(3,12): error TS1127: Invalid character.
-/.src/privateNameComputedPropertyName4.ts/privateNames(7,12): error TS1127: Invalid character.
-/.src/privateNameComputedPropertyName4.ts/privateNames(11,12): error TS1127: Invalid character.

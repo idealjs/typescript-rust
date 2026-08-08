@@ -1,7 +1,0 @@
-/.src/optionalChainingInference.ts/optionalChaining(8,25): error TS2339: Property 'length' does not exist on type 'string | undefined'.
-/.src/optionalChainingInference.ts/optionalChaining(11,25): error TS2339: Property 'length' does not exist on type 'string | undefined'.
-/.src/optionalChainingInference.ts/optionalChaining(12,26): error TS2345: Argument of type '{ value: number | undefined }' is not assignable to parameter of type '{ value: T | undefined }'.
-/.src/optionalChainingInference.ts/optionalChaining(14,56): error TS2339: Property 'length' does not exist on type 'string | undefined'.
-/.src/optionalChainingInference.ts/optionalChaining(15,26): error TS2345: Argument of type '{ value: number | undefined }' is not assignable to parameter of type '{ value: T | undefined }'.
-/.src/optionalChainingInference.ts/optionalChaining(17,21): error TS2349: This expression is not callable.
-/.src/optionalChainingInference.ts/optionalChaining(20,25): error TS2339: Property '' does not exist on type 'string | undefined'.

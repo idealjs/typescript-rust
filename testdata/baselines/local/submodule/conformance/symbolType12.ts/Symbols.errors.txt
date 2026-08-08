@@ -1,4 +1,0 @@
-/.src/symbolType12.ts/Symbols(19,6): error TS1012: Unexpected token.
-/.src/symbolType12.ts/Symbols(19,8): error TS1005: ';' expected.
-/.src/symbolType12.ts/Symbols(20,6): error TS1012: Unexpected token.
-/.src/symbolType12.ts/Symbols(20,8): error TS1005: ';' expected.

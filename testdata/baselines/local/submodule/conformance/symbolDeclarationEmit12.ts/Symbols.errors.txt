@@ -1,3 +1,0 @@
-/.src/symbolDeclarationEmit12.ts/Symbols(9,13): error TS1005: ';' expected.
-/.src/symbolDeclarationEmit12.ts/Symbols(10,13): error TS1005: ';' expected.
-/.src/symbolDeclarationEmit12.ts/Symbols(7,20): error TS2322: Type 'undefined' is not assignable to type 'object'.

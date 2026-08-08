@@ -1,4 +1,0 @@
-/.src/propertyAndAccessorWithSameName.ts/propertyMemberDeclarations(3,9): error TS1005: ';' expected.
-/.src/propertyAndAccessorWithSameName.ts/propertyMemberDeclarations(10,9): error TS1005: ';' expected.
-/.src/propertyAndAccessorWithSameName.ts/propertyMemberDeclarations(15,9): error TS1005: ';' expected.
-/.src/propertyAndAccessorWithSameName.ts/propertyMemberDeclarations(18,9): error TS1005: ';' expected.

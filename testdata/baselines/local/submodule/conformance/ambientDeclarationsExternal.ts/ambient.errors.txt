@@ -1,1 +1,0 @@
-/.src/consumer.ts(7,9): error TS2304: Cannot find name 'imp3'.

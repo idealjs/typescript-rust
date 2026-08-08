@@ -1,4 +1,0 @@
-/.src/a.ts(6,17): error TS1012: Unexpected token.
-/.src/a.ts(6,18): error TS1005: ')' expected.
-/.src/a.ts(6,22): error TS1005: ';' expected.
-/.src/a.ts(6,31): error TS1128: Declaration or statement expected.

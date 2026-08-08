@@ -1,3 +1,0 @@
-/.src/privateNameEnum.ts/privateNames(2,5): error TS1003: Identifier expected.
-/.src/privateNameEnum.ts/privateNames(2,6): error TS1005: ',' expected.
-/.src/privateNameEnum.ts/privateNames(2,5): error TS1127: Invalid character.

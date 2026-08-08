@@ -1,7 +1,0 @@
-/.src/asyncArrowFunction8_es6.ts/asyncArrowFunction(1,19): error TS1005: ',' expected.
-/.src/asyncArrowFunction8_es6.ts/asyncArrowFunction(1,28): error TS1005: ',' expected.
-/.src/asyncArrowFunction8_es6.ts/asyncArrowFunction(1,33): error TS1005: ',' expected.
-/.src/asyncArrowFunction8_es6.ts/asyncArrowFunction(1,35): error TS1005: ';' expected.
-/.src/asyncArrowFunction8_es6.ts/asyncArrowFunction(2,19): error TS1012: Unexpected token.
-/.src/asyncArrowFunction8_es6.ts/asyncArrowFunction(2,20): error TS1005: ']' expected.
-/.src/asyncArrowFunction8_es6.ts/asyncArrowFunction(1,11): error TS2304: Cannot find name 'async'.

@@ -1,6 +1,0 @@
-/.src/assignmentLHSIsValue.ts/assignmentOperator(35,9): error TS1128: Declaration or statement expected.
-/.src/assignmentLHSIsValue.ts/assignmentOperator(50,20): error TS1128: Declaration or statement expected.
-/.src/assignmentLHSIsValue.ts/assignmentOperator(51,11): error TS1005: ';' expected.
-/.src/assignmentLHSIsValue.ts/assignmentOperator(42,21): error TS2349: This expression is not callable.
-/.src/assignmentLHSIsValue.ts/assignmentOperator(54,1): error TS2349: This expression is not callable.
-/.src/assignmentLHSIsValue.ts/assignmentOperator(70,2): error TS2349: This expression is not callable.

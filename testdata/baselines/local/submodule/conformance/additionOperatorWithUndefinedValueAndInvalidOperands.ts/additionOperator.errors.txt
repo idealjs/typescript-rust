@@ -1,2 +1,0 @@
-/.src/additionOperatorWithUndefinedValueAndInvalidOperands.ts/additionOperator(6,16): error TS2304: Cannot find name 'Object'.
-/.src/additionOperatorWithUndefinedValueAndInvalidOperands.ts/additionOperator(8,16): error TS2304: Cannot find name 'Number'.

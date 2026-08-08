@@ -1,2 +1,0 @@
-/.src/computedPropertyNamesDeclarationEmit2_ES5.ts/computedProperties(3,16): error TS1005: ';' expected.
-/.src/computedPropertyNamesDeclarationEmit2_ES5.ts/computedProperties(4,16): error TS1005: ';' expected.

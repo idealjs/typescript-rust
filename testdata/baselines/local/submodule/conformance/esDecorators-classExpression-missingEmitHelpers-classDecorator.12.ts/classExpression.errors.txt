@@ -1,5 +1,0 @@
-/.src/main.ts(5,16): error TS1012: Unexpected token.
-/.src/main.ts(5,17): error TS1005: ',' expected.
-/.src/main.ts(5,21): error TS1005: ',' expected.
-/.src/main.ts(5,27): error TS1005: ',' expected.
-/.src/main.ts(5,17): error TS1016: A required parameter cannot follow an optional parameter.

@@ -1,1 +1,0 @@
-/.src/destructuringVariableDeclaration2.ts/destructuring(4,5): error TS2322: Type '{ a1: true; a2: 1 }' is not assignable to type '{ a1: number; a2: string }'.

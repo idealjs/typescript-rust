@@ -1,2 +1,0 @@
-/.src/protectedStaticNotAccessibleInClodule.ts/accessibility(9,22): error TS2339: Property 'foo' does not exist on type 'C'.
-/.src/protectedStaticNotAccessibleInClodule.ts/accessibility(10,22): error TS2339: Property 'bar' does not exist on type 'C'.

@@ -1,5 +1,0 @@
-/.src/accessorsOverrideProperty9.ts/propertyMemberDeclarations(11,14): error TS1005: ';' expected.
-/.src/accessorsOverrideProperty9.ts/propertyMemberDeclarations(33,16): error TS1005: ';' expected.
-/.src/accessorsOverrideProperty9.ts/propertyMemberDeclarations(44,14): error TS1005: ';' expected.
-/.src/accessorsOverrideProperty9.ts/propertyMemberDeclarations(30,7): error TS2349: This expression is not callable.
-/.src/accessorsOverrideProperty9.ts/propertyMemberDeclarations(38,10): error TS2322: Type 'object' is not assignable to type 'TBaseClass & object'.

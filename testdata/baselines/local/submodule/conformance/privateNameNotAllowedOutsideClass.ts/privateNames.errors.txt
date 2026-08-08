@@ -1,2 +1,0 @@
-/.src/privateNameNotAllowedOutsideClass.ts/privateNames(1,7): error TS1134: Variable declaration expected.
-/.src/privateNameNotAllowedOutsideClass.ts/privateNames(1,7): error TS1127: Invalid character.

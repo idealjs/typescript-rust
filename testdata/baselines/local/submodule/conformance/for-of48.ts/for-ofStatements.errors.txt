@@ -1,6 +1,0 @@
-/.src/for-of48.ts/for-ofStatements(5,12): error TS1005: ',' expected.
-/.src/for-of48.ts/for-ofStatements(5,14): error TS1005: ',' expected.
-/.src/for-of48.ts/for-ofStatements(5,15): error TS1005: ',' expected.
-/.src/for-of48.ts/for-ofStatements(5,16): error TS1005: ',' expected.
-/.src/for-of48.ts/for-ofStatements(5,12): error TS2304: Cannot find name '='.
-/.src/for-of48.ts/for-ofStatements(5,15): error TS2304: Cannot find name '.'.

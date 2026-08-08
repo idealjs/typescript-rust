@@ -1,7 +1,0 @@
-/.src/callWithMissingVoid.ts/functionCalls(48,1): error TS2554: Expected 2 arguments, but got 1.
-/.src/callWithMissingVoid.ts/functionCalls(55,1): error TS2554: Expected 4 arguments, but got 2.
-/.src/callWithMissingVoid.ts/functionCalls(56,1): error TS2554: Expected 4 arguments, but got 3.
-/.src/callWithMissingVoid.ts/functionCalls(57,1): error TS2554: Expected 4 arguments, but got 1.
-/.src/callWithMissingVoid.ts/functionCalls(64,1): error TS2554: Expected 3 arguments, but got 2.
-/.src/callWithMissingVoid.ts/functionCalls(65,1): error TS2554: Expected 3 arguments, but got 1.
-/.src/callWithMissingVoid.ts/functionCalls(66,1): error TS2554: Expected 3 arguments, but got 0.

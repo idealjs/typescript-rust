@@ -1,4 +1,0 @@
-/.src/taggedTemplateStringsWithOverloadResolution2_ES6.ts/templates(8,14): error TS1005: ',' expected.
-/.src/taggedTemplateStringsWithOverloadResolution2_ES6.ts/templates(8,17): error TS1134: Variable declaration expected.
-/.src/taggedTemplateStringsWithOverloadResolution2_ES6.ts/templates(8,18): error TS1128: Declaration or statement expected.
-/.src/taggedTemplateStringsWithOverloadResolution2_ES6.ts/templates(2,21): error TS2304: Cannot find name 'TemplateStringsArray'.

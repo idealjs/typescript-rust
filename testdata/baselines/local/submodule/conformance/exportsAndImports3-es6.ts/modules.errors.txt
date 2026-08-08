@@ -1,9 +1,0 @@
-/.src/t1.ts(10,19): error TS1005: ',' expected.
-/.src/t1.ts(10,21): error TS1005: ',' expected.
-/.src/t1.ts(21,8): error TS1005: '{' expected.
-/.src/t1.ts(21,17): error TS1003: Identifier expected.
-/.src/t1.ts(21,20): error TS1003: Identifier expected.
-/.src/t1.ts(21,22): error TS1003: Identifier expected.
-/.src/t1.ts(23,8): error TS1003: Identifier expected.
-/.src/t1.ts(10,21): error TS1182: A destructuring declaration must have an initializer.
-error TS2300: Duplicate identifier 'C'.

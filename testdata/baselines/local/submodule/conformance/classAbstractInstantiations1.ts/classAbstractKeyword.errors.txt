@@ -1,4 +1,0 @@
-/.src/classAbstractInstantiations1.ts/classAbstractKeyword(11,5): error TS2511: Cannot create an instance of an abstract class.
-/.src/classAbstractInstantiations1.ts/classAbstractKeyword(12,5): error TS2511: Cannot create an instance of an abstract class.
-/.src/classAbstractInstantiations1.ts/classAbstractKeyword(12,7): error TS2554: Expected 0 arguments, but got 1.
-/.src/classAbstractInstantiations1.ts/classAbstractKeyword(14,5): error TS2511: Cannot create an instance of an abstract class.

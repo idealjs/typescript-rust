@@ -1,4 +1,0 @@
-/.src/decoratorOnClassMethod5.ts/method(4,25): error TS1003: Identifier expected.
-/.src/decoratorOnClassMethod5.ts/method(5,1): error TS1128: Declaration or statement expected.
-/.src/decoratorOnClassMethod5.ts/method(1,106): error TS2304: Cannot find name 'TypedPropertyDescriptor'.
-/.src/decoratorOnClassMethod5.ts/method(1,75): error TS2304: Cannot find name 'TypedPropertyDescriptor'.

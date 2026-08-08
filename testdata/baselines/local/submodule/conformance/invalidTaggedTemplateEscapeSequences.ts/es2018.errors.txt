@@ -1,5 +1,0 @@
-/.src/invalidTaggedTemplateEscapeSequences.ts/es2018(5,14): error TS1005: ',' expected.
-/.src/invalidTaggedTemplateEscapeSequences.ts/es2018(6,7): error TS1005: ',' expected.
-/.src/invalidTaggedTemplateEscapeSequences.ts/es2018(6,14): error TS1005: ',' expected.
-/.src/invalidTaggedTemplateEscapeSequences.ts/es2018(6,21): error TS1134: Variable declaration expected.
-/.src/invalidTaggedTemplateEscapeSequences.ts/es2018(6,24): error TS1128: Declaration or statement expected.

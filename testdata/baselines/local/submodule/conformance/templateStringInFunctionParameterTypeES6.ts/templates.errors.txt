@@ -1,1 +1,0 @@
-/.src/templateStringInFunctionParameterTypeES6.ts/templates(2,12): error TS1138: Parameter declaration expected.

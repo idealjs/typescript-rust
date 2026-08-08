@@ -1,5 +1,0 @@
-/.src/asyncFunctionDeclaration12_es2017.ts/functionDeclarations(1,15): error TS1005: ',' expected.
-/.src/asyncFunctionDeclaration12_es2017.ts/functionDeclarations(1,24): error TS1005: ',' expected.
-/.src/asyncFunctionDeclaration12_es2017.ts/functionDeclarations(1,29): error TS1005: ',' expected.
-/.src/asyncFunctionDeclaration12_es2017.ts/functionDeclarations(1,30): error TS1134: Variable declaration expected.
-/.src/asyncFunctionDeclaration12_es2017.ts/functionDeclarations(1,9): error TS2304: Cannot find name 'async'.

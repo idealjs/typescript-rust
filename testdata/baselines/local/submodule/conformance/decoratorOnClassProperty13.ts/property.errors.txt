@@ -1,1 +1,0 @@
-/.src/decoratorOnClassProperty13.ts/property(1,62): error TS2304: Cannot find name 'PropertyDescriptor'.

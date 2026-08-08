@@ -1,1 +1,0 @@
-/.src/for-of6.ts/for-ofStatements(2,6): error TS2304: Cannot find name 'v'.

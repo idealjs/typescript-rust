@@ -1,3 +1,0 @@
-/.src/decoratorOnEnum2.ts/invalid(4,5): error TS1003: Identifier expected.
-/.src/decoratorOnEnum2.ts/invalid(4,6): error TS1005: ',' expected.
-/.src/decoratorOnEnum2.ts/invalid(4,10): error TS1005: ',' expected.

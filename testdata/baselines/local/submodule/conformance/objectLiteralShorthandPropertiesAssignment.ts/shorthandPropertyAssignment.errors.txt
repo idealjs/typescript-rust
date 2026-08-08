@@ -1,1 +1,0 @@
-/.src/objectLiteralShorthandPropertiesAssignment.ts/shorthandPropertyAssignment(13,5): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type '{ name: string }'.

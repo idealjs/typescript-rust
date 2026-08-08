@@ -1,2 +1,0 @@
-/.src/emitClassDeclarationWithTypeArgumentInES6.ts/classDeclaration(9,9): error TS1005: ';' expected.
-/.src/emitClassDeclarationWithTypeArgumentInES6.ts/classDeclaration(12,9): error TS1005: ';' expected.

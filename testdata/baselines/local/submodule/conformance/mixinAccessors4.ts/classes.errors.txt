@@ -1,4 +1,0 @@
-/.src/mixinAccessors4.ts/classes(5,7): error TS1005: ';' expected.
-/.src/mixinAccessors4.ts/classes(12,9): error TS1005: ';' expected.
-/.src/mixinAccessors4.ts/classes(19,7): error TS1005: ';' expected.
-/.src/mixinAccessors4.ts/classes(11,16): error TS2304: Cannot find name 'B'.

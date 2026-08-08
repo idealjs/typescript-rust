@@ -1,3 +1,0 @@
-/.src/decoratorOnClassMethodParameter2.ts/parameter(4,21): error TS1138: Parameter declaration expected.
-/.src/decoratorOnClassMethodParameter2.ts/parameter(4,26): error TS1005: ',' expected.
-/.src/decoratorOnClassMethodParameter2.ts/parameter(1,30): error TS2304: Cannot find name 'Object'.

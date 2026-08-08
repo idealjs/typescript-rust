@@ -1,8 +1,0 @@
-/.src/getSetAccessorContextualTyping.ts/contextualTyping(7,9): error TS1005: ';' expected.
-/.src/getSetAccessorContextualTyping.ts/contextualTyping(8,9): error TS1005: ';' expected.
-/.src/getSetAccessorContextualTyping.ts/contextualTyping(12,9): error TS1005: ';' expected.
-/.src/getSetAccessorContextualTyping.ts/contextualTyping(13,9): error TS1005: ';' expected.
-/.src/getSetAccessorContextualTyping.ts/contextualTyping(17,9): error TS1005: ';' expected.
-/.src/getSetAccessorContextualTyping.ts/contextualTyping(18,9): error TS1005: ';' expected.
-/.src/getSetAccessorContextualTyping.ts/contextualTyping(22,9): error TS1005: ';' expected.
-/.src/getSetAccessorContextualTyping.ts/contextualTyping(23,9): error TS1005: ';' expected.

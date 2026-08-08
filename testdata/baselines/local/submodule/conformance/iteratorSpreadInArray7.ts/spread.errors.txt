@@ -1,1 +1,0 @@
-/.src/iteratorSpreadInArray7.ts/spread(15,7): error TS2339: Property 'concat' does not exist on type 'symbol[]'.

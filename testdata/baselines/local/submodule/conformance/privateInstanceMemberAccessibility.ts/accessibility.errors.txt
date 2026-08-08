@@ -1,2 +1,0 @@
-/.src/privateInstanceMemberAccessibility.ts/accessibility(12,12): error TS1005: ';' expected.
-/.src/privateInstanceMemberAccessibility.ts/accessibility(12,13): error TS1005: ';' expected.

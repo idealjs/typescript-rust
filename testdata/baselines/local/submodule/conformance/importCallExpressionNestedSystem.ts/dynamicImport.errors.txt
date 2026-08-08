@@ -1,2 +1,0 @@
-/.src/index.ts(2,18): error TS2304: Cannot find name 'import'.
-/.src/index.ts(2,32): error TS2304: Cannot find name 'import'.

@@ -1,9 +1,0 @@
-/.src/classStaticBlock9.ts/classStaticBlock(3,12): error TS1005: ';' expected.
-/.src/classStaticBlock9.ts/classStaticBlock(4,10): error TS1005: ';' expected.
-/.src/classStaticBlock9.ts/classStaticBlock(4,11): error TS1005: ';' expected.
-/.src/classStaticBlock9.ts/classStaticBlock(4,15): error TS1005: ';' expected.
-/.src/classStaticBlock9.ts/classStaticBlock(4,17): error TS1005: ';' expected.
-/.src/classStaticBlock9.ts/classStaticBlock(6,12): error TS1005: ';' expected.
-/.src/classStaticBlock9.ts/classStaticBlock(7,1): error TS1128: Declaration or statement expected.
-/.src/classStaticBlock9.ts/classStaticBlock(6,5): error TS2304: Cannot find name 'static'.
-/.src/classStaticBlock9.ts/classStaticBlock(6,12): error TS2304: Cannot find name 'foo'.

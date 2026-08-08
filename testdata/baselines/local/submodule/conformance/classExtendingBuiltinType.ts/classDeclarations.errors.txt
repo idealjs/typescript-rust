@@ -1,9 +1,0 @@
-/.src/classExtendingBuiltinType.ts/classDeclarations(1,18): error TS2304: Cannot find name 'Object'.
-/.src/classExtendingBuiltinType.ts/classDeclarations(3,18): error TS2304: Cannot find name 'String'.
-/.src/classExtendingBuiltinType.ts/classDeclarations(4,18): error TS2304: Cannot find name 'Boolean'.
-/.src/classExtendingBuiltinType.ts/classDeclarations(5,18): error TS2304: Cannot find name 'Number'.
-/.src/classExtendingBuiltinType.ts/classDeclarations(6,18): error TS2304: Cannot find name 'Date'.
-/.src/classExtendingBuiltinType.ts/classDeclarations(7,18): error TS2304: Cannot find name 'RegExp'.
-/.src/classExtendingBuiltinType.ts/classDeclarations(8,18): error TS2304: Cannot find name 'Error'.
-/.src/classExtendingBuiltinType.ts/classDeclarations(9,18): error TS2304: Cannot find name 'Array'.
-/.src/classExtendingBuiltinType.ts/classDeclarations(10,19): error TS2304: Cannot find name 'Array'.

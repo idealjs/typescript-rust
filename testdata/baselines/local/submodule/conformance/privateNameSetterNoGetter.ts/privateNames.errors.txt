@@ -1,6 +1,0 @@
-/.src/privateNameSetterNoGetter.ts/privateNames(2,9): error TS1005: ';' expected.
-/.src/privateNameSetterNoGetter.ts/privateNames(2,10): error TS1005: ';' expected.
-/.src/privateNameSetterNoGetter.ts/privateNames(4,14): error TS1003: Identifier expected.
-/.src/privateNameSetterNoGetter.ts/privateNames(4,15): error TS1005: ';' expected.
-/.src/privateNameSetterNoGetter.ts/privateNames(2,9): error TS1127: Invalid character.
-/.src/privateNameSetterNoGetter.ts/privateNames(4,14): error TS1127: Invalid character.

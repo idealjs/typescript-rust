@@ -1,2 +1,0 @@
-/.src/enumClassification.ts/enums(74,15): error TS2339: Property 'length' does not exist on type '"foo"'.
-/.src/enumClassification.ts/enums(77,9): error TS2304: Cannot find name 'Math'.

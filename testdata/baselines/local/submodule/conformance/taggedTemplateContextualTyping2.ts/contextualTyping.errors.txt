@@ -1,9 +1,0 @@
-/.src/taggedTemplateContextualTyping2.ts/contextualTyping(14,10): error TS1005: ';' expected.
-/.src/taggedTemplateContextualTyping2.ts/contextualTyping(15,10): error TS1005: ';' expected.
-/.src/taggedTemplateContextualTyping2.ts/contextualTyping(16,10): error TS1005: ';' expected.
-/.src/taggedTemplateContextualTyping2.ts/contextualTyping(4,33): error TS2304: Cannot find name 'TemplateStringsArray'.
-/.src/taggedTemplateContextualTyping2.ts/contextualTyping(1,35): error TS2304: Cannot find name 'T'.
-/.src/taggedTemplateContextualTyping2.ts/contextualTyping(1,29): error TS2304: Cannot find name 'T'.
-/.src/taggedTemplateContextualTyping2.ts/contextualTyping(5,33): error TS2304: Cannot find name 'TemplateStringsArray'.
-/.src/taggedTemplateContextualTyping2.ts/contextualTyping(2,38): error TS2304: Cannot find name 'T'.
-/.src/taggedTemplateContextualTyping2.ts/contextualTyping(2,32): error TS2304: Cannot find name 'T'.

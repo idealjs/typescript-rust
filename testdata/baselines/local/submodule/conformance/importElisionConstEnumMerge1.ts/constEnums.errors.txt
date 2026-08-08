@@ -1,6 +1,0 @@
-/.src/enum.ts(1,19): error TS1005: ',' expected.
-/.src/enum.ts(1,24): error TS1005: ',' expected.
-/.src/enum.ts(3,1): error TS1012: Unexpected token.
-/.src/enum.ts(4,1): error TS1005: '}' expected.
-/.src/enum.ts(1,24): error TS1182: A destructuring declaration must have an initializer.
-error TS2300: Duplicate identifier 'Enum'.

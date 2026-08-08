@@ -1,2 +1,0 @@
-/.src/es2022IntlAPIs.ts/es2022(4,23): error TS2304: Cannot find name 'Intl'.
-/.src/es2022IntlAPIs.ts/es2022(12,19): error TS2304: Cannot find name 'Intl'.

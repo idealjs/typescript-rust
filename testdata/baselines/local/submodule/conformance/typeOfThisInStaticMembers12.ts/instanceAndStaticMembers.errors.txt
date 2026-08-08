@@ -1,1 +1,0 @@
-/.src/typeOfThisInStaticMembers12.ts/instanceAndStaticMembers(3,25): error TS2304: Cannot find name 'Inner'.

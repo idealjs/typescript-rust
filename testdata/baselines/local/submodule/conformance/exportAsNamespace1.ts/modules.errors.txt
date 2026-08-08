@@ -1,2 +1,0 @@
-/.src/2.ts(3,1): error TS2304: Cannot find name 'foo'.
-/.src/2.ts(4,1): error TS2304: Cannot find name 'foo'.

@@ -1,1 +1,0 @@
-/.src/templateStringInTaggedTemplateES6.ts/templates(2,42): error TS1005: ';' expected.

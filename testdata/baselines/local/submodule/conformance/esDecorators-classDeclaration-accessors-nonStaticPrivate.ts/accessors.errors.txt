@@ -1,6 +1,0 @@
-/.src/esDecorators-classDeclaration-accessors-nonStaticPrivate.ts/accessors(4,17): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-accessors-nonStaticPrivate.ts/accessors(4,18): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-accessors-nonStaticPrivate.ts/accessors(5,17): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-accessors-nonStaticPrivate.ts/accessors(5,18): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-accessors-nonStaticPrivate.ts/accessors(4,17): error TS1127: Invalid character.
-/.src/esDecorators-classDeclaration-accessors-nonStaticPrivate.ts/accessors(5,17): error TS1127: Invalid character.

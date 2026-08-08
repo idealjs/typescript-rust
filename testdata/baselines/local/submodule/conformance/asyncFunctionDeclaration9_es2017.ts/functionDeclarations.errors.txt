@@ -1,2 +1,0 @@
-/.src/asyncFunctionDeclaration9_es2017.ts/functionDeclarations(2,19): error TS1012: Unexpected token.
-/.src/asyncFunctionDeclaration9_es2017.ts/functionDeclarations(2,20): error TS1005: ']' expected.

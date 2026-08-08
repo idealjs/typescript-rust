@@ -1,5 +1,0 @@
-/.src/taggedTemplateStringsWithOverloadResolution3_ES6.ts/templates(7,21): error TS1005: ',' expected.
-/.src/taggedTemplateStringsWithOverloadResolution3_ES6.ts/templates(7,35): error TS1128: Declaration or statement expected.
-/.src/taggedTemplateStringsWithOverloadResolution3_ES6.ts/templates(3,20): error TS2304: Cannot find name 'TemplateStringsArray'.
-/.src/taggedTemplateStringsWithOverloadResolution3_ES6.ts/templates(4,20): error TS2304: Cannot find name 'TemplateStringsArray'.
-/.src/taggedTemplateStringsWithOverloadResolution3_ES6.ts/templates(7,5): error TS2322: Type '(strs: error, s: string) => string' is not assignable to type 'string'.

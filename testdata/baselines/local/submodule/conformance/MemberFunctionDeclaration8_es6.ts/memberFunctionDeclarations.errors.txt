@@ -1,5 +1,0 @@
-/.src/MemberFunctionDeclaration8_es6.ts/memberFunctionDeclarations(4,12): error TS1012: Unexpected token.
-/.src/MemberFunctionDeclaration8_es6.ts/memberFunctionDeclarations(4,12): error TS1127: Invalid character.
-/.src/MemberFunctionDeclaration8_es6.ts/memberFunctionDeclarations(4,9): error TS2304: Cannot find name 'a'.
-/.src/MemberFunctionDeclaration8_es6.ts/memberFunctionDeclarations(4,16): error TS2304: Cannot find name 'bar'.
-/.src/MemberFunctionDeclaration8_es6.ts/memberFunctionDeclarations(5,12): error TS2304: Cannot find name 'bar'.

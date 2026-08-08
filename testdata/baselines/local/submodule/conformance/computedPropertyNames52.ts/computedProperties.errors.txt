@@ -1,2 +1,0 @@
-/.src/computedPropertyNames52.js(2,23): error TS1005: '>' expected.
-/.src/computedPropertyNames52.js(3,22): error TS2304: Cannot find name 'C'.

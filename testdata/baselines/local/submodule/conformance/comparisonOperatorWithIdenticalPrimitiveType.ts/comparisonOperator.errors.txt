@@ -1,7 +1,0 @@
-/.src/comparisonOperatorWithIdenticalPrimitiveType.ts/comparisonOperator(10,16): error TS1005: '>' expected.
-/.src/comparisonOperatorWithIdenticalPrimitiveType.ts/comparisonOperator(11,16): error TS1005: '>' expected.
-/.src/comparisonOperatorWithIdenticalPrimitiveType.ts/comparisonOperator(12,16): error TS1005: '>' expected.
-/.src/comparisonOperatorWithIdenticalPrimitiveType.ts/comparisonOperator(13,16): error TS1005: '>' expected.
-/.src/comparisonOperatorWithIdenticalPrimitiveType.ts/comparisonOperator(14,16): error TS1005: '>' expected.
-/.src/comparisonOperatorWithIdenticalPrimitiveType.ts/comparisonOperator(15,22): error TS1005: '>' expected.
-/.src/comparisonOperatorWithIdenticalPrimitiveType.ts/comparisonOperator(16,32): error TS1005: '>' expected.

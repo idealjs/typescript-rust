@@ -1,5 +1,0 @@
-/.src/esDecorators-classDeclaration-classSuper.6.ts/classSuper(12,16): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-classSuper.6.ts/classSuper(13,16): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-classSuper.6.ts/classSuper(22,9): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-classSuper.6.ts/classSuper(23,9): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-classSuper.6.ts/classSuper(16,9): error TS2349: This expression is not callable.

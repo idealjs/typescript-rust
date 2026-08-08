@@ -1,2 +1,0 @@
-/.src/decoratorOnClassConstructor1.ts/constructor(1,71): error TS2304: Cannot find name 'TypedPropertyDescriptor'.
-/.src/decoratorOnClassConstructor1.ts/constructor(1,100): error TS2304: Cannot find name 'TypedPropertyDescriptor'.

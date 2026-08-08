@@ -1,3 +1,0 @@
-/.src/additionOperatorWithInvalidOperands.ts/additionOperator(11,16): error TS2304: Cannot find name 'Object'.
-/.src/additionOperatorWithInvalidOperands.ts/additionOperator(12,16): error TS2304: Cannot find name 'Number'.
-/.src/additionOperatorWithInvalidOperands.ts/additionOperator(39,19): error TS2339: Property 'foo' does not exist on type 'object'.

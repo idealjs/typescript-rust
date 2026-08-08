@@ -1,2 +1,0 @@
-/.src/classAbstractInstantiations2.ts/classAbstractKeyword(10,5): error TS2511: Cannot create an instance of an abstract class.
-/.src/classAbstractInstantiations2.ts/classAbstractKeyword(23,15): error TS2448: Block-scoped variable 'C' used before its declaration.

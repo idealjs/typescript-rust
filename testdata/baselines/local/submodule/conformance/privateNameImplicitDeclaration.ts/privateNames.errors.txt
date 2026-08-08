@@ -1,5 +1,0 @@
-/.src/privateNameImplicitDeclaration.js(4,14): error TS1003: Identifier expected.
-/.src/privateNameImplicitDeclaration.js(4,15): error TS1005: ';' expected.
-/.src/privateNameImplicitDeclaration.js(4,14): error TS1127: Invalid character.
-/.src/privateNameImplicitDeclaration.js(4,14): error TS2339: Property '#' does not exist on type 'object'.
-/.src/privateNameImplicitDeclaration.js(4,15): error TS2304: Cannot find name 'x'.

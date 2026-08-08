@@ -1,1 +1,0 @@
-/.src/ambientModuleDeclarationWithReservedIdentifierInDottedPath.ts/ambient(7,22): error TS2304: Cannot find name 'chrome'.

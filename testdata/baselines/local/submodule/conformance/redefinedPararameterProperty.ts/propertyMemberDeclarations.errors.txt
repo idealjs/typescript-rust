@@ -1,2 +1,0 @@
-/.src/redefinedPararameterProperty.ts/propertyMemberDeclarations(8,24): error TS1005: ',' expected.
-/.src/redefinedPararameterProperty.ts/propertyMemberDeclarations(9,9): error TS2349: This expression is not callable.

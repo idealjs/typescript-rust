@@ -1,6 +1,0 @@
-/.src/emptyVariableDeclarationBindingPatterns02_ES5iterable.ts/destructuring(2,9): error TS1182: A destructuring declaration must have an initializer.
-/.src/emptyVariableDeclarationBindingPatterns02_ES5iterable.ts/destructuring(3,9): error TS1182: A destructuring declaration must have an initializer.
-/.src/emptyVariableDeclarationBindingPatterns02_ES5iterable.ts/destructuring(4,11): error TS1182: A destructuring declaration must have an initializer.
-/.src/emptyVariableDeclarationBindingPatterns02_ES5iterable.ts/destructuring(6,9): error TS1182: A destructuring declaration must have an initializer.
-/.src/emptyVariableDeclarationBindingPatterns02_ES5iterable.ts/destructuring(7,9): error TS1182: A destructuring declaration must have an initializer.
-/.src/emptyVariableDeclarationBindingPatterns02_ES5iterable.ts/destructuring(8,11): error TS1182: A destructuring declaration must have an initializer.

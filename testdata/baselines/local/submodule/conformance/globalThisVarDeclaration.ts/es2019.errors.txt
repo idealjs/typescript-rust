@@ -1,4 +1,0 @@
-/.src/b.js(4,12): error TS2339: Property 'a' does not exist on type 'globalThis'.
-/.src/b.js(5,12): error TS2339: Property 'b' does not exist on type 'globalThis'.
-/.src/actual.ts(4,12): error TS2339: Property 'a' does not exist on type 'globalThis'.
-/.src/actual.ts(5,12): error TS2339: Property 'b' does not exist on type 'globalThis'.

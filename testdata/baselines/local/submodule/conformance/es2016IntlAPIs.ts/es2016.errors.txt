@@ -1,3 +1,0 @@
-/.src/es2016IntlAPIs.ts/es2016(3,13): error TS2304: Cannot find name 'Intl'.
-/.src/es2016IntlAPIs.ts/es2016(6,13): error TS2304: Cannot find name 'Intl'.
-/.src/es2016IntlAPIs.ts/es2016(10,3): error TS2304: Cannot find name 'Intl'.

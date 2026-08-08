@@ -1,5 +1,0 @@
-/.src/callOverload.ts/functionCalls(3,44): error TS2304: Cannot find name 'Array'.
-/.src/callOverload.ts/functionCalls(7,7): error TS2554: Expected 1 arguments, but got 4.
-/.src/callOverload.ts/functionCalls(8,15): error TS2554: Expected 2 arguments, but got 4.
-/.src/callOverload.ts/functionCalls(10,1): error TS2555: Expected at least 1 arguments, but got 0.
-/.src/callOverload.ts/functionCalls(11,13): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.

@@ -1,5 +1,0 @@
-/.src/globalThisBlockscopedProperties.ts/es2019(4,12): error TS2339: Property 'x' does not exist on type 'globalThis'.
-/.src/globalThisBlockscopedProperties.ts/es2019(5,12): error TS2339: Property 'y' does not exist on type 'globalThis'.
-/.src/globalThisBlockscopedProperties.ts/es2019(6,12): error TS2339: Property 'z' does not exist on type 'globalThis'.
-/.src/globalThisBlockscopedProperties.ts/es2019(10,12): error TS2339: Property 'Float64Array' does not exist on type 'globalThis'.
-/.src/globalThisBlockscopedProperties.ts/es2019(11,12): error TS2339: Property 'Infinity' does not exist on type 'globalThis'.

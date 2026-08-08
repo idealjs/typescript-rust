@@ -1,1 +1,0 @@
-/.src/taggedTemplateUntypedTagCall01.ts/templates(2,5): error TS1005: ';' expected.

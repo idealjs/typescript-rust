@@ -1,2 +1,0 @@
-/.src/initializationOrdering1.ts/propertyMemberDeclarations(8,26): error TS1005: ',' expected.
-/.src/initializationOrdering1.ts/propertyMemberDeclarations(15,1): error TS2554: Expected 2 arguments, but got 1.

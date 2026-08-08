@@ -1,3 +1,0 @@
-/.src/main.ts(7,14): error TS1005: ';' expected.
-/.src/main.ts(7,15): error TS1005: ';' expected.
-/.src/main.ts(7,14): error TS1127: Invalid character.

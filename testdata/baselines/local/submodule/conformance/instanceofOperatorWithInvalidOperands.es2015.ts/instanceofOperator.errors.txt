@@ -1,1 +1,0 @@
-/.src/instanceofOperatorWithInvalidOperands.es2015.ts/instanceofOperator(31,17): error TS2304: Cannot find name 'Object'.

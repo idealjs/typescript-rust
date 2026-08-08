@@ -1,2 +1,0 @@
-/.src/classStaticBlock28.ts/classStaticBlock(4,12): error TS1005: ';' expected.
-/.src/classStaticBlock28.ts/classStaticBlock(7,1): error TS1128: Declaration or statement expected.

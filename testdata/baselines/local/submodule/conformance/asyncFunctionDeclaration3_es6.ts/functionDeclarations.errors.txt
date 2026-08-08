@@ -1,4 +1,0 @@
-/.src/asyncFunctionDeclaration3_es6.ts/functionDeclarations(1,25): error TS1012: Unexpected token.
-/.src/asyncFunctionDeclaration3_es6.ts/functionDeclarations(1,27): error TS1005: ',' expected.
-/.src/asyncFunctionDeclaration3_es6.ts/functionDeclarations(2,2): error TS1005: ')' expected.
-/.src/asyncFunctionDeclaration3_es6.ts/functionDeclarations(1,27): error TS1016: A required parameter cannot follow an optional parameter.

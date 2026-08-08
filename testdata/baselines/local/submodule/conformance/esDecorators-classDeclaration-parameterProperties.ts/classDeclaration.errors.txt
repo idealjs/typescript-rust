@@ -1,1 +1,0 @@
-/.src/esDecorators-classDeclaration-parameterProperties.ts/classDeclaration(4,25): error TS1005: ',' expected.

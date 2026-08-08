@@ -1,1 +1,0 @@
-/.src/generatorTypeCheck25.ts/yieldExpressions(5,5): error TS2304: Cannot find name 'yield'.

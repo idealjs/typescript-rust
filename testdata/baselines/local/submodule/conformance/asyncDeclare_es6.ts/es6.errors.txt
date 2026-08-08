@@ -1,1 +1,0 @@
-/.src/asyncDeclare_es6.ts/es6(1,9): error TS1040: 'async' modifier cannot be used in an ambient context.

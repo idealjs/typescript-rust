@@ -1,5 +1,0 @@
-/.src/F5.ts(2,29): error TS1005: ')' expected.
-/.src/F5.ts(2,37): error TS1005: ',' expected.
-/.src/F5.ts(2,38): error TS1134: Variable declaration expected.
-/.src/F5.ts(2,39): error TS1134: Variable declaration expected.
-/.src/F5.ts(2,23): error TS2304: Cannot find name 'async'.

@@ -1,1 +1,0 @@
-/.src/TypeGuardWithArrayUnion.ts/typeGuards(6,28): error TS2304: Cannot find name 'Array'.

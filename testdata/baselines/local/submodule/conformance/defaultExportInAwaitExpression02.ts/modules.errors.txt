@@ -1,3 +1,0 @@
-/.src/b.ts(3,9): error TS1005: ')' expected.
-/.src/b.ts(5,3): error TS1012: Unexpected token.
-/.src/b.ts(3,3): error TS2304: Cannot find name 'async'.

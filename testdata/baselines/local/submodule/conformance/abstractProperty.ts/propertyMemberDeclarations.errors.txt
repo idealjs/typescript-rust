@@ -1,2 +1,0 @@
-/.src/abstractProperty.ts/propertyMemberDeclarations(13,19): error TS1005: ';' expected.
-/.src/abstractProperty.ts/propertyMemberDeclarations(13,39): error TS1003: Identifier expected.

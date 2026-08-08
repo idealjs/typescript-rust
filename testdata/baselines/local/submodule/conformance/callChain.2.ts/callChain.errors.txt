@@ -1,2 +1,0 @@
-/.src/callChain.2.ts/callChain(2,1): error TS2349: This expression is not callable.
-/.src/callChain.2.ts/callChain(8,1): error TS2349: This expression is not callable.

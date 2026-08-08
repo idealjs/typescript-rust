@@ -1,2 +1,0 @@
-/.src/decoratorOnClass3.ts/class(4,1): error TS1005: '{' expected.
-/.src/decoratorOnClass3.ts/class(5,9): error TS1003: Identifier expected.

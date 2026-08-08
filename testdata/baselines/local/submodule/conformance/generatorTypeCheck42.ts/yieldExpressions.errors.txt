@@ -1,7 +1,0 @@
-/.src/generatorTypeCheck42.ts/yieldExpressions(3,18): error TS1005: ',' expected.
-/.src/generatorTypeCheck42.ts/yieldExpressions(3,19): error TS1005: ',' expected.
-/.src/generatorTypeCheck42.ts/yieldExpressions(3,21): error TS1005: ',' expected.
-/.src/generatorTypeCheck42.ts/yieldExpressions(7,1): error TS1128: Declaration or statement expected.
-/.src/generatorTypeCheck42.ts/yieldExpressions(3,18): error TS2304: Cannot find name '('.
-/.src/generatorTypeCheck42.ts/yieldExpressions(3,19): error TS2304: Cannot find name ')'.
-/.src/generatorTypeCheck42.ts/yieldExpressions(3,21): error TS2304: Cannot find name '{'.

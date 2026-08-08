@@ -1,1 +1,0 @@
-/.src/VariableDeclaration13_es6.ts/variableDeclarations(4,5): error TS1181: Array element destructuring pattern expected.

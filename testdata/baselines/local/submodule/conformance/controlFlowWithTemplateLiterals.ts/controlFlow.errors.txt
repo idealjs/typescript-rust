@@ -1,2 +1,0 @@
-/.src/controlFlowWithTemplateLiterals.ts/controlFlow(3,10): error TS2339: Property 'slice' does not exist on type 'string | undefined'.
-/.src/controlFlowWithTemplateLiterals.ts/controlFlow(8,7): error TS2339: Property 'test' does not exist on type '{ test: string } | object'.

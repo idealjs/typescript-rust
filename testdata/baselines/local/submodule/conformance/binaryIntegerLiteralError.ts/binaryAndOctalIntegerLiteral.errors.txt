@@ -1,2 +1,0 @@
-/.src/binaryIntegerLiteralError.ts/binaryAndOctalIntegerLiteral(3,17): error TS1005: ',' expected.
-/.src/binaryIntegerLiteralError.ts/binaryAndOctalIntegerLiteral(4,17): error TS1005: ',' expected.

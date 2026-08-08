@@ -1,2 +1,0 @@
-/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS1.ts/exponentiationOperator(14,13): error TS2304: Cannot find name 'j1'.
-/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS1.ts/exponentiationOperator(15,25): error TS2304: Cannot find name 'j1'.

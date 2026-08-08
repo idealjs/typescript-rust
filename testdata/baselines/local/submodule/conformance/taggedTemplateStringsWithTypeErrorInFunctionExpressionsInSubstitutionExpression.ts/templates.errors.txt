@@ -1,1 +1,0 @@
-/.src/taggedTemplateStringsWithTypeErrorInFunctionExpressionsInSubstitutionExpression.ts/templates(7,5): error TS1005: ';' expected.

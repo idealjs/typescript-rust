@@ -1,2 +1,0 @@
-/.src/decoratorInAmbientContext.ts/decorators(5,24): error TS1005: ';' expected.
-/.src/decoratorInAmbientContext.ts/decorators(6,24): error TS1005: ';' expected.

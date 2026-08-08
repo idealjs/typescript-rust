@@ -1,4 +1,0 @@
-/.src/constructorHasPrototypeProperty.ts/constructorFunctionTypes(10,15): error TS2339: Property 'prototype' does not exist on type 'object'.
-/.src/constructorHasPrototypeProperty.ts/constructorFunctionTypes(12,16): error TS2339: Property 'prototype' does not exist on type 'object'.
-/.src/constructorHasPrototypeProperty.ts/constructorFunctionTypes(27,15): error TS2339: Property 'prototype' does not exist on type 'object'.
-/.src/constructorHasPrototypeProperty.ts/constructorFunctionTypes(29,16): error TS2339: Property 'prototype' does not exist on type 'object'.

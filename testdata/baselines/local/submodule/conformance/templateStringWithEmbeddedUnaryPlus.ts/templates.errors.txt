@@ -1,1 +1,0 @@
-/.src/templateStringWithEmbeddedUnaryPlus.ts/templates(2,17): error TS2304: Cannot find name 'Infinity'.

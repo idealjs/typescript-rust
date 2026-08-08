@@ -1,8 +1,0 @@
-/.src/constructBigint.ts/es2020(1,1): error TS2304: Cannot find name 'BigInt'.
-/.src/constructBigint.ts/es2020(2,1): error TS2304: Cannot find name 'BigInt'.
-/.src/constructBigint.ts/es2020(3,1): error TS2304: Cannot find name 'BigInt'.
-/.src/constructBigint.ts/es2020(4,1): error TS2304: Cannot find name 'BigInt'.
-/.src/constructBigint.ts/es2020(6,1): error TS2304: Cannot find name 'BigInt'.
-/.src/constructBigint.ts/es2020(7,1): error TS2304: Cannot find name 'BigInt'.
-/.src/constructBigint.ts/es2020(8,1): error TS2304: Cannot find name 'BigInt'.
-/.src/constructBigint.ts/es2020(9,1): error TS2304: Cannot find name 'BigInt'.

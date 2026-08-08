@@ -1,6 +1,0 @@
-/.src/classStaticBlock10.ts/classStaticBlock(11,16): error TS1005: ';' expected.
-/.src/classStaticBlock10.ts/classStaticBlock(12,17): error TS1005: ';' expected.
-/.src/classStaticBlock10.ts/classStaticBlock(13,17): error TS1005: ';' expected.
-/.src/classStaticBlock10.ts/classStaticBlock(14,19): error TS1005: ';' expected.
-/.src/classStaticBlock10.ts/classStaticBlock(15,19): error TS1005: ';' expected.
-/.src/classStaticBlock10.ts/classStaticBlock(18,1): error TS1128: Declaration or statement expected.

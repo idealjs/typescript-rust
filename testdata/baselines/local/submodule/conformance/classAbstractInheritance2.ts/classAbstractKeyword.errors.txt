@@ -1,3 +1,0 @@
-/.src/classAbstractInheritance2.ts/classAbstractKeyword(11,25): error TS1005: '{' expected.
-/.src/classAbstractInheritance2.ts/classAbstractKeyword(11,27): error TS1005: ';' expected.
-/.src/classAbstractInheritance2.ts/classAbstractKeyword(11,17): error TS2304: Cannot find name 'extends'.

@@ -1,1 +1,0 @@
-/.src/2.ts(4,7): error TS2339: Property 'print' does not exist on type 'object'.

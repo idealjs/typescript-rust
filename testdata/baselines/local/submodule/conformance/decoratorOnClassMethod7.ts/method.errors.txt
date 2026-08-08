@@ -1,2 +1,0 @@
-/.src/decoratorOnClassMethod7.ts/method(1,71): error TS2304: Cannot find name 'TypedPropertyDescriptor'.
-/.src/decoratorOnClassMethod7.ts/method(1,100): error TS2304: Cannot find name 'TypedPropertyDescriptor'.

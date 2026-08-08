@@ -1,2 +1,0 @@
-/.src/propertyAccessWidening.ts/propertyAccess(5,43): error TS2339: Property 'concat' does not exist on type '{ cells: any }[]'.
-/.src/propertyAccessWidening.ts/propertyAccess(10,19): error TS2349: This expression is not callable.

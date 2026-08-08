@@ -1,2 +1,0 @@
-/.src/propertyAccess.ts/propertyAccess(42,14): error TS2339: Property 'hasOwnProperty' does not exist on type '{ 10: string; x: string; y: number; z: { n: string; m: number; o: () => boolean }; literal property: number }'.
-/.src/propertyAccess.ts/propertyAccess(45,14): error TS2339: Property 'qqq' does not exist on type '{ 10: string; x: string; y: number; z: { n: string; m: number; o: () => boolean }; literal property: number }'.

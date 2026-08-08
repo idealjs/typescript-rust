@@ -1,5 +1,0 @@
-/.src/1.ts(11,10): error TS2304: Cannot find name 'import'.
-/.src/1.ts(12,24): error TS2304: Cannot find name 'import'.
-/.src/1.ts(13,42): error TS2304: Cannot find name 'import'.
-/.src/1.ts(14,12): error TS2304: Cannot find name 'import'.
-/.src/1.ts(20,41): error TS2304: Cannot find name 'import'.

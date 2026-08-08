@@ -1,4 +1,0 @@
-/.src/esDecorators-classDeclaration-fields-nonStatic.ts/fields(7,24): error TS1003: Identifier expected.
-/.src/esDecorators-classDeclaration-fields-nonStatic.ts/fields(7,26): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-fields-nonStatic.ts/fields(8,22): error TS1003: Identifier expected.
-/.src/esDecorators-classDeclaration-fields-nonStatic.ts/fields(8,24): error TS1005: ';' expected.

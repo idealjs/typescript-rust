@@ -1,6 +1,0 @@
-/.src/esDecorators-classDeclaration-accessors-nonStaticAbstract.ts/accessors(6,27): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-accessors-nonStaticAbstract.ts/accessors(7,27): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-accessors-nonStaticAbstract.ts/accessors(8,27): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-accessors-nonStaticAbstract.ts/accessors(9,27): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-accessors-nonStaticAbstract.ts/accessors(10,27): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-accessors-nonStaticAbstract.ts/accessors(11,27): error TS1005: ';' expected.

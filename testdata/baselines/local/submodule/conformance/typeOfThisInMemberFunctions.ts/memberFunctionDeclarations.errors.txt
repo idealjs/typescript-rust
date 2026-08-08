@@ -1,1 +1,0 @@
-/.src/typeOfThisInMemberFunctions.ts/memberFunctionDeclarations(22,19): error TS2304: Cannot find name 'Date'.

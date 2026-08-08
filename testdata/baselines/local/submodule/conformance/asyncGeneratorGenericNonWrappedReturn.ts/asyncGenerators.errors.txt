@@ -1,1 +1,0 @@
-/.src/asyncGeneratorGenericNonWrappedReturn.ts/asyncGenerators(3,39): error TS2304: Cannot find name 'AsyncGenerator'.

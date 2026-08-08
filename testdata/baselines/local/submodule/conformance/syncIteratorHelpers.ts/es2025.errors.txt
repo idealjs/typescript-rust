@@ -1,1 +1,0 @@
-/.src/syncIteratorHelpers.ts/es2025(1,14): error TS2339: Property 'values' does not exist on type 'number[]'.

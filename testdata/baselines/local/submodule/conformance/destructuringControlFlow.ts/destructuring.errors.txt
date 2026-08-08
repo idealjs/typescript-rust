@@ -1,4 +1,0 @@
-/.src/destructuringControlFlow.ts/destructuring(5,22): error TS2339: Property 'a' does not exist on type 'object'.
-/.src/destructuringControlFlow.ts/destructuring(31,8): error TS2454: Variable 'x' is used before being assigned.
-/.src/destructuringControlFlow.ts/destructuring(32,15): error TS2454: Variable 'x' is used before being assigned.
-/.src/destructuringControlFlow.ts/destructuring(33,20): error TS2454: Variable 'x' is used before being assigned.

@@ -1,3 +1,0 @@
-/.src/symbolProperty61.ts/Symbols(10,25): error TS1005: ',' expected.
-/.src/symbolProperty61.ts/Symbols(13,19): error TS2339: Property '_val' does not exist on type '{ subscribe: (next: (val: T) => void) => any }'.
-/.src/symbolProperty61.ts/Symbols(29,6): error TS2554: Expected 2 arguments, but got 1.

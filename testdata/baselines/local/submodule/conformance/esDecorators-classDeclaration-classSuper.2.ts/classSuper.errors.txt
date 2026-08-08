@@ -1,4 +1,0 @@
-/.src/esDecorators-classDeclaration-classSuper.2.ts/classSuper(6,12): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-classSuper.2.ts/classSuper(7,14): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-classSuper.2.ts/classSuper(7,15): error TS1005: ';' expected.
-/.src/esDecorators-classDeclaration-classSuper.2.ts/classSuper(9,1): error TS1128: Declaration or statement expected.

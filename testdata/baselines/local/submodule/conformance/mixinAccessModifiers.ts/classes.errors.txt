@@ -1,3 +1,0 @@
-/.src/mixinAccessModifiers.ts/classes(89,6): error TS2339: Property 's' does not exist on type 'object'.
-/.src/mixinAccessModifiers.ts/classes(102,6): error TS2339: Property 's' does not exist on type 'object'.
-/.src/mixinAccessModifiers.ts/classes(103,6): error TS2339: Property 's' does not exist on type 'object'.

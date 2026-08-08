@@ -1,3 +1,0 @@
-/.src/superCallParameterContextualTyping1.ts/contextualTyping(4,25): error TS1005: ',' expected.
-/.src/superCallParameterContextualTyping1.ts/contextualTyping(11,36): error TS2304: Cannot find name 'String'.
-/.src/superCallParameterContextualTyping1.ts/contextualTyping(11,21): error TS2349: This expression is not callable.

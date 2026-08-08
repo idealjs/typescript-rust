@@ -1,1 +1,0 @@
-/.src/typeArgumentInferenceWithClassExpression2.ts/classExpressions(2,12): error TS2322: Type 'undefined' is not assignable to type 'T'.

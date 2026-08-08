@@ -1,8 +1,0 @@
-/.src/classPropertyAsPrivate.ts/accessibility(3,17): error TS1005: ';' expected.
-/.src/classPropertyAsPrivate.ts/accessibility(4,17): error TS1005: ';' expected.
-/.src/classPropertyAsPrivate.ts/accessibility(8,24): error TS1005: ';' expected.
-/.src/classPropertyAsPrivate.ts/accessibility(9,24): error TS1005: ';' expected.
-/.src/classPropertyAsPrivate.ts/accessibility(20,3): error TS2339: Property 'a' does not exist on type 'object'.
-/.src/classPropertyAsPrivate.ts/accessibility(21,3): error TS2339: Property 'b' does not exist on type 'object'.
-/.src/classPropertyAsPrivate.ts/accessibility(22,3): error TS2339: Property 'b' does not exist on type 'object'.
-/.src/classPropertyAsPrivate.ts/accessibility(23,3): error TS2339: Property 'foo' does not exist on type 'object'.

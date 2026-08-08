@@ -1,1 +1,0 @@
-/.src/classAppearsToHaveMembersOfObject.ts/classHeritageSpecification(6,8): error TS2304: Cannot find name 'Object'.

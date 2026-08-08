@@ -1,3 +1,0 @@
-/.src/topLevelVarHoistingCommonJS.ts/moduleExportsSystem(41,12): error TS1005: ';' expected.
-/.src/topLevelVarHoistingCommonJS.ts/moduleExportsSystem(64,10): error TS1005: ';' expected.
-/.src/topLevelVarHoistingCommonJS.ts/moduleExportsSystem(64,1): error TS2304: Cannot find name 'with'.

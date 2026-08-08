@@ -1,2 +1,0 @@
-/.src/typeOfThisInInstanceMember2.ts/instanceAndStaticMembers(14,9): error TS1005: ';' expected.
-/.src/typeOfThisInInstanceMember2.ts/instanceAndStaticMembers(30,4): error TS2339: Property 'forEach' does not exist on type 'any[]'.

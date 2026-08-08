@@ -1,6 +1,0 @@
-/.src/arraySpreadInCall.ts/spread(2,19): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
-/.src/arraySpreadInCall.ts/spread(3,7): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
-/.src/arraySpreadInCall.ts/spread(4,13): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
-/.src/arraySpreadInCall.ts/spread(5,13): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
-/.src/arraySpreadInCall.ts/spread(6,7): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
-/.src/arraySpreadInCall.ts/spread(7,7): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.

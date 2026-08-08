@@ -1,1 +1,0 @@
-/.src/for-of43.ts/for-ofStatements(3,23): error TS1005: ',' expected.

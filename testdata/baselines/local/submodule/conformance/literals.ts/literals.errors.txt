@@ -1,3 +1,0 @@
-/.src/literals.ts/literals(19,9): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
-/.src/literals.ts/literals(24,9): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
-/.src/literals.ts/literals(35,8): error TS2304: Cannot find name 'RegExp'.

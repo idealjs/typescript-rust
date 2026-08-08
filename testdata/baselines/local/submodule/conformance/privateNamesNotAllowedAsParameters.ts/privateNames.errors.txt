@@ -1,2 +1,0 @@
-/.src/privateNamesNotAllowedAsParameters.ts/privateNames(2,12): error TS1138: Parameter declaration expected.
-/.src/privateNamesNotAllowedAsParameters.ts/privateNames(2,12): error TS1127: Invalid character.

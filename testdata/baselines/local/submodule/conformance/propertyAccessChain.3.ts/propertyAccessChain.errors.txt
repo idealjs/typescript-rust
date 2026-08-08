@@ -1,2 +1,0 @@
-/.src/propertyAccessChain.3.ts/propertyAccessChain(18,18): error TS1005: ';' expected.
-/.src/propertyAccessChain.3.ts/propertyAccessChain(19,20): error TS1005: ';' expected.

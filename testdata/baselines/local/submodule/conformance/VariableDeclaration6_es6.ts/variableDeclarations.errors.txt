@@ -1,1 +1,0 @@
-/.src/VariableDeclaration6_es6.ts/variableDeclarations(1,1): error TS2304: Cannot find name 'let'.

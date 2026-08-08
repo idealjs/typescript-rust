@@ -1,3 +1,0 @@
-/.src/autoAccessorAllowedModifiers.ts/propertyMemberDeclarations(11,14): error TS1005: ';' expected.
-/.src/autoAccessorAllowedModifiers.ts/propertyMemberDeclarations(11,15): error TS1005: ';' expected.
-/.src/autoAccessorAllowedModifiers.ts/propertyMemberDeclarations(11,14): error TS1127: Invalid character.

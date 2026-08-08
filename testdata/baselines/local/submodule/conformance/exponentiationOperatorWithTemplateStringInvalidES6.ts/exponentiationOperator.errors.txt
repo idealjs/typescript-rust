@@ -1,1 +1,0 @@
-/.src/exponentiationOperatorWithTemplateStringInvalidES6.ts/exponentiationOperator(16,1): error TS2304: Cannot find name 'kj'.

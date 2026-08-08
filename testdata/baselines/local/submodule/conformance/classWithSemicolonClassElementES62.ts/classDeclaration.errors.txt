@@ -1,1 +1,0 @@
-/.src/classWithSemicolonClassElementES62.ts/classDeclaration(2,5): error TS1003: Identifier expected.

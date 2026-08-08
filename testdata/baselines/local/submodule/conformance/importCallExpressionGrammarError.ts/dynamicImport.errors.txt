@@ -1,4 +1,0 @@
-/.src/importCallExpressionGrammarError.ts/dynamicImport(5,8): error TS1012: Unexpected token.
-/.src/importCallExpressionGrammarError.ts/dynamicImport(7,10): error TS2304: Cannot find name 'import'.
-/.src/importCallExpressionGrammarError.ts/dynamicImport(8,12): error TS2304: Cannot find name 'import'.
-/.src/importCallExpressionGrammarError.ts/dynamicImport(9,12): error TS2304: Cannot find name 'import'.

@@ -1,4 +1,0 @@
-/.src/callWithSpread.ts/functionCalls(50,9): error TS2349: This expression is not callable.
-/.src/callWithSpread.ts/functionCalls(51,9): error TS2349: This expression is not callable.
-/.src/callWithSpread.ts/functionCalls(54,19): error TS2554: Expected 0 arguments, but got 2.
-/.src/callWithSpread.ts/functionCalls(55,28): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.

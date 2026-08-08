@@ -1,5 +1,0 @@
-/.src/esDecorators-classExpression-namedEvaluation.10.ts/namedEvaluation(6,24): error TS1012: Unexpected token.
-/.src/esDecorators-classExpression-namedEvaluation.10.ts/namedEvaluation(6,25): error TS1005: ';' expected.
-/.src/esDecorators-classExpression-namedEvaluation.10.ts/namedEvaluation(6,29): error TS1005: ';' expected.
-/.src/esDecorators-classExpression-namedEvaluation.10.ts/namedEvaluation(6,35): error TS1005: ';' expected.
-/.src/esDecorators-classExpression-namedEvaluation.10.ts/namedEvaluation(6,41): error TS1128: Declaration or statement expected.

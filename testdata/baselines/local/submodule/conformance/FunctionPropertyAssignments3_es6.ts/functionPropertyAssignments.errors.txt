@@ -1,5 +1,0 @@
-/.src/FunctionPropertyAssignments3_es6.ts/functionPropertyAssignments(1,11): error TS1003: Identifier expected.
-/.src/FunctionPropertyAssignments3_es6.ts/functionPropertyAssignments(1,12): error TS1005: ',' expected.
-/.src/FunctionPropertyAssignments3_es6.ts/functionPropertyAssignments(1,16): error TS1128: Declaration or statement expected.
-/.src/FunctionPropertyAssignments3_es6.ts/functionPropertyAssignments(1,11): error TS2304: Cannot find name '*'.
-/.src/FunctionPropertyAssignments3_es6.ts/functionPropertyAssignments(1,12): error TS2304: Cannot find name '{'.

@@ -1,6 +1,0 @@
-/.src/privateNameStaticFieldInitializer.ts/privateNames(2,12): error TS1005: ';' expected.
-/.src/privateNameStaticFieldInitializer.ts/privateNames(2,13): error TS1005: ';' expected.
-/.src/privateNameStaticFieldInitializer.ts/privateNames(3,12): error TS1005: ';' expected.
-/.src/privateNameStaticFieldInitializer.ts/privateNames(3,13): error TS1005: ';' expected.
-/.src/privateNameStaticFieldInitializer.ts/privateNames(2,12): error TS1127: Invalid character.
-/.src/privateNameStaticFieldInitializer.ts/privateNames(3,12): error TS1127: Invalid character.

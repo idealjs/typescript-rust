@@ -1,2 +1,0 @@
-/.src/derivedClassFunctionOverridesBaseClassAccessor.ts/inheritanceAndOverriding(2,9): error TS1005: ';' expected.
-/.src/derivedClassFunctionOverridesBaseClassAccessor.ts/inheritanceAndOverriding(5,9): error TS1005: ';' expected.

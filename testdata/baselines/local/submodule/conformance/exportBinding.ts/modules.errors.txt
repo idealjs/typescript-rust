@@ -1,1 +1,0 @@
-/.src/exportConsts.ts(3,16): error TS2448: Block-scoped variable 'x' used before its declaration.

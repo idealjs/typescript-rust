@@ -1,2 +1,0 @@
-/.src/constEnumPropertyAccess1.ts/constEnums(26,9): error TS1005: ';' expected.
-/.src/constEnumPropertyAccess1.ts/constEnums(29,9): error TS1005: ';' expected.
