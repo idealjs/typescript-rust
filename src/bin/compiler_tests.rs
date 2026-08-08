@@ -702,7 +702,10 @@ fn run_compiler_baselines(
                                     total_skip += val.parse().unwrap_or(0);
                                 }
                             }
-                        } else if line.starts_with("FAIL:") || line.starts_with("PANIC:") {
+                        } else if line.starts_with("FAIL:")
+                            || line.starts_with("PANIC:")
+                            || line.starts_with("DIFF:")
+                        {
                             print_flush(&format!("  {line}\n"));
                         }
                     }

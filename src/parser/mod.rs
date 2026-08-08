@@ -3829,6 +3829,12 @@ impl Parser {
             }
             SyntaxKind::FunctionKeyword => self.parse_function_expression(),
             SyntaxKind::ClassKeyword => self.parse_class_expression(),
+            // `async function` expression: when `async` is followed by `function`
+            // on the same line, parse as an async function expression.
+            // Mirrors Go's parsePrimaryExpression AsyncKeyword case (line 5581).
+            SyntaxKind::AsyncKeyword if self.is_async_function_expression() => {
+                self.parse_async_function_expression()
+            }
             SyntaxKind::TemplateHead => self.parse_template_expression(),
             SyntaxKind::SlashToken | SyntaxKind::SlashEqualsToken => {
                 self.re_scan_slash_token();
@@ -4306,6 +4312,52 @@ impl Parser {
         Arc::new(Node::with_loc(
             SyntaxKind::JsxClosingElement,
             NodeData::JsxClosingElement(JsxClosingElementData { tag_name }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    /// Check if the current `async` keyword is followed by `function` on the same line.
+    /// Mirrors Go's `nextTokenIsFunctionKeywordOnSameLine`.
+    fn is_async_function_expression(&self) -> bool {
+        if self.token != SyntaxKind::AsyncKeyword {
+            return false;
+        }
+        let mut scanner = self.scanner.clone();
+        scanner.scan() == SyntaxKind::FunctionKeyword && !scanner.has_preceding_line_break()
+    }
+
+    /// Parse `async function() {}` as a function expression with async modifier.
+    fn parse_async_function_expression(&mut self) -> Arc<Node> {
+        let async_modifier = self.create_token_node();
+        self.next_token(); // consume 'async'
+        let pos = async_modifier.pos();
+        // Now at `function` keyword.
+        self.next_token(); // consume 'function'
+        let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
+        let name = if self.is_identifier() {
+            Some(self.parse_identifier())
+        } else {
+            None
+        };
+        let type_parameters = self.parse_optional_type_parameters();
+        let parameters = self.parse_parameter_list();
+        let type_node = self.parse_optional_return_type();
+        let is_generator = asterisk_token.is_some();
+        let body = self.parse_function_block(is_generator, true);
+        let end = body.end();
+        let modifiers = self.make_async_modifier_list(async_modifier);
+        Arc::new(Node::with_loc(
+            SyntaxKind::FunctionExpression,
+            NodeData::FunctionExpression(FunctionExpressionData {
+                modifiers,
+                asterisk_token,
+                name,
+                type_parameters,
+                parameters,
+                type_node,
+                full_signature: None,
+                body,
+            }),
             TextRange::new(pos, end),
         ))
     }
