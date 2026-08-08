@@ -1,0 +1,87 @@
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(10,6): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(11,13): error TS1005: '(' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(11,14): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(12,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(12,5): error TS1138: Parameter declaration expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(12,16): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(12,17): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(12,18): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(15,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(15,6): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(15,7): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(16,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(16,6): error TS1138: Parameter declaration expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(16,13): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(16,14): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(16,15): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(17,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(17,6): error TS1138: Parameter declaration expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(17,17): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(17,18): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(17,19): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(20,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(20,6): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(20,7): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(21,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(21,6): error TS1138: Parameter declaration expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(21,13): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(21,14): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(21,15): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(22,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(22,6): error TS1138: Parameter declaration expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(22,17): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(22,18): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(22,19): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(25,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(25,6): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(25,7): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(26,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(26,6): error TS1138: Parameter declaration expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(26,13): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(26,14): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(26,15): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(27,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(27,6): error TS1138: Parameter declaration expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(27,17): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(27,18): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(27,19): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(30,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(30,6): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(30,7): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(31,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(31,6): error TS1138: Parameter declaration expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(31,13): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(31,14): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(31,15): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(32,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(32,6): error TS1138: Parameter declaration expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(32,17): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(32,18): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(32,19): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(35,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(35,7): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(35,8): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(36,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(36,7): error TS1138: Parameter declaration expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(36,14): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(36,15): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(36,16): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(37,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(37,7): error TS1138: Parameter declaration expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(37,18): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(37,19): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(37,20): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(40,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(40,7): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(40,8): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(41,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(41,7): error TS1138: Parameter declaration expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(41,14): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(41,15): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(41,16): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(42,3): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(42,7): error TS1138: Parameter declaration expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(42,18): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(42,19): error TS1003: Identifier expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(42,20): error TS1005: ',' expected.
+/.src/comparisonOperatorWithNumericLiteral.ts/comparisonOperator(42,21): error TS1005: ')' expected.

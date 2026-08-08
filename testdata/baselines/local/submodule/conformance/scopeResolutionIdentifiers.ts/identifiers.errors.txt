@@ -1,0 +1,2 @@
+/.src/scopeResolutionIdentifiers.ts/identifiers(23,9): error TS2304: Cannot find name 'Date'.
+/.src/scopeResolutionIdentifiers.ts/identifiers(27,16): error TS2304: Cannot find name 'Date'.

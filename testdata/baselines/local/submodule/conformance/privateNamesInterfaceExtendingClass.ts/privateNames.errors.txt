@@ -1,0 +1,12 @@
+/.src/privateNamesInterfaceExtendingClass.ts/privateNames(2,5): error TS1003: Identifier expected.
+/.src/privateNamesInterfaceExtendingClass.ts/privateNames(2,6): error TS1005: ';' expected.
+/.src/privateNamesInterfaceExtendingClass.ts/privateNames(4,11): error TS1003: Identifier expected.
+/.src/privateNamesInterfaceExtendingClass.ts/privateNames(4,12): error TS1005: ';' expected.
+/.src/privateNamesInterfaceExtendingClass.ts/privateNames(10,7): error TS1003: Identifier expected.
+/.src/privateNamesInterfaceExtendingClass.ts/privateNames(10,8): error TS1005: ';' expected.
+/.src/privateNamesInterfaceExtendingClass.ts/privateNames(2,5): error TS1127: Invalid character.
+/.src/privateNamesInterfaceExtendingClass.ts/privateNames(4,11): error TS1127: Invalid character.
+/.src/privateNamesInterfaceExtendingClass.ts/privateNames(10,7): error TS1127: Invalid character.
+/.src/privateNamesInterfaceExtendingClass.ts/privateNames(4,11): error TS2339: Property '#' does not exist on type 'object'.
+/.src/privateNamesInterfaceExtendingClass.ts/privateNames(10,7): error TS2339: Property '#' does not exist on type 'object'.
+/.src/privateNamesInterfaceExtendingClass.ts/privateNames(10,8): error TS2304: Cannot find name 'prop'.

@@ -1,0 +1,1 @@
+/.src/symbolProperty55.ts/Symbols(6,17): error TS2304: Cannot find name 'SymbolConstructor'.

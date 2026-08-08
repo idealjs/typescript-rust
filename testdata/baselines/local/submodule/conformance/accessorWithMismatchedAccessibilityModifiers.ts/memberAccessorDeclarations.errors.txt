@@ -1,0 +1,8 @@
+/.src/accessorWithMismatchedAccessibilityModifiers.ts/memberAccessorDeclarations(2,9): error TS1005: ';' expected.
+/.src/accessorWithMismatchedAccessibilityModifiers.ts/memberAccessorDeclarations(5,17): error TS1005: ';' expected.
+/.src/accessorWithMismatchedAccessibilityModifiers.ts/memberAccessorDeclarations(10,19): error TS1005: ';' expected.
+/.src/accessorWithMismatchedAccessibilityModifiers.ts/memberAccessorDeclarations(13,17): error TS1005: ';' expected.
+/.src/accessorWithMismatchedAccessibilityModifiers.ts/memberAccessorDeclarations(18,19): error TS1005: ';' expected.
+/.src/accessorWithMismatchedAccessibilityModifiers.ts/memberAccessorDeclarations(20,9): error TS1005: ';' expected.
+/.src/accessorWithMismatchedAccessibilityModifiers.ts/memberAccessorDeclarations(26,26): error TS1005: ';' expected.
+/.src/accessorWithMismatchedAccessibilityModifiers.ts/memberAccessorDeclarations(28,16): error TS1005: ';' expected.

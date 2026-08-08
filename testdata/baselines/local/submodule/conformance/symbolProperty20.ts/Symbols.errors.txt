@@ -1,0 +1,15 @@
+/.src/symbolProperty20.ts/Symbols(8,25): error TS1005: ',' expected.
+/.src/symbolProperty20.ts/Symbols(8,26): error TS1005: ',' expected.
+/.src/symbolProperty20.ts/Symbols(8,27): error TS1005: ',' expected.
+/.src/symbolProperty20.ts/Symbols(8,29): error TS1005: ',' expected.
+/.src/symbolProperty20.ts/Symbols(8,31): error TS1005: ',' expected.
+/.src/symbolProperty20.ts/Symbols(8,38): error TS1005: ',' expected.
+/.src/symbolProperty20.ts/Symbols(8,39): error TS1005: ',' expected.
+/.src/symbolProperty20.ts/Symbols(9,1): error TS1128: Declaration or statement expected.
+/.src/symbolProperty20.ts/Symbols(8,25): error TS2304: Cannot find name '('.
+/.src/symbolProperty20.ts/Symbols(8,26): error TS2304: Cannot find name 'n'.
+/.src/symbolProperty20.ts/Symbols(8,27): error TS2304: Cannot find name ')'.
+/.src/symbolProperty20.ts/Symbols(8,29): error TS2304: Cannot find name '{'.
+/.src/symbolProperty20.ts/Symbols(8,31): error TS2304: Cannot find name 'return'.
+/.src/symbolProperty20.ts/Symbols(8,38): error TS2304: Cannot find name 'n'.
+/.src/symbolProperty20.ts/Symbols(8,39): error TS2304: Cannot find name ';'.

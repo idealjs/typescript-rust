@@ -1,0 +1,5 @@
+/.src/conditionalOperatorConditoinIsStringType.ts/conditonalOperator(8,28): error TS2304: Cannot find name 'Object'.
+/.src/conditionalOperatorConditoinIsStringType.ts/conditonalOperator(14,28): error TS2304: Cannot find name 'Object'.
+/.src/conditionalOperatorConditoinIsStringType.ts/conditonalOperator(37,12): error TS2339: Property 'toUpperCase' does not exist on type 'string'.
+/.src/conditionalOperatorConditoinIsStringType.ts/conditonalOperator(59,35): error TS2339: Property 'toUpperCase' does not exist on type 'string'.
+/.src/conditionalOperatorConditoinIsStringType.ts/conditonalOperator(64,43): error TS2339: Property 'toUpperCase' does not exist on type 'string'.

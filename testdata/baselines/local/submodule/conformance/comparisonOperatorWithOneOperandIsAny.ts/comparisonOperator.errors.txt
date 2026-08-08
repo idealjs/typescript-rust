@@ -1,0 +1,16 @@
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(6,23): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(15,23): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(34,17): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(35,17): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(36,17): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(37,17): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(38,17): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(39,17): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(40,17): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(42,17): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(43,17): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(44,17): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(45,17): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(46,17): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(47,17): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsAny.ts/comparisonOperator(48,17): error TS1005: '>' expected.

@@ -1,0 +1,4 @@
+/.src/destructuringParameterDeclaration5.ts/destructuring(11,21): error TS2349: This expression is not callable.
+/.src/destructuringParameterDeclaration5.ts/destructuring(22,9): error TS2349: This expression is not callable.
+/.src/destructuringParameterDeclaration5.ts/destructuring(40,4): error TS2345: Argument of type '{ x: "string" }' is not assignable to parameter of type '{ x: object }'.
+/.src/destructuringParameterDeclaration5.ts/destructuring(49,4): error TS2345: Argument of type 'object' is not assignable to parameter of type '{ y: error }'.

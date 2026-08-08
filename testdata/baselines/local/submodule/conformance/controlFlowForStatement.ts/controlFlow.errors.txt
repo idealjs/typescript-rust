@@ -1,0 +1,15 @@
+/.src/controlFlowForStatement.ts/controlFlow(5,9): error TS2454: Variable 'x' is used before being assigned.
+/.src/controlFlowForStatement.ts/controlFlow(10,29): error TS2339: Property 'length' does not exist on type '""'.
+/.src/controlFlowForStatement.ts/controlFlow(11,9): error TS2454: Variable 'x' is used before being assigned.
+/.src/controlFlowForStatement.ts/controlFlow(17,21): error TS2454: Variable 'x' is used before being assigned.
+/.src/controlFlowForStatement.ts/controlFlow(17,23): error TS2339: Property 'toExponential' does not exist on type 'string | number | boolean'.
+/.src/controlFlowForStatement.ts/controlFlow(18,9): error TS2454: Variable 'x' is used before being assigned.
+/.src/controlFlowForStatement.ts/controlFlow(23,25): error TS2454: Variable 'x' is used before being assigned.
+/.src/controlFlowForStatement.ts/controlFlow(24,9): error TS2454: Variable 'x' is used before being assigned.
+/.src/controlFlowForStatement.ts/controlFlow(28,40): error TS2304: Cannot find name 'RegExp'.
+/.src/controlFlowForStatement.ts/controlFlow(29,30): error TS2454: Variable 'x' is used before being assigned.
+/.src/controlFlowForStatement.ts/controlFlow(30,9): error TS2454: Variable 'x' is used before being assigned.
+/.src/controlFlowForStatement.ts/controlFlow(35,19): error TS2454: Variable 'x' is used before being assigned.
+/.src/controlFlowForStatement.ts/controlFlow(36,9): error TS2454: Variable 'x' is used before being assigned.
+/.src/controlFlowForStatement.ts/controlFlow(37,20): error TS2454: Variable 'x' is used before being assigned.
+/.src/controlFlowForStatement.ts/controlFlow(40,5): error TS2454: Variable 'x' is used before being assigned.

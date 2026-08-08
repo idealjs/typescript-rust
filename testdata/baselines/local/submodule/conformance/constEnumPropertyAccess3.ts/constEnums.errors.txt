@@ -1,0 +1,4 @@
+/.src/constEnumPropertyAccess3.ts/constEnums(9,5): error TS2339: Property 'toString' does not exist on type 'number'.
+/.src/constEnumPropertyAccess3.ts/constEnums(10,5): error TS2339: Property 'toString' does not exist on type 'number'.
+/.src/constEnumPropertyAccess3.ts/constEnums(11,5): error TS2339: Property 'toString' does not exist on type 'number'.
+/.src/constEnumPropertyAccess3.ts/constEnums(12,5): error TS2339: Property 'toString' does not exist on type 'number'.

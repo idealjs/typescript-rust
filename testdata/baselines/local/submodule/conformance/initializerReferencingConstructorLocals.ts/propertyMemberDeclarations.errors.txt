@@ -1,0 +1,4 @@
+/.src/initializerReferencingConstructorLocals.ts/propertyMemberDeclarations(4,9): error TS2304: Cannot find name 'z'.
+/.src/initializerReferencingConstructorLocals.ts/propertyMemberDeclarations(9,9): error TS2304: Cannot find name 'z'.
+/.src/initializerReferencingConstructorLocals.ts/propertyMemberDeclarations(14,9): error TS2304: Cannot find name 'z'.
+/.src/initializerReferencingConstructorLocals.ts/propertyMemberDeclarations(19,9): error TS2304: Cannot find name 'z'.

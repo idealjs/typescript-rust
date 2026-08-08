@@ -1,0 +1,1 @@
+/.src/ES5SymbolType1.ts/Symbols(2,3): error TS2339: Property 'toString' does not exist on type 'symbol'.

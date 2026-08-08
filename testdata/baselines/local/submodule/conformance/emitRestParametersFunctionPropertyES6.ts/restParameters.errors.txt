@@ -1,0 +1,10 @@
+/.src/emitRestParametersFunctionPropertyES6.ts/restParameters(7,9): error TS1005: ',' expected.
+/.src/emitRestParametersFunctionPropertyES6.ts/restParameters(7,10): error TS1005: ',' expected.
+/.src/emitRestParametersFunctionPropertyES6.ts/restParameters(7,17): error TS1005: ',' expected.
+/.src/emitRestParametersFunctionPropertyES6.ts/restParameters(7,19): error TS1005: ',' expected.
+/.src/emitRestParametersFunctionPropertyES6.ts/restParameters(8,1): error TS1128: Declaration or statement expected.
+/.src/emitRestParametersFunctionPropertyES6.ts/restParameters(7,5): error TS2304: Cannot find name 'func'.
+/.src/emitRestParametersFunctionPropertyES6.ts/restParameters(7,9): error TS2304: Cannot find name '('.
+/.src/emitRestParametersFunctionPropertyES6.ts/restParameters(7,13): error TS2304: Cannot find name 'rest'.
+/.src/emitRestParametersFunctionPropertyES6.ts/restParameters(7,17): error TS2304: Cannot find name ')'.
+/.src/emitRestParametersFunctionPropertyES6.ts/restParameters(7,19): error TS2304: Cannot find name '{'.

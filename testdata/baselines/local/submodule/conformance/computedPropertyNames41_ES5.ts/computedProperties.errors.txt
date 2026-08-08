@@ -1,0 +1,2 @@
+/.src/computedPropertyNames41_ES5.ts/computedProperties(5,7): error TS1005: ']' expected.
+/.src/computedPropertyNames41_ES5.ts/computedProperties(5,15): error TS1005: ';' expected.

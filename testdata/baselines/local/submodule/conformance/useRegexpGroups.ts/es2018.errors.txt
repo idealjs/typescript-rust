@@ -1,0 +1,1 @@
+/.src/useRegexpGroups.ts/es2018(15,17): error TS2339: Property 'match' does not exist on type '"foo"'.

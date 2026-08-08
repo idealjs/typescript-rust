@@ -1,0 +1,7 @@
+/.src/classAbstractManyKeywords.ts/classAbstractKeyword(1,25): error TS1005: ';' expected.
+/.src/classAbstractManyKeywords.ts/classAbstractKeyword(3,9): error TS1005: ';' expected.
+/.src/classAbstractManyKeywords.ts/classAbstractKeyword(4,17): error TS1005: '=' expected.
+/.src/classAbstractManyKeywords.ts/classAbstractKeyword(4,23): error TS1005: ';' expected.
+/.src/classAbstractManyKeywords.ts/classAbstractKeyword(4,25): error TS1005: ';' expected.
+/.src/classAbstractManyKeywords.ts/classAbstractKeyword(1,16): error TS2304: Cannot find name 'abstract'.
+/.src/classAbstractManyKeywords.ts/classAbstractKeyword(4,23): error TS2304: Cannot find name 'D'.

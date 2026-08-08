@@ -1,0 +1,3 @@
+/.src/classImplementsMergedClassInterface.ts/classDeclarations(9,1): error TS2420: Class 'C2' incorrectly implements interface '{ y: number }'.
+/.src/classImplementsMergedClassInterface.ts/classDeclarations(12,1): error TS2420: Class 'C3' incorrectly implements interface '{ y: number }'.
+error TS2300: Duplicate identifier 'C1'.

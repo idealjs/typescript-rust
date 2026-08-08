@@ -1,0 +1,6 @@
+/.src/privateNameNestedClassNameConflict.ts/privateNames(2,5): error TS1003: Identifier expected.
+/.src/privateNameNestedClassNameConflict.ts/privateNames(2,6): error TS1005: ';' expected.
+/.src/privateNameNestedClassNameConflict.ts/privateNames(5,13): error TS1003: Identifier expected.
+/.src/privateNameNestedClassNameConflict.ts/privateNames(5,14): error TS1005: ';' expected.
+/.src/privateNameNestedClassNameConflict.ts/privateNames(2,5): error TS1127: Invalid character.
+/.src/privateNameNestedClassNameConflict.ts/privateNames(5,13): error TS1127: Invalid character.

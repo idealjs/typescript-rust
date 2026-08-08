@@ -1,0 +1,7 @@
+/.src/readonlyInConstructorParameters.ts/constructorParameters(2,26): error TS1005: ',' expected.
+/.src/readonlyInConstructorParameters.ts/constructorParameters(7,26): error TS1005: ',' expected.
+/.src/readonlyInConstructorParameters.ts/constructorParameters(7,33): error TS1005: ',' expected.
+/.src/readonlyInConstructorParameters.ts/constructorParameters(11,25): error TS1005: ',' expected.
+/.src/readonlyInConstructorParameters.ts/constructorParameters(11,34): error TS1005: ',' expected.
+/.src/readonlyInConstructorParameters.ts/constructorParameters(4,5): error TS2349: This expression is not callable.
+/.src/readonlyInConstructorParameters.ts/constructorParameters(13,5): error TS2349: This expression is not callable.

@@ -1,0 +1,9 @@
+/.src/computedPropertyNames28_ES6.ts/computedProperties(7,32): error TS1005: ',' expected.
+/.src/computedPropertyNames28_ES6.ts/computedProperties(7,33): error TS1005: ',' expected.
+/.src/computedPropertyNames28_ES6.ts/computedProperties(7,35): error TS1005: ',' expected.
+/.src/computedPropertyNames28_ES6.ts/computedProperties(8,10): error TS1003: Identifier expected.
+/.src/computedPropertyNames28_ES6.ts/computedProperties(10,1): error TS1128: Declaration or statement expected.
+/.src/computedPropertyNames28_ES6.ts/computedProperties(5,9): error TS2349: This expression is not callable.
+/.src/computedPropertyNames28_ES6.ts/computedProperties(7,32): error TS2304: Cannot find name '('.
+/.src/computedPropertyNames28_ES6.ts/computedProperties(7,33): error TS2304: Cannot find name ')'.
+/.src/computedPropertyNames28_ES6.ts/computedProperties(7,35): error TS2304: Cannot find name '{'.

@@ -1,0 +1,108 @@
+/.src/neverReturningFunctions1.ts/controlFlow(210,9): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(210,10): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(210,12): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(211,5): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(211,12): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(211,18): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(217,9): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(218,7): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(218,8): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(218,12): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(218,13): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(218,17): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(218,19): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(218,20): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(219,3): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(219,7): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(219,8): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(219,10): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(219,11): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(219,23): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(219,24): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(219,58): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(219,59): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(221,11): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(222,9): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(223,11): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(224,10): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(225,9): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(227,12): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(227,22): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,10): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,12): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,14): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,18): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,19): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,23): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,24): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,28): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,30): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,34): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,35): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,41): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,42): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,43): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,47): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,48): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(229,55): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(231,1): error TS1005: ',' expected.
+/.src/neverReturningFunctions1.ts/controlFlow(2,15): error TS2304: Cannot find name 'Error'.
+/.src/neverReturningFunctions1.ts/controlFlow(7,7): error TS2339: Property 'length' does not exist on type 'undefined | string'.
+/.src/neverReturningFunctions1.ts/controlFlow(10,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
+/.src/neverReturningFunctions1.ts/controlFlow(24,7): error TS2339: Property 'length' does not exist on type 'undefined | string'.
+/.src/neverReturningFunctions1.ts/controlFlow(27,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
+/.src/neverReturningFunctions1.ts/controlFlow(45,7): error TS2339: Property 'length' does not exist on type 'undefined | string'.
+/.src/neverReturningFunctions1.ts/controlFlow(48,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
+/.src/neverReturningFunctions1.ts/controlFlow(68,19): error TS2304: Cannot find name 'Error'.
+/.src/neverReturningFunctions1.ts/controlFlow(72,11): error TS2339: Property 'length' does not exist on type 'undefined | string'.
+/.src/neverReturningFunctions1.ts/controlFlow(157,43): error TS2304: Cannot find name 'Error'.
+/.src/neverReturningFunctions1.ts/controlFlow(204,87): error TS2304: Cannot find name 'ThisType'.
+/.src/neverReturningFunctions1.ts/controlFlow(210,4): error TS2304: Cannot find name 'parse'.
+/.src/neverReturningFunctions1.ts/controlFlow(210,9): error TS2304: Cannot find name '('.
+/.src/neverReturningFunctions1.ts/controlFlow(210,10): error TS2304: Cannot find name ')'.
+/.src/neverReturningFunctions1.ts/controlFlow(210,12): error TS2304: Cannot find name '{'.
+/.src/neverReturningFunctions1.ts/controlFlow(211,5): error TS2304: Cannot find name 'return'.
+/.src/neverReturningFunctions1.ts/controlFlow(211,18): error TS2304: Cannot find name ';'.
+/.src/neverReturningFunctions1.ts/controlFlow(217,2): error TS2304: Cannot find name 'init'.
+/.src/neverReturningFunctions1.ts/controlFlow(218,3): error TS2304: Cannot find name 'this'.
+/.src/neverReturningFunctions1.ts/controlFlow(218,7): error TS2304: Cannot find name '.'.
+/.src/neverReturningFunctions1.ts/controlFlow(218,8): error TS2304: Cannot find name 'data'.
+/.src/neverReturningFunctions1.ts/controlFlow(218,12): error TS2304: Cannot find name '.'.
+/.src/neverReturningFunctions1.ts/controlFlow(218,13): error TS2304: Cannot find name 'num'.
+/.src/neverReturningFunctions1.ts/controlFlow(218,17): error TS2304: Cannot find name '='.
+/.src/neverReturningFunctions1.ts/controlFlow(218,20): error TS2304: Cannot find name ';'.
+/.src/neverReturningFunctions1.ts/controlFlow(219,3): error TS2304: Cannot find name 'this'.
+/.src/neverReturningFunctions1.ts/controlFlow(219,7): error TS2304: Cannot find name '.'.
+/.src/neverReturningFunctions1.ts/controlFlow(219,8): error TS2304: Cannot find name 'el'.
+/.src/neverReturningFunctions1.ts/controlFlow(219,10): error TS2304: Cannot find name '.'.
+/.src/neverReturningFunctions1.ts/controlFlow(219,11): error TS2304: Cannot find name 'setAttribute'.
+/.src/neverReturningFunctions1.ts/controlFlow(219,23): error TS2304: Cannot find name '('.
+/.src/neverReturningFunctions1.ts/controlFlow(219,58): error TS2304: Cannot find name ')'.
+/.src/neverReturningFunctions1.ts/controlFlow(219,59): error TS2304: Cannot find name ';'.
+/.src/neverReturningFunctions1.ts/controlFlow(221,2): error TS2304: Cannot find name 'update'.
+/.src/neverReturningFunctions1.ts/controlFlow(222,2): error TS2304: Cannot find name 'tick'.
+/.src/neverReturningFunctions1.ts/controlFlow(223,2): error TS2304: Cannot find name 'remove'.
+/.src/neverReturningFunctions1.ts/controlFlow(224,2): error TS2304: Cannot find name 'pause'.
+/.src/neverReturningFunctions1.ts/controlFlow(225,2): error TS2304: Cannot find name 'play'.
+/.src/neverReturningFunctions1.ts/controlFlow(227,2): error TS2304: Cannot find name 'multiply'.
+/.src/neverReturningFunctions1.ts/controlFlow(227,11): error TS2304: Cannot find name 'f'.
+/.src/neverReturningFunctions1.ts/controlFlow(227,14): error TS2304: Cannot find name 'number'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,3): error TS2304: Cannot find name 'return'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,10): error TS2304: Cannot find name 'f'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,12): error TS2304: Cannot find name '*'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,14): error TS2304: Cannot find name 'this'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,18): error TS2304: Cannot find name '.'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,19): error TS2304: Cannot find name 'data'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,23): error TS2304: Cannot find name '.'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,24): error TS2304: Cannot find name 'num'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,28): error TS2304: Cannot find name '*'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,30): error TS2304: Cannot find name 'this'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,34): error TS2304: Cannot find name '.'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,35): error TS2304: Cannot find name 'system'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,41): error TS2304: Cannot find name '!'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,42): error TS2304: Cannot find name '.'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,43): error TS2304: Cannot find name 'data'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,47): error TS2304: Cannot find name '.'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,48): error TS2304: Cannot find name 'counter'.
+/.src/neverReturningFunctions1.ts/controlFlow(229,55): error TS2304: Cannot find name ';'.
+/.src/neverReturningFunctions1.ts/controlFlow(217,2): error TS2554: Expected 2 arguments, but got 16.

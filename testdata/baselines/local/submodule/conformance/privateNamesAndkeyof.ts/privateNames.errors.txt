@@ -1,0 +1,15 @@
+/.src/privateNamesAndkeyof.ts/privateNames(2,5): error TS1003: Identifier expected.
+/.src/privateNamesAndkeyof.ts/privateNames(2,6): error TS1005: ';' expected.
+/.src/privateNamesAndkeyof.ts/privateNames(3,5): error TS1003: Identifier expected.
+/.src/privateNamesAndkeyof.ts/privateNames(3,6): error TS1005: ';' expected.
+/.src/privateNamesAndkeyof.ts/privateNames(3,21): error TS1003: Identifier expected.
+/.src/privateNamesAndkeyof.ts/privateNames(4,9): error TS1005: ';' expected.
+/.src/privateNamesAndkeyof.ts/privateNames(4,10): error TS1005: ';' expected.
+/.src/privateNamesAndkeyof.ts/privateNames(4,33): error TS1003: Identifier expected.
+/.src/privateNamesAndkeyof.ts/privateNames(5,9): error TS1005: ';' expected.
+/.src/privateNamesAndkeyof.ts/privateNames(5,10): error TS1005: ';' expected.
+/.src/privateNamesAndkeyof.ts/privateNames(5,36): error TS1003: Identifier expected.
+/.src/privateNamesAndkeyof.ts/privateNames(2,5): error TS1127: Invalid character.
+/.src/privateNamesAndkeyof.ts/privateNames(3,5): error TS1127: Invalid character.
+/.src/privateNamesAndkeyof.ts/privateNames(4,9): error TS1127: Invalid character.
+/.src/privateNamesAndkeyof.ts/privateNames(5,9): error TS1127: Invalid character.

@@ -1,0 +1,3 @@
+/.src/typeOfThisInInstanceMember.ts/instanceAndStaticMembers(14,9): error TS1005: ';' expected.
+/.src/typeOfThisInInstanceMember.ts/instanceAndStaticMembers(10,11): error TS2339: Property 'z' does not exist on type '{ x: any; foo: () => any; get: any; y: () => any }'.
+/.src/typeOfThisInInstanceMember.ts/instanceAndStaticMembers(27,4): error TS2339: Property 'forEach' does not exist on type 'any[]'.

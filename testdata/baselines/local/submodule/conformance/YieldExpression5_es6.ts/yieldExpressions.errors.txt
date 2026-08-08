@@ -1,0 +1,2 @@
+/.src/YieldExpression5_es6.ts/yieldExpressions(3,1): error TS1012: Unexpected token.
+/.src/YieldExpression5_es6.ts/yieldExpressions(3,2): error TS1005: '}' expected.

@@ -1,0 +1,2 @@
+/.src/symbolType8.ts/Symbols(2,6): error TS1005: '>' expected.
+/.src/symbolType8.ts/Symbols(3,6): error TS1005: '>' expected.

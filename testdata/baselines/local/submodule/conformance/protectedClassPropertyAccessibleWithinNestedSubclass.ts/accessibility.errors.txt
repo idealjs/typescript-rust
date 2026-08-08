@@ -1,0 +1,4 @@
+/.src/protectedClassPropertyAccessibleWithinNestedSubclass.ts/accessibility(7,19): error TS1005: ';' expected.
+/.src/protectedClassPropertyAccessibleWithinNestedSubclass.ts/accessibility(8,19): error TS1005: ';' expected.
+/.src/protectedClassPropertyAccessibleWithinNestedSubclass.ts/accessibility(11,26): error TS1005: ';' expected.
+/.src/protectedClassPropertyAccessibleWithinNestedSubclass.ts/accessibility(12,26): error TS1005: ';' expected.

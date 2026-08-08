@@ -1,0 +1,13 @@
+/.src/readonlyConstructorAssignment.ts/constructorParameters(4,26): error TS1005: ',' expected.
+/.src/readonlyConstructorAssignment.ts/constructorParameters(20,26): error TS1005: ',' expected.
+/.src/readonlyConstructorAssignment.ts/constructorParameters(27,25): error TS1005: ',' expected.
+/.src/readonlyConstructorAssignment.ts/constructorParameters(27,34): error TS1005: ',' expected.
+/.src/readonlyConstructorAssignment.ts/constructorParameters(34,26): error TS1005: ',' expected.
+/.src/readonlyConstructorAssignment.ts/constructorParameters(5,14): error TS2339: Property 'x' does not exist on type 'object'.
+/.src/readonlyConstructorAssignment.ts/constructorParameters(11,9): error TS2349: This expression is not callable.
+/.src/readonlyConstructorAssignment.ts/constructorParameters(13,14): error TS2339: Property 'x' does not exist on type 'object'.
+/.src/readonlyConstructorAssignment.ts/constructorParameters(21,9): error TS2349: This expression is not callable.
+/.src/readonlyConstructorAssignment.ts/constructorParameters(22,14): error TS2339: Property 'x' does not exist on type 'object'.
+/.src/readonlyConstructorAssignment.ts/constructorParameters(28,14): error TS2339: Property 'x' does not exist on type 'object'.
+/.src/readonlyConstructorAssignment.ts/constructorParameters(35,9): error TS2349: This expression is not callable.
+/.src/readonlyConstructorAssignment.ts/constructorParameters(36,14): error TS2339: Property 'x' does not exist on type 'object'.

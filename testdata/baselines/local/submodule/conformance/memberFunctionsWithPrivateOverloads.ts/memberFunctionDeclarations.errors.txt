@@ -1,0 +1,2 @@
+/.src/memberFunctionsWithPrivateOverloads.ts/memberFunctionDeclarations(48,12): error TS2339: Property 'foo' does not exist on type 'object'.
+/.src/memberFunctionsWithPrivateOverloads.ts/memberFunctionDeclarations(49,12): error TS2339: Property 'bar' does not exist on type 'object'.

@@ -1,0 +1,10 @@
+/.src/classExtendingClassLikeType.ts/classDeclarations(21,9): error TS2349: This expression is not callable.
+/.src/classExtendingClassLikeType.ts/classDeclarations(22,14): error TS2339: Property 'x' does not exist on type 'object'.
+/.src/classExtendingClassLikeType.ts/classDeclarations(23,14): error TS2339: Property 'y' does not exist on type 'object'.
+/.src/classExtendingClassLikeType.ts/classDeclarations(29,9): error TS2349: This expression is not callable.
+/.src/classExtendingClassLikeType.ts/classDeclarations(30,9): error TS2349: This expression is not callable.
+/.src/classExtendingClassLikeType.ts/classDeclarations(31,14): error TS2339: Property 'x' does not exist on type 'object'.
+/.src/classExtendingClassLikeType.ts/classDeclarations(32,14): error TS2339: Property 'y' does not exist on type 'object'.
+/.src/classExtendingClassLikeType.ts/classDeclarations(38,9): error TS2349: This expression is not callable.
+/.src/classExtendingClassLikeType.ts/classDeclarations(39,14): error TS2339: Property 'x' does not exist on type 'object'.
+/.src/classExtendingClassLikeType.ts/classDeclarations(40,14): error TS2339: Property 'y' does not exist on type 'object'.

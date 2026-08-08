@@ -1,0 +1,47 @@
+/.src/privateNameFieldCallExpression.ts/privateNames(2,5): error TS1003: Identifier expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(2,6): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(3,5): error TS1003: Identifier expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(3,6): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(6,14): error TS1003: Identifier expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(6,15): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(7,14): error TS1003: Identifier expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(7,15): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(8,27): error TS1003: Identifier expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(8,28): error TS1005: ',' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(10,18): error TS1003: Identifier expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(10,19): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(13,14): error TS1003: Identifier expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(13,15): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(14,28): error TS1003: Identifier expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(14,29): error TS1005: ',' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(14,39): error TS1005: ',' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(14,40): error TS1134: Variable declaration expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(14,41): error TS1134: Variable declaration expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(14,43): error TS1134: Variable declaration expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(14,51): error TS1134: Variable declaration expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(14,52): error TS1134: Variable declaration expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(15,15): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(15,26): error TS1003: Identifier expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(15,27): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(15,37): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(15,44): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(15,53): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(15,60): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(16,40): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(16,45): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(16,52): error TS1005: ';' expected.
+/.src/privateNameFieldCallExpression.ts/privateNames(2,5): error TS1127: Invalid character.
+/.src/privateNameFieldCallExpression.ts/privateNames(3,5): error TS1127: Invalid character.
+/.src/privateNameFieldCallExpression.ts/privateNames(6,14): error TS1127: Invalid character.
+/.src/privateNameFieldCallExpression.ts/privateNames(7,14): error TS1127: Invalid character.
+/.src/privateNameFieldCallExpression.ts/privateNames(8,27): error TS1127: Invalid character.
+/.src/privateNameFieldCallExpression.ts/privateNames(10,18): error TS1127: Invalid character.
+/.src/privateNameFieldCallExpression.ts/privateNames(13,14): error TS1127: Invalid character.
+/.src/privateNameFieldCallExpression.ts/privateNames(14,28): error TS1127: Invalid character.
+/.src/privateNameFieldCallExpression.ts/privateNames(15,26): error TS1127: Invalid character.
+/.src/privateNameFieldCallExpression.ts/privateNames(16,55): error TS1160: Unterminated template literal.
+/.src/privateNameFieldCallExpression.ts/privateNames(15,46): error TS2304: Cannot find name 'middle$'.
+/.src/privateNameFieldCallExpression.ts/privateNames(15,56): error TS2304: Cannot find name 'tail'.
+/.src/privateNameFieldCallExpression.ts/privateNames(16,40): error TS2304: Cannot find name 'test$'.
+/.src/privateNameFieldCallExpression.ts/privateNames(16,48): error TS2304: Cannot find name 'and$'.
+error TS2451: Cannot redeclare block-scoped variable 'arr'.

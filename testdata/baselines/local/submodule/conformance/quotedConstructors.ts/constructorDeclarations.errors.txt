@@ -1,0 +1,7 @@
+/.src/quotedConstructors.ts/constructorDeclarations(25,24): error TS1005: ',' expected.
+/.src/quotedConstructors.ts/constructorDeclarations(25,25): error TS1005: ',' expected.
+/.src/quotedConstructors.ts/constructorDeclarations(25,27): error TS1005: ',' expected.
+/.src/quotedConstructors.ts/constructorDeclarations(25,30): error TS1128: Declaration or statement expected.
+/.src/quotedConstructors.ts/constructorDeclarations(25,24): error TS2304: Cannot find name '('.
+/.src/quotedConstructors.ts/constructorDeclarations(25,25): error TS2304: Cannot find name ')'.
+/.src/quotedConstructors.ts/constructorDeclarations(25,27): error TS2304: Cannot find name '{'.

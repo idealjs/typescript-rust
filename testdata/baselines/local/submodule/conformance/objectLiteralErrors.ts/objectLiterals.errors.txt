@@ -1,0 +1,15 @@
+/.src/objectLiteralErrors.ts/objectLiterals(22,22): error TS1005: ',' expected.
+/.src/objectLiteralErrors.ts/objectLiterals(22,23): error TS1005: ',' expected.
+/.src/objectLiteralErrors.ts/objectLiterals(22,24): error TS1005: ',' expected.
+/.src/objectLiteralErrors.ts/objectLiterals(22,26): error TS1005: ',' expected.
+/.src/objectLiteralErrors.ts/objectLiterals(22,28): error TS1005: ',' expected.
+/.src/objectLiteralErrors.ts/objectLiterals(22,35): error TS1005: ',' expected.
+/.src/objectLiteralErrors.ts/objectLiterals(22,36): error TS1005: ',' expected.
+/.src/objectLiteralErrors.ts/objectLiterals(22,40): error TS1128: Declaration or statement expected.
+/.src/objectLiteralErrors.ts/objectLiterals(22,18): error TS2304: Cannot find name 'get'.
+/.src/objectLiteralErrors.ts/objectLiterals(22,22): error TS2304: Cannot find name 'a'.
+/.src/objectLiteralErrors.ts/objectLiterals(22,23): error TS2304: Cannot find name '('.
+/.src/objectLiteralErrors.ts/objectLiterals(22,24): error TS2304: Cannot find name ')'.
+/.src/objectLiteralErrors.ts/objectLiterals(22,26): error TS2304: Cannot find name '{'.
+/.src/objectLiteralErrors.ts/objectLiterals(22,28): error TS2304: Cannot find name 'return'.
+/.src/objectLiteralErrors.ts/objectLiterals(22,36): error TS2304: Cannot find name ';'.

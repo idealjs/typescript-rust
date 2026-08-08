@@ -1,0 +1,2 @@
+/.src/a.ts(1,16): error TS2304: Cannot find name 'ClassDecorator'.
+/.src/b.ts(1,16): error TS2304: Cannot find name 'ClassDecorator'.

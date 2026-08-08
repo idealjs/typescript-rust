@@ -1,0 +1,3 @@
+/.src/esDecorators-preservesThis.ts/esDecorators(4,72): error TS2304: Cannot find name 'T'.
+/.src/esDecorators-preservesThis.ts/esDecorators(4,45): error TS2304: Cannot find name 'T'.
+/.src/esDecorators-preservesThis.ts/esDecorators(4,53): error TS2304: Cannot find name 'DecoratorContext'.

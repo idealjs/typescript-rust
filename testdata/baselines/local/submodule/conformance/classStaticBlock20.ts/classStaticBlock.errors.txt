@@ -1,0 +1,12 @@
+/.src/classStaticBlock20.ts/classStaticBlock(2,18): error TS1005: ';' expected.
+/.src/classStaticBlock20.ts/classStaticBlock(6,12): error TS1005: ';' expected.
+/.src/classStaticBlock20.ts/classStaticBlock(6,19): error TS1005: ';' expected.
+/.src/classStaticBlock20.ts/classStaticBlock(10,14): error TS1005: ';' expected.
+/.src/classStaticBlock20.ts/classStaticBlock(10,22): error TS1005: ';' expected.
+/.src/classStaticBlock20.ts/classStaticBlock(10,29): error TS1005: ';' expected.
+/.src/classStaticBlock20.ts/classStaticBlock(13,1): error TS1128: Declaration or statement expected.
+/.src/classStaticBlock20.ts/classStaticBlock(6,5): error TS2304: Cannot find name 'public'.
+/.src/classStaticBlock20.ts/classStaticBlock(6,12): error TS2304: Cannot find name 'static'.
+/.src/classStaticBlock20.ts/classStaticBlock(10,5): error TS2304: Cannot find name 'readonly'.
+/.src/classStaticBlock20.ts/classStaticBlock(10,14): error TS2304: Cannot find name 'private'.
+/.src/classStaticBlock20.ts/classStaticBlock(10,22): error TS2304: Cannot find name 'static'.

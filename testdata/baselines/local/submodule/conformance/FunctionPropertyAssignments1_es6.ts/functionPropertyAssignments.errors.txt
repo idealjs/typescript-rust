@@ -1,0 +1,11 @@
+/.src/FunctionPropertyAssignments1_es6.ts/functionPropertyAssignments(1,11): error TS1003: Identifier expected.
+/.src/FunctionPropertyAssignments1_es6.ts/functionPropertyAssignments(1,12): error TS1005: ',' expected.
+/.src/FunctionPropertyAssignments1_es6.ts/functionPropertyAssignments(1,15): error TS1005: ',' expected.
+/.src/FunctionPropertyAssignments1_es6.ts/functionPropertyAssignments(1,16): error TS1005: ',' expected.
+/.src/FunctionPropertyAssignments1_es6.ts/functionPropertyAssignments(1,18): error TS1005: ',' expected.
+/.src/FunctionPropertyAssignments1_es6.ts/functionPropertyAssignments(1,22): error TS1128: Declaration or statement expected.
+/.src/FunctionPropertyAssignments1_es6.ts/functionPropertyAssignments(1,11): error TS2304: Cannot find name '*'.
+/.src/FunctionPropertyAssignments1_es6.ts/functionPropertyAssignments(1,12): error TS2304: Cannot find name 'foo'.
+/.src/FunctionPropertyAssignments1_es6.ts/functionPropertyAssignments(1,15): error TS2304: Cannot find name '('.
+/.src/FunctionPropertyAssignments1_es6.ts/functionPropertyAssignments(1,16): error TS2304: Cannot find name ')'.
+/.src/FunctionPropertyAssignments1_es6.ts/functionPropertyAssignments(1,18): error TS2304: Cannot find name '{'.

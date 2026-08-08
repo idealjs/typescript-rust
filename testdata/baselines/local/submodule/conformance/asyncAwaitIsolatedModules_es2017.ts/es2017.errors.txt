@@ -1,0 +1,4 @@
+/.src/asyncAwaitIsolatedModules_es2017.ts/es2017(10,16): error TS1005: ',' expected.
+/.src/asyncAwaitIsolatedModules_es2017.ts/es2017(10,24): error TS1005: ',' expected.
+/.src/asyncAwaitIsolatedModules_es2017.ts/es2017(10,25): error TS1134: Variable declaration expected.
+/.src/asyncAwaitIsolatedModules_es2017.ts/es2017(10,10): error TS2304: Cannot find name 'async'.

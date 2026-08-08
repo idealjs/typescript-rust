@@ -1,0 +1,4 @@
+/.src/objectLiteralShorthandPropertiesErrorWithModule.ts/shorthandPropertyAssignment(10,10): error TS1005: ',' expected.
+/.src/objectLiteralShorthandPropertiesErrorWithModule.ts/shorthandPropertyAssignment(10,11): error TS1005: ',' expected.
+/.src/objectLiteralShorthandPropertiesErrorWithModule.ts/shorthandPropertyAssignment(10,10): error TS2304: Cannot find name '.'.
+/.src/objectLiteralShorthandPropertiesErrorWithModule.ts/shorthandPropertyAssignment(14,3): error TS2339: Property 'y' does not exist on type 'm'.

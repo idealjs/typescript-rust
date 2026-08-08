@@ -1,0 +1,2 @@
+/.src/staticFactory1.ts/memberFunctionDeclarations(4,20): error TS2351: This expression is not constructable.
+/.src/staticFactory1.ts/memberFunctionDeclarations(11,17): error TS2339: Property 'create' does not exist on type 'object'.

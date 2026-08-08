@@ -1,0 +1,4 @@
+/.src/derivedClassWithPrivateInstanceShadowingProtectedInstance.ts/inheritanceAndOverriding(7,19): error TS1005: ';' expected.
+/.src/derivedClassWithPrivateInstanceShadowingProtectedInstance.ts/inheritanceAndOverriding(8,19): error TS1005: ';' expected.
+/.src/derivedClassWithPrivateInstanceShadowingProtectedInstance.ts/inheritanceAndOverriding(18,17): error TS1005: ';' expected.
+/.src/derivedClassWithPrivateInstanceShadowingProtectedInstance.ts/inheritanceAndOverriding(19,17): error TS1005: ';' expected.

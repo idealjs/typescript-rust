@@ -1,0 +1,6 @@
+/.src/initializerReferencingConstructorParameters.ts/propertyMemberDeclarations(12,24): error TS1005: ',' expected.
+/.src/initializerReferencingConstructorParameters.ts/propertyMemberDeclarations(18,24): error TS1005: ',' expected.
+/.src/initializerReferencingConstructorParameters.ts/propertyMemberDeclarations(24,24): error TS1005: ',' expected.
+/.src/initializerReferencingConstructorParameters.ts/propertyMemberDeclarations(4,9): error TS2304: Cannot find name 'x'.
+/.src/initializerReferencingConstructorParameters.ts/propertyMemberDeclarations(10,9): error TS2304: Cannot find name 'x'.
+/.src/initializerReferencingConstructorParameters.ts/propertyMemberDeclarations(23,9): error TS2304: Cannot find name 'x'.

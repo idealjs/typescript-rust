@@ -1,0 +1,4 @@
+/.src/asyncAwait_es6.ts/es6(10,16): error TS1005: ',' expected.
+/.src/asyncAwait_es6.ts/es6(10,24): error TS1005: ',' expected.
+/.src/asyncAwait_es6.ts/es6(10,25): error TS1134: Variable declaration expected.
+/.src/asyncAwait_es6.ts/es6(10,10): error TS2304: Cannot find name 'async'.

@@ -1,0 +1,2 @@
+/.src/classAbstractImportInstantiation.ts/classAbstractKeyword(4,9): error TS2511: Cannot create an instance of an abstract class.
+/.src/classAbstractImportInstantiation.ts/classAbstractKeyword(9,5): error TS2304: Cannot find name 'myA'.

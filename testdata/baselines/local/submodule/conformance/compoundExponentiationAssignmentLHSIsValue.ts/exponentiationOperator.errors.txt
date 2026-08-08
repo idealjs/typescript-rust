@@ -1,0 +1,6 @@
+/.src/compoundExponentiationAssignmentLHSIsValue.ts/exponentiationOperator(43,10): error TS1128: Declaration or statement expected.
+/.src/compoundExponentiationAssignmentLHSIsValue.ts/exponentiationOperator(65,21): error TS1128: Declaration or statement expected.
+/.src/compoundExponentiationAssignmentLHSIsValue.ts/exponentiationOperator(66,11): error TS1005: ';' expected.
+/.src/compoundExponentiationAssignmentLHSIsValue.ts/exponentiationOperator(51,9): error TS2349: This expression is not callable.
+/.src/compoundExponentiationAssignmentLHSIsValue.ts/exponentiationOperator(69,1): error TS2349: This expression is not callable.
+/.src/compoundExponentiationAssignmentLHSIsValue.ts/exponentiationOperator(85,2): error TS2349: This expression is not callable.

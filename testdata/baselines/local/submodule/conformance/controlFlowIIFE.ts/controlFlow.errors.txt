@@ -1,0 +1,11 @@
+/.src/controlFlowIIFE.ts/controlFlow(69,12): error TS1005: ')' expected.
+/.src/controlFlowIIFE.ts/controlFlow(71,6): error TS1128: Declaration or statement expected.
+/.src/controlFlowIIFE.ts/controlFlow(7,22): error TS2339: Property 'length' does not exist on type 'string | number'.
+/.src/controlFlowIIFE.ts/controlFlow(16,22): error TS2339: Property 'length' does not exist on type 'string | number'.
+/.src/controlFlowIIFE.ts/controlFlow(25,25): error TS2339: Property 'length' does not exist on type 'string | number'.
+/.src/controlFlowIIFE.ts/controlFlow(25,34): error TS2454: Variable 'y' is used before being assigned.
+/.src/controlFlowIIFE.ts/controlFlow(42,15): error TS2304: Cannot find name 'Error'.
+/.src/controlFlowIIFE.ts/controlFlow(45,10): error TS2339: Property 'slice' does not exist on type 'string | undefined'.
+/.src/controlFlowIIFE.ts/controlFlow(55,5): error TS2454: Variable 'v' is used before being assigned.
+/.src/controlFlowIIFE.ts/controlFlow(64,5): error TS2454: Variable 'v' is used before being assigned.
+/.src/controlFlowIIFE.ts/controlFlow(69,6): error TS2304: Cannot find name 'async'.

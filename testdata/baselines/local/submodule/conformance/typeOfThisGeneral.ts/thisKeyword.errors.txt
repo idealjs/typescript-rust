@@ -1,0 +1,83 @@
+/.src/typeOfThisGeneral.ts/thisKeyword(8,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(8,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(14,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(14,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(18,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(18,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(22,9): error TS1005: ';' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(24,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(24,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(27,9): error TS1005: ';' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(29,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(29,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(37,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(37,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(42,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(42,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(42,24): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(48,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(48,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(48,24): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(53,16): error TS1005: ';' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(56,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(56,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(56,24): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(61,16): error TS1005: ';' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(64,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(64,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(64,24): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(77,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(77,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(83,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(83,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(83,35): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(83,40): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(87,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(87,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(87,35): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(87,40): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(91,9): error TS1005: ';' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(93,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(93,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(93,35): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(93,40): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(96,9): error TS1005: ';' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(98,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(98,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(98,35): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(98,40): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(106,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(106,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(106,35): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(106,40): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(111,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(111,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(111,24): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(117,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(117,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(117,24): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(122,16): error TS1005: ';' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(125,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(125,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(125,24): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(130,16): error TS1005: ';' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(133,14): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(133,15): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(133,24): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(141,10): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(141,11): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(145,10): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(145,11): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(152,10): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(152,11): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(156,10): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(156,11): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(163,10): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(163,11): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(163,20): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(167,10): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(167,11): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(167,20): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(173,6): error TS1005: ',' expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(173,7): error TS1134: Variable declaration expected.
+/.src/typeOfThisGeneral.ts/thisKeyword(173,16): error TS1005: ',' expected.

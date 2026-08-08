@@ -1,0 +1,1 @@
+/.src/templateStringUnterminated4.ts/templates(3,1): error TS1160: Unterminated template literal.

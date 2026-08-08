@@ -1,0 +1,2 @@
+/.src/accessorsOverrideProperty3.ts/propertyMemberDeclarations(6,9): error TS1005: ';' expected.
+/.src/accessorsOverrideProperty3.ts/propertyMemberDeclarations(7,9): error TS1005: ';' expected.

@@ -1,0 +1,3 @@
+/.src/classExtendingPrimitive2.ts/classHeritageSpecification(3,19): error TS1109: Expression expected.
+/.src/classExtendingPrimitive2.ts/classHeritageSpecification(4,1): error TS1005: ',' expected.
+/.src/classExtendingPrimitive2.ts/classHeritageSpecification(4,27): error TS1005: '{' expected.

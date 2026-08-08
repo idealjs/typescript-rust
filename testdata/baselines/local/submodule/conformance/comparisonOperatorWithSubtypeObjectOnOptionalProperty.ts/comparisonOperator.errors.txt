@@ -1,0 +1,2 @@
+/.src/comparisonOperatorWithSubtypeObjectOnOptionalProperty.ts/comparisonOperator(14,16): error TS1005: '>' expected.
+/.src/comparisonOperatorWithSubtypeObjectOnOptionalProperty.ts/comparisonOperator(15,16): error TS1005: '>' expected.

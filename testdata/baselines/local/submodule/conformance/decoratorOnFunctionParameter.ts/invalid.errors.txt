@@ -1,0 +1,7 @@
+/.src/decoratorOnFunctionParameter.ts/invalid(5,17): error TS1138: Parameter declaration expected.
+/.src/decoratorOnFunctionParameter.ts/invalid(5,22): error TS1005: ',' expected.
+/.src/decoratorOnFunctionParameter.ts/invalid(6,17): error TS1138: Parameter declaration expected.
+/.src/decoratorOnFunctionParameter.ts/invalid(6,21): error TS1005: ',' expected.
+/.src/decoratorOnFunctionParameter.ts/invalid(6,24): error TS1005: ';' expected.
+/.src/decoratorOnFunctionParameter.ts/invalid(6,28): error TS1005: ';' expected.
+/.src/decoratorOnFunctionParameter.ts/invalid(6,31): error TS1005: ';' expected.

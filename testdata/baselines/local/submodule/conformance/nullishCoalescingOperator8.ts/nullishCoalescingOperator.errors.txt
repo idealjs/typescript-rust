@@ -1,0 +1,3 @@
+/.src/nullishCoalescingOperator8.ts/nullishCoalescingOperator(5,14): error TS2339: Property 'm' does not exist on type '{ p: string | undefined }'.
+/.src/nullishCoalescingOperator8.ts/nullishCoalescingOperator(6,14): error TS2339: Property 'm' does not exist on type '{ p: string | undefined }'.
+/.src/nullishCoalescingOperator8.ts/nullishCoalescingOperator(6,30): error TS2339: Property 'm' does not exist on type '{ p: string | undefined }'.

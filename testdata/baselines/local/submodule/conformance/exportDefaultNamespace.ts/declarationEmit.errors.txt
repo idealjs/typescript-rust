@@ -1,0 +1,1 @@
+/.src/exportDefaultNamespace.ts/declarationEmit(5,10): error TS2339: Property 'someProp' does not exist on type '() => string'.

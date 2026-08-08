@@ -1,0 +1,14 @@
+/.src/comparisonOperatorWithNoRelationshipObjectsOnConstructorSignature.ts/comparisonOperator(35,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnConstructorSignature.ts/comparisonOperator(36,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnConstructorSignature.ts/comparisonOperator(37,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnConstructorSignature.ts/comparisonOperator(38,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnConstructorSignature.ts/comparisonOperator(39,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnConstructorSignature.ts/comparisonOperator(40,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnConstructorSignature.ts/comparisonOperator(41,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnConstructorSignature.ts/comparisonOperator(43,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnConstructorSignature.ts/comparisonOperator(44,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnConstructorSignature.ts/comparisonOperator(45,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnConstructorSignature.ts/comparisonOperator(46,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnConstructorSignature.ts/comparisonOperator(47,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnConstructorSignature.ts/comparisonOperator(48,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnConstructorSignature.ts/comparisonOperator(49,19): error TS1005: '>' expected.

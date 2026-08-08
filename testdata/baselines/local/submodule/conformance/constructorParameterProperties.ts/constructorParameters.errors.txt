@@ -1,0 +1,4 @@
+/.src/constructorParameterProperties.ts/constructorParameters(3,25): error TS1005: ',' expected.
+/.src/constructorParameterProperties.ts/constructorParameters(3,46): error TS1005: ',' expected.
+/.src/constructorParameterProperties.ts/constructorParameters(13,31): error TS1005: ',' expected.
+/.src/constructorParameterProperties.ts/constructorParameters(13,47): error TS1005: ',' expected.

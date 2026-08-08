@@ -1,0 +1,5 @@
+/.src/arbitraryModuleNamespaceIdentifiers_importEmpty.ts/arbitraryModuleNamespaceIdentifiers(8,14): error TS2304: Cannot find name 'x'.
+/.src/arbitraryModuleNamespaceIdentifiers_importEmpty.ts/arbitraryModuleNamespaceIdentifiers(8,17): error TS2304: Cannot find name 'y'.
+/.src/arbitraryModuleNamespaceIdentifiers_importEmpty.ts/arbitraryModuleNamespaceIdentifiers(8,20): error TS2304: Cannot find name 'z'.
+error TS2300: Duplicate identifier 'stringliteral'.
+error TS2300: Duplicate identifier 'stringliteral'.

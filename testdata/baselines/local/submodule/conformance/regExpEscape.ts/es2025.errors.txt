@@ -1,0 +1,2 @@
+/.src/regExpEscape.ts/es2025(1,20): error TS2304: Cannot find name 'RegExp'.
+/.src/regExpEscape.ts/es2025(1,27): error TS2304: Cannot find name 'RegExp'.

@@ -1,0 +1,12 @@
+/.src/asyncMethodWithSuper_es6.ts/es6(127,11): error TS1003: Identifier expected.
+/.src/asyncMethodWithSuper_es6.ts/es6(127,13): error TS1005: ';' expected.
+/.src/asyncMethodWithSuper_es6.ts/es6(141,11): error TS1003: Identifier expected.
+/.src/asyncMethodWithSuper_es6.ts/es6(141,13): error TS1005: ';' expected.
+/.src/asyncMethodWithSuper_es6.ts/es6(157,11): error TS1003: Identifier expected.
+/.src/asyncMethodWithSuper_es6.ts/es6(157,13): error TS1005: ';' expected.
+/.src/asyncMethodWithSuper_es6.ts/es6(171,11): error TS1003: Identifier expected.
+/.src/asyncMethodWithSuper_es6.ts/es6(171,13): error TS1005: ';' expected.
+/.src/asyncMethodWithSuper_es6.ts/es6(190,9): error TS1005: ';' expected.
+/.src/asyncMethodWithSuper_es6.ts/es6(191,9): error TS1005: ';' expected.
+/.src/asyncMethodWithSuper_es6.ts/es6(194,16): error TS1005: ';' expected.
+/.src/asyncMethodWithSuper_es6.ts/es6(195,16): error TS1005: ';' expected.

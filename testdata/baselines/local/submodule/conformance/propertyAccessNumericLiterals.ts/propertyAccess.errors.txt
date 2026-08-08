@@ -1,0 +1,17 @@
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(6,1): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(7,1): error TS1489: Decimals with leading zeros are not allowed.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(8,2): error TS6188: Numeric separators are not allowed here.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(10,1): error TS1489: Decimals with leading zeros are not allowed.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(1,12): error TS2339: Property 'toString' does not exist on type '4294967295'.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(2,9): error TS2339: Property 'toString' does not exist on type '668'.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(3,12): error TS2339: Property 'toString' does not exist on type '109'.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(4,7): error TS2339: Property 'toString' does not exist on type '1234'.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(5,5): error TS2339: Property 'toString' does not exist on type '1'.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(6,5): error TS2339: Property 'toString' does not exist on type '0'.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(7,8): error TS2339: Property 'toString' does not exist on type '880000'.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(8,9): error TS2339: Property 'toString' does not exist on type 'number'.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(9,7): error TS2339: Property 'toString' does not exist on type '880000'.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(10,7): error TS2339: Property 'toString' does not exist on type '880000'.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(11,7): error TS2339: Property 'toString' does not exist on type 'number'.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(12,6): error TS2339: Property 'toString' does not exist on type '880000'.
+/.src/propertyAccessNumericLiterals.ts/propertyAccess(13,7): error TS2339: Property 'toString' does not exist on type 'number'.

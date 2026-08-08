@@ -1,0 +1,36 @@
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(6,19): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(7,19): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(7,11): error TS2322: Type '0 | 1 | 9' is not assignable to type '0'.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(12,13): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(13,19): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(13,11): error TS2322: Type '0 | 1 | 9' is not assignable to type '9'.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(18,19): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(19,23): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(19,11): error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(24,13): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(25,23): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(25,11): error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(31,19): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(32,19): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(32,11): error TS2322: Type '0 | 1 | 9' is not assignable to type '0'.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(37,13): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(38,19): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(38,11): error TS2322: Type '0 | 1 | 9' is not assignable to type '9'.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(43,19): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(44,23): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(44,11): error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(49,13): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(50,23): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(50,11): error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(56,24): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(57,19): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(57,11): error TS2322: Type '0 | 1 | 9' is not assignable to type '0'.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(62,18): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(63,19): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(63,11): error TS2322: Type '0 | 1 | 9' is not assignable to type '9'.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(68,24): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(69,23): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(69,11): error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(74,18): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(75,23): error TS2454: Variable 'b' is used before being assigned.
+/.src/controlFlowAssignmentPatternOrder.ts/controlFlow(75,11): error TS2322: Type '0 | 1 | 8 | 9' is not assignable to type '0 | 8'.

@@ -1,0 +1,19 @@
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,13): error TS1005: ',' expected.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,14): error TS1005: ',' expected.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,15): error TS1005: ',' expected.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,17): error TS1005: ',' expected.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,19): error TS1005: ',' expected.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,26): error TS1005: ',' expected.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,27): error TS1005: ',' expected.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,28): error TS1005: ',' expected.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,34): error TS1005: ',' expected.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(7,13): error TS1005: ',' expected.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(7,17): error TS1005: ';' expected.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(8,1): error TS1128: Declaration or statement expected.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,13): error TS2304: Cannot find name '('.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,15): error TS2304: Cannot find name ')'.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,17): error TS2304: Cannot find name '{'.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,19): error TS2304: Cannot find name 'return'.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,27): error TS2304: Cannot find name '.'.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,28): error TS2304: Cannot find name 'length'.
+/.src/computedPropertyNamesContextualType3_ES5.ts/computedProperties(6,34): error TS2304: Cannot find name ';'.

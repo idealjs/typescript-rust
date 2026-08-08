@@ -1,0 +1,8 @@
+/.src/classStaticBlockUseBeforeDef3.ts/classStaticBlock(2,12): error TS1005: ';' expected.
+/.src/classStaticBlockUseBeforeDef3.ts/classStaticBlock(3,10): error TS1005: ';' expected.
+/.src/classStaticBlockUseBeforeDef3.ts/classStaticBlock(3,11): error TS1005: ';' expected.
+/.src/classStaticBlockUseBeforeDef3.ts/classStaticBlock(6,12): error TS1005: ';' expected.
+/.src/classStaticBlockUseBeforeDef3.ts/classStaticBlock(6,26): error TS1005: ';' expected.
+/.src/classStaticBlockUseBeforeDef3.ts/classStaticBlock(9,1): error TS1128: Declaration or statement expected.
+/.src/classStaticBlockUseBeforeDef3.ts/classStaticBlock(6,5): error TS2304: Cannot find name 'static'.
+/.src/classStaticBlockUseBeforeDef3.ts/classStaticBlock(6,12): error TS2304: Cannot find name 'doSomething'.

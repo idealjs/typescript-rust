@@ -1,0 +1,2 @@
+/.src/destructuringObjectBindingPatternAndAssignment5.ts/destructuring(4,8): error TS2454: Variable 'x' is used before being assigned.
+/.src/destructuringObjectBindingPatternAndAssignment5.ts/destructuring(4,14): error TS2454: Variable 'y' is used before being assigned.

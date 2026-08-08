@@ -1,0 +1,5 @@
+/.src/propertyAccessNumericLiterals.es6.ts/propertyAccess(1,12): error TS2339: Property 'toString' does not exist on type '4294967295'.
+/.src/propertyAccessNumericLiterals.es6.ts/propertyAccess(2,9): error TS2339: Property 'toString' does not exist on type '668'.
+/.src/propertyAccessNumericLiterals.es6.ts/propertyAccess(3,12): error TS2339: Property 'toString' does not exist on type '109'.
+/.src/propertyAccessNumericLiterals.es6.ts/propertyAccess(4,7): error TS2339: Property 'toString' does not exist on type '1234'.
+/.src/propertyAccessNumericLiterals.es6.ts/propertyAccess(5,5): error TS2339: Property 'toString' does not exist on type '1'.

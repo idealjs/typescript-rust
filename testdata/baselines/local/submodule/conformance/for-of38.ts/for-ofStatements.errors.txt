@@ -1,0 +1,1 @@
+/.src/for-of38.ts/for-ofStatements(2,15): error TS2304: Cannot find name 'Map'.

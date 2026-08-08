@@ -1,0 +1,3 @@
+/.src/anonymousClassAccessorsDeclarationEmit1.ts/declarationEmit(16,9): error TS1005: ';' expected.
+/.src/anonymousClassAccessorsDeclarationEmit1.ts/declarationEmit(19,9): error TS1005: ';' expected.
+/.src/anonymousClassAccessorsDeclarationEmit1.ts/declarationEmit(15,16): error TS2304: Cannot find name 'B'.

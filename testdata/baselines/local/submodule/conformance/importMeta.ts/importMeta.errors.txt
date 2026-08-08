@@ -1,0 +1,17 @@
+/.src/assignmentTargets.ts(2,7): error TS1012: Unexpected token.
+/.src/assignmentTargets.ts(2,8): error TS1005: ';' expected.
+/.src/moduleLookingFile01.ts(1,16): error TS2304: Cannot find name 'import'.
+/.src/moduleLookingFile01.ts(2,16): error TS2304: Cannot find name 'import'.
+/.src/moduleLookingFile01.ts(3,16): error TS2304: Cannot find name 'import'.
+/.src/scriptLookingFile01.ts(1,15): error TS2304: Cannot find name 'import'.
+/.src/scriptLookingFile01.ts(2,15): error TS2304: Cannot find name 'import'.
+/.src/scriptLookingFile01.ts(3,15): error TS2304: Cannot find name 'import'.
+/.src/example.ts(3,59): error TS2304: Cannot find name 'import'.
+/.src/example.ts(6,16): error TS2304: Cannot find name 'import'.
+/.src/example.ts(8,21): error TS2304: Cannot find name 'Image'.
+/.src/assignmentTargets.ts(1,32): error TS2304: Cannot find name 'import'.
+/.src/assignmentTargets.ts(1,51): error TS2304: Cannot find name 'import'.
+/.src/assignmentTargets.ts(1,70): error TS2304: Cannot find name 'import'.
+/.src/assignmentTargets.ts(1,19): error TS2304: Cannot find name 'ImportMeta'.
+/.src/assignmentTargets.ts(2,8): error TS2304: Cannot find name 'meta'.
+/.src/assignmentTargets.ts(11,21): error TS2304: Cannot find name 'import'.

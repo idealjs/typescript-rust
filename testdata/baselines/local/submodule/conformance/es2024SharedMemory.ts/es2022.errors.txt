@@ -1,0 +1,8 @@
+/.src/es2024SharedMemory.ts/es2022(5,17): error TS2304: Cannot find name 'SharedArrayBuffer'.
+/.src/es2024SharedMemory.ts/es2022(7,19): error TS2304: Cannot find name 'SharedArrayBuffer'.
+/.src/es2024SharedMemory.ts/es2022(7,37): error TS2304: Cannot find name 'BigInt64Array'.
+/.src/es2024SharedMemory.ts/es2022(8,19): error TS2304: Cannot find name 'BigInt64Array'.
+/.src/es2024SharedMemory.ts/es2022(9,19): error TS2304: Cannot find name 'Atomics'.
+/.src/es2024SharedMemory.ts/es2022(10,26): error TS2304: Cannot find name 'Atomics'.
+/.src/es2024SharedMemory.ts/es2022(11,44): error TS2304: Cannot find name 'Atomics'.
+/.src/es2024SharedMemory.ts/es2022(11,72): error TS2304: Cannot find name 'BigInt'.

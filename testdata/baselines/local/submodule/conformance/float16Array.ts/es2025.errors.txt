@@ -1,0 +1,1 @@
+/.src/float16Array.ts/es2025(1,21): error TS2304: Cannot find name 'Float16Array'.

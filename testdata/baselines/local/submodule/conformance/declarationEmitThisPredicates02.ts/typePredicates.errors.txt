@@ -1,0 +1,25 @@
+/.src/declarationEmitThisPredicates02.ts/typePredicates(8,6): error TS1005: ',' expected.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(8,7): error TS1005: ',' expected.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(8,15): error TS1005: ',' expected.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(8,18): error TS1005: ',' expected.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(8,22): error TS1005: ',' expected.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(9,9): error TS1005: ',' expected.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(9,13): error TS1005: ',' expected.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(9,17): error TS1005: ',' expected.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(9,19): error TS1005: ',' expected.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(9,24): error TS1005: ',' expected.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(9,27): error TS1005: ',' expected.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(11,5): error TS1128: Declaration or statement expected.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(8,5): error TS2304: Cannot find name 'm'.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(8,6): error TS2304: Cannot find name '('.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(8,15): error TS2304: Cannot find name 'is'.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(8,22): error TS2304: Cannot find name '{'.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(9,9): error TS2304: Cannot find name 'let'.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(9,13): error TS2304: Cannot find name 'dis'.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(9,17): error TS2304: Cannot find name '='.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(9,19): error TS2304: Cannot find name 'this'.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(9,24): error TS2304: Cannot find name 'as'.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(9,27): error TS2304: Cannot find name '{'.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(10,16): error TS2304: Cannot find name 'dis'.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(10,33): error TS2304: Cannot find name 'dis'.
+/.src/declarationEmitThisPredicates02.ts/typePredicates(10,50): error TS2304: Cannot find name 'dis'.

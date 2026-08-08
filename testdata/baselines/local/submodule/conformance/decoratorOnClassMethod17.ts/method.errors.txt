@@ -1,0 +1,1 @@
+/.src/decoratorOnClassMethod17.ts/method(4,18): error TS1005: ';' expected.

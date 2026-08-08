@@ -1,0 +1,3 @@
+/.src/esDecorators-classExpression-namedEvaluation.7.ts/namedEvaluation(6,6): error TS1012: Unexpected token.
+/.src/esDecorators-classExpression-namedEvaluation.7.ts/namedEvaluation(6,7): error TS1005: ',' expected.
+/.src/esDecorators-classExpression-namedEvaluation.7.ts/namedEvaluation(6,11): error TS1005: ',' expected.

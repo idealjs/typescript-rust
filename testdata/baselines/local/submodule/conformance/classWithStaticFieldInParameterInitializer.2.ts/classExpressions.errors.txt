@@ -1,0 +1,8 @@
+/.src/classWithStaticFieldInParameterInitializer.2.ts/classExpressions(3,21): error TS1005: '{' expected.
+/.src/classWithStaticFieldInParameterInitializer.2.ts/classExpressions(3,23): error TS1005: ';' expected.
+/.src/classWithStaticFieldInParameterInitializer.2.ts/classExpressions(3,25): error TS1005: ';' expected.
+/.src/classWithStaticFieldInParameterInitializer.2.ts/classExpressions(6,21): error TS1005: '{' expected.
+/.src/classWithStaticFieldInParameterInitializer.2.ts/classExpressions(6,23): error TS1005: ';' expected.
+/.src/classWithStaticFieldInParameterInitializer.2.ts/classExpressions(6,25): error TS1005: ';' expected.
+/.src/classWithStaticFieldInParameterInitializer.2.ts/classExpressions(3,1): error TS2554: Expected 1 arguments, but got 0.
+/.src/classWithStaticFieldInParameterInitializer.2.ts/classExpressions(6,1): error TS2554: Expected 2 arguments, but got 0.

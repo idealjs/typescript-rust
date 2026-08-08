@@ -1,0 +1,6 @@
+/.src/parenthesizedContexualTyping3.ts/contextualTyping(12,17): error TS1005: ',' expected.
+/.src/parenthesizedContexualTyping3.ts/contextualTyping(12,23): error TS1005: ';' expected.
+/.src/parenthesizedContexualTyping3.ts/contextualTyping(12,28): error TS1128: Declaration or statement expected.
+/.src/parenthesizedContexualTyping3.ts/contextualTyping(6,31): error TS2304: Cannot find name 'TemplateStringsArray'.
+/.src/parenthesizedContexualTyping3.ts/contextualTyping(7,31): error TS2304: Cannot find name 'TemplateStringsArray'.
+/.src/parenthesizedContexualTyping3.ts/contextualTyping(8,31): error TS2304: Cannot find name 'TemplateStringsArray'.

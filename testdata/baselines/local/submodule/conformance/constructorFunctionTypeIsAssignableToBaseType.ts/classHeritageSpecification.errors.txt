@@ -1,0 +1,1 @@
+/.src/constructorFunctionTypeIsAssignableToBaseType.ts/classHeritageSpecification(3,14): error TS2304: Cannot find name 'Object'.

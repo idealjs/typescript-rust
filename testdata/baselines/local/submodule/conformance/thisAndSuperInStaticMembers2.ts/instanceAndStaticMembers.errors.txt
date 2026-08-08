@@ -1,0 +1,4 @@
+/.src/thisAndSuperInStaticMembers2.ts/instanceAndStaticMembers(32,25): error TS1005: ';' expected.
+/.src/thisAndSuperInStaticMembers2.ts/instanceAndStaticMembers(11,17): error TS2349: This expression is not callable.
+/.src/thisAndSuperInStaticMembers2.ts/instanceAndStaticMembers(12,17): error TS2349: This expression is not callable.
+/.src/thisAndSuperInStaticMembers2.ts/instanceAndStaticMembers(14,23): error TS2339: Property '' does not exist on type '{ a: number; f: () => number; ``: any; x: 1; y: any; z: any }'.

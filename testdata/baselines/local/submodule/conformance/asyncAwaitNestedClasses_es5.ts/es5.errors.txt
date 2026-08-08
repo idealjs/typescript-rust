@@ -1,0 +1,1 @@
+/.src/asyncAwaitNestedClasses_es5.ts/es5(15,3): error TS2339: Property 'B' does not exist on type 'object'.

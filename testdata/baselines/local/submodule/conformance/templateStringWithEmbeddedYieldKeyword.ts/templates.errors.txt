@@ -1,0 +1,4 @@
+/.src/templateStringWithEmbeddedYieldKeyword.ts/templates(2,15): error TS1005: '(' expected.
+/.src/templateStringWithEmbeddedYieldKeyword.ts/templates(4,9): error TS1005: ',' expected.
+/.src/templateStringWithEmbeddedYieldKeyword.ts/templates(4,34): error TS1005: ',' expected.
+/.src/templateStringWithEmbeddedYieldKeyword.ts/templates(5,2): error TS1005: ')' expected.

@@ -1,0 +1,2 @@
+/.src/esnextSharedMemory.ts/esnext(1,1): error TS2304: Cannot find name 'Atomics'.
+/.src/esnextSharedMemory.ts/esnext(2,1): error TS2304: Cannot find name 'Atomics'.

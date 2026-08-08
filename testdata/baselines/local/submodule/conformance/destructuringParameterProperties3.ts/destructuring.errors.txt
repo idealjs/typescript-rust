@@ -1,0 +1,15 @@
+/.src/destructuringParameterProperties3.ts/destructuring(3,25): error TS1005: ',' expected.
+/.src/destructuringParameterProperties3.ts/destructuring(3,39): error TS1005: ',' expected.
+/.src/destructuringParameterProperties3.ts/destructuring(4,59): error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+/.src/destructuringParameterProperties3.ts/destructuring(4,83): error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+/.src/destructuringParameterProperties3.ts/destructuring(5,18): error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+/.src/destructuringParameterProperties3.ts/destructuring(10,21): error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+/.src/destructuringParameterProperties3.ts/destructuring(14,21): error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+/.src/destructuringParameterProperties3.ts/destructuring(18,21): error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+/.src/destructuringParameterProperties3.ts/destructuring(22,9): error TS2554: Expected 4 arguments, but got 2.
+/.src/destructuringParameterProperties3.ts/destructuring(25,9): error TS2554: Expected 4 arguments, but got 2.
+/.src/destructuringParameterProperties3.ts/destructuring(28,9): error TS2554: Expected 4 arguments, but got 2.
+/.src/destructuringParameterProperties3.ts/destructuring(31,9): error TS2554: Expected 4 arguments, but got 2.
+error TS2451: Cannot redeclare block-scoped variable 'z_a'.
+error TS2451: Cannot redeclare block-scoped variable 'z_b'.
+error TS2451: Cannot redeclare block-scoped variable 'z_c'.

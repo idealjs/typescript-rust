@@ -1,0 +1,24 @@
+/.src/classStaticBlock26.ts/classStaticBlock(2,12): error TS1005: ';' expected.
+/.src/classStaticBlock26.ts/classStaticBlock(5,12): error TS1005: ';' expected.
+/.src/classStaticBlock26.ts/classStaticBlock(8,12): error TS1005: ';' expected.
+/.src/classStaticBlock26.ts/classStaticBlock(9,18): error TS1012: Unexpected token.
+/.src/classStaticBlock26.ts/classStaticBlock(9,19): error TS1005: ']' expected.
+/.src/classStaticBlock26.ts/classStaticBlock(11,12): error TS1005: ';' expected.
+/.src/classStaticBlock26.ts/classStaticBlock(13,19): error TS1012: Unexpected token.
+/.src/classStaticBlock26.ts/classStaticBlock(13,24): error TS1005: ']' expected.
+/.src/classStaticBlock26.ts/classStaticBlock(16,12): error TS1005: ';' expected.
+/.src/classStaticBlock26.ts/classStaticBlock(19,12): error TS1005: ';' expected.
+/.src/classStaticBlock26.ts/classStaticBlock(20,14): error TS1012: Unexpected token.
+/.src/classStaticBlock26.ts/classStaticBlock(23,12): error TS1005: ';' expected.
+/.src/classStaticBlock26.ts/classStaticBlock(26,27): error TS1012: Unexpected token.
+/.src/classStaticBlock26.ts/classStaticBlock(26,30): error TS1005: ',' expected.
+/.src/classStaticBlock26.ts/classStaticBlock(28,1): error TS1128: Declaration or statement expected.
+/.src/classStaticBlock26.ts/classStaticBlock(5,5): error TS2304: Cannot find name 'static'.
+/.src/classStaticBlock26.ts/classStaticBlock(8,5): error TS2304: Cannot find name 'static'.
+/.src/classStaticBlock26.ts/classStaticBlock(11,5): error TS2304: Cannot find name 'static'.
+/.src/classStaticBlock26.ts/classStaticBlock(16,5): error TS2304: Cannot find name 'static'.
+/.src/classStaticBlock26.ts/classStaticBlock(17,12): error TS2304: Cannot find name 'await'.
+/.src/classStaticBlock26.ts/classStaticBlock(19,5): error TS2304: Cannot find name 'static'.
+/.src/classStaticBlock26.ts/classStaticBlock(21,9): error TS1116: A 'break' statement can only jump to a label of an enclosing statement.
+/.src/classStaticBlock26.ts/classStaticBlock(23,5): error TS2304: Cannot find name 'static'.
+/.src/classStaticBlock26.ts/classStaticBlock(26,30): error TS1182: A destructuring declaration must have an initializer.

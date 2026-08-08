@@ -1,0 +1,14 @@
+/.src/esDecorators-decoratorExpression.1.ts/esDecorators(17,8): error TS1005: ';' expected.
+/.src/esDecorators-decoratorExpression.1.ts/esDecorators(19,10): error TS1005: ';' expected.
+/.src/esDecorators-decoratorExpression.1.ts/esDecorators(21,10): error TS1005: ';' expected.
+/.src/esDecorators-decoratorExpression.1.ts/esDecorators(23,12): error TS1005: ';' expected.
+/.src/esDecorators-decoratorExpression.1.ts/esDecorators(39,15): error TS1003: Identifier expected.
+/.src/esDecorators-decoratorExpression.1.ts/esDecorators(39,18): error TS1005: ';' expected.
+/.src/esDecorators-decoratorExpression.1.ts/esDecorators(41,15): error TS1003: Identifier expected.
+/.src/esDecorators-decoratorExpression.1.ts/esDecorators(41,20): error TS1005: ';' expected.
+/.src/esDecorators-decoratorExpression.1.ts/esDecorators(43,17): error TS1003: Identifier expected.
+/.src/esDecorators-decoratorExpression.1.ts/esDecorators(43,20): error TS1005: ';' expected.
+/.src/esDecorators-decoratorExpression.1.ts/esDecorators(45,17): error TS1003: Identifier expected.
+/.src/esDecorators-decoratorExpression.1.ts/esDecorators(45,22): error TS1005: ';' expected.
+/.src/esDecorators-decoratorExpression.1.ts/esDecorators(19,5): error TS2349: This expression is not callable.
+/.src/esDecorators-decoratorExpression.1.ts/esDecorators(23,7): error TS2349: This expression is not callable.

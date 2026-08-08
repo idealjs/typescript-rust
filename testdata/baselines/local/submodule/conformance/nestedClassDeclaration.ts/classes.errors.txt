@@ -1,0 +1,3 @@
+/.src/nestedClassDeclaration.ts/classes(5,11): error TS1005: ';' expected.
+/.src/nestedClassDeclaration.ts/classes(5,14): error TS1005: ';' expected.
+/.src/nestedClassDeclaration.ts/classes(7,1): error TS1128: Declaration or statement expected.

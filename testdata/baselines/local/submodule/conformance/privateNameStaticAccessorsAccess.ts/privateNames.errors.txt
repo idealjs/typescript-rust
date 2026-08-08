@@ -1,0 +1,30 @@
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(3,16): error TS1005: ';' expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(3,17): error TS1005: ';' expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(4,16): error TS1005: ';' expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(4,17): error TS1005: ';' expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(7,24): error TS1003: Identifier expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(7,25): error TS1005: ',' expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(9,11): error TS1003: Identifier expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(9,12): error TS1005: ';' expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(11,15): error TS1003: Identifier expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(11,16): error TS1005: ';' expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(16,4): error TS1003: Identifier expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(16,5): error TS1005: ';' expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(19,8): error TS1003: Identifier expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(19,9): error TS1005: ';' expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(24,12): error TS1003: Identifier expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(24,13): error TS1005: ';' expected.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(3,16): error TS1127: Invalid character.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(4,16): error TS1127: Invalid character.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(7,24): error TS1127: Invalid character.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(9,11): error TS1127: Invalid character.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(11,15): error TS1127: Invalid character.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(16,4): error TS1127: Invalid character.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(19,8): error TS1127: Invalid character.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(24,12): error TS1127: Invalid character.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(16,4): error TS2339: Property '#' does not exist on type 'object'.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(16,5): error TS2304: Cannot find name 'prop'.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(19,8): error TS2339: Property '#' does not exist on type 'object'.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(19,9): error TS2304: Cannot find name 'prop'.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(24,12): error TS2339: Property '#' does not exist on type 'object'.
+/.src/privateNameStaticAccessorsAccess.ts/privateNames(24,13): error TS2304: Cannot find name 'prop'.

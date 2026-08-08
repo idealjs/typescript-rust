@@ -1,0 +1,3 @@
+/.src/constructorImplementationWithDefaultValues2.ts/constructorParameters(3,24): error TS1005: ',' expected.
+/.src/constructorImplementationWithDefaultValues2.ts/constructorParameters(10,34): error TS1005: ',' expected.
+/.src/constructorImplementationWithDefaultValues2.ts/constructorParameters(15,19): error TS2304: Cannot find name 'Date'.

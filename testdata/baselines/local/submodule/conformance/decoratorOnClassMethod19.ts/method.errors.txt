@@ -1,0 +1,23 @@
+/.src/decoratorOnClassMethod19.ts/method(5,5): error TS1003: Identifier expected.
+/.src/decoratorOnClassMethod19.ts/method(5,6): error TS1005: ';' expected.
+/.src/decoratorOnClassMethod19.ts/method(7,29): error TS1003: Identifier expected.
+/.src/decoratorOnClassMethod19.ts/method(7,30): error TS1005: ',' expected.
+/.src/decoratorOnClassMethod19.ts/method(12,5): error TS1003: Identifier expected.
+/.src/decoratorOnClassMethod19.ts/method(12,6): error TS1005: ';' expected.
+/.src/decoratorOnClassMethod19.ts/method(14,7): error TS1138: Parameter declaration expected.
+/.src/decoratorOnClassMethod19.ts/method(14,17): error TS1005: ',' expected.
+/.src/decoratorOnClassMethod19.ts/method(14,18): error TS1138: Parameter declaration expected.
+/.src/decoratorOnClassMethod19.ts/method(14,26): error TS1005: ';' expected.
+/.src/decoratorOnClassMethod19.ts/method(14,29): error TS1005: ';' expected.
+/.src/decoratorOnClassMethod19.ts/method(14,30): error TS1005: ';' expected.
+/.src/decoratorOnClassMethod19.ts/method(14,31): error TS1005: ';' expected.
+/.src/decoratorOnClassMethod19.ts/method(14,32): error TS1005: ';' expected.
+/.src/decoratorOnClassMethod19.ts/method(14,33): error TS1005: ';' expected.
+/.src/decoratorOnClassMethod19.ts/method(14,35): error TS1005: ';' expected.
+/.src/decoratorOnClassMethod19.ts/method(14,36): error TS1005: ';' expected.
+/.src/decoratorOnClassMethod19.ts/method(14,38): error TS1005: ';' expected.
+/.src/decoratorOnClassMethod19.ts/method(15,1): error TS1128: Declaration or statement expected.
+/.src/decoratorOnClassMethod19.ts/method(5,5): error TS1127: Invalid character.
+/.src/decoratorOnClassMethod19.ts/method(7,29): error TS1127: Invalid character.
+/.src/decoratorOnClassMethod19.ts/method(12,5): error TS1127: Invalid character.
+/.src/decoratorOnClassMethod19.ts/method(14,31): error TS1127: Invalid character.

@@ -1,0 +1,1 @@
+/.src/asOperatorAmbiguity.ts/asOperator(7,14): error TS2339: Property 'm' does not exist on type '{ x: { m: string } }'.

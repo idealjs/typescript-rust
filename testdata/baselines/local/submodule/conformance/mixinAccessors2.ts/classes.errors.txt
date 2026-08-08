@@ -1,0 +1,3 @@
+/.src/mixinAccessors2.ts/classes(2,24): error TS1005: '{' expected.
+/.src/mixinAccessors2.ts/classes(2,35): error TS1005: ';' expected.
+/.src/mixinAccessors2.ts/classes(2,16): error TS2304: Cannot find name 'extends'.

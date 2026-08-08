@@ -1,0 +1,4 @@
+/.src/decoratorMetadata-jsdoc.ts/decorators(5,15): error TS1005: ';' expected.
+/.src/decoratorMetadata-jsdoc.ts/decorators(7,15): error TS1005: ';' expected.
+/.src/decoratorMetadata-jsdoc.ts/decorators(9,9): error TS1003: Identifier expected.
+/.src/decoratorMetadata-jsdoc.ts/decorators(9,9): error TS2304: Cannot find name '*'.

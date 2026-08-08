@@ -1,0 +1,16 @@
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(8,7): error TS1005: ']' expected.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(8,15): error TS1003: Identifier expected.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(13,3): error TS1005: ';' expected.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(15,3): error TS1005: ';' expected.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(17,3): error TS1005: ';' expected.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(19,3): error TS1005: ';' expected.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(21,3): error TS1005: ';' expected.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(23,3): error TS1005: ';' expected.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(25,3): error TS1005: ';' expected.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(25,19): error TS1005: ';' expected.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(27,3): error TS1005: ';' expected.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(27,40): error TS1005: ';' expected.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(29,3): error TS1005: ';' expected.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(29,50): error TS1005: ';' expected.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(17,9): error TS2339: Property 'member' does not exist on type 'string'.
+/.src/taggedTemplateStringsWithIncompatibleTypedTagsES6.ts/templates(19,23): error TS2339: Property 'member' does not exist on type 'string'.

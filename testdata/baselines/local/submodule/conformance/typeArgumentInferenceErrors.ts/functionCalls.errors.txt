@@ -1,0 +1,5 @@
+/.src/typeArgumentInferenceErrors.ts/functionCalls(7,35): error TS2345: Argument of type '(x: string) => string' is not assignable to parameter of type '(x: U) => void'.
+/.src/typeArgumentInferenceErrors.ts/functionCalls(11,35): error TS2345: Argument of type '(x: string) => string' is not assignable to parameter of type '(x: U) => void'.
+/.src/typeArgumentInferenceErrors.ts/functionCalls(15,23): error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(a: A) => A'.
+/.src/typeArgumentInferenceErrors.ts/functionCalls(15,41): error TS2345: Argument of type '(n: string) => string' is not assignable to parameter of type '(b: A) => A'.
+/.src/typeArgumentInferenceErrors.ts/functionCalls(15,59): error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(c: A) => A'.

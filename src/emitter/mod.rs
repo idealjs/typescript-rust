@@ -1842,8 +1842,12 @@ fn rewrite_import_extensions(text: &str) -> String {
     let bytes = text.as_bytes();
     let mut i = 0;
     while i < bytes.len() {
+        // Only attempt ASCII pattern matching at UTF-8 character boundaries.
+        // A continuation byte (10xxxxxx) means we're inside a multi-byte char.
+        let is_char_start = (bytes[i] & 0xC0) != 0x80;
+
         // Check for `from ` or `import(` patterns followed by a string literal
-        if i + 5 <= bytes.len() && &text[i..i + 5] == "from " {
+        if is_char_start && i + 5 <= bytes.len() && &bytes[i..i + 5] == b"from " {
             result.push_str("from ");
             i += 5;
             // Skip whitespace
@@ -1857,8 +1861,17 @@ fn rewrite_import_extensions(text: &str) -> String {
                 let start = i + 1;
                 result.push(quote);
                 i += 1;
-                while i < bytes.len() && bytes[i] as char != quote {
-                    i += 1;
+                while i < bytes.len() && bytes[i] != quote as u8 {
+                    // Advance by a full UTF-8 char to stay on char boundaries.
+                    if (bytes[i] & 0x80) == 0 {
+                        i += 1;
+                    } else if (bytes[i] & 0xE0) == 0xC0 {
+                        i += 2;
+                    } else if (bytes[i] & 0xF0) == 0xE0 {
+                        i += 3;
+                    } else {
+                        i += 4;
+                    }
                 }
                 let specifier = &text[start..i];
                 let rewritten = rewrite_one_specifier(specifier);
@@ -1868,7 +1881,7 @@ fn rewrite_import_extensions(text: &str) -> String {
                     i += 1;
                 }
             }
-        } else if i + 7 <= bytes.len() && &text[i..i + 7] == "import(" {
+        } else if is_char_start && i + 7 <= bytes.len() && &bytes[i..i + 7] == b"import(" {
             result.push_str("import(");
             i += 7;
             while i < bytes.len() && bytes[i].is_ascii_whitespace() {
@@ -1880,8 +1893,17 @@ fn rewrite_import_extensions(text: &str) -> String {
                 let start = i + 1;
                 result.push(quote);
                 i += 1;
-                while i < bytes.len() && bytes[i] as char != quote {
-                    i += 1;
+                while i < bytes.len() && bytes[i] != quote as u8 {
+                    // Advance by a full UTF-8 char to stay on char boundaries.
+                    if (bytes[i] & 0x80) == 0 {
+                        i += 1;
+                    } else if (bytes[i] & 0xE0) == 0xC0 {
+                        i += 2;
+                    } else if (bytes[i] & 0xF0) == 0xE0 {
+                        i += 3;
+                    } else {
+                        i += 4;
+                    }
                 }
                 let specifier = &text[start..i];
                 let rewritten = rewrite_one_specifier(specifier);

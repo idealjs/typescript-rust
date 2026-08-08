@@ -1,0 +1,4 @@
+/.src/importMetaNarrowing.ts/importMeta(4,9): error TS1012: Unexpected token.
+/.src/importMetaNarrowing.ts/importMeta(4,10): error TS1005: ';' expected.
+/.src/importMetaNarrowing.ts/importMeta(3,5): error TS2304: Cannot find name 'import'.
+/.src/importMetaNarrowing.ts/importMeta(4,10): error TS2304: Cannot find name 'meta'.

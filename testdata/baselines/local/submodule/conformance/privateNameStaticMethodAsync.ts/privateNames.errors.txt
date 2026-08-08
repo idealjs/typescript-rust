@@ -1,0 +1,59 @@
+/.src/privateNameStaticMethodAsync.ts/privateNames(2,18): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(2,19): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(4,30): error TS1003: Identifier expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(4,31): error TS1005: ',' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(4,34): error TS1005: ',' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(4,35): error TS1134: Variable declaration expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,16): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,18): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,25): error TS1005: ',' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,26): error TS1138: Parameter declaration expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,30): error TS1005: ',' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,32): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,33): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,39): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,40): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,46): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,49): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,50): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,52): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,55): error TS1138: Parameter declaration expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,62): error TS1005: ',' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,66): error TS1005: ',' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,67): error TS1138: Parameter declaration expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,71): error TS1005: ',' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,73): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,74): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,80): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,81): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,82): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,88): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,91): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,92): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(7,13): error TS1012: Unexpected token.
+/.src/privateNameStaticMethodAsync.ts/privateNames(7,14): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(7,20): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(8,12): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(8,19): error TS1012: Unexpected token.
+/.src/privateNameStaticMethodAsync.ts/privateNames(8,20): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(8,26): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(11,11): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(11,19): error TS1012: Unexpected token.
+/.src/privateNameStaticMethodAsync.ts/privateNames(11,20): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(11,29): error TS1005: ';' expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(12,1): error TS1128: Declaration or statement expected.
+/.src/privateNameStaticMethodAsync.ts/privateNames(2,18): error TS1127: Invalid character.
+/.src/privateNameStaticMethodAsync.ts/privateNames(4,30): error TS1127: Invalid character.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,26): error TS1127: Invalid character.
+/.src/privateNameStaticMethodAsync.ts/privateNames(5,67): error TS1127: Invalid character.
+/.src/privateNameStaticMethodAsync.ts/privateNames(7,13): error TS1127: Invalid character.
+/.src/privateNameStaticMethodAsync.ts/privateNames(8,19): error TS1127: Invalid character.
+/.src/privateNameStaticMethodAsync.ts/privateNames(11,19): error TS1127: Invalid character.
+/.src/privateNameStaticMethodAsync.ts/privateNames(7,5): error TS2304: Cannot find name 'static'.
+/.src/privateNameStaticMethodAsync.ts/privateNames(7,14): error TS2304: Cannot find name 'baz'.
+/.src/privateNameStaticMethodAsync.ts/privateNames(8,5): error TS2304: Cannot find name 'static'.
+/.src/privateNameStaticMethodAsync.ts/privateNames(8,12): error TS2304: Cannot find name 'async'.
+/.src/privateNameStaticMethodAsync.ts/privateNames(8,20): error TS2304: Cannot find name 'qux'.
+/.src/privateNameStaticMethodAsync.ts/privateNames(11,5): error TS2304: Cannot find name 'async'.
+/.src/privateNameStaticMethodAsync.ts/privateNames(11,11): error TS2304: Cannot find name 'static'.
+/.src/privateNameStaticMethodAsync.ts/privateNames(11,20): error TS2304: Cannot find name 'bazBad'.

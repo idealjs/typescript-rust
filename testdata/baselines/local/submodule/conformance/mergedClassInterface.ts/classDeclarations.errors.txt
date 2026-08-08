@@ -1,0 +1,8 @@
+/.src/file1.ts(35,4): error TS2339: Property 'x1' does not exist on type '{ x3: number; x4: number }'.
+/.src/file1.ts(36,4): error TS2339: Property 'x2' does not exist on type '{ x3: number; x4: number }'.
+error TS2300: Duplicate identifier 'C1'.
+error TS2300: Duplicate identifier 'C2'.
+error TS2300: Duplicate identifier 'C3'.
+error TS2300: Duplicate identifier 'C4'.
+error TS2300: Duplicate identifier 'C5'.
+error TS2300: Duplicate identifier 'C5'.

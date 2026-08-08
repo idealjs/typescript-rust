@@ -1,0 +1,24 @@
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(14,37): error TS2304: Cannot find name 'T'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(24,33): error TS2339: Property 'substr' does not exist on type 'T'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(29,44): error TS2339: Property 'substr' does not exist on type 'T'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(41,35): error TS2345: Argument of type '(x: string) => string' is not assignable to parameter of type '(x: U) => void'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(42,37): error TS2345: Argument of type 'null' is not assignable to parameter of type '(x: U) => void'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(48,35): error TS2345: Argument of type '(x: string) => string' is not assignable to parameter of type '(x: U) => void'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(49,37): error TS2345: Argument of type 'null' is not assignable to parameter of type '(x: U) => void'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(55,41): error TS2345: Argument of type '(n: string) => string' is not assignable to parameter of type '(b: A) => A'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(60,15): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(a: A) => A'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(60,31): error TS2345: Argument of type '(n: C) => C' is not assignable to parameter of type '(c: C) => C'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(61,39): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(a: A) => A'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(61,55): error TS2345: Argument of type '(n: C) => C' is not assignable to parameter of type '(c: C) => C'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(62,39): error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(a: A) => A'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(62,75): error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(c: C) => C'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(66,31): error TS2345: Argument of type '(a: (a: A) => A, b: (b: B) => B, c: (c: C) => C) => void' is not assignable to parameter of type 'string'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(67,1): error TS2349: This expression is not callable.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(73,29): error TS2345: Argument of type '0' is not assignable to parameter of type 'string'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(73,32): error TS2345: Argument of type 'any[]' is not assignable to parameter of type 'string'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(75,54): error TS2345: Argument of type '{ a: 0 }' is not assignable to parameter of type 'null | null'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(75,64): error TS2345: Argument of type '{ b: "" }' is not assignable to parameter of type 'null | null'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(87,36): error TS2345: Argument of type '{ x: 6; z: any }' is not assignable to parameter of type 'undefined | undefined'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(87,57): error TS2345: Argument of type '{ x: 6; y: "" }' is not assignable to parameter of type 'undefined | undefined'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(89,41): error TS2345: Argument of type '{ x: 6; z: any }' is not assignable to parameter of type 'undefined | undefined'.
+/.src/typeArgumentInferenceWithConstraints.ts/functionCalls(89,62): error TS2345: Argument of type '{ x: 6; y: "" }' is not assignable to parameter of type 'undefined | undefined'.

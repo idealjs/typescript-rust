@@ -1,0 +1,2 @@
+/.src/symbolProperty46.ts/Symbols(2,9): error TS1005: ';' expected.
+/.src/symbolProperty46.ts/Symbols(6,9): error TS1005: ';' expected.

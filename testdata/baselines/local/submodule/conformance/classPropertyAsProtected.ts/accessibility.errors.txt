@@ -1,0 +1,8 @@
+/.src/classPropertyAsProtected.ts/accessibility(3,19): error TS1005: ';' expected.
+/.src/classPropertyAsProtected.ts/accessibility(4,19): error TS1005: ';' expected.
+/.src/classPropertyAsProtected.ts/accessibility(8,26): error TS1005: ';' expected.
+/.src/classPropertyAsProtected.ts/accessibility(9,26): error TS1005: ';' expected.
+/.src/classPropertyAsProtected.ts/accessibility(20,3): error TS2339: Property 'a' does not exist on type 'object'.
+/.src/classPropertyAsProtected.ts/accessibility(21,3): error TS2339: Property 'b' does not exist on type 'object'.
+/.src/classPropertyAsProtected.ts/accessibility(22,3): error TS2339: Property 'b' does not exist on type 'object'.
+/.src/classPropertyAsProtected.ts/accessibility(23,3): error TS2339: Property 'foo' does not exist on type 'object'.

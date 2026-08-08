@@ -1,0 +1,3 @@
+/.src/derivedTypeAccessesHiddenBaseCallViaSuperPropertyAccess.ts/memberFunctionDeclarations(3,16): error TS2322: Type 'null' is not assignable to type '{ a: number }'.
+/.src/derivedTypeAccessesHiddenBaseCallViaSuperPropertyAccess.ts/memberFunctionDeclarations(9,16): error TS2322: Type 'null' is not assignable to type '{ a: number; b: number }'.
+/.src/derivedTypeAccessesHiddenBaseCallViaSuperPropertyAccess.ts/memberFunctionDeclarations(13,27): error TS2345: Argument of type '{ a: 1 }' is not assignable to parameter of type '{ a: number; b: number }'.

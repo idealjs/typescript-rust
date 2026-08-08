@@ -1,0 +1,15 @@
+/.src/enumErrors.ts/enums(48,18): error TS1005: ',' expected.
+/.src/enumErrors.ts/enums(49,5): error TS1005: ',' expected.
+/.src/enumErrors.ts/enums(49,24): error TS1005: ',' expected.
+/.src/enumErrors.ts/enums(49,26): error TS1005: ',' expected.
+/.src/enumErrors.ts/enums(50,28): error TS1005: ',' expected.
+/.src/enumErrors.ts/enums(50,30): error TS1005: ',' expected.
+/.src/enumErrors.ts/enums(50,31): error TS1005: ',' expected.
+/.src/enumErrors.ts/enums(53,16): error TS1005: ',' expected.
+/.src/enumErrors.ts/enums(53,18): error TS1005: ',' expected.
+/.src/enumErrors.ts/enums(53,22): error TS1005: ',' expected.
+/.src/enumErrors.ts/enums(53,30): error TS1005: ',' expected.
+/.src/enumErrors.ts/enums(53,33): error TS1005: ',' expected.
+/.src/enumErrors.ts/enums(9,13): error TS2304: Cannot find name 'Number'.
+/.src/enumErrors.ts/enums(27,13): error TS2304: Cannot find name 'Date'.
+/.src/enumErrors.ts/enums(36,13): error TS2304: Cannot find name 'Date'.

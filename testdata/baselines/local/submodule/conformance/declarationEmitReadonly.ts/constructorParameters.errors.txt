@@ -1,0 +1,1 @@
+/.src/declarationEmitReadonly.ts/constructorParameters(2,26): error TS1005: ',' expected.

@@ -1,0 +1,7 @@
+/.src/es2021LocalesObjectArgument.ts/es2021(1,18): error TS2304: Cannot find name 'Intl'.
+/.src/es2021LocalesObjectArgument.ts/es2021(2,18): error TS2304: Cannot find name 'Intl'.
+/.src/es2021LocalesObjectArgument.ts/es2021(3,18): error TS2304: Cannot find name 'Intl'.
+/.src/es2021LocalesObjectArgument.ts/es2021(5,5): error TS2304: Cannot find name 'Intl'.
+/.src/es2021LocalesObjectArgument.ts/es2021(6,5): error TS2304: Cannot find name 'Intl'.
+/.src/es2021LocalesObjectArgument.ts/es2021(7,1): error TS2304: Cannot find name 'Intl'.
+/.src/es2021LocalesObjectArgument.ts/es2021(8,1): error TS2304: Cannot find name 'Intl'.

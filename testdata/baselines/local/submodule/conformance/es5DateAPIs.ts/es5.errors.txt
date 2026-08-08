@@ -1,0 +1,1 @@
+/.src/es5DateAPIs.ts/es5(1,1): error TS2304: Cannot find name 'Date'.

@@ -1,0 +1,18 @@
+/.src/a.js(3,5): error TS1003: Identifier expected.
+/.src/a.js(3,6): error TS1005: ';' expected.
+/.src/a.js(5,5): error TS1003: Identifier expected.
+/.src/a.js(5,6): error TS1005: ';' expected.
+/.src/a.js(7,24): error TS1003: Identifier expected.
+/.src/a.js(7,25): error TS1005: ',' expected.
+/.src/a.js(7,27): error TS1005: ',' expected.
+/.src/a.js(8,14): error TS1003: Identifier expected.
+/.src/a.js(8,15): error TS1005: ';' expected.
+/.src/a.js(8,24): error TS1003: Identifier expected.
+/.src/a.js(8,25): error TS1005: ';' expected.
+/.src/a.js(3,5): error TS1127: Invalid character.
+/.src/a.js(5,5): error TS1127: Invalid character.
+/.src/a.js(7,24): error TS1127: Invalid character.
+/.src/a.js(8,14): error TS1127: Invalid character.
+/.src/a.js(8,24): error TS1127: Invalid character.
+/.src/a.js(7,30): error TS1182: A destructuring declaration must have an initializer.
+error TS2451: Cannot redeclare block-scoped variable 'a'.

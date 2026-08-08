@@ -1,0 +1,7 @@
+/.src/destructuringWithLiteralInitializers.ts/destructuring(19,1): error TS2554: Expected 1 arguments, but got 0.
+/.src/destructuringWithLiteralInitializers.ts/destructuring(24,1): error TS2554: Expected 1 arguments, but got 0.
+/.src/destructuringWithLiteralInitializers.ts/destructuring(30,1): error TS2554: Expected 1 arguments, but got 0.
+/.src/destructuringWithLiteralInitializers.ts/destructuring(38,1): error TS2554: Expected 1 arguments, but got 0.
+/.src/destructuringWithLiteralInitializers.ts/destructuring(54,1): error TS2554: Expected 1 arguments, but got 0.
+/.src/destructuringWithLiteralInitializers.ts/destructuring(59,1): error TS2554: Expected 1 arguments, but got 0.
+/.src/destructuringWithLiteralInitializers.ts/destructuring(64,1): error TS2554: Expected 1 arguments, but got 0.

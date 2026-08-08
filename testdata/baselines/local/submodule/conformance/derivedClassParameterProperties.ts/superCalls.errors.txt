@@ -1,0 +1,12 @@
+/.src/derivedClassParameterProperties.ts/superCalls(15,24): error TS1005: ',' expected.
+/.src/derivedClassParameterProperties.ts/superCalls(22,24): error TS1005: ',' expected.
+/.src/derivedClassParameterProperties.ts/superCalls(10,9): error TS2349: This expression is not callable.
+/.src/derivedClassParameterProperties.ts/superCalls(17,9): error TS2349: This expression is not callable.
+/.src/derivedClassParameterProperties.ts/superCalls(23,9): error TS2349: This expression is not callable.
+/.src/derivedClassParameterProperties.ts/superCalls(32,9): error TS2349: This expression is not callable.
+/.src/derivedClassParameterProperties.ts/superCalls(39,9): error TS2349: This expression is not callable.
+/.src/derivedClassParameterProperties.ts/superCalls(49,9): error TS2349: This expression is not callable.
+/.src/derivedClassParameterProperties.ts/superCalls(59,9): error TS2349: This expression is not callable.
+/.src/derivedClassParameterProperties.ts/superCalls(67,9): error TS2349: This expression is not callable.
+/.src/derivedClassParameterProperties.ts/superCalls(82,9): error TS2349: This expression is not callable.
+/.src/derivedClassParameterProperties.ts/superCalls(90,9): error TS2349: This expression is not callable.

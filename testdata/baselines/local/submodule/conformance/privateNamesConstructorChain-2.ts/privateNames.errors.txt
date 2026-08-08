@@ -1,0 +1,19 @@
+/.src/privateNamesConstructorChain-2.ts/privateNames(2,5): error TS1003: Identifier expected.
+/.src/privateNamesConstructorChain-2.ts/privateNames(2,6): error TS1005: ';' expected.
+/.src/privateNamesConstructorChain-2.ts/privateNames(3,12): error TS1005: ';' expected.
+/.src/privateNamesConstructorChain-2.ts/privateNames(3,13): error TS1005: ';' expected.
+/.src/privateNamesConstructorChain-2.ts/privateNames(5,29): error TS1003: Identifier expected.
+/.src/privateNamesConstructorChain-2.ts/privateNames(5,30): error TS1005: ';' expected.
+/.src/privateNamesConstructorChain-2.ts/privateNames(6,15): error TS1003: Identifier expected.
+/.src/privateNamesConstructorChain-2.ts/privateNames(6,16): error TS1005: ';' expected.
+/.src/privateNamesConstructorChain-2.ts/privateNames(11,5): error TS1003: Identifier expected.
+/.src/privateNamesConstructorChain-2.ts/privateNames(11,6): error TS1005: ';' expected.
+/.src/privateNamesConstructorChain-2.ts/privateNames(12,5): error TS1003: Identifier expected.
+/.src/privateNamesConstructorChain-2.ts/privateNames(12,6): error TS1005: ';' expected.
+/.src/privateNamesConstructorChain-2.ts/privateNames(2,5): error TS1127: Invalid character.
+/.src/privateNamesConstructorChain-2.ts/privateNames(3,12): error TS1127: Invalid character.
+/.src/privateNamesConstructorChain-2.ts/privateNames(5,29): error TS1127: Invalid character.
+/.src/privateNamesConstructorChain-2.ts/privateNames(6,15): error TS1127: Invalid character.
+/.src/privateNamesConstructorChain-2.ts/privateNames(11,5): error TS1127: Invalid character.
+/.src/privateNamesConstructorChain-2.ts/privateNames(12,5): error TS1127: Invalid character.
+/.src/privateNamesConstructorChain-2.ts/privateNames(15,5): error TS2349: This expression is not callable.

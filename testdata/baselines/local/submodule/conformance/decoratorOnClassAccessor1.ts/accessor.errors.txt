@@ -1,0 +1,3 @@
+/.src/decoratorOnClassAccessor1.ts/accessor(4,14): error TS1005: ';' expected.
+/.src/decoratorOnClassAccessor1.ts/accessor(1,71): error TS2304: Cannot find name 'TypedPropertyDescriptor'.
+/.src/decoratorOnClassAccessor1.ts/accessor(1,100): error TS2304: Cannot find name 'TypedPropertyDescriptor'.

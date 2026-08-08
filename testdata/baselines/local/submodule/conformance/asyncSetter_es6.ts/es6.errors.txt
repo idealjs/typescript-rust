@@ -1,0 +1,1 @@
+/.src/asyncSetter_es6.ts/es6(2,13): error TS1005: ';' expected.

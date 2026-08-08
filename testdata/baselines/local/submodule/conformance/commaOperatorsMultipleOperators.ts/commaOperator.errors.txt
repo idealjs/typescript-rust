@@ -1,0 +1,5 @@
+/.src/commaOperatorsMultipleOperators.ts/commaOperator(5,13): error TS2304: Cannot find name 'Object'.
+/.src/commaOperatorsMultipleOperators.ts/commaOperator(23,18): error TS2339: Property 'charAt' does not exist on type 'string'.
+/.src/commaOperatorsMultipleOperators.ts/commaOperator(23,33): error TS2304: Cannot find name 'Object'.
+/.src/commaOperatorsMultipleOperators.ts/commaOperator(26,41): error TS2339: Property 'charAt' does not exist on type 'string'.
+/.src/commaOperatorsMultipleOperators.ts/commaOperator(26,56): error TS2304: Cannot find name 'Object'.

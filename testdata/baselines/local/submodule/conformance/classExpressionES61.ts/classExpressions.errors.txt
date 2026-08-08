@@ -1,0 +1,1 @@
+/.src/classExpressionES61.ts/classExpressions(1,15): error TS2304: Cannot find name 'C'.

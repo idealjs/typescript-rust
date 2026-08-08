@@ -1,0 +1,9 @@
+/.src/esDecorators-emitDecoratorMetadata.ts/esDecorators(11,9): error TS1005: ';' expected.
+/.src/esDecorators-emitDecoratorMetadata.ts/esDecorators(20,16): error TS1005: ';' expected.
+/.src/esDecorators-emitDecoratorMetadata.ts/esDecorators(26,2): error TS1012: Unexpected token.
+/.src/esDecorators-emitDecoratorMetadata.ts/esDecorators(26,3): error TS1005: ')' expected.
+/.src/esDecorators-emitDecoratorMetadata.ts/esDecorators(26,7): error TS1005: ';' expected.
+/.src/esDecorators-emitDecoratorMetadata.ts/esDecorators(33,9): error TS1005: ';' expected.
+/.src/esDecorators-emitDecoratorMetadata.ts/esDecorators(42,16): error TS1005: ';' expected.
+/.src/esDecorators-emitDecoratorMetadata.ts/esDecorators(46,2): error TS1128: Declaration or statement expected.
+error TS2300: Duplicate identifier 'C'.

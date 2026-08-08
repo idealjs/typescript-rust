@@ -1,0 +1,6 @@
+/.src/esDecorators-classExpression-classSuper.2.ts/classSuper(4,2): error TS1012: Unexpected token.
+/.src/esDecorators-classExpression-classSuper.2.ts/classSuper(4,3): error TS1005: ')' expected.
+/.src/esDecorators-classExpression-classSuper.2.ts/classSuper(6,12): error TS1005: ';' expected.
+/.src/esDecorators-classExpression-classSuper.2.ts/classSuper(7,14): error TS1005: ';' expected.
+/.src/esDecorators-classExpression-classSuper.2.ts/classSuper(7,15): error TS1005: ';' expected.
+/.src/esDecorators-classExpression-classSuper.2.ts/classSuper(9,1): error TS1128: Declaration or statement expected.

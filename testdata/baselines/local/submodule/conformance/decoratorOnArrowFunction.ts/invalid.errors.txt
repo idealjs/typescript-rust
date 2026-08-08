@@ -1,0 +1,4 @@
+/.src/decoratorOnArrowFunction.ts/invalid(3,9): error TS1012: Unexpected token.
+/.src/decoratorOnArrowFunction.ts/invalid(3,10): error TS1005: ',' expected.
+/.src/decoratorOnArrowFunction.ts/invalid(3,14): error TS1005: ',' expected.
+/.src/decoratorOnArrowFunction.ts/invalid(3,15): error TS1134: Variable declaration expected.

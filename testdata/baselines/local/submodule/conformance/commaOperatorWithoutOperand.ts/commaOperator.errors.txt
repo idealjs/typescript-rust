@@ -1,0 +1,14 @@
+/.src/commaOperatorWithoutOperand.ts/commaOperator(9,7): error TS1012: Unexpected token.
+/.src/commaOperatorWithoutOperand.ts/commaOperator(9,8): error TS1005: ')' expected.
+/.src/commaOperatorWithoutOperand.ts/commaOperator(10,11): error TS1012: Unexpected token.
+/.src/commaOperatorWithoutOperand.ts/commaOperator(10,12): error TS1005: ')' expected.
+/.src/commaOperatorWithoutOperand.ts/commaOperator(11,10): error TS1012: Unexpected token.
+/.src/commaOperatorWithoutOperand.ts/commaOperator(11,11): error TS1005: ')' expected.
+/.src/commaOperatorWithoutOperand.ts/commaOperator(12,10): error TS1012: Unexpected token.
+/.src/commaOperatorWithoutOperand.ts/commaOperator(12,11): error TS1005: ')' expected.
+/.src/commaOperatorWithoutOperand.ts/commaOperator(13,10): error TS1012: Unexpected token.
+/.src/commaOperatorWithoutOperand.ts/commaOperator(13,11): error TS1005: ')' expected.
+/.src/commaOperatorWithoutOperand.ts/commaOperator(16,2): error TS1012: Unexpected token.
+/.src/commaOperatorWithoutOperand.ts/commaOperator(16,4): error TS1005: ')' expected.
+/.src/commaOperatorWithoutOperand.ts/commaOperator(16,7): error TS1005: ';' expected.
+/.src/commaOperatorWithoutOperand.ts/commaOperator(5,21): error TS2304: Cannot find name 'Object'.

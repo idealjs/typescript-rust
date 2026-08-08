@@ -1,0 +1,6 @@
+/.src/enumConstantMembers.ts/enums(26,9): error TS2304: Cannot find name 'NaN'.
+/.src/enumConstantMembers.ts/enums(27,9): error TS2304: Cannot find name 'Infinity'.
+/.src/enumConstantMembers.ts/enums(28,10): error TS2304: Cannot find name 'Infinity'.
+/.src/enumConstantMembers.ts/enums(36,9): error TS2304: Cannot find name 'NaN'.
+/.src/enumConstantMembers.ts/enums(37,9): error TS2304: Cannot find name 'Infinity'.
+/.src/enumConstantMembers.ts/enums(38,10): error TS2304: Cannot find name 'Infinity'.

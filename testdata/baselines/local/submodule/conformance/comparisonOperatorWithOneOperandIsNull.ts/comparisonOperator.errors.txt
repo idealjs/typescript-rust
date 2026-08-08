@@ -1,0 +1,16 @@
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(4,26): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(13,26): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(32,20): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(33,20): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(34,20): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(35,20): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(36,20): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(37,20): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(38,20): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(40,20): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(41,20): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(42,20): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(43,20): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(44,20): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(45,20): error TS1005: '>' expected.
+/.src/comparisonOperatorWithOneOperandIsNull.ts/comparisonOperator(46,20): error TS1005: '>' expected.

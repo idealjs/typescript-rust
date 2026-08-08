@@ -1,0 +1,4 @@
+/.src/taggedTemplatesWithTypeArguments2.ts/templates(11,19): error TS1005: ',' expected.
+/.src/taggedTemplatesWithTypeArguments2.ts/templates(11,22): error TS1134: Variable declaration expected.
+/.src/taggedTemplatesWithTypeArguments2.ts/templates(11,25): error TS1128: Declaration or statement expected.
+/.src/taggedTemplatesWithTypeArguments2.ts/templates(11,15): error TS2351: This expression is not constructable.

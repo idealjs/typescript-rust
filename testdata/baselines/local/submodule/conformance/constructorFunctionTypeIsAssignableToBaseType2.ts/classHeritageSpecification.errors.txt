@@ -1,0 +1,4 @@
+/.src/constructorFunctionTypeIsAssignableToBaseType2.ts/classHeritageSpecification(5,14): error TS2304: Cannot find name 'Object'.
+/.src/constructorFunctionTypeIsAssignableToBaseType2.ts/classHeritageSpecification(7,20): error TS2304: Cannot find name 'Object'.
+/.src/constructorFunctionTypeIsAssignableToBaseType2.ts/classHeritageSpecification(18,9): error TS2349: This expression is not callable.
+/.src/constructorFunctionTypeIsAssignableToBaseType2.ts/classHeritageSpecification(29,9): error TS2349: This expression is not callable.

@@ -1,0 +1,28 @@
+/.src/C1.ts(2,11): error TS1003: Identifier expected.
+/.src/C1.ts(2,13): error TS1005: ';' expected.
+/.src/C2.ts(2,11): error TS1003: Identifier expected.
+/.src/C2.ts(2,13): error TS1005: ';' expected.
+/.src/C3.ts(2,11): error TS1003: Identifier expected.
+/.src/C3.ts(2,13): error TS1005: ';' expected.
+/.src/C4.ts(2,11): error TS1003: Identifier expected.
+/.src/C4.ts(2,13): error TS1005: ';' expected.
+/.src/C5.ts(2,11): error TS1003: Identifier expected.
+/.src/C5.ts(2,13): error TS1005: ';' expected.
+/.src/C5.ts(3,33): error TS1005: ')' expected.
+/.src/C5.ts(3,41): error TS1005: ',' expected.
+/.src/C5.ts(3,42): error TS1134: Variable declaration expected.
+/.src/C5.ts(3,43): error TS1134: Variable declaration expected.
+/.src/C5.ts(3,45): error TS1005: ';' expected.
+/.src/C5.ts(3,47): error TS1005: ';' expected.
+/.src/C5.ts(3,53): error TS1005: ';' expected.
+/.src/C5.ts(3,57): error TS1128: Declaration or statement expected.
+/.src/C6.ts(2,11): error TS1003: Identifier expected.
+/.src/C6.ts(2,13): error TS1005: ';' expected.
+/.src/C7.ts(2,11): error TS1003: Identifier expected.
+/.src/C7.ts(2,13): error TS1005: ';' expected.
+/.src/C8.ts(4,11): error TS1003: Identifier expected.
+/.src/C8.ts(4,13): error TS1005: ';' expected.
+/.src/C9.ts(5,11): error TS1003: Identifier expected.
+/.src/C9.ts(5,13): error TS1005: ';' expected.
+/.src/C5.ts(3,27): error TS2304: Cannot find name 'async'.
+/.src/C2.ts(3,19): error TS2304: Cannot find name 'yield'.

@@ -1,0 +1,24 @@
+/.src/generatorTypeCheck28.ts/yieldExpressions(3,9): error TS1003: Identifier expected.
+/.src/generatorTypeCheck28.ts/yieldExpressions(3,10): error TS1005: ',' expected.
+/.src/generatorTypeCheck28.ts/yieldExpressions(3,27): error TS1005: ',' expected.
+/.src/generatorTypeCheck28.ts/yieldExpressions(3,28): error TS1005: ',' expected.
+/.src/generatorTypeCheck28.ts/yieldExpressions(3,30): error TS1005: ',' expected.
+/.src/generatorTypeCheck28.ts/yieldExpressions(4,13): error TS1005: ',' expected.
+/.src/generatorTypeCheck28.ts/yieldExpressions(4,19): error TS1005: ',' expected.
+/.src/generatorTypeCheck28.ts/yieldExpressions(4,21): error TS1005: ',' expected.
+/.src/generatorTypeCheck28.ts/yieldExpressions(4,24): error TS1005: ',' expected.
+/.src/generatorTypeCheck28.ts/yieldExpressions(4,25): error TS1005: ',' expected.
+/.src/generatorTypeCheck28.ts/yieldExpressions(4,26): error TS1005: ',' expected.
+/.src/generatorTypeCheck28.ts/yieldExpressions(4,32): error TS1005: ',' expected.
+/.src/generatorTypeCheck28.ts/yieldExpressions(7,1): error TS1128: Declaration or statement expected.
+/.src/generatorTypeCheck28.ts/yieldExpressions(3,9): error TS2304: Cannot find name '*'.
+/.src/generatorTypeCheck28.ts/yieldExpressions(3,27): error TS2304: Cannot find name '('.
+/.src/generatorTypeCheck28.ts/yieldExpressions(3,28): error TS2304: Cannot find name ')'.
+/.src/generatorTypeCheck28.ts/yieldExpressions(3,30): error TS2304: Cannot find name '{'.
+/.src/generatorTypeCheck28.ts/yieldExpressions(4,13): error TS2304: Cannot find name 'yield'.
+/.src/generatorTypeCheck28.ts/yieldExpressions(4,19): error TS2304: Cannot find name 'x'.
+/.src/generatorTypeCheck28.ts/yieldExpressions(4,21): error TS2304: Cannot find name '=>'.
+/.src/generatorTypeCheck28.ts/yieldExpressions(4,24): error TS2304: Cannot find name 'x'.
+/.src/generatorTypeCheck28.ts/yieldExpressions(4,25): error TS2304: Cannot find name '.'.
+/.src/generatorTypeCheck28.ts/yieldExpressions(4,26): error TS2304: Cannot find name 'length'.
+/.src/generatorTypeCheck28.ts/yieldExpressions(4,32): error TS2304: Cannot find name ';'.

@@ -1,0 +1,4 @@
+/.src/newOperatorErrorCases.ts/newOperator(26,16): error TS1005: ',' expected.
+/.src/newOperatorErrorCases.ts/newOperator(26,18): error TS1134: Variable declaration expected.
+/.src/newOperatorErrorCases.ts/newOperator(26,20): error TS1134: Variable declaration expected.
+/.src/newOperatorErrorCases.ts/newOperator(36,13): error TS2351: This expression is not constructable.

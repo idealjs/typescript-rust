@@ -1,0 +1,23 @@
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(7,9): error TS1005: ';' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(8,9): error TS1005: ';' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(13,16): error TS1005: ';' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(14,16): error TS1005: ';' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(23,9): error TS1005: ';' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(24,9): error TS1005: ';' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(29,16): error TS1005: ';' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(30,16): error TS1005: ';' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(49,7): error TS1005: ']' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(49,15): error TS1005: ';' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(50,7): error TS1005: ']' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(50,15): error TS1005: ';' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(54,7): error TS1005: ']' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(54,15): error TS1005: ';' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(55,7): error TS1005: ']' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(55,15): error TS1005: ';' expected.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(33,32): error TS2349: This expression is not callable.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(42,18): error TS2339: Property 'r' does not exist on type 'object'.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(43,18): error TS2339: Property 's' does not exist on type 'object'.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(44,18): error TS2339: Property 't' does not exist on type 'object'.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(45,19): error TS2339: Property 'u' does not exist on type 'object'.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(46,9): error TS2339: Property 't' does not exist on type 'object'.
+/.src/derivedClassOverridesPublicMembers.ts/inheritanceAndOverriding(49,18): error TS2304: Cannot find name 'Object'.

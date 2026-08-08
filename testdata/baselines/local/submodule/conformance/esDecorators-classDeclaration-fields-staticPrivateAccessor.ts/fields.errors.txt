@@ -1,0 +1,16 @@
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(4,26): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(4,27): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(9,21): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(9,22): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(10,12): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(11,13): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(11,14): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(11,15): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(12,13): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(12,14): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(12,15): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(14,1): error TS1128: Declaration or statement expected.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(4,26): error TS1127: Invalid character.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(9,21): error TS1127: Invalid character.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(11,14): error TS1127: Invalid character.
+/.src/esDecorators-classDeclaration-fields-staticPrivateAccessor.ts/fields(12,14): error TS1127: Invalid character.

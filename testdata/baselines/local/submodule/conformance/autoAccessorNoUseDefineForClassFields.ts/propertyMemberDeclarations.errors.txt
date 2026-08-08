@@ -1,0 +1,12 @@
+/.src/file2.ts(2,21): error TS1005: ';' expected.
+/.src/file2.ts(2,22): error TS1005: ';' expected.
+/.src/file2.ts(2,21): error TS1127: Invalid character.
+/.src/file4.ts(2,14): error TS1005: ';' expected.
+/.src/file4.ts(2,15): error TS1005: ';' expected.
+/.src/file4.ts(2,14): error TS1127: Invalid character.
+/.src/file5.ts(3,14): error TS1005: ';' expected.
+/.src/file5.ts(3,15): error TS1005: ';' expected.
+/.src/file5.ts(3,14): error TS1127: Invalid character.
+/.src/file6.ts(2,14): error TS1005: ';' expected.
+/.src/file6.ts(2,15): error TS1005: ';' expected.
+/.src/file6.ts(2,14): error TS1127: Invalid character.

@@ -1,0 +1,17 @@
+/.src/main.ts(2,12): error TS1005: ';' expected.
+/.src/main.ts(2,13): error TS1005: ';' expected.
+/.src/main.ts(3,12): error TS1005: ';' expected.
+/.src/main.ts(3,13): error TS1005: ';' expected.
+/.src/main.ts(3,24): error TS1003: Identifier expected.
+/.src/main.ts(3,25): error TS1005: ';' expected.
+/.src/main.ts(4,16): error TS1005: ';' expected.
+/.src/main.ts(4,17): error TS1005: ';' expected.
+/.src/main.ts(4,32): error TS1003: Identifier expected.
+/.src/main.ts(4,33): error TS1005: ';' expected.
+/.src/main.ts(2,12): error TS1127: Invalid character.
+/.src/main.ts(3,12): error TS1127: Invalid character.
+/.src/main.ts(3,24): error TS1127: Invalid character.
+/.src/main.ts(4,16): error TS1127: Invalid character.
+/.src/main.ts(4,32): error TS1127: Invalid character.
+/.src/main.ts(4,33): error TS7027: Unreachable code detected.
+/.src/main.ts(4,33): error TS2349: This expression is not callable.

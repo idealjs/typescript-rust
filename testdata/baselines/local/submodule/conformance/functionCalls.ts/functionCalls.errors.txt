@@ -1,0 +1,6 @@
+/.src/functionCalls.ts/functionCalls(18,1): error TS2349: This expression is not callable.
+/.src/functionCalls.ts/functionCalls(19,1): error TS2349: This expression is not callable.
+/.src/functionCalls.ts/functionCalls(20,1): error TS2349: This expression is not callable.
+/.src/functionCalls.ts/functionCalls(25,1): error TS2349: This expression is not callable.
+/.src/functionCalls.ts/functionCalls(26,1): error TS2349: This expression is not callable.
+/.src/functionCalls.ts/functionCalls(27,1): error TS2349: This expression is not callable.

@@ -1,0 +1,3 @@
+/.src/controlFlowInstanceofExtendsFunction.ts/controlFlow(25,15): error TS2339: Property 'now' does not exist on type 'object'.
+/.src/controlFlowInstanceofExtendsFunction.ts/controlFlow(26,15): error TS2339: Property 'now' does not exist on type 'object'.
+/.src/controlFlowInstanceofExtendsFunction.ts/controlFlow(28,30): error TS2304: Cannot find name 'Math'.

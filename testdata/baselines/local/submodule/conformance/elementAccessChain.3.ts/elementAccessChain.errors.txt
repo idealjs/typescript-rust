@@ -1,0 +1,2 @@
+/.src/elementAccessChain.3.ts/elementAccessChain(18,22): error TS1005: ';' expected.
+/.src/elementAccessChain.3.ts/elementAccessChain(19,23): error TS1005: ';' expected.

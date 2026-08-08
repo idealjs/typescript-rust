@@ -1,0 +1,6 @@
+/.src/controlFlowInstanceOfGuardPrimitives.ts/controlFlow(1,47): error TS2304: Cannot find name 'Date'.
+/.src/controlFlowInstanceOfGuardPrimitives.ts/controlFlow(2,26): error TS2304: Cannot find name 'Object'.
+/.src/controlFlowInstanceOfGuardPrimitives.ts/controlFlow(3,53): error TS2339: Property 'getFullYear' does not exist on type 'string | number | error'.
+/.src/controlFlowInstanceOfGuardPrimitives.ts/controlFlow(5,62): error TS2339: Property 'length' does not exist on type 'string'.
+/.src/controlFlowInstanceOfGuardPrimitives.ts/controlFlow(7,54): error TS2339: Property 'toPrecision' does not exist on type 'number | error'.
+/.src/controlFlowInstanceOfGuardPrimitives.ts/controlFlow(11,17): error TS2304: Cannot find name 'Date'.

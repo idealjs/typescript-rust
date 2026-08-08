@@ -1,0 +1,21 @@
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(5,9): error TS1005: ',' expected.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(6,9): error TS1005: ',' expected.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(15,6): error TS1005: ',' expected.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(15,7): error TS1005: ',' expected.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(16,6): error TS1005: ',' expected.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(17,6): error TS1005: ',' expected.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(5,5): error TS2304: Cannot find name 'get'.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(5,9): error TS2304: Cannot find name 'e'.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(6,5): error TS2304: Cannot find name 'set'.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(6,9): error TS2304: Cannot find name 'f'.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(7,5): error TS2304: Cannot find name 'this'.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(8,5): error TS2304: Cannot find name 'super'.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(9,5): error TS2304: Cannot find name 'var'.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(10,5): error TS2304: Cannot find name 'class'.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(11,5): error TS2304: Cannot find name 'typeof'.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(15,5): error TS2304: Cannot find name 'a'.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(15,6): error TS2304: Cannot find name '.'.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(15,7): error TS2304: Cannot find name 'b'.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(16,5): error TS2304: Cannot find name 'a'.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(17,5): error TS2304: Cannot find name 'a'.
+/.src/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.ts/shorthandPropertyAssignment(20,11): error TS2304: Cannot find name 'class'.

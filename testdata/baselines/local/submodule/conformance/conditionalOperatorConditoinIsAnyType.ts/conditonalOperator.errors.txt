@@ -1,0 +1,2 @@
+/.src/conditionalOperatorConditoinIsAnyType.ts/conditonalOperator(9,28): error TS2304: Cannot find name 'Object'.
+/.src/conditionalOperatorConditoinIsAnyType.ts/conditonalOperator(15,28): error TS2304: Cannot find name 'Object'.

@@ -1,0 +1,6 @@
+/.src/assignmentTypeNarrowing.ts/assignmentOperator(18,5): error TS1005: ',' expected.
+/.src/assignmentTypeNarrowing.ts/assignmentOperator(18,7): error TS1005: ',' expected.
+/.src/assignmentTypeNarrowing.ts/assignmentOperator(1,36): error TS2304: Cannot find name 'RegExp'.
+/.src/assignmentTypeNarrowing.ts/assignmentOperator(18,5): error TS2304: Cannot find name '='.
+/.src/assignmentTypeNarrowing.ts/assignmentOperator(26,11): error TS2454: Variable 'a' is used before being assigned.
+/.src/assignmentTypeNarrowing.ts/assignmentOperator(34,5): error TS2339: Property 'push' does not exist on type '{ x: "ok" } | { x: "ok" }[]'.

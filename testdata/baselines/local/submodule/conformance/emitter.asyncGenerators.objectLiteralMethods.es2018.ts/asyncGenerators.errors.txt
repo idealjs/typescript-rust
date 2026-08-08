@@ -1,0 +1,163 @@
+/.src/O1.ts(2,11): error TS1005: ',' expected.
+/.src/O1.ts(2,13): error TS1005: ',' expected.
+/.src/O1.ts(2,14): error TS1005: ',' expected.
+/.src/O1.ts(2,15): error TS1005: ',' expected.
+/.src/O1.ts(2,17): error TS1005: ',' expected.
+/.src/O1.ts(4,1): error TS1128: Declaration or statement expected.
+/.src/O2.ts(2,11): error TS1005: ',' expected.
+/.src/O2.ts(2,13): error TS1005: ',' expected.
+/.src/O2.ts(2,14): error TS1005: ',' expected.
+/.src/O2.ts(2,15): error TS1005: ',' expected.
+/.src/O2.ts(2,17): error TS1005: ',' expected.
+/.src/O2.ts(3,9): error TS1005: ',' expected.
+/.src/O2.ts(3,15): error TS1005: ',' expected.
+/.src/O2.ts(3,17): error TS1005: ',' expected.
+/.src/O2.ts(3,19): error TS1005: ',' expected.
+/.src/O2.ts(3,24): error TS1005: ',' expected.
+/.src/O2.ts(5,1): error TS1128: Declaration or statement expected.
+/.src/O3.ts(2,11): error TS1005: ',' expected.
+/.src/O3.ts(2,13): error TS1005: ',' expected.
+/.src/O3.ts(2,14): error TS1005: ',' expected.
+/.src/O3.ts(2,15): error TS1005: ',' expected.
+/.src/O3.ts(2,17): error TS1005: ',' expected.
+/.src/O3.ts(3,9): error TS1005: ',' expected.
+/.src/O3.ts(3,15): error TS1005: ',' expected.
+/.src/O3.ts(3,17): error TS1005: ',' expected.
+/.src/O3.ts(3,19): error TS1005: ',' expected.
+/.src/O3.ts(3,25): error TS1005: ',' expected.
+/.src/O3.ts(3,26): error TS1005: ',' expected.
+/.src/O3.ts(5,1): error TS1128: Declaration or statement expected.
+/.src/O4.ts(2,11): error TS1005: ',' expected.
+/.src/O4.ts(2,13): error TS1005: ',' expected.
+/.src/O4.ts(2,14): error TS1005: ',' expected.
+/.src/O4.ts(2,15): error TS1005: ',' expected.
+/.src/O4.ts(2,17): error TS1005: ',' expected.
+/.src/O4.ts(3,9): error TS1005: ',' expected.
+/.src/O4.ts(3,15): error TS1005: ',' expected.
+/.src/O4.ts(3,17): error TS1005: ',' expected.
+/.src/O4.ts(3,19): error TS1005: ',' expected.
+/.src/O4.ts(3,24): error TS1005: ',' expected.
+/.src/O4.ts(3,26): error TS1005: ',' expected.
+/.src/O4.ts(3,29): error TS1005: ',' expected.
+/.src/O4.ts(5,1): error TS1128: Declaration or statement expected.
+/.src/O5.ts(2,11): error TS1005: ',' expected.
+/.src/O5.ts(2,13): error TS1005: ',' expected.
+/.src/O5.ts(2,14): error TS1005: ',' expected.
+/.src/O5.ts(2,15): error TS1005: ',' expected.
+/.src/O5.ts(2,17): error TS1005: ',' expected.
+/.src/O5.ts(3,9): error TS1005: ',' expected.
+/.src/O5.ts(3,15): error TS1005: ',' expected.
+/.src/O5.ts(3,17): error TS1005: ',' expected.
+/.src/O5.ts(3,19): error TS1005: ',' expected.
+/.src/O5.ts(3,24): error TS1005: ',' expected.
+/.src/O5.ts(3,26): error TS1005: ',' expected.
+/.src/O5.ts(3,27): error TS1005: ',' expected.
+/.src/O5.ts(3,33): error TS1005: ',' expected.
+/.src/O5.ts(3,41): error TS1005: ',' expected.
+/.src/O5.ts(3,42): error TS1005: ',' expected.
+/.src/O5.ts(3,43): error TS1005: ',' expected.
+/.src/O5.ts(3,45): error TS1005: ',' expected.
+/.src/O5.ts(3,47): error TS1005: ',' expected.
+/.src/O5.ts(3,53): error TS1005: ',' expected.
+/.src/O5.ts(3,54): error TS1005: ',' expected.
+/.src/O5.ts(3,57): error TS1005: ',' expected.
+/.src/O6.ts(2,11): error TS1005: ',' expected.
+/.src/O6.ts(2,13): error TS1005: ',' expected.
+/.src/O6.ts(2,14): error TS1005: ',' expected.
+/.src/O6.ts(2,15): error TS1005: ',' expected.
+/.src/O6.ts(2,17): error TS1005: ',' expected.
+/.src/O6.ts(3,9): error TS1005: ',' expected.
+/.src/O6.ts(3,15): error TS1005: ',' expected.
+/.src/O6.ts(3,17): error TS1005: ',' expected.
+/.src/O6.ts(3,19): error TS1005: ',' expected.
+/.src/O6.ts(3,25): error TS1005: ',' expected.
+/.src/O6.ts(3,26): error TS1005: ',' expected.
+/.src/O6.ts(5,1): error TS1128: Declaration or statement expected.
+/.src/O7.ts(2,11): error TS1005: ',' expected.
+/.src/O7.ts(2,13): error TS1005: ',' expected.
+/.src/O7.ts(2,14): error TS1005: ',' expected.
+/.src/O7.ts(2,15): error TS1005: ',' expected.
+/.src/O7.ts(2,17): error TS1005: ',' expected.
+/.src/O7.ts(3,9): error TS1005: ',' expected.
+/.src/O7.ts(3,16): error TS1005: ',' expected.
+/.src/O7.ts(3,17): error TS1005: ',' expected.
+/.src/O7.ts(5,1): error TS1128: Declaration or statement expected.
+/.src/O7.ts(2,5): error TS2304: Cannot find name 'async'.
+/.src/O7.ts(2,11): error TS2304: Cannot find name '*'.
+/.src/O7.ts(2,13): error TS2304: Cannot find name 'f'.
+/.src/O7.ts(2,14): error TS2304: Cannot find name '('.
+/.src/O7.ts(2,15): error TS2304: Cannot find name ')'.
+/.src/O7.ts(2,17): error TS2304: Cannot find name '{'.
+/.src/O7.ts(3,9): error TS2304: Cannot find name 'return'.
+/.src/O7.ts(3,17): error TS2304: Cannot find name ';'.
+/.src/O4.ts(2,5): error TS2304: Cannot find name 'async'.
+/.src/O4.ts(2,11): error TS2304: Cannot find name '*'.
+/.src/O4.ts(2,13): error TS2304: Cannot find name 'f'.
+/.src/O4.ts(2,14): error TS2304: Cannot find name '('.
+/.src/O4.ts(2,15): error TS2304: Cannot find name ')'.
+/.src/O4.ts(2,17): error TS2304: Cannot find name '{'.
+/.src/O4.ts(3,9): error TS2304: Cannot find name 'const'.
+/.src/O4.ts(3,15): error TS2304: Cannot find name 'x'.
+/.src/O4.ts(3,17): error TS2304: Cannot find name '='.
+/.src/O4.ts(3,19): error TS2304: Cannot find name 'yield'.
+/.src/O4.ts(3,24): error TS2304: Cannot find name '*'.
+/.src/O4.ts(3,29): error TS2304: Cannot find name ';'.
+/.src/O2.ts(2,5): error TS2304: Cannot find name 'async'.
+/.src/O2.ts(2,11): error TS2304: Cannot find name '*'.
+/.src/O2.ts(2,13): error TS2304: Cannot find name 'f'.
+/.src/O2.ts(2,14): error TS2304: Cannot find name '('.
+/.src/O2.ts(2,15): error TS2304: Cannot find name ')'.
+/.src/O2.ts(2,17): error TS2304: Cannot find name '{'.
+/.src/O2.ts(3,9): error TS2304: Cannot find name 'const'.
+/.src/O2.ts(3,15): error TS2304: Cannot find name 'x'.
+/.src/O2.ts(3,17): error TS2304: Cannot find name '='.
+/.src/O2.ts(3,19): error TS2304: Cannot find name 'yield'.
+/.src/O2.ts(3,24): error TS2304: Cannot find name ';'.
+/.src/O5.ts(2,5): error TS2304: Cannot find name 'async'.
+/.src/O5.ts(2,11): error TS2304: Cannot find name '*'.
+/.src/O5.ts(2,13): error TS2304: Cannot find name 'f'.
+/.src/O5.ts(2,14): error TS2304: Cannot find name '('.
+/.src/O5.ts(2,15): error TS2304: Cannot find name ')'.
+/.src/O5.ts(2,17): error TS2304: Cannot find name '{'.
+/.src/O5.ts(3,9): error TS2304: Cannot find name 'const'.
+/.src/O5.ts(3,15): error TS2304: Cannot find name 'x'.
+/.src/O5.ts(3,17): error TS2304: Cannot find name '='.
+/.src/O5.ts(3,19): error TS2304: Cannot find name 'yield'.
+/.src/O5.ts(3,24): error TS2304: Cannot find name '*'.
+/.src/O5.ts(3,26): error TS2304: Cannot find name '('.
+/.src/O5.ts(3,27): error TS2304: Cannot find name 'async'.
+/.src/O5.ts(3,33): error TS2304: Cannot find name 'function'.
+/.src/O5.ts(3,41): error TS2304: Cannot find name '*'.
+/.src/O5.ts(3,42): error TS2304: Cannot find name '('.
+/.src/O5.ts(3,43): error TS2304: Cannot find name ')'.
+/.src/O5.ts(3,45): error TS2304: Cannot find name '{'.
+/.src/O5.ts(3,47): error TS2304: Cannot find name 'yield'.
+/.src/O5.ts(3,54): error TS2304: Cannot find name ';'.
+/.src/O1.ts(2,5): error TS2304: Cannot find name 'async'.
+/.src/O1.ts(2,11): error TS2304: Cannot find name '*'.
+/.src/O1.ts(2,13): error TS2304: Cannot find name 'f'.
+/.src/O1.ts(2,14): error TS2304: Cannot find name '('.
+/.src/O1.ts(2,15): error TS2304: Cannot find name ')'.
+/.src/O1.ts(2,17): error TS2304: Cannot find name '{'.
+/.src/O6.ts(2,5): error TS2304: Cannot find name 'async'.
+/.src/O6.ts(2,11): error TS2304: Cannot find name '*'.
+/.src/O6.ts(2,13): error TS2304: Cannot find name 'f'.
+/.src/O6.ts(2,14): error TS2304: Cannot find name '('.
+/.src/O6.ts(2,15): error TS2304: Cannot find name ')'.
+/.src/O6.ts(2,17): error TS2304: Cannot find name '{'.
+/.src/O6.ts(3,9): error TS2304: Cannot find name 'const'.
+/.src/O6.ts(3,15): error TS2304: Cannot find name 'x'.
+/.src/O6.ts(3,17): error TS2304: Cannot find name '='.
+/.src/O6.ts(3,19): error TS2304: Cannot find name 'await'.
+/.src/O6.ts(3,26): error TS2304: Cannot find name ';'.
+/.src/O3.ts(2,5): error TS2304: Cannot find name 'async'.
+/.src/O3.ts(2,11): error TS2304: Cannot find name '*'.
+/.src/O3.ts(2,13): error TS2304: Cannot find name 'f'.
+/.src/O3.ts(2,14): error TS2304: Cannot find name '('.
+/.src/O3.ts(2,15): error TS2304: Cannot find name ')'.
+/.src/O3.ts(2,17): error TS2304: Cannot find name '{'.
+/.src/O3.ts(3,9): error TS2304: Cannot find name 'const'.
+/.src/O3.ts(3,15): error TS2304: Cannot find name 'x'.
+/.src/O3.ts(3,17): error TS2304: Cannot find name '='.
+/.src/O3.ts(3,19): error TS2304: Cannot find name 'yield'.
+/.src/O3.ts(3,26): error TS2304: Cannot find name ';'.

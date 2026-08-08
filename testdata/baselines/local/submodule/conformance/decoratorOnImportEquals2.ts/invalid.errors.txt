@@ -1,0 +1,4 @@
+/.src/decoratorOnImportEquals2_1.ts(2,8): error TS1005: ';' expected.
+/.src/decoratorOnImportEquals2_1.ts(2,1): error TS2304: Cannot find name 'import'.
+/.src/decoratorOnImportEquals2_1.ts(2,8): error TS2304: Cannot find name 'lib'.
+/.src/decoratorOnImportEquals2_1.ts(2,14): error TS2304: Cannot find name 'require'.

@@ -1,0 +1,12 @@
+/.src/staticIndexSignature3.ts/staticIndexSignature(2,23): error TS1005: ']' expected.
+/.src/staticIndexSignature3.ts/staticIndexSignature(2,31): error TS1005: ';' expected.
+/.src/staticIndexSignature3.ts/staticIndexSignature(3,23): error TS1005: ']' expected.
+/.src/staticIndexSignature3.ts/staticIndexSignature(3,31): error TS1005: ';' expected.
+/.src/staticIndexSignature3.ts/staticIndexSignature(7,23): error TS1005: ']' expected.
+/.src/staticIndexSignature3.ts/staticIndexSignature(7,31): error TS1005: ';' expected.
+/.src/staticIndexSignature3.ts/staticIndexSignature(11,23): error TS1005: ']' expected.
+/.src/staticIndexSignature3.ts/staticIndexSignature(11,31): error TS1005: ';' expected.
+/.src/staticIndexSignature3.ts/staticIndexSignature(12,23): error TS1005: ']' expected.
+/.src/staticIndexSignature3.ts/staticIndexSignature(12,31): error TS1005: ';' expected.
+/.src/staticIndexSignature3.ts/staticIndexSignature(16,23): error TS1005: ']' expected.
+/.src/staticIndexSignature3.ts/staticIndexSignature(16,31): error TS1005: ';' expected.

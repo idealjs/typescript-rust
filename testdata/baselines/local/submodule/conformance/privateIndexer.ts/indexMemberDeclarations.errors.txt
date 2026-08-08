@@ -1,0 +1,6 @@
+/.src/privateIndexer.ts/indexMemberDeclarations(4,15): error TS1005: ']' expected.
+/.src/privateIndexer.ts/indexMemberDeclarations(4,23): error TS1005: ';' expected.
+/.src/privateIndexer.ts/indexMemberDeclarations(8,15): error TS1005: ']' expected.
+/.src/privateIndexer.ts/indexMemberDeclarations(8,23): error TS1005: ';' expected.
+/.src/privateIndexer.ts/indexMemberDeclarations(12,15): error TS1005: ']' expected.
+/.src/privateIndexer.ts/indexMemberDeclarations(12,23): error TS1005: ';' expected.

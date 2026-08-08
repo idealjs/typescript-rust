@@ -1,0 +1,4 @@
+/.src/taggedTemplateStringsWithManyCallAndMemberExpressionsES6.ts/templates(14,23): error TS1005: ',' expected.
+/.src/taggedTemplateStringsWithManyCallAndMemberExpressionsES6.ts/templates(14,30): error TS1134: Variable declaration expected.
+/.src/taggedTemplateStringsWithManyCallAndMemberExpressionsES6.ts/templates(14,32): error TS1128: Declaration or statement expected.
+/.src/taggedTemplateStringsWithManyCallAndMemberExpressionsES6.ts/templates(14,21): error TS2351: This expression is not constructable.

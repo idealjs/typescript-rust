@@ -1,0 +1,1 @@
+/.src/templateStringWithPropertyAccess.ts/templates(2,14): error TS2339: Property 'indexOf' does not exist on type 'string'.

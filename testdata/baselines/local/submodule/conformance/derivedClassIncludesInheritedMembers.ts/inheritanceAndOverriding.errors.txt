@@ -1,0 +1,15 @@
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(4,9): error TS1005: ';' expected.
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(5,9): error TS1005: ';' expected.
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(9,16): error TS1005: ';' expected.
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(10,16): error TS1005: ';' expected.
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(29,7): error TS1005: ']' expected.
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(29,15): error TS1005: ';' expected.
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(30,7): error TS1005: ']' expected.
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(30,15): error TS1005: ';' expected.
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(18,30): error TS2554: Expected 0 arguments, but got 1.
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(23,18): error TS2339: Property 'r' does not exist on type 'object'.
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(24,18): error TS2339: Property 's' does not exist on type 'object'.
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(25,18): error TS2339: Property 't' does not exist on type 'object'.
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(26,9): error TS2339: Property 't' does not exist on type 'object'.
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(29,18): error TS2304: Cannot find name 'Object'.
+/.src/derivedClassIncludesInheritedMembers.ts/inheritanceAndOverriding(30,18): error TS2304: Cannot find name 'Date'.

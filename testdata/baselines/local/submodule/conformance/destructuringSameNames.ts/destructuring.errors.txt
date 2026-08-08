@@ -1,0 +1,8 @@
+error TS2451: Cannot redeclare block-scoped variable 'foo1'.
+error TS2451: Cannot redeclare block-scoped variable 'foo2'.
+error TS2451: Cannot redeclare block-scoped variable 'foo3'.
+error TS2451: Cannot redeclare block-scoped variable 'foo4'.
+error TS2451: Cannot redeclare block-scoped variable 'foo5'.
+error TS2451: Cannot redeclare block-scoped variable 'foo6'.
+error TS2451: Cannot redeclare block-scoped variable 'blah1'.
+error TS2451: Cannot redeclare block-scoped variable 'blah2'.

@@ -1,0 +1,7 @@
+/.src/esDecorators-classExpression-namedEvaluation.6.ts/namedEvaluation(6,11): error TS1012: Unexpected token.
+/.src/esDecorators-classExpression-namedEvaluation.6.ts/namedEvaluation(6,12): error TS1005: ',' expected.
+/.src/esDecorators-classExpression-namedEvaluation.6.ts/namedEvaluation(6,16): error TS1005: ',' expected.
+/.src/esDecorators-classExpression-namedEvaluation.6.ts/namedEvaluation(6,22): error TS1005: ',' expected.
+/.src/esDecorators-classExpression-namedEvaluation.6.ts/namedEvaluation(6,26): error TS1005: ')' expected.
+/.src/esDecorators-classExpression-namedEvaluation.6.ts/namedEvaluation(6,16): error TS2304: Cannot find name 'class'.
+/.src/esDecorators-classExpression-namedEvaluation.6.ts/namedEvaluation(6,22): error TS2304: Cannot find name '{'.

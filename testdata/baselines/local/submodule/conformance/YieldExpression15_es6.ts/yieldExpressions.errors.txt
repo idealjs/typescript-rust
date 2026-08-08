@@ -1,0 +1,1 @@
+/.src/YieldExpression15_es6.ts/yieldExpressions(2,12): error TS2304: Cannot find name 'foo'.

@@ -1,0 +1,4 @@
+/.src/intlDateTimeFormatRangeES2021.ts/es2021(1,5): error TS2304: Cannot find name 'Intl'.
+/.src/intlDateTimeFormatRangeES2021.ts/es2021(1,43): error TS2304: Cannot find name 'Date'.
+/.src/intlDateTimeFormatRangeES2021.ts/es2021(1,56): error TS2304: Cannot find name 'Date'.
+/.src/intlDateTimeFormatRangeES2021.ts/es2021(2,22): error TS2304: Cannot find name 'Intl'.

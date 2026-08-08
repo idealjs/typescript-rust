@@ -1,0 +1,7 @@
+/.src/indexersInClassType.ts/classTypes(2,7): error TS1005: ']' expected.
+/.src/indexersInClassType.ts/classTypes(2,15): error TS1005: ';' expected.
+/.src/indexersInClassType.ts/classTypes(3,7): error TS1005: ']' expected.
+/.src/indexersInClassType.ts/classTypes(3,15): error TS1005: ';' expected.
+/.src/indexersInClassType.ts/classTypes(2,18): error TS2304: Cannot find name 'Date'.
+/.src/indexersInClassType.ts/classTypes(3,18): error TS2304: Cannot find name 'Object'.
+/.src/indexersInClassType.ts/classTypes(4,8): error TS2304: Cannot find name 'Date'.

@@ -1,0 +1,53 @@
+/.src/privateNameMethodCallExpression.ts/privateNames(2,5): error TS1003: Identifier expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(2,6): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(2,31): error TS1003: Identifier expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(3,5): error TS1003: Identifier expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(3,6): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(3,25): error TS1003: Identifier expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(6,14): error TS1003: Identifier expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(6,15): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(7,27): error TS1003: Identifier expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(7,28): error TS1005: ',' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(9,18): error TS1003: Identifier expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(9,19): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(12,14): error TS1003: Identifier expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(12,15): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(14,28): error TS1003: Identifier expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(14,29): error TS1005: ',' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(14,36): error TS1005: ',' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(14,37): error TS1134: Variable declaration expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(14,38): error TS1134: Variable declaration expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(14,40): error TS1134: Variable declaration expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(14,48): error TS1134: Variable declaration expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(14,49): error TS1134: Variable declaration expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(15,15): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(15,26): error TS1003: Identifier expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(15,27): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(15,34): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(15,41): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(15,50): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(15,57): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(16,37): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(16,42): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(16,49): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(20,50): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(20,55): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(20,65): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(20,72): error TS1005: ';' expected.
+/.src/privateNameMethodCallExpression.ts/privateNames(2,5): error TS1127: Invalid character.
+/.src/privateNameMethodCallExpression.ts/privateNames(3,5): error TS1127: Invalid character.
+/.src/privateNameMethodCallExpression.ts/privateNames(6,14): error TS1127: Invalid character.
+/.src/privateNameMethodCallExpression.ts/privateNames(7,27): error TS1127: Invalid character.
+/.src/privateNameMethodCallExpression.ts/privateNames(9,18): error TS1127: Invalid character.
+/.src/privateNameMethodCallExpression.ts/privateNames(12,14): error TS1127: Invalid character.
+/.src/privateNameMethodCallExpression.ts/privateNames(14,28): error TS1127: Invalid character.
+/.src/privateNameMethodCallExpression.ts/privateNames(15,26): error TS1127: Invalid character.
+/.src/privateNameMethodCallExpression.ts/privateNames(20,72): error TS1160: Unterminated template literal.
+/.src/privateNameMethodCallExpression.ts/privateNames(15,43): error TS2304: Cannot find name 'middle$'.
+/.src/privateNameMethodCallExpression.ts/privateNames(15,53): error TS2304: Cannot find name 'tail'.
+/.src/privateNameMethodCallExpression.ts/privateNames(16,37): error TS2304: Cannot find name 'test$'.
+/.src/privateNameMethodCallExpression.ts/privateNames(16,45): error TS2304: Cannot find name 'and$'.
+/.src/privateNameMethodCallExpression.ts/privateNames(20,50): error TS2304: Cannot find name 'head$'.
+/.src/privateNameMethodCallExpression.ts/privateNames(20,58): error TS2304: Cannot find name 'middle$'.
+/.src/privateNameMethodCallExpression.ts/privateNames(20,68): error TS2304: Cannot find name 'tail'.
+error TS2451: Cannot redeclare block-scoped variable 'arr'.

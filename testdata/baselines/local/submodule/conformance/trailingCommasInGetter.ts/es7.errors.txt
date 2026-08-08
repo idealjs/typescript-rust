@@ -1,0 +1,2 @@
+/.src/trailingCommasInGetter.ts/es7(2,9): error TS1005: ';' expected.
+/.src/trailingCommasInGetter.ts/es7(2,11): error TS1138: Parameter declaration expected.

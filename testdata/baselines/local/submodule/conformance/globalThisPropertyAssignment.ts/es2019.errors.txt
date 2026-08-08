@@ -1,0 +1,1 @@
+/.src/globalThisPropertyAssignment.js(6,12): error TS2339: Property 'alpha' does not exist on type 'globalThis'.

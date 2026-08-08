@@ -1,0 +1,5 @@
+/.src/decoratorOnFunctionExpression.ts/invalid(3,9): error TS1012: Unexpected token.
+/.src/decoratorOnFunctionExpression.ts/invalid(3,10): error TS1005: ',' expected.
+/.src/decoratorOnFunctionExpression.ts/invalid(3,14): error TS1005: ',' expected.
+/.src/decoratorOnFunctionExpression.ts/invalid(3,23): error TS1005: ',' expected.
+/.src/decoratorOnFunctionExpression.ts/invalid(3,24): error TS1134: Variable declaration expected.

@@ -1,0 +1,12 @@
+/.src/classConstructorAccessibility.ts/constructorDeclarations(2,31): error TS1005: ',' expected.
+/.src/classConstructorAccessibility.ts/constructorDeclarations(6,32): error TS1005: ',' expected.
+/.src/classConstructorAccessibility.ts/constructorDeclarations(10,34): error TS1005: ',' expected.
+/.src/classConstructorAccessibility.ts/constructorDeclarations(19,35): error TS1005: ',' expected.
+/.src/classConstructorAccessibility.ts/constructorDeclarations(23,36): error TS1005: ',' expected.
+/.src/classConstructorAccessibility.ts/constructorDeclarations(27,38): error TS1005: ',' expected.
+/.src/classConstructorAccessibility.ts/constructorDeclarations(13,9): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility.ts/constructorDeclarations(14,9): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility.ts/constructorDeclarations(15,9): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility.ts/constructorDeclarations(30,13): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility.ts/constructorDeclarations(31,13): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility.ts/constructorDeclarations(32,13): error TS2554: Expected 2 arguments, but got 1.

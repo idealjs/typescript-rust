@@ -1,0 +1,2 @@
+/.src/classExpressionLoop.ts/classExpressions(2,23): error TS1005: '>' expected.
+/.src/classExpressionLoop.ts/classExpressions(3,20): error TS2304: Cannot find name 'C'.

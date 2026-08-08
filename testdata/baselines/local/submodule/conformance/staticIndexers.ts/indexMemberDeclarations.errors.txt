@@ -1,0 +1,6 @@
+/.src/staticIndexers.ts/indexMemberDeclarations(4,14): error TS1005: ']' expected.
+/.src/staticIndexers.ts/indexMemberDeclarations(4,22): error TS1005: ';' expected.
+/.src/staticIndexers.ts/indexMemberDeclarations(8,14): error TS1005: ']' expected.
+/.src/staticIndexers.ts/indexMemberDeclarations(8,22): error TS1005: ';' expected.
+/.src/staticIndexers.ts/indexMemberDeclarations(12,14): error TS1005: ']' expected.
+/.src/staticIndexers.ts/indexMemberDeclarations(12,22): error TS1005: ';' expected.

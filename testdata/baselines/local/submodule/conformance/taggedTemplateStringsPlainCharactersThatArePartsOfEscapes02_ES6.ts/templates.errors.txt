@@ -1,0 +1,1 @@
+/.src/taggedTemplateStringsPlainCharactersThatArePartsOfEscapes02_ES6.ts/templates(7,3): error TS1005: ';' expected.

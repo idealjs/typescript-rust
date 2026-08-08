@@ -1,0 +1,10 @@
+/.src/taggedTemplateStringsWithOverloadResolution1.ts/templates(17,13): error TS1005: ',' expected.
+/.src/taggedTemplateStringsWithOverloadResolution1.ts/templates(18,13): error TS1005: ',' expected.
+/.src/taggedTemplateStringsWithOverloadResolution1.ts/templates(18,16): error TS1134: Variable declaration expected.
+/.src/taggedTemplateStringsWithOverloadResolution1.ts/templates(18,17): error TS1128: Declaration or statement expected.
+/.src/taggedTemplateStringsWithOverloadResolution1.ts/templates(2,20): error TS2304: Cannot find name 'TemplateStringsArray'.
+/.src/taggedTemplateStringsWithOverloadResolution1.ts/templates(3,20): error TS2304: Cannot find name 'TemplateStringsArray'.
+/.src/taggedTemplateStringsWithOverloadResolution1.ts/templates(4,20): error TS2304: Cannot find name 'TemplateStringsArray'.
+/.src/taggedTemplateStringsWithOverloadResolution1.ts/templates(5,20): error TS2304: Cannot find name 'TemplateStringsArray'.
+/.src/taggedTemplateStringsWithOverloadResolution1.ts/templates(13,17): error TS2554: Expected 1 arguments, but got 3.
+/.src/taggedTemplateStringsWithOverloadResolution1.ts/templates(15,17): error TS2554: Expected 1 arguments, but got 4.

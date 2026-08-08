@@ -1,0 +1,1 @@
+/.src/privateStaticNotAccessibleInClodule2.ts/accessibility(13,22): error TS2339: Property 'bar' does not exist on type 'D'.

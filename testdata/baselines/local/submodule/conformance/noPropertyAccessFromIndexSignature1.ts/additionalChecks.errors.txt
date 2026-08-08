@@ -1,0 +1,7 @@
+/.src/noPropertyAccessFromIndexSignature1.ts/additionalChecks(11,7): error TS1005: ']' expected.
+/.src/noPropertyAccessFromIndexSignature1.ts/additionalChecks(11,15): error TS1003: Identifier expected.
+/.src/noPropertyAccessFromIndexSignature1.ts/additionalChecks(11,6): error TS2304: Cannot find name 'k'.
+/.src/noPropertyAccessFromIndexSignature1.ts/additionalChecks(32,3): error TS2339: Property 'bar' does not exist on type '{ foo: any; :: error; string: error; ]: string }'.
+/.src/noPropertyAccessFromIndexSignature1.ts/additionalChecks(37,4): error TS2339: Property '' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
+/.src/noPropertyAccessFromIndexSignature1.ts/additionalChecks(40,4): error TS2339: Property 'bar' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
+/.src/noPropertyAccessFromIndexSignature1.ts/additionalChecks(41,4): error TS2339: Property '' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.

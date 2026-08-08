@@ -1,0 +1,15 @@
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(2,14): error TS1005: ',' expected.
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(2,15): error TS1005: ',' expected.
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(2,17): error TS1005: ',' expected.
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(3,9): error TS1005: ',' expected.
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(3,17): error TS1005: ',' expected.
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(5,23): error TS1005: ',' expected.
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(6,10): error TS1005: ',' expected.
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(6,11): error TS1005: ':' expected.
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(8,1): error TS1128: Declaration or statement expected.
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(5,23): error TS1182: A destructuring declaration must have an initializer.
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(2,14): error TS2304: Cannot find name '('.
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(2,15): error TS2304: Cannot find name ')'.
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(2,17): error TS2304: Cannot find name '{'.
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(3,9): error TS2304: Cannot find name 'debugger'.
+/.src/computedPropertyNamesSourceMap2_ES5.ts/computedProperties(5,5): error TS2304: Cannot find name 'get'.

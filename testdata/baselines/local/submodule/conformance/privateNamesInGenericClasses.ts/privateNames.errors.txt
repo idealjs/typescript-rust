@@ -1,0 +1,72 @@
+/.src/privateNamesInGenericClasses.ts/privateNames(2,5): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(2,6): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(3,5): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(3,6): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(3,32): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(3,33): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(4,9): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(4,10): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(4,34): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(4,35): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(5,9): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(5,10): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(5,33): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(5,34): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(7,29): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(7,30): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(8,30): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(8,31): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(9,30): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(9,31): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(11,34): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(11,35): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(12,35): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(12,36): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(13,35): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(13,36): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(15,35): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(15,36): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(16,36): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(16,37): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(17,36): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(17,37): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(22,3): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(22,4): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(23,3): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(23,4): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(24,3): error TS1003: Identifier expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(24,4): error TS1005: ';' expected.
+/.src/privateNamesInGenericClasses.ts/privateNames(2,5): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(3,5): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(3,32): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(4,9): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(4,34): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(5,9): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(5,33): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(7,29): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(8,30): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(9,30): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(11,34): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(12,35): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(13,35): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(15,35): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(16,36): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(17,36): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(22,3): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(23,3): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(24,3): error TS1127: Invalid character.
+/.src/privateNamesInGenericClasses.ts/privateNames(3,33): error TS7027: Unreachable code detected.
+/.src/privateNamesInGenericClasses.ts/privateNames(4,35): error TS7027: Unreachable code detected.
+/.src/privateNamesInGenericClasses.ts/privateNames(7,30): error TS7027: Unreachable code detected.
+/.src/privateNamesInGenericClasses.ts/privateNames(8,31): error TS7027: Unreachable code detected.
+/.src/privateNamesInGenericClasses.ts/privateNames(8,31): error TS2349: This expression is not callable.
+/.src/privateNamesInGenericClasses.ts/privateNames(9,31): error TS7027: Unreachable code detected.
+/.src/privateNamesInGenericClasses.ts/privateNames(11,35): error TS7027: Unreachable code detected.
+/.src/privateNamesInGenericClasses.ts/privateNames(12,36): error TS7027: Unreachable code detected.
+/.src/privateNamesInGenericClasses.ts/privateNames(13,36): error TS7027: Unreachable code detected.
+/.src/privateNamesInGenericClasses.ts/privateNames(15,36): error TS7027: Unreachable code detected.
+/.src/privateNamesInGenericClasses.ts/privateNames(16,37): error TS7027: Unreachable code detected.
+/.src/privateNamesInGenericClasses.ts/privateNames(17,37): error TS7027: Unreachable code detected.
+/.src/privateNamesInGenericClasses.ts/privateNames(22,4): error TS2304: Cannot find name 'foo'.
+/.src/privateNamesInGenericClasses.ts/privateNames(23,4): error TS2304: Cannot find name 'method'.
+/.src/privateNamesInGenericClasses.ts/privateNames(24,4): error TS2304: Cannot find name 'prop'.

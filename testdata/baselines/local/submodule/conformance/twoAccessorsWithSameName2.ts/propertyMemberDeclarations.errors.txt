@@ -1,0 +1,6 @@
+/.src/twoAccessorsWithSameName2.ts/propertyMemberDeclarations(2,16): error TS1005: ';' expected.
+/.src/twoAccessorsWithSameName2.ts/propertyMemberDeclarations(3,16): error TS1005: ';' expected.
+/.src/twoAccessorsWithSameName2.ts/propertyMemberDeclarations(7,16): error TS1005: ';' expected.
+/.src/twoAccessorsWithSameName2.ts/propertyMemberDeclarations(8,16): error TS1005: ';' expected.
+/.src/twoAccessorsWithSameName2.ts/propertyMemberDeclarations(12,16): error TS1005: ';' expected.
+/.src/twoAccessorsWithSameName2.ts/propertyMemberDeclarations(15,16): error TS1005: ';' expected.

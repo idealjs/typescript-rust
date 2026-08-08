@@ -21,6 +21,9 @@ pub fn line_and_character(line_map: &LineMap, text: &str, offset: usize) -> (usi
     if starts.is_empty() {
         return (0, 0);
     }
+    // Clamp offset to text bounds — synthetic nodes may have positions
+    // beyond the actual text length.
+    let offset = offset.min(text.len());
     // Binary search for the last line start <= offset.
     let mut lo = 0usize;
     let mut hi = starts.len();
@@ -34,7 +37,11 @@ pub fn line_and_character(line_map: &LineMap, text: &str, offset: usize) -> (usi
     }
     let line = lo;
     let line_start = starts[line] as usize;
-    let col = utf16_len(&text[line_start..offset]);
+    let col = if line_start <= offset {
+        utf16_len(&text[line_start..offset])
+    } else {
+        0
+    };
     (line, col)
 }
 

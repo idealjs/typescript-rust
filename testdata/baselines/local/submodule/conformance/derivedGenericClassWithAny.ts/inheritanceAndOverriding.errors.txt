@@ -1,0 +1,6 @@
+/.src/derivedGenericClassWithAny.ts/inheritanceAndOverriding(3,9): error TS1005: ';' expected.
+/.src/derivedGenericClassWithAny.ts/inheritanceAndOverriding(11,9): error TS1005: ';' expected.
+/.src/derivedGenericClassWithAny.ts/inheritanceAndOverriding(19,16): error TS1005: ';' expected.
+/.src/derivedGenericClassWithAny.ts/inheritanceAndOverriding(30,9): error TS1005: ';' expected.
+/.src/derivedGenericClassWithAny.ts/inheritanceAndOverriding(3,25): error TS2322: Type 'null' is not assignable to type 'T'.
+/.src/derivedGenericClassWithAny.ts/inheritanceAndOverriding(5,16): error TS2322: Type 'null' is not assignable to type 'T'.

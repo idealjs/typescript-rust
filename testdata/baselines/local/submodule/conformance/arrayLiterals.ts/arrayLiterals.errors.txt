@@ -1,0 +1,1 @@
+/.src/arrayLiterals.ts/arrayLiterals(21,21): error TS2304: Cannot find name 'Array'.

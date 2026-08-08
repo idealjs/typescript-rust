@@ -1,0 +1,21 @@
+/.src/definiteAssignmentAssertions.ts/controlFlow(41,10): error TS1005: ',' expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(41,11): error TS1134: Variable declaration expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(43,10): error TS1005: ',' expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(43,11): error TS1134: Variable declaration expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(48,10): error TS1005: ',' expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(48,11): error TS1134: Variable declaration expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(48,20): error TS1005: ',' expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(58,10): error TS1005: ',' expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(58,11): error TS1134: Variable declaration expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(69,10): error TS1005: ',' expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(70,10): error TS1005: ',' expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(70,12): error TS1134: Variable declaration expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(70,14): error TS1134: Variable declaration expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(71,10): error TS1005: ',' expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(71,11): error TS1134: Variable declaration expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(76,15): error TS1005: ',' expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(76,16): error TS1134: Variable declaration expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(77,15): error TS1005: ',' expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(77,16): error TS1134: Variable declaration expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(80,7): error TS1005: ',' expected.
+/.src/definiteAssignmentAssertions.ts/controlFlow(80,8): error TS1134: Variable declaration expected.

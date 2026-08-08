@@ -1,0 +1,5 @@
+/.src/arrowFunctionExpressions.ts/functions(2,26): error TS2339: Property 'length' does not exist on type 'string'.
+/.src/arrowFunctionExpressions.ts/functions(3,35): error TS2339: Property 'length' does not exist on type 'string'.
+/.src/arrowFunctionExpressions.ts/functions(47,15): error TS2339: Property 'toExponential' does not exist on type 'number'.
+/.src/arrowFunctionExpressions.ts/functions(53,12): error TS2339: Property 'charAt' does not exist on type 'number'.
+/.src/arrowFunctionExpressions.ts/functions(80,28): error TS2339: Property 'length' does not exist on type 'string'.

@@ -1,0 +1,5 @@
+/.src/computedPropertyNames51_ES6.ts/computedProperties(2,10): error TS1005: ',' expected.
+/.src/computedPropertyNames51_ES6.ts/computedProperties(2,11): error TS1134: Variable declaration expected.
+/.src/computedPropertyNames51_ES6.ts/computedProperties(3,10): error TS1005: ',' expected.
+/.src/computedPropertyNames51_ES6.ts/computedProperties(3,11): error TS1134: Variable declaration expected.
+/.src/computedPropertyNames51_ES6.ts/computedProperties(1,31): error TS2304: Cannot find name 'T'.

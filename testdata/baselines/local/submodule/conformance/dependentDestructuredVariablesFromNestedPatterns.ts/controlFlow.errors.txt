@@ -1,0 +1,6 @@
+/.src/dependentDestructuredVariablesFromNestedPatterns.ts/controlFlow(1,34): error TS2304: Cannot find name 'Error'.
+/.src/dependentDestructuredVariablesFromNestedPatterns.ts/controlFlow(11,46): error TS2304: Cannot find name 'Error'.
+/.src/dependentDestructuredVariablesFromNestedPatterns.ts/controlFlow(25,25): error TS2304: Cannot find name 'Error'.
+/.src/dependentDestructuredVariablesFromNestedPatterns.ts/controlFlow(25,31): error TS2304: Cannot find name 'String'.
+/.src/dependentDestructuredVariablesFromNestedPatterns.ts/controlFlow(39,46): error TS2304: Cannot find name 'Error'.
+/.src/dependentDestructuredVariablesFromNestedPatterns.ts/controlFlow(40,7): error TS2304: Cannot find name 'Math'.

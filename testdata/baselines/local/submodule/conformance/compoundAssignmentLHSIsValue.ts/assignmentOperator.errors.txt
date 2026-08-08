@@ -1,0 +1,11 @@
+/.src/compoundAssignmentLHSIsValue.ts/assignmentOperator(58,9): error TS1128: Declaration or statement expected.
+/.src/compoundAssignmentLHSIsValue.ts/assignmentOperator(59,9): error TS1128: Declaration or statement expected.
+/.src/compoundAssignmentLHSIsValue.ts/assignmentOperator(85,21): error TS1128: Declaration or statement expected.
+/.src/compoundAssignmentLHSIsValue.ts/assignmentOperator(86,21): error TS1128: Declaration or statement expected.
+/.src/compoundAssignmentLHSIsValue.ts/assignmentOperator(87,11): error TS1005: ';' expected.
+/.src/compoundAssignmentLHSIsValue.ts/assignmentOperator(88,11): error TS1005: ';' expected.
+/.src/compoundAssignmentLHSIsValue.ts/assignmentOperator(68,9): error TS2349: This expression is not callable.
+/.src/compoundAssignmentLHSIsValue.ts/assignmentOperator(91,1): error TS2349: This expression is not callable.
+/.src/compoundAssignmentLHSIsValue.ts/assignmentOperator(92,1): error TS2349: This expression is not callable.
+/.src/compoundAssignmentLHSIsValue.ts/assignmentOperator(121,2): error TS2349: This expression is not callable.
+/.src/compoundAssignmentLHSIsValue.ts/assignmentOperator(122,2): error TS2349: This expression is not callable.

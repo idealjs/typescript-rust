@@ -1,0 +1,1 @@
+/.src/asyncFunctionDeclarationCapturesArguments_es5.ts/functionDeclarations(5,24): error TS2339: Property 'apply' does not exist on type '() => void'.

@@ -1,0 +1,2 @@
+/.src/decoratorOnClassConstructorParameter4.ts/parameter(4,24): error TS1005: ',' expected.
+/.src/decoratorOnClassConstructorParameter4.ts/parameter(4,29): error TS1005: ',' expected.

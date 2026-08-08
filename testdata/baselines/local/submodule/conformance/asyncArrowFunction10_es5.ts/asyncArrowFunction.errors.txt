@@ -1,0 +1,6 @@
+/.src/asyncArrowFunction10_es5.ts/asyncArrowFunction(1,19): error TS1005: ',' expected.
+/.src/asyncArrowFunction10_es5.ts/asyncArrowFunction(1,28): error TS1005: ',' expected.
+/.src/asyncArrowFunction10_es5.ts/asyncArrowFunction(1,33): error TS1005: ',' expected.
+/.src/asyncArrowFunction10_es5.ts/asyncArrowFunction(1,35): error TS1005: ';' expected.
+/.src/asyncArrowFunction10_es5.ts/asyncArrowFunction(1,11): error TS2304: Cannot find name 'async'.
+/.src/asyncArrowFunction10_es5.ts/asyncArrowFunction(3,11): error TS2304: Cannot find name 'await'.

@@ -1,0 +1,1 @@
+/.src/arithmeticOperatorWithInvalidOperands.ts/arithmeticOperator(10,16): error TS2304: Cannot find name 'Number'.

@@ -1,0 +1,4 @@
+/.src/classWithBaseClassButNoConstructor.ts/constructorFunctionTypes(11,16): error TS2554: Expected 0 arguments, but got 1.
+/.src/classWithBaseClassButNoConstructor.ts/constructorFunctionTypes(23,16): error TS2554: Expected 0 arguments, but got 1.
+/.src/classWithBaseClassButNoConstructor.ts/constructorFunctionTypes(32,16): error TS2554: Expected 0 arguments, but got 1.
+/.src/classWithBaseClassButNoConstructor.ts/constructorFunctionTypes(40,16): error TS2554: Expected 0 arguments, but got 1.

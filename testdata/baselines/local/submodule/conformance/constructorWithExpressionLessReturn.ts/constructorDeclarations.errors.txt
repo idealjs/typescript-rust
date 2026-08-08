@@ -1,0 +1,2 @@
+/.src/constructorWithExpressionLessReturn.ts/constructorDeclarations(15,24): error TS1005: ',' expected.
+/.src/constructorWithExpressionLessReturn.ts/constructorDeclarations(21,24): error TS1005: ',' expected.

@@ -1,0 +1,18 @@
+/.src/destructuringParameterProperties1.ts/destructuring(3,24): error TS1005: ',' expected.
+/.src/destructuringParameterProperties1.ts/destructuring(10,24): error TS1005: ',' expected.
+/.src/destructuringParameterProperties1.ts/destructuring(17,24): error TS1005: ',' expected.
+/.src/destructuringParameterProperties1.ts/destructuring(21,10): error TS2554: Expected 2 arguments, but got 1.
+/.src/destructuringParameterProperties1.ts/destructuring(22,6): error TS2554: Expected 2 arguments, but got 1.
+/.src/destructuringParameterProperties1.ts/destructuring(23,26): error TS2339: Property 'x' does not exist on type 'object'.
+/.src/destructuringParameterProperties1.ts/destructuring(23,35): error TS2339: Property 'y' does not exist on type 'object'.
+/.src/destructuringParameterProperties1.ts/destructuring(23,43): error TS2339: Property 'y' does not exist on type 'object'.
+/.src/destructuringParameterProperties1.ts/destructuring(23,52): error TS2339: Property 'z' does not exist on type 'object'.
+/.src/destructuringParameterProperties1.ts/destructuring(25,10): error TS2554: Expected 2 arguments, but got 1.
+/.src/destructuringParameterProperties1.ts/destructuring(26,30): error TS2339: Property 'x' does not exist on type 'object'.
+/.src/destructuringParameterProperties1.ts/destructuring(26,36): error TS2339: Property 'y' does not exist on type 'object'.
+/.src/destructuringParameterProperties1.ts/destructuring(26,42): error TS2339: Property 'z' does not exist on type 'object'.
+/.src/destructuringParameterProperties1.ts/destructuring(28,10): error TS2554: Expected 2 arguments, but got 1.
+/.src/destructuringParameterProperties1.ts/destructuring(29,6): error TS2554: Expected 2 arguments, but got 1.
+/.src/destructuringParameterProperties1.ts/destructuring(30,30): error TS2339: Property 'x' does not exist on type 'object'.
+/.src/destructuringParameterProperties1.ts/destructuring(30,36): error TS2339: Property 'y' does not exist on type 'object'.
+/.src/destructuringParameterProperties1.ts/destructuring(30,42): error TS2339: Property 'z' does not exist on type 'object'.

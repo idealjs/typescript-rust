@@ -1,0 +1,6 @@
+/.src/privateNameAndStaticInitializer.ts/privateNames(2,3): error TS1003: Identifier expected.
+/.src/privateNameAndStaticInitializer.ts/privateNames(2,4): error TS1005: ';' expected.
+/.src/privateNameAndStaticInitializer.ts/privateNames(4,3): error TS1003: Identifier expected.
+/.src/privateNameAndStaticInitializer.ts/privateNames(4,4): error TS1005: ';' expected.
+/.src/privateNameAndStaticInitializer.ts/privateNames(2,3): error TS1127: Invalid character.
+/.src/privateNameAndStaticInitializer.ts/privateNames(4,3): error TS1127: Invalid character.

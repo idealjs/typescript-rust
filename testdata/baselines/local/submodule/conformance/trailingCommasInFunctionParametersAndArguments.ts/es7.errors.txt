@@ -1,0 +1,1 @@
+/.src/trailingCommasInFunctionParametersAndArguments.ts/es7(23,9): error TS1005: ';' expected.

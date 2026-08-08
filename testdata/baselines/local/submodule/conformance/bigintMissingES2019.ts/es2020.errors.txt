@@ -1,0 +1,1 @@
+/.src/bigintMissingES2019.ts/es2020(1,36): error TS2304: Cannot find name 'A'.

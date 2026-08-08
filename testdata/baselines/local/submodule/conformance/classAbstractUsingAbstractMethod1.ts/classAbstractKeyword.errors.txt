@@ -1,0 +1,1 @@
+/.src/classAbstractUsingAbstractMethod1.ts/classAbstractKeyword(16,9): error TS2511: Cannot create an instance of an abstract class.

@@ -1,0 +1,11 @@
+/.src/computedPropertyNames16_ES5.ts/computedProperties(5,9): error TS1005: ';' expected.
+/.src/computedPropertyNames16_ES5.ts/computedProperties(6,9): error TS1005: ';' expected.
+/.src/computedPropertyNames16_ES5.ts/computedProperties(7,16): error TS1005: ';' expected.
+/.src/computedPropertyNames16_ES5.ts/computedProperties(8,9): error TS1005: ';' expected.
+/.src/computedPropertyNames16_ES5.ts/computedProperties(9,9): error TS1005: ';' expected.
+/.src/computedPropertyNames16_ES5.ts/computedProperties(10,16): error TS1005: ';' expected.
+/.src/computedPropertyNames16_ES5.ts/computedProperties(11,9): error TS1005: ';' expected.
+/.src/computedPropertyNames16_ES5.ts/computedProperties(12,9): error TS1005: ';' expected.
+/.src/computedPropertyNames16_ES5.ts/computedProperties(13,16): error TS1005: ';' expected.
+/.src/computedPropertyNames16_ES5.ts/computedProperties(14,9): error TS1005: ';' expected.
+/.src/computedPropertyNames16_ES5.ts/computedProperties(15,9): error TS1005: ';' expected.

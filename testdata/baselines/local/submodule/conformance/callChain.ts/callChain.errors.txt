@@ -1,0 +1,21 @@
+/.src/callChain.ts/callChain(2,1): error TS2349: This expression is not callable.
+/.src/callChain.ts/callChain(3,1): error TS2349: This expression is not callable.
+/.src/callChain.ts/callChain(4,1): error TS2349: This expression is not callable.
+/.src/callChain.ts/callChain(5,1): error TS2349: This expression is not callable.
+/.src/callChain.ts/callChain(12,5): error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
+/.src/callChain.ts/callChain(13,5): error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
+/.src/callChain.ts/callChain(14,5): error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
+/.src/callChain.ts/callChain(15,5): error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
+/.src/callChain.ts/callChain(18,1): error TS2349: This expression is not callable.
+/.src/callChain.ts/callChain(19,1): error TS2349: This expression is not callable.
+/.src/callChain.ts/callChain(20,1): error TS2349: This expression is not callable.
+/.src/callChain.ts/callChain(21,1): error TS2349: This expression is not callable.
+/.src/callChain.ts/callChain(22,1): error TS2349: This expression is not callable.
+/.src/callChain.ts/callChain(23,1): error TS2349: This expression is not callable.
+/.src/callChain.ts/callChain(24,1): error TS2349: This expression is not callable.
+/.src/callChain.ts/callChain(25,1): error TS2349: This expression is not callable.
+/.src/callChain.ts/callChain(31,55): error TS2304: Cannot find name 'T'.
+/.src/callChain.ts/callChain(31,49): error TS2304: Cannot find name 'T'.
+/.src/callChain.ts/callChain(31,43): error TS2304: Cannot find name 'T'.
+/.src/callChain.ts/callChain(33,31): error TS2349: This expression is not callable.
+/.src/callChain.ts/callChain(37,1): error TS2349: This expression is not callable.

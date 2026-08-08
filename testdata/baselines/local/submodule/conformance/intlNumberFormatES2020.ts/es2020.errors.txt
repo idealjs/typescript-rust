@@ -1,0 +1,7 @@
+/.src/intlNumberFormatES2020.ts/es2020(2,46): error TS2304: Cannot find name 'Intl'.
+/.src/intlNumberFormatES2020.ts/es2020(5,5): error TS2304: Cannot find name 'Intl'.
+/.src/intlNumberFormatES2020.ts/es2020(8,5): error TS2304: Cannot find name 'Intl'.
+/.src/intlNumberFormatES2020.ts/es2020(11,40): error TS2304: Cannot find name 'Intl'.
+/.src/intlNumberFormatES2020.ts/es2020(14,35): error TS2304: Cannot find name 'Intl'.
+/.src/intlNumberFormatES2020.ts/es2020(17,32): error TS2304: Cannot find name 'Intl'.
+/.src/intlNumberFormatES2020.ts/es2020(20,5): error TS2304: Cannot find name 'Intl'.

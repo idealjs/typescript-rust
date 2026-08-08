@@ -1,0 +1,1 @@
+/.src/typeGuardsTypeParameters.ts/controlFlow(30,21): error TS2339: Property 'push' does not exist on type 'string[]'.

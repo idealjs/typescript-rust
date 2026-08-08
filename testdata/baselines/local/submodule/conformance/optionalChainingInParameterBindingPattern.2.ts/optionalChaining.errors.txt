@@ -1,0 +1,7 @@
+/.src/optionalChainingInParameterBindingPattern.2.ts/optionalChaining(2,12): error TS1012: Unexpected token.
+/.src/optionalChainingInParameterBindingPattern.2.ts/optionalChaining(2,13): error TS1005: ')' expected.
+/.src/optionalChainingInParameterBindingPattern.2.ts/optionalChaining(2,29): error TS1005: ',' expected.
+/.src/optionalChainingInParameterBindingPattern.2.ts/optionalChaining(2,41): error TS1005: ';' expected.
+/.src/optionalChainingInParameterBindingPattern.2.ts/optionalChaining(2,15): error TS1182: A destructuring declaration must have an initializer.
+/.src/optionalChainingInParameterBindingPattern.2.ts/optionalChaining(3,1): error TS2554: Expected 1 arguments, but got 0.
+/.src/optionalChainingInParameterBindingPattern.2.ts/optionalChaining(6,1): error TS2554: Expected 2 arguments, but got 0.

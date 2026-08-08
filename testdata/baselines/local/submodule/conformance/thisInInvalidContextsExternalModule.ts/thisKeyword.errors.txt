@@ -1,0 +1,2 @@
+/.src/thisInInvalidContextsExternalModule.ts/thisKeyword(9,9): error TS2349: This expression is not callable.
+/.src/thisInInvalidContextsExternalModule.ts/thisKeyword(17,9): error TS2349: This expression is not callable.

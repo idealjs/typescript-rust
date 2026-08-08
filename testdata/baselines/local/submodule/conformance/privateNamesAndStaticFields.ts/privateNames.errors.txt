@@ -1,0 +1,22 @@
+/.src/privateNamesAndStaticFields.ts/privateNames(2,12): error TS1005: ';' expected.
+/.src/privateNamesAndStaticFields.ts/privateNames(2,13): error TS1005: ';' expected.
+/.src/privateNamesAndStaticFields.ts/privateNames(3,12): error TS1005: ';' expected.
+/.src/privateNamesAndStaticFields.ts/privateNames(3,13): error TS1005: ';' expected.
+/.src/privateNamesAndStaticFields.ts/privateNames(5,11): error TS1003: Identifier expected.
+/.src/privateNamesAndStaticFields.ts/privateNames(5,12): error TS1005: ';' expected.
+/.src/privateNamesAndStaticFields.ts/privateNames(6,11): error TS1003: Identifier expected.
+/.src/privateNamesAndStaticFields.ts/privateNames(6,12): error TS1005: ';' expected.
+/.src/privateNamesAndStaticFields.ts/privateNames(7,11): error TS1003: Identifier expected.
+/.src/privateNamesAndStaticFields.ts/privateNames(7,12): error TS1005: ';' expected.
+/.src/privateNamesAndStaticFields.ts/privateNames(12,12): error TS1005: ';' expected.
+/.src/privateNamesAndStaticFields.ts/privateNames(12,13): error TS1005: ';' expected.
+/.src/privateNamesAndStaticFields.ts/privateNames(15,11): error TS1003: Identifier expected.
+/.src/privateNamesAndStaticFields.ts/privateNames(15,12): error TS1005: ';' expected.
+/.src/privateNamesAndStaticFields.ts/privateNames(2,12): error TS1127: Invalid character.
+/.src/privateNamesAndStaticFields.ts/privateNames(3,12): error TS1127: Invalid character.
+/.src/privateNamesAndStaticFields.ts/privateNames(5,11): error TS1127: Invalid character.
+/.src/privateNamesAndStaticFields.ts/privateNames(6,11): error TS1127: Invalid character.
+/.src/privateNamesAndStaticFields.ts/privateNames(7,11): error TS1127: Invalid character.
+/.src/privateNamesAndStaticFields.ts/privateNames(12,12): error TS1127: Invalid character.
+/.src/privateNamesAndStaticFields.ts/privateNames(15,11): error TS1127: Invalid character.
+/.src/privateNamesAndStaticFields.ts/privateNames(14,9): error TS2349: This expression is not callable.

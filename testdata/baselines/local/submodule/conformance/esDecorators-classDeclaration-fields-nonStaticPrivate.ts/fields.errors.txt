@@ -1,0 +1,3 @@
+/.src/esDecorators-classDeclaration-fields-nonStaticPrivate.ts/fields(4,10): error TS1003: Identifier expected.
+/.src/esDecorators-classDeclaration-fields-nonStaticPrivate.ts/fields(4,11): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-nonStaticPrivate.ts/fields(4,10): error TS1127: Invalid character.

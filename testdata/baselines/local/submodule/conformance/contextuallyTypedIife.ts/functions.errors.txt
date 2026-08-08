@@ -1,0 +1,4 @@
+/.src/contextuallyTypedIife.ts/functions(12,1): error TS2554: Expected 1 arguments, but got 0.
+/.src/contextuallyTypedIife.ts/functions(26,1): error TS2554: Expected 1 arguments, but got 0.
+/.src/contextuallyTypedIife.ts/functions(31,1): error TS2554: Expected 2 arguments, but got 1.
+/.src/contextuallyTypedIife.ts/functions(32,1): error TS2554: Expected 3 arguments, but got 0.

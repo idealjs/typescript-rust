@@ -1,0 +1,2 @@
+/.src/instanceMemberInitialization.ts/propertyMemberDeclarations(15,25): error TS1005: ',' expected.
+/.src/instanceMemberInitialization.ts/propertyMemberDeclarations(15,34): error TS1005: ',' expected.

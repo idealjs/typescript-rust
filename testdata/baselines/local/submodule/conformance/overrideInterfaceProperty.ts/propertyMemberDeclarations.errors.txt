@@ -1,0 +1,1 @@
+/.src/overrideInterfaceProperty.ts/propertyMemberDeclarations(13,9): error TS1005: ';' expected.

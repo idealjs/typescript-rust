@@ -1,0 +1,7 @@
+/.src/es2022LocalesObjectArgument.ts/es2022(1,18): error TS2304: Cannot find name 'Intl'.
+/.src/es2022LocalesObjectArgument.ts/es2022(2,18): error TS2304: Cannot find name 'Intl'.
+/.src/es2022LocalesObjectArgument.ts/es2022(3,18): error TS2304: Cannot find name 'Intl'.
+/.src/es2022LocalesObjectArgument.ts/es2022(5,5): error TS2304: Cannot find name 'Intl'.
+/.src/es2022LocalesObjectArgument.ts/es2022(6,5): error TS2304: Cannot find name 'Intl'.
+/.src/es2022LocalesObjectArgument.ts/es2022(7,1): error TS2304: Cannot find name 'Intl'.
+/.src/es2022LocalesObjectArgument.ts/es2022(8,1): error TS2304: Cannot find name 'Intl'.

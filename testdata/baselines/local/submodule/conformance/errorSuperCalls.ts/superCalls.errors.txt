@@ -1,0 +1,19 @@
+/.src/errorSuperCalls.ts/superCalls(13,9): error TS1005: ';' expected.
+/.src/errorSuperCalls.ts/superCalls(17,9): error TS1005: ';' expected.
+/.src/errorSuperCalls.ts/superCalls(33,16): error TS1005: ';' expected.
+/.src/errorSuperCalls.ts/superCalls(37,16): error TS1005: ';' expected.
+/.src/errorSuperCalls.ts/superCalls(66,9): error TS1005: ';' expected.
+/.src/errorSuperCalls.ts/superCalls(70,9): error TS1005: ';' expected.
+/.src/errorSuperCalls.ts/superCalls(4,9): error TS2349: This expression is not callable.
+/.src/errorSuperCalls.ts/superCalls(9,9): error TS2349: This expression is not callable.
+/.src/errorSuperCalls.ts/superCalls(14,9): error TS2349: This expression is not callable.
+/.src/errorSuperCalls.ts/superCalls(18,9): error TS2349: This expression is not callable.
+/.src/errorSuperCalls.ts/superCalls(26,9): error TS2349: This expression is not callable.
+/.src/errorSuperCalls.ts/superCalls(30,16): error TS2349: This expression is not callable.
+/.src/errorSuperCalls.ts/superCalls(34,9): error TS2349: This expression is not callable.
+/.src/errorSuperCalls.ts/superCalls(38,9): error TS2349: This expression is not callable.
+/.src/errorSuperCalls.ts/superCalls(46,9): error TS2349: This expression is not callable.
+/.src/errorSuperCalls.ts/superCalls(47,9): error TS2349: This expression is not callable.
+/.src/errorSuperCalls.ts/superCalls(62,9): error TS2349: This expression is not callable.
+/.src/errorSuperCalls.ts/superCalls(67,9): error TS2349: This expression is not callable.
+/.src/errorSuperCalls.ts/superCalls(71,9): error TS2349: This expression is not callable.

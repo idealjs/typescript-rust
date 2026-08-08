@@ -1,0 +1,41 @@
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(2,12): error TS1005: ';' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(2,13): error TS1005: ';' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(12,17): error TS1003: Identifier expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(12,18): error TS1005: ',' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(13,13): error TS1003: Identifier expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(13,14): error TS1005: ',' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(14,17): error TS1003: Identifier expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(14,18): error TS1005: ',' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(14,31): error TS1003: Identifier expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(14,32): error TS1005: ',' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(15,12): error TS1003: Identifier expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(15,13): error TS1005: ',' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(15,23): error TS1003: Identifier expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(15,24): error TS1005: ',' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(16,17): error TS1003: Identifier expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(16,18): error TS1005: ',' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(16,24): error TS1005: ',' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(16,26): error TS1005: ',' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(16,35): error TS1003: Identifier expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(16,36): error TS1005: ',' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(17,12): error TS1003: Identifier expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(17,13): error TS1005: ',' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(18,26): error TS1003: Identifier expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(18,27): error TS1005: ',' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(21,13): error TS1003: Identifier expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(21,14): error TS1005: ',' expected.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(2,12): error TS1127: Invalid character.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(12,17): error TS1127: Invalid character.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(13,13): error TS1127: Invalid character.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(14,17): error TS1127: Invalid character.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(14,31): error TS1127: Invalid character.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(15,12): error TS1127: Invalid character.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(15,23): error TS1127: Invalid character.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(16,17): error TS1127: Invalid character.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(16,35): error TS1127: Invalid character.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(17,12): error TS1127: Invalid character.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(18,26): error TS1127: Invalid character.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(21,13): error TS1127: Invalid character.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(12,25): error TS2454: Variable 'y' is used before being assigned.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(13,21): error TS2454: Variable 'y' is used before being assigned.
+/.src/privateNameStaticFieldDestructuredBinding.ts/privateNames(16,24): error TS2304: Cannot find name '='.

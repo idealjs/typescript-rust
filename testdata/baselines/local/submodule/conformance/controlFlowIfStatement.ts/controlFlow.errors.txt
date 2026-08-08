@@ -1,0 +1,6 @@
+/.src/controlFlowIfStatement.ts/controlFlow(1,36): error TS2304: Cannot find name 'RegExp'.
+/.src/controlFlowIfStatement.ts/controlFlow(17,9): error TS2454: Variable 'cond' is used before being assigned.
+/.src/controlFlowIfStatement.ts/controlFlow(28,9): error TS2454: Variable 'cond' is used before being assigned.
+/.src/controlFlowIfStatement.ts/controlFlow(39,16): error TS2304: Cannot find name 'JSON'.
+/.src/controlFlowIfStatement.ts/controlFlow(47,19): error TS2304: Cannot find name 'Error'.
+/.src/controlFlowIfStatement.ts/controlFlow(50,16): error TS2322: Type 'T' is not assignable to type 'never'.

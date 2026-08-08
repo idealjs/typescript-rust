@@ -1,0 +1,1 @@
+/.src/generatorTypeCheck55.ts/yieldExpressions(2,19): error TS2304: Cannot find name 'C'.

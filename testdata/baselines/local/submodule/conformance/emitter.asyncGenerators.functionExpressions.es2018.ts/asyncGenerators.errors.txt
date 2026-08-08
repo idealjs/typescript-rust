@@ -1,0 +1,35 @@
+/.src/F1.ts(1,18): error TS1005: ',' expected.
+/.src/F1.ts(1,27): error TS1005: ',' expected.
+/.src/F1.ts(1,29): error TS1134: Variable declaration expected.
+/.src/F1.ts(1,30): error TS1134: Variable declaration expected.
+/.src/F2.ts(1,18): error TS1005: ',' expected.
+/.src/F2.ts(1,27): error TS1005: ',' expected.
+/.src/F2.ts(1,29): error TS1134: Variable declaration expected.
+/.src/F2.ts(1,30): error TS1134: Variable declaration expected.
+/.src/F3.ts(1,18): error TS1005: ',' expected.
+/.src/F3.ts(1,27): error TS1005: ',' expected.
+/.src/F3.ts(1,29): error TS1134: Variable declaration expected.
+/.src/F3.ts(1,30): error TS1134: Variable declaration expected.
+/.src/F4.ts(1,18): error TS1005: ',' expected.
+/.src/F4.ts(1,27): error TS1005: ',' expected.
+/.src/F4.ts(1,29): error TS1134: Variable declaration expected.
+/.src/F4.ts(1,30): error TS1134: Variable declaration expected.
+/.src/F5.ts(1,18): error TS1005: ',' expected.
+/.src/F5.ts(1,27): error TS1005: ',' expected.
+/.src/F5.ts(1,29): error TS1134: Variable declaration expected.
+/.src/F5.ts(1,30): error TS1134: Variable declaration expected.
+/.src/F6.ts(1,18): error TS1005: ',' expected.
+/.src/F6.ts(1,27): error TS1005: ',' expected.
+/.src/F6.ts(1,29): error TS1134: Variable declaration expected.
+/.src/F6.ts(1,30): error TS1134: Variable declaration expected.
+/.src/F7.ts(1,18): error TS1005: ',' expected.
+/.src/F7.ts(1,27): error TS1005: ',' expected.
+/.src/F7.ts(1,29): error TS1134: Variable declaration expected.
+/.src/F7.ts(1,30): error TS1134: Variable declaration expected.
+/.src/F4.ts(1,12): error TS2304: Cannot find name 'async'.
+/.src/F6.ts(1,12): error TS2304: Cannot find name 'async'.
+/.src/F5.ts(1,12): error TS2304: Cannot find name 'async'.
+/.src/F3.ts(1,12): error TS2304: Cannot find name 'async'.
+/.src/F1.ts(1,12): error TS2304: Cannot find name 'async'.
+/.src/F7.ts(1,12): error TS2304: Cannot find name 'async'.
+/.src/F2.ts(1,12): error TS2304: Cannot find name 'async'.

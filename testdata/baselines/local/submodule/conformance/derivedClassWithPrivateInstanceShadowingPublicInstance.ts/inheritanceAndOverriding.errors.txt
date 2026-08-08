@@ -1,0 +1,12 @@
+/.src/derivedClassWithPrivateInstanceShadowingPublicInstance.ts/inheritanceAndOverriding(7,16): error TS1005: ';' expected.
+/.src/derivedClassWithPrivateInstanceShadowingPublicInstance.ts/inheritanceAndOverriding(8,16): error TS1005: ';' expected.
+/.src/derivedClassWithPrivateInstanceShadowingPublicInstance.ts/inheritanceAndOverriding(18,17): error TS1005: ';' expected.
+/.src/derivedClassWithPrivateInstanceShadowingPublicInstance.ts/inheritanceAndOverriding(19,17): error TS1005: ';' expected.
+/.src/derivedClassWithPrivateInstanceShadowingPublicInstance.ts/inheritanceAndOverriding(22,14): error TS2339: Property 'x' does not exist on type 'object'.
+/.src/derivedClassWithPrivateInstanceShadowingPublicInstance.ts/inheritanceAndOverriding(23,18): error TS2339: Property 'x' does not exist on type 'object'.
+/.src/derivedClassWithPrivateInstanceShadowingPublicInstance.ts/inheritanceAndOverriding(25,15): error TS2339: Property 'fn' does not exist on type 'object'.
+/.src/derivedClassWithPrivateInstanceShadowingPublicInstance.ts/inheritanceAndOverriding(26,18): error TS2339: Property 'fn' does not exist on type 'object'.
+/.src/derivedClassWithPrivateInstanceShadowingPublicInstance.ts/inheritanceAndOverriding(28,15): error TS2339: Property 'a' does not exist on type 'object'.
+/.src/derivedClassWithPrivateInstanceShadowingPublicInstance.ts/inheritanceAndOverriding(29,6): error TS2339: Property 'a' does not exist on type 'object'.
+/.src/derivedClassWithPrivateInstanceShadowingPublicInstance.ts/inheritanceAndOverriding(31,18): error TS2339: Property 'a' does not exist on type 'object'.
+/.src/derivedClassWithPrivateInstanceShadowingPublicInstance.ts/inheritanceAndOverriding(32,9): error TS2339: Property 'a' does not exist on type 'object'.

@@ -1,0 +1,25 @@
+/.src/mixinClassesAnnotated.ts/classes(4,24): error TS1005: ',' expected.
+/.src/mixinClassesAnnotated.ts/classes(4,42): error TS1005: ',' expected.
+/.src/mixinClassesAnnotated.ts/classes(8,46): error TS1005: ',' expected.
+/.src/mixinClassesAnnotated.ts/classes(17,47): error TS1005: '?' expected.
+/.src/mixinClassesAnnotated.ts/classes(17,48): error TS1005: ':' expected.
+/.src/mixinClassesAnnotated.ts/classes(17,63): error TS1005: '=>' expected.
+/.src/mixinClassesAnnotated.ts/classes(17,65): error TS1005: ',' expected.
+/.src/mixinClassesAnnotated.ts/classes(17,76): error TS1005: ',' expected.
+/.src/mixinClassesAnnotated.ts/classes(17,86): error TS1005: ',' expected.
+/.src/mixinClassesAnnotated.ts/classes(17,88): error TS1134: Variable declaration expected.
+/.src/mixinClassesAnnotated.ts/classes(17,110): error TS1005: ',' expected.
+/.src/mixinClassesAnnotated.ts/classes(17,114): error TS1005: ';' expected.
+/.src/mixinClassesAnnotated.ts/classes(18,19): error TS1005: '{' expected.
+/.src/mixinClassesAnnotated.ts/classes(18,30): error TS1005: ';' expected.
+/.src/mixinClassesAnnotated.ts/classes(9,9): error TS2349: This expression is not callable.
+/.src/mixinClassesAnnotated.ts/classes(17,90): error TS1182: A destructuring declaration must have an initializer.
+/.src/mixinClassesAnnotated.ts/classes(21,33): error TS2339: Property 'x' does not exist on type '{ superClass: any; {: any; print: () => any }'.
+/.src/mixinClassesAnnotated.ts/classes(21,48): error TS2339: Property 'y' does not exist on type '{ superClass: any; {: any; print: () => any }'.
+/.src/mixinClassesAnnotated.ts/classes(33,13): error TS2349: This expression is not callable.
+/.src/mixinClassesAnnotated.ts/classes(37,12): error TS2322: Type 'object' is not assignable to type 'object & T'.
+/.src/mixinClassesAnnotated.ts/classes(45,23): error TS2351: This expression is not constructable.
+/.src/mixinClassesAnnotated.ts/classes(51,23): error TS2351: This expression is not constructable.
+/.src/mixinClassesAnnotated.ts/classes(59,9): error TS2349: This expression is not callable.
+/.src/mixinClassesAnnotated.ts/classes(60,14): error TS2339: Property '_tag' does not exist on type '{ test: () => any }'.
+/.src/mixinClassesAnnotated.ts/classes(63,14): error TS2339: Property 'print' does not exist on type '{ test: () => any }'.

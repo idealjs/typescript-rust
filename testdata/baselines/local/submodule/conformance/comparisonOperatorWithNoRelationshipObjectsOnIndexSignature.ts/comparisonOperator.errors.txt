@@ -1,0 +1,16 @@
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(26,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(27,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(28,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(29,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(31,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(32,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(33,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(34,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(70,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(75,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(81,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(86,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(92,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(97,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(103,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts/comparisonOperator(108,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.

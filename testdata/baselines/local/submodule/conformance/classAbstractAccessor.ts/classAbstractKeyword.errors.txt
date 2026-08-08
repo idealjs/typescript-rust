@@ -1,0 +1,4 @@
+/.src/classAbstractAccessor.ts/classAbstractKeyword(2,17): error TS1005: ';' expected.
+/.src/classAbstractAccessor.ts/classAbstractKeyword(3,17): error TS1005: ';' expected.
+/.src/classAbstractAccessor.ts/classAbstractKeyword(4,17): error TS1005: ';' expected.
+/.src/classAbstractAccessor.ts/classAbstractKeyword(5,17): error TS1005: ';' expected.

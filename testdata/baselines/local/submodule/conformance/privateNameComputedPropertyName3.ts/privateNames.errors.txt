@@ -1,0 +1,24 @@
+/.src/privateNameComputedPropertyName3.ts/privateNames(2,5): error TS1003: Identifier expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(2,6): error TS1005: ';' expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(5,14): error TS1003: Identifier expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(5,15): error TS1005: ';' expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(12,13): error TS1003: Identifier expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(12,14): error TS1005: ';' expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(14,18): error TS1003: Identifier expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(14,19): error TS1005: ']' expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(14,23): error TS1005: ';' expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(15,33): error TS1003: Identifier expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(15,34): error TS1005: ';' expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(19,30): error TS1003: Identifier expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(19,31): error TS1005: ']' expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(19,35): error TS1005: ';' expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(21,1): error TS1128: Declaration or statement expected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(2,5): error TS1127: Invalid character.
+/.src/privateNameComputedPropertyName3.ts/privateNames(5,14): error TS1127: Invalid character.
+/.src/privateNameComputedPropertyName3.ts/privateNames(12,13): error TS1127: Invalid character.
+/.src/privateNameComputedPropertyName3.ts/privateNames(14,18): error TS1127: Invalid character.
+/.src/privateNameComputedPropertyName3.ts/privateNames(15,33): error TS1127: Invalid character.
+/.src/privateNameComputedPropertyName3.ts/privateNames(19,30): error TS1127: Invalid character.
+/.src/privateNameComputedPropertyName3.ts/privateNames(15,34): error TS7027: Unreachable code detected.
+/.src/privateNameComputedPropertyName3.ts/privateNames(19,20): error TS2349: This expression is not callable.
+/.src/privateNameComputedPropertyName3.ts/privateNames(19,31): error TS7027: Unreachable code detected.

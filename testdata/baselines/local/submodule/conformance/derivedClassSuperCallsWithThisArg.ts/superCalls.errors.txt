@@ -1,0 +1,7 @@
+/.src/derivedClassSuperCallsWithThisArg.ts/superCalls(13,24): error TS1005: ',' expected.
+/.src/derivedClassSuperCallsWithThisArg.ts/superCalls(19,24): error TS1005: ',' expected.
+/.src/derivedClassSuperCallsWithThisArg.ts/superCalls(25,24): error TS1005: ',' expected.
+/.src/derivedClassSuperCallsWithThisArg.ts/superCalls(8,9): error TS2349: This expression is not callable.
+/.src/derivedClassSuperCallsWithThisArg.ts/superCalls(14,9): error TS2349: This expression is not callable.
+/.src/derivedClassSuperCallsWithThisArg.ts/superCalls(20,9): error TS2349: This expression is not callable.
+/.src/derivedClassSuperCallsWithThisArg.ts/superCalls(26,9): error TS2349: This expression is not callable.

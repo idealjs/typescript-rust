@@ -1,0 +1,2 @@
+/.src/for-of40.ts/for-ofStatements(2,15): error TS2304: Cannot find name 'Map'.
+/.src/for-of40.ts/for-ofStatements(5,5): error TS2304: Cannot find name 'v'.

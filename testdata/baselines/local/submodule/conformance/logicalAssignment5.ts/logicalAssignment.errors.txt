@@ -1,0 +1,3 @@
+/.src/logicalAssignment5.ts/logicalAssignment(17,14): error TS2339: Property 'toString' does not exist on type '(a: number) => void'.
+/.src/logicalAssignment5.ts/logicalAssignment(22,14): error TS2339: Property 'toString' does not exist on type '(a: number) => void'.
+/.src/logicalAssignment5.ts/logicalAssignment(27,14): error TS2339: Property 'toString' does not exist on type '(a: number) => void'.

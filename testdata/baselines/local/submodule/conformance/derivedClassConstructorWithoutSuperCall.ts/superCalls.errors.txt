@@ -1,0 +1,3 @@
+/.src/derivedClassConstructorWithoutSuperCall.ts/superCalls(18,24): error TS2349: This expression is not callable.
+/.src/derivedClassConstructorWithoutSuperCall.ts/superCalls(24,31): error TS2349: This expression is not callable.
+/.src/derivedClassConstructorWithoutSuperCall.ts/superCalls(30,17): error TS2349: This expression is not callable.

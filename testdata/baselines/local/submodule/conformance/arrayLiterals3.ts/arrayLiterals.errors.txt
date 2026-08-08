@@ -1,0 +1,1 @@
+/.src/arrayLiterals3.ts/arrayLiterals(33,5): error TS2739: Type 'any[]' is missing the following properties from type '{ 0: number[] | string[]; 1: number[] | string[] }': 0, 1

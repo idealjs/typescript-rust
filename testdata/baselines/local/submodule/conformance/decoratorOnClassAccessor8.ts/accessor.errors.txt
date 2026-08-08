@@ -1,0 +1,12 @@
+/.src/decoratorOnClassAccessor8.ts/accessor(4,14): error TS1005: ';' expected.
+/.src/decoratorOnClassAccessor8.ts/accessor(5,9): error TS1005: ';' expected.
+/.src/decoratorOnClassAccessor8.ts/accessor(9,9): error TS1005: ';' expected.
+/.src/decoratorOnClassAccessor8.ts/accessor(10,14): error TS1005: ';' expected.
+/.src/decoratorOnClassAccessor8.ts/accessor(14,14): error TS1005: ';' expected.
+/.src/decoratorOnClassAccessor8.ts/accessor(15,9): error TS1005: ';' expected.
+/.src/decoratorOnClassAccessor8.ts/accessor(19,9): error TS1005: ';' expected.
+/.src/decoratorOnClassAccessor8.ts/accessor(20,14): error TS1005: ';' expected.
+/.src/decoratorOnClassAccessor8.ts/accessor(24,14): error TS1005: ';' expected.
+/.src/decoratorOnClassAccessor8.ts/accessor(28,14): error TS1005: ';' expected.
+/.src/decoratorOnClassAccessor8.ts/accessor(1,71): error TS2304: Cannot find name 'TypedPropertyDescriptor'.
+/.src/decoratorOnClassAccessor8.ts/accessor(1,100): error TS2304: Cannot find name 'TypedPropertyDescriptor'.

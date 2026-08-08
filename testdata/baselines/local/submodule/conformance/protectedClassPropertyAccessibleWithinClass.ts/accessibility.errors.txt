@@ -1,0 +1,8 @@
+/.src/protectedClassPropertyAccessibleWithinClass.ts/accessibility(5,19): error TS1005: ';' expected.
+/.src/protectedClassPropertyAccessibleWithinClass.ts/accessibility(6,19): error TS1005: ';' expected.
+/.src/protectedClassPropertyAccessibleWithinClass.ts/accessibility(10,26): error TS1005: ';' expected.
+/.src/protectedClassPropertyAccessibleWithinClass.ts/accessibility(11,26): error TS1005: ';' expected.
+/.src/protectedClassPropertyAccessibleWithinClass.ts/accessibility(19,19): error TS1005: ';' expected.
+/.src/protectedClassPropertyAccessibleWithinClass.ts/accessibility(20,19): error TS1005: ';' expected.
+/.src/protectedClassPropertyAccessibleWithinClass.ts/accessibility(24,26): error TS1005: ';' expected.
+/.src/protectedClassPropertyAccessibleWithinClass.ts/accessibility(25,26): error TS1005: ';' expected.

@@ -1,0 +1,19 @@
+/.src/controlFlowOptionalChain3.tsx/controlFlow(29,11): error TS1005: ',' expected.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(29,13): error TS1005: ',' expected.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(29,17): error TS1005: ',' expected.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(29,21): error TS1005: ',' expected.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(29,27): error TS1005: ',' expected.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(29,30): error TS1005: ',' expected.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(30,7): error TS1005: ')' expected.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(31,5): error TS1128: Declaration or statement expected.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(32,3): error TS1012: Unexpected token.
+error TS6053: File '/.lib/react16.d.ts' not found.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(28,6): error TS2304: Cannot find name 'div'.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(29,11): error TS2304: Cannot find name '?.'.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(29,13): error TS2304: Cannot find name 'bar'.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(29,17): error TS2304: Cannot find name '==='.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(29,21): error TS2304: Cannot find name 'false'.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(29,27): error TS2304: Cannot find name '&&'.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(30,7): error TS7027: Unreachable code detected.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(31,7): error TS7027: Unreachable code detected.
+/.src/controlFlowOptionalChain3.tsx/controlFlow(31,7): error TS2304: Cannot find name 'div'.

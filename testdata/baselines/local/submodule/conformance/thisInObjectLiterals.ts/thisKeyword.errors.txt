@@ -1,0 +1,18 @@
+/.src/thisInObjectLiterals.ts/thisKeyword(14,6): error TS1005: ',' expected.
+/.src/thisInObjectLiterals.ts/thisKeyword(14,7): error TS1005: ',' expected.
+/.src/thisInObjectLiterals.ts/thisKeyword(14,9): error TS1005: ',' expected.
+/.src/thisInObjectLiterals.ts/thisKeyword(15,9): error TS1005: ',' expected.
+/.src/thisInObjectLiterals.ts/thisKeyword(15,16): error TS1005: ',' expected.
+/.src/thisInObjectLiterals.ts/thisKeyword(15,20): error TS1005: ',' expected.
+/.src/thisInObjectLiterals.ts/thisKeyword(15,21): error TS1005: ',' expected.
+/.src/thisInObjectLiterals.ts/thisKeyword(15,28): error TS1005: ',' expected.
+/.src/thisInObjectLiterals.ts/thisKeyword(17,1): error TS1128: Declaration or statement expected.
+/.src/thisInObjectLiterals.ts/thisKeyword(14,5): error TS2304: Cannot find name 'f'.
+/.src/thisInObjectLiterals.ts/thisKeyword(14,6): error TS2304: Cannot find name '('.
+/.src/thisInObjectLiterals.ts/thisKeyword(14,7): error TS2304: Cannot find name ')'.
+/.src/thisInObjectLiterals.ts/thisKeyword(14,9): error TS2304: Cannot find name '{'.
+/.src/thisInObjectLiterals.ts/thisKeyword(15,9): error TS2304: Cannot find name 'return'.
+/.src/thisInObjectLiterals.ts/thisKeyword(15,16): error TS2304: Cannot find name 'this'.
+/.src/thisInObjectLiterals.ts/thisKeyword(15,20): error TS2304: Cannot find name '.'.
+/.src/thisInObjectLiterals.ts/thisKeyword(15,21): error TS2304: Cannot find name 'spaaace'.
+/.src/thisInObjectLiterals.ts/thisKeyword(15,28): error TS2304: Cannot find name ';'.

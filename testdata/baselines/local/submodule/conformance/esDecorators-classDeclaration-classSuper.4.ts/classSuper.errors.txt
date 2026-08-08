@@ -1,0 +1,5 @@
+/.src/esDecorators-classDeclaration-classSuper.4.ts/classSuper(14,28): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.4.ts/classSuper(15,31): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.4.ts/classSuper(16,29): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.4.ts/classSuper(11,22): error TS2339: Property 'method' does not exist on type '{ ``: any }'.
+/.src/esDecorators-classDeclaration-classSuper.4.ts/classSuper(14,22): error TS2339: Property 'method' does not exist on type '{ ``: any }'.

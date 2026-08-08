@@ -1,0 +1,4 @@
+/.src/comparisonOperatorWithNoRelationshipObjectsOnProperty.ts/comparisonOperator(23,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnProperty.ts/comparisonOperator(24,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnProperty.ts/comparisonOperator(26,19): error TS1005: '>' expected.
+/.src/comparisonOperatorWithNoRelationshipObjectsOnProperty.ts/comparisonOperator(27,19): error TS1005: '>' expected.

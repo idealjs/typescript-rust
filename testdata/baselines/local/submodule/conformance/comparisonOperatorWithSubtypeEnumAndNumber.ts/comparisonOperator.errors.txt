@@ -1,0 +1,6 @@
+/.src/comparisonOperatorWithSubtypeEnumAndNumber.ts/comparisonOperator(7,16): error TS1005: '>' expected.
+/.src/comparisonOperatorWithSubtypeEnumAndNumber.ts/comparisonOperator(8,16): error TS1005: '>' expected.
+/.src/comparisonOperatorWithSubtypeEnumAndNumber.ts/comparisonOperator(9,18): error TS1005: '>' expected.
+/.src/comparisonOperatorWithSubtypeEnumAndNumber.ts/comparisonOperator(10,18): error TS1005: '>' expected.
+/.src/comparisonOperatorWithSubtypeEnumAndNumber.ts/comparisonOperator(11,18): error TS1005: '>' expected.
+/.src/comparisonOperatorWithSubtypeEnumAndNumber.ts/comparisonOperator(12,18): error TS1005: '>' expected.

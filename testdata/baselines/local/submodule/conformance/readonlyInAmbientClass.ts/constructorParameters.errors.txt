@@ -1,0 +1,2 @@
+/.src/readonlyInAmbientClass.ts/constructorParameters(2,23): error TS1005: ',' expected.
+/.src/readonlyInAmbientClass.ts/constructorParameters(3,18): error TS1005: ',' expected.

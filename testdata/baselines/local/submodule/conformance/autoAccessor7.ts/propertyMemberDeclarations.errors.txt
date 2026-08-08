@@ -1,0 +1,1 @@
+/.src/autoAccessor7.ts/propertyMemberDeclarations(10,9): error TS1005: ';' expected.

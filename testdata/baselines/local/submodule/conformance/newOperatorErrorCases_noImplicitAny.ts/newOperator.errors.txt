@@ -1,0 +1,3 @@
+/.src/newOperatorErrorCases_noImplicitAny.ts/newOperator(2,5): error TS2351: This expression is not constructable.
+/.src/newOperatorErrorCases_noImplicitAny.ts/newOperator(5,5): error TS2351: This expression is not constructable.
+/.src/newOperatorErrorCases_noImplicitAny.ts/newOperator(8,5): error TS2351: This expression is not constructable.

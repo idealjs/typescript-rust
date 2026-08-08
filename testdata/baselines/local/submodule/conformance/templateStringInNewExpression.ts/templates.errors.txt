@@ -1,0 +1,1 @@
+/.src/templateStringInNewExpression.ts/templates(2,5): error TS2351: This expression is not constructable.

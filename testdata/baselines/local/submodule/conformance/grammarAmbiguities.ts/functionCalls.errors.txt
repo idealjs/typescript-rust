@@ -1,0 +1,2 @@
+/.src/grammarAmbiguities.ts/functionCalls(8,14): error TS1005: ',' expected.
+/.src/grammarAmbiguities.ts/functionCalls(8,14): error TS2554: Expected 1 arguments, but got 2.

@@ -1,0 +1,30 @@
+/.src/mixinClassesAnonymous.ts/classes(4,24): error TS1005: ',' expected.
+/.src/mixinClassesAnonymous.ts/classes(4,42): error TS1005: ',' expected.
+/.src/mixinClassesAnonymous.ts/classes(8,46): error TS1005: ',' expected.
+/.src/mixinClassesAnonymous.ts/classes(13,47): error TS1005: '?' expected.
+/.src/mixinClassesAnonymous.ts/classes(13,48): error TS1005: ':' expected.
+/.src/mixinClassesAnonymous.ts/classes(13,92): error TS1005: '?' expected.
+/.src/mixinClassesAnonymous.ts/classes(15,13): error TS1003: Identifier expected.
+/.src/mixinClassesAnonymous.ts/classes(16,28): error TS1003: Identifier expected.
+/.src/mixinClassesAnonymous.ts/classes(16,31): error TS1003: Identifier expected.
+/.src/mixinClassesAnonymous.ts/classes(16,37): error TS1003: Identifier expected.
+/.src/mixinClassesAnonymous.ts/classes(16,43): error TS1003: Identifier expected.
+/.src/mixinClassesAnonymous.ts/classes(18,1): error TS1005: ':' expected.
+/.src/mixinClassesAnonymous.ts/classes(20,1): error TS1005: '>' expected.
+/.src/mixinClassesAnonymous.ts/classes(60,52): error TS1005: '?' expected.
+/.src/mixinClassesAnonymous.ts/classes(60,53): error TS1005: ':' expected.
+/.src/mixinClassesAnonymous.ts/classes(61,31): error TS1003: Identifier expected.
+/.src/mixinClassesAnonymous.ts/classes(62,25): error TS1005: '(' expected.
+/.src/mixinClassesAnonymous.ts/classes(62,29): error TS1005: ',' expected.
+/.src/mixinClassesAnonymous.ts/classes(62,31): error TS1005: '=>' expected.
+/.src/mixinClassesAnonymous.ts/classes(63,6): error TS1005: '>' expected.
+/.src/mixinClassesAnonymous.ts/classes(64,1): error TS1128: Declaration or statement expected.
+/.src/mixinClassesAnonymous.ts/classes(9,9): error TS2349: This expression is not callable.
+/.src/mixinClassesAnonymous.ts/classes(24,13): error TS2349: This expression is not callable.
+/.src/mixinClassesAnonymous.ts/classes(31,16): error TS2304: Cannot find name 'Tagged'.
+/.src/mixinClassesAnonymous.ts/classes(32,16): error TS2304: Cannot find name 'Tagged'.
+/.src/mixinClassesAnonymous.ts/classes(32,23): error TS2349: This expression is not callable.
+/.src/mixinClassesAnonymous.ts/classes(50,9): error TS2349: This expression is not callable.
+/.src/mixinClassesAnonymous.ts/classes(51,14): error TS2339: Property '_tag' does not exist on type '{ test: () => any }'.
+/.src/mixinClassesAnonymous.ts/classes(54,14): error TS2339: Property 'print' does not exist on type '{ test: () => any }'.
+/.src/mixinClassesAnonymous.ts/classes(60,22): error TS2304: Cannot find name 'CT'.

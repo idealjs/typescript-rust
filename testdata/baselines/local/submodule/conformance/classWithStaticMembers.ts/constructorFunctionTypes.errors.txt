@@ -1,0 +1,6 @@
+/.src/classWithStaticMembers.ts/constructorFunctionTypes(3,16): error TS1005: ';' expected.
+/.src/classWithStaticMembers.ts/constructorFunctionTypes(4,16): error TS1005: ';' expected.
+/.src/classWithStaticMembers.ts/constructorFunctionTypes(5,24): error TS1005: ',' expected.
+/.src/classWithStaticMembers.ts/constructorFunctionTypes(5,43): error TS1005: ',' expected.
+/.src/classWithStaticMembers.ts/constructorFunctionTypes(9,11): error TS2339: Property 'fn' does not exist on type 'object'.
+/.src/classWithStaticMembers.ts/constructorFunctionTypes(17,11): error TS2339: Property 'fn' does not exist on type 'object'.

@@ -1,0 +1,2 @@
+/.src/privateStaticMemberAccessibility.ts/accessibility(6,23): error TS2339: Property 'foo' does not exist on type 'object'.
+/.src/privateStaticMemberAccessibility.ts/accessibility(7,23): error TS2339: Property 'foo' does not exist on type 'object'.

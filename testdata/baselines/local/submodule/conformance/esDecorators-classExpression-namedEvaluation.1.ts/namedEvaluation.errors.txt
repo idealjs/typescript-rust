@@ -1,0 +1,12 @@
+/.src/esDecorators-classExpression-namedEvaluation.1.ts/namedEvaluation(8,5): error TS1012: Unexpected token.
+/.src/esDecorators-classExpression-namedEvaluation.1.ts/namedEvaluation(8,6): error TS1005: ';' expected.
+/.src/esDecorators-classExpression-namedEvaluation.1.ts/namedEvaluation(8,10): error TS1005: ';' expected.
+/.src/esDecorators-classExpression-namedEvaluation.1.ts/namedEvaluation(14,7): error TS1012: Unexpected token.
+/.src/esDecorators-classExpression-namedEvaluation.1.ts/namedEvaluation(14,8): error TS1005: ';' expected.
+/.src/esDecorators-classExpression-namedEvaluation.1.ts/namedEvaluation(14,12): error TS1005: ';' expected.
+/.src/esDecorators-classExpression-namedEvaluation.1.ts/namedEvaluation(20,7): error TS1012: Unexpected token.
+/.src/esDecorators-classExpression-namedEvaluation.1.ts/namedEvaluation(20,8): error TS1005: ';' expected.
+/.src/esDecorators-classExpression-namedEvaluation.1.ts/namedEvaluation(20,12): error TS1005: ';' expected.
+/.src/esDecorators-classExpression-namedEvaluation.1.ts/namedEvaluation(26,7): error TS1012: Unexpected token.
+/.src/esDecorators-classExpression-namedEvaluation.1.ts/namedEvaluation(26,8): error TS1005: ';' expected.
+/.src/esDecorators-classExpression-namedEvaluation.1.ts/namedEvaluation(26,12): error TS1005: ';' expected.

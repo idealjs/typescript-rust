@@ -1,0 +1,7 @@
+/.src/destructuringParameterDeclaration2.ts/destructuring(8,29): error TS1005: ',' expected.
+/.src/destructuringParameterDeclaration2.ts/destructuring(39,4): error TS2345: Argument of type '{ b: true }' is not assignable to parameter of type '{ b: number | string }'.
+error TS2451: Cannot redeclare block-scoped variable 'a'.
+error TS2451: Cannot redeclare block-scoped variable 'b'.
+error TS2451: Cannot redeclare block-scoped variable 'c'.
+error TS2451: Cannot redeclare block-scoped variable 'number'.
+error TS2451: Cannot redeclare block-scoped variable 'number'.

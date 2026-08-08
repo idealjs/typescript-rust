@@ -1,0 +1,2 @@
+/.src/esDecorators-decoratorExpression.2.ts/esDecorators(21,6): error TS1005: ')' expected.
+/.src/esDecorators-decoratorExpression.2.ts/esDecorators(21,8): error TS1005: ';' expected.

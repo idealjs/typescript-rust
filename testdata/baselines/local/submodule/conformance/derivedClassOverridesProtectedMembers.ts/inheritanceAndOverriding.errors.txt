@@ -1,0 +1,9 @@
+/.src/derivedClassOverridesProtectedMembers.ts/inheritanceAndOverriding(7,19): error TS1005: ';' expected.
+/.src/derivedClassOverridesProtectedMembers.ts/inheritanceAndOverriding(8,19): error TS1005: ';' expected.
+/.src/derivedClassOverridesProtectedMembers.ts/inheritanceAndOverriding(13,26): error TS1005: ';' expected.
+/.src/derivedClassOverridesProtectedMembers.ts/inheritanceAndOverriding(14,26): error TS1005: ';' expected.
+/.src/derivedClassOverridesProtectedMembers.ts/inheritanceAndOverriding(23,19): error TS1005: ';' expected.
+/.src/derivedClassOverridesProtectedMembers.ts/inheritanceAndOverriding(24,19): error TS1005: ';' expected.
+/.src/derivedClassOverridesProtectedMembers.ts/inheritanceAndOverriding(29,26): error TS1005: ';' expected.
+/.src/derivedClassOverridesProtectedMembers.ts/inheritanceAndOverriding(30,26): error TS1005: ';' expected.
+/.src/derivedClassOverridesProtectedMembers.ts/inheritanceAndOverriding(33,32): error TS2349: This expression is not callable.

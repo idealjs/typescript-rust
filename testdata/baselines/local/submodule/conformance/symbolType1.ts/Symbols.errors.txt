@@ -1,0 +1,1 @@
+/.src/symbolType1.ts/Symbols(3,29): error TS2304: Cannot find name 'Object'.

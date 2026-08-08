@@ -1,0 +1,3 @@
+/.src/controlFlowNullishCoalesce.ts/controlFlow(4,1): error TS2454: Variable 'a' is used before being assigned.
+/.src/controlFlowNullishCoalesce.ts/controlFlow(4,3): error TS2339: Property 'toString' does not exist on type 'number'.
+/.src/controlFlowNullishCoalesce.ts/controlFlow(10,5): error TS2454: Variable 'x' is used before being assigned.

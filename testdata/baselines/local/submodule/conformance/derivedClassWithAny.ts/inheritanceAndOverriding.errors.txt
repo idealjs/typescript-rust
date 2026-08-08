@@ -1,0 +1,6 @@
+/.src/derivedClassWithAny.ts/inheritanceAndOverriding(3,9): error TS1005: ';' expected.
+/.src/derivedClassWithAny.ts/inheritanceAndOverriding(9,16): error TS1005: ';' expected.
+/.src/derivedClassWithAny.ts/inheritanceAndOverriding(19,9): error TS1005: ';' expected.
+/.src/derivedClassWithAny.ts/inheritanceAndOverriding(27,16): error TS1005: ';' expected.
+/.src/derivedClassWithAny.ts/inheritanceAndOverriding(38,9): error TS1005: ';' expected.
+/.src/derivedClassWithAny.ts/inheritanceAndOverriding(44,16): error TS1005: ';' expected.

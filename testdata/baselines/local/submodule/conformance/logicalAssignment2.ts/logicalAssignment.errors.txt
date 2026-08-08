@@ -1,0 +1,6 @@
+/.src/logicalAssignment2.ts/logicalAssignment(24,7): error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+/.src/logicalAssignment2.ts/logicalAssignment(24,32): error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+/.src/logicalAssignment2.ts/logicalAssignment(25,7): error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+/.src/logicalAssignment2.ts/logicalAssignment(25,32): error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+/.src/logicalAssignment2.ts/logicalAssignment(26,7): error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.
+/.src/logicalAssignment2.ts/logicalAssignment(26,32): error TS2339: Property 'bar' does not exist on type '{ baz: 0 | 1 | 42 | undefined | "" }'.

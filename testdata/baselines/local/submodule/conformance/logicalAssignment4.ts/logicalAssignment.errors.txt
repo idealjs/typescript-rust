@@ -1,0 +1,8 @@
+/.src/logicalAssignment4.ts/logicalAssignment(26,29): error TS18048: 'thing' is possibly 'undefined'.
+/.src/logicalAssignment4.ts/logicalAssignment(27,19): error TS18048: 'thing' is possibly 'undefined'.
+/.src/logicalAssignment4.ts/logicalAssignment(32,19): error TS18048: 'thing' is possibly 'undefined'.
+/.src/logicalAssignment4.ts/logicalAssignment(33,26): error TS18048: 'defaultValue' is possibly 'undefined'.
+/.src/logicalAssignment4.ts/logicalAssignment(38,19): error TS18048: 'thing' is possibly 'undefined'.
+/.src/logicalAssignment4.ts/logicalAssignment(39,26): error TS18048: 'defaultValue' is possibly 'undefined'.
+/.src/logicalAssignment4.ts/logicalAssignment(44,19): error TS18048: 'thing' is possibly 'undefined'.
+/.src/logicalAssignment4.ts/logicalAssignment(45,26): error TS18048: 'defaultValue' is possibly 'undefined'.

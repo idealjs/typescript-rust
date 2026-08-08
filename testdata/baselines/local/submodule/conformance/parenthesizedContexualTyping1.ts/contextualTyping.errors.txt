@@ -1,0 +1,31 @@
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(18,34): error TS1005: '>' expected.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(19,34): error TS1005: '>' expected.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(19,39): error TS1005: ',' expected.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(19,50): error TS1005: ')' expected.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(19,62): error TS1005: ':' expected.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(20,34): error TS1005: '>' expected.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(20,39): error TS1005: ',' expected.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(20,50): error TS1005: ')' expected.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(20,62): error TS1005: ':' expected.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(21,35): error TS1005: '>' expected.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(21,38): error TS1138: Parameter declaration expected.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(21,41): error TS1005: ',' expected.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(21,46): error TS1005: '=>' expected.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(7,13): error TS2345: Argument of type '(x: T) => T' is not assignable to parameter of type '(x: T) => T'.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(7,21): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(8,23): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(9,25): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(10,27): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(12,29): error TS2554: Expected 2 arguments, but got 3.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(13,33): error TS2554: Expected 2 arguments, but got 3.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(14,37): error TS2554: Expected 2 arguments, but got 3.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(15,39): error TS2554: Expected 2 arguments, but got 3.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(18,14): error TS2304: Cannot find name 'Math'.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(18,62): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(19,14): error TS2304: Cannot find name 'Math'.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(19,13): error TS2345: Argument of type '((x: any, x: any) => error) | any' is not assignable to parameter of type '(x: T) => T'.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(19,66): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(20,14): error TS2304: Cannot find name 'Math'.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(20,74): error TS2554: Expected 2 arguments, but got 3.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(21,15): error TS2304: Cannot find name 'Math'.
+/.src/parenthesizedContexualTyping1.ts/contextualTyping(21,84): error TS2554: Expected 2 arguments, but got 3.

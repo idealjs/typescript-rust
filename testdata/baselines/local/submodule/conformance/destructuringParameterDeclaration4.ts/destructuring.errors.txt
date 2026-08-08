@@ -1,0 +1,9 @@
+/.src/destructuringParameterDeclaration4.ts/destructuring(30,24): error TS1005: ',' expected.
+/.src/destructuringParameterDeclaration4.ts/destructuring(9,18): error TS2304: Cannot find name 'Array'.
+/.src/destructuringParameterDeclaration4.ts/destructuring(15,17): error TS1047: A rest parameter cannot be optional.
+/.src/destructuringParameterDeclaration4.ts/destructuring(16,16): error TS1048: A rest parameter cannot have an initializer.
+/.src/destructuringParameterDeclaration4.ts/destructuring(21,19): error TS2345: Argument of type 'true' is not assignable to parameter of type 'number | string'.
+/.src/destructuringParameterDeclaration4.ts/destructuring(22,7): error TS2304: Cannot find name 'array2'.
+/.src/destructuringParameterDeclaration4.ts/destructuring(34,25): error TS2304: Cannot find name 'Number'.
+/.src/destructuringParameterDeclaration4.ts/destructuring(35,22): error TS2304: Cannot find name 'E1'.
+/.src/destructuringParameterDeclaration4.ts/destructuring(35,28): error TS2304: Cannot find name 'E'.

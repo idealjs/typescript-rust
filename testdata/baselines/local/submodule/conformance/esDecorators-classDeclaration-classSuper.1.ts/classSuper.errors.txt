@@ -1,0 +1,13 @@
+/.src/esDecorators-classDeclaration-classSuper.1.ts/classSuper(11,12): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.1.ts/classSuper(12,14): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.1.ts/classSuper(12,15): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.1.ts/classSuper(13,14): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.1.ts/classSuper(14,14): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.1.ts/classSuper(16,14): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.1.ts/classSuper(16,15): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.1.ts/classSuper(16,21): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.1.ts/classSuper(17,14): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.1.ts/classSuper(17,24): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.1.ts/classSuper(18,14): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.1.ts/classSuper(18,22): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-classSuper.1.ts/classSuper(20,1): error TS1128: Declaration or statement expected.

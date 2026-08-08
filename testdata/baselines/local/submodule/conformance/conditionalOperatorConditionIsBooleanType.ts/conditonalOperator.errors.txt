@@ -1,0 +1,2 @@
+/.src/conditionalOperatorConditionIsBooleanType.ts/conditonalOperator(8,20): error TS2304: Cannot find name 'Object'.
+/.src/conditionalOperatorConditionIsBooleanType.ts/conditonalOperator(14,20): error TS2304: Cannot find name 'Object'.

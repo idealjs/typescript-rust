@@ -1,0 +1,2 @@
+/.src/enumBasics.ts/enums(33,15): error TS2339: Property 'length' does not exist on type '"foo"'.
+/.src/enumBasics.ts/enums(38,25): error TS2339: Property 'length' does not exist on type '"foo"'.

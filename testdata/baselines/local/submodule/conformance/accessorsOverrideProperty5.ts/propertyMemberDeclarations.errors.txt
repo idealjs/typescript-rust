@@ -1,0 +1,3 @@
+/.src/accessorsOverrideProperty5.ts/propertyMemberDeclarations(7,9): error TS1005: ';' expected.
+/.src/accessorsOverrideProperty5.ts/propertyMemberDeclarations(8,9): error TS1005: ';' expected.
+error TS2300: Duplicate identifier 'B'.

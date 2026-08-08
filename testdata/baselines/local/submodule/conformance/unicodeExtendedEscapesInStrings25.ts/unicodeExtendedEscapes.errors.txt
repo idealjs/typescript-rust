@@ -1,0 +1,1 @@
+/.src/unicodeExtendedEscapesInStrings25.ts/unicodeExtendedEscapes(3,9): error TS1002: Unterminated string literal.

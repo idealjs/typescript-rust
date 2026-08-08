@@ -1,0 +1,1 @@
+/.src/es2017DateAPIs.ts/es2017(1,1): error TS2304: Cannot find name 'Date'.

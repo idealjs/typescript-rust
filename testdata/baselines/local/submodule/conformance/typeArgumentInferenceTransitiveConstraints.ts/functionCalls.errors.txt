@@ -1,0 +1,5 @@
+/.src/typeArgumentInferenceTransitiveConstraints.ts/functionCalls(1,23): error TS2304: Cannot find name 'Date'.
+/.src/typeArgumentInferenceTransitiveConstraints.ts/functionCalls(5,16): error TS2304: Cannot find name 'Date'.
+/.src/typeArgumentInferenceTransitiveConstraints.ts/functionCalls(5,28): error TS2304: Cannot find name 'Date'.
+/.src/typeArgumentInferenceTransitiveConstraints.ts/functionCalls(5,40): error TS2304: Cannot find name 'Date'.
+/.src/typeArgumentInferenceTransitiveConstraints.ts/functionCalls(6,8): error TS2304: Cannot find name 'Date'.

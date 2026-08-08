@@ -1,0 +1,2 @@
+/.src/controlFlowConditionalExpression.ts/controlFlow(4,1): error TS2454: Variable 'cond' is used before being assigned.
+/.src/controlFlowConditionalExpression.ts/controlFlow(5,1): error TS2454: Variable 'x' is used before being assigned.

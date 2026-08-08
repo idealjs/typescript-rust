@@ -1,0 +1,12 @@
+/.src/instancePropertiesInheritedIntoClassType.ts/classTypes(4,13): error TS1005: ';' expected.
+/.src/instancePropertiesInheritedIntoClassType.ts/classTypes(7,13): error TS1005: ';' expected.
+/.src/instancePropertiesInheritedIntoClassType.ts/classTypes(9,28): error TS1005: ',' expected.
+/.src/instancePropertiesInheritedIntoClassType.ts/classTypes(9,47): error TS1005: ',' expected.
+/.src/instancePropertiesInheritedIntoClassType.ts/classTypes(26,13): error TS1005: ';' expected.
+/.src/instancePropertiesInheritedIntoClassType.ts/classTypes(29,13): error TS1005: ';' expected.
+/.src/instancePropertiesInheritedIntoClassType.ts/classTypes(31,28): error TS1005: ',' expected.
+/.src/instancePropertiesInheritedIntoClassType.ts/classTypes(31,42): error TS1005: ',' expected.
+/.src/instancePropertiesInheritedIntoClassType.ts/classTypes(14,19): error TS2554: Expected 0 arguments, but got 2.
+/.src/instancePropertiesInheritedIntoClassType.ts/classTypes(19,14): error TS2554: Expected 1 arguments, but got 0.
+/.src/instancePropertiesInheritedIntoClassType.ts/classTypes(36,19): error TS2554: Expected 0 arguments, but got 2.
+/.src/instancePropertiesInheritedIntoClassType.ts/classTypes(41,14): error TS2554: Expected 1 arguments, but got 0.

@@ -1,0 +1,2 @@
+/.src/user.ts(5,10): error TS2304: Cannot find name 'baz'.
+/.src/user.ts(5,15): error TS2304: Cannot find name 'boom'.

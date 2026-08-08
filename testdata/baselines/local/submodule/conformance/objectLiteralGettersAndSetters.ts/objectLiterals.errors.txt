@@ -1,0 +1,17 @@
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,24): error TS1005: ',' expected.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,27): error TS1005: ',' expected.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,28): error TS1005: ',' expected.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,30): error TS1005: ',' expected.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,32): error TS1005: ',' expected.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,39): error TS1005: ',' expected.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,41): error TS1005: ',' expected.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,50): error TS1005: ',' expected.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,51): error TS1005: ',' expected.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,53): error TS1005: ',' expected.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,20): error TS2304: Cannot find name 'get'.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,27): error TS2304: Cannot find name '('.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,28): error TS2304: Cannot find name ')'.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,30): error TS2304: Cannot find name '{'.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,32): error TS2304: Cannot find name 'return'.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,41): error TS2304: Cannot find name ';'.
+/.src/objectLiteralGettersAndSetters.ts/objectLiterals(2,46): error TS2304: Cannot find name 'set'.

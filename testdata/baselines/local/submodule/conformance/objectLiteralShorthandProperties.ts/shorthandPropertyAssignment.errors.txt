@@ -1,0 +1,9 @@
+/.src/objectLiteralShorthandProperties.ts/shorthandPropertyAssignment(15,6): error TS1005: ',' expected.
+/.src/objectLiteralShorthandProperties.ts/shorthandPropertyAssignment(15,7): error TS1005: ',' expected.
+/.src/objectLiteralShorthandProperties.ts/shorthandPropertyAssignment(15,9): error TS1005: ',' expected.
+/.src/objectLiteralShorthandProperties.ts/shorthandPropertyAssignment(17,11): error TS1005: ',' expected.
+/.src/objectLiteralShorthandProperties.ts/shorthandPropertyAssignment(18,1): error TS1128: Declaration or statement expected.
+/.src/objectLiteralShorthandProperties.ts/shorthandPropertyAssignment(15,5): error TS2304: Cannot find name 'd'.
+/.src/objectLiteralShorthandProperties.ts/shorthandPropertyAssignment(15,6): error TS2304: Cannot find name '('.
+/.src/objectLiteralShorthandProperties.ts/shorthandPropertyAssignment(15,7): error TS2304: Cannot find name ')'.
+/.src/objectLiteralShorthandProperties.ts/shorthandPropertyAssignment(15,9): error TS2304: Cannot find name '{'.

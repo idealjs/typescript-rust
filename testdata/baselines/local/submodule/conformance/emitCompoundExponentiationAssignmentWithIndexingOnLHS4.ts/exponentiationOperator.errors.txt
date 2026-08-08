@@ -1,0 +1,2 @@
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS4.ts/exponentiationOperator(6,15): error TS2304: Cannot find name 'Math'.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS4.ts/exponentiationOperator(6,26): error TS2304: Cannot find name 'Math'.

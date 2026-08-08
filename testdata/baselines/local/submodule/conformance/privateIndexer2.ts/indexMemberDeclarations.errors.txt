@@ -1,0 +1,8 @@
+/.src/privateIndexer2.ts/indexMemberDeclarations(4,13): error TS1005: ',' expected.
+/.src/privateIndexer2.ts/indexMemberDeclarations(4,15): error TS1005: ']' expected.
+/.src/privateIndexer2.ts/indexMemberDeclarations(4,23): error TS1005: ',' expected.
+/.src/privateIndexer2.ts/indexMemberDeclarations(4,32): error TS1005: ',' expected.
+/.src/privateIndexer2.ts/indexMemberDeclarations(4,5): error TS2304: Cannot find name 'private'.
+/.src/privateIndexer2.ts/indexMemberDeclarations(4,17): error TS2304: Cannot find name 'string'.
+/.src/privateIndexer2.ts/indexMemberDeclarations(4,26): error TS2304: Cannot find name 'string'.
+/.src/privateIndexer2.ts/indexMemberDeclarations(4,32): error TS2304: Cannot find name ';'.

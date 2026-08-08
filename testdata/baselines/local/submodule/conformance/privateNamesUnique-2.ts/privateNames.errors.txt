@@ -1,0 +1,12 @@
+/.src/a.ts(2,5): error TS1003: Identifier expected.
+/.src/a.ts(2,6): error TS1005: ';' expected.
+/.src/a.ts(4,15): error TS1003: Identifier expected.
+/.src/a.ts(4,16): error TS1005: ';' expected.
+/.src/a.ts(2,5): error TS1127: Invalid character.
+/.src/a.ts(4,15): error TS1127: Invalid character.
+/.src/b.ts(2,5): error TS1003: Identifier expected.
+/.src/b.ts(2,6): error TS1005: ';' expected.
+/.src/b.ts(2,5): error TS1127: Invalid character.
+/.src/main.ts(4,15): error TS2304: Cannot find name 'A'.
+/.src/main.ts(5,15): error TS2304: Cannot find name 'B'.
+error TS2300: Duplicate identifier 'Foo'.

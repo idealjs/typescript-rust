@@ -1,0 +1,1 @@
+/.src/classWithStaticFieldInParameterBindingPattern.ts/classExpressions(2,1): error TS2554: Expected 1 arguments, but got 0.

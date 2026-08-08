@@ -1,0 +1,4 @@
+/.src/computedPropertyNames8_ES5.ts/computedProperties(2,10): error TS1005: ',' expected.
+/.src/computedPropertyNames8_ES5.ts/computedProperties(2,11): error TS1134: Variable declaration expected.
+/.src/computedPropertyNames8_ES5.ts/computedProperties(3,10): error TS1005: ',' expected.
+/.src/computedPropertyNames8_ES5.ts/computedProperties(3,11): error TS1134: Variable declaration expected.

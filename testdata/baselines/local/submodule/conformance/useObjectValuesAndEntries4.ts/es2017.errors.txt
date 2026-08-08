@@ -1,0 +1,2 @@
+/.src/useObjectValuesAndEntries4.ts/es2017(3,15): error TS2304: Cannot find name 'Object'.
+/.src/useObjectValuesAndEntries4.ts/es2017(7,15): error TS2304: Cannot find name 'Object'.

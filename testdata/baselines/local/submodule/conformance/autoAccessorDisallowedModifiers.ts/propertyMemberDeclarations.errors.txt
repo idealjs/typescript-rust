@@ -1,0 +1,16 @@
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(4,13): error TS1005: ';' expected.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(11,18): error TS1005: ';' expected.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(12,18): error TS1005: ';' expected.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(16,22): error TS1005: ';' expected.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(34,17): error TS1005: ';' expected.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(35,17): error TS1005: ';' expected.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(35,25): error TS1005: ';' expected.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(38,17): error TS1005: ';' expected.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(27,1): error TS1275: 'accessor' modifier can only appear on a property declaration.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(31,1): error TS1275: 'accessor' modifier can only appear on a property declaration.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(33,1): error TS1275: 'accessor' modifier can only appear on a property declaration.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(34,10): error TS2304: Cannot find name 'import'.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(35,10): error TS2304: Cannot find name 'import'.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(35,20): error TS2304: Cannot find name 'from'.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(38,10): error TS2304: Cannot find name 'import'.
+/.src/autoAccessorDisallowedModifiers.ts/propertyMemberDeclarations(38,17): error TS2304: Cannot find name 'N2'.

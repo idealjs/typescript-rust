@@ -1,0 +1,11 @@
+/.src/classStaticBlock11.ts/classStaticBlock(3,3): error TS1003: Identifier expected.
+/.src/classStaticBlock11.ts/classStaticBlock(3,4): error TS1005: ';' expected.
+/.src/classStaticBlock11.ts/classStaticBlock(5,10): error TS1003: Identifier expected.
+/.src/classStaticBlock11.ts/classStaticBlock(5,11): error TS1005: ';' expected.
+/.src/classStaticBlock11.ts/classStaticBlock(8,10): error TS1005: ';' expected.
+/.src/classStaticBlock11.ts/classStaticBlock(10,28): error TS1003: Identifier expected.
+/.src/classStaticBlock11.ts/classStaticBlock(10,29): error TS1005: ';' expected.
+/.src/classStaticBlock11.ts/classStaticBlock(12,1): error TS1128: Declaration or statement expected.
+/.src/classStaticBlock11.ts/classStaticBlock(3,3): error TS1127: Invalid character.
+/.src/classStaticBlock11.ts/classStaticBlock(5,10): error TS1127: Invalid character.
+/.src/classStaticBlock11.ts/classStaticBlock(10,28): error TS1127: Invalid character.

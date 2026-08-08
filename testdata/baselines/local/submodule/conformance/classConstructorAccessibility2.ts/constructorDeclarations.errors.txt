@@ -1,0 +1,21 @@
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(2,31): error TS1005: ',' expected.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(7,34): error TS1005: ',' expected.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(12,32): error TS1005: ',' expected.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(18,24): error TS1005: ',' expected.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(25,24): error TS1005: ',' expected.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(32,24): error TS1005: ',' expected.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(18,37): error TS2349: This expression is not callable.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(20,28): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(21,35): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(25,37): error TS2349: This expression is not callable.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(27,28): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(28,35): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(32,37): error TS2349: This expression is not callable.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(34,28): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(35,35): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(38,10): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(39,10): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(40,10): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(42,10): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(43,10): error TS2554: Expected 2 arguments, but got 1.
+/.src/classConstructorAccessibility2.ts/constructorDeclarations(44,10): error TS2554: Expected 2 arguments, but got 1.

@@ -1,0 +1,15 @@
+/.src/accessorWithES5.ts/memberAccessorDeclarations(2,9): error TS1005: ';' expected.
+/.src/accessorWithES5.ts/memberAccessorDeclarations(8,9): error TS1005: ';' expected.
+/.src/accessorWithES5.ts/memberAccessorDeclarations(13,9): error TS1005: ',' expected.
+/.src/accessorWithES5.ts/memberAccessorDeclarations(13,10): error TS1005: ',' expected.
+/.src/accessorWithES5.ts/memberAccessorDeclarations(13,11): error TS1005: ',' expected.
+/.src/accessorWithES5.ts/memberAccessorDeclarations(13,13): error TS1005: ',' expected.
+/.src/accessorWithES5.ts/memberAccessorDeclarations(13,15): error TS1005: ',' expected.
+/.src/accessorWithES5.ts/memberAccessorDeclarations(13,22): error TS1005: ',' expected.
+/.src/accessorWithES5.ts/memberAccessorDeclarations(14,1): error TS1128: Declaration or statement expected.
+/.src/accessorWithES5.ts/memberAccessorDeclarations(13,5): error TS2304: Cannot find name 'get'.
+/.src/accessorWithES5.ts/memberAccessorDeclarations(13,9): error TS2304: Cannot find name 'a'.
+/.src/accessorWithES5.ts/memberAccessorDeclarations(13,10): error TS2304: Cannot find name '('.
+/.src/accessorWithES5.ts/memberAccessorDeclarations(13,11): error TS2304: Cannot find name ')'.
+/.src/accessorWithES5.ts/memberAccessorDeclarations(13,13): error TS2304: Cannot find name '{'.
+/.src/accessorWithES5.ts/memberAccessorDeclarations(13,15): error TS2304: Cannot find name 'return'.

@@ -1,0 +1,5 @@
+/.src/superPropertyAccessNoError.ts/superPropertyAccess(36,9): error TS1005: ';' expected.
+/.src/superPropertyAccessNoError.ts/superPropertyAccess(42,9): error TS1005: ';' expected.
+/.src/superPropertyAccessNoError.ts/superPropertyAccess(52,16): error TS1005: ';' expected.
+/.src/superPropertyAccessNoError.ts/superPropertyAccess(58,16): error TS1005: ';' expected.
+/.src/superPropertyAccessNoError.ts/superPropertyAccess(25,9): error TS2349: This expression is not callable.

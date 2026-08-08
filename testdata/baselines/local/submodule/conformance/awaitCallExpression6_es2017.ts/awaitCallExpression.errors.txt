@@ -1,0 +1,1 @@
+/.src/awaitCallExpression6_es2017.ts/awaitCallExpression(11,15): error TS2339: Property 'fn' does not exist on type 'object'.

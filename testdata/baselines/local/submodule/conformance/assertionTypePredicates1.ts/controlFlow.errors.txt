@@ -1,0 +1,16 @@
+/.src/assertionTypePredicates1.ts/controlFlow(162,9): error TS1005: ';' expected.
+/.src/assertionTypePredicates1.ts/controlFlow(163,9): error TS1005: ';' expected.
+/.src/assertionTypePredicates1.ts/controlFlow(164,9): error TS1005: ';' expected.
+/.src/assertionTypePredicates1.ts/controlFlow(165,9): error TS1005: ';' expected.
+/.src/assertionTypePredicates1.ts/controlFlow(16,29): error TS2304: Cannot find name 'Error'.
+/.src/assertionTypePredicates1.ts/controlFlow(29,14): error TS2339: Property 'length' does not exist on type 'string'.
+/.src/assertionTypePredicates1.ts/controlFlow(54,11): error TS2339: Property 'length' does not exist on type 'string'.
+/.src/assertionTypePredicates1.ts/controlFlow(58,11): error TS2339: Property 'length' does not exist on type 'string | string | undefined'.
+/.src/assertionTypePredicates1.ts/controlFlow(68,7): error TS2339: Property 'length' does not exist on type 'string'.
+/.src/assertionTypePredicates1.ts/controlFlow(79,11): error TS2339: Property 'length' does not exist on type 'string'.
+/.src/assertionTypePredicates1.ts/controlFlow(83,11): error TS2339: Property 'length' does not exist on type 'string | string | undefined'.
+/.src/assertionTypePredicates1.ts/controlFlow(98,19): error TS2304: Cannot find name 'Error'.
+/.src/assertionTypePredicates1.ts/controlFlow(105,19): error TS2304: Cannot find name 'Error'.
+/.src/assertionTypePredicates1.ts/controlFlow(109,19): error TS2304: Cannot find name 'Error'.
+/.src/assertionTypePredicates1.ts/controlFlow(119,18): error TS2339: Property 'z' does not exist on type '{ assert: (value: unknown) => void; isTest2: () => boolean; assertIsTest2: () => void; assertThis: () => void; bar: () => any; foo: (x: unknown) => any; baz: (x: number) => any }'.
+/.src/assertionTypePredicates1.ts/controlFlow(122,14): error TS2339: Property 'z' does not exist on type '{ assert: (value: unknown) => void; isTest2: () => boolean; assertIsTest2: () => void; assertThis: () => void; bar: () => any; foo: (x: unknown) => any; baz: (x: number) => any }'.

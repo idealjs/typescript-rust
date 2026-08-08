@@ -1,0 +1,5 @@
+/.src/decoratorOnUsing.ts/invalid(4,7): error TS1005: ';' expected.
+/.src/decoratorOnUsing.ts/invalid(7,7): error TS1005: ';' expected.
+/.src/decoratorOnUsing.ts/invalid(4,1): error TS2304: Cannot find name 'using'.
+/.src/decoratorOnUsing.ts/invalid(7,1): error TS2304: Cannot find name 'using'.
+/.src/decoratorOnUsing.ts/invalid(7,7): error TS2304: Cannot find name 'x'.

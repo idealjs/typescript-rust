@@ -1,0 +1,2 @@
+/.src/esDecorators-contextualTypes.2.ts/esDecorators(16,18): error TS2304: Cannot find name 'ClassMethodDecoratorContext'.
+/.src/esDecorators-contextualTypes.2.ts/esDecorators(27,27): error TS2339: Property 'apply' does not exist on type '(this: This, args: Args) => Return'.

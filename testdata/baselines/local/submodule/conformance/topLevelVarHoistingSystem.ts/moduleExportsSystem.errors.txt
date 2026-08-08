@@ -1,0 +1,1 @@
+/.src/topLevelVarHoistingSystem.ts/moduleExportsSystem(6,17): error TS2304: Cannot find name 'y'.

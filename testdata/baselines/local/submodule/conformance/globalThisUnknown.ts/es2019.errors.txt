@@ -1,0 +1,1 @@
+/.src/globalThisUnknown.ts/es2019(7,12): error TS2339: Property 'hi' does not exist on type 'globalThis'.

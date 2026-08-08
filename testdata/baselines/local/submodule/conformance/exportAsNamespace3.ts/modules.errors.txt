@@ -1,0 +1,5 @@
+/.src/1.ts(2,1): error TS2448: Block-scoped variable 'ns' used before its declaration.
+/.src/1.ts(3,1): error TS2448: Block-scoped variable 'ns' used before its declaration.
+/.src/2.ts(3,1): error TS2304: Cannot find name 'foo'.
+/.src/2.ts(4,1): error TS2304: Cannot find name 'foo'.
+error TS2300: Duplicate identifier 'ns'.

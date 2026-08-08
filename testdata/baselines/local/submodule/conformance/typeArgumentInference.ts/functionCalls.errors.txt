@@ -1,0 +1,42 @@
+/.src/typeArgumentInference.ts/functionCalls(20,16): error TS2345: Argument of type '(n: string) => string' is not assignable to parameter of type '(x: T) => void'.
+/.src/typeArgumentInference.ts/functionCalls(21,24): error TS2345: Argument of type '(n: string) => string' is not assignable to parameter of type '(x: T) => void'.
+/.src/typeArgumentInference.ts/functionCalls(25,16): error TS2345: Argument of type '(n: string, x: number) => string' is not assignable to parameter of type '(x: T, y: U) => void'.
+/.src/typeArgumentInference.ts/functionCalls(26,32): error TS2345: Argument of type '(n: string, t: number) => string' is not assignable to parameter of type '(x: T, y: U) => void'.
+/.src/typeArgumentInference.ts/functionCalls(31,15): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
+/.src/typeArgumentInference.ts/functionCalls(32,21): error TS2345: Argument of type '() => undefined' is not assignable to parameter of type '() => T'.
+/.src/typeArgumentInference.ts/functionCalls(33,23): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
+/.src/typeArgumentInference.ts/functionCalls(39,37): error TS2345: Argument of type 'null' is not assignable to parameter of type '(x: U) => void'.
+/.src/typeArgumentInference.ts/functionCalls(45,37): error TS2345: Argument of type 'null' is not assignable to parameter of type '(x: U) => void'.
+/.src/typeArgumentInference.ts/functionCalls(49,15): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(a: A) => A'.
+/.src/typeArgumentInference.ts/functionCalls(49,23): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(b: A) => A'.
+/.src/typeArgumentInference.ts/functionCalls(49,31): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(c: A) => A'.
+/.src/typeArgumentInference.ts/functionCalls(50,23): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(a: A) => A'.
+/.src/typeArgumentInference.ts/functionCalls(50,31): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(b: A) => A'.
+/.src/typeArgumentInference.ts/functionCalls(50,39): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(c: A) => A'.
+/.src/typeArgumentInference.ts/functionCalls(51,23): error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(a: A) => A'.
+/.src/typeArgumentInference.ts/functionCalls(51,41): error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(b: A) => A'.
+/.src/typeArgumentInference.ts/functionCalls(51,59): error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(c: A) => A'.
+/.src/typeArgumentInference.ts/functionCalls(55,15): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(a: A) => A'.
+/.src/typeArgumentInference.ts/functionCalls(55,23): error TS2345: Argument of type '(n: B) => B' is not assignable to parameter of type '(b: B) => B'.
+/.src/typeArgumentInference.ts/functionCalls(55,31): error TS2345: Argument of type '(n: C) => C' is not assignable to parameter of type '(c: C) => C'.
+/.src/typeArgumentInference.ts/functionCalls(56,39): error TS2345: Argument of type '(n: A) => A' is not assignable to parameter of type '(a: A) => A'.
+/.src/typeArgumentInference.ts/functionCalls(56,47): error TS2345: Argument of type '(n: B) => B' is not assignable to parameter of type '(b: B) => B'.
+/.src/typeArgumentInference.ts/functionCalls(56,55): error TS2345: Argument of type '(n: C) => C' is not assignable to parameter of type '(c: C) => C'.
+/.src/typeArgumentInference.ts/functionCalls(57,39): error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(a: A) => A'.
+/.src/typeArgumentInference.ts/functionCalls(57,57): error TS2345: Argument of type '(n: string) => string' is not assignable to parameter of type '(b: B) => B'.
+/.src/typeArgumentInference.ts/functionCalls(57,75): error TS2345: Argument of type '(n: number) => number' is not assignable to parameter of type '(c: C) => C'.
+/.src/typeArgumentInference.ts/functionCalls(62,27): error TS2345: Argument of type 'null' is not assignable to parameter of type '(a: A) => A'.
+/.src/typeArgumentInference.ts/functionCalls(62,33): error TS2345: Argument of type 'null' is not assignable to parameter of type '(b: B) => B'.
+/.src/typeArgumentInference.ts/functionCalls(62,39): error TS2345: Argument of type 'null' is not assignable to parameter of type '(c: C) => C'.
+/.src/typeArgumentInference.ts/functionCalls(66,12): error TS2322: Type 'null' is not assignable to type 'T'.
+/.src/typeArgumentInference.ts/functionCalls(68,29): error TS2345: Argument of type '0' is not assignable to parameter of type 'string'.
+/.src/typeArgumentInference.ts/functionCalls(68,32): error TS2345: Argument of type 'any[]' is not assignable to parameter of type 'string'.
+/.src/typeArgumentInference.ts/functionCalls(70,54): error TS2345: Argument of type '{ a: 0 }' is not assignable to parameter of type 'null | null'.
+/.src/typeArgumentInference.ts/functionCalls(70,64): error TS2345: Argument of type '{ b: "" }' is not assignable to parameter of type 'null | null'.
+/.src/typeArgumentInference.ts/functionCalls(82,51): error TS2304: Cannot find name 'Date'.
+/.src/typeArgumentInference.ts/functionCalls(82,36): error TS2345: Argument of type '{ x: 6; z: any }' is not assignable to parameter of type 'undefined | undefined'.
+/.src/typeArgumentInference.ts/functionCalls(82,61): error TS2345: Argument of type '{ x: 6; y: "" }' is not assignable to parameter of type 'undefined | undefined'.
+/.src/typeArgumentInference.ts/functionCalls(84,56): error TS2304: Cannot find name 'Date'.
+/.src/typeArgumentInference.ts/functionCalls(84,41): error TS2345: Argument of type '{ x: 6; z: any }' is not assignable to parameter of type 'undefined | undefined'.
+/.src/typeArgumentInference.ts/functionCalls(84,66): error TS2345: Argument of type '{ x: 6; y: "" }' is not assignable to parameter of type 'undefined | undefined'.
+/.src/typeArgumentInference.ts/functionCalls(80,9): error TS2304: Cannot find name 'Date'.

@@ -1,0 +1,5 @@
+/.src/taggedTemplatesWithTypeArguments1.ts/templates(9,27): error TS1005: ',' expected.
+/.src/taggedTemplatesWithTypeArguments1.ts/templates(11,13): error TS1005: ';' expected.
+/.src/taggedTemplatesWithTypeArguments1.ts/templates(11,23): error TS1128: Declaration or statement expected.
+/.src/taggedTemplatesWithTypeArguments1.ts/templates(1,29): error TS2304: Cannot find name 'TemplateStringsArray'.
+/.src/taggedTemplatesWithTypeArguments1.ts/templates(1,65): error TS2304: Cannot find name 'Array'.

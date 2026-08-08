@@ -1,0 +1,5 @@
+/.src/arrayLiteralInference.ts/arrayLiterals(23,67): error TS2304: Cannot find name 'Map'.
+/.src/arrayLiteralInference.ts/arrayLiterals(23,31): error TS2304: Cannot find name 'Map'.
+/.src/arrayLiteralInference.ts/arrayLiterals(33,27): error TS2345: Argument of type 'boolean[]' is not assignable to parameter of type 'boolean'.
+/.src/arrayLiteralInference.ts/arrayLiterals(33,35): error TS2345: Argument of type 'boolean[]' is not assignable to parameter of type 'boolean'.
+/.src/arrayLiteralInference.ts/arrayLiterals(33,5): error TS2322: Type 'boolean[]' is not assignable to type 'boolean[][]'.

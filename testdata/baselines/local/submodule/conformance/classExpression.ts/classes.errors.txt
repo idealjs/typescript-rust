@@ -1,0 +1,3 @@
+/.src/classExpression.ts/classes(1,15): error TS2304: Cannot find name 'C'.
+/.src/classExpression.ts/classes(5,16): error TS2304: Cannot find name 'C2'.
+/.src/classExpression.ts/classes(10,19): error TS2304: Cannot find name 'C4'.

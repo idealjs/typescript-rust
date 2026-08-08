@@ -1,0 +1,1 @@
+/.src/templateStringWithEmbeddedInstanceOf.ts/templates(2,35): error TS2304: Cannot find name 'String'.

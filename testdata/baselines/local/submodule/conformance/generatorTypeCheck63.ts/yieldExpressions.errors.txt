@@ -1,0 +1,4 @@
+/.src/generatorTypeCheck63.ts/yieldExpressions(26,61): error TS2345: Argument of type '(state: { foo: number }) => { foo: number }' is not assignable to parameter of type '(a: T) => error'.
+/.src/generatorTypeCheck63.ts/yieldExpressions(31,62): error TS2345: Argument of type '(state: { foo: number }) => void' is not assignable to parameter of type '(a: T) => error'.
+/.src/generatorTypeCheck63.ts/yieldExpressions(34,62): error TS2345: Argument of type '(state: { foo: number }) => number' is not assignable to parameter of type '(a: T) => error'.
+/.src/generatorTypeCheck63.ts/yieldExpressions(38,62): error TS2345: Argument of type '(state: { foo: number }) => number' is not assignable to parameter of type '(a: T) => error'.

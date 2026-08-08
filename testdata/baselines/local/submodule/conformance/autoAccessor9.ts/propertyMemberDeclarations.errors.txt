@@ -1,0 +1,9 @@
+/.src/autoAccessor9.ts/propertyMemberDeclarations(17,5): error TS1003: Identifier expected.
+/.src/autoAccessor9.ts/propertyMemberDeclarations(17,6): error TS1005: ';' expected.
+/.src/autoAccessor9.ts/propertyMemberDeclarations(25,5): error TS1003: Identifier expected.
+/.src/autoAccessor9.ts/propertyMemberDeclarations(25,6): error TS1005: ';' expected.
+/.src/autoAccessor9.ts/propertyMemberDeclarations(30,5): error TS1003: Identifier expected.
+/.src/autoAccessor9.ts/propertyMemberDeclarations(30,6): error TS1005: ';' expected.
+/.src/autoAccessor9.ts/propertyMemberDeclarations(17,5): error TS1127: Invalid character.
+/.src/autoAccessor9.ts/propertyMemberDeclarations(25,5): error TS1127: Invalid character.
+/.src/autoAccessor9.ts/propertyMemberDeclarations(30,5): error TS1127: Invalid character.

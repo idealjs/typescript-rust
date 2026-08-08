@@ -1,0 +1,2 @@
+/.src/constructorDefaultValuesReferencingThis.ts/constructorParameters(11,24): error TS1005: ',' expected.
+/.src/constructorDefaultValuesReferencingThis.ts/constructorParameters(16,9): error TS2349: This expression is not callable.

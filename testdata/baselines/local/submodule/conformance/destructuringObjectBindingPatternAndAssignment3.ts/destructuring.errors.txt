@@ -1,0 +1,12 @@
+/.src/destructuringObjectBindingPatternAndAssignment3.ts/destructuring(3,7): error TS1005: ',' expected.
+/.src/destructuringObjectBindingPatternAndAssignment3.ts/destructuring(3,15): error TS1005: ',' expected.
+/.src/destructuringObjectBindingPatternAndAssignment3.ts/destructuring(7,7): error TS1005: ':' expected.
+/.src/destructuringObjectBindingPatternAndAssignment3.ts/destructuring(7,16): error TS1005: ',' expected.
+/.src/destructuringObjectBindingPatternAndAssignment3.ts/destructuring(8,5): error TS1005: ',' expected.
+/.src/destructuringObjectBindingPatternAndAssignment3.ts/destructuring(8,12): error TS1005: ':' expected.
+/.src/destructuringObjectBindingPatternAndAssignment3.ts/destructuring(8,29): error TS1005: ',' expected.
+/.src/destructuringObjectBindingPatternAndAssignment3.ts/destructuring(8,30): error TS1005: '}' expected.
+/.src/destructuringObjectBindingPatternAndAssignment3.ts/destructuring(4,30): error TS2353: Object literal may only specify known properties, and 'i' does not exist in type 'string | number'.
+/.src/destructuringObjectBindingPatternAndAssignment3.ts/destructuring(5,35): error TS2353: Object literal may only specify known properties, and 'i1' does not exist in type 'string | number | object'.
+/.src/destructuringObjectBindingPatternAndAssignment3.ts/destructuring(7,5): error TS1182: A destructuring declaration must have an initializer.
+error TS2451: Cannot redeclare block-scoped variable '}'.

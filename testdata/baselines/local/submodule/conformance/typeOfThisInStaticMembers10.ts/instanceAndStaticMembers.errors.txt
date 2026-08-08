@@ -1,0 +1,22 @@
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(19,16): error TS1005: ';' expected.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(22,16): error TS1005: ';' expected.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(41,16): error TS1005: ';' expected.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(44,16): error TS1005: ';' expected.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(6,21): error TS2339: Property 'a' does not exist on type 'object'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(12,21): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(13,22): error TS2339: Property 'a' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(13,31): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(14,27): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(15,36): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(17,21): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(20,21): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(23,14): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(29,21): error TS2339: Property 'a' does not exist on type 'object'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(34,21): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(35,22): error TS2339: Property 'a' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(35,31): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(36,27): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(37,36): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(39,21): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(42,21): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+/.src/typeOfThisInStaticMembers10.ts/instanceAndStaticMembers(45,14): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.

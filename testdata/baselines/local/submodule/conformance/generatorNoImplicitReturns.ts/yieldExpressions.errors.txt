@@ -1,0 +1,1 @@
+/.src/generatorNoImplicitReturns.ts/yieldExpressions(3,7): error TS2304: Cannot find name 'Math'.

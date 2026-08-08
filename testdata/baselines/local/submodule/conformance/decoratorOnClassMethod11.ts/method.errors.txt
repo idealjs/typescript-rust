@@ -1,0 +1,1 @@
+/.src/decoratorOnClassMethod11.ts/method(3,27): error TS2304: Cannot find name 'Object'.

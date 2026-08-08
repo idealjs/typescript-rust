@@ -1,0 +1,6 @@
+/.src/legacyDecorators-contextualTypes.ts/decorators(3,17): error TS1138: Parameter declaration expected.
+/.src/legacyDecorators-contextualTypes.ts/decorators(3,18): error TS1138: Parameter declaration expected.
+/.src/legacyDecorators-contextualTypes.ts/decorators(3,19): error TS1138: Parameter declaration expected.
+/.src/legacyDecorators-contextualTypes.ts/decorators(3,29): error TS1005: ';' expected.
+/.src/legacyDecorators-contextualTypes.ts/decorators(3,32): error TS1005: ';' expected.
+/.src/legacyDecorators-contextualTypes.ts/decorators(3,34): error TS1128: Declaration or statement expected.

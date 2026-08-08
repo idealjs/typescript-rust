@@ -1,0 +1,12 @@
+/.src/declarationEmitWorkWithInlineComments.ts/declarationEmit(4,12): error TS1005: ',' expected.
+/.src/declarationEmitWorkWithInlineComments.ts/declarationEmit(5,29): error TS1005: ',' expected.
+/.src/declarationEmitWorkWithInlineComments.ts/declarationEmit(6,12): error TS1005: ',' expected.
+/.src/declarationEmitWorkWithInlineComments.ts/declarationEmit(8,12): error TS1005: ',' expected.
+/.src/declarationEmitWorkWithInlineComments.ts/declarationEmit(11,12): error TS1005: ',' expected.
+/.src/declarationEmitWorkWithInlineComments.ts/declarationEmit(12,28): error TS1005: ',' expected.
+/.src/declarationEmitWorkWithInlineComments.ts/declarationEmit(13,28): error TS1005: ',' expected.
+/.src/declarationEmitWorkWithInlineComments.ts/declarationEmit(15,12): error TS1005: ',' expected.
+/.src/declarationEmitWorkWithInlineComments.ts/declarationEmit(18,12): error TS1005: ',' expected.
+/.src/declarationEmitWorkWithInlineComments.ts/declarationEmit(22,12): error TS1005: ',' expected.
+/.src/declarationEmitWorkWithInlineComments.ts/declarationEmit(27,38): error TS1005: ',' expected.
+/.src/declarationEmitWorkWithInlineComments.ts/declarationEmit(32,12): error TS1005: ',' expected.

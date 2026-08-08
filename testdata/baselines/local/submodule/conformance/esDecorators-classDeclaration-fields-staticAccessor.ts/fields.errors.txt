@@ -1,0 +1,6 @@
+/.src/esDecorators-classDeclaration-fields-staticAccessor.ts/fields(14,12): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticAccessor.ts/fields(15,13): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticAccessor.ts/fields(15,14): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticAccessor.ts/fields(16,13): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticAccessor.ts/fields(16,14): error TS1005: ';' expected.
+/.src/esDecorators-classDeclaration-fields-staticAccessor.ts/fields(18,1): error TS1128: Declaration or statement expected.

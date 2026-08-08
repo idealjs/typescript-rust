@@ -1,0 +1,22 @@
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(5,9): error TS1005: ',' expected.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(5,10): error TS1005: ',' expected.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(5,11): error TS1005: ',' expected.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(5,13): error TS1005: ',' expected.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(6,9): error TS1005: ',' expected.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(6,16): error TS1005: ',' expected.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(6,20): error TS1005: ',' expected.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(6,21): error TS1005: ',' expected.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(6,23): error TS1005: ',' expected.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(8,9): error TS1005: ',' expected.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(8,10): error TS1134: Variable declaration expected.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(8,20): error TS1005: ',' expected.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(5,5): error TS2304: Cannot find name 'get'.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(5,10): error TS2304: Cannot find name '('.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(5,11): error TS2304: Cannot find name ')'.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(5,13): error TS2304: Cannot find name '{'.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(6,9): error TS2304: Cannot find name 'return'.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(6,16): error TS2304: Cannot find name 'this'.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(6,20): error TS2304: Cannot find name '.'.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(6,21): error TS2304: Cannot find name '_0'.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(6,23): error TS2304: Cannot find name ';'.
+/.src/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts/exponentiationOperator(8,5): error TS2304: Cannot find name 'set'.

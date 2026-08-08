@@ -1,0 +1,11 @@
+/.src/esDecorators-classExpression-namedEvaluation.4.ts/namedEvaluation(6,14): error TS1012: Unexpected token.
+/.src/esDecorators-classExpression-namedEvaluation.4.ts/namedEvaluation(6,15): error TS1005: ',' expected.
+/.src/esDecorators-classExpression-namedEvaluation.4.ts/namedEvaluation(6,19): error TS1005: ',' expected.
+/.src/esDecorators-classExpression-namedEvaluation.4.ts/namedEvaluation(6,25): error TS1005: ',' expected.
+/.src/esDecorators-classExpression-namedEvaluation.4.ts/namedEvaluation(12,15): error TS1012: Unexpected token.
+/.src/esDecorators-classExpression-namedEvaluation.4.ts/namedEvaluation(12,16): error TS1005: ',' expected.
+/.src/esDecorators-classExpression-namedEvaluation.4.ts/namedEvaluation(12,20): error TS1005: ',' expected.
+/.src/esDecorators-classExpression-namedEvaluation.4.ts/namedEvaluation(12,26): error TS1005: ',' expected.
+/.src/esDecorators-classExpression-namedEvaluation.4.ts/namedEvaluation(12,32): error TS1128: Declaration or statement expected.
+/.src/esDecorators-classExpression-namedEvaluation.4.ts/namedEvaluation(12,39): error TS1128: Declaration or statement expected.
+/.src/esDecorators-classExpression-namedEvaluation.4.ts/namedEvaluation(12,9): error TS1182: A destructuring declaration must have an initializer.

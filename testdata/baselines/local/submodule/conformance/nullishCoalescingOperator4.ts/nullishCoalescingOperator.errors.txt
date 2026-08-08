@@ -1,0 +1,2 @@
+/.src/nullishCoalescingOperator4.ts/nullishCoalescingOperator(2,22): error TS2339: Property 'toLowerCase' does not exist on type '"literal" | undefined | null'.
+/.src/nullishCoalescingOperator4.ts/nullishCoalescingOperator(3,22): error TS2339: Property 'toLocaleUpperCase' does not exist on type '"literal" | undefined | null'.

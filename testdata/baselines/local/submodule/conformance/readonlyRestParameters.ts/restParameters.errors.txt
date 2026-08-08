@@ -1,0 +1,4 @@
+/.src/readonlyRestParameters.ts/restParameters(8,11): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+/.src/readonlyRestParameters.ts/restParameters(15,11): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+/.src/readonlyRestParameters.ts/restParameters(20,18): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+/.src/readonlyRestParameters.ts/restParameters(21,11): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.

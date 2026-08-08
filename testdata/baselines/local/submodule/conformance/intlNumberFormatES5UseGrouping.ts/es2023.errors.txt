@@ -1,0 +1,4 @@
+/.src/intlNumberFormatES5UseGrouping.ts/es2023(1,5): error TS2304: Cannot find name 'Intl'.
+/.src/intlNumberFormatES5UseGrouping.ts/es2023(2,5): error TS2304: Cannot find name 'Intl'.
+/.src/intlNumberFormatES5UseGrouping.ts/es2023(3,5): error TS2304: Cannot find name 'Intl'.
+/.src/intlNumberFormatES5UseGrouping.ts/es2023(5,29): error TS2304: Cannot find name 'Intl'.

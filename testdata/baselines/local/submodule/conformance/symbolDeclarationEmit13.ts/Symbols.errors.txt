@@ -1,0 +1,2 @@
+/.src/symbolDeclarationEmit13.ts/Symbols(2,9): error TS1005: ';' expected.
+/.src/symbolDeclarationEmit13.ts/Symbols(3,9): error TS1005: ';' expected.

@@ -1,0 +1,22 @@
+/.src/mixinClassesMembers.ts/classes(28,18): error TS2351: This expression is not constructable.
+/.src/mixinClassesMembers.ts/classes(29,18): error TS2351: This expression is not constructable.
+/.src/mixinClassesMembers.ts/classes(30,18): error TS2351: This expression is not constructable.
+/.src/mixinClassesMembers.ts/classes(31,18): error TS2351: This expression is not constructable.
+/.src/mixinClassesMembers.ts/classes(32,18): error TS2351: This expression is not constructable.
+/.src/mixinClassesMembers.ts/classes(33,18): error TS2351: This expression is not constructable.
+/.src/mixinClassesMembers.ts/classes(34,18): error TS2351: This expression is not constructable.
+/.src/mixinClassesMembers.ts/classes(35,18): error TS2351: This expression is not constructable.
+/.src/mixinClassesMembers.ts/classes(36,18): error TS2351: This expression is not constructable.
+/.src/mixinClassesMembers.ts/classes(40,17): error TS2351: This expression is not constructable.
+/.src/mixinClassesMembers.ts/classes(47,17): error TS2351: This expression is not constructable.
+/.src/mixinClassesMembers.ts/classes(54,17): error TS2351: This expression is not constructable.
+/.src/mixinClassesMembers.ts/classes(63,17): error TS2351: This expression is not constructable.
+/.src/mixinClassesMembers.ts/classes(72,17): error TS2351: This expression is not constructable.
+/.src/mixinClassesMembers.ts/classes(81,9): error TS2349: This expression is not callable.
+/.src/mixinClassesMembers.ts/classes(82,14): error TS2339: Property 'a' does not exist on type 'object'.
+/.src/mixinClassesMembers.ts/classes(83,14): error TS2339: Property 'b' does not exist on type 'object'.
+/.src/mixinClassesMembers.ts/classes(84,14): error TS2339: Property 'p' does not exist on type 'object'.
+/.src/mixinClassesMembers.ts/classes(90,9): error TS2349: This expression is not callable.
+/.src/mixinClassesMembers.ts/classes(91,14): error TS2339: Property 'a' does not exist on type '{ f: () => any }'.
+/.src/mixinClassesMembers.ts/classes(92,14): error TS2339: Property 'b' does not exist on type '{ f: () => any }'.
+/.src/mixinClassesMembers.ts/classes(93,14): error TS2339: Property 'p' does not exist on type '{ f: () => any }'.

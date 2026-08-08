@@ -1,0 +1,1 @@
+/.src/additionOperatorWithAnyAndEveryType.ts/additionOperator(13,8): error TS2304: Cannot find name 'Object'.

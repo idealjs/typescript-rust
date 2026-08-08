@@ -1,0 +1,1 @@
+/.src/newTargetNarrowing.ts/newTarget(9,3): error TS2339: Property 'marked' does not exist on type '() => void'.

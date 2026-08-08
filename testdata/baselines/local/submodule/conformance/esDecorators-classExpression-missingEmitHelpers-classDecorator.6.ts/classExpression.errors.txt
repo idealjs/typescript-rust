@@ -1,0 +1,7 @@
+/.src/main.ts(5,7): error TS1012: Unexpected token.
+/.src/main.ts(5,8): error TS1005: ',' expected.
+/.src/main.ts(5,12): error TS1005: ',' expected.
+/.src/main.ts(5,18): error TS1005: ',' expected.
+/.src/main.ts(5,21): error TS1005: ')' expected.
+/.src/main.ts(5,12): error TS2304: Cannot find name 'class'.
+/.src/main.ts(5,18): error TS2304: Cannot find name '{'.

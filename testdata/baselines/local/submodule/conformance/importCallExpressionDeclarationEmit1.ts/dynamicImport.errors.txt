@@ -1,0 +1,4 @@
+/.src/importCallExpressionDeclarationEmit1.ts/dynamicImport(8,10): error TS2304: Cannot find name 'import'.
+/.src/importCallExpressionDeclarationEmit1.ts/dynamicImport(9,10): error TS2304: Cannot find name 'import'.
+/.src/importCallExpressionDeclarationEmit1.ts/dynamicImport(10,12): error TS2304: Cannot find name 'import'.
+/.src/importCallExpressionDeclarationEmit1.ts/dynamicImport(13,12): error TS2304: Cannot find name 'import'.

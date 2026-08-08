@@ -1,0 +1,4 @@
+/.src/constEnum2.ts/constEnums(12,15): error TS2304: Cannot find name 'Math'.
+/.src/constEnum2.ts/constEnums(12,26): error TS2304: Cannot find name 'Math'.
+/.src/constEnum2.ts/constEnums(13,20): error TS2304: Cannot find name 'Math'.
+/.src/constEnum2.ts/constEnums(13,31): error TS2304: Cannot find name 'Math'.

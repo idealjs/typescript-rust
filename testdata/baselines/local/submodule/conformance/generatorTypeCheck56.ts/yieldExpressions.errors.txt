@@ -1,0 +1,3 @@
+/.src/generatorTypeCheck56.ts/yieldExpressions(3,9): error TS1003: Identifier expected.
+/.src/generatorTypeCheck56.ts/yieldExpressions(3,10): error TS1005: ';' expected.
+/.src/generatorTypeCheck56.ts/yieldExpressions(2,19): error TS2304: Cannot find name 'C'.

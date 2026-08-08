@@ -1,0 +1,12 @@
+/.src/symbolProperty2.ts/Symbols(4,8): error TS1005: ',' expected.
+/.src/symbolProperty2.ts/Symbols(4,9): error TS1005: ',' expected.
+/.src/symbolProperty2.ts/Symbols(4,11): error TS1005: ',' expected.
+/.src/symbolProperty2.ts/Symbols(5,15): error TS1005: ',' expected.
+/.src/symbolProperty2.ts/Symbols(6,16): error TS1005: ',' expected.
+/.src/symbolProperty2.ts/Symbols(6,17): error TS1005: ':' expected.
+/.src/symbolProperty2.ts/Symbols(8,1): error TS1128: Declaration or statement expected.
+/.src/symbolProperty2.ts/Symbols(5,15): error TS1182: A destructuring declaration must have an initializer.
+/.src/symbolProperty2.ts/Symbols(4,8): error TS2304: Cannot find name '('.
+/.src/symbolProperty2.ts/Symbols(4,9): error TS2304: Cannot find name ')'.
+/.src/symbolProperty2.ts/Symbols(4,11): error TS2304: Cannot find name '{'.
+/.src/symbolProperty2.ts/Symbols(5,5): error TS2304: Cannot find name 'get'.

@@ -1,0 +1,5 @@
+/.src/typeAssertions.ts/typeAssertions(44,14): error TS1005: '>' expected.
+/.src/typeAssertions.ts/typeAssertions(44,17): error TS1005: ')' expected.
+/.src/typeAssertions.ts/typeAssertions(44,48): error TS1005: ';' expected.
+/.src/typeAssertions.ts/typeAssertions(44,14): error TS2304: Cannot find name 'is'.
+/.src/typeAssertions.ts/typeAssertions(44,17): error TS2304: Cannot find name 'string'.

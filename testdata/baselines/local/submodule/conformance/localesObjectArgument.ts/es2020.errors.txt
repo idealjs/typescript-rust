@@ -1,0 +1,42 @@
+/.src/localesObjectArgument.ts/es2020(1,18): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(2,18): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(3,18): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(5,17): error TS2304: Cannot find name 'Date'.
+/.src/localesObjectArgument.ts/es2020(19,5): error TS2339: Property 'toLocaleString' does not exist on type '1000'.
+/.src/localesObjectArgument.ts/es2020(20,5): error TS2339: Property 'toLocaleString' does not exist on type '1000'.
+/.src/localesObjectArgument.ts/es2020(22,8): error TS2339: Property 'toLocaleString' does not exist on type 'bigint'.
+/.src/localesObjectArgument.ts/es2020(23,8): error TS2339: Property 'toLocaleString' does not exist on type 'bigint'.
+/.src/localesObjectArgument.ts/es2020(25,5): error TS2339: Property 'toLocaleLowerCase' does not exist on type '""'.
+/.src/localesObjectArgument.ts/es2020(26,5): error TS2339: Property 'toLocaleLowerCase' does not exist on type '""'.
+/.src/localesObjectArgument.ts/es2020(27,5): error TS2339: Property 'toLocaleUpperCase' does not exist on type '""'.
+/.src/localesObjectArgument.ts/es2020(28,5): error TS2339: Property 'toLocaleUpperCase' does not exist on type '""'.
+/.src/localesObjectArgument.ts/es2020(29,5): error TS2339: Property 'localeCompare' does not exist on type '""'.
+/.src/localesObjectArgument.ts/es2020(30,5): error TS2339: Property 'localeCompare' does not exist on type '""'.
+/.src/localesObjectArgument.ts/es2020(32,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(33,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(34,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(35,1): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(36,1): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(37,1): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(39,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(40,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(41,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(42,1): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(43,1): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(44,1): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(46,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(47,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(48,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(49,1): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(50,1): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(52,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(53,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(54,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(55,1): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(56,1): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(57,1): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(59,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(60,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(61,5): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(62,1): error TS2304: Cannot find name 'Intl'.
+/.src/localesObjectArgument.ts/es2020(63,1): error TS2304: Cannot find name 'Intl'.

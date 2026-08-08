@@ -1,0 +1,2 @@
+/.src/declarationInAmbientContext.ts/destructuring(1,13): error TS1182: A destructuring declaration must have an initializer.
+/.src/declarationInAmbientContext.ts/destructuring(2,13): error TS1182: A destructuring declaration must have an initializer.

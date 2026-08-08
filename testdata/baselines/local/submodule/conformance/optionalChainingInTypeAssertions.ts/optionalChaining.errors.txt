@@ -1,0 +1,2 @@
+/.src/optionalChainingInTypeAssertions.ts/optionalChaining(16,7): error TS2339: Property '' does not exist on type '{ m: () => any }'.
+/.src/optionalChainingInTypeAssertions.ts/optionalChaining(17,12): error TS2339: Property '' does not exist on type '{ m: () => any }'.

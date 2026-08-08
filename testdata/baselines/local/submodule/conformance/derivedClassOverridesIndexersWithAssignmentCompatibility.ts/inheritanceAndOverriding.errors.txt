@@ -1,0 +1,10 @@
+/.src/derivedClassOverridesIndexersWithAssignmentCompatibility.ts/inheritanceAndOverriding(2,7): error TS1005: ']' expected.
+/.src/derivedClassOverridesIndexersWithAssignmentCompatibility.ts/inheritanceAndOverriding(2,15): error TS1005: ';' expected.
+/.src/derivedClassOverridesIndexersWithAssignmentCompatibility.ts/inheritanceAndOverriding(7,7): error TS1005: ']' expected.
+/.src/derivedClassOverridesIndexersWithAssignmentCompatibility.ts/inheritanceAndOverriding(7,15): error TS1005: ';' expected.
+/.src/derivedClassOverridesIndexersWithAssignmentCompatibility.ts/inheritanceAndOverriding(11,7): error TS1005: ']' expected.
+/.src/derivedClassOverridesIndexersWithAssignmentCompatibility.ts/inheritanceAndOverriding(11,15): error TS1005: ';' expected.
+/.src/derivedClassOverridesIndexersWithAssignmentCompatibility.ts/inheritanceAndOverriding(16,7): error TS1005: ']' expected.
+/.src/derivedClassOverridesIndexersWithAssignmentCompatibility.ts/inheritanceAndOverriding(16,15): error TS1005: ';' expected.
+/.src/derivedClassOverridesIndexersWithAssignmentCompatibility.ts/inheritanceAndOverriding(2,18): error TS2304: Cannot find name 'Object'.
+/.src/derivedClassOverridesIndexersWithAssignmentCompatibility.ts/inheritanceAndOverriding(11,18): error TS2304: Cannot find name 'Object'.

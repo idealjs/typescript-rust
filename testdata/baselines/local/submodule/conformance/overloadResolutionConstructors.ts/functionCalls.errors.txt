@@ -1,0 +1,3 @@
+/.src/overloadResolutionConstructors.ts/functionCalls(27,9): error TS2345: Argument of type 'object' is not assignable to parameter of type 'string'.
+/.src/overloadResolutionConstructors.ts/functionCalls(37,8): error TS2304: Cannot find name 'Date'.
+/.src/overloadResolutionConstructors.ts/functionCalls(67,1): error TS2554: Expected 1 arguments, but got 0.

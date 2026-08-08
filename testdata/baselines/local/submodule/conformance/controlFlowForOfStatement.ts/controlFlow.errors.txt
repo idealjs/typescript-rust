@@ -1,0 +1,3 @@
+/.src/controlFlowForOfStatement.ts/controlFlow(2,36): error TS2304: Cannot find name 'RegExp'.
+/.src/controlFlowForOfStatement.ts/controlFlow(6,15): error TS2454: Variable 'obj' is used before being assigned.
+/.src/controlFlowForOfStatement.ts/controlFlow(7,15): error TS2339: Property 'toExponential' does not exist on type 'true'.

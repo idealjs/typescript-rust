@@ -1,0 +1,1 @@
+/.src/iterableArrayPattern16.ts/destructuring(2,12): error TS2448: Block-scoped variable 'FooIteratorIterator' used before its declaration.

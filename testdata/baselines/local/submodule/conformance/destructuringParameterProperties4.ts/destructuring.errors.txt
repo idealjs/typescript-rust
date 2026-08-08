@@ -1,0 +1,11 @@
+/.src/destructuringParameterProperties4.ts/destructuring(4,25): error TS1005: ',' expected.
+/.src/destructuringParameterProperties4.ts/destructuring(4,41): error TS1005: ',' expected.
+/.src/destructuringParameterProperties4.ts/destructuring(5,59): error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+/.src/destructuringParameterProperties4.ts/destructuring(5,83): error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+/.src/destructuringParameterProperties4.ts/destructuring(6,18): error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+/.src/destructuringParameterProperties4.ts/destructuring(11,21): error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+/.src/destructuringParameterProperties4.ts/destructuring(15,21): error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+/.src/destructuringParameterProperties4.ts/destructuring(19,21): error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any }'.
+/.src/destructuringParameterProperties4.ts/destructuring(25,24): error TS2339: Property 'a' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any; doSomethingWithSuperProperties: () => any }'.
+/.src/destructuringParameterProperties4.ts/destructuring(25,34): error TS2339: Property 'b' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any; doSomethingWithSuperProperties: () => any }'.
+/.src/destructuringParameterProperties4.ts/destructuring(25,44): error TS2339: Property 'c' does not exist on type '{ getA: () => any; getB: () => any; getC: () => any; doSomethingWithSuperProperties: () => any }'.

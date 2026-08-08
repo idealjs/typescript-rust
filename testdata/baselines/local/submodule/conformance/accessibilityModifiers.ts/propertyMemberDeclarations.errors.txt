@@ -1,0 +1,14 @@
+/.src/accessibilityModifiers.ts/propertyMemberDeclarations(5,24): error TS1005: ';' expected.
+/.src/accessibilityModifiers.ts/propertyMemberDeclarations(6,24): error TS1005: ';' expected.
+/.src/accessibilityModifiers.ts/propertyMemberDeclarations(10,26): error TS1005: ';' expected.
+/.src/accessibilityModifiers.ts/propertyMemberDeclarations(11,26): error TS1005: ';' expected.
+/.src/accessibilityModifiers.ts/propertyMemberDeclarations(15,23): error TS1005: ';' expected.
+/.src/accessibilityModifiers.ts/propertyMemberDeclarations(16,23): error TS1005: ';' expected.
+/.src/accessibilityModifiers.ts/propertyMemberDeclarations(23,24): error TS1005: ';' expected.
+/.src/accessibilityModifiers.ts/propertyMemberDeclarations(24,24): error TS1005: ';' expected.
+/.src/accessibilityModifiers.ts/propertyMemberDeclarations(28,26): error TS1005: ';' expected.
+/.src/accessibilityModifiers.ts/propertyMemberDeclarations(29,26): error TS1005: ';' expected.
+/.src/accessibilityModifiers.ts/propertyMemberDeclarations(33,23): error TS1005: ';' expected.
+/.src/accessibilityModifiers.ts/propertyMemberDeclarations(34,23): error TS1005: ';' expected.
+/.src/accessibilityModifiers.ts/propertyMemberDeclarations(41,27): error TS1005: ';' expected.
+/.src/accessibilityModifiers.ts/propertyMemberDeclarations(42,23): error TS1005: ';' expected.
