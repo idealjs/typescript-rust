@@ -1,0 +1,74 @@
+genericSetterInClassTypeJsDoc.js(5,5): error TS1003: Identifier expected.
+genericSetterInClassTypeJsDoc.js(5,5): error TS1127: Invalid character.
+genericSetterInClassTypeJsDoc.js(5,6): error TS1005: ';' expected.
+genericSetterInClassTypeJsDoc.js(9,14): error TS1003: Identifier expected.
+genericSetterInClassTypeJsDoc.js(9,14): error TS1127: Invalid character.
+genericSetterInClassTypeJsDoc.js(9,15): error TS1005: ';' expected.
+genericSetterInClassTypeJsDoc.js(13,9): error TS1005: ';' expected.
+genericSetterInClassTypeJsDoc.js(14,21): error TS1003: Identifier expected.
+genericSetterInClassTypeJsDoc.js(14,21): error TS1127: Invalid character.
+genericSetterInClassTypeJsDoc.js(14,22): error TS1005: ';' expected.
+genericSetterInClassTypeJsDoc.js(14,22): error TS7027: Unreachable code detected.
+genericSetterInClassTypeJsDoc.js(17,9): error TS1005: ';' expected.
+genericSetterInClassTypeJsDoc.js(18,14): error TS1003: Identifier expected.
+genericSetterInClassTypeJsDoc.js(18,14): error TS1127: Invalid character.
+genericSetterInClassTypeJsDoc.js(18,15): error TS1005: ';' expected.
+genericSetterInClassTypeJsDoc.js(22,5): error TS2349: This expression is not callable.
+
+
+==== genericSetterInClassTypeJsDoc.js (16 errors) ====
+    /**
+     * @template T
+     */
+     class Box {
+        #value;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~~
+!!! error TS1005: ';' expected.
+    
+        /** @param {T} initialValue */
+        constructor(initialValue) {
+            this.#value = initialValue;
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~~~
+!!! error TS1005: ';' expected.
+        }
+        
+        /** @type {T} */
+        get value() {
+            ~~~~~
+!!! error TS1005: ';' expected.
+            return this.#value;
+                        ~
+!!! error TS1003: Identifier expected.
+                        ~
+!!! error TS1127: Invalid character.
+                         ~~~~~
+!!! error TS1005: ';' expected.
+                         ~~~~~~
+        }
+    ~~~~
+!!! error TS7027: Unreachable code detected.
+    
+        set value(value) {
+            ~~~~~
+!!! error TS1005: ';' expected.
+            this.#value = value;
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                  ~~~~~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+    new Box(3).value = 3;
+        ~~~
+!!! error TS2349: This expression is not callable.

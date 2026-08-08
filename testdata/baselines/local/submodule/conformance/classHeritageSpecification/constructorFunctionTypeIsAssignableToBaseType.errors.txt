@@ -1,0 +1,25 @@
+classHeritageSpecification/constructorFunctionTypeIsAssignableToBaseType.ts(3,14): error TS2304: Cannot find name 'Object'.
+
+
+==== classHeritageSpecification/constructorFunctionTypeIsAssignableToBaseType.ts (1 errors) ====
+    class Base {
+        static foo: {
+            bar: Object;
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        }
+    }
+    
+    class Derived extends Base {
+        // ok
+        static foo: {
+            bar: number;
+        }
+    }
+    
+    class Derived2 extends Base {
+        // ok, use assignability here
+        static foo: {
+            bar: any;
+        }
+    }

@@ -1,0 +1,14 @@
+functionDeclarations/asyncFunctionDeclarationCapturesArguments_es5.ts(5,24): error TS2339: Property 'apply' does not exist on type '() => void'.
+
+
+==== functionDeclarations/asyncFunctionDeclarationCapturesArguments_es5.ts (1 errors) ====
+    class C {
+       method() {
+          function other() {}
+          async function fn () {
+               await other.apply(this, arguments);
+                           ~~~~~
+!!! error TS2339: Property 'apply' does not exist on type '() => void'.
+          }
+       }
+    }

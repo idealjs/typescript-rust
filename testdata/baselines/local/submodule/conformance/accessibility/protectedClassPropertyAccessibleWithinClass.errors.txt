@@ -1,0 +1,57 @@
+accessibility/protectedClassPropertyAccessibleWithinClass.ts(5,19): error TS1005: ';' expected.
+accessibility/protectedClassPropertyAccessibleWithinClass.ts(6,19): error TS1005: ';' expected.
+accessibility/protectedClassPropertyAccessibleWithinClass.ts(10,26): error TS1005: ';' expected.
+accessibility/protectedClassPropertyAccessibleWithinClass.ts(11,26): error TS1005: ';' expected.
+accessibility/protectedClassPropertyAccessibleWithinClass.ts(19,19): error TS1005: ';' expected.
+accessibility/protectedClassPropertyAccessibleWithinClass.ts(20,19): error TS1005: ';' expected.
+accessibility/protectedClassPropertyAccessibleWithinClass.ts(24,26): error TS1005: ';' expected.
+accessibility/protectedClassPropertyAccessibleWithinClass.ts(25,26): error TS1005: ';' expected.
+
+
+==== accessibility/protectedClassPropertyAccessibleWithinClass.ts (8 errors) ====
+    // no errors
+    
+    class C {
+        protected x: string;
+        protected get y() { return this.x; }
+                      ~
+!!! error TS1005: ';' expected.
+        protected set y(x) { this.y = this.x; }
+                      ~
+!!! error TS1005: ';' expected.
+        protected foo() { return this.foo; }
+    
+        protected static x: string;
+        protected static get y() { return this.x; }
+                             ~
+!!! error TS1005: ';' expected.
+        protected static set y(x) { this.y = this.x; }
+                             ~
+!!! error TS1005: ';' expected.
+        protected static foo() { return this.foo; }
+        protected static bar() { this.foo(); }
+    }
+    
+    // added level of function nesting
+    class C2 {
+        protected x: string;
+        protected get y() { () => this.x; return null; }
+                      ~
+!!! error TS1005: ';' expected.
+        protected set y(x) { () => { this.y = this.x; } }
+                      ~
+!!! error TS1005: ';' expected.
+        protected foo() { () => this.foo; }
+    
+        protected static x: string;
+        protected static get y() { () => this.x; return null; }
+                             ~
+!!! error TS1005: ';' expected.
+        protected static set y(x) {
+                             ~
+!!! error TS1005: ';' expected.
+            () => { this.y = this.x; }
+         }
+        protected static foo() { () => this.foo; }
+        protected static bar() { () => this.foo(); }
+    }

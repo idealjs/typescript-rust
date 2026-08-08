@@ -1,0 +1,38 @@
+asyncArrowFunction/asyncArrowFunction7_es5.ts(1,11): error TS2304: Cannot find name 'async'.
+asyncArrowFunction/asyncArrowFunction7_es5.ts(1,19): error TS1005: ',' expected.
+asyncArrowFunction/asyncArrowFunction7_es5.ts(1,28): error TS1005: ',' expected.
+asyncArrowFunction/asyncArrowFunction7_es5.ts(1,33): error TS1005: ',' expected.
+asyncArrowFunction/asyncArrowFunction7_es5.ts(1,35): error TS1005: ';' expected.
+asyncArrowFunction/asyncArrowFunction7_es5.ts(3,13): error TS2304: Cannot find name 'async'.
+asyncArrowFunction/asyncArrowFunction7_es5.ts(3,20): error TS2304: Cannot find name 'a'.
+asyncArrowFunction/asyncArrowFunction7_es5.ts(3,29): error TS1012: Unexpected token.
+asyncArrowFunction/asyncArrowFunction7_es5.ts(3,30): error TS1005: ',' expected.
+asyncArrowFunction/asyncArrowFunction7_es5.ts(5,1): error TS1005: ',' expected.
+
+
+==== asyncArrowFunction/asyncArrowFunction7_es5.ts (10 errors) ====
+    var bar = async (): Promise<void> => {
+              ~~~~~
+!!! error TS2304: Cannot find name 'async'.
+                      ~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS1005: ',' expected.
+                                    ~
+!!! error TS1005: ',' expected.
+                                      ~~
+!!! error TS1005: ';' expected.
+      // 'await' here is an identifier, and not an await expression.
+      var foo = async (a = await): Promise<void> => {
+                ~~~~~
+!!! error TS2304: Cannot find name 'async'.
+                       ~
+!!! error TS2304: Cannot find name 'a'.
+                                ~
+!!! error TS1012: Unexpected token.
+                                 ~
+!!! error TS1005: ',' expected.
+      }
+    }
+    ~
+!!! error TS1005: ',' expected.

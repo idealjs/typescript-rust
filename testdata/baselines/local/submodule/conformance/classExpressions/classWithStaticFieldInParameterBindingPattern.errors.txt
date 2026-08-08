@@ -1,0 +1,8 @@
+classExpressions/classWithStaticFieldInParameterBindingPattern.ts(2,1): error TS2554: Expected 1 arguments, but got 0.
+
+
+==== classExpressions/classWithStaticFieldInParameterBindingPattern.ts (1 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/36295
+    (({ [class { static x = 1 }.x]: b = "" }) => {})();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 0.

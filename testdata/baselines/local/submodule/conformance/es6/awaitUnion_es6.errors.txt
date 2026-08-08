@@ -1,0 +1,30 @@
+es6/awaitUnion_es6.ts(2,16): error TS2304: Cannot find name 'PromiseLike'.
+es6/awaitUnion_es6.ts(2,38): error TS2304: Cannot find name 'PromiseLike'.
+es6/awaitUnion_es6.ts(3,16): error TS2304: Cannot find name 'PromiseLike'.
+es6/awaitUnion_es6.ts(4,25): error TS2304: Cannot find name 'PromiseLike'.
+es6/awaitUnion_es6.ts(5,25): error TS2304: Cannot find name 'PromiseLike'.
+
+
+==== es6/awaitUnion_es6.ts (5 errors) ====
+    declare let a: number | string;
+    declare let b: PromiseLike<number> | PromiseLike<string>;
+                   ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'PromiseLike'.
+                                         ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'PromiseLike'.
+    declare let c: PromiseLike<number | string>;
+                   ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'PromiseLike'.
+    declare let d: number | PromiseLike<string>;
+                            ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'PromiseLike'.
+    declare let e: number | PromiseLike<number | string>;
+                            ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'PromiseLike'.
+    async function f() {
+    	let await_a = await a;
+    	let await_b = await b;
+    	let await_c = await c;
+    	let await_d = await d;
+    	let await_e = await e;
+    }

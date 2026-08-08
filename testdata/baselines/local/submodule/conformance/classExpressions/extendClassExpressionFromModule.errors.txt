@@ -1,0 +1,14 @@
+foo2.ts(2,9): error TS2304: Cannot find name 'foo1'.
+
+
+==== foo1.ts (0 errors) ====
+    class x{}
+    
+    export = x; 
+    
+==== foo2.ts (1 errors) ====
+    import foo1 = require('./foo1');
+    var x = foo1;
+            ~~~~
+!!! error TS2304: Cannot find name 'foo1'.
+    class y extends x {}

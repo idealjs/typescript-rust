@@ -1,0 +1,69 @@
+classStaticBlock/classStaticBlockUseBeforeDef3.ts(2,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef3.ts(3,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef3.ts(3,11): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef3.ts(6,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlockUseBeforeDef3.ts(6,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef3.ts(6,12): error TS2304: Cannot find name 'doSomething'.
+classStaticBlock/classStaticBlockUseBeforeDef3.ts(6,26): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef3.ts(9,1): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlockUseBeforeDef3.ts (8 errors) ====
+    class A {
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            A.doSomething(); // should not error
+             ~
+!!! error TS1005: ';' expected.
+              ~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+        }
+    
+        static doSomething() {
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+               ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'doSomething'.
+                             ~
+!!! error TS1005: ';' expected.
+           console.log("gotcha!");
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+    
+    class Baz {
+        static {
+            console.log(FOO);   // should error
+        }
+    }
+    
+    const FOO = "FOO";
+    class Bar {
+        static {
+            console.log(FOO); // should not error
+        }
+    }
+    
+    let u = "FOO" as "FOO" | "BAR";
+    
+    class CFA {
+        static {
+            u = "BAR";
+            u;  // should be "BAR"
+        }
+    
+        static t = 1;
+    
+        static doSomething() {}
+    
+        static {
+            u;  // should be "BAR"
+        }
+    }
+    
+    u; // should be "BAR"

@@ -1,0 +1,116 @@
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(6,21): error TS2339: Property 'a' does not exist on type 'object'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(12,21): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(13,22): error TS2339: Property 'a' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(13,31): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(14,27): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(15,36): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(17,21): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(19,16): error TS1005: ';' expected.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(20,21): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(22,16): error TS1005: ';' expected.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(23,14): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(29,21): error TS2339: Property 'a' does not exist on type 'object'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(34,21): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(35,22): error TS2339: Property 'a' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(35,31): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(36,27): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(37,36): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(39,21): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(41,16): error TS1005: ';' expected.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(42,21): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(44,16): error TS1005: ';' expected.
+instanceAndStaticMembers/typeOfThisInStaticMembers11.ts(45,14): error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+
+
+==== instanceAndStaticMembers/typeOfThisInStaticMembers11.ts (22 errors) ====
+    declare const foo: any;
+    
+    @foo
+    class C {
+        static a = 1;
+        static b = this.a + 1;
+                        ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+    }
+    
+    @foo
+    class D extends C {
+        static c = 2;
+        static d = this.c + 1;
+                        ~
+!!! error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+        static e = super.a + this.c + 1;
+                         ~
+!!! error TS2339: Property 'a' does not exist on type '{ fa: (v: number) => any }'.
+                                  ~
+!!! error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+        static f = () => this.c + 1;
+                              ~
+!!! error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+        static ff = function () { this.c + 1 }
+                                       ~
+!!! error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+        static foo () {
+            return this.c + 1;
+                        ~
+!!! error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+        }
+        static get fa () {
+                   ~~
+!!! error TS1005: ';' expected.
+            return this.c + 1;
+                        ~
+!!! error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+        }
+        static set fa (v: number) {
+                   ~~
+!!! error TS1005: ';' expected.
+            this.c = v + 1;
+                 ~
+!!! error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+        }
+    }
+    
+    class CC {
+        static a = 1;
+        static b = this.a + 1;
+                        ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+    }
+    
+    class DD extends CC {
+        static c = 2;
+        static d = this.c + 1;
+                        ~
+!!! error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+        static e = super.a + this.c + 1;
+                         ~
+!!! error TS2339: Property 'a' does not exist on type '{ fa: (v: number) => any }'.
+                                  ~
+!!! error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+        static f = () => this.c + 1;
+                              ~
+!!! error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+        static ff = function () { this.c + 1 }
+                                       ~
+!!! error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+        static foo () {
+            return this.c + 1;
+                        ~
+!!! error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+        }
+        static get fa () {
+                   ~~
+!!! error TS1005: ';' expected.
+            return this.c + 1;
+                        ~
+!!! error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+        }
+        static set fa (v: number) {
+                   ~~
+!!! error TS1005: ';' expected.
+            this.c = v + 1;
+                 ~
+!!! error TS2339: Property 'c' does not exist on type '{ fa: (v: number) => any }'.
+        }
+    }

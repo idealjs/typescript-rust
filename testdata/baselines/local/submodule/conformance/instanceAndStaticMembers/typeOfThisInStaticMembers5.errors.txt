@@ -1,0 +1,16 @@
+instanceAndStaticMembers/typeOfThisInStaticMembers5.ts(2,31): error TS2351: This expression is not constructable.
+instanceAndStaticMembers/typeOfThisInStaticMembers5.ts(4,26): error TS1005: ',' expected.
+
+
+==== instanceAndStaticMembers/typeOfThisInStaticMembers5.ts (2 errors) ====
+    class C {
+        static create = () => new this("yep")
+                                  ~~~~
+!!! error TS2351: This expression is not constructable.
+    
+        constructor (private foo: string) {
+                             ~~~
+!!! error TS1005: ',' expected.
+    
+        }
+    }

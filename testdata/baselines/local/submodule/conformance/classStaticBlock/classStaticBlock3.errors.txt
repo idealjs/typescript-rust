@@ -1,0 +1,74 @@
+classStaticBlock/classStaticBlock3.ts(6,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock3.ts(7,16): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock3.ts(7,17): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock3.ts(7,22): error TS1005: ',' expected.
+classStaticBlock/classStaticBlock3.ts(7,28): error TS1005: ',' expected.
+classStaticBlock/classStaticBlock3.ts(7,34): error TS1005: ',' expected.
+classStaticBlock/classStaticBlock3.ts(10,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock3.ts(10,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock3.ts(10,12): error TS2304: Cannot find name 'f2'.
+classStaticBlock/classStaticBlock3.ts(12,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock3.ts(12,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock3.ts(13,23): error TS2339: Property 'f1' does not exist on type 'object'.
+classStaticBlock/classStaticBlock3.ts(13,29): error TS2339: Property 'f2' does not exist on type 'object'.
+classStaticBlock/classStaticBlock3.ts(13,35): error TS2339: Property 'f3' does not exist on type 'object'.
+classStaticBlock/classStaticBlock3.ts(16,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock3.ts(16,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock3.ts(16,12): error TS2304: Cannot find name 'f3'.
+classStaticBlock/classStaticBlock3.ts(17,1): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlock3.ts (18 errors) ====
+    const a = 1;
+    
+    class C {
+        static f1 = 1;
+    
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            console.log(C.f1, C.f2, C.f3)
+                   ~
+!!! error TS1005: ';' expected.
+                    ~~~
+!!! error TS1005: ';' expected.
+                         ~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS1005: ',' expected.
+                                     ~
+!!! error TS1005: ',' expected.
+        }
+    
+        static f2 = 2;
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~~
+!!! error TS1005: ';' expected.
+               ~~
+!!! error TS2304: Cannot find name 'f2'.
+    
+        static {
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~
+!!! error TS1005: ';' expected.
+            console.log(C.f1, C.f2, C.f3)
+                          ~~
+!!! error TS2339: Property 'f1' does not exist on type 'object'.
+                                ~~
+!!! error TS2339: Property 'f2' does not exist on type 'object'.
+                                      ~~
+!!! error TS2339: Property 'f3' does not exist on type 'object'.
+        }
+    
+        static f3 = 3;
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~~
+!!! error TS1005: ';' expected.
+               ~~
+!!! error TS2304: Cannot find name 'f3'.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

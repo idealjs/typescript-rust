@@ -1,0 +1,15 @@
+classStaticBlock/classStaticBlock21.ts(3,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock21.ts(6,1): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlock21.ts (2 errors) ====
+    class C {
+        /* jsdocs */
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            // something
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

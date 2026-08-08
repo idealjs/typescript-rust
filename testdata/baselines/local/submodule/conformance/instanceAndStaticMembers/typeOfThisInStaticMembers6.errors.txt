@@ -1,0 +1,13 @@
+instanceAndStaticMembers/typeOfThisInStaticMembers6.ts(6,16): error TS2349: This expression is not callable.
+
+
+==== instanceAndStaticMembers/typeOfThisInStaticMembers6.ts (1 errors) ====
+    class C {
+        static f = 1
+    }
+    
+    class D extends C {
+        static c = super();
+                   ~~~~~
+!!! error TS2349: This expression is not callable.
+    }

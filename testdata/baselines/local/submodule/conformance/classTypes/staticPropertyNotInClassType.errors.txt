@@ -1,0 +1,75 @@
+classTypes/staticPropertyNotInClassType.ts(4,20): error TS1005: ';' expected.
+classTypes/staticPropertyNotInClassType.ts(5,20): error TS1005: ';' expected.
+classTypes/staticPropertyNotInClassType.ts(6,28): error TS1005: ',' expected.
+classTypes/staticPropertyNotInClassType.ts(6,47): error TS1005: ',' expected.
+classTypes/staticPropertyNotInClassType.ts(14,17): error TS2351: This expression is not constructable.
+classTypes/staticPropertyNotInClassType.ts(24,20): error TS1005: ';' expected.
+classTypes/staticPropertyNotInClassType.ts(25,20): error TS1005: ';' expected.
+classTypes/staticPropertyNotInClassType.ts(26,28): error TS1005: ',' expected.
+classTypes/staticPropertyNotInClassType.ts(26,42): error TS1005: ',' expected.
+classTypes/staticPropertyNotInClassType.ts(27,21): error TS2302: Static members cannot reference class type parameters.
+classTypes/staticPropertyNotInClassType.ts(34,17): error TS2351: This expression is not constructable.
+
+
+==== classTypes/staticPropertyNotInClassType.ts (11 errors) ====
+    namespace NonGeneric {
+        class C {
+            fn() { return this; }
+            static get x() { return 1; }
+                       ~
+!!! error TS1005: ';' expected.
+            static set x(v) { }
+                       ~
+!!! error TS1005: ';' expected.
+            constructor(public a: number, private b: number) { }
+                               ~
+!!! error TS1005: ',' expected.
+                                                  ~
+!!! error TS1005: ',' expected.
+            static foo: string; // not reflected in class type
+        }
+    
+        namespace C {
+            export var bar = ''; // not reflected in class type
+        }
+    
+        var c = new C(1, 2);
+                    ~
+!!! error TS2351: This expression is not constructable.
+        var r = c.fn();
+        var r4 = c.foo; // error
+        var r5 = c.bar; // error
+        var r6 = c.x; // error
+    }
+    
+    namespace Generic {
+        class C<T, U> {
+            fn() { return this; }
+            static get x() { return 1; }
+                       ~
+!!! error TS1005: ';' expected.
+            static set x(v) { }
+                       ~
+!!! error TS1005: ';' expected.
+            constructor(public a: T, private b: U) { }
+                               ~
+!!! error TS1005: ',' expected.
+                                             ~
+!!! error TS1005: ',' expected.
+            static foo: T; // not reflected in class type
+                        ~
+!!! error TS2302: Static members cannot reference class type parameters.
+        }
+    
+        namespace C {
+            export var bar = ''; // not reflected in class type
+        }
+    
+        var c = new C(1, '');
+                    ~
+!!! error TS2351: This expression is not constructable.
+        var r = c.fn();
+        var r4 = c.foo; // error
+        var r5 = c.bar; // error
+        var r6 = c.x; // error
+    }

@@ -1,0 +1,33 @@
+constructorDeclarations/constructorWithExpressionLessReturn.ts(15,24): error TS1005: ',' expected.
+constructorDeclarations/constructorWithExpressionLessReturn.ts(21,24): error TS1005: ',' expected.
+
+
+==== constructorDeclarations/constructorWithExpressionLessReturn.ts (2 errors) ====
+    class C {
+        constructor() {
+            return;
+        }
+    }
+    
+    class D {
+        x: number;
+        constructor() {
+            return;
+        }
+    }
+    
+    class E {
+        constructor(public x: number) {
+                           ~
+!!! error TS1005: ',' expected.
+            return;
+        }
+    }
+    
+    class F<T> {
+        constructor(public x: T) {
+                           ~
+!!! error TS1005: ',' expected.
+            return;
+        }
+    }

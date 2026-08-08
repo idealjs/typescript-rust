@@ -1,0 +1,79 @@
+inheritanceAndOverriding/derivedClassWithAny.ts(3,9): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassWithAny.ts(9,16): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassWithAny.ts(19,9): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassWithAny.ts(27,16): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassWithAny.ts(38,9): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassWithAny.ts(44,16): error TS1005: ';' expected.
+
+
+==== inheritanceAndOverriding/derivedClassWithAny.ts (6 errors) ====
+    class C {
+        x: number;
+        get X(): number { return 1; }
+            ~
+!!! error TS1005: ';' expected.
+        foo(): number {
+            return 1;
+        }
+    
+        static y: number;
+        static get Y(): number {
+                   ~
+!!! error TS1005: ';' expected.
+            return 1;
+        }
+        static bar(): number {
+            return 1;
+        }
+    }
+    
+    class D extends C {
+        x: any;
+        get X(): any {
+            ~
+!!! error TS1005: ';' expected.
+            return null;
+        }
+        foo(): any {
+            return 1;
+        }
+    
+        static y: any;
+        static get Y(): any {
+                   ~
+!!! error TS1005: ';' expected.
+            return null;
+        }
+        static bar(): any {
+            return null;
+        }
+    }
+    
+    // if D is a valid class definition than E is now not safe tranisitively through C
+    class E extends D {
+        x: string;
+        get X(): string{ return ''; }
+            ~
+!!! error TS1005: ';' expected.
+        foo(): string {
+            return '';
+        }
+    
+        static y: string;
+        static get Y(): string {
+                   ~
+!!! error TS1005: ';' expected.
+            return '';
+        }
+        static bar(): string {
+            return '';
+        }
+    }
+    
+    declare var c: C;
+    declare var d: D;
+    declare var e: E;
+    
+    c = d;
+    c = e;
+    var r = c.foo(); // e.foo would return string

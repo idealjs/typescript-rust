@@ -1,0 +1,13 @@
+classHeritageSpecification/classAppearsToHaveMembersOfObject.ts(6,8): error TS2304: Cannot find name 'Object'.
+
+
+==== classHeritageSpecification/classAppearsToHaveMembersOfObject.ts (1 errors) ====
+    class C { foo: string; }
+    
+    var c: C;
+    var r = c.toString();
+    var r2 = c.hasOwnProperty('');
+    var o: Object = c;
+           ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    var o2: {} = c;

@@ -1,0 +1,34 @@
+error TS2300: Duplicate identifier 'C1'.
+error TS2300: Duplicate identifier 'C2'.
+error TS2300: Duplicate identifier 'C3'.
+
+
+!!! error TS2300: Duplicate identifier 'C1'.
+
+!!! error TS2300: Duplicate identifier 'C2'.
+
+!!! error TS2300: Duplicate identifier 'C3'.
+==== classDeclarations/classAndInterfaceMergeConflictingMembers.ts (0 errors) ====
+    declare class C1 {
+        public x : number;
+    }
+    
+    interface C1 {
+        x : number;
+    }
+    
+    declare class C2 {
+        protected x : number;
+    }
+    
+    interface C2 {
+        x : number;
+    }
+    
+    declare class C3 {
+        private x : number;
+    }
+    
+    interface C3 {
+        x : number;
+    }

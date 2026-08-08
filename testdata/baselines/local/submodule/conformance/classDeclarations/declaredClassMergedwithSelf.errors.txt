@@ -1,0 +1,28 @@
+error TS2300: Duplicate identifier 'C1'.
+error TS2300: Duplicate identifier 'C2'.
+error TS2300: Duplicate identifier 'C2'.
+
+
+!!! error TS2300: Duplicate identifier 'C1'.
+
+!!! error TS2300: Duplicate identifier 'C2'.
+
+!!! error TS2300: Duplicate identifier 'C2'.
+==== classDeclarations/declaredClassMergedwithSelf.ts (0 errors) ====
+    
+==== file1.ts (0 errors) ====
+    declare class C1 {}
+    
+    declare class C1 {}
+    
+    declare class C2 {}
+    
+    interface C2 {}
+    
+    declare class C2 {}
+    
+==== file2.ts (0 errors) ====
+    declare class C3 { }
+    
+==== file3.ts (0 errors) ====
+    declare class C3 { }

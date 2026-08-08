@@ -1,0 +1,15 @@
+classExpressions/modifierOnClassExpressionMemberInFunction.ts(4,19): error TS2304: Cannot find name 'C'.
+
+
+==== classExpressions/modifierOnClassExpressionMemberInFunction.ts (1 errors) ====
+    ﻿// @target: es2015
+    
+    function g() {
+        var x = class C {
+                   ~
+!!! error TS2304: Cannot find name 'C'.
+            public prop1 = 1;
+            private foo() { }
+            static prop2 = 43;
+        }
+    }

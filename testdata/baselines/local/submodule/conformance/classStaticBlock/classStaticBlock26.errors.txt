@@ -1,0 +1,105 @@
+classStaticBlock/classStaticBlock26.ts(2,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock26.ts(5,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock26.ts(5,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock26.ts(8,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock26.ts(8,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock26.ts(9,18): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock26.ts(9,19): error TS1005: ']' expected.
+classStaticBlock/classStaticBlock26.ts(11,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock26.ts(11,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock26.ts(13,19): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock26.ts(13,24): error TS1005: ']' expected.
+classStaticBlock/classStaticBlock26.ts(16,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock26.ts(16,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock26.ts(17,12): error TS2304: Cannot find name 'await'.
+classStaticBlock/classStaticBlock26.ts(19,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock26.ts(19,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock26.ts(20,14): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock26.ts(21,9): error TS1116: A 'break' statement can only jump to a label of an enclosing statement.
+classStaticBlock/classStaticBlock26.ts(23,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock26.ts(23,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock26.ts(26,27): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock26.ts(26,30): error TS1005: ',' expected.
+classStaticBlock/classStaticBlock26.ts(26,30): error TS1182: A destructuring declaration must have an initializer.
+classStaticBlock/classStaticBlock26.ts(28,1): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlock26.ts (24 errors) ====
+    class C {
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            await; // illegal
+        }
+        static {
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~
+!!! error TS1005: ';' expected.
+            await (1); // illegal
+        }
+        static {
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~
+!!! error TS1005: ';' expected.
+            ({ [await]: 1 }); // illegal
+                     ~
+!!! error TS1012: Unexpected token.
+                      ~
+!!! error TS1005: ']' expected.
+        }
+        static {
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~
+!!! error TS1005: ';' expected.
+            class D {
+                [await] = 1; // illegal (computed property names are evaluated outside of a class body
+                      ~
+!!! error TS1012: Unexpected token.
+                           ~
+!!! error TS1005: ']' expected.
+            };
+        }
+        static {
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~
+!!! error TS1005: ';' expected.
+            ({ await }); // illegal short-hand property reference
+               ~~~~~
+!!! error TS2304: Cannot find name 'await'.
+        }
+        static {
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~
+!!! error TS1005: ';' expected.
+            await: // illegal, 'await' cannot be used as a label
+                 ~
+!!! error TS1012: Unexpected token.
+            break await; // illegal, 'await' cannot be used as a label
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        }
+    ~~~~
+!!! error TS1116: A 'break' statement can only jump to a label of an enclosing statement.
+        static {
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~
+!!! error TS1005: ';' expected.
+            function f(await) { }
+            const ff = (await) => { }
+            const fff = await => { }
+                              ~~
+!!! error TS1012: Unexpected token.
+                                 ~
+!!! error TS1005: ',' expected.
+                                 ~~~
+        }
+    ~~~~
+!!! error TS1182: A destructuring declaration must have an initializer.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

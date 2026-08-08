@@ -1,0 +1,163 @@
+classStaticBlock/classStaticBlock8.ts(4,20): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock8.ts(5,23): error TS1005: ',' expected.
+classStaticBlock/classStaticBlock8.ts(5,27): error TS1003: Identifier expected.
+classStaticBlock/classStaticBlock8.ts(8,23): error TS1005: ',' expected.
+classStaticBlock/classStaticBlock8.ts(8,27): error TS1003: Identifier expected.
+classStaticBlock/classStaticBlock8.ts(11,23): error TS1005: ',' expected.
+classStaticBlock/classStaticBlock8.ts(11,27): error TS1003: Identifier expected.
+classStaticBlock/classStaticBlock8.ts(14,23): error TS1005: ',' expected.
+classStaticBlock/classStaticBlock8.ts(14,27): error TS1003: Identifier expected.
+classStaticBlock/classStaticBlock8.ts(21,13): error TS1107: Jump target cannot cross function boundary.
+classStaticBlock/classStaticBlock8.ts(24,13): error TS1107: Jump target cannot cross function boundary.
+classStaticBlock/classStaticBlock8.ts(27,13): error TS1107: Jump target cannot cross function boundary.
+classStaticBlock/classStaticBlock8.ts(30,13): error TS1107: Jump target cannot cross function boundary.
+classStaticBlock/classStaticBlock8.ts(35,16): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock8.ts(36,26): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock8.ts(37,19): error TS2304: Cannot find name 'while'.
+classStaticBlock/classStaticBlock8.ts(37,25): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock8.ts(37,26): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock8.ts(37,27): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock8.ts(37,29): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock8.ts(38,23): error TS1005: ',' expected.
+classStaticBlock/classStaticBlock8.ts(38,27): error TS1003: Identifier expected.
+classStaticBlock/classStaticBlock8.ts(38,30): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock8.ts(38,36): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock8.ts(39,23): error TS1005: ',' expected.
+classStaticBlock/classStaticBlock8.ts(39,27): error TS1003: Identifier expected.
+classStaticBlock/classStaticBlock8.ts(39,30): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock8.ts(39,39): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock8.ts(40,23): error TS1005: ',' expected.
+classStaticBlock/classStaticBlock8.ts(40,27): error TS1003: Identifier expected.
+classStaticBlock/classStaticBlock8.ts(40,30): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock8.ts(41,23): error TS1005: ',' expected.
+classStaticBlock/classStaticBlock8.ts(41,27): error TS1003: Identifier expected.
+classStaticBlock/classStaticBlock8.ts(41,30): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock8.ts(43,21): error TS2304: Cannot find name 'v'.
+classStaticBlock/classStaticBlock8.ts(46,9): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlock8.ts (36 errors) ====
+    function foo (v: number) {
+        label: while (v) {
+            class C {
+                static {
+                       ~
+!!! error TS1005: ';' expected.
+                    if (v === 1) {
+                          ~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1003: Identifier expected.
+                        break label;
+                    }
+                    if (v === 2) {
+                          ~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1003: Identifier expected.
+                        continue label;
+                    }
+                    if (v === 3) {
+                          ~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1003: Identifier expected.
+                        break
+                    }
+                    if (v === 4) {
+                          ~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1003: Identifier expected.
+                        continue
+                    }
+                }
+            }
+    
+            if (v === 5) {
+                break label;
+                ~~~~~~~~~~~~
+            }
+    ~~~~~~~~
+!!! error TS1107: Jump target cannot cross function boundary.
+            if (v === 6) {
+                continue label;
+                ~~~~~~~~~~~~~~~
+            }
+    ~~~~~~~~
+!!! error TS1107: Jump target cannot cross function boundary.
+            if (v === 7) {
+                break;
+                ~~~~~~
+            }
+    ~~~~~~~~
+!!! error TS1107: Jump target cannot cross function boundary.
+            if (v === 8) {
+                continue;
+                ~~~~~~~~~
+            }
+    ~~~~~~~~
+!!! error TS1107: Jump target cannot cross function boundary.
+        }
+    
+        class C {
+            static {
+                   ~
+!!! error TS1005: ';' expected.
+                outer: break outer; // valid
+                             ~~~~~
+!!! error TS1005: ';' expected.
+                loop: while (v) {
+                      ~~~~~
+!!! error TS2304: Cannot find name 'while'.
+                            ~
+!!! error TS1005: ';' expected.
+                             ~
+!!! error TS1005: ';' expected.
+                              ~
+!!! error TS1005: ';' expected.
+                                ~
+!!! error TS1005: ';' expected.
+                    if (v === 1) break loop; // valid
+                          ~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1003: Identifier expected.
+                                 ~~~~~
+!!! error TS1005: ';' expected.
+                                       ~~~~
+!!! error TS1005: ';' expected.
+                    if (v === 2) continue loop; // valid
+                          ~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1003: Identifier expected.
+                                 ~~~~~~~~
+!!! error TS1005: ';' expected.
+                                          ~~~~
+!!! error TS1005: ';' expected.
+                    if (v === 3) break; // valid
+                          ~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1003: Identifier expected.
+                                 ~~~~~
+!!! error TS1005: ';' expected.
+                    if (v === 4) continue; // valid
+                          ~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1003: Identifier expected.
+                                 ~~~~~~~~
+!!! error TS1005: ';' expected.
+                }
+                switch (v) {
+                        ~
+!!! error TS2304: Cannot find name 'v'.
+                    default: break; // valid
+                }
+            }
+            ~
+!!! error TS1128: Declaration or statement expected.
+        }
+    }

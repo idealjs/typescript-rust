@@ -1,0 +1,30 @@
+privateNames/privateNameDeclaration.ts(2,5): error TS1003: Identifier expected.
+privateNames/privateNameDeclaration.ts(2,5): error TS1127: Invalid character.
+privateNames/privateNameDeclaration.ts(2,6): error TS1005: ';' expected.
+privateNames/privateNameDeclaration.ts(3,5): error TS1003: Identifier expected.
+privateNames/privateNameDeclaration.ts(3,5): error TS1127: Invalid character.
+privateNames/privateNameDeclaration.ts(3,6): error TS1005: ';' expected.
+
+
+==== privateNames/privateNameDeclaration.ts (6 errors) ====
+    class A {
+        #foo: string;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~
+!!! error TS1005: ';' expected.
+        #bar = 6;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~
+!!! error TS1005: ';' expected.
+        baz: string;
+        qux = 6;
+        quux(): void {
+    
+        }
+    }

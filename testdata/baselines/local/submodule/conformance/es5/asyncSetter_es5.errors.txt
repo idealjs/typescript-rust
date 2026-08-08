@@ -1,0 +1,10 @@
+es5/asyncSetter_es5.ts(2,13): error TS1005: ';' expected.
+
+
+==== es5/asyncSetter_es5.ts (1 errors) ====
+    class C {
+      async set foo(value) {
+                ~~~
+!!! error TS1005: ';' expected.
+      }
+    }

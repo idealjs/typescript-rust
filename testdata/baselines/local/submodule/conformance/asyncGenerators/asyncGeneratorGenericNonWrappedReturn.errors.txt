@@ -1,0 +1,11 @@
+asyncGenerators/asyncGeneratorGenericNonWrappedReturn.ts(3,39): error TS2304: Cannot find name 'AsyncGenerator'.
+
+
+==== asyncGenerators/asyncGeneratorGenericNonWrappedReturn.ts (1 errors) ====
+    // #48966
+    
+    export async function* test<T>(a: T): AsyncGenerator<T, T, T> {
+                                          ~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'AsyncGenerator'.
+      return a // `T` should be allowed here even though the generator's `returnType` is `Awaited<T>`
+    }

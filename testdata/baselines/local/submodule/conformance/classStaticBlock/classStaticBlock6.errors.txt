@@ -1,0 +1,110 @@
+classStaticBlock/classStaticBlock6.ts(6,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock6.ts(7,13): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock6.ts(8,13): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock6.ts(9,13): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock6.ts(12,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock6.ts(12,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock6.ts(13,14): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock6.ts(13,16): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock6.ts(17,9): error TS2304: Cannot find name 'arguments'.
+classStaticBlock/classStaticBlock6.ts(18,14): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock6.ts(21,1): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlock6.ts (11 errors) ====
+    class B {
+        static a = 1;
+    }
+    
+    class C extends B {
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            let await = 1;
+                ~~~~~
+!!! error TS1005: ';' expected.
+            let arguments = 1;
+                ~~~~~~~~~
+!!! error TS1005: ';' expected.
+            let eval = 1;
+                ~~~~
+!!! error TS1005: ';' expected.
+        }
+    
+        static {
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~
+!!! error TS1005: ';' expected.
+            await: if (true) {
+                 ~
+!!! error TS1012: Unexpected token.
+                   ~~
+!!! error TS1005: ';' expected.
+    
+            }
+    
+            arguments;
+            ~~~~~~~~~
+!!! error TS2304: Cannot find name 'arguments'.
+            await;
+                 ~
+!!! error TS1012: Unexpected token.
+            super();
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+    class CC {
+        constructor () {
+            class C extends B {
+                static {
+                    class CC extends B {
+                        constructor () {
+                            super();
+                        }
+                    }
+                    super();
+                }
+            }
+        }
+    }
+    
+    async function foo () {
+        class C extends B {
+            static {
+                arguments;
+                await;
+    
+                async function ff () {
+                    arguments;
+                    await;
+                }
+            }
+        }
+    }
+    
+    function foo1 () {
+        class C extends B {
+            static {
+                arguments;
+    
+                function ff () {
+                    arguments;
+                }
+            }
+        }
+    }
+    
+    class foo2 {
+        static {
+            this.b  // should error
+            let b: typeof this.b;   // ok
+            if (1) {
+                this.b; // should error
+            }
+        }
+    
+        static b = 1;
+    }

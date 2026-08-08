@@ -1,0 +1,7 @@
+classExpressions/classExpression1.ts(1,15): error TS2304: Cannot find name 'C'.
+
+
+==== classExpressions/classExpression1.ts (1 errors) ====
+    var v = class C {};
+                  ~
+!!! error TS2304: Cannot find name 'C'.

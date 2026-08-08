@@ -1,0 +1,61 @@
+classStaticBlock/classStaticBlock7.ts(2,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock7.ts(3,15): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock7.ts(4,15): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock7.ts(5,16): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock7.ts(7,1): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlock7.ts (5 errors) ====
+    class C {
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            await 1;
+                  ~
+!!! error TS1005: ';' expected.
+            yield 1;
+                  ~
+!!! error TS1005: ';' expected.
+            return 1;
+                   ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+    async function f1 () {
+        class C {
+            static {
+                await 1;
+    
+                async function ff () {
+                    await 1;
+                }
+            }
+        }
+    }
+    
+    function * f2 () {
+        class C {
+            static {
+                yield 1;
+    
+                function * ff () {
+                    yield 1;
+                }
+            }
+        }
+    }
+    
+    function f3 () {
+        class C {
+            static {
+                return 1;
+    
+                function ff () {
+                    return 1
+                }
+            }
+        }
+    }

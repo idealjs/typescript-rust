@@ -1,0 +1,35 @@
+constructorParameters/constructorParameterProperties.ts(3,25): error TS1005: ',' expected.
+constructorParameters/constructorParameterProperties.ts(3,46): error TS1005: ',' expected.
+constructorParameters/constructorParameterProperties.ts(13,31): error TS1005: ',' expected.
+constructorParameters/constructorParameterProperties.ts(13,47): error TS1005: ',' expected.
+
+
+==== constructorParameters/constructorParameterProperties.ts (4 errors) ====
+    class C {
+        y: string;
+        constructor(private x: string, protected z: string) { }
+                            ~
+!!! error TS1005: ',' expected.
+                                                 ~
+!!! error TS1005: ',' expected.
+    }
+    
+    declare var c: C;
+    var r = c.y;
+    var r2 = c.x; // error
+    var r3 = c.z; // error
+    
+    class D<T> {
+        y: T;
+        constructor(a: T, private x: T, protected z: T) { }
+                                  ~
+!!! error TS1005: ',' expected.
+                                                  ~
+!!! error TS1005: ',' expected.
+    }
+    
+    declare var d: D<string>;
+    var r = d.y;
+    var r2 = d.x; // error
+    var r3 = d.a; // error
+    var r4 = d.z; // error

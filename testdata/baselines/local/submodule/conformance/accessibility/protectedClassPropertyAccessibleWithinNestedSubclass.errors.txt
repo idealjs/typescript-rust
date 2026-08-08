@@ -1,0 +1,52 @@
+accessibility/protectedClassPropertyAccessibleWithinNestedSubclass.ts(7,19): error TS1005: ';' expected.
+accessibility/protectedClassPropertyAccessibleWithinNestedSubclass.ts(8,19): error TS1005: ';' expected.
+accessibility/protectedClassPropertyAccessibleWithinNestedSubclass.ts(11,26): error TS1005: ';' expected.
+accessibility/protectedClassPropertyAccessibleWithinNestedSubclass.ts(12,26): error TS1005: ';' expected.
+
+
+==== accessibility/protectedClassPropertyAccessibleWithinNestedSubclass.ts (4 errors) ====
+    class B {
+        protected x: string;
+        protected static x: string;
+    }
+    
+    class C extends B {
+        protected get y() { return this.x; }
+                      ~
+!!! error TS1005: ';' expected.
+        protected set y(x) { this.y = this.x; }
+                      ~
+!!! error TS1005: ';' expected.
+        protected foo() { return this.x; }
+    
+        protected static get y() { return this.x; }
+                             ~
+!!! error TS1005: ';' expected.
+        protected static set y(x) { this.y = this.x; }
+                             ~
+!!! error TS1005: ';' expected.
+        protected static foo() { return this.x; }
+        protected static bar() { this.foo(); }
+        
+        protected bar() { 
+            class D {
+                protected foo() {
+                    var c = new C();
+                    var c1 = c.y;
+                    var c2 = c.x;
+                    var c3 = c.foo;
+                    var c4 = c.bar;
+                    var c5 = c.z; // error
+                    
+                    var sc1 = C.x;
+                    var sc2 = C.y;
+                    var sc3 = C.foo;
+                    var sc4 = C.bar;
+                }
+            }
+        }
+    }
+    
+    class E extends C {
+        protected z: string;
+    }

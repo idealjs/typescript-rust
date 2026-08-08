@@ -590,9 +590,16 @@ fn process_batch(
                     }
                 }
             }
-            Err(_) => {
+            Err(e) => {
                 panic_count += 1;
-                fails.push(format!("PANIC: {clean_name}"));
+                let msg = if let Some(s) = e.downcast_ref::<&str>() {
+                    s.to_string()
+                } else if let Some(s) = e.downcast_ref::<String>() {
+                    s.clone()
+                } else {
+                    format!("{e:?}")
+                };
+                fails.push(format!("PANIC: {clean_name}: {msg}"));
             }
         }
     }

@@ -1,0 +1,52 @@
+superCalls/derivedClassSuperCallsWithThisArg.ts(8,9): error TS2349: This expression is not callable.
+superCalls/derivedClassSuperCallsWithThisArg.ts(13,24): error TS1005: ',' expected.
+superCalls/derivedClassSuperCallsWithThisArg.ts(14,9): error TS2349: This expression is not callable.
+superCalls/derivedClassSuperCallsWithThisArg.ts(19,24): error TS1005: ',' expected.
+superCalls/derivedClassSuperCallsWithThisArg.ts(20,9): error TS2349: This expression is not callable.
+superCalls/derivedClassSuperCallsWithThisArg.ts(25,24): error TS1005: ',' expected.
+superCalls/derivedClassSuperCallsWithThisArg.ts(26,9): error TS2349: This expression is not callable.
+
+
+==== superCalls/derivedClassSuperCallsWithThisArg.ts (7 errors) ====
+    class Base {
+        x: string;
+        constructor(a) { }
+    }
+    
+    class Derived extends Base {
+        constructor() {
+            super(this); // ok
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    class Derived2 extends Base {
+        constructor(public a: string) {
+                           ~
+!!! error TS1005: ',' expected.
+            super(this); // error
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    class Derived3 extends Base {
+        constructor(public a: string) {
+                           ~
+!!! error TS1005: ',' expected.
+            super(() => this); // error
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    class Derived4 extends Base {
+        constructor(public a: string) {
+                           ~
+!!! error TS1005: ',' expected.
+            super(function () { return this; }); // ok
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }

@@ -1,0 +1,13 @@
+functionDeclarations/asyncFunctionDeclaration8_es6.ts(1,17): error TS1012: Unexpected token.
+functionDeclarations/asyncFunctionDeclaration8_es6.ts(1,18): error TS1005: ']' expected.
+functionDeclarations/asyncFunctionDeclaration8_es6.ts(1,20): error TS2304: Cannot find name 'foo'.
+
+
+==== functionDeclarations/asyncFunctionDeclaration8_es6.ts (3 errors) ====
+    var v = { [await]: foo }
+                    ~
+!!! error TS1012: Unexpected token.
+                     ~
+!!! error TS1005: ']' expected.
+                       ~~~
+!!! error TS2304: Cannot find name 'foo'.

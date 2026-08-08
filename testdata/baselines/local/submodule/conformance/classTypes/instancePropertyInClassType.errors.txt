@@ -1,0 +1,77 @@
+classTypes/instancePropertyInClassType.ts(4,13): error TS1005: ';' expected.
+classTypes/instancePropertyInClassType.ts(7,13): error TS1005: ';' expected.
+classTypes/instancePropertyInClassType.ts(9,28): error TS1005: ',' expected.
+classTypes/instancePropertyInClassType.ts(9,47): error TS1005: ',' expected.
+classTypes/instancePropertyInClassType.ts(12,13): error TS2554: Expected 4 arguments, but got 2.
+classTypes/instancePropertyInClassType.ts(17,14): error TS2554: Expected 1 arguments, but got 0.
+classTypes/instancePropertyInClassType.ts(24,13): error TS1005: ';' expected.
+classTypes/instancePropertyInClassType.ts(27,13): error TS1005: ';' expected.
+classTypes/instancePropertyInClassType.ts(29,28): error TS1005: ',' expected.
+classTypes/instancePropertyInClassType.ts(29,42): error TS1005: ',' expected.
+classTypes/instancePropertyInClassType.ts(32,13): error TS2554: Expected 4 arguments, but got 2.
+classTypes/instancePropertyInClassType.ts(37,14): error TS2554: Expected 1 arguments, but got 0.
+
+
+==== classTypes/instancePropertyInClassType.ts (12 errors) ====
+    namespace NonGeneric {
+        class C {
+            x: string;
+            get y() {
+                ~
+!!! error TS1005: ';' expected.
+                return 1;
+            }
+            set y(v) { }
+                ~
+!!! error TS1005: ';' expected.
+            fn() { return this; }
+            constructor(public a: number, private b: number) { }
+                               ~
+!!! error TS1005: ',' expected.
+                                                  ~
+!!! error TS1005: ',' expected.
+        }
+    
+        var c = new C(1, 2);
+                ~~~~~~~~~~~
+!!! error TS2554: Expected 4 arguments, but got 2.
+        var r = c.fn();
+        var r2 = r.x;
+        var r3 = r.y;
+        r.y = 4;
+        var r6 = c.y(); // error
+                 ~~~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    
+    }
+    
+    namespace Generic {
+        class C<T,U> {
+            x: T;
+            get y() {
+                ~
+!!! error TS1005: ';' expected.
+                return null;
+            }
+            set y(v: U) { }
+                ~
+!!! error TS1005: ';' expected.
+            fn() { return this; }
+            constructor(public a: T, private b: U) { }
+                               ~
+!!! error TS1005: ',' expected.
+                                             ~
+!!! error TS1005: ',' expected.
+        }
+    
+        var c = new C(1, '');
+                ~~~~~~~~~~~~
+!!! error TS2554: Expected 4 arguments, but got 2.
+        var r = c.fn();
+        var r2 = r.x;
+        var r3 = r.y;
+        r.y = '';
+        var r6 = c.y(); // error
+                 ~~~
+!!! error TS2554: Expected 1 arguments, but got 0.
+    }

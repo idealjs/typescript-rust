@@ -1,0 +1,80 @@
+constructorParameters/readonlyConstructorAssignment.ts(4,26): error TS1005: ',' expected.
+constructorParameters/readonlyConstructorAssignment.ts(5,14): error TS2339: Property 'x' does not exist on type 'object'.
+constructorParameters/readonlyConstructorAssignment.ts(11,9): error TS2349: This expression is not callable.
+constructorParameters/readonlyConstructorAssignment.ts(13,14): error TS2339: Property 'x' does not exist on type 'object'.
+constructorParameters/readonlyConstructorAssignment.ts(20,26): error TS1005: ',' expected.
+constructorParameters/readonlyConstructorAssignment.ts(21,9): error TS2349: This expression is not callable.
+constructorParameters/readonlyConstructorAssignment.ts(22,14): error TS2339: Property 'x' does not exist on type 'object'.
+constructorParameters/readonlyConstructorAssignment.ts(27,25): error TS1005: ',' expected.
+constructorParameters/readonlyConstructorAssignment.ts(27,34): error TS1005: ',' expected.
+constructorParameters/readonlyConstructorAssignment.ts(28,14): error TS2339: Property 'x' does not exist on type 'object'.
+constructorParameters/readonlyConstructorAssignment.ts(34,26): error TS1005: ',' expected.
+constructorParameters/readonlyConstructorAssignment.ts(35,9): error TS2349: This expression is not callable.
+constructorParameters/readonlyConstructorAssignment.ts(36,14): error TS2339: Property 'x' does not exist on type 'object'.
+
+
+==== constructorParameters/readonlyConstructorAssignment.ts (13 errors) ====
+    // Tests that readonly parameter properties behave like regular readonly properties
+    
+    class A {
+        constructor(readonly x: number) {
+                             ~
+!!! error TS1005: ',' expected.
+            this.x = 0;
+                 ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+        }
+    }
+    
+    class B extends A {
+        constructor(x: number) {
+            super(x);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            // Fails, x is readonly
+            this.x = 1;
+                 ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+        }
+    }
+    
+    class C extends A {
+        // This is the usual behavior of readonly properties:
+        // if one is redeclared in a base class, then it can be assigned to.
+        constructor(readonly x: number) {
+                             ~
+!!! error TS1005: ',' expected.
+            super(x);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            this.x = 1;
+                 ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+        }
+    }
+    
+    class D {
+        constructor(private readonly x: number) {
+                            ~~~~~~~~
+!!! error TS1005: ',' expected.
+                                     ~
+!!! error TS1005: ',' expected.
+            this.x = 0;
+                 ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+        }
+    }
+    
+    // Fails, can't redeclare readonly property
+    class E extends D {
+        constructor(readonly x: number) {
+                             ~
+!!! error TS1005: ',' expected.
+            super(x);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            this.x = 1;
+                 ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
+        }
+    }

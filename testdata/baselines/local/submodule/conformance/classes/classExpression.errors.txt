@@ -1,0 +1,24 @@
+classes/classExpression.ts(1,15): error TS2304: Cannot find name 'C'.
+classes/classExpression.ts(5,16): error TS2304: Cannot find name 'C2'.
+classes/classExpression.ts(10,19): error TS2304: Cannot find name 'C4'.
+
+
+==== classes/classExpression.ts (3 errors) ====
+    var x = class C {
+                  ~
+!!! error TS2304: Cannot find name 'C'.
+    }
+    
+    var y = {
+        foo: class C2 {
+                   ~~
+!!! error TS2304: Cannot find name 'C2'.
+        }
+    }
+    
+    namespace M {
+        var z = class C4 {
+                      ~~
+!!! error TS2304: Cannot find name 'C4'.
+        }
+    }

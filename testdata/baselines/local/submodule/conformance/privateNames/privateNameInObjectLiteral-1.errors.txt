@@ -1,0 +1,18 @@
+privateNames/privateNameInObjectLiteral-1.ts(2,5): error TS1003: Identifier expected.
+privateNames/privateNameInObjectLiteral-1.ts(2,5): error TS1127: Invalid character.
+privateNames/privateNameInObjectLiteral-1.ts(2,5): error TS2304: Cannot find name '#'.
+privateNames/privateNameInObjectLiteral-1.ts(2,6): error TS1005: ',' expected.
+
+
+==== privateNames/privateNameInObjectLiteral-1.ts (4 errors) ====
+    const obj = {
+        #foo: 1
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+        ~
+!!! error TS2304: Cannot find name '#'.
+         ~~~
+!!! error TS1005: ',' expected.
+    };

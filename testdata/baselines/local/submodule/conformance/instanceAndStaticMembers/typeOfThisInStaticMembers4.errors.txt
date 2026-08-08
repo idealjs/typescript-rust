@@ -1,0 +1,25 @@
+instanceAndStaticMembers/typeOfThisInStaticMembers4.ts(3,21): error TS2339: Property 'a' does not exist on type 'object'.
+instanceAndStaticMembers/typeOfThisInStaticMembers4.ts(8,21): error TS2339: Property 'c' does not exist on type 'object'.
+instanceAndStaticMembers/typeOfThisInStaticMembers4.ts(9,22): error TS2339: Property 'a' does not exist on type 'object'.
+instanceAndStaticMembers/typeOfThisInStaticMembers4.ts(9,31): error TS2339: Property 'c' does not exist on type 'object'.
+
+
+==== instanceAndStaticMembers/typeOfThisInStaticMembers4.ts (4 errors) ====
+    class C {
+        static a = 1;
+        static b = this.a + 1;
+                        ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+    }
+    
+    class D extends C {
+        static c = 2;
+        static d = this.c + 1;
+                        ~
+!!! error TS2339: Property 'c' does not exist on type 'object'.
+        static e = super.a + this.c + 1;
+                         ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+                                  ~
+!!! error TS2339: Property 'c' does not exist on type 'object'.
+    }

@@ -1,0 +1,35 @@
+inheritanceAndOverriding/derivedClassWithPrivateInstanceShadowingProtectedInstance.ts(7,19): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassWithPrivateInstanceShadowingProtectedInstance.ts(8,19): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassWithPrivateInstanceShadowingProtectedInstance.ts(18,17): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassWithPrivateInstanceShadowingProtectedInstance.ts(19,17): error TS1005: ';' expected.
+
+
+==== inheritanceAndOverriding/derivedClassWithPrivateInstanceShadowingProtectedInstance.ts (4 errors) ====
+    class Base {
+        protected x: string;
+        protected fn(): string {
+            return '';
+        }
+    
+        protected get a() { return 1; }
+                      ~
+!!! error TS1005: ';' expected.
+        protected set a(v) { }
+                      ~
+!!! error TS1005: ';' expected.
+    }
+    
+    // error, not a subtype
+    class Derived extends Base {
+        private x: string; 
+        private fn(): string {
+            return '';
+        }
+    
+        private get a() { return 1; }
+                    ~
+!!! error TS1005: ';' expected.
+        private set a(v) { }
+                    ~
+!!! error TS1005: ';' expected.
+    }

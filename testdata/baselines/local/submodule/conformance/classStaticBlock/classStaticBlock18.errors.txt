@@ -1,0 +1,28 @@
+classStaticBlock/classStaticBlock18.ts(4,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock18.ts(5,13): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock18.ts(7,16): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock18.ts(12,3): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlock18.ts (4 errors) ====
+    function foo () {
+      return class {
+        static foo = 1;
+        static {
+               ~
+!!! error TS1005: ';' expected.
+          const c = class {
+                ~
+!!! error TS1005: ';' expected.
+            static bar = 2;
+            static {
+                   ~
+!!! error TS1005: ';' expected.
+              // do
+            }
+          }
+        }
+      }
+      ~
+!!! error TS1128: Declaration or statement expected.
+    }

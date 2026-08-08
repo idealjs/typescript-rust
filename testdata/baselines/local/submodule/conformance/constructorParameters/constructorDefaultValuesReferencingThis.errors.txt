@@ -1,0 +1,27 @@
+constructorParameters/constructorDefaultValuesReferencingThis.ts(11,24): error TS1005: ',' expected.
+constructorParameters/constructorDefaultValuesReferencingThis.ts(16,9): error TS2349: This expression is not callable.
+
+
+==== constructorParameters/constructorDefaultValuesReferencingThis.ts (2 errors) ====
+    class C {
+        public baseProp = 1;
+        constructor(x = this) { }
+    }
+    
+    class D<T> {
+        constructor(x = this) { }
+    }
+    
+    class E<T> {
+        constructor(public x = this) { }
+                           ~
+!!! error TS1005: ',' expected.
+    }
+    
+    class F extends C {
+        constructor(y = this.baseProp) {
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }

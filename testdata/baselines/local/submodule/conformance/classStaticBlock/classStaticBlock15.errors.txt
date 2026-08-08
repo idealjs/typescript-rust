@@ -1,0 +1,82 @@
+classStaticBlock/classStaticBlock15.ts(4,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock15.ts(4,10): error TS1127: Invalid character.
+classStaticBlock/classStaticBlock15.ts(4,11): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock15.ts(5,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock15.ts(5,10): error TS1127: Invalid character.
+classStaticBlock/classStaticBlock15.ts(5,11): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock15.ts(6,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock15.ts(6,10): error TS1127: Invalid character.
+classStaticBlock/classStaticBlock15.ts(6,11): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock15.ts(8,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock15.ts(9,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock15.ts(9,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock15.ts(10,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock15.ts(10,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock15.ts(11,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock15.ts(11,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock15.ts(12,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock15.ts(12,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock15.ts(13,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock15.ts(13,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock15.ts(14,1): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlock15.ts (21 errors) ====
+    var _C__1;
+    
+    class C {
+      static #_1 = 1;
+             ~
+!!! error TS1005: ';' expected.
+             ~
+!!! error TS1127: Invalid character.
+              ~~
+!!! error TS1005: ';' expected.
+      static #_3 = 3;
+             ~
+!!! error TS1005: ';' expected.
+             ~
+!!! error TS1127: Invalid character.
+              ~~
+!!! error TS1005: ';' expected.
+      static #_5 = 5;
+             ~
+!!! error TS1005: ';' expected.
+             ~
+!!! error TS1127: Invalid character.
+              ~~
+!!! error TS1005: ';' expected.
+    
+      static {}
+             ~
+!!! error TS1005: ';' expected.
+      static {}
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+      static {}
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+      static {}
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+      static {}
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+      static {}
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+    console.log(_C__1)

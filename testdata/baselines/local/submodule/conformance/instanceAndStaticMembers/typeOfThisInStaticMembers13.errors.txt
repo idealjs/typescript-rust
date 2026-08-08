@@ -1,0 +1,13 @@
+instanceAndStaticMembers/typeOfThisInStaticMembers13.ts(3,25): error TS2304: Cannot find name 'Inner'.
+
+
+==== instanceAndStaticMembers/typeOfThisInStaticMembers13.ts (1 errors) ====
+    class C {
+        static readonly c: "foo" = "foo"
+        static bar =  class Inner {
+                            ~~~~~
+!!! error TS2304: Cannot find name 'Inner'.
+            static [this.c] = 123;
+            [this.c] = 123;
+        }
+    }

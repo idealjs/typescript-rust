@@ -1,0 +1,176 @@
+superCalls/derivedClassSuperStatementPosition.ts(1,28): error TS2304: Cannot find name 'Object'.
+superCalls/derivedClassSuperStatementPosition.ts(4,9): error TS2349: This expression is not callable.
+superCalls/derivedClassSuperStatementPosition.ts(8,44): error TS2304: Cannot find name 'Object'.
+superCalls/derivedClassSuperStatementPosition.ts(13,9): error TS2349: This expression is not callable.
+superCalls/derivedClassSuperStatementPosition.ts(18,41): error TS2304: Cannot find name 'Object'.
+superCalls/derivedClassSuperStatementPosition.ts(23,9): error TS2349: This expression is not callable.
+superCalls/derivedClassSuperStatementPosition.ts(28,31): error TS2304: Cannot find name 'Object'.
+superCalls/derivedClassSuperStatementPosition.ts(34,9): error TS2349: This expression is not callable.
+superCalls/derivedClassSuperStatementPosition.ts(41,42): error TS2304: Cannot find name 'Object'.
+superCalls/derivedClassSuperStatementPosition.ts(49,9): error TS2349: This expression is not callable.
+superCalls/derivedClassSuperStatementPosition.ts(56,36): error TS2304: Cannot find name 'Object'.
+superCalls/derivedClassSuperStatementPosition.ts(59,9): error TS2304: Cannot find name 'Math'.
+superCalls/derivedClassSuperStatementPosition.ts(60,15): error TS2349: This expression is not callable.
+superCalls/derivedClassSuperStatementPosition.ts(61,15): error TS2349: This expression is not callable.
+superCalls/derivedClassSuperStatementPosition.ts(65,27): error TS2304: Cannot find name 'Object'.
+superCalls/derivedClassSuperStatementPosition.ts(68,13): error TS2304: Cannot find name 'Math'.
+superCalls/derivedClassSuperStatementPosition.ts(69,13): error TS2349: This expression is not callable.
+superCalls/derivedClassSuperStatementPosition.ts(72,13): error TS2349: This expression is not callable.
+superCalls/derivedClassSuperStatementPosition.ts(77,44): error TS2304: Cannot find name 'Object'.
+superCalls/derivedClassSuperStatementPosition.ts(79,25): error TS1005: ',' expected.
+superCalls/derivedClassSuperStatementPosition.ts(81,13): error TS2349: This expression is not callable.
+superCalls/derivedClassSuperStatementPosition.ts(86,50): error TS2304: Cannot find name 'Object'.
+superCalls/derivedClassSuperStatementPosition.ts(88,25): error TS1005: ',' expected.
+superCalls/derivedClassSuperStatementPosition.ts(89,13): error TS2304: Cannot find name 'Math'.
+superCalls/derivedClassSuperStatementPosition.ts(90,13): error TS2349: This expression is not callable.
+superCalls/derivedClassSuperStatementPosition.ts(92,13): error TS2349: This expression is not callable.
+
+
+==== superCalls/derivedClassSuperStatementPosition.ts (26 errors) ====
+    class DerivedBasic extends Object {
+                               ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        prop = 1;
+        constructor() {
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    class DerivedAfterParameterDefault extends Object {
+                                               ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        x1: boolean;
+        x2: boolean;
+        constructor(x = false) {
+            this.x1 = x;
+            super(x);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            this.x2 = x;
+        }
+    }
+    
+    class DerivedAfterRestParameter extends Object {
+                                            ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        x1: boolean[];
+        x2: boolean[];
+        constructor(...x: boolean[]) {
+            this.x1 = x;
+            super(x);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            this.x2 = x;
+        }
+    }
+    
+    class DerivedComments extends Object {
+                                  ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        x: any;
+        constructor() {
+            // c1
+            console.log(); // c2
+            // c3
+            super(); // c4
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            // c5
+            this.x = null; // c6
+            // c7
+        }
+    }
+    
+    class DerivedCommentsInvalidThis extends Object {
+                                             ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        x: any;
+        constructor() {
+            // c0
+            this;
+            // c1
+            console.log(); // c2
+            // c3
+            super(); // c4
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            // c5
+            this.x = null; // c6
+            // c7
+        }
+    }
+    
+    class DerivedInConditional extends Object {
+                                       ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        prop = 1;
+        constructor() {
+            Math.random()
+            ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                ? super(1)
+                  ~~~~~
+!!! error TS2349: This expression is not callable.
+                : super(0);
+                  ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    class DerivedInIf extends Object {
+                              ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        prop = 1;
+        constructor() {
+            if (Math.random()) {
+                ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                super(1);
+                ~~~~~
+!!! error TS2349: This expression is not callable.
+            }
+            else {
+                super(0);
+                ~~~~~
+!!! error TS2349: This expression is not callable.
+            }
+        }
+    }
+    
+    class DerivedInBlockWithProperties extends Object {
+                                               ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        prop = 1;
+        constructor(private paramProp = 2) {
+                            ~~~~~~~~~
+!!! error TS1005: ',' expected.
+            {
+                super();
+                ~~~~~
+!!! error TS2349: This expression is not callable.
+            }
+        }
+    }
+    
+    class DerivedInConditionalWithProperties extends Object {
+                                                     ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        prop = 1;
+        constructor(private paramProp = 2) {
+                            ~~~~~~~~~
+!!! error TS1005: ',' expected.
+            if (Math.random()) {
+                ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                super(1);
+                ~~~~~
+!!! error TS2349: This expression is not callable.
+            } else {
+                super(0);
+                ~~~~~
+!!! error TS2349: This expression is not callable.
+            }
+        }
+    }

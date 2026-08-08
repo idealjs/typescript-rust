@@ -1,0 +1,34 @@
+instanceAndStaticMembers/thisAndSuperInStaticMembers3.ts(11,17): error TS2349: This expression is not callable.
+instanceAndStaticMembers/thisAndSuperInStaticMembers3.ts(12,17): error TS2349: This expression is not callable.
+instanceAndStaticMembers/thisAndSuperInStaticMembers3.ts(14,23): error TS2339: Property '' does not exist on type '{ a: number; f: () => number; x: 1; y: any; z: any }'.
+
+
+==== instanceAndStaticMembers/thisAndSuperInStaticMembers3.ts (3 errors) ====
+    declare class B {
+        static a: any;
+        static f(): number;
+        a: number;
+        f(): number;
+    }
+    
+    class C extends B {
+        static x: any = undefined!;
+        static y1 = this.x;
+        static y2 = this.x();
+                    ~~~~~~
+!!! error TS2349: This expression is not callable.
+        static y3 = this?.x();
+                    ~~~~~~~
+!!! error TS2349: This expression is not callable.
+        static y4 = this[("x")]();
+        static y5 = this?.[("x")]();
+                          ~~~~~~~
+!!! error TS2339: Property '' does not exist on type '{ a: number; f: () => number; x: 1; y: any; z: any }'.
+        static z3 = super.f();
+        static z4 = super["f"]();
+        
+        // these should be unaffected
+        x = 1;
+        y = this.x;
+        z = super.f();
+    }

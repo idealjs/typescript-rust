@@ -1,0 +1,169 @@
+classExpressions/genericClassExpressionInFunction.ts(7,18): error TS2304: Cannot find name 'extends'.
+classExpressions/genericClassExpressionInFunction.ts(7,26): error TS1005: '{' expected.
+classExpressions/genericClassExpressionInFunction.ts(7,31): error TS1005: '(' expected.
+classExpressions/genericClassExpressionInFunction.ts(8,1): error TS1005: ',' expected.
+classExpressions/genericClassExpressionInFunction.ts(9,1): error TS7027: Unreachable code detected.
+classExpressions/genericClassExpressionInFunction.ts(10,26): error TS1005: '{' expected.
+classExpressions/genericClassExpressionInFunction.ts(10,31): error TS1005: '(' expected.
+classExpressions/genericClassExpressionInFunction.ts(11,1): error TS1005: ',' expected.
+classExpressions/genericClassExpressionInFunction.ts(12,10): error TS1005: ';' expected.
+classExpressions/genericClassExpressionInFunction.ts(13,18): error TS2304: Cannot find name 'Inner'.
+classExpressions/genericClassExpressionInFunction.ts(16,7): error TS1005: ';' expected.
+classExpressions/genericClassExpressionInFunction.ts(16,9): error TS1005: ';' expected.
+classExpressions/genericClassExpressionInFunction.ts(16,17): error TS1005: ';' expected.
+classExpressions/genericClassExpressionInFunction.ts(17,12): error TS2304: Cannot find name 'string'.
+classExpressions/genericClassExpressionInFunction.ts(19,7): error TS1005: ';' expected.
+classExpressions/genericClassExpressionInFunction.ts(19,9): error TS1005: ';' expected.
+classExpressions/genericClassExpressionInFunction.ts(19,22): error TS1005: ',' expected.
+classExpressions/genericClassExpressionInFunction.ts(19,24): error TS1005: ',' expected.
+classExpressions/genericClassExpressionInFunction.ts(19,31): error TS1005: ',' expected.
+classExpressions/genericClassExpressionInFunction.ts(19,32): error TS1138: Parameter declaration expected.
+classExpressions/genericClassExpressionInFunction.ts(19,34): error TS1005: ';' expected.
+classExpressions/genericClassExpressionInFunction.ts(19,35): error TS1005: ';' expected.
+classExpressions/genericClassExpressionInFunction.ts(19,39): error TS1005: ';' expected.
+classExpressions/genericClassExpressionInFunction.ts(19,41): error TS1005: ';' expected.
+classExpressions/genericClassExpressionInFunction.ts(22,1): error TS7027: Unreachable code detected.
+classExpressions/genericClassExpressionInFunction.ts(22,16): error TS2304: Cannot find name 'B3'.
+classExpressions/genericClassExpressionInFunction.ts(23,1): error TS7027: Unreachable code detected.
+classExpressions/genericClassExpressionInFunction.ts(26,1): error TS7027: Unreachable code detected.
+classExpressions/genericClassExpressionInFunction.ts(26,13): error TS2304: Cannot find name 'C'.
+classExpressions/genericClassExpressionInFunction.ts(27,1): error TS7027: Unreachable code detected.
+classExpressions/genericClassExpressionInFunction.ts(27,13): error TS2304: Cannot find name 'K'.
+classExpressions/genericClassExpressionInFunction.ts(28,1): error TS7027: Unreachable code detected.
+classExpressions/genericClassExpressionInFunction.ts(28,13): error TS2351: This expression is not constructable.
+classExpressions/genericClassExpressionInFunction.ts(29,1): error TS7027: Unreachable code detected.
+classExpressions/genericClassExpressionInFunction.ts(30,1): error TS7027: Unreachable code detected.
+classExpressions/genericClassExpressionInFunction.ts(31,1): error TS7027: Unreachable code detected.
+classExpressions/genericClassExpressionInFunction.ts(31,19): error TS1005: '}' expected.
+
+
+==== classExpressions/genericClassExpressionInFunction.ts (37 errors) ====
+    ﻿// @target: es2015
+    class A<T> {
+        genericVar: T
+    }
+    function B1<U>() {
+        // class expression can use T
+        return class extends A<U> { }
+                  ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                          ~
+!!! error TS1005: '{' expected.
+                               ~
+!!! error TS1005: '(' expected.
+                                   ~
+!!! error TS1005: ',' expected.
+                                     
+    }
+    ~
+    class B2<V> {
+    ~~~~~~~~~~~~~
+        anon = class extends A<V> { }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                          ~
+!!! error TS1005: '{' expected.
+                               ~
+!!! error TS1005: '(' expected.
+                                   ~
+!!! error TS1005: ',' expected.
+    }
+    ~
+    function B3<W>() {
+    ~~~~~~~~~~~~~~~~~~
+          ~~
+!!! error TS1005: ';' expected.
+        return class Inner<TInner> extends A<W> { }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                  ~~~~~
+!!! error TS2304: Cannot find name 'Inner'.
+    }
+    ~
+    // extends can call B
+    ~~~~~~~~~~~~~~~~~~~~~
+    class K extends B1<number>() {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       ~
+!!! error TS1005: ';' expected.
+         ~~~~~~~
+!!! error TS1005: ';' expected.
+                 ~~
+!!! error TS1005: ';' expected.
+        namae: string;
+    ~~~~~~~~~~~~~~~~~~
+            ~~~~~~
+!!! error TS2304: Cannot find name 'string'.
+    }
+    ~
+    class C extends (new B2<number>().anon) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       ~
+!!! error TS1005: ';' expected.
+         ~~~~~~~
+!!! error TS1005: ';' expected.
+                      ~~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS1005: ',' expected.
+                                ~
+!!! error TS1138: Parameter declaration expected.
+                                  ~
+!!! error TS1005: ';' expected.
+                                   ~~~~
+!!! error TS1005: ';' expected.
+                                       ~
+!!! error TS1005: ';' expected.
+                                         ~
+!!! error TS1005: ';' expected.
+        name: string;
+    ~~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                     
+    }
+    ~
+    let b3Number = B3<number>();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                ~~
+!!! error TS2304: Cannot find name 'B3'.
+                              ~~
+    class S extends b3Number<string> {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        nom: string;
+    ~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                    
+    }
+    ~
+    var c = new C();
+    ~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+             ~
+!!! error TS2304: Cannot find name 'C'.
+                  ~~
+    var k = new K();
+    ~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+             ~
+!!! error TS2304: Cannot find name 'K'.
+                  ~~
+    var s = new S();
+    ~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+             ~
+!!! error TS2351: This expression is not constructable.
+                  ~~
+    c.genericVar = 12;
+    ~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                    ~~
+    k.genericVar = 12;
+    ~~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                    ~~
+    s.genericVar = 12;
+    ~~~~~~~~~~~~~~~
+!!! error TS7027: Unreachable code detected.
+                   
+!!! error TS1005: '}' expected.

@@ -1,0 +1,15 @@
+classExpressions/classExpressionLoop.ts(2,23): error TS1005: '>' expected.
+classExpressions/classExpressionLoop.ts(3,20): error TS2304: Cannot find name 'C'.
+
+
+==== classExpressions/classExpressionLoop.ts (2 errors) ====
+    let arr = [];
+    for (let i = 0; i < 10; ++i) {
+                          ~
+!!! error TS1005: '>' expected.
+        arr.push(class C {
+                       ~
+!!! error TS2304: Cannot find name 'C'.
+            prop = i;
+        });
+    }

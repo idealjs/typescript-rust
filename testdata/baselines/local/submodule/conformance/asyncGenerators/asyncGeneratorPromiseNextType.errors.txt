@@ -1,0 +1,50 @@
+asyncGenerators/asyncGeneratorPromiseNextType.ts(5,29): error TS2304: Cannot find name 'AsyncGenerator'.
+asyncGenerators/asyncGeneratorPromiseNextType.ts(10,21): error TS2339: Property 'push' does not exist on type 'error[]'.
+asyncGenerators/asyncGeneratorPromiseNextType.ts(30,21): error TS2339: Property 'push' does not exist on type 'error[]'.
+
+
+==== asyncGenerators/asyncGeneratorPromiseNextType.ts (3 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/44808
+    
+    type Result = {message: string}
+    
+    async function *saverGen(): AsyncGenerator<void, void, Promise<Result> | undefined> {
+                                ~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'AsyncGenerator'.
+        let pending: Promise<Result>[] = [];
+        while (true) {
+            const p: Promise<Result> | undefined = yield;
+            if (p != null)
+                pending.push(p);
+                        ~~~~
+!!! error TS2339: Property 'push' does not exist on type 'error[]'.
+            else {
+                const results = await Promise.all(pending);
+                pending = [];
+                console.log('Storing...');
+                await storeResults(results);
+            }
+        }
+    }
+    
+    function storeResults(results: Result[]) {
+        console.log(results);
+        return Promise.resolve();
+    }
+    
+    async function *saverGen2() {
+        let pending: Promise<Result>[] = [];
+        while (true) {
+            const p: Promise<Result> | undefined = yield;
+            if (p != null)
+                pending.push(p);
+                        ~~~~
+!!! error TS2339: Property 'push' does not exist on type 'error[]'.
+            else {
+                const results = await Promise.all(pending);
+                pending = [];
+                console.log('Storing...');
+                await storeResults(results);
+            }
+        }
+    }

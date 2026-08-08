@@ -1,0 +1,28 @@
+classAbstractKeyword/classAbstractManyKeywords.ts(1,16): error TS2304: Cannot find name 'abstract'.
+classAbstractKeyword/classAbstractManyKeywords.ts(1,25): error TS1005: ';' expected.
+classAbstractKeyword/classAbstractManyKeywords.ts(3,9): error TS1005: ';' expected.
+classAbstractKeyword/classAbstractManyKeywords.ts(4,17): error TS1005: '=' expected.
+classAbstractKeyword/classAbstractManyKeywords.ts(4,23): error TS1005: ';' expected.
+classAbstractKeyword/classAbstractManyKeywords.ts(4,23): error TS2304: Cannot find name 'D'.
+classAbstractKeyword/classAbstractManyKeywords.ts(4,25): error TS1005: ';' expected.
+
+
+==== classAbstractKeyword/classAbstractManyKeywords.ts (7 errors) ====
+    export default abstract class A {}
+                   ~~~~~~~~
+!!! error TS2304: Cannot find name 'abstract'.
+                            ~~~~~
+!!! error TS1005: ';' expected.
+    export abstract class B {}
+    default abstract class C {}
+            ~~~~~~~~
+!!! error TS1005: ';' expected.
+    import abstract class D {}
+                    ~~~~~
+!!! error TS1005: '=' expected.
+                          ~
+!!! error TS1005: ';' expected.
+                          ~
+!!! error TS2304: Cannot find name 'D'.
+                            ~
+!!! error TS1005: ';' expected.

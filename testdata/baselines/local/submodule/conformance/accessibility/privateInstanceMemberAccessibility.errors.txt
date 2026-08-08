@@ -1,0 +1,22 @@
+accessibility/privateInstanceMemberAccessibility.ts(12,12): error TS1005: ';' expected.
+accessibility/privateInstanceMemberAccessibility.ts(12,13): error TS1005: ';' expected.
+
+
+==== accessibility/privateInstanceMemberAccessibility.ts (2 errors) ====
+    class Base {
+        private foo: string;
+    }
+    
+    class Derived extends Base {
+        x = super.foo; // error
+        y() {
+            return super.foo; // error
+        }
+        z: typeof super.foo; // error
+    
+        a: this.foo; // error
+               ~
+!!! error TS1005: ';' expected.
+                ~~~
+!!! error TS1005: ';' expected.
+    }

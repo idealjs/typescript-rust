@@ -1,0 +1,214 @@
+classStaticBlock/classStaticBlock22.ts(3,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(4,9): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(6,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock22.ts(6,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(9,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock22.ts(9,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(12,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock22.ts(12,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(15,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock22.ts(15,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(18,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock22.ts(18,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(22,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock22.ts(22,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(25,16): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock22.ts(28,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock22.ts(28,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(31,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock22.ts(31,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(32,12): error TS2454: Variable 'await' is used before being assigned.
+classStaticBlock/classStaticBlock22.ts(34,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock22.ts(34,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(35,32): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock22.ts(37,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock22.ts(37,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(38,17): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock22.ts(38,18): error TS1005: ')' expected.
+classStaticBlock/classStaticBlock22.ts(41,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock22.ts(41,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(43,28): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock22.ts(44,23): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock22.ts(45,11): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(46,14): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock22.ts(49,11): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(50,14): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock22.ts(52,33): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock22.ts(53,37): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock22.ts(56,3): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock22.ts(56,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(58,30): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock22.ts(59,18): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(60,14): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock22.ts(63,18): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock22.ts(64,14): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock22.ts(66,40): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock22.ts(67,44): error TS1012: Unexpected token.
+classStaticBlock/classStaticBlock22.ts(70,1): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlock22.ts (47 errors) ====
+    let await: "any";
+    class C {
+      static {
+             ~
+!!! error TS1005: ';' expected.
+        let await: any; // illegal, cannot declare a new binding for await
+            ~~~~~
+!!! error TS1005: ';' expected.
+      }
+      static {
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+        let { await } = {} as any; // illegal, cannot declare a new binding for await
+      }
+      static {
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+        let { await: other } = {} as any; // legal
+      }
+      static {
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+        let await; // illegal, cannot declare a new binding for await
+      }
+      static {
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+        function await() { }; // illegal
+      }
+      static {
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+        class await { }; // illegal
+      }
+    
+      static {
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+        class D {
+          await = 1; // legal
+          x = await; // legal (initializers have an implicit function boundary)
+                   ~
+!!! error TS1012: Unexpected token.
+        };
+      }
+      static {
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+        (function await() { }); // legal, 'await' in function expression name not bound inside of static block
+      }
+      static {
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+        (class await { }); // legal, 'await' in class expression name not bound inside of static block
+               ~~~~~
+!!! error TS2454: Variable 'await' is used before being assigned.
+      }
+      static {
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+        (function () { return await; }); // legal, 'await' is inside of a new function boundary
+                                   ~
+!!! error TS1012: Unexpected token.
+      }
+      static {
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+        (() => await); // legal, 'await' is inside of a new function boundary
+                    ~
+!!! error TS1012: Unexpected token.
+                     ~
+!!! error TS1005: ')' expected.
+      }
+    
+      static {
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+        class E {
+          constructor() { await; }
+                               ~
+!!! error TS1012: Unexpected token.
+          method() { await; }
+                          ~
+!!! error TS1012: Unexpected token.
+          get accessor() {
+              ~~~~~~~~
+!!! error TS1005: ';' expected.
+            await;
+                 ~
+!!! error TS1012: Unexpected token.
+            return 1;
+          }
+          set accessor(v: any) {
+              ~~~~~~~~
+!!! error TS1005: ';' expected.
+            await;
+                 ~
+!!! error TS1012: Unexpected token.
+          }
+          propLambda = () => { await; }
+                                    ~
+!!! error TS1012: Unexpected token.
+          propFunc = function () { await; }
+                                        ~
+!!! error TS1012: Unexpected token.
+        }
+      }
+      static {
+      ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+             ~
+!!! error TS1005: ';' expected.
+        class S {
+          static method() { await; }
+                                 ~
+!!! error TS1012: Unexpected token.
+          static get accessor() {
+                     ~~~~~~~~
+!!! error TS1005: ';' expected.
+            await;
+                 ~
+!!! error TS1012: Unexpected token.
+            return 1;
+          }
+          static set accessor(v: any) {
+                     ~~~~~~~~
+!!! error TS1005: ';' expected.
+            await;
+                 ~
+!!! error TS1012: Unexpected token.
+          }
+          static propLambda = () => { await; }
+                                           ~
+!!! error TS1012: Unexpected token.
+          static propFunc = function () { await; }
+                                               ~
+!!! error TS1012: Unexpected token.
+        }
+      }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

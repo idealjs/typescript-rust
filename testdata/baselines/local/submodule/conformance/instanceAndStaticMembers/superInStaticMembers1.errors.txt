@@ -1,0 +1,995 @@
+classDeclInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+classDeclInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+classDeclInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+classDeclInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+classDeclInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+classDeclInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+classExprInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+classExprInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+classExprInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+classExprInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+classExprInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+classExprInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+constEnumInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+constEnumInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+constEnumInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+constEnumInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+constEnumInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+constEnumInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+defaultImportInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+defaultImportInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+defaultImportInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+defaultImportInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+defaultImportInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+defaultImportInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+enumInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+enumInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+enumInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+enumInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+enumInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+enumInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+external.ts(4,19): error TS1005: ',' expected.
+external.ts(4,23): error TS1005: ',' expected.
+external.ts(4,23): error TS1182: A destructuring declaration must have an initializer.
+funcDeclInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+funcDeclInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+funcDeclInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+funcDeclInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+funcDeclInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+funcDeclInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+funcExprInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+funcExprInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+funcExprInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+funcExprInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+funcExprInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+funcExprInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+inContainingClassExprStaticBlock.ts(4,12): error TS1005: ';' expected.
+inContainingClassExprStaticBlock.ts(5,15): error TS1005: ';' expected.
+inContainingClassExprStaticBlock.ts(5,17): error TS1005: ';' expected.
+inContainingClassExprStaticBlock.ts(5,25): error TS1005: ';' expected.
+inContainingClassExprStaticBlock.ts(5,27): error TS1005: ';' expected.
+inContainingClassExprStaticBlock.ts(6,20): error TS1005: ';' expected.
+inContainingClassExprStaticBlock.ts(6,22): error TS1005: ';' expected.
+inContainingClassExprStaticBlock.ts(6,27): error TS1005: ';' expected.
+inContainingClassExprStaticBlock.ts(6,28): error TS1005: ';' expected.
+inContainingClassExprStaticBlock.ts(7,9): error TS1005: ')' expected.
+inContainingClassExprStaticField.ts(4,12): error TS1005: ';' expected.
+inContainingClassExprStaticField.ts(5,15): error TS1005: ';' expected.
+inContainingClassExprStaticField.ts(5,17): error TS1005: ';' expected.
+inContainingClassExprStaticField.ts(5,25): error TS1005: ';' expected.
+inContainingClassExprStaticField.ts(5,27): error TS1005: ';' expected.
+inContainingClassExprStaticField.ts(8,5): error TS1005: ')' expected.
+inContainingFuncExprStaticBlock.ts(5,16): error TS1005: ';' expected.
+inContainingFuncExprStaticBlock.ts(5,18): error TS1005: ';' expected.
+inContainingFuncExprStaticBlock.ts(5,23): error TS1005: ';' expected.
+inContainingFuncExprStaticBlock.ts(5,24): error TS1005: ';' expected.
+inContainingFuncExprStaticBlock.ts(7,1): error TS1005: ')' expected.
+inContainingFuncExprStaticField.ts(5,26): error TS2339: Property 'w' does not exist on type 'object'.
+interfaceInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+interfaceInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+interfaceInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+interfaceInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+interfaceInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+interfaceInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+locals.ts(7,19): error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+locals.ts(11,19): error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+locals.ts(15,19): error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+locals.ts(19,19): error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+locals.ts(23,19): error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+locals.ts(27,19): error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+locals.ts(31,19): error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+locals.ts(35,19): error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+locals.ts(39,19): error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+locals.ts(43,19): error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+locals.ts(47,19): error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+locals.ts(51,12): error TS1005: ';' expected.
+locals.ts(52,13): error TS1005: ';' expected.
+locals.ts(52,15): error TS1005: ';' expected.
+locals.ts(52,25): error TS1128: Declaration or statement expected.
+locals.ts(54,5): error TS1128: Declaration or statement expected.
+namedImportInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+namedImportInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+namedImportInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+namedImportInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+namedImportInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+namedImportInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+namedImportOfConstEnumInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+namedImportOfConstEnumInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+namedImportOfConstEnumInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+namedImportOfConstEnumInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+namedImportOfConstEnumInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+namedImportOfConstEnumInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+namedImportOfInterfaceInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+namedImportOfInterfaceInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+namedImportOfInterfaceInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+namedImportOfInterfaceInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+namedImportOfInterfaceInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+namedImportOfInterfaceInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+namedImportOfUninstantiatedNamespaceInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+namedImportOfUninstantiatedNamespaceInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+namedImportOfUninstantiatedNamespaceInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+namedImportOfUninstantiatedNamespaceInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+namedImportOfUninstantiatedNamespaceInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+namedImportOfUninstantiatedNamespaceInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+namespaceImportInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+namespaceImportInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+namespaceImportInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+namespaceImportInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+namespaceImportInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+namespaceImportInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+typeInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+typeInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+typeInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+typeInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+typeInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+typeInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+typeOnlyDefaultImportInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+typeOnlyDefaultImportInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+typeOnlyDefaultImportInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+typeOnlyDefaultImportInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+typeOnlyDefaultImportInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+typeOnlyDefaultImportInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+typeOnlyNamedImportInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+typeOnlyNamedImportInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+typeOnlyNamedImportInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+typeOnlyNamedImportInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+typeOnlyNamedImportInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+typeOnlyNamedImportInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+uninstantiatedNamespaceInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+uninstantiatedNamespaceInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+uninstantiatedNamespaceInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+uninstantiatedNamespaceInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+uninstantiatedNamespaceInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+uninstantiatedNamespaceInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+valueNamespaceInContainingScopeStaticBlock.ts(5,12): error TS1005: ';' expected.
+valueNamespaceInContainingScopeStaticBlock.ts(5,14): error TS1005: ';' expected.
+valueNamespaceInContainingScopeStaticBlock.ts(5,19): error TS1005: ';' expected.
+valueNamespaceInContainingScopeStaticBlock.ts(5,20): error TS1005: ';' expected.
+valueNamespaceInContainingScopeStaticBlock.ts(6,1): error TS1128: Declaration or statement expected.
+valueNamespaceInContainingScopeStaticField.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+varInContainingScopeStaticBlock1.ts(5,12): error TS1005: ';' expected.
+varInContainingScopeStaticBlock1.ts(5,14): error TS1005: ';' expected.
+varInContainingScopeStaticBlock1.ts(5,19): error TS1005: ';' expected.
+varInContainingScopeStaticBlock1.ts(5,20): error TS1005: ';' expected.
+varInContainingScopeStaticBlock1.ts(6,1): error TS1128: Declaration or statement expected.
+varInContainingScopeStaticBlock2.ts(5,12): error TS1005: ';' expected.
+varInContainingScopeStaticBlock2.ts(5,14): error TS1005: ';' expected.
+varInContainingScopeStaticBlock2.ts(5,19): error TS1005: ';' expected.
+varInContainingScopeStaticBlock2.ts(5,20): error TS1005: ';' expected.
+varInContainingScopeStaticBlock2.ts(6,1): error TS1128: Declaration or statement expected.
+varInContainingScopeStaticBlock3.ts(5,12): error TS1005: ';' expected.
+varInContainingScopeStaticBlock3.ts(5,14): error TS1005: ';' expected.
+varInContainingScopeStaticBlock3.ts(5,19): error TS1005: ';' expected.
+varInContainingScopeStaticBlock3.ts(5,20): error TS1005: ';' expected.
+varInContainingScopeStaticBlock3.ts(6,1): error TS1128: Declaration or statement expected.
+varInContainingScopeStaticField1.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+varInContainingScopeStaticField2.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+varInContainingScopeStaticField3.ts(5,22): error TS2339: Property 'w' does not exist on type 'object'.
+
+
+==== instanceAndStaticMembers/superInStaticMembers1.ts (0 errors) ====
+    
+==== external.ts (3 errors) ====
+    export class Reflect {}
+    export interface Foo {}
+    export declare namespace Bar { type _ = unknown; }
+    export const enum Baz {}
+                      ~~~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS1005: ',' expected.
+                          ~~
+    export default class {};
+    
+!!! error TS1182: A destructuring declaration must have an initializer.
+    
+==== locals.ts (16 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    class C extends B {
+        static _ = [
+            (() => {
+                var Reflect; // collision (es2015-es2021 only)
+                super.w();
+                      ~
+!!! error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+            })(),
+            (() => {
+                var { Reflect } = { Reflect: null }; // collision (es2015-es2021 only)
+                super.w();
+                      ~
+!!! error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+            })(),
+            (() => {
+                var [Reflect] = [null]; // collision (es2015-es2021 only)
+                super.w();
+                      ~
+!!! error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+            })(),
+            (() => {
+                class Reflect {} // collision (es2015-es2021 only)
+                super.w();
+                      ~
+!!! error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+            })(),
+            (() => {
+                function Reflect() {} // collision (es2015-es2021 only)
+                super.w();
+                      ~
+!!! error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+            })(),
+            (() => {
+                enum Reflect {} // collision (es2015-es2021 only)
+                super.w();
+                      ~
+!!! error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+            })(),
+            (() => {
+                const enum Reflect {} // collision (es2015-es2021 only)
+                super.w();
+                      ~
+!!! error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+            })(),
+            (() => {
+                type Reflect = unknown; // no collision
+                super.w();
+                      ~
+!!! error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+            })(),
+            (() => {
+                interface Reflect {}; // no collision
+                super.w();
+                      ~
+!!! error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+            })(),
+            (() => {
+                (class Reflect {}); // no collision
+                super.w();
+                      ~
+!!! error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+            })(),
+            (() => {
+                (function Reflect() {}); // no collision
+                super.w();
+                      ~
+!!! error TS2339: Property 'w' does not exist on type '{ static: any; {: any; var: any; Reflect: any }'.
+            })(),
+        ];
+    
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            var { Reflect } = { Reflect: null }; // collision (es2015-es2021 only)
+                ~
+!!! error TS1005: ';' expected.
+                  ~~~~~~~
+!!! error TS1005: ';' expected.
+                            ~
+!!! error TS1128: Declaration or statement expected.
+            super.w();
+        }
+        ~
+!!! error TS1128: Declaration or statement expected.
+    
+        static {
+            var [Reflect] = [null]; // collision (es2015-es2021 only)
+            super.w();
+        }
+    
+        static {
+            var Reflect; // collision (es2015-es2021 only)
+            super.w();
+        }
+    
+        static {
+            class Reflect {} // collision (es2015-es2021 only)
+            super.w();
+        }
+    
+        static {
+            function Reflect() {} // collision (es2015-es2021 only)
+            super.w();
+        }
+    
+        static {
+            enum Reflect {} // collision (es2015-es2021 only)
+            super.w();
+        }
+    
+        static {
+            const enum Reflect {} // collision (es2015-es2021 only)
+            super.w();
+        }
+    
+        static {
+            type Reflect = unknown; // no collision
+            super.w();
+        }
+    
+        static {
+            interface Reflect {} // no collision
+            super.w();
+        }
+    
+        static {
+            (class Reflect {}) // no collision
+            super.w();
+        }
+    
+        static {
+            (function Reflect() {}) // no collision
+            super.w();
+        }
+    }
+    
+==== varInContainingScopeStaticField1.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    var Reflect = null; // collision (es2015-es2021 only)
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== varInContainingScopeStaticField2.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    var { Reflect } = { Reflect: null }; // collision (es2015-es2021 only)
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== varInContainingScopeStaticField3.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    var [Reflect] = [null]; // collision (es2015-es2021 only)
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== varInContainingScopeStaticBlock1.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    var Reflect = null; // collision (es2015-es2021 only)
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== varInContainingScopeStaticBlock2.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    var { Reflect } = { Reflect: null }; // collision (es2015-es2021 only)
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== varInContainingScopeStaticBlock3.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    var [Reflect] = [null]; // collision (es2015-es2021 only)
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== classDeclInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    class Reflect {} // collision (es2015-es2021 only)
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== classDeclInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    class Reflect {} // collision (es2015-es2021 only)
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== funcDeclInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    function Reflect() {} // collision (es2015-es2021 only)
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== funcDeclInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    function Reflect() {} // collision (es2015-es2021 only)
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== valueNamespaceInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    namespace Reflect {} // collision (es2015-es2021 only)
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== valueNamespaceInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    namespace Reflect {} // collision (es2015-es2021 only)
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== enumInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    enum Reflect {} // collision (es2015-es2021 only)
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== enumInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    enum Reflect {} // collision (es2015-es2021 only)
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== constEnumInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    const enum Reflect {} // collision (es2015-es2021 only)
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== constEnumInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    const enum Reflect {} // collision (es2015-es2021 only)
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== namespaceImportInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import * as Reflect from "./external"; // collision (es2015-es2021 only)
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== namespaceImportInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import * as Reflect from "./external"; // collision (es2015-es2021 only)
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== namedImportInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import { Reflect } from "./external"; // collision (es2015-es2021 only)
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== namedImportInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import { Reflect } from "./external"; // collision (es2015-es2021 only)
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== namedImportOfInterfaceInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import { Foo as Reflect } from "./external"; // collision (es2015-es2021 only, not a type-only import)
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== namedImportOfInterfaceInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import { Foo as Reflect } from "./external"; // collision (es2015-es2021 only, not a type-only import)
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== namedImportOfUninstantiatedNamespaceInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import { Bar as Reflect } from "./external"; // collision (es2015-es2021 only, not a type-only import)
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== namedImportOfUninstantiatedNamespaceInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import { Bar as Reflect } from "./external"; // collision (es2015-es2021 only, not a type-only import)
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== namedImportOfConstEnumInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import { Baz as Reflect } from "./external"; // collision (es2015-es2021 only)
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== namedImportOfConstEnumInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import { Baz as Reflect } from "./external"; // collision (es2015-es2021 only)
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== typeOnlyNamedImportInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import type { Reflect } from "./external"; // no collision
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== typeOnlyNamedImportInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import type { Reflect } from "./external"; // no collision
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== defaultImportInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import Reflect from "./external"; // collision (es2015-es2021 only)
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== defaultImportInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import Reflect from "./external"; // collision (es2015-es2021 only)
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== typeOnlyDefaultImportInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import type Reflect from "./external"; // no collision
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== typeOnlyDefaultImportInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    import type Reflect from "./external"; // no collision
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== typeInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    type Reflect = unknown; // no collision
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== typeInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    type Reflect = unknown; // no collision
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== interfaceInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    interface Reflect {}; // no collision
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== interfaceInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    interface Reflect {}; // no collision
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== uninstantiatedNamespaceInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    declare namespace Reflect { type _ = unknown; }; // no collision
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== uninstantiatedNamespaceInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    declare namespace Reflect { type _ = unknown; }; // no collision
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== classExprInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    (class Reflect {}); // no collision
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== classExprInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    (class Reflect {}); // no collision
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== inContainingClassExprStaticField.ts (6 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    (class Reflect { // collision (es2015-es2021 only)
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            class C extends B {
+                  ~
+!!! error TS1005: ';' expected.
+                    ~~~~~~~
+!!! error TS1005: ';' expected.
+                            ~
+!!! error TS1005: ';' expected.
+                              ~
+!!! error TS1005: ';' expected.
+                static _ = super.w();
+            }
+        }
+        ~
+!!! error TS1005: ')' expected.
+    });
+    
+==== inContainingClassExprStaticBlock.ts (10 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    (class Reflect { // collision (es2015-es2021 only)
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            class C extends B {
+                  ~
+!!! error TS1005: ';' expected.
+                    ~~~~~~~
+!!! error TS1005: ';' expected.
+                            ~
+!!! error TS1005: ';' expected.
+                              ~
+!!! error TS1005: ';' expected.
+                static { super.w(); }
+                       ~
+!!! error TS1005: ';' expected.
+                         ~~~~~
+!!! error TS1005: ';' expected.
+                              ~
+!!! error TS1005: ';' expected.
+                               ~
+!!! error TS1005: ';' expected.
+            }
+            ~
+!!! error TS1005: ')' expected.
+        }
+    });
+    
+==== funcExprInContainingScopeStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    (function Reflect() {}); // no collision
+    class C extends B {
+        static _ = super.w();
+                         ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+    }
+    
+==== funcExprInContainingScopeStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    (function Reflect() {}); // no collision
+    class C extends B {
+        static { super.w(); }
+               ~
+!!! error TS1005: ';' expected.
+                 ~~~~~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1005: ';' expected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== inContainingFuncExprStaticField.ts (1 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    (function Reflect() { // collision (es2015-es2021 only)
+        class C extends B {
+            static _ = super.w();
+                             ~
+!!! error TS2339: Property 'w' does not exist on type 'object'.
+        }
+    });
+    
+==== inContainingFuncExprStaticBlock.ts (5 errors) ====
+    export {};
+    declare class B { static w(): number; }
+    (function Reflect() { // collision (es2015-es2021 only)
+        class C extends B {
+            static { super.w(); }
+                   ~
+!!! error TS1005: ';' expected.
+                     ~~~~~
+!!! error TS1005: ';' expected.
+                          ~
+!!! error TS1005: ';' expected.
+                           ~
+!!! error TS1005: ';' expected.
+        }
+    });
+    ~
+!!! error TS1005: ')' expected.

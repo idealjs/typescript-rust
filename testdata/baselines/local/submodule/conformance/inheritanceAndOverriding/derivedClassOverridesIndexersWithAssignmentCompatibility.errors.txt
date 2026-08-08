@@ -1,0 +1,50 @@
+inheritanceAndOverriding/derivedClassOverridesIndexersWithAssignmentCompatibility.ts(2,7): error TS1005: ']' expected.
+inheritanceAndOverriding/derivedClassOverridesIndexersWithAssignmentCompatibility.ts(2,15): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesIndexersWithAssignmentCompatibility.ts(2,18): error TS2304: Cannot find name 'Object'.
+inheritanceAndOverriding/derivedClassOverridesIndexersWithAssignmentCompatibility.ts(7,7): error TS1005: ']' expected.
+inheritanceAndOverriding/derivedClassOverridesIndexersWithAssignmentCompatibility.ts(7,15): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesIndexersWithAssignmentCompatibility.ts(11,7): error TS1005: ']' expected.
+inheritanceAndOverriding/derivedClassOverridesIndexersWithAssignmentCompatibility.ts(11,15): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesIndexersWithAssignmentCompatibility.ts(11,18): error TS2304: Cannot find name 'Object'.
+inheritanceAndOverriding/derivedClassOverridesIndexersWithAssignmentCompatibility.ts(16,7): error TS1005: ']' expected.
+inheritanceAndOverriding/derivedClassOverridesIndexersWithAssignmentCompatibility.ts(16,15): error TS1005: ';' expected.
+
+
+==== inheritanceAndOverriding/derivedClassOverridesIndexersWithAssignmentCompatibility.ts (10 errors) ====
+    class Base {
+        [x: string]: Object;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+                     ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    }
+    
+    // ok, use assignment compatibility
+    class Derived extends Base {
+        [x: string]: any;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class Base2 {
+        [x: number]: Object;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+                     ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    }
+    
+    // ok, use assignment compatibility
+    class Derived2 extends Base2 {
+        [x: number]: any;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+    }

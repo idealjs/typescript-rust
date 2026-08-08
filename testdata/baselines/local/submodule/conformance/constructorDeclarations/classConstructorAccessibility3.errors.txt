@@ -1,0 +1,48 @@
+constructorDeclarations/classConstructorAccessibility3.ts(2,25): error TS1005: ',' expected.
+constructorDeclarations/classConstructorAccessibility3.ts(6,31): error TS1005: ',' expected.
+constructorDeclarations/classConstructorAccessibility3.ts(10,34): error TS1005: ',' expected.
+constructorDeclarations/classConstructorAccessibility3.ts(14,33): error TS1005: ',' expected.
+
+
+==== constructorDeclarations/classConstructorAccessibility3.ts (4 errors) ====
+    class Foo {
+         constructor(public x: number) { }
+                            ~
+!!! error TS1005: ',' expected.
+    }
+    
+    class Bar {
+        public constructor(public x: number) { }
+                                  ~
+!!! error TS1005: ',' expected.
+    }
+    
+    class Baz {
+        protected constructor(public x: number) { }
+                                     ~
+!!! error TS1005: ',' expected.
+    }
+    
+    class Qux {
+         private constructor(public x: number) { }
+                                    ~
+!!! error TS1005: ',' expected.
+    }
+    
+    // b is public
+    let a = Foo;
+    a = Bar;
+    a = Baz; // error Baz is protected
+    a = Qux; // error Qux is private
+    
+    // b is protected
+    let b = Baz;
+    b = Foo;
+    b = Bar;
+    b = Qux; // error Qux is private
+    
+    // c is private
+    let c = Qux;
+    c = Foo;
+    c = Bar;
+    c = Baz;

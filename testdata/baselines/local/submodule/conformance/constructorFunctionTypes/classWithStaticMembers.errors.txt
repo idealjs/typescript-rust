@@ -1,0 +1,40 @@
+constructorFunctionTypes/classWithStaticMembers.ts(3,16): error TS1005: ';' expected.
+constructorFunctionTypes/classWithStaticMembers.ts(4,16): error TS1005: ';' expected.
+constructorFunctionTypes/classWithStaticMembers.ts(5,24): error TS1005: ',' expected.
+constructorFunctionTypes/classWithStaticMembers.ts(5,43): error TS1005: ',' expected.
+constructorFunctionTypes/classWithStaticMembers.ts(9,11): error TS2339: Property 'fn' does not exist on type 'object'.
+constructorFunctionTypes/classWithStaticMembers.ts(17,11): error TS2339: Property 'fn' does not exist on type 'object'.
+
+
+==== constructorFunctionTypes/classWithStaticMembers.ts (6 errors) ====
+    class C {
+        static fn() { return this; }
+        static get x() { return 1; }
+                   ~
+!!! error TS1005: ';' expected.
+        static set x(v) { }
+                   ~
+!!! error TS1005: ';' expected.
+        constructor(public a: number, private b: number) { }
+                           ~
+!!! error TS1005: ',' expected.
+                                              ~
+!!! error TS1005: ',' expected.
+        static foo: string; 
+    }
+    
+    var r = C.fn();
+              ~~
+!!! error TS2339: Property 'fn' does not exist on type 'object'.
+    var r2 = r.x;
+    var r3 = r.foo;
+    
+    class D extends C {
+        bar: string;
+    }
+    
+    var r = D.fn();
+              ~~
+!!! error TS2339: Property 'fn' does not exist on type 'object'.
+    var r2 = r.x;
+    var r3 = r.foo;

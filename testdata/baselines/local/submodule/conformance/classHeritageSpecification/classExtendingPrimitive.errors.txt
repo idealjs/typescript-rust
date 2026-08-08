@@ -1,0 +1,136 @@
+classHeritageSpecification/classExtendingPrimitive.ts(3,17): error TS1109: Expression expected.
+classHeritageSpecification/classExtendingPrimitive.ts(4,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(4,18): error TS1109: Expression expected.
+classHeritageSpecification/classExtendingPrimitive.ts(5,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(5,18): error TS1109: Expression expected.
+classHeritageSpecification/classExtendingPrimitive.ts(6,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(7,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(7,19): error TS1109: Expression expected.
+classHeritageSpecification/classExtendingPrimitive.ts(8,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(9,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(10,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(10,18): error TS1109: Expression expected.
+classHeritageSpecification/classExtendingPrimitive.ts(11,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(13,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(14,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(16,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(16,10): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(16,26): error TS1005: '{' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(16,33): error TS1005: ';' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(17,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(17,11): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(17,27): error TS1005: '{' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(17,34): error TS1005: ';' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(18,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(18,11): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(18,27): error TS1005: '{' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(18,35): error TS1005: ';' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(20,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(20,11): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(20,29): error TS1109: Expression expected.
+classHeritageSpecification/classExtendingPrimitive.ts(21,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(21,11): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(21,29): error TS1109: Expression expected.
+classHeritageSpecification/classExtendingPrimitive.ts(22,1): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(22,11): error TS1005: ',' expected.
+classHeritageSpecification/classExtendingPrimitive.ts(22,29): error TS1109: Expression expected.
+classHeritageSpecification/classExtendingPrimitive.ts(22,40): error TS1005: '{' expected.
+
+
+==== classHeritageSpecification/classExtendingPrimitive.ts (37 errors) ====
+    // classes cannot extend primitives
+    
+    class C extends number { }
+                    ~~~~~~
+!!! error TS1109: Expression expected.
+    class C2 extends string { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+                     ~~~~~~
+!!! error TS1109: Expression expected.
+    class C3 extends boolean { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+                     ~~~~~~~
+!!! error TS1109: Expression expected.
+    class C4 extends Void  { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+    class C4a extends void {}
+    ~~~~~
+!!! error TS1005: ',' expected.
+                      ~~~~
+!!! error TS1109: Expression expected.
+    class C5 extends Null { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+    class C5a extends null { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+    class C6 extends undefined { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+                     ~~~~~~~~~
+!!! error TS1109: Expression expected.
+    class C7 extends Undefined { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+    
+    enum E { A }
+    ~~~~
+!!! error TS1005: ',' expected.
+    class C8 extends E { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+    
+    const C9 = class extends number { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+                             ~~~~~~
+!!! error TS1005: '{' expected.
+                                    ~
+!!! error TS1005: ';' expected.
+    const C10 = class extends string { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+                              ~~~~~~
+!!! error TS1005: '{' expected.
+                                     ~
+!!! error TS1005: ';' expected.
+    const C11 = class extends boolean { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+                              ~~~~~~~
+!!! error TS1005: '{' expected.
+                                      ~
+!!! error TS1005: ';' expected.
+    
+    const C12 = class A extends number { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+                                ~~~~~~
+!!! error TS1109: Expression expected.
+    const C13 = class B extends string { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+                                ~~~~~~
+!!! error TS1109: Expression expected.
+    const C14 = class C extends boolean { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+                                ~~~~~~~
+!!! error TS1109: Expression expected.
+                                           
+!!! error TS1005: '{' expected.

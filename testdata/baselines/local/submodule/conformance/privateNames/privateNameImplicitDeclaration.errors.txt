@@ -1,0 +1,25 @@
+privateNameImplicitDeclaration.js(4,14): error TS1003: Identifier expected.
+privateNameImplicitDeclaration.js(4,14): error TS1127: Invalid character.
+privateNameImplicitDeclaration.js(4,14): error TS2339: Property '#' does not exist on type 'object'.
+privateNameImplicitDeclaration.js(4,15): error TS1005: ';' expected.
+privateNameImplicitDeclaration.js(4,15): error TS2304: Cannot find name 'x'.
+
+
+==== privateNameImplicitDeclaration.js (5 errors) ====
+    class C {
+        constructor() {
+            /** @type {string} */
+            this.#x;
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                 ~
+!!! error TS2339: Property '#' does not exist on type 'object'.
+                  ~
+!!! error TS1005: ';' expected.
+                  ~
+!!! error TS2304: Cannot find name 'x'.
+        }
+    }
+    

@@ -1,0 +1,47 @@
+classHeritageSpecification/constructorFunctionTypeIsAssignableToBaseType2.ts(5,14): error TS2304: Cannot find name 'Object'.
+classHeritageSpecification/constructorFunctionTypeIsAssignableToBaseType2.ts(7,20): error TS2304: Cannot find name 'Object'.
+classHeritageSpecification/constructorFunctionTypeIsAssignableToBaseType2.ts(18,9): error TS2349: This expression is not callable.
+classHeritageSpecification/constructorFunctionTypeIsAssignableToBaseType2.ts(29,9): error TS2349: This expression is not callable.
+
+
+==== classHeritageSpecification/constructorFunctionTypeIsAssignableToBaseType2.ts (4 errors) ====
+    // the constructor function itself does not need to be a subtype of the base type constructor function
+    
+    class Base {
+        static foo: {
+            bar: Object;
+                 ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        }
+        constructor(x: Object) {
+                       ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        }
+    }
+    
+    class Derived extends Base {
+        // ok
+        static foo: {
+            bar: number;
+        }
+    
+        constructor(x: number) {
+            super(x);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    
+    class Derived2 extends Base {   
+        static foo: {
+            bar: number;
+        }
+    
+        // ok, not enforcing assignability relation on this
+        constructor(x: any) {
+            super(x);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            return 1;
+        }
+    }

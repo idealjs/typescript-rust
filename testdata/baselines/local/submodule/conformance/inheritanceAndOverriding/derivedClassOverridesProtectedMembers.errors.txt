@@ -1,0 +1,64 @@
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(7,19): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(8,19): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(13,26): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(14,26): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(23,19): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(24,19): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(29,26): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(30,26): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts(33,32): error TS2349: This expression is not callable.
+
+
+==== inheritanceAndOverriding/derivedClassOverridesProtectedMembers.ts (9 errors) ====
+    var x: { foo: string; }
+    var y: { foo: string; bar: string; }
+    
+    class Base {
+        protected a: typeof x;
+        protected b(a: typeof x) { }
+        protected get c() { return x; }
+                      ~
+!!! error TS1005: ';' expected.
+        protected set c(v: typeof x) { }
+                      ~
+!!! error TS1005: ';' expected.
+        protected d: (a: typeof x) => void;
+    
+        protected static r: typeof x;
+        protected static s(a: typeof x) { }
+        protected static get t() { return x; }
+                             ~
+!!! error TS1005: ';' expected.
+        protected static set t(v: typeof x) { }
+                             ~
+!!! error TS1005: ';' expected.
+        protected static u: (a: typeof x) => void;
+    
+        constructor(a: typeof x) { }
+    }
+    
+    class Derived extends Base {
+        protected a: typeof y;
+        protected b(a: typeof y) { }
+        protected get c() { return y; }
+                      ~
+!!! error TS1005: ';' expected.
+        protected set c(v: typeof y) { }
+                      ~
+!!! error TS1005: ';' expected.
+        protected d: (a: typeof y) => void;
+    
+        protected static r: typeof y;
+        protected static s(a: typeof y) { }
+        protected static get t() { return y; }
+                             ~
+!!! error TS1005: ';' expected.
+        protected static set t(a: typeof y) { }
+                             ~
+!!! error TS1005: ';' expected.
+        protected static u: (a: typeof y) => void;
+    
+        constructor(a: typeof y) { super(x) }
+                                   ~~~~~
+!!! error TS2349: This expression is not callable.
+    }

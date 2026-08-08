@@ -1,0 +1,62 @@
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(3,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(4,13): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(4,14): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(6,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(6,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(6,12): error TS2304: Cannot find name 'accessor'.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(6,21): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(6,21): error TS2304: Cannot find name 'y'.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(7,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(7,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(7,12): error TS2304: Cannot find name 'accessor'.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(7,21): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(7,21): error TS2304: Cannot find name 'z'.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(8,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(8,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef4.ts(11,1): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlockUseBeforeDef4.ts (16 errors) ====
+    class C {
+        static accessor x;
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            this.x = 1;
+                ~
+!!! error TS1005: ';' expected.
+                 ~
+!!! error TS1005: ';' expected.
+        }
+        static accessor y = this.x;
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~~~~~~~~
+!!! error TS1005: ';' expected.
+               ~~~~~~~~
+!!! error TS2304: Cannot find name 'accessor'.
+                        ~
+!!! error TS1005: ';' expected.
+                        ~
+!!! error TS2304: Cannot find name 'y'.
+        static accessor z;
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~~~~~~~~
+!!! error TS1005: ';' expected.
+               ~~~~~~~~
+!!! error TS2304: Cannot find name 'accessor'.
+                        ~
+!!! error TS1005: ';' expected.
+                        ~
+!!! error TS2304: Cannot find name 'z'.
+        static {
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~
+!!! error TS1005: ';' expected.
+            this.z = this.y;
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

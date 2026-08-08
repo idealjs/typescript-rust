@@ -1,0 +1,134 @@
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(7,19): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(8,19): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(13,26): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(14,26): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(24,9): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(25,9): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(30,16): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(31,16): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(34,32): error TS2349: This expression is not callable.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(43,18): error TS2339: Property 'r' does not exist on type 'object'.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(44,18): error TS2339: Property 's' does not exist on type 'object'.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(45,18): error TS2339: Property 't' does not exist on type 'object'.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(46,19): error TS2339: Property 'u' does not exist on type 'object'.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(47,9): error TS2339: Property 't' does not exist on type 'object'.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(50,7): error TS1005: ']' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(50,15): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(50,18): error TS2304: Cannot find name 'Object'.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(51,7): error TS1005: ']' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(51,15): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(55,7): error TS1005: ']' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(55,15): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(56,7): error TS1005: ']' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts(56,15): error TS1005: ';' expected.
+
+
+==== inheritanceAndOverriding/derivedClassOverridesProtectedMembers2.ts (23 errors) ====
+    var x: { foo: string; }
+    var y: { foo: string; bar: string; }
+    
+    class Base {
+        protected a: typeof x;
+        protected b(a: typeof x) { }
+        protected get c() { return x; }
+                      ~
+!!! error TS1005: ';' expected.
+        protected set c(v: typeof x) { }
+                      ~
+!!! error TS1005: ';' expected.
+        protected d: (a: typeof x) => void ;
+    
+        protected static r: typeof x;
+        protected static s(a: typeof x) { }
+        protected static get t() { return x; }
+                             ~
+!!! error TS1005: ';' expected.
+        protected static set t(v: typeof x) { }
+                             ~
+!!! error TS1005: ';' expected.
+        protected static u: (a: typeof x) => void ;
+    
+    constructor(a: typeof x) { }
+    }
+    
+    // Increase visibility of all protected members to public
+    class Derived extends Base {
+        a: typeof y;
+        b(a: typeof y) { }
+        get c() { return y; }
+            ~
+!!! error TS1005: ';' expected.
+        set c(v: typeof y) { }
+            ~
+!!! error TS1005: ';' expected.
+        d: (a: typeof y) => void;
+    
+        static r: typeof y;
+        static s(a: typeof y) { }
+        static get t() { return y; }
+                   ~
+!!! error TS1005: ';' expected.
+        static set t(a: typeof y) { }
+                   ~
+!!! error TS1005: ';' expected.
+        static u: (a: typeof y) => void;
+    
+        constructor(a: typeof y) { super(a); }
+                                   ~~~~~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    var d: Derived = new Derived(y);
+    var r1 = d.a;
+    var r2 = d.b(y);
+    var r3 = d.c;
+    var r3a = d.d;
+    d.c = y;
+    var r4 = Derived.r;
+                     ~
+!!! error TS2339: Property 'r' does not exist on type 'object'.
+    var r5 = Derived.s(y);
+                     ~
+!!! error TS2339: Property 's' does not exist on type 'object'.
+    var r6 = Derived.t;
+                     ~
+!!! error TS2339: Property 't' does not exist on type 'object'.
+    var r6a = Derived.u;
+                      ~
+!!! error TS2339: Property 'u' does not exist on type 'object'.
+    Derived.t = y;
+            ~
+!!! error TS2339: Property 't' does not exist on type 'object'.
+    
+    class Base2 {
+        [i: string]: Object;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+                     ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        [i: number]: typeof x;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class Derived2 extends Base2 {
+        [i: string]: typeof x;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+        [i: number]: typeof y;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+    }
+    
+    var d2: Derived2;
+    var r7 = d2[''];
+    var r8 = d2[1];
+    

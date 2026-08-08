@@ -1,0 +1,69 @@
+classStaticBlock/classStaticBlock13.ts(2,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock13.ts(2,10): error TS1127: Invalid character.
+classStaticBlock/classStaticBlock13.ts(2,11): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock13.ts(4,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock13.ts(5,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock13.ts(5,13): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock13.ts(5,18): error TS1005: ',' expected.
+classStaticBlock/classStaticBlock13.ts(5,19): error TS1127: Invalid character.
+classStaticBlock/classStaticBlock13.ts(5,19): error TS1138: Parameter declaration expected.
+classStaticBlock/classStaticBlock13.ts(8,3): error TS2304: Cannot find name 'foo'.
+classStaticBlock/classStaticBlock13.ts(8,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock13.ts(9,14): error TS1003: Identifier expected.
+classStaticBlock/classStaticBlock13.ts(9,14): error TS1127: Invalid character.
+classStaticBlock/classStaticBlock13.ts(9,14): error TS2339: Property '#' does not exist on type 'object'.
+classStaticBlock/classStaticBlock13.ts(9,15): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock13.ts(9,15): error TS2304: Cannot find name 'x'.
+classStaticBlock/classStaticBlock13.ts(9,15): error TS7027: Unreachable code detected.
+classStaticBlock/classStaticBlock13.ts(11,1): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlock13.ts (18 errors) ====
+    class C {
+      static #x = 123;
+             ~
+!!! error TS1005: ';' expected.
+             ~
+!!! error TS1127: Invalid character.
+              ~
+!!! error TS1005: ';' expected.
+    
+      static {
+             ~
+!!! error TS1005: ';' expected.
+        console.log(C.#x)
+               ~
+!!! error TS1005: ';' expected.
+                ~~~
+!!! error TS1005: ';' expected.
+                     ~
+!!! error TS1005: ',' expected.
+                      ~
+!!! error TS1127: Invalid character.
+                      ~
+!!! error TS1138: Parameter declaration expected.
+      }
+    
+      foo () {
+      ~~~
+!!! error TS2304: Cannot find name 'foo'.
+             ~
+!!! error TS1005: ';' expected.
+        return C.#x;
+                 ~
+!!! error TS1003: Identifier expected.
+                 ~
+!!! error TS1127: Invalid character.
+                 ~
+!!! error TS2339: Property '#' does not exist on type 'object'.
+                  ~
+!!! error TS1005: ';' expected.
+                  ~
+!!! error TS2304: Cannot find name 'x'.
+                  ~~
+      }
+    ~~
+!!! error TS7027: Unreachable code detected.
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

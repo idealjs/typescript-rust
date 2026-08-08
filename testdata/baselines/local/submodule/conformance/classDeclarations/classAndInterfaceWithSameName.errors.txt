@@ -1,0 +1,17 @@
+error TS2300: Duplicate identifier 'C'.
+
+
+!!! error TS2300: Duplicate identifier 'C'.
+==== classDeclarations/classAndInterfaceWithSameName.ts (0 errors) ====
+    class C { foo: string; }
+    interface C { foo: string; }
+    
+    namespace M {
+        class D {
+            bar: string;
+        }
+    
+        interface D {
+            bar: string;
+        }
+    }

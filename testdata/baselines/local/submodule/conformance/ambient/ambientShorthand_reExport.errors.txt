@@ -1,0 +1,19 @@
+reExportUser.ts(4,3): error TS2304: Cannot find name '$'.
+
+
+==== declarations.d.ts (0 errors) ====
+    declare module "jquery";
+    
+==== reExportX.ts (0 errors) ====
+    export {x} from "jquery";
+    
+==== reExportAll.ts (0 errors) ====
+    export * from "jquery";
+    
+==== reExportUser.ts (1 errors) ====
+    import {x} from "./reExportX";
+    import * as $ from "./reExportAll";
+    // '$' is not callable, it is an object.
+    x($);
+      ~
+!!! error TS2304: Cannot find name '$'.

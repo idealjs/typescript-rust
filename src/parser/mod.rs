@@ -2959,12 +2959,14 @@ impl Parser {
             return self.parse_yield_expression();
         }
         if self.token == SyntaxKind::AsyncKeyword && self.is_async_arrow_function() {
+            // Capture the async modifier before consuming it.
+            let async_modifier = self.create_token_node();
             self.next_token();
             if self.token == SyntaxKind::OpenParenToken {
-                return self.parse_parenthesized_arrow_function();
+                return self.parse_parenthesized_arrow_function_with_async(async_modifier);
             }
             let identifier = self.parse_identifier();
-            return self.parse_simple_arrow_function(identifier);
+            return self.parse_simple_arrow_function_with_async(identifier, async_modifier);
         }
 
         if self.token == SyntaxKind::OpenParenToken && self.is_parenthesized_arrow_function() {
@@ -3084,6 +3086,22 @@ impl Parser {
         !p.has_preceding_line_break() && p.is_start_of_expression()
     }
 
+    /// Check whether `await` should be parsed as an AwaitExpression.
+    /// Mirrors Go's `isAwaitExpression`.
+    fn is_await_expression(&self) -> bool {
+        if self.token != SyntaxKind::AwaitKeyword {
+            return false;
+        }
+        if self.await_context {
+            return true;
+        }
+        // Outside an async context, `await` is an identifier unless the next
+        // token clearly indicates an await expression on the same line.
+        let mut p = self.clone_state();
+        p.next_token(); // skip 'await'
+        !p.has_preceding_line_break() && p.is_start_of_expression()
+    }
+
     /// Go: `parseYieldExpression`.
     fn parse_yield_expression(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
@@ -3194,6 +3212,97 @@ impl Parser {
             return scanner.scan() == SyntaxKind::EqualsGreaterThanToken;
         }
         false
+    }
+
+    /// Build a modifier list containing a single `async` keyword node.
+    fn make_async_modifier_list(&self, async_modifier: Arc<Node>) -> Option<Arc<ModifierList>> {
+        Some(Arc::new(ModifierList::new(
+            vec![async_modifier],
+            ModifierFlags::Async,
+        )))
+    }
+
+    fn parse_parenthesized_arrow_function_with_async(
+        &mut self,
+        async_modifier: Arc<Node>,
+    ) -> Arc<Node> {
+        let modifiers = self.make_async_modifier_list(async_modifier);
+        let pos = self.token_pos();
+        let parameters = self.parse_parameter_list();
+        let type_node = self.parse_optional_return_type();
+        let equals_greater_than_token = self.create_token_node();
+        self.expect(SyntaxKind::EqualsGreaterThanToken);
+        let saved_await = self.await_context;
+        self.await_context = true;
+        let body = if self.token == SyntaxKind::OpenBraceToken {
+            self.parse_block()
+        } else {
+            self.parse_assignment_expression()
+        };
+        self.await_context = saved_await;
+        let end = body.end();
+        Arc::new(Node::with_loc(
+            SyntaxKind::ArrowFunction,
+            NodeData::ArrowFunction(ArrowFunctionData {
+                modifiers,
+                type_parameters: None,
+                parameters,
+                type_node,
+                equals_greater_than_token,
+                body,
+                full_signature: None,
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    fn parse_simple_arrow_function_with_async(
+        &mut self,
+        identifier: Arc<Node>,
+        async_modifier: Arc<Node>,
+    ) -> Arc<Node> {
+        let modifiers = self.make_async_modifier_list(async_modifier);
+        let pos = identifier.pos();
+        let parameter = Arc::new(Node::with_loc(
+            SyntaxKind::Parameter,
+            NodeData::ParameterDeclaration(ParameterDeclarationData {
+                modifiers: None,
+                dot_dot_dot_token: None,
+                name: identifier,
+                question_token: None,
+                type_node: None,
+                initializer: None,
+            }),
+            TextRange::new(pos, self.token_pos()),
+        ));
+        let parameters = Arc::new(NodeList {
+            loc: TextRange::new(pos, self.token_pos()),
+            nodes: vec![parameter],
+        });
+        let equals_greater_than_token = self.create_token_node();
+        self.expect(SyntaxKind::EqualsGreaterThanToken);
+        let saved_await = self.await_context;
+        self.await_context = true;
+        let body = if self.token == SyntaxKind::OpenBraceToken {
+            self.parse_block()
+        } else {
+            self.parse_assignment_expression()
+        };
+        self.await_context = saved_await;
+        let end = body.end();
+        Arc::new(Node::with_loc(
+            SyntaxKind::ArrowFunction,
+            NodeData::ArrowFunction(ArrowFunctionData {
+                modifiers,
+                type_parameters: None,
+                parameters,
+                type_node: None,
+                equals_greater_than_token,
+                body,
+                full_signature: None,
+            }),
+            TextRange::new(pos, end),
+        ))
     }
 
     fn parse_parenthesized_arrow_function(&mut self) -> Arc<Node> {
@@ -3348,7 +3457,7 @@ impl Parser {
                     ))
                 }
             }
-            SyntaxKind::AwaitKeyword => {
+            SyntaxKind::AwaitKeyword if self.is_await_expression() => {
                 let pos = self.token_pos();
                 self.next_token();
                 let expression = self.parse_unary_expression();

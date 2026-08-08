@@ -1,0 +1,28 @@
+constructorDeclarations/classConstructorParametersAccessibility3.ts(2,27): error TS1005: ',' expected.
+constructorDeclarations/classConstructorParametersAccessibility3.ts(6,24): error TS1005: ',' expected.
+constructorDeclarations/classConstructorParametersAccessibility3.ts(7,9): error TS2349: This expression is not callable.
+constructorDeclarations/classConstructorParametersAccessibility3.ts(8,14): error TS2339: Property 'p' does not exist on type 'object'.
+
+
+==== constructorDeclarations/classConstructorParametersAccessibility3.ts (4 errors) ====
+    class Base {
+        constructor(protected p: number) { }
+                              ~
+!!! error TS1005: ',' expected.
+    }
+    
+    class Derived extends Base {
+        constructor(public p: number) {
+                           ~
+!!! error TS1005: ',' expected.
+            super(p);
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            this.p; // OK
+                 ~
+!!! error TS2339: Property 'p' does not exist on type 'object'.
+        }
+    }
+    
+    var d: Derived;
+    d.p;  // public, OK

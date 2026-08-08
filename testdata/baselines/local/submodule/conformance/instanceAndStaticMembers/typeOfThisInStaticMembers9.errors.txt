@@ -1,0 +1,38 @@
+instanceAndStaticMembers/typeOfThisInStaticMembers9.ts(6,48): error TS2339: Property 'f' does not exist on type 'object'.
+instanceAndStaticMembers/typeOfThisInStaticMembers9.ts(7,62): error TS2339: Property 'f' does not exist on type 'object'.
+instanceAndStaticMembers/typeOfThisInStaticMembers9.ts(11,26): error TS2339: Property 'f' does not exist on type 'object'.
+instanceAndStaticMembers/typeOfThisInStaticMembers9.ts(14,23): error TS2339: Property 'f' does not exist on type '{ a: number; method: () => any }'.
+instanceAndStaticMembers/typeOfThisInStaticMembers9.ts(16,30): error TS2339: Property 'f' does not exist on type '{ a: number; method: () => any }'.
+
+
+==== instanceAndStaticMembers/typeOfThisInStaticMembers9.ts (5 errors) ====
+    class C {
+        static f = 1
+    }
+    
+    class D extends C {
+        static arrowFunctionBoundary = () => super.f + 1;
+                                                   ~
+!!! error TS2339: Property 'f' does not exist on type 'object'.
+        static functionExprBoundary = function () { return super.f + 2 };
+                                                                 ~
+!!! error TS2339: Property 'f' does not exist on type 'object'.
+        static classExprBoundary = class { a = super.f + 3 };
+        static functionAndClassDeclBoundary = (() => {
+            function foo () {
+                return super.f + 4
+                             ~
+!!! error TS2339: Property 'f' does not exist on type 'object'.
+            }
+            class C {
+                a = super.f + 5
+                          ~
+!!! error TS2339: Property 'f' does not exist on type '{ a: number; method: () => any }'.
+                method () {
+                    return super.f +6
+                                 ~
+!!! error TS2339: Property 'f' does not exist on type '{ a: number; method: () => any }'.
+                }
+            }
+        })();
+    }

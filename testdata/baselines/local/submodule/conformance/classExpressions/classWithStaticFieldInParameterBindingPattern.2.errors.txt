@@ -1,0 +1,33 @@
+classExpressions/classWithStaticFieldInParameterBindingPattern.2.ts(3,1): error TS2554: Expected 1 arguments, but got 0.
+classExpressions/classWithStaticFieldInParameterBindingPattern.2.ts(3,20): error TS1005: '{' expected.
+classExpressions/classWithStaticFieldInParameterBindingPattern.2.ts(3,22): error TS1005: ';' expected.
+classExpressions/classWithStaticFieldInParameterBindingPattern.2.ts(3,24): error TS1005: ';' expected.
+classExpressions/classWithStaticFieldInParameterBindingPattern.2.ts(6,1): error TS2554: Expected 2 arguments, but got 0.
+classExpressions/classWithStaticFieldInParameterBindingPattern.2.ts(6,20): error TS1005: '{' expected.
+classExpressions/classWithStaticFieldInParameterBindingPattern.2.ts(6,22): error TS1005: ';' expected.
+classExpressions/classWithStaticFieldInParameterBindingPattern.2.ts(6,24): error TS1005: ';' expected.
+
+
+==== classExpressions/classWithStaticFieldInParameterBindingPattern.2.ts (8 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/36295
+    class C {}
+    (({ [class extends C { static x = 1 }.x]: b = "" }) => { var C; })();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 0.
+                       ~
+!!! error TS1005: '{' expected.
+                         ~
+!!! error TS1005: ';' expected.
+                           ~~~~~~
+!!! error TS1005: ';' expected.
+    
+    const x = "";
+    (({ [class extends C { static x = 1 }.x]: b = "" }, d = x) => { var x; })();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 0.
+                       ~
+!!! error TS1005: '{' expected.
+                         ~
+!!! error TS1005: ';' expected.
+                           ~~~~~~
+!!! error TS1005: ';' expected.

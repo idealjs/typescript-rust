@@ -1,0 +1,46 @@
+constructorFunctionTypes/constructorHasPrototypeProperty.ts(10,15): error TS2339: Property 'prototype' does not exist on type 'object'.
+constructorFunctionTypes/constructorHasPrototypeProperty.ts(12,16): error TS2339: Property 'prototype' does not exist on type 'object'.
+constructorFunctionTypes/constructorHasPrototypeProperty.ts(27,15): error TS2339: Property 'prototype' does not exist on type 'object'.
+constructorFunctionTypes/constructorHasPrototypeProperty.ts(29,16): error TS2339: Property 'prototype' does not exist on type 'object'.
+
+
+==== constructorFunctionTypes/constructorHasPrototypeProperty.ts (4 errors) ====
+    namespace NonGeneric {
+        class C {
+            foo: string;
+        }
+    
+        class D extends C {
+            bar: string;
+        }
+    
+        var r = C.prototype;
+                  ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+        r.foo;
+        var r2 = D.prototype;
+                   ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+        r2.bar;
+    }
+    
+    namespace Generic {
+        class C<T,U> {
+            foo: T;
+            bar: U;
+        }
+    
+        class D<T,U> extends C<T,U> {
+            baz: T;
+            bing: U;
+        }
+    
+        var r = C.prototype; // C<any, any>
+                  ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+        var ra = r.foo; // any
+        var r2 = D.prototype; // D<any, any>
+                   ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+        var rb = r2.baz; // any
+    }

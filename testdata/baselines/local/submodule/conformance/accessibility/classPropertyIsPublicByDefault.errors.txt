@@ -1,0 +1,49 @@
+accessibility/classPropertyIsPublicByDefault.ts(3,9): error TS1005: ';' expected.
+accessibility/classPropertyIsPublicByDefault.ts(4,9): error TS1005: ';' expected.
+accessibility/classPropertyIsPublicByDefault.ts(8,16): error TS1005: ';' expected.
+accessibility/classPropertyIsPublicByDefault.ts(9,16): error TS1005: ';' expected.
+accessibility/classPropertyIsPublicByDefault.ts(19,3): error TS2339: Property 'a' does not exist on type 'object'.
+accessibility/classPropertyIsPublicByDefault.ts(20,3): error TS2339: Property 'b' does not exist on type 'object'.
+accessibility/classPropertyIsPublicByDefault.ts(21,3): error TS2339: Property 'b' does not exist on type 'object'.
+accessibility/classPropertyIsPublicByDefault.ts(22,3): error TS2339: Property 'foo' does not exist on type 'object'.
+
+
+==== accessibility/classPropertyIsPublicByDefault.ts (8 errors) ====
+    class C {
+        x: string;
+        get y() { return null; }
+            ~
+!!! error TS1005: ';' expected.
+        set y(x) { }
+            ~
+!!! error TS1005: ';' expected.
+        foo() { }
+    
+        static a: string;
+        static get b() { return null; }
+                   ~
+!!! error TS1005: ';' expected.
+        static set b(x) { }
+                   ~
+!!! error TS1005: ';' expected.
+        static foo() { }
+    }
+    
+    var c: C;
+    c.x;
+    c.y;
+    c.y = 1;
+    c.foo();
+    
+    C.a;
+      ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
+    C.b();
+      ~
+!!! error TS2339: Property 'b' does not exist on type 'object'.
+    C.b = 1;
+      ~
+!!! error TS2339: Property 'b' does not exist on type 'object'.
+    C.foo();
+      ~~~
+!!! error TS2339: Property 'foo' does not exist on type 'object'.

@@ -1,0 +1,50 @@
+classStaticBlock/classStaticBlockUseBeforeDef1.ts(3,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef1.ts(4,13): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef1.ts(4,14): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef1.ts(6,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlockUseBeforeDef1.ts(6,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef1.ts(6,12): error TS2304: Cannot find name 'y'.
+classStaticBlock/classStaticBlockUseBeforeDef1.ts(7,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlockUseBeforeDef1.ts(7,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef1.ts(7,12): error TS2304: Cannot find name 'z'.
+classStaticBlock/classStaticBlockUseBeforeDef1.ts(8,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlockUseBeforeDef1.ts(8,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlockUseBeforeDef1.ts(11,1): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlockUseBeforeDef1.ts (12 errors) ====
+    class C {
+        static x;
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            this.x = 1;
+                ~
+!!! error TS1005: ';' expected.
+                 ~
+!!! error TS1005: ';' expected.
+        }
+        static y = this.x;
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS2304: Cannot find name 'y'.
+        static z;
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~
+!!! error TS1005: ';' expected.
+               ~
+!!! error TS2304: Cannot find name 'z'.
+        static {
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~
+!!! error TS1005: ';' expected.
+            this.z = this.y;
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

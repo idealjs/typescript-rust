@@ -1,0 +1,76 @@
+error TS2300: Duplicate identifier 'C1'.
+error TS2300: Duplicate identifier 'C2'.
+error TS2300: Duplicate identifier 'C3'.
+error TS2300: Duplicate identifier 'C4'.
+error TS2300: Duplicate identifier 'C5'.
+error TS2300: Duplicate identifier 'C5'.
+file1.ts(35,4): error TS2339: Property 'x1' does not exist on type '{ x3: number; x4: number }'.
+file1.ts(36,4): error TS2339: Property 'x2' does not exist on type '{ x3: number; x4: number }'.
+
+
+!!! error TS2300: Duplicate identifier 'C1'.
+
+!!! error TS2300: Duplicate identifier 'C2'.
+
+!!! error TS2300: Duplicate identifier 'C3'.
+
+!!! error TS2300: Duplicate identifier 'C4'.
+
+!!! error TS2300: Duplicate identifier 'C5'.
+
+!!! error TS2300: Duplicate identifier 'C5'.
+==== classDeclarations/mergedClassInterface.ts (0 errors) ====
+    
+==== file1.ts (2 errors) ====
+    declare class C1 { }
+    
+    interface C1 { }
+    
+    interface C2 { }
+    
+    declare class C2 { }
+    
+    class C3 { }
+    
+    interface C3 { }
+    
+    interface C4 { }
+    
+    class C4 { }
+    
+    interface C5 {
+        x1: number;
+    }
+    
+    declare class C5 {
+        x2: number;
+    }
+    
+    interface C5 {
+        x3: number;
+    }
+    
+    interface C5 {
+        x4: number;
+    }
+    
+    // checks if properties actually were merged
+    var c5 : C5;
+    c5.x1;
+       ~~
+!!! error TS2339: Property 'x1' does not exist on type '{ x3: number; x4: number }'.
+    c5.x2;
+       ~~
+!!! error TS2339: Property 'x2' does not exist on type '{ x3: number; x4: number }'.
+    c5.x3;
+    c5.x4;
+    
+==== file2.ts (0 errors) ====
+    declare class C6 { }
+    
+    interface C7 { }
+    
+==== file3.ts (0 errors) ====
+    interface C6 { }
+    
+    declare class C7 { }

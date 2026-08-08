@@ -1,0 +1,39 @@
+error TS2300: Duplicate identifier 'C'.
+privateNames/privateNameConstructorSignature.ts(5,5): error TS1003: Identifier expected.
+privateNames/privateNameConstructorSignature.ts(5,5): error TS1127: Invalid character.
+privateNames/privateNameConstructorSignature.ts(5,6): error TS1005: ';' expected.
+privateNames/privateNameConstructorSignature.ts(7,17): error TS1003: Identifier expected.
+privateNames/privateNameConstructorSignature.ts(7,17): error TS1127: Invalid character.
+privateNames/privateNameConstructorSignature.ts(7,18): error TS1005: ';' expected.
+
+
+!!! error TS2300: Duplicate identifier 'C'.
+==== privateNames/privateNameConstructorSignature.ts (6 errors) ====
+    interface D {
+        x: number;
+    }
+    class C {
+        #x;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ';' expected.
+        static test() {
+            new C().#x = 10;
+                    ~
+!!! error TS1003: Identifier expected.
+                    ~
+!!! error TS1127: Invalid character.
+                     ~
+!!! error TS1005: ';' expected.
+            const y = new C();
+            const z = new y();
+            z.x = 123;
+        }
+    }
+    interface C {
+        new (): D;
+    }
+    

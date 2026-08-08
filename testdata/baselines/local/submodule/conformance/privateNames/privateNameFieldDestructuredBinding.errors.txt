@@ -1,0 +1,149 @@
+privateNames/privateNameFieldDestructuredBinding.ts(2,5): error TS1003: Identifier expected.
+privateNames/privateNameFieldDestructuredBinding.ts(2,5): error TS1127: Invalid character.
+privateNames/privateNameFieldDestructuredBinding.ts(2,6): error TS1005: ';' expected.
+privateNames/privateNameFieldDestructuredBinding.ts(12,20): error TS1003: Identifier expected.
+privateNames/privateNameFieldDestructuredBinding.ts(12,20): error TS1127: Invalid character.
+privateNames/privateNameFieldDestructuredBinding.ts(12,21): error TS1005: ',' expected.
+privateNames/privateNameFieldDestructuredBinding.ts(12,28): error TS2454: Variable 'y' is used before being assigned.
+privateNames/privateNameFieldDestructuredBinding.ts(13,16): error TS1003: Identifier expected.
+privateNames/privateNameFieldDestructuredBinding.ts(13,16): error TS1127: Invalid character.
+privateNames/privateNameFieldDestructuredBinding.ts(13,17): error TS1005: ',' expected.
+privateNames/privateNameFieldDestructuredBinding.ts(13,24): error TS2454: Variable 'y' is used before being assigned.
+privateNames/privateNameFieldDestructuredBinding.ts(14,20): error TS1003: Identifier expected.
+privateNames/privateNameFieldDestructuredBinding.ts(14,20): error TS1127: Invalid character.
+privateNames/privateNameFieldDestructuredBinding.ts(14,21): error TS1005: ',' expected.
+privateNames/privateNameFieldDestructuredBinding.ts(14,37): error TS1003: Identifier expected.
+privateNames/privateNameFieldDestructuredBinding.ts(14,37): error TS1127: Invalid character.
+privateNames/privateNameFieldDestructuredBinding.ts(14,38): error TS1005: ',' expected.
+privateNames/privateNameFieldDestructuredBinding.ts(15,15): error TS1003: Identifier expected.
+privateNames/privateNameFieldDestructuredBinding.ts(15,15): error TS1127: Invalid character.
+privateNames/privateNameFieldDestructuredBinding.ts(15,16): error TS1005: ',' expected.
+privateNames/privateNameFieldDestructuredBinding.ts(15,29): error TS1003: Identifier expected.
+privateNames/privateNameFieldDestructuredBinding.ts(15,29): error TS1127: Invalid character.
+privateNames/privateNameFieldDestructuredBinding.ts(15,30): error TS1005: ',' expected.
+privateNames/privateNameFieldDestructuredBinding.ts(16,20): error TS1003: Identifier expected.
+privateNames/privateNameFieldDestructuredBinding.ts(16,20): error TS1127: Invalid character.
+privateNames/privateNameFieldDestructuredBinding.ts(16,21): error TS1005: ',' expected.
+privateNames/privateNameFieldDestructuredBinding.ts(16,27): error TS1005: ',' expected.
+privateNames/privateNameFieldDestructuredBinding.ts(16,27): error TS2304: Cannot find name '='.
+privateNames/privateNameFieldDestructuredBinding.ts(16,29): error TS1005: ',' expected.
+privateNames/privateNameFieldDestructuredBinding.ts(16,41): error TS1003: Identifier expected.
+privateNames/privateNameFieldDestructuredBinding.ts(16,41): error TS1127: Invalid character.
+privateNames/privateNameFieldDestructuredBinding.ts(16,42): error TS1005: ',' expected.
+privateNames/privateNameFieldDestructuredBinding.ts(17,15): error TS1003: Identifier expected.
+privateNames/privateNameFieldDestructuredBinding.ts(17,15): error TS1127: Invalid character.
+privateNames/privateNameFieldDestructuredBinding.ts(17,16): error TS1005: ',' expected.
+privateNames/privateNameFieldDestructuredBinding.ts(18,27): error TS1003: Identifier expected.
+privateNames/privateNameFieldDestructuredBinding.ts(18,27): error TS1127: Invalid character.
+privateNames/privateNameFieldDestructuredBinding.ts(18,28): error TS1005: ',' expected.
+privateNames/privateNameFieldDestructuredBinding.ts(21,13): error TS1003: Identifier expected.
+privateNames/privateNameFieldDestructuredBinding.ts(21,13): error TS1127: Invalid character.
+privateNames/privateNameFieldDestructuredBinding.ts(21,14): error TS1005: ',' expected.
+
+
+==== privateNames/privateNameFieldDestructuredBinding.ts (41 errors) ====
+    class A {
+        #field = 1;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~~
+!!! error TS1005: ';' expected.
+        otherObject = new A();
+        testObject() {
+            return { x: 10, y: 6 };
+        }
+        testArray() {
+            return [10, 11];
+        }
+        constructor() {
+            let y: number;
+            ({ x: this.#field, y } = this.testObject());
+                       ~
+!!! error TS1003: Identifier expected.
+                       ~
+!!! error TS1127: Invalid character.
+                        ~~~~~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS2454: Variable 'y' is used before being assigned.
+            ([this.#field, y] = this.testArray());
+                   ~
+!!! error TS1003: Identifier expected.
+                   ~
+!!! error TS1127: Invalid character.
+                    ~~~~~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS2454: Variable 'y' is used before being assigned.
+            ({ a: this.#field, b: [this.#field] } = { a: 1, b: [2] });
+                       ~
+!!! error TS1003: Identifier expected.
+                       ~
+!!! error TS1127: Invalid character.
+                        ~~~~~
+!!! error TS1005: ',' expected.
+                                        ~
+!!! error TS1003: Identifier expected.
+                                        ~
+!!! error TS1127: Invalid character.
+                                         ~~~~~
+!!! error TS1005: ',' expected.
+            [this.#field, [this.#field]] = [1, [2]];
+                  ~
+!!! error TS1003: Identifier expected.
+                  ~
+!!! error TS1127: Invalid character.
+                   ~~~~~
+!!! error TS1005: ',' expected.
+                                ~
+!!! error TS1003: Identifier expected.
+                                ~
+!!! error TS1127: Invalid character.
+                                 ~~~~~
+!!! error TS1005: ',' expected.
+            ({ a: this.#field = 1, b: [this.#field = 1] } = { b: [] });
+                       ~
+!!! error TS1003: Identifier expected.
+                       ~
+!!! error TS1127: Invalid character.
+                        ~~~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS2304: Cannot find name '='.
+                                ~
+!!! error TS1005: ',' expected.
+                                            ~
+!!! error TS1003: Identifier expected.
+                                            ~
+!!! error TS1127: Invalid character.
+                                             ~~~~~
+!!! error TS1005: ',' expected.
+            [this.#field = 2] = [];
+                  ~
+!!! error TS1003: Identifier expected.
+                  ~
+!!! error TS1127: Invalid character.
+                   ~~~~~
+!!! error TS1005: ',' expected.
+            [this.otherObject.#field = 2] = [];
+                              ~
+!!! error TS1003: Identifier expected.
+                              ~
+!!! error TS1127: Invalid character.
+                               ~~~~~
+!!! error TS1005: ',' expected.
+        }
+        static test(_a: A) {
+            [_a.#field] = [2];
+                ~
+!!! error TS1003: Identifier expected.
+                ~
+!!! error TS1127: Invalid character.
+                 ~~~~~
+!!! error TS1005: ',' expected.
+        }
+    }

@@ -1,0 +1,55 @@
+constructorDeclarations/quotedConstructors.ts(25,24): error TS1005: ',' expected.
+constructorDeclarations/quotedConstructors.ts(25,24): error TS2304: Cannot find name '('.
+constructorDeclarations/quotedConstructors.ts(25,25): error TS1005: ',' expected.
+constructorDeclarations/quotedConstructors.ts(25,25): error TS2304: Cannot find name ')'.
+constructorDeclarations/quotedConstructors.ts(25,27): error TS1005: ',' expected.
+constructorDeclarations/quotedConstructors.ts(25,27): error TS2304: Cannot find name '{'.
+constructorDeclarations/quotedConstructors.ts(25,30): error TS1128: Declaration or statement expected.
+
+
+==== constructorDeclarations/quotedConstructors.ts (7 errors) ====
+    class C {
+        "constructor"() {
+            console.log(this);
+        }
+    }
+    
+    class D {
+        'constructor'() {
+            console.log(this);
+        }
+    }
+    
+    class E {
+        ['constructor']() {
+            console.log(this);
+        }
+    }
+    
+    new class {
+        "constructor"() {
+            console.log(this);
+        }
+    };
+    
+    var o = { "constructor"() {} };
+                           ~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS2304: Cannot find name '('.
+                            ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS2304: Cannot find name ')'.
+                              ~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS2304: Cannot find name '{'.
+                                 ~
+!!! error TS1128: Declaration or statement expected.
+    
+    class F {
+        "\x63onstructor"() {
+            console.log(this);
+        }
+    }

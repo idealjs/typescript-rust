@@ -1,0 +1,71 @@
+classStaticBlock/classStaticBlock27.ts(3,12): error TS2304: Cannot find name 'Foo'.
+classStaticBlock/classStaticBlock27.ts(5,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock27.ts(6,16): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock27.ts(6,17): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock27.ts(6,24): error TS1005: ',' expected.
+classStaticBlock/classStaticBlock27.ts(7,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock27.ts(7,13): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock27.ts(7,17): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock27.ts(9,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock27.ts(9,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock27.ts(10,21): error TS2304: Cannot find name 'Foo'.
+classStaticBlock/classStaticBlock27.ts(11,9): error TS2304: Cannot find name 'Foo'.
+classStaticBlock/classStaticBlock27.ts(13,5): error TS2304: Cannot find name 'static'.
+classStaticBlock/classStaticBlock27.ts(13,12): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock27.ts(14,21): error TS2304: Cannot find name 'Foo'.
+classStaticBlock/classStaticBlock27.ts(15,9): error TS2304: Cannot find name 'Foo'.
+classStaticBlock/classStaticBlock27.ts(17,1): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlock27.ts (17 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/44872
+    
+    void class Foo {
+               ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+        static prop = 1
+        static {
+               ~
+!!! error TS1005: ';' expected.
+            console.log(Foo.prop);
+                   ~
+!!! error TS1005: ';' expected.
+                    ~~~
+!!! error TS1005: ';' expected.
+                           ~
+!!! error TS1005: ',' expected.
+            Foo.prop++;
+               ~
+!!! error TS1005: ';' expected.
+                ~~~~
+!!! error TS1005: ';' expected.
+                    ~~
+!!! error TS1005: ';' expected.
+        }
+        static {
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~
+!!! error TS1005: ';' expected.
+            console.log(Foo.prop);
+                        ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+            Foo.prop++;
+            ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+        }
+        static {
+        ~~~~~~
+!!! error TS2304: Cannot find name 'static'.
+               ~
+!!! error TS1005: ';' expected.
+            console.log(Foo.prop);
+                        ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+            Foo.prop++;
+            ~~~
+!!! error TS2304: Cannot find name 'Foo'.
+        }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.

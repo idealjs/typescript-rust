@@ -1,0 +1,45 @@
+privateNames/privateNameFieldDerivedClasses.ts(2,5): error TS1003: Identifier expected.
+privateNames/privateNameFieldDerivedClasses.ts(2,5): error TS1127: Invalid character.
+privateNames/privateNameFieldDerivedClasses.ts(2,6): error TS1005: ';' expected.
+privateNames/privateNameFieldDerivedClasses.ts(4,23): error TS1003: Identifier expected.
+privateNames/privateNameFieldDerivedClasses.ts(4,23): error TS1127: Invalid character.
+privateNames/privateNameFieldDerivedClasses.ts(4,24): error TS1005: ',' expected.
+privateNames/privateNameFieldDerivedClasses.ts(9,23): error TS1003: Identifier expected.
+privateNames/privateNameFieldDerivedClasses.ts(9,23): error TS1127: Invalid character.
+privateNames/privateNameFieldDerivedClasses.ts(9,24): error TS1005: ',' expected.
+privateNames/privateNameFieldDerivedClasses.ts(9,24): error TS2304: Cannot find name 'prop'.
+
+
+==== privateNames/privateNameFieldDerivedClasses.ts (10 errors) ====
+    class Base {
+        #prop: number = 123;
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~
+!!! error TS1005: ';' expected.
+        static method(x: Derived) {
+            console.log(x.#prop);
+                          ~
+!!! error TS1003: Identifier expected.
+                          ~
+!!! error TS1127: Invalid character.
+                           ~~~~
+!!! error TS1005: ',' expected.
+        }
+    }
+    class Derived extends Base {
+        static method(x: Derived) {
+            console.log(x.#prop);
+                          ~
+!!! error TS1003: Identifier expected.
+                          ~
+!!! error TS1127: Invalid character.
+                           ~~~~
+!!! error TS1005: ',' expected.
+                           ~~~~
+!!! error TS2304: Cannot find name 'prop'.
+        }
+    }
+    

@@ -1,0 +1,72 @@
+classStaticBlock/classStaticBlock16.ts(3,3): error TS1003: Identifier expected.
+classStaticBlock/classStaticBlock16.ts(3,3): error TS1127: Invalid character.
+classStaticBlock/classStaticBlock16.ts(3,4): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock16.ts(5,10): error TS1003: Identifier expected.
+classStaticBlock/classStaticBlock16.ts(5,10): error TS1127: Invalid character.
+classStaticBlock/classStaticBlock16.ts(5,11): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock16.ts(8,10): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock16.ts(10,28): error TS1003: Identifier expected.
+classStaticBlock/classStaticBlock16.ts(10,28): error TS1127: Invalid character.
+classStaticBlock/classStaticBlock16.ts(10,29): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock16.ts(11,18): error TS2304: Cannot find name 'D'.
+classStaticBlock/classStaticBlock16.ts(11,28): error TS1003: Identifier expected.
+classStaticBlock/classStaticBlock16.ts(11,28): error TS1127: Invalid character.
+classStaticBlock/classStaticBlock16.ts(11,29): error TS1005: ';' expected.
+classStaticBlock/classStaticBlock16.ts(13,1): error TS1128: Declaration or statement expected.
+
+
+==== classStaticBlock/classStaticBlock16.ts (15 errors) ====
+    let getX: (c: C) => number;
+    class C {
+      #x = 1
+      ~
+!!! error TS1003: Identifier expected.
+      ~
+!!! error TS1127: Invalid character.
+       ~
+!!! error TS1005: ';' expected.
+      constructor(x: number) {
+        this.#x = x;
+             ~
+!!! error TS1003: Identifier expected.
+             ~
+!!! error TS1127: Invalid character.
+              ~
+!!! error TS1005: ';' expected.
+      }
+    
+      static {
+             ~
+!!! error TS1005: ';' expected.
+        // getX has privileged access to #x
+        getX = (obj: C) => obj.#x;
+                               ~
+!!! error TS1003: Identifier expected.
+                               ~
+!!! error TS1127: Invalid character.
+                                ~
+!!! error TS1005: ';' expected.
+        getY = (obj: D) => obj.#y;
+                     ~
+!!! error TS2304: Cannot find name 'D'.
+                               ~
+!!! error TS1003: Identifier expected.
+                               ~
+!!! error TS1127: Invalid character.
+                                ~
+!!! error TS1005: ';' expected.
+      }
+    }
+    ~
+!!! error TS1128: Declaration or statement expected.
+    
+    let getY: (c: D) => number;
+    class D {
+      #y = 1
+    
+      static {
+        // getY has privileged access to y
+        getX = (obj: C) => obj.#x;
+        getY = (obj: D) => obj.#y;
+      }
+    }

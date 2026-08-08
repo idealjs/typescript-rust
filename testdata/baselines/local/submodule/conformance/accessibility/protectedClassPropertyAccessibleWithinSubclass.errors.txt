@@ -1,0 +1,33 @@
+accessibility/protectedClassPropertyAccessibleWithinSubclass.ts(9,19): error TS1005: ';' expected.
+accessibility/protectedClassPropertyAccessibleWithinSubclass.ts(10,19): error TS1005: ';' expected.
+accessibility/protectedClassPropertyAccessibleWithinSubclass.ts(14,26): error TS1005: ';' expected.
+accessibility/protectedClassPropertyAccessibleWithinSubclass.ts(15,26): error TS1005: ';' expected.
+
+
+==== accessibility/protectedClassPropertyAccessibleWithinSubclass.ts (4 errors) ====
+    // no errors
+    
+    class B {
+        protected x: string;
+        protected static x: string;
+    }
+    
+    class C extends B {
+        protected get y() { return this.x; }
+                      ~
+!!! error TS1005: ';' expected.
+        protected set y(x) { this.y = this.x; }
+                      ~
+!!! error TS1005: ';' expected.
+        protected foo() { return this.x; }
+        protected bar() { return this.foo(); }
+    
+        protected static get y() { return this.x; }
+                             ~
+!!! error TS1005: ';' expected.
+        protected static set y(x) { this.y = this.x; }
+                             ~
+!!! error TS1005: ';' expected.
+        protected static foo() { return this.x; }
+        protected static bar() { this.foo(); }
+    }

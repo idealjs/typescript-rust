@@ -1,0 +1,13 @@
+classDeclarations/classDeclarationLoop.ts(2,23): error TS1005: '>' expected.
+
+
+==== classDeclarations/classDeclarationLoop.ts (1 errors) ====
+    const arr = [];
+    for (let i = 0; i < 10; ++i) {
+                          ~
+!!! error TS1005: '>' expected.
+        class C {
+            prop = i;
+        }
+        arr.push(C);
+    }

@@ -1,0 +1,72 @@
+constructorDeclarations/classConstructorAccessibility.ts(2,31): error TS1005: ',' expected.
+constructorDeclarations/classConstructorAccessibility.ts(6,32): error TS1005: ',' expected.
+constructorDeclarations/classConstructorAccessibility.ts(10,34): error TS1005: ',' expected.
+constructorDeclarations/classConstructorAccessibility.ts(13,9): error TS2554: Expected 2 arguments, but got 1.
+constructorDeclarations/classConstructorAccessibility.ts(14,9): error TS2554: Expected 2 arguments, but got 1.
+constructorDeclarations/classConstructorAccessibility.ts(15,9): error TS2554: Expected 2 arguments, but got 1.
+constructorDeclarations/classConstructorAccessibility.ts(19,35): error TS1005: ',' expected.
+constructorDeclarations/classConstructorAccessibility.ts(23,36): error TS1005: ',' expected.
+constructorDeclarations/classConstructorAccessibility.ts(27,38): error TS1005: ',' expected.
+constructorDeclarations/classConstructorAccessibility.ts(30,13): error TS2554: Expected 2 arguments, but got 1.
+constructorDeclarations/classConstructorAccessibility.ts(31,13): error TS2554: Expected 2 arguments, but got 1.
+constructorDeclarations/classConstructorAccessibility.ts(32,13): error TS2554: Expected 2 arguments, but got 1.
+
+
+==== constructorDeclarations/classConstructorAccessibility.ts (12 errors) ====
+    class C {
+        public constructor(public x: number) { }
+                                  ~
+!!! error TS1005: ',' expected.
+    }
+    
+    class D {
+        private constructor(public x: number) { }
+                                   ~
+!!! error TS1005: ',' expected.
+    }
+    
+    class E {
+        protected constructor(public x: number) { }
+                                     ~
+!!! error TS1005: ',' expected.
+    }
+    
+    var c = new C(1);
+            ~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    var d = new D(1); // error
+            ~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    var e = new E(1); // error
+            ~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    
+    namespace Generic {
+        class C<T> {
+            public constructor(public x: T) { }
+                                      ~
+!!! error TS1005: ',' expected.
+        }
+    
+        class D<T> {
+            private constructor(public x: T) { }
+                                       ~
+!!! error TS1005: ',' expected.
+        }
+    
+        class E<T> {
+            protected constructor(public x: T) { }
+                                         ~
+!!! error TS1005: ',' expected.
+        }
+    
+        var c = new C(1);
+                ~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+        var d = new D(1); // error
+                ~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+        var e = new E(1); // error
+                ~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    }

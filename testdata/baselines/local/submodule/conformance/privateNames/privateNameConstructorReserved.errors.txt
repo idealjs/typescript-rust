@@ -1,0 +1,15 @@
+privateNames/privateNameConstructorReserved.ts(2,5): error TS1003: Identifier expected.
+privateNames/privateNameConstructorReserved.ts(2,5): error TS1127: Invalid character.
+privateNames/privateNameConstructorReserved.ts(2,6): error TS1005: ';' expected.
+
+
+==== privateNames/privateNameConstructorReserved.ts (3 errors) ====
+    class A {
+        #constructor() {}      // Error: `#constructor` is a reserved word.
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+    }

@@ -1,0 +1,127 @@
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(7,9): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(8,9): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(13,16): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(14,16): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(24,32): error TS2349: This expression is not callable.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(29,32): error TS2349: This expression is not callable.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(33,19): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(34,32): error TS2349: This expression is not callable.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(38,19): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(39,32): error TS2349: This expression is not callable.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(44,32): error TS2349: This expression is not callable.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(49,32): error TS2349: This expression is not callable.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(54,32): error TS2349: This expression is not callable.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(58,26): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(59,32): error TS2349: This expression is not callable.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(63,26): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(64,32): error TS2349: This expression is not callable.
+inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts(69,32): error TS2349: This expression is not callable.
+
+
+==== inheritanceAndOverriding/derivedClassOverridesProtectedMembers3.ts (18 errors) ====
+    var x: { foo: string; }
+    var y: { foo: string; bar: string; }
+    
+    class Base {
+        a: typeof x;
+        b(a: typeof x) { }
+        get c() { return x; }
+            ~
+!!! error TS1005: ';' expected.
+        set c(v: typeof x) { }
+            ~
+!!! error TS1005: ';' expected.
+        d: (a: typeof x) => void;
+    
+        static r: typeof x;
+        static s(a: typeof x) { }
+        static get t() { return x; }
+                   ~
+!!! error TS1005: ';' expected.
+        static set t(v: typeof x) { }
+                   ~
+!!! error TS1005: ';' expected.
+        static u: (a: typeof x) => void;
+    
+        constructor(a: typeof x) {}
+    }
+    
+    // Errors
+    // decrease visibility of all public members to protected
+    class Derived1 extends Base {
+        protected a: typeof x;
+        constructor(a: typeof x) { super(a); }
+                                   ~~~~~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    class Derived2 extends Base {
+        protected b(a: typeof x) { }
+        constructor(a: typeof x) { super(a); }
+                                   ~~~~~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    class Derived3 extends Base {
+        protected get c() { return x; }
+                      ~
+!!! error TS1005: ';' expected.
+        constructor(a: typeof x) { super(a); }
+                                   ~~~~~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    class Derived4 extends Base {
+        protected set c(v: typeof x) { }
+                      ~
+!!! error TS1005: ';' expected.
+        constructor(a: typeof x) { super(a); }
+                                   ~~~~~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    class Derived5 extends Base {
+        protected d: (a: typeof x) => void ;
+        constructor(a: typeof x) { super(a); }
+                                   ~~~~~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    class Derived6 extends Base {
+        protected static r: typeof x;
+        constructor(a: typeof x) { super(a); }
+                                   ~~~~~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    class Derived7 extends Base {
+        protected static s(a: typeof x) { }
+        constructor(a: typeof x) { super(a); }
+                                   ~~~~~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    class Derived8 extends Base {
+        protected static get t() { return x; }
+                             ~
+!!! error TS1005: ';' expected.
+        constructor(a: typeof x) { super(a); }
+                                   ~~~~~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    class Derived9 extends Base {
+        protected static set t(v: typeof x) { }
+                             ~
+!!! error TS1005: ';' expected.
+        constructor(a: typeof x) { super(a); }
+                                   ~~~~~
+!!! error TS2349: This expression is not callable.
+    }
+    
+    class Derived10 extends Base {
+        protected static u: (a: typeof x) => void ;
+        constructor(a: typeof x) { super(a); }
+                                   ~~~~~
+!!! error TS2349: This expression is not callable.
+    }

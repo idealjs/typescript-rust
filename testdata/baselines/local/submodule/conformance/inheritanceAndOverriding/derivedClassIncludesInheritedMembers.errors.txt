@@ -1,0 +1,87 @@
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(4,9): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(5,9): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(9,16): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(10,16): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(18,30): error TS2554: Expected 0 arguments, but got 1.
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(23,18): error TS2339: Property 'r' does not exist on type 'object'.
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(24,18): error TS2339: Property 's' does not exist on type 'object'.
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(25,18): error TS2339: Property 't' does not exist on type 'object'.
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(26,9): error TS2339: Property 't' does not exist on type 'object'.
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(29,7): error TS1005: ']' expected.
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(29,15): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(29,18): error TS2304: Cannot find name 'Object'.
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(30,7): error TS1005: ']' expected.
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(30,15): error TS1005: ';' expected.
+inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts(30,18): error TS2304: Cannot find name 'Date'.
+
+
+==== inheritanceAndOverriding/derivedClassIncludesInheritedMembers.ts (15 errors) ====
+    class Base {
+        a: string;
+        b() { }
+        get c() { return ''; }
+            ~
+!!! error TS1005: ';' expected.
+        set c(v) { }
+            ~
+!!! error TS1005: ';' expected.
+    
+        static r: string;
+        static s() { }
+        static get t() { return ''; }
+                   ~
+!!! error TS1005: ';' expected.
+        static set t(v) { }
+                   ~
+!!! error TS1005: ';' expected.
+    
+        constructor(x) { }
+    }
+    
+    class Derived extends Base {
+    }
+    
+    var d: Derived = new Derived(1);
+                                 ~
+!!! error TS2554: Expected 0 arguments, but got 1.
+    var r1 = d.a;
+    var r2 = d.b();
+    var r3 = d.c;
+    d.c = '';
+    var r4 = Derived.r;
+                     ~
+!!! error TS2339: Property 'r' does not exist on type 'object'.
+    var r5 = Derived.s();
+                     ~
+!!! error TS2339: Property 's' does not exist on type 'object'.
+    var r6 = Derived.t;
+                     ~
+!!! error TS2339: Property 't' does not exist on type 'object'.
+    Derived.t = '';
+            ~
+!!! error TS2339: Property 't' does not exist on type 'object'.
+    
+    class Base2 {
+        [x: string]: Object;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+                     ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+        [x: number]: Date;
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1005: ';' expected.
+                     ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    }
+    
+    class Derived2 extends Base2 {
+    }
+    
+    var d2: Derived2;
+    var r7 = d2[''];
+    var r8 = d2[1];
+    

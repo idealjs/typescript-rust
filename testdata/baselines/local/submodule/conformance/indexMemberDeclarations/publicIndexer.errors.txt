@@ -1,0 +1,34 @@
+indexMemberDeclarations/publicIndexer.ts(4,14): error TS1005: ']' expected.
+indexMemberDeclarations/publicIndexer.ts(4,22): error TS1005: ';' expected.
+indexMemberDeclarations/publicIndexer.ts(8,14): error TS1005: ']' expected.
+indexMemberDeclarations/publicIndexer.ts(8,22): error TS1005: ';' expected.
+indexMemberDeclarations/publicIndexer.ts(12,14): error TS1005: ']' expected.
+indexMemberDeclarations/publicIndexer.ts(12,22): error TS1005: ';' expected.
+
+
+==== indexMemberDeclarations/publicIndexer.ts (6 errors) ====
+    // public indexers not allowed
+    
+    class C {
+        public [x: string]: string;
+                 ~
+!!! error TS1005: ']' expected.
+                         ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class D {
+        public [x: number]: string;
+                 ~
+!!! error TS1005: ']' expected.
+                         ~
+!!! error TS1005: ';' expected.
+    }
+    
+    class E<T> {
+        public [x: string]: T;
+                 ~
+!!! error TS1005: ']' expected.
+                         ~
+!!! error TS1005: ';' expected.
+    }
