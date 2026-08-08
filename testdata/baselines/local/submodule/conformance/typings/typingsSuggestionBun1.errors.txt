@@ -1,0 +1,7 @@
+a.ts(1,14): error TS2304: Cannot find name 'Bun'.
+
+
+==== a.ts (1 errors) ====
+    const file = Bun.file("/a.ts");
+                 ~~~
+!!! error TS2304: Cannot find name 'Bun'.

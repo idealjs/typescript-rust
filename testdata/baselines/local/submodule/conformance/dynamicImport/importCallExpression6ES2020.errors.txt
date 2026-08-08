@@ -1,0 +1,33 @@
+2.ts(3,16): error TS2304: Cannot find name 'import'.
+2.ts(4,17): error TS2304: Cannot find name 'import'.
+2.ts(5,17): error TS2304: Cannot find name 'import'.
+2.ts(6,17): error TS2304: Cannot find name 'import'.
+
+
+==== dynamicImport/importCallExpression6ES2020.ts (0 errors) ====
+    ﻿// @module: es2020
+==== 0.ts (0 errors) ====
+    export class B {
+        print() { return "I am B"}
+    }
+    
+    export function foo() { return "foo" }
+    
+==== 1.ts (0 errors) ====
+    export function backup() { return "backup"; }
+    
+==== 2.ts (4 errors) ====
+    declare function bar(): boolean;
+    const specify = bar() ? "./0" : undefined;
+    let myModule = import(specify);
+                   ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    let myModule1 = import(undefined);
+                    ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    let myModule2 = import(bar() ? "./1" : null);
+                    ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    let myModule3 = import(null);
+                    ~~~~~~
+!!! error TS2304: Cannot find name 'import'.

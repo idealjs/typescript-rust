@@ -1,0 +1,74 @@
+index.ts(1,37): error TS2304: Cannot find name 'import'.
+node_modules/inner/package.json(2,11): error TS1005: ';' expected.
+node_modules/inner/package.json(3,14): error TS1005: ';' expected.
+node_modules/inner/package.json(4,11): error TS1005: ';' expected.
+node_modules/inner/package.json(5,14): error TS1005: ';' expected.
+node_modules/inner/package.json(6,12): error TS1005: ';' expected.
+node_modules/inner/package.json(7,22): error TS1005: ';' expected.
+node_modules/inner/package.json(8,10): error TS1128: Declaration or statement expected.
+node_modules/inner/package.json(9,18): error TS1005: ';' expected.
+node_modules/inner/package.json(10,22): error TS1005: ';' expected.
+package.json(2,11): error TS1005: ';' expected.
+package.json(3,14): error TS1005: ';' expected.
+package.json(4,11): error TS1005: ';' expected.
+package.json(5,14): error TS1005: ';' expected.
+
+
+==== index.ts (1 errors) ====
+    export const a = async () => (await import("inner")).x();
+                                        ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+==== node_modules/inner/index.d.ts (0 errors) ====
+    export { x } from "./other.js";
+==== node_modules/inner/other.d.ts (0 errors) ====
+    import { Thing } from "./private.js"
+    export const x: () => Thing;
+==== node_modules/inner/private.d.ts (0 errors) ====
+    export interface Thing {} // not exported in export map, inaccessible under new module modes
+==== package.json (4 errors) ====
+    {
+        "name": "package",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+                 ~
+!!! error TS1005: ';' expected.
+        "type": "module",
+              ~
+!!! error TS1005: ';' expected.
+        "exports": "./index.js"
+                 ~
+!!! error TS1005: ';' expected.
+    }
+==== node_modules/inner/package.json (9 errors) ====
+    {
+        "name": "inner",
+              ~
+!!! error TS1005: ';' expected.
+        "private": true,
+                 ~
+!!! error TS1005: ';' expected.
+        "type": "module",
+              ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            ".": {
+               ~
+!!! error TS1005: ';' expected.
+                "default": "./index.js"
+                         ~
+!!! error TS1005: ';' expected.
+            },
+             ~
+!!! error TS1128: Declaration or statement expected.
+            "./other": {
+                     ~
+!!! error TS1005: ';' expected.
+                "default": "./other.js"
+                         ~
+!!! error TS1005: ';' expected.
+            }
+        }
+    }

@@ -1,0 +1,96 @@
+type-decls-bad-export.ts(1,13): error TS1003: Identifier expected.
+type-decls-bad-export.ts(1,15): error TS1005: '=' expected.
+type-decls-bad-export.ts(1,27): error TS1005: ';' expected.
+type-decls-bad-export.ts(1,30): error TS1005: ';' expected.
+type-decls-bad-export.ts(1,30): error TS2304: Cannot find name 'baz'.
+type-decls-bad-export.ts(1,34): error TS1128: Declaration or statement expected.
+type-decls-valid.ts(2,13): error TS1003: Identifier expected.
+type-decls-valid.ts(2,15): error TS1005: '=' expected.
+type-decls-valid.ts(2,19): error TS1005: ';' expected.
+type-decls-valid.ts(2,22): error TS1005: ';' expected.
+type-decls-valid.ts(2,32): error TS1128: Declaration or statement expected.
+
+
+==== arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_syntax.ts (0 errors) ====
+    
+==== values-valid.ts (0 errors) ====
+    export const foo = 123;
+    export { foo as "valid 1" };
+    import { "valid 1" as bar } from "./values-valid";
+    export { "valid 1" as "valid 2" } from "./values-valid";
+    export { foo as "valid 3" } from "./values-valid";
+    export * as "valid 4" from "./values-valid";
+    
+==== values-bad-import.ts (0 errors) ====
+    import { foo as "invalid 2" } from "./values-valid";
+    
+==== values-bad-export.ts (0 errors) ====
+    export { "invalid 3" as baz };
+    
+==== values-no-as.ts (0 errors) ====
+    import { "invalid 1" } from "./values-valid";
+    
+==== values-type-as.ts (0 errors) ====
+    import { type as "invalid 4" } from "./values-valid";
+    
+    
+==== type-decls-valid.ts (5 errors) ====
+    export type foo = 123;
+    export type { foo as "valid 1" };
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~
+!!! error TS1005: '=' expected.
+                      ~~
+!!! error TS1005: ';' expected.
+                         ~~~~~~~~~
+!!! error TS1005: ';' expected.
+                                   ~
+!!! error TS1128: Declaration or statement expected.
+    import type { "valid 1" as bar } from "./type-decls-valid";
+    export type { "valid 1" as "valid 2" } from "./type-decls-valid";
+    export type { foo as "valid 3" } from "./type-decls-valid";
+    export type * as "valid 4" from "./type-decls-valid";
+    
+==== type-decls-bad-import.ts (0 errors) ====
+    import type { foo as "invalid 2" } from "./type-decls-valid";
+    
+==== type-decls-bad-export.ts (6 errors) ====
+    export type { "invalid 3" as baz };
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~~~~~~~~~
+!!! error TS1005: '=' expected.
+                              ~~
+!!! error TS1005: ';' expected.
+                                 ~~~
+!!! error TS1005: ';' expected.
+                                 ~~~
+!!! error TS2304: Cannot find name 'baz'.
+                                     ~
+!!! error TS1128: Declaration or statement expected.
+    
+==== type-decls-no-as.ts (0 errors) ====
+    import type { "invalid 1" } from "./type-decls-valid";
+    
+==== type-decls-type-as.ts (0 errors) ====
+    import type { type as "invalid 4" } from "./type-decls-valid";
+    
+==== type-clause-valid.ts (0 errors) ====
+    export type foo = 123;
+    export { type foo as "valid 1" };
+    import { type "valid 1" as bar } from "./type-clause-valid";
+    export { type "valid 1" as "valid 2" } from "./type-clause-valid";
+    export { type foo as "valid 3" } from "./type-clause-valid";
+    
+==== type-clause-bad-import.ts (0 errors) ====
+    import { type foo as "invalid 2" } from "./type-clause-valid";
+    
+==== type-clause-bad-export.ts (0 errors) ====
+    export { type "invalid 3" as baz };
+    
+==== type-clause-no-as.ts (0 errors) ====
+    import { type "invalid 1" } from "./type-clause-valid";
+    
+==== type-clause-type-as-as.ts (0 errors) ====
+    import { type as as "invalid 4" } from "./type-clause-valid";

@@ -1,0 +1,131 @@
+file11.ts(2,8): error TS1005: '{' expected.
+file11.ts(2,32): error TS1003: Identifier expected.
+file12.ts(2,16): error TS1012: Unexpected token.
+file12.ts(2,17): error TS1005: ';' expected.
+file12.ts(2,21): error TS1005: ';' expected.
+file13.ts(2,1): error TS2304: Cannot find name 'abstract'.
+file13.ts(2,10): error TS1005: ';' expected.
+file14.ts(2,8): error TS2304: Cannot find name 'abstract'.
+file14.ts(2,17): error TS1005: ';' expected.
+file15.ts(2,16): error TS2304: Cannot find name 'abstract'.
+file15.ts(2,25): error TS1005: ';' expected.
+file3.ts(2,8): error TS1005: '{' expected.
+file3.ts(2,30): error TS1003: Identifier expected.
+file4.ts(2,8): error TS1005: '{' expected.
+file4.ts(2,22): error TS1003: Identifier expected.
+file5.ts(2,16): error TS1012: Unexpected token.
+file5.ts(2,17): error TS1005: ';' expected.
+file5.ts(2,21): error TS1005: ';' expected.
+file6.ts(2,6): error TS2304: Cannot find name 'export'.
+file6.ts(2,13): error TS1005: ';' expected.
+file7.ts(2,13): error TS2304: Cannot find name 'default'.
+file7.ts(2,21): error TS1005: ';' expected.
+
+
+==== global.ts (0 errors) ====
+    /** @type {*} */
+    var dec;
+    
+==== file1.ts (0 errors) ====
+    // ok
+    @dec export class C1 { }
+    
+==== file2.ts (0 errors) ====
+    // ok
+    @dec export default class C2 {}
+    
+==== file3.ts (2 errors) ====
+    // error
+    export @dec default class C3 {}
+           ~
+!!! error TS1005: '{' expected.
+                                 ~
+!!! error TS1003: Identifier expected.
+    
+==== file4.ts (2 errors) ====
+    // ok
+    export @dec class C4 {}
+           ~
+!!! error TS1005: '{' expected.
+                         ~
+!!! error TS1003: Identifier expected.
+    
+==== file5.ts (3 errors) ====
+    // ok
+    export default @dec class C5 {}
+                   ~
+!!! error TS1012: Unexpected token.
+                    ~~~
+!!! error TS1005: ';' expected.
+                        ~~~~~
+!!! error TS1005: ';' expected.
+    
+==== file6.ts (2 errors) ====
+    // error
+    @dec export @dec class C6 {}
+         ~~~~~~
+!!! error TS2304: Cannot find name 'export'.
+                ~
+!!! error TS1005: ';' expected.
+    
+==== file7.ts (2 errors) ====
+    // error
+    @dec export default @dec class C7 {}
+                ~~~~~~~
+!!! error TS2304: Cannot find name 'default'.
+                        ~
+!!! error TS1005: ';' expected.
+    
+==== file8.ts (0 errors) ====
+    // ok
+    @dec abstract class C8 {}
+    
+==== file9.ts (0 errors) ====
+    // ok
+    @dec export abstract class C9 {}
+    
+==== file10.ts (0 errors) ====
+    // ok
+    @dec export default abstract class C10 {}
+    
+==== file11.ts (2 errors) ====
+    // ok
+    export @dec abstract class C11 {}
+           ~
+!!! error TS1005: '{' expected.
+                                   ~
+!!! error TS1003: Identifier expected.
+    
+==== file12.ts (3 errors) ====
+    // ok
+    export default @dec abstract class C12 {}
+                   ~
+!!! error TS1012: Unexpected token.
+                    ~~~
+!!! error TS1005: ';' expected.
+                        ~~~~~~~~
+!!! error TS1005: ';' expected.
+    
+==== file13.ts (2 errors) ====
+    // error
+    abstract @dec class C13 {}
+    ~~~~~~~~
+!!! error TS2304: Cannot find name 'abstract'.
+             ~
+!!! error TS1005: ';' expected.
+    
+==== file14.ts (2 errors) ====
+    // error
+    export abstract @dec class C14 {}
+           ~~~~~~~~
+!!! error TS2304: Cannot find name 'abstract'.
+                    ~
+!!! error TS1005: ';' expected.
+    
+==== file15.ts (2 errors) ====
+    // error
+    export default abstract @dec class C15 {}
+                   ~~~~~~~~
+!!! error TS2304: Cannot find name 'abstract'.
+                            ~
+!!! error TS1005: ';' expected.

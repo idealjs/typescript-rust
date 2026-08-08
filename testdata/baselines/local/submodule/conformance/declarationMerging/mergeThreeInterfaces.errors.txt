@@ -1,0 +1,93 @@
+declarationMerging/mergeThreeInterfaces.ts(54,16): error TS2339: Property 'foo' does not exist on type '{ baz: boolean }'.
+declarationMerging/mergeThreeInterfaces.ts(56,16): error TS2339: Property 'bar' does not exist on type '{ baz: boolean }'.
+declarationMerging/mergeThreeInterfaces.ts(73,16): error TS2339: Property 'foo' does not exist on type '{ baz: string }'.
+declarationMerging/mergeThreeInterfaces.ts(75,16): error TS2339: Property 'bar' does not exist on type '{ baz: string }'.
+
+
+==== declarationMerging/mergeThreeInterfaces.ts (4 errors) ====
+    // interfaces with the same root module should merge
+    
+    // basic case
+    interface A {
+        foo: string;
+    }
+    
+    interface A {
+        bar: number;
+    }
+    
+    interface A {
+        baz: boolean;
+    }
+    
+    var a: A;
+    var r1 = a.foo
+    var r2 = a.bar;
+    var r3 = a.baz;
+    
+    // basic generic case
+    interface B<T> {
+        foo: T;
+    }
+    
+    interface B<T> {
+        bar: T;
+    }
+    
+    interface B<T> {
+        baz: T;
+    }
+    
+    var b: B<string>;
+    var r4 = b.foo
+    var r5 = b.bar;
+    var r6 = b.baz;
+    
+    // basic non-generic and generic case inside a module
+    namespace M {
+        interface A {
+            foo: string;
+        }
+    
+        interface A {
+            bar: number;
+        }
+    
+        interface A {
+            baz: boolean;
+        }
+    
+        var a: A;
+        var r1 = a.foo;
+                   ~~~
+!!! error TS2339: Property 'foo' does not exist on type '{ baz: boolean }'.
+        // BUG 856491
+        var r2 = a.bar; // any, should be number
+                   ~~~
+!!! error TS2339: Property 'bar' does not exist on type '{ baz: boolean }'.
+        // BUG 856491
+        var r3 = a.baz; // any, should be boolean
+    
+        interface B<T> {
+            foo: T;
+        }
+    
+        interface B<T> {
+            bar: T;
+        }
+    
+        interface B<T> {
+            baz: T;
+        }
+    
+        var b: B<string>;
+        var r4 = b.foo
+                   ~~~
+!!! error TS2339: Property 'foo' does not exist on type '{ baz: string }'.
+        // BUG 856491
+        var r5 = b.bar; // any, should be number
+                   ~~~
+!!! error TS2339: Property 'bar' does not exist on type '{ baz: string }'.
+        // BUG 856491
+        var r6 = b.baz; // any, should be boolean
+    }

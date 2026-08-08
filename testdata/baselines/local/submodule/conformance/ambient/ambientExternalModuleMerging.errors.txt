@@ -1,0 +1,23 @@
+ambientExternalModuleMerging_use.ts(3,9): error TS2304: Cannot find name 'M'.
+ambientExternalModuleMerging_use.ts(4,9): error TS2304: Cannot find name 'M'.
+
+
+==== ambientExternalModuleMerging_use.ts (2 errors) ====
+    import M = require("M");
+    // Should be strings
+    var x = M.x;
+            ~
+!!! error TS2304: Cannot find name 'M'.
+    var y = M.y;
+            ~
+!!! error TS2304: Cannot find name 'M'.
+    
+==== ambientExternalModuleMerging_declare.ts (0 errors) ====
+    declare module "M" {
+        export var x: string;
+    }
+    
+    // Merge
+    declare module "M" {
+        export var y: string;
+    }

@@ -1,0 +1,116 @@
+mod1.js(8,8): error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
+mod1.js(11,1): error TS2304: Cannot find name 'Object'.
+mod1.js(11,30): error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
+mod1.js(12,1): error TS2304: Cannot find name 'Object'.
+mod1.js(12,30): error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
+mod1.js(13,1): error TS2304: Cannot find name 'Object'.
+mod1.js(13,30): error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
+mod1.js(13,58): error TS2304: Cannot find name 'get'.
+mod1.js(13,61): error TS1005: ',' expected.
+mod1.js(13,61): error TS2304: Cannot find name '('.
+mod1.js(13,62): error TS1005: ',' expected.
+mod1.js(13,62): error TS2304: Cannot find name ')'.
+mod1.js(13,64): error TS1005: ',' expected.
+mod1.js(13,64): error TS2304: Cannot find name '{'.
+mod1.js(13,66): error TS1005: ',' expected.
+mod1.js(13,66): error TS2304: Cannot find name 'return'.
+mod1.js(13,73): error TS1005: ',' expected.
+mod1.js(13,82): error TS2304: Cannot find name 'set'.
+mod1.js(13,86): error TS2304: Cannot find name '_'.
+mod1.js(13,89): error TS1005: ',' expected.
+mod1.js(13,104): error TS1005: ',' expected.
+validator.ts(5,16): error TS2351: This expression is not constructable.
+
+
+==== mod1.js (21 errors) ====
+    /**
+     * @constructor
+     * @param {string} name
+     */
+    function Person(name) {
+        this.name = name;
+    }
+    Person.prototype.describe = function () {
+           ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
+        return "Person called " + this.name;
+    };
+    Object.defineProperty(Person.prototype, "thing", { value: 42, writable: true });
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                                 ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
+    Object.defineProperty(Person.prototype, "readonlyProp", { value: "Smith", writable: false });
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                                 ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
+    Object.defineProperty(Person.prototype, "rwAccessors", { get() { return 98122 }, set(_) { /*ignore*/ } });
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                                 ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
+                                                             ~~~
+!!! error TS2304: Cannot find name 'get'.
+                                                                ~
+!!! error TS1005: ',' expected.
+                                                                ~
+!!! error TS2304: Cannot find name '('.
+                                                                 ~
+!!! error TS1005: ',' expected.
+                                                                 ~
+!!! error TS2304: Cannot find name ')'.
+                                                                   ~
+!!! error TS1005: ',' expected.
+                                                                   ~
+!!! error TS2304: Cannot find name '{'.
+                                                                     ~~~~~~
+!!! error TS1005: ',' expected.
+                                                                     ~~~~~~
+!!! error TS2304: Cannot find name 'return'.
+                                                                            ~~~~~
+!!! error TS1005: ',' expected.
+                                                                                     ~~~
+!!! error TS2304: Cannot find name 'set'.
+                                                                                         ~
+!!! error TS2304: Cannot find name '_'.
+                                                                                            ~
+!!! error TS1005: ',' expected.
+                                                                                                           ~
+!!! error TS1005: ',' expected.
+    Object.defineProperty(Person.prototype, "readonlyAccessor", { get() { return 21.75 } });
+    Object.defineProperty(Person.prototype, "setonlyAccessor", {
+        /** @param {string} str */
+        set(str) {
+            this.rwAccessors = Number(str)
+        }
+    });
+    module.exports = Person;
+    
+==== validator.ts (1 errors) ====
+    import "./";
+    
+    import Person = require("./mod1");
+    
+    const m1 = new Person("Name")
+                   ~~~~~~
+!!! error TS2351: This expression is not constructable.
+    
+    m1.thing;
+    m1.readonlyProp;
+    m1.rwAccessors;
+    m1.readonlyAccessor;
+    m1.setonlyAccessor;
+    
+    // allowed assignments
+    m1.thing = 10;
+    m1.rwAccessors = 11;
+    m1.setonlyAccessor = "yes";
+    
+    // disallowed assignments
+    m1.readonlyProp = "name";
+    m1.readonlyAccessor = 12;
+    m1.thing = "no";
+    m1.rwAccessors = "no";
+    m1.setonlyAccessor = 0;
+    

@@ -1,0 +1,106 @@
+exponentiationOperator/compoundExponentiationAssignmentLHSIsValue.ts(43,10): error TS1128: Declaration or statement expected.
+exponentiationOperator/compoundExponentiationAssignmentLHSIsValue.ts(51,9): error TS2349: This expression is not callable.
+exponentiationOperator/compoundExponentiationAssignmentLHSIsValue.ts(65,21): error TS1128: Declaration or statement expected.
+exponentiationOperator/compoundExponentiationAssignmentLHSIsValue.ts(66,11): error TS1005: ';' expected.
+exponentiationOperator/compoundExponentiationAssignmentLHSIsValue.ts(69,1): error TS2349: This expression is not callable.
+exponentiationOperator/compoundExponentiationAssignmentLHSIsValue.ts(85,2): error TS2349: This expression is not callable.
+
+
+==== exponentiationOperator/compoundExponentiationAssignmentLHSIsValue.ts (6 errors) ====
+    // expected error for all the LHS of compound assignments (arithmetic and addition)
+    var value: any;
+    
+    // this
+    class C {
+        constructor() {
+            this **= value;
+        }
+        foo() {
+            this **= value;
+        }
+        static sfoo() {
+            this **= value;
+        }
+    }
+    
+    function foo() {
+        this **= value;
+    }
+    
+    this **= value;
+    
+    // identifiers: module, class, enum, function
+    namespace M { export var a; }
+    M **= value;
+    
+    C **= value;
+    
+    enum E { }
+    E **= value;
+    
+    foo **= value;
+    
+    // literals
+    null **= value;
+    true **= value;
+    false **= value;
+    0 **= value;
+    '' **= value;
+    /d+/ **= value;
+    
+    // object literals
+    { a: 0 } **= value;
+             ~~~
+!!! error TS1128: Declaration or statement expected.
+    
+    // array literals
+    ['', ''] **= value;
+    
+    // super
+    class Derived extends C {
+        constructor() {
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            super **= value;
+        }
+    
+        foo() {
+            super **= value;
+        }
+    
+        static sfoo() {
+            super **= value;
+        }
+    }
+    
+    // function expression
+    function bar1() { } **= value;
+                        ~~~
+!!! error TS1128: Declaration or statement expected.
+    () => { } **= value;
+              ~~~
+!!! error TS1005: ';' expected.
+    
+    // function calls
+    foo() **= value;
+    ~~~
+!!! error TS2349: This expression is not callable.
+    
+    // parentheses, the containted expression is value
+    (this) **= value;
+    (M) **= value;
+    (C) **= value;
+    (E) **= value;
+    (foo) **= value;
+    (null) **= value;
+    (true) **= value;
+    (0) **= value;
+    ('') **= value;
+    (/d+/) **= value;
+    ({}) **= value;
+    ([]) **= value;
+    (function baz1() { }) **= value;
+    (foo()) **= value;
+     ~~~
+!!! error TS2349: This expression is not callable.

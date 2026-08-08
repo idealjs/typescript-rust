@@ -1,0 +1,18 @@
+asyncArrowFunction/asyncArrowFunction3_es2017.ts(1,25): error TS1012: Unexpected token.
+asyncArrowFunction/asyncArrowFunction3_es2017.ts(1,27): error TS1005: ',' expected.
+asyncArrowFunction/asyncArrowFunction3_es2017.ts(1,27): error TS1016: A required parameter cannot follow an optional parameter.
+asyncArrowFunction/asyncArrowFunction3_es2017.ts(2,2): error TS1005: ')' expected.
+
+
+==== asyncArrowFunction/asyncArrowFunction3_es2017.ts (4 errors) ====
+    function f(await = await) {
+                            ~
+!!! error TS1012: Unexpected token.
+                              ~
+!!! error TS1005: ',' expected.
+                              ~
+    }
+    ~
+!!! error TS1016: A required parameter cannot follow an optional parameter.
+     
+!!! error TS1005: ')' expected.

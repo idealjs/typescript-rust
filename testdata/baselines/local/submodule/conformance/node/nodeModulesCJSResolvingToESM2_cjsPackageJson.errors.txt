@@ -1,0 +1,24 @@
+/package.json(1,9): error TS1005: ';' expected.
+
+
+==== node/nodeModulesCJSResolvingToESM2_cjsPackageJson.ts (0 errors) ====
+    
+==== /package.json (1 errors) ====
+    { "type": "commonjs" }
+            ~
+!!! error TS1005: ';' expected.
+    
+==== /module.mts (0 errors) ====
+    export {};
+    
+==== /tsExtension.ts (0 errors) ====
+    import {} from "./module.mjs";
+    
+==== /jsExtension.js (0 errors) ====
+    import {} from "./module.mjs";
+    
+==== /ctsExtension.cts (0 errors) ====
+    import {} from "./module.mjs";
+    
+==== /tsxExtension.tsx (0 errors) ====
+    import {} from "./module.mjs";

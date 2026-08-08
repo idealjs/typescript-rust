@@ -1,0 +1,66 @@
+file3.js(2,8): error TS1005: '{' expected.
+file3.js(2,30): error TS1003: Identifier expected.
+file4.js(2,8): error TS1005: '{' expected.
+file4.js(2,22): error TS1003: Identifier expected.
+file5.js(2,16): error TS1012: Unexpected token.
+file5.js(2,17): error TS1005: ';' expected.
+file5.js(2,21): error TS1005: ';' expected.
+file6.js(2,6): error TS2304: Cannot find name 'export'.
+file6.js(2,13): error TS1005: ';' expected.
+file7.js(2,13): error TS2304: Cannot find name 'default'.
+file7.js(2,21): error TS1005: ';' expected.
+
+
+==== global.js (0 errors) ====
+    /** @type {*} */
+    var dec;
+    
+==== file1.js (0 errors) ====
+    // ok
+    @dec export class C1 { }
+    
+==== file2.js (0 errors) ====
+    // ok
+    @dec export default class C2 {}
+    
+==== file3.js (2 errors) ====
+    // error
+    export @dec default class C3 {}
+           ~
+!!! error TS1005: '{' expected.
+                                 ~
+!!! error TS1003: Identifier expected.
+    
+==== file4.js (2 errors) ====
+    // ok
+    export @dec class C4 {}
+           ~
+!!! error TS1005: '{' expected.
+                         ~
+!!! error TS1003: Identifier expected.
+    
+==== file5.js (3 errors) ====
+    // ok
+    export default @dec class C5 {}
+                   ~
+!!! error TS1012: Unexpected token.
+                    ~~~
+!!! error TS1005: ';' expected.
+                        ~~~~~
+!!! error TS1005: ';' expected.
+    
+==== file6.js (2 errors) ====
+    // error
+    @dec export @dec class C6 {}
+         ~~~~~~
+!!! error TS2304: Cannot find name 'export'.
+                ~
+!!! error TS1005: ';' expected.
+    
+==== file7.js (2 errors) ====
+    // error
+    @dec export default @dec class C7 {}
+                ~~~~~~~
+!!! error TS2304: Cannot find name 'default'.
+                        ~
+!!! error TS1005: ';' expected.

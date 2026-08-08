@@ -1,0 +1,25 @@
+asyncArrowFunction/asyncArrowFunction10_es2017.ts(1,11): error TS2304: Cannot find name 'async'.
+asyncArrowFunction/asyncArrowFunction10_es2017.ts(1,19): error TS1005: ',' expected.
+asyncArrowFunction/asyncArrowFunction10_es2017.ts(1,28): error TS1005: ',' expected.
+asyncArrowFunction/asyncArrowFunction10_es2017.ts(1,33): error TS1005: ',' expected.
+asyncArrowFunction/asyncArrowFunction10_es2017.ts(1,35): error TS1005: ';' expected.
+asyncArrowFunction/asyncArrowFunction10_es2017.ts(3,11): error TS2304: Cannot find name 'await'.
+
+
+==== asyncArrowFunction/asyncArrowFunction10_es2017.ts (6 errors) ====
+    var foo = async (): Promise<void> => {
+              ~~~~~
+!!! error TS2304: Cannot find name 'async'.
+                      ~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS1005: ',' expected.
+                                    ~
+!!! error TS1005: ',' expected.
+                                      ~~
+!!! error TS1005: ';' expected.
+       // Legal to use 'await' in a type context.
+       var v: await;
+              ~~~~~
+!!! error TS2304: Cannot find name 'await'.
+    }

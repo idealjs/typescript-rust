@@ -1,1 +1,11 @@
-/.src/noErrors.ts(4,17): error TS2339: Property 'length' does not exist on type 'string'.
+noErrors.ts(4,17): error TS2339: Property 'length' does not exist on type 'string'.
+
+
+==== noErrors.ts (1 errors) ====
+    // Valid: no errors expected
+    const x: number = 42;
+    const y: string = "hello";
+    const z = x + y.length;
+                    ~~~~~~
+!!! error TS2339: Property 'length' does not exist on type 'string'.
+    console.log(z);

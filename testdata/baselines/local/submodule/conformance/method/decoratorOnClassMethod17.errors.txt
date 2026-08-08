@@ -1,0 +1,14 @@
+method/decoratorOnClassMethod17.ts(4,18): error TS1005: ';' expected.
+
+
+==== method/decoratorOnClassMethod17.ts (1 errors) ====
+    declare var decorator: any;
+    
+    class Foo {
+        private prop @decorator
+                     ~
+!!! error TS1005: ';' expected.
+        foo() {
+            return 0;
+        }
+    }

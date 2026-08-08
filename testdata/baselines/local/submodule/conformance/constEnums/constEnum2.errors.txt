@@ -1,0 +1,30 @@
+constEnums/constEnum2.ts(12,15): error TS2304: Cannot find name 'Math'.
+constEnums/constEnum2.ts(12,26): error TS2304: Cannot find name 'Math'.
+constEnums/constEnum2.ts(13,20): error TS2304: Cannot find name 'Math'.
+constEnums/constEnum2.ts(13,31): error TS2304: Cannot find name 'Math'.
+
+
+==== constEnums/constEnum2.ts (4 errors) ====
+    ﻿// @target: es2015
+    
+    // An enum declaration that specifies a const modifier is a constant enum declaration.
+    // In a constant enum declaration, all members must have constant values and
+    // it is an error for a member declaration to specify an expression that isn't classified as a constant enum expression.
+    
+    // Error : not a constant enum expression
+    
+    const CONST = 9000 % 2;
+    const enum D {
+        d = 10,
+        e = 199 * Math.floor(Math.random() * 1000),
+               ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                          ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+        f = d - (100 * Math.floor(Math.random() % 8)),
+                    ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+                               ~~~~
+!!! error TS2304: Cannot find name 'Math'.
+        g = CONST,
+    }

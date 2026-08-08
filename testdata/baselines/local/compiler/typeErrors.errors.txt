@@ -1,1 +1,13 @@
-/.src/typeErrors.ts(7,7): error TS2322: Type 'string' is not assignable to type 'number'.
+typeErrors.ts(7,7): error TS2322: Type 'string' is not assignable to type 'number'.
+
+
+==== typeErrors.ts (1 errors) ====
+    // Error: 'x' implicitly has an 'any' type
+    function foo(x) {
+        return x + 1;
+    }
+    
+    // Error: Type 'string' is not assignable to type 'number'
+    const y: number = "hello";
+          ~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'string' is not assignable to type 'number'.

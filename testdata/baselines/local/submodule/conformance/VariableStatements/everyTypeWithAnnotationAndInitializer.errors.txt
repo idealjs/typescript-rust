@@ -1,0 +1,65 @@
+VariableStatements/everyTypeWithAnnotationAndInitializer.ts(22,54): error TS2339: Property 'toString' does not exist on type 'number'.
+VariableStatements/everyTypeWithAnnotationAndInitializer.ts(27,12): error TS2304: Cannot find name 'Date'.
+VariableStatements/everyTypeWithAnnotationAndInitializer.ts(27,23): error TS2304: Cannot find name 'Date'.
+VariableStatements/everyTypeWithAnnotationAndInitializer.ts(28,15): error TS2304: Cannot find name 'Object'.
+VariableStatements/everyTypeWithAnnotationAndInitializer.ts(28,28): error TS2304: Cannot find name 'Object'.
+
+
+==== VariableStatements/everyTypeWithAnnotationAndInitializer.ts (5 errors) ====
+    interface I {
+        id: number;
+    }
+    
+    class C implements I {
+        id: number;
+    }
+    
+    class D<T>{
+        source: T;
+        recurse: D<T>;
+        wrapped: D<D<T>>
+    }
+    
+    function F(x: string): number { return 42; }
+    
+    namespace M {
+        export class A {
+            name: string;
+        }
+    
+        export function F2(x: number): string { return x.toString(); }
+                                                         ~~~~~~~~
+!!! error TS2339: Property 'toString' does not exist on type 'number'.
+    }
+    
+    var aNumber: number = 9.9;
+    var aString: string = 'this is a string';
+    var aDate: Date = new Date(12);
+               ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+                          ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+    var anObject: Object = new Object();
+                  ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                               ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+    
+    var anAny: any = null;
+    var aSecondAny: any = undefined;
+    var aVoid: void = undefined;
+    
+    var anInterface: I = new C();
+    var aClass: C = new C();
+    var aGenericClass: D<string> = new D<string>();
+    var anObjectLiteral: I = { id: 12 };
+    var anOtherObjectLiteral: { id: number } = new C();
+    
+    var aFunction: typeof F = F;
+    var anOtherFunction: (x: string) => number = F;
+    var aLambda: typeof F = (x) => 2;
+    
+    var aModule: typeof M = M;
+    var aClassInModule: M.A = new M.A();
+    var aFunctionInModule: typeof M.F2 = (x) => 'this is a string';
+    

@@ -1,0 +1,29 @@
+/importer-cjs.cjs(1,13): error TS2304: Cannot find name 'require'.
+/importer-cts.cts(8,5): error TS2304: Cannot find name 'Foo3'.
+
+
+==== node/esmModuleExports1.ts (0 errors) ====
+    
+==== /importer-cjs.cjs (1 errors) ====
+    const Foo = require("./exporter.mjs");
+                ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    new Foo();
+    
+==== /importer-cts.cts (1 errors) ====
+    import Foo = require("./exporter.mjs");
+    new Foo();
+    
+    import Foo2 from "./exporter.mjs";
+    new Foo2();
+    
+    import * as Foo3 from "./exporter.mjs";
+    new Foo3();
+        ~~~~
+!!! error TS2304: Cannot find name 'Foo3'.
+    
+    import { Oops } from "./exporter.mjs";
+    
+==== /exporter.mts (0 errors) ====
+    export default class Foo {}
+    export { Foo as "module.exports" };

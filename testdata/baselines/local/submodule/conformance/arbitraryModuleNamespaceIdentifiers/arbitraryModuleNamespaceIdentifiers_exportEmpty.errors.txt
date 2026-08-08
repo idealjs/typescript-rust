@@ -1,0 +1,12 @@
+arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_exportEmpty.ts(6,41): error TS2304: Cannot find name 'foo'.
+
+
+==== arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_exportEmpty.ts (1 errors) ====
+    // This should result in a type error. In particular, the empty string is a now
+    // a valid module export name, and should be treated as such here.
+    const empty = "empty";
+    export { empty as "" };
+    import { "" as foo } from "./arbitraryModuleNamespaceIdentifiers_exportEmpty";
+    const bar: "type error expected here" = foo;
+                                            ~~~
+!!! error TS2304: Cannot find name 'foo'.

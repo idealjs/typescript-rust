@@ -1,0 +1,17 @@
+ambient/ambientModuleDeclarationWithReservedIdentifierInDottedPath.ts(7,22): error TS2304: Cannot find name 'chrome'.
+
+
+==== ambient/ambientModuleDeclarationWithReservedIdentifierInDottedPath.ts (1 errors) ====
+    // https://github.com/microsoft/TypeScript/issues/7840
+    
+    declare namespace chrome.debugger {
+        declare var tabId: number;
+    }
+    
+    export const tabId = chrome.debugger.tabId;
+                         ~~~~~~
+!!! error TS2304: Cannot find name 'chrome'.
+    
+    declare namespace test.class {}
+    
+    declare namespace debugger {} // still an error

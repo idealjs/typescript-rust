@@ -1,0 +1,27 @@
+error TS6053: File 'a.ts' not found.
+error TS6053: File 'b.ts' not found.
+
+
+!!! error TS6053: File '/.src/a.ts' not found.
+
+!!! error TS6053: File '/.src/b.ts' not found.
+==== ./a.ts (0 errors) ====
+    export default {};
+    
+==== ./b.ts (0 errors) ====
+    declare global {
+        interface  ImportAttributes {
+            type: "json"
+        }
+    }
+    
+    import * as ns from "./a" with { type: "not-json" };
+    void ns;
+    
+    async function f() {
+        await import("./a", {
+            with: {
+                type: "not-json",
+            },
+        });
+    }

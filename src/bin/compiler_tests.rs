@@ -477,6 +477,7 @@ fn process_batch(
     suite_name: &str,
     is_submodule: bool,
     no_write: bool,
+    ts_ref_dir: Option<&str>,
 ) -> (usize, usize, usize, usize, usize, Vec<String>) {
     let mut pass = 0usize;
     let mut fail = 0usize;
@@ -498,13 +499,15 @@ fn process_batch(
             continue;
         }
         let clean_name = if is_submodule {
-            Path::new(rel_path)
-                .components()
-                .rev()
-                .take(2)
-                .collect::<std::path::PathBuf>()
-                .to_string_lossy()
-                .replace('\\', "/")
+            // Take last 2 path components but preserve order.
+            // E.g. "expressions/typeAssertions/typeAssertions.ts" -> "typeAssertions/typeAssertions.ts"
+            let components: Vec<&str> = rel_path.split('/').collect();
+            let n = components.len();
+            if n >= 2 {
+                format!("{}/{}", components[n - 2], components[n - 1])
+            } else {
+                rel_path.to_string()
+            }
         } else {
             rel_path.replace('\\', "/")
         };
@@ -528,6 +531,37 @@ fn process_batch(
         match result {
             Ok(output) => {
                 let error_baseline = format_error_baseline(&output);
+
+                // If a TS reference baseline directory was provided, compare
+                // against it directly instead of using the local reference set.
+                if let Some(ref_dir) = ts_ref_dir {
+                    // TS baseline name: last path component without .ts extension.
+                    // E.g. "typeAssertions.ts" -> "typeAssertions.errors.txt"
+                    let ts_name = basename
+                        .strip_suffix(".ts")
+                        .or_else(|| basename.strip_suffix(".tsx"))
+                        .unwrap_or(&basename);
+                    let ts_baseline_path =
+                        PathBuf::from(ref_dir).join(format!("{ts_name}.errors.txt"));
+
+                    let expected = std::fs::read_to_string(&ts_baseline_path).unwrap_or_default();
+                    let actual = if error_baseline.is_empty() {
+                        baseline::NO_CONTENT.to_string()
+                    } else {
+                        error_baseline.clone()
+                    };
+
+                    if expected.is_empty() && actual == baseline::NO_CONTENT {
+                        // Both empty — match
+                        pass += 1;
+                    } else if expected.trim_end() == actual.trim_end() {
+                        pass += 1;
+                    } else {
+                        fail += 1;
+                        fails.push(format!("DIFF: {clean_name}"));
+                    }
+                    continue;
+                }
 
                 if no_write {
                     pass += 1;
@@ -572,6 +606,7 @@ fn run_compiler_baselines(
     is_submodule: bool,
     max_tests: Option<usize>,
     no_write: bool,
+    ts_ref_dir: Option<&str>,
 ) {
     let ts_file_re = Regex::new(r"\.tsx?$").unwrap();
     let files = baseline::enumerate_test_files(test_dir, &ts_file_re);
@@ -611,6 +646,9 @@ fn run_compiler_baselines(
         }
         if no_write {
             cmd.arg("--no-write");
+        }
+        if let Some(ref_dir) = ts_ref_dir {
+            cmd.arg("--ts-ref-dir").arg(ref_dir);
         }
         for f in chunk {
             cmd.arg("--file").arg(f);
@@ -741,6 +779,7 @@ fn main_inner() {
     let mut run_submodule = false;
     let mut limit_submodule: Option<usize> = None;
     let mut no_write = false;
+    let mut ts_ref_dir: Option<String> = None;
 
     // Batch mode args.
     let mut batch_mode = false;
@@ -806,6 +845,12 @@ fn main_inner() {
             "--is-submodule" => {
                 batch_is_submodule = true;
             }
+            "--ts-ref-dir" => {
+                if i + 1 < args.len() {
+                    ts_ref_dir = Some(args[i + 1].to_string());
+                    i += 1;
+                }
+            }
             _ => {}
         }
         i += 1;
@@ -820,6 +865,7 @@ fn main_inner() {
             &batch_suite,
             batch_is_submodule,
             no_write,
+            ts_ref_dir.as_deref(),
         );
 
         for f in &fails {
@@ -834,7 +880,14 @@ fn main_inner() {
         let local_dir = manifest_dir.join("tests/cases/compiler");
         if local_dir.exists() {
             print_flush("=== Running local compiler tests ===\n");
-            run_compiler_baselines(&local_dir, "compiler", false, max_tests, no_write);
+            run_compiler_baselines(
+                &local_dir,
+                "compiler",
+                false,
+                max_tests,
+                no_write,
+                ts_ref_dir.as_deref(),
+            );
         }
     }
 
@@ -843,12 +896,23 @@ fn main_inner() {
             manifest_dir.join("../typescript-go/_submodules/TypeScript/tests/cases/conformance");
         if submodule_dir.exists() {
             print_flush("\n=== Running submodule conformance tests ===\n");
+            // If --ts-ref-dir was not provided, default to the TS submodule baselines.
+            let ts_ref: Option<String> = ts_ref_dir.clone().or_else(|| {
+                let default = manifest_dir
+                    .join("../typescript-go/_submodules/TypeScript/tests/baselines/reference");
+                if default.exists() {
+                    Some(default.to_string_lossy().into_owned())
+                } else {
+                    None
+                }
+            });
             run_compiler_baselines(
                 &submodule_dir,
                 "conformance",
                 true,
                 limit_submodule,
                 no_write,
+                ts_ref.as_deref(),
             );
         } else {
             print_flush(&format!(

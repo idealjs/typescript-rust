@@ -1,0 +1,68 @@
+additionalChecks/noPropertyAccessFromIndexSignature1.ts(11,6): error TS2304: Cannot find name 'k'.
+additionalChecks/noPropertyAccessFromIndexSignature1.ts(11,7): error TS1005: ']' expected.
+additionalChecks/noPropertyAccessFromIndexSignature1.ts(11,15): error TS1003: Identifier expected.
+additionalChecks/noPropertyAccessFromIndexSignature1.ts(32,3): error TS2339: Property 'bar' does not exist on type '{ foo: any; :: error; string: error; ]: string }'.
+additionalChecks/noPropertyAccessFromIndexSignature1.ts(37,4): error TS2339: Property '' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
+additionalChecks/noPropertyAccessFromIndexSignature1.ts(40,4): error TS2339: Property 'bar' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
+additionalChecks/noPropertyAccessFromIndexSignature1.ts(41,4): error TS2339: Property '' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
+
+
+==== additionalChecks/noPropertyAccessFromIndexSignature1.ts (7 errors) ====
+    interface A {
+        foo: string
+    }
+    
+    interface B {
+        [k: string]: string
+    }
+    
+    interface C {
+        foo: string
+        [k: string]: string
+         ~
+!!! error TS2304: Cannot find name 'k'.
+          ~
+!!! error TS1005: ']' expected.
+                  ~
+!!! error TS1003: Identifier expected.
+    }
+    
+    declare const a: A;
+    declare const b: B;
+    declare const c: C;
+    declare const d: C | undefined;
+    
+    // access property
+    a.foo;
+    a["foo"]
+    
+    // access index signature
+    b.foo;
+    b["foo"];
+    
+    // access property
+    c.foo;
+    c["foo"]
+    
+    // access index signature
+    c.bar;
+      ~~~
+!!! error TS2339: Property 'bar' does not exist on type '{ foo: any; :: error; string: error; ]: string }'.
+    c["bar"];
+    
+    // optional access property
+    d?.foo;
+    d?.["foo"]
+       ~~~~~~~
+    
+    
+    // optional access index signature
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    d?.bar;
+    
+!!! error TS2339: Property '' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
+       ~~~
+!!! error TS2339: Property 'bar' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
+    d?.["bar"];
+       ~~~~~~~
+!!! error TS2339: Property '' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.

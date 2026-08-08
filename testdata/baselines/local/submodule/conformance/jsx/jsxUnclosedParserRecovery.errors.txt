@@ -1,0 +1,224 @@
+jsxParserRecovery.tsx(2,1): error TS2304: Cannot find name 'noName'.
+jsxParserRecovery.tsx(2,11): error TS2304: Cannot find name 'noClose'.
+jsxParserRecovery.tsx(2,22): error TS2304: Cannot find name 'noCloseTypeArg'.
+jsxParserRecovery.tsx(2,40): error TS2304: Cannot find name 'noCloseAttrs'.
+jsxParserRecovery.tsx(2,56): error TS2304: Cannot find name 'noCloseTypeArgAttrs'.
+jsxParserRecovery.tsx(2,79): error TS2304: Cannot find name 'noCloseBracket'.
+jsxParserRecovery.tsx(2,97): error TS2304: Cannot find name 'noCloseBracketTypeArgAttrs'.
+jsxParserRecovery.tsx(2,127): error TS2304: Cannot find name 'noSelfclose'.
+jsxParserRecovery.tsx(2,142): error TS2304: Cannot find name 'noSelfcloseTypeArgAttrs'.
+jsxParserRecovery.tsx(3,1): error TS2304: Cannot find name 'noNameTrailingTag'.
+jsxParserRecovery.tsx(3,22): error TS2304: Cannot find name 'noCloseTrailingTag'.
+jsxParserRecovery.tsx(3,44): error TS2304: Cannot find name 'noCloseTypeArgTrailingTag'.
+jsxParserRecovery.tsx(3,73): error TS2304: Cannot find name 'noCloseAttrsTrailingTag'.
+jsxParserRecovery.tsx(3,100): error TS2304: Cannot find name 'noCloseTypeArgAttrsTrailingTag'.
+jsxParserRecovery.tsx(3,134): error TS2304: Cannot find name 'noCloseBracketTrailingTag'.
+jsxParserRecovery.tsx(3,163): error TS2304: Cannot find name 'noCloseBracketTypeArgAttrsTrailingTag'.
+jsxParserRecovery.tsx(4,1): error TS2304: Cannot find name 'noNameTrailingText'.
+jsxParserRecovery.tsx(4,23): error TS2304: Cannot find name 'noCloseTrailingText'.
+jsxParserRecovery.tsx(4,46): error TS2304: Cannot find name 'noCloseTypeArgTrailingText'.
+jsxParserRecovery.tsx(4,76): error TS2304: Cannot find name 'noCloseAttrsTrailingText'.
+jsxParserRecovery.tsx(4,104): error TS2304: Cannot find name 'noCloseTypeArgAttrsTrailingText'.
+jsxParserRecovery.tsx(4,139): error TS2304: Cannot find name 'noCloseBracketTrailingText'.
+jsxParserRecovery.tsx(4,169): error TS2304: Cannot find name 'noCloseBracketTypeArgAttrsTrailingText'.
+jsxParserRecovery.tsx(32,1): error TS1005: '>' expected.
+jsxParserRecovery.tsx(74,5): error TS1005: '>' expected.
+jsxParserRecovery.tsx(95,5): error TS2304: Cannot find name 'Cranky'.
+jsxParserRecovery.tsx(120,5): error TS1005: '>' expected.
+jsxParserRecovery.tsx(137,51): error TS1005: '</' expected.
+
+
+==== jsxParserRecovery.tsx (28 errors) ====
+    // should have no errors here; all these functions should parse and resolve
+    noName(); noClose(); noCloseTypeArg(); noCloseAttrs(); noCloseTypeArgAttrs(); noCloseBracket(); noCloseBracketTypeArgAttrs(); noSelfclose(); noSelfcloseTypeArgAttrs();
+    ~~~~~~
+!!! error TS2304: Cannot find name 'noName'.
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'noClose'.
+                         ~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseTypeArg'.
+                                           ~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseAttrs'.
+                                                           ~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseTypeArgAttrs'.
+                                                                                  ~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseBracket'.
+                                                                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseBracketTypeArgAttrs'.
+                                                                                                                                  ~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noSelfclose'.
+                                                                                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noSelfcloseTypeArgAttrs'.
+    noNameTrailingTag(); noCloseTrailingTag(); noCloseTypeArgTrailingTag(); noCloseAttrsTrailingTag(); noCloseTypeArgAttrsTrailingTag(); noCloseBracketTrailingTag(); noCloseBracketTypeArgAttrsTrailingTag(); // noSelfcloseTrailingTag(); noSelfcloseTypeArgAttrsTrailingTag();
+    ~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noNameTrailingTag'.
+                         ~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseTrailingTag'.
+                                               ~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseTypeArgTrailingTag'.
+                                                                            ~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseAttrsTrailingTag'.
+                                                                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseTypeArgAttrsTrailingTag'.
+                                                                                                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseBracketTrailingTag'.
+                                                                                                                                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseBracketTypeArgAttrsTrailingTag'.
+    noNameTrailingText(); noCloseTrailingText(); noCloseTypeArgTrailingText(); noCloseAttrsTrailingText(); noCloseTypeArgAttrsTrailingText(); noCloseBracketTrailingText(); noCloseBracketTypeArgAttrsTrailingText(); // noSelfcloseTrailingText(); noSelfcloseTypeArgAttrsTrailingText();
+    ~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noNameTrailingText'.
+                          ~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseTrailingText'.
+                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseTypeArgTrailingText'.
+                                                                               ~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseAttrsTrailingText'.
+                                                                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseTypeArgAttrsTrailingText'.
+                                                                                                                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseBracketTrailingText'.
+                                                                                                                                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2304: Cannot find name 'noCloseBracketTypeArgAttrsTrailingText'.
+    
+    function diddy() {
+        return null;
+    }
+    
+    var donkey = <div>
+        <
+    </div>;
+    function noName() { }
+    var donkey = <div>
+        <diddy
+    </div>;
+    function noClose() { }
+    var donkey = <div>
+        <diddy<boolean>
+    </div>;
+    function noCloseTypeArg() { }
+    var donkey = <div>
+        <diddy bananas="please"
+    </div>;
+    function noCloseAttrs() { }
+    var donkey = <div>
+        <diddy<boolean> bananas="please"
+    </div>;
+    function noCloseTypeArgAttrs() { }
+    var donkey = <div>
+        <diddy/
+    </div>;
+    ~~
+!!! error TS1005: '>' expected.
+    function noCloseBracket() { }
+    var donkey = <div>
+        <diddy<boolean> bananas="please"/
+    </div>;
+    function noCloseBracketTypeArgAttrs() { }
+    var donkey = <div>
+        <diddy>
+    </div>;
+    function noSelfclose() { }
+    var donkey = <div>
+        <diddy<boolean> bananas="please">
+    </div>;
+    function noSelfcloseTypeArgAttrs() { }
+    
+    var donkey = <div>
+        <
+        <diddy/>
+    </div>;
+    function noNameTrailingTag() { }
+    var donkey = <div>
+        <diddy
+        <diddy/>
+    </div>;
+    function noCloseTrailingTag() { }
+    var donkey = <div>
+        <diddy<boolean>
+        <diddy/>
+    </div>;
+    function noCloseTypeArgTrailingTag() { }
+    var donkey = <div>
+        <diddy bananas="please"
+        <diddy/>
+    </div>;
+    function noCloseAttrsTrailingTag() { }
+    var donkey = <div>
+        <diddy<boolean> bananas="please"
+        <diddy/>
+    </div>;
+    function noCloseTypeArgAttrsTrailingTag() { }
+    var donkey = <div>
+        <diddy/
+        <diddy/>
+        ~
+!!! error TS1005: '>' expected.
+    </div>;
+    function noCloseBracketTrailingTag() { }
+    var donkey = <div>
+        <diddy<boolean> bananas="please"/
+        <diddy/>
+    </div>;
+    function noCloseBracketTypeArgAttrsTrailingTag() { }
+    var donkey = <div>
+        <diddy>
+        <diddy/>
+    </div>;
+    function noSelfcloseTrailingTag() { }
+    var donkey = <div>
+        <diddy<boolean> bananas="please">
+        <diddy/>
+    </div>;
+    function noSelfcloseTypeArgAttrsTrailingTag() { }
+    
+    var donkey = <div>
+        <
+        Cranky Wrinkly Funky
+        ~~~~~~
+!!! error TS2304: Cannot find name 'Cranky'.
+    </div>;
+    function noNameTrailingText() { }
+    var donkey = <div>
+        <diddy
+        Cranky Wrinkly Funky
+    </div>;
+    function noCloseTrailingText() { }
+    var donkey = <div>
+        <diddy<boolean>
+        Cranky Wrinkly Funky
+    </div>;
+    function noCloseTypeArgTrailingText() { }
+    var donkey = <div>
+        <diddy bananas="please"
+        Cranky Wrinkly Funky
+    </div>;
+    function noCloseAttrsTrailingText() { }
+    var donkey = <div>
+        <diddy<boolean> bananas="please"
+        Cranky Wrinkly Funky
+    </div>;
+    function noCloseTypeArgAttrsTrailingText() { }
+    var donkey = <div>
+        <diddy/
+        Cranky Wrinkly Funky
+        ~~~~~~
+!!! error TS1005: '>' expected.
+    </div>;
+    function noCloseBracketTrailingText() { }
+    var donkey = <div>
+        <diddy<boolean> bananas="please"/
+        Cranky Wrinkly Funky
+    </div>;
+    function noCloseBracketTypeArgAttrsTrailingText() { }
+    var donkey = <div>
+        <diddy>
+        Cranky Wrinkly Funky
+    </div>;
+    function noSelfcloseTrailingText() { }
+    var donkey = <div>
+        <diddy<boolean> bananas="please">
+        Cranky Wrinkly Funky
+    </div>;
+    function noSelfcloseTypeArgAttrsTrailingText() { }
+                                                      
+!!! error TS1005: '</' expected.

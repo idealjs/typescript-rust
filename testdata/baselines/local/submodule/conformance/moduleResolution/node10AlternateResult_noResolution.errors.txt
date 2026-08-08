@@ -1,0 +1,30 @@
+/node_modules/pkg/package.json(2,11): error TS1005: ';' expected.
+/node_modules/pkg/package.json(3,14): error TS1005: ';' expected.
+/node_modules/pkg/package.json(4,14): error TS1005: ';' expected.
+/node_modules/pkg/package.json(5,12): error TS1005: ';' expected.
+
+
+==== moduleResolution/node10AlternateResult_noResolution.ts (0 errors) ====
+    
+==== /node_modules/pkg/package.json (4 errors) ====
+    {
+        "name": "pkg",
+              ~
+!!! error TS1005: ';' expected.
+        "version": "1.0.0",
+                 ~
+!!! error TS1005: ';' expected.
+        "exports": {
+                 ~
+!!! error TS1005: ';' expected.
+            ".": "./definitely-not-index.js"
+               ~
+!!! error TS1005: ';' expected.
+        }
+    }
+    
+==== /node_modules/pkg/definitely-not-index.d.ts (0 errors) ====
+    export {};
+    
+==== /index.ts (0 errors) ====
+    import { pkg } from "pkg";

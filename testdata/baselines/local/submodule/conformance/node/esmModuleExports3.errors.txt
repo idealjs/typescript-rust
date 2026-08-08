@@ -1,0 +1,47 @@
+/exporter.mts(2,13): error TS1003: Identifier expected.
+/exporter.mts(2,15): error TS1005: '=' expected.
+/exporter.mts(2,19): error TS1005: ';' expected.
+/exporter.mts(2,19): error TS2304: Cannot find name 'as'.
+/exporter.mts(2,22): error TS1005: ';' expected.
+/exporter.mts(2,39): error TS1128: Declaration or statement expected.
+/importer-cjs.cjs(1,13): error TS2304: Cannot find name 'require'.
+/importer-cts.cts(8,5): error TS2304: Cannot find name 'Foo3'.
+
+
+==== node/esmModuleExports3.ts (0 errors) ====
+    
+==== /importer-cjs.cjs (1 errors) ====
+    const Foo = require("./exporter.mjs");
+                ~~~~~~~
+!!! error TS2304: Cannot find name 'require'.
+    new Foo();
+    
+==== /importer-cts.cts (1 errors) ====
+    import Foo = require("./exporter.mjs");
+    new Foo();
+    
+    import Foo2 from "./exporter.mjs";
+    new Foo2();
+    
+    import * as Foo3 from "./exporter.mjs";
+    new Foo3();
+        ~~~~
+!!! error TS2304: Cannot find name 'Foo3'.
+    
+    import { Oops } from "./exporter.mjs";
+    
+==== /exporter.mts (6 errors) ====
+    export default class Foo {}
+    export type { Foo as "module.exports" }
+                ~
+!!! error TS1003: Identifier expected.
+                  ~~~
+!!! error TS1005: '=' expected.
+                      ~~
+!!! error TS1005: ';' expected.
+                      ~~
+!!! error TS2304: Cannot find name 'as'.
+                         ~~~~~~~~~~~~~~~~
+!!! error TS1005: ';' expected.
+                                          ~
+!!! error TS1128: Declaration or statement expected.

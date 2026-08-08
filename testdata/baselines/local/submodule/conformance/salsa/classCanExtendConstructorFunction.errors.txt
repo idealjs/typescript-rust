@@ -1,0 +1,172 @@
+first.js(9,7): error TS2339: Property 'circle' does not exist on type '(numberOxen: any) => void'.
+first.js(13,7): error TS2339: Property 'prototype' does not exist on type '(numberOxen: any) => void'.
+first.js(16,7): error TS2339: Property 'prototype' does not exist on type '(numberOxen: any) => void'.
+first.js(17,7): error TS2339: Property 'prototype' does not exist on type '(numberOxen: any) => void'.
+first.js(23,9): error TS2349: This expression is not callable.
+first.js(24,14): error TS2339: Property 'foonly' does not exist on type '{ load: (files: any, format: any) => any }'.
+first.js(33,23): error TS2304: Cannot find name 'Error'.
+first.js(36,19): error TS2339: Property 'speed' does not exist on type '{ load: (files: any, format: any) => any }'.
+first.js(37,23): error TS2339: Property 'weight' does not exist on type '{ load: (files: any, format: any) => any }'.
+first.js(37,35): error TS1005: '>' expected.
+first.js(44,4): error TS2339: Property 'numberOxen' does not exist on type '{ load: (files: any, format: any) => any }'.
+first.js(44,20): error TS2339: Property 'foonly' does not exist on type '{ load: (files: any, format: any) => any }'.
+generic.js(11,21): error TS2339: Property 'flavour' does not exist on type '{ log: () => any }'.
+generic.js(15,16): error TS2351: This expression is not constructable.
+generic.js(17,27): error TS2554: Expected 0 arguments, but got 1.
+generic.js(18,9): error TS2339: Property 'flavour' does not exist on type '{ log: () => any }'.
+generic.js(20,32): error TS2554: Expected 0 arguments, but got 1.
+second.ts(10,9): error TS2349: This expression is not callable.
+second.ts(15,24): error TS1005: ',' expected.
+second.ts(17,9): error TS2349: This expression is not callable.
+second.ts(24,9): error TS2554: Expected 2 arguments, but got 1.
+second.ts(25,3): error TS2339: Property 'drunkOO' does not exist on type 'object'.
+second.ts(26,3): error TS2339: Property 'numberOxen' does not exist on type 'object'.
+
+
+==== first.js (12 errors) ====
+    /**
+     * @constructor
+     * @param {number} numberOxen
+     */
+    function Wagon(numberOxen) {
+        this.numberOxen = numberOxen
+    }
+    /** @param {Wagon[]=} wagons */
+    Wagon.circle = function (wagons) {
+          ~~~~~~
+!!! error TS2339: Property 'circle' does not exist on type '(numberOxen: any) => void'.
+        return wagons ? wagons.length : 3.14;
+    }
+    /** @param {*[]=} supplies - *[]= is my favourite type */
+    Wagon.prototype.load = function (supplies) {
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '(numberOxen: any) => void'.
+    }
+    /** @param {*[]=} supplies - Yep, still a great type */
+    Wagon.prototype.weight = supplies => supplies ? supplies.length : -1
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '(numberOxen: any) => void'.
+    Wagon.prototype.speed = function () {
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '(numberOxen: any) => void'.
+        return this.numberOxen / this.weight()
+    }
+    // ok
+    class Sql extends Wagon {
+        constructor() {
+            super(); // error: not enough arguments
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+            this.foonly = 12
+                 ~~~~~~
+!!! error TS2339: Property 'foonly' does not exist on type '{ load: (files: any, format: any) => any }'.
+        }
+        /**
+         * @param {Array.<string>} files
+         * @param {"csv" | "json" | "xmlolololol"} format
+         * This is not assignable, so should have a type error
+         */
+        load(files, format) {
+            if (format === "xmlolololol") {
+                throw new Error("please do not use XML. It was a joke.");
+                          ~~~~~
+!!! error TS2304: Cannot find name 'Error'.
+            }
+            else {
+                super.speed() // run faster
+                      ~~~~~
+!!! error TS2339: Property 'speed' does not exist on type '{ load: (files: any, format: any) => any }'.
+                if (super.weight() < 0) {
+                          ~~~~~~
+!!! error TS2339: Property 'weight' does not exist on type '{ load: (files: any, format: any) => any }'.
+                                      ~
+!!! error TS1005: '>' expected.
+                    // ????????????????????????
+                }
+            }
+        }
+    }
+    var db = new Sql();
+    db.numberOxen = db.foonly
+       ~~~~~~~~~~
+!!! error TS2339: Property 'numberOxen' does not exist on type '{ load: (files: any, format: any) => any }'.
+                       ~~~~~~
+!!! error TS2339: Property 'foonly' does not exist on type '{ load: (files: any, format: any) => any }'.
+    
+    // error, can't extend a TS constructor function
+    class Drakkhen extends Dragon {
+    
+    }
+    
+==== second.ts (6 errors) ====
+    /**
+     * @constructor
+     */
+    function Dragon(numberEaten: number) {
+        this.numberEaten = numberEaten
+    }
+    // error!
+    class Firedrake extends Dragon {
+        constructor() {
+            super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+    }
+    // ok
+    class Conestoga extends Wagon {
+        constructor(public drunkOO: true) {
+                           ~~~~~~~
+!!! error TS1005: ',' expected.
+            // error: wrong type
+            super('nope');
+            ~~~~~
+!!! error TS2349: This expression is not callable.
+        }
+        // should error since others is not optional
+        static circle(others: (typeof Wagon)[]) {
+            return others.length
+        }
+    }
+    var c = new Conestoga(true);
+            ~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+    c.drunkOO
+      ~~~~~~~
+!!! error TS2339: Property 'drunkOO' does not exist on type 'object'.
+    c.numberOxen
+      ~~~~~~~~~~
+!!! error TS2339: Property 'numberOxen' does not exist on type 'object'.
+    
+==== generic.js (5 errors) ====
+    /**
+     * @template T
+     * @param {T} flavour
+     */
+    function Soup(flavour) {
+        this.flavour = flavour
+    }
+    /** @extends {Soup<{ claim: "ignorant" | "malicious" }>} */
+    class Chowder extends Soup {
+        log() {
+            return this.flavour
+                        ~~~~~~~
+!!! error TS2339: Property 'flavour' does not exist on type '{ log: () => any }'.
+        }
+    }
+    
+    var soup = new Soup(1);
+                   ~~~~
+!!! error TS2351: This expression is not constructable.
+    soup.flavour
+    var chowder = new Chowder({ claim: "ignorant" });
+                              ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 0 arguments, but got 1.
+    chowder.flavour.claim
+            ~~~~~~~
+!!! error TS2339: Property 'flavour' does not exist on type '{ log: () => any }'.
+    var errorNoArgs = new Chowder();
+    var errorArgType = new Chowder(0);
+                                   ~
+!!! error TS2554: Expected 0 arguments, but got 1.
+    

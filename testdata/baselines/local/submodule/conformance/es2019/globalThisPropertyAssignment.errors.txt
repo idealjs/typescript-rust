@@ -1,0 +1,12 @@
+globalThisPropertyAssignment.js(6,12): error TS2339: Property 'alpha' does not exist on type 'globalThis'.
+
+
+==== globalThisPropertyAssignment.js (1 errors) ====
+    this.x = 1
+    var y = 2
+    // should work in JS
+    window.z = 3
+    // should work in JS (even though it's a secondary declaration)
+    globalThis.alpha = 4
+               ~~~~~
+!!! error TS2339: Property 'alpha' does not exist on type 'globalThis'.

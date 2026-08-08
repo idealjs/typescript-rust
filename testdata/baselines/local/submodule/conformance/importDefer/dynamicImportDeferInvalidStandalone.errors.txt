@@ -1,0 +1,36 @@
+b.ts(1,7): error TS1012: Unexpected token.
+b.ts(1,8): error TS1005: ';' expected.
+b.ts(1,8): error TS2304: Cannot find name 'defer'.
+b.ts(3,2): error TS2304: Cannot find name 'import'.
+b.ts(5,10): error TS2304: Cannot find name 'import'.
+b.ts(7,7): error TS1012: Unexpected token.
+b.ts(7,8): error TS1005: ';' expected.
+b.ts(7,8): error TS2304: Cannot find name 'defer'.
+
+
+==== importDefer/dynamicImportDeferInvalidStandalone.ts (0 errors) ====
+    
+==== b.ts (8 errors) ====
+    import.defer;
+          ~
+!!! error TS1012: Unexpected token.
+           ~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~
+!!! error TS2304: Cannot find name 'defer'.
+    
+    (import.defer)("a");
+     ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    
+    Function(import.defer);
+             ~~~~~~
+!!! error TS2304: Cannot find name 'import'.
+    
+    import.defer
+          ~
+!!! error TS1012: Unexpected token.
+           ~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~
+!!! error TS2304: Cannot find name 'defer'.

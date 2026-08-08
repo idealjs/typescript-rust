@@ -1,0 +1,19 @@
+/a/b/consumer.ts(1,3): error TS2339: Property 'foo' does not exist on type 'object'.
+/a/b/consumer.ts(2,4): error TS2339: Property 'foo' does not exist on type 'object'.
+
+
+==== references/library-reference-15.ts (0 errors) ====
+    
+==== /a/types/jquery/index.d.ts (0 errors) ====
+    declare var $: { foo(): void };
+    
+==== /a/types/jquery2/index.d.ts (0 errors) ====
+    declare var $2: { foo(): void };
+    
+==== /a/b/consumer.ts (2 errors) ====
+    $.foo(); // should OK
+      ~~~
+!!! error TS2339: Property 'foo' does not exist on type 'object'.
+    $2.foo(); // should error
+       ~~~
+!!! error TS2339: Property 'foo' does not exist on type 'object'.

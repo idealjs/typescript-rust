@@ -1,0 +1,34 @@
+es2019/globalThisBlockscopedProperties.ts(4,12): error TS2339: Property 'x' does not exist on type 'globalThis'.
+es2019/globalThisBlockscopedProperties.ts(5,12): error TS2339: Property 'y' does not exist on type 'globalThis'.
+es2019/globalThisBlockscopedProperties.ts(6,12): error TS2339: Property 'z' does not exist on type 'globalThis'.
+es2019/globalThisBlockscopedProperties.ts(10,12): error TS2339: Property 'Float64Array' does not exist on type 'globalThis'.
+es2019/globalThisBlockscopedProperties.ts(11,12): error TS2339: Property 'Infinity' does not exist on type 'globalThis'.
+
+
+==== es2019/globalThisBlockscopedProperties.ts (5 errors) ====
+    var x = 1
+    const y = 2
+    let z = 3
+    globalThis.x // ok
+               ~
+!!! error TS2339: Property 'x' does not exist on type 'globalThis'.
+    globalThis.y // should error, no property 'y'
+               ~
+!!! error TS2339: Property 'y' does not exist on type 'globalThis'.
+    globalThis.z // should error, no property 'z'
+               ~
+!!! error TS2339: Property 'z' does not exist on type 'globalThis'.
+    globalThis['x'] // ok
+    globalThis['y'] // should error, no property 'y'
+    globalThis['z'] // should error, no property 'z'
+    globalThis.Float64Array // ok
+               ~~~~~~~~~~~~
+!!! error TS2339: Property 'Float64Array' does not exist on type 'globalThis'.
+    globalThis.Infinity // ok
+               ~~~~~~~~
+!!! error TS2339: Property 'Infinity' does not exist on type 'globalThis'.
+    
+    declare let test1: (typeof globalThis)['x'] // ok
+    declare let test2: (typeof globalThis)['y'] // error
+    declare let test3: (typeof globalThis)['z'] // error
+    declare let themAll: keyof typeof globalThis

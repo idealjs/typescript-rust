@@ -1,0 +1,56 @@
+override/override1.ts(19,18): error TS2304: Cannot find name 'extends'.
+override/override1.ts(19,26): error TS1005: '{' expected.
+override/override1.ts(19,28): error TS1005: ';' expected.
+
+
+==== override/override1.ts (3 errors) ====
+    class B {
+        foo (v: string) {}
+        fooo (v: string) {}
+    }
+    
+    class D extends B {
+        override foo (v: string) {}
+    
+        fooo (v: string) {}
+    
+        override bar(v: string) {}
+    }
+    
+    class C {
+        override foo(v: string) {}
+    }
+    
+    function f () {
+        return class extends B {
+                     ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                             ~
+!!! error TS1005: '{' expected.
+                               ~
+!!! error TS1005: ';' expected.
+            override foo (v: string) {}
+        
+            fooo (v: string) {}
+        
+            override bar(v: string) {}
+        }
+    }
+    
+    class E extends (class {
+        foo () { }
+        bar () { }
+    }) {
+        override foo () { }
+        bar () { }
+    
+        baz() {}
+    
+        override bazz () {}
+    }
+    
+    function ff () {
+        return class {
+            override foo () {}
+        }
+    }

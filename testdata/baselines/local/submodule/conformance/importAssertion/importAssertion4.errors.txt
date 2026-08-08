@@ -1,0 +1,7 @@
+importAssertion/importAssertion4.ts(1,34): error TS1005: '{' expected.
+
+
+==== importAssertion/importAssertion4.ts (1 errors) ====
+    import * as f from "./first" with
+                                     
+!!! error TS1005: '{' expected.
