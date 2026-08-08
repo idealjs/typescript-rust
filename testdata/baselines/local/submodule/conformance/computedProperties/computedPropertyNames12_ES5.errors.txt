@@ -1,0 +1,28 @@
+computedPropertyNames12_ES5.ts(5,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+computedPropertyNames12_ES5.ts(11,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+computedPropertyNames12_ES5.ts(12,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+
+
+==== computedPropertyNames12_ES5.ts (3 errors) ====
+    var s: string;
+    var n: number;
+    var a: any;
+    class C {
+        [s]: number;
+        ~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+        [n] = n;
+        static [s + s]: string;
+        [s + n] = 2;
+        [+s]: typeof s;
+        static [""]: number;
+        [0]: number;
+        ~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+        [a]: number;
+        ~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+        static [<any>true]: number;
+        [`hello bye`] = 0;
+        static [`hello ${a} bye`] = 0
+    }

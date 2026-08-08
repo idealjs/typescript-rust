@@ -1,12 +1,13 @@
 privateNameField.ts(2,5): error TS1003: Identifier expected.
 privateNameField.ts(2,5): error TS1127: Invalid character.
 privateNameField.ts(2,6): error TS1005: ';' expected.
+privateNameField.ts(2,6): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 privateNameField.ts(4,14): error TS1003: Identifier expected.
 privateNameField.ts(4,14): error TS1127: Invalid character.
 privateNameField.ts(4,15): error TS1005: ';' expected.
 
 
-==== privateNameField.ts (6 errors) ====
+==== privateNameField.ts (7 errors) ====
     class A {
         #name: string;
         ~
@@ -15,6 +16,8 @@ privateNameField.ts(4,15): error TS1005: ';' expected.
 !!! error TS1127: Invalid character.
          ~~~~
 !!! error TS1005: ';' expected.
+         ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
         constructor(name: string) {
             this.#name = name;
                  ~

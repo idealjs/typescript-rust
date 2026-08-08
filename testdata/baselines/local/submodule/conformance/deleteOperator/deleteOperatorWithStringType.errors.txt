@@ -1,8 +1,9 @@
+deleteOperatorWithStringType.ts(8,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 deleteOperatorWithStringType.ts(31,34): error TS2339: Property 'foo' does not exist on type 'object'.
 deleteOperatorWithStringType.ts(33,39): error TS2339: Property 'charAt' does not exist on type 'string'.
 
 
-==== deleteOperatorWithStringType.ts (2 errors) ====
+==== deleteOperatorWithStringType.ts (3 errors) ====
     // delete  operator on string type
     declare var STRING: string;
     var STRING1: string[] = ["", "abc"];
@@ -11,6 +12,8 @@ deleteOperatorWithStringType.ts(33,39): error TS2339: Property 'charAt' does not
     
     class A {
         public a: string;
+               ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         static foo() { return ""; }
     }
     namespace M {

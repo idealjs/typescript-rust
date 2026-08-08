@@ -1,10 +1,11 @@
+typeGuardsOnClassProperty.ts(8,5): error TS2564: Property 'data' has no initializer and is not definitely assigned in the constructor.
 typeGuardsOnClassProperty.ts(11,55): error TS2339: Property 'join' does not exist on type 'string | string[]'.
 typeGuardsOnClassProperty.ts(15,70): error TS2339: Property 'join' does not exist on type 'string | string[]'.
 typeGuardsOnClassProperty.ts(27,44): error TS2339: Property 'toLowerCase' does not exist on type 'number | string'.
 typeGuardsOnClassProperty.ts(29,40): error TS2339: Property 'toLocaleLowerCase' does not exist on type 'number | string'.
 
 
-==== typeGuardsOnClassProperty.ts (4 errors) ====
+==== typeGuardsOnClassProperty.ts (5 errors) ====
     ﻿// @target: es2015
     // Note that type guards affect types of variables and parameters only and 
     // have no effect on members of objects such as properties. 
@@ -13,6 +14,8 @@ typeGuardsOnClassProperty.ts(29,40): error TS2339: Property 'toLocaleLowerCase' 
     // the type guard to have an effect
     class D {
         data: string | string[];
+     ~~~~
+!!! error TS2564: Property 'data' has no initializer and is not definitely assigned in the constructor.
         getData() {
             var data = this.data;
             return typeof data === "string" ? data : data.join(" ");

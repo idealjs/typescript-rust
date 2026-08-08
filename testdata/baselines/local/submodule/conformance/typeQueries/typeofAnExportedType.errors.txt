@@ -1,3 +1,5 @@
+typeofAnExportedType.ts(6,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+typeofAnExportedType.ts(26,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 typeofAnExportedType.ts(32,8): error TS1005: '{' expected.
 typeofAnExportedType.ts(32,17): error TS1003: Identifier expected.
 typeofAnExportedType.ts(32,20): error TS1003: Identifier expected.
@@ -7,15 +9,18 @@ typeofAnExportedType.ts(34,14): error TS1003: Identifier expected.
 typeofAnExportedType.ts(34,24): error TS1003: Identifier expected.
 typeofAnExportedType.ts(34,28): error TS1003: Identifier expected.
 typeofAnExportedType.ts(36,15): error TS1003: Identifier expected.
+typeofAnExportedType.ts(48,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 
 
-==== typeofAnExportedType.ts (9 errors) ====
+==== typeofAnExportedType.ts (12 errors) ====
     export var x = 1;
     export var r1: typeof x;
     export var y = { foo: '' };
     export var r2: typeof y;
     export class C {
         foo: string;
+        ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
     }
     export var c: C;
     var c2: C;
@@ -36,6 +41,8 @@ typeofAnExportedType.ts(36,15): error TS1003: Identifier expected.
         export var foo = '';
         export class C {
             foo: string;
+            ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
         }
     }
     export var r6: typeof M;
@@ -76,6 +83,8 @@ typeofAnExportedType.ts(36,15): error TS1003: Identifier expected.
         export var y = 1;
         export class C {
             foo: string;
+            ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
         }
     }
     export var r13: typeof foo;

@@ -1,25 +1,42 @@
+mergedInterfacesWithMultipleBases3.ts(5,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases3.ts(9,5): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases3.ts(13,5): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases3.ts(17,5): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
 mergedInterfacesWithMultipleBases3.ts(28,1): error TS2420: Class 'D' incorrectly implements interface '{ y: T; z: T }'.
+mergedInterfacesWithMultipleBases3.ts(29,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 mergedInterfacesWithMultipleBases3.ts(30,8): error TS2304: Cannot find name 'Date'.
+mergedInterfacesWithMultipleBases3.ts(31,5): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases3.ts(32,5): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases3.ts(33,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases3.ts(34,5): error TS2564: Property 'z' has no initializer and is not definitely assigned in the constructor.
 
 
-==== mergedInterfacesWithMultipleBases3.ts (2 errors) ====
+==== mergedInterfacesWithMultipleBases3.ts (11 errors) ====
     // merged interfaces behave as if all extends clauses from each declaration are merged together
     // no errors expected
     
     class C<T> {
         a: T;
+        ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
     }
     
     class C2<T> {
         b: T;
+        ~
+!!! error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
     }
     
     class C3<T> {
         c: T;
+        ~
+!!! error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
     }
     
     class C4<T> {
         d: T;
+        ~
+!!! error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
     }
     
     interface A<T> extends C<string>, C3<string> {
@@ -34,18 +51,28 @@ mergedInterfacesWithMultipleBases3.ts(30,8): error TS2304: Cannot find name 'Dat
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         a: string;
     ~~~~~~~~~~~~~~
+        ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         b: Date;
     ~~~~~~~~~~~~
            ~~~~
 !!! error TS2304: Cannot find name 'Date'.
         c: string;
     ~~~~~~~~~~~~~~
+        ~
+!!! error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
         d: string;
     ~~~~~~~~~~~~~~
+        ~
+!!! error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
         y: boolean;
     ~~~~~~~~~~~~~~~
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
         z: boolean;
     ~~~~~~~~~~~~~~~
+        ~
+!!! error TS2564: Property 'z' has no initializer and is not definitely assigned in the constructor.
     }
     ~
 !!! error TS2420: Class 'D' incorrectly implements interface '{ y: T; z: T }'.

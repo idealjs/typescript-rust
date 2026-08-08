@@ -1,3 +1,4 @@
+undefinedAssignableToEveryType.ts(2,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 undefinedAssignableToEveryType.ts(13,5): error TS2322: Type 'undefined' is not assignable to type 'number'.
 undefinedAssignableToEveryType.ts(14,5): error TS2322: Type 'undefined' is not assignable to type 'string'.
 undefinedAssignableToEveryType.ts(15,5): error TS2322: Type 'undefined' is not assignable to type 'boolean'.
@@ -16,9 +17,11 @@ undefinedAssignableToEveryType.ts(31,8): error TS2304: Cannot find name 'String'
 undefinedAssignableToEveryType.ts(33,30): error TS2304: Cannot find name 'Date'.
 
 
-==== undefinedAssignableToEveryType.ts (16 errors) ====
+==== undefinedAssignableToEveryType.ts (17 errors) ====
     class C {
         foo: string;
+        ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
     }
     var ac: C;
     interface I {

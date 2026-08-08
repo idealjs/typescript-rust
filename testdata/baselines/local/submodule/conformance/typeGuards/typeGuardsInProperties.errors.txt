@@ -1,7 +1,9 @@
+typeGuardsInProperties.ts(7,13): error TS2564: Property 'pp1' has no initializer and is not definitely assigned in the constructor.
+typeGuardsInProperties.ts(8,5): error TS2564: Property 'pp2' has no initializer and is not definitely assigned in the constructor.
 typeGuardsInProperties.ts(10,9): error TS1005: ';' expected.
 
 
-==== typeGuardsInProperties.ts (1 errors) ====
+==== typeGuardsInProperties.ts (3 errors) ====
     // Note that type guards affect types of variables and parameters only and 
     // have no effect on members of objects such as properties. 
     
@@ -9,7 +11,11 @@ typeGuardsInProperties.ts(10,9): error TS1005: ';' expected.
     var strOrNum: string | number;
     class C1 {
         private pp1: string | number;
+                ~~~
+!!! error TS2564: Property 'pp1' has no initializer and is not definitely assigned in the constructor.
         pp2: string | number;
+        ~~~
+!!! error TS2564: Property 'pp2' has no initializer and is not definitely assigned in the constructor.
         // Inside public accessor getter
         get pp3() {
             ~~~

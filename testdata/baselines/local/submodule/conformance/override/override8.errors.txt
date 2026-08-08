@@ -1,3 +1,4 @@
+override8.ts(2,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 override8.ts(6,24): error TS1005: ',' expected.
 override8.ts(6,42): error TS1005: ',' expected.
 override8.ts(7,9): error TS2349: This expression is not callable.
@@ -7,9 +8,11 @@ override8.ts(19,9): error TS2349: This expression is not callable.
 override8.ts(27,9): error TS2349: This expression is not callable.
 
 
-==== override8.ts (7 errors) ====
+==== override8.ts (8 errors) ====
     class B {
         a: string
+        ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
     }
     
     class D extends B {

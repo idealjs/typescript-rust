@@ -1,3 +1,4 @@
+invalidUndefinedValues.ts(10,11): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 invalidUndefinedValues.ts(22,7): error TS2304: Cannot find name 'f'.
 invalidUndefinedValues.ts(22,8): error TS1005: ',' expected.
 invalidUndefinedValues.ts(22,8): error TS2304: Cannot find name '('.
@@ -8,7 +9,7 @@ invalidUndefinedValues.ts(22,11): error TS2304: Cannot find name '{'.
 invalidUndefinedValues.ts(22,15): error TS1128: Declaration or statement expected.
 
 
-==== invalidUndefinedValues.ts (8 errors) ====
+==== invalidUndefinedValues.ts (9 errors) ====
     var x: typeof undefined;
     
     x = 1;
@@ -19,6 +20,8 @@ invalidUndefinedValues.ts(22,15): error TS1128: Declaration or statement expecte
     x = null;
     
     class C { foo: string }
+              ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
     var b: C;
     x = C;
     x = b;

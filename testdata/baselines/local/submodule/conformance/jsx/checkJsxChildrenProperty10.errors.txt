@@ -1,3 +1,4 @@
+file.tsx(12,2): error TS2564: Property 'props' has no initializer and is not definitely assigned in the constructor.
 file.tsx(14,17): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
 file.tsx(14,17): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
 file.tsx(19,10): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
@@ -19,7 +20,7 @@ file.tsx(22,19): error TS2602: JSX element implicitly has type 'any' because the
 file.tsx(22,19): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
 
 
-==== file.tsx (19 errors) ====
+==== file.tsx (20 errors) ====
     declare namespace JSX {
     	interface Element { }
     	interface ElementAttributesProperty { props: {} }
@@ -32,6 +33,8 @@ file.tsx(22,19): error TS7026: JSX element implicitly has type 'any' because no 
     
     class Button {
     	props: {}
+    	~~~~~
+!!! error TS2564: Property 'props' has no initializer and is not definitely assigned in the constructor.
         render() {
             return (<div>My Button</div>)
                     ~~~~~

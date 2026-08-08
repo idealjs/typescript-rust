@@ -1,9 +1,11 @@
 derivedClassOverridesProtectedMembers2.ts(7,19): error TS1005: ';' expected.
 derivedClassOverridesProtectedMembers2.ts(8,19): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers2.ts(9,15): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesProtectedMembers2.ts(13,26): error TS1005: ';' expected.
 derivedClassOverridesProtectedMembers2.ts(14,26): error TS1005: ';' expected.
 derivedClassOverridesProtectedMembers2.ts(24,9): error TS1005: ';' expected.
 derivedClassOverridesProtectedMembers2.ts(25,9): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers2.ts(26,5): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesProtectedMembers2.ts(30,16): error TS1005: ';' expected.
 derivedClassOverridesProtectedMembers2.ts(31,16): error TS1005: ';' expected.
 derivedClassOverridesProtectedMembers2.ts(34,32): error TS2349: This expression is not callable.
@@ -12,18 +14,22 @@ derivedClassOverridesProtectedMembers2.ts(44,18): error TS2339: Property 's' doe
 derivedClassOverridesProtectedMembers2.ts(45,18): error TS2339: Property 't' does not exist on type 'object'.
 derivedClassOverridesProtectedMembers2.ts(46,19): error TS2339: Property 'u' does not exist on type 'object'.
 derivedClassOverridesProtectedMembers2.ts(47,9): error TS2339: Property 't' does not exist on type 'object'.
+derivedClassOverridesProtectedMembers2.ts(50,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesProtectedMembers2.ts(50,7): error TS1005: ']' expected.
 derivedClassOverridesProtectedMembers2.ts(50,15): error TS1005: ';' expected.
 derivedClassOverridesProtectedMembers2.ts(50,18): error TS2304: Cannot find name 'Object'.
+derivedClassOverridesProtectedMembers2.ts(51,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesProtectedMembers2.ts(51,7): error TS1005: ']' expected.
 derivedClassOverridesProtectedMembers2.ts(51,15): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers2.ts(55,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesProtectedMembers2.ts(55,7): error TS1005: ']' expected.
 derivedClassOverridesProtectedMembers2.ts(55,15): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers2.ts(56,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesProtectedMembers2.ts(56,7): error TS1005: ']' expected.
 derivedClassOverridesProtectedMembers2.ts(56,15): error TS1005: ';' expected.
 
 
-==== derivedClassOverridesProtectedMembers2.ts (23 errors) ====
+==== derivedClassOverridesProtectedMembers2.ts (29 errors) ====
     var x: { foo: string; }
     var y: { foo: string; bar: string; }
     
@@ -37,6 +43,8 @@ derivedClassOverridesProtectedMembers2.ts(56,15): error TS1005: ';' expected.
                       ~
 !!! error TS1005: ';' expected.
         protected d: (a: typeof x) => void ;
+                  ~
+!!! error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
     
         protected static r: typeof x;
         protected static s(a: typeof x) { }
@@ -62,6 +70,8 @@ derivedClassOverridesProtectedMembers2.ts(56,15): error TS1005: ';' expected.
             ~
 !!! error TS1005: ';' expected.
         d: (a: typeof y) => void;
+        ~
+!!! error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
     
         static r: typeof y;
         static s(a: typeof y) { }
@@ -102,6 +112,8 @@ derivedClassOverridesProtectedMembers2.ts(56,15): error TS1005: ';' expected.
     
     class Base2 {
         [i: string]: Object;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -109,6 +121,8 @@ derivedClassOverridesProtectedMembers2.ts(56,15): error TS1005: ';' expected.
                      ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
         [i: number]: typeof x;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -117,11 +131,15 @@ derivedClassOverridesProtectedMembers2.ts(56,15): error TS1005: ';' expected.
     
     class Derived2 extends Base2 {
         [i: string]: typeof x;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
         [i: number]: typeof y;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~

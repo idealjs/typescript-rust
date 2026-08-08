@@ -1,11 +1,12 @@
 commaOperatorWithSecondOperandObjectType.ts(5,13): error TS2304: Cannot find name 'Object'.
+commaOperatorWithSecondOperandObjectType.ts(8,5): error TS2564: Property 'num' has no initializer and is not definitely assigned in the constructor.
 commaOperatorWithSecondOperandObjectType.ts(30,15): error TS2304: Cannot find name 'Date'.
 commaOperatorWithSecondOperandObjectType.ts(31,8): error TS2339: Property 'toLowerCase' does not exist on type 'string'.
 commaOperatorWithSecondOperandObjectType.ts(37,39): error TS2304: Cannot find name 'Date'.
 commaOperatorWithSecondOperandObjectType.ts(38,32): error TS2339: Property 'toLowerCase' does not exist on type 'string'.
 
 
-==== commaOperatorWithSecondOperandObjectType.ts (5 errors) ====
+==== commaOperatorWithSecondOperandObjectType.ts (6 errors) ====
     var ANY: any;
     var BOOLEAN: boolean;
     var NUMBER: number;
@@ -16,6 +17,8 @@ commaOperatorWithSecondOperandObjectType.ts(38,32): error TS2339: Property 'toLo
     
     class CLASS {
         num: number;
+        ~~~
+!!! error TS2564: Property 'num' has no initializer and is not definitely assigned in the constructor.
     }
     
     //The second operand type is Object

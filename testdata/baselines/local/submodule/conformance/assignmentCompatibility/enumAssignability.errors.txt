@@ -1,3 +1,4 @@
+enumAssignability.ts(20,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 enumAssignability.ts(29,9): error TS2322: Type 'number' is not assignable to type 'string'.
 enumAssignability.ts(30,9): error TS2322: Type 'number' is not assignable to type 'boolean'.
 enumAssignability.ts(31,13): error TS2304: Cannot find name 'Date'.
@@ -17,7 +18,7 @@ enumAssignability.ts(47,44): error TS2304: Cannot find name 'Date'.
 enumAssignability.ts(47,60): error TS2304: Cannot find name 'Number'.
 
 
-==== enumAssignability.ts (17 errors) ====
+==== enumAssignability.ts (18 errors) ====
     // enums assignable to number, any, Object, errors unless otherwise noted
     
     enum E { A }
@@ -38,6 +39,8 @@ enumAssignability.ts(47,60): error TS2304: Cannot find name 'Number'.
     
         class C {
             foo: string;
+            ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
         }
         var ac: C;
         interface I {

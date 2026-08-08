@@ -1,13 +1,27 @@
+localTypes1.ts(6,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+localTypes1.ts(23,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+localTypes1.ts(43,17): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+localTypes1.ts(55,17): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+localTypes1.ts(74,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+localTypes1.ts(83,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+localTypes1.ts(95,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+localTypes1.ts(103,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 localTypes1.ts(107,9): error TS1005: ';' expected.
+localTypes1.ts(112,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+localTypes1.ts(120,9): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+localTypes1.ts(124,13): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+localTypes1.ts(128,17): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
 
 
-==== localTypes1.ts (1 errors) ====
+==== localTypes1.ts (13 errors) ====
     function f1() {
         enum E {
             A, B, C
         }
         class C {
             x: E;
+            ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         }
         interface I {
             x: E;
@@ -25,6 +39,8 @@ localTypes1.ts(107,9): error TS1005: ';' expected.
             }
             class C {
                 x: E;
+                ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
             }
             interface I {
                 x: E;
@@ -45,6 +61,8 @@ localTypes1.ts(107,9): error TS1005: ';' expected.
             if (b) {
                 class C {
                     x: E;
+                    ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
                 }
                 interface I {
                     x: E;
@@ -57,6 +75,8 @@ localTypes1.ts(107,9): error TS1005: ';' expected.
             else {
                 class A {
                     x: E;
+                    ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
                 }
                 interface J {
                     x: E;
@@ -76,6 +96,8 @@ localTypes1.ts(107,9): error TS1005: ';' expected.
             }
             class C {
                 x: E;
+                ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
             }
             return new C();
         }
@@ -85,6 +107,8 @@ localTypes1.ts(107,9): error TS1005: ';' expected.
             }
             class C {
                 x: E;
+                ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
             }
             return new C();
         }
@@ -97,6 +121,8 @@ localTypes1.ts(107,9): error TS1005: ';' expected.
             }
             class C {
                 x: E;
+                ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
             }
         }
         m() {
@@ -105,6 +131,8 @@ localTypes1.ts(107,9): error TS1005: ';' expected.
             }
             class C {
                 x: E;
+                ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
             }
             return new C();
         }
@@ -116,6 +144,8 @@ localTypes1.ts(107,9): error TS1005: ';' expected.
             }
             class C {
                 x: E;
+                ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
             }
             return new C();
         }
@@ -124,14 +154,20 @@ localTypes1.ts(107,9): error TS1005: ';' expected.
     function f6() {
         class A {
             a: string;
+            ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         }
         function g() {
             class B extends A {
                 b: string;
+                ~
+!!! error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
             }
             function h() {
                 class C extends B {
                     c: string;
+                    ~
+!!! error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
                 }
                 var x = new C();
                 x.a = "a";

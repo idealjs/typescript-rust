@@ -1,3 +1,7 @@
+subtypingWithCallSignatures3.ts(5,18): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypingWithCallSignatures3.ts(6,34): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+subtypingWithCallSignatures3.ts(7,38): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+subtypingWithCallSignatures3.ts(8,39): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
 subtypingWithCallSignatures3.ts(25,36): error TS2304: Cannot find name 'Array'.
 subtypingWithCallSignatures3.ts(25,52): error TS2304: Cannot find name 'Array'.
 subtypingWithCallSignatures3.ts(25,72): error TS2304: Cannot find name 'Array'.
@@ -163,15 +167,23 @@ subtypingWithCallSignatures3.ts(116,32): error TS2304: Cannot find name 'T'.
 subtypingWithCallSignatures3.ts(117,14): error TS2304: Cannot find name 'foo3'.
 
 
-==== subtypingWithCallSignatures3.ts (163 errors) ====
+==== subtypingWithCallSignatures3.ts (167 errors) ====
     // checking subtype relations for function types as it relates to contextual signature instantiation
     // error cases, so function calls will all result in 'any'
     
     namespace Errors {
         class Base { foo: string; }
+                     ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
         class Derived extends Base { bar: string; }
+                                     ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
         class Derived2 extends Derived { baz: string; }
+                                         ~~~
+!!! error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
         class OtherDerived extends Base { bing: string; }
+                                          ~~~~
+!!! error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
     
         declare function foo2(a2: (x: number) => string[]): typeof a2;
         declare function foo2(a2: any): any;

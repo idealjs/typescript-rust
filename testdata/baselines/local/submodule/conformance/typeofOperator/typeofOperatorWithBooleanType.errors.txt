@@ -1,9 +1,10 @@
+typeofOperatorWithBooleanType.ts(7,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 typeofOperatorWithBooleanType.ts(11,17): error TS1005: ',' expected.
 typeofOperatorWithBooleanType.ts(11,18): error TS1134: Variable declaration expected.
 typeofOperatorWithBooleanType.ts(27,32): error TS2339: Property 'foo' does not exist on type 'object'.
 
 
-==== typeofOperatorWithBooleanType.ts (3 errors) ====
+==== typeofOperatorWithBooleanType.ts (4 errors) ====
     // typeof  operator on boolean type
     declare var BOOLEAN: boolean;
     
@@ -11,6 +12,8 @@ typeofOperatorWithBooleanType.ts(27,32): error TS2339: Property 'foo' does not e
     
     class A {
         public a: boolean;
+               ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         static foo() { return false; }
     }
     namespace M {

@@ -1,13 +1,17 @@
+interfaceExtendingClass2.ts(2,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 interfaceExtendingClass2.ts(4,9): error TS1005: ';' expected.
+interfaceExtendingClass2.ts(7,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 interfaceExtendingClass2.ts(7,7): error TS1005: ']' expected.
 interfaceExtendingClass2.ts(7,15): error TS1005: ';' expected.
 interfaceExtendingClass2.ts(7,18): error TS2304: Cannot find name 'Object'.
 interfaceExtendingClass2.ts(15,6): error TS1005: '}' expected.
 
 
-==== interfaceExtendingClass2.ts (5 errors) ====
+==== interfaceExtendingClass2.ts (7 errors) ====
     class Foo {
         x: string;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         y() { }
         get Z() {
             ~
@@ -15,6 +19,8 @@ interfaceExtendingClass2.ts(15,6): error TS1005: '}' expected.
             return 1;
         }
         [x: string]: Object;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~

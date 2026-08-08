@@ -1,11 +1,14 @@
 error TS2300: Duplicate identifier 'MyClass'.
+thisTypeAccessibility.ts(17,13): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
+thisTypeAccessibility.ts(18,15): error TS2564: Property 'pp' has no initializer and is not definitely assigned in the constructor.
+thisTypeAccessibility.ts(19,12): error TS2564: Property 'ppp' has no initializer and is not definitely assigned in the constructor.
 thisTypeAccessibility.ts(58,20): error TS2339: Property 'sp' does not exist on type 'object'.
 thisTypeAccessibility.ts(59,20): error TS2339: Property 'spp' does not exist on type 'object'.
 thisTypeAccessibility.ts(60,20): error TS2339: Property 'sppp' does not exist on type 'object'.
 
 
 !!! error TS2300: Duplicate identifier 'MyClass'.
-==== thisTypeAccessibility.ts (3 errors) ====
+==== thisTypeAccessibility.ts (6 errors) ====
     class MyClass {
         private p: number = 123;
         protected pp: number = 123;
@@ -23,8 +26,14 @@ thisTypeAccessibility.ts(60,20): error TS2339: Property 'sppp' does not exist on
     
     class MyGenericClass<T> {
         private p: T;
+                ~
+!!! error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
         protected pp: T;
+                  ~~
+!!! error TS2564: Property 'pp' has no initializer and is not definitely assigned in the constructor.
         public ppp: T;
+               ~~~
+!!! error TS2564: Property 'ppp' has no initializer and is not definitely assigned in the constructor.
         private static sp: number;
         protected static spp: number;
         public static sppp: number;

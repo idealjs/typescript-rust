@@ -1,14 +1,20 @@
+numericIndexingResults.ts(2,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 numericIndexingResults.ts(2,7): error TS1005: ']' expected.
 numericIndexingResults.ts(2,15): error TS1005: ';' expected.
+numericIndexingResults.ts(2,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 
 
-==== numericIndexingResults.ts (2 errors) ====
+==== numericIndexingResults.ts (4 errors) ====
     class C {
         [x: number]: string;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         1 = '';
         "2" = ''
     }

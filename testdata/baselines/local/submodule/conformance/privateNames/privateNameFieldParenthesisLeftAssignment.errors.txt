@@ -1,6 +1,7 @@
 privateNameFieldParenthesisLeftAssignment.ts(2,5): error TS1003: Identifier expected.
 privateNameFieldParenthesisLeftAssignment.ts(2,5): error TS1127: Invalid character.
 privateNameFieldParenthesisLeftAssignment.ts(2,6): error TS1005: ';' expected.
+privateNameFieldParenthesisLeftAssignment.ts(2,6): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
 privateNameFieldParenthesisLeftAssignment.ts(5,14): error TS1003: Identifier expected.
 privateNameFieldParenthesisLeftAssignment.ts(5,14): error TS1127: Invalid character.
 privateNameFieldParenthesisLeftAssignment.ts(5,15): error TS1005: ';' expected.
@@ -20,7 +21,7 @@ privateNameFieldParenthesisLeftAssignment.ts(13,18): error TS2304: Cannot find n
 privateNameFieldParenthesisLeftAssignment.ts(13,29): error TS1005: ';' expected.
 
 
-==== privateNameFieldParenthesisLeftAssignment.ts (20 errors) ====
+==== privateNameFieldParenthesisLeftAssignment.ts (21 errors) ====
     class Foo {
         #p: number;
         ~
@@ -29,6 +30,8 @@ privateNameFieldParenthesisLeftAssignment.ts(13,29): error TS1005: ';' expected.
 !!! error TS1127: Invalid character.
          ~
 !!! error TS1005: ';' expected.
+         ~
+!!! error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
     
         constructor(value: number) {
             this.#p = value;

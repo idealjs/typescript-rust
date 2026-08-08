@@ -1,3 +1,4 @@
+thisInObjectLiterals.ts(2,5): error TS2564: Property 't' has no initializer and is not definitely assigned in the constructor.
 thisInObjectLiterals.ts(14,5): error TS2304: Cannot find name 'f'.
 thisInObjectLiterals.ts(14,6): error TS1005: ',' expected.
 thisInObjectLiterals.ts(14,6): error TS2304: Cannot find name '('.
@@ -18,9 +19,11 @@ thisInObjectLiterals.ts(15,28): error TS2304: Cannot find name ';'.
 thisInObjectLiterals.ts(17,1): error TS1128: Declaration or statement expected.
 
 
-==== thisInObjectLiterals.ts (18 errors) ====
+==== thisInObjectLiterals.ts (19 errors) ====
     class MyClass {
         t: number;
+        ~
+!!! error TS2564: Property 't' has no initializer and is not definitely assigned in the constructor.
     
         fn() {
             type ContainingThis = this;

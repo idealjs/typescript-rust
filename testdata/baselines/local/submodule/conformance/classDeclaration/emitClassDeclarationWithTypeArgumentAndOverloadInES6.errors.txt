@@ -1,12 +1,18 @@
+emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts(3,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts(4,5): error TS2564: Property 'B' has no initializer and is not definitely assigned in the constructor.
 emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts(17,9): error TS1005: ';' expected.
 emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts(20,9): error TS1005: ';' expected.
 
 
-==== emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts (2 errors) ====
+==== emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts (4 errors) ====
     ﻿// @strict: false
     class B<T> {
         x: T;
+     ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         B: T;
+     ~
+!!! error TS2564: Property 'B' has no initializer and is not definitely assigned in the constructor.
     
         constructor(a: any)
         constructor(a: any,b: T)

@@ -1,12 +1,21 @@
+typeGuardOfFromPropNameInUnionType.ts(1,11): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFromPropNameInUnionType.ts(2,11): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
 typeGuardOfFromPropNameInUnionType.ts(3,14): error TS2304: Cannot find name 'Object'.
 typeGuardOfFromPropNameInUnionType.ts(4,14): error TS2304: Cannot find name 'Date'.
 typeGuardOfFromPropNameInUnionType.ts(16,25): error TS2304: Cannot find name 'Date'.
 typeGuardOfFromPropNameInUnionType.ts(18,25): error TS2304: Cannot find name 'Object'.
+typeGuardOfFromPropNameInUnionType.ts(51,28): error TS2564: Property 'prop' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFromPropNameInUnionType.ts(72,15): error TS2564: Property 'prop' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFromPropNameInUnionType.ts(84,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 
 
-==== typeGuardOfFromPropNameInUnionType.ts (4 errors) ====
+==== typeGuardOfFromPropNameInUnionType.ts (9 errors) ====
     class A { a: string; }
+              ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
     class B { b: number; }
+              ~
+!!! error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
     class C { b: Object; }
                  ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
@@ -64,6 +73,8 @@ typeGuardOfFromPropNameInUnionType.ts(18,25): error TS2304: Cannot find name 'Ob
     }
     
     class ClassWithUnionProp { prop: A | B; }
+                               ~~~~
+!!! error TS2564: Property 'prop' has no initializer and is not definitely assigned in the constructor.
     
     function inProperty(x: ClassWithUnionProp) {
         if ("a" in x.prop) {
@@ -85,6 +96,8 @@ typeGuardOfFromPropNameInUnionType.ts(18,25): error TS2304: Cannot find name 'Ob
     
     class InMemberOfClass {
         protected prop: A | B;
+                  ~~~~
+!!! error TS2564: Property 'prop' has no initializer and is not definitely assigned in the constructor.
         inThis() {
             if ("a" in this.prop) {
                 let y: string = this.prop.a;
@@ -97,6 +110,8 @@ typeGuardOfFromPropNameInUnionType.ts(18,25): error TS2304: Cannot find name 'Ob
     // added for completeness
     class SelfAssert {
         a: string;
+        ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         inThis() {
             if ("a" in this) {
                 let y: string = this.a;

@@ -1,0 +1,19 @@
+classAndVariableWithSameName.ts(1,11): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+classAndVariableWithSameName.ts(6,9): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+
+
+==== classAndVariableWithSameName.ts (2 errors) ====
+    class C { foo: string; } // error
+              ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+    var C = ''; // error
+    
+    namespace M {
+        class D { // error
+            bar: string;
+            ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+        }
+    
+        var D = 1; // error
+    }

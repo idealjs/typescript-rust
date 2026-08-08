@@ -1,11 +1,14 @@
+ExportVariableOfGenericTypeWithInaccessibleTypeAsTypeArgument.ts(3,9): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
 ExportVariableOfGenericTypeWithInaccessibleTypeAsTypeArgument.ts(6,22): error TS2304: Cannot find name 'Array'.
 ExportVariableOfGenericTypeWithInaccessibleTypeAsTypeArgument.ts(7,28): error TS2304: Cannot find name 'Array'.
 
 
-==== ExportVariableOfGenericTypeWithInaccessibleTypeAsTypeArgument.ts (2 errors) ====
+==== ExportVariableOfGenericTypeWithInaccessibleTypeAsTypeArgument.ts (3 errors) ====
     namespace A {
         class B {
             id: number;
+            ~~
+!!! error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
         }
     
         export var beez: Array<B>;

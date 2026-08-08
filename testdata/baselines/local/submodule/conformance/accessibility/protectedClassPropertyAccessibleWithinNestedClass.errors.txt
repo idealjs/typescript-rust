@@ -1,3 +1,4 @@
+protectedClassPropertyAccessibleWithinNestedClass.ts(4,15): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 protectedClassPropertyAccessibleWithinNestedClass.ts(5,19): error TS1005: ';' expected.
 protectedClassPropertyAccessibleWithinNestedClass.ts(6,19): error TS1005: ';' expected.
 protectedClassPropertyAccessibleWithinNestedClass.ts(10,26): error TS1005: ';' expected.
@@ -8,11 +9,13 @@ protectedClassPropertyAccessibleWithinNestedClass.ts(21,26): error TS2454: Varia
 protectedClassPropertyAccessibleWithinNestedClass.ts(22,26): error TS2454: Variable 'x' is used before being assigned.
 
 
-==== protectedClassPropertyAccessibleWithinNestedClass.ts (8 errors) ====
+==== protectedClassPropertyAccessibleWithinNestedClass.ts (9 errors) ====
     // no errors
     
     class C {
         protected x: string;
+                  ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         protected get y() { return this.x; }
                       ~
 !!! error TS1005: ';' expected.

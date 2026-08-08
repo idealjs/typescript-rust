@@ -1,0 +1,17 @@
+classExtendsShadowedConstructorFunction.ts(1,11): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+classExtendsShadowedConstructorFunction.ts(6,9): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+
+
+==== classExtendsShadowedConstructorFunction.ts (2 errors) ====
+    class C { foo: string; }
+              ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+    
+    namespace M {
+        var C = 1;
+        class D extends C { // error, C must evaluate to constructor function
+            bar: string;
+            ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+        }
+    }

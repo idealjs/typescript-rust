@@ -4,12 +4,14 @@ privateNameComputedPropertyName1.ts(2,6): error TS1005: ';' expected.
 privateNameComputedPropertyName1.ts(3,5): error TS1003: Identifier expected.
 privateNameComputedPropertyName1.ts(3,5): error TS1127: Invalid character.
 privateNameComputedPropertyName1.ts(3,6): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(3,6): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
 privateNameComputedPropertyName1.ts(5,14): error TS1005: ';' expected.
 privateNameComputedPropertyName1.ts(5,14): error TS1127: Invalid character.
 privateNameComputedPropertyName1.ts(5,15): error TS1005: ';' expected.
 privateNameComputedPropertyName1.ts(6,14): error TS1005: ';' expected.
 privateNameComputedPropertyName1.ts(6,14): error TS1127: Invalid character.
 privateNameComputedPropertyName1.ts(6,15): error TS1005: ';' expected.
+privateNameComputedPropertyName1.ts(6,15): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
 privateNameComputedPropertyName1.ts(8,5): error TS1003: Identifier expected.
 privateNameComputedPropertyName1.ts(8,5): error TS1127: Invalid character.
 privateNameComputedPropertyName1.ts(8,6): error TS1005: ';' expected.
@@ -59,7 +61,7 @@ privateNameComputedPropertyName1.ts(26,31): error TS1005: ']' expected.
 privateNameComputedPropertyName1.ts(26,32): error TS1005: ',' expected.
 
 
-==== privateNameComputedPropertyName1.ts (59 errors) ====
+==== privateNameComputedPropertyName1.ts (61 errors) ====
     class A {
         #a = 'a';
         ~
@@ -75,6 +77,8 @@ privateNameComputedPropertyName1.ts(26,32): error TS1005: ',' expected.
 !!! error TS1127: Invalid character.
          ~
 !!! error TS1005: ';' expected.
+         ~
+!!! error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
     
         readonly #c = 'c';
                  ~
@@ -90,6 +94,8 @@ privateNameComputedPropertyName1.ts(26,32): error TS1005: ',' expected.
 !!! error TS1127: Invalid character.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
     
         #e = '';
         ~

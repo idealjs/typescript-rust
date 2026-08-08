@@ -1,9 +1,10 @@
+typeofOperatorWithNumberType.ts(8,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 typeofOperatorWithNumberType.ts(12,17): error TS1005: ',' expected.
 typeofOperatorWithNumberType.ts(12,18): error TS1134: Variable declaration expected.
 typeofOperatorWithNumberType.ts(31,33): error TS2339: Property 'foo' does not exist on type 'object'.
 
 
-==== typeofOperatorWithNumberType.ts (3 errors) ====
+==== typeofOperatorWithNumberType.ts (4 errors) ====
     // typeof  operator on number type
     declare var NUMBER: number;
     var NUMBER1: number[] = [1, 2];
@@ -12,6 +13,8 @@ typeofOperatorWithNumberType.ts(31,33): error TS2339: Property 'foo' does not ex
     
     class A {
         public a: number;
+               ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         static foo() { return 1; }
     }
     namespace M {

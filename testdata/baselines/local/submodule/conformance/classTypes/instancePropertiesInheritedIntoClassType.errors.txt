@@ -1,21 +1,27 @@
+instancePropertiesInheritedIntoClassType.ts(3,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 instancePropertiesInheritedIntoClassType.ts(4,13): error TS1005: ';' expected.
 instancePropertiesInheritedIntoClassType.ts(7,13): error TS1005: ';' expected.
 instancePropertiesInheritedIntoClassType.ts(9,28): error TS1005: ',' expected.
 instancePropertiesInheritedIntoClassType.ts(9,47): error TS1005: ',' expected.
+instancePropertiesInheritedIntoClassType.ts(12,25): error TS2564: Property 'e' has no initializer and is not definitely assigned in the constructor.
 instancePropertiesInheritedIntoClassType.ts(14,19): error TS2554: Expected 0 arguments, but got 2.
 instancePropertiesInheritedIntoClassType.ts(19,14): error TS2554: Expected 1 arguments, but got 0.
+instancePropertiesInheritedIntoClassType.ts(25,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 instancePropertiesInheritedIntoClassType.ts(26,13): error TS1005: ';' expected.
 instancePropertiesInheritedIntoClassType.ts(29,13): error TS1005: ';' expected.
 instancePropertiesInheritedIntoClassType.ts(31,28): error TS1005: ',' expected.
 instancePropertiesInheritedIntoClassType.ts(31,42): error TS1005: ',' expected.
+instancePropertiesInheritedIntoClassType.ts(34,37): error TS2564: Property 'e' has no initializer and is not definitely assigned in the constructor.
 instancePropertiesInheritedIntoClassType.ts(36,19): error TS2554: Expected 0 arguments, but got 2.
 instancePropertiesInheritedIntoClassType.ts(41,14): error TS2554: Expected 1 arguments, but got 0.
 
 
-==== instancePropertiesInheritedIntoClassType.ts (12 errors) ====
+==== instancePropertiesInheritedIntoClassType.ts (16 errors) ====
     namespace NonGeneric {
         class C {
             x: string;
+            ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
             get y() {
                 ~
 !!! error TS1005: ';' expected.
@@ -33,6 +39,8 @@ instancePropertiesInheritedIntoClassType.ts(41,14): error TS2554: Expected 1 arg
         }
     
         class D extends C { e: string; }
+                            ~
+!!! error TS2564: Property 'e' has no initializer and is not definitely assigned in the constructor.
     
         var d = new D(1, 2);
                       ~~~~
@@ -50,6 +58,8 @@ instancePropertiesInheritedIntoClassType.ts(41,14): error TS2554: Expected 1 arg
     namespace Generic {
         class C<T, U> {
             x: T;
+            ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
             get y() {
                 ~
 !!! error TS1005: ';' expected.
@@ -67,6 +77,8 @@ instancePropertiesInheritedIntoClassType.ts(41,14): error TS2554: Expected 1 arg
         }
     
         class D<T, U> extends C<T, U> { e: T; }
+                                        ~
+!!! error TS2564: Property 'e' has no initializer and is not definitely assigned in the constructor.
     
         var d = new D(1, '');
                       ~~~~~

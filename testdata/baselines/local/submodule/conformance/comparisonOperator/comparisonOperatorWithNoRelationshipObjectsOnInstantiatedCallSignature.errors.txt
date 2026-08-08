@@ -1,3 +1,6 @@
+comparisonOperatorWithNoRelationshipObjectsOnInstantiatedCallSignature.ts(2,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+comparisonOperatorWithNoRelationshipObjectsOnInstantiatedCallSignature.ts(6,12): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+comparisonOperatorWithNoRelationshipObjectsOnInstantiatedCallSignature.ts(10,12): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
 comparisonOperatorWithNoRelationshipObjectsOnInstantiatedCallSignature.ts(32,19): error TS1005: '>' expected.
 comparisonOperatorWithNoRelationshipObjectsOnInstantiatedCallSignature.ts(33,19): error TS1005: '>' expected.
 comparisonOperatorWithNoRelationshipObjectsOnInstantiatedCallSignature.ts(34,19): error TS1005: '>' expected.
@@ -12,17 +15,23 @@ comparisonOperatorWithNoRelationshipObjectsOnInstantiatedCallSignature.ts(43,19)
 comparisonOperatorWithNoRelationshipObjectsOnInstantiatedCallSignature.ts(44,19): error TS1005: '>' expected.
 
 
-==== comparisonOperatorWithNoRelationshipObjectsOnInstantiatedCallSignature.ts (12 errors) ====
+==== comparisonOperatorWithNoRelationshipObjectsOnInstantiatedCallSignature.ts (15 errors) ====
     class Base {
         public a: string;
+               ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
     }
     
     class Derived extends Base {
         public b: string;
+               ~
+!!! error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
     }
     
     class C {
         public c: string;
+               ~
+!!! error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
     }
     
     var a1: { fn<T>(x: T): T };

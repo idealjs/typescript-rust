@@ -1,0 +1,24 @@
+derivedClassOverridesPrivates.ts(2,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+derivedClassOverridesPrivates.ts(6,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+
+
+==== derivedClassOverridesPrivates.ts (2 errors) ====
+    class Base {
+        private x: { foo: string };
+                ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class Derived extends Base {
+        private x: { foo: string; bar: string; }; // error
+                ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class Base2 {
+        private static y: { foo: string };
+    }
+    
+    class Derived2 extends Base2 {
+        private static y: { foo: string; bar: string; }; // error
+    }

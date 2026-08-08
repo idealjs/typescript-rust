@@ -1,8 +1,10 @@
 decoratorInAmbientContext.ts(5,24): error TS1005: ';' expected.
+decoratorInAmbientContext.ts(5,24): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 decoratorInAmbientContext.ts(6,24): error TS1005: ';' expected.
+decoratorInAmbientContext.ts(6,24): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 
 
-==== decoratorInAmbientContext.ts (2 errors) ====
+==== decoratorInAmbientContext.ts (4 errors) ====
     declare function decorator(target: any, key: any): any;
     
     const b = Symbol('b');
@@ -10,7 +12,11 @@ decoratorInAmbientContext.ts(6,24): error TS1005: ';' expected.
         @decorator declare a: number;
                            ~
 !!! error TS1005: ';' expected.
+                           ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         @decorator declare [b]: number;
                            ~
 !!! error TS1005: ';' expected.
+                           ~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
     }

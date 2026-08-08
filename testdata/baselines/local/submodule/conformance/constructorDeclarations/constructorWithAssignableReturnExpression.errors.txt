@@ -1,0 +1,50 @@
+constructorWithAssignableReturnExpression.ts(10,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+constructorWithAssignableReturnExpression.ts(17,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+constructorWithAssignableReturnExpression.ts(24,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+constructorWithAssignableReturnExpression.ts(31,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+
+
+==== constructorWithAssignableReturnExpression.ts (4 errors) ====
+    // a class constructor may return an expression, it must be assignable to the class instance type to be valid
+    
+    class C {
+        constructor() {
+            return 1;
+        }
+    }
+    
+    class D {
+        x: number;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+        constructor() {
+            return 1; // error
+        }
+    }
+    
+    class E {
+        x: number;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+        constructor() {
+            return { x: 1 };
+        }
+    }
+    
+    class F<T> {
+        x: T;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+        constructor() {
+            return { x: 1 }; // error
+        }
+    }
+    
+    class G<T> {
+        x: T;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+        constructor() {
+            return { x: <T>null };
+        }
+    }

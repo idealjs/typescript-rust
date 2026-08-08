@@ -1,8 +1,9 @@
 error TS6053: File 'react.d.ts' not found.
+file.tsx(28,5): error TS2564: Property 'greeting' has no initializer and is not definitely assigned in the constructor.
 
 
 !!! error TS6053: File '/.lib/react.d.ts' not found.
-==== file.tsx (0 errors) ====
+==== file.tsx (1 errors) ====
     /// <reference path="/.lib/react.d.ts" />
     
     import React = require('react');
@@ -31,6 +32,8 @@ error TS6053: File 'react.d.ts' not found.
             return <div>Default hi</div>;
         }
         greeting: string;
+        ~~~~~~~~
+!!! error TS2564: Property 'greeting' has no initializer and is not definitely assigned in the constructor.
     }
     
     let o = {

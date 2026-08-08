@@ -1,9 +1,12 @@
+typeGuardOfFormTypeOfOther.ts(1,19): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
 typeGuardOfFormTypeOfOther.ts(47,9): error TS2322: Type 'string | number | boolean' is not assignable to type 'object'.
 typeGuardOfFormTypeOfOther.ts(79,9): error TS2322: Type 'string | number | boolean' is not assignable to type 'object'.
 
 
-==== typeGuardOfFormTypeOfOther.ts (2 errors) ====
+==== typeGuardOfFormTypeOfOther.ts (3 errors) ====
     class C { private p: string };
+                      ~
+!!! error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
     
     var str: string;
     var bool: boolean;

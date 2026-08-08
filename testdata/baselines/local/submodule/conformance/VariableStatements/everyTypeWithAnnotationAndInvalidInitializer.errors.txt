@@ -1,6 +1,10 @@
+everyTypeWithAnnotationAndInvalidInitializer.ts(6,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+everyTypeWithAnnotationAndInvalidInitializer.ts(10,5): error TS2564: Property 'source' has no initializer and is not definitely assigned in the constructor.
 everyTypeWithAnnotationAndInvalidInitializer.ts(16,42): error TS2322: Type 'number' is not assignable to type 'boolean'.
 everyTypeWithAnnotationAndInvalidInitializer.ts(16,48): error TS1005: '>' expected.
+everyTypeWithAnnotationAndInvalidInitializer.ts(20,9): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 everyTypeWithAnnotationAndInvalidInitializer.ts(23,54): error TS2339: Property 'toString' does not exist on type 'number'.
+everyTypeWithAnnotationAndInvalidInitializer.ts(28,9): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
 everyTypeWithAnnotationAndInvalidInitializer.ts(31,54): error TS2339: Property 'toString' does not exist on type 'number'.
 everyTypeWithAnnotationAndInvalidInitializer.ts(34,5): error TS2322: Type 'string' is not assignable to type 'number'.
 everyTypeWithAnnotationAndInvalidInitializer.ts(35,5): error TS2322: Type 'number' is not assignable to type 'string'.
@@ -12,17 +16,21 @@ everyTypeWithAnnotationAndInvalidInitializer.ts(44,5): error TS2322: Type '{ id:
 everyTypeWithAnnotationAndInvalidInitializer.ts(47,5): error TS2322: Type '(x: number) => boolean' is not assignable to type '(x: string) => number'.
 
 
-==== everyTypeWithAnnotationAndInvalidInitializer.ts (12 errors) ====
+==== everyTypeWithAnnotationAndInvalidInitializer.ts (16 errors) ====
     interface I {
         id: number;
     }
     
     class C implements I {
         id: number;
+        ~~
+!!! error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
     }
     
     class D<T>{
         source: T;
+        ~~~~~~
+!!! error TS2564: Property 'source' has no initializer and is not definitely assigned in the constructor.
         recurse: D<T>;
         wrapped: D<D<T>>
     }
@@ -37,6 +45,8 @@ everyTypeWithAnnotationAndInvalidInitializer.ts(47,5): error TS2322: Type '(x: n
     namespace M {
         export class A {
             name: string;
+            ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
         }
     
         export function F2(x: number): string { return x.toString(); }
@@ -47,6 +57,8 @@ everyTypeWithAnnotationAndInvalidInitializer.ts(47,5): error TS2322: Type '(x: n
     namespace N {
         export class A {
             id: number;
+            ~~
+!!! error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
         }
     
         export function F2(x: number): string { return x.toString(); }

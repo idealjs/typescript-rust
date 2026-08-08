@@ -1,21 +1,27 @@
 staticIndexSignature5.ts(2,23): error TS1005: ']' expected.
 staticIndexSignature5.ts(2,31): error TS1005: ';' expected.
+staticIndexSignature5.ts(2,31): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexSignature5.ts(3,23): error TS1005: ']' expected.
 staticIndexSignature5.ts(3,31): error TS1005: ';' expected.
+staticIndexSignature5.ts(3,31): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 
 
-==== staticIndexSignature5.ts (4 errors) ====
+==== staticIndexSignature5.ts (6 errors) ====
     class B {
         static readonly [s: string]: number;
                           ~
 !!! error TS1005: ']' expected.
                                   ~
 !!! error TS1005: ';' expected.
+                                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         static readonly [s: number]: 42 | 233
                           ~
 !!! error TS1005: ']' expected.
                                   ~
 !!! error TS1005: ';' expected.
+                                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     interface I {

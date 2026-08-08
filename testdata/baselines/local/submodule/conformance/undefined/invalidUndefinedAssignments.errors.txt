@@ -1,0 +1,27 @@
+invalidUndefinedAssignments.ts(7,11): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+
+
+==== invalidUndefinedAssignments.ts (1 errors) ====
+    var x: typeof undefined;
+    
+    enum E { A }
+    E = x;
+    E.A = x;
+    
+    class C { foo: string }
+              ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+    var f: C;
+    C = x;
+    
+    interface I { foo: string }
+    var g: I;
+    g = x;
+    I = x;
+    
+    namespace M { export var x = 1; }
+    M = x;
+    
+    function i<T>(a: T) { }
+    // BUG 767030
+    i = x; 

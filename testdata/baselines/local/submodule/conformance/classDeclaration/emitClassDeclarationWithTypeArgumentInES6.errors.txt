@@ -1,11 +1,14 @@
+emitClassDeclarationWithTypeArgumentInES6.ts(3,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 emitClassDeclarationWithTypeArgumentInES6.ts(9,9): error TS1005: ';' expected.
 emitClassDeclarationWithTypeArgumentInES6.ts(12,9): error TS1005: ';' expected.
 
 
-==== emitClassDeclarationWithTypeArgumentInES6.ts (2 errors) ====
+==== emitClassDeclarationWithTypeArgumentInES6.ts (3 errors) ====
     ﻿// @target: es6
     class B<T> {
         x: T;
+     ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         B: T;
         constructor(a: T) { this.B = a;}
         foo(): T {

@@ -1,15 +1,21 @@
+classDoesNotDependOnBaseTypes.ts(3,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 classDoesNotDependOnBaseTypes.ts(3,7): error TS1005: ']' expected.
 classDoesNotDependOnBaseTypes.ts(3,15): error TS1005: ';' expected.
+classDoesNotDependOnBaseTypes.ts(3,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 
 
-==== classDoesNotDependOnBaseTypes.ts (2 errors) ====
+==== classDoesNotDependOnBaseTypes.ts (4 errors) ====
     type StringTree = string | StringTreeCollection;
     class StringTreeCollectionBase {
         [n: number]: StringTree;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     class StringTreeCollection extends StringTreeCollectionBase { }

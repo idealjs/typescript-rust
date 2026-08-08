@@ -1,14 +1,18 @@
+derivedClassWithAny.ts(2,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 derivedClassWithAny.ts(3,9): error TS1005: ';' expected.
 derivedClassWithAny.ts(9,16): error TS1005: ';' expected.
 derivedClassWithAny.ts(19,9): error TS1005: ';' expected.
 derivedClassWithAny.ts(27,16): error TS1005: ';' expected.
+derivedClassWithAny.ts(37,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 derivedClassWithAny.ts(38,9): error TS1005: ';' expected.
 derivedClassWithAny.ts(44,16): error TS1005: ';' expected.
 
 
-==== derivedClassWithAny.ts (6 errors) ====
+==== derivedClassWithAny.ts (8 errors) ====
     class C {
         x: number;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         get X(): number { return 1; }
             ~
 !!! error TS1005: ';' expected.
@@ -52,6 +56,8 @@ derivedClassWithAny.ts(44,16): error TS1005: ';' expected.
     // if D is a valid class definition than E is now not safe tranisitively through C
     class E extends D {
         x: string;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         get X(): string{ return ''; }
             ~
 !!! error TS1005: ';' expected.

@@ -1,3 +1,4 @@
+emitClassDeclarationWithGetterSetterInES6.ts(3,5): error TS2564: Property '_name' has no initializer and is not definitely assigned in the constructor.
 emitClassDeclarationWithGetterSetterInES6.ts(4,9): error TS1005: ';' expected.
 emitClassDeclarationWithGetterSetterInES6.ts(7,16): error TS1005: ';' expected.
 emitClassDeclarationWithGetterSetterInES6.ts(10,16): error TS1005: ';' expected.
@@ -10,10 +11,12 @@ emitClassDeclarationWithGetterSetterInES6.ts(26,16): error TS1005: ';' expected.
 emitClassDeclarationWithGetterSetterInES6.ts(27,16): error TS1005: ';' expected.
 
 
-==== emitClassDeclarationWithGetterSetterInES6.ts (10 errors) ====
+==== emitClassDeclarationWithGetterSetterInES6.ts (11 errors) ====
     ﻿// @target:es6
     class C {
         _name: string;
+     ~~~~~
+!!! error TS2564: Property '_name' has no initializer and is not definitely assigned in the constructor.
         get name(): string {
          ~~~~
 !!! error TS1005: ';' expected.

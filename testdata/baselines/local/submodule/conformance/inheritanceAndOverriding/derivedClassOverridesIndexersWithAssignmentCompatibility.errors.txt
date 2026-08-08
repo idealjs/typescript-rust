@@ -1,18 +1,24 @@
+derivedClassOverridesIndexersWithAssignmentCompatibility.ts(2,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesIndexersWithAssignmentCompatibility.ts(2,7): error TS1005: ']' expected.
 derivedClassOverridesIndexersWithAssignmentCompatibility.ts(2,15): error TS1005: ';' expected.
 derivedClassOverridesIndexersWithAssignmentCompatibility.ts(2,18): error TS2304: Cannot find name 'Object'.
+derivedClassOverridesIndexersWithAssignmentCompatibility.ts(7,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesIndexersWithAssignmentCompatibility.ts(7,7): error TS1005: ']' expected.
 derivedClassOverridesIndexersWithAssignmentCompatibility.ts(7,15): error TS1005: ';' expected.
+derivedClassOverridesIndexersWithAssignmentCompatibility.ts(11,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesIndexersWithAssignmentCompatibility.ts(11,7): error TS1005: ']' expected.
 derivedClassOverridesIndexersWithAssignmentCompatibility.ts(11,15): error TS1005: ';' expected.
 derivedClassOverridesIndexersWithAssignmentCompatibility.ts(11,18): error TS2304: Cannot find name 'Object'.
+derivedClassOverridesIndexersWithAssignmentCompatibility.ts(16,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesIndexersWithAssignmentCompatibility.ts(16,7): error TS1005: ']' expected.
 derivedClassOverridesIndexersWithAssignmentCompatibility.ts(16,15): error TS1005: ';' expected.
 
 
-==== derivedClassOverridesIndexersWithAssignmentCompatibility.ts (10 errors) ====
+==== derivedClassOverridesIndexersWithAssignmentCompatibility.ts (14 errors) ====
     class Base {
         [x: string]: Object;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -24,6 +30,8 @@ derivedClassOverridesIndexersWithAssignmentCompatibility.ts(16,15): error TS1005
     // ok, use assignment compatibility
     class Derived extends Base {
         [x: string]: any;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -32,6 +40,8 @@ derivedClassOverridesIndexersWithAssignmentCompatibility.ts(16,15): error TS1005
     
     class Base2 {
         [x: number]: Object;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -43,6 +53,8 @@ derivedClassOverridesIndexersWithAssignmentCompatibility.ts(16,15): error TS1005
     // ok, use assignment compatibility
     class Derived2 extends Base2 {
         [x: number]: any;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~

@@ -1,15 +1,24 @@
+parserIndexMemberDeclaration5.ts(2,4): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 parserIndexMemberDeclaration5.ts(2,6): error TS1005: ']' expected.
 parserIndexMemberDeclaration5.ts(2,14): error TS1005: ';' expected.
+parserIndexMemberDeclaration5.ts(2,14): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 parserIndexMemberDeclaration5.ts(2,24): error TS1005: ';' expected.
+parserIndexMemberDeclaration5.ts(2,31): error TS2564: Property 'v' has no initializer and is not definitely assigned in the constructor.
 
 
-==== parserIndexMemberDeclaration5.ts (3 errors) ====
+==== parserIndexMemberDeclaration5.ts (6 errors) ====
     class C {
        [a: string]: number public v: number
+       ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
          ~
 !!! error TS1005: ']' expected.
                  ~
 !!! error TS1005: ';' expected.
+                 ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
                            ~~~~~~
 !!! error TS1005: ';' expected.
+                                  ~
+!!! error TS2564: Property 'v' has no initializer and is not definitely assigned in the constructor.
     }

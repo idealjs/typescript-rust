@@ -1,0 +1,411 @@
+staticPropertyNameConflicts.ts(12,5): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(17,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(33,5): error TS2564: Property 'length' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(38,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(54,5): error TS2564: Property 'prototype' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(59,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(75,5): error TS2564: Property 'caller' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(80,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(96,5): error TS2564: Property 'arguments' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(101,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(229,9): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(235,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(254,9): error TS2564: Property 'length' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(260,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(279,9): error TS2564: Property 'prototype' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(285,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(304,9): error TS2564: Property 'caller' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(310,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(329,9): error TS2564: Property 'arguments' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(335,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+
+
+==== staticPropertyNameConflicts.ts (20 errors) ====
+    const FunctionPropertyNames = {
+        name: 'name',
+        length: 'length',
+        prototype: 'prototype',
+        caller: 'caller',
+        arguments: 'arguments',
+    } as const;
+    
+    // name
+    class StaticName {
+        static name: number; // error without useDefineForClassFields
+        name: string; // ok
+        ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class StaticName2 {
+        static [FunctionPropertyNames.name]: number; // error without useDefineForClassFields
+        [FunctionPropertyNames.name]: number; // ok
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class StaticNameFn {
+        static name() {} // error without useDefineForClassFields
+        name() {} // ok
+    }
+    
+    class StaticNameFn2 {
+        static [FunctionPropertyNames.name]() {} // error without useDefineForClassFields
+        [FunctionPropertyNames.name]() {} // ok
+    }
+    
+    // length
+    class StaticLength {
+        static length: number; // error without useDefineForClassFields
+        length: string; // ok
+        ~~~~~~
+!!! error TS2564: Property 'length' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class StaticLength2 {
+        static [FunctionPropertyNames.length]: number; // error without useDefineForClassFields
+        [FunctionPropertyNames.length]: number; // ok
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class StaticLengthFn {
+        static length() {} // error without useDefineForClassFields
+        length() {} // ok
+    }
+    
+    class StaticLengthFn2 {
+        static [FunctionPropertyNames.length]() {} // error without useDefineForClassFields
+        [FunctionPropertyNames.length]() {} // ok
+    }
+    
+    // prototype
+    class StaticPrototype {
+        static prototype: number; // always an error
+        prototype: string; // ok
+        ~~~~~~~~~
+!!! error TS2564: Property 'prototype' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class StaticPrototype2 {
+        static [FunctionPropertyNames.prototype]: number; // always an error
+        [FunctionPropertyNames.prototype]: string; // ok
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class StaticPrototypeFn {
+        static prototype() {} // always an error
+        prototype() {} // ok
+    }
+    
+    class StaticPrototypeFn2 {
+        static [FunctionPropertyNames.prototype]() {} // always an error
+        [FunctionPropertyNames.prototype]() {} // ok
+    }
+    
+    // caller
+    class StaticCaller {
+        static caller: number; // error without useDefineForClassFields
+        caller: string; // ok
+        ~~~~~~
+!!! error TS2564: Property 'caller' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class StaticCaller2 {
+        static [FunctionPropertyNames.caller]: number; // error without useDefineForClassFields
+        [FunctionPropertyNames.caller]: string; // ok
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class StaticCallerFn {
+        static caller() {} // error without useDefineForClassFields
+        caller() {} // ok
+    }
+    
+    class StaticCallerFn2 {
+        static [FunctionPropertyNames.caller]() {} // error without useDefineForClassFields
+        [FunctionPropertyNames.caller]() {} // ok
+    }
+    
+    // arguments
+    class StaticArguments {
+        static arguments: number; // error without useDefineForClassFields
+        arguments: string; // ok
+        ~~~~~~~~~
+!!! error TS2564: Property 'arguments' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class StaticArguments2 {
+        static [FunctionPropertyNames.arguments]: number; // error without useDefineForClassFields
+        [FunctionPropertyNames.arguments]: string; // ok
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class StaticArgumentsFn {
+        static arguments() {} // error without useDefineForClassFields
+        arguments() {} // ok
+    }
+    
+    class StaticArgumentsFn2 {
+        static [FunctionPropertyNames.arguments]() {} // error without useDefineForClassFields
+        [FunctionPropertyNames.arguments]() {} // ok
+    }
+    
+    
+    // === Static properties on anonymous classes ===
+    
+    // name
+    var StaticName_Anonymous = class {
+        static name: number; // error without useDefineForClassFields
+        name: string; // ok
+    }
+    
+    var StaticName_Anonymous2 = class {
+        static [FunctionPropertyNames.name]: number; // error without useDefineForClassFields
+        [FunctionPropertyNames.name]: string; // ok
+    }
+    
+    var StaticNameFn_Anonymous = class {
+        static name() {} // error without useDefineForClassFields
+        name() {} // ok
+    }
+    
+    var StaticNameFn_Anonymous2 = class {
+        static [FunctionPropertyNames.name]() {} // error without useDefineForClassFields
+        [FunctionPropertyNames.name]() {} // ok
+    }
+    
+    // length
+    var StaticLength_Anonymous = class {
+        static length: number; // error without useDefineForClassFields
+        length: string; // ok
+    }
+    
+    var StaticLength_Anonymous2 = class {
+        static [FunctionPropertyNames.length]: number; // error without useDefineForClassFields
+        [FunctionPropertyNames.length]: string; // ok
+    }
+    
+    var StaticLengthFn_Anonymous = class {
+        static length() {} // error without useDefineForClassFields
+        length() {} // ok
+    }
+    
+    var StaticLengthFn_Anonymous2 = class {
+        static [FunctionPropertyNames.length]() {} // error without useDefineForClassFields
+        [FunctionPropertyNames.length]() {} // ok
+    }
+    
+    // prototype
+    var StaticPrototype_Anonymous = class {
+        static prototype: number; // always an error
+        prototype: string; // ok
+    }
+    
+    var StaticPrototype_Anonymous2 = class {
+        static [FunctionPropertyNames.prototype]: number; // always an error
+        [FunctionPropertyNames.prototype]: string; // ok
+    }
+    
+    var StaticPrototypeFn_Anonymous = class {
+        static prototype() {} // always an error
+        prototype() {} // ok
+    }
+    
+    var StaticPrototypeFn_Anonymous2 = class {
+        static [FunctionPropertyNames.prototype]() {} // always an error
+        [FunctionPropertyNames.prototype]() {} // ok
+    }
+    
+    // caller
+    var StaticCaller_Anonymous = class {
+        static caller: number; // error without useDefineForClassFields
+        caller: string; // ok
+    }
+    
+    var StaticCaller_Anonymous2 = class {
+        static [FunctionPropertyNames.caller]: number; // error without useDefineForClassFields
+        [FunctionPropertyNames.caller]: string; // ok
+    }
+    
+    var StaticCallerFn_Anonymous = class {
+        static caller() {} // error without useDefineForClassFields
+        caller() {} // ok
+    }
+    
+    var StaticCallerFn_Anonymous2 = class {
+        static [FunctionPropertyNames.caller]() {} // error without useDefineForClassFields
+        [FunctionPropertyNames.caller]() {} // ok
+    }
+    
+    // arguments
+    var StaticArguments_Anonymous = class {
+        static arguments: number; // error without useDefineForClassFields
+        arguments: string; // ok
+    }
+    
+    var StaticArguments_Anonymous2 = class {
+        static [FunctionPropertyNames.arguments]: number; // error without useDefineForClassFields
+        [FunctionPropertyNames.arguments]: string; // ok
+    }
+    
+    var StaticArgumentsFn_Anonymous = class {
+        static arguments() {} // error without useDefineForClassFields
+        arguments() {} // ok
+    }
+    
+    var StaticArgumentsFn_Anonymous2 = class {
+        static [FunctionPropertyNames.arguments]() {} // error without useDefineForClassFields
+        [FunctionPropertyNames.arguments]() {} // ok
+    }
+    
+    
+    // === Static properties on default exported classes ===
+    
+    // name
+    namespace TestOnDefaultExportedClass_1 {
+        class StaticName {
+            static name: number; // error without useDefineForClassFields
+            name: string; // ok
+            ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+        }
+    }
+    
+    export class ExportedStaticName {
+        static [FunctionPropertyNames.name]: number; // error without useDefineForClassFields
+        [FunctionPropertyNames.name]: string; // ok
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    namespace TestOnDefaultExportedClass_2 {
+        class StaticNameFn {
+            static name() {} // error without useDefineForClassFields
+            name() {} // ok
+        }
+    }
+    
+    export class ExportedStaticNameFn {
+        static [FunctionPropertyNames.name]() {} // error without useDefineForClassFields
+        [FunctionPropertyNames.name]() {} // ok
+    }
+    
+    // length
+    namespace TestOnDefaultExportedClass_3 {
+        export default class StaticLength {
+            static length: number; // error without useDefineForClassFields
+            length: string; // ok
+            ~~~~~~
+!!! error TS2564: Property 'length' has no initializer and is not definitely assigned in the constructor.
+        }
+    }
+    
+    export class ExportedStaticLength {
+        static [FunctionPropertyNames.length]: number; // error without useDefineForClassFields
+        [FunctionPropertyNames.length]: string; // ok
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    namespace TestOnDefaultExportedClass_4 {
+        export default class StaticLengthFn {
+            static length() {} // error without useDefineForClassFields
+            length() {} // ok
+        }
+    }
+    
+    export class ExportedStaticLengthFn {
+        static [FunctionPropertyNames.length]() {} // error without useDefineForClassFields
+        [FunctionPropertyNames.length]() {} // ok
+    }
+    
+    // prototype
+    namespace TestOnDefaultExportedClass_5 {
+        export default class StaticPrototype {
+            static prototype: number; // always an error
+            prototype: string; // ok
+            ~~~~~~~~~
+!!! error TS2564: Property 'prototype' has no initializer and is not definitely assigned in the constructor.
+        }
+    }
+    
+    export class ExportedStaticPrototype {
+        static [FunctionPropertyNames.prototype]: number; // always an error
+        [FunctionPropertyNames.prototype]: string; // ok
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    namespace TestOnDefaultExportedClass_6 {
+        export default class StaticPrototypeFn {
+            static prototype() {} // always an error
+            prototype() {} // ok
+        }
+    }
+    
+    export class ExportedStaticPrototypeFn {
+        static [FunctionPropertyNames.prototype]() {} // always an error
+        [FunctionPropertyNames.prototype]() {} // ok
+    }
+    
+    // caller
+    namespace TestOnDefaultExportedClass_7 {
+        export default class StaticCaller {
+            static caller: number; // error without useDefineForClassFields
+            caller: string; // ok
+            ~~~~~~
+!!! error TS2564: Property 'caller' has no initializer and is not definitely assigned in the constructor.
+        }
+    }
+    
+    export class ExportedStaticCaller {
+        static [FunctionPropertyNames.caller]: number; // error without useDefineForClassFields
+        [FunctionPropertyNames.caller]: string; // ok
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    namespace TestOnDefaultExportedClass_8 {
+        export default class StaticCallerFn {
+            static caller() {} // error without useDefineForClassFields
+            caller() {} // ok
+        }
+    }
+    
+    export class ExportedStaticCallerFn {
+        static [FunctionPropertyNames.caller]() {} // error without useDefineForClassFields
+        [FunctionPropertyNames.caller]() {} // ok
+    }
+    
+    // arguments
+    namespace TestOnDefaultExportedClass_9 {
+        export default class StaticArguments {
+            static arguments: number; // error without useDefineForClassFields
+            arguments: string; // ok
+            ~~~~~~~~~
+!!! error TS2564: Property 'arguments' has no initializer and is not definitely assigned in the constructor.
+        }
+    }
+    
+    export class ExportedStaticArguments {
+        static [FunctionPropertyNames.arguments]: number; // error without useDefineForClassFields
+        [FunctionPropertyNames.arguments]: string; // ok
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    namespace TestOnDefaultExportedClass_10 {
+        export default class StaticArgumentsFn {
+            static arguments() {} // error without useDefineForClassFields
+            arguments() {} // ok
+        }
+    }
+    
+    export class ExportedStaticArgumentsFn {
+        static [FunctionPropertyNames.arguments]() {} // error without useDefineForClassFields
+        [FunctionPropertyNames.arguments]() {} // ok
+    }

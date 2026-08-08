@@ -1,17 +1,27 @@
+constructorHasPrototypeProperty.ts(3,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+constructorHasPrototypeProperty.ts(7,9): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 constructorHasPrototypeProperty.ts(10,15): error TS2339: Property 'prototype' does not exist on type 'object'.
 constructorHasPrototypeProperty.ts(12,16): error TS2339: Property 'prototype' does not exist on type 'object'.
+constructorHasPrototypeProperty.ts(18,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+constructorHasPrototypeProperty.ts(19,9): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+constructorHasPrototypeProperty.ts(23,9): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+constructorHasPrototypeProperty.ts(24,9): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
 constructorHasPrototypeProperty.ts(27,15): error TS2339: Property 'prototype' does not exist on type 'object'.
 constructorHasPrototypeProperty.ts(29,16): error TS2339: Property 'prototype' does not exist on type 'object'.
 
 
-==== constructorHasPrototypeProperty.ts (4 errors) ====
+==== constructorHasPrototypeProperty.ts (10 errors) ====
     namespace NonGeneric {
         class C {
             foo: string;
+            ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
         }
     
         class D extends C {
             bar: string;
+            ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
         }
     
         var r = C.prototype;
@@ -27,12 +37,20 @@ constructorHasPrototypeProperty.ts(29,16): error TS2339: Property 'prototype' do
     namespace Generic {
         class C<T,U> {
             foo: T;
+            ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
             bar: U;
+            ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
         }
     
         class D<T,U> extends C<T,U> {
             baz: T;
+            ~~~
+!!! error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
             bing: U;
+            ~~~~
+!!! error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
         }
     
         var r = C.prototype; // C<any, any>

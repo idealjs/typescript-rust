@@ -1,20 +1,25 @@
+typeGuardOfFormThisMember.ts(4,3): error TS2564: Property 'isFSO' has no initializer and is not definitely assigned in the constructor.
 typeGuardOfFormThisMember.ts(5,7): error TS1005: ';' expected.
 typeGuardOfFormThisMember.ts(8,7): error TS1005: ';' expected.
 typeGuardOfFormThisMember.ts(11,7): error TS1005: ';' expected.
+typeGuardOfFormThisMember.ts(14,3): error TS2564: Property 'isNetworked' has no initializer and is not definitely assigned in the constructor.
 typeGuardOfFormThisMember.ts(15,22): error TS1005: ',' expected.
 typeGuardOfFormThisMember.ts(19,36): error TS1005: ',' expected.
 typeGuardOfFormThisMember.ts(19,55): error TS2349: This expression is not callable.
+typeGuardOfFormThisMember.ts(22,3): error TS2564: Property 'children' has no initializer and is not definitely assigned in the constructor.
 typeGuardOfFormThisMember.ts(28,31): error TS2554: Expected 3 arguments, but got 2.
 typeGuardOfFormThisMember.ts(63,9): error TS2339: Property 'lead' does not exist on type '{ target: error; isLeader: boolean; isFollower: boolean }'.
 typeGuardOfFormThisMember.ts(66,9): error TS2339: Property 'follow' does not exist on type '{ target: error; isLeader: boolean; isFollower: boolean }'.
 typeGuardOfFormThisMember.ts(79,11): error TS2339: Property 'do' does not exist on type '{ isMoreSpecific: boolean }'.
 
 
-==== typeGuardOfFormThisMember.ts (10 errors) ====
+==== typeGuardOfFormThisMember.ts (13 errors) ====
     // There's a 'File' class in the stdlib, wrap with a namespace to avoid collision
     namespace Test {
     	export class FileSystemObject {
     		isFSO: this is FileSystemObject;
+    		~~~~~
+!!! error TS2564: Property 'isFSO' has no initializer and is not definitely assigned in the constructor.
     		get isFile(): this is File {
     		    ~~~~~~
 !!! error TS1005: ';' expected.
@@ -31,6 +36,8 @@ typeGuardOfFormThisMember.ts(79,11): error TS2339: Property 'do' does not exist 
     			return this instanceof Directory;
     		}
     		isNetworked: this is (Networked & this);
+    		~~~~~~~~~~~
+!!! error TS2564: Property 'isNetworked' has no initializer and is not definitely assigned in the constructor.
     		constructor(public path: string) {}
     		                   ~~~~
 !!! error TS1005: ',' expected.
@@ -45,6 +52,8 @@ typeGuardOfFormThisMember.ts(79,11): error TS2339: Property 'do' does not exist 
     	}
     	export class Directory extends FileSystemObject {
     		children: FileSystemObject[];
+    		~~~~~~~~
+!!! error TS2564: Property 'children' has no initializer and is not definitely assigned in the constructor.
     	}
     	export interface Networked {
     		host: string;

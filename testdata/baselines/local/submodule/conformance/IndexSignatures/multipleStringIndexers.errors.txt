@@ -1,27 +1,43 @@
+multipleStringIndexers.ts(4,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 multipleStringIndexers.ts(4,7): error TS1005: ']' expected.
 multipleStringIndexers.ts(4,15): error TS1005: ';' expected.
+multipleStringIndexers.ts(4,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+multipleStringIndexers.ts(5,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 multipleStringIndexers.ts(5,7): error TS1005: ']' expected.
 multipleStringIndexers.ts(5,15): error TS1005: ';' expected.
+multipleStringIndexers.ts(5,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+multipleStringIndexers.ts(24,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 multipleStringIndexers.ts(24,7): error TS1005: ']' expected.
 multipleStringIndexers.ts(24,15): error TS1005: ';' expected.
+multipleStringIndexers.ts(24,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+multipleStringIndexers.ts(25,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 multipleStringIndexers.ts(25,7): error TS1005: ']' expected.
 multipleStringIndexers.ts(25,15): error TS1005: ';' expected.
+multipleStringIndexers.ts(25,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 
 
-==== multipleStringIndexers.ts (8 errors) ====
+==== multipleStringIndexers.ts (16 errors) ====
     // Multiple indexers of the same type are an error
     
     class C {
         [x: string]: string;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         [x: string]: string;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     interface I {
@@ -41,15 +57,23 @@ multipleStringIndexers.ts(25,15): error TS1005: ';' expected.
     
     class C2<T> {
         [x: string]: string;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         [x: string]: string;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     interface I2<T> {

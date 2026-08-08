@@ -1,3 +1,4 @@
+privateNameAndIndexSignature.ts(2,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 privateNameAndIndexSignature.ts(2,7): error TS1005: ']' expected.
 privateNameAndIndexSignature.ts(2,15): error TS1005: ';' expected.
 privateNameAndIndexSignature.ts(3,5): error TS1003: Identifier expected.
@@ -9,9 +10,11 @@ privateNameAndIndexSignature.ts(6,15): error TS1005: ';' expected.
 privateNameAndIndexSignature.ts(6,15): error TS2304: Cannot find name 'f'.
 
 
-==== privateNameAndIndexSignature.ts (9 errors) ====
+==== privateNameAndIndexSignature.ts (10 errors) ====
     class A {
         [k: string]: any;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~

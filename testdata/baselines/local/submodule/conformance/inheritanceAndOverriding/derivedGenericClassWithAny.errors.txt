@@ -1,14 +1,18 @@
+derivedGenericClassWithAny.ts(2,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 derivedGenericClassWithAny.ts(3,9): error TS1005: ';' expected.
 derivedGenericClassWithAny.ts(3,25): error TS2322: Type 'null' is not assignable to type 'T'.
 derivedGenericClassWithAny.ts(5,16): error TS2322: Type 'null' is not assignable to type 'T'.
 derivedGenericClassWithAny.ts(11,9): error TS1005: ';' expected.
 derivedGenericClassWithAny.ts(19,16): error TS1005: ';' expected.
+derivedGenericClassWithAny.ts(29,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 derivedGenericClassWithAny.ts(30,9): error TS1005: ';' expected.
 
 
-==== derivedGenericClassWithAny.ts (6 errors) ====
+==== derivedGenericClassWithAny.ts (8 errors) ====
     class C<T extends number> {
         x: T;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         get X(): T { return null; }
             ~
 !!! error TS1005: ';' expected.
@@ -46,6 +50,8 @@ derivedGenericClassWithAny.ts(30,9): error TS1005: ';' expected.
     // if D is a valid class definition than E is now not safe tranisitively through C
     class E<T extends string> extends D {
         x: T;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         get X(): T { return ''; } // error
             ~
 !!! error TS1005: ';' expected.

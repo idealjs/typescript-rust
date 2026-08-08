@@ -1,10 +1,14 @@
+duplicateNumericIndexers.ts(19,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 duplicateNumericIndexers.ts(19,7): error TS1005: ']' expected.
 duplicateNumericIndexers.ts(19,15): error TS1005: ';' expected.
+duplicateNumericIndexers.ts(19,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+duplicateNumericIndexers.ts(20,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 duplicateNumericIndexers.ts(20,7): error TS1005: ']' expected.
 duplicateNumericIndexers.ts(20,15): error TS1005: ';' expected.
+duplicateNumericIndexers.ts(20,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 
 
-==== duplicateNumericIndexers.ts (4 errors) ====
+==== duplicateNumericIndexers.ts (8 errors) ====
     // it is an error to have duplicate index signatures of the same kind in a type
     
     interface Number {
@@ -24,15 +28,23 @@ duplicateNumericIndexers.ts(20,15): error TS1005: ';' expected.
     
     class C {
         [x: number]: string;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         [x: number]: string;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     interface I {

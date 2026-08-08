@@ -1,0 +1,32 @@
+classExtendsItselfIndirectly.ts(1,21): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly.ts(3,21): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly.ts(5,21): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly.ts(7,29): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly.ts(9,29): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly.ts(11,29): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+
+
+==== classExtendsItselfIndirectly.ts (6 errors) ====
+    class C extends E { foo: string; } // error
+                        ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+    
+    class D extends C { bar: string; }
+                        ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+    
+    class E extends D { baz: number; }
+                        ~~~
+!!! error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+    
+    class C2<T> extends E2<T> { foo: T; } // error
+                                ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+    
+    class D2<T> extends C2<T> { bar: T; }
+                                ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+    
+    class E2<T> extends D2<T> { baz: T; }
+                                ~~~
+!!! error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.

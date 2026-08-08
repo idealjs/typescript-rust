@@ -1,16 +1,20 @@
 staticIndexSignature7.ts(2,18): error TS1005: ']' expected.
 staticIndexSignature7.ts(2,26): error TS1005: ';' expected.
+staticIndexSignature7.ts(2,26): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexSignature7.ts(6,18): error TS1005: ']' expected.
 staticIndexSignature7.ts(6,26): error TS1005: ';' expected.
+staticIndexSignature7.ts(6,26): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 
 
-==== staticIndexSignature7.ts (4 errors) ====
+==== staticIndexSignature7.ts (6 errors) ====
     class X {
         static [index: string]: string;
                      ~
 !!! error TS1005: ']' expected.
                              ~
 !!! error TS1005: ';' expected.
+                             ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         static x = 12; // Should error, incompatible with index signature
     }
     class Y {
@@ -19,5 +23,7 @@ staticIndexSignature7.ts(6,26): error TS1005: ';' expected.
 !!! error TS1005: ']' expected.
                              ~
 !!! error TS1005: ';' expected.
+                             ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         static foo() {} // should error, incompatible with index signature
     }

@@ -1,3 +1,7 @@
+assignmentCompatWithConstructSignatures3.ts(3,14): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithConstructSignatures3.ts(4,30): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithConstructSignatures3.ts(5,34): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithConstructSignatures3.ts(6,35): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithConstructSignatures3.ts(19,26): error TS2304: Cannot find name 'Array'.
 assignmentCompatWithConstructSignatures3.ts(19,42): error TS2304: Cannot find name 'Array'.
 assignmentCompatWithConstructSignatures3.ts(19,62): error TS2304: Cannot find name 'Array'.
@@ -61,13 +65,21 @@ assignmentCompatWithConstructSignatures3.ts(96,43): error TS2304: Cannot find na
 assignmentCompatWithConstructSignatures3.ts(96,49): error TS2304: Cannot find name 'T'.
 
 
-==== assignmentCompatWithConstructSignatures3.ts (61 errors) ====
+==== assignmentCompatWithConstructSignatures3.ts (65 errors) ====
     // checking assignment compatibility relations for function types. All of these are valid.
     
     class Base { foo: string; }
+                 ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
     class Derived extends Base { bar: string; }
+                                 ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
     class Derived2 extends Derived { baz: string; }
+                                     ~~~
+!!! error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
     class OtherDerived extends Base { bing: string; }
+                                      ~~~~
+!!! error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
     
     declare var a: new (x: number) => number[];
     declare var a2: new (x: number) => string[];

@@ -1,3 +1,4 @@
+derivedClassParameterProperties.ts(4,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 derivedClassParameterProperties.ts(10,9): error TS2349: This expression is not callable.
 derivedClassParameterProperties.ts(15,24): error TS1005: ',' expected.
 derivedClassParameterProperties.ts(17,9): error TS2349: This expression is not callable.
@@ -8,15 +9,18 @@ derivedClassParameterProperties.ts(39,9): error TS2349: This expression is not c
 derivedClassParameterProperties.ts(49,9): error TS2349: This expression is not callable.
 derivedClassParameterProperties.ts(59,9): error TS2349: This expression is not callable.
 derivedClassParameterProperties.ts(67,9): error TS2349: This expression is not callable.
+derivedClassParameterProperties.ts(74,18): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 derivedClassParameterProperties.ts(82,9): error TS2349: This expression is not callable.
 derivedClassParameterProperties.ts(90,9): error TS2349: This expression is not callable.
 
 
-==== derivedClassParameterProperties.ts (12 errors) ====
+==== derivedClassParameterProperties.ts (14 errors) ====
     // ordering of super calls in derived constructors matters depending on other class contents
     
     class Base {
         x: string;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     }
     
     class Derived extends Base {
@@ -107,6 +111,8 @@ derivedClassParameterProperties.ts(90,9): error TS2349: This expression is not c
     
     // generic cases of Derived7 and Derived8
     class Base2<T> { x: T; }
+                     ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     
     class Derived9<T> extends Base2<T> {
         a = 1;

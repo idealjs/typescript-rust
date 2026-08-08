@@ -1,8 +1,9 @@
 importAliasIdentifiers.ts(3,28): error TS1005: ',' expected.
 importAliasIdentifiers.ts(3,46): error TS1005: ',' expected.
+importAliasIdentifiers.ts(14,5): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 
 
-==== importAliasIdentifiers.ts (2 errors) ====
+==== importAliasIdentifiers.ts (3 errors) ====
     namespace moduleA {
         export class Point {
             constructor(public x: number, public y: number) { }
@@ -21,6 +22,8 @@ importAliasIdentifiers.ts(3,46): error TS1005: ',' expected.
     
     class clodule {
         name: string;
+        ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
     }
     
     namespace clodule {

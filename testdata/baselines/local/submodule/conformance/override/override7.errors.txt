@@ -1,9 +1,16 @@
 override7.ts(9,13): error TS1005: ';' expected.
+override7.ts(9,13): error TS2564: Property 'p1' has no initializer and is not definitely assigned in the constructor.
 override7.ts(11,22): error TS1005: ';' expected.
+override7.ts(11,22): error TS2564: Property 'p2' has no initializer and is not definitely assigned in the constructor.
+override7.ts(13,23): error TS2564: Property 'p3' has no initializer and is not definitely assigned in the constructor.
+override7.ts(15,23): error TS2564: Property 'p4' has no initializer and is not definitely assigned in the constructor.
+override7.ts(19,23): error TS2564: Property 'oop' has no initializer and is not definitely assigned in the constructor.
+override7.ts(21,21): error TS2564: Property 'pp' has no initializer and is not definitely assigned in the constructor.
+override7.ts(22,21): error TS2564: Property 'op' has no initializer and is not definitely assigned in the constructor.
 override7.ts(25,9): error TS2349: This expression is not callable.
 
 
-==== override7.ts (3 errors) ====
+==== override7.ts (10 errors) ====
     class B {
         p1: number = 1;
         p2: number = 2;
@@ -15,21 +22,35 @@ override7.ts(25,9): error TS2349: This expression is not callable.
         declare p1: number
                 ~~
 !!! error TS1005: ';' expected.
+                ~~
+!!! error TS2564: Property 'p1' has no initializer and is not definitely assigned in the constructor.
     
         override declare p2: number;
                          ~~
 !!! error TS1005: ';' expected.
+                         ~~
+!!! error TS2564: Property 'p2' has no initializer and is not definitely assigned in the constructor.
     
         readonly override p3: number;
+                          ~~
+!!! error TS2564: Property 'p3' has no initializer and is not definitely assigned in the constructor.
     
         override readonly p4: number;
+                          ~~
+!!! error TS2564: Property 'p4' has no initializer and is not definitely assigned in the constructor.
     
         static override sp: number;
     
         override override oop: number;
+                          ~~~
+!!! error TS2564: Property 'oop' has no initializer and is not definitely assigned in the constructor.
     
         public override pp: number;
+                        ~~
+!!! error TS2564: Property 'pp' has no initializer and is not definitely assigned in the constructor.
         override public op: number;
+                        ~~
+!!! error TS2564: Property 'op' has no initializer and is not definitely assigned in the constructor.
     
         override constructor () {
             super();

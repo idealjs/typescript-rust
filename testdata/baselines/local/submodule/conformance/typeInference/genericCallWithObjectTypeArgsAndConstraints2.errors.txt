@@ -1,15 +1,21 @@
+genericCallWithObjectTypeArgsAndConstraints2.ts(5,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+genericCallWithObjectTypeArgsAndConstraints2.ts(8,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 genericCallWithObjectTypeArgsAndConstraints2.ts(36,19): error TS2345: Argument of type 'null' is not assignable to parameter of type '(a: T) => T'.
 
 
-==== genericCallWithObjectTypeArgsAndConstraints2.ts (1 errors) ====
+==== genericCallWithObjectTypeArgsAndConstraints2.ts (3 errors) ====
     // Generic call with constraints infering type parameter from object member properties
     // No errors expected
     
     class Base {
         x: string;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     }
     class Derived extends Base {
         y: string;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
     }
     
     function f<T extends Base>(x: { foo: T; bar: T }) {

@@ -3,6 +3,9 @@ subtypesOfTypeParameterWithConstraints2.ts(28,29): error TS2304: Cannot find nam
 subtypesOfTypeParameterWithConstraints2.ts(29,25): error TS2304: Cannot find name 'Date'.
 subtypesOfTypeParameterWithConstraints2.ts(32,29): error TS2304: Cannot find name 'Date'.
 subtypesOfTypeParameterWithConstraints2.ts(33,25): error TS2304: Cannot find name 'Date'.
+subtypesOfTypeParameterWithConstraints2.ts(38,12): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints2.ts(39,15): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints2.ts(45,11): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithConstraints2.ts(50,23): error TS2304: Cannot find name 'Number'.
 subtypesOfTypeParameterWithConstraints2.ts(59,23): error TS2304: Cannot find name 'Number'.
 subtypesOfTypeParameterWithConstraints2.ts(64,23): error TS2304: Cannot find name 'String'.
@@ -19,7 +22,7 @@ subtypesOfTypeParameterWithConstraints2.ts(151,30): error TS2304: Cannot find na
 subtypesOfTypeParameterWithConstraints2.ts(154,24): error TS2304: Cannot find name 'Number'.
 
 
-==== subtypesOfTypeParameterWithConstraints2.ts (19 errors) ====
+==== subtypesOfTypeParameterWithConstraints2.ts (22 errors) ====
     // checking whether other types are subtypes of type parameters with constraints
     
     function f1<T extends U, U>(x: T, y: U) {
@@ -68,13 +71,19 @@ subtypesOfTypeParameterWithConstraints2.ts(154,24): error TS2304: Cannot find na
     
     interface I1 { foo: number; }
     class C1 { foo: number; }
+               ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
     class C2<T> { foo: T; }
+                  ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
     enum E { A }
     function f() { }
     namespace f {
         export var bar = 1;
     }
     class c { baz: string }
+              ~~~
+!!! error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
     namespace c {
         export var bar = 1;
     }

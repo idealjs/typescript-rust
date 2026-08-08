@@ -1,9 +1,11 @@
 privateNamesAndStaticFields.ts(2,12): error TS1005: ';' expected.
 privateNamesAndStaticFields.ts(2,12): error TS1127: Invalid character.
 privateNamesAndStaticFields.ts(2,13): error TS1005: ';' expected.
+privateNamesAndStaticFields.ts(2,13): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 privateNamesAndStaticFields.ts(3,12): error TS1005: ';' expected.
 privateNamesAndStaticFields.ts(3,12): error TS1127: Invalid character.
 privateNamesAndStaticFields.ts(3,13): error TS1005: ';' expected.
+privateNamesAndStaticFields.ts(3,13): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 privateNamesAndStaticFields.ts(5,11): error TS1003: Identifier expected.
 privateNamesAndStaticFields.ts(5,11): error TS1127: Invalid character.
 privateNamesAndStaticFields.ts(5,12): error TS1005: ';' expected.
@@ -16,13 +18,14 @@ privateNamesAndStaticFields.ts(7,12): error TS1005: ';' expected.
 privateNamesAndStaticFields.ts(12,12): error TS1005: ';' expected.
 privateNamesAndStaticFields.ts(12,12): error TS1127: Invalid character.
 privateNamesAndStaticFields.ts(12,13): error TS1005: ';' expected.
+privateNamesAndStaticFields.ts(12,13): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 privateNamesAndStaticFields.ts(14,9): error TS2349: This expression is not callable.
 privateNamesAndStaticFields.ts(15,11): error TS1003: Identifier expected.
 privateNamesAndStaticFields.ts(15,11): error TS1127: Invalid character.
 privateNamesAndStaticFields.ts(15,12): error TS1005: ';' expected.
 
 
-==== privateNamesAndStaticFields.ts (22 errors) ====
+==== privateNamesAndStaticFields.ts (25 errors) ====
     class A {
         static #foo: number;
                ~
@@ -31,6 +34,8 @@ privateNamesAndStaticFields.ts(15,12): error TS1005: ';' expected.
 !!! error TS1127: Invalid character.
                 ~~~
 !!! error TS1005: ';' expected.
+                ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
         static #bar: number;
                ~
 !!! error TS1005: ';' expected.
@@ -38,6 +43,8 @@ privateNamesAndStaticFields.ts(15,12): error TS1005: ';' expected.
 !!! error TS1127: Invalid character.
                 ~~~
 !!! error TS1005: ';' expected.
+                ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
         constructor () {
             A.#foo = 3;
               ~
@@ -71,6 +78,8 @@ privateNamesAndStaticFields.ts(15,12): error TS1005: ';' expected.
 !!! error TS1127: Invalid character.
                 ~~~
 !!! error TS1005: ';' expected.
+                ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
         constructor () {
             super();
             ~~~~~

@@ -1,3 +1,6 @@
+comparisonOperatorWithNoRelationshipObjectsOnCallSignature.ts(2,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+comparisonOperatorWithNoRelationshipObjectsOnCallSignature.ts(6,12): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+comparisonOperatorWithNoRelationshipObjectsOnCallSignature.ts(10,12): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
 comparisonOperatorWithNoRelationshipObjectsOnCallSignature.ts(35,19): error TS1005: '>' expected.
 comparisonOperatorWithNoRelationshipObjectsOnCallSignature.ts(36,19): error TS1005: '>' expected.
 comparisonOperatorWithNoRelationshipObjectsOnCallSignature.ts(37,19): error TS1005: '>' expected.
@@ -14,17 +17,23 @@ comparisonOperatorWithNoRelationshipObjectsOnCallSignature.ts(48,19): error TS10
 comparisonOperatorWithNoRelationshipObjectsOnCallSignature.ts(49,19): error TS1005: '>' expected.
 
 
-==== comparisonOperatorWithNoRelationshipObjectsOnCallSignature.ts (14 errors) ====
+==== comparisonOperatorWithNoRelationshipObjectsOnCallSignature.ts (17 errors) ====
     class Base {
         public a: string;
+               ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
     }
     
     class Derived extends Base {
         public b: string;
+               ~
+!!! error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
     }
     
     class C {
         public c: string;
+               ~
+!!! error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
     }
     
     declare var a1: { fn(): Base };

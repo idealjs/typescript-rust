@@ -1,7 +1,8 @@
+deleteOperatorWithNumberType.ts(8,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 deleteOperatorWithNumberType.ts(31,34): error TS2339: Property 'foo' does not exist on type 'object'.
 
 
-==== deleteOperatorWithNumberType.ts (1 errors) ====
+==== deleteOperatorWithNumberType.ts (2 errors) ====
     // delete  operator on number type
     declare var NUMBER: number;
     var NUMBER1: number[] = [1, 2];
@@ -10,6 +11,8 @@ deleteOperatorWithNumberType.ts(31,34): error TS2339: Property 'foo' does not ex
     
     class A {
         public a: number;
+               ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         static foo() { return 1; }
     }
     namespace M {

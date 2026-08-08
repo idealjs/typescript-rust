@@ -1,0 +1,44 @@
+foo3.ts(5,2): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+
+
+==== foo1.ts (0 errors) ====
+    var x = 10;
+    var y = 20;
+    export = x;
+    export = y;
+    
+==== foo2.ts (0 errors) ====
+    var x = 10;
+    class y {};
+    export = x;
+    export = y;
+    
+==== foo3.ts (1 errors) ====
+    namespace x {
+    	export var x = 10;
+    }
+    class y {
+    	y: number;
+    	~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+    }
+    export = x;
+    export = y;
+    
+==== foo4.ts (0 errors) ====
+    export = x;
+    function x(){
+    	return 42;
+    }
+    function y(){
+    	return 42;
+    }
+    export = y;
+    
+==== foo5.ts (0 errors) ====
+    var x = 5;
+    var y = "test";
+    var z = {};
+    export = x;
+    export = y;
+    export = z;

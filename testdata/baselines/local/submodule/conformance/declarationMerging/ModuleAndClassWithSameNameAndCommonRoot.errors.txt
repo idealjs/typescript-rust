@@ -1,6 +1,7 @@
 module.ts(3,33): error TS2351: This expression is not constructable.
 simple.ts(2,31): error TS2351: This expression is not constructable.
 simple.ts(2,31): error TS2448: Block-scoped variable 'A' used before its declaration.
+simple.ts(7,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
 
 
 ==== module.ts (1 errors) ====
@@ -25,7 +26,7 @@ simple.ts(2,31): error TS2448: Block-scoped variable 'A' used before its declara
         }
     }
     
-==== simple.ts (2 errors) ====
+==== simple.ts (3 errors) ====
     namespace A {
         export var Instance = new A();
                                   ~
@@ -37,4 +38,6 @@ simple.ts(2,31): error TS2448: Block-scoped variable 'A' used before its declara
     // duplicate identifier
     class A {
         id: string;
+        ~~
+!!! error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
     }

@@ -1,10 +1,13 @@
+destructuringParameterDeclaration5.ts(10,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 destructuringParameterDeclaration5.ts(11,21): error TS2349: This expression is not callable.
+destructuringParameterDeclaration5.ts(15,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+destructuringParameterDeclaration5.ts(20,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 destructuringParameterDeclaration5.ts(22,9): error TS2349: This expression is not callable.
 destructuringParameterDeclaration5.ts(40,4): error TS2345: Argument of type '{ x: "string" }' is not assignable to parameter of type '{ x: object }'.
 destructuringParameterDeclaration5.ts(49,4): error TS2345: Argument of type 'object' is not assignable to parameter of type '{ y: error }'.
 
 
-==== destructuringParameterDeclaration5.ts (4 errors) ====
+==== destructuringParameterDeclaration5.ts (7 errors) ====
     ﻿// @target: es2015
     // Parameter Declaration with generic
     
@@ -15,6 +18,8 @@ destructuringParameterDeclaration5.ts(49,4): error TS2345: Argument of type 'obj
     
     class SubClass extends Class {
         foo: boolean;
+     ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
         constructor() { super(); }
                      ~~~~~
 !!! error TS2349: This expression is not callable.
@@ -22,11 +27,15 @@ destructuringParameterDeclaration5.ts(49,4): error TS2345: Argument of type 'obj
     
     class D implements F {
         foo: boolean
+     ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
         constructor() { }
     }
     
     class SubD extends D {
         bar: number
+     ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
         constructor() {
             super();
          ~~~~~

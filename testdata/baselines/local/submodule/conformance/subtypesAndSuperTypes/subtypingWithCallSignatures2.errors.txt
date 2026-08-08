@@ -1,3 +1,7 @@
+subtypingWithCallSignatures2.ts(3,14): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypingWithCallSignatures2.ts(4,30): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+subtypingWithCallSignatures2.ts(5,34): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+subtypingWithCallSignatures2.ts(6,35): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
 subtypingWithCallSignatures2.ts(41,31): error TS2304: Cannot find name 'Array'.
 subtypingWithCallSignatures2.ts(41,47): error TS2304: Cannot find name 'Array'.
 subtypingWithCallSignatures2.ts(41,67): error TS2304: Cannot find name 'Array'.
@@ -20,13 +24,21 @@ subtypingWithCallSignatures2.ts(98,24): error TS2304: Cannot find name 'T'.
 subtypingWithCallSignatures2.ts(98,31): error TS1005: ',' expected.
 
 
-==== subtypingWithCallSignatures2.ts (20 errors) ====
+==== subtypingWithCallSignatures2.ts (24 errors) ====
     // checking subtype relations for function types as it relates to contextual signature instantiation
     
     class Base { foo: string; }
+                 ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
     class Derived extends Base { bar: string; }
+                                 ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
     class Derived2 extends Derived { baz: string; }
+                                     ~~~
+!!! error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
     class OtherDerived extends Base { bing: string; }
+                                      ~~~~
+!!! error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
     
     declare function foo1(a: (x: number) => number[]): typeof a;
     declare function foo1(a: any): any;

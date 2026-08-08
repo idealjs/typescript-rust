@@ -1,3 +1,4 @@
+file.tsx(5,3): error TS2564: Property 'props' has no initializer and is not definitely assigned in the constructor.
 file.tsx(11,9): error TS2602: JSX element implicitly has type 'any' because the global type 'JSX.Element' does not exist.
 
 
@@ -16,12 +17,14 @@ file.tsx(11,9): error TS2602: JSX element implicitly has type 'any' because the 
     	}
     }
     
-==== file.tsx (1 errors) ====
+==== file.tsx (2 errors) ====
     class MyComponent {  
       render() {
       }
     
       props: {
+      ~~~~~
+!!! error TS2564: Property 'props' has no initializer and is not definitely assigned in the constructor.
     	  ref?: string;
       }
     }

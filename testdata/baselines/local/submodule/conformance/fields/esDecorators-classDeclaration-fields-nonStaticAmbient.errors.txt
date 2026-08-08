@@ -1,9 +1,12 @@
 esDecorators-classDeclaration-fields-nonStaticAmbient.ts(6,21): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-nonStaticAmbient.ts(6,21): error TS2564: Property 'field1' has no initializer and is not definitely assigned in the constructor.
 esDecorators-classDeclaration-fields-nonStaticAmbient.ts(7,21): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-nonStaticAmbient.ts(7,21): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 esDecorators-classDeclaration-fields-nonStaticAmbient.ts(8,21): error TS1005: ';' expected.
+esDecorators-classDeclaration-fields-nonStaticAmbient.ts(8,21): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 
 
-==== esDecorators-classDeclaration-fields-nonStaticAmbient.ts (3 errors) ====
+==== esDecorators-classDeclaration-fields-nonStaticAmbient.ts (6 errors) ====
     declare let dec: any;
     
     const field3 = "field3";
@@ -12,10 +15,16 @@ esDecorators-classDeclaration-fields-nonStaticAmbient.ts(8,21): error TS1005: ';
         @dec(1) declare field1: number;
                         ~~~~~~
 !!! error TS1005: ';' expected.
+                        ~~~~~~
+!!! error TS2564: Property 'field1' has no initializer and is not definitely assigned in the constructor.
         @dec(2) declare ["field2"]: number;
                         ~
 !!! error TS1005: ';' expected.
+                        ~~~~~~~~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
         @dec(3) declare [field3]: number;
                         ~
 !!! error TS1005: ';' expected.
+                        ~~~~~~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
     }

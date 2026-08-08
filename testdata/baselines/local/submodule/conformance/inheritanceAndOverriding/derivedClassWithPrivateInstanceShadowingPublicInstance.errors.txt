@@ -1,5 +1,7 @@
+derivedClassWithPrivateInstanceShadowingPublicInstance.ts(2,12): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 derivedClassWithPrivateInstanceShadowingPublicInstance.ts(7,16): error TS1005: ';' expected.
 derivedClassWithPrivateInstanceShadowingPublicInstance.ts(8,16): error TS1005: ';' expected.
+derivedClassWithPrivateInstanceShadowingPublicInstance.ts(13,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 derivedClassWithPrivateInstanceShadowingPublicInstance.ts(18,17): error TS1005: ';' expected.
 derivedClassWithPrivateInstanceShadowingPublicInstance.ts(19,17): error TS1005: ';' expected.
 derivedClassWithPrivateInstanceShadowingPublicInstance.ts(22,14): error TS2339: Property 'x' does not exist on type 'object'.
@@ -12,9 +14,11 @@ derivedClassWithPrivateInstanceShadowingPublicInstance.ts(31,18): error TS2339: 
 derivedClassWithPrivateInstanceShadowingPublicInstance.ts(32,9): error TS2339: Property 'a' does not exist on type 'object'.
 
 
-==== derivedClassWithPrivateInstanceShadowingPublicInstance.ts (12 errors) ====
+==== derivedClassWithPrivateInstanceShadowingPublicInstance.ts (14 errors) ====
     class Base {
         public x: string;
+               ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         public fn(): string {
             return '';
         }
@@ -30,6 +34,8 @@ derivedClassWithPrivateInstanceShadowingPublicInstance.ts(32,9): error TS2339: P
     // error, not a subtype
     class Derived extends Base {
         private x: string; 
+                ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         private fn(): string {
             return '';
         }

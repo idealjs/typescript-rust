@@ -1,0 +1,35 @@
+derivedTypeDoesNotRequireExtendsClause.ts(2,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+derivedTypeDoesNotRequireExtendsClause.ts(6,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+derivedTypeDoesNotRequireExtendsClause.ts(7,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+derivedTypeDoesNotRequireExtendsClause.ts(11,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+
+
+==== derivedTypeDoesNotRequireExtendsClause.ts (4 errors) ====
+    class Base {
+        foo: string;
+        ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class Derived {
+        foo: string;
+        ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+        bar: number;
+        ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class Derived2 extends Base {
+        bar: string;
+        ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    var b: Base;
+    var d1: Derived;
+    var d2: Derived2;
+    b = d1;
+    b = d2;
+    
+    var r: Base[] = [d1, d2];

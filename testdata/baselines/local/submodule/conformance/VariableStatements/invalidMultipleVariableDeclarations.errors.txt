@@ -1,23 +1,36 @@
+invalidMultipleVariableDeclarations.ts(6,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+invalidMultipleVariableDeclarations.ts(7,5): error TS2564: Property 'valid' has no initializer and is not definitely assigned in the constructor.
+invalidMultipleVariableDeclarations.ts(11,5): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+invalidMultipleVariableDeclarations.ts(15,5): error TS2564: Property 'source' has no initializer and is not definitely assigned in the constructor.
+invalidMultipleVariableDeclarations.ts(24,9): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 invalidMultipleVariableDeclarations.ts(27,54): error TS2339: Property 'toString' does not exist on type 'number'.
 invalidMultipleVariableDeclarations.ts(50,16): error TS2304: Cannot find name 'Array'.
 
 
-==== invalidMultipleVariableDeclarations.ts (2 errors) ====
+==== invalidMultipleVariableDeclarations.ts (7 errors) ====
     interface I {
         id: number;
     }
     
     class C implements I {
         id: number;
+        ~~
+!!! error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
         valid: boolean;
+        ~~~~~
+!!! error TS2564: Property 'valid' has no initializer and is not definitely assigned in the constructor.
     }
     
     class C2 extends C {
         name: string;
+        ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
     }
     
     class D<T>{
         source: T;
+        ~~~~~~
+!!! error TS2564: Property 'source' has no initializer and is not definitely assigned in the constructor.
         recurse: D<T>;
         wrapped: D<D<T>>
     }
@@ -27,6 +40,8 @@ invalidMultipleVariableDeclarations.ts(50,16): error TS2304: Cannot find name 'A
     namespace M {
         export class A {
             name: string;
+            ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
         }
     
         export function F2(x: number): string { return x.toString(); }

@@ -1,18 +1,27 @@
+subtypesOfTypeParameter.ts(4,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameter.ts(8,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameter.ts(17,12): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameter.ts(18,15): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameter.ts(24,11): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameter.ts(47,25): error TS2304: Cannot find name 'Date'.
 subtypesOfTypeParameter.ts(48,29): error TS2304: Cannot find name 'Date'.
 subtypesOfTypeParameter.ts(100,26): error TS2304: Cannot find name 'Object'.
 subtypesOfTypeParameter.ts(101,30): error TS2304: Cannot find name 'Object'.
 
 
-==== subtypesOfTypeParameter.ts (4 errors) ====
+==== subtypesOfTypeParameter.ts (9 errors) ====
     // checking whether other types are subtypes of type parameters
     
     class C3<T> {
         foo: T;
+        ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
     }
     
     class D1<T, U> extends C3<T> {
         foo: U; // error
+        ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
     }
     
     function f1<T, U>(x: T, y: U) {
@@ -22,13 +31,19 @@ subtypesOfTypeParameter.ts(101,30): error TS2304: Cannot find name 'Object'.
     
     interface I1 { foo: number; }
     class C1 { foo: number; }
+               ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
     class C2<T> { foo: T; }
+                  ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
     enum E { A }
     function f() { }
     namespace f {
         export var bar = 1;
     }
     class c { baz: string }
+              ~~~
+!!! error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
     namespace c {
         export var bar = 1;
     }

@@ -1,0 +1,37 @@
+typeParameterAssignability3.ts(3,13): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+typeParameterAssignability3.ts(19,5): error TS2564: Property 't' has no initializer and is not definitely assigned in the constructor.
+typeParameterAssignability3.ts(20,5): error TS2564: Property 'u' has no initializer and is not definitely assigned in the constructor.
+
+
+==== typeParameterAssignability3.ts (3 errors) ====
+    // type parameters are not assignable to one another unless directly or indirectly constrained to one another
+    
+    class Foo { foo: string; }
+                ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+    
+    function foo<T extends Foo, U extends Foo>(t: T, u: U) {
+        var a: T;
+        var b: U;
+        t = a; // ok
+        a = t; // ok
+    
+        b = u; // ok
+        u = b; // ok
+    
+        t = u; // error
+        u = t; // error
+    }
+    
+    class C<T extends Foo, U extends Foo> {
+        t: T;
+        ~
+!!! error TS2564: Property 't' has no initializer and is not definitely assigned in the constructor.
+        u: U;
+        ~
+!!! error TS2564: Property 'u' has no initializer and is not definitely assigned in the constructor.
+        r = () => {
+            this.t = this.u; // error
+            this.u = this.t; // error
+        }
+    }

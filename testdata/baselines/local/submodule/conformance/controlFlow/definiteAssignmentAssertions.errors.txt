@@ -1,3 +1,4 @@
+definiteAssignmentAssertions.ts(5,5): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
 definiteAssignmentAssertions.ts(41,10): error TS1005: ',' expected.
 definiteAssignmentAssertions.ts(41,11): error TS1134: Variable declaration expected.
 definiteAssignmentAssertions.ts(43,10): error TS1005: ',' expected.
@@ -21,12 +22,14 @@ definiteAssignmentAssertions.ts(80,7): error TS1005: ',' expected.
 definiteAssignmentAssertions.ts(80,8): error TS1134: Variable declaration expected.
 
 
-==== definiteAssignmentAssertions.ts (21 errors) ====
+==== definiteAssignmentAssertions.ts (22 errors) ====
     // Suppress strict property initialization check
     
     class C1 {
         a!: number;
         b: string;  // Error
+        ~
+!!! error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
     }
     
     // Suppress definite assignment check in constructor

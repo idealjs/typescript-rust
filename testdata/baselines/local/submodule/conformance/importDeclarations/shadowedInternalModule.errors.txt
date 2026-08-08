@@ -1,3 +1,4 @@
+shadowedInternalModule.ts(25,9): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 shadowedInternalModule.ts(42,10): error TS1005: '{' expected.
 shadowedInternalModule.ts(42,19): error TS1003: Identifier expected.
 shadowedInternalModule.ts(42,22): error TS1003: Identifier expected.
@@ -12,7 +13,7 @@ shadowedInternalModule.ts(58,25): error TS1003: Identifier expected.
 shadowedInternalModule.ts(64,2): error TS1005: '}' expected.
 
 
-==== shadowedInternalModule.ts (12 errors) ====
+==== shadowedInternalModule.ts (13 errors) ====
     // all errors imported modules conflict with local variables
     
     namespace A {
@@ -38,6 +39,8 @@ shadowedInternalModule.ts(64,2): error TS1005: '}' expected.
     
         export class Y {
             name: string;
+            ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
         }
     }
     

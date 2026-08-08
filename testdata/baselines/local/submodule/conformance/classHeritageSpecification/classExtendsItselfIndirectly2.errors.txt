@@ -1,0 +1,43 @@
+classExtendsItselfIndirectly2.ts(1,23): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly2.ts(4,32): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly2.ts(9,34): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly2.ts(13,35): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly2.ts(16,44): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly2.ts(20,46): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+
+
+==== classExtendsItselfIndirectly2.ts (6 errors) ====
+    class C extends N.E { foo: string; } // error
+                          ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+    
+    namespace M {
+        export class D extends C { bar: string; }
+                                   ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+    
+    }
+    
+    namespace N {
+        export class E extends M.D { baz: number; }
+                                     ~~~
+!!! error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    namespace O {
+        class C2<T> extends Q.E2<T> { foo: T; } // error
+                                      ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+    
+        namespace P {
+            export class D2<T> extends C2<T> { bar: T; }
+                                               ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+        }
+    
+        namespace Q {
+            export class E2<T> extends P.D2<T> { baz: T; }
+                                                 ~~~
+!!! error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+        }
+    }

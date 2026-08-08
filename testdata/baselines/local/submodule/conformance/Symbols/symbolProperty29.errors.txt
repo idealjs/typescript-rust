@@ -1,15 +1,21 @@
+symbolProperty29.ts(5,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 symbolProperty29.ts(5,7): error TS1005: ']' expected.
 symbolProperty29.ts(5,15): error TS1005: ';' expected.
+symbolProperty29.ts(5,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 
 
-==== symbolProperty29.ts (2 errors) ====
+==== symbolProperty29.ts (4 errors) ====
     class C1 {
         [Symbol.toStringTag]() {
             return { x: "" };
         }
         [s: symbol]: () => { x: string };
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }

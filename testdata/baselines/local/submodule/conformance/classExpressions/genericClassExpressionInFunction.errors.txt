@@ -1,3 +1,4 @@
+genericClassExpressionInFunction.ts(3,5): error TS2564: Property 'genericVar' has no initializer and is not definitely assigned in the constructor.
 genericClassExpressionInFunction.ts(7,18): error TS2304: Cannot find name 'extends'.
 genericClassExpressionInFunction.ts(7,26): error TS1005: '{' expected.
 genericClassExpressionInFunction.ts(7,31): error TS1005: '(' expected.
@@ -22,9 +23,11 @@ genericClassExpressionInFunction.ts(19,34): error TS1005: ';' expected.
 genericClassExpressionInFunction.ts(19,35): error TS1005: ';' expected.
 genericClassExpressionInFunction.ts(19,39): error TS1005: ';' expected.
 genericClassExpressionInFunction.ts(19,41): error TS1005: ';' expected.
+genericClassExpressionInFunction.ts(20,5): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 genericClassExpressionInFunction.ts(22,1): error TS7027: Unreachable code detected.
 genericClassExpressionInFunction.ts(22,16): error TS2304: Cannot find name 'B3'.
 genericClassExpressionInFunction.ts(23,1): error TS7027: Unreachable code detected.
+genericClassExpressionInFunction.ts(24,5): error TS2564: Property 'nom' has no initializer and is not definitely assigned in the constructor.
 genericClassExpressionInFunction.ts(26,1): error TS7027: Unreachable code detected.
 genericClassExpressionInFunction.ts(26,13): error TS2304: Cannot find name 'C'.
 genericClassExpressionInFunction.ts(27,1): error TS7027: Unreachable code detected.
@@ -37,10 +40,12 @@ genericClassExpressionInFunction.ts(31,1): error TS7027: Unreachable code detect
 genericClassExpressionInFunction.ts(31,19): error TS1005: '}' expected.
 
 
-==== genericClassExpressionInFunction.ts (37 errors) ====
+==== genericClassExpressionInFunction.ts (40 errors) ====
     ﻿// @target: es2015
     class A<T> {
         genericVar: T
+     ~~~~~~~~~~
+!!! error TS2564: Property 'genericVar' has no initializer and is not definitely assigned in the constructor.
     }
     function B1<U>() {
         // class expression can use T
@@ -119,6 +124,8 @@ genericClassExpressionInFunction.ts(31,19): error TS1005: '}' expected.
         name: string;
     ~~~~~~~~~~~~~~~~~
 !!! error TS7027: Unreachable code detected.
+     ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
                      
     }
     ~
@@ -133,6 +140,8 @@ genericClassExpressionInFunction.ts(31,19): error TS1005: '}' expected.
         nom: string;
     ~~~~~~~~~~~~~~~~
 !!! error TS7027: Unreachable code detected.
+     ~~~
+!!! error TS2564: Property 'nom' has no initializer and is not definitely assigned in the constructor.
                     
     }
     ~

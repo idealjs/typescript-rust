@@ -1,18 +1,27 @@
+genericCallWithObjectTypeArgs.ts(2,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+genericCallWithObjectTypeArgs.ts(6,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+genericCallWithObjectTypeArgs.ts(10,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 genericCallWithObjectTypeArgs.ts(14,10): error TS1005: ',' expected.
 genericCallWithObjectTypeArgs.ts(14,11): error TS1134: Variable declaration expected.
 
 
-==== genericCallWithObjectTypeArgs.ts (2 errors) ====
+==== genericCallWithObjectTypeArgs.ts (5 errors) ====
     class C {
         private x: string;
+                ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     }
     
     class D {
         private x: string;
+                ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     }
     
     class X<T> {
         x: T;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     }
     
     function foo<T>(t: X<T>, t2: X<T>) {

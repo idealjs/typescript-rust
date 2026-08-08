@@ -1,3 +1,4 @@
+parserErrorRecovery_IncompleteMemberVariable1.ts(12,16): error TS2564: Property 'con' has no initializer and is not definitely assigned in the constructor.
 parserErrorRecovery_IncompleteMemberVariable1.ts(14,29): error TS1005: ',' expected.
 parserErrorRecovery_IncompleteMemberVariable1.ts(14,47): error TS1005: ',' expected.
 parserErrorRecovery_IncompleteMemberVariable1.ts(17,28): error TS2304: Cannot find name 'Math'.
@@ -8,7 +9,7 @@ parserErrorRecovery_IncompleteMemberVariable1.ts(17,70): error TS2339: Property 
 parserErrorRecovery_IncompleteMemberVariable1.ts(26,17): error TS2554: Expected 4 arguments, but got 2.
 
 
-==== parserErrorRecovery_IncompleteMemberVariable1.ts (8 errors) ====
+==== parserErrorRecovery_IncompleteMemberVariable1.ts (9 errors) ====
     // Interface
     interface IPoint {
         getDist(): number;
@@ -21,6 +22,8 @@ parserErrorRecovery_IncompleteMemberVariable1.ts(26,17): error TS2554: Expected 
         export class Point implements IPoint {
     
             public con: "hello";
+                   ~~~
+!!! error TS2564: Property 'con' has no initializer and is not definitely assigned in the constructor.
             // Constructor
             constructor (public x: number, public y: number) { }
                                 ~

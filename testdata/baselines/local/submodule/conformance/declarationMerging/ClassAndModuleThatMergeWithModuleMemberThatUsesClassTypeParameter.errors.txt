@@ -1,0 +1,84 @@
+ClassAndModuleThatMergeWithModuleMemberThatUsesClassTypeParameter.ts(5,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+ClassAndModuleThatMergeWithModuleMemberThatUsesClassTypeParameter.ts(6,5): error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
+ClassAndModuleThatMergeWithModuleMemberThatUsesClassTypeParameter.ts(15,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+ClassAndModuleThatMergeWithModuleMemberThatUsesClassTypeParameter.ts(16,5): error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
+ClassAndModuleThatMergeWithModuleMemberThatUsesClassTypeParameter.ts(23,9): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+ClassAndModuleThatMergeWithModuleMemberThatUsesClassTypeParameter.ts(24,9): error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
+ClassAndModuleThatMergeWithModuleMemberThatUsesClassTypeParameter.ts(30,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+ClassAndModuleThatMergeWithModuleMemberThatUsesClassTypeParameter.ts(31,5): error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
+ClassAndModuleThatMergeWithModuleMemberThatUsesClassTypeParameter.ts(40,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+ClassAndModuleThatMergeWithModuleMemberThatUsesClassTypeParameter.ts(41,5): error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
+ClassAndModuleThatMergeWithModuleMemberThatUsesClassTypeParameter.ts(46,9): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+
+
+==== ClassAndModuleThatMergeWithModuleMemberThatUsesClassTypeParameter.ts (11 errors) ====
+    // all expected to be errors
+    
+    class clodule1<T>{
+    
+        id: string;
+        ~~
+!!! error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+        value: T;
+        ~~~~~
+!!! error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    namespace clodule1 {
+        function f(x: T) { }
+    }
+    
+    class clodule2<T>{
+    
+        id: string;
+        ~~
+!!! error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+        value: T;
+        ~~~~~
+!!! error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    namespace clodule2 {
+        var x: T;
+    
+        class D<U extends T>{
+            id: string;
+            ~~
+!!! error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+            value: U;
+            ~~~~~
+!!! error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
+        }
+    }
+    
+    class clodule3<T>{
+    
+        id: string;
+        ~~
+!!! error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+        value: T;
+        ~~~~~
+!!! error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    namespace clodule3 {
+        export var y = { id: T };
+    }
+    
+    class clodule4<T>{
+    
+        id: string;
+        ~~
+!!! error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+        value: T;
+        ~~~~~
+!!! error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    namespace clodule4 {
+        class D {
+            name: T;
+            ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+        }
+    }

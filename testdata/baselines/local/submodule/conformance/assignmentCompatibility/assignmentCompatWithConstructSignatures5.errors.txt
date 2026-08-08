@@ -1,3 +1,7 @@
+assignmentCompatWithConstructSignatures5.ts(3,14): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithConstructSignatures5.ts(4,30): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithConstructSignatures5.ts(5,34): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithConstructSignatures5.ts(6,35): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithConstructSignatures5.ts(8,27): error TS2304: Cannot find name 'T'.
 assignmentCompatWithConstructSignatures5.ts(8,33): error TS2304: Cannot find name 'T'.
 assignmentCompatWithConstructSignatures5.ts(9,28): error TS2304: Cannot find name 'T'.
@@ -47,13 +51,21 @@ assignmentCompatWithConstructSignatures5.ts(62,37): error TS2304: Cannot find na
 assignmentCompatWithConstructSignatures5.ts(62,43): error TS2304: Cannot find name 'T'.
 
 
-==== assignmentCompatWithConstructSignatures5.ts (47 errors) ====
+==== assignmentCompatWithConstructSignatures5.ts (51 errors) ====
     // checking assignment compat for function types. All valid
     
     class Base { foo: string; }
+                 ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
     class Derived extends Base { bar: string; }
+                                 ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
     class Derived2 extends Derived { baz: string; }
+                                     ~~~
+!!! error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
     class OtherDerived extends Base { bing: string; }
+                                      ~~~~
+!!! error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
     
     declare var a: new <T>(x: T) => T[];
                               ~

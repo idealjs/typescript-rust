@@ -1,9 +1,15 @@
+assignmentCompatWithNumericIndexer3.ts(8,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithNumericIndexer3.ts(8,7): error TS1005: ']' expected.
 assignmentCompatWithNumericIndexer3.ts(8,15): error TS1005: ';' expected.
+assignmentCompatWithNumericIndexer3.ts(8,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithNumericIndexer3.ts(18,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithNumericIndexer3.ts(18,7): error TS1005: ']' expected.
 assignmentCompatWithNumericIndexer3.ts(18,15): error TS1005: ';' expected.
+assignmentCompatWithNumericIndexer3.ts(18,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithNumericIndexer3.ts(27,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithNumericIndexer3.ts(27,11): error TS1005: ']' expected.
 assignmentCompatWithNumericIndexer3.ts(27,19): error TS1005: ';' expected.
+assignmentCompatWithNumericIndexer3.ts(27,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithNumericIndexer3.ts(31,14): error TS1005: ',' expected.
 assignmentCompatWithNumericIndexer3.ts(31,15): error TS1134: Variable declaration expected.
 assignmentCompatWithNumericIndexer3.ts(31,18): error TS1005: ',' expected.
@@ -15,7 +21,7 @@ assignmentCompatWithNumericIndexer3.ts(32,21): error TS1005: ']' expected.
 assignmentCompatWithNumericIndexer3.ts(32,29): error TS1005: ',' expected.
 
 
-==== assignmentCompatWithNumericIndexer3.ts (15 errors) ====
+==== assignmentCompatWithNumericIndexer3.ts (21 errors) ====
     // Derived type indexer must be subtype of base type indexer
     
     interface Base { foo: string; }
@@ -24,10 +30,14 @@ assignmentCompatWithNumericIndexer3.ts(32,29): error TS1005: ',' expected.
     
     class A {
         [x: number]: Derived;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     declare var a: A;
@@ -38,10 +48,14 @@ assignmentCompatWithNumericIndexer3.ts(32,29): error TS1005: ',' expected.
     
     class B2 extends A {
         [x: number]: Derived2; // ok
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     declare var b2: { [x: number]: Derived2; };
@@ -51,10 +65,14 @@ assignmentCompatWithNumericIndexer3.ts(32,29): error TS1005: ',' expected.
     namespace Generics {
         class A<T extends Derived> {
             [x: number]: T;
+            ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
 !!! error TS1005: ';' expected.
+                      ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         }
     
         function foo<T extends Derived>() {

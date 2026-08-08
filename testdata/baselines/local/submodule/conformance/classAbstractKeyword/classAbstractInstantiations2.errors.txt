@@ -1,8 +1,9 @@
 classAbstractInstantiations2.ts(10,5): error TS2511: Cannot create an instance of an abstract class.
 classAbstractInstantiations2.ts(23,15): error TS2448: Block-scoped variable 'C' used before its declaration.
+classAbstractInstantiations2.ts(42,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 
 
-==== classAbstractInstantiations2.ts (2 errors) ====
+==== classAbstractInstantiations2.ts (3 errors) ====
     class A {
         // ...
     }
@@ -49,6 +50,8 @@ classAbstractInstantiations2.ts(23,15): error TS2448: Block-scoped variable 'C' 
         abstract qux(x : number) : string;
         abstract qux() : number;
         y : number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
         abstract quz(x : number, y : string) : boolean; // error -- declarations must be adjacent
     
         abstract nom(): boolean;

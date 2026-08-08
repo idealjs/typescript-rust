@@ -1,12 +1,14 @@
 privateNameDeclaration.ts(2,5): error TS1003: Identifier expected.
 privateNameDeclaration.ts(2,5): error TS1127: Invalid character.
 privateNameDeclaration.ts(2,6): error TS1005: ';' expected.
+privateNameDeclaration.ts(2,6): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 privateNameDeclaration.ts(3,5): error TS1003: Identifier expected.
 privateNameDeclaration.ts(3,5): error TS1127: Invalid character.
 privateNameDeclaration.ts(3,6): error TS1005: ';' expected.
+privateNameDeclaration.ts(4,5): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
 
 
-==== privateNameDeclaration.ts (6 errors) ====
+==== privateNameDeclaration.ts (8 errors) ====
     class A {
         #foo: string;
         ~
@@ -15,6 +17,8 @@ privateNameDeclaration.ts(3,6): error TS1005: ';' expected.
 !!! error TS1127: Invalid character.
          ~~~
 !!! error TS1005: ';' expected.
+         ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
         #bar = 6;
         ~
 !!! error TS1003: Identifier expected.
@@ -23,6 +27,8 @@ privateNameDeclaration.ts(3,6): error TS1005: ';' expected.
          ~~~
 !!! error TS1005: ';' expected.
         baz: string;
+        ~~~
+!!! error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
         qux = 6;
         quux(): void {
     

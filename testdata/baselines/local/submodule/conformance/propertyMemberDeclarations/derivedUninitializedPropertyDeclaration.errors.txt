@@ -5,16 +5,21 @@ derivedUninitializedPropertyDeclaration.ts(15,13): error TS1005: ';' expected.
 derivedUninitializedPropertyDeclaration.ts(16,13): error TS1005: ';' expected.
 derivedUninitializedPropertyDeclaration.ts(17,13): error TS1005: ';' expected.
 derivedUninitializedPropertyDeclaration.ts(20,13): error TS1005: ';' expected.
+derivedUninitializedPropertyDeclaration.ts(24,5): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
+derivedUninitializedPropertyDeclaration.ts(27,5): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
 derivedUninitializedPropertyDeclaration.ts(30,13): error TS1005: ';' expected.
+derivedUninitializedPropertyDeclaration.ts(30,13): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
 derivedUninitializedPropertyDeclaration.ts(40,13): error TS1005: ';' expected.
+derivedUninitializedPropertyDeclaration.ts(40,13): error TS2564: Property 'p2' has no initializer and is not definitely assigned in the constructor.
 derivedUninitializedPropertyDeclaration.ts(46,9): error TS2349: This expression is not callable.
 derivedUninitializedPropertyDeclaration.ts(53,13): error TS1005: ';' expected.
 derivedUninitializedPropertyDeclaration.ts(76,13): error TS1005: ';' expected.
+derivedUninitializedPropertyDeclaration.ts(76,13): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 derivedUninitializedPropertyDeclaration.ts(78,9): error TS2349: This expression is not callable.
 
 
 !!! error TS2300: Duplicate identifier 'J'.
-==== derivedUninitializedPropertyDeclaration.ts (12 errors) ====
+==== derivedUninitializedPropertyDeclaration.ts (17 errors) ====
     class A {
         property = 'x';
         m() { return 1 }
@@ -51,14 +56,20 @@ derivedUninitializedPropertyDeclaration.ts(78,9): error TS2349: This expression 
     
     class C {
         p: string;
+        ~
+!!! error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
     }
     class D extends C {
         p: 'hi'; // error
+        ~
+!!! error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
     }
     class DD extends C {
         declare p: 'bye'; // ok
                 ~
 !!! error TS1005: ';' expected.
+                ~
+!!! error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
     }
     
     
@@ -71,6 +82,8 @@ derivedUninitializedPropertyDeclaration.ts(78,9): error TS2349: This expression 
         declare p2: 'alpha'
                 ~~
 !!! error TS1005: ';' expected.
+                ~~
+!!! error TS2564: Property 'p2' has no initializer and is not definitely assigned in the constructor.
     }
     
     class G extends E {
@@ -113,6 +126,8 @@ derivedUninitializedPropertyDeclaration.ts(78,9): error TS2349: This expression 
         declare a: number;
                 ~
 !!! error TS1005: ';' expected.
+                ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         constructor(arg: number) {
             super(arg);
             ~~~~~

@@ -1,7 +1,8 @@
+bitwiseNotOperatorWithNumberType.ts(8,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 bitwiseNotOperatorWithNumberType.ts(31,27): error TS2339: Property 'foo' does not exist on type 'object'.
 
 
-==== bitwiseNotOperatorWithNumberType.ts (1 errors) ====
+==== bitwiseNotOperatorWithNumberType.ts (2 errors) ====
     // ~ operator on number type
     var NUMBER: number;
     var NUMBER1: number[] = [1, 2];
@@ -10,6 +11,8 @@ bitwiseNotOperatorWithNumberType.ts(31,27): error TS2339: Property 'foo' does no
     
     class A {
         public a: number;
+               ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         static foo() { return 1; }
     }
     namespace M {

@@ -11,6 +11,7 @@ privateNamesAndMethods.ts(4,13): error TS1005: ';' expected.
 privateNamesAndMethods.ts(7,5): error TS1003: Identifier expected.
 privateNamesAndMethods.ts(7,5): error TS1127: Invalid character.
 privateNamesAndMethods.ts(7,6): error TS1005: ';' expected.
+privateNamesAndMethods.ts(7,6): error TS2564: Property '_quux' has no initializer and is not definitely assigned in the constructor.
 privateNamesAndMethods.ts(8,9): error TS1005: ';' expected.
 privateNamesAndMethods.ts(8,9): error TS1127: Invalid character.
 privateNamesAndMethods.ts(8,10): error TS1005: ';' expected.
@@ -51,7 +52,7 @@ privateNamesAndMethods.ts(27,14): error TS1127: Invalid character.
 privateNamesAndMethods.ts(27,15): error TS1005: ';' expected.
 
 
-==== privateNamesAndMethods.ts (51 errors) ====
+==== privateNamesAndMethods.ts (52 errors) ====
     class A {
         #foo(a: number) {}
         ~
@@ -85,6 +86,8 @@ privateNamesAndMethods.ts(27,15): error TS1005: ';' expected.
 !!! error TS1127: Invalid character.
          ~~~~~
 !!! error TS1005: ';' expected.
+         ~~~~~
+!!! error TS2564: Property '_quux' has no initializer and is not definitely assigned in the constructor.
         get #quux (): number {
             ~
 !!! error TS1005: ';' expected.

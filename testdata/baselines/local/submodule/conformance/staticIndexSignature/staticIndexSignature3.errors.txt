@@ -1,29 +1,39 @@
 staticIndexSignature3.ts(2,23): error TS1005: ']' expected.
 staticIndexSignature3.ts(2,31): error TS1005: ';' expected.
+staticIndexSignature3.ts(2,31): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexSignature3.ts(3,23): error TS1005: ']' expected.
 staticIndexSignature3.ts(3,31): error TS1005: ';' expected.
+staticIndexSignature3.ts(3,31): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexSignature3.ts(7,23): error TS1005: ']' expected.
 staticIndexSignature3.ts(7,31): error TS1005: ';' expected.
+staticIndexSignature3.ts(7,31): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexSignature3.ts(11,23): error TS1005: ']' expected.
 staticIndexSignature3.ts(11,31): error TS1005: ';' expected.
+staticIndexSignature3.ts(11,31): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexSignature3.ts(12,23): error TS1005: ']' expected.
 staticIndexSignature3.ts(12,31): error TS1005: ';' expected.
+staticIndexSignature3.ts(12,31): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexSignature3.ts(16,23): error TS1005: ']' expected.
 staticIndexSignature3.ts(16,31): error TS1005: ';' expected.
+staticIndexSignature3.ts(16,31): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 
 
-==== staticIndexSignature3.ts (12 errors) ====
+==== staticIndexSignature3.ts (18 errors) ====
     class B {
         static readonly [s: string]: number;
                           ~
 !!! error TS1005: ']' expected.
                                   ~
 !!! error TS1005: ';' expected.
+                                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         static readonly [s: number]: 42 | 233
                           ~
 !!! error TS1005: ']' expected.
                                   ~
 !!! error TS1005: ';' expected.
+                                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     class D extends B {
@@ -32,6 +42,8 @@ staticIndexSignature3.ts(16,31): error TS1005: ';' expected.
 !!! error TS1005: ']' expected.
                                   ~
 !!! error TS1005: ';' expected.
+                                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     class ED extends D {
@@ -40,11 +52,15 @@ staticIndexSignature3.ts(16,31): error TS1005: ';' expected.
 !!! error TS1005: ']' expected.
                                   ~
 !!! error TS1005: ';' expected.
+                                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         static readonly [s: number]: 1 
                           ~
 !!! error TS1005: ']' expected.
                                   ~
 !!! error TS1005: ';' expected.
+                                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     class DD extends D {
@@ -53,6 +69,8 @@ staticIndexSignature3.ts(16,31): error TS1005: ';' expected.
 !!! error TS1005: ']' expected.
                                   ~
 !!! error TS1005: ';' expected.
+                                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     const a = B["f"];

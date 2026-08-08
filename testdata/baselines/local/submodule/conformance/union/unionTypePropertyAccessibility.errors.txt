@@ -1,0 +1,62 @@
+unionTypePropertyAccessibility.ts(2,5): error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.
+unionTypePropertyAccessibility.ts(6,12): error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.
+unionTypePropertyAccessibility.ts(10,15): error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.
+unionTypePropertyAccessibility.ts(14,13): error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.
+
+
+==== unionTypePropertyAccessibility.ts (4 errors) ====
+    class Default {
+        member: string;
+        ~~~~~~
+!!! error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class Public {
+        public member: string;
+               ~~~~~~
+!!! error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class Protected {
+        protected member: string;
+                  ~~~~~~
+!!! error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class Private {
+        private member: number;
+                ~~~~~~
+!!! error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    declare var v1: Default;
+    declare var v2: Public;
+    declare var v3: Protected;
+    declare var v4: Private;
+    declare var v5: Default | Public;
+    declare var v6: Default | Protected;
+    declare var v7: Default | Private;
+    declare var v8: Public | Protected;
+    declare var v9: Public | Private;
+    declare var v10: Protected | Private;
+    declare var v11: Default | Public | Protected;
+    declare var v12: Default | Public | Private;
+    declare var v13: Default | Protected | Private;
+    declare var v14: Public | Private | Protected;
+    declare var v15: Default | Public | Private | Protected;
+    
+    v1.member;
+    v2.member;
+    v3.member;
+    v4.member;
+    v5.member;
+    v6.member;
+    v7.member;
+    v8.member;
+    v9.member;
+    v10.member;
+    v11.member;
+    v12.member;
+    v13.member;
+    v14.member;
+    v15.member;

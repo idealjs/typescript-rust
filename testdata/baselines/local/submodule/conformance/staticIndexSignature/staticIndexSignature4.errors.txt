@@ -1,11 +1,15 @@
 staticIndexSignature4.ts(2,23): error TS1005: ']' expected.
 staticIndexSignature4.ts(2,31): error TS1005: ';' expected.
+staticIndexSignature4.ts(2,31): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexSignature4.ts(3,23): error TS1005: ']' expected.
 staticIndexSignature4.ts(3,31): error TS1005: ';' expected.
+staticIndexSignature4.ts(3,31): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexSignature4.ts(7,14): error TS1005: ']' expected.
 staticIndexSignature4.ts(7,22): error TS1005: ';' expected.
+staticIndexSignature4.ts(7,22): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexSignature4.ts(8,14): error TS1005: ']' expected.
 staticIndexSignature4.ts(8,22): error TS1005: ';' expected.
+staticIndexSignature4.ts(8,22): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexSignature4.ts(19,7): error TS2339: Property 'a' does not exist on type 'object'.
 staticIndexSignature4.ts(19,13): error TS2339: Property 'a' does not exist on type 'object'.
 staticIndexSignature4.ts(22,7): error TS2339: Property 'a' does not exist on type 'object'.
@@ -16,18 +20,22 @@ staticIndexSignature4.ts(30,13): error TS2339: Property 'a' does not exist on ty
 staticIndexSignature4.ts(33,13): error TS2339: Property 'a' does not exist on type 'object'.
 
 
-==== staticIndexSignature4.ts (16 errors) ====
+==== staticIndexSignature4.ts (20 errors) ====
     class B {
         static readonly [s: string]: number;
                           ~
 !!! error TS1005: ']' expected.
                                   ~
 !!! error TS1005: ';' expected.
+                                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         static readonly [s: number]: 42 | 233
                           ~
 !!! error TS1005: ']' expected.
                                   ~
 !!! error TS1005: ';' expected.
+                                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     class D {
@@ -36,11 +44,15 @@ staticIndexSignature4.ts(33,13): error TS2339: Property 'a' does not exist on ty
 !!! error TS1005: ']' expected.
                          ~
 !!! error TS1005: ';' expected.
+                         ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         static [s: number]: 42 | 233
                  ~
 !!! error TS1005: ']' expected.
                          ~
 !!! error TS1005: ';' expected.
+                         ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     interface IB {

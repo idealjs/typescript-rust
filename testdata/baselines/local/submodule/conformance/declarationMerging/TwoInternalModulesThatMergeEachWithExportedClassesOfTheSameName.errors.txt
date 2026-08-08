@@ -1,12 +1,22 @@
 error TS2300: Duplicate identifier 'Point'.
+TwoInternalModulesThatMergeEachWithExportedClassesOfTheSameName.ts(3,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+TwoInternalModulesThatMergeEachWithExportedClassesOfTheSameName.ts(4,9): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+TwoInternalModulesThatMergeEachWithExportedClassesOfTheSameName.ts(11,9): error TS2564: Property 'origin' has no initializer and is not definitely assigned in the constructor.
+TwoInternalModulesThatMergeEachWithExportedClassesOfTheSameName.ts(12,9): error TS2564: Property 'angle' has no initializer and is not definitely assigned in the constructor.
+TwoInternalModulesThatMergeEachWithExportedClassesOfTheSameName.ts(18,9): error TS2564: Property 'length' has no initializer and is not definitely assigned in the constructor.
+TwoInternalModulesThatMergeEachWithExportedClassesOfTheSameName.ts(27,17): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 
 
 !!! error TS2300: Duplicate identifier 'Point'.
-==== TwoInternalModulesThatMergeEachWithExportedClassesOfTheSameName.ts (0 errors) ====
+==== TwoInternalModulesThatMergeEachWithExportedClassesOfTheSameName.ts (6 errors) ====
     namespace A {
         export class Point {
             x: number;
+            ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
             y: number;
+            ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
         }
     }
     
@@ -14,13 +24,19 @@ error TS2300: Duplicate identifier 'Point'.
         // expected error
         export class Point {
             origin: number;
+            ~~~~~~
+!!! error TS2564: Property 'origin' has no initializer and is not definitely assigned in the constructor.
             angle: number;
+            ~~~~~
+!!! error TS2564: Property 'angle' has no initializer and is not definitely assigned in the constructor.
         }
     }
     
     namespace X.Y.Z {
         export class Line {
             length: number;
+            ~~~~~~
+!!! error TS2564: Property 'length' has no initializer and is not definitely assigned in the constructor.
         }
     }
     
@@ -30,6 +46,8 @@ error TS2300: Duplicate identifier 'Point'.
                 // expected error
                 export class Line {
                     name: string;
+                    ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
                 }
             }
         }

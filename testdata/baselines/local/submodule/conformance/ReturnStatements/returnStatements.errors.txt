@@ -1,8 +1,10 @@
 returnStatements.ts(7,17): error TS2304: Cannot find name 'Date'.
 returnStatements.ts(7,35): error TS2304: Cannot find name 'Date'.
+returnStatements.ts(13,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+returnStatements.ts(17,5): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 
 
-==== returnStatements.ts (2 errors) ====
+==== returnStatements.ts (4 errors) ====
     // all the following should be valid
     function fn1(): number { return 1; }
     function fn2(): string { return ''; }
@@ -20,10 +22,14 @@ returnStatements.ts(7,35): error TS2304: Cannot find name 'Date'.
     interface I { id: number }
     class C implements I {
         id: number;
+        ~~
+!!! error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
         dispose() {}
     }
     class D extends C {
         name: string;
+        ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
     }
     function fn10(): I { return { id: 12 }; } 
     

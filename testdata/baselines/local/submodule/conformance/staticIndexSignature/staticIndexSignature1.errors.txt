@@ -1,22 +1,28 @@
 staticIndexSignature1.ts(2,14): error TS1005: ']' expected.
 staticIndexSignature1.ts(2,22): error TS1005: ';' expected.
+staticIndexSignature1.ts(2,22): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexSignature1.ts(3,14): error TS1005: ']' expected.
 staticIndexSignature1.ts(3,22): error TS1005: ';' expected.
+staticIndexSignature1.ts(3,22): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexSignature1.ts(7,3): error TS2339: Property 'bar' does not exist on type 'object'.
 
 
-==== staticIndexSignature1.ts (5 errors) ====
+==== staticIndexSignature1.ts (7 errors) ====
     class C {
         static [s: string]: number;
                  ~
 !!! error TS1005: ']' expected.
                          ~
 !!! error TS1005: ';' expected.
+                         ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         static [s: number]: 42
                  ~
 !!! error TS1005: ']' expected.
                          ~
 !!! error TS1005: ';' expected.
+                         ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     C["foo"] = 1

@@ -1,9 +1,11 @@
+instancePropertyInClassType.ts(3,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 instancePropertyInClassType.ts(4,13): error TS1005: ';' expected.
 instancePropertyInClassType.ts(7,13): error TS1005: ';' expected.
 instancePropertyInClassType.ts(9,28): error TS1005: ',' expected.
 instancePropertyInClassType.ts(9,47): error TS1005: ',' expected.
 instancePropertyInClassType.ts(12,13): error TS2554: Expected 4 arguments, but got 2.
 instancePropertyInClassType.ts(17,14): error TS2554: Expected 1 arguments, but got 0.
+instancePropertyInClassType.ts(23,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 instancePropertyInClassType.ts(24,13): error TS1005: ';' expected.
 instancePropertyInClassType.ts(27,13): error TS1005: ';' expected.
 instancePropertyInClassType.ts(29,28): error TS1005: ',' expected.
@@ -12,10 +14,12 @@ instancePropertyInClassType.ts(32,13): error TS2554: Expected 4 arguments, but g
 instancePropertyInClassType.ts(37,14): error TS2554: Expected 1 arguments, but got 0.
 
 
-==== instancePropertyInClassType.ts (12 errors) ====
+==== instancePropertyInClassType.ts (14 errors) ====
     namespace NonGeneric {
         class C {
             x: string;
+            ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
             get y() {
                 ~
 !!! error TS1005: ';' expected.
@@ -48,6 +52,8 @@ instancePropertyInClassType.ts(37,14): error TS2554: Expected 1 arguments, but g
     namespace Generic {
         class C<T,U> {
             x: T;
+            ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
             get y() {
                 ~
 !!! error TS1005: ';' expected.

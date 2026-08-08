@@ -1,9 +1,12 @@
+classWithOnlyPublicMembersEquivalentToInterface2.ts(4,12): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 classWithOnlyPublicMembersEquivalentToInterface2.ts(5,42): error TS2322: Type 'null' is not assignable to type 'number'.
 classWithOnlyPublicMembersEquivalentToInterface2.ts(6,16): error TS1005: ';' expected.
 classWithOnlyPublicMembersEquivalentToInterface2.ts(7,16): error TS1005: ';' expected.
+classWithOnlyPublicMembersEquivalentToInterface2.ts(8,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 classWithOnlyPublicMembersEquivalentToInterface2.ts(8,7): error TS1005: ']' expected.
 classWithOnlyPublicMembersEquivalentToInterface2.ts(8,15): error TS1005: ';' expected.
 classWithOnlyPublicMembersEquivalentToInterface2.ts(8,18): error TS2304: Cannot find name 'Object'.
+classWithOnlyPublicMembersEquivalentToInterface2.ts(9,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 classWithOnlyPublicMembersEquivalentToInterface2.ts(9,7): error TS1005: ']' expected.
 classWithOnlyPublicMembersEquivalentToInterface2.ts(9,15): error TS1005: ';' expected.
 classWithOnlyPublicMembersEquivalentToInterface2.ts(9,18): error TS2304: Cannot find name 'Object'.
@@ -11,11 +14,13 @@ classWithOnlyPublicMembersEquivalentToInterface2.ts(19,18): error TS2304: Cannot
 classWithOnlyPublicMembersEquivalentToInterface2.ts(20,18): error TS2304: Cannot find name 'Object'.
 
 
-==== classWithOnlyPublicMembersEquivalentToInterface2.ts (11 errors) ====
+==== classWithOnlyPublicMembersEquivalentToInterface2.ts (14 errors) ====
     // no errors expected
     
     class C {
         public x: string;
+               ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         public y(a: number): number { return null; }
                                              ~~~~
 !!! error TS2322: Type 'null' is not assignable to type 'number'.
@@ -26,6 +31,8 @@ classWithOnlyPublicMembersEquivalentToInterface2.ts(20,18): error TS2304: Cannot
                    ~
 !!! error TS1005: ';' expected.
         [x: string]: Object;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -33,6 +40,8 @@ classWithOnlyPublicMembersEquivalentToInterface2.ts(20,18): error TS2304: Cannot
                      ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
         [x: number]: Object;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~

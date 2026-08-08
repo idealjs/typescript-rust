@@ -1,3 +1,7 @@
+assignmentCompatWithCallSignatures4.ts(4,18): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithCallSignatures4.ts(5,34): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithCallSignatures4.ts(6,38): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithCallSignatures4.ts(7,39): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithCallSignatures4.ts(16,30): error TS2304: Cannot find name 'Array'.
 assignmentCompatWithCallSignatures4.ts(16,46): error TS2304: Cannot find name 'Array'.
 assignmentCompatWithCallSignatures4.ts(16,66): error TS2304: Cannot find name 'Array'.
@@ -39,14 +43,22 @@ assignmentCompatWithCallSignatures4.ts(94,32): error TS2304: Cannot find name 'T
 assignmentCompatWithCallSignatures4.ts(94,38): error TS2304: Cannot find name 'T'.
 
 
-==== assignmentCompatWithCallSignatures4.ts (39 errors) ====
+==== assignmentCompatWithCallSignatures4.ts (43 errors) ====
     // These are mostly permitted with the current loose rules. All ok unless otherwise noted.
     
     namespace Errors {
         class Base { foo: string; }
+                     ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
         class Derived extends Base { bar: string; }
+                                     ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
         class Derived2 extends Derived { baz: string; }
+                                         ~~~
+!!! error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
         class OtherDerived extends Base { bing: string; }
+                                          ~~~~
+!!! error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
     
         namespace WithNonGenericSignaturesInBaseType {
             // target type with non-generic call signatures

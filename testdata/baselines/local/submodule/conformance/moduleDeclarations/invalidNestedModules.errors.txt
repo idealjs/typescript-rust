@@ -1,12 +1,21 @@
 error TS2300: Duplicate identifier 'Point'.
+invalidNestedModules.ts(3,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+invalidNestedModules.ts(4,9): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+invalidNestedModules.ts(11,13): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+invalidNestedModules.ts(18,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+invalidNestedModules.ts(18,20): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 
 
 !!! error TS2300: Duplicate identifier 'Point'.
-==== invalidNestedModules.ts (0 errors) ====
+==== invalidNestedModules.ts (5 errors) ====
     namespace A.B.C {
         export class Point {
             x: number;
+            ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
             y: number;
+            ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
         }
     }
     
@@ -14,6 +23,8 @@ error TS2300: Duplicate identifier 'Point'.
         export namespace B {
             export class C { // Error
                 name: string;
+                ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
             }
         }
     }
@@ -21,6 +32,10 @@ error TS2300: Duplicate identifier 'Point'.
     namespace M2.X {
         export class Point {
             x: number; y: number;
+            ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+                       ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
         }
     }
     

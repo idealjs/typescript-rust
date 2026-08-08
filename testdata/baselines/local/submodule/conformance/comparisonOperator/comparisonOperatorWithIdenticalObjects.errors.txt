@@ -1,7 +1,14 @@
+comparisonOperatorWithIdenticalObjects.ts(2,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+comparisonOperatorWithIdenticalObjects.ts(3,12): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+comparisonOperatorWithIdenticalObjects.ts(4,12): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
 comparisonOperatorWithIdenticalObjects.ts(6,15): error TS2304: Cannot find name 'Object'.
 comparisonOperatorWithIdenticalObjects.ts(8,16): error TS2322: Type 'null' is not assignable to type 'string'.
+comparisonOperatorWithIdenticalObjects.ts(12,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+comparisonOperatorWithIdenticalObjects.ts(13,12): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+comparisonOperatorWithIdenticalObjects.ts(14,12): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
 comparisonOperatorWithIdenticalObjects.ts(16,15): error TS2304: Cannot find name 'Object'.
 comparisonOperatorWithIdenticalObjects.ts(18,16): error TS2322: Type 'null' is not assignable to type 'string'.
+comparisonOperatorWithIdenticalObjects.ts(23,13): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 comparisonOperatorWithIdenticalObjects.ts(25,16): error TS2322: Type 'null' is not assignable to type 'string'.
 comparisonOperatorWithIdenticalObjects.ts(61,19): error TS1005: '>' expected.
 comparisonOperatorWithIdenticalObjects.ts(62,25): error TS1005: '>' expected.
@@ -19,11 +26,17 @@ comparisonOperatorWithIdenticalObjects.ts(74,19): error TS1005: '>' expected.
 comparisonOperatorWithIdenticalObjects.ts(75,19): error TS1005: '>' expected.
 
 
-==== comparisonOperatorWithIdenticalObjects.ts (19 errors) ====
+==== comparisonOperatorWithIdenticalObjects.ts (26 errors) ====
     class A1 {
         public a: string;
+               ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         public b: number;
+               ~
+!!! error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
         public c: boolean;
+               ~
+!!! error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
         public d: any;
         public e: Object;
                   ~~~~~~
@@ -36,8 +49,14 @@ comparisonOperatorWithIdenticalObjects.ts(75,19): error TS1005: '>' expected.
     }
     class B1 {
         public a: string;
+               ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         public b: number;
+               ~
+!!! error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
         public c: boolean;
+               ~
+!!! error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
         public d: any;
         public e: Object;
                   ~~~~~~
@@ -51,6 +70,8 @@ comparisonOperatorWithIdenticalObjects.ts(75,19): error TS1005: '>' expected.
     
     class Base {
         private a: string;
+                ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         private fn(b: string): string {
             return null;
                    ~~~~

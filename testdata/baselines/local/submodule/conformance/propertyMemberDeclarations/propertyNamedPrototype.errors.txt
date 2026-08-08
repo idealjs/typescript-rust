@@ -1,0 +1,10 @@
+propertyNamedPrototype.ts(2,5): error TS2564: Property 'prototype' has no initializer and is not definitely assigned in the constructor.
+
+
+==== propertyNamedPrototype.ts (1 errors) ====
+    class C {
+        prototype: number; // ok
+        ~~~~~~~~~
+!!! error TS2564: Property 'prototype' has no initializer and is not definitely assigned in the constructor.
+        static prototype: C; // error
+    }

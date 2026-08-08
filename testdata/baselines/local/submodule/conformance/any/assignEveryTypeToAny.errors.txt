@@ -1,3 +1,4 @@
+assignEveryTypeToAny.ts(42,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 assignEveryTypeToAny.ts(50,8): error TS1005: ',' expected.
 assignEveryTypeToAny.ts(50,8): error TS2304: Cannot find name '('.
 assignEveryTypeToAny.ts(50,9): error TS1005: ',' expected.
@@ -12,7 +13,7 @@ assignEveryTypeToAny.ts(50,21): error TS2304: Cannot find name ';'.
 assignEveryTypeToAny.ts(50,25): error TS1128: Declaration or statement expected.
 
 
-==== assignEveryTypeToAny.ts (12 errors) ====
+==== assignEveryTypeToAny.ts (13 errors) ====
     // all of these are valid
     
     var x: any;
@@ -55,6 +56,8 @@ assignEveryTypeToAny.ts(50,25): error TS1128: Declaration or statement expected.
     
     class C {
         bar: string;
+        ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
     }
     
     var h: C;

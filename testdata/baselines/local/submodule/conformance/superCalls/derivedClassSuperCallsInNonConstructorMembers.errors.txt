@@ -1,3 +1,4 @@
+derivedClassSuperCallsInNonConstructorMembers.ts(4,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 derivedClassSuperCallsInNonConstructorMembers.ts(8,8): error TS2304: Cannot find name 'super'.
 derivedClassSuperCallsInNonConstructorMembers.ts(8,13): error TS1005: ';' expected.
 derivedClassSuperCallsInNonConstructorMembers.ts(8,14): error TS1005: ';' expected.
@@ -16,11 +17,13 @@ derivedClassSuperCallsInNonConstructorMembers.ts(28,16): error TS1005: ';' expec
 derivedClassSuperCallsInNonConstructorMembers.ts(29,9): error TS2349: This expression is not callable.
 
 
-==== derivedClassSuperCallsInNonConstructorMembers.ts (16 errors) ====
+==== derivedClassSuperCallsInNonConstructorMembers.ts (17 errors) ====
     // error to use super calls outside a constructor
     
     class Base {
         x: string;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     }
     
     class Derived extends Base {

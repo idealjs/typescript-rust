@@ -11,6 +11,7 @@ privateNameStaticsAndStaticMethods.ts(4,20): error TS1005: ';' expected.
 privateNameStaticsAndStaticMethods.ts(7,12): error TS1005: ';' expected.
 privateNameStaticsAndStaticMethods.ts(7,12): error TS1127: Invalid character.
 privateNameStaticsAndStaticMethods.ts(7,13): error TS1005: ';' expected.
+privateNameStaticsAndStaticMethods.ts(7,13): error TS2564: Property '_quux' has no initializer and is not definitely assigned in the constructor.
 privateNameStaticsAndStaticMethods.ts(8,16): error TS1005: ';' expected.
 privateNameStaticsAndStaticMethods.ts(8,16): error TS1127: Invalid character.
 privateNameStaticsAndStaticMethods.ts(8,17): error TS1005: ';' expected.
@@ -51,7 +52,7 @@ privateNameStaticsAndStaticMethods.ts(27,11): error TS1127: Invalid character.
 privateNameStaticsAndStaticMethods.ts(27,12): error TS1005: ';' expected.
 
 
-==== privateNameStaticsAndStaticMethods.ts (51 errors) ====
+==== privateNameStaticsAndStaticMethods.ts (52 errors) ====
     class A {
         static #foo(a: number) {}
                ~
@@ -85,6 +86,8 @@ privateNameStaticsAndStaticMethods.ts(27,12): error TS1005: ';' expected.
 !!! error TS1127: Invalid character.
                 ~~~~~
 !!! error TS1005: ';' expected.
+                ~~~~~
+!!! error TS2564: Property '_quux' has no initializer and is not definitely assigned in the constructor.
         static get #quux (): number {
                    ~
 !!! error TS1005: ';' expected.

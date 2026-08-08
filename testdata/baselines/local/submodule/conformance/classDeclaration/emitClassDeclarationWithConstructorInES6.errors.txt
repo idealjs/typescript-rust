@@ -1,0 +1,33 @@
+emitClassDeclarationWithConstructorInES6.ts(3,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+emitClassDeclarationWithConstructorInES6.ts(13,5): error TS2564: Property '_bar' has no initializer and is not definitely assigned in the constructor.
+
+
+==== emitClassDeclarationWithConstructorInES6.ts (2 errors) ====
+    ﻿// @strict: false
+    class A {
+        y: number;
+     ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+        constructor(x: number) {
+        }
+        foo(a: any);
+        foo() { }
+    }
+    
+    class B {
+        y: number;
+        x: string = "hello";
+        _bar: string;
+     ~~~~
+!!! error TS2564: Property '_bar' has no initializer and is not definitely assigned in the constructor.
+    
+        constructor(x: number, z = "hello", ...args) {
+            this.y = 10;
+        }
+        baz(...args): string;
+        baz(z: string, v: number): string {
+            return this._bar;
+        } 
+    }
+    
+    

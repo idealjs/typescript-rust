@@ -1,3 +1,6 @@
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(2,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(6,12): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(10,12): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
 comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(26,19): error TS1005: '>' expected.
 comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(27,19): error TS1005: '>' expected.
 comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(28,19): error TS1005: '>' expected.
@@ -16,17 +19,23 @@ comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(103,12): error TS
 comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts(108,12): error TS2367: This comparison appears to be unintentional because the types 'object' and 'object' have no overlap.
 
 
-==== comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts (16 errors) ====
+==== comparisonOperatorWithNoRelationshipObjectsOnIndexSignature.ts (19 errors) ====
     class Base {
         public a: string;
+               ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
     }
     
     class Derived extends Base {
         public b: string;
+               ~
+!!! error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
     }
     
     class C {
         public c: string;
+               ~
+!!! error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
     }
     
     declare var a1: { [a: string]: string };

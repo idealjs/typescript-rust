@@ -1,0 +1,42 @@
+subtypingWithObjectMembersAccessibility.ts(4,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypingWithObjectMembersAccessibility.ts(8,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+
+
+==== subtypingWithObjectMembersAccessibility.ts (2 errors) ====
+    // Derived member is private, base member is not causes errors
+    
+    class Base {
+        foo: string;
+        ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class Derived extends Base {
+        bar: string;
+        ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    class A {
+        public foo: Base;
+    }
+    
+    class B extends A {
+        private foo: Derived; // error
+    }
+    
+    class A2 {
+        public 1: Base; 
+    }
+    
+    class B2 extends A2 {
+        private 1: Derived; // error
+    }
+    
+    class A3 {
+        public '1': Base;
+    }
+    
+    class B3 extends A3 {
+        private '1': Derived; // error
+    }

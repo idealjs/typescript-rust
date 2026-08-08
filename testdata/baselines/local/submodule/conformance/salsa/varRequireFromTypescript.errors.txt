@@ -1,10 +1,13 @@
+ex.d.ts(3,5): error TS2564: Property 'n' has no initializer and is not definitely assigned in the constructor.
 use.js(1,10): error TS2304: Cannot find name 'require'.
 
 
-==== ex.d.ts (0 errors) ====
+==== ex.d.ts (1 errors) ====
     export type Greatest = { day: 1 }
     export class Crunch {
         n: number
+        ~
+!!! error TS2564: Property 'n' has no initializer and is not definitely assigned in the constructor.
         m(): number
         constructor(n: number)
     }

@@ -1,11 +1,14 @@
 error TS2300: Duplicate identifier 'Child'.
 error TS2300: Duplicate identifier 'ChildNoBaseClass'.
+mergedInheritedClassInterface.ts(8,5): error TS2564: Property 'baseNumber' has no initializer and is not definitely assigned in the constructor.
+mergedInheritedClassInterface.ts(16,5): error TS2564: Property 'classNumber' has no initializer and is not definitely assigned in the constructor.
+mergedInheritedClassInterface.ts(24,5): error TS2564: Property 'classString' has no initializer and is not definitely assigned in the constructor.
 
 
 !!! error TS2300: Duplicate identifier 'Child'.
 
 !!! error TS2300: Duplicate identifier 'ChildNoBaseClass'.
-==== mergedInheritedClassInterface.ts (0 errors) ====
+==== mergedInheritedClassInterface.ts (3 errors) ====
     interface BaseInterface {
         required: number;
         optional?: number;
@@ -14,6 +17,8 @@ error TS2300: Duplicate identifier 'ChildNoBaseClass'.
     class BaseClass {
         baseMethod() { }
         baseNumber: number;
+        ~~~~~~~~~~
+!!! error TS2564: Property 'baseNumber' has no initializer and is not definitely assigned in the constructor.
     }
     
     interface Child extends BaseInterface {
@@ -22,6 +27,8 @@ error TS2300: Duplicate identifier 'ChildNoBaseClass'.
     
     class Child extends BaseClass {
         classNumber: number;
+        ~~~~~~~~~~~
+!!! error TS2564: Property 'classNumber' has no initializer and is not definitely assigned in the constructor.
         method() { }
     }
     
@@ -30,6 +37,8 @@ error TS2300: Duplicate identifier 'ChildNoBaseClass'.
     }
     class ChildNoBaseClass {
         classString: string;
+        ~~~~~~~~~~~
+!!! error TS2564: Property 'classString' has no initializer and is not definitely assigned in the constructor.
         method2() { }
     }
     class Grandchild extends ChildNoBaseClass {

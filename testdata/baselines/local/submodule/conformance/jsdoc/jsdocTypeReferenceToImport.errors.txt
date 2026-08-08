@@ -1,3 +1,5 @@
+ex.d.ts(2,5): error TS2564: Property 'start' has no initializer and is not definitely assigned in the constructor.
+ex.d.ts(3,5): error TS2564: Property 'end' has no initializer and is not definitely assigned in the constructor.
 jsdocTypeReferenceToImport.js(1,11): error TS2304: Cannot find name 'require'.
 jsdocTypeReferenceToImport.js(2,11): error TS2304: Cannot find name 'require'.
 
@@ -21,8 +23,12 @@ jsdocTypeReferenceToImport.js(2,11): error TS2304: Cannot find name 'require'.
     d.start
     d.end
     
-==== ex.d.ts (0 errors) ====
+==== ex.d.ts (2 errors) ====
     export class C {
         start: number
+        ~~~~~
+!!! error TS2564: Property 'start' has no initializer and is not definitely assigned in the constructor.
         end: number
+        ~~~
+!!! error TS2564: Property 'end' has no initializer and is not definitely assigned in the constructor.
     }

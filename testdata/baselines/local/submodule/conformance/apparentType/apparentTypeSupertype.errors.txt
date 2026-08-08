@@ -1,12 +1,16 @@
+apparentTypeSupertype.ts(5,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 apparentTypeSupertype.ts(9,25): error TS2304: Cannot find name 'String'.
+apparentTypeSupertype.ts(10,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 
 
-==== apparentTypeSupertype.ts (1 errors) ====
+==== apparentTypeSupertype.ts (3 errors) ====
     // subtype checks use the apparent type of the target type
     // S is a subtype of a type T, and T is a supertype of S, if one of the following is true, where S' denotes the apparent type (section 3.8.1) of S:
     
     class Base {
         x: string;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     }
     
     // is String (S) a subtype of U extends String (T)? Would only be true if we used the apparent type of U (T)
@@ -14,4 +18,6 @@ apparentTypeSupertype.ts(9,25): error TS2304: Cannot find name 'String'.
                             ~~~~~~
 !!! error TS2304: Cannot find name 'String'.
         x: U;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     }

@@ -1,7 +1,8 @@
+deleteOperatorWithBooleanType.ts(7,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 deleteOperatorWithBooleanType.ts(27,33): error TS2339: Property 'foo' does not exist on type 'object'.
 
 
-==== deleteOperatorWithBooleanType.ts (1 errors) ====
+==== deleteOperatorWithBooleanType.ts (2 errors) ====
     // delete  operator on boolean type
     declare var BOOLEAN: boolean;
     
@@ -9,6 +10,8 @@ deleteOperatorWithBooleanType.ts(27,33): error TS2339: Property 'foo' does not e
     
     class A {
         public a: boolean;
+               ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         static foo() { return false; }
     }
     namespace M {

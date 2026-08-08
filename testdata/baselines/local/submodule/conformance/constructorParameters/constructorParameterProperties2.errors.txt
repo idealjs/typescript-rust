@@ -1,11 +1,17 @@
+constructorParameterProperties2.ts(2,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+constructorParameterProperties2.ts(10,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 constructorParameterProperties2.ts(11,24): error TS1005: ',' expected.
+constructorParameterProperties2.ts(18,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 constructorParameterProperties2.ts(19,25): error TS1005: ',' expected.
+constructorParameterProperties2.ts(26,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 constructorParameterProperties2.ts(27,27): error TS1005: ',' expected.
 
 
-==== constructorParameterProperties2.ts (3 errors) ====
+==== constructorParameterProperties2.ts (7 errors) ====
     class C {
         y: number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
         constructor(y: number) { } // ok
     }
     
@@ -14,6 +20,8 @@ constructorParameterProperties2.ts(27,27): error TS1005: ',' expected.
     
     class D {
         y: number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
         constructor(public y: number) { } // error
                            ~
 !!! error TS1005: ',' expected.
@@ -24,6 +32,8 @@ constructorParameterProperties2.ts(27,27): error TS1005: ',' expected.
     
     class E {
         y: number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
         constructor(private y: number) { } // error
                             ~
 !!! error TS1005: ',' expected.
@@ -34,6 +44,8 @@ constructorParameterProperties2.ts(27,27): error TS1005: ',' expected.
     
     class F {
         y: number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
         constructor(protected y: number) { } // error
                               ~
 !!! error TS1005: ',' expected.

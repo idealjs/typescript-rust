@@ -1,20 +1,34 @@
+subtypingWithNumericIndexer5.ts(12,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer5.ts(12,7): error TS1005: ']' expected.
 subtypingWithNumericIndexer5.ts(12,15): error TS1005: ';' expected.
+subtypingWithNumericIndexer5.ts(12,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer5.ts(16,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer5.ts(16,7): error TS1005: ']' expected.
 subtypingWithNumericIndexer5.ts(16,15): error TS1005: ';' expected.
+subtypingWithNumericIndexer5.ts(16,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer5.ts(25,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer5.ts(25,11): error TS1005: ']' expected.
 subtypingWithNumericIndexer5.ts(25,19): error TS1005: ';' expected.
+subtypingWithNumericIndexer5.ts(25,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer5.ts(29,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer5.ts(29,11): error TS1005: ']' expected.
 subtypingWithNumericIndexer5.ts(29,19): error TS1005: ';' expected.
+subtypingWithNumericIndexer5.ts(29,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer5.ts(33,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer5.ts(33,11): error TS1005: ']' expected.
 subtypingWithNumericIndexer5.ts(33,19): error TS1005: ';' expected.
+subtypingWithNumericIndexer5.ts(33,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer5.ts(37,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer5.ts(37,11): error TS1005: ']' expected.
 subtypingWithNumericIndexer5.ts(37,19): error TS1005: ';' expected.
+subtypingWithNumericIndexer5.ts(37,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer5.ts(41,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer5.ts(41,11): error TS1005: ']' expected.
 subtypingWithNumericIndexer5.ts(41,19): error TS1005: ';' expected.
+subtypingWithNumericIndexer5.ts(41,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 
 
-==== subtypingWithNumericIndexer5.ts (14 errors) ====
+==== subtypingWithNumericIndexer5.ts (28 errors) ====
     // Derived type indexer must be subtype of base type indexer
     
     interface Base { foo: string; }
@@ -27,18 +41,26 @@ subtypingWithNumericIndexer5.ts(41,19): error TS1005: ';' expected.
     
     class B implements A {
         [x: string]: Base; // error
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     class B2 implements A {
         [x: string]: Derived2; // ok
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     namespace Generics {
@@ -48,41 +70,61 @@ subtypingWithNumericIndexer5.ts(41,19): error TS1005: ';' expected.
     
         class B implements A<Base> {
             [x: string]: Derived; // ok
+            ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
 !!! error TS1005: ';' expected.
+                      ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         }
     
         class B2 implements A<Derived> {
             [x: string]: Derived2; // ok
+            ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
 !!! error TS1005: ';' expected.
+                      ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         }
     
         class B3<T extends Derived> implements A<T> {
             [x: string]: Base; // error
+            ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
 !!! error TS1005: ';' expected.
+                      ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         }
     
         class B4<T extends Derived> implements A<T> {
             [x: string]: Derived; // error
+            ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
 !!! error TS1005: ';' expected.
+                      ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         }
     
         class B5<T extends Derived2> implements A<T> {
             [x: string]: Derived2; // error
+            ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
 !!! error TS1005: ';' expected.
+                      ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         }
     }

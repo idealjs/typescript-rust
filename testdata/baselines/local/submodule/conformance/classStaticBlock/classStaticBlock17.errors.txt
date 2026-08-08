@@ -1,6 +1,7 @@
 classStaticBlock17.ts(4,3): error TS1003: Identifier expected.
 classStaticBlock17.ts(4,3): error TS1127: Invalid character.
 classStaticBlock17.ts(4,4): error TS1005: ';' expected.
+classStaticBlock17.ts(4,4): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 classStaticBlock17.ts(7,10): error TS1003: Identifier expected.
 classStaticBlock17.ts(7,10): error TS1127: Invalid character.
 classStaticBlock17.ts(7,11): error TS1005: ';' expected.
@@ -32,7 +33,7 @@ classStaticBlock17.ts(17,31): error TS1005: ';' expected.
 classStaticBlock17.ts(19,3): error TS1128: Declaration or statement expected.
 
 
-==== classStaticBlock17.ts (32 errors) ====
+==== classStaticBlock17.ts (33 errors) ====
     let friendA: { getX(o: A): number, setX(o: A, v: number): void };
     
     class A {
@@ -43,6 +44,8 @@ classStaticBlock17.ts(19,3): error TS1128: Declaration or statement expected.
 !!! error TS1127: Invalid character.
        ~
 !!! error TS1005: ';' expected.
+       ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     
       constructor (v: number) {
         this.#x = v;

@@ -1,8 +1,10 @@
 exportCodeGen.ts(6,22): error TS1005: '>' expected.
 exportCodeGen.ts(14,22): error TS1005: '>' expected.
+exportCodeGen.ts(37,22): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+exportCodeGen.ts(49,15): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 
 
-==== exportCodeGen.ts (2 errors) ====
+==== exportCodeGen.ts (4 errors) ====
     // should replace all refs to 'x' in the body,
     // with fully qualified
     namespace A {
@@ -44,6 +46,8 @@ exportCodeGen.ts(14,22): error TS1005: '>' expected.
         export function fn() { }
         export interface I { id: number }
         export class C { name: string }
+                         ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
         export namespace M {
             export var x = 42;
         }
@@ -56,6 +60,8 @@ exportCodeGen.ts(14,22): error TS1005: '>' expected.
         function fn() { }
         interface I { id: number }
         class C { name: string }
+                  ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
         namespace M {
             var x = 42;
         }

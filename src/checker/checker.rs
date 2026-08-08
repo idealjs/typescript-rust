@@ -27,7 +27,9 @@ use crate::diagnostics::messages_generated::{
     EXPECTED_0_ARGUMENTS_BUT_GOT_1, EXPECTED_AT_LEAST_0_ARGUMENTS_BUT_GOT_1,
     FUNCTION_LACKS_ENDING_RETURN_STATEMENT_AND_RETURN_TYPE_DOES_NOT_INCLUDE_UNDEFINED,
     OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
-    PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1, PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
+    PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+    PROPERTY_0_HAS_NO_INITIALIZER_AND_IS_NOT_DEFINITELY_ASSIGNED_IN_THE_CONSTRUCTOR,
+    PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
     PROPERTY_0_IS_PRIVATE_AND_ONLY_ACCESSIBLE_WITHIN_CLASS_1,
     THIS_COMPARISON_APPEARS_TO_BE_UNINTENTIONAL_BECAUSE_THE_TYPES_0_AND_1_HAVE_NO_OVERLAP,
     THIS_EXPRESSION_IS_NOT_CALLABLE, THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE,
@@ -5141,6 +5143,9 @@ impl Checker {
                     for member in data.members.iter() {
                         self.check_class_member(member);
                     }
+                    // TS2564: Check property initialization under
+                    // strictPropertyInitialization.
+                    self.check_property_initialization(node);
                 }
                 self.pop_scope();
                 self.this_type_stack.pop();
@@ -5643,6 +5648,172 @@ impl Checker {
     /// emitted elsewhere, so the `implements` check is skipped by the caller.
     fn get_type_from_heritage_type_reference(&mut self, type_ref: &Arc<Node>) -> Arc<Type> {
         self.get_type_from_type_node(type_ref)
+    }
+
+    /// TS2564: Check property initialization. Under strictNullChecks and
+    /// strictPropertyInitialization, reports an error for non-static instance
+    /// properties that have no initializer, no definite-assignment assertion
+    /// (`!`), and are not definitely assigned in the constructor. Mirrors
+    /// Go's `checkPropertyInitialization`.
+    fn check_property_initialization(&mut self, class_node: &Arc<Node>) {
+        if !self.strict_null_checks || !self.strict_property_initialization {
+            return;
+        }
+        // Skip ambient classes (`declare class`).
+        if class_node.has_syntactic_modifier(ModifierFlags::Ambient) {
+            return;
+        }
+        let members = match &class_node.data {
+            crate::ast::NodeData::ClassDeclaration(d) => &d.members,
+            _ => return,
+        };
+        // Find the constructor (if any) for definite-assignment checking.
+        let constructor = members.iter().find(|m| m.kind == SyntaxKind::Constructor);
+        for member in members.iter() {
+            if member.kind != SyntaxKind::PropertyDeclaration {
+                continue;
+            }
+            // Skip ambient and static members.
+            let mods = self.get_combined_modifier_flags(member);
+            if mods.contains(ModifierFlags::Ambient) || mods.contains(ModifierFlags::Static) {
+                continue;
+            }
+            // Skip abstract properties.
+            if mods.contains(ModifierFlags::Abstract) {
+                continue;
+            }
+            let crate::ast::NodeData::PropertyDeclaration(pd) = &member.data else {
+                continue;
+            };
+            // Skip if it has an initializer or a definite-assignment assertion.
+            if pd.initializer.is_some() || pd.postfix_token.is_some() {
+                continue;
+            }
+            // Skip if there's no name or the name isn't an identifier/private/computed.
+            let name_node = &pd.name;
+            if !matches!(
+                name_node.kind,
+                SyntaxKind::Identifier
+                    | SyntaxKind::PrivateIdentifier
+                    | SyntaxKind::ComputedPropertyName
+            ) {
+                continue;
+            }
+            // Get the property's type from the type annotation. If no type
+            // annotation, the property type is `any` — skip (matches Go's
+            // `TypeFlagsAnyOrUnknown` guard).
+            let Some(type_node) = &pd.type_node else {
+                continue;
+            };
+            let prop_type = self.get_type_from_type_node(type_node);
+            if prop_type
+                .flags
+                .intersects(TYPE_FLAGS_ANY_OR_UNKNOWN | TypeFlags::Undefined)
+                || type_contains_undefined(&prop_type)
+            {
+                continue;
+            }
+            // Check if the property is assigned in the constructor.
+            if let Some(ctor) = constructor {
+                if self.is_property_assigned_in_constructor(name_node, ctor) {
+                    continue;
+                }
+            }
+            // Report TS2564.
+            let name_text = self.node_text(name_node);
+            let file = self.current_file.clone();
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file,
+                name_node.loc,
+                PROPERTY_0_HAS_NO_INITIALIZER_AND_IS_NOT_DEFINITELY_ASSIGNED_IN_THE_CONSTRUCTOR,
+                vec![name_text],
+            ));
+        }
+    }
+
+    /// Get the text representation of a property name node.
+    fn node_text(&self, node: &Arc<Node>) -> String {
+        match &node.data {
+            crate::ast::NodeData::Identifier(d) => d.text.clone(),
+            crate::ast::NodeData::PrivateIdentifier(d) => d.text.clone(),
+            _ => String::new(),
+        }
+    }
+
+    /// Resolve the symbol for a property declaration's name node.
+    fn resolve_property_name(
+        &mut self,
+        member: &Arc<Node>,
+        name: &Arc<Node>,
+    ) -> Option<Arc<Symbol>> {
+        // Try to resolve via the name node directly.
+        self.resolve_identifier(name)
+    }
+
+    /// Check whether a property is definitely assigned in the constructor body.
+    /// Simplified: looks for `this.propName =` or `this[propName] =` patterns.
+    fn is_property_assigned_in_constructor(&self, name_node: &Arc<Node>, ctor: &Arc<Node>) -> bool {
+        let name_text = match &name_node.data {
+            crate::ast::NodeData::Identifier(d) => d.text.as_str(),
+            _ => return false,
+        };
+        // Walk the constructor body looking for `this.name =` assignments.
+        let body = match &ctor.data {
+            crate::ast::NodeData::ConstructorDeclaration(d) => &d.body,
+            _ => return false,
+        };
+        let Some(body) = body else {
+            return false;
+        };
+        Self::node_contains_this_assignment(body, name_text)
+    }
+
+    /// Recursively check if a node tree contains `this.<name> =` or
+    /// `this[<name>] =`.
+    fn node_contains_this_assignment(node: &Arc<Node>, name: &str) -> bool {
+        // Check for BinaryExpression with `=` operator where the left side is
+        // `this.name` or `this[name]`.
+        if let crate::ast::NodeData::BinaryExpression(data) = &node.data {
+            if data.operator_token.kind == SyntaxKind::EqualsToken {
+                if Self::is_this_property_access(&data.left, name) {
+                    return true;
+                }
+            }
+        }
+        // Recursively check child nodes.
+        let mut found = false;
+        crate::ast::node_data_generated::for_each_child(node, |child| {
+            if Self::node_contains_this_assignment(child, name) {
+                found = true;
+                return true; // stop iteration
+            }
+            false
+        });
+        found
+    }
+
+    /// Check if a node is `this.name` or `this["name"]` or `this['name']`.
+    fn is_this_property_access(node: &Arc<Node>, name: &str) -> bool {
+        match &node.data {
+            crate::ast::NodeData::PropertyAccessExpression(data) => {
+                if data.expression.kind == SyntaxKind::ThisKeyword {
+                    if let crate::ast::NodeData::Identifier(id) = &data.name.data {
+                        return id.text == name;
+                    }
+                }
+                false
+            }
+            crate::ast::NodeData::ElementAccessExpression(data) => {
+                if data.expression.kind == SyntaxKind::ThisKeyword {
+                    if let crate::ast::NodeData::StringLiteral(sl) = &data.argument_expression.data
+                    {
+                        return sl.text == name;
+                    }
+                }
+                false
+            }
+            _ => false,
+        }
     }
 
     fn check_class_member(&mut self, node: &Arc<Node>) {

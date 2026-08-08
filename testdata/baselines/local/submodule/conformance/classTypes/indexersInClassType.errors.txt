@@ -1,15 +1,19 @@
+indexersInClassType.ts(2,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 indexersInClassType.ts(2,7): error TS1005: ']' expected.
 indexersInClassType.ts(2,15): error TS1005: ';' expected.
 indexersInClassType.ts(2,18): error TS2304: Cannot find name 'Date'.
+indexersInClassType.ts(3,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 indexersInClassType.ts(3,7): error TS1005: ']' expected.
 indexersInClassType.ts(3,15): error TS1005: ';' expected.
 indexersInClassType.ts(3,18): error TS2304: Cannot find name 'Object'.
 indexersInClassType.ts(4,8): error TS2304: Cannot find name 'Date'.
 
 
-==== indexersInClassType.ts (7 errors) ====
+==== indexersInClassType.ts (9 errors) ====
     class C {
         [x: number]: Date;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -17,6 +21,8 @@ indexersInClassType.ts(4,8): error TS2304: Cannot find name 'Date'.
                      ~~~~
 !!! error TS2304: Cannot find name 'Date'.
         [x: string]: Object;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~

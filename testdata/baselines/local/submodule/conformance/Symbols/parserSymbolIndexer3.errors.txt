@@ -1,12 +1,15 @@
 parserSymbolIndexer3.ts(2,14): error TS1005: ']' expected.
 parserSymbolIndexer3.ts(2,22): error TS1005: ';' expected.
+parserSymbolIndexer3.ts(2,22): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 
 
-==== parserSymbolIndexer3.ts (2 errors) ====
+==== parserSymbolIndexer3.ts (3 errors) ====
     class C {
         static [s: symbol]: string;
                  ~
 !!! error TS1005: ']' expected.
                          ~
 !!! error TS1005: ';' expected.
+                         ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }

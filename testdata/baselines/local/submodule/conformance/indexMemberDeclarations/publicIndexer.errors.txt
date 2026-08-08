@@ -1,34 +1,52 @@
+publicIndexer.ts(4,12): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 publicIndexer.ts(4,14): error TS1005: ']' expected.
 publicIndexer.ts(4,22): error TS1005: ';' expected.
+publicIndexer.ts(4,22): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+publicIndexer.ts(8,12): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 publicIndexer.ts(8,14): error TS1005: ']' expected.
 publicIndexer.ts(8,22): error TS1005: ';' expected.
+publicIndexer.ts(8,22): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+publicIndexer.ts(12,12): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 publicIndexer.ts(12,14): error TS1005: ']' expected.
 publicIndexer.ts(12,22): error TS1005: ';' expected.
+publicIndexer.ts(12,22): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 
 
-==== publicIndexer.ts (6 errors) ====
+==== publicIndexer.ts (12 errors) ====
     // public indexers not allowed
     
     class C {
         public [x: string]: string;
+               ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
                  ~
 !!! error TS1005: ']' expected.
                          ~
 !!! error TS1005: ';' expected.
+                         ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     class D {
         public [x: number]: string;
+               ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
                  ~
 !!! error TS1005: ']' expected.
                          ~
 !!! error TS1005: ';' expected.
+                         ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     class E<T> {
         public [x: string]: T;
+               ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
                  ~
 !!! error TS1005: ']' expected.
                          ~
 !!! error TS1005: ';' expected.
+                         ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }

@@ -1,3 +1,5 @@
+class.d.ts(4,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+class.d.ts(5,9): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 test.ts(2,17): error TS2339: Property 'Origin' does not exist on type 'object'.
 
 
@@ -11,12 +13,16 @@ test.ts(2,17): error TS2339: Property 'Origin' does not exist on type 'object'.
         }
     }
     
-==== class.d.ts (0 errors) ====
+==== class.d.ts (2 errors) ====
     declare namespace A {
         export class Point {
             constructor(x: number, y: number);
             x: number;
+            ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
             y: number;
+            ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
         }
     }
     

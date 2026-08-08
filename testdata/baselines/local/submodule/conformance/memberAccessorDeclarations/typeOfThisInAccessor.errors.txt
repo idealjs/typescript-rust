@@ -1,5 +1,6 @@
 typeOfThisInAccessor.ts(2,9): error TS1005: ';' expected.
 typeOfThisInAccessor.ts(7,16): error TS1005: ';' expected.
+typeOfThisInAccessor.ts(14,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 typeOfThisInAccessor.ts(15,9): error TS1005: ';' expected.
 typeOfThisInAccessor.ts(20,16): error TS1005: ';' expected.
 typeOfThisInAccessor.ts(27,5): error TS2304: Cannot find name 'get'.
@@ -29,7 +30,7 @@ typeOfThisInAccessor.ts(29,17): error TS2304: Cannot find name ';'.
 typeOfThisInAccessor.ts(31,1): error TS1128: Declaration or statement expected.
 
 
-==== typeOfThisInAccessor.ts (29 errors) ====
+==== typeOfThisInAccessor.ts (30 errors) ====
     class C {
         get x() {
             ~
@@ -48,6 +49,8 @@ typeOfThisInAccessor.ts(31,1): error TS1128: Declaration or statement expected.
     
     class D<T> {
         a: T;
+        ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         get x() {
             ~
 !!! error TS1005: ';' expected.

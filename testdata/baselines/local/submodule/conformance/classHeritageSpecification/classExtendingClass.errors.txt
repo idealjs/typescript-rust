@@ -1,16 +1,24 @@
+classExtendingClass.ts(2,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+classExtendingClass.ts(8,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 classExtendingClass.ts(15,12): error TS2339: Property 'other' does not exist on type 'object'.
+classExtendingClass.ts(18,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+classExtendingClass.ts(24,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 classExtendingClass.ts(31,13): error TS2339: Property 'other' does not exist on type 'object'.
 
 
-==== classExtendingClass.ts (2 errors) ====
+==== classExtendingClass.ts (6 errors) ====
     class C {
         foo: string;
+        ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
         thing() { }
         static other() { }
     }
     
     class D extends C {
         bar: string;
+        ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
     }
     
     var d: D;
@@ -23,12 +31,16 @@ classExtendingClass.ts(31,13): error TS2339: Property 'other' does not exist on 
     
     class C2<T> {
         foo: T;
+        ~~~
+!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
         thing(x: T) { }
         static other<T>(x: T) { }
     }
     
     class D2<T> extends C2<T> {
         bar: string;
+        ~~~
+!!! error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
     }
     
     var d2: D2<string>;

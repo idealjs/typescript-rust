@@ -1,9 +1,17 @@
+implementingAnInterfaceExtendingClassWithPrivates.ts(2,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 implementingAnInterfaceExtendingClassWithPrivates.ts(9,1): error TS2420: Class 'Bar' incorrectly implements interface '{ y: number }'.
+implementingAnInterfaceExtendingClassWithPrivates.ts(13,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+implementingAnInterfaceExtendingClassWithPrivates.ts(17,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+implementingAnInterfaceExtendingClassWithPrivates.ts(18,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+implementingAnInterfaceExtendingClassWithPrivates.ts(22,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+implementingAnInterfaceExtendingClassWithPrivates.ts(23,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 
 
-==== implementingAnInterfaceExtendingClassWithPrivates.ts (1 errors) ====
+==== implementingAnInterfaceExtendingClassWithPrivates.ts (7 errors) ====
     class Foo {
         private x: string;
+                ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     }
     
     interface I extends Foo {
@@ -20,14 +28,24 @@ implementingAnInterfaceExtendingClassWithPrivates.ts(9,1): error TS2420: Class '
     
 !!! error TS2420: Class 'Bar' incorrectly implements interface '{ y: number }'.
         y: number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
     }
     
     class Bar3 implements I { // error
         x: string;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         y: number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
     }
     
     class Bar4 implements I { // error
         private x: string;
+                ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         y: number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
     }

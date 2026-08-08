@@ -1,22 +1,38 @@
+subtypingWithStringIndexer.ts(8,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithStringIndexer.ts(8,7): error TS1005: ']' expected.
 subtypingWithStringIndexer.ts(8,15): error TS1005: ';' expected.
+subtypingWithStringIndexer.ts(8,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+subtypingWithStringIndexer.ts(12,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithStringIndexer.ts(12,7): error TS1005: ']' expected.
 subtypingWithStringIndexer.ts(12,15): error TS1005: ';' expected.
+subtypingWithStringIndexer.ts(12,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+subtypingWithStringIndexer.ts(16,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithStringIndexer.ts(16,7): error TS1005: ']' expected.
 subtypingWithStringIndexer.ts(16,15): error TS1005: ';' expected.
+subtypingWithStringIndexer.ts(16,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+subtypingWithStringIndexer.ts(21,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithStringIndexer.ts(21,11): error TS1005: ']' expected.
 subtypingWithStringIndexer.ts(21,19): error TS1005: ';' expected.
+subtypingWithStringIndexer.ts(21,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+subtypingWithStringIndexer.ts(25,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithStringIndexer.ts(25,11): error TS1005: ']' expected.
 subtypingWithStringIndexer.ts(25,19): error TS1005: ';' expected.
+subtypingWithStringIndexer.ts(25,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+subtypingWithStringIndexer.ts(29,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithStringIndexer.ts(29,11): error TS1005: ']' expected.
 subtypingWithStringIndexer.ts(29,19): error TS1005: ';' expected.
+subtypingWithStringIndexer.ts(29,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+subtypingWithStringIndexer.ts(33,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithStringIndexer.ts(33,11): error TS1005: ']' expected.
 subtypingWithStringIndexer.ts(33,19): error TS1005: ';' expected.
+subtypingWithStringIndexer.ts(33,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
+subtypingWithStringIndexer.ts(37,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 subtypingWithStringIndexer.ts(37,11): error TS1005: ']' expected.
 subtypingWithStringIndexer.ts(37,19): error TS1005: ';' expected.
+subtypingWithStringIndexer.ts(37,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 
 
-==== subtypingWithStringIndexer.ts (16 errors) ====
+==== subtypingWithStringIndexer.ts (32 errors) ====
     // Derived type indexer must be subtype of base type indexer
     
     interface Base { foo: string; }
@@ -25,66 +41,98 @@ subtypingWithStringIndexer.ts(37,19): error TS1005: ';' expected.
     
     class A {
         [x: string]: Base;
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     class B extends A {
         [x: string]: Derived; // ok
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     class B2 extends A {
         [x: string]: Derived2; // ok
+        ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
+                  ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     namespace Generics {
         class A<T extends Base> {
             [x: string]: T;
+            ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
 !!! error TS1005: ';' expected.
+                      ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         }
     
         class B extends A<Base> {
             [x: string]: Derived; // ok
+            ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
 !!! error TS1005: ';' expected.
+                      ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         }
     
         class B2 extends A<Base> {
             [x: string]: Derived2; // ok
+            ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
 !!! error TS1005: ';' expected.
+                      ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         }
     
         class B3<T extends Base> extends A<T> {
             [x: string]: Derived; // error
+            ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
 !!! error TS1005: ';' expected.
+                      ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         }
     
         class B4<T extends Base> extends A<T> {
             [x: string]: Derived2; // error
+            ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
 !!! error TS1005: ';' expected.
+                      ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         }
     }

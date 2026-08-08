@@ -1,15 +1,17 @@
 derivedClassOverridesProtectedMembers.ts(7,19): error TS1005: ';' expected.
 derivedClassOverridesProtectedMembers.ts(8,19): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers.ts(9,15): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesProtectedMembers.ts(13,26): error TS1005: ';' expected.
 derivedClassOverridesProtectedMembers.ts(14,26): error TS1005: ';' expected.
 derivedClassOverridesProtectedMembers.ts(23,19): error TS1005: ';' expected.
 derivedClassOverridesProtectedMembers.ts(24,19): error TS1005: ';' expected.
+derivedClassOverridesProtectedMembers.ts(25,15): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesProtectedMembers.ts(29,26): error TS1005: ';' expected.
 derivedClassOverridesProtectedMembers.ts(30,26): error TS1005: ';' expected.
 derivedClassOverridesProtectedMembers.ts(33,32): error TS2349: This expression is not callable.
 
 
-==== derivedClassOverridesProtectedMembers.ts (9 errors) ====
+==== derivedClassOverridesProtectedMembers.ts (11 errors) ====
     var x: { foo: string; }
     var y: { foo: string; bar: string; }
     
@@ -23,6 +25,8 @@ derivedClassOverridesProtectedMembers.ts(33,32): error TS2349: This expression i
                       ~
 !!! error TS1005: ';' expected.
         protected d: (a: typeof x) => void;
+                  ~
+!!! error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
     
         protected static r: typeof x;
         protected static s(a: typeof x) { }
@@ -47,6 +51,8 @@ derivedClassOverridesProtectedMembers.ts(33,32): error TS2349: This expression i
                       ~
 !!! error TS1005: ';' expected.
         protected d: (a: typeof y) => void;
+                  ~
+!!! error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
     
         protected static r: typeof y;
         protected static s(a: typeof y) { }

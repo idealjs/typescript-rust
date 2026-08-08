@@ -1,7 +1,9 @@
 TwoInternalModulesThatMergeEachWithExportedModulesOfTheSameName.ts(13,11): error TS2339: Property 'B' does not exist on type 'A'.
+TwoInternalModulesThatMergeEachWithExportedModulesOfTheSameName.ts(17,9): error TS2564: Property 'length' has no initializer and is not definitely assigned in the constructor.
+TwoInternalModulesThatMergeEachWithExportedModulesOfTheSameName.ts(25,17): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 
 
-==== TwoInternalModulesThatMergeEachWithExportedModulesOfTheSameName.ts (1 errors) ====
+==== TwoInternalModulesThatMergeEachWithExportedModulesOfTheSameName.ts (3 errors) ====
     namespace A.B {
         export var x: number;
     }
@@ -21,6 +23,8 @@ TwoInternalModulesThatMergeEachWithExportedModulesOfTheSameName.ts(13,11): error
     namespace X.Y.Z {
         export class Line {
             length: number;
+            ~~~~~~
+!!! error TS2564: Property 'length' has no initializer and is not definitely assigned in the constructor.
         }
     }
     
@@ -29,6 +33,8 @@ TwoInternalModulesThatMergeEachWithExportedModulesOfTheSameName.ts(13,11): error
             namespace Z {
                 export class Line {
                     name: string;
+                    ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
                 }
             }
         }

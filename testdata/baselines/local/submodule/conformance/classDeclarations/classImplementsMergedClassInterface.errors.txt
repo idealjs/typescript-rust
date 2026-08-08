@@ -1,10 +1,14 @@
 error TS2300: Duplicate identifier 'C1'.
 classImplementsMergedClassInterface.ts(9,1): error TS2420: Class 'C2' incorrectly implements interface '{ y: number }'.
 classImplementsMergedClassInterface.ts(12,1): error TS2420: Class 'C3' incorrectly implements interface '{ y: number }'.
+classImplementsMergedClassInterface.ts(13,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+classImplementsMergedClassInterface.ts(17,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+classImplementsMergedClassInterface.ts(21,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+classImplementsMergedClassInterface.ts(22,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 
 
 !!! error TS2300: Duplicate identifier 'C1'.
-==== classImplementsMergedClassInterface.ts (2 errors) ====
+==== classImplementsMergedClassInterface.ts (6 errors) ====
     declare class C1 {
         x : number;
     }
@@ -25,6 +29,8 @@ classImplementsMergedClassInterface.ts(12,1): error TS2420: Class 'C3' incorrect
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         x : number;
     ~~~~~~~~~~~~~~~
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     }
     ~
     
@@ -33,9 +39,15 @@ classImplementsMergedClassInterface.ts(12,1): error TS2420: Class 'C3' incorrect
     
 !!! error TS2420: Class 'C3' incorrectly implements interface '{ y: number }'.
         y : number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
     }
     
     class C5 implements C1 { // okay
         x : number;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         y : number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
     }

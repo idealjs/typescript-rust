@@ -1,12 +1,14 @@
 error TS6053: File 'node_modules/math2d/index.d.ts' not found.
 a.ts(3,13): error TS2304: Cannot find name 'Math2d'.
 a.ts(4,17): error TS2304: Cannot find name 'Math2d'.
+index.d.ts(12,3): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+index.d.ts(13,3): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 
 
 !!! error TS6053: File '/.src/node_modules/math2d/index.d.ts' not found.
 ==== umd-augmentation-4.ts (0 errors) ====
     
-==== index.d.ts (0 errors) ====
+==== index.d.ts (2 errors) ====
     export as namespace Math2d;
     
     export = M2D;
@@ -19,7 +21,11 @@ a.ts(4,17): error TS2304: Cannot find name 'Math2d'.
     
     	class Vector implements Point {
     		x: number;
+    		~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     		y: number;
+    		~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
     		constructor(x: number, y: number);
     
     		translate(dx: number, dy: number): Vector;

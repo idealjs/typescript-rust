@@ -1,10 +1,13 @@
+typeParametersAvailableInNestedScope.ts(2,5): error TS2564: Property 'data' has no initializer and is not definitely assigned in the constructor.
 typeParametersAvailableInNestedScope.ts(4,10): error TS2304: Cannot find name 'U'.
 typeParametersAvailableInNestedScope.ts(4,16): error TS2304: Cannot find name 'U'.
 
 
-==== typeParametersAvailableInNestedScope.ts (2 errors) ====
+==== typeParametersAvailableInNestedScope.ts (3 errors) ====
     class C<T> {
         data: T;
+        ~~~~
+!!! error TS2564: Property 'data' has no initializer and is not definitely assigned in the constructor.
     
         x = <U>(a: U) => {
              ~

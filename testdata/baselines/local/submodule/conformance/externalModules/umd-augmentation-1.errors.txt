@@ -1,10 +1,12 @@
 b.ts(3,13): error TS2304: Cannot find name 'm'.
 b.ts(4,17): error TS2304: Cannot find name 'm'.
+index.d.ts(9,2): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+index.d.ts(10,2): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 
 
 ==== umd-augmentation-1.ts (0 errors) ====
     
-==== index.d.ts (0 errors) ====
+==== index.d.ts (2 errors) ====
     export as namespace Math2d;
     
     export interface Point {
@@ -14,7 +16,11 @@ b.ts(4,17): error TS2304: Cannot find name 'm'.
     
     export class Vector implements Point {
     	x: number;
+    	~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     	y: number;
+    	~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
     	constructor(x: number, y: number);
     
     	translate(dx: number, dy: number): Vector;

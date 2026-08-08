@@ -1,24 +1,36 @@
+comparisonOperatorWithNoRelationshipObjectsOnProperty.ts(2,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+comparisonOperatorWithNoRelationshipObjectsOnProperty.ts(6,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+comparisonOperatorWithNoRelationshipObjectsOnProperty.ts(10,13): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+comparisonOperatorWithNoRelationshipObjectsOnProperty.ts(14,13): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 comparisonOperatorWithNoRelationshipObjectsOnProperty.ts(23,19): error TS1005: '>' expected.
 comparisonOperatorWithNoRelationshipObjectsOnProperty.ts(24,19): error TS1005: '>' expected.
 comparisonOperatorWithNoRelationshipObjectsOnProperty.ts(26,19): error TS1005: '>' expected.
 comparisonOperatorWithNoRelationshipObjectsOnProperty.ts(27,19): error TS1005: '>' expected.
 
 
-==== comparisonOperatorWithNoRelationshipObjectsOnProperty.ts (4 errors) ====
+==== comparisonOperatorWithNoRelationshipObjectsOnProperty.ts (8 errors) ====
     class A1 {
         public a: number;
+               ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
     }
     
     class B1 {
         public a: string;
+               ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
     }
     
     class A2 {
         private a: string;
+                ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
     }
     
     class B2 {
         private a: string;
+                ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
     }
     
     declare var a1: A1;

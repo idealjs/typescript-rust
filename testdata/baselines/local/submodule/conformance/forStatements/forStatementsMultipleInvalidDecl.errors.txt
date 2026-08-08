@@ -1,3 +1,8 @@
+forStatementsMultipleInvalidDecl.ts(6,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+forStatementsMultipleInvalidDecl.ts(7,5): error TS2564: Property 'valid' has no initializer and is not definitely assigned in the constructor.
+forStatementsMultipleInvalidDecl.ts(11,5): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+forStatementsMultipleInvalidDecl.ts(15,5): error TS2564: Property 'source' has no initializer and is not definitely assigned in the constructor.
+forStatementsMultipleInvalidDecl.ts(24,9): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 forStatementsMultipleInvalidDecl.ts(27,54): error TS2339: Property 'toString' does not exist on type 'number'.
 forStatementsMultipleInvalidDecl.ts(34,18): error TS2351: This expression is not constructable.
 forStatementsMultipleInvalidDecl.ts(35,18): error TS2351: This expression is not constructable.
@@ -10,22 +15,30 @@ forStatementsMultipleInvalidDecl.ts(49,21): error TS2351: This expression is not
 forStatementsMultipleInvalidDecl.ts(50,21): error TS2304: Cannot find name 'Array'.
 
 
-==== forStatementsMultipleInvalidDecl.ts (10 errors) ====
+==== forStatementsMultipleInvalidDecl.ts (15 errors) ====
     interface I {
         id: number;
     }
     
     class C implements I {
         id: number;
+        ~~
+!!! error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
         valid: boolean;
+        ~~~~~
+!!! error TS2564: Property 'valid' has no initializer and is not definitely assigned in the constructor.
     }
     
     class C2 extends C {
         name: string;
+        ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
     }
     
     class D<T>{
         source: T;
+        ~~~~~~
+!!! error TS2564: Property 'source' has no initializer and is not definitely assigned in the constructor.
         recurse: D<T>;
         wrapped: D<D<T>>
     }
@@ -35,6 +48,8 @@ forStatementsMultipleInvalidDecl.ts(50,21): error TS2304: Cannot find name 'Arra
     namespace M {
         export class A {
             name: string;
+            ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
         }
     
         export function F2(x: number): string { return x.toString(); }

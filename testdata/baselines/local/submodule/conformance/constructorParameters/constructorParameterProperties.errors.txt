@@ -1,12 +1,16 @@
+constructorParameterProperties.ts(2,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 constructorParameterProperties.ts(3,25): error TS1005: ',' expected.
 constructorParameterProperties.ts(3,46): error TS1005: ',' expected.
+constructorParameterProperties.ts(12,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 constructorParameterProperties.ts(13,31): error TS1005: ',' expected.
 constructorParameterProperties.ts(13,47): error TS1005: ',' expected.
 
 
-==== constructorParameterProperties.ts (4 errors) ====
+==== constructorParameterProperties.ts (6 errors) ====
     class C {
         y: string;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
         constructor(private x: string, protected z: string) { }
                             ~
 !!! error TS1005: ',' expected.
@@ -21,6 +25,8 @@ constructorParameterProperties.ts(13,47): error TS1005: ',' expected.
     
     class D<T> {
         y: T;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
         constructor(a: T, private x: T, protected z: T) { }
                                   ~
 !!! error TS1005: ',' expected.

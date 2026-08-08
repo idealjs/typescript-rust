@@ -1,0 +1,29 @@
+invalidImportAliasIdentifiers.ts(8,5): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+
+
+==== invalidImportAliasIdentifiers.ts (1 errors) ====
+    // none of these should work, since non are actually modules
+    
+    var V = 12;
+    
+    import v = V;
+    
+    class C {
+        name: string;
+        ~~~~
+!!! error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+    }
+    
+    import c = C;
+    
+    enum E {
+        Red, Blue
+    }
+    
+    import e = E;
+    
+    interface I {
+        id: number;
+    }
+    
+    import i = I;

@@ -1,10 +1,22 @@
+implementingAnInterfaceExtendingClassWithProtecteds.ts(2,15): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 implementingAnInterfaceExtendingClassWithProtecteds.ts(9,1): error TS2420: Class 'Bar' incorrectly implements interface '{ y: number }'.
+implementingAnInterfaceExtendingClassWithProtecteds.ts(13,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+implementingAnInterfaceExtendingClassWithProtecteds.ts(17,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+implementingAnInterfaceExtendingClassWithProtecteds.ts(18,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+implementingAnInterfaceExtendingClassWithProtecteds.ts(22,15): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+implementingAnInterfaceExtendingClassWithProtecteds.ts(23,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 implementingAnInterfaceExtendingClassWithProtecteds.ts(26,1): error TS2420: Class 'Bar5' incorrectly implements interface '{ y: number }'.
+implementingAnInterfaceExtendingClassWithProtecteds.ts(30,15): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+implementingAnInterfaceExtendingClassWithProtecteds.ts(34,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+implementingAnInterfaceExtendingClassWithProtecteds.ts(38,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+implementingAnInterfaceExtendingClassWithProtecteds.ts(39,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 
 
-==== implementingAnInterfaceExtendingClassWithProtecteds.ts (2 errors) ====
+==== implementingAnInterfaceExtendingClassWithProtecteds.ts (12 errors) ====
     class Foo {
         protected x: string;
+                  ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
     }
     
     interface I extends Foo {
@@ -21,16 +33,26 @@ implementingAnInterfaceExtendingClassWithProtecteds.ts(26,1): error TS2420: Clas
     
 !!! error TS2420: Class 'Bar' incorrectly implements interface '{ y: number }'.
         y: number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
     }
     
     class Bar3 implements I { // error
         x: string;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         y: number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
     }
     
     class Bar4 implements I { // error
         protected x: string;
+                  ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         y: number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
     }
     
     class Bar5 extends Foo implements I { // error
@@ -43,13 +65,21 @@ implementingAnInterfaceExtendingClassWithProtecteds.ts(26,1): error TS2420: Clas
     
 !!! error TS2420: Class 'Bar5' incorrectly implements interface '{ y: number }'.
         protected y: number;
+                  ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
     }
     
     class Bar7 extends Foo implements I {
         y: number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
     }
     
     class Bar8 extends Foo implements I {
         x: string;
+        ~
+!!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         y: number;
+        ~
+!!! error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
     }

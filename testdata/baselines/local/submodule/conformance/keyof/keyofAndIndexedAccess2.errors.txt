@@ -2,12 +2,14 @@ keyofAndIndexedAccess2.ts(120,34): error TS2304: Cannot find name 'Array'.
 keyofAndIndexedAccess2.ts(120,62): error TS2304: Cannot find name 'Array'.
 keyofAndIndexedAccess2.ts(124,24): error TS2304: Cannot find name 'Array'.
 keyofAndIndexedAccess2.ts(135,12): error TS2304: Cannot find name 'Array'.
+keyofAndIndexedAccess2.ts(142,3): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 keyofAndIndexedAccess2.ts(142,5): error TS1005: ']' expected.
 keyofAndIndexedAccess2.ts(142,13): error TS1005: ';' expected.
+keyofAndIndexedAccess2.ts(142,13): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 keyofAndIndexedAccess2.ts(144,10): error TS2339: Property 'a' does not exist on type '{ ]: string }'.
 
 
-==== keyofAndIndexedAccess2.ts (7 errors) ====
+==== keyofAndIndexedAccess2.ts (9 errors) ====
     function f1(obj: { a: number, b: 0 | 1, c: string }, k0: 'a', k1: 'a' | 'b', k2: 'a' | 'b' | 'c') {
         obj[k0] = 1;
         obj[k0] = 2;
@@ -158,10 +160,14 @@ keyofAndIndexedAccess2.ts(144,10): error TS2339: Property 'a' does not exist on 
     
     export class c {
       [x: string]: string;
+      ~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
         ~
 !!! error TS1005: ']' expected.
                 ~
 !!! error TS1005: ';' expected.
+                ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
       constructor() {
         this.a = "b";
              ~

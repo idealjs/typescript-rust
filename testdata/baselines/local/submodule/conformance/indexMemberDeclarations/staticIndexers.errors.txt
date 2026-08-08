@@ -1,12 +1,15 @@
 staticIndexers.ts(4,14): error TS1005: ']' expected.
 staticIndexers.ts(4,22): error TS1005: ';' expected.
+staticIndexers.ts(4,22): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexers.ts(8,14): error TS1005: ']' expected.
 staticIndexers.ts(8,22): error TS1005: ';' expected.
+staticIndexers.ts(8,22): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 staticIndexers.ts(12,14): error TS1005: ']' expected.
 staticIndexers.ts(12,22): error TS1005: ';' expected.
+staticIndexers.ts(12,22): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 
 
-==== staticIndexers.ts (6 errors) ====
+==== staticIndexers.ts (9 errors) ====
     // static indexers not allowed
     
     class C {
@@ -15,6 +18,8 @@ staticIndexers.ts(12,22): error TS1005: ';' expected.
 !!! error TS1005: ']' expected.
                          ~
 !!! error TS1005: ';' expected.
+                         ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     class D {
@@ -23,6 +28,8 @@ staticIndexers.ts(12,22): error TS1005: ';' expected.
 !!! error TS1005: ']' expected.
                          ~
 !!! error TS1005: ';' expected.
+                         ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }
     
     class E<T> {
@@ -31,4 +38,6 @@ staticIndexers.ts(12,22): error TS1005: ';' expected.
 !!! error TS1005: ']' expected.
                          ~
 !!! error TS1005: ';' expected.
+                         ~
+!!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
     }

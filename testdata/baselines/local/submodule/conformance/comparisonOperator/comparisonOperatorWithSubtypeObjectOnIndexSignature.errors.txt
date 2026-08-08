@@ -1,3 +1,5 @@
+comparisonOperatorWithSubtypeObjectOnIndexSignature.ts(2,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+comparisonOperatorWithSubtypeObjectOnIndexSignature.ts(6,12): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
 comparisonOperatorWithSubtypeObjectOnIndexSignature.ts(22,19): error TS1005: '>' expected.
 comparisonOperatorWithSubtypeObjectOnIndexSignature.ts(23,19): error TS1005: '>' expected.
 comparisonOperatorWithSubtypeObjectOnIndexSignature.ts(24,19): error TS1005: '>' expected.
@@ -8,13 +10,17 @@ comparisonOperatorWithSubtypeObjectOnIndexSignature.ts(29,19): error TS1005: '>'
 comparisonOperatorWithSubtypeObjectOnIndexSignature.ts(30,19): error TS1005: '>' expected.
 
 
-==== comparisonOperatorWithSubtypeObjectOnIndexSignature.ts (8 errors) ====
+==== comparisonOperatorWithSubtypeObjectOnIndexSignature.ts (10 errors) ====
     class Base {
         public a: string;
+               ~
+!!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
     }
     
     class Derived extends Base {
         public b: string;
+               ~
+!!! error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
     }
     
     var a1: { [a: string]: string };

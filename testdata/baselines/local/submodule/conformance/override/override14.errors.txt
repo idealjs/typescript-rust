@@ -1,7 +1,8 @@
 override14.ts(6,13): error TS1005: ';' expected.
+override14.ts(6,13): error TS2564: Property 'property' has no initializer and is not definitely assigned in the constructor.
 
 
-==== override14.ts (1 errors) ====
+==== override14.ts (2 errors) ====
     class Foo {
         property = 1
     }
@@ -10,4 +11,6 @@ override14.ts(6,13): error TS1005: ';' expected.
         declare property: number
                 ~~~~~~~~
 !!! error TS1005: ';' expected.
+                ~~~~~~~~
+!!! error TS2564: Property 'property' has no initializer and is not definitely assigned in the constructor.
     }

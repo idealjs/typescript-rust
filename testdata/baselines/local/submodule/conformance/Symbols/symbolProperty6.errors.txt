@@ -1,10 +1,13 @@
+symbolProperty6.ts(3,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
 symbolProperty6.ts(5,9): error TS1005: ';' expected.
 
 
-==== symbolProperty6.ts (1 errors) ====
+==== symbolProperty6.ts (2 errors) ====
     class C {
         [Symbol.iterator] = 0;
         [Symbol.unscopables]: number;
+        ~~~~~~~~~~~~~~~~~~~~
+!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
         [Symbol.toPrimitive]() { }
         get [Symbol.toStringTag]() {
             ~
