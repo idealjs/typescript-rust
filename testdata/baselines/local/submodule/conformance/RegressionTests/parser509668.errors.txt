@@ -1,10 +1,13 @@
-parser509668.ts(3,23): error TS1005: ',' expected.
+parser509668.ts(3,23): error TS1003: Identifier expected.
+parser509668.ts(3,26): error TS1005: ',' expected.
 
 
-==== parser509668.ts (1 errors) ====
+==== parser509668.ts (2 errors) ====
     class Foo3 {
       // Doesn't work, but should
       constructor (public ...args: string[]) { }
                           ~~~
+!!! error TS1003: Identifier expected.
+                             ~~~~
 !!! error TS1005: ',' expected.
     }

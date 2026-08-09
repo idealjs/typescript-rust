@@ -1,30 +1,6 @@
-classStaticBlock22.ts(3,10): error TS1005: ';' expected.
-classStaticBlock22.ts(4,9): error TS1005: ';' expected.
-classStaticBlock22.ts(6,3): error TS2304: Cannot find name 'static'.
-classStaticBlock22.ts(6,10): error TS1005: ';' expected.
-classStaticBlock22.ts(9,3): error TS2304: Cannot find name 'static'.
-classStaticBlock22.ts(9,10): error TS1005: ';' expected.
-classStaticBlock22.ts(12,3): error TS2304: Cannot find name 'static'.
-classStaticBlock22.ts(12,10): error TS1005: ';' expected.
-classStaticBlock22.ts(15,3): error TS2304: Cannot find name 'static'.
-classStaticBlock22.ts(15,10): error TS1005: ';' expected.
-classStaticBlock22.ts(18,3): error TS2304: Cannot find name 'static'.
-classStaticBlock22.ts(18,10): error TS1005: ';' expected.
-classStaticBlock22.ts(22,3): error TS2304: Cannot find name 'static'.
-classStaticBlock22.ts(22,10): error TS1005: ';' expected.
-classStaticBlock22.ts(28,3): error TS2304: Cannot find name 'static'.
-classStaticBlock22.ts(28,10): error TS1005: ';' expected.
-classStaticBlock22.ts(31,3): error TS2304: Cannot find name 'static'.
-classStaticBlock22.ts(31,10): error TS1005: ';' expected.
 classStaticBlock22.ts(32,12): error TS2454: Variable 'await' is used before being assigned.
-classStaticBlock22.ts(34,3): error TS2304: Cannot find name 'static'.
-classStaticBlock22.ts(34,10): error TS1005: ';' expected.
 classStaticBlock22.ts(35,27): error TS2454: Variable 'await' is used before being assigned.
-classStaticBlock22.ts(37,3): error TS2304: Cannot find name 'static'.
-classStaticBlock22.ts(37,10): error TS1005: ';' expected.
 classStaticBlock22.ts(38,12): error TS2454: Variable 'await' is used before being assigned.
-classStaticBlock22.ts(41,3): error TS2304: Cannot find name 'static'.
-classStaticBlock22.ts(41,10): error TS1005: ';' expected.
 classStaticBlock22.ts(43,23): error TS2454: Variable 'await' is used before being assigned.
 classStaticBlock22.ts(44,18): error TS2454: Variable 'await' is used before being assigned.
 classStaticBlock22.ts(45,11): error TS1005: ';' expected.
@@ -33,8 +9,6 @@ classStaticBlock22.ts(49,11): error TS1005: ';' expected.
 classStaticBlock22.ts(50,9): error TS2454: Variable 'await' is used before being assigned.
 classStaticBlock22.ts(52,28): error TS2454: Variable 'await' is used before being assigned.
 classStaticBlock22.ts(53,32): error TS2454: Variable 'await' is used before being assigned.
-classStaticBlock22.ts(56,3): error TS2304: Cannot find name 'static'.
-classStaticBlock22.ts(56,10): error TS1005: ';' expected.
 classStaticBlock22.ts(58,25): error TS2454: Variable 'await' is used before being assigned.
 classStaticBlock22.ts(59,18): error TS1005: ';' expected.
 classStaticBlock22.ts(60,9): error TS2454: Variable 'await' is used before being assigned.
@@ -42,105 +16,56 @@ classStaticBlock22.ts(63,18): error TS1005: ';' expected.
 classStaticBlock22.ts(64,9): error TS2454: Variable 'await' is used before being assigned.
 classStaticBlock22.ts(66,35): error TS2454: Variable 'await' is used before being assigned.
 classStaticBlock22.ts(67,39): error TS2454: Variable 'await' is used before being assigned.
-classStaticBlock22.ts(70,1): error TS1128: Declaration or statement expected.
 
 
-==== classStaticBlock22.ts (45 errors) ====
+==== classStaticBlock22.ts (18 errors) ====
     let await: "any";
     class C {
       static {
-             ~
-!!! error TS1005: ';' expected.
         let await: any; // illegal, cannot declare a new binding for await
-            ~~~~~
-!!! error TS1005: ';' expected.
       }
       static {
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
         let { await } = {} as any; // illegal, cannot declare a new binding for await
       }
       static {
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
         let { await: other } = {} as any; // legal
       }
       static {
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
         let await; // illegal, cannot declare a new binding for await
       }
       static {
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
         function await() { }; // illegal
       }
       static {
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
         class await { }; // illegal
       }
     
       static {
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
         class D {
           await = 1; // legal
           x = await; // legal (initializers have an implicit function boundary)
         };
       }
       static {
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
         (function await() { }); // legal, 'await' in function expression name not bound inside of static block
       }
       static {
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
         (class await { }); // legal, 'await' in class expression name not bound inside of static block
                ~~~~~
 !!! error TS2454: Variable 'await' is used before being assigned.
       }
       static {
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
         (function () { return await; }); // legal, 'await' is inside of a new function boundary
                               ~~~~~
 !!! error TS2454: Variable 'await' is used before being assigned.
       }
       static {
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
         (() => await); // legal, 'await' is inside of a new function boundary
                ~~~~~
 !!! error TS2454: Variable 'await' is used before being assigned.
       }
     
       static {
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
         class E {
           constructor() { await; }
                           ~~~~~
@@ -172,10 +97,6 @@ classStaticBlock22.ts(70,1): error TS1128: Declaration or statement expected.
         }
       }
       static {
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
         class S {
           static method() { await; }
                             ~~~~~
@@ -204,5 +125,3 @@ classStaticBlock22.ts(70,1): error TS1128: Declaration or statement expected.
         }
       }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.

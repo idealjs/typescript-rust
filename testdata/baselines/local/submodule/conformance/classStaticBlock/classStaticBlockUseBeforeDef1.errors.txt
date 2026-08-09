@@ -1,50 +1,26 @@
-classStaticBlockUseBeforeDef1.ts(3,12): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef1.ts(4,13): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef1.ts(4,14): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef1.ts(6,5): error TS2304: Cannot find name 'static'.
-classStaticBlockUseBeforeDef1.ts(6,12): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef1.ts(6,12): error TS2304: Cannot find name 'y'.
-classStaticBlockUseBeforeDef1.ts(7,5): error TS2304: Cannot find name 'static'.
-classStaticBlockUseBeforeDef1.ts(7,12): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef1.ts(7,12): error TS2304: Cannot find name 'z'.
-classStaticBlockUseBeforeDef1.ts(8,5): error TS2304: Cannot find name 'static'.
-classStaticBlockUseBeforeDef1.ts(8,12): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef1.ts(11,1): error TS1128: Declaration or statement expected.
+classStaticBlockUseBeforeDef1.ts(4,14): error TS2339: Property 'x' does not exist on type 'object'.
+classStaticBlockUseBeforeDef1.ts(6,21): error TS2339: Property 'x' does not exist on type 'object'.
+classStaticBlockUseBeforeDef1.ts(9,14): error TS2339: Property 'z' does not exist on type 'object'.
+classStaticBlockUseBeforeDef1.ts(9,23): error TS2339: Property 'y' does not exist on type 'object'.
 
 
-==== classStaticBlockUseBeforeDef1.ts (12 errors) ====
+==== classStaticBlockUseBeforeDef1.ts (4 errors) ====
     class C {
         static x;
         static {
-               ~
-!!! error TS1005: ';' expected.
             this.x = 1;
-                ~
-!!! error TS1005: ';' expected.
                  ~
-!!! error TS1005: ';' expected.
+!!! error TS2339: Property 'x' does not exist on type 'object'.
         }
         static y = this.x;
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS2304: Cannot find name 'y'.
+                        ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
         static z;
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS2304: Cannot find name 'z'.
         static {
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~
-!!! error TS1005: ';' expected.
             this.z = this.y;
+                 ~
+!!! error TS2339: Property 'z' does not exist on type 'object'.
+                          ~
+!!! error TS2339: Property 'y' does not exist on type 'object'.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.

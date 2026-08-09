@@ -1,10 +1,9 @@
-superCalls.ts(12,24): error TS1005: ',' expected.
 superCalls.ts(13,9): error TS2349: This expression is not callable.
 superCalls.ts(15,17): error TS2349: This expression is not callable.
 superCalls.ts(27,9): error TS2349: This expression is not callable.
 
 
-==== superCalls.ts (4 errors) ====
+==== superCalls.ts (3 errors) ====
     class Base {
         x = 43;
         constructor(n: string) {
@@ -17,8 +16,6 @@ superCalls.ts(27,9): error TS2349: This expression is not callable.
     class Derived extends Base {
         //super call in class constructor of derived type
         constructor(public q: number) {
-                           ~
-!!! error TS1005: ',' expected.
             super('');
             ~~~~~
 !!! error TS2349: This expression is not callable.

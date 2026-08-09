@@ -16,9 +16,7 @@ generic.js(17,27): error TS2554: Expected 0 arguments, but got 1.
 generic.js(18,9): error TS2339: Property 'flavour' does not exist on type '{ log: () => any }'.
 generic.js(20,32): error TS2554: Expected 0 arguments, but got 1.
 second.ts(10,9): error TS2349: This expression is not callable.
-second.ts(15,24): error TS1005: ',' expected.
 second.ts(17,9): error TS2349: This expression is not callable.
-second.ts(24,9): error TS2554: Expected 2 arguments, but got 1.
 second.ts(25,3): error TS2339: Property 'drunkOO' does not exist on type 'object'.
 second.ts(26,3): error TS2339: Property 'numberOxen' does not exist on type 'object'.
 
@@ -98,7 +96,7 @@ second.ts(26,3): error TS2339: Property 'numberOxen' does not exist on type 'obj
     
     }
     
-==== second.ts (6 errors) ====
+==== second.ts (4 errors) ====
     /**
      * @constructor
      */
@@ -116,8 +114,6 @@ second.ts(26,3): error TS2339: Property 'numberOxen' does not exist on type 'obj
     // ok
     class Conestoga extends Wagon {
         constructor(public drunkOO: true) {
-                           ~~~~~~~
-!!! error TS1005: ',' expected.
             // error: wrong type
             super('nope');
             ~~~~~
@@ -129,8 +125,6 @@ second.ts(26,3): error TS2339: Property 'numberOxen' does not exist on type 'obj
         }
     }
     var c = new Conestoga(true);
-            ~~~~~~~~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
     c.drunkOO
       ~~~~~~~
 !!! error TS2339: Property 'drunkOO' does not exist on type 'object'.

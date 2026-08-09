@@ -1,7 +1,6 @@
 error TS2300: Duplicate identifier '.'.
 error TS2300: Duplicate identifier '.'.
 error TS6053: File 'typescript.ts' not found.
-parserRealSource7.ts(9,29): error TS1005: ',' expected.
 parserRealSource7.ts(12,38): error TS2304: Cannot find name 'ASTList'.
 parserRealSource7.ts(12,62): error TS2304: Cannot find name 'TypeLink'.
 parserRealSource7.ts(16,37): error TS2304: Cannot find name 'TypeLink'.
@@ -324,7 +323,7 @@ parserRealSource7.ts(828,13): error TS2304: Cannot find name 'popTypeCollectionS
 !!! error TS2300: Duplicate identifier '.'.
 
 !!! error TS6053: File '/.src/typescript.ts' not found.
-==== parserRealSource7.ts (316 errors) ====
+==== parserRealSource7.ts (315 errors) ====
     // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
     // See LICENSE.txt in the project root for complete license information.
     
@@ -334,8 +333,6 @@ parserRealSource7.ts(828,13): error TS2304: Cannot find name 'popTypeCollectionS
         export class Continuation {
             public exceptionBlock = -1;
             constructor (public normalBlock: number) { }
-                                ~~~~~~~~~~~
-!!! error TS1005: ',' expected.
         }
     
         function getBaseTypeLinks(bases: ASTList, baseTypeLinks: TypeLink[]) {

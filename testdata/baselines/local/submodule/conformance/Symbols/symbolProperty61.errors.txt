@@ -1,9 +1,8 @@
-symbolProperty61.ts(10,25): error TS1005: ',' expected.
 symbolProperty61.ts(13,19): error TS2339: Property '_val' does not exist on type '{ subscribe: (next: (val: T) => void) => any }'.
-symbolProperty61.ts(29,6): error TS2554: Expected 2 arguments, but got 1.
+symbolProperty61.ts(29,23): error TS2345: Argument of type '42' is not assignable to parameter of type 'T'.
 
 
-==== symbolProperty61.ts (3 errors) ====
+==== symbolProperty61.ts (2 errors) ====
     declare global {
       interface SymbolConstructor {
         readonly obs: symbol
@@ -14,8 +13,6 @@ symbolProperty61.ts(29,6): error TS2554: Expected 2 arguments, but got 1.
     
     export class MyObservable<T> {
         constructor(private _val: T) {}
-                            ~~~~
-!!! error TS1005: ',' expected.
     
         subscribe(next: (val: T) => void) {
             next(this._val)
@@ -37,5 +34,5 @@ symbolProperty61.ts(29,6): error TS2554: Expected 2 arguments, but got 1.
     }
     
     from(new MyObservable(42))
-         ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
+                          ~~
+!!! error TS2345: Argument of type '42' is not assignable to parameter of type 'T'.

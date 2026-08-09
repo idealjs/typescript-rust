@@ -1,13 +1,11 @@
 classWithStaticMembers.ts(3,16): error TS1005: ';' expected.
 classWithStaticMembers.ts(4,16): error TS1005: ';' expected.
-classWithStaticMembers.ts(5,24): error TS1005: ',' expected.
-classWithStaticMembers.ts(5,43): error TS1005: ',' expected.
 classWithStaticMembers.ts(9,11): error TS2339: Property 'fn' does not exist on type 'object'.
 classWithStaticMembers.ts(14,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 classWithStaticMembers.ts(17,11): error TS2339: Property 'fn' does not exist on type 'object'.
 
 
-==== classWithStaticMembers.ts (7 errors) ====
+==== classWithStaticMembers.ts (5 errors) ====
     class C {
         static fn() { return this; }
         static get x() { return 1; }
@@ -17,10 +15,6 @@ classWithStaticMembers.ts(17,11): error TS2339: Property 'fn' does not exist on 
                    ~
 !!! error TS1005: ';' expected.
         constructor(public a: number, private b: number) { }
-                           ~
-!!! error TS1005: ',' expected.
-                                              ~
-!!! error TS1005: ',' expected.
         static foo: string; 
     }
     

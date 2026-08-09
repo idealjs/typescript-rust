@@ -1,7 +1,0 @@
-parserArrowFunctionExpression1.ts(1,17): error TS1005: ',' expected.
-
-
-==== parserArrowFunctionExpression1.ts (1 errors) ====
-    var v = (public x: string) => { };
-                    ~
-!!! error TS1005: ',' expected.

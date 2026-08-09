@@ -1,18 +1,14 @@
 wrappedAndRecursiveConstraints.ts(3,19): error TS2304: Cannot find name 'Date'.
-wrappedAndRecursiveConstraints.ts(4,24): error TS1005: ',' expected.
 wrappedAndRecursiveConstraints.ts(5,25): error TS2304: Cannot find name 'U'.
-wrappedAndRecursiveConstraints.ts(15,9): error TS2554: Expected 2 arguments, but got 1.
 
 
-==== wrappedAndRecursiveConstraints.ts (4 errors) ====
+==== wrappedAndRecursiveConstraints.ts (2 errors) ====
     // no errors expected
     
     class C<T extends Date> {
                       ~~~~
 !!! error TS2304: Cannot find name 'Date'.
         constructor(public data: T) { }
-                           ~~~~
-!!! error TS1005: ',' expected.
         foo<U extends T>(x: U) {
                             ~
 !!! error TS2304: Cannot find name 'U'.
@@ -26,6 +22,4 @@ wrappedAndRecursiveConstraints.ts(15,9): error TS2554: Expected 2 arguments, but
     
     var y: Foo = {} as Foo;
     var c = new C(y);
-            ~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
     var r = c.foo(y);

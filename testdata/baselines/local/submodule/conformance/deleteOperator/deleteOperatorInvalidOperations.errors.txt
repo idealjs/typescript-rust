@@ -1,9 +1,8 @@
 deleteOperatorInvalidOperations.ts(5,20): error TS1005: ',' expected.
 deleteOperatorInvalidOperations.ts(8,23): error TS1012: Unexpected token.
-deleteOperatorInvalidOperations.ts(12,24): error TS1005: ',' expected.
 
 
-==== deleteOperatorInvalidOperations.ts (3 errors) ====
+==== deleteOperatorInvalidOperations.ts (2 errors) ====
     // Unary operator delete
     var ANY;
     
@@ -20,8 +19,6 @@ deleteOperatorInvalidOperations.ts(12,24): error TS1005: ',' expected.
     // delete global variable s
     class testADelx {
         constructor(public s: () => {}) {
-                           ~
-!!! error TS1005: ',' expected.
             delete s;      //expect error
         }
     }

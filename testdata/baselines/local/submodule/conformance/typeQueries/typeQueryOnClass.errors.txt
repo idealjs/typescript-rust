@@ -1,20 +1,16 @@
-typeQueryOnClass.ts(4,24): error TS1005: ',' expected.
 typeQueryOnClass.ts(15,16): error TS1005: ';' expected.
 typeQueryOnClass.ts(18,16): error TS1005: ';' expected.
 typeQueryOnClass.ts(21,16): error TS1005: ';' expected.
 typeQueryOnClass.ts(30,9): error TS1005: ';' expected.
 typeQueryOnClass.ts(33,9): error TS1005: ';' expected.
 typeQueryOnClass.ts(36,9): error TS1005: ';' expected.
-typeQueryOnClass.ts(49,24): error TS1005: ',' expected.
 
 
-==== typeQueryOnClass.ts (8 errors) ====
+==== typeQueryOnClass.ts (6 errors) ====
     class C<T> {
         constructor(x: number);
         constructor(x: string);
         constructor(public x) { }
-                           ~
-!!! error TS1005: ',' expected.
     
         static foo(x: number);
         static foo(x: {});
@@ -72,8 +68,6 @@ typeQueryOnClass.ts(49,24): error TS1005: ',' expected.
     
     class D<T> {
         constructor(public y?) { }
-                           ~
-!!! error TS1005: ',' expected.
         x: T;
         foo() { }
     }

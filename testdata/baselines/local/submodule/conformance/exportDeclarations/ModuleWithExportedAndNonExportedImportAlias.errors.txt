@@ -1,5 +1,3 @@
-ModuleWithExportedAndNonExportedImportAlias.ts(14,28): error TS1005: ',' expected.
-ModuleWithExportedAndNonExportedImportAlias.ts(14,51): error TS1005: ',' expected.
 ModuleWithExportedAndNonExportedImportAlias.ts(19,12): error TS1005: '{' expected.
 ModuleWithExportedAndNonExportedImportAlias.ts(19,26): error TS1003: Identifier expected.
 ModuleWithExportedAndNonExportedImportAlias.ts(19,29): error TS1003: Identifier expected.
@@ -20,7 +18,7 @@ ModuleWithExportedAndNonExportedImportAlias.ts(31,18): error TS2339: Property 'O
 ModuleWithExportedAndNonExportedImportAlias.ts(37,21): error TS2339: Property 'Lines' does not exist on type 'Geometry'.
 
 
-==== ModuleWithExportedAndNonExportedImportAlias.ts (20 errors) ====
+==== ModuleWithExportedAndNonExportedImportAlias.ts (18 errors) ====
     namespace A {
         export interface Point {
             x: number;
@@ -35,10 +33,6 @@ ModuleWithExportedAndNonExportedImportAlias.ts(37,21): error TS2339: Property 'L
     namespace B {
         export class Line {
             constructor(public start: A.Point, public end: A.Point) { }
-                               ~~~~~
-!!! error TS1005: ',' expected.
-                                                      ~~~
-!!! error TS1005: ',' expected.
         }
     }
     

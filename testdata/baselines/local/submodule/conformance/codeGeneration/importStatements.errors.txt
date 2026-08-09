@@ -1,23 +1,14 @@
-importStatements.ts(3,28): error TS1005: ',' expected.
-importStatements.ts(3,46): error TS1005: ',' expected.
-importStatements.ts(6,25): error TS2554: Expected 4 arguments, but got 2.
 importStatements.ts(26,17): error TS2304: Cannot find name 'a'.
 importStatements.ts(32,17): error TS2304: Cannot find name 'a'.
 
 
-==== importStatements.ts (5 errors) ====
+==== importStatements.ts (2 errors) ====
     namespace A {
         export class Point {
             constructor(public x: number, public y: number) { }
-                               ~
-!!! error TS1005: ',' expected.
-                                                 ~
-!!! error TS1005: ',' expected.
         }
     
         export var Origin = new Point(0, 0);
-                            ~~~~~~~~~~~~~~~
-!!! error TS2554: Expected 4 arguments, but got 2.
     }
     
     // no code gen expected

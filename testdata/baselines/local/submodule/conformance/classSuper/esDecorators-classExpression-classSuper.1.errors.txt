@@ -1,21 +1,14 @@
 esDecorators-classExpression-classSuper.1.ts(9,2): error TS1012: Unexpected token.
 esDecorators-classExpression-classSuper.1.ts(9,3): error TS1005: ')' expected.
-esDecorators-classExpression-classSuper.1.ts(11,12): error TS1005: ';' expected.
-esDecorators-classExpression-classSuper.1.ts(12,14): error TS1005: ';' expected.
-esDecorators-classExpression-classSuper.1.ts(12,15): error TS1005: ';' expected.
-esDecorators-classExpression-classSuper.1.ts(13,14): error TS1005: ';' expected.
-esDecorators-classExpression-classSuper.1.ts(14,14): error TS1005: ';' expected.
-esDecorators-classExpression-classSuper.1.ts(16,14): error TS1005: ';' expected.
-esDecorators-classExpression-classSuper.1.ts(16,15): error TS1005: ';' expected.
+esDecorators-classExpression-classSuper.1.ts(12,15): error TS2339: Property 'method' does not exist on type 'object'.
+esDecorators-classExpression-classSuper.1.ts(16,15): error TS2339: Property 'method' does not exist on type 'object'.
 esDecorators-classExpression-classSuper.1.ts(16,21): error TS1005: ';' expected.
-esDecorators-classExpression-classSuper.1.ts(17,14): error TS1005: ';' expected.
 esDecorators-classExpression-classSuper.1.ts(17,24): error TS1005: ';' expected.
-esDecorators-classExpression-classSuper.1.ts(18,14): error TS1005: ';' expected.
 esDecorators-classExpression-classSuper.1.ts(18,22): error TS1005: ';' expected.
-esDecorators-classExpression-classSuper.1.ts(20,1): error TS1128: Declaration or statement expected.
+esDecorators-classExpression-classSuper.1.ts(20,2): error TS1128: Declaration or statement expected.
 
 
-==== esDecorators-classExpression-classSuper.1.ts (15 errors) ====
+==== esDecorators-classExpression-classSuper.1.ts (8 errors) ====
     declare var dec: any;
     
     declare class Base {
@@ -31,38 +24,24 @@ esDecorators-classExpression-classSuper.1.ts(20,1): error TS1128: Declaration or
 !!! error TS1005: ')' expected.
     class C extends Base {
         static {
-               ~
-!!! error TS1005: ';' expected.
             super.method();
-                 ~
-!!! error TS1005: ';' expected.
                   ~~~~~~
-!!! error TS1005: ';' expected.
+!!! error TS2339: Property 'method' does not exist on type 'object'.
             super["method"]();
-                 ~
-!!! error TS1005: ';' expected.
             super[method]();
-                 ~
-!!! error TS1005: ';' expected.
     
             super.method``;
-                 ~
-!!! error TS1005: ';' expected.
                   ~~~~~~
-!!! error TS1005: ';' expected.
+!!! error TS2339: Property 'method' does not exist on type 'object'.
                         ~~
 !!! error TS1005: ';' expected.
             super["method"]``;
-                 ~
-!!! error TS1005: ';' expected.
                            ~~
 !!! error TS1005: ';' expected.
             super[method]``;
-                 ~
-!!! error TS1005: ';' expected.
                          ~~
 !!! error TS1005: ';' expected.
         }
     });
-    ~
+     ~
 !!! error TS1128: Declaration or statement expected.

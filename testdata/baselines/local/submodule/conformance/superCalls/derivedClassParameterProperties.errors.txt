@@ -1,8 +1,6 @@
 derivedClassParameterProperties.ts(4,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 derivedClassParameterProperties.ts(10,9): error TS2349: This expression is not callable.
-derivedClassParameterProperties.ts(15,24): error TS1005: ',' expected.
 derivedClassParameterProperties.ts(17,9): error TS2349: This expression is not callable.
-derivedClassParameterProperties.ts(22,24): error TS1005: ',' expected.
 derivedClassParameterProperties.ts(23,9): error TS2349: This expression is not callable.
 derivedClassParameterProperties.ts(32,9): error TS2349: This expression is not callable.
 derivedClassParameterProperties.ts(39,9): error TS2349: This expression is not callable.
@@ -14,7 +12,7 @@ derivedClassParameterProperties.ts(82,9): error TS2349: This expression is not c
 derivedClassParameterProperties.ts(90,9): error TS2349: This expression is not callable.
 
 
-==== derivedClassParameterProperties.ts (14 errors) ====
+==== derivedClassParameterProperties.ts (12 errors) ====
     // ordering of super calls in derived constructors matters depending on other class contents
     
     class Base {
@@ -34,8 +32,6 @@ derivedClassParameterProperties.ts(90,9): error TS2349: This expression is not c
     
     class Derived2 extends Base {
         constructor(public y: string) {
-                           ~
-!!! error TS1005: ',' expected.
             var a = 1;
             super();
             ~~~~~
@@ -45,8 +41,6 @@ derivedClassParameterProperties.ts(90,9): error TS2349: This expression is not c
     
     class Derived3 extends Base {
         constructor(public y: string) {
-                           ~
-!!! error TS1005: ',' expected.
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.

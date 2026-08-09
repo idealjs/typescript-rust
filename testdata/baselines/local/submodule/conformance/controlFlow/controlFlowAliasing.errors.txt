@@ -20,10 +20,8 @@ controlFlowAliasing.ts(190,13): error TS2339: Property 'bar' does not exist on t
 controlFlowAliasing.ts(197,13): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
 controlFlowAliasing.ts(200,13): error TS2339: Property 'bar' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
 controlFlowAliasing.ts(207,25): error TS2339: Property 'foo' does not exist on type '{ kind: "foo"; foo: string } | { kind: "bar"; bar: number }'.
-controlFlowAliasing.ts(214,26): error TS1005: ',' expected.
 controlFlowAliasing.ts(215,44): error TS2339: Property 'x' does not exist on type 'object'.
 controlFlowAliasing.ts(219,22): error TS2339: Property 'x' does not exist on type 'object'.
-controlFlowAliasing.ts(226,26): error TS1005: ',' expected.
 controlFlowAliasing.ts(227,44): error TS2339: Property 'x' does not exist on type 'object'.
 controlFlowAliasing.ts(232,22): error TS2339: Property 'x' does not exist on type 'object'.
 controlFlowAliasing.ts(236,18): error TS2339: Property 'x' does not exist on type 'object'.
@@ -34,7 +32,7 @@ controlFlowAliasing.ts(295,28): error TS2339: Property 'isDefined' does not exis
 controlFlowAliasing.ts(298,13): error TS2322: Type 'number | undefined' is not assignable to type 'number'.
 
 
-==== controlFlowAliasing.ts (34 errors) ====
+==== controlFlowAliasing.ts (32 errors) ====
     // Narrowing by aliased conditional expressions
     
     function f10(x: string | number) {
@@ -293,8 +291,6 @@ controlFlowAliasing.ts(298,13): error TS2322: Type 'number | undefined' is not a
     
     class C10 {
         constructor(readonly x: string | number) {
-                             ~
-!!! error TS1005: ',' expected.
             const thisX_isString = typeof this.x === 'string';
                                                ~
 !!! error TS2339: Property 'x' does not exist on type 'object'.
@@ -311,8 +307,6 @@ controlFlowAliasing.ts(298,13): error TS2322: Type 'number | undefined' is not a
     
     class C11 {
         constructor(readonly x: string | number) {
-                             ~
-!!! error TS1005: ',' expected.
             const thisX_isString = typeof this.x === 'string';
                                                ~
 !!! error TS2339: Property 'x' does not exist on type 'object'.

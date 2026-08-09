@@ -1,20 +1,14 @@
 error TS6053: File 'typescript.ts' not found.
-parserRealSource8.ts(9,29): error TS1005: ',' expected.
 parserRealSource8.ts(9,41): error TS2304: Cannot find name 'ScopeChain'.
-parserRealSource8.ts(10,29): error TS1005: ',' expected.
 parserRealSource8.ts(10,39): error TS2304: Cannot find name 'TypeFlow'.
-parserRealSource8.ts(11,29): error TS1005: ',' expected.
 parserRealSource8.ts(11,43): error TS2304: Cannot find name 'ModuleDeclaration'.
 parserRealSource8.ts(15,44): error TS2304: Cannot find name 'SymbolScope'.
 parserRealSource8.ts(17,15): error TS2304: Cannot find name 'Type'.
 parserRealSource8.ts(18,20): error TS2304: Cannot find name 'Type'.
 parserRealSource8.ts(19,14): error TS2304: Cannot find name 'FuncDecl'.
 parserRealSource8.ts(21,25): error TS2304: Cannot find name 'ScopeChain'.
-parserRealSource8.ts(47,29): error TS1005: ',' expected.
-parserRealSource8.ts(48,36): error TS1005: ',' expected.
 parserRealSource8.ts(57,32): error TS2339: Property 'select' does not exist on type '{ result: error; reset: () => any; update: (b: error) => boolean }'.
 parserRealSource8.ts(59,29): error TS2339: Property 'stop' does not exist on type '{ result: error; reset: () => any; update: (b: error) => boolean }'.
-parserRealSource8.ts(67,33): error TS2554: Expected 4 arguments, but got 2.
 parserRealSource8.ts(69,48): error TS2304: Cannot find name 'AST'.
 parserRealSource8.ts(70,27): error TS2304: Cannot find name 'ModuleDeclaration'.
 parserRealSource8.ts(71,26): error TS2304: Cannot find name 'SymbolTableScope'.
@@ -130,7 +124,7 @@ parserRealSource8.ts(454,35): error TS2304: Cannot find name 'Catch'.
 
 
 !!! error TS6053: File '/.src/typescript.ts' not found.
-==== parserRealSource8.ts (128 errors) ====
+==== parserRealSource8.ts (122 errors) ====
     // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
     // See LICENSE.txt in the project root for complete license information.
     
@@ -140,18 +134,12 @@ parserRealSource8.ts(454,35): error TS2304: Cannot find name 'Catch'.
     
         export class AssignScopeContext {
             constructor (public scopeChain: ScopeChain,
-                                ~~~~~~~~~~
-!!! error TS1005: ',' expected.
                                             ~~~~~~~~~~
 !!! error TS2304: Cannot find name 'ScopeChain'.
                          public typeFlow: TypeFlow,
-                                ~~~~~~~~
-!!! error TS1005: ',' expected.
                                           ~~~~~~~~
 !!! error TS2304: Cannot find name 'TypeFlow'.
                          public modDeclChain: ModuleDeclaration[]) {
-                                ~~~~~~~~~~~~
-!!! error TS1005: ',' expected.
                                               ~~~~~~~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'ModuleDeclaration'.
             }
@@ -200,11 +188,7 @@ parserRealSource8.ts(454,35): error TS2304: Cannot find name 'Catch'.
         export class ScopeSearchFilter {
     
             constructor (public select: (a: Symbol, b: Symbol) =>Symbol,
-                                ~~~~~~
-!!! error TS1005: ',' expected.
                                 public stop: (s: Symbol) =>boolean) { }
-                                       ~~~~
-!!! error TS1005: ',' expected.
     
             public result: Symbol = null;
     
@@ -228,8 +212,6 @@ parserRealSource8.ts(454,35): error TS2304: Cannot find name 'Catch'.
         }
     
         export var instanceFilter = new ScopeSearchFilter(instanceCompare, instanceFilterStop);
-                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2554: Expected 4 arguments, but got 2.
     
         export function preAssignModuleScopes(ast: AST, context: AssignScopeContext) {
                                                    ~~~

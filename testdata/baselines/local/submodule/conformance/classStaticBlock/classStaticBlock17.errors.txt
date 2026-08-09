@@ -9,7 +9,6 @@ classStaticBlock17.ts(11,17): error TS1003: Identifier expected.
 classStaticBlock17.ts(11,17): error TS1127: Invalid character.
 classStaticBlock17.ts(11,18): error TS1005: ';' expected.
 classStaticBlock17.ts(11,18): error TS7027: Unreachable code detected.
-classStaticBlock17.ts(14,10): error TS1005: ';' expected.
 classStaticBlock17.ts(16,26): error TS2304: Cannot find name 'obj'.
 classStaticBlock17.ts(16,30): error TS1003: Identifier expected.
 classStaticBlock17.ts(16,30): error TS1127: Invalid character.
@@ -20,10 +19,13 @@ classStaticBlock17.ts(17,30): error TS1003: Identifier expected.
 classStaticBlock17.ts(17,30): error TS1127: Invalid character.
 classStaticBlock17.ts(17,31): error TS1005: ';' expected.
 classStaticBlock17.ts(17,35): error TS2304: Cannot find name 'value'.
-classStaticBlock17.ts(20,1): error TS1128: Declaration or statement expected.
+classStaticBlock17.ts(24,15): error TS2454: Variable 'friendA' is used before being assigned.
+classStaticBlock17.ts(24,23): error TS2339: Property 'getX' does not exist on type 'object'.
+classStaticBlock17.ts(25,5): error TS2454: Variable 'friendA' is used before being assigned.
+classStaticBlock17.ts(25,13): error TS2339: Property 'setX' does not exist on type 'object'.
 
 
-==== classStaticBlock17.ts (23 errors) ====
+==== classStaticBlock17.ts (25 errors) ====
     let friendA: { getX(o: A): number, setX(o: A, v: number): void };
     
     class A {
@@ -61,8 +63,6 @@ classStaticBlock17.ts(20,1): error TS1128: Declaration or statement expected.
 !!! error TS7027: Unreachable code detected.
     
       static {
-             ~
-!!! error TS1005: ';' expected.
         friendA = {
           getX(obj) { return obj.#x },
                              ~~~
@@ -89,13 +89,19 @@ classStaticBlock17.ts(20,1): error TS1128: Declaration or statement expected.
         };
       }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
     
     class B {
       constructor(a: A) {
         const x = friendA.getX(a); // ok
+                  ~~~~~~~
+!!! error TS2454: Variable 'friendA' is used before being assigned.
+                          ~~~~
+!!! error TS2339: Property 'getX' does not exist on type 'object'.
         friendA.setX(a, x + 1); // ok
+        ~~~~~~~
+!!! error TS2454: Variable 'friendA' is used before being assigned.
+                ~~~~
+!!! error TS2339: Property 'setX' does not exist on type 'object'.
       }
     };
     

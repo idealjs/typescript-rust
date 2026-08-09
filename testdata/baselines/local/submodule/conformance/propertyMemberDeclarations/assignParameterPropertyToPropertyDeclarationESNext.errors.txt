@@ -1,19 +1,15 @@
 assignParameterPropertyToPropertyDeclarationESNext.ts(8,14): error TS2339: Property 'foo' does not exist on type '{ qux: any; bar: any; quiz: any; quench: any; quanch: any; m1: () => any; m3: () => void; quim: any; baz: any; quid: any; m2: () => any }'.
-assignParameterPropertyToPropertyDeclarationESNext.ts(11,24): error TS1005: ',' expected.
 assignParameterPropertyToPropertyDeclarationESNext.ts(16,14): error TS2339: Property 'foo' does not exist on type '{ qux: any; bar: any; quiz: any; quench: any; quanch: any; m1: () => any; m3: () => void; quim: any; baz: any; quid: any; m2: () => any }'.
 assignParameterPropertyToPropertyDeclarationESNext.ts(25,34): error TS2339: Property 'foo2' does not exist on type '{ bar: () => number; foo1: "" }'.
-assignParameterPropertyToPropertyDeclarationESNext.ts(27,24): error TS1005: ',' expected.
 assignParameterPropertyToPropertyDeclarationESNext.ts(31,19): error TS2304: Cannot find name 'extends'.
 assignParameterPropertyToPropertyDeclarationESNext.ts(31,27): error TS1005: '{' expected.
 assignParameterPropertyToPropertyDeclarationESNext.ts(31,29): error TS1005: ';' expected.
 assignParameterPropertyToPropertyDeclarationESNext.ts(37,19): error TS2304: Cannot find name 'extends'.
 assignParameterPropertyToPropertyDeclarationESNext.ts(37,27): error TS1005: '{' expected.
 assignParameterPropertyToPropertyDeclarationESNext.ts(37,29): error TS1005: ';' expected.
-assignParameterPropertyToPropertyDeclarationESNext.ts(40,24): error TS1005: ',' expected.
-assignParameterPropertyToPropertyDeclarationESNext.ts(43,24): error TS1005: ',' expected.
 
 
-==== assignParameterPropertyToPropertyDeclarationESNext.ts (13 errors) ====
+==== assignParameterPropertyToPropertyDeclarationESNext.ts (9 errors) ====
     class C {
         qux = this.bar // should error
         bar = this.foo // should error
@@ -27,8 +23,6 @@ assignParameterPropertyToPropertyDeclarationESNext.ts(43,24): error TS1005: ',' 
         }
         m3 = function() { }
         constructor(public foo: string) {}
-                           ~~~
-!!! error TS1005: ',' expected.
         quim = this.baz // should error
         baz = this.foo; // should error
         quid = this.baz // ok
@@ -49,8 +43,6 @@ assignParameterPropertyToPropertyDeclarationESNext.ts(43,24): error TS1005: ',' 
 !!! error TS2339: Property 'foo2' does not exist on type '{ bar: () => number; foo1: "" }'.
         foo1 = '';
         constructor(public foo2: string) {}
-                           ~~~~
-!!! error TS1005: ',' expected.
     }
     
     class F {
@@ -76,13 +68,9 @@ assignParameterPropertyToPropertyDeclarationESNext.ts(43,24): error TS1005: ',' 
             p2 = this.p1
         }
         constructor(public p1: number) {}
-                           ~~
-!!! error TS1005: ',' expected.
     }
     class H {
         constructor(public p1: C) {}
-                           ~~
-!!! error TS1005: ',' expected.
     
         public p2 = () => {
             return this.p1.foo;

@@ -165,32 +165,8 @@ generatedContextualTyping.ts(87,62): error TS2304: Cannot find name 'd2'.
 generatedContextualTyping.ts(89,73): error TS2304: Cannot find name 'd1'.
 generatedContextualTyping.ts(89,77): error TS2304: Cannot find name 'd2'.
 generatedContextualTyping.ts(97,31): error TS2304: Cannot find name 'Array'.
-generatedContextualTyping.ts(102,32): error TS1005: ',' expected.
-generatedContextualTyping.ts(103,32): error TS1005: ',' expected.
-generatedContextualTyping.ts(104,32): error TS1005: ',' expected.
-generatedContextualTyping.ts(105,33): error TS1005: ',' expected.
-generatedContextualTyping.ts(106,33): error TS1005: ',' expected.
-generatedContextualTyping.ts(107,33): error TS1005: ',' expected.
-generatedContextualTyping.ts(108,33): error TS1005: ',' expected.
-generatedContextualTyping.ts(109,33): error TS1005: ',' expected.
 generatedContextualTyping.ts(109,39): error TS2304: Cannot find name 'Array'.
-generatedContextualTyping.ts(110,33): error TS1005: ',' expected.
-generatedContextualTyping.ts(111,33): error TS1005: ',' expected.
-generatedContextualTyping.ts(112,33): error TS1005: ',' expected.
-generatedContextualTyping.ts(113,33): error TS1005: ',' expected.
-generatedContextualTyping.ts(114,34): error TS1005: ',' expected.
-generatedContextualTyping.ts(115,34): error TS1005: ',' expected.
-generatedContextualTyping.ts(116,34): error TS1005: ',' expected.
-generatedContextualTyping.ts(117,34): error TS1005: ',' expected.
-generatedContextualTyping.ts(118,34): error TS1005: ',' expected.
-generatedContextualTyping.ts(119,34): error TS1005: ',' expected.
-generatedContextualTyping.ts(120,34): error TS1005: ',' expected.
-generatedContextualTyping.ts(121,34): error TS1005: ',' expected.
 generatedContextualTyping.ts(121,40): error TS2304: Cannot find name 'Array'.
-generatedContextualTyping.ts(122,34): error TS1005: ',' expected.
-generatedContextualTyping.ts(123,34): error TS1005: ',' expected.
-generatedContextualTyping.ts(124,34): error TS1005: ',' expected.
-generatedContextualTyping.ts(125,34): error TS1005: ',' expected.
 generatedContextualTyping.ts(133,21): error TS2304: Cannot find name 'Array'.
 generatedContextualTyping.ts(138,47): error TS2304: Cannot find name 'd1'.
 generatedContextualTyping.ts(138,51): error TS2304: Cannot find name 'd2'.
@@ -739,7 +715,7 @@ generatedContextualTyping.ts(354,71): error TS2304: Cannot find name 'd1'.
 generatedContextualTyping.ts(354,75): error TS2304: Cannot find name 'd2'.
 
 
-==== generatedContextualTyping.ts (739 errors) ====
+==== generatedContextualTyping.ts (715 errors) ====
     class Base { private p; }
     class Derived1 extends Base { private m; }
     class Derived2 extends Base { private n; }
@@ -1176,81 +1152,33 @@ generatedContextualTyping.ts(354,75): error TS2304: Cannot find name 'd2'.
     class x95 { constructor(parm: (s: Base[]) => any = n => { var n: Base[]; return null; }) { } }
     class x96 { constructor(parm: Genric<Base> = { func: n => { return [d1, d2]; } }) { } }
     class x97 { constructor(public parm: () => Base[] = () => [d1, d2]) { } }
-                                   ~~~~
-!!! error TS1005: ',' expected.
     class x98 { constructor(public parm: () => Base[] = function() { return [d1, d2] }) { } }
-                                   ~~~~
-!!! error TS1005: ',' expected.
     class x99 { constructor(public parm: () => Base[] = function named() { return [d1, d2] }) { } }
-                                   ~~~~
-!!! error TS1005: ',' expected.
     class x100 { constructor(public parm: { (): Base[]; } = () => [d1, d2]) { } }
-                                    ~~~~
-!!! error TS1005: ',' expected.
     class x101 { constructor(public parm: { (): Base[]; } = function() { return [d1, d2] }) { } }
-                                    ~~~~
-!!! error TS1005: ',' expected.
     class x102 { constructor(public parm: { (): Base[]; } = function named() { return [d1, d2] }) { } }
-                                    ~~~~
-!!! error TS1005: ',' expected.
     class x103 { constructor(public parm: Base[] = [d1, d2]) { } }
-                                    ~~~~
-!!! error TS1005: ',' expected.
     class x104 { constructor(public parm: Array<Base> = [d1, d2]) { } }
-                                    ~~~~
-!!! error TS1005: ',' expected.
                                           ~~~~~
 !!! error TS2304: Cannot find name 'Array'.
     class x105 { constructor(public parm: { [n: number]: Base; } = [d1, d2]) { } }
-                                    ~~~~
-!!! error TS1005: ',' expected.
     class x106 { constructor(public parm: {n: Base[]; }  = { n: [d1, d2] }) { } }
-                                    ~~~~
-!!! error TS1005: ',' expected.
     class x107 { constructor(public parm: (s: Base[]) => any = n => { var n: Base[]; return null; }) { } }
-                                    ~~~~
-!!! error TS1005: ',' expected.
     class x108 { constructor(public parm: Genric<Base> = { func: n => { return [d1, d2]; } }) { } }
-                                    ~~~~
-!!! error TS1005: ',' expected.
     class x109 { constructor(private parm: () => Base[] = () => [d1, d2]) { } }
-                                     ~~~~
-!!! error TS1005: ',' expected.
     class x110 { constructor(private parm: () => Base[] = function() { return [d1, d2] }) { } }
-                                     ~~~~
-!!! error TS1005: ',' expected.
     class x111 { constructor(private parm: () => Base[] = function named() { return [d1, d2] }) { } }
-                                     ~~~~
-!!! error TS1005: ',' expected.
     class x112 { constructor(private parm: { (): Base[]; } = () => [d1, d2]) { } }
-                                     ~~~~
-!!! error TS1005: ',' expected.
     class x113 { constructor(private parm: { (): Base[]; } = function() { return [d1, d2] }) { } }
-                                     ~~~~
-!!! error TS1005: ',' expected.
     class x114 { constructor(private parm: { (): Base[]; } = function named() { return [d1, d2] }) { } }
-                                     ~~~~
-!!! error TS1005: ',' expected.
     class x115 { constructor(private parm: Base[] = [d1, d2]) { } }
-                                     ~~~~
-!!! error TS1005: ',' expected.
     class x116 { constructor(private parm: Array<Base> = [d1, d2]) { } }
-                                     ~~~~
-!!! error TS1005: ',' expected.
                                            ~~~~~
 !!! error TS2304: Cannot find name 'Array'.
     class x117 { constructor(private parm: { [n: number]: Base; } = [d1, d2]) { } }
-                                     ~~~~
-!!! error TS1005: ',' expected.
     class x118 { constructor(private parm: {n: Base[]; }  = { n: [d1, d2] }) { } }
-                                     ~~~~
-!!! error TS1005: ',' expected.
     class x119 { constructor(private parm: (s: Base[]) => any = n => { var n: Base[]; return null; }) { } }
-                                     ~~~~
-!!! error TS1005: ',' expected.
     class x120 { constructor(private parm: Genric<Base> = { func: n => { return [d1, d2]; } }) { } }
-                                     ~~~~
-!!! error TS1005: ',' expected.
     function x121(parm: () => Base[] = () => [d1, d2]) { }
     function x122(parm: () => Base[] = function() { return [d1, d2] }) { }
     function x123(parm: () => Base[] = function named() { return [d1, d2] }) { }

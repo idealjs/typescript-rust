@@ -1,10 +1,7 @@
-part2.ts(7,32): error TS1005: ',' expected.
 part2.ts(7,36): error TS2304: Cannot find name 'Point'.
-part2.ts(7,50): error TS1005: ',' expected.
 part2.ts(7,54): error TS2304: Cannot find name 'Point'.
 part3.ts(5,11): error TS2339: Property 'Origin' does not exist on type 'A'.
 part3.ts(6,17): error TS2339: Property 'mirror' does not exist on type 'Utils'.
-part3.ts(10,9): error TS2554: Expected 4 arguments, but got 2.
 
 
 ==== part1.ts (0 errors) ====
@@ -22,7 +19,7 @@ part3.ts(10,9): error TS2554: Expected 4 arguments, but got 2.
         export var Origin: Point = { x: 0, y: 0 };
     }
     
-==== part2.ts (4 errors) ====
+==== part2.ts (2 errors) ====
     namespace A {
         // not a collision, since we don't export
         var Origin: string = "0,0";
@@ -30,19 +27,15 @@ part3.ts(10,9): error TS2554: Expected 4 arguments, but got 2.
         export namespace Utils {
             export class Plane {
                 constructor(public tl: Point, public br: Point) { }
-                                   ~~
-!!! error TS1005: ',' expected.
                                        ~~~~~
 !!! error TS2304: Cannot find name 'Point'.
-                                                     ~~
-!!! error TS1005: ',' expected.
                                                          ~~~~~
 !!! error TS2304: Cannot find name 'Point'.
             }
         }
     }
     
-==== part3.ts (3 errors) ====
+==== part3.ts (2 errors) ====
     // test the merging actually worked
     
     var o: { x: number; y: number };
@@ -57,6 +50,4 @@ part3.ts(10,9): error TS2554: Expected 4 arguments, but got 2.
     var p: { tl: A.Point; br: A.Point };
     var p: A.Utils.Plane;
     var p = new A.Utils.Plane(o, { x: 1, y: 1 });
-            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2554: Expected 4 arguments, but got 2.
     

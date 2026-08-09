@@ -1,13 +1,10 @@
 derivedClassSuperCallsWithThisArg.ts(8,9): error TS2349: This expression is not callable.
-derivedClassSuperCallsWithThisArg.ts(13,24): error TS1005: ',' expected.
 derivedClassSuperCallsWithThisArg.ts(14,9): error TS2349: This expression is not callable.
-derivedClassSuperCallsWithThisArg.ts(19,24): error TS1005: ',' expected.
 derivedClassSuperCallsWithThisArg.ts(20,9): error TS2349: This expression is not callable.
-derivedClassSuperCallsWithThisArg.ts(25,24): error TS1005: ',' expected.
 derivedClassSuperCallsWithThisArg.ts(26,9): error TS2349: This expression is not callable.
 
 
-==== derivedClassSuperCallsWithThisArg.ts (7 errors) ====
+==== derivedClassSuperCallsWithThisArg.ts (4 errors) ====
     class Base {
         x: string;
         constructor(a) { }
@@ -23,8 +20,6 @@ derivedClassSuperCallsWithThisArg.ts(26,9): error TS2349: This expression is not
     
     class Derived2 extends Base {
         constructor(public a: string) {
-                           ~
-!!! error TS1005: ',' expected.
             super(this); // error
             ~~~~~
 !!! error TS2349: This expression is not callable.
@@ -33,8 +28,6 @@ derivedClassSuperCallsWithThisArg.ts(26,9): error TS2349: This expression is not
     
     class Derived3 extends Base {
         constructor(public a: string) {
-                           ~
-!!! error TS1005: ',' expected.
             super(() => this); // error
             ~~~~~
 !!! error TS2349: This expression is not callable.
@@ -43,8 +36,6 @@ derivedClassSuperCallsWithThisArg.ts(26,9): error TS2349: This expression is not
     
     class Derived4 extends Base {
         constructor(public a: string) {
-                           ~
-!!! error TS1005: ',' expected.
             super(function () { return this; }); // ok
             ~~~~~
 !!! error TS2349: This expression is not callable.

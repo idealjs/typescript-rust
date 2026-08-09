@@ -4,14 +4,12 @@ classStaticBlock11.ts(3,4): error TS1005: ';' expected.
 classStaticBlock11.ts(5,10): error TS1003: Identifier expected.
 classStaticBlock11.ts(5,10): error TS1127: Invalid character.
 classStaticBlock11.ts(5,11): error TS1005: ';' expected.
-classStaticBlock11.ts(8,10): error TS1005: ';' expected.
 classStaticBlock11.ts(10,28): error TS1003: Identifier expected.
 classStaticBlock11.ts(10,28): error TS1127: Invalid character.
 classStaticBlock11.ts(10,29): error TS1005: ';' expected.
-classStaticBlock11.ts(12,1): error TS1128: Declaration or statement expected.
 
 
-==== classStaticBlock11.ts (11 errors) ====
+==== classStaticBlock11.ts (9 errors) ====
     let getX;
     class C {
       #x = 1
@@ -32,8 +30,6 @@ classStaticBlock11.ts(12,1): error TS1128: Declaration or statement expected.
       }
     
       static {
-             ~
-!!! error TS1005: ';' expected.
         // getX has privileged access to #x
         getX = (obj: C) => obj.#x;
                                ~
@@ -44,5 +40,3 @@ classStaticBlock11.ts(12,1): error TS1128: Declaration or statement expected.
 !!! error TS1005: ';' expected.
       }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.

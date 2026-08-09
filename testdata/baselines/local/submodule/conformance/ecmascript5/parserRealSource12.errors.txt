@@ -3,11 +3,6 @@ parserRealSource12.ts(8,19): error TS2304: Cannot find name 'AST'.
 parserRealSource12.ts(8,32): error TS2304: Cannot find name 'AST'.
 parserRealSource12.ts(8,38): error TS2304: Cannot find name 'AST'.
 parserRealSource12.ts(32,5): error TS2420: Class 'AstWalker' incorrectly implements interface '{ walk: (ast: error, parent: error) => error; options: error; state: any }'.
-parserRealSource12.ts(34,21): error TS1005: ',' expected.
-parserRealSource12.ts(35,21): error TS1005: ',' expected.
-parserRealSource12.ts(36,21): error TS1005: ',' expected.
-parserRealSource12.ts(37,20): error TS1005: ',' expected.
-parserRealSource12.ts(38,20): error TS1005: ',' expected.
 parserRealSource12.ts(41,26): error TS2304: Cannot find name 'AST'.
 parserRealSource12.ts(41,39): error TS2304: Cannot find name 'AST'.
 parserRealSource12.ts(41,45): error TS2304: Cannot find name 'AST'.
@@ -23,7 +18,6 @@ parserRealSource12.ts(58,36): error TS2339: Property 'post' does not exist on ty
 parserRealSource12.ts(77,26): error TS2304: Cannot find name 'AST'.
 parserRealSource12.ts(77,119): error TS2304: Cannot find name 'AST'.
 parserRealSource12.ts(90,20): error TS2322: Type '{ walk: (ast: error, parent: error) => error }' is not assignable to type '{ walk: (ast: error, parent: error) => error; options: error; state: any }'.
-parserRealSource12.ts(90,20): error TS2554: Expected 10 arguments, but got 5.
 parserRealSource12.ts(94,34): error TS2304: Cannot find name 'NodeType'.
 parserRealSource12.ts(95,34): error TS2304: Cannot find name 'NodeType'.
 parserRealSource12.ts(96,34): error TS2304: Cannot find name 'NodeType'.
@@ -203,7 +197,7 @@ parserRealSource12.ts(523,88): error TS2304: Cannot find name 'AST'.
 
 
 !!! error TS6053: File '/.src/typescript.ts' not found.
-==== parserRealSource12.ts (201 errors) ====
+==== parserRealSource12.ts (195 errors) ====
     // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
     // See LICENSE.txt in the project root for complete license information.
     
@@ -247,24 +241,14 @@ parserRealSource12.ts(523,88): error TS2304: Cannot find name 'AST'.
     ~~~~~~~~~~~~~~~~~~~~~
                 private childrenWalkers: IAstWalkChildren[],
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                        ~~~~~~~~~~~~~~~
-!!! error TS1005: ',' expected.
                 private pre: IAstWalkCallback,
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                        ~~~
-!!! error TS1005: ',' expected.
                 private post: IAstWalkCallback,
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                        ~~~~
-!!! error TS1005: ',' expected.
                 public options: AstWalkOptions,
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                       ~~~~~~~
-!!! error TS1005: ',' expected.
                 public state: any) {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                       ~~~~~
-!!! error TS1005: ',' expected.
             }
     ~~~~~~~~~
     
@@ -380,8 +364,6 @@ parserRealSource12.ts(523,88): error TS2304: Cannot find name 'AST'.
                 return new AstWalker(this.childrenWalkers, pre, post, options, state);
                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2322: Type '{ walk: (ast: error, parent: error) => error }' is not assignable to type '{ walk: (ast: error, parent: error) => error; options: error; state: any }'.
-                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2554: Expected 10 arguments, but got 5.
             }
     
             private initChildrenWalkers(): void {

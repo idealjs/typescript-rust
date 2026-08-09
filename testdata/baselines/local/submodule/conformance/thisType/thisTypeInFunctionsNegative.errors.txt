@@ -26,7 +26,6 @@ thisTypeInFunctionsNegative.ts(86,5): error TS2322: Type '(this: { y: number }, 
 thisTypeInFunctionsNegative.ts(96,5): error TS2353: Object literal may only specify known properties, and 'explicitThis' does not exist in type '{ n: number; explicitProperty: (this: { n: number }, m: number) => number }'.
 thisTypeInFunctionsNegative.ts(133,49): error TS2339: Property 'x' does not exist on type '{ y: number; polymorphic: (this: error) => number; explicit: (this: error) => number }'.
 thisTypeInFunctionsNegative.ts(154,20): error TS2351: This expression is not constructable.
-thisTypeInFunctionsNegative.ts(158,48): error TS1005: ',' expected.
 thisTypeInFunctionsNegative.ts(168,26): error TS1005: ',' expected.
 thisTypeInFunctionsNegative.ts(171,20): error TS1138: Parameter declaration expected.
 thisTypeInFunctionsNegative.ts(171,25): error TS1005: ',' expected.
@@ -35,7 +34,7 @@ thisTypeInFunctionsNegative.ts(171,32): error TS1005: ';' expected.
 thisTypeInFunctionsNegative.ts(171,35): error TS1005: ';' expected.
 
 
-==== thisTypeInFunctionsNegative.ts (35 errors) ====
+==== thisTypeInFunctionsNegative.ts (34 errors) ====
     class C {
         n: number;
         explicitThis(this: this, m: number): number {
@@ -250,8 +249,6 @@ thisTypeInFunctionsNegative.ts(171,35): error TS1005: ';' expected.
     ///// syntax-ish errors /////
     class ThisConstructor {
         constructor(this: ThisConstructor, private n: number) {
-                                                   ~
-!!! error TS1005: ',' expected.
         }
     }
     interface ThisConstructorInterface {

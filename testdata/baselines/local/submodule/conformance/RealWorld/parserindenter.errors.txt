@@ -2,16 +2,9 @@ error TS6053: File 'formatting.ts' not found.
 parserindenter.ts(21,38): error TS2304: Cannot find name 'ILineIndenationResolver'.
 parserindenter.ts(23,33): error TS2304: Cannot find name 'IndentationBag'.
 parserindenter.ts(25,42): error TS2304: Cannot find name 'Dictionary_int_int'.
-parserindenter.ts(28,20): error TS1005: ',' expected.
-parserindenter.ts(29,20): error TS1005: ',' expected.
 parserindenter.ts(29,26): error TS2304: Cannot find name 'ParseTree'.
-parserindenter.ts(30,20): error TS1005: ',' expected.
 parserindenter.ts(30,30): error TS2304: Cannot find name 'ITextSnapshot'.
-parserindenter.ts(31,20): error TS1005: ',' expected.
-parserindenter.ts(32,20): error TS1005: ',' expected.
-parserindenter.ts(33,20): error TS1005: ',' expected.
 parserindenter.ts(33,32): error TS2304: Cannot find name 'TokenSpan'.
-parserindenter.ts(34,20): error TS1005: ',' expected.
 parserindenter.ts(36,39): error TS2304: Cannot find name 'IndentationBag'.
 parserindenter.ts(36,59): error TS2339: Property 'snapshot' does not exist on type '{ indentationBag: error; scriptBlockBeginLineNumber: number; offsetIndentationDeltas: error; GetIndentationEdits: (token: error, nextToken: error, node: error, sameLineIndent: boolean) => error; GetIndentationEditsWorker: (token: error, nextToken: error, node: error, sameLineIndent: boolean) => error; GetCommentIndentationEdits: (token: error) => error; GetSpecialCaseIndentation: (token: error, node: error) => error; GetSpecialCaseIndentationForLCurly: (node: error) => error; GetSpecialCaseIndentationForSemicolon: (token: error, node: error) => error; GetSpecialCaseIndentationForComment: (token: error, node: error) => error; CanIndentComment: (token: error, node: error) => boolean; ApplyScriptBlockIndentation: (languageHostIndentation: string, tree: error) => void; GetIndentEdit: (indentInfo: error, tokenStartPosition: number, sameLineIndent: boolean) => error; ApplyIndentationLevel: (existingIndentation: string, level: number) => string; GetIndentString: (prefix: string, totalIndentSize: number, tabSize: number, convertTabsToSpaces: boolean) => string; ApplyIndentationDeltaFromParent: (token: error, node: error) => error; ApplyIndentationDelta1: (tokenStartPosition: number, delta: number) => error; ApplyIndentationDelta2: (currentIndent: string, delta: number) => error; GetIndentationDelta: (tokenStartPosition: number, childTokenStartPosition: number) => number; FillInheritedIndentation: (tree: error) => void; GetLineIndentationForOffset: (offset: number) => string; RegisterIndentation: (indent: error, sameLineIndent: boolean) => void; RegisterIndentation2: (position: number, indent: string) => void; AdjustStartOffsetIfNeeded: (token: error, node: error) => void; IsMultiLineString: (token: error) => boolean }'.
 parserindenter.ts(38,48): error TS2304: Cannot find name 'Dictionary_int_int'.
@@ -192,7 +185,7 @@ parserindenter.ts(738,90): error TS2339: Property 'snapshot' does not exist on t
 
 
 !!! error TS6053: File '/.src/formatting.ts' not found.
-==== parserindenter.ts (190 errors) ====
+==== parserindenter.ts (183 errors) ====
     ﻿// @target: es2015
     //﻿
     // Copyright (c) Microsoft Corporation.  All rights reserved.
@@ -227,32 +220,18 @@ parserindenter.ts(738,90): error TS2339: Property 'snapshot' does not exist on t
     
             constructor(
                 public logger: TypeScript.ILogger,
-                    ~~~~~~
-!!! error TS1005: ',' expected.
                 public tree: ParseTree,
-                    ~~~~
-!!! error TS1005: ',' expected.
                           ~~~~~~~~~
 !!! error TS2304: Cannot find name 'ParseTree'.
                 public snapshot: ITextSnapshot,
-                    ~~~~~~~~
-!!! error TS1005: ',' expected.
                               ~~~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'ITextSnapshot'.
                 public languageHostIndentation: string,
-                    ~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS1005: ',' expected.
                 public editorOptions: Services.EditorOptions,
-                    ~~~~~~~~~~~~~
-!!! error TS1005: ',' expected.
                 public firstToken: TokenSpan,
-                    ~~~~~~~~~~
-!!! error TS1005: ',' expected.
                                 ~~~~~~~~~
 !!! error TS2304: Cannot find name 'TokenSpan'.
                 public smartIndent: boolean) {
-                    ~~~~~~~~~~~
-!!! error TS1005: ',' expected.
     
                 this.indentationBag = new IndentationBag(this.snapshot);
                                        ~~~~~~~~~~~~~~

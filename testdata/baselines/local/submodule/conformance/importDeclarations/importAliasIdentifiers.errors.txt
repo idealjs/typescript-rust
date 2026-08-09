@@ -1,16 +1,10 @@
-importAliasIdentifiers.ts(3,28): error TS1005: ',' expected.
-importAliasIdentifiers.ts(3,46): error TS1005: ',' expected.
 importAliasIdentifiers.ts(14,5): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 
 
-==== importAliasIdentifiers.ts (3 errors) ====
+==== importAliasIdentifiers.ts (1 errors) ====
     namespace moduleA {
         export class Point {
             constructor(public x: number, public y: number) { }
-                               ~
-!!! error TS1005: ',' expected.
-                                                 ~
-!!! error TS1005: ',' expected.
         }
     }
     

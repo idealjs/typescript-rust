@@ -1,11 +1,8 @@
 ExportFunctionWithInaccessibleTypesInParameterTypeAnnotation.ts(4,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 ExportFunctionWithInaccessibleTypesInParameterTypeAnnotation.ts(5,9): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
-ExportFunctionWithInaccessibleTypesInParameterTypeAnnotation.ts(9,28): error TS1005: ',' expected.
-ExportFunctionWithInaccessibleTypesInParameterTypeAnnotation.ts(9,49): error TS1005: ',' expected.
-ExportFunctionWithInaccessibleTypesInParameterTypeAnnotation.ts(13,16): error TS2554: Expected 4 arguments, but got 2.
 
 
-==== ExportFunctionWithInaccessibleTypesInParameterTypeAnnotation.ts (5 errors) ====
+==== ExportFunctionWithInaccessibleTypesInParameterTypeAnnotation.ts (2 errors) ====
     namespace A {
     
         class Point {
@@ -19,15 +16,9 @@ ExportFunctionWithInaccessibleTypesInParameterTypeAnnotation.ts(13,16): error TS
     
         export class Line {
             constructor(public start: Point, public end: Point) { }
-                               ~~~~~
-!!! error TS1005: ',' expected.
-                                                    ~~~
-!!! error TS1005: ',' expected.
         }
     
         export function fromOrigin(p: Point): Line {
             return new Line({ x: 0, y: 0 }, p);
-                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2554: Expected 4 arguments, but got 2.
         }
     }

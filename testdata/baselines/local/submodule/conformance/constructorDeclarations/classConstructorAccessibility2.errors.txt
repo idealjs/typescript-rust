@@ -1,110 +1,56 @@
-classConstructorAccessibility2.ts(2,31): error TS1005: ',' expected.
-classConstructorAccessibility2.ts(7,34): error TS1005: ',' expected.
-classConstructorAccessibility2.ts(12,32): error TS1005: ',' expected.
-classConstructorAccessibility2.ts(18,24): error TS1005: ',' expected.
 classConstructorAccessibility2.ts(18,37): error TS2349: This expression is not callable.
-classConstructorAccessibility2.ts(20,28): error TS2554: Expected 2 arguments, but got 1.
-classConstructorAccessibility2.ts(21,35): error TS2554: Expected 2 arguments, but got 1.
-classConstructorAccessibility2.ts(25,24): error TS1005: ',' expected.
 classConstructorAccessibility2.ts(25,37): error TS2349: This expression is not callable.
-classConstructorAccessibility2.ts(27,28): error TS2554: Expected 2 arguments, but got 1.
-classConstructorAccessibility2.ts(28,35): error TS2554: Expected 2 arguments, but got 1.
-classConstructorAccessibility2.ts(32,24): error TS1005: ',' expected.
 classConstructorAccessibility2.ts(32,37): error TS2349: This expression is not callable.
-classConstructorAccessibility2.ts(34,28): error TS2554: Expected 2 arguments, but got 1.
-classConstructorAccessibility2.ts(35,35): error TS2554: Expected 2 arguments, but got 1.
-classConstructorAccessibility2.ts(38,10): error TS2554: Expected 2 arguments, but got 1.
-classConstructorAccessibility2.ts(39,10): error TS2554: Expected 2 arguments, but got 1.
-classConstructorAccessibility2.ts(40,10): error TS2554: Expected 2 arguments, but got 1.
-classConstructorAccessibility2.ts(42,10): error TS2554: Expected 2 arguments, but got 1.
-classConstructorAccessibility2.ts(43,10): error TS2554: Expected 2 arguments, but got 1.
-classConstructorAccessibility2.ts(44,10): error TS2554: Expected 2 arguments, but got 1.
 
 
-==== classConstructorAccessibility2.ts (21 errors) ====
+==== classConstructorAccessibility2.ts (3 errors) ====
     class BaseA {
         public constructor(public x: number) { }
-                                  ~
-!!! error TS1005: ',' expected.
         createInstance() { new BaseA(1); }
     }
     
     class BaseB {
         protected constructor(public x: number) { }
-                                     ~
-!!! error TS1005: ',' expected.
         createInstance() { new BaseB(2); }
     }
     
     class BaseC {
         private constructor(public x: number) { }
-                                   ~
-!!! error TS1005: ',' expected.
         createInstance() { new BaseC(3); }
         static staticInstance() { new BaseC(4); }
     }
     
     class DerivedA extends BaseA {
         constructor(public x: number) { super(x); }
-                           ~
-!!! error TS1005: ',' expected.
                                         ~~~~~
 !!! error TS2349: This expression is not callable.
         createInstance() { new DerivedA(5); }
         createBaseInstance() { new BaseA(6); }
-                               ~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
         static staticBaseInstance() { new BaseA(7); }
-                                      ~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
     }
     
     class DerivedB extends BaseB {
         constructor(public x: number) { super(x); }
-                           ~
-!!! error TS1005: ',' expected.
                                         ~~~~~
 !!! error TS2349: This expression is not callable.
         createInstance() { new DerivedB(7); }
         createBaseInstance() { new BaseB(8); } // ok
-                               ~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
         static staticBaseInstance() { new BaseB(9); } // ok
-                                      ~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
     }
     
     class DerivedC extends BaseC { // error
         constructor(public x: number) { super(x); }
-                           ~
-!!! error TS1005: ',' expected.
                                         ~~~~~
 !!! error TS2349: This expression is not callable.
         createInstance() { new DerivedC(9); }
         createBaseInstance() { new BaseC(10); } // error
-                               ~~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
         static staticBaseInstance() { new BaseC(11); } // error
-                                      ~~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
     }
     
     var ba = new BaseA(1);
-             ~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
     var bb = new BaseB(1); // error
-             ~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
     var bc = new BaseC(1); // error
-             ~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
     
     var da = new DerivedA(1);
-             ~~~~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
     var db = new DerivedB(1);
-             ~~~~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
     var dc = new DerivedC(1);
-             ~~~~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.

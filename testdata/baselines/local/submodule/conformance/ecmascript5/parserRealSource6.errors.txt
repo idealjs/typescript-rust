@@ -1,31 +1,21 @@
 error TS6053: File 'typescript.ts' not found.
 parserRealSource6.ts(8,24): error TS2304: Cannot find name 'Script'.
-parserRealSource6.ts(10,29): error TS1005: ',' expected.
 parserRealSource6.ts(10,41): error TS2304: Cannot find name 'ScopeChain'.
-parserRealSource6.ts(10,60): error TS1005: ',' expected.
 parserRealSource6.ts(10,69): error TS2304: Cannot find name 'TypeChecker'.
 parserRealSource6.ts(15,22): error TS2304: Cannot find name 'Type'.
 parserRealSource6.ts(16,21): error TS2304: Cannot find name 'AST'.
 parserRealSource6.ts(17,23): error TS2304: Cannot find name 'SymbolScope'.
 parserRealSource6.ts(18,30): error TS2304: Cannot find name 'AstWalkOptions'.
-parserRealSource6.ts(20,29): error TS1005: ',' expected.
 parserRealSource6.ts(20,35): error TS2304: Cannot find name 'TypeFlow'.
-parserRealSource6.ts(20,52): error TS1005: ',' expected.
-parserRealSource6.ts(20,72): error TS1005: ',' expected.
 parserRealSource6.ts(20,83): error TS2304: Cannot find name 'ASTFlags'.
 parserRealSource6.ts(28,31): error TS2304: Cannot find name 'AST'.
 parserRealSource6.ts(30,35): error TS2304: Cannot find name 'ModuleDeclaration'.
 parserRealSource6.ts(31,36): error TS2304: Cannot find name 'TypeDeclaration'.
 parserRealSource6.ts(32,36): error TS2304: Cannot find name 'UnaryExpression'.
 parserRealSource6.ts(35,33): error TS2304: Cannot find name 'Script'.
-parserRealSource6.ts(37,29): error TS1005: ',' expected.
 parserRealSource6.ts(37,37): error TS2304: Cannot find name 'ILogger'.
-parserRealSource6.ts(38,28): error TS1005: ',' expected.
 parserRealSource6.ts(38,36): error TS2304: Cannot find name 'Script'.
-parserRealSource6.ts(39,28): error TS1005: ',' expected.
 parserRealSource6.ts(39,34): error TS2304: Cannot find name 'ISourceText'.
-parserRealSource6.ts(40,28): error TS1005: ',' expected.
-parserRealSource6.ts(41,28): error TS1005: ',' expected.
 parserRealSource6.ts(44,28): error TS2304: Cannot find name 'SymbolScope'.
 parserRealSource6.ts(48,41): error TS2304: Cannot find name 'SymbolScope'.
 parserRealSource6.ts(60,45): error TS2304: Cannot find name 'AST'.
@@ -69,12 +59,11 @@ parserRealSource6.ts(179,86): error TS2304: Cannot find name 'FncFlags'.
 parserRealSource6.ts(212,50): error TS2304: Cannot find name 'ILogger'.
 parserRealSource6.ts(212,67): error TS2304: Cannot find name 'Script'.
 parserRealSource6.ts(212,81): error TS2304: Cannot find name 'ISourceText'.
-parserRealSource6.ts(213,23): error TS2554: Expected 10 arguments, but got 5.
 parserRealSource6.ts(215,20): error TS2339: Property 'getAstWalkerFactory' does not exist on type 'TypeScript'.
 
 
 !!! error TS6053: File '/.src/typescript.ts' not found.
-==== parserRealSource6.ts (72 errors) ====
+==== parserRealSource6.ts (61 errors) ====
     // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
     // See LICENSE.txt in the project root for complete license information.
     
@@ -87,12 +76,8 @@ parserRealSource6.ts(215,20): error TS2339: Property 'getAstWalkerFactory' does 
 !!! error TS2304: Cannot find name 'Script'.
     
             constructor (public scopeChain: ScopeChain, public checker: TypeChecker) {
-                                ~~~~~~~~~~
-!!! error TS1005: ',' expected.
                                             ~~~~~~~~~~
 !!! error TS2304: Cannot find name 'ScopeChain'.
-                                                               ~~~~~~~
-!!! error TS1005: ',' expected.
                                                                         ~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'TypeChecker'.
             }
@@ -113,14 +98,8 @@ parserRealSource6.ts(215,20): error TS2339: Property 'getAstWalkerFactory' does 
 !!! error TS2304: Cannot find name 'AstWalkOptions'.
     
             constructor (public flow: TypeFlow, public pos: number, public matchFlag: ASTFlags) {
-                                ~~~~
-!!! error TS1005: ',' expected.
                                       ~~~~~~~~
 !!! error TS2304: Cannot find name 'TypeFlow'.
-                                                       ~~~
-!!! error TS1005: ',' expected.
-                                                                           ~~~~~~~~~
-!!! error TS1005: ',' expected.
                                                                                       ~~~~~~~~
 !!! error TS2304: Cannot find name 'ASTFlags'.
             }
@@ -150,26 +129,16 @@ parserRealSource6.ts(215,20): error TS2339: Property 'getAstWalkerFactory' does 
 !!! error TS2304: Cannot find name 'Script'.
     
             constructor (public logger: ILogger,
-                                ~~~~~~
-!!! error TS1005: ',' expected.
                                         ~~~~~~~
 !!! error TS2304: Cannot find name 'ILogger'.
                         public script: Script,
-                               ~~~~~~
-!!! error TS1005: ',' expected.
                                        ~~~~~~
 !!! error TS2304: Cannot find name 'Script'.
                         public text: ISourceText,
-                               ~~~~
-!!! error TS1005: ',' expected.
                                      ~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'ISourceText'.
                         public pos: number,
-                               ~~~
-!!! error TS1005: ',' expected.
                         public isMemberCompletion: boolean) {
-                               ~~~~~~~~~~~~~~~~~~
-!!! error TS1005: ',' expected.
             }
     
             public getScope(): SymbolScope {
@@ -428,8 +397,6 @@ parserRealSource6.ts(215,20): error TS2339: Property 'getAstWalkerFactory' does 
                                                                                     ~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'ISourceText'.
             var context = new EnclosingScopeContext(logger, script, text, pos, isMemberCompletion);
-                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2554: Expected 10 arguments, but got 5.
     
             TypeScript.getAstWalkerFactory().walk(script, preFindEnclosingScope, null, null, context);
                        ~~~~~~~~~~~~~~~~~~~

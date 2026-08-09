@@ -1,12 +1,8 @@
 constraintSatisfactionWithEmptyObject.ts(4,24): error TS2304: Cannot find name 'Object'.
 constraintSatisfactionWithEmptyObject.ts(9,19): error TS2304: Cannot find name 'Object'.
-constraintSatisfactionWithEmptyObject.ts(10,24): error TS1005: ',' expected.
-constraintSatisfactionWithEmptyObject.ts(13,10): error TS2554: Expected 2 arguments, but got 1.
-constraintSatisfactionWithEmptyObject.ts(27,24): error TS1005: ',' expected.
-constraintSatisfactionWithEmptyObject.ts(30,10): error TS2554: Expected 2 arguments, but got 1.
 
 
-==== constraintSatisfactionWithEmptyObject.ts (6 errors) ====
+==== constraintSatisfactionWithEmptyObject.ts (2 errors) ====
     // valid uses of a basic object constraint, no errors expected
     
     // Object constraint
@@ -21,13 +17,9 @@ constraintSatisfactionWithEmptyObject.ts(30,10): error TS2554: Expected 2 argume
                       ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
         constructor(public x: T) { }
-                           ~
-!!! error TS1005: ',' expected.
     }
     
     var r2 = new C({});
-             ~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
     
     interface I<T extends Object> {
         x: T;
@@ -42,13 +34,9 @@ constraintSatisfactionWithEmptyObject.ts(30,10): error TS2554: Expected 2 argume
     
     class C2<T extends {}> {
         constructor(public x: T) { }
-                           ~
-!!! error TS1005: ',' expected.
     }
     
     var r2 = new C2({});
-             ~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
     
     interface I2<T extends {}> {
         x: T;

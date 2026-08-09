@@ -7,21 +7,9 @@ classStaticBlock15.ts(5,11): error TS1005: ';' expected.
 classStaticBlock15.ts(6,10): error TS1005: ';' expected.
 classStaticBlock15.ts(6,10): error TS1127: Invalid character.
 classStaticBlock15.ts(6,11): error TS1005: ';' expected.
-classStaticBlock15.ts(8,10): error TS1005: ';' expected.
-classStaticBlock15.ts(9,3): error TS2304: Cannot find name 'static'.
-classStaticBlock15.ts(9,10): error TS1005: ';' expected.
-classStaticBlock15.ts(10,3): error TS2304: Cannot find name 'static'.
-classStaticBlock15.ts(10,10): error TS1005: ';' expected.
-classStaticBlock15.ts(11,3): error TS2304: Cannot find name 'static'.
-classStaticBlock15.ts(11,10): error TS1005: ';' expected.
-classStaticBlock15.ts(12,3): error TS2304: Cannot find name 'static'.
-classStaticBlock15.ts(12,10): error TS1005: ';' expected.
-classStaticBlock15.ts(13,3): error TS2304: Cannot find name 'static'.
-classStaticBlock15.ts(13,10): error TS1005: ';' expected.
-classStaticBlock15.ts(14,1): error TS1128: Declaration or statement expected.
 
 
-==== classStaticBlock15.ts (21 errors) ====
+==== classStaticBlock15.ts (9 errors) ====
     var _C__1;
     
     class C {
@@ -48,35 +36,11 @@ classStaticBlock15.ts(14,1): error TS1128: Declaration or statement expected.
 !!! error TS1005: ';' expected.
     
       static {}
-             ~
-!!! error TS1005: ';' expected.
       static {}
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
       static {}
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
       static {}
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
       static {}
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
       static {}
-      ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-             ~
-!!! error TS1005: ';' expected.
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
     
     console.log(_C__1)

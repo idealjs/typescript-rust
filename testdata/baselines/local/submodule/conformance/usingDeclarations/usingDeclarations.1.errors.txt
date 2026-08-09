@@ -1,32 +1,19 @@
-usingDeclarations.1.ts(36,12): error TS1005: ';' expected.
-usingDeclarations.1.ts(37,15): error TS1005: ';' expected.
-usingDeclarations.1.ts(40,5): error TS2304: Cannot find name 'm'.
-usingDeclarations.1.ts(40,9): error TS1005: ';' expected.
-usingDeclarations.1.ts(44,5): error TS2304: Cannot find name 'get'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
 usingDeclarations.1.ts(44,9): error TS1005: ';' expected.
-usingDeclarations.1.ts(44,9): error TS2304: Cannot find name 'x'.
-usingDeclarations.1.ts(44,13): error TS1005: ';' expected.
-usingDeclarations.1.ts(49,5): error TS2304: Cannot find name 'set'.
 usingDeclarations.1.ts(49,9): error TS1005: ';' expected.
-usingDeclarations.1.ts(49,9): error TS2304: Cannot find name 'x'.
-usingDeclarations.1.ts(49,11): error TS2304: Cannot find name 'v'.
-usingDeclarations.1.ts(49,14): error TS1005: ';' expected.
-usingDeclarations.1.ts(53,5): error TS2304: Cannot find name 'async'.
-usingDeclarations.1.ts(53,11): error TS1005: ';' expected.
-usingDeclarations.1.ts(53,11): error TS2304: Cannot find name 'am'.
-usingDeclarations.1.ts(53,16): error TS1005: ';' expected.
-usingDeclarations.1.ts(58,5): error TS1128: Declaration or statement expected.
-usingDeclarations.1.ts(58,7): error TS2349: This expression is not callable.
-usingDeclarations.1.ts(58,11): error TS1005: ';' expected.
+usingDeclarations.1.ts(58,5): error TS1003: Identifier expected.
+usingDeclarations.1.ts(58,7): error TS1005: ';' expected.
 usingDeclarations.1.ts(60,9): error TS2304: Cannot find name 'yield'.
-usingDeclarations.1.ts(63,5): error TS2304: Cannot find name 'async'.
-usingDeclarations.1.ts(63,13): error TS2349: This expression is not callable.
-usingDeclarations.1.ts(63,18): error TS1005: ';' expected.
+usingDeclarations.1.ts(63,11): error TS1003: Identifier expected.
+usingDeclarations.1.ts(63,13): error TS1005: ';' expected.
 usingDeclarations.1.ts(65,9): error TS2304: Cannot find name 'yield'.
-usingDeclarations.1.ts(68,1): error TS1128: Declaration or statement expected.
+usingDeclarations.1.ts(73,9): error TS2349: This expression is not callable.
+usingDeclarations.1.ts(81,9): error TS2349: This expression is not callable.
+usingDeclarations.1.ts(93,9): error TS2304: Cannot find name 'Math'.
 
 
-==== usingDeclarations.1.ts (26 errors) ====
+!!! error TS2451: Cannot redeclare block-scoped variable 'x'.
+==== usingDeclarations.1.ts (11 errors) ====
     using d1 = { [Symbol.dispose]() {} };
     
     function f() {
@@ -63,67 +50,35 @@ usingDeclarations.1.ts(68,1): error TS1128: Declaration or statement expected.
         }
     
         static {
-               ~
-!!! error TS1005: ';' expected.
             using d9 = { [Symbol.dispose]() {} };
-                  ~~
-!!! error TS1005: ';' expected.
         }
     
         m() {
-        ~
-!!! error TS2304: Cannot find name 'm'.
-            ~
-!!! error TS1005: ';' expected.
             using d10 = { [Symbol.dispose]() {} };
         }
     
         get x() {
-        ~~~
-!!! error TS2304: Cannot find name 'get'.
             ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS2304: Cannot find name 'x'.
-                ~
 !!! error TS1005: ';' expected.
             using d11 = { [Symbol.dispose]() {} };
             return 0;
         }
     
         set x(v) {
-        ~~~
-!!! error TS2304: Cannot find name 'set'.
             ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS2304: Cannot find name 'x'.
-              ~
-!!! error TS2304: Cannot find name 'v'.
-                 ~
 !!! error TS1005: ';' expected.
             using d12 = { [Symbol.dispose]() {} };
         }
     
         async am() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~~
-!!! error TS1005: ';' expected.
-              ~~
-!!! error TS2304: Cannot find name 'am'.
-                   ~
-!!! error TS1005: ';' expected.
             using d13 = { [Symbol.dispose]() {} };
             await null;
         }
     
         * g() {
         ~
-!!! error TS1128: Declaration or statement expected.
+!!! error TS1003: Identifier expected.
           ~
-!!! error TS2349: This expression is not callable.
-              ~
 !!! error TS1005: ';' expected.
             using d14 = { [Symbol.dispose]() {} };
             yield;
@@ -132,11 +87,9 @@ usingDeclarations.1.ts(68,1): error TS1128: Declaration or statement expected.
         }
     
         async * ag() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
+              ~
+!!! error TS1003: Identifier expected.
                 ~~
-!!! error TS2349: This expression is not callable.
-                     ~
 !!! error TS1005: ';' expected.
             using d15 = { [Symbol.dispose]() {} };
             yield;
@@ -145,13 +98,13 @@ usingDeclarations.1.ts(68,1): error TS1128: Declaration or statement expected.
             await null;
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
     
     class C2 extends C1 {
         constructor() {
             using d16 = { [Symbol.dispose]() {} };
             super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
         }
     }
     
@@ -160,6 +113,8 @@ usingDeclarations.1.ts(68,1): error TS1128: Declaration or statement expected.
         constructor() {
             using d17 = { [Symbol.dispose]() {} };
             super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
         }
     }
     
@@ -172,6 +127,8 @@ usingDeclarations.1.ts(68,1): error TS1128: Declaration or statement expected.
     }
     
     switch (Math.random()) {
+            ~~~~
+!!! error TS2304: Cannot find name 'Math'.
         case 0: {
             using d20 = { [Symbol.dispose]() {} };
             break;

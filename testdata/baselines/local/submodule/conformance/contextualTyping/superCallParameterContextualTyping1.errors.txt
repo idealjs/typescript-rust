@@ -1,15 +1,12 @@
-superCallParameterContextualTyping1.ts(4,25): error TS1005: ',' expected.
 superCallParameterContextualTyping1.ts(11,21): error TS2349: This expression is not callable.
 superCallParameterContextualTyping1.ts(11,36): error TS2304: Cannot find name 'String'.
 
 
-==== superCallParameterContextualTyping1.ts (3 errors) ====
+==== superCallParameterContextualTyping1.ts (2 errors) ====
     ﻿// @target: es2015
     
     class A<T1, T2> {
         constructor(private map: (value: T1) => T2) {
-                         ~~~
-!!! error TS1005: ',' expected.
     
         }
     }

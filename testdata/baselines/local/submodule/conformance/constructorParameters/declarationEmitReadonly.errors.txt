@@ -1,9 +1,0 @@
-declarationEmitReadonly.ts(2,26): error TS1005: ',' expected.
-
-
-==== declarationEmitReadonly.ts (1 errors) ====
-    class C {
-        constructor(readonly x: number) {}
-                             ~
-!!! error TS1005: ',' expected.
-    }

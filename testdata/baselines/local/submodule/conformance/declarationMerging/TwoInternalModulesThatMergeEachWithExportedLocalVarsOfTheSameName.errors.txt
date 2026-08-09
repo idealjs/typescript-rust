@@ -1,7 +1,5 @@
 part2.ts(3,24): error TS2304: Cannot find name 'Point'.
-part2.ts(7,32): error TS1005: ',' expected.
 part2.ts(7,36): error TS2304: Cannot find name 'Point'.
-part2.ts(7,50): error TS1005: ',' expected.
 part2.ts(7,54): error TS2304: Cannot find name 'Point'.
 
 
@@ -21,7 +19,7 @@ part2.ts(7,54): error TS2304: Cannot find name 'Point'.
         export var Origin: Point = { x: 0, y: 0 };
     }
     
-==== part2.ts (5 errors) ====
+==== part2.ts (3 errors) ====
     export namespace A {
         // collision with 'Origin' var in other part of merged module
         export var Origin: Point = { x: 0, y: 0 };
@@ -31,12 +29,8 @@ part2.ts(7,54): error TS2304: Cannot find name 'Point'.
         export namespace Utils {
             export class Plane {
                 constructor(public tl: Point, public br: Point) { }
-                                   ~~
-!!! error TS1005: ',' expected.
                                        ~~~~~
 !!! error TS2304: Cannot find name 'Point'.
-                                                     ~~
-!!! error TS1005: ',' expected.
                                                          ~~~~~
 !!! error TS2304: Cannot find name 'Point'.
             }

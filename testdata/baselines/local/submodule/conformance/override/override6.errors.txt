@@ -1,18 +1,10 @@
-override6.ts(3,24): error TS1005: ',' expected.
-override6.ts(3,44): error TS1005: ',' expected.
-override6.ts(10,24): error TS1005: ',' expected.
-override6.ts(10,44): error TS1005: ',' expected.
 override6.ts(11,9): error TS2349: This expression is not callable.
 
 
-==== override6.ts (5 errors) ====
+==== override6.ts (1 errors) ====
     class B {
         public baz: number = 1;
         constructor(public foo: string, public bar: number) {
-                           ~~~
-!!! error TS1005: ',' expected.
-                                               ~~~
-!!! error TS1005: ',' expected.
     
         }
     }
@@ -20,10 +12,6 @@ override6.ts(11,9): error TS2349: This expression is not callable.
     class D extends B {
         public bar: number = 1
         constructor(public foo: string, public baz: number) {
-                           ~~~
-!!! error TS1005: ',' expected.
-                                               ~~~
-!!! error TS1005: ',' expected.
             super(foo, 42)
             ~~~~~
 !!! error TS2349: This expression is not callable.

@@ -1,76 +1,37 @@
-classStaticBlock26.ts(2,12): error TS1005: ';' expected.
-classStaticBlock26.ts(5,5): error TS2304: Cannot find name 'static'.
-classStaticBlock26.ts(5,12): error TS1005: ';' expected.
-classStaticBlock26.ts(8,5): error TS2304: Cannot find name 'static'.
-classStaticBlock26.ts(8,12): error TS1005: ';' expected.
-classStaticBlock26.ts(11,5): error TS2304: Cannot find name 'static'.
-classStaticBlock26.ts(11,12): error TS1005: ';' expected.
-classStaticBlock26.ts(16,5): error TS2304: Cannot find name 'static'.
-classStaticBlock26.ts(16,12): error TS1005: ';' expected.
+classStaticBlock26.ts(3,9): error TS2304: Cannot find name 'await'.
 classStaticBlock26.ts(17,12): error TS2304: Cannot find name 'await'.
-classStaticBlock26.ts(19,5): error TS2304: Cannot find name 'static'.
-classStaticBlock26.ts(19,12): error TS1005: ';' expected.
-classStaticBlock26.ts(23,5): error TS2304: Cannot find name 'static'.
-classStaticBlock26.ts(23,12): error TS1005: ';' expected.
-classStaticBlock26.ts(28,1): error TS1128: Declaration or statement expected.
 
 
-==== classStaticBlock26.ts (15 errors) ====
+==== classStaticBlock26.ts (2 errors) ====
     class C {
         static {
-               ~
-!!! error TS1005: ';' expected.
             await; // illegal
+            ~~~~~
+!!! error TS2304: Cannot find name 'await'.
         }
         static {
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~
-!!! error TS1005: ';' expected.
             await (1); // illegal
         }
         static {
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~
-!!! error TS1005: ';' expected.
             ({ [await]: 1 }); // illegal
         }
         static {
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~
-!!! error TS1005: ';' expected.
             class D {
                 [await] = 1; // illegal (computed property names are evaluated outside of a class body
             };
         }
         static {
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~
-!!! error TS1005: ';' expected.
             ({ await }); // illegal short-hand property reference
                ~~~~~
 !!! error TS2304: Cannot find name 'await'.
         }
         static {
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~
-!!! error TS1005: ';' expected.
             await: // illegal, 'await' cannot be used as a label
             break await; // illegal, 'await' cannot be used as a label
         }
         static {
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~
-!!! error TS1005: ';' expected.
             function f(await) { }
             const ff = (await) => { }
             const fff = await => { }
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.

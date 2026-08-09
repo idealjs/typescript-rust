@@ -17,16 +17,14 @@ derivedClassSuperStatementPosition.ts(68,13): error TS2304: Cannot find name 'Ma
 derivedClassSuperStatementPosition.ts(69,13): error TS2349: This expression is not callable.
 derivedClassSuperStatementPosition.ts(72,13): error TS2349: This expression is not callable.
 derivedClassSuperStatementPosition.ts(77,44): error TS2304: Cannot find name 'Object'.
-derivedClassSuperStatementPosition.ts(79,25): error TS1005: ',' expected.
 derivedClassSuperStatementPosition.ts(81,13): error TS2349: This expression is not callable.
 derivedClassSuperStatementPosition.ts(86,50): error TS2304: Cannot find name 'Object'.
-derivedClassSuperStatementPosition.ts(88,25): error TS1005: ',' expected.
 derivedClassSuperStatementPosition.ts(89,13): error TS2304: Cannot find name 'Math'.
 derivedClassSuperStatementPosition.ts(90,13): error TS2349: This expression is not callable.
 derivedClassSuperStatementPosition.ts(92,13): error TS2349: This expression is not callable.
 
 
-==== derivedClassSuperStatementPosition.ts (26 errors) ====
+==== derivedClassSuperStatementPosition.ts (24 errors) ====
     class DerivedBasic extends Object {
                                ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
@@ -144,8 +142,6 @@ derivedClassSuperStatementPosition.ts(92,13): error TS2349: This expression is n
 !!! error TS2304: Cannot find name 'Object'.
         prop = 1;
         constructor(private paramProp = 2) {
-                            ~~~~~~~~~
-!!! error TS1005: ',' expected.
             {
                 super();
                 ~~~~~
@@ -159,8 +155,6 @@ derivedClassSuperStatementPosition.ts(92,13): error TS2349: This expression is n
 !!! error TS2304: Cannot find name 'Object'.
         prop = 1;
         constructor(private paramProp = 2) {
-                            ~~~~~~~~~
-!!! error TS1005: ',' expected.
             if (Math.random()) {
                 ~~~~
 !!! error TS2304: Cannot find name 'Math'.

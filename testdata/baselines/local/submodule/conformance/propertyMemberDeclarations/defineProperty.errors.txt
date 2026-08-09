@@ -1,12 +1,9 @@
-defineProperty.ts(9,24): error TS1005: ',' expected.
-defineProperty.ts(9,33): error TS1005: ',' expected.
 defineProperty.ts(11,13): error TS1005: ';' expected.
 defineProperty.ts(17,13): error TS1005: ';' expected.
-defineProperty.ts(19,24): error TS1005: ',' expected.
 defineProperty.ts(20,9): error TS2349: This expression is not callable.
 
 
-==== defineProperty.ts (6 errors) ====
+==== defineProperty.ts (3 errors) ====
     var x: "p" = "p"
     class A {
         a = this.y
@@ -16,10 +13,6 @@ defineProperty.ts(20,9): error TS2349: This expression is not callable.
         ;[x] = 14
         m() { }
         constructor(public readonly y: number) { }
-                           ~~~~~~~~
-!!! error TS1005: ',' expected.
-                                    ~
-!!! error TS1005: ',' expected.
         z = this.y
         declare notEmitted;
                 ~~~~~~~~~~
@@ -34,8 +27,6 @@ defineProperty.ts(20,9): error TS2349: This expression is not callable.
 !!! error TS1005: ';' expected.
         z = this.ka
         constructor(public ka: number) {
-                           ~~
-!!! error TS1005: ',' expected.
             super()
             ~~~~~
 !!! error TS2349: This expression is not callable.

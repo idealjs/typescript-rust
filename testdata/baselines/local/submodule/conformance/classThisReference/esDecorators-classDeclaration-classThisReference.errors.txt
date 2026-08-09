@@ -1,76 +1,16 @@
-esDecorators-classDeclaration-classThisReference.ts(5,12): error TS1005: ';' expected.
-esDecorators-classDeclaration-classThisReference.ts(5,14): error TS1005: ';' expected.
-esDecorators-classDeclaration-classThisReference.ts(6,5): error TS2304: Cannot find name 'static'.
-esDecorators-classDeclaration-classThisReference.ts(6,12): error TS1005: ';' expected.
-esDecorators-classDeclaration-classThisReference.ts(6,15): error TS2304: Cannot find name 'any'.
-esDecorators-classDeclaration-classThisReference.ts(7,5): error TS2304: Cannot find name 'static'.
-esDecorators-classDeclaration-classThisReference.ts(7,12): error TS1005: ';' expected.
-esDecorators-classDeclaration-classThisReference.ts(7,12): error TS2304: Cannot find name 'accessor'.
-esDecorators-classDeclaration-classThisReference.ts(7,21): error TS1005: ';' expected.
-esDecorators-classDeclaration-classThisReference.ts(7,24): error TS2304: Cannot find name 'any'.
-esDecorators-classDeclaration-classThisReference.ts(8,5): error TS2304: Cannot find name 'static'.
-esDecorators-classDeclaration-classThisReference.ts(8,12): error TS1005: ';' expected.
-esDecorators-classDeclaration-classThisReference.ts(8,12): error TS2304: Cannot find name 'm'.
-esDecorators-classDeclaration-classThisReference.ts(8,16): error TS1005: ';' expected.
-esDecorators-classDeclaration-classThisReference.ts(9,5): error TS2304: Cannot find name 'static'.
-esDecorators-classDeclaration-classThisReference.ts(9,12): error TS1005: ';' expected.
-esDecorators-classDeclaration-classThisReference.ts(9,12): error TS2304: Cannot find name 'get'.
 esDecorators-classDeclaration-classThisReference.ts(9,16): error TS1005: ';' expected.
-esDecorators-classDeclaration-classThisReference.ts(9,16): error TS2304: Cannot find name 'g'.
-esDecorators-classDeclaration-classThisReference.ts(9,20): error TS1005: ';' expected.
-esDecorators-classDeclaration-classThisReference.ts(10,1): error TS1128: Declaration or statement expected.
 
 
-==== esDecorators-classDeclaration-classThisReference.ts (21 errors) ====
+==== esDecorators-classDeclaration-classThisReference.ts (1 errors) ====
     declare let dec: any;
     
     @dec
     class C {
         static { this; }
-               ~
-!!! error TS1005: ';' expected.
-                 ~~~~
-!!! error TS1005: ';' expected.
         static x: any = this;
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~
-!!! error TS1005: ';' expected.
-                  ~~~
-!!! error TS2304: Cannot find name 'any'.
         static accessor a: any = this;
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~~~~~~~~
-!!! error TS1005: ';' expected.
-               ~~~~~~~~
-!!! error TS2304: Cannot find name 'accessor'.
-                        ~
-!!! error TS1005: ';' expected.
-                           ~~~
-!!! error TS2304: Cannot find name 'any'.
         static m() { this; }
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS2304: Cannot find name 'm'.
-                   ~
-!!! error TS1005: ';' expected.
         static get g() { return this; }
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~~~
-!!! error TS1005: ';' expected.
-               ~~~
-!!! error TS2304: Cannot find name 'get'.
                    ~
-!!! error TS1005: ';' expected.
-                   ~
-!!! error TS2304: Cannot find name 'g'.
-                       ~
 !!! error TS1005: ';' expected.
     }
-    ~
-!!! error TS1128: Declaration or statement expected.

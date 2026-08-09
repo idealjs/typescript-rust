@@ -1,44 +1,23 @@
-classStaticBlockUseBeforeDef3.ts(2,12): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef3.ts(3,10): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef3.ts(3,11): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef3.ts(6,5): error TS2304: Cannot find name 'static'.
-classStaticBlockUseBeforeDef3.ts(6,12): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef3.ts(6,12): error TS2304: Cannot find name 'doSomething'.
-classStaticBlockUseBeforeDef3.ts(6,26): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef3.ts(9,1): error TS1128: Declaration or statement expected.
+classStaticBlockUseBeforeDef3.ts(14,21): error TS2448: Block-scoped variable 'FOO' used before its declaration.
 
 
-==== classStaticBlockUseBeforeDef3.ts (8 errors) ====
+==== classStaticBlockUseBeforeDef3.ts (1 errors) ====
     class A {
         static {
-               ~
-!!! error TS1005: ';' expected.
             A.doSomething(); // should not error
-             ~
-!!! error TS1005: ';' expected.
-              ~~~~~~~~~~~
-!!! error TS1005: ';' expected.
         }
     
         static doSomething() {
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~~~~~~~~~~~
-!!! error TS1005: ';' expected.
-               ~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'doSomething'.
-                             ~
-!!! error TS1005: ';' expected.
            console.log("gotcha!");
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
     
     
     class Baz {
         static {
             console.log(FOO);   // should error
+                        ~~~
+!!! error TS2448: Block-scoped variable 'FOO' used before its declaration.
         }
     }
     

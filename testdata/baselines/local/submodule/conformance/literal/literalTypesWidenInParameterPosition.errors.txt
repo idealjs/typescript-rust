@@ -1,15 +1,11 @@
-literalTypesWidenInParameterPosition.ts(3,26): error TS1005: ',' expected.
 literalTypesWidenInParameterPosition.ts(4,14): error TS2540: Cannot assign to 'noWiden' because it is a read-only property.
 literalTypesWidenInParameterPosition.ts(5,14): error TS2339: Property 'widen' does not exist on type '{ noWiden: 1 }'.
-literalTypesWidenInParameterPosition.ts(8,1): error TS2554: Expected 2 arguments, but got 1.
 
 
-==== literalTypesWidenInParameterPosition.ts (4 errors) ====
+==== literalTypesWidenInParameterPosition.ts (2 errors) ====
     class D {
         readonly noWiden = 1
         constructor(readonly widen = 2) {
-                             ~~~~~
-!!! error TS1005: ',' expected.
             this.noWiden = 5; // error
                  ~~~~~~~
 !!! error TS2540: Cannot assign to 'noWiden' because it is a read-only property.
@@ -19,5 +15,3 @@ literalTypesWidenInParameterPosition.ts(8,1): error TS2554: Expected 2 arguments
         }
     }
     new D(7); // ok
-    ~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.

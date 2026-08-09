@@ -10,19 +10,15 @@ esDecorators-classDeclaration-accessors-staticPrivate.ts(10,17): error TS1005: '
 esDecorators-classDeclaration-accessors-staticPrivate.ts(11,16): error TS1005: ';' expected.
 esDecorators-classDeclaration-accessors-staticPrivate.ts(11,16): error TS1127: Invalid character.
 esDecorators-classDeclaration-accessors-staticPrivate.ts(11,17): error TS1005: ';' expected.
-esDecorators-classDeclaration-accessors-staticPrivate.ts(12,12): error TS1005: ';' expected.
-esDecorators-classDeclaration-accessors-staticPrivate.ts(13,13): error TS1005: ';' expected.
-esDecorators-classDeclaration-accessors-staticPrivate.ts(13,14): error TS1005: ';' expected.
+esDecorators-classDeclaration-accessors-staticPrivate.ts(13,14): error TS1003: Identifier expected.
 esDecorators-classDeclaration-accessors-staticPrivate.ts(13,14): error TS1127: Invalid character.
 esDecorators-classDeclaration-accessors-staticPrivate.ts(13,15): error TS1005: ';' expected.
-esDecorators-classDeclaration-accessors-staticPrivate.ts(14,13): error TS1005: ';' expected.
-esDecorators-classDeclaration-accessors-staticPrivate.ts(14,14): error TS1005: ';' expected.
+esDecorators-classDeclaration-accessors-staticPrivate.ts(14,14): error TS1003: Identifier expected.
 esDecorators-classDeclaration-accessors-staticPrivate.ts(14,14): error TS1127: Invalid character.
 esDecorators-classDeclaration-accessors-staticPrivate.ts(14,15): error TS1005: ';' expected.
-esDecorators-classDeclaration-accessors-staticPrivate.ts(16,1): error TS1128: Declaration or statement expected.
 
 
-==== esDecorators-classDeclaration-accessors-staticPrivate.ts (22 errors) ====
+==== esDecorators-classDeclaration-accessors-staticPrivate.ts (18 errors) ====
     declare let dec: any;
     
     class C {
@@ -59,27 +55,19 @@ esDecorators-classDeclaration-accessors-staticPrivate.ts(16,1): error TS1128: De
                     ~~~~~~~
 !!! error TS1005: ';' expected.
         static {
-               ~
-!!! error TS1005: ';' expected.
             this.#method1;
-                ~
-!!! error TS1005: ';' expected.
                  ~
-!!! error TS1005: ';' expected.
+!!! error TS1003: Identifier expected.
                  ~
 !!! error TS1127: Invalid character.
                   ~~~~~~~
 !!! error TS1005: ';' expected.
             this.#method1 = 1;
-                ~
-!!! error TS1005: ';' expected.
                  ~
-!!! error TS1005: ';' expected.
+!!! error TS1003: Identifier expected.
                  ~
 !!! error TS1127: Invalid character.
                   ~~~~~~~
 !!! error TS1005: ';' expected.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.

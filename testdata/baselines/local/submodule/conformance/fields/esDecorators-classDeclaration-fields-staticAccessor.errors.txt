@@ -1,12 +1,8 @@
-esDecorators-classDeclaration-fields-staticAccessor.ts(14,12): error TS1005: ';' expected.
-esDecorators-classDeclaration-fields-staticAccessor.ts(15,13): error TS1005: ';' expected.
-esDecorators-classDeclaration-fields-staticAccessor.ts(15,14): error TS1005: ';' expected.
-esDecorators-classDeclaration-fields-staticAccessor.ts(16,13): error TS1005: ';' expected.
-esDecorators-classDeclaration-fields-staticAccessor.ts(16,14): error TS1005: ';' expected.
-esDecorators-classDeclaration-fields-staticAccessor.ts(18,1): error TS1128: Declaration or statement expected.
+esDecorators-classDeclaration-fields-staticAccessor.ts(15,14): error TS2339: Property 'field1' does not exist on type 'object'.
+esDecorators-classDeclaration-fields-staticAccessor.ts(16,14): error TS2339: Property 'field1' does not exist on type 'object'.
 
 
-==== esDecorators-classDeclaration-fields-staticAccessor.ts (6 errors) ====
+==== esDecorators-classDeclaration-fields-staticAccessor.ts (2 errors) ====
     declare let dec: any;
     
     const field3 = "field3";
@@ -21,19 +17,11 @@ esDecorators-classDeclaration-fields-staticAccessor.ts(18,1): error TS1128: Decl
     class D {
         static accessor field1 = 1;
         static {
-               ~
-!!! error TS1005: ';' expected.
             this.field1;
-                ~
-!!! error TS1005: ';' expected.
                  ~~~~~~
-!!! error TS1005: ';' expected.
+!!! error TS2339: Property 'field1' does not exist on type 'object'.
             this.field1 = 1;
-                ~
-!!! error TS1005: ';' expected.
                  ~~~~~~
-!!! error TS1005: ';' expected.
+!!! error TS2339: Property 'field1' does not exist on type 'object'.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.

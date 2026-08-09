@@ -1,62 +1,26 @@
-classStaticBlockUseBeforeDef4.ts(3,12): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef4.ts(4,13): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef4.ts(4,14): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef4.ts(6,5): error TS2304: Cannot find name 'static'.
-classStaticBlockUseBeforeDef4.ts(6,12): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef4.ts(6,12): error TS2304: Cannot find name 'accessor'.
-classStaticBlockUseBeforeDef4.ts(6,21): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef4.ts(6,21): error TS2304: Cannot find name 'y'.
-classStaticBlockUseBeforeDef4.ts(7,5): error TS2304: Cannot find name 'static'.
-classStaticBlockUseBeforeDef4.ts(7,12): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef4.ts(7,12): error TS2304: Cannot find name 'accessor'.
-classStaticBlockUseBeforeDef4.ts(7,21): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef4.ts(7,21): error TS2304: Cannot find name 'z'.
-classStaticBlockUseBeforeDef4.ts(8,5): error TS2304: Cannot find name 'static'.
-classStaticBlockUseBeforeDef4.ts(8,12): error TS1005: ';' expected.
-classStaticBlockUseBeforeDef4.ts(11,1): error TS1128: Declaration or statement expected.
+classStaticBlockUseBeforeDef4.ts(4,14): error TS2339: Property 'x' does not exist on type 'object'.
+classStaticBlockUseBeforeDef4.ts(6,30): error TS2339: Property 'x' does not exist on type 'object'.
+classStaticBlockUseBeforeDef4.ts(9,14): error TS2339: Property 'z' does not exist on type 'object'.
+classStaticBlockUseBeforeDef4.ts(9,23): error TS2339: Property 'y' does not exist on type 'object'.
 
 
-==== classStaticBlockUseBeforeDef4.ts (16 errors) ====
+==== classStaticBlockUseBeforeDef4.ts (4 errors) ====
     class C {
         static accessor x;
         static {
-               ~
-!!! error TS1005: ';' expected.
             this.x = 1;
-                ~
-!!! error TS1005: ';' expected.
                  ~
-!!! error TS1005: ';' expected.
+!!! error TS2339: Property 'x' does not exist on type 'object'.
         }
         static accessor y = this.x;
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~~~~~~~~
-!!! error TS1005: ';' expected.
-               ~~~~~~~~
-!!! error TS2304: Cannot find name 'accessor'.
-                        ~
-!!! error TS1005: ';' expected.
-                        ~
-!!! error TS2304: Cannot find name 'y'.
+                                 ~
+!!! error TS2339: Property 'x' does not exist on type 'object'.
         static accessor z;
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~~~~~~~~
-!!! error TS1005: ';' expected.
-               ~~~~~~~~
-!!! error TS2304: Cannot find name 'accessor'.
-                        ~
-!!! error TS1005: ';' expected.
-                        ~
-!!! error TS2304: Cannot find name 'z'.
         static {
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~
-!!! error TS1005: ';' expected.
             this.z = this.y;
+                 ~
+!!! error TS2339: Property 'z' does not exist on type 'object'.
+                          ~
+!!! error TS2339: Property 'y' does not exist on type 'object'.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.

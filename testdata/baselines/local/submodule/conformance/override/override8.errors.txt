@@ -1,14 +1,10 @@
 override8.ts(2,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
-override8.ts(6,24): error TS1005: ',' expected.
-override8.ts(6,42): error TS1005: ',' expected.
 override8.ts(7,9): error TS2349: This expression is not callable.
-override8.ts(12,24): error TS1005: ',' expected.
-override8.ts(18,24): error TS1005: ',' expected.
 override8.ts(19,9): error TS2349: This expression is not callable.
 override8.ts(27,9): error TS2349: This expression is not callable.
 
 
-==== override8.ts (8 errors) ====
+==== override8.ts (4 errors) ====
     class B {
         a: string
         ~
@@ -17,10 +13,6 @@ override8.ts(27,9): error TS2349: This expression is not callable.
     
     class D extends B {
         constructor(public a: string, public b: string) {
-                           ~
-!!! error TS1005: ',' expected.
-                                             ~
-!!! error TS1005: ',' expected.
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.
@@ -29,16 +21,12 @@ override8.ts(27,9): error TS2349: This expression is not callable.
     
     class BB {
         constructor(public a: string) {
-                           ~
-!!! error TS1005: ',' expected.
     
         }
     }
     
     class DD extends BB {
         constructor(public a: string) {
-                           ~
-!!! error TS1005: ',' expected.
             super(a)
             ~~~~~
 !!! error TS2349: This expression is not callable.

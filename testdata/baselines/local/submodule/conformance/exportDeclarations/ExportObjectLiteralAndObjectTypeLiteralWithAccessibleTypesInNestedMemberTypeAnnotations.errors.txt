@@ -1,17 +1,11 @@
-ExportObjectLiteralAndObjectTypeLiteralWithAccessibleTypesInNestedMemberTypeAnnotations.ts(4,28): error TS1005: ',' expected.
-ExportObjectLiteralAndObjectTypeLiteralWithAccessibleTypesInNestedMemberTypeAnnotations.ts(4,46): error TS1005: ',' expected.
 ExportObjectLiteralAndObjectTypeLiteralWithAccessibleTypesInNestedMemberTypeAnnotations.ts(7,16): error TS2322: Type 'null' is not assignable to type '{ top: { left: error; right: error }; bottom: { left: error; right: error } }'.
 
 
-==== ExportObjectLiteralAndObjectTypeLiteralWithAccessibleTypesInNestedMemberTypeAnnotations.ts (3 errors) ====
+==== ExportObjectLiteralAndObjectTypeLiteralWithAccessibleTypesInNestedMemberTypeAnnotations.ts (1 errors) ====
     namespace A {
     
         class Point {
             constructor(public x: number, public y: number) { }
-                               ~
-!!! error TS1005: ',' expected.
-                                                 ~
-!!! error TS1005: ',' expected.
         }
     
         export var UnitSquare : {

@@ -1,14 +1,10 @@
-classStaticBlock5.ts(10,12): error TS1005: ';' expected.
-classStaticBlock5.ts(11,13): error TS1005: ';' expected.
-classStaticBlock5.ts(11,14): error TS1005: ';' expected.
-classStaticBlock5.ts(12,14): error TS1005: ';' expected.
-classStaticBlock5.ts(12,15): error TS1005: ';' expected.
-classStaticBlock5.ts(13,14): error TS1005: ';' expected.
-classStaticBlock5.ts(13,15): error TS1005: ';' expected.
-classStaticBlock5.ts(15,1): error TS1128: Declaration or statement expected.
+classStaticBlock5.ts(8,22): error TS2339: Property 'a' does not exist on type 'object'.
+classStaticBlock5.ts(11,14): error TS2339: Property 'b' does not exist on type 'object'.
+classStaticBlock5.ts(12,15): error TS2339: Property 'b' does not exist on type 'object'.
+classStaticBlock5.ts(13,15): error TS2339: Property 'a' does not exist on type 'object'.
 
 
-==== classStaticBlock5.ts (8 errors) ====
+==== classStaticBlock5.ts (4 errors) ====
     class B {
         static a = 1;
         static b = 2;
@@ -17,26 +13,18 @@ classStaticBlock5.ts(15,1): error TS1128: Declaration or statement expected.
     class C extends B {
         static b = 3;
         static c = super.a
+                         ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.
     
         static {
-               ~
-!!! error TS1005: ';' expected.
             this.b;
-                ~
-!!! error TS1005: ';' expected.
                  ~
-!!! error TS1005: ';' expected.
+!!! error TS2339: Property 'b' does not exist on type 'object'.
             super.b;
-                 ~
-!!! error TS1005: ';' expected.
                   ~
-!!! error TS1005: ';' expected.
+!!! error TS2339: Property 'b' does not exist on type 'object'.
             super.a;
-                 ~
-!!! error TS1005: ';' expected.
                   ~
-!!! error TS1005: ';' expected.
+!!! error TS2339: Property 'a' does not exist on type 'object'.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.

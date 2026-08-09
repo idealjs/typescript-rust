@@ -1,9 +1,0 @@
-parserIndexSignature2.ts(2,11): error TS1005: ',' expected.
-
-
-==== parserIndexSignature2.ts (1 errors) ====
-    interface I {
-      [public a]
-              ~
-!!! error TS1005: ',' expected.
-    }

@@ -5729,6 +5729,44 @@ impl Parser {
     fn parse_parameter(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         let dot_dot_dot_token = self.parse_optional_token(SyntaxKind::DotDotDotToken);
+
+        // Parse TypeScript parameter modifiers (public, private, protected,
+        // readonly, override) used in constructor parameter properties:
+        // `constructor(public x: number)`.
+        let mut modifiers = Vec::new();
+        loop {
+            if !matches!(
+                self.token,
+                SyntaxKind::PublicKeyword
+                    | SyntaxKind::PrivateKeyword
+                    | SyntaxKind::ProtectedKeyword
+                    | SyntaxKind::ReadonlyKeyword
+                    | SyntaxKind::OverrideKeyword
+            ) {
+                break;
+            }
+            // Only treat as modifier if followed by a valid token (name or
+            // rest), not when the keyword is the actual parameter name.
+            let mut s = self.scanner.clone();
+            s.scan();
+            if s.has_preceding_line_break() {
+                break;
+            }
+            if !Self::token_can_follow_modifier(s.token()) {
+                break;
+            }
+            let kind = self.token;
+            let mpos = self.token_pos();
+            let mend = self.token_end();
+            self.next_token();
+            modifiers.push((kind, mpos, mend));
+        }
+        let modifiers = if modifiers.is_empty() {
+            None
+        } else {
+            Some(self.make_modifier_list(modifiers))
+        };
+
         let name = self.parse_identifier_or_pattern();
         let question_token = self.parse_optional_token(SyntaxKind::QuestionToken);
         let type_node = self.parse_optional_type_annotation();
@@ -5745,7 +5783,7 @@ impl Parser {
         Arc::new(Node::with_loc(
             SyntaxKind::Parameter,
             NodeData::ParameterDeclaration(ParameterDeclarationData {
-                modifiers: None,
+                modifiers,
                 dot_dot_dot_token,
                 name,
                 question_token,
@@ -6104,6 +6142,27 @@ impl Parser {
         } else {
             Some(self.make_modifier_list_with_decorators(modifiers, decorators))
         };
+
+        // Handle `static { ... }` class static block (ES2022).
+        if self.token == SyntaxKind::StaticKeyword {
+            // Check if next token is `{` on the same line.
+            let mut s = self.scanner.clone();
+            s.scan();
+            if !s.has_preceding_line_break() && s.token() == SyntaxKind::OpenBraceToken {
+                let pos = self.token_pos();
+                self.next_token(); // consume `static`
+                let body = self.parse_block();
+                let end = body.end();
+                return Arc::new(Node::with_loc(
+                    SyntaxKind::ClassStaticBlockDeclaration,
+                    NodeData::ClassStaticBlockDeclaration(ClassStaticBlockDeclarationData {
+                        modifiers: None,
+                        body,
+                    }),
+                    TextRange::new(pos, end),
+                ));
+            }
+        }
 
         let name = self.parse_property_name();
         let postfix_token = self

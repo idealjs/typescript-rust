@@ -8,17 +8,13 @@ noInfer.ts(55,61): error TS2304: Cannot find name 'NoInfer'.
 noInfer.ts(58,8): error TS2345: Argument of type '(value: { x: number }) => number' is not assignable to parameter of type '(value: T) => R'.
 noInfer.ts(62,68): error TS2304: Cannot find name 'NoInfer'.
 noInfer.ts(69,24): error TS2345: Argument of type '(a: error, b: number) => number' is not assignable to parameter of type '(a: error, b: number) => T'.
-noInfer.ts(73,25): error TS1005: ',' expected.
-noInfer.ts(73,57): error TS1005: ',' expected.
 noInfer.ts(73,65): error TS2304: Cannot find name 'NoInfer'.
 noInfer.ts(75,9): error TS1005: ';' expected.
 noInfer.ts(76,21): error TS2339: Property '_value' does not exist on type '{ get: any; value: () => T }'.
-noInfer.ts(80,25): error TS1005: ',' expected.
-noInfer.ts(80,56): error TS1005: ',' expected.
 noInfer.ts(80,64): error TS2304: Cannot find name 'NoInfer'.
 
 
-==== noInfer.ts (18 errors) ====
+==== noInfer.ts (14 errors) ====
     // NoInfer<T> is erased for primitives
     
     type T00 = NoInfer<string>;
@@ -112,10 +108,6 @@ noInfer.ts(80,64): error TS2304: Cannot find name 'NoInfer'.
     declare class ExampleClass<T> {}
     class OkClass<T> {
         constructor(private clazz: ExampleClass<T>, private _value: NoInfer<T>) {}
-                            ~~~~~
-!!! error TS1005: ',' expected.
-                                                            ~~~~~~
-!!! error TS1005: ',' expected.
                                                                     ~~~~~~~
 !!! error TS2304: Cannot find name 'NoInfer'.
     
@@ -129,10 +121,6 @@ noInfer.ts(80,64): error TS2304: Cannot find name 'NoInfer'.
     }
     class OkClass2<T> {
         constructor(private clazz: ExampleClass<T>, public _value: NoInfer<T>) {}
-                            ~~~~~
-!!! error TS1005: ',' expected.
-                                                           ~~~~~~
-!!! error TS1005: ',' expected.
                                                                    ~~~~~~~
 !!! error TS2304: Cannot find name 'NoInfer'.
     }

@@ -1,5 +1,4 @@
 error TS6053: File 'typescript.ts' not found.
-parserRealSource1.ts(65,29): error TS1005: ',' expected.
 parserRealSource1.ts(66,38): error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
 parserRealSource1.ts(67,32): error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
 parserRealSource1.ts(68,34): error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
@@ -19,7 +18,7 @@ parserRealSource1.ts(149,39): error TS1005: '>' expected.
 
 
 !!! error TS6053: File '/.src/typescript.ts' not found.
-==== parserRealSource1.ts (17 errors) ====
+==== parserRealSource1.ts (16 errors) ====
     // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
     // See LICENSE.txt in the project root for complete license information.
     
@@ -85,8 +84,6 @@ parserRealSource1.ts(149,39): error TS1005: '>' expected.
             private _fatal: boolean;
     
             constructor (public logger: ILogger) { 
-                                ~~~~~~
-!!! error TS1005: ',' expected.
                 this._information = this.logger.information();
                                          ~~~~~~
 !!! error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.

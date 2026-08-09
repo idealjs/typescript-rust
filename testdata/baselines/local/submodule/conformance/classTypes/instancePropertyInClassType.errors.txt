@@ -1,20 +1,16 @@
 instancePropertyInClassType.ts(3,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 instancePropertyInClassType.ts(4,13): error TS1005: ';' expected.
 instancePropertyInClassType.ts(7,13): error TS1005: ';' expected.
-instancePropertyInClassType.ts(9,28): error TS1005: ',' expected.
-instancePropertyInClassType.ts(9,47): error TS1005: ',' expected.
-instancePropertyInClassType.ts(12,13): error TS2554: Expected 4 arguments, but got 2.
 instancePropertyInClassType.ts(17,14): error TS2554: Expected 1 arguments, but got 0.
 instancePropertyInClassType.ts(23,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 instancePropertyInClassType.ts(24,13): error TS1005: ';' expected.
 instancePropertyInClassType.ts(27,13): error TS1005: ';' expected.
-instancePropertyInClassType.ts(29,28): error TS1005: ',' expected.
-instancePropertyInClassType.ts(29,42): error TS1005: ',' expected.
-instancePropertyInClassType.ts(32,13): error TS2554: Expected 4 arguments, but got 2.
+instancePropertyInClassType.ts(32,19): error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+instancePropertyInClassType.ts(32,22): error TS2345: Argument of type '""' is not assignable to parameter of type 'U'.
 instancePropertyInClassType.ts(37,14): error TS2554: Expected 1 arguments, but got 0.
 
 
-==== instancePropertyInClassType.ts (14 errors) ====
+==== instancePropertyInClassType.ts (10 errors) ====
     namespace NonGeneric {
         class C {
             x: string;
@@ -30,15 +26,9 @@ instancePropertyInClassType.ts(37,14): error TS2554: Expected 1 arguments, but g
 !!! error TS1005: ';' expected.
             fn() { return this; }
             constructor(public a: number, private b: number) { }
-                               ~
-!!! error TS1005: ',' expected.
-                                                  ~
-!!! error TS1005: ',' expected.
         }
     
         var c = new C(1, 2);
-                ~~~~~~~~~~~
-!!! error TS2554: Expected 4 arguments, but got 2.
         var r = c.fn();
         var r2 = r.x;
         var r3 = r.y;
@@ -64,15 +54,13 @@ instancePropertyInClassType.ts(37,14): error TS2554: Expected 1 arguments, but g
 !!! error TS1005: ';' expected.
             fn() { return this; }
             constructor(public a: T, private b: U) { }
-                               ~
-!!! error TS1005: ',' expected.
-                                             ~
-!!! error TS1005: ',' expected.
         }
     
         var c = new C(1, '');
-                ~~~~~~~~~~~~
-!!! error TS2554: Expected 4 arguments, but got 2.
+                      ~
+!!! error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+                         ~~
+!!! error TS2345: Argument of type '""' is not assignable to parameter of type 'U'.
         var r = c.fn();
         var r2 = r.x;
         var r3 = r.y;

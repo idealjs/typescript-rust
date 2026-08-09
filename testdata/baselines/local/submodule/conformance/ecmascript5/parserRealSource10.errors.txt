@@ -11,17 +11,8 @@ parserRealSource10.ts(129,49): error TS1005: ']' expected.
 parserRealSource10.ts(130,35): error TS2304: Cannot find name 'boolean'.
 parserRealSource10.ts(130,43): error TS1012: Unexpected token.
 parserRealSource10.ts(130,44): error TS1005: ']' expected.
-parserRealSource10.ts(176,29): error TS1005: ',' expected.
-parserRealSource10.ts(176,54): error TS1005: ',' expected.
-parserRealSource10.ts(177,28): error TS1005: ',' expected.
-parserRealSource10.ts(177,60): error TS1005: ',' expected.
-parserRealSource10.ts(178,28): error TS1005: ',' expected.
-parserRealSource10.ts(178,59): error TS1005: ',' expected.
-parserRealSource10.ts(179,28): error TS1005: ',' expected.
-parserRealSource10.ts(179,49): error TS1005: ',' expected.
 parserRealSource10.ts(179,54): error TS2304: Cannot find name 'ErrorRecoverySet'.
 parserRealSource10.ts(184,28): error TS2304: Cannot find name 'ErrorRecoverySet'.
-parserRealSource10.ts(186,35): error TS2554: Expected 16 arguments, but got 8.
 parserRealSource10.ts(188,34): error TS2304: Cannot find name 'NodeType'.
 parserRealSource10.ts(192,33): error TS2304: Cannot find name 'NodeType'.
 parserRealSource10.ts(198,80): error TS2304: Cannot find name 'NodeType'.
@@ -351,10 +342,6 @@ parserRealSource10.ts(311,144): error TS2304: Cannot find name 'ErrorRecoverySet
 parserRealSource10.ts(312,88): error TS2304: Cannot find name 'NodeType'.
 parserRealSource10.ts(312,128): error TS2304: Cannot find name 'NodeType'.
 parserRealSource10.ts(312,149): error TS2304: Cannot find name 'ErrorRecoverySet'.
-parserRealSource10.ts(329,29): error TS1005: ',' expected.
-parserRealSource10.ts(329,48): error TS1005: ',' expected.
-parserRealSource10.ts(329,72): error TS1005: ',' expected.
-parserRealSource10.ts(333,29): error TS1005: ',' expected.
 parserRealSource10.ts(337,37): error TS2339: Property 'tokenId' does not exist on type '{ toString: () => any; print: (line: number, outfile: any) => any; getText: () => string; classification: () => 0 | 1 | 2 | 3 | 4 | 5 | 6 }'.
 parserRealSource10.ts(337,102): error TS2339: Property 'tokenId' does not exist on type '{ toString: () => any; print: (line: number, outfile: any) => any; getText: () => string; classification: () => 0 | 1 | 2 | 3 | 4 | 5 | 6 }'.
 parserRealSource10.ts(345,36): error TS2339: Property 'tokenId' does not exist on type '{ toString: () => any; print: (line: number, outfile: any) => any; getText: () => string; classification: () => 0 | 1 | 2 | 3 | 4 | 5 | 6 }'.
@@ -362,40 +349,27 @@ parserRealSource10.ts(349,22): error TS2339: Property 'tokenId' does not exist o
 parserRealSource10.ts(353,50): error TS2339: Property 'tokenId' does not exist on type '{ toString: () => any; print: (line: number, outfile: any) => any; getText: () => string; classification: () => 0 | 1 | 2 | 3 | 4 | 5 | 6 }'.
 parserRealSource10.ts(355,52): error TS2304: Cannot find name 'NodeType'.
 parserRealSource10.ts(356,53): error TS2304: Cannot find name 'NodeType'.
-parserRealSource10.ts(367,29): error TS1005: ',' expected.
-parserRealSource10.ts(367,51): error TS1005: ',' expected.
 parserRealSource10.ts(368,13): error TS2349: This expression is not callable.
 parserRealSource10.ts(372,20): error TS2322: Type 'number | any' is not assignable to type 'string'.
 parserRealSource10.ts(372,25): error TS2339: Property 'hasEmptyFraction' does not exist on type '{ toString: () => any; print: (line: number, outfile: any) => any; getText: () => string; classification: () => 0 | 1 | 2 | 3 | 4 | 5 | 6 }'.
 parserRealSource10.ts(372,49): error TS2339: Property 'value' does not exist on type '{ toString: () => any; print: (line: number, outfile: any) => any; getText: () => string; classification: () => 0 | 1 | 2 | 3 | 4 | 5 | 6 }'.
 parserRealSource10.ts(372,80): error TS2339: Property 'value' does not exist on type '{ toString: () => any; print: (line: number, outfile: any) => any; getText: () => string; classification: () => 0 | 1 | 2 | 3 | 4 | 5 | 6 }'.
-parserRealSource10.ts(381,29): error TS1005: ',' expected.
 parserRealSource10.ts(382,13): error TS2349: This expression is not callable.
 parserRealSource10.ts(386,25): error TS2339: Property 'value' does not exist on type '{ toString: () => any; print: (line: number, outfile: any) => any; getText: () => string; classification: () => 0 | 1 | 2 | 3 | 4 | 5 | 6 }'.
-parserRealSource10.ts(395,29): error TS1005: ',' expected.
-parserRealSource10.ts(395,51): error TS1005: ',' expected.
 parserRealSource10.ts(396,13): error TS2349: This expression is not callable.
 parserRealSource10.ts(399,25): error TS2339: Property 'value' does not exist on type '{ toString: () => any; print: (line: number, outfile: any) => any; getText: () => string; classification: () => 0 | 1 | 2 | 3 | 4 | 5 | 6 }'.
-parserRealSource10.ts(407,47): error TS1005: ',' expected.
 parserRealSource10.ts(408,13): error TS2349: This expression is not callable.
 parserRealSource10.ts(412,25): error TS2339: Property 'value' does not exist on type '{ toString: () => any; print: (line: number, outfile: any) => any; getText: () => string; classification: () => 0 | 1 | 2 | 3 | 4 | 5 | 6 }'.
-parserRealSource10.ts(421,47): error TS1005: ',' expected.
-parserRealSource10.ts(421,69): error TS1005: ',' expected.
-parserRealSource10.ts(421,94): error TS1005: ',' expected.
-parserRealSource10.ts(421,119): error TS1005: ',' expected.
-parserRealSource10.ts(421,140): error TS1005: ',' expected.
 parserRealSource10.ts(422,13): error TS2349: This expression is not callable.
 parserRealSource10.ts(426,25): error TS2339: Property 'value' does not exist on type '{ toString: () => any; print: (line: number, outfile: any) => any; getText: () => string; classification: () => 0 | 1 | 2 | 3 | 4 | 5 | 6 }'.
-parserRealSource10.ts(435,28): error TS1005: ',' expected.
 parserRealSource10.ts(436,13): error TS2349: This expression is not callable.
 parserRealSource10.ts(440,25): error TS2339: Property 'regex' does not exist on type '{ toString: () => any; print: (line: number, outfile: any) => any; getText: () => string; classification: () => 0 | 1 | 2 | 3 | 4 | 5 | 6 }'.
 parserRealSource10.ts(449,41): error TS1012: Unexpected token.
 parserRealSource10.ts(449,42): error TS1005: ']' expected.
-parserRealSource10.ts(452,31): error TS2554: Expected 2 arguments, but got 1.
 
 
 !!! error TS6053: File '/.src/typescript.ts' not found.
-==== parserRealSource10.ts (393 errors) ====
+==== parserRealSource10.ts (367 errors) ====
     // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
     // See LICENSE.txt in the project root for complete license information.
     
@@ -596,25 +570,9 @@ parserRealSource10.ts(452,31): error TS2554: Expected 2 arguments, but got 1.
     
         export class TokenInfo {
             constructor (public tokenId: TokenID, public reservation: Reservation,
-                                ~~~~~~~
-!!! error TS1005: ',' expected.
-                                                         ~~~~~~~~~~~
-!!! error TS1005: ',' expected.
                         public binopPrecedence: number, public binopNodeType: number,
-                               ~~~~~~~~~~~~~~~
-!!! error TS1005: ',' expected.
-                                                               ~~~~~~~~~~~~~
-!!! error TS1005: ',' expected.
                         public unopPrecedence: number, public unopNodeType: number,
-                               ~~~~~~~~~~~~~~
-!!! error TS1005: ',' expected.
-                                                              ~~~~~~~~~~~~
-!!! error TS1005: ',' expected.
                         public text: string, public ers: ErrorRecoverySet) { }
-                               ~~~~
-!!! error TS1005: ',' expected.
-                                                    ~~~
-!!! error TS1005: ',' expected.
                                                          ~~~~~~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'ErrorRecoverySet'.
         }
@@ -626,10 +584,7 @@ parserRealSource10.ts(452,31): error TS2554: Expected 2 arguments, but got 1.
 !!! error TS2304: Cannot find name 'ErrorRecoverySet'.
             if (tokenId !== undefined) {
                 tokenTable[tokenId] = new TokenInfo(tokenId, reservation, binopPrecedence,
-                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                                                   binopNodeType, unopPrecedence, unopNodeType, text, ers);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2554: Expected 16 arguments, but got 8.
                 if (binopNodeType != NodeType.None) {
                                      ~~~~~~~~
 !!! error TS2304: Cannot find name 'NodeType'.
@@ -1430,18 +1385,10 @@ parserRealSource10.ts(452,31): error TS2554: Expected 2 arguments, but got 1.
     
         export class SavedToken {
             constructor (public tok: Token, public minChar: number, public limChar: number) { }
-                                ~~~
-!!! error TS1005: ',' expected.
-                                                   ~~~~~~~
-!!! error TS1005: ',' expected.
-                                                                           ~~~~~~~
-!!! error TS1005: ',' expected.
         }
     
         export class Token {
             constructor (public tokenId: TokenID) {
-                                ~~~~~~~
-!!! error TS1005: ',' expected.
             }
     
             public toString() {
@@ -1490,10 +1437,6 @@ parserRealSource10.ts(452,31): error TS2554: Expected 2 arguments, but got 1.
     
         export class NumberLiteralToken extends Token {
             constructor (public value: number, public hasEmptyFraction?: boolean) {
-                                ~~~~~
-!!! error TS1005: ',' expected.
-                                                      ~~~~~~~~~~~~~~~~
-!!! error TS1005: ',' expected.
                 super(TokenID.NumberLiteral);
                 ~~~~~
 !!! error TS2349: This expression is not callable.
@@ -1518,8 +1461,6 @@ parserRealSource10.ts(452,31): error TS2554: Expected 2 arguments, but got 1.
     
         export class StringLiteralToken extends Token {
             constructor (public value: string) {
-                                ~~~~~
-!!! error TS1005: ',' expected.
                 super(TokenID.StringLiteral);
                 ~~~~~
 !!! error TS2349: This expression is not callable.
@@ -1538,10 +1479,6 @@ parserRealSource10.ts(452,31): error TS2554: Expected 2 arguments, but got 1.
     
         export class IdentifierToken extends Token {
             constructor (public value: string, public hasEscapeSequence : boolean) {
-                                ~~~~~
-!!! error TS1005: ',' expected.
-                                                      ~~~~~~~~~~~~~~~~~
-!!! error TS1005: ',' expected.
                 super(TokenID.Identifier);
                 ~~~~~
 !!! error TS2349: This expression is not callable.
@@ -1558,8 +1495,6 @@ parserRealSource10.ts(452,31): error TS2554: Expected 2 arguments, but got 1.
     
         export class WhitespaceToken extends Token {
             constructor (tokenId: TokenID, public value: string) {
-                                                  ~~~~~
-!!! error TS1005: ',' expected.
                 super(tokenId);
                 ~~~~~
 !!! error TS2349: This expression is not callable.
@@ -1578,16 +1513,6 @@ parserRealSource10.ts(452,31): error TS2554: Expected 2 arguments, but got 1.
     
         export class CommentToken extends Token {
             constructor (tokenID: TokenID, public value: string, public isBlock: boolean, public startPos: number, public line: number, public endsLine: boolean) {
-                                                  ~~~~~
-!!! error TS1005: ',' expected.
-                                                                        ~~~~~~~
-!!! error TS1005: ',' expected.
-                                                                                                 ~~~~~~~~
-!!! error TS1005: ',' expected.
-                                                                                                                          ~~~~
-!!! error TS1005: ',' expected.
-                                                                                                                                               ~~~~~~~~
-!!! error TS1005: ',' expected.
                 super(tokenID);
                 ~~~~~
 !!! error TS2349: This expression is not callable.
@@ -1606,8 +1531,6 @@ parserRealSource10.ts(452,31): error TS2554: Expected 2 arguments, but got 1.
     
         export class RegularExpressionLiteralToken extends Token {
             constructor(public regex) {
-                               ~~~~~
-!!! error TS1005: ',' expected.
                 super(TokenID.RegularExpressionLiteral);
                 ~~~~~
 !!! error TS2349: This expression is not callable.
@@ -1633,8 +1556,6 @@ parserRealSource10.ts(452,31): error TS2554: Expected 2 arguments, but got 1.
         export function initializeStaticTokens() {
             for (var i = 0; i <= TokenID.LimFixed; i++) {
                 staticTokens[i] = new Token(i);
-                                  ~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 1.
             }
         }
     }

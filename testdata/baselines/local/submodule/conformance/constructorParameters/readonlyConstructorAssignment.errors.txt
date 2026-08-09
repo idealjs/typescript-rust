@@ -1,25 +1,18 @@
-readonlyConstructorAssignment.ts(4,26): error TS1005: ',' expected.
 readonlyConstructorAssignment.ts(5,14): error TS2339: Property 'x' does not exist on type 'object'.
 readonlyConstructorAssignment.ts(11,9): error TS2349: This expression is not callable.
 readonlyConstructorAssignment.ts(13,14): error TS2339: Property 'x' does not exist on type 'object'.
-readonlyConstructorAssignment.ts(20,26): error TS1005: ',' expected.
 readonlyConstructorAssignment.ts(21,9): error TS2349: This expression is not callable.
 readonlyConstructorAssignment.ts(22,14): error TS2339: Property 'x' does not exist on type 'object'.
-readonlyConstructorAssignment.ts(27,25): error TS1005: ',' expected.
-readonlyConstructorAssignment.ts(27,34): error TS1005: ',' expected.
 readonlyConstructorAssignment.ts(28,14): error TS2339: Property 'x' does not exist on type 'object'.
-readonlyConstructorAssignment.ts(34,26): error TS1005: ',' expected.
 readonlyConstructorAssignment.ts(35,9): error TS2349: This expression is not callable.
 readonlyConstructorAssignment.ts(36,14): error TS2339: Property 'x' does not exist on type 'object'.
 
 
-==== readonlyConstructorAssignment.ts (13 errors) ====
+==== readonlyConstructorAssignment.ts (8 errors) ====
     // Tests that readonly parameter properties behave like regular readonly properties
     
     class A {
         constructor(readonly x: number) {
-                             ~
-!!! error TS1005: ',' expected.
             this.x = 0;
                  ~
 !!! error TS2339: Property 'x' does not exist on type 'object'.
@@ -42,8 +35,6 @@ readonlyConstructorAssignment.ts(36,14): error TS2339: Property 'x' does not exi
         // This is the usual behavior of readonly properties:
         // if one is redeclared in a base class, then it can be assigned to.
         constructor(readonly x: number) {
-                             ~
-!!! error TS1005: ',' expected.
             super(x);
             ~~~~~
 !!! error TS2349: This expression is not callable.
@@ -55,10 +46,6 @@ readonlyConstructorAssignment.ts(36,14): error TS2339: Property 'x' does not exi
     
     class D {
         constructor(private readonly x: number) {
-                            ~~~~~~~~
-!!! error TS1005: ',' expected.
-                                     ~
-!!! error TS1005: ',' expected.
             this.x = 0;
                  ~
 !!! error TS2339: Property 'x' does not exist on type 'object'.
@@ -68,8 +55,6 @@ readonlyConstructorAssignment.ts(36,14): error TS2339: Property 'x' does not exi
     // Fails, can't redeclare readonly property
     class E extends D {
         constructor(readonly x: number) {
-                             ~
-!!! error TS1005: ',' expected.
             super(x);
             ~~~~~
 !!! error TS2349: This expression is not callable.

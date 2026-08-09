@@ -1,8 +1,7 @@
-redefinedPararameterProperty.ts(8,24): error TS1005: ',' expected.
 redefinedPararameterProperty.ts(9,9): error TS2349: This expression is not callable.
 
 
-==== redefinedPararameterProperty.ts (2 errors) ====
+==== redefinedPararameterProperty.ts (1 errors) ====
     class Base {
         a = 1;
       }
@@ -11,8 +10,6 @@ redefinedPararameterProperty.ts(9,9): error TS2349: This expression is not calla
         b = this.a /*undefined*/;
       
         constructor(public a: number) {
-                           ~
-!!! error TS1005: ',' expected.
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.

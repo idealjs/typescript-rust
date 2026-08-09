@@ -1,6 +1,5 @@
 error TS2300: Duplicate identifier '.'.
 error TS6053: File 'typescript.ts' not found.
-parserRealSource9.ts(8,29): error TS1005: ',' expected.
 parserRealSource9.ts(8,38): error TS2304: Cannot find name 'TypeChecker'.
 parserRealSource9.ts(9,48): error TS2304: Cannot find name 'TypeLink'.
 parserRealSource9.ts(9,67): error TS2304: Cannot find name 'SymbolScope'.
@@ -82,7 +81,7 @@ parserRealSource9.ts(200,48): error TS2304: Cannot find name 'IHashTable'.
 !!! error TS2300: Duplicate identifier '.'.
 
 !!! error TS6053: File '/.src/typescript.ts' not found.
-==== parserRealSource9.ts (77 errors) ====
+==== parserRealSource9.ts (76 errors) ====
     // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
     // See LICENSE.txt in the project root for complete license information.
     
@@ -91,8 +90,6 @@ parserRealSource9.ts(200,48): error TS2304: Cannot find name 'IHashTable'.
     namespace TypeScript {
         export class Binder {
             constructor (public checker: TypeChecker) { }
-                                ~~~~~~~
-!!! error TS1005: ',' expected.
                                          ~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'TypeChecker'.
             public resolveBaseTypeLinks(typeLinks: TypeLink[], scope: SymbolScope) {

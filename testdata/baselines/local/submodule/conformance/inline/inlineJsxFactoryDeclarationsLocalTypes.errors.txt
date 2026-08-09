@@ -1,10 +1,8 @@
-component.tsx(8,24): error TS1005: ',' expected.
 component.tsx(11,19): error TS2339: Property 'props' does not exist on type '{ __predomBrand: void; render: () => any }'.
 component.tsx(11,36): error TS2339: Property 'props' does not exist on type '{ __predomBrand: void; render: () => any }'.
 component.tsx(11,53): error TS2339: Property 'props' does not exist on type '{ __predomBrand: void; render: () => any }'.
 component.tsx(11,68): error TS2339: Property 'props' does not exist on type '{ __predomBrand: void; render: () => any }'.
 component.tsx(12,22): error TS2339: Property 'props' does not exist on type '{ __predomBrand: void; render: () => any }'.
-index.tsx(11,24): error TS1005: ',' expected.
 index.tsx(13,25): error TS2339: Property 'props' does not exist on type '{ __domBrand: void; render: () => any }'.
 index.tsx(13,42): error TS2339: Property 'props' does not exist on type '{ __domBrand: void; render: () => any }'.
 index.tsx(13,59): error TS2339: Property 'props' does not exist on type '{ __domBrand: void; render: () => any }'.
@@ -52,7 +50,7 @@ index.tsx(13,91): error TS2339: Property 'props' does not exist on type '{ __dom
         }
     }
     export function predom(): predom.JSX.Element;
-==== component.tsx (6 errors) ====
+==== component.tsx (5 errors) ====
     /** @jsx predom */
     import { predom } from "./renderer2"
     
@@ -61,8 +59,6 @@ index.tsx(13,91): error TS2339: Property 'props' does not exist on type '{ __dom
     export class MyClass implements predom.JSX.Element {
         __predomBrand!: void;
         constructor(public props: {x: number, y: number, children?: predom.JSX.Element[]}) {}
-                           ~~~~~
-!!! error TS1005: ',' expected.
         render() {
             return <p>
                 {this.props.x} + {this.props.y} = {this.props.x + this.props.y}
@@ -84,7 +80,7 @@ index.tsx(13,91): error TS2339: Property 'props' does not exist on type '{ __dom
     
     export default <h></h>
     
-==== index.tsx (6 errors) ====
+==== index.tsx (5 errors) ====
     /** @jsx dom */
     import { dom } from "./renderer"
     import prerendered, {MySFC, MyClass, tree} from "./component";
@@ -96,8 +92,6 @@ index.tsx(13,91): error TS2339: Property 'props' does not exist on type '{ __dom
     class DOMClass implements dom.JSX.Element {
         __domBrand!: void;
         constructor(public props: {x: number, y: number, children?: dom.JSX.Element[]}) {}
-                           ~~~~~
-!!! error TS1005: ',' expected.
         render() {
             return <p>{this.props.x} + {this.props.y} = {this.props.x + this.props.y}{...this.props.children}</p>;
                             ~~~~~

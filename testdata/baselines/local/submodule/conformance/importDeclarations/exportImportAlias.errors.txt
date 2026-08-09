@@ -1,19 +1,14 @@
-exportImportAlias.ts(7,28): error TS1005: ',' expected.
-exportImportAlias.ts(7,46): error TS1005: ',' expected.
 exportImportAlias.ts(17,12): error TS1005: '{' expected.
 exportImportAlias.ts(17,21): error TS1003: Identifier expected.
 exportImportAlias.ts(17,24): error TS1003: Identifier expected.
 exportImportAlias.ts(20,19): error TS2339: Property 'a' does not exist on type 'C'.
 exportImportAlias.ts(21,42): error TS2339: Property 'a' does not exist on type 'C'.
-exportImportAlias.ts(32,32): error TS1005: ',' expected.
-exportImportAlias.ts(32,50): error TS1005: ',' expected.
 exportImportAlias.ts(40,12): error TS1005: '{' expected.
 exportImportAlias.ts(40,21): error TS1003: Identifier expected.
 exportImportAlias.ts(40,24): error TS1003: Identifier expected.
 exportImportAlias.ts(40,26): error TS1003: Identifier expected.
 exportImportAlias.ts(43,19): error TS2339: Property 'y' does not exist on type 'Z'.
 exportImportAlias.ts(44,42): error TS2339: Property 'y' does not exist on type 'Z'.
-exportImportAlias.ts(48,28): error TS1005: ',' expected.
 exportImportAlias.ts(61,12): error TS1005: '{' expected.
 exportImportAlias.ts(61,21): error TS1003: Identifier expected.
 exportImportAlias.ts(61,24): error TS1003: Identifier expected.
@@ -22,7 +17,7 @@ exportImportAlias.ts(65,15): error TS2339: Property 'D' does not exist on type '
 exportImportAlias.ts(68,18): error TS1005: '}' expected.
 
 
-==== exportImportAlias.ts (22 errors) ====
+==== exportImportAlias.ts (17 errors) ====
     // expect no errors here
     
     namespace A {
@@ -30,10 +25,6 @@ exportImportAlias.ts(68,18): error TS1005: '}' expected.
         export var x = 'hello world'
         export class Point {
             constructor(public x: number, public y: number) { }
-                               ~
-!!! error TS1005: ',' expected.
-                                                 ~
-!!! error TS1005: ',' expected.
         }
         export namespace B {
             export interface Id {
@@ -69,10 +60,6 @@ exportImportAlias.ts(68,18): error TS1005: '}' expected.
         export namespace Y {
             export class Point {
                 constructor(public x: number, public y: number) { }
-                                   ~
-!!! error TS1005: ',' expected.
-                                                     ~
-!!! error TS1005: ',' expected.
             }
         }
     }
@@ -101,8 +88,6 @@ exportImportAlias.ts(68,18): error TS1005: '}' expected.
     namespace K {
         export class L {
             constructor(public name: string) { }
-                               ~~~~
-!!! error TS1005: ',' expected.
         }
     
         export namespace L {

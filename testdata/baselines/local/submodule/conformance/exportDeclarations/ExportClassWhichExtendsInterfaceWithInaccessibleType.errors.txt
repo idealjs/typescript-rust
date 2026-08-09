@@ -1,9 +1,7 @@
 ExportClassWhichExtendsInterfaceWithInaccessibleType.ts(10,12): error TS2420: Class 'Point2d' incorrectly implements interface '{ x: number; y: number; fromOrigin: (p: error) => number }'.
-ExportClassWhichExtendsInterfaceWithInaccessibleType.ts(11,28): error TS1005: ',' expected.
-ExportClassWhichExtendsInterfaceWithInaccessibleType.ts(11,46): error TS1005: ',' expected.
 
 
-==== ExportClassWhichExtendsInterfaceWithInaccessibleType.ts (3 errors) ====
+==== ExportClassWhichExtendsInterfaceWithInaccessibleType.ts (1 errors) ====
     namespace A {
     
         interface Point {
@@ -17,10 +15,6 @@ ExportClassWhichExtendsInterfaceWithInaccessibleType.ts(11,46): error TS1005: ',
                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             constructor(public x: number, public y: number) { }
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                               ~
-!!! error TS1005: ',' expected.
-                                                 ~
-!!! error TS1005: ',' expected.
     
     
             fromOrigin(p: Point) {

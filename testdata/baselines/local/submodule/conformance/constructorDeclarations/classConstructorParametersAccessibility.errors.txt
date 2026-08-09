@@ -1,15 +1,10 @@
-classConstructorParametersAccessibility.ts(2,24): error TS1005: ',' expected.
-classConstructorParametersAccessibility.ts(9,25): error TS1005: ',' expected.
-classConstructorParametersAccessibility.ts(16,27): error TS1005: ',' expected.
 classConstructorParametersAccessibility.ts(22,9): error TS2349: This expression is not callable.
 classConstructorParametersAccessibility.ts(23,14): error TS2339: Property 'p' does not exist on type 'object'.
 
 
-==== classConstructorParametersAccessibility.ts (5 errors) ====
+==== classConstructorParametersAccessibility.ts (2 errors) ====
     class C1 {
         constructor(public x: number) { }
-                           ~
-!!! error TS1005: ',' expected.
     }
     declare var c1: C1;
     c1.x // OK
@@ -17,8 +12,6 @@ classConstructorParametersAccessibility.ts(23,14): error TS2339: Property 'p' do
     
     class C2 {
         constructor(private p: number) { }
-                            ~
-!!! error TS1005: ',' expected.
     }
     declare var c2: C2;
     c2.p // private, error
@@ -26,8 +19,6 @@ classConstructorParametersAccessibility.ts(23,14): error TS2339: Property 'p' do
     
     class C3 {
         constructor(protected p: number) { }
-                              ~
-!!! error TS1005: ',' expected.
     }
     declare var c3: C3;
     c3.p // protected, error

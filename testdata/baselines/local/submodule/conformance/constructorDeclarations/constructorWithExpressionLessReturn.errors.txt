@@ -1,9 +1,7 @@
 constructorWithExpressionLessReturn.ts(8,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-constructorWithExpressionLessReturn.ts(15,24): error TS1005: ',' expected.
-constructorWithExpressionLessReturn.ts(21,24): error TS1005: ',' expected.
 
 
-==== constructorWithExpressionLessReturn.ts (3 errors) ====
+==== constructorWithExpressionLessReturn.ts (1 errors) ====
     class C {
         constructor() {
             return;
@@ -21,16 +19,12 @@ constructorWithExpressionLessReturn.ts(21,24): error TS1005: ',' expected.
     
     class E {
         constructor(public x: number) {
-                           ~
-!!! error TS1005: ',' expected.
             return;
         }
     }
     
     class F<T> {
         constructor(public x: T) {
-                           ~
-!!! error TS1005: ',' expected.
             return;
         }
     }

@@ -1,7 +1,5 @@
 error TS6053: File 'typescript.ts' not found.
-parserRealSource5.ts(14,29): error TS1005: ',' expected.
 parserRealSource5.ts(14,38): error TS2304: Cannot find name 'ITextWriter'.
-parserRealSource5.ts(14,58): error TS1005: ',' expected.
 parserRealSource5.ts(14,66): error TS2304: Cannot find name 'Parser'.
 parserRealSource5.ts(26,30): error TS2339: Property 'length' does not exist on type '""'.
 parserRealSource5.ts(27,17): error TS2304: Cannot find name 'CompilerDiagnostics'.
@@ -19,7 +17,7 @@ parserRealSource5.ts(38,9): error TS1128: Declaration or statement expected.
 
 
 !!! error TS6053: File '/.src/typescript.ts' not found.
-==== parserRealSource5.ts (17 errors) ====
+==== parserRealSource5.ts (15 errors) ====
     // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
     // See LICENSE.txt in the project root for complete license information.
     
@@ -34,12 +32,8 @@ parserRealSource5.ts(38,9): error TS1128: Declaration or statement expected.
             public indentAmt = 0;
     
             constructor (public outfile: ITextWriter, public parser: Parser) {
-                                ~~~~~~~
-!!! error TS1005: ',' expected.
                                          ~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'ITextWriter'.
-                                                             ~~~~~~
-!!! error TS1005: ',' expected.
                                                                      ~~~~~~
 !!! error TS2304: Cannot find name 'Parser'.
             }
