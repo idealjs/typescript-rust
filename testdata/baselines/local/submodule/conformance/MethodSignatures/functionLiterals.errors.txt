@@ -4,7 +4,6 @@ functionLiterals.ts(12,13): error TS2339: Property 'func1' does not exist on typ
 functionLiterals.ts(14,13): error TS2339: Property 'func1' does not exist on type '{ func2: (x: number) => number; func3: object }'.
 functionLiterals.ts(27,3): error TS2339: Property 'func4' does not exist on type '{ func5: object }'.
 functionLiterals.ts(28,13): error TS2339: Property 'func4' does not exist on type '{ func5: object }'.
-functionLiterals.ts(33,19): error TS2304: Cannot find name 'T'.
 functionLiterals.ts(38,4): error TS2339: Property 'func1' does not exist on type '{ func2: (x: error) => number; func3: object }'.
 functionLiterals.ts(39,4): error TS2339: Property 'func1' does not exist on type '{ func2: (x: error) => number; func3: object }'.
 functionLiterals.ts(40,15): error TS2339: Property 'func1' does not exist on type '{ func2: (x: error) => number; func3: object }'.
@@ -13,7 +12,7 @@ functionLiterals.ts(55,4): error TS2339: Property 'func4' does not exist on type
 functionLiterals.ts(56,15): error TS2339: Property 'func4' does not exist on type '{ func5: object }'.
 
 
-==== functionLiterals.ts (13 errors) ====
+==== functionLiterals.ts (12 errors) ====
     // PropName<TypeParamList>(ParamList):ReturnType is equivalent to PropName: { <TypeParamList>(ParamList): ReturnType }
     
     var b: {
@@ -59,8 +58,6 @@ functionLiterals.ts(56,15): error TS2339: Property 'func4' does not exist on typ
     var b2: {
         func1<T>(x: T): number;         // Method signature
         func2: <T>(x: T) => number;     // Function type literal
-                      ~
-!!! error TS2304: Cannot find name 'T'.
         func3: { <T>(x: T): number };   // Object type literal
     }
     

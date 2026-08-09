@@ -1,9 +1,8 @@
-generatorYieldContextualType.ts(7,62): error TS2304: Cannot find name 'AsyncGenerator'.
 generatorYieldContextualType.ts(69,5): error TS2304: Cannot find name 'AsyncGenerator'.
 generatorYieldContextualType.ts(113,43): error TS2345: Argument of type '<unknown type>' is not assignable to parameter of type '<unknown type> | 0 | 1 | 2 | 3'.
 
 
-==== generatorYieldContextualType.ts (3 errors) ====
+==== generatorYieldContextualType.ts (2 errors) ====
     declare function f1<T, R, S>(gen: () => Generator<R, T, S>): void;
     f1<0, 0, 1>(function* () {
     	const a = yield 0;
@@ -11,8 +10,6 @@ generatorYieldContextualType.ts(113,43): error TS2345: Argument of type '<unknow
     });
     
     declare function f2<T, R, S>(gen: () => Generator<R, T, S> | AsyncGenerator<R, T, S>): void;
-                                                                 ~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'AsyncGenerator'.
     f2<0, 0, 1>(async function* () {
     	const a = yield 0;
     	return 0;

@@ -1,17 +1,9 @@
-templateLiteralTypes7.ts(10,46): error TS2304: Cannot find name 'T'.
-templateLiteralTypes7.ts(10,59): error TS2304: Cannot find name 'T'.
-templateLiteralTypes7.ts(12,39): error TS2304: Cannot find name 'T'.
-templateLiteralTypes7.ts(12,52): error TS2304: Cannot find name 'T'.
 templateLiteralTypes7.ts(13,7): error TS2322: Type '(x: `${error}`) => any' is not assignable to type '(x: `${error}`) => any'.
-templateLiteralTypes7.ts(15,43): error TS2304: Cannot find name 'T'.
-templateLiteralTypes7.ts(15,56): error TS2304: Cannot find name 'T'.
 templateLiteralTypes7.ts(16,7): error TS2322: Type '(x: `${error}`) => any' is not assignable to type '(x: `${error}`) => any'.
-templateLiteralTypes7.ts(18,35): error TS2304: Cannot find name 'T'.
-templateLiteralTypes7.ts(18,48): error TS2304: Cannot find name 'T'.
 templateLiteralTypes7.ts(19,7): error TS2322: Type '(x: `${error}`) => any' is not assignable to type '(x: `${error}`) => any'.
 
 
-==== templateLiteralTypes7.ts (11 errors) ====
+==== templateLiteralTypes7.ts (3 errors) ====
     // https://github.com/microsoft/TypeScript/issues/57807
     
     interface NMap {
@@ -22,34 +14,18 @@ templateLiteralTypes7.ts(19,7): error TS2322: Type '(x: `${error}`) => any' is n
     }
     
     declare const g: <T extends 1 | 2 | 3>(x: `${T}`) => NMap[T]
-                                                 ~
-!!! error TS2304: Cannot find name 'T'.
-                                                              ~
-!!! error TS2304: Cannot find name 'T'.
     
     type G1 = <T extends 1 | 2 | 3>(x: `${T}`) => NMap[T]
-                                          ~
-!!! error TS2304: Cannot find name 'T'.
-                                                       ~
-!!! error TS2304: Cannot find name 'T'.
     const g1: G1 = g; // ok
           ~~~~~~~~~~
 !!! error TS2322: Type '(x: `${error}`) => any' is not assignable to type '(x: `${error}`) => any'.
     
     type G2 = <T extends 1 | 2 | 3 | 4>(x: `${T}`) => NMap[T]
-                                              ~
-!!! error TS2304: Cannot find name 'T'.
-                                                           ~
-!!! error TS2304: Cannot find name 'T'.
     const g2: G2 = g; // error
           ~~~~~~~~~~
 !!! error TS2322: Type '(x: `${error}`) => any' is not assignable to type '(x: `${error}`) => any'.
     
     type G3 = <T extends 1 | 2>(x: `${T}`) => NMap[T]
-                                      ~
-!!! error TS2304: Cannot find name 'T'.
-                                                   ~
-!!! error TS2304: Cannot find name 'T'.
     const g3: G3 = g; // ok
           ~~~~~~~~~~
 !!! error TS2322: Type '(x: `${error}`) => any' is not assignable to type '(x: `${error}`) => any'.

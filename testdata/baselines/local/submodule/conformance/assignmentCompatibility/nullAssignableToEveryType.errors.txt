@@ -1,13 +1,11 @@
 nullAssignableToEveryType.ts(16,8): error TS2304: Cannot find name 'Date'.
 nullAssignableToEveryType.ts(19,8): error TS2304: Cannot find name 'Object'.
-nullAssignableToEveryType.ts(29,15): error TS2304: Cannot find name 'T'.
-nullAssignableToEveryType.ts(29,21): error TS2304: Cannot find name 'T'.
 nullAssignableToEveryType.ts(30,8): error TS2304: Cannot find name 'Number'.
 nullAssignableToEveryType.ts(31,8): error TS2304: Cannot find name 'String'.
 nullAssignableToEveryType.ts(33,30): error TS2304: Cannot find name 'Date'.
 
 
-==== nullAssignableToEveryType.ts (7 errors) ====
+==== nullAssignableToEveryType.ts (5 errors) ====
     class C {
         foo: string;
     }
@@ -41,10 +39,6 @@ nullAssignableToEveryType.ts(33,30): error TS2304: Cannot find name 'Date'.
     var m: number[] = null;
     var n: { foo: string } = null;
     var o: <T>(x: T) => T = null;
-                  ~
-!!! error TS2304: Cannot find name 'T'.
-                        ~
-!!! error TS2304: Cannot find name 'T'.
     var p: Number = null;
            ~~~~~~
 !!! error TS2304: Cannot find name 'Number'.

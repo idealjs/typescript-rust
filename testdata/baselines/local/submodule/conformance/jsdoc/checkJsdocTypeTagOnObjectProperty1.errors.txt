@@ -19,7 +19,6 @@
 0.js(15,16): error TS1005: ',' expected.
 0.js(15,18): error TS1134: Variable declaration expected.
 0.js(15,20): error TS1134: Variable declaration expected.
-0.js(17,23): error TS2304: Cannot find name 'num'.
 0.js(17,27): error TS1005: ',' expected.
 0.js(17,29): error TS1134: Variable declaration expected.
 0.js(18,1): error TS1128: Declaration or statement expected.
@@ -27,7 +26,7 @@
 
 ==== checkJsdocTypeTagOnObjectProperty1.ts (0 errors) ====
     
-==== 0.js (25 errors) ====
+==== 0.js (24 errors) ====
     // @ts-check
     var lol = "hello Lol"
     const obj = {
@@ -87,8 +86,6 @@
 !!! error TS1134: Variable declaration expected.
       /** @type {function(number): number} */
       arrowFunc: (num) => num + 42
-                          ~~~
-!!! error TS2304: Cannot find name 'num'.
                               ~
 !!! error TS1005: ',' expected.
                                 ~~

@@ -3,7 +3,6 @@ dependentDestructuredVariables.ts(155,39): error TS2304: Cannot find name 'Array
 dependentDestructuredVariables.ts(195,9): error TS2367: This comparison appears to be unintentional because the types '["A", number] | ["B", string]' and '"A"' have no overlap.
 dependentDestructuredVariables.ts(204,9): error TS2367: This comparison appears to be unintentional because the types '["A", number] | ["B", string]' and '"A"' have no overlap.
 dependentDestructuredVariables.ts(213,9): error TS2367: This comparison appears to be unintentional because the types '["A", number] | ["B"]' and '"A"' have no overlap.
-dependentDestructuredVariables.ts(221,98): error TS2304: Cannot find name 'Error'.
 dependentDestructuredVariables.ts(228,13): error TS2339: Property 'message' does not exist on type '[null, unknown[]] | [error, undefined]'.
 dependentDestructuredVariables.ts(258,3): error TS2304: Cannot find name 'method'.
 dependentDestructuredVariables.ts(258,3): error TS2353: Object literal may only specify known properties, and 'method' does not exist in type 'object'.
@@ -39,7 +38,7 @@ dependentDestructuredVariables.ts(262,15): error TS1005: ':' expected.
 dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement expected.
 
 
-==== dependentDestructuredVariables.ts (39 errors) ====
+==== dependentDestructuredVariables.ts (38 errors) ====
     type Action =
         | { kind: 'A', payload: number }
         | { kind: 'B', payload: string };
@@ -271,8 +270,6 @@ dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement
     };
     
     declare function readFile(path: string, callback: (...args: [err: null, data: unknown[]] | [err: Error, data: undefined]) => void): void;
-                                                                                                     ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     
     readFile('hello', (err, data) => {
         if (err === null) {

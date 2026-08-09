@@ -2,45 +2,9 @@ assignmentCompatWithConstructSignatures6.ts(3,14): error TS2564: Property 'foo' 
 assignmentCompatWithConstructSignatures6.ts(4,30): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithConstructSignatures6.ts(5,34): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithConstructSignatures6.ts(6,35): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
-assignmentCompatWithConstructSignatures6.ts(9,19): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(9,25): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(10,20): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(11,20): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(12,23): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(12,29): error TS2304: Cannot find name 'U'.
-assignmentCompatWithConstructSignatures6.ts(13,29): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(13,35): error TS2304: Cannot find name 'U'.
-assignmentCompatWithConstructSignatures6.ts(13,41): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(14,39): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(14,57): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(15,28): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(15,43): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(15,51): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(16,26): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(16,32): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(16,40): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(17,39): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(17,45): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(17,53): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(22,27): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(22,33): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(25,28): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(28,28): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(28,34): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(31,31): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(31,37): error TS2304: Cannot find name 'U'.
-assignmentCompatWithConstructSignatures6.ts(34,37): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(34,43): error TS2304: Cannot find name 'U'.
-assignmentCompatWithConstructSignatures6.ts(34,49): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(37,39): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(37,54): error TS2304: Cannot find name 'U'.
-assignmentCompatWithConstructSignatures6.ts(37,62): error TS2304: Cannot find name 'U'.
-assignmentCompatWithConstructSignatures6.ts(40,34): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(40,40): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures6.ts(40,48): error TS2304: Cannot find name 'T'.
 
 
-==== assignmentCompatWithConstructSignatures6.ts (40 errors) ====
+==== assignmentCompatWithConstructSignatures6.ts (4 errors) ====
     // checking assignment compatibility relations for function types. All valid.
     
     class Base { foo: string; }
@@ -58,108 +22,36 @@ assignmentCompatWithConstructSignatures6.ts(40,48): error TS2304: Cannot find na
     
     interface A {
         a: new <T>(x: T) => T[];
-                      ~
-!!! error TS2304: Cannot find name 'T'.
-                            ~
-!!! error TS2304: Cannot find name 'T'.
         a2: new <T>(x: T) => string[];
-                       ~
-!!! error TS2304: Cannot find name 'T'.
         a3: new <T>(x: T) => void;
-                       ~
-!!! error TS2304: Cannot find name 'T'.
         a4: new <T, U>(x: T, y: U) => string;
-                          ~
-!!! error TS2304: Cannot find name 'T'.
-                                ~
-!!! error TS2304: Cannot find name 'U'.
         a5: new <T, U>(x: (arg: T) => U) => T;
-                                ~
-!!! error TS2304: Cannot find name 'T'.
-                                      ~
-!!! error TS2304: Cannot find name 'U'.
-                                            ~
-!!! error TS2304: Cannot find name 'T'.
         a6: new <T extends Base>(x: (arg: T) => Derived) => T;
-                                          ~
-!!! error TS2304: Cannot find name 'T'.
-                                                            ~
-!!! error TS2304: Cannot find name 'T'.
         a11: new <T>(x: { foo: T }, y: { foo: T; bar: T }) => Base;
-                               ~
-!!! error TS2304: Cannot find name 'T'.
-                                              ~
-!!! error TS2304: Cannot find name 'T'.
-                                                      ~
-!!! error TS2304: Cannot find name 'T'.
         a15: new <T>(x: { a: T; b: T }) => T[];
-                             ~
-!!! error TS2304: Cannot find name 'T'.
-                                   ~
-!!! error TS2304: Cannot find name 'T'.
-                                           ~
-!!! error TS2304: Cannot find name 'T'.
         a16: new <T extends Base>(x: { a: T; b: T }) => T[];
-                                          ~
-!!! error TS2304: Cannot find name 'T'.
-                                                ~
-!!! error TS2304: Cannot find name 'T'.
-                                                        ~
-!!! error TS2304: Cannot find name 'T'.
     }
     
     declare var x: A;
     
     declare var b: new <T>(x: T) => T[]; 
-                              ~
-!!! error TS2304: Cannot find name 'T'.
-                                    ~
-!!! error TS2304: Cannot find name 'T'.
     x.a = b;
     b = x.a;
     declare var b2: new <T>(x: T) => string[]; 
-                               ~
-!!! error TS2304: Cannot find name 'T'.
     x.a2 = b2;
     b2 = x.a2;
     declare var b3: new <T>(x: T) => T;
-                               ~
-!!! error TS2304: Cannot find name 'T'.
-                                     ~
-!!! error TS2304: Cannot find name 'T'.
     x.a3 = b3;
     b3 = x.a3;
     declare var b4: new <T, U>(x: T, y: U) => string; 
-                                  ~
-!!! error TS2304: Cannot find name 'T'.
-                                        ~
-!!! error TS2304: Cannot find name 'U'.
     x.a4 = b4;
     b4 = x.a4;
     declare var b5: new <T, U>(x: (arg: T) => U) => T; 
-                                        ~
-!!! error TS2304: Cannot find name 'T'.
-                                              ~
-!!! error TS2304: Cannot find name 'U'.
-                                                    ~
-!!! error TS2304: Cannot find name 'T'.
     x.a5 = b5;
     b5 = x.a5;
     declare var b11: new <T, U>(x: { foo: T }, y: { foo: U; bar: U }) => Base; 
-                                          ~
-!!! error TS2304: Cannot find name 'T'.
-                                                         ~
-!!! error TS2304: Cannot find name 'U'.
-                                                                 ~
-!!! error TS2304: Cannot find name 'U'.
     x.a11 = b11;
     b11 = x.a11;
     declare var b16: new <T>(x: { a: T; b: T }) => T[]; 
-                                     ~
-!!! error TS2304: Cannot find name 'T'.
-                                           ~
-!!! error TS2304: Cannot find name 'T'.
-                                                   ~
-!!! error TS2304: Cannot find name 'T'.
     x.a16 = b16;
     b16 = x.a16;

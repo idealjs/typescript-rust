@@ -1,10 +1,9 @@
-callWithSpread4.ts(15,32): error TS2304: Cannot find name 'AsyncGenerator'.
 callWithSpread4.ts(16,1): error TS2349: This expression is not callable.
 callWithSpread4.ts(27,9): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
 callWithSpread4.ts(29,1): error TS2349: This expression is not callable.
 
 
-==== callWithSpread4.ts (4 errors) ====
+==== callWithSpread4.ts (3 errors) ====
     type R = { a: number }
     type W = { b: number }
     type RW = { a: number, b: number }
@@ -20,8 +19,6 @@ callWithSpread4.ts(29,1): error TS2349: This expression is not callable.
     declare var gun: RW[]
     declare var gz: RW[]
     declare var fun: (inp: any) => AsyncGenerator<string, void, unknown>
-                                   ~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'AsyncGenerator'.
     pli(
     ~~~
 !!! error TS2349: This expression is not callable.

@@ -14,14 +14,11 @@ callChain.ts(22,1): error TS2349: This expression is not callable.
 callChain.ts(23,1): error TS2349: This expression is not callable.
 callChain.ts(24,1): error TS2349: This expression is not callable.
 callChain.ts(25,1): error TS2349: This expression is not callable.
-callChain.ts(31,43): error TS2304: Cannot find name 'T'.
-callChain.ts(31,49): error TS2304: Cannot find name 'T'.
-callChain.ts(31,55): error TS2304: Cannot find name 'T'.
 callChain.ts(33,31): error TS2349: This expression is not callable.
 callChain.ts(37,1): error TS2349: This expression is not callable.
 
 
-==== callChain.ts (21 errors) ====
+==== callChain.ts (18 errors) ====
     declare const o1: undefined | ((...args: any[]) => number);
     o1?.();
     ~~
@@ -85,12 +82,6 @@ callChain.ts(37,1): error TS2349: This expression is not callable.
     o3["b"]?.(1, ...[2, 3], 4).c;
     
     declare const o4: undefined | (<T>(f: (a: T) => T) => T);
-                                              ~
-!!! error TS2304: Cannot find name 'T'.
-                                                    ~
-!!! error TS2304: Cannot find name 'T'.
-                                                          ~
-!!! error TS2304: Cannot find name 'T'.
     declare function incr(x: number): number;
     const v: number | undefined = o4?.(incr);
                                   ~~

@@ -8,12 +8,11 @@ genericClassWithFunctionTypedMemberArguments.ts(18,22): error TS2345: Argument o
 genericClassWithFunctionTypedMemberArguments.ts(23,22): error TS2304: Cannot find name 'U'.
 genericClassWithFunctionTypedMemberArguments.ts(23,28): error TS2304: Cannot find name 'U'.
 genericClassWithFunctionTypedMemberArguments.ts(24,22): error TS2345: Argument of type '(x: T) => number' is not assignable to parameter of type '(a: T) => T'.
-genericClassWithFunctionTypedMemberArguments.ts(29,40): error TS2304: Cannot find name 'U'.
 genericClassWithFunctionTypedMemberArguments.ts(37,48): error TS2304: Cannot find name 'Z'.
 genericClassWithFunctionTypedMemberArguments.ts(46,32): error TS2304: Cannot find name 'Z'.
 
 
-==== genericClassWithFunctionTypedMemberArguments.ts (13 errors) ====
+==== genericClassWithFunctionTypedMemberArguments.ts (12 errors) ====
     // Generic functions used as arguments for function typed parameters are not used to make inferences from
     // Using function arguments, no errors expected
     
@@ -63,8 +62,6 @@ genericClassWithFunctionTypedMemberArguments.ts(46,32): error TS2304: Cannot fin
     namespace WithCandidates {
         class C<T> {
             foo2<T, U>(x: T, cb: (a: T) => U) {
-                                           ~
-!!! error TS2304: Cannot find name 'U'.
                 return cb(x);
             }
         }

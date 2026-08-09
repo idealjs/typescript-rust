@@ -22,11 +22,10 @@ restTuplesFromContextualTypes.ts(71,29): error TS2345: Argument of type '(x: B) 
 restTuplesFromContextualTypes.ts(72,15): error TS2345: Argument of type '(x: number, y: string) => number' is not assignable to parameter of type '(args: A) => B'.
 restTuplesFromContextualTypes.ts(72,45): error TS2345: Argument of type '(x: B) => number' is not assignable to parameter of type '(x: B) => C'.
 restTuplesFromContextualTypes.ts(77,26): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
-restTuplesFromContextualTypes.ts(88,46): error TS2304: Cannot find name 'Error'.
 restTuplesFromContextualTypes.ts(91,7): error TS2322: Type '(num: [number, string] | [number, error], strOrErr: any) => [number, string] | [number, error]' is not assignable to type '(params: [number, string] | [number, error]) => number'.
 
 
-==== restTuplesFromContextualTypes.ts (26 errors) ====
+==== restTuplesFromContextualTypes.ts (25 errors) ====
     declare const t1: [number, boolean, string];
     
     (function (a, b, c){})(...t1);
@@ -163,8 +162,6 @@ restTuplesFromContextualTypes.ts(91,7): error TS2322: Type '(num: [number, strin
     // Repro from #29833
     
     type ArgsUnion = [number, string] | [number, Error];
-                                                 ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     type TupleUnionFunc = (...params: ArgsUnion) => number;
     
     const funcUnionTupleNoRest: TupleUnionFunc = (num, strOrErr) => {

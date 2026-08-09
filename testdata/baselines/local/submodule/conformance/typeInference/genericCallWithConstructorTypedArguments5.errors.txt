@@ -1,8 +1,5 @@
 genericCallWithConstructorTypedArguments5.ts(4,23): error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
-genericCallWithConstructorTypedArguments5.ts(7,34): error TS2304: Cannot find name 'T'.
 genericCallWithConstructorTypedArguments5.ts(8,13): error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
-genericCallWithConstructorTypedArguments5.ts(10,36): error TS2304: Cannot find name 'T'.
-genericCallWithConstructorTypedArguments5.ts(10,42): error TS2304: Cannot find name 'T'.
 genericCallWithConstructorTypedArguments5.ts(11,14): error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
 genericCallWithConstructorTypedArguments5.ts(13,14): error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
 genericCallWithConstructorTypedArguments5.ts(16,23): error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
@@ -12,7 +9,7 @@ genericCallWithConstructorTypedArguments5.ts(22,14): error TS2345: Argument of t
 genericCallWithConstructorTypedArguments5.ts(24,14): error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
 
 
-==== genericCallWithConstructorTypedArguments5.ts (12 errors) ====
+==== genericCallWithConstructorTypedArguments5.ts (9 errors) ====
     // Generic call with parameter of object type with member of function type of n args passed object whose associated member is call signature with n+1 args
     
     function foo<T, U>(arg: { cb: new(t: T) => U }) {
@@ -22,17 +19,11 @@ genericCallWithConstructorTypedArguments5.ts(24,14): error TS2345: Argument of t
     }
     
     declare var arg: { cb: new<T>(x: T) => string };
-                                     ~
-!!! error TS2304: Cannot find name 'T'.
     var r = foo(arg); // {}
                 ~~~
 !!! error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.
     // more args not allowed
     declare var arg2: { cb: new <T>(x: T, y: T) => string };
-                                       ~
-!!! error TS2304: Cannot find name 'T'.
-                                             ~
-!!! error TS2304: Cannot find name 'T'.
     var r2 = foo(arg2); // error
                  ~~~~
 !!! error TS2345: Argument of type '{ cb: object }' is not assignable to parameter of type '{ cb: object }'.

@@ -1,16 +1,13 @@
 error TS2300: Duplicate identifier 'WriteFileOptions'.
-/node_modules/@types/node/index.d.ts(3,97): error TS2304: Cannot find name 'Error'.
 
 
 !!! error TS2300: Duplicate identifier 'WriteFileOptions'.
 ==== importingExportingTypes.ts (0 errors) ====
     
-==== /node_modules/@types/node/index.d.ts (1 errors) ====
+==== /node_modules/@types/node/index.d.ts (0 errors) ====
     declare module "fs" {
       export interface WriteFileOptions {}
       export function writeFile(path: string, data: any, options: WriteFileOptions, callback: (err: Error) => void): void;
-                                                                                                    ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     }
     
 ==== /index.js (0 errors) ====

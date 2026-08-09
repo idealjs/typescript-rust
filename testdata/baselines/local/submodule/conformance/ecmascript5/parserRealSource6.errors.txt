@@ -13,8 +13,6 @@ parserRealSource6.ts(20,35): error TS2304: Cannot find name 'TypeFlow'.
 parserRealSource6.ts(20,52): error TS1005: ',' expected.
 parserRealSource6.ts(20,72): error TS1005: ',' expected.
 parserRealSource6.ts(20,83): error TS2304: Cannot find name 'ASTFlags'.
-parserRealSource6.ts(26,35): error TS2304: Cannot find name 'SymbolScope'.
-parserRealSource6.ts(27,48): error TS2304: Cannot find name 'SymbolScope'.
 parserRealSource6.ts(28,31): error TS2304: Cannot find name 'AST'.
 parserRealSource6.ts(30,35): error TS2304: Cannot find name 'ModuleDeclaration'.
 parserRealSource6.ts(31,36): error TS2304: Cannot find name 'TypeDeclaration'.
@@ -76,7 +74,7 @@ parserRealSource6.ts(215,20): error TS2339: Property 'getAstWalkerFactory' does 
 
 
 !!! error TS6053: File '/.src/typescript.ts' not found.
-==== parserRealSource6.ts (74 errors) ====
+==== parserRealSource6.ts (72 errors) ====
     // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
     // See LICENSE.txt in the project root for complete license information.
     
@@ -131,11 +129,7 @@ parserRealSource6.ts(215,20): error TS2339: Property 'getAstWalkerFactory' does 
         export class EnclosingScopeContext {
     
             public scopeGetter: () => SymbolScope = null;
-                                      ~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'SymbolScope'.
             public objectLiteralScopeGetter: () => SymbolScope = null;
-                                                   ~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'SymbolScope'.
             public scopeStartAST: AST = null;
                                   ~~~
 !!! error TS2304: Cannot find name 'AST'.

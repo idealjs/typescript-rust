@@ -34,8 +34,6 @@ parserharness.ts(206,29): error TS2339: Property 'split' does not exist on type 
 parserharness.ts(214,18): error TS2339: Property 'indexOf' does not exist on type 'string'.
 parserharness.ts(214,38): error TS1005: '>' expected.
 parserharness.ts(220,23): error TS2304: Cannot find name 'Error'.
-parserharness.ts(231,60): error TS2304: Cannot find name 'Error'.
-parserharness.ts(236,45): error TS2304: Cannot find name 'Error'.
 parserharness.ts(245,65): error TS2304: Cannot find name 'Error'.
 parserharness.ts(250,50): error TS2304: Cannot find name 'Error'.
 parserharness.ts(258,17): error TS2339: Property 'push' does not exist on type '{ start: (fileName: string, priority: number) => void; end: (fileName: string) => void; scenarioStart: (scenario: { id: string; desc: string; pass: boolean; bugs: string[] }) => void; scenarioEnd: (scenario: { id: string; desc: string; pass: boolean; bugs: string[] }, error: error) => void; testStart: (test: { id: string; desc: string; pass: boolean; perfResults: { mean: number; min: number; max: number; stdDev: number; trials: number[] } }) => void; pass: (test: { id: string; desc: string; pass: boolean; perfResults: { mean: number; min: number; max: number; stdDev: number; trials: number[] } }) => void; bug: (test: { id: string; desc: string; pass: boolean; perfResults: { mean: number; min: number; max: number; stdDev: number; trials: number[] } }) => void; fail: (test: { id: string; desc: string; pass: boolean; perfResults: { mean: number; min: number; max: number; stdDev: number; trials: number[] } }) => void; error: (test: { id: string; desc: string; pass: boolean; perfResults: { mean: number; min: number; max: number; stdDev: number; trials: number[] } }, error: error) => void; comment: (comment: string) => void; verify: (test: { id: string; desc: string; pass: boolean; perfResults: { mean: number; min: number; max: number; stdDev: number; trials: number[] } }, passed: boolean, actual: any, expected: any, message: string) => void }[]'.
@@ -80,7 +78,7 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
 !!! error TS6053: File '/services/typescriptServices.ts' not found.
 
 !!! error TS6053: File '/.src/diff.ts' not found.
-==== parserharness.ts (69 errors) ====
+==== parserharness.ts (67 errors) ====
     ﻿// @target: es2015
     //﻿
     // Copyright (c) Microsoft Corporation.  All rights reserved.
@@ -376,15 +374,11 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
             end: (fileName?: string) => void;
             scenarioStart: (scenario: IScenarioMetadata) => void;
             scenarioEnd: (scenario: IScenarioMetadata, error?: Error) => void;
-                                                            ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
             testStart: (test: ITestMetadata) => void;
             pass: (test: ITestMetadata) => void;
             bug: (test: ITestMetadata) => void;
             fail: (test: ITestMetadata) => void;
             error: (test: ITestMetadata, error: Error) => void;
-                                             ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
             comment: (comment: string) => void;
             verify: (test: ITestMetadata, passed: boolean, actual: any, expected: any, message: string) => void;
         }

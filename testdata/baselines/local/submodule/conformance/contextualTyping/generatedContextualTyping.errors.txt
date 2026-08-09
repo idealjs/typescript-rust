@@ -298,7 +298,6 @@ generatedContextualTyping.ts(167,77): error TS2304: Cannot find name 'd1'.
 generatedContextualTyping.ts(167,81): error TS2304: Cannot find name 'd2'.
 generatedContextualTyping.ts(168,42): error TS2304: Cannot find name 'd1'.
 generatedContextualTyping.ts(168,46): error TS2304: Cannot find name 'd2'.
-generatedContextualTyping.ts(169,17): error TS2304: Cannot find name 'Array'.
 generatedContextualTyping.ts(169,47): error TS2304: Cannot find name 'd1'.
 generatedContextualTyping.ts(169,51): error TS2304: Cannot find name 'd2'.
 generatedContextualTyping.ts(170,58): error TS2304: Cannot find name 'd1'.
@@ -324,7 +323,6 @@ generatedContextualTyping.ts(179,82): error TS2304: Cannot find name 'd1'.
 generatedContextualTyping.ts(179,86): error TS2304: Cannot find name 'd2'.
 generatedContextualTyping.ts(180,47): error TS2304: Cannot find name 'd1'.
 generatedContextualTyping.ts(180,51): error TS2304: Cannot find name 'd2'.
-generatedContextualTyping.ts(181,17): error TS2304: Cannot find name 'Array'.
 generatedContextualTyping.ts(181,52): error TS2304: Cannot find name 'd1'.
 generatedContextualTyping.ts(181,56): error TS2304: Cannot find name 'd2'.
 generatedContextualTyping.ts(182,63): error TS2304: Cannot find name 'd1'.
@@ -741,7 +739,7 @@ generatedContextualTyping.ts(354,71): error TS2304: Cannot find name 'd1'.
 generatedContextualTyping.ts(354,75): error TS2304: Cannot find name 'd2'.
 
 
-==== generatedContextualTyping.ts (741 errors) ====
+==== generatedContextualTyping.ts (739 errors) ====
     class Base { private p; }
     class Derived1 extends Base { private m; }
     class Derived2 extends Base { private n; }
@@ -1511,8 +1509,6 @@ generatedContextualTyping.ts(354,75): error TS2304: Cannot find name 'd2'.
                                                  ~~
 !!! error TS2304: Cannot find name 'd2'.
     var x164: () => Array<Base> = () => { return [d1, d2]; };
-                    ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
                                                   ~~
 !!! error TS2304: Cannot find name 'd1'.
                                                       ~~
@@ -1575,8 +1571,6 @@ generatedContextualTyping.ts(354,75): error TS2304: Cannot find name 'd2'.
                                                       ~~
 !!! error TS2304: Cannot find name 'd2'.
     var x176: () => Array<Base> = function() { return [d1, d2]; };
-                    ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
                                                        ~~
 !!! error TS2304: Cannot find name 'd1'.
                                                            ~~

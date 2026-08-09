@@ -10,14 +10,12 @@ undefinedAssignableToEveryType.ts(23,5): error TS2322: Type 'undefined' is not a
 undefinedAssignableToEveryType.ts(27,5): error TS2322: Type 'undefined' is not assignable to type 'number[]'.
 undefinedAssignableToEveryType.ts(28,5): error TS2322: Type 'undefined' is not assignable to type '{ foo: string }'.
 undefinedAssignableToEveryType.ts(29,5): error TS2322: Type 'undefined' is not assignable to type '(x: error) => error'.
-undefinedAssignableToEveryType.ts(29,15): error TS2304: Cannot find name 'T'.
-undefinedAssignableToEveryType.ts(29,21): error TS2304: Cannot find name 'T'.
 undefinedAssignableToEveryType.ts(30,8): error TS2304: Cannot find name 'Number'.
 undefinedAssignableToEveryType.ts(31,8): error TS2304: Cannot find name 'String'.
 undefinedAssignableToEveryType.ts(33,30): error TS2304: Cannot find name 'Date'.
 
 
-==== undefinedAssignableToEveryType.ts (17 errors) ====
+==== undefinedAssignableToEveryType.ts (15 errors) ====
     class C {
         foo: string;
         ~~~
@@ -71,10 +69,6 @@ undefinedAssignableToEveryType.ts(33,30): error TS2304: Cannot find name 'Date'.
     var o: <T>(x: T) => T = undefined;
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2322: Type 'undefined' is not assignable to type '(x: error) => error'.
-                  ~
-!!! error TS2304: Cannot find name 'T'.
-                        ~
-!!! error TS2304: Cannot find name 'T'.
     var p: Number = undefined;
            ~~~~~~
 !!! error TS2304: Cannot find name 'Number'.

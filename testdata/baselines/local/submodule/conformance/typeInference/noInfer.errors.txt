@@ -3,12 +3,10 @@ noInfer.ts(29,50): error TS2304: Cannot find name 'NoInfer'.
 noInfer.ts(30,50): error TS2304: Cannot find name 'NoInfer'.
 noInfer.ts(31,55): error TS2304: Cannot find name 'NoInfer'.
 noInfer.ts(32,50): error TS2304: Cannot find name 'NoInfer'.
-noInfer.ts(43,61): error TS2304: Cannot find name 'NoInfer'.
 noInfer.ts(49,54): error TS2304: Cannot find name 'NoInfer'.
 noInfer.ts(55,61): error TS2304: Cannot find name 'NoInfer'.
 noInfer.ts(58,8): error TS2345: Argument of type '(value: { x: number }) => number' is not assignable to parameter of type '(value: T) => R'.
 noInfer.ts(62,68): error TS2304: Cannot find name 'NoInfer'.
-noInfer.ts(68,42): error TS2304: Cannot find name 'NoInfer'.
 noInfer.ts(69,24): error TS2345: Argument of type '(a: error, b: number) => number' is not assignable to parameter of type '(a: error, b: number) => T'.
 noInfer.ts(73,25): error TS1005: ',' expected.
 noInfer.ts(73,57): error TS1005: ',' expected.
@@ -20,7 +18,7 @@ noInfer.ts(80,56): error TS1005: ',' expected.
 noInfer.ts(80,64): error TS2304: Cannot find name 'NoInfer'.
 
 
-==== noInfer.ts (20 errors) ====
+==== noInfer.ts (18 errors) ====
     // NoInfer<T> is erased for primitives
     
     type T00 = NoInfer<string>;
@@ -74,8 +72,6 @@ noInfer.ts(80,64): error TS2304: Cannot find name 'NoInfer'.
     declare class Animal { move(): void }
     declare class Dog extends Animal { woof(): void }
     declare function doSomething<T>(value: T, getDefault: () => NoInfer<T>): void;
-                                                                ~~~~~~~
-!!! error TS2304: Cannot find name 'NoInfer'.
     
     doSomething(new Animal(), () => new Animal()); // ok
     doSomething(new Animal(), () => new Dog()); // ok
@@ -109,8 +105,6 @@ noInfer.ts(80,64): error TS2304: Cannot find name 'NoInfer'.
     doWork(comp, {}); // error
     
     declare function mutate<T>(callback: (a: NoInfer<T>, b: number) => T): T;
-                                             ~~~~~~~
-!!! error TS2304: Cannot find name 'NoInfer'.
     const mutate1 = mutate((a, b) => b);
                            ~~~~~~~~~~~
 !!! error TS2345: Argument of type '(a: error, b: number) => number' is not assignable to parameter of type '(a: error, b: number) => T'.

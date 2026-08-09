@@ -10,15 +10,13 @@ enumAssignability.ts(38,9): error TS2322: Type 'number' is not assignable to typ
 enumAssignability.ts(41,9): error TS2322: Type 'number' is not assignable to type 'number[]'.
 enumAssignability.ts(42,9): error TS2322: Type 'number' is not assignable to type '{ foo: string }'.
 enumAssignability.ts(43,9): error TS2322: Type 'number' is not assignable to type '(x: error) => error'.
-enumAssignability.ts(43,19): error TS2304: Cannot find name 'T'.
-enumAssignability.ts(43,25): error TS2304: Cannot find name 'T'.
 enumAssignability.ts(44,12): error TS2304: Cannot find name 'Number'.
 enumAssignability.ts(45,12): error TS2304: Cannot find name 'String'.
 enumAssignability.ts(47,44): error TS2304: Cannot find name 'Date'.
 enumAssignability.ts(47,60): error TS2304: Cannot find name 'Number'.
 
 
-==== enumAssignability.ts (18 errors) ====
+==== enumAssignability.ts (16 errors) ====
     // enums assignable to number, any, Object, errors unless otherwise noted
     
     enum E { A }
@@ -86,10 +84,6 @@ enumAssignability.ts(47,60): error TS2304: Cannot find name 'Number'.
         var o: <T>(x: T) => T = e;
             ~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2322: Type 'number' is not assignable to type '(x: error) => error'.
-                      ~
-!!! error TS2304: Cannot find name 'T'.
-                            ~
-!!! error TS2304: Cannot find name 'T'.
         var p: Number = e;
                ~~~~~~
 !!! error TS2304: Cannot find name 'Number'.

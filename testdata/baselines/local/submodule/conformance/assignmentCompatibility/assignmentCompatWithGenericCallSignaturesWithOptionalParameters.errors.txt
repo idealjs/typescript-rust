@@ -1,31 +1,9 @@
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(42,21): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(43,21): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(43,27): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(44,20): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(44,26): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(45,20): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(45,27): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(45,33): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(46,21): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(46,28): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(46,34): error TS2304: Cannot find name 'T'.
 assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(59,14): error TS1005: ',' expected.
 assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(59,15): error TS1134: Variable declaration expected.
 assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(60,14): error TS1005: ',' expected.
 assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(60,15): error TS1134: Variable declaration expected.
 assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(60,23): error TS1005: ',' expected.
 assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(60,25): error TS1005: ',' expected.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(98,21): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(99,21): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(99,27): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(100,20): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(100,26): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(101,20): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(101,27): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(101,33): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(102,21): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(102,28): error TS2304: Cannot find name 'T'.
-assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(102,34): error TS2304: Cannot find name 'T'.
 assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(106,30): error TS2304: Cannot find name 'T'.
 assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(107,29): error TS2304: Cannot find name 'T'.
 assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(110,31): error TS2304: Cannot find name 'T'.
@@ -46,7 +24,7 @@ assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(127,30): erro
 assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(127,36): error TS2304: Cannot find name 'T'.
 
 
-==== assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts (46 errors) ====
+==== assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts (24 errors) ====
     // call signatures in derived types must have the same or fewer optional parameters as the target for assignment
     
     namespace ClassTypeParam {
@@ -89,32 +67,10 @@ assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(127,36): erro
     
         class Base2 {
             a: <T>() => T;
-                        ~
-!!! error TS2304: Cannot find name 'T'.
             a2: <T>(x?: T) => T;
-                        ~
-!!! error TS2304: Cannot find name 'T'.
-                              ~
-!!! error TS2304: Cannot find name 'T'.
             a3: <T>(x: T) => T;
-                       ~
-!!! error TS2304: Cannot find name 'T'.
-                             ~
-!!! error TS2304: Cannot find name 'T'.
             a4: <T>(x: T, y?: T) => T;
-                       ~
-!!! error TS2304: Cannot find name 'T'.
-                              ~
-!!! error TS2304: Cannot find name 'T'.
-                                    ~
-!!! error TS2304: Cannot find name 'T'.
             a5: <T>(x?: T, y?: T) => T;
-                        ~
-!!! error TS2304: Cannot find name 'T'.
-                               ~
-!!! error TS2304: Cannot find name 'T'.
-                                     ~
-!!! error TS2304: Cannot find name 'T'.
         }
     
         class Target<T> {
@@ -179,32 +135,10 @@ assignmentCompatWithGenericCallSignaturesWithOptionalParameters.ts(127,36): erro
     
         class Base2 {
             a: <T>() => T;
-                        ~
-!!! error TS2304: Cannot find name 'T'.
             a2: <T>(x?: T) => T;
-                        ~
-!!! error TS2304: Cannot find name 'T'.
-                              ~
-!!! error TS2304: Cannot find name 'T'.
             a3: <T>(x: T) => T;
-                       ~
-!!! error TS2304: Cannot find name 'T'.
-                             ~
-!!! error TS2304: Cannot find name 'T'.
             a4: <T>(x: T, y?: T) => T;
-                       ~
-!!! error TS2304: Cannot find name 'T'.
-                              ~
-!!! error TS2304: Cannot find name 'T'.
-                                    ~
-!!! error TS2304: Cannot find name 'T'.
             a5: <T>(x?: T, y?: T) => T;
-                        ~
-!!! error TS2304: Cannot find name 'T'.
-                               ~
-!!! error TS2304: Cannot find name 'T'.
-                                     ~
-!!! error TS2304: Cannot find name 'T'.
     
             init = () => {
                 this.a = <T>() => null; // ok, same T of required params

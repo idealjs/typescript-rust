@@ -4,14 +4,10 @@ taggedTemplateContextualTyping1.ts(6,12): error TS2322: Type 'undefined' is not 
 taggedTemplateContextualTyping1.ts(13,10): error TS1005: ';' expected.
 taggedTemplateContextualTyping1.ts(14,10): error TS1005: ';' expected.
 taggedTemplateContextualTyping1.ts(15,10): error TS1005: ';' expected.
-taggedTemplateContextualTyping1.ts(15,88): error TS2304: Cannot find name 'T'.
-taggedTemplateContextualTyping1.ts(15,94): error TS2304: Cannot find name 'T'.
 taggedTemplateContextualTyping1.ts(16,10): error TS1005: ';' expected.
-taggedTemplateContextualTyping1.ts(16,25): error TS2304: Cannot find name 'T'.
-taggedTemplateContextualTyping1.ts(16,31): error TS2304: Cannot find name 'T'.
 
 
-==== taggedTemplateContextualTyping1.ts (11 errors) ====
+==== taggedTemplateContextualTyping1.ts (7 errors) ====
     type FuncType = (x: <T>(p: T) => T) => typeof x;
     
     function tempTag1<T>(templateStrs: TemplateStringsArray, f: FuncType, x: T): T;
@@ -39,14 +35,6 @@ taggedTemplateContextualTyping1.ts(16,31): error TS2304: Cannot find name 'T'.
     tempTag1 `${ x => { x<number>(undefined); return x; }                   }${ (y: <T>(p: T) => T) => { y<number>(undefined); return y } }${ undefined }`;
              ~~~
 !!! error TS1005: ';' expected.
-                                                                                           ~
-!!! error TS2304: Cannot find name 'T'.
-                                                                                                 ~
-!!! error TS2304: Cannot find name 'T'.
     tempTag1 `${ (x: <T>(p: T) => T) => { x<number>(undefined); return x; } }${ y => { y<number>(undefined); return y; }                  }${ undefined }`;
              ~~~
 !!! error TS1005: ';' expected.
-                            ~
-!!! error TS2304: Cannot find name 'T'.
-                                  ~
-!!! error TS2304: Cannot find name 'T'.

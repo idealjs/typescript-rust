@@ -1,14 +1,12 @@
 everyTypeAssignableToAny.ts(4,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 everyTypeAssignableToAny.ts(18,8): error TS2304: Cannot find name 'Date'.
 everyTypeAssignableToAny.ts(21,8): error TS2304: Cannot find name 'Object'.
-everyTypeAssignableToAny.ts(28,15): error TS2304: Cannot find name 'T'.
-everyTypeAssignableToAny.ts(28,21): error TS2304: Cannot find name 'T'.
 everyTypeAssignableToAny.ts(29,8): error TS2304: Cannot find name 'Number'.
 everyTypeAssignableToAny.ts(30,8): error TS2304: Cannot find name 'String'.
 everyTypeAssignableToAny.ts(51,44): error TS2304: Cannot find name 'Date'.
 
 
-==== everyTypeAssignableToAny.ts (8 errors) ====
+==== everyTypeAssignableToAny.ts (6 errors) ====
     var a: any;
     
     class C {
@@ -43,10 +41,6 @@ everyTypeAssignableToAny.ts(51,44): error TS2304: Cannot find name 'Date'.
     var m: number[];
     var n: { foo: string };
     var o: <T>(x: T) => T;
-                  ~
-!!! error TS2304: Cannot find name 'T'.
-                        ~
-!!! error TS2304: Cannot find name 'T'.
     var p: Number;
            ~~~~~~
 !!! error TS2304: Cannot find name 'Number'.

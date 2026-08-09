@@ -1,7 +1,3 @@
-taggedTemplateContextualTyping2.ts(1,29): error TS2304: Cannot find name 'T'.
-taggedTemplateContextualTyping2.ts(1,35): error TS2304: Cannot find name 'T'.
-taggedTemplateContextualTyping2.ts(2,32): error TS2304: Cannot find name 'T'.
-taggedTemplateContextualTyping2.ts(2,38): error TS2304: Cannot find name 'T'.
 taggedTemplateContextualTyping2.ts(4,33): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateContextualTyping2.ts(5,33): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateContextualTyping2.ts(14,10): error TS1005: ';' expected.
@@ -9,17 +5,9 @@ taggedTemplateContextualTyping2.ts(15,10): error TS1005: ';' expected.
 taggedTemplateContextualTyping2.ts(16,10): error TS1005: ';' expected.
 
 
-==== taggedTemplateContextualTyping2.ts (9 errors) ====
+==== taggedTemplateContextualTyping2.ts (5 errors) ====
     type FuncType1 = (x: <T>(p: T) => T) => typeof x;
-                                ~
-!!! error TS2304: Cannot find name 'T'.
-                                      ~
-!!! error TS2304: Cannot find name 'T'.
     type FuncType2 = (x: <S, T>(p: T) => T) => typeof x;
-                                   ~
-!!! error TS2304: Cannot find name 'T'.
-                                         ~
-!!! error TS2304: Cannot find name 'T'.
     
     function tempTag2(templateStrs: TemplateStringsArray, f: FuncType1, x: number): number;
                                     ~~~~~~~~~~~~~~~~~~~~

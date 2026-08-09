@@ -1,14 +1,6 @@
-genericContextualTypes1.ts(23,19): error TS2304: Cannot find name 'A'.
-genericContextualTypes1.ts(23,25): error TS2304: Cannot find name 'A'.
-genericContextualTypes1.ts(24,19): error TS2304: Cannot find name 'A'.
-genericContextualTypes1.ts(24,25): error TS2304: Cannot find name 'A'.
 genericContextualTypes1.ts(25,7): error TS2322: Type '(a: A) => B' is not assignable to type '(x: error) => error[]'.
-genericContextualTypes1.ts(25,19): error TS2304: Cannot find name 'A'.
-genericContextualTypes1.ts(25,25): error TS2304: Cannot find name 'A'.
 genericContextualTypes1.ts(25,36): error TS2345: Argument of type '(a: T) => T[]' is not assignable to parameter of type '(a: A) => B'.
 genericContextualTypes1.ts(26,7): error TS2322: Type '(a: A) => B' is not assignable to type '(x: error) => error[]'.
-genericContextualTypes1.ts(26,19): error TS2304: Cannot find name 'A'.
-genericContextualTypes1.ts(26,25): error TS2304: Cannot find name 'A'.
 genericContextualTypes1.ts(26,36): error TS2345: Argument of type '(x: A) => A[]' is not assignable to parameter of type '(a: A) => B'.
 genericContextualTypes1.ts(28,7): error TS2322: Type '(a: A) => C' is not assignable to type '(x: T) => { value: T[] }'.
 genericContextualTypes1.ts(28,44): error TS2345: Argument of type '(a: A) => A[]' is not assignable to parameter of type '(a: A) => B'.
@@ -31,7 +23,7 @@ genericContextualTypes1.ts(33,24): error TS1134: Variable declaration expected.
 genericContextualTypes1.ts(33,39): error TS1005: ',' expected.
 
 
-==== genericContextualTypes1.ts (31 errors) ====
+==== genericContextualTypes1.ts (23 errors) ====
     type Box<T> = { value: T };
     
     declare function wrap<A, B>(f: (a: A) => B): (a: A) => B;
@@ -55,31 +47,15 @@ genericContextualTypes1.ts(33,39): error TS1005: ',' expected.
     declare function flip<X, Y, Z>(f: (x: X, y: Y) => Z): (y: Y, x: X) => Z;
     
     const f00: <A>(x: A) => A[] = list;
-                      ~
-!!! error TS2304: Cannot find name 'A'.
-                            ~
-!!! error TS2304: Cannot find name 'A'.
     const f01: <A>(x: A) => A[] = x => [x];
-                      ~
-!!! error TS2304: Cannot find name 'A'.
-                            ~
-!!! error TS2304: Cannot find name 'A'.
     const f02: <A>(x: A) => A[] = wrap(list);
           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2322: Type '(a: A) => B' is not assignable to type '(x: error) => error[]'.
-                      ~
-!!! error TS2304: Cannot find name 'A'.
-                            ~
-!!! error TS2304: Cannot find name 'A'.
                                        ~~~~
 !!! error TS2345: Argument of type '(a: T) => T[]' is not assignable to parameter of type '(a: A) => B'.
     const f03: <A>(x: A) => A[] = wrap(x => [x]);
           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2322: Type '(a: A) => B' is not assignable to type '(x: error) => error[]'.
-                      ~
-!!! error TS2304: Cannot find name 'A'.
-                            ~
-!!! error TS2304: Cannot find name 'A'.
                                        ~~~~~~~~
 !!! error TS2345: Argument of type '(x: A) => A[]' is not assignable to parameter of type '(a: A) => B'.
     

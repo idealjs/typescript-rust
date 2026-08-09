@@ -6,27 +6,9 @@ keyofAndIndexedAccess.ts(115,48): error TS2304: Cannot find name 'K'.
 keyofAndIndexedAccess.ts(118,48): error TS2304: Cannot find name 'K'.
 keyofAndIndexedAccess.ts(118,67): error TS2304: Cannot find name 'K'.
 keyofAndIndexedAccess.ts(133,18): error TS2339: Property 'map' does not exist on type 'T[]'.
-keyofAndIndexedAccess.ts(220,42): error TS2304: Cannot find name 'U'.
-keyofAndIndexedAccess.ts(220,61): error TS2304: Cannot find name 'U'.
 keyofAndIndexedAccess.ts(221,50): error TS2345: Argument of type '"a"' is not assignable to parameter of type 'never'.
 keyofAndIndexedAccess.ts(222,50): error TS2345: Argument of type '"a"' is not assignable to parameter of type 'never'.
 keyofAndIndexedAccess.ts(223,50): error TS2345: Argument of type '"a"' is not assignable to parameter of type 'never'.
-keyofAndIndexedAccess.ts(226,36): error TS2304: Cannot find name 'U'.
-keyofAndIndexedAccess.ts(233,53): error TS2304: Cannot find name 'U'.
-keyofAndIndexedAccess.ts(233,65): error TS2304: Cannot find name 'U'.
-keyofAndIndexedAccess.ts(233,71): error TS2304: Cannot find name 'K'.
-keyofAndIndexedAccess.ts(233,82): error TS2304: Cannot find name 'U'.
-keyofAndIndexedAccess.ts(233,85): error TS2304: Cannot find name 'K'.
-keyofAndIndexedAccess.ts(239,48): error TS2304: Cannot find name 'U'.
-keyofAndIndexedAccess.ts(239,61): error TS2304: Cannot find name 'U'.
-keyofAndIndexedAccess.ts(239,67): error TS2304: Cannot find name 'K'.
-keyofAndIndexedAccess.ts(239,78): error TS2304: Cannot find name 'U'.
-keyofAndIndexedAccess.ts(239,81): error TS2304: Cannot find name 'K'.
-keyofAndIndexedAccess.ts(245,48): error TS2304: Cannot find name 'U'.
-keyofAndIndexedAccess.ts(245,61): error TS2304: Cannot find name 'U'.
-keyofAndIndexedAccess.ts(245,67): error TS2304: Cannot find name 'K'.
-keyofAndIndexedAccess.ts(245,78): error TS2304: Cannot find name 'U'.
-keyofAndIndexedAccess.ts(245,81): error TS2304: Cannot find name 'K'.
 keyofAndIndexedAccess.ts(273,43): error TS2345: Argument of type '"foo"' is not assignable to parameter of type 'never'.
 keyofAndIndexedAccess.ts(274,38): error TS2345: Argument of type '"bar"' is not assignable to parameter of type 'never'.
 keyofAndIndexedAccess.ts(279,36): error TS2304: Cannot find name 'K'.
@@ -64,7 +46,7 @@ keyofAndIndexedAccess.ts(389,96): error TS1005: ',' expected.
 !!! error TS2451: Cannot redeclare block-scoped variable 'T'.
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'K1'.
-==== keyofAndIndexedAccess.ts (53 errors) ====
+==== keyofAndIndexedAccess.ts (35 errors) ====
     class Shape {
         name: string;
         width: number;
@@ -293,10 +275,6 @@ keyofAndIndexedAccess.ts(389,96): error TS1005: ',' expected.
     }
     
     function f70(func: <T, U>(k1: keyof (T | U), k2: keyof (T & U)) => void) {
-                                             ~
-!!! error TS2304: Cannot find name 'U'.
-                                                                ~
-!!! error TS2304: Cannot find name 'U'.
         func<{ a: any, b: any }, { a: any, c: any }>('a', 'a');
                                                      ~~~
 !!! error TS2345: Argument of type '"a"' is not assignable to parameter of type 'never'.
@@ -309,8 +287,6 @@ keyofAndIndexedAccess.ts(389,96): error TS1005: ',' expected.
     }
     
     function f71(func: <T, U>(x: T, y: U) => Partial<T & U>) {
-                                       ~
-!!! error TS2304: Cannot find name 'U'.
         let x = func({ a: 1, b: "hello" }, { c: true });
         x.a;  // number | undefined
         x.b;  // string | undefined
@@ -318,48 +294,18 @@ keyofAndIndexedAccess.ts(389,96): error TS1005: ',' expected.
     }
     
     function f72(func: <T, U, K extends keyof T | keyof U>(x: T, y: U, k: K) => (T & U)[K]) {
-                                                        ~
-!!! error TS2304: Cannot find name 'U'.
-                                                                    ~
-!!! error TS2304: Cannot find name 'U'.
-                                                                          ~
-!!! error TS2304: Cannot find name 'K'.
-                                                                                     ~
-!!! error TS2304: Cannot find name 'U'.
-                                                                                        ~
-!!! error TS2304: Cannot find name 'K'.
         let a = func({ a: 1, b: "hello" }, { c: true }, 'a');  // number
         let b = func({ a: 1, b: "hello" }, { c: true }, 'b');  // string
         let c = func({ a: 1, b: "hello" }, { c: true }, 'c');  // boolean
     }
     
     function f73(func: <T, U, K extends keyof (T & U)>(x: T, y: U, k: K) => (T & U)[K]) {
-                                                   ~
-!!! error TS2304: Cannot find name 'U'.
-                                                                ~
-!!! error TS2304: Cannot find name 'U'.
-                                                                      ~
-!!! error TS2304: Cannot find name 'K'.
-                                                                                 ~
-!!! error TS2304: Cannot find name 'U'.
-                                                                                    ~
-!!! error TS2304: Cannot find name 'K'.
         let a = func({ a: 1, b: "hello" }, { c: true }, 'a');  // number
         let b = func({ a: 1, b: "hello" }, { c: true }, 'b');  // string
         let c = func({ a: 1, b: "hello" }, { c: true }, 'c');  // boolean
     }
     
     function f74(func: <T, U, K extends keyof (T | U)>(x: T, y: U, k: K) => (T | U)[K]) {
-                                                   ~
-!!! error TS2304: Cannot find name 'U'.
-                                                                ~
-!!! error TS2304: Cannot find name 'U'.
-                                                                      ~
-!!! error TS2304: Cannot find name 'K'.
-                                                                                 ~
-!!! error TS2304: Cannot find name 'U'.
-                                                                                    ~
-!!! error TS2304: Cannot find name 'K'.
         let a = func({ a: 1, b: "hello" }, { a: 2, b: true }, 'a');  // number
         let b = func({ a: 1, b: "hello" }, { a: 2, b: true }, 'b');  // string | boolean
     }

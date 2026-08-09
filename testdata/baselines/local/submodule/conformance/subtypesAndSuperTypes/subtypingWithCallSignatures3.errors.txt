@@ -2,9 +2,6 @@ subtypingWithCallSignatures3.ts(5,18): error TS2564: Property 'foo' has no initi
 subtypingWithCallSignatures3.ts(6,34): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 subtypingWithCallSignatures3.ts(7,38): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
 subtypingWithCallSignatures3.ts(8,39): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
-subtypingWithCallSignatures3.ts(25,36): error TS2304: Cannot find name 'Array'.
-subtypingWithCallSignatures3.ts(25,52): error TS2304: Cannot find name 'Array'.
-subtypingWithCallSignatures3.ts(25,72): error TS2304: Cannot find name 'Array'.
 subtypingWithCallSignatures3.ts(56,21): error TS1005: '>' expected.
 subtypingWithCallSignatures3.ts(56,23): error TS1005: ',' expected.
 subtypingWithCallSignatures3.ts(56,23): error TS2304: Cannot find name 'U'.
@@ -167,7 +164,7 @@ subtypingWithCallSignatures3.ts(116,32): error TS2304: Cannot find name 'T'.
 subtypingWithCallSignatures3.ts(117,14): error TS2304: Cannot find name 'foo3'.
 
 
-==== subtypingWithCallSignatures3.ts (167 errors) ====
+==== subtypingWithCallSignatures3.ts (164 errors) ====
     // checking subtype relations for function types as it relates to contextual signature instantiation
     // error cases, so function calls will all result in 'any'
     
@@ -201,12 +198,6 @@ subtypingWithCallSignatures3.ts(117,14): error TS2304: Cannot find name 'foo3'.
         declare function foo11(a2: any): any;
     
         declare function foo12(a2: (x: Array<Base>, y: Array<Derived2>) => Array<Derived>): typeof a2;
-                                       ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
-                                                       ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
-                                                                           ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
         declare function foo12(a2: any): any;
     
         declare function foo15(a2: (x: { a: string; b: number }) => number): typeof a2;

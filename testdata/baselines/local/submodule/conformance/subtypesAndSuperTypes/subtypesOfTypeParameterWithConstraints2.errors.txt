@@ -14,15 +14,13 @@ subtypesOfTypeParameterWithConstraints2.ts(74,23): error TS2304: Cannot find nam
 subtypesOfTypeParameterWithConstraints2.ts(75,25): error TS2304: Cannot find name 'Date'.
 subtypesOfTypeParameterWithConstraints2.ts(76,29): error TS2304: Cannot find name 'Date'.
 subtypesOfTypeParameterWithConstraints2.ts(79,23): error TS2304: Cannot find name 'RegExp'.
-subtypesOfTypeParameterWithConstraints2.ts(94,31): error TS2304: Cannot find name 'U'.
-subtypesOfTypeParameterWithConstraints2.ts(94,37): error TS2304: Cannot find name 'U'.
 subtypesOfTypeParameterWithConstraints2.ts(149,24): error TS2304: Cannot find name 'Number'.
 subtypesOfTypeParameterWithConstraints2.ts(150,26): error TS2304: Cannot find name 'Object'.
 subtypesOfTypeParameterWithConstraints2.ts(151,30): error TS2304: Cannot find name 'Object'.
 subtypesOfTypeParameterWithConstraints2.ts(154,24): error TS2304: Cannot find name 'Number'.
 
 
-==== subtypesOfTypeParameterWithConstraints2.ts (22 errors) ====
+==== subtypesOfTypeParameterWithConstraints2.ts (20 errors) ====
     // checking whether other types are subtypes of type parameters with constraints
     
     function f1<T extends U, U>(x: T, y: U) {
@@ -149,10 +147,6 @@ subtypesOfTypeParameterWithConstraints2.ts(154,24): error TS2304: Cannot find na
     }
     
     function f12<T extends <U>(x: U) => U>(x: T) {
-                                  ~
-!!! error TS2304: Cannot find name 'U'.
-                                        ~
-!!! error TS2304: Cannot find name 'U'.
         var r8 = true ? <T>(x: T) => { return x } : x; // ok
         var r8b = true ? x : <T>(x: T) => { return x }; // ok, type parameters not identical across declarations
     }

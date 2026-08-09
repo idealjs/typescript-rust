@@ -2,48 +2,9 @@ assignmentCompatWithConstructSignatures4.ts(4,18): error TS2564: Property 'foo' 
 assignmentCompatWithConstructSignatures4.ts(5,34): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithConstructSignatures4.ts(6,38): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithConstructSignatures4.ts(7,39): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
-assignmentCompatWithConstructSignatures4.ts(16,34): error TS2304: Cannot find name 'Array'.
-assignmentCompatWithConstructSignatures4.ts(16,50): error TS2304: Cannot find name 'Array'.
-assignmentCompatWithConstructSignatures4.ts(16,70): error TS2304: Cannot find name 'Array'.
-assignmentCompatWithConstructSignatures4.ts(43,39): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(43,45): error TS2304: Cannot find name 'U'.
-assignmentCompatWithConstructSignatures4.ts(47,94): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(47,100): error TS2304: Cannot find name 'U'.
-assignmentCompatWithConstructSignatures4.ts(47,110): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(47,116): error TS2304: Cannot find name 'V'.
-assignmentCompatWithConstructSignatures4.ts(51,74): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(51,80): error TS2304: Cannot find name 'U'.
-assignmentCompatWithConstructSignatures4.ts(51,114): error TS2304: Cannot find name 'U'.
-assignmentCompatWithConstructSignatures4.ts(51,124): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(51,130): error TS2304: Cannot find name 'U'.
-assignmentCompatWithConstructSignatures4.ts(56,56): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(56,64): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(60,53): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(60,59): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(60,65): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(64,41): error TS2304: Cannot find name 'Array'.
-assignmentCompatWithConstructSignatures4.ts(64,61): error TS2304: Cannot find name 'Array'.
-assignmentCompatWithConstructSignatures4.ts(64,77): error TS2304: Cannot find name 'Array'.
-assignmentCompatWithConstructSignatures4.ts(64,93): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(68,42): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(68,48): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(68,56): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(72,56): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(72,62): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(76,41): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(76,47): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(76,53): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(80,41): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(80,47): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(87,36): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(87,42): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(88,36): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(93,36): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(94,36): error TS2304: Cannot find name 'T'.
-assignmentCompatWithConstructSignatures4.ts(94,42): error TS2304: Cannot find name 'T'.
 
 
-==== assignmentCompatWithConstructSignatures4.ts (43 errors) ====
+==== assignmentCompatWithConstructSignatures4.ts (4 errors) ====
     // checking assignment compatibility relations for function types.
     
     namespace Errors {
@@ -68,12 +29,6 @@ assignmentCompatWithConstructSignatures4.ts(94,42): error TS2304: Cannot find na
             declare var a10: new (...x: Base[]) => Base;
             declare var a11: new (x: { foo: string }, y: { foo: string; bar: string }) => Base;
             declare var a12: new (x: Array<Base>, y: Array<Derived2>) => Array<Derived>;
-                                     ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
-                                                     ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
-                                                                         ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
             declare var a14: {
                     new (x: number): number[];
                     new (x: string): string[];
@@ -101,103 +56,43 @@ assignmentCompatWithConstructSignatures4.ts(94,42): error TS2304: Cannot find na
                 };
     
             declare var b2: new <T, U>(x: T) => U[]; 
-                                          ~
-!!! error TS2304: Cannot find name 'T'.
-                                                ~
-!!! error TS2304: Cannot find name 'U'.
             a2 = b2; // ok
             b2 = a2; // ok
     
             declare var b7: new <T extends Base, U extends Derived, V extends Derived2>(x: (arg: T) => U) => (r: T) => V;
-                                                                                                 ~
-!!! error TS2304: Cannot find name 'T'.
-                                                                                                       ~
-!!! error TS2304: Cannot find name 'U'.
-                                                                                                                 ~
-!!! error TS2304: Cannot find name 'T'.
-                                                                                                                       ~
-!!! error TS2304: Cannot find name 'V'.
             a7 = b7; // ok
             b7 = a7; // ok
     
             declare var b8: new <T extends Base, U extends Derived>(x: (arg: T) => U, y: (arg2: { foo: number; }) => U) => (r: T) => U; 
-                                                                             ~
-!!! error TS2304: Cannot find name 'T'.
-                                                                                   ~
-!!! error TS2304: Cannot find name 'U'.
-                                                                                                                     ~
-!!! error TS2304: Cannot find name 'U'.
-                                                                                                                               ~
-!!! error TS2304: Cannot find name 'T'.
-                                                                                                                                     ~
-!!! error TS2304: Cannot find name 'U'.
             a8 = b8; // error, type mismatch
             b8 = a8; // error
     
             
             declare var b10: new <T extends Derived>(...x: T[]) => T; 
-                                                           ~
-!!! error TS2304: Cannot find name 'T'.
-                                                                   ~
-!!! error TS2304: Cannot find name 'T'.
             a10 = b10; // ok
             b10 = a10; // ok
     
             declare var b11: new <T extends Derived>(x: T, y: T) => T; 
-                                                        ~
-!!! error TS2304: Cannot find name 'T'.
-                                                              ~
-!!! error TS2304: Cannot find name 'T'.
-                                                                    ~
-!!! error TS2304: Cannot find name 'T'.
             a11 = b11; // ok
             b11 = a11; // ok
     
             declare var b12: new <T extends Array<Derived2>>(x: Array<Base>, y: Array<Base>) => T; 
-                                            ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
-                                                                ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
-                                                                                ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
-                                                                                                ~
-!!! error TS2304: Cannot find name 'T'.
             a12 = b12; // ok
             b12 = a12; // ok
     
             declare var b15: new <T>(x: { a: T; b: T }) => T; 
-                                             ~
-!!! error TS2304: Cannot find name 'T'.
-                                                   ~
-!!! error TS2304: Cannot find name 'T'.
-                                                           ~
-!!! error TS2304: Cannot find name 'T'.
             a15 = b15; // ok
             b15 = a15; // ok
     
             declare var b15a: new <T extends Base>(x: { a: T; b: T }) => number; 
-                                                           ~
-!!! error TS2304: Cannot find name 'T'.
-                                                                 ~
-!!! error TS2304: Cannot find name 'T'.
             a15 = b15a; // ok
             b15a = a15; // ok
     
             declare var b16: new <T>(x: (a: T) => T) => T[];
-                                            ~
-!!! error TS2304: Cannot find name 'T'.
-                                                  ~
-!!! error TS2304: Cannot find name 'T'.
-                                                        ~
-!!! error TS2304: Cannot find name 'T'.
             a16 = b16; // error
             b16 = a16; // error
     
             declare var b17: new <T>(x: (a: T) => T) => any[];
-                                            ~
-!!! error TS2304: Cannot find name 'T'.
-                                                  ~
-!!! error TS2304: Cannot find name 'T'.
             a17 = b17; // error
             b17 = a17; // error
         }
@@ -205,25 +100,13 @@ assignmentCompatWithConstructSignatures4.ts(94,42): error TS2304: Cannot find na
         namespace WithGenericSignaturesInBaseType {
             // target type has generic call signature
             declare var a2: new <T>(x: T) => T[];
-                                       ~
-!!! error TS2304: Cannot find name 'T'.
-                                             ~
-!!! error TS2304: Cannot find name 'T'.
             declare var b2: new <T>(x: T) => string[];
-                                       ~
-!!! error TS2304: Cannot find name 'T'.
             a2 = b2; // ok
             b2 = a2; // ok
     
             // target type has generic call signature
             declare var a3: new <T>(x: T) => string[];
-                                       ~
-!!! error TS2304: Cannot find name 'T'.
             declare var b3: new <T>(x: T) => T[]; 
-                                       ~
-!!! error TS2304: Cannot find name 'T'.
-                                             ~
-!!! error TS2304: Cannot find name 'T'.
             a3 = b3; // ok
             b3 = a3; // ok
         }

@@ -1,9 +1,8 @@
 genericCallWithNonSymmetricSubtypes.ts(12,16): error TS2345: Argument of type '{ x: number; z: number }' is not assignable to parameter of type '{ x: number; y: number }'.
 genericCallWithNonSymmetricSubtypes.ts(13,17): error TS2345: Argument of type '{ x: number; y: number }' is not assignable to parameter of type '{ x: number; z: number }'.
-genericCallWithNonSymmetricSubtypes.ts(27,13): error TS2304: Cannot find name 'Object'.
 
 
-==== genericCallWithNonSymmetricSubtypes.ts (3 errors) ====
+==== genericCallWithNonSymmetricSubtypes.ts (2 errors) ====
     // generic type argument inference where inference leads to two candidates that are both supertypes of all candidates
     // we choose the first candidate so the result is dependent on the order of the arguments provided
     
@@ -35,8 +34,6 @@ genericCallWithNonSymmetricSubtypes.ts(27,13): error TS2304: Cannot find name 'O
     var r6 = foo(y, x); // { x?: number; };
     
     var s1: (x: Object) => string;
-                ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     var s2: (x: string) => string;
     
     var r7 = foo(s1, s2); // (x: Object) => string;

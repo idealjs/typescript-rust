@@ -1,12 +1,8 @@
 recursiveTypesWithTypeof.ts(10,8): error TS2304: Cannot find name 'Array'.
-recursiveTypesWithTypeof.ts(25,32): error TS2304: Cannot find name 'T'.
-recursiveTypesWithTypeof.ts(25,38): error TS2304: Cannot find name 'T'.
-recursiveTypesWithTypeof.ts(33,38): error TS2304: Cannot find name 'T'.
-recursiveTypesWithTypeof.ts(33,44): error TS2304: Cannot find name 'T'.
 recursiveTypesWithTypeof.ts(45,15): error TS2304: Cannot find name 'Array'.
 
 
-==== recursiveTypesWithTypeof.ts (6 errors) ====
+==== recursiveTypesWithTypeof.ts (2 errors) ====
     // The following are errors because of circular references
     var c: typeof c;
     var c: any;
@@ -34,10 +30,6 @@ recursiveTypesWithTypeof.ts(45,15): error TS2304: Cannot find name 'Array'.
     var i: (x: typeof i) => typeof x;
     var i = i(i);
     var j: <T extends typeof j>(x: T) => T;
-                                   ~
-!!! error TS2304: Cannot find name 'T'.
-                                         ~
-!!! error TS2304: Cannot find name 'T'.
     var j = j(j);
     
     // Same as h, i, j with construct signatures
@@ -46,10 +38,6 @@ recursiveTypesWithTypeof.ts(45,15): error TS2304: Cannot find name 'Array'.
     var i2: new (x: typeof i2) => typeof x;
     var i2 = new i2(i2);
     var j2: new <T extends typeof j2>(x: T) => T;
-                                         ~
-!!! error TS2304: Cannot find name 'T'.
-                                               ~
-!!! error TS2304: Cannot find name 'T'.
     var j2 = new j2(j2);
     
     // Indexers

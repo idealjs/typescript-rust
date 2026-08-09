@@ -18,7 +18,6 @@ typeParameterConstModifiersReturnsAndYields.ts(20,24): error TS2345: Argument of
 typeParameterConstModifiersReturnsAndYields.ts(21,24): error TS2345: Argument of type '() => 0' is not assignable to parameter of type '() => T'.
 typeParameterConstModifiersReturnsAndYields.ts(23,30): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
 typeParameterConstModifiersReturnsAndYields.ts(24,30): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
-typeParameterConstModifiersReturnsAndYields.ts(38,53): error TS2304: Cannot find name 'AsyncGenerator'.
 typeParameterConstModifiersReturnsAndYields.ts(46,40): error TS1005: '>' expected.
 typeParameterConstModifiersReturnsAndYields.ts(46,40): error TS2304: Cannot find name 'ValidRoutes'.
 typeParameterConstModifiersReturnsAndYields.ts(46,52): error TS1012: Unexpected token.
@@ -55,7 +54,7 @@ typeParameterConstModifiersReturnsAndYields.ts(108,31): error TS2345: Argument o
 typeParameterConstModifiersReturnsAndYields.ts(109,43): error TS2554: Expected 1 arguments, but got 2.
 
 
-==== typeParameterConstModifiersReturnsAndYields.ts (55 errors) ====
+==== typeParameterConstModifiersReturnsAndYields.ts (54 errors) ====
     enum E { Val, Val2 }
     
     declare function test1<const T>(create: () => T): T;
@@ -134,8 +133,6 @@ typeParameterConstModifiersReturnsAndYields.ts(109,43): error TS2554: Expected 1
     });
     
     declare function test4<const T, const R>(arg: () => AsyncGenerator<T, R>): [T, R]
-                                                        ~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'AsyncGenerator'.
     
     const result22 = test4(async function*() {
         yield 10;

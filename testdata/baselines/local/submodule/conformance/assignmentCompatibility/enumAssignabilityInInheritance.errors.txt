@@ -2,15 +2,11 @@ enumAssignabilityInInheritance.ts(29,26): error TS2304: Cannot find name 'Date'.
 enumAssignabilityInInheritance.ts(29,33): error TS2304: Cannot find name 'Date'.
 enumAssignabilityInInheritance.ts(34,26): error TS2304: Cannot find name 'RegExp'.
 enumAssignabilityInInheritance.ts(34,35): error TS2304: Cannot find name 'RegExp'.
-enumAssignabilityInInheritance.ts(72,34): error TS2304: Cannot find name 'T'.
-enumAssignabilityInInheritance.ts(72,40): error TS2304: Cannot find name 'T'.
-enumAssignabilityInInheritance.ts(72,51): error TS2304: Cannot find name 'T'.
-enumAssignabilityInInheritance.ts(72,57): error TS2304: Cannot find name 'T'.
 enumAssignabilityInInheritance.ts(101,27): error TS2304: Cannot find name 'Object'.
 enumAssignabilityInInheritance.ts(101,36): error TS2304: Cannot find name 'Object'.
 
 
-==== enumAssignabilityInInheritance.ts (10 errors) ====
+==== enumAssignabilityInInheritance.ts (6 errors) ====
     // enum is only a subtype of number, no types are subtypes of enum, all of these except the first are errors
     
     
@@ -91,14 +87,6 @@ enumAssignabilityInInheritance.ts(101,36): error TS2304: Cannot find name 'Objec
     var r4 = foo11(E.A);
     
     declare function foo12(x: <T>(x: T) => T): <T>(x: T) => T;
-                                     ~
-!!! error TS2304: Cannot find name 'T'.
-                                           ~
-!!! error TS2304: Cannot find name 'T'.
-                                                      ~
-!!! error TS2304: Cannot find name 'T'.
-                                                            ~
-!!! error TS2304: Cannot find name 'T'.
     declare function foo12(x: E): E;
     
     var r4 = foo12(E.A);

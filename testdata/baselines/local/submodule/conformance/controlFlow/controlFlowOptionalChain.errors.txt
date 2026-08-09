@@ -23,7 +23,6 @@ controlFlowOptionalChain.ts(68,8): error TS18048: 'o3' is possibly 'undefined'.
 controlFlowOptionalChain.ts(125,8): error TS18048: 'o6' is possibly 'undefined'.
 controlFlowOptionalChain.ts(130,8): error TS18048: 'o6' is possibly 'undefined'.
 controlFlowOptionalChain.ts(134,4): error TS18048: 'o6' is possibly 'undefined'.
-controlFlowOptionalChain.ts(137,37): error TS2304: Cannot find name 'T'.
 controlFlowOptionalChain.ts(148,9): error TS2349: This expression is not callable.
 controlFlowOptionalChain.ts(157,9): error TS2349: This expression is not callable.
 controlFlowOptionalChain.ts(168,12): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
@@ -108,7 +107,7 @@ controlFlowOptionalChain.ts(532,20): error TS2304: Cannot find name 'Math'.
 controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not exist on type '{ type: "rectangle"; width: number; height: number } | { type: "circle"; radius: number }'.
 
 
-==== controlFlowOptionalChain.ts (108 errors) ====
+==== controlFlowOptionalChain.ts (107 errors) ====
     // assignments in shortcutting chain
     declare const o: undefined | {
         [key: string]: any;
@@ -296,8 +295,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
     
     // asserts
     declare const isDefined: <T>(value: T) => asserts value is NonNullable<T>;
-                                        ~
-!!! error TS2304: Cannot find name 'T'.
     declare const isString: (value: unknown) => asserts value is string;
     declare const maybeIsString: undefined | ((value: unknown) => asserts value is string);
     declare const maybeNever: undefined | (() => never);

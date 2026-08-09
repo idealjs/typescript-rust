@@ -2,15 +2,11 @@ anyAssignabilityInInheritance.ts(22,26): error TS2304: Cannot find name 'Date'.
 anyAssignabilityInInheritance.ts(22,33): error TS2304: Cannot find name 'Date'.
 anyAssignabilityInInheritance.ts(26,26): error TS2304: Cannot find name 'RegExp'.
 anyAssignabilityInInheritance.ts(26,35): error TS2304: Cannot find name 'RegExp'.
-anyAssignabilityInInheritance.ts(57,34): error TS2304: Cannot find name 'T'.
-anyAssignabilityInInheritance.ts(57,40): error TS2304: Cannot find name 'T'.
-anyAssignabilityInInheritance.ts(57,51): error TS2304: Cannot find name 'T'.
-anyAssignabilityInInheritance.ts(57,57): error TS2304: Cannot find name 'T'.
 anyAssignabilityInInheritance.ts(82,27): error TS2304: Cannot find name 'Object'.
 anyAssignabilityInInheritance.ts(82,36): error TS2304: Cannot find name 'Object'.
 
 
-==== anyAssignabilityInInheritance.ts (10 errors) ====
+==== anyAssignabilityInInheritance.ts (6 errors) ====
     // any is not a subtype of any other types, errors expected on all the below derived classes unless otherwise noted
     
     interface I {
@@ -76,14 +72,6 @@ anyAssignabilityInInheritance.ts(82,36): error TS2304: Cannot find name 'Object'
     var r3 = foo3(a); // any
     
     declare function foo13(x: <T>(x: T) => T): <T>(x: T) => T;
-                                     ~
-!!! error TS2304: Cannot find name 'T'.
-                                           ~
-!!! error TS2304: Cannot find name 'T'.
-                                                      ~
-!!! error TS2304: Cannot find name 'T'.
-                                                            ~
-!!! error TS2304: Cannot find name 'T'.
     declare function foo13(x: any): any;
     var r3 = foo3(a); // any
     

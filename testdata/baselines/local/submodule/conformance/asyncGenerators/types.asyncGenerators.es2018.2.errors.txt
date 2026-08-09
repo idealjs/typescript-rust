@@ -1,12 +1,9 @@
-types.asyncGenerators.es2018.2.ts(10,29): error TS2304: Cannot find name 'AsyncIterableIterator'.
-types.asyncGenerators.es2018.2.ts(13,29): error TS2304: Cannot find name 'AsyncIterableIterator'.
-types.asyncGenerators.es2018.2.ts(16,29): error TS2304: Cannot find name 'AsyncIterableIterator'.
 types.asyncGenerators.es2018.2.ts(37,41): error TS2304: Cannot find name 'AsyncIterableIterator'.
 types.asyncGenerators.es2018.2.ts(40,41): error TS2304: Cannot find name 'AsyncIterableIterator'.
 types.asyncGenerators.es2018.2.ts(43,41): error TS2304: Cannot find name 'AsyncIterableIterator'.
 
 
-==== types.asyncGenerators.es2018.2.ts (6 errors) ====
+==== types.asyncGenerators.es2018.2.ts (3 errors) ====
     async function * inferReturnType1() {
         yield* {};
     }
@@ -17,18 +14,12 @@ types.asyncGenerators.es2018.2.ts(43,41): error TS2304: Cannot find name 'AsyncI
         yield* Promise.resolve([1, 2]);
     }
     const assignability1: () => AsyncIterableIterator<number> = async function * () {
-                                ~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'AsyncIterableIterator'.
         yield "a";
     };
     const assignability2: () => AsyncIterableIterator<number> = async function * () {
-                                ~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'AsyncIterableIterator'.
         yield* ["a", "b"];
     };
     const assignability3: () => AsyncIterableIterator<number> = async function * () {
-                                ~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'AsyncIterableIterator'.
         yield* (async function * () { yield "a"; })();
     };
     const assignability4: () => AsyncIterable<number> = async function * () {

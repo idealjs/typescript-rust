@@ -6,8 +6,6 @@ unionAndIntersectionInference3.ts(9,170): error TS1005: ',' expected.
 unionAndIntersectionInference3.ts(9,172): error TS1005: ',' expected.
 unionAndIntersectionInference3.ts(9,174): error TS1005: ';' expected.
 unionAndIntersectionInference3.ts(10,9): error TS2304: Cannot find name 'com'.
-unionAndIntersectionInference3.ts(18,21): error TS2304: Cannot find name 'PromiseLike'.
-unionAndIntersectionInference3.ts(18,21): error TS2304: Cannot find name 'PromiseLike'.
 unionAndIntersectionInference3.ts(49,10): error TS2349: This expression is not callable.
 unionAndIntersectionInference3.ts(50,10): error TS2349: This expression is not callable.
 unionAndIntersectionInference3.ts(52,10): error TS2349: This expression is not callable.
@@ -16,7 +14,7 @@ unionAndIntersectionInference3.ts(77,1): error TS2349: This expression is not ca
 unionAndIntersectionInference3.ts(87,9): error TS2349: This expression is not callable.
 
 
-==== unionAndIntersectionInference3.ts (16 errors) ====
+==== unionAndIntersectionInference3.ts (14 errors) ====
     // Repro from #30720
     
     type Maybe<T> = T | undefined;
@@ -51,10 +49,6 @@ unionAndIntersectionInference3.ts(87,9): error TS2349: This expression is not ca
     
     interface Bar1<T> {
         test(value: T | PromiseLike<T>): void;
-                        ~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'PromiseLike'.
-                        ~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'PromiseLike'.
     }
     
     declare let f1: <T>(x: Foo1<T> | Bar1<T>) => Promise<T>;

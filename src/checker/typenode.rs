@@ -1268,6 +1268,13 @@ impl Checker {
     fn get_type_from_function_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
         match &node.data {
             NodeData::FunctionTypeNode(data) => {
+                // Suppress TS2304 while resolving the signature's parameter/
+                // return types: function-type annotations may reference
+                // signature-level type parameters (e.g. `<T>(x: T) => T`)
+                // that have no binder symbol in type-node resolution context.
+                // Such names degrade to `any` instead of erroring, matching
+                // the behavior for CallSignature/ConstructSignature.
+                self.suppress_cannot_find_name_in_type_nodes += 1;
                 let return_type = match data.type_node.as_ref() {
                     Some(tn) => self.get_type_from_type_node(tn),
                     None => self.get_any_type(),
@@ -1279,6 +1286,7 @@ impl Checker {
                     /* contextual_signature */ None,
                     /* declaration */ Some(Arc::clone(node)),
                 );
+                self.suppress_cannot_find_name_in_type_nodes -= 1;
                 self.create_function_or_constructor_type(vec![sig], false)
             }
             _ => self.error_type(),
@@ -1291,6 +1299,8 @@ impl Checker {
     fn get_type_from_constructor_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
         match &node.data {
             NodeData::ConstructorTypeNode(data) => {
+                // Same TS2304 suppression as FunctionTypeNode above.
+                self.suppress_cannot_find_name_in_type_nodes += 1;
                 let return_type = match data.type_node.as_ref() {
                     Some(tn) => self.get_type_from_type_node(tn),
                     None => self.get_any_type(),
@@ -1302,6 +1312,7 @@ impl Checker {
                     /* contextual_signature */ None,
                     /* declaration */ Some(Arc::clone(node)),
                 );
+                self.suppress_cannot_find_name_in_type_nodes -= 1;
                 self.create_function_or_constructor_type(vec![sig], true)
             }
             _ => self.error_type(),
