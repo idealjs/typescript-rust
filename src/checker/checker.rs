@@ -6150,6 +6150,10 @@ impl Checker {
                             }
                         }
                     }
+                    // TS2322: Assignment type check is deferred until type
+                    // resolution is more precise (currently causes false
+                    // positives due to imprecise left-side type inference).
+                    // TODO: Implement precise assignment type checking.
                     // TS2367: For equality/relational comparisons between
                     // types with no overlap, the comparison is always
                     // `false` (or `true` for `!=`/`!==`). Mirrors Go's
