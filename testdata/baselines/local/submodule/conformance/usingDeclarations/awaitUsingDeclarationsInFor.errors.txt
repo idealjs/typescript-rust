@@ -2,28 +2,22 @@ awaitUsingDeclarationsInFor.ts(2,16): error TS2304: Cannot find name 'using'.
 awaitUsingDeclarationsInFor.ts(2,22): error TS1005: ';' expected.
 awaitUsingDeclarationsInFor.ts(2,22): error TS2304: Cannot find name 'd1'.
 awaitUsingDeclarationsInFor.ts(2,45): error TS1005: ',' expected.
-awaitUsingDeclarationsInFor.ts(2,45): error TS2304: Cannot find name '('.
 awaitUsingDeclarationsInFor.ts(2,46): error TS1005: ',' expected.
-awaitUsingDeclarationsInFor.ts(2,46): error TS2304: Cannot find name ')'.
 awaitUsingDeclarationsInFor.ts(2,48): error TS1005: ',' expected.
-awaitUsingDeclarationsInFor.ts(2,48): error TS2304: Cannot find name '{'.
 awaitUsingDeclarationsInFor.ts(2,51): error TS1005: ';' expected.
 awaitUsingDeclarationsInFor.ts(3,21): error TS2304: Cannot find name 'd2'.
 awaitUsingDeclarationsInFor.ts(3,28): error TS2304: Cannot find name 'async'.
 awaitUsingDeclarationsInFor.ts(3,34): error TS1005: ',' expected.
 awaitUsingDeclarationsInFor.ts(3,55): error TS1005: ',' expected.
-awaitUsingDeclarationsInFor.ts(3,55): error TS2304: Cannot find name '('.
 awaitUsingDeclarationsInFor.ts(3,56): error TS1005: ',' expected.
-awaitUsingDeclarationsInFor.ts(3,56): error TS2304: Cannot find name ')'.
 awaitUsingDeclarationsInFor.ts(3,58): error TS1005: ',' expected.
-awaitUsingDeclarationsInFor.ts(3,58): error TS2304: Cannot find name '{'.
 awaitUsingDeclarationsInFor.ts(3,61): error TS1005: ')' expected.
 awaitUsingDeclarationsInFor.ts(4,21): error TS2304: Cannot find name 'd3'.
 awaitUsingDeclarationsInFor.ts(5,21): error TS2304: Cannot find name 'd4'.
 awaitUsingDeclarationsInFor.ts(5,37): error TS1128: Declaration or statement expected.
 
 
-==== awaitUsingDeclarationsInFor.ts (23 errors) ====
+==== awaitUsingDeclarationsInFor.ts (17 errors) ====
     async function main() {
         for (await using d1 = { [Symbol.dispose]() {} },
                    ~~~~~
@@ -34,16 +28,10 @@ awaitUsingDeclarationsInFor.ts(5,37): error TS1128: Declaration or statement exp
 !!! error TS2304: Cannot find name 'd1'.
                                                 ~
 !!! error TS1005: ',' expected.
-                                                ~
-!!! error TS2304: Cannot find name '('.
                                                  ~
 !!! error TS1005: ',' expected.
-                                                 ~
-!!! error TS2304: Cannot find name ')'.
                                                    ~
 !!! error TS1005: ',' expected.
-                                                   ~
-!!! error TS2304: Cannot find name '{'.
                                                       ~
 !!! error TS1005: ';' expected.
                         d2 = { async [Symbol.asyncDispose]() {} },
@@ -55,16 +43,10 @@ awaitUsingDeclarationsInFor.ts(5,37): error TS1128: Declaration or statement exp
 !!! error TS1005: ',' expected.
                                                           ~
 !!! error TS1005: ',' expected.
-                                                          ~
-!!! error TS2304: Cannot find name '('.
                                                            ~
 !!! error TS1005: ',' expected.
-                                                           ~
-!!! error TS2304: Cannot find name ')'.
                                                              ~
 !!! error TS1005: ',' expected.
-                                                             ~
-!!! error TS2304: Cannot find name '{'.
                                                                 ~
 !!! error TS1005: ')' expected.
                         d3 = null,

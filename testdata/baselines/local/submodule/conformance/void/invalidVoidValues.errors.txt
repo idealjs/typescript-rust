@@ -1,14 +1,11 @@
 invalidVoidValues.ts(18,7): error TS2304: Cannot find name 'f'.
 invalidVoidValues.ts(18,8): error TS1005: ',' expected.
-invalidVoidValues.ts(18,8): error TS2304: Cannot find name '('.
 invalidVoidValues.ts(18,9): error TS1005: ',' expected.
-invalidVoidValues.ts(18,9): error TS2304: Cannot find name ')'.
 invalidVoidValues.ts(18,11): error TS1005: ',' expected.
-invalidVoidValues.ts(18,11): error TS2304: Cannot find name '{'.
 invalidVoidValues.ts(18,14): error TS1128: Declaration or statement expected.
 
 
-==== invalidVoidValues.ts (8 errors) ====
+==== invalidVoidValues.ts (5 errors) ====
     var x: void;
     x = 1;
     x = '';
@@ -31,16 +28,10 @@ invalidVoidValues.ts(18,14): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'f'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name ')'.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name '{'.
                  ~
 !!! error TS1128: Declaration or statement expected.
     

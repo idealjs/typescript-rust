@@ -1,16 +1,12 @@
 thisTypeInFunctions2.ts(22,5): error TS2304: Cannot find name 'init'.
 thisTypeInFunctions2.ts(22,9): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(22,9): error TS2304: Cannot find name '('.
 thisTypeInFunctions2.ts(22,10): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(22,10): error TS2304: Cannot find name ')'.
 thisTypeInFunctions2.ts(22,12): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(22,12): error TS2304: Cannot find name '{'.
 thisTypeInFunctions2.ts(23,9): error TS1005: ',' expected.
 thisTypeInFunctions2.ts(23,9): error TS2304: Cannot find name 'this'.
 thisTypeInFunctions2.ts(25,9): error TS1005: ',' expected.
 thisTypeInFunctions2.ts(25,9): error TS2304: Cannot find name 'this'.
 thisTypeInFunctions2.ts(25,13): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(25,13): error TS2304: Cannot find name '.'.
 thisTypeInFunctions2.ts(25,14): error TS1005: ',' expected.
 thisTypeInFunctions2.ts(25,14): error TS2304: Cannot find name 'willDestroy'.
 thisTypeInFunctions2.ts(27,5): error TS2304: Cannot find name 'mine'.
@@ -20,23 +16,19 @@ thisTypeInFunctions2.ts(28,5): error TS2304: Cannot find name 'foo'.
 thisTypeInFunctions2.ts(28,11): error TS1005: ',' expected.
 thisTypeInFunctions2.ts(29,9): error TS2304: Cannot find name 'this'.
 thisTypeInFunctions2.ts(29,13): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(29,13): error TS2304: Cannot find name '.'.
 thisTypeInFunctions2.ts(29,14): error TS1005: ',' expected.
 thisTypeInFunctions2.ts(29,14): error TS2304: Cannot find name 'url'.
 thisTypeInFunctions2.ts(29,17): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(29,17): error TS2304: Cannot find name ';'.
 thisTypeInFunctions2.ts(30,9): error TS1005: ',' expected.
 thisTypeInFunctions2.ts(30,9): error TS2304: Cannot find name 'this'.
 thisTypeInFunctions2.ts(30,13): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(30,13): error TS2304: Cannot find name '.'.
 thisTypeInFunctions2.ts(30,14): error TS1005: ',' expected.
 thisTypeInFunctions2.ts(30,14): error TS2304: Cannot find name 'willDestroy'.
 thisTypeInFunctions2.ts(30,25): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(30,25): error TS2304: Cannot find name ';'.
 thisTypeInFunctions2.ts(32,1): error TS1005: ',' expected.
 
 
-==== thisTypeInFunctions2.ts (36 errors) ====
+==== thisTypeInFunctions2.ts (28 errors) ====
     interface IndexedWithThis {
         // this is a workaround for React
         init?: (this: this) => void;
@@ -63,16 +55,10 @@ thisTypeInFunctions2.ts(32,1): error TS1005: ',' expected.
 !!! error TS2304: Cannot find name 'init'.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name '('.
              ~
 !!! error TS1005: ',' expected.
-             ~
-!!! error TS2304: Cannot find name ')'.
                ~
 !!! error TS1005: ',' expected.
-               ~
-!!! error TS2304: Cannot find name '{'.
             this // this: IndexedWithThis because of contextual typing.
             ~~~~
 !!! error TS1005: ',' expected.
@@ -86,8 +72,6 @@ thisTypeInFunctions2.ts(32,1): error TS1005: ',' expected.
 !!! error TS2304: Cannot find name 'this'.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name '.'.
                  ~~~~~~~~~~~
 !!! error TS1005: ',' expected.
                  ~~~~~~~~~~~
@@ -111,16 +95,12 @@ thisTypeInFunctions2.ts(32,1): error TS1005: ',' expected.
 !!! error TS2304: Cannot find name 'this'.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name '.'.
                  ~~~
 !!! error TS1005: ',' expected.
                  ~~~
 !!! error TS2304: Cannot find name 'url'.
                     ~
 !!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name ';'.
             this.willDestroy;
     ~~~~~~~~~~~~~~~~~~~~~~~~~
             ~~~~
@@ -129,16 +109,12 @@ thisTypeInFunctions2.ts(32,1): error TS1005: ',' expected.
 !!! error TS2304: Cannot find name 'this'.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name '.'.
                  ~~~~~~~~~~~
 !!! error TS1005: ',' expected.
                  ~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'willDestroy'.
                             ~
 !!! error TS1005: ',' expected.
-                            ~
-!!! error TS2304: Cannot find name ';'.
         }
     ~~~~~
     });

@@ -7,19 +7,16 @@ callSignaturesWithDuplicateParameters.ts(13,23): error TS2304: Cannot find name 
 callSignaturesWithDuplicateParameters.ts(18,16): error TS2304: Cannot find name 'T'.
 callSignaturesWithDuplicateParameters.ts(18,22): error TS2304: Cannot find name 'T'.
 callSignaturesWithDuplicateParameters.ts(35,8): error TS1005: ',' expected.
-callSignaturesWithDuplicateParameters.ts(35,8): error TS2304: Cannot find name '('.
 callSignaturesWithDuplicateParameters.ts(35,9): error TS1005: ',' expected.
 callSignaturesWithDuplicateParameters.ts(35,13): error TS1005: ',' expected.
-callSignaturesWithDuplicateParameters.ts(35,13): error TS2304: Cannot find name ')'.
 callSignaturesWithDuplicateParameters.ts(35,15): error TS1005: ',' expected.
-callSignaturesWithDuplicateParameters.ts(35,15): error TS2304: Cannot find name '{'.
 callSignaturesWithDuplicateParameters.ts(36,6): error TS1005: ',' expected.
 callSignaturesWithDuplicateParameters.ts(36,17): error TS1005: ',' expected.
 callSignaturesWithDuplicateParameters.ts(36,20): error TS1005: ',' expected.
 callSignaturesWithDuplicateParameters.ts(36,41): error TS1005: ',' expected.
 
 
-==== callSignaturesWithDuplicateParameters.ts (19 errors) ====
+==== callSignaturesWithDuplicateParameters.ts (16 errors) ====
     // Duplicate parameter names are always an error
     
     function foo(x, x) { }
@@ -73,18 +70,12 @@ callSignaturesWithDuplicateParameters.ts(36,41): error TS1005: ',' expected.
         foo(x, x) { },
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~
 !!! error TS1005: ',' expected.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name ')'.
                   ~
 !!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name '{'.
         a: function foo(x: number, x: string) { },
          ~
 !!! error TS1005: ',' expected.

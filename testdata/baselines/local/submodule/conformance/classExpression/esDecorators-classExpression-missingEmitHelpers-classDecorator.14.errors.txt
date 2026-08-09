@@ -3,11 +3,10 @@ main.ts(6,10): error TS1005: ',' expected.
 main.ts(6,14): error TS1005: ',' expected.
 main.ts(6,14): error TS2304: Cannot find name 'class'.
 main.ts(6,20): error TS1005: ',' expected.
-main.ts(6,20): error TS2304: Cannot find name '{'.
 main.ts(6,23): error TS1005: ')' expected.
 
 
-==== main.ts (7 errors) ====
+==== main.ts (6 errors) ====
     export {};
     declare var dec: any;
     declare var x: any;
@@ -24,8 +23,6 @@ main.ts(6,23): error TS1005: ')' expected.
 !!! error TS2304: Cannot find name 'class'.
                        ~
 !!! error TS1005: ',' expected.
-                       ~
-!!! error TS2304: Cannot find name '{'.
                           ~
 !!! error TS1005: ')' expected.
     

@@ -5,16 +5,13 @@ prototypePropertyAssignmentMergeAcrossFiles2.js(3,4): error TS2339: Property 'Tw
 prototypePropertyAssignmentMergeAcrossFiles2.js(5,4): error TS2339: Property 'One' does not exist on type 'object'.
 prototypePropertyAssignmentMergeAcrossFiles2.js(6,3): error TS2304: Cannot find name 'ok'.
 prototypePropertyAssignmentMergeAcrossFiles2.js(6,5): error TS1005: ',' expected.
-prototypePropertyAssignmentMergeAcrossFiles2.js(6,5): error TS2304: Cannot find name '('.
 prototypePropertyAssignmentMergeAcrossFiles2.js(6,6): error TS1005: ',' expected.
-prototypePropertyAssignmentMergeAcrossFiles2.js(6,6): error TS2304: Cannot find name ')'.
 prototypePropertyAssignmentMergeAcrossFiles2.js(6,8): error TS1005: ',' expected.
-prototypePropertyAssignmentMergeAcrossFiles2.js(6,8): error TS2304: Cannot find name '{'.
 prototypePropertyAssignmentMergeAcrossFiles2.js(7,1): error TS1012: Unexpected token.
 prototypePropertyAssignmentMergeAcrossFiles2.js(8,4): error TS2339: Property 'Two' does not exist on type 'object'.
 
 
-==== prototypePropertyAssignmentMergeAcrossFiles2.js (12 errors) ====
+==== prototypePropertyAssignmentMergeAcrossFiles2.js (9 errors) ====
     var Ns = {}
     Ns.One = function() {};
        ~~~
@@ -31,16 +28,10 @@ prototypePropertyAssignmentMergeAcrossFiles2.js(8,4): error TS2339: Property 'Tw
 !!! error TS2304: Cannot find name 'ok'.
         ~
 !!! error TS1005: ',' expected.
-        ~
-!!! error TS2304: Cannot find name '('.
          ~
 !!! error TS1005: ',' expected.
-         ~
-!!! error TS2304: Cannot find name ')'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '{'.
     };
     ~
 !!! error TS1012: Unexpected token.

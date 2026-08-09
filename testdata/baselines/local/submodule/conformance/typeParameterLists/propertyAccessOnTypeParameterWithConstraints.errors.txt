@@ -14,30 +14,23 @@ propertyAccessOnTypeParameterWithConstraints.ts(34,1): error TS2304: Cannot find
 propertyAccessOnTypeParameterWithConstraints.ts(34,5): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints.ts(34,5): error TS2304: Cannot find name 'r4'.
 propertyAccessOnTypeParameterWithConstraints.ts(34,8): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints.ts(34,8): error TS2304: Cannot find name '='.
 propertyAccessOnTypeParameterWithConstraints.ts(34,10): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints.ts(34,11): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints.ts(34,11): error TS2304: Cannot find name '.'.
 propertyAccessOnTypeParameterWithConstraints.ts(34,12): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints.ts(34,12): error TS2304: Cannot find name 'foo'.
 propertyAccessOnTypeParameterWithConstraints.ts(34,15): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints.ts(34,15): error TS2304: Cannot find name '('.
 propertyAccessOnTypeParameterWithConstraints.ts(34,16): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints.ts(34,16): error TS2304: Cannot find name 'new'.
 propertyAccessOnTypeParameterWithConstraints.ts(34,20): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints.ts(34,20): error TS2304: Cannot find name 'Date'.
 propertyAccessOnTypeParameterWithConstraints.ts(34,24): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints.ts(34,24): error TS2304: Cannot find name '('.
 propertyAccessOnTypeParameterWithConstraints.ts(34,25): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints.ts(34,25): error TS2304: Cannot find name ')'.
 propertyAccessOnTypeParameterWithConstraints.ts(34,26): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints.ts(34,26): error TS2304: Cannot find name ')'.
 propertyAccessOnTypeParameterWithConstraints.ts(34,27): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints.ts(34,27): error TS2304: Cannot find name ';'.
 propertyAccessOnTypeParameterWithConstraints.ts(34,28): error TS1005: '}' expected.
 
 
-==== propertyAccessOnTypeParameterWithConstraints.ts (37 errors) ====
+==== propertyAccessOnTypeParameterWithConstraints.ts (30 errors) ====
     // generic types should behave as if they have properties of their constraint type
     // no errors expected 
     
@@ -104,22 +97,16 @@ propertyAccessOnTypeParameterWithConstraints.ts(34,28): error TS1005: '}' expect
 !!! error TS2304: Cannot find name 'r4'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '='.
              ~
 !!! error TS1005: ',' expected.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name '.'.
                ~~~
 !!! error TS1005: ',' expected.
                ~~~
 !!! error TS2304: Cannot find name 'foo'.
                   ~
 !!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name '('.
                    ~~~
 !!! error TS1005: ',' expected.
                    ~~~
@@ -130,19 +117,11 @@ propertyAccessOnTypeParameterWithConstraints.ts(34,28): error TS1005: '}' expect
 !!! error TS2304: Cannot find name 'Date'.
                            ~
 !!! error TS1005: ',' expected.
-                           ~
-!!! error TS2304: Cannot find name '('.
                             ~
 !!! error TS1005: ',' expected.
-                            ~
-!!! error TS2304: Cannot find name ')'.
                              ~
 !!! error TS1005: ',' expected.
-                             ~
-!!! error TS2304: Cannot find name ')'.
                               ~
 !!! error TS1005: ',' expected.
-                              ~
-!!! error TS2304: Cannot find name ';'.
                                
 !!! error TS1005: '}' expected.

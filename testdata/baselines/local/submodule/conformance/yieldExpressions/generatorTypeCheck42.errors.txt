@@ -1,28 +1,19 @@
 generatorTypeCheck42.ts(3,18): error TS1005: ',' expected.
-generatorTypeCheck42.ts(3,18): error TS2304: Cannot find name '('.
 generatorTypeCheck42.ts(3,19): error TS1005: ',' expected.
-generatorTypeCheck42.ts(3,19): error TS2304: Cannot find name ')'.
 generatorTypeCheck42.ts(3,21): error TS1005: ',' expected.
-generatorTypeCheck42.ts(3,21): error TS2304: Cannot find name '{'.
 generatorTypeCheck42.ts(7,1): error TS1128: Declaration or statement expected.
 
 
-==== generatorTypeCheck42.ts (7 errors) ====
+==== generatorTypeCheck42.ts (4 errors) ====
     function* g() {
         let x = {
             [yield 0]() {
                      ~
 !!! error TS1005: ',' expected.
-                     ~
-!!! error TS2304: Cannot find name '('.
                       ~
 !!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name ')'.
                         ~
 !!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name '{'.
     
             }
         }

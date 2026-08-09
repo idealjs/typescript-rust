@@ -27,11 +27,8 @@ asyncAwaitIsolatedModules_es5.ts(23,2): error TS2304: Cannot find name 'async'.
 asyncAwaitIsolatedModules_es5.ts(23,8): error TS1005: ',' expected.
 asyncAwaitIsolatedModules_es5.ts(23,8): error TS2304: Cannot find name 'm1'.
 asyncAwaitIsolatedModules_es5.ts(23,10): error TS1005: ',' expected.
-asyncAwaitIsolatedModules_es5.ts(23,10): error TS2304: Cannot find name '('.
 asyncAwaitIsolatedModules_es5.ts(23,11): error TS1005: ',' expected.
-asyncAwaitIsolatedModules_es5.ts(23,11): error TS2304: Cannot find name ')'.
 asyncAwaitIsolatedModules_es5.ts(23,13): error TS1005: ',' expected.
-asyncAwaitIsolatedModules_es5.ts(23,13): error TS2304: Cannot find name '{'.
 asyncAwaitIsolatedModules_es5.ts(24,2): error TS2304: Cannot find name 'async'.
 asyncAwaitIsolatedModules_es5.ts(24,8): error TS1005: ',' expected.
 asyncAwaitIsolatedModules_es5.ts(24,10): error TS1005: ',' expected.
@@ -47,7 +44,7 @@ asyncAwaitIsolatedModules_es5.ts(24,11): error TS1134: Variable declaration expe
 !!! error TS2451: Cannot redeclare block-scoped variable 'MyPromise'.
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'number'.
-==== asyncAwaitIsolatedModules_es5.ts (33 errors) ====
+==== asyncAwaitIsolatedModules_es5.ts (30 errors) ====
     import { MyPromise } from "missing";
     
     declare var p: Promise<number>;
@@ -119,16 +116,10 @@ asyncAwaitIsolatedModules_es5.ts(24,11): error TS1134: Variable declaration expe
 !!! error TS2304: Cannot find name 'm1'.
     	        ~
 !!! error TS1005: ',' expected.
-    	        ~
-!!! error TS2304: Cannot find name '('.
     	         ~
 !!! error TS1005: ',' expected.
-    	         ~
-!!! error TS2304: Cannot find name ')'.
     	           ~
 !!! error TS1005: ',' expected.
-    	           ~
-!!! error TS2304: Cannot find name '{'.
     	async m2(): Promise<void> { },
     	~~~~~
 !!! error TS2304: Cannot find name 'async'.

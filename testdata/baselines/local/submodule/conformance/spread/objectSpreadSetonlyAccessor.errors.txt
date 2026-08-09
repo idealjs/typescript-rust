@@ -2,17 +2,14 @@ objectSpreadSetonlyAccessor.ts(1,61): error TS2304: Cannot find name 'set'.
 objectSpreadSetonlyAccessor.ts(1,65): error TS1005: ',' expected.
 objectSpreadSetonlyAccessor.ts(1,65): error TS2304: Cannot find name 'bar'.
 objectSpreadSetonlyAccessor.ts(1,68): error TS1005: ',' expected.
-objectSpreadSetonlyAccessor.ts(1,68): error TS2304: Cannot find name '('.
 objectSpreadSetonlyAccessor.ts(1,69): error TS1005: ',' expected.
 objectSpreadSetonlyAccessor.ts(1,73): error TS2304: Cannot find name 'number'.
 objectSpreadSetonlyAccessor.ts(1,79): error TS1005: ',' expected.
-objectSpreadSetonlyAccessor.ts(1,79): error TS2304: Cannot find name ')'.
 objectSpreadSetonlyAccessor.ts(1,81): error TS1005: ',' expected.
-objectSpreadSetonlyAccessor.ts(1,81): error TS2304: Cannot find name '{'.
 objectSpreadSetonlyAccessor.ts(1,87): error TS1128: Declaration or statement expected.
 
 
-==== objectSpreadSetonlyAccessor.ts (12 errors) ====
+==== objectSpreadSetonlyAccessor.ts (9 errors) ====
     const o1: { foo: number, bar: undefined } = { foo: 1, ... { set bar(_v: number) { } } }
                                                                 ~~~
 !!! error TS2304: Cannot find name 'set'.
@@ -22,20 +19,14 @@ objectSpreadSetonlyAccessor.ts(1,87): error TS1128: Declaration or statement exp
 !!! error TS2304: Cannot find name 'bar'.
                                                                        ~
 !!! error TS1005: ',' expected.
-                                                                       ~
-!!! error TS2304: Cannot find name '('.
                                                                         ~~
 !!! error TS1005: ',' expected.
                                                                             ~~~~~~
 !!! error TS2304: Cannot find name 'number'.
                                                                                   ~
 !!! error TS1005: ',' expected.
-                                                                                  ~
-!!! error TS2304: Cannot find name ')'.
                                                                                     ~
 !!! error TS1005: ',' expected.
-                                                                                    ~
-!!! error TS2304: Cannot find name '{'.
                                                                                           ~
 !!! error TS1128: Declaration or statement expected.
     const o2: { foo: undefined } = { foo: 1, ... { set foo(_v: number) { } } }

@@ -15,23 +15,18 @@ propertyAccessOnTypeParameterWithConstraints2.ts(81,1): error TS2304: Cannot fin
 propertyAccessOnTypeParameterWithConstraints2.ts(81,5): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints2.ts(81,5): error TS2304: Cannot find name 'r4'.
 propertyAccessOnTypeParameterWithConstraints2.ts(81,8): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints2.ts(81,8): error TS2304: Cannot find name '='.
 propertyAccessOnTypeParameterWithConstraints2.ts(81,10): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints2.ts(81,11): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints2.ts(81,11): error TS2304: Cannot find name '.'.
 propertyAccessOnTypeParameterWithConstraints2.ts(81,12): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints2.ts(81,12): error TS2304: Cannot find name 'foo'.
 propertyAccessOnTypeParameterWithConstraints2.ts(81,15): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints2.ts(81,15): error TS2304: Cannot find name '('.
 propertyAccessOnTypeParameterWithConstraints2.ts(81,16): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints2.ts(81,22): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints2.ts(81,22): error TS2304: Cannot find name ')'.
 propertyAccessOnTypeParameterWithConstraints2.ts(81,23): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints2.ts(81,23): error TS2304: Cannot find name ';'.
 propertyAccessOnTypeParameterWithConstraints2.ts(81,84): error TS1005: '}' expected.
 
 
-==== propertyAccessOnTypeParameterWithConstraints2.ts (31 errors) ====
+==== propertyAccessOnTypeParameterWithConstraints2.ts (26 errors) ====
     // generic types should behave as if they have properties of their constraint type
     
     class A {
@@ -147,31 +142,21 @@ propertyAccessOnTypeParameterWithConstraints2.ts(81,84): error TS1005: '}' expec
 !!! error TS2304: Cannot find name 'r4'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '='.
              ~
 !!! error TS1005: ',' expected.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name '.'.
                ~~~
 !!! error TS1005: ',' expected.
                ~~~
 !!! error TS2304: Cannot find name 'foo'.
                   ~
 !!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name '('.
                    ~~
 !!! error TS1005: ',' expected.
                          ~
 !!! error TS1005: ',' expected.
-                         ~
-!!! error TS2304: Cannot find name ')'.
                           ~
 !!! error TS1005: ',' expected.
-                          ~
-!!! error TS2304: Cannot find name ';'.
                                                                                        
 !!! error TS1005: '}' expected.

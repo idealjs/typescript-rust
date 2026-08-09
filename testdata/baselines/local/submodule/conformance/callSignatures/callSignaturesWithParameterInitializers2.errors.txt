@@ -1,28 +1,21 @@
 callSignaturesWithParameterInitializers2.ts(8,1): error TS2554: Expected 1 arguments, but got 0.
 callSignaturesWithParameterInitializers2.ts(20,8): error TS1005: ',' expected.
-callSignaturesWithParameterInitializers2.ts(20,8): error TS2304: Cannot find name '('.
 callSignaturesWithParameterInitializers2.ts(20,9): error TS1005: ',' expected.
 callSignaturesWithParameterInitializers2.ts(20,9): error TS2304: Cannot find name 'x'.
 callSignaturesWithParameterInitializers2.ts(20,11): error TS1005: ',' expected.
-callSignaturesWithParameterInitializers2.ts(20,11): error TS2304: Cannot find name '='.
 callSignaturesWithParameterInitializers2.ts(20,13): error TS1005: ',' expected.
 callSignaturesWithParameterInitializers2.ts(20,14): error TS1005: ',' expected.
-callSignaturesWithParameterInitializers2.ts(20,14): error TS2304: Cannot find name ')'.
 callSignaturesWithParameterInitializers2.ts(21,8): error TS1005: ',' expected.
-callSignaturesWithParameterInitializers2.ts(21,8): error TS2304: Cannot find name '('.
 callSignaturesWithParameterInitializers2.ts(21,9): error TS1005: ',' expected.
 callSignaturesWithParameterInitializers2.ts(21,9): error TS2304: Cannot find name 'x'.
 callSignaturesWithParameterInitializers2.ts(21,11): error TS1005: ',' expected.
-callSignaturesWithParameterInitializers2.ts(21,11): error TS2304: Cannot find name '='.
 callSignaturesWithParameterInitializers2.ts(21,13): error TS1005: ',' expected.
 callSignaturesWithParameterInitializers2.ts(21,14): error TS1005: ',' expected.
-callSignaturesWithParameterInitializers2.ts(21,14): error TS2304: Cannot find name ')'.
 callSignaturesWithParameterInitializers2.ts(21,16): error TS1005: ',' expected.
-callSignaturesWithParameterInitializers2.ts(21,16): error TS2304: Cannot find name '{'.
 callSignaturesWithParameterInitializers2.ts(22,1): error TS1012: Unexpected token.
 
 
-==== callSignaturesWithParameterInitializers2.ts (22 errors) ====
+==== callSignaturesWithParameterInitializers2.ts (15 errors) ====
     // Optional parameters allow initializers only in implementation signatures
     // All the below declarations are errors
     
@@ -47,45 +40,31 @@ callSignaturesWithParameterInitializers2.ts(22,1): error TS1012: Unexpected toke
         foo(x = 1), // error
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~
 !!! error TS1005: ',' expected.
             ~
 !!! error TS2304: Cannot find name 'x'.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name '='.
                 ~
 !!! error TS1005: ',' expected.
                  ~
 !!! error TS1005: ',' expected.
-                 ~
-!!! error TS2304: Cannot find name ')'.
         foo(x = 1) { }, // error
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~
 !!! error TS1005: ',' expected.
             ~
 !!! error TS2304: Cannot find name 'x'.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name '='.
                 ~
 !!! error TS1005: ',' expected.
                  ~
 !!! error TS1005: ',' expected.
-                 ~
-!!! error TS2304: Cannot find name ')'.
                    ~
 !!! error TS1005: ',' expected.
-                   ~
-!!! error TS2304: Cannot find name '{'.
     }
     ~
 !!! error TS1012: Unexpected token.

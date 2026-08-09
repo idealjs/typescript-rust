@@ -1,19 +1,15 @@
 assignEveryTypeToAny.ts(42,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 assignEveryTypeToAny.ts(50,8): error TS1005: ',' expected.
-assignEveryTypeToAny.ts(50,8): error TS2304: Cannot find name '('.
 assignEveryTypeToAny.ts(50,9): error TS1005: ',' expected.
-assignEveryTypeToAny.ts(50,9): error TS2304: Cannot find name ')'.
 assignEveryTypeToAny.ts(50,11): error TS1005: ',' expected.
-assignEveryTypeToAny.ts(50,11): error TS2304: Cannot find name '{'.
 assignEveryTypeToAny.ts(50,13): error TS1005: ',' expected.
 assignEveryTypeToAny.ts(50,13): error TS2304: Cannot find name 'return'.
 assignEveryTypeToAny.ts(50,20): error TS1005: ',' expected.
 assignEveryTypeToAny.ts(50,21): error TS1005: ',' expected.
-assignEveryTypeToAny.ts(50,21): error TS2304: Cannot find name ';'.
 assignEveryTypeToAny.ts(50,25): error TS1128: Declaration or statement expected.
 
 
-==== assignEveryTypeToAny.ts (13 errors) ====
+==== assignEveryTypeToAny.ts (9 errors) ====
     // all of these are valid
     
     var x: any;
@@ -68,16 +64,10 @@ assignEveryTypeToAny.ts(50,25): error TS1128: Declaration or statement expected.
     x = { f() { return 1; } }
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name ')'.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name '{'.
                 ~~~~~~
 !!! error TS1005: ',' expected.
                 ~~~~~~
@@ -86,8 +76,6 @@ assignEveryTypeToAny.ts(50,25): error TS1128: Declaration or statement expected.
 !!! error TS1005: ',' expected.
                         ~
 !!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name ';'.
                             ~
 !!! error TS1128: Declaration or statement expected.
     x = { f<T>(x: T) { return x; } }

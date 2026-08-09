@@ -3,11 +3,10 @@ esDecorators-classExpression-namedEvaluation.2.ts(8,8): error TS1005: ',' expect
 esDecorators-classExpression-namedEvaluation.2.ts(8,12): error TS1005: ',' expected.
 esDecorators-classExpression-namedEvaluation.2.ts(8,12): error TS2304: Cannot find name 'class'.
 esDecorators-classExpression-namedEvaluation.2.ts(8,18): error TS1005: ',' expected.
-esDecorators-classExpression-namedEvaluation.2.ts(8,18): error TS2304: Cannot find name '{'.
 esDecorators-classExpression-namedEvaluation.2.ts(8,22): error TS1005: ')' expected.
 
 
-==== esDecorators-classExpression-namedEvaluation.2.ts (7 errors) ====
+==== esDecorators-classExpression-namedEvaluation.2.ts (6 errors) ====
     declare let dec: any;
     
     let x: any, f: any;
@@ -26,8 +25,6 @@ esDecorators-classExpression-namedEvaluation.2.ts(8,22): error TS1005: ')' expec
 !!! error TS2304: Cannot find name 'class'.
                      ~
 !!! error TS1005: ',' expected.
-                     ~
-!!! error TS2304: Cannot find name '{'.
                          ~
 !!! error TS1005: ')' expected.
     ({ x: class { @dec y: any; } });

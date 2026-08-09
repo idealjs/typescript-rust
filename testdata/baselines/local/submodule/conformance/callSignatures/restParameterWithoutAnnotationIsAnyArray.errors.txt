@@ -1,10 +1,7 @@
 restParameterWithoutAnnotationIsAnyArray.ts(22,8): error TS1005: ',' expected.
-restParameterWithoutAnnotationIsAnyArray.ts(22,8): error TS2304: Cannot find name '('.
 restParameterWithoutAnnotationIsAnyArray.ts(22,9): error TS1005: ',' expected.
 restParameterWithoutAnnotationIsAnyArray.ts(22,13): error TS1005: ',' expected.
-restParameterWithoutAnnotationIsAnyArray.ts(22,13): error TS2304: Cannot find name ')'.
 restParameterWithoutAnnotationIsAnyArray.ts(22,15): error TS1005: ',' expected.
-restParameterWithoutAnnotationIsAnyArray.ts(22,15): error TS2304: Cannot find name '{'.
 restParameterWithoutAnnotationIsAnyArray.ts(23,6): error TS1005: ',' expected.
 restParameterWithoutAnnotationIsAnyArray.ts(23,17): error TS1005: ',' expected.
 restParameterWithoutAnnotationIsAnyArray.ts(23,20): error TS1005: ',' expected.
@@ -13,7 +10,7 @@ restParameterWithoutAnnotationIsAnyArray.ts(23,27): error TS1134: Variable decla
 restParameterWithoutAnnotationIsAnyArray.ts(23,31): error TS1005: ',' expected.
 
 
-==== restParameterWithoutAnnotationIsAnyArray.ts (13 errors) ====
+==== restParameterWithoutAnnotationIsAnyArray.ts (10 errors) ====
     // Rest parameters without type annotations are 'any', errors only for the functions with 2 rest params
     
     function foo(...x) { }
@@ -38,18 +35,12 @@ restParameterWithoutAnnotationIsAnyArray.ts(23,31): error TS1005: ',' expected.
         foo(...x) { },
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~~~
 !!! error TS1005: ',' expected.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name ')'.
                   ~
 !!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name '{'.
         a: function foo(...x, ...y) { },
          ~
 !!! error TS1005: ',' expected.

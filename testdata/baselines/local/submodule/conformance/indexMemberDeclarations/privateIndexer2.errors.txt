@@ -5,10 +5,9 @@ privateIndexer2.ts(4,17): error TS2304: Cannot find name 'string'.
 privateIndexer2.ts(4,23): error TS1005: ',' expected.
 privateIndexer2.ts(4,26): error TS2304: Cannot find name 'string'.
 privateIndexer2.ts(4,32): error TS1005: ',' expected.
-privateIndexer2.ts(4,32): error TS2304: Cannot find name ';'.
 
 
-==== privateIndexer2.ts (8 errors) ====
+==== privateIndexer2.ts (7 errors) ====
     // private indexers not allowed
     
     var x = {
@@ -27,8 +26,6 @@ privateIndexer2.ts(4,32): error TS2304: Cannot find name ';'.
 !!! error TS2304: Cannot find name 'string'.
                                    ~
 !!! error TS1005: ',' expected.
-                                   ~
-!!! error TS2304: Cannot find name ';'.
     }
     
     var y: {

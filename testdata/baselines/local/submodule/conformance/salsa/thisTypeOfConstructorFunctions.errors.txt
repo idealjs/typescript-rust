@@ -1,27 +1,20 @@
 thisTypeOfConstructorFunctions.js(14,4): error TS2339: Property 'prototype' does not exist on type '(t: any) => void'.
 thisTypeOfConstructorFunctions.js(16,5): error TS2304: Cannot find name 'm4'.
 thisTypeOfConstructorFunctions.js(16,7): error TS1005: ',' expected.
-thisTypeOfConstructorFunctions.js(16,7): error TS2304: Cannot find name '('.
 thisTypeOfConstructorFunctions.js(16,8): error TS1005: ',' expected.
-thisTypeOfConstructorFunctions.js(16,8): error TS2304: Cannot find name ')'.
 thisTypeOfConstructorFunctions.js(16,10): error TS1005: ',' expected.
-thisTypeOfConstructorFunctions.js(16,10): error TS2304: Cannot find name '{'.
 thisTypeOfConstructorFunctions.js(17,9): error TS1005: ',' expected.
 thisTypeOfConstructorFunctions.js(17,9): error TS2304: Cannot find name 'this'.
 thisTypeOfConstructorFunctions.js(17,13): error TS1005: ',' expected.
-thisTypeOfConstructorFunctions.js(17,13): error TS2304: Cannot find name '.'.
 thisTypeOfConstructorFunctions.js(17,14): error TS1005: ',' expected.
 thisTypeOfConstructorFunctions.js(17,14): error TS2304: Cannot find name 'z'.
 thisTypeOfConstructorFunctions.js(17,16): error TS1005: ',' expected.
-thisTypeOfConstructorFunctions.js(17,16): error TS2304: Cannot find name '='.
 thisTypeOfConstructorFunctions.js(17,18): error TS1005: ',' expected.
 thisTypeOfConstructorFunctions.js(17,18): error TS2304: Cannot find name 'this'.
 thisTypeOfConstructorFunctions.js(17,22): error TS1005: ',' expected.
-thisTypeOfConstructorFunctions.js(17,22): error TS2304: Cannot find name '.'.
 thisTypeOfConstructorFunctions.js(17,23): error TS1005: ',' expected.
 thisTypeOfConstructorFunctions.js(17,23): error TS2304: Cannot find name 'y'.
 thisTypeOfConstructorFunctions.js(17,24): error TS1005: ',' expected.
-thisTypeOfConstructorFunctions.js(17,24): error TS2304: Cannot find name ';'.
 thisTypeOfConstructorFunctions.js(17,26): error TS1005: ',' expected.
 thisTypeOfConstructorFunctions.js(17,26): error TS2304: Cannot find name 'return'.
 thisTypeOfConstructorFunctions.js(17,33): error TS1005: ',' expected.
@@ -29,7 +22,7 @@ thisTypeOfConstructorFunctions.js(17,33): error TS2304: Cannot find name 'this'.
 thisTypeOfConstructorFunctions.js(19,1): error TS1128: Declaration or statement expected.
 
 
-==== thisTypeOfConstructorFunctions.js (29 errors) ====
+==== thisTypeOfConstructorFunctions.js (22 errors) ====
     /**
      * @class
      * @template T
@@ -52,16 +45,10 @@ thisTypeOfConstructorFunctions.js(19,1): error TS1128: Declaration or statement 
 !!! error TS2304: Cannot find name 'm4'.
           ~
 !!! error TS1005: ',' expected.
-          ~
-!!! error TS2304: Cannot find name '('.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name ')'.
              ~
 !!! error TS1005: ',' expected.
-             ~
-!!! error TS2304: Cannot find name '{'.
             this.z = this.y; return this
             ~~~~
 !!! error TS1005: ',' expected.
@@ -69,32 +56,24 @@ thisTypeOfConstructorFunctions.js(19,1): error TS1128: Declaration or statement 
 !!! error TS2304: Cannot find name 'this'.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name '.'.
                  ~
 !!! error TS1005: ',' expected.
                  ~
 !!! error TS2304: Cannot find name 'z'.
                    ~
 !!! error TS1005: ',' expected.
-                   ~
-!!! error TS2304: Cannot find name '='.
                      ~~~~
 !!! error TS1005: ',' expected.
                      ~~~~
 !!! error TS2304: Cannot find name 'this'.
                          ~
 !!! error TS1005: ',' expected.
-                         ~
-!!! error TS2304: Cannot find name '.'.
                           ~
 !!! error TS1005: ',' expected.
                           ~
 !!! error TS2304: Cannot find name 'y'.
                            ~
 !!! error TS1005: ',' expected.
-                           ~
-!!! error TS2304: Cannot find name ';'.
                              ~~~~~~
 !!! error TS1005: ',' expected.
                              ~~~~~~

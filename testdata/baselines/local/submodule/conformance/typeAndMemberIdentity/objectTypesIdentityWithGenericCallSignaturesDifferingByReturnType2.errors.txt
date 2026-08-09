@@ -4,7 +4,6 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(9,19): err
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(13,19): error TS2304: Cannot find name 'Date'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,11): error TS2304: Cannot find name 'foo'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,14): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,14): error TS2304: Cannot find name '<'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,15): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,15): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,17): error TS1005: ',' expected.
@@ -12,25 +11,20 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,17): er
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,25): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,25): error TS2304: Cannot find name 'Date'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,29): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,29): error TS2304: Cannot find name '>'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,30): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,30): error TS2304: Cannot find name '('.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,31): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,34): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,35): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,35): error TS2304: Cannot find name ')'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,37): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,37): error TS2304: Cannot find name '{'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,39): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,39): error TS2304: Cannot find name 'return'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,46): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,46): error TS2304: Cannot find name 'null'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,50): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,50): error TS2304: Cannot find name ';'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,54): error TS1128: Declaration or statement expected.
 
 
-==== objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts (30 errors) ====
+==== objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts (24 errors) ====
     // Two call or construct signatures are considered identical when they have the same number of type parameters and, considering those 
     // parameters pairwise identical, have identical type parameter constraints, identical number of parameters with identical kind(required, 
     // optional or rest) and types, and identical return types.
@@ -69,8 +63,6 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,54): er
 !!! error TS2304: Cannot find name 'foo'.
                  ~
 !!! error TS1005: ',' expected.
-                 ~
-!!! error TS2304: Cannot find name '<'.
                   ~
 !!! error TS1005: ',' expected.
                   ~
@@ -85,24 +77,16 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,54): er
 !!! error TS2304: Cannot find name 'Date'.
                                 ~
 !!! error TS1005: ',' expected.
-                                ~
-!!! error TS2304: Cannot find name '>'.
                                  ~
 !!! error TS1005: ',' expected.
-                                 ~
-!!! error TS2304: Cannot find name '('.
                                   ~
 !!! error TS1005: ',' expected.
                                      ~
 !!! error TS2304: Cannot find name 'T'.
                                       ~
 !!! error TS1005: ',' expected.
-                                      ~
-!!! error TS2304: Cannot find name ')'.
                                         ~
 !!! error TS1005: ',' expected.
-                                        ~
-!!! error TS2304: Cannot find name '{'.
                                           ~~~~~~
 !!! error TS1005: ',' expected.
                                           ~~~~~~
@@ -113,8 +97,6 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByReturnType2.ts(26,54): er
 !!! error TS2304: Cannot find name 'null'.
                                                      ~
 !!! error TS1005: ',' expected.
-                                                     ~
-!!! error TS2304: Cannot find name ';'.
                                                          ~
 !!! error TS1128: Declaration or statement expected.
     

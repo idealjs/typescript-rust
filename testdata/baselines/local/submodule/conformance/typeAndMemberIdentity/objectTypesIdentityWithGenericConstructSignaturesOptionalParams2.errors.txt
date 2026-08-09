@@ -1,47 +1,37 @@
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,11): error TS2304: Cannot find name 'new'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,14): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,14): error TS2304: Cannot find name '<'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,15): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,15): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,18): error TS2304: Cannot find name 'U'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,19): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,19): error TS2304: Cannot find name '>'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,20): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,20): error TS2304: Cannot find name '('.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,21): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,24): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,27): error TS2304: Cannot find name 'y'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,28): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,31): error TS2304: Cannot find name 'U'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,32): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,32): error TS2304: Cannot find name ')'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,34): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,34): error TS2304: Cannot find name '{'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,36): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,36): error TS2304: Cannot find name 'return'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,43): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,43): error TS2304: Cannot find name 'new'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,47): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,48): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,48): error TS2304: Cannot find name '<'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,49): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,49): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,52): error TS2304: Cannot find name 'U'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,53): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,53): error TS2304: Cannot find name '>'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,54): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,54): error TS2304: Cannot find name '('.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,55): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,55): error TS2304: Cannot find name 'x'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,58): error TS2304: Cannot find name 'y'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,59): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,59): error TS2304: Cannot find name ')'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,60): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,60): error TS2304: Cannot find name ';'.
 objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,64): error TS1128: Declaration or statement expected.
 
 
-==== objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts (41 errors) ====
+==== objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts (31 errors) ====
     // Two call or construct signatures are considered identical when they have the same number of type parameters and, considering those 
     // parameters pairwise identical, have identical type parameter constraints, identical number of parameters with identical kind(required, 
     // optional or rest) and types, and identical return types.
@@ -68,8 +58,6 @@ objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,64): erro
 !!! error TS2304: Cannot find name 'new'.
                  ~
 !!! error TS1005: ',' expected.
-                 ~
-!!! error TS2304: Cannot find name '<'.
                   ~
 !!! error TS1005: ',' expected.
                   ~
@@ -78,12 +66,8 @@ objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,64): erro
 !!! error TS2304: Cannot find name 'U'.
                       ~
 !!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name '>'.
                        ~
 !!! error TS1005: ',' expected.
-                       ~
-!!! error TS2304: Cannot find name '('.
                         ~
 !!! error TS1005: ',' expected.
                            ~
@@ -96,12 +80,8 @@ objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,64): erro
 !!! error TS2304: Cannot find name 'U'.
                                    ~
 !!! error TS1005: ',' expected.
-                                   ~
-!!! error TS2304: Cannot find name ')'.
                                      ~
 !!! error TS1005: ',' expected.
-                                     ~
-!!! error TS2304: Cannot find name '{'.
                                        ~~~~~~
 !!! error TS1005: ',' expected.
                                        ~~~~~~
@@ -114,8 +94,6 @@ objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,64): erro
 !!! error TS1005: ',' expected.
                                                    ~
 !!! error TS1005: ',' expected.
-                                                   ~
-!!! error TS2304: Cannot find name '<'.
                                                     ~
 !!! error TS1005: ',' expected.
                                                     ~
@@ -124,12 +102,8 @@ objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,64): erro
 !!! error TS2304: Cannot find name 'U'.
                                                         ~
 !!! error TS1005: ',' expected.
-                                                        ~
-!!! error TS2304: Cannot find name '>'.
                                                          ~
 !!! error TS1005: ',' expected.
-                                                         ~
-!!! error TS2304: Cannot find name '('.
                                                           ~
 !!! error TS1005: ',' expected.
                                                           ~
@@ -138,12 +112,8 @@ objectTypesIdentityWithGenericConstructSignaturesOptionalParams2.ts(22,64): erro
 !!! error TS2304: Cannot find name 'y'.
                                                               ~
 !!! error TS1005: ',' expected.
-                                                              ~
-!!! error TS2304: Cannot find name ')'.
                                                                ~
 !!! error TS1005: ',' expected.
-                                                               ~
-!!! error TS2304: Cannot find name ';'.
                                                                    ~
 !!! error TS1128: Declaration or statement expected.
     

@@ -7,7 +7,6 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(13,32): e
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(17,32): error TS2304: Cannot find name 'Number'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,11): error TS2304: Cannot find name 'foo'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,14): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,14): error TS2304: Cannot find name '<'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,15): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,15): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,17): error TS1005: ',' expected.
@@ -20,25 +19,20 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,30): e
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,38): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,38): error TS2304: Cannot find name 'RegExp'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,44): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,44): error TS2304: Cannot find name '>'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,45): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,45): error TS2304: Cannot find name '('.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,46): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,49): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,55): error TS2304: Cannot find name 'U'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,56): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,56): error TS2304: Cannot find name ')'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,58): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,58): error TS2304: Cannot find name '{'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,60): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,60): error TS2304: Cannot find name 'return'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,67): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,69): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,69): error TS2304: Cannot find name ';'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,73): error TS1128: Declaration or statement expected.
 
 
-==== objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts (38 errors) ====
+==== objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts (32 errors) ====
     // Two call or construct signatures are considered identical when they have the same number of type parameters and, considering those 
     // parameters pairwise identical, have identical type parameter constraints, identical number of parameters with identical kind(required, 
     // optional or rest) and types, and identical return types.
@@ -87,8 +81,6 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,73): e
 !!! error TS2304: Cannot find name 'foo'.
                  ~
 !!! error TS1005: ',' expected.
-                 ~
-!!! error TS2304: Cannot find name '<'.
                   ~
 !!! error TS1005: ',' expected.
                   ~
@@ -113,12 +105,8 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,73): e
 !!! error TS2304: Cannot find name 'RegExp'.
                                                ~
 !!! error TS1005: ',' expected.
-                                               ~
-!!! error TS2304: Cannot find name '>'.
                                                 ~
 !!! error TS1005: ',' expected.
-                                                ~
-!!! error TS2304: Cannot find name '('.
                                                  ~
 !!! error TS1005: ',' expected.
                                                     ~
@@ -127,12 +115,8 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,73): e
 !!! error TS2304: Cannot find name 'U'.
                                                            ~
 !!! error TS1005: ',' expected.
-                                                           ~
-!!! error TS2304: Cannot find name ')'.
                                                              ~
 !!! error TS1005: ',' expected.
-                                                             ~
-!!! error TS2304: Cannot find name '{'.
                                                                ~~~~~~
 !!! error TS1005: ',' expected.
                                                                ~~~~~~
@@ -141,8 +125,6 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints2.ts(30,73): e
 !!! error TS1005: ',' expected.
                                                                         ~
 !!! error TS1005: ',' expected.
-                                                                        ~
-!!! error TS2304: Cannot find name ';'.
                                                                             ~
 !!! error TS1128: Declaration or statement expected.
     

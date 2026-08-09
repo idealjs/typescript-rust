@@ -1,15 +1,12 @@
 objectLiteralShorthandProperties.ts(15,5): error TS2304: Cannot find name 'd'.
 objectLiteralShorthandProperties.ts(15,6): error TS1005: ',' expected.
-objectLiteralShorthandProperties.ts(15,6): error TS2304: Cannot find name '('.
 objectLiteralShorthandProperties.ts(15,7): error TS1005: ',' expected.
-objectLiteralShorthandProperties.ts(15,7): error TS2304: Cannot find name ')'.
 objectLiteralShorthandProperties.ts(15,9): error TS1005: ',' expected.
-objectLiteralShorthandProperties.ts(15,9): error TS2304: Cannot find name '{'.
 objectLiteralShorthandProperties.ts(17,11): error TS1005: ',' expected.
 objectLiteralShorthandProperties.ts(18,1): error TS1128: Declaration or statement expected.
 
 
-==== objectLiteralShorthandProperties.ts (9 errors) ====
+==== objectLiteralShorthandProperties.ts (6 errors) ====
     var a, b, c;
     
     var x1 = {
@@ -29,16 +26,10 @@ objectLiteralShorthandProperties.ts(18,1): error TS1128: Declaration or statemen
 !!! error TS2304: Cannot find name 'd'.
          ~
 !!! error TS1005: ',' expected.
-         ~
-!!! error TS2304: Cannot find name '('.
           ~
 !!! error TS1005: ',' expected.
-          ~
-!!! error TS2304: Cannot find name ')'.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name '{'.
         x3,
         parent: x3
               ~

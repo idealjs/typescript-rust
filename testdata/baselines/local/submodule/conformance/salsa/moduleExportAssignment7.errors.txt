@@ -3,11 +3,8 @@ mod.js(6,8): error TS1005: ';' expected.
 mod.js(6,8): error TS2304: Cannot find name 'exports'.
 mod.js(11,5): error TS2304: Cannot find name 'baz'.
 mod.js(11,8): error TS1005: ',' expected.
-mod.js(11,8): error TS2304: Cannot find name '('.
 mod.js(11,9): error TS1005: ',' expected.
-mod.js(11,9): error TS2304: Cannot find name ')'.
 mod.js(11,11): error TS1005: ',' expected.
-mod.js(11,11): error TS2304: Cannot find name '{'.
 mod.js(11,13): error TS1005: ',' expected.
 mod.js(11,13): error TS2304: Cannot find name 'return'.
 mod.js(11,20): error TS1005: ',' expected.
@@ -16,7 +13,7 @@ mod.js(12,12): error TS1005: ';' expected.
 mod.js(13,1): error TS1012: Unexpected token.
 
 
-==== mod.js (16 errors) ====
+==== mod.js (13 errors) ====
     class Thing  { x = 1 }
     class AnotherThing { y = 2  }
     function foo() { return 3 }
@@ -38,16 +35,10 @@ mod.js(13,1): error TS1012: Unexpected token.
 !!! error TS2304: Cannot find name 'baz'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name ')'.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name '{'.
                 ~~~~~~
 !!! error TS1005: ',' expected.
                 ~~~~~~

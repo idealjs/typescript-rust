@@ -1,19 +1,16 @@
 superCallParameterContextualTyping3.ts(18,9): error TS2349: This expression is not callable.
 superCallParameterContextualTyping3.ts(19,13): error TS2304: Cannot find name 'method'.
 superCallParameterContextualTyping3.ts(19,19): error TS1005: ',' expected.
-superCallParameterContextualTyping3.ts(19,19): error TS2304: Cannot find name '('.
 superCallParameterContextualTyping3.ts(19,20): error TS1005: ',' expected.
 superCallParameterContextualTyping3.ts(19,20): error TS2304: Cannot find name 'p'.
 superCallParameterContextualTyping3.ts(19,21): error TS1005: ',' expected.
 superCallParameterContextualTyping3.ts(19,23): error TS1005: ',' expected.
-superCallParameterContextualTyping3.ts(19,23): error TS2304: Cannot find name '{'.
 superCallParameterContextualTyping3.ts(20,17): error TS1005: ',' expected.
 superCallParameterContextualTyping3.ts(20,17): error TS2304: Cannot find name 'p'.
 superCallParameterContextualTyping3.ts(20,18): error TS1005: ',' expected.
 superCallParameterContextualTyping3.ts(20,19): error TS1005: ',' expected.
 superCallParameterContextualTyping3.ts(20,19): error TS2304: Cannot find name 'length'.
 superCallParameterContextualTyping3.ts(20,25): error TS1005: ',' expected.
-superCallParameterContextualTyping3.ts(20,25): error TS2304: Cannot find name ';'.
 superCallParameterContextualTyping3.ts(22,9): error TS1005: ',' expected.
 superCallParameterContextualTyping3.ts(22,10): error TS1003: Identifier expected.
 superCallParameterContextualTyping3.ts(26,14): error TS1005: ';' expected.
@@ -23,7 +20,7 @@ superCallParameterContextualTyping3.ts(27,21): error TS1005: ',' expected.
 superCallParameterContextualTyping3.ts(30,10): error TS1128: Declaration or statement expected.
 
 
-==== superCallParameterContextualTyping3.ts (23 errors) ====
+==== superCallParameterContextualTyping3.ts (20 errors) ====
     ﻿// @target: es2015
     interface ContextualType<T> {
         method(parameter: T): void;
@@ -49,8 +46,6 @@ superCallParameterContextualTyping3.ts(30,10): error TS1128: Declaration or stat
 !!! error TS2304: Cannot find name 'method'.
                    ~
 !!! error TS1005: ',' expected.
-                   ~
-!!! error TS2304: Cannot find name '('.
                     ~
 !!! error TS1005: ',' expected.
                     ~
@@ -59,8 +54,6 @@ superCallParameterContextualTyping3.ts(30,10): error TS1128: Declaration or stat
 !!! error TS1005: ',' expected.
                        ~
 !!! error TS1005: ',' expected.
-                       ~
-!!! error TS2304: Cannot find name '{'.
                     p.length;
                  ~
 !!! error TS1005: ',' expected.
@@ -74,8 +67,6 @@ superCallParameterContextualTyping3.ts(30,10): error TS1128: Declaration or stat
 !!! error TS2304: Cannot find name 'length'.
                          ~
 !!! error TS1005: ',' expected.
-                         ~
-!!! error TS2304: Cannot find name ';'.
                 }
             });
          ~

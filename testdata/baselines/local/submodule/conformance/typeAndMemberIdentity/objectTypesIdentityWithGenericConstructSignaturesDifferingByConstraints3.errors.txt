@@ -1,6 +1,5 @@
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,11): error TS2304: Cannot find name 'new'.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,14): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,14): error TS2304: Cannot find name '<'.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,15): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,15): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,17): error TS1005: ',' expected.
@@ -12,25 +11,20 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,3
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,30): error TS2304: Cannot find name 'extends'.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,38): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,41): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,41): error TS2304: Cannot find name '>'.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,42): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,42): error TS2304: Cannot find name '('.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,43): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,46): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,52): error TS2304: Cannot find name 'U'.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,53): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,53): error TS2304: Cannot find name ')'.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,55): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,55): error TS2304: Cannot find name '{'.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,57): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,57): error TS2304: Cannot find name 'return'.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,64): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,66): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,66): error TS2304: Cannot find name ';'.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,70): error TS1128: Declaration or statement expected.
 
 
-==== objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts (30 errors) ====
+==== objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts (24 errors) ====
     // Two call or construct signatures are considered identical when they have the same number of type parameters and, considering those 
     // parameters pairwise identical, have identical type parameter constraints, identical number of parameters with identical kind(required, 
     // optional or rest) and types, and identical return types.
@@ -70,8 +64,6 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,7
 !!! error TS2304: Cannot find name 'new'.
                  ~
 !!! error TS1005: ',' expected.
-                 ~
-!!! error TS2304: Cannot find name '<'.
                   ~
 !!! error TS1005: ',' expected.
                   ~
@@ -94,12 +86,8 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,7
 !!! error TS1005: ',' expected.
                                             ~
 !!! error TS1005: ',' expected.
-                                            ~
-!!! error TS2304: Cannot find name '>'.
                                              ~
 !!! error TS1005: ',' expected.
-                                             ~
-!!! error TS2304: Cannot find name '('.
                                               ~
 !!! error TS1005: ',' expected.
                                                  ~
@@ -108,12 +96,8 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,7
 !!! error TS2304: Cannot find name 'U'.
                                                         ~
 !!! error TS1005: ',' expected.
-                                                        ~
-!!! error TS2304: Cannot find name ')'.
                                                           ~
 !!! error TS1005: ',' expected.
-                                                          ~
-!!! error TS2304: Cannot find name '{'.
                                                             ~~~~~~
 !!! error TS1005: ',' expected.
                                                             ~~~~~~
@@ -122,8 +106,6 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingByConstraints3.ts(35,7
 !!! error TS1005: ',' expected.
                                                                      ~
 !!! error TS1005: ',' expected.
-                                                                     ~
-!!! error TS2304: Cannot find name ';'.
                                                                          ~
 !!! error TS1128: Declaration or statement expected.
     

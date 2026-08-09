@@ -11,23 +11,19 @@ uniqueSymbolsDeclarations.ts(132,4): error TS2339: Property 's' does not exist o
 uniqueSymbolsDeclarations.ts(138,10): error TS2339: Property 's' does not exist on type 'N'.
 uniqueSymbolsDeclarations.ts(141,5): error TS2304: Cannot find name 'method1'.
 uniqueSymbolsDeclarations.ts(141,12): error TS1005: ',' expected.
-uniqueSymbolsDeclarations.ts(141,12): error TS2304: Cannot find name '('.
 uniqueSymbolsDeclarations.ts(141,13): error TS1005: ',' expected.
-uniqueSymbolsDeclarations.ts(141,13): error TS2304: Cannot find name ')'.
 uniqueSymbolsDeclarations.ts(141,15): error TS1005: ',' expected.
-uniqueSymbolsDeclarations.ts(141,15): error TS2304: Cannot find name '{'.
 uniqueSymbolsDeclarations.ts(141,17): error TS1005: ',' expected.
 uniqueSymbolsDeclarations.ts(141,17): error TS2304: Cannot find name 'return'.
 uniqueSymbolsDeclarations.ts(141,24): error TS1005: ',' expected.
 uniqueSymbolsDeclarations.ts(141,25): error TS1005: ',' expected.
-uniqueSymbolsDeclarations.ts(141,25): error TS2304: Cannot find name ';'.
 uniqueSymbolsDeclarations.ts(142,5): error TS2304: Cannot find name 'async'.
 uniqueSymbolsDeclarations.ts(142,11): error TS1005: ',' expected.
 uniqueSymbolsDeclarations.ts(142,18): error TS1005: ',' expected.
 uniqueSymbolsDeclarations.ts(142,19): error TS1134: Variable declaration expected.
 
 
-==== uniqueSymbolsDeclarations.ts (27 errors) ====
+==== uniqueSymbolsDeclarations.ts (23 errors) ====
     // declarations with call initializer
     const constCall = Symbol();
     let letCall = Symbol();
@@ -195,16 +191,10 @@ uniqueSymbolsDeclarations.ts(142,19): error TS1134: Variable declaration expecte
 !!! error TS2304: Cannot find name 'method1'.
                ~
 !!! error TS1005: ',' expected.
-               ~
-!!! error TS2304: Cannot find name '('.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name ')'.
                   ~
 !!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name '{'.
                     ~~~~~~
 !!! error TS1005: ',' expected.
                     ~~~~~~
@@ -213,8 +203,6 @@ uniqueSymbolsDeclarations.ts(142,19): error TS1134: Variable declaration expecte
 !!! error TS1005: ',' expected.
                             ~
 !!! error TS1005: ',' expected.
-                            ~
-!!! error TS2304: Cannot find name ';'.
         async method2() { return s; },
         ~~~~~
 !!! error TS2304: Cannot find name 'async'.

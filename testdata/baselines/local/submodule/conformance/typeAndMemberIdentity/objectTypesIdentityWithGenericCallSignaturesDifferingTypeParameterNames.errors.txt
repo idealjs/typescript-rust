@@ -2,27 +2,21 @@ objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(4,15)
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(4,19): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,11): error TS2304: Cannot find name 'foo'.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,14): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,14): error TS2304: Cannot find name '<'.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,15): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,16): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,16): error TS2304: Cannot find name '>'.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,17): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,17): error TS2304: Cannot find name '('.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,18): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,22): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,22): error TS2304: Cannot find name ')'.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,24): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,24): error TS2304: Cannot find name '{'.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,26): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,26): error TS2304: Cannot find name 'return'.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,33): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,33): error TS2304: Cannot find name 'x'.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,34): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,34): error TS2304: Cannot find name ';'.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,38): error TS1128: Declaration or statement expected.
 
 
-==== objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts (22 errors) ====
+==== objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts (16 errors) ====
     // object types are identical structurally
     
     class A {
@@ -55,28 +49,18 @@ objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,38
 !!! error TS2304: Cannot find name 'foo'.
                  ~
 !!! error TS1005: ',' expected.
-                 ~
-!!! error TS2304: Cannot find name '<'.
                   ~
 !!! error TS1005: ',' expected.
                    ~
 !!! error TS1005: ',' expected.
-                   ~
-!!! error TS2304: Cannot find name '>'.
                     ~
 !!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name '('.
                      ~
 !!! error TS1005: ',' expected.
                          ~
 !!! error TS1005: ',' expected.
-                         ~
-!!! error TS2304: Cannot find name ')'.
                            ~
 !!! error TS1005: ',' expected.
-                           ~
-!!! error TS2304: Cannot find name '{'.
                              ~~~~~~
 !!! error TS1005: ',' expected.
                              ~~~~~~
@@ -87,8 +71,6 @@ objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterNames.ts(24,38
 !!! error TS2304: Cannot find name 'x'.
                                      ~
 !!! error TS1005: ',' expected.
-                                     ~
-!!! error TS2304: Cannot find name ';'.
                                          ~
 !!! error TS1128: Declaration or statement expected.
     

@@ -1,15 +1,12 @@
 awaitUsingDeclarations.1.ts(1,20): error TS2304: Cannot find name 'async'.
 awaitUsingDeclarations.1.ts(1,26): error TS1005: ',' expected.
 awaitUsingDeclarations.1.ts(1,47): error TS1005: ',' expected.
-awaitUsingDeclarations.1.ts(1,47): error TS2304: Cannot find name '('.
 awaitUsingDeclarations.1.ts(1,48): error TS1005: ',' expected.
-awaitUsingDeclarations.1.ts(1,48): error TS2304: Cannot find name ')'.
 awaitUsingDeclarations.1.ts(1,50): error TS1005: ',' expected.
-awaitUsingDeclarations.1.ts(1,50): error TS2304: Cannot find name '{'.
 awaitUsingDeclarations.1.ts(1,53): error TS1128: Declaration or statement expected.
 
 
-==== awaitUsingDeclarations.1.ts (9 errors) ====
+==== awaitUsingDeclarations.1.ts (6 errors) ====
     await using d1 = { async [Symbol.asyncDispose]() {} };
                        ~~~~~
 !!! error TS2304: Cannot find name 'async'.
@@ -17,16 +14,10 @@ awaitUsingDeclarations.1.ts(1,53): error TS1128: Declaration or statement expect
 !!! error TS1005: ',' expected.
                                                   ~
 !!! error TS1005: ',' expected.
-                                                  ~
-!!! error TS2304: Cannot find name '('.
                                                    ~
 !!! error TS1005: ',' expected.
-                                                   ~
-!!! error TS2304: Cannot find name ')'.
                                                      ~
 !!! error TS1005: ',' expected.
-                                                     ~
-!!! error TS2304: Cannot find name '{'.
                                                         ~
 !!! error TS1128: Declaration or statement expected.
     

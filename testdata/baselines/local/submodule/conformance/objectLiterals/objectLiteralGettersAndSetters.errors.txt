@@ -1,23 +1,19 @@
 objectLiteralGettersAndSetters.ts(2,20): error TS2304: Cannot find name 'get'.
 objectLiteralGettersAndSetters.ts(2,24): error TS1005: ',' expected.
 objectLiteralGettersAndSetters.ts(2,27): error TS1005: ',' expected.
-objectLiteralGettersAndSetters.ts(2,27): error TS2304: Cannot find name '('.
 objectLiteralGettersAndSetters.ts(2,28): error TS1005: ',' expected.
-objectLiteralGettersAndSetters.ts(2,28): error TS2304: Cannot find name ')'.
 objectLiteralGettersAndSetters.ts(2,30): error TS1005: ',' expected.
-objectLiteralGettersAndSetters.ts(2,30): error TS2304: Cannot find name '{'.
 objectLiteralGettersAndSetters.ts(2,32): error TS1005: ',' expected.
 objectLiteralGettersAndSetters.ts(2,32): error TS2304: Cannot find name 'return'.
 objectLiteralGettersAndSetters.ts(2,39): error TS1005: ',' expected.
 objectLiteralGettersAndSetters.ts(2,41): error TS1005: ',' expected.
-objectLiteralGettersAndSetters.ts(2,41): error TS2304: Cannot find name ';'.
 objectLiteralGettersAndSetters.ts(2,46): error TS2304: Cannot find name 'set'.
 objectLiteralGettersAndSetters.ts(2,50): error TS1005: ',' expected.
 objectLiteralGettersAndSetters.ts(2,51): error TS1005: ',' expected.
 objectLiteralGettersAndSetters.ts(2,53): error TS1005: ',' expected.
 
 
-==== objectLiteralGettersAndSetters.ts (17 errors) ====
+==== objectLiteralGettersAndSetters.ts (13 errors) ====
     // Get and set accessor with the same name
     var sameName1a = { get 'a'() { return ''; }, set a(n) { var p = n; var p: string; } };
                        ~~~
@@ -26,16 +22,10 @@ objectLiteralGettersAndSetters.ts(2,53): error TS1005: ',' expected.
 !!! error TS1005: ',' expected.
                               ~
 !!! error TS1005: ',' expected.
-                              ~
-!!! error TS2304: Cannot find name '('.
                                ~
 !!! error TS1005: ',' expected.
-                               ~
-!!! error TS2304: Cannot find name ')'.
                                  ~
 !!! error TS1005: ',' expected.
-                                 ~
-!!! error TS2304: Cannot find name '{'.
                                    ~~~~~~
 !!! error TS1005: ',' expected.
                                    ~~~~~~
@@ -44,8 +34,6 @@ objectLiteralGettersAndSetters.ts(2,53): error TS1005: ',' expected.
 !!! error TS1005: ',' expected.
                                             ~
 !!! error TS1005: ',' expected.
-                                            ~
-!!! error TS2304: Cannot find name ';'.
                                                  ~~~
 !!! error TS2304: Cannot find name 'set'.
                                                      ~

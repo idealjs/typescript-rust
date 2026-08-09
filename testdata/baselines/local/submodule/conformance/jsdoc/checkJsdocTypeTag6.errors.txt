@@ -1,16 +1,13 @@
 test.js(34,3): error TS2304: Cannot find name 'methodWithMoreParameters'.
 test.js(34,27): error TS1005: ',' expected.
-test.js(34,27): error TS2304: Cannot find name '('.
 test.js(34,28): error TS1005: ',' expected.
 test.js(34,28): error TS2304: Cannot find name 'more'.
 test.js(34,32): error TS1005: ',' expected.
-test.js(34,32): error TS2304: Cannot find name ')'.
 test.js(34,34): error TS1005: ',' expected.
-test.js(34,34): error TS2304: Cannot find name '{'.
 test.js(35,1): error TS1012: Unexpected token.
 
 
-==== test.js (10 errors) ====
+==== test.js (7 errors) ====
     /** @type {number} */
     function f() {
         return 1
@@ -49,20 +46,14 @@ test.js(35,1): error TS1012: Unexpected token.
 !!! error TS2304: Cannot find name 'methodWithMoreParameters'.
                               ~
 !!! error TS1005: ',' expected.
-                              ~
-!!! error TS2304: Cannot find name '('.
                                ~~~~
 !!! error TS1005: ',' expected.
                                ~~~~
 !!! error TS2304: Cannot find name 'more'.
                                    ~
 !!! error TS1005: ',' expected.
-                                   ~
-!!! error TS2304: Cannot find name ')'.
                                      ~
 !!! error TS1005: ',' expected.
-                                     ~
-!!! error TS2304: Cannot find name '{'.
     });
     ~
 !!! error TS1012: Unexpected token.

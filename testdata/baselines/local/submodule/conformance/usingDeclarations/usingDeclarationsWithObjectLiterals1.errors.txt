@@ -1,13 +1,10 @@
 usingDeclarationsWithObjectLiterals1.ts(7,31): error TS1005: ',' expected.
-usingDeclarationsWithObjectLiterals1.ts(7,31): error TS2304: Cannot find name '('.
 usingDeclarationsWithObjectLiterals1.ts(7,32): error TS1005: ',' expected.
-usingDeclarationsWithObjectLiterals1.ts(7,32): error TS2304: Cannot find name ')'.
 usingDeclarationsWithObjectLiterals1.ts(7,34): error TS1005: ',' expected.
-usingDeclarationsWithObjectLiterals1.ts(7,34): error TS2304: Cannot find name '{'.
 usingDeclarationsWithObjectLiterals1.ts(8,1): error TS1128: Declaration or statement expected.
 
 
-==== usingDeclarationsWithObjectLiterals1.ts (7 errors) ====
+==== usingDeclarationsWithObjectLiterals1.ts (4 errors) ====
     interface MyDisposable {
       value: number;
       [Symbol.dispose](): void;
@@ -17,16 +14,10 @@ usingDeclarationsWithObjectLiterals1.ts(8,1): error TS1128: Declaration or state
       using _ = { [Symbol.dispose]() {} };
                                   ~
 !!! error TS1005: ',' expected.
-                                  ~
-!!! error TS2304: Cannot find name '('.
                                    ~
 !!! error TS1005: ',' expected.
-                                   ~
-!!! error TS2304: Cannot find name ')'.
                                      ~
 !!! error TS1005: ',' expected.
-                                     ~
-!!! error TS2304: Cannot find name '{'.
     }
     ~
 !!! error TS1128: Declaration or statement expected.

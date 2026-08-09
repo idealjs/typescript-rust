@@ -2,21 +2,17 @@ YieldExpression17_es6.ts(1,11): error TS2304: Cannot find name 'get'.
 YieldExpression17_es6.ts(1,15): error TS1005: ',' expected.
 YieldExpression17_es6.ts(1,15): error TS2304: Cannot find name 'foo'.
 YieldExpression17_es6.ts(1,18): error TS1005: ',' expected.
-YieldExpression17_es6.ts(1,18): error TS2304: Cannot find name '('.
 YieldExpression17_es6.ts(1,19): error TS1005: ',' expected.
-YieldExpression17_es6.ts(1,19): error TS2304: Cannot find name ')'.
 YieldExpression17_es6.ts(1,21): error TS1005: ',' expected.
-YieldExpression17_es6.ts(1,21): error TS2304: Cannot find name '{'.
 YieldExpression17_es6.ts(1,23): error TS1005: ',' expected.
 YieldExpression17_es6.ts(1,23): error TS2304: Cannot find name 'yield'.
 YieldExpression17_es6.ts(1,29): error TS1005: ',' expected.
 YieldExpression17_es6.ts(1,29): error TS2304: Cannot find name 'foo'.
 YieldExpression17_es6.ts(1,32): error TS1005: ',' expected.
-YieldExpression17_es6.ts(1,32): error TS2304: Cannot find name ';'.
 YieldExpression17_es6.ts(1,36): error TS1128: Declaration or statement expected.
 
 
-==== YieldExpression17_es6.ts (16 errors) ====
+==== YieldExpression17_es6.ts (12 errors) ====
     var v = { get foo() { yield foo; } }
               ~~~
 !!! error TS2304: Cannot find name 'get'.
@@ -26,16 +22,10 @@ YieldExpression17_es6.ts(1,36): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'foo'.
                      ~
 !!! error TS1005: ',' expected.
-                     ~
-!!! error TS2304: Cannot find name '('.
                       ~
 !!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name ')'.
                         ~
 !!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name '{'.
                           ~~~~~
 !!! error TS1005: ',' expected.
                           ~~~~~
@@ -46,7 +36,5 @@ YieldExpression17_es6.ts(1,36): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'foo'.
                                    ~
 !!! error TS1005: ',' expected.
-                                   ~
-!!! error TS2304: Cannot find name ';'.
                                        ~
 !!! error TS1128: Declaration or statement expected.

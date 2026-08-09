@@ -1,15 +1,12 @@
 constAssertions.ts(37,37): error TS1005: ',' expected.
-constAssertions.ts(37,37): error TS2304: Cannot find name '('.
 constAssertions.ts(37,38): error TS1005: ',' expected.
-constAssertions.ts(37,38): error TS2304: Cannot find name ')'.
 constAssertions.ts(37,40): error TS1005: ',' expected.
-constAssertions.ts(37,40): error TS2304: Cannot find name '{'.
 constAssertions.ts(37,54): error TS1005: ',' expected.
 constAssertions.ts(37,56): error TS1134: Variable declaration expected.
 constAssertions.ts(37,58): error TS1128: Declaration or statement expected.
 
 
-==== constAssertions.ts (9 errors) ====
+==== constAssertions.ts (6 errors) ====
     let v1 = 'abc' as const;
     let v2 = `abc` as const;
     let v3 = 10 as const;
@@ -49,16 +46,10 @@ constAssertions.ts(37,58): error TS1128: Declaration or statement expected.
     let o2 = { a: 1, 'b': 2, ['c']: 3, d() {}, ['e' + '']: 4 } as const;
                                         ~
 !!! error TS1005: ',' expected.
-                                        ~
-!!! error TS2304: Cannot find name '('.
                                          ~
 !!! error TS1005: ',' expected.
-                                         ~
-!!! error TS2304: Cannot find name ')'.
                                            ~
 !!! error TS1005: ',' expected.
-                                           ~
-!!! error TS2304: Cannot find name '{'.
                                                          ~
 !!! error TS1005: ',' expected.
                                                            ~

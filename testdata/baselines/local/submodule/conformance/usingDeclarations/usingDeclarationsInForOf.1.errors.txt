@@ -4,16 +4,13 @@ usingDeclarationsInForOf.1.ts(1,12): error TS2304: Cannot find name 'd1'.
 usingDeclarationsInForOf.1.ts(1,15): error TS1005: ';' expected.
 usingDeclarationsInForOf.1.ts(1,15): error TS2304: Cannot find name 'of'.
 usingDeclarationsInForOf.1.ts(1,37): error TS1005: ',' expected.
-usingDeclarationsInForOf.1.ts(1,37): error TS2304: Cannot find name '('.
 usingDeclarationsInForOf.1.ts(1,38): error TS1005: ',' expected.
-usingDeclarationsInForOf.1.ts(1,38): error TS2304: Cannot find name ')'.
 usingDeclarationsInForOf.1.ts(1,40): error TS1005: ',' expected.
-usingDeclarationsInForOf.1.ts(1,40): error TS2304: Cannot find name '{'.
 usingDeclarationsInForOf.1.ts(1,43): error TS1005: ']' expected.
 usingDeclarationsInForOf.1.ts(1,61): error TS1005: ';' expected.
 
 
-==== usingDeclarationsInForOf.1.ts (13 errors) ====
+==== usingDeclarationsInForOf.1.ts (10 errors) ====
     for (using d1 of [{ [Symbol.dispose]() {} }, null, undefined]) {
          ~~~~~
 !!! error TS2304: Cannot find name 'using'.
@@ -27,16 +24,10 @@ usingDeclarationsInForOf.1.ts(1,61): error TS1005: ';' expected.
 !!! error TS2304: Cannot find name 'of'.
                                         ~
 !!! error TS1005: ',' expected.
-                                        ~
-!!! error TS2304: Cannot find name '('.
                                          ~
 !!! error TS1005: ',' expected.
-                                         ~
-!!! error TS2304: Cannot find name ')'.
                                            ~
 !!! error TS1005: ',' expected.
-                                           ~
-!!! error TS2304: Cannot find name '{'.
                                               ~
 !!! error TS1005: ']' expected.
                                                                 ~

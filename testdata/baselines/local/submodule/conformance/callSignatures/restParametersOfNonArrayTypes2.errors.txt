@@ -1,13 +1,9 @@
 restParametersOfNonArrayTypes2.ts(26,8): error TS1005: ',' expected.
-restParametersOfNonArrayTypes2.ts(26,8): error TS2304: Cannot find name '('.
 restParametersOfNonArrayTypes2.ts(26,9): error TS1005: ',' expected.
 restParametersOfNonArrayTypes2.ts(26,13): error TS1005: ',' expected.
-restParametersOfNonArrayTypes2.ts(26,13): error TS2304: Cannot find name ':'.
 restParametersOfNonArrayTypes2.ts(26,15): error TS1005: ',' expected.
 restParametersOfNonArrayTypes2.ts(26,22): error TS1005: ',' expected.
-restParametersOfNonArrayTypes2.ts(26,22): error TS2304: Cannot find name ')'.
 restParametersOfNonArrayTypes2.ts(26,24): error TS1005: ',' expected.
-restParametersOfNonArrayTypes2.ts(26,24): error TS2304: Cannot find name '{'.
 restParametersOfNonArrayTypes2.ts(27,6): error TS1005: ',' expected.
 restParametersOfNonArrayTypes2.ts(27,17): error TS1005: ',' expected.
 restParametersOfNonArrayTypes2.ts(27,20): error TS1005: ',' expected.
@@ -16,7 +12,7 @@ restParametersOfNonArrayTypes2.ts(27,36): error TS1134: Variable declaration exp
 restParametersOfNonArrayTypes2.ts(27,49): error TS1005: ',' expected.
 
 
-==== restParametersOfNonArrayTypes2.ts (16 errors) ====
+==== restParametersOfNonArrayTypes2.ts (12 errors) ====
     // Rest parameters must be an array type if they have a type annotation, 
     // user defined subtypes of array do not count, all of these are errors
     
@@ -45,24 +41,16 @@ restParametersOfNonArrayTypes2.ts(27,49): error TS1005: ',' expected.
         foo(...x: MyThing) { },
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~~~
 !!! error TS1005: ',' expected.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name ':'.
                   ~~~~~~~
 !!! error TS1005: ',' expected.
                          ~
 !!! error TS1005: ',' expected.
-                         ~
-!!! error TS2304: Cannot find name ')'.
                            ~
 !!! error TS1005: ',' expected.
-                           ~
-!!! error TS2304: Cannot find name '{'.
         a: function foo(...x: MyThing, ...y: MyThing) { },
          ~
 !!! error TS1005: ',' expected.

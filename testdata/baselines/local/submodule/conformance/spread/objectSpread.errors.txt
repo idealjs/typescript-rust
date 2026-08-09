@@ -12,18 +12,15 @@ objectSpread.ts(23,12): error TS2304: Cannot find name 'get'.
 objectSpread.ts(23,16): error TS1005: ',' expected.
 objectSpread.ts(23,16): error TS2304: Cannot find name 'a'.
 objectSpread.ts(23,18): error TS1005: ',' expected.
-objectSpread.ts(23,18): error TS2304: Cannot find name '('.
 objectSpread.ts(23,19): error TS1005: ',' expected.
-objectSpread.ts(23,19): error TS2304: Cannot find name ')'.
 objectSpread.ts(23,21): error TS1005: ',' expected.
-objectSpread.ts(23,21): error TS2304: Cannot find name '{'.
 objectSpread.ts(23,23): error TS1005: ',' expected.
 objectSpread.ts(23,23): error TS2304: Cannot find name 'return'.
 objectSpread.ts(23,30): error TS1005: ',' expected.
 objectSpread.ts(23,34): error TS1128: Declaration or statement expected.
 
 
-==== objectSpread.ts (23 errors) ====
+==== objectSpread.ts (20 errors) ====
     let o = { a: 1, b: 'no' }
     let o2 = { b: 'yes', c: true }
     let swap = { a: 'yes', b: -1 };
@@ -75,16 +72,10 @@ objectSpread.ts(23,34): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'a'.
                      ~
 !!! error TS1005: ',' expected.
-                     ~
-!!! error TS2304: Cannot find name '('.
                       ~
 !!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name ')'.
                         ~
 !!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name '{'.
                           ~~~~~~
 !!! error TS1005: ',' expected.
                           ~~~~~~

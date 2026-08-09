@@ -2,20 +2,16 @@ objectLiteralErrors.ts(22,18): error TS2304: Cannot find name 'get'.
 objectLiteralErrors.ts(22,22): error TS1005: ',' expected.
 objectLiteralErrors.ts(22,22): error TS2304: Cannot find name 'a'.
 objectLiteralErrors.ts(22,23): error TS1005: ',' expected.
-objectLiteralErrors.ts(22,23): error TS2304: Cannot find name '('.
 objectLiteralErrors.ts(22,24): error TS1005: ',' expected.
-objectLiteralErrors.ts(22,24): error TS2304: Cannot find name ')'.
 objectLiteralErrors.ts(22,26): error TS1005: ',' expected.
-objectLiteralErrors.ts(22,26): error TS2304: Cannot find name '{'.
 objectLiteralErrors.ts(22,28): error TS1005: ',' expected.
 objectLiteralErrors.ts(22,28): error TS2304: Cannot find name 'return'.
 objectLiteralErrors.ts(22,35): error TS1005: ',' expected.
 objectLiteralErrors.ts(22,36): error TS1005: ',' expected.
-objectLiteralErrors.ts(22,36): error TS2304: Cannot find name ';'.
 objectLiteralErrors.ts(22,40): error TS1128: Declaration or statement expected.
 
 
-==== objectLiteralErrors.ts (15 errors) ====
+==== objectLiteralErrors.ts (11 errors) ====
     // Multiple properties with the same name
     var e1 = { a: 0, a: 0 };
     var e2 = { a: '', a: '' };
@@ -46,16 +42,10 @@ objectLiteralErrors.ts(22,40): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'a'.
                           ~
 !!! error TS1005: ',' expected.
-                          ~
-!!! error TS2304: Cannot find name '('.
                            ~
 !!! error TS1005: ',' expected.
-                           ~
-!!! error TS2304: Cannot find name ')'.
                              ~
 !!! error TS1005: ',' expected.
-                             ~
-!!! error TS2304: Cannot find name '{'.
                                ~~~~~~
 !!! error TS1005: ',' expected.
                                ~~~~~~
@@ -64,8 +54,6 @@ objectLiteralErrors.ts(22,40): error TS1128: Declaration or statement expected.
 !!! error TS1005: ',' expected.
                                        ~
 !!! error TS1005: ',' expected.
-                                       ~
-!!! error TS2304: Cannot find name ';'.
                                            ~
 !!! error TS1128: Declaration or statement expected.
     var f2 = { a: '', get a() { return ''; } };

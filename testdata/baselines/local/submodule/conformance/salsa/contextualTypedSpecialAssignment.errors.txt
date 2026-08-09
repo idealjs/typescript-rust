@@ -3,28 +3,22 @@ mod.js(3,8): error TS1005: ';' expected.
 mod.js(3,8): error TS2304: Cannot find name 'exports'.
 mod.js(5,5): error TS2304: Cannot find name 'm'.
 mod.js(5,6): error TS1005: ',' expected.
-mod.js(5,6): error TS2304: Cannot find name '('.
 mod.js(5,7): error TS1005: ',' expected.
 mod.js(5,7): error TS2304: Cannot find name 'n'.
 mod.js(5,8): error TS1005: ',' expected.
-mod.js(5,8): error TS2304: Cannot find name ')'.
 mod.js(5,10): error TS1005: ',' expected.
-mod.js(5,10): error TS2304: Cannot find name '{'.
 mod.js(6,1): error TS1128: Declaration or statement expected.
 test.js(9,4): error TS2339: Property 'x' does not exist on type 'object'.
 test.js(11,5): error TS2304: Cannot find name 'm'.
 test.js(11,6): error TS1005: ',' expected.
-test.js(11,6): error TS2304: Cannot find name '('.
 test.js(11,7): error TS1005: ',' expected.
 test.js(11,7): error TS2304: Cannot find name 'n'.
 test.js(11,8): error TS1005: ',' expected.
-test.js(11,8): error TS2304: Cannot find name ')'.
 test.js(11,10): error TS1005: ',' expected.
-test.js(11,10): error TS2304: Cannot find name '{'.
 test.js(12,1): error TS1128: Declaration or statement expected.
 
 
-==== test.js (11 errors) ====
+==== test.js (8 errors) ====
     /** @typedef {{
         status: 'done'
         m(n: number): void
@@ -42,20 +36,14 @@ test.js(12,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'm'.
          ~
 !!! error TS1005: ',' expected.
-         ~
-!!! error TS2304: Cannot find name '('.
           ~
 !!! error TS1005: ',' expected.
           ~
 !!! error TS2304: Cannot find name 'n'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name ')'.
              ~
 !!! error TS1005: ',' expected.
-             ~
-!!! error TS2304: Cannot find name '{'.
     }
     ~
 !!! error TS1128: Declaration or statement expected.
@@ -118,7 +106,7 @@ test.js(12,1): error TS1128: Declaration or statement expected.
         m(n) { }
     }
     
-==== mod.js (13 errors) ====
+==== mod.js (10 errors) ====
     // module.exports assignment
     /** @type {{ status: 'done', m(n: number): void }} */
     module.exports = {
@@ -134,20 +122,14 @@ test.js(12,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'm'.
          ~
 !!! error TS1005: ',' expected.
-         ~
-!!! error TS2304: Cannot find name '('.
           ~
 !!! error TS1005: ',' expected.
           ~
 !!! error TS2304: Cannot find name 'n'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name ')'.
              ~
 !!! error TS1005: ',' expected.
-             ~
-!!! error TS2304: Cannot find name '{'.
     }
     ~
 !!! error TS1128: Declaration or statement expected.

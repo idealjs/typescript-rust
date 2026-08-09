@@ -3,13 +3,10 @@ callSignaturesWithOptionalParameters.ts(39,1): error TS2349: This expression is 
 callSignaturesWithOptionalParameters.ts(40,3): error TS2339: Property 'foo' does not exist on type 'object'.
 callSignaturesWithOptionalParameters.ts(41,3): error TS2339: Property 'foo' does not exist on type 'object'.
 callSignaturesWithOptionalParameters.ts(44,8): error TS1005: ',' expected.
-callSignaturesWithOptionalParameters.ts(44,8): error TS2304: Cannot find name '('.
 callSignaturesWithOptionalParameters.ts(44,9): error TS1005: ',' expected.
 callSignaturesWithOptionalParameters.ts(44,10): error TS1005: ',' expected.
 callSignaturesWithOptionalParameters.ts(44,19): error TS1005: ',' expected.
-callSignaturesWithOptionalParameters.ts(44,19): error TS2304: Cannot find name ')'.
 callSignaturesWithOptionalParameters.ts(44,21): error TS1005: ',' expected.
-callSignaturesWithOptionalParameters.ts(44,21): error TS2304: Cannot find name '{'.
 callSignaturesWithOptionalParameters.ts(45,6): error TS1005: ',' expected.
 callSignaturesWithOptionalParameters.ts(45,17): error TS1005: ',' expected.
 callSignaturesWithOptionalParameters.ts(45,20): error TS1005: ',' expected.
@@ -18,7 +15,7 @@ callSignaturesWithOptionalParameters.ts(45,34): error TS1134: Variable declarati
 callSignaturesWithOptionalParameters.ts(45,42): error TS1005: ',' expected.
 
 
-==== callSignaturesWithOptionalParameters.ts (18 errors) ====
+==== callSignaturesWithOptionalParameters.ts (15 errors) ====
     // Optional parameters should be valid in all the below casts
     
     function foo(x?: number) { }
@@ -73,20 +70,14 @@ callSignaturesWithOptionalParameters.ts(45,42): error TS1005: ',' expected.
         foo(x?: number) { },
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~
 !!! error TS1005: ',' expected.
              ~
 !!! error TS1005: ',' expected.
                       ~
 !!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name ')'.
                         ~
 !!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name '{'.
         a: function foo(x: number, y?: number) { },
          ~
 !!! error TS1005: ',' expected.

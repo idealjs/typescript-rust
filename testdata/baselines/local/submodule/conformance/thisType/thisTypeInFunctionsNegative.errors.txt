@@ -1,27 +1,22 @@
 thisTypeInFunctionsNegative.ts(38,5): error TS2304: Cannot find name 'explicitVoid1'.
 thisTypeInFunctionsNegative.ts(38,18): error TS1005: ',' expected.
-thisTypeInFunctionsNegative.ts(38,18): error TS2304: Cannot find name '('.
 thisTypeInFunctionsNegative.ts(38,19): error TS1005: ',' expected.
-thisTypeInFunctionsNegative.ts(38,19): error TS2304: Cannot find name ')'.
 thisTypeInFunctionsNegative.ts(38,21): error TS1005: ',' expected.
-thisTypeInFunctionsNegative.ts(38,21): error TS2304: Cannot find name '{'.
 thisTypeInFunctionsNegative.ts(39,9): error TS1005: ',' expected.
 thisTypeInFunctionsNegative.ts(39,9): error TS2304: Cannot find name 'return'.
 thisTypeInFunctionsNegative.ts(39,16): error TS1005: ',' expected.
 thisTypeInFunctionsNegative.ts(39,16): error TS2304: Cannot find name 'this'.
 thisTypeInFunctionsNegative.ts(39,20): error TS1005: ',' expected.
-thisTypeInFunctionsNegative.ts(39,20): error TS2304: Cannot find name '.'.
 thisTypeInFunctionsNegative.ts(39,21): error TS1005: ',' expected.
 thisTypeInFunctionsNegative.ts(39,21): error TS2304: Cannot find name 'a'.
 thisTypeInFunctionsNegative.ts(39,22): error TS1005: ',' expected.
-thisTypeInFunctionsNegative.ts(39,22): error TS2304: Cannot find name ';'.
 thisTypeInFunctionsNegative.ts(41,5): error TS2304: Cannot find name 'explicitVoid2'.
 thisTypeInFunctionsNegative.ts(41,18): error TS1005: ',' expected.
 thisTypeInFunctionsNegative.ts(41,20): error TS1134: Variable declaration expected.
 thisTypeInFunctionsNegative.ts(41,21): error TS1134: Variable declaration expected.
 
 
-==== thisTypeInFunctionsNegative.ts (21 errors) ====
+==== thisTypeInFunctionsNegative.ts (16 errors) ====
     class C {
         n: number;
         explicitThis(this: this, m: number): number {
@@ -64,16 +59,10 @@ thisTypeInFunctionsNegative.ts(41,21): error TS1134: Variable declaration expect
 !!! error TS2304: Cannot find name 'explicitVoid1'.
                      ~
 !!! error TS1005: ',' expected.
-                     ~
-!!! error TS2304: Cannot find name '('.
                       ~
 !!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name ')'.
                         ~
 !!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name '{'.
             return this.a; // error, no 'a' in 'void'
             ~~~~~~
 !!! error TS1005: ',' expected.
@@ -85,16 +74,12 @@ thisTypeInFunctionsNegative.ts(41,21): error TS1134: Variable declaration expect
 !!! error TS2304: Cannot find name 'this'.
                        ~
 !!! error TS1005: ',' expected.
-                       ~
-!!! error TS2304: Cannot find name '.'.
                         ~
 !!! error TS1005: ',' expected.
                         ~
 !!! error TS2304: Cannot find name 'a'.
                          ~
 !!! error TS1005: ',' expected.
-                         ~
-!!! error TS2304: Cannot find name ';'.
         },
         explicitVoid2: () => this.a, // ok, `this:any` because it refers to an outer object
         ~~~~~~~~~~~~~

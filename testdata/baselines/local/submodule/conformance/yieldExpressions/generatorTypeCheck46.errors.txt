@@ -1,29 +1,23 @@
 generatorTypeCheck46.ts(3,1): error TS2554: Expected 3 arguments, but got 2.
 generatorTypeCheck46.ts(5,9): error TS1003: Identifier expected.
-generatorTypeCheck46.ts(5,9): error TS2304: Cannot find name '*'.
 generatorTypeCheck46.ts(5,10): error TS1005: ',' expected.
 generatorTypeCheck46.ts(5,27): error TS1005: ',' expected.
-generatorTypeCheck46.ts(5,27): error TS2304: Cannot find name '('.
 generatorTypeCheck46.ts(5,28): error TS1005: ',' expected.
-generatorTypeCheck46.ts(5,28): error TS2304: Cannot find name ')'.
 generatorTypeCheck46.ts(5,30): error TS1005: ',' expected.
-generatorTypeCheck46.ts(5,30): error TS2304: Cannot find name '{'.
 generatorTypeCheck46.ts(6,13): error TS1005: ',' expected.
 generatorTypeCheck46.ts(6,13): error TS2304: Cannot find name 'yield'.
 generatorTypeCheck46.ts(6,19): error TS1005: ',' expected.
 generatorTypeCheck46.ts(6,19): error TS2304: Cannot find name 'x'.
 generatorTypeCheck46.ts(6,21): error TS1005: ',' expected.
-generatorTypeCheck46.ts(6,21): error TS2304: Cannot find name '=>'.
 generatorTypeCheck46.ts(6,24): error TS1005: ',' expected.
 generatorTypeCheck46.ts(6,24): error TS2304: Cannot find name 'x'.
 generatorTypeCheck46.ts(6,25): error TS1005: ',' expected.
-generatorTypeCheck46.ts(6,25): error TS2304: Cannot find name '.'.
 generatorTypeCheck46.ts(6,26): error TS1005: ',' expected.
 generatorTypeCheck46.ts(6,26): error TS2304: Cannot find name 'length'.
 generatorTypeCheck46.ts(9,1): error TS1005: ',' expected.
 
 
-==== generatorTypeCheck46.ts (23 errors) ====
+==== generatorTypeCheck46.ts (17 errors) ====
     declare function foo<T, U>(x: T, fun: () => Iterable<(x: T) => U>, fun2: (y: U) => T): T;
     
     foo("", function* () {
@@ -33,22 +27,14 @@ generatorTypeCheck46.ts(9,1): error TS1005: ',' expected.
             *[Symbol.iterator]() {
             ~
 !!! error TS1003: Identifier expected.
-            ~
-!!! error TS2304: Cannot find name '*'.
              ~
 !!! error TS1005: ',' expected.
                               ~
 !!! error TS1005: ',' expected.
-                              ~
-!!! error TS2304: Cannot find name '('.
                                ~
 !!! error TS1005: ',' expected.
-                               ~
-!!! error TS2304: Cannot find name ')'.
                                  ~
 !!! error TS1005: ',' expected.
-                                 ~
-!!! error TS2304: Cannot find name '{'.
                 yield x => x.length
                 ~~~~~
 !!! error TS1005: ',' expected.
@@ -60,16 +46,12 @@ generatorTypeCheck46.ts(9,1): error TS1005: ',' expected.
 !!! error TS2304: Cannot find name 'x'.
                         ~~
 !!! error TS1005: ',' expected.
-                        ~~
-!!! error TS2304: Cannot find name '=>'.
                            ~
 !!! error TS1005: ',' expected.
                            ~
 !!! error TS2304: Cannot find name 'x'.
                             ~
 !!! error TS1005: ',' expected.
-                            ~
-!!! error TS2304: Cannot find name '.'.
                              ~~~~~~
 !!! error TS1005: ',' expected.
                              ~~~~~~

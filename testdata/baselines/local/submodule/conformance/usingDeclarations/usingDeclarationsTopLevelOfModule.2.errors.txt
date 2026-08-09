@@ -1,26 +1,17 @@
 usingDeclarationsTopLevelOfModule.2.ts(1,29): error TS1005: ',' expected.
-usingDeclarationsTopLevelOfModule.2.ts(1,29): error TS2304: Cannot find name '('.
 usingDeclarationsTopLevelOfModule.2.ts(1,30): error TS1005: ',' expected.
-usingDeclarationsTopLevelOfModule.2.ts(1,30): error TS2304: Cannot find name ')'.
 usingDeclarationsTopLevelOfModule.2.ts(1,32): error TS1005: ',' expected.
-usingDeclarationsTopLevelOfModule.2.ts(1,32): error TS2304: Cannot find name '{'.
 usingDeclarationsTopLevelOfModule.2.ts(1,35): error TS1128: Declaration or statement expected.
 
 
-==== usingDeclarationsTopLevelOfModule.2.ts (7 errors) ====
+==== usingDeclarationsTopLevelOfModule.2.ts (4 errors) ====
     using z = { [Symbol.dispose]() {} };
                                 ~
 !!! error TS1005: ',' expected.
-                                ~
-!!! error TS2304: Cannot find name '('.
                                  ~
 !!! error TS1005: ',' expected.
-                                 ~
-!!! error TS2304: Cannot find name ')'.
                                    ~
 !!! error TS1005: ',' expected.
-                                   ~
-!!! error TS2304: Cannot find name '{'.
                                       ~
 !!! error TS1128: Declaration or statement expected.
     

@@ -1,17 +1,14 @@
 objectSpreadNegative.ts(62,25): error TS2304: Cannot find name 'set'.
 objectSpreadNegative.ts(62,29): error TS1005: ',' expected.
 objectSpreadNegative.ts(62,31): error TS1005: ',' expected.
-objectSpreadNegative.ts(62,31): error TS2304: Cannot find name '('.
 objectSpreadNegative.ts(62,32): error TS1005: ',' expected.
 objectSpreadNegative.ts(62,37): error TS2304: Cannot find name 'number'.
 objectSpreadNegative.ts(62,43): error TS1005: ',' expected.
-objectSpreadNegative.ts(62,43): error TS2304: Cannot find name ')'.
 objectSpreadNegative.ts(62,45): error TS1005: ',' expected.
-objectSpreadNegative.ts(62,45): error TS2304: Cannot find name '{'.
 objectSpreadNegative.ts(62,51): error TS1128: Declaration or statement expected.
 
 
-==== objectSpreadNegative.ts (11 errors) ====
+==== objectSpreadNegative.ts (8 errors) ====
     let o = { a: 1, b: 'no' }
     
     /// private propagates
@@ -80,20 +77,14 @@ objectSpreadNegative.ts(62,51): error TS1128: Declaration or statement expected.
 !!! error TS1005: ',' expected.
                                   ~
 !!! error TS1005: ',' expected.
-                                  ~
-!!! error TS2304: Cannot find name '('.
                                    ~~~
 !!! error TS1005: ',' expected.
                                         ~~~~~~
 !!! error TS2304: Cannot find name 'number'.
                                               ~
 !!! error TS1005: ',' expected.
-                                              ~
-!!! error TS2304: Cannot find name ')'.
                                                 ~
 !!! error TS1005: ',' expected.
-                                                ~
-!!! error TS2304: Cannot find name '{'.
                                                       ~
 !!! error TS1128: Declaration or statement expected.
     setterOnly.b = 12; // error, 'b' does not exist

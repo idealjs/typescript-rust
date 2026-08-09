@@ -1,25 +1,20 @@
 thisInObjectLiterals.ts(2,5): error TS2564: Property 't' has no initializer and is not definitely assigned in the constructor.
 thisInObjectLiterals.ts(14,5): error TS2304: Cannot find name 'f'.
 thisInObjectLiterals.ts(14,6): error TS1005: ',' expected.
-thisInObjectLiterals.ts(14,6): error TS2304: Cannot find name '('.
 thisInObjectLiterals.ts(14,7): error TS1005: ',' expected.
-thisInObjectLiterals.ts(14,7): error TS2304: Cannot find name ')'.
 thisInObjectLiterals.ts(14,9): error TS1005: ',' expected.
-thisInObjectLiterals.ts(14,9): error TS2304: Cannot find name '{'.
 thisInObjectLiterals.ts(15,9): error TS1005: ',' expected.
 thisInObjectLiterals.ts(15,9): error TS2304: Cannot find name 'return'.
 thisInObjectLiterals.ts(15,16): error TS1005: ',' expected.
 thisInObjectLiterals.ts(15,16): error TS2304: Cannot find name 'this'.
 thisInObjectLiterals.ts(15,20): error TS1005: ',' expected.
-thisInObjectLiterals.ts(15,20): error TS2304: Cannot find name '.'.
 thisInObjectLiterals.ts(15,21): error TS1005: ',' expected.
 thisInObjectLiterals.ts(15,21): error TS2304: Cannot find name 'spaaace'.
 thisInObjectLiterals.ts(15,28): error TS1005: ',' expected.
-thisInObjectLiterals.ts(15,28): error TS2304: Cannot find name ';'.
 thisInObjectLiterals.ts(17,1): error TS1128: Declaration or statement expected.
 
 
-==== thisInObjectLiterals.ts (19 errors) ====
+==== thisInObjectLiterals.ts (14 errors) ====
     class MyClass {
         t: number;
         ~
@@ -40,16 +35,10 @@ thisInObjectLiterals.ts(17,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'f'.
          ~
 !!! error TS1005: ',' expected.
-         ~
-!!! error TS2304: Cannot find name '('.
           ~
 !!! error TS1005: ',' expected.
-          ~
-!!! error TS2304: Cannot find name ')'.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name '{'.
             return this.spaaace;
             ~~~~~~
 !!! error TS1005: ',' expected.
@@ -61,16 +50,12 @@ thisInObjectLiterals.ts(17,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'this'.
                        ~
 !!! error TS1005: ',' expected.
-                       ~
-!!! error TS2304: Cannot find name '.'.
                         ~~~~~~~
 !!! error TS1005: ',' expected.
                         ~~~~~~~
 !!! error TS2304: Cannot find name 'spaaace'.
                                ~
 !!! error TS1005: ',' expected.
-                               ~
-!!! error TS2304: Cannot find name ';'.
         }
     };
     ~

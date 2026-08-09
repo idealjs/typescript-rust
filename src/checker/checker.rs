@@ -6540,6 +6540,12 @@ impl Checker {
         if name.is_empty() {
             return;
         }
+        // Skip identifiers whose text is not a valid JS/TS identifier (parser
+        // recovery artifacts: punctuation like `(`, `{`, `)`, `;` leaked into
+        // Identifier nodes). Valid identifiers start with a letter, `_`, or `$`.
+        if !is_valid_identifier_text(name) {
+            return;
+        }
         // Skip if the identifier is the name of a declaration rather than a
         // reference. We detect this by looking at the parent's kind and the
         // slot the identifier occupies.
@@ -7885,6 +7891,22 @@ fn is_property_access_name(node: &Arc<Node>) -> bool {
         name_field.as_ref() as *const Node,
         node.as_ref() as *const Node,
     )
+}
+
+/// Whether a string is valid as a JS/TS identifier name. Valid identifiers
+/// must start with a letter, `_`, or `$`, and contain only alphanumeric,
+/// `_`, or `$` characters. Used to filter out parser-recovery artifacts
+/// (e.g. punctuation like `(`, `{`, `)` that leaked into Identifier nodes).
+fn is_valid_identifier_text(s: &str) -> bool {
+    let mut chars = s.chars();
+    match chars.next() {
+        Some(c) if c.is_ascii_alphabetic() || c == '_' || c == '$' => {}
+        // Allow Unicode identifiers (e.g. `$`, `café`). Non-ASCII letters are
+        // valid identifier starts per ECMAScript spec.
+        Some(c) if c.is_alphabetic() => {}
+        _ => return false,
+    }
+    chars.all(|c| c.is_alphanumeric() || c == '_' || c == '$')
 }
 
 /// Whether an identifier node is the left-hand side of an assignment (e.g.,

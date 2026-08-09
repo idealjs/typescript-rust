@@ -1,35 +1,23 @@
 usingDeclarations.2.ts(2,34): error TS1005: ',' expected.
-usingDeclarations.2.ts(2,34): error TS2304: Cannot find name '('.
 usingDeclarations.2.ts(2,35): error TS1005: ',' expected.
-usingDeclarations.2.ts(2,35): error TS2304: Cannot find name ')'.
 usingDeclarations.2.ts(2,37): error TS1005: ',' expected.
-usingDeclarations.2.ts(2,37): error TS2304: Cannot find name '{'.
 usingDeclarations.2.ts(2,41): error TS1128: Declaration or statement expected.
 usingDeclarations.2.ts(3,11): error TS2304: Cannot find name 'd2'.
 usingDeclarations.2.ts(3,34): error TS1005: ',' expected.
-usingDeclarations.2.ts(3,34): error TS2304: Cannot find name '('.
 usingDeclarations.2.ts(3,35): error TS1005: ',' expected.
-usingDeclarations.2.ts(3,35): error TS2304: Cannot find name ')'.
 usingDeclarations.2.ts(3,37): error TS1005: ',' expected.
-usingDeclarations.2.ts(3,37): error TS2304: Cannot find name '{'.
 usingDeclarations.2.ts(3,40): error TS1128: Declaration or statement expected.
 
 
-==== usingDeclarations.2.ts (15 errors) ====
+==== usingDeclarations.2.ts (9 errors) ====
     {
         using d1 = { [Symbol.dispose]() {} },
                                      ~
 !!! error TS1005: ',' expected.
-                                     ~
-!!! error TS2304: Cannot find name '('.
                                       ~
 !!! error TS1005: ',' expected.
-                                      ~
-!!! error TS2304: Cannot find name ')'.
                                         ~
 !!! error TS1005: ',' expected.
-                                        ~
-!!! error TS2304: Cannot find name '{'.
                                             ~
 !!! error TS1128: Declaration or statement expected.
               d2 = { [Symbol.dispose]() {} };
@@ -37,16 +25,10 @@ usingDeclarations.2.ts(3,40): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'd2'.
                                      ~
 !!! error TS1005: ',' expected.
-                                     ~
-!!! error TS2304: Cannot find name '('.
                                       ~
 !!! error TS1005: ',' expected.
-                                      ~
-!!! error TS2304: Cannot find name ')'.
                                         ~
 !!! error TS1005: ',' expected.
-                                        ~
-!!! error TS2304: Cannot find name '{'.
                                            ~
 !!! error TS1128: Declaration or statement expected.
     }

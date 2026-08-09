@@ -11,11 +11,8 @@ mod1.js(15,1): error TS2304: Cannot find name 'Object'.
 mod1.js(15,23): error TS2304: Cannot find name 'exports'.
 mod1.js(15,42): error TS2304: Cannot find name 'get'.
 mod1.js(15,45): error TS1005: ',' expected.
-mod1.js(15,45): error TS2304: Cannot find name '('.
 mod1.js(15,46): error TS1005: ',' expected.
-mod1.js(15,46): error TS2304: Cannot find name ')'.
 mod1.js(15,48): error TS1005: ',' expected.
-mod1.js(15,48): error TS2304: Cannot find name '{'.
 mod1.js(15,50): error TS1005: ',' expected.
 mod1.js(15,50): error TS2304: Cannot find name 'return'.
 mod1.js(15,57): error TS1005: ',' expected.
@@ -24,7 +21,7 @@ mod1.js(15,68): error TS1005: ',' expected.
 mod1.js(15,75): error TS1005: ',' expected.
 
 
-==== mod1.js (23 errors) ====
+==== mod1.js (20 errors) ====
     const obj = { value: 42, writable: true };
     Object.defineProperty(exports, "thing", obj);
     ~~~~~~
@@ -64,16 +61,10 @@ mod1.js(15,75): error TS1005: ',' expected.
 !!! error TS2304: Cannot find name 'get'.
                                                 ~
 !!! error TS1005: ',' expected.
-                                                ~
-!!! error TS2304: Cannot find name '('.
                                                  ~
 !!! error TS1005: ',' expected.
-                                                 ~
-!!! error TS2304: Cannot find name ')'.
                                                    ~
 !!! error TS1005: ',' expected.
-                                                   ~
-!!! error TS2304: Cannot find name '{'.
                                                      ~~~~~~
 !!! error TS1005: ',' expected.
                                                      ~~~~~~

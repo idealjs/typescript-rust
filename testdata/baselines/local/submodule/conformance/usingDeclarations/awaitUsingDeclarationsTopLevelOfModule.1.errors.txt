@@ -1,15 +1,12 @@
 awaitUsingDeclarationsTopLevelOfModule.1.ts(4,19): error TS2304: Cannot find name 'async'.
 awaitUsingDeclarationsTopLevelOfModule.1.ts(4,25): error TS1005: ',' expected.
 awaitUsingDeclarationsTopLevelOfModule.1.ts(4,46): error TS1005: ',' expected.
-awaitUsingDeclarationsTopLevelOfModule.1.ts(4,46): error TS2304: Cannot find name '('.
 awaitUsingDeclarationsTopLevelOfModule.1.ts(4,47): error TS1005: ',' expected.
-awaitUsingDeclarationsTopLevelOfModule.1.ts(4,47): error TS2304: Cannot find name ')'.
 awaitUsingDeclarationsTopLevelOfModule.1.ts(4,49): error TS1005: ',' expected.
-awaitUsingDeclarationsTopLevelOfModule.1.ts(4,49): error TS2304: Cannot find name '{'.
 awaitUsingDeclarationsTopLevelOfModule.1.ts(4,52): error TS1128: Declaration or statement expected.
 
 
-==== awaitUsingDeclarationsTopLevelOfModule.1.ts (9 errors) ====
+==== awaitUsingDeclarationsTopLevelOfModule.1.ts (6 errors) ====
     export const x = 1;
     export { y };
     
@@ -20,16 +17,10 @@ awaitUsingDeclarationsTopLevelOfModule.1.ts(4,52): error TS1128: Declaration or 
 !!! error TS1005: ',' expected.
                                                  ~
 !!! error TS1005: ',' expected.
-                                                 ~
-!!! error TS2304: Cannot find name '('.
                                                   ~
 !!! error TS1005: ',' expected.
-                                                  ~
-!!! error TS2304: Cannot find name ')'.
                                                     ~
 !!! error TS1005: ',' expected.
-                                                    ~
-!!! error TS2304: Cannot find name '{'.
                                                        ~
 !!! error TS1128: Declaration or statement expected.
     

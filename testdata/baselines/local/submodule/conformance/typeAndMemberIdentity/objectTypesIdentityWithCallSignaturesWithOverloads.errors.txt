@@ -1,27 +1,21 @@
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,5): error TS2304: Cannot find name 'foo'.
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,8): error TS1005: ',' expected.
-objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,8): error TS2304: Cannot find name '('.
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,9): error TS1005: ',' expected.
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,12): error TS2304: Cannot find name 'any'.
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,15): error TS1005: ',' expected.
-objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,15): error TS2304: Cannot find name ')'.
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,17): error TS1005: ',' expected.
-objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,17): error TS2304: Cannot find name '{'.
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,19): error TS1005: ',' expected.
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,19): error TS2304: Cannot find name 'return'.
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,26): error TS1005: ',' expected.
-objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,26): error TS2304: Cannot find name '<'.
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,27): error TS1005: ',' expected.
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,27): error TS2304: Cannot find name 'any'.
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,30): error TS1005: ',' expected.
-objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,30): error TS2304: Cannot find name '>'.
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,31): error TS1005: ',' expected.
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,33): error TS1005: ',' expected.
-objectTypesIdentityWithCallSignaturesWithOverloads.ts(39,33): error TS2304: Cannot find name ';'.
 objectTypesIdentityWithCallSignaturesWithOverloads.ts(40,1): error TS1128: Declaration or statement expected.
 
 
-==== objectTypesIdentityWithCallSignaturesWithOverloads.ts (21 errors) ====
+==== objectTypesIdentityWithCallSignaturesWithOverloads.ts (15 errors) ====
     // object types are identical structurally
     
     class A {
@@ -65,42 +59,30 @@ objectTypesIdentityWithCallSignaturesWithOverloads.ts(40,1): error TS1128: Decla
 !!! error TS2304: Cannot find name 'foo'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~
 !!! error TS1005: ',' expected.
                ~~~
 !!! error TS2304: Cannot find name 'any'.
                   ~
 !!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name ')'.
                     ~
 !!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name '{'.
                       ~~~~~~
 !!! error TS1005: ',' expected.
                       ~~~~~~
 !!! error TS2304: Cannot find name 'return'.
                              ~
 !!! error TS1005: ',' expected.
-                             ~
-!!! error TS2304: Cannot find name '<'.
                               ~~~
 !!! error TS1005: ',' expected.
                               ~~~
 !!! error TS2304: Cannot find name 'any'.
                                  ~
 !!! error TS1005: ',' expected.
-                                 ~
-!!! error TS2304: Cannot find name '>'.
                                   ~~
 !!! error TS1005: ',' expected.
                                     ~
 !!! error TS1005: ',' expected.
-                                    ~
-!!! error TS2304: Cannot find name ';'.
     };
     ~
 !!! error TS1128: Declaration or statement expected.

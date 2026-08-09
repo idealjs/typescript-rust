@@ -1,11 +1,8 @@
 symbolDeclarationEmit10.ts(2,5): error TS2304: Cannot find name 'get'.
 symbolDeclarationEmit10.ts(2,9): error TS1005: ',' expected.
 symbolDeclarationEmit10.ts(2,36): error TS1005: ',' expected.
-symbolDeclarationEmit10.ts(2,36): error TS2304: Cannot find name '('.
 symbolDeclarationEmit10.ts(2,37): error TS1005: ',' expected.
-symbolDeclarationEmit10.ts(2,37): error TS2304: Cannot find name ')'.
 symbolDeclarationEmit10.ts(2,39): error TS1005: ',' expected.
-symbolDeclarationEmit10.ts(2,39): error TS2304: Cannot find name '{'.
 symbolDeclarationEmit10.ts(2,41): error TS1005: ',' expected.
 symbolDeclarationEmit10.ts(2,41): error TS2304: Cannot find name 'return'.
 symbolDeclarationEmit10.ts(2,48): error TS1005: ',' expected.
@@ -16,7 +13,7 @@ symbolDeclarationEmit10.ts(3,40): error TS1182: A destructuring declaration must
 symbolDeclarationEmit10.ts(4,1): error TS1128: Declaration or statement expected.
 
 
-==== symbolDeclarationEmit10.ts (16 errors) ====
+==== symbolDeclarationEmit10.ts (13 errors) ====
     var obj = {
         get [Symbol.isConcatSpreadable]() { return '' },
         ~~~
@@ -25,16 +22,10 @@ symbolDeclarationEmit10.ts(4,1): error TS1128: Declaration or statement expected
 !!! error TS1005: ',' expected.
                                        ~
 !!! error TS1005: ',' expected.
-                                       ~
-!!! error TS2304: Cannot find name '('.
                                         ~
 !!! error TS1005: ',' expected.
-                                        ~
-!!! error TS2304: Cannot find name ')'.
                                           ~
 !!! error TS1005: ',' expected.
-                                          ~
-!!! error TS2304: Cannot find name '{'.
                                             ~~~~~~
 !!! error TS1005: ',' expected.
                                             ~~~~~~

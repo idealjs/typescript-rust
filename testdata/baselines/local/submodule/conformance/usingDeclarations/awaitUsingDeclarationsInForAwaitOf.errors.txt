@@ -6,23 +6,17 @@ awaitUsingDeclarationsInForAwaitOf.ts(2,31): error TS2304: Cannot find name 'of'
 awaitUsingDeclarationsInForAwaitOf.ts(2,37): error TS2304: Cannot find name 'async'.
 awaitUsingDeclarationsInForAwaitOf.ts(2,43): error TS1005: ',' expected.
 awaitUsingDeclarationsInForAwaitOf.ts(2,64): error TS1005: ',' expected.
-awaitUsingDeclarationsInForAwaitOf.ts(2,64): error TS2304: Cannot find name '('.
 awaitUsingDeclarationsInForAwaitOf.ts(2,65): error TS1005: ',' expected.
-awaitUsingDeclarationsInForAwaitOf.ts(2,65): error TS2304: Cannot find name ')'.
 awaitUsingDeclarationsInForAwaitOf.ts(2,67): error TS1005: ',' expected.
-awaitUsingDeclarationsInForAwaitOf.ts(2,67): error TS2304: Cannot find name '{'.
 awaitUsingDeclarationsInForAwaitOf.ts(2,70): error TS1005: ']' expected.
 awaitUsingDeclarationsInForAwaitOf.ts(2,91): error TS1005: ',' expected.
-awaitUsingDeclarationsInForAwaitOf.ts(2,91): error TS2304: Cannot find name '('.
 awaitUsingDeclarationsInForAwaitOf.ts(2,92): error TS1005: ',' expected.
-awaitUsingDeclarationsInForAwaitOf.ts(2,92): error TS2304: Cannot find name ')'.
 awaitUsingDeclarationsInForAwaitOf.ts(2,94): error TS1005: ',' expected.
-awaitUsingDeclarationsInForAwaitOf.ts(2,94): error TS2304: Cannot find name '{'.
 awaitUsingDeclarationsInForAwaitOf.ts(2,98): error TS1128: Declaration or statement expected.
 awaitUsingDeclarationsInForAwaitOf.ts(2,115): error TS1005: ';' expected.
 
 
-==== awaitUsingDeclarationsInForAwaitOf.ts (22 errors) ====
+==== awaitUsingDeclarationsInForAwaitOf.ts (16 errors) ====
     async function main() {
         for await (await using d1 of [{ async [Symbol.asyncDispose]() {} }, { [Symbol.dispose]() {} }, null, undefined]) {
                          ~~~~~
@@ -41,30 +35,18 @@ awaitUsingDeclarationsInForAwaitOf.ts(2,115): error TS1005: ';' expected.
 !!! error TS1005: ',' expected.
                                                                    ~
 !!! error TS1005: ',' expected.
-                                                                   ~
-!!! error TS2304: Cannot find name '('.
                                                                     ~
 !!! error TS1005: ',' expected.
-                                                                    ~
-!!! error TS2304: Cannot find name ')'.
                                                                       ~
 !!! error TS1005: ',' expected.
-                                                                      ~
-!!! error TS2304: Cannot find name '{'.
                                                                          ~
 !!! error TS1005: ']' expected.
                                                                                               ~
 !!! error TS1005: ',' expected.
-                                                                                              ~
-!!! error TS2304: Cannot find name '('.
                                                                                                ~
 !!! error TS1005: ',' expected.
-                                                                                               ~
-!!! error TS2304: Cannot find name ')'.
                                                                                                  ~
 !!! error TS1005: ',' expected.
-                                                                                                 ~
-!!! error TS2304: Cannot find name '{'.
                                                                                                      ~
 !!! error TS1128: Declaration or statement expected.
                                                                                                                       ~

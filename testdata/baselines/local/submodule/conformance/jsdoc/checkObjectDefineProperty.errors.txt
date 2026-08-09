@@ -4,11 +4,8 @@ index.js(4,1): error TS2304: Cannot find name 'Object'.
 index.js(5,1): error TS2304: Cannot find name 'Object'.
 index.js(5,35): error TS2304: Cannot find name 'get'.
 index.js(5,38): error TS1005: ',' expected.
-index.js(5,38): error TS2304: Cannot find name '('.
 index.js(5,39): error TS1005: ',' expected.
-index.js(5,39): error TS2304: Cannot find name ')'.
 index.js(5,41): error TS1005: ',' expected.
-index.js(5,41): error TS2304: Cannot find name '{'.
 index.js(5,43): error TS1005: ',' expected.
 index.js(5,43): error TS2304: Cannot find name 'return'.
 index.js(5,50): error TS1005: ',' expected.
@@ -31,7 +28,7 @@ validate.ts(16,3): error TS2339: Property 'zipStr' does not exist on type 'objec
 validate.ts(17,3): error TS2339: Property 'middleInit' does not exist on type 'object'.
 
 
-==== index.js (18 errors) ====
+==== index.js (15 errors) ====
     const x = {};
     Object.defineProperty(x, "name", { value: "Charles", writable: true });
     ~~~~~~
@@ -49,16 +46,10 @@ validate.ts(17,3): error TS2339: Property 'middleInit' does not exist on type 'o
 !!! error TS2304: Cannot find name 'get'.
                                          ~
 !!! error TS1005: ',' expected.
-                                         ~
-!!! error TS2304: Cannot find name '('.
                                           ~
 !!! error TS1005: ',' expected.
-                                          ~
-!!! error TS2304: Cannot find name ')'.
                                             ~
 !!! error TS1005: ',' expected.
-                                            ~
-!!! error TS2304: Cannot find name '{'.
                                               ~~~~~~
 !!! error TS1005: ',' expected.
                                               ~~~~~~

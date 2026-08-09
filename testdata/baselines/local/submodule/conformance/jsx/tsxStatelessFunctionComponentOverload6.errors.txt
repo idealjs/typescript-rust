@@ -3,15 +3,12 @@ file.tsx(50,28): error TS2454: Variable 'obj1' is used before being assigned.
 file.tsx(51,28): error TS2454: Variable 'obj1' is used before being assigned.
 file.tsx(54,29): error TS2304: Cannot find name 'onClick'.
 file.tsx(54,36): error TS1005: ',' expected.
-file.tsx(54,36): error TS2304: Cannot find name '('.
 file.tsx(54,37): error TS1005: ',' expected.
-file.tsx(54,37): error TS2304: Cannot find name ')'.
 file.tsx(54,39): error TS1005: ',' expected.
-file.tsx(54,39): error TS2304: Cannot find name '{'.
 
 
 !!! error TS6053: File '/.lib/react.d.ts' not found.
-==== file.tsx (9 errors) ====
+==== file.tsx (6 errors) ====
     /// <reference path="/.lib/react.d.ts" />
     
     import React = require('react')
@@ -74,16 +71,10 @@ file.tsx(54,39): error TS2304: Cannot find name '{'.
 !!! error TS2304: Cannot find name 'onClick'.
                                        ~
 !!! error TS1005: ',' expected.
-                                       ~
-!!! error TS2304: Cannot find name '('.
                                         ~
 !!! error TS1005: ',' expected.
-                                        ~
-!!! error TS2304: Cannot find name ')'.
                                           ~
 !!! error TS1005: ',' expected.
-                                          ~
-!!! error TS2304: Cannot find name '{'.
     const b9 = <MainButton to='/some/path' extra-prop>GO</MainButton>;
     const b10 = <MainButton to='/some/path' children="hi" ></MainButton>;
     const b11 = <MainButton onClick={(e) => {}} className="hello" data-format>Hello world</MainButton>;

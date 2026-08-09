@@ -1,26 +1,20 @@
 38572.js(9,16): error TS2304: Cannot find name 'x'.
 38572.js(9,17): error TS1005: ',' expected.
-38572.js(9,17): error TS2304: Cannot find name '('.
 38572.js(9,18): error TS1005: ',' expected.
 38572.js(9,18): error TS2304: Cannot find name 'param'.
 38572.js(9,23): error TS1005: ',' expected.
-38572.js(9,23): error TS2304: Cannot find name ')'.
 38572.js(9,25): error TS1005: ',' expected.
-38572.js(9,25): error TS2304: Cannot find name '{'.
 38572.js(9,27): error TS1005: ',' expected.
 38572.js(9,27): error TS2304: Cannot find name 'param'.
 38572.js(9,32): error TS1005: ',' expected.
-38572.js(9,32): error TS2304: Cannot find name '.'.
 38572.js(9,33): error TS1005: ',' expected.
 38572.js(9,33): error TS2304: Cannot find name 'toFixed'.
 38572.js(9,40): error TS1005: ',' expected.
-38572.js(9,40): error TS2304: Cannot find name '('.
 38572.js(9,41): error TS1005: ',' expected.
-38572.js(9,41): error TS2304: Cannot find name ')'.
 38572.js(9,45): error TS1005: ',' expected.
 
 
-==== 38572.js (20 errors) ====
+==== 38572.js (14 errors) ====
     /**
      * @template T
      * @param {T} a
@@ -34,39 +28,27 @@
 !!! error TS2304: Cannot find name 'x'.
                     ~
 !!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name '('.
                      ~~~~~
 !!! error TS1005: ',' expected.
                      ~~~~~
 !!! error TS2304: Cannot find name 'param'.
                           ~
 !!! error TS1005: ',' expected.
-                          ~
-!!! error TS2304: Cannot find name ')'.
                             ~
 !!! error TS1005: ',' expected.
-                            ~
-!!! error TS2304: Cannot find name '{'.
                               ~~~~~
 !!! error TS1005: ',' expected.
                               ~~~~~
 !!! error TS2304: Cannot find name 'param'.
                                    ~
 !!! error TS1005: ',' expected.
-                                   ~
-!!! error TS2304: Cannot find name '.'.
                                     ~~~~~~~
 !!! error TS1005: ',' expected.
                                     ~~~~~~~
 !!! error TS2304: Cannot find name 'toFixed'.
                                            ~
 !!! error TS1005: ',' expected.
-                                           ~
-!!! error TS2304: Cannot find name '('.
                                             ~
 !!! error TS1005: ',' expected.
-                                            ~
-!!! error TS2304: Cannot find name ')'.
                                                 ~
 !!! error TS1005: ',' expected.

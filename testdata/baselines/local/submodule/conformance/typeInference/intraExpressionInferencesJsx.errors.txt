@@ -7,18 +7,13 @@ intraExpressionInferencesJsx.tsx(35,2): error TS1005: '}' expected.
 intraExpressionInferencesJsx.tsx(50,15): error TS18007: JSX expressions may not use the comma operator. Did you mean to write an array?
 intraExpressionInferencesJsx.tsx(55,7): error TS2304: Cannot find name 'func'.
 intraExpressionInferencesJsx.tsx(55,11): error TS1005: ',' expected.
-intraExpressionInferencesJsx.tsx(55,11): error TS2304: Cannot find name '('.
 intraExpressionInferencesJsx.tsx(55,12): error TS1005: ',' expected.
-intraExpressionInferencesJsx.tsx(55,12): error TS2304: Cannot find name ')'.
 intraExpressionInferencesJsx.tsx(55,14): error TS1005: ',' expected.
-intraExpressionInferencesJsx.tsx(55,14): error TS2304: Cannot find name '{'.
 intraExpressionInferencesJsx.tsx(56,9): error TS1005: ',' expected.
 intraExpressionInferencesJsx.tsx(56,9): error TS2304: Cannot find name 'return'.
 intraExpressionInferencesJsx.tsx(56,16): error TS1005: ',' expected.
-intraExpressionInferencesJsx.tsx(56,16): error TS2304: Cannot find name '{'.
 intraExpressionInferencesJsx.tsx(57,11): error TS1005: ',' expected.
 intraExpressionInferencesJsx.tsx(58,10): error TS1005: ',' expected.
-intraExpressionInferencesJsx.tsx(58,10): error TS2304: Cannot find name ';'.
 intraExpressionInferencesJsx.tsx(60,5): error TS1012: Unexpected token.
 intraExpressionInferencesJsx.tsx(61,3): error TS1012: Unexpected token.
 intraExpressionInferencesJsx.tsx(87,3): error TS2304: Cannot find name 'a'.
@@ -34,7 +29,7 @@ intraExpressionInferencesJsx.tsx(108,7): error TS1005: '</' expected.
 
 
 !!! error TS6053: File '/.lib/react16.d.ts' not found.
-==== intraExpressionInferencesJsx.tsx (32 errors) ====
+==== intraExpressionInferencesJsx.tsx (27 errors) ====
     /// <reference path="/.lib/react16.d.ts" />
     
     // repro from #52798
@@ -112,16 +107,10 @@ intraExpressionInferencesJsx.tsx(108,7): error TS1005: '</' expected.
 !!! error TS2304: Cannot find name 'func'.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name '('.
                ~
 !!! error TS1005: ',' expected.
-               ~
-!!! error TS2304: Cannot find name ')'.
                  ~
 !!! error TS1005: ',' expected.
-                 ~
-!!! error TS2304: Cannot find name '{'.
             return {
     ~~~~~~~~~~~~~~~~
             ~~~~~~
@@ -130,8 +119,6 @@ intraExpressionInferencesJsx.tsx(108,7): error TS1005: '</' expected.
 !!! error TS2304: Cannot find name 'return'.
                    ~
 !!! error TS1005: ',' expected.
-                   ~
-!!! error TS2304: Cannot find name '{'.
               a: true,
     ~~~~~~~~~~~~~~~~~~
               ~
@@ -140,8 +127,6 @@ intraExpressionInferencesJsx.tsx(108,7): error TS1005: '</' expected.
     ~~~~~~~~~~
              ~
 !!! error TS1005: ',' expected.
-             ~
-!!! error TS2304: Cannot find name ';'.
           },
     ~~~~~~~~
         },

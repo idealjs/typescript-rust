@@ -1,15 +1,12 @@
 computedPropertyNames33_ES6.ts(5,23): error TS1005: ',' expected.
-computedPropertyNames33_ES6.ts(5,23): error TS2304: Cannot find name '('.
 computedPropertyNames33_ES6.ts(5,24): error TS1005: ',' expected.
-computedPropertyNames33_ES6.ts(5,24): error TS2304: Cannot find name ')'.
 computedPropertyNames33_ES6.ts(5,26): error TS1005: ',' expected.
-computedPropertyNames33_ES6.ts(5,26): error TS2304: Cannot find name '{'.
 computedPropertyNames33_ES6.ts(6,10): error TS1003: Identifier expected.
 computedPropertyNames33_ES6.ts(7,16): error TS1005: ';' expected.
 computedPropertyNames33_ES6.ts(9,1): error TS1128: Declaration or statement expected.
 
 
-==== computedPropertyNames33_ES6.ts (9 errors) ====
+==== computedPropertyNames33_ES6.ts (6 errors) ====
     function foo<T>() { return '' }
     class C<T> {
         bar() {
@@ -17,16 +14,10 @@ computedPropertyNames33_ES6.ts(9,1): error TS1128: Declaration or statement expe
                 [foo<T>()]() { }
                           ~
 !!! error TS1005: ',' expected.
-                          ~
-!!! error TS2304: Cannot find name '('.
                            ~
 !!! error TS1005: ',' expected.
-                           ~
-!!! error TS2304: Cannot find name ')'.
                              ~
 !!! error TS1005: ',' expected.
-                             ~
-!!! error TS2304: Cannot find name '{'.
             };
              ~
 !!! error TS1003: Identifier expected.

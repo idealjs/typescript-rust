@@ -6,20 +6,16 @@ index.js(24,1): error TS2304: Cannot find name 'Object'.
 index.js(24,25): error TS2339: Property 'prototype' does not exist on type 'object'.
 index.js(25,5): error TS2304: Cannot find name 'get'.
 index.js(25,8): error TS1005: ',' expected.
-index.js(25,8): error TS2304: Cannot find name '('.
 index.js(25,9): error TS1005: ',' expected.
-index.js(25,9): error TS2304: Cannot find name ')'.
 index.js(25,11): error TS1005: ',' expected.
-index.js(25,11): error TS2304: Cannot find name '{'.
 index.js(26,9): error TS1005: ',' expected.
 index.js(26,9): error TS2304: Cannot find name 'return'.
 index.js(26,16): error TS1005: ',' expected.
 index.js(26,18): error TS1005: ',' expected.
-index.js(26,18): error TS2304: Cannot find name ';'.
 index.js(28,1): error TS1005: ',' expected.
 
 
-==== index.js (19 errors) ====
+==== index.js (15 errors) ====
     export class A {
         get x() {
             ~
@@ -61,16 +57,10 @@ index.js(28,1): error TS1005: ',' expected.
 !!! error TS2304: Cannot find name 'get'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name ')'.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name '{'.
             return 12;
             ~~~~~~
 !!! error TS1005: ',' expected.
@@ -80,8 +70,6 @@ index.js(28,1): error TS1005: ',' expected.
 !!! error TS1005: ',' expected.
                      ~
 !!! error TS1005: ',' expected.
-                     ~
-!!! error TS2304: Cannot find name ';'.
         }
     });
     ~

@@ -1,18 +1,15 @@
 spreadMethods.ts(4,9): error TS1005: ';' expected.
 spreadMethods.ts(22,21): error TS2304: Cannot find name 'm'.
 spreadMethods.ts(22,22): error TS1005: ',' expected.
-spreadMethods.ts(22,22): error TS2304: Cannot find name '('.
 spreadMethods.ts(22,23): error TS1005: ',' expected.
-spreadMethods.ts(22,23): error TS2304: Cannot find name ')'.
 spreadMethods.ts(22,25): error TS1005: ',' expected.
-spreadMethods.ts(22,25): error TS2304: Cannot find name '{'.
 spreadMethods.ts(22,30): error TS2304: Cannot find name 'get'.
 spreadMethods.ts(22,34): error TS1005: ',' expected.
 spreadMethods.ts(22,35): error TS1005: ',' expected.
 spreadMethods.ts(22,36): error TS1134: Variable declaration expected.
 
 
-==== spreadMethods.ts (12 errors) ====
+==== spreadMethods.ts (9 errors) ====
     class K {
         p = 12;
         m() { }
@@ -41,16 +38,10 @@ spreadMethods.ts(22,36): error TS1134: Variable declaration expected.
 !!! error TS2304: Cannot find name 'm'.
                          ~
 !!! error TS1005: ',' expected.
-                         ~
-!!! error TS2304: Cannot find name '('.
                           ~
 !!! error TS1005: ',' expected.
-                          ~
-!!! error TS2304: Cannot find name ')'.
                             ~
 !!! error TS1005: ',' expected.
-                            ~
-!!! error TS2304: Cannot find name '{'.
                                  ~~~
 !!! error TS2304: Cannot find name 'get'.
                                      ~

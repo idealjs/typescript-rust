@@ -1,11 +1,8 @@
 error TS2451: Cannot redeclare block-scoped variable 's'.
 error TS2451: Cannot redeclare block-scoped variable 's'.
 computedPropertyNames10_ES6.ts(5,8): error TS1005: ',' expected.
-computedPropertyNames10_ES6.ts(5,8): error TS2304: Cannot find name '('.
 computedPropertyNames10_ES6.ts(5,9): error TS1005: ',' expected.
-computedPropertyNames10_ES6.ts(5,9): error TS2304: Cannot find name ')'.
 computedPropertyNames10_ES6.ts(5,11): error TS1005: ',' expected.
-computedPropertyNames10_ES6.ts(5,11): error TS2304: Cannot find name '{'.
 computedPropertyNames10_ES6.ts(6,5): error TS2349: This expression is not callable.
 computedPropertyNames10_ES6.ts(6,11): error TS1005: ',' expected.
 computedPropertyNames10_ES6.ts(6,11): error TS1182: A destructuring declaration must have an initializer.
@@ -17,7 +14,7 @@ computedPropertyNames10_ES6.ts(7,13): error TS1134: Variable declaration expecte
 !!! error TS2451: Cannot redeclare block-scoped variable 's'.
 
 !!! error TS2451: Cannot redeclare block-scoped variable 's'.
-==== computedPropertyNames10_ES6.ts (12 errors) ====
+==== computedPropertyNames10_ES6.ts (9 errors) ====
     var s: string;
     var n: number;
     var a: any;
@@ -25,16 +22,10 @@ computedPropertyNames10_ES6.ts(7,13): error TS1134: Variable declaration expecte
         [s]() { },
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name ')'.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name '{'.
         [n]() { },
         ~~~
 !!! error TS2349: This expression is not callable.

@@ -31,13 +31,11 @@ typeParameterConstModifiersReturnsAndYields.ts(47,39): error TS1005: ',' expecte
 typeParameterConstModifiersReturnsAndYields.ts(48,23): error TS2304: Cannot find name 'ValidRoutes'.
 typeParameterConstModifiersReturnsAndYields.ts(48,35): error TS2304: Cannot find name 'Route'.
 typeParameterConstModifiersReturnsAndYields.ts(48,41): error TS1005: ',' expected.
-typeParameterConstModifiersReturnsAndYields.ts(48,41): error TS2304: Cannot find name ';'.
 typeParameterConstModifiersReturnsAndYields.ts(49,5): error TS1005: ',' expected.
 typeParameterConstModifiersReturnsAndYields.ts(49,38): error TS2304: Cannot find name 'ValidRoutes'.
 typeParameterConstModifiersReturnsAndYields.ts(49,50): error TS2304: Cannot find name 'Route'.
 typeParameterConstModifiersReturnsAndYields.ts(49,67): error TS1012: Unexpected token.
 typeParameterConstModifiersReturnsAndYields.ts(50,4): error TS1005: ',' expected.
-typeParameterConstModifiersReturnsAndYields.ts(50,4): error TS2304: Cannot find name ';'.
 typeParameterConstModifiersReturnsAndYields.ts(51,4): error TS1005: ';' expected.
 typeParameterConstModifiersReturnsAndYields.ts(68,30): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
 typeParameterConstModifiersReturnsAndYields.ts(76,30): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => T'.
@@ -54,7 +52,7 @@ typeParameterConstModifiersReturnsAndYields.ts(108,31): error TS2345: Argument o
 typeParameterConstModifiersReturnsAndYields.ts(109,43): error TS2554: Expected 1 arguments, but got 2.
 
 
-==== typeParameterConstModifiersReturnsAndYields.ts (54 errors) ====
+==== typeParameterConstModifiersReturnsAndYields.ts (52 errors) ====
     enum E { Val, Val2 }
     
     declare function test1<const T>(create: () => T): T;
@@ -169,8 +167,6 @@ typeParameterConstModifiersReturnsAndYields.ts(109,43): error TS2554: Expected 1
 !!! error TS2304: Cannot find name 'Route'.
                                             ~
 !!! error TS1005: ',' expected.
-                                            ~
-!!! error TS2304: Cannot find name ';'.
         onUpload: (response: { metadata: ValidRoutes[Route] }) => void;
         ~~~~~~~~
 !!! error TS1005: ',' expected.
@@ -183,8 +179,6 @@ typeParameterConstModifiersReturnsAndYields.ts(109,43): error TS2554: Expected 1
       };
        ~
 !!! error TS1005: ',' expected.
-       ~
-!!! error TS2304: Cannot find name ';'.
     }) => {};
        ~~
 !!! error TS1005: ';' expected.

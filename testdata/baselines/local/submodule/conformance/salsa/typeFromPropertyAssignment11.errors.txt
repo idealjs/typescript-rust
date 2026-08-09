@@ -1,17 +1,14 @@
 module.js(2,7): error TS2339: Property 'prototype' does not exist on type '() => void'.
 module.js(3,5): error TS2304: Cannot find name 'm'.
 module.js(3,6): error TS1005: ',' expected.
-module.js(3,6): error TS2304: Cannot find name '('.
 module.js(3,7): error TS1005: ',' expected.
-module.js(3,7): error TS2304: Cannot find name ')'.
 module.js(3,9): error TS1005: ',' expected.
-module.js(3,9): error TS2304: Cannot find name '{'.
 module.js(4,5): error TS2304: Cannot find name 'i'.
 module.js(4,6): error TS1005: ';' expected.
 module.js(5,1): error TS1128: Declaration or statement expected.
 
 
-==== module.js (11 errors) ====
+==== module.js (8 errors) ====
     var Inner = function() {}
     Inner.prototype = {
           ~~~~~~~~~
@@ -21,16 +18,10 @@ module.js(5,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'm'.
          ~
 !!! error TS1005: ',' expected.
-         ~
-!!! error TS2304: Cannot find name '('.
           ~
 !!! error TS1005: ',' expected.
-          ~
-!!! error TS2304: Cannot find name ')'.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name '{'.
         i: 1
         ~
 !!! error TS2304: Cannot find name 'i'.

@@ -2,11 +2,8 @@ constructorNameInObjectLiteralAccessor.ts(2,5): error TS2304: Cannot find name '
 constructorNameInObjectLiteralAccessor.ts(2,9): error TS1005: ',' expected.
 constructorNameInObjectLiteralAccessor.ts(2,9): error TS2448: Block-scoped variable 'constructor' used before its declaration.
 constructorNameInObjectLiteralAccessor.ts(2,20): error TS1005: ',' expected.
-constructorNameInObjectLiteralAccessor.ts(2,20): error TS2304: Cannot find name '('.
 constructorNameInObjectLiteralAccessor.ts(2,21): error TS1005: ',' expected.
-constructorNameInObjectLiteralAccessor.ts(2,21): error TS2304: Cannot find name ')'.
 constructorNameInObjectLiteralAccessor.ts(2,23): error TS1005: ',' expected.
-constructorNameInObjectLiteralAccessor.ts(2,23): error TS2304: Cannot find name '{'.
 constructorNameInObjectLiteralAccessor.ts(2,25): error TS1005: ',' expected.
 constructorNameInObjectLiteralAccessor.ts(2,25): error TS2304: Cannot find name 'return'.
 constructorNameInObjectLiteralAccessor.ts(3,5): error TS2304: Cannot find name 'set'.
@@ -15,7 +12,7 @@ constructorNameInObjectLiteralAccessor.ts(3,20): error TS1005: ',' expected.
 constructorNameInObjectLiteralAccessor.ts(3,26): error TS1005: ',' expected.
 
 
-==== constructorNameInObjectLiteralAccessor.ts (15 errors) ====
+==== constructorNameInObjectLiteralAccessor.ts (12 errors) ====
     const c1 = {
         get constructor() { return },
         ~~~
@@ -26,16 +23,10 @@ constructorNameInObjectLiteralAccessor.ts(3,26): error TS1005: ',' expected.
 !!! error TS2448: Block-scoped variable 'constructor' used before its declaration.
                        ~
 !!! error TS1005: ',' expected.
-                       ~
-!!! error TS2304: Cannot find name '('.
                         ~
 !!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name ')'.
                           ~
 !!! error TS1005: ',' expected.
-                          ~
-!!! error TS2304: Cannot find name '{'.
                             ~~~~~~
 !!! error TS1005: ',' expected.
                             ~~~~~~

@@ -1,11 +1,8 @@
 computedPropertyNames49_ES6.ts(3,5): error TS2304: Cannot find name 'get'.
 computedPropertyNames49_ES6.ts(3,9): error TS1005: ',' expected.
 computedPropertyNames49_ES6.ts(3,16): error TS1005: ',' expected.
-computedPropertyNames49_ES6.ts(3,16): error TS2304: Cannot find name '('.
 computedPropertyNames49_ES6.ts(3,17): error TS1005: ',' expected.
-computedPropertyNames49_ES6.ts(3,17): error TS2304: Cannot find name ')'.
 computedPropertyNames49_ES6.ts(3,19): error TS1005: ',' expected.
-computedPropertyNames49_ES6.ts(3,19): error TS2304: Cannot find name '{'.
 computedPropertyNames49_ES6.ts(4,9): error TS1005: ',' expected.
 computedPropertyNames49_ES6.ts(4,9): error TS2304: Cannot find name 'throw'.
 computedPropertyNames49_ES6.ts(4,15): error TS1005: ',' expected.
@@ -23,7 +20,7 @@ computedPropertyNames49_ES6.ts(9,16): error TS1005: ',' expected.
 computedPropertyNames49_ES6.ts(9,17): error TS1134: Variable declaration expected.
 
 
-==== computedPropertyNames49_ES6.ts (23 errors) ====
+==== computedPropertyNames49_ES6.ts (20 errors) ====
     var x = {
         p1: 10,
         get [1 + 1]() {
@@ -33,16 +30,10 @@ computedPropertyNames49_ES6.ts(9,17): error TS1134: Variable declaration expecte
 !!! error TS1005: ',' expected.
                    ~
 !!! error TS1005: ',' expected.
-                   ~
-!!! error TS2304: Cannot find name '('.
                     ~
 !!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name ')'.
                       ~
 !!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name '{'.
             throw 10;
             ~~~~~
 !!! error TS1005: ',' expected.

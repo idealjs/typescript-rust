@@ -4,28 +4,23 @@ invalidNewTarget.es6.ts(13,16): error TS1005: ';' expected.
 invalidNewTarget.es6.ts(14,16): error TS1005: ';' expected.
 invalidNewTarget.es6.ts(20,5): error TS2304: Cannot find name 'k'.
 invalidNewTarget.es6.ts(20,6): error TS1005: ',' expected.
-invalidNewTarget.es6.ts(20,6): error TS2304: Cannot find name '('.
 invalidNewTarget.es6.ts(20,7): error TS1005: ',' expected.
-invalidNewTarget.es6.ts(20,7): error TS2304: Cannot find name ')'.
 invalidNewTarget.es6.ts(20,9): error TS1005: ',' expected.
-invalidNewTarget.es6.ts(20,9): error TS2304: Cannot find name '{'.
 invalidNewTarget.es6.ts(20,11): error TS1005: ',' expected.
 invalidNewTarget.es6.ts(20,11): error TS2304: Cannot find name 'return'.
 invalidNewTarget.es6.ts(20,18): error TS1005: ',' expected.
 invalidNewTarget.es6.ts(20,18): error TS2304: Cannot find name 'new'.
 invalidNewTarget.es6.ts(20,21): error TS1005: ',' expected.
-invalidNewTarget.es6.ts(20,21): error TS2304: Cannot find name '.'.
 invalidNewTarget.es6.ts(20,22): error TS1005: ',' expected.
 invalidNewTarget.es6.ts(20,22): error TS2304: Cannot find name 'target'.
 invalidNewTarget.es6.ts(20,28): error TS1005: ',' expected.
-invalidNewTarget.es6.ts(20,28): error TS2304: Cannot find name ';'.
 invalidNewTarget.es6.ts(21,5): error TS2304: Cannot find name 'get'.
 invalidNewTarget.es6.ts(21,9): error TS1005: ',' expected.
 invalidNewTarget.es6.ts(21,10): error TS1005: ',' expected.
 invalidNewTarget.es6.ts(21,11): error TS1134: Variable declaration expected.
 
 
-==== invalidNewTarget.es6.ts (25 errors) ====
+==== invalidNewTarget.es6.ts (20 errors) ====
     const a = new.target;
     const b = () => new.target;
     
@@ -58,16 +53,10 @@ invalidNewTarget.es6.ts(21,11): error TS1134: Variable declaration expected.
 !!! error TS2304: Cannot find name 'k'.
          ~
 !!! error TS1005: ',' expected.
-         ~
-!!! error TS2304: Cannot find name '('.
           ~
 !!! error TS1005: ',' expected.
-          ~
-!!! error TS2304: Cannot find name ')'.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name '{'.
               ~~~~~~
 !!! error TS1005: ',' expected.
               ~~~~~~
@@ -78,16 +67,12 @@ invalidNewTarget.es6.ts(21,11): error TS1134: Variable declaration expected.
 !!! error TS2304: Cannot find name 'new'.
                         ~
 !!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name '.'.
                          ~~~~~~
 !!! error TS1005: ',' expected.
                          ~~~~~~
 !!! error TS2304: Cannot find name 'target'.
                                ~
 !!! error TS1005: ',' expected.
-                               ~
-!!! error TS2304: Cannot find name ';'.
         get l() { return new.target; },
         ~~~
 !!! error TS2304: Cannot find name 'get'.

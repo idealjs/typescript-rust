@@ -8,11 +8,8 @@ mod1.js(3,1): error TS2304: Cannot find name 'Object'.
 mod1.js(3,23): error TS2304: Cannot find name 'exports'.
 mod1.js(3,49): error TS2304: Cannot find name 'get'.
 mod1.js(3,52): error TS1005: ',' expected.
-mod1.js(3,52): error TS2304: Cannot find name '('.
 mod1.js(3,53): error TS1005: ',' expected.
-mod1.js(3,53): error TS2304: Cannot find name ')'.
 mod1.js(3,55): error TS1005: ',' expected.
-mod1.js(3,55): error TS2304: Cannot find name '{'.
 mod1.js(3,57): error TS1005: ',' expected.
 mod1.js(3,57): error TS2304: Cannot find name 'return'.
 mod1.js(3,64): error TS1005: ',' expected.
@@ -28,11 +25,8 @@ mod2.js(3,1): error TS2304: Cannot find name 'Object'.
 mod2.js(3,23): error TS2304: Cannot find name 'module'.
 mod2.js(3,56): error TS2304: Cannot find name 'get'.
 mod2.js(3,59): error TS1005: ',' expected.
-mod2.js(3,59): error TS2304: Cannot find name '('.
 mod2.js(3,60): error TS1005: ',' expected.
-mod2.js(3,60): error TS2304: Cannot find name ')'.
 mod2.js(3,62): error TS1005: ',' expected.
-mod2.js(3,62): error TS2304: Cannot find name '{'.
 mod2.js(3,64): error TS1005: ',' expected.
 mod2.js(3,64): error TS2304: Cannot find name 'return'.
 mod2.js(3,71): error TS1005: ',' expected.
@@ -68,7 +62,7 @@ validator.ts(40,1): error TS2304: Cannot find name 'm2'.
 validator.ts(41,1): error TS2304: Cannot find name 'm2'.
 
 
-==== mod1.js (20 errors) ====
+==== mod1.js (17 errors) ====
     Object.defineProperty(exports, "thing", { value: 42, writable: true });
     ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
@@ -88,16 +82,10 @@ validator.ts(41,1): error TS2304: Cannot find name 'm2'.
 !!! error TS2304: Cannot find name 'get'.
                                                        ~
 !!! error TS1005: ',' expected.
-                                                       ~
-!!! error TS2304: Cannot find name '('.
                                                         ~
 !!! error TS1005: ',' expected.
-                                                        ~
-!!! error TS2304: Cannot find name ')'.
                                                           ~
 !!! error TS1005: ',' expected.
-                                                          ~
-!!! error TS2304: Cannot find name '{'.
                                                             ~~~~~~
 !!! error TS1005: ',' expected.
                                                             ~~~~~~
@@ -120,7 +108,7 @@ validator.ts(41,1): error TS2304: Cannot find name 'm2'.
         }
     });
     
-==== mod2.js (20 errors) ====
+==== mod2.js (17 errors) ====
     Object.defineProperty(module.exports, "thing", { value: "yes", writable: true });
     ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
@@ -140,16 +128,10 @@ validator.ts(41,1): error TS2304: Cannot find name 'm2'.
 !!! error TS2304: Cannot find name 'get'.
                                                               ~
 !!! error TS1005: ',' expected.
-                                                              ~
-!!! error TS2304: Cannot find name '('.
                                                                ~
 !!! error TS1005: ',' expected.
-                                                               ~
-!!! error TS2304: Cannot find name ')'.
                                                                  ~
 !!! error TS1005: ',' expected.
-                                                                 ~
-!!! error TS2304: Cannot find name '{'.
                                                                    ~~~~~~
 !!! error TS1005: ',' expected.
                                                                    ~~~~~~

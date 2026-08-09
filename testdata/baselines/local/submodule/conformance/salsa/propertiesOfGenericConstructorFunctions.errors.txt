@@ -3,17 +3,13 @@ propertiesOfGenericConstructorFunctions.js(17,18): error TS2351: This expression
 propertiesOfGenericConstructorFunctions.js(37,4): error TS2339: Property 'prototype' does not exist on type '(t: any) => void'.
 propertiesOfGenericConstructorFunctions.js(38,5): error TS2304: Cannot find name 'm1'.
 propertiesOfGenericConstructorFunctions.js(38,7): error TS1005: ',' expected.
-propertiesOfGenericConstructorFunctions.js(38,7): error TS2304: Cannot find name '('.
 propertiesOfGenericConstructorFunctions.js(38,8): error TS1005: ',' expected.
-propertiesOfGenericConstructorFunctions.js(38,8): error TS2304: Cannot find name ')'.
 propertiesOfGenericConstructorFunctions.js(38,10): error TS1005: ',' expected.
-propertiesOfGenericConstructorFunctions.js(38,10): error TS2304: Cannot find name '{'.
 propertiesOfGenericConstructorFunctions.js(38,12): error TS1005: ',' expected.
 propertiesOfGenericConstructorFunctions.js(38,12): error TS2304: Cannot find name 'return'.
 propertiesOfGenericConstructorFunctions.js(38,19): error TS1005: ',' expected.
 propertiesOfGenericConstructorFunctions.js(38,19): error TS2304: Cannot find name 'this'.
 propertiesOfGenericConstructorFunctions.js(38,23): error TS1005: ',' expected.
-propertiesOfGenericConstructorFunctions.js(38,23): error TS2304: Cannot find name '.'.
 propertiesOfGenericConstructorFunctions.js(38,24): error TS1005: ',' expected.
 propertiesOfGenericConstructorFunctions.js(38,24): error TS2304: Cannot find name 'x'.
 propertiesOfGenericConstructorFunctions.js(39,5): error TS2304: Cannot find name 'm2'.
@@ -21,7 +17,7 @@ propertiesOfGenericConstructorFunctions.js(39,10): error TS1005: ';' expected.
 propertiesOfGenericConstructorFunctions.js(40,1): error TS1128: Declaration or statement expected.
 
 
-==== propertiesOfGenericConstructorFunctions.js (21 errors) ====
+==== propertiesOfGenericConstructorFunctions.js (17 errors) ====
     /**
      * @template {string} K
      * @template V
@@ -70,16 +66,10 @@ propertiesOfGenericConstructorFunctions.js(40,1): error TS1128: Declaration or s
 !!! error TS2304: Cannot find name 'm1'.
           ~
 !!! error TS1005: ',' expected.
-          ~
-!!! error TS2304: Cannot find name '('.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name ')'.
              ~
 !!! error TS1005: ',' expected.
-             ~
-!!! error TS2304: Cannot find name '{'.
                ~~~~~~
 !!! error TS1005: ',' expected.
                ~~~~~~
@@ -90,8 +80,6 @@ propertiesOfGenericConstructorFunctions.js(40,1): error TS1128: Declaration or s
 !!! error TS2304: Cannot find name 'this'.
                           ~
 !!! error TS1005: ',' expected.
-                          ~
-!!! error TS2304: Cannot find name '.'.
                            ~
 !!! error TS1005: ',' expected.
                            ~

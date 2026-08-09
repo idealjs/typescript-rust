@@ -8,40 +8,29 @@ propertyAccessOnTypeParameterWithConstraints4.ts(25,32): error TS1005: '=>' expe
 propertyAccessOnTypeParameterWithConstraints4.ts(25,34): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints4.ts(25,34): error TS2304: Cannot find name 'T'.
 propertyAccessOnTypeParameterWithConstraints4.ts(25,36): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints4.ts(25,36): error TS2304: Cannot find name '=>'.
 propertyAccessOnTypeParameterWithConstraints4.ts(25,39): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints4.ts(25,39): error TS2304: Cannot find name '{'.
 propertyAccessOnTypeParameterWithConstraints4.ts(26,9): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints4.ts(26,9): error TS2304: Cannot find name 'var'.
 propertyAccessOnTypeParameterWithConstraints4.ts(26,13): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints4.ts(26,15): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints4.ts(26,15): error TS2304: Cannot find name '='.
 propertyAccessOnTypeParameterWithConstraints4.ts(26,17): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints4.ts(26,17): error TS2304: Cannot find name 'x'.
 propertyAccessOnTypeParameterWithConstraints4.ts(26,18): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints4.ts(26,29): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints4.ts(26,29): error TS2304: Cannot find name '('.
 propertyAccessOnTypeParameterWithConstraints4.ts(26,30): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints4.ts(26,30): error TS2304: Cannot find name ')'.
 propertyAccessOnTypeParameterWithConstraints4.ts(26,31): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints4.ts(26,31): error TS2304: Cannot find name ';'.
 propertyAccessOnTypeParameterWithConstraints4.ts(27,9): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints4.ts(27,9): error TS2304: Cannot find name 'return'.
 propertyAccessOnTypeParameterWithConstraints4.ts(27,16): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints4.ts(27,18): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints4.ts(27,18): error TS2304: Cannot find name '+'.
 propertyAccessOnTypeParameterWithConstraints4.ts(27,20): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints4.ts(27,20): error TS2304: Cannot find name 'x'.
 propertyAccessOnTypeParameterWithConstraints4.ts(27,21): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints4.ts(27,21): error TS2304: Cannot find name '.'.
 propertyAccessOnTypeParameterWithConstraints4.ts(27,22): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints4.ts(27,22): error TS2304: Cannot find name 'notHere'.
 propertyAccessOnTypeParameterWithConstraints4.ts(27,29): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints4.ts(27,29): error TS2304: Cannot find name '('.
 propertyAccessOnTypeParameterWithConstraints4.ts(27,30): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints4.ts(27,30): error TS2304: Cannot find name ')'.
 propertyAccessOnTypeParameterWithConstraints4.ts(27,31): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints4.ts(27,31): error TS2304: Cannot find name ';'.
 propertyAccessOnTypeParameterWithConstraints4.ts(29,5): error TS2304: Cannot find name 'bar'.
 propertyAccessOnTypeParameterWithConstraints4.ts(29,8): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints4.ts(29,11): error TS1005: ',' expected.
@@ -49,7 +38,7 @@ propertyAccessOnTypeParameterWithConstraints4.ts(29,15): error TS1005: ',' expec
 propertyAccessOnTypeParameterWithConstraints4.ts(29,16): error TS1134: Variable declaration expected.
 
 
-==== propertyAccessOnTypeParameterWithConstraints4.ts (49 errors) ====
+==== propertyAccessOnTypeParameterWithConstraints4.ts (38 errors) ====
     class C<T extends Date> {
                       ~~~~
 !!! error TS2304: Cannot find name 'Date'.
@@ -95,12 +84,8 @@ propertyAccessOnTypeParameterWithConstraints4.ts(29,16): error TS1134: Variable 
 !!! error TS2304: Cannot find name 'T'.
                                        ~~
 !!! error TS1005: ',' expected.
-                                       ~~
-!!! error TS2304: Cannot find name '=>'.
                                           ~
 !!! error TS1005: ',' expected.
-                                          ~
-!!! error TS2304: Cannot find name '{'.
             var a = x['notHere'](); // should be string
             ~~~
 !!! error TS1005: ',' expected.
@@ -110,8 +95,6 @@ propertyAccessOnTypeParameterWithConstraints4.ts(29,16): error TS1134: Variable 
 !!! error TS1005: ',' expected.
                   ~
 !!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name '='.
                     ~
 !!! error TS1005: ',' expected.
                     ~
@@ -120,16 +103,10 @@ propertyAccessOnTypeParameterWithConstraints4.ts(29,16): error TS1134: Variable 
 !!! error TS1005: ',' expected.
                                 ~
 !!! error TS1005: ',' expected.
-                                ~
-!!! error TS2304: Cannot find name '('.
                                  ~
 !!! error TS1005: ',' expected.
-                                 ~
-!!! error TS2304: Cannot find name ')'.
                                   ~
 !!! error TS1005: ',' expected.
-                                  ~
-!!! error TS2304: Cannot find name ';'.
             return a + x.notHere();
             ~~~~~~
 !!! error TS1005: ',' expected.
@@ -139,32 +116,22 @@ propertyAccessOnTypeParameterWithConstraints4.ts(29,16): error TS1134: Variable 
 !!! error TS1005: ',' expected.
                      ~
 !!! error TS1005: ',' expected.
-                     ~
-!!! error TS2304: Cannot find name '+'.
                        ~
 !!! error TS1005: ',' expected.
                        ~
 !!! error TS2304: Cannot find name 'x'.
                         ~
 !!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name '.'.
                          ~~~~~~~
 !!! error TS1005: ',' expected.
                          ~~~~~~~
 !!! error TS2304: Cannot find name 'notHere'.
                                 ~
 !!! error TS1005: ',' expected.
-                                ~
-!!! error TS2304: Cannot find name '('.
                                  ~
 !!! error TS1005: ',' expected.
-                                 ~
-!!! error TS2304: Cannot find name ')'.
                                   ~
 !!! error TS1005: ',' expected.
-                                  ~
-!!! error TS2304: Cannot find name ';'.
         },
         bar: b.foo().notHere()
         ~~~

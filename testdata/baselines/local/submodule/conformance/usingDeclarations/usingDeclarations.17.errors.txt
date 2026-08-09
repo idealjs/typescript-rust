@@ -1,24 +1,18 @@
 usingDeclarations.17.ts(1,9): error TS2304: Cannot find name 'Math'.
 usingDeclarations.17.ts(3,39): error TS1005: ',' expected.
-usingDeclarations.17.ts(3,39): error TS2304: Cannot find name '('.
 usingDeclarations.17.ts(3,40): error TS1005: ',' expected.
-usingDeclarations.17.ts(3,40): error TS2304: Cannot find name ')'.
 usingDeclarations.17.ts(3,42): error TS1005: ',' expected.
-usingDeclarations.17.ts(3,42): error TS2304: Cannot find name '{'.
 usingDeclarations.17.ts(4,9): error TS1105: A 'break' statement can only be used within an enclosing iteration or switch statement.
 usingDeclarations.17.ts(6,5): error TS2304: Cannot find name 'case'.
 usingDeclarations.17.ts(6,10): error TS1005: ';' expected.
 usingDeclarations.17.ts(6,11): error TS1005: ';' expected.
 usingDeclarations.17.ts(7,39): error TS1005: ',' expected.
-usingDeclarations.17.ts(7,39): error TS2304: Cannot find name '('.
 usingDeclarations.17.ts(7,40): error TS1005: ',' expected.
-usingDeclarations.17.ts(7,40): error TS2304: Cannot find name ')'.
 usingDeclarations.17.ts(7,42): error TS1005: ',' expected.
-usingDeclarations.17.ts(7,42): error TS2304: Cannot find name '{'.
 usingDeclarations.17.ts(7,45): error TS1128: Declaration or statement expected.
 
 
-==== usingDeclarations.17.ts (18 errors) ====
+==== usingDeclarations.17.ts (12 errors) ====
     switch (Math.random()) {
             ~~~~
 !!! error TS2304: Cannot find name 'Math'.
@@ -26,16 +20,10 @@ usingDeclarations.17.ts(7,45): error TS1128: Declaration or statement expected.
             using d20 = { [Symbol.dispose]() {} };
                                           ~
 !!! error TS1005: ',' expected.
-                                          ~
-!!! error TS2304: Cannot find name '('.
                                            ~
 !!! error TS1005: ',' expected.
-                                           ~
-!!! error TS2304: Cannot find name ')'.
                                              ~
 !!! error TS1005: ',' expected.
-                                             ~
-!!! error TS2304: Cannot find name '{'.
             break;
             ~~~~~~
     
@@ -52,16 +40,10 @@ usingDeclarations.17.ts(7,45): error TS1128: Declaration or statement expected.
             using d21 = { [Symbol.dispose]() {} };
                                           ~
 !!! error TS1005: ',' expected.
-                                          ~
-!!! error TS2304: Cannot find name '('.
                                            ~
 !!! error TS1005: ',' expected.
-                                           ~
-!!! error TS2304: Cannot find name ')'.
                                              ~
 !!! error TS1005: ',' expected.
-                                             ~
-!!! error TS2304: Cannot find name '{'.
                                                 ~
 !!! error TS1128: Declaration or statement expected.
             break;

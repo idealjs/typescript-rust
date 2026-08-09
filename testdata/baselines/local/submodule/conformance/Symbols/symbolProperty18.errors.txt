@@ -1,9 +1,6 @@
 symbolProperty18.ts(3,25): error TS1005: ',' expected.
-symbolProperty18.ts(3,25): error TS2304: Cannot find name '('.
 symbolProperty18.ts(3,26): error TS1005: ',' expected.
-symbolProperty18.ts(3,26): error TS2304: Cannot find name ')'.
 symbolProperty18.ts(3,28): error TS1005: ',' expected.
-symbolProperty18.ts(3,28): error TS2304: Cannot find name '{'.
 symbolProperty18.ts(3,30): error TS1005: ',' expected.
 symbolProperty18.ts(3,30): error TS2304: Cannot find name 'return'.
 symbolProperty18.ts(3,37): error TS1005: ',' expected.
@@ -16,22 +13,16 @@ symbolProperty18.ts(4,42): error TS1182: A destructuring declaration must have a
 symbolProperty18.ts(5,1): error TS1128: Declaration or statement expected.
 
 
-==== symbolProperty18.ts (16 errors) ====
+==== symbolProperty18.ts (13 errors) ====
     var i = {
         [Symbol.iterator]: 0,
         [Symbol.toStringTag]() { return "" },
                             ~
 !!! error TS1005: ',' expected.
-                            ~
-!!! error TS2304: Cannot find name '('.
                              ~
 !!! error TS1005: ',' expected.
-                             ~
-!!! error TS2304: Cannot find name ')'.
                                ~
 !!! error TS1005: ',' expected.
-                               ~
-!!! error TS2304: Cannot find name '{'.
                                  ~~~~~~
 !!! error TS1005: ',' expected.
                                  ~~~~~~

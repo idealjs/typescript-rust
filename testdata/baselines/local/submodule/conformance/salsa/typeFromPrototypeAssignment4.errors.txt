@@ -1,27 +1,22 @@
 a.js(10,3): error TS2304: Cannot find name 'get'.
 a.js(10,6): error TS1005: ',' expected.
-a.js(10,6): error TS2304: Cannot find name '('.
 a.js(10,7): error TS1005: ',' expected.
 a.js(10,7): error TS2304: Cannot find name 'key'.
 a.js(10,10): error TS1005: ',' expected.
-a.js(10,10): error TS2304: Cannot find name ')'.
 a.js(10,12): error TS1005: ',' expected.
-a.js(10,12): error TS2304: Cannot find name '{'.
 a.js(11,5): error TS1005: ',' expected.
 a.js(11,5): error TS2304: Cannot find name 'return'.
 a.js(11,12): error TS1005: ',' expected.
 a.js(11,12): error TS2304: Cannot find name 'this'.
 a.js(11,16): error TS1005: ',' expected.
-a.js(11,16): error TS2304: Cannot find name '.'.
 a.js(11,17): error TS1005: ',' expected.
 a.js(11,17): error TS2304: Cannot find name '_map'.
 a.js(11,21): error TS1005: ',' expected.
 a.js(11,31): error TS1005: ',' expected.
-a.js(11,31): error TS2304: Cannot find name ';'.
 a.js(13,1): error TS1128: Declaration or statement expected.
 
 
-==== a.js (21 errors) ====
+==== a.js (16 errors) ====
     function Multimap4() {
       this._map = {};
     };
@@ -36,20 +31,14 @@ a.js(13,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'get'.
          ~
 !!! error TS1005: ',' expected.
-         ~
-!!! error TS2304: Cannot find name '('.
           ~~~
 !!! error TS1005: ',' expected.
           ~~~
 !!! error TS2304: Cannot find name 'key'.
              ~
 !!! error TS1005: ',' expected.
-             ~
-!!! error TS2304: Cannot find name ')'.
                ~
 !!! error TS1005: ',' expected.
-               ~
-!!! error TS2304: Cannot find name '{'.
         return this._map[key + ''];
         ~~~~~~
 !!! error TS1005: ',' expected.
@@ -61,8 +50,6 @@ a.js(13,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'this'.
                    ~
 !!! error TS1005: ',' expected.
-                   ~
-!!! error TS2304: Cannot find name '.'.
                     ~~~~
 !!! error TS1005: ',' expected.
                     ~~~~
@@ -71,8 +58,6 @@ a.js(13,1): error TS1128: Declaration or statement expected.
 !!! error TS1005: ',' expected.
                                   ~
 !!! error TS1005: ',' expected.
-                                  ~
-!!! error TS2304: Cannot find name ';'.
       }
     };
     ~

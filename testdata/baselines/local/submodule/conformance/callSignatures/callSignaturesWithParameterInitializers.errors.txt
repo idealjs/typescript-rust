@@ -8,22 +8,18 @@ callSignaturesWithParameterInitializers.ts(41,1): error TS2349: This expression 
 callSignaturesWithParameterInitializers.ts(42,3): error TS2339: Property 'foo' does not exist on type 'object'.
 callSignaturesWithParameterInitializers.ts(43,3): error TS2339: Property 'foo' does not exist on type 'object'.
 callSignaturesWithParameterInitializers.ts(46,8): error TS1005: ',' expected.
-callSignaturesWithParameterInitializers.ts(46,8): error TS2304: Cannot find name '('.
 callSignaturesWithParameterInitializers.ts(46,9): error TS1005: ',' expected.
 callSignaturesWithParameterInitializers.ts(46,11): error TS1005: ',' expected.
-callSignaturesWithParameterInitializers.ts(46,11): error TS2304: Cannot find name '='.
 callSignaturesWithParameterInitializers.ts(46,13): error TS1005: ',' expected.
 callSignaturesWithParameterInitializers.ts(46,14): error TS1005: ',' expected.
-callSignaturesWithParameterInitializers.ts(46,14): error TS2304: Cannot find name ')'.
 callSignaturesWithParameterInitializers.ts(46,16): error TS1005: ',' expected.
-callSignaturesWithParameterInitializers.ts(46,16): error TS2304: Cannot find name '{'.
 callSignaturesWithParameterInitializers.ts(47,6): error TS1005: ',' expected.
 callSignaturesWithParameterInitializers.ts(47,17): error TS1005: ',' expected.
 callSignaturesWithParameterInitializers.ts(47,20): error TS1005: ',' expected.
 callSignaturesWithParameterInitializers.ts(47,37): error TS1005: ',' expected.
 
 
-==== callSignaturesWithParameterInitializers.ts (23 errors) ====
+==== callSignaturesWithParameterInitializers.ts (19 errors) ====
     // Optional parameters allow initializers only in implementation signatures
     
     function foo(x = 1) { }
@@ -90,24 +86,16 @@ callSignaturesWithParameterInitializers.ts(47,37): error TS1005: ',' expected.
         foo(x = 1) { },
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~
 !!! error TS1005: ',' expected.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name '='.
                 ~
 !!! error TS1005: ',' expected.
                  ~
 !!! error TS1005: ',' expected.
-                 ~
-!!! error TS2304: Cannot find name ')'.
                    ~
 !!! error TS1005: ',' expected.
-                   ~
-!!! error TS2304: Cannot find name '{'.
         a: function foo(x: number, y = 1) { },
          ~
 !!! error TS1005: ',' expected.

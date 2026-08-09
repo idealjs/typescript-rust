@@ -1,26 +1,17 @@
 usingDeclarationsDeclarationEmit.2.ts(1,30): error TS1005: ',' expected.
-usingDeclarationsDeclarationEmit.2.ts(1,30): error TS2304: Cannot find name '('.
 usingDeclarationsDeclarationEmit.2.ts(1,31): error TS1005: ',' expected.
-usingDeclarationsDeclarationEmit.2.ts(1,31): error TS2304: Cannot find name ')'.
 usingDeclarationsDeclarationEmit.2.ts(1,33): error TS1005: ',' expected.
-usingDeclarationsDeclarationEmit.2.ts(1,33): error TS2304: Cannot find name '{'.
 usingDeclarationsDeclarationEmit.2.ts(1,36): error TS1128: Declaration or statement expected.
 
 
-==== usingDeclarationsDeclarationEmit.2.ts (7 errors) ====
+==== usingDeclarationsDeclarationEmit.2.ts (4 errors) ====
     using r1 = { [Symbol.dispose]() {} };
                                  ~
 !!! error TS1005: ',' expected.
-                                 ~
-!!! error TS2304: Cannot find name '('.
                                   ~
 !!! error TS1005: ',' expected.
-                                  ~
-!!! error TS2304: Cannot find name ')'.
                                     ~
 !!! error TS1005: ',' expected.
-                                    ~
-!!! error TS2304: Cannot find name '{'.
                                        ~
 !!! error TS1128: Declaration or statement expected.
     export type R1 = typeof r1;

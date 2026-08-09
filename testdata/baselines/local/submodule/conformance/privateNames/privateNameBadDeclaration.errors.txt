@@ -1,19 +1,14 @@
 privateNameBadDeclaration.ts(2,3): error TS2339: Property 'prototype' does not exist on type '() => void'.
 privateNameBadDeclaration.ts(3,3): error TS1003: Identifier expected.
 privateNameBadDeclaration.ts(3,3): error TS1127: Invalid character.
-privateNameBadDeclaration.ts(3,3): error TS2304: Cannot find name '#'.
 privateNameBadDeclaration.ts(3,4): error TS1005: ',' expected.
 privateNameBadDeclaration.ts(4,3): error TS1003: Identifier expected.
 privateNameBadDeclaration.ts(4,3): error TS1127: Invalid character.
-privateNameBadDeclaration.ts(4,3): error TS2304: Cannot find name '#'.
 privateNameBadDeclaration.ts(4,4): error TS1005: ',' expected.
 privateNameBadDeclaration.ts(4,4): error TS2304: Cannot find name 'm'.
 privateNameBadDeclaration.ts(4,5): error TS1005: ',' expected.
-privateNameBadDeclaration.ts(4,5): error TS2304: Cannot find name '('.
 privateNameBadDeclaration.ts(4,6): error TS1005: ',' expected.
-privateNameBadDeclaration.ts(4,6): error TS2304: Cannot find name ')'.
 privateNameBadDeclaration.ts(4,8): error TS1005: ',' expected.
-privateNameBadDeclaration.ts(4,8): error TS2304: Cannot find name '{'.
 privateNameBadDeclaration.ts(5,3): error TS2304: Cannot find name 'get'.
 privateNameBadDeclaration.ts(5,7): error TS1005: ';' expected.
 privateNameBadDeclaration.ts(5,7): error TS1127: Invalid character.
@@ -22,7 +17,7 @@ privateNameBadDeclaration.ts(5,12): error TS1005: ';' expected.
 privateNameBadDeclaration.ts(6,1): error TS1128: Declaration or statement expected.
 
 
-==== privateNameBadDeclaration.ts (22 errors) ====
+==== privateNameBadDeclaration.ts (17 errors) ====
     function A() { }
     A.prototype = {
       ~~~~~~~~~
@@ -32,8 +27,6 @@ privateNameBadDeclaration.ts(6,1): error TS1128: Declaration or statement expect
 !!! error TS1003: Identifier expected.
       ~
 !!! error TS1127: Invalid character.
-      ~
-!!! error TS2304: Cannot find name '#'.
        ~
 !!! error TS1005: ',' expected.
       #m() {},       // Error
@@ -41,24 +34,16 @@ privateNameBadDeclaration.ts(6,1): error TS1128: Declaration or statement expect
 !!! error TS1003: Identifier expected.
       ~
 !!! error TS1127: Invalid character.
-      ~
-!!! error TS2304: Cannot find name '#'.
        ~
 !!! error TS1005: ',' expected.
        ~
 !!! error TS2304: Cannot find name 'm'.
         ~
 !!! error TS1005: ',' expected.
-        ~
-!!! error TS2304: Cannot find name '('.
          ~
 !!! error TS1005: ',' expected.
-         ~
-!!! error TS2304: Cannot find name ')'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '{'.
       get #p() { return "" } // Error
       ~~~
 !!! error TS2304: Cannot find name 'get'.

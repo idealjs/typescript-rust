@@ -17,7 +17,6 @@ file.tsx(34,90): error TS1005: '...' expected.
 file.tsx(35,20): error TS2304: Cannot find name 'P'.
 file.tsx(35,23): error TS2304: Cannot find name 'P2'.
 file.tsx(35,26): error TS1005: ',' expected.
-file.tsx(35,26): error TS2304: Cannot find name ';'.
 file.tsx(37,1): error TS1005: '}' expected.
 file.tsx(37,6): error TS2304: Cannot find name 'MyComp2'.
 file.tsx(37,15): error TS1005: '...' expected.
@@ -83,7 +82,7 @@ file.tsx(55,74): error TS1005: '</' expected.
 
 
 !!! error TS6053: File '/.lib/react.d.ts' not found.
-==== file.tsx (81 errors) ====
+==== file.tsx (80 errors) ====
     /// <reference path="/.lib/react.d.ts" />
     
     import React = require('react');
@@ -155,8 +154,6 @@ file.tsx(55,74): error TS1005: '</' expected.
 !!! error TS2304: Cannot find name 'P2'.
                              ~
 !!! error TS1005: ',' expected.
-                             ~
-!!! error TS2304: Cannot find name ';'.
     }
     x = <MyComp2<{a: string, b: string}> a="a" b="b" />; // OK
     ~

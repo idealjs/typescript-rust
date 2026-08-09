@@ -2,11 +2,8 @@ usingDeclarationsInFor.ts(1,6): error TS2304: Cannot find name 'using'.
 usingDeclarationsInFor.ts(1,12): error TS1005: ';' expected.
 usingDeclarationsInFor.ts(1,12): error TS2304: Cannot find name 'd1'.
 usingDeclarationsInFor.ts(1,35): error TS1005: ',' expected.
-usingDeclarationsInFor.ts(1,35): error TS2304: Cannot find name '('.
 usingDeclarationsInFor.ts(1,36): error TS1005: ',' expected.
-usingDeclarationsInFor.ts(1,36): error TS2304: Cannot find name ')'.
 usingDeclarationsInFor.ts(1,38): error TS1005: ',' expected.
-usingDeclarationsInFor.ts(1,38): error TS2304: Cannot find name '{'.
 usingDeclarationsInFor.ts(1,41): error TS1005: ';' expected.
 usingDeclarationsInFor.ts(1,44): error TS2304: Cannot find name 'd2'.
 usingDeclarationsInFor.ts(1,55): error TS2304: Cannot find name 'd3'.
@@ -14,7 +11,7 @@ usingDeclarationsInFor.ts(1,69): error TS1005: ')' expected.
 usingDeclarationsInFor.ts(1,71): error TS1128: Declaration or statement expected.
 
 
-==== usingDeclarationsInFor.ts (14 errors) ====
+==== usingDeclarationsInFor.ts (11 errors) ====
     for (using d1 = { [Symbol.dispose]() {} }, d2 = null, d3 = undefined;;) {
          ~~~~~
 !!! error TS2304: Cannot find name 'using'.
@@ -24,16 +21,10 @@ usingDeclarationsInFor.ts(1,71): error TS1128: Declaration or statement expected
 !!! error TS2304: Cannot find name 'd1'.
                                       ~
 !!! error TS1005: ',' expected.
-                                      ~
-!!! error TS2304: Cannot find name '('.
                                        ~
 !!! error TS1005: ',' expected.
-                                       ~
-!!! error TS2304: Cannot find name ')'.
                                          ~
 !!! error TS1005: ',' expected.
-                                         ~
-!!! error TS2304: Cannot find name '{'.
                                             ~
 !!! error TS1005: ';' expected.
                                                ~~

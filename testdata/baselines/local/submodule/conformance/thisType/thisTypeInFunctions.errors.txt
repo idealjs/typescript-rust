@@ -1,14 +1,10 @@
 thisTypeInFunctions.ts(41,5): error TS2304: Cannot find name 'explicitVoid1'.
 thisTypeInFunctions.ts(41,18): error TS1005: ',' expected.
-thisTypeInFunctions.ts(41,18): error TS2304: Cannot find name '('.
 thisTypeInFunctions.ts(41,19): error TS1005: ',' expected.
-thisTypeInFunctions.ts(41,19): error TS2304: Cannot find name ')'.
 thisTypeInFunctions.ts(41,21): error TS1005: ',' expected.
-thisTypeInFunctions.ts(41,21): error TS2304: Cannot find name '{'.
 thisTypeInFunctions.ts(41,23): error TS1005: ',' expected.
 thisTypeInFunctions.ts(41,30): error TS1005: ',' expected.
 thisTypeInFunctions.ts(41,32): error TS1005: ',' expected.
-thisTypeInFunctions.ts(41,32): error TS2304: Cannot find name ';'.
 thisTypeInFunctions.ts(42,5): error TS2554: Expected 2 arguments, but got 0.
 thisTypeInFunctions.ts(42,26): error TS1005: ',' expected.
 thisTypeInFunctions.ts(42,26): error TS1182: A destructuring declaration must have an initializer.
@@ -19,7 +15,7 @@ thisTypeInFunctions.ts(45,22): error TS1005: ',' expected.
 thisTypeInFunctions.ts(45,23): error TS1134: Variable declaration expected.
 
 
-==== thisTypeInFunctions.ts (19 errors) ====
+==== thisTypeInFunctions.ts (15 errors) ====
     // body checking
     class B {
         n: number;
@@ -65,24 +61,16 @@ thisTypeInFunctions.ts(45,23): error TS1134: Variable declaration expected.
 !!! error TS2304: Cannot find name 'explicitVoid1'.
                      ~
 !!! error TS1005: ',' expected.
-                     ~
-!!! error TS2304: Cannot find name '('.
                       ~
 !!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name ')'.
                         ~
 !!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name '{'.
                           ~~~~~~
 !!! error TS1005: ',' expected.
                                  ~~
 !!! error TS1005: ',' expected.
                                    ~
 !!! error TS1005: ',' expected.
-                                   ~
-!!! error TS2304: Cannot find name ';'.
         explicitStructural() {
         ~~~~~~~~~~~~~~~~~~
 !!! error TS2554: Expected 2 arguments, but got 0.

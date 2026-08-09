@@ -1,33 +1,26 @@
 a.js(13,14): error TS2339: Property 'prototype' does not exist on type '() => void'.
 a.js(20,9): error TS2304: Cannot find name 'get'.
 a.js(20,12): error TS1005: ',' expected.
-a.js(20,12): error TS2304: Cannot find name '('.
 a.js(20,13): error TS1005: ',' expected.
-a.js(20,13): error TS2304: Cannot find name ')'.
 a.js(20,15): error TS1005: ',' expected.
-a.js(20,15): error TS2304: Cannot find name '{'.
 a.js(21,13): error TS1005: ',' expected.
 a.js(21,13): error TS2304: Cannot find name 'this'.
 a.js(21,17): error TS1005: ',' expected.
-a.js(21,17): error TS2304: Cannot find name '.'.
 a.js(21,18): error TS1005: ',' expected.
 a.js(21,18): error TS2304: Cannot find name '_map'.
 a.js(22,13): error TS1005: ',' expected.
 a.js(22,13): error TS2304: Cannot find name 'this'.
 a.js(22,17): error TS1005: ',' expected.
-a.js(22,17): error TS2304: Cannot find name '.'.
 a.js(22,18): error TS1005: ',' expected.
 a.js(22,18): error TS2304: Cannot find name 'set'.
 a.js(23,13): error TS1005: ',' expected.
 a.js(23,13): error TS2304: Cannot find name 'this'.
 a.js(23,17): error TS1005: ',' expected.
-a.js(23,17): error TS2304: Cannot find name '.'.
 a.js(23,18): error TS1005: ',' expected.
 a.js(23,18): error TS2304: Cannot find name 'get'.
 a.js(24,13): error TS1005: ',' expected.
 a.js(24,13): error TS2304: Cannot find name 'this'.
 a.js(24,17): error TS1005: ',' expected.
-a.js(24,17): error TS2304: Cannot find name '.'.
 a.js(24,18): error TS1005: ',' expected.
 a.js(24,18): error TS2304: Cannot find name 'addon'.
 a.js(28,5): error TS1005: ')' expected.
@@ -36,7 +29,7 @@ a.js(35,18): error TS2304: Cannot find name 'Multimap'.
 a.js(40,1): error TS1128: Declaration or statement expected.
 
 
-==== a.js (36 errors) ====
+==== a.js (29 errors) ====
     // non top-level:
     // all references to _map, set, get, addon should be ok
     (function container() {
@@ -63,16 +56,10 @@ a.js(40,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'get'.
                ~
 !!! error TS1005: ',' expected.
-               ~
-!!! error TS2304: Cannot find name '('.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name ')'.
                   ~
 !!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name '{'.
                 this._map
                 ~~~~
 !!! error TS1005: ',' expected.
@@ -80,8 +67,6 @@ a.js(40,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'this'.
                     ~
 !!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name '.'.
                      ~~~~
 !!! error TS1005: ',' expected.
                      ~~~~
@@ -93,8 +78,6 @@ a.js(40,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'this'.
                     ~
 !!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name '.'.
                      ~~~
 !!! error TS1005: ',' expected.
                      ~~~
@@ -106,8 +89,6 @@ a.js(40,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'this'.
                     ~
 !!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name '.'.
                      ~~~
 !!! error TS1005: ',' expected.
                      ~~~
@@ -119,8 +100,6 @@ a.js(40,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'this'.
                     ~
 !!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name '.'.
                      ~~~~~
 !!! error TS1005: ',' expected.
                      ~~~~~

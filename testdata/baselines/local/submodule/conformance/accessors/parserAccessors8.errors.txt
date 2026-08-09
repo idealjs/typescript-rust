@@ -2,15 +2,12 @@ parserAccessors8.ts(1,11): error TS2304: Cannot find name 'set'.
 parserAccessors8.ts(1,15): error TS1005: ',' expected.
 parserAccessors8.ts(1,15): error TS2304: Cannot find name 'foo'.
 parserAccessors8.ts(1,18): error TS1005: ',' expected.
-parserAccessors8.ts(1,18): error TS2304: Cannot find name '('.
 parserAccessors8.ts(1,19): error TS1005: ',' expected.
-parserAccessors8.ts(1,19): error TS2304: Cannot find name ')'.
 parserAccessors8.ts(1,21): error TS1005: ',' expected.
-parserAccessors8.ts(1,21): error TS2304: Cannot find name '{'.
 parserAccessors8.ts(1,25): error TS1128: Declaration or statement expected.
 
 
-==== parserAccessors8.ts (10 errors) ====
+==== parserAccessors8.ts (7 errors) ====
     var v = { set foo() { } }
               ~~~
 !!! error TS2304: Cannot find name 'set'.
@@ -20,15 +17,9 @@ parserAccessors8.ts(1,25): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'foo'.
                      ~
 !!! error TS1005: ',' expected.
-                     ~
-!!! error TS2304: Cannot find name '('.
                       ~
 !!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name ')'.
                         ~
 !!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name '{'.
                             ~
 !!! error TS1128: Declaration or statement expected.

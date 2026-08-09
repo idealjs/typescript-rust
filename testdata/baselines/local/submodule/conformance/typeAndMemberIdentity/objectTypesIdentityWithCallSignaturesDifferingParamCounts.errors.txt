@@ -1,21 +1,17 @@
 objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,11): error TS2304: Cannot find name 'foo'.
 objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,14): error TS1005: ',' expected.
-objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,14): error TS2304: Cannot find name '('.
 objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,15): error TS1005: ',' expected.
 objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,18): error TS2304: Cannot find name 'string'.
 objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,24): error TS1005: ',' expected.
-objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,24): error TS2304: Cannot find name ')'.
 objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,26): error TS1005: ',' expected.
-objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,26): error TS2304: Cannot find name '{'.
 objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,28): error TS1005: ',' expected.
 objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,28): error TS2304: Cannot find name 'return'.
 objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,35): error TS1005: ',' expected.
 objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,37): error TS1005: ',' expected.
-objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,37): error TS2304: Cannot find name ';'.
 objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,41): error TS1128: Declaration or statement expected.
 
 
-==== objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts (15 errors) ====
+==== objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts (11 errors) ====
     // object types are identical structurally
     
     class A {
@@ -44,20 +40,14 @@ objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,41): error TS112
 !!! error TS2304: Cannot find name 'foo'.
                  ~
 !!! error TS1005: ',' expected.
-                 ~
-!!! error TS2304: Cannot find name '('.
                   ~
 !!! error TS1005: ',' expected.
                      ~~~~~~
 !!! error TS2304: Cannot find name 'string'.
                            ~
 !!! error TS1005: ',' expected.
-                           ~
-!!! error TS2304: Cannot find name ')'.
                              ~
 !!! error TS1005: ',' expected.
-                             ~
-!!! error TS2304: Cannot find name '{'.
                                ~~~~~~
 !!! error TS1005: ',' expected.
                                ~~~~~~
@@ -66,8 +56,6 @@ objectTypesIdentityWithCallSignaturesDifferingParamCounts.ts(24,41): error TS112
 !!! error TS1005: ',' expected.
                                         ~
 !!! error TS1005: ',' expected.
-                                        ~
-!!! error TS2304: Cannot find name ';'.
                                             ~
 !!! error TS1128: Declaration or statement expected.
     

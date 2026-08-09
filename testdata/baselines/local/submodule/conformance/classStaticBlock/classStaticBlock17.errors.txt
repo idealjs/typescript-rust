@@ -11,18 +11,15 @@ classStaticBlock17.ts(11,18): error TS1005: ';' expected.
 classStaticBlock17.ts(11,18): error TS7027: Unreachable code detected.
 classStaticBlock17.ts(14,10): error TS1005: ';' expected.
 classStaticBlock17.ts(16,11): error TS1005: ',' expected.
-classStaticBlock17.ts(16,11): error TS2304: Cannot find name '('.
 classStaticBlock17.ts(16,12): error TS1005: ',' expected.
 classStaticBlock17.ts(16,12): error TS2304: Cannot find name 'obj'.
 classStaticBlock17.ts(16,15): error TS1005: ',' expected.
-classStaticBlock17.ts(16,15): error TS2304: Cannot find name ')'.
 classStaticBlock17.ts(16,17): error TS1005: ',' expected.
 classStaticBlock17.ts(16,19): error TS1005: ',' expected.
 classStaticBlock17.ts(16,19): error TS2304: Cannot find name 'return'.
 classStaticBlock17.ts(16,26): error TS1005: ',' expected.
 classStaticBlock17.ts(16,26): error TS2304: Cannot find name 'obj'.
 classStaticBlock17.ts(16,29): error TS1005: ',' expected.
-classStaticBlock17.ts(16,29): error TS2304: Cannot find name '.'.
 classStaticBlock17.ts(16,30): error TS1005: ',' expected.
 classStaticBlock17.ts(16,30): error TS1127: Invalid character.
 classStaticBlock17.ts(16,31): error TS1005: ',' expected.
@@ -33,7 +30,7 @@ classStaticBlock17.ts(17,31): error TS1005: ';' expected.
 classStaticBlock17.ts(19,3): error TS1128: Declaration or statement expected.
 
 
-==== classStaticBlock17.ts (33 errors) ====
+==== classStaticBlock17.ts (30 errors) ====
     let friendA: { getX(o: A): number, setX(o: A, v: number): void };
     
     class A {
@@ -77,16 +74,12 @@ classStaticBlock17.ts(19,3): error TS1128: Declaration or statement expected.
           getX(obj) { return obj.#x },
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name '('.
                ~~~
 !!! error TS1005: ',' expected.
                ~~~
 !!! error TS2304: Cannot find name 'obj'.
                   ~
 !!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name ')'.
                     ~
 !!! error TS1005: ',' expected.
                       ~~~~~~
@@ -99,8 +92,6 @@ classStaticBlock17.ts(19,3): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'obj'.
                                 ~
 !!! error TS1005: ',' expected.
-                                ~
-!!! error TS2304: Cannot find name '.'.
                                  ~
 !!! error TS1005: ',' expected.
                                  ~

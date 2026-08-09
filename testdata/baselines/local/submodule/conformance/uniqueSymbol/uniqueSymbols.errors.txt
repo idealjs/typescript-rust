@@ -11,23 +11,19 @@ uniqueSymbols.ts(136,4): error TS2339: Property 's' does not exist on type 'N'.
 uniqueSymbols.ts(142,10): error TS2339: Property 's' does not exist on type 'N'.
 uniqueSymbols.ts(145,5): error TS2304: Cannot find name 'method1'.
 uniqueSymbols.ts(145,12): error TS1005: ',' expected.
-uniqueSymbols.ts(145,12): error TS2304: Cannot find name '('.
 uniqueSymbols.ts(145,13): error TS1005: ',' expected.
-uniqueSymbols.ts(145,13): error TS2304: Cannot find name ')'.
 uniqueSymbols.ts(145,15): error TS1005: ',' expected.
-uniqueSymbols.ts(145,15): error TS2304: Cannot find name '{'.
 uniqueSymbols.ts(145,17): error TS1005: ',' expected.
 uniqueSymbols.ts(145,17): error TS2304: Cannot find name 'return'.
 uniqueSymbols.ts(145,24): error TS1005: ',' expected.
 uniqueSymbols.ts(145,25): error TS1005: ',' expected.
-uniqueSymbols.ts(145,25): error TS2304: Cannot find name ';'.
 uniqueSymbols.ts(146,5): error TS2304: Cannot find name 'async'.
 uniqueSymbols.ts(146,11): error TS1005: ',' expected.
 uniqueSymbols.ts(146,18): error TS1005: ',' expected.
 uniqueSymbols.ts(146,19): error TS1134: Variable declaration expected.
 
 
-==== uniqueSymbols.ts (27 errors) ====
+==== uniqueSymbols.ts (23 errors) ====
     // declarations with call initializer
     const constCall = Symbol();
     let letCall = Symbol();
@@ -199,16 +195,10 @@ uniqueSymbols.ts(146,19): error TS1134: Variable declaration expected.
 !!! error TS2304: Cannot find name 'method1'.
                ~
 !!! error TS1005: ',' expected.
-               ~
-!!! error TS2304: Cannot find name '('.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name ')'.
                   ~
 !!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name '{'.
                     ~~~~~~
 !!! error TS1005: ',' expected.
                     ~~~~~~
@@ -217,8 +207,6 @@ uniqueSymbols.ts(146,19): error TS1134: Variable declaration expected.
 !!! error TS1005: ',' expected.
                             ~
 !!! error TS1005: ',' expected.
-                            ~
-!!! error TS2304: Cannot find name ';'.
         async method2() { return s; },
         ~~~~~
 !!! error TS2304: Cannot find name 'async'.

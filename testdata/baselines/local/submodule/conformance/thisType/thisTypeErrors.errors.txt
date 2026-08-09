@@ -5,34 +5,28 @@ thisTypeErrors.ts(22,5): error TS2564: Property 'd' has no initializer and is no
 thisTypeErrors.ts(23,5): error TS2564: Property 'e' has no initializer and is not definitely assigned in the constructor.
 thisTypeErrors.ts(41,9): error TS2304: Cannot find name 'g'.
 thisTypeErrors.ts(41,10): error TS1005: ',' expected.
-thisTypeErrors.ts(41,10): error TS2304: Cannot find name '('.
 thisTypeErrors.ts(41,11): error TS1005: ',' expected.
 thisTypeErrors.ts(41,18): error TS1005: ',' expected.
 thisTypeErrors.ts(41,26): error TS1005: ',' expected.
-thisTypeErrors.ts(41,26): error TS2304: Cannot find name '{'.
 thisTypeErrors.ts(42,13): error TS1005: ',' expected.
 thisTypeErrors.ts(42,13): error TS2304: Cannot find name 'return'.
 thisTypeErrors.ts(42,20): error TS1005: ',' expected.
 thisTypeErrors.ts(42,29): error TS1005: ',' expected.
-thisTypeErrors.ts(42,29): error TS2304: Cannot find name ';'.
 thisTypeErrors.ts(45,5): error TS2304: Cannot find name 'f'.
 thisTypeErrors.ts(45,9): error TS1005: ';' expected.
 thisTypeErrors.ts(50,13): error TS2304: Cannot find name 'h'.
 thisTypeErrors.ts(50,14): error TS1005: ',' expected.
-thisTypeErrors.ts(50,14): error TS2304: Cannot find name '('.
 thisTypeErrors.ts(50,15): error TS1005: ',' expected.
 thisTypeErrors.ts(50,22): error TS1005: ',' expected.
 thisTypeErrors.ts(50,30): error TS1005: ',' expected.
-thisTypeErrors.ts(50,30): error TS2304: Cannot find name '{'.
 thisTypeErrors.ts(51,17): error TS1005: ',' expected.
 thisTypeErrors.ts(51,17): error TS2304: Cannot find name 'return'.
 thisTypeErrors.ts(51,24): error TS1005: ',' expected.
 thisTypeErrors.ts(51,33): error TS1005: ',' expected.
-thisTypeErrors.ts(51,33): error TS2304: Cannot find name ';'.
 thisTypeErrors.ts(54,5): error TS1128: Declaration or statement expected.
 
 
-==== thisTypeErrors.ts (32 errors) ====
+==== thisTypeErrors.ts (26 errors) ====
     var x1: this;
     var x2: { a: this };
     var x3: this[];
@@ -88,16 +82,12 @@ thisTypeErrors.ts(54,5): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'g'.
              ~
 !!! error TS1005: ',' expected.
-             ~
-!!! error TS2304: Cannot find name '('.
               ~
 !!! error TS1005: ',' expected.
                      ~
 !!! error TS1005: ',' expected.
                              ~
 !!! error TS1005: ',' expected.
-                             ~
-!!! error TS2304: Cannot find name '{'.
                 return undefined;
                 ~~~~~~
 !!! error TS1005: ',' expected.
@@ -107,8 +97,6 @@ thisTypeErrors.ts(54,5): error TS1128: Declaration or statement expected.
 !!! error TS1005: ',' expected.
                                 ~
 !!! error TS1005: ',' expected.
-                                ~
-!!! error TS2304: Cannot find name ';'.
             }
         }
         f() {
@@ -125,16 +113,12 @@ thisTypeErrors.ts(54,5): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'h'.
                  ~
 !!! error TS1005: ',' expected.
-                 ~
-!!! error TS2304: Cannot find name '('.
                   ~
 !!! error TS1005: ',' expected.
                          ~
 !!! error TS1005: ',' expected.
                                  ~
 !!! error TS1005: ',' expected.
-                                 ~
-!!! error TS2304: Cannot find name '{'.
                     return undefined;
                     ~~~~~~
 !!! error TS1005: ',' expected.
@@ -144,8 +128,6 @@ thisTypeErrors.ts(54,5): error TS1128: Declaration or statement expected.
 !!! error TS1005: ',' expected.
                                     ~
 !!! error TS1005: ',' expected.
-                                    ~
-!!! error TS2304: Cannot find name ';'.
                 }
             }
         }

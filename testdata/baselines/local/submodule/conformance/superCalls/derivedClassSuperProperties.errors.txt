@@ -38,7 +38,6 @@ derivedClassSuperProperties.ts(260,9): error TS2349: This expression is not call
 derivedClassSuperProperties.ts(268,13): error TS2304: Cannot find name 'get'.
 derivedClassSuperProperties.ts(268,17): error TS1005: ',' expected.
 derivedClassSuperProperties.ts(268,21): error TS1005: ',' expected.
-derivedClassSuperProperties.ts(268,21): error TS2304: Cannot find name '('.
 derivedClassSuperProperties.ts(268,22): error TS1005: ',' expected.
 derivedClassSuperProperties.ts(268,24): error TS1005: ',' expected.
 derivedClassSuperProperties.ts(269,17): error TS1005: ',' expected.
@@ -46,7 +45,6 @@ derivedClassSuperProperties.ts(269,17): error TS2304: Cannot find name 'return'.
 derivedClassSuperProperties.ts(269,24): error TS1005: ',' expected.
 derivedClassSuperProperties.ts(269,24): error TS2304: Cannot find name 'true'.
 derivedClassSuperProperties.ts(269,28): error TS1005: ',' expected.
-derivedClassSuperProperties.ts(269,28): error TS2304: Cannot find name ';'.
 derivedClassSuperProperties.ts(271,13): error TS2304: Cannot find name 'set'.
 derivedClassSuperProperties.ts(271,17): error TS1005: ',' expected.
 derivedClassSuperProperties.ts(271,21): error TS1005: ',' expected.
@@ -58,7 +56,7 @@ derivedClassSuperProperties.ts(272,30): error TS2304: Cannot find name 'param'.
 derivedClassSuperProperties.ts(274,9): error TS1128: Declaration or statement expected.
 
 
-==== derivedClassSuperProperties.ts (58 errors) ====
+==== derivedClassSuperProperties.ts (56 errors) ====
     declare const decorate: any;
     
     class Base {
@@ -407,8 +405,6 @@ derivedClassSuperProperties.ts(274,9): error TS1128: Declaration or statement ex
 !!! error TS1005: ',' expected.
                         ~
 !!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name '('.
                          ~
 !!! error TS1005: ',' expected.
                            ~
@@ -424,8 +420,6 @@ derivedClassSuperProperties.ts(274,9): error TS1128: Declaration or statement ex
 !!! error TS2304: Cannot find name 'true'.
                                ~
 !!! error TS1005: ',' expected.
-                               ~
-!!! error TS2304: Cannot find name ';'.
                 },
                 set prop(param) {
                 ~~~

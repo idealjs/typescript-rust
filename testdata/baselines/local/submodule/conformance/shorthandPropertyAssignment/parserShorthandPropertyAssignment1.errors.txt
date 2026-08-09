@@ -1,18 +1,12 @@
 parserShorthandPropertyAssignment1.ts(3,11): error TS1005: ',' expected.
-parserShorthandPropertyAssignment1.ts(3,11): error TS2304: Cannot find name '?'.
 parserShorthandPropertyAssignment1.ts(3,16): error TS1005: ',' expected.
-parserShorthandPropertyAssignment1.ts(3,16): error TS2304: Cannot find name '?'.
 
 
-==== parserShorthandPropertyAssignment1.ts (4 errors) ====
+==== parserShorthandPropertyAssignment1.ts (2 errors) ====
     function foo(obj: { name?: string; id: number }) { }
     var name:any, id: any;
     foo({ name?, id? });
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name '?'.
                    ~
 !!! error TS1005: ',' expected.
-                   ~
-!!! error TS2304: Cannot find name '?'.

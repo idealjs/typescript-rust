@@ -3,31 +3,25 @@ objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(6,25): error TS23
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(6,29): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,11): error TS2304: Cannot find name 'foo'.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,14): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,14): error TS2304: Cannot find name '<'.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,15): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,15): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,18): error TS2304: Cannot find name 'U'.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,19): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,19): error TS2304: Cannot find name '>'.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,20): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,20): error TS2304: Cannot find name '('.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,21): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,24): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,30): error TS2304: Cannot find name 'U'.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,31): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,31): error TS2304: Cannot find name ')'.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,33): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,33): error TS2304: Cannot find name '{'.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,35): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,35): error TS2304: Cannot find name 'return'.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,42): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,42): error TS2304: Cannot find name 'x'.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,43): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,43): error TS2304: Cannot find name ';'.
 objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,47): error TS1128: Declaration or statement expected.
 
 
-==== objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts (27 errors) ====
+==== objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts (21 errors) ====
     // Two call or construct signatures are considered identical when they have the same number of type parameters and, considering those 
     // parameters pairwise identical, have identical type parameter constraints, identical number of parameters with identical kind(required, 
     // optional or rest) and types, and identical return types.
@@ -64,8 +58,6 @@ objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,47): error TS1
 !!! error TS2304: Cannot find name 'foo'.
                  ~
 !!! error TS1005: ',' expected.
-                 ~
-!!! error TS2304: Cannot find name '<'.
                   ~
 !!! error TS1005: ',' expected.
                   ~
@@ -74,12 +66,8 @@ objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,47): error TS1
 !!! error TS2304: Cannot find name 'U'.
                       ~
 !!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name '>'.
                        ~
 !!! error TS1005: ',' expected.
-                       ~
-!!! error TS2304: Cannot find name '('.
                         ~
 !!! error TS1005: ',' expected.
                            ~
@@ -88,12 +76,8 @@ objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,47): error TS1
 !!! error TS2304: Cannot find name 'U'.
                                   ~
 !!! error TS1005: ',' expected.
-                                  ~
-!!! error TS2304: Cannot find name ')'.
                                     ~
 !!! error TS1005: ',' expected.
-                                    ~
-!!! error TS2304: Cannot find name '{'.
                                       ~~~~~~
 !!! error TS1005: ',' expected.
                                       ~~~~~~
@@ -104,8 +88,6 @@ objectTypesIdentityWithGenericCallSignaturesOptionalParams3.ts(26,47): error TS1
 !!! error TS2304: Cannot find name 'x'.
                                               ~
 !!! error TS1005: ',' expected.
-                                              ~
-!!! error TS2304: Cannot find name ';'.
                                                   ~
 !!! error TS1128: Declaration or statement expected.
     

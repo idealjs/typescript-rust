@@ -1,14 +1,11 @@
 uniqueSymbolsDeclarationsErrors.ts(7,5): error TS2304: Cannot find name 'method1'.
 uniqueSymbolsDeclarationsErrors.ts(7,12): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(7,12): error TS2304: Cannot find name '('.
 uniqueSymbolsDeclarationsErrors.ts(7,13): error TS1005: ',' expected.
 uniqueSymbolsDeclarationsErrors.ts(7,24): error TS1005: ',' expected.
 uniqueSymbolsDeclarationsErrors.ts(7,36): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(7,36): error TS2304: Cannot find name '{'.
 uniqueSymbolsDeclarationsErrors.ts(8,9): error TS1005: ',' expected.
 uniqueSymbolsDeclarationsErrors.ts(8,16): error TS1005: ',' expected.
 uniqueSymbolsDeclarationsErrors.ts(8,17): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(8,17): error TS2304: Cannot find name ';'.
 uniqueSymbolsDeclarationsErrors.ts(10,5): error TS2304: Cannot find name 'method2'.
 uniqueSymbolsDeclarationsErrors.ts(10,14): error TS1005: ',' expected.
 uniqueSymbolsDeclarationsErrors.ts(10,16): error TS2448: Block-scoped variable 'I' used before its declaration.
@@ -22,7 +19,7 @@ uniqueSymbolsDeclarationsErrors.ts(11,17): error TS1005: ',' expected.
 uniqueSymbolsDeclarationsErrors.ts(13,1): error TS1128: Declaration or statement expected.
 
 
-==== uniqueSymbolsDeclarationsErrors.ts (22 errors) ====
+==== uniqueSymbolsDeclarationsErrors.ts (19 errors) ====
     declare const s: unique symbol;
     interface I { readonly readonlyType: unique symbol; }
     
@@ -34,16 +31,12 @@ uniqueSymbolsDeclarationsErrors.ts(13,1): error TS1128: Declaration or statement
 !!! error TS2304: Cannot find name 'method1'.
                ~
 !!! error TS1005: ',' expected.
-               ~
-!!! error TS2304: Cannot find name '('.
                 ~
 !!! error TS1005: ',' expected.
                            ~
 !!! error TS1005: ',' expected.
                                        ~
 !!! error TS1005: ',' expected.
-                                       ~
-!!! error TS2304: Cannot find name '{'.
             return p;
             ~~~~~~
 !!! error TS1005: ',' expected.
@@ -51,8 +44,6 @@ uniqueSymbolsDeclarationsErrors.ts(13,1): error TS1128: Declaration or statement
 !!! error TS1005: ',' expected.
                     ~
 !!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name ';'.
         },
         method2(p: I["readonlyType"]): I["readonlyType"] {
         ~~~~~~~

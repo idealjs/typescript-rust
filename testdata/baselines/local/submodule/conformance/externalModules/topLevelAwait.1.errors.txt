@@ -2,15 +2,12 @@ index.ts(24,9): error TS1005: ';' expected.
 index.ts(25,9): error TS1005: ';' expected.
 index.ts(31,5): error TS2304: Cannot find name 'await'.
 index.ts(31,10): error TS1005: ',' expected.
-index.ts(31,10): error TS2304: Cannot find name '('.
 index.ts(31,11): error TS1005: ',' expected.
-index.ts(31,11): error TS2304: Cannot find name ')'.
 index.ts(31,13): error TS1005: ',' expected.
-index.ts(31,13): error TS2304: Cannot find name '{'.
 index.ts(32,1): error TS1005: ')' expected.
 
 
-==== index.ts (10 errors) ====
+==== index.ts (7 errors) ====
     export const x = 1;
     await x;
     
@@ -50,16 +47,10 @@ index.ts(32,1): error TS1005: ')' expected.
 !!! error TS2304: Cannot find name 'await'.
              ~
 !!! error TS1005: ',' expected.
-             ~
-!!! error TS2304: Cannot find name '('.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name ')'.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name '{'.
     });
     ~
 !!! error TS1005: ')' expected.

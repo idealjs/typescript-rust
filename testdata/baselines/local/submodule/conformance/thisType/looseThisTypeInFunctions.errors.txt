@@ -1,22 +1,19 @@
 looseThisTypeInFunctions.ts(27,5): error TS2304: Cannot find name 'implicitThis'.
 looseThisTypeInFunctions.ts(27,17): error TS1005: ',' expected.
-looseThisTypeInFunctions.ts(27,17): error TS2304: Cannot find name '('.
 looseThisTypeInFunctions.ts(27,18): error TS1005: ',' expected.
 looseThisTypeInFunctions.ts(27,21): error TS2304: Cannot find name 'number'.
 looseThisTypeInFunctions.ts(27,27): error TS1005: ',' expected.
 looseThisTypeInFunctions.ts(27,30): error TS2304: Cannot find name 'number'.
 looseThisTypeInFunctions.ts(27,37): error TS1005: ',' expected.
-looseThisTypeInFunctions.ts(27,37): error TS2304: Cannot find name '{'.
 looseThisTypeInFunctions.ts(27,39): error TS1005: ',' expected.
 looseThisTypeInFunctions.ts(27,39): error TS2304: Cannot find name 'return'.
 looseThisTypeInFunctions.ts(27,46): error TS1005: ',' expected.
 looseThisTypeInFunctions.ts(27,46): error TS2304: Cannot find name 'm'.
 looseThisTypeInFunctions.ts(27,47): error TS1005: ',' expected.
-looseThisTypeInFunctions.ts(27,47): error TS2304: Cannot find name ';'.
 looseThisTypeInFunctions.ts(28,1): error TS1128: Declaration or statement expected.
 
 
-==== looseThisTypeInFunctions.ts (16 errors) ====
+==== looseThisTypeInFunctions.ts (13 errors) ====
     interface I {
         n: number;
         explicitThis(this: this, m: number): number;
@@ -48,8 +45,6 @@ looseThisTypeInFunctions.ts(28,1): error TS1128: Declaration or statement expect
 !!! error TS2304: Cannot find name 'implicitThis'.
                     ~
 !!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name '('.
                      ~
 !!! error TS1005: ',' expected.
                         ~~~~~~
@@ -60,8 +55,6 @@ looseThisTypeInFunctions.ts(28,1): error TS1128: Declaration or statement expect
 !!! error TS2304: Cannot find name 'number'.
                                         ~
 !!! error TS1005: ',' expected.
-                                        ~
-!!! error TS2304: Cannot find name '{'.
                                           ~~~~~~
 !!! error TS1005: ',' expected.
                                           ~~~~~~
@@ -72,8 +65,6 @@ looseThisTypeInFunctions.ts(28,1): error TS1128: Declaration or statement expect
 !!! error TS2304: Cannot find name 'm'.
                                                   ~
 !!! error TS1005: ',' expected.
-                                                  ~
-!!! error TS2304: Cannot find name ';'.
     };
     ~
 !!! error TS1128: Declaration or statement expected.

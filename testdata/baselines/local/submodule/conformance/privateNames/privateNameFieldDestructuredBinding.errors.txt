@@ -25,7 +25,6 @@ privateNameFieldDestructuredBinding.ts(16,20): error TS1003: Identifier expected
 privateNameFieldDestructuredBinding.ts(16,20): error TS1127: Invalid character.
 privateNameFieldDestructuredBinding.ts(16,21): error TS1005: ',' expected.
 privateNameFieldDestructuredBinding.ts(16,27): error TS1005: ',' expected.
-privateNameFieldDestructuredBinding.ts(16,27): error TS2304: Cannot find name '='.
 privateNameFieldDestructuredBinding.ts(16,29): error TS1005: ',' expected.
 privateNameFieldDestructuredBinding.ts(16,41): error TS1003: Identifier expected.
 privateNameFieldDestructuredBinding.ts(16,41): error TS1127: Invalid character.
@@ -41,7 +40,7 @@ privateNameFieldDestructuredBinding.ts(21,13): error TS1127: Invalid character.
 privateNameFieldDestructuredBinding.ts(21,14): error TS1005: ',' expected.
 
 
-==== privateNameFieldDestructuredBinding.ts (41 errors) ====
+==== privateNameFieldDestructuredBinding.ts (40 errors) ====
     class A {
         #field = 1;
         ~
@@ -112,8 +111,6 @@ privateNameFieldDestructuredBinding.ts(21,14): error TS1005: ',' expected.
 !!! error TS1005: ',' expected.
                               ~
 !!! error TS1005: ',' expected.
-                              ~
-!!! error TS2304: Cannot find name '='.
                                 ~
 !!! error TS1005: ',' expected.
                                             ~

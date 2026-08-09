@@ -1,21 +1,17 @@
 objectTypesIdentityWithCallSignatures2.ts(24,11): error TS2304: Cannot find name 'foo'.
 objectTypesIdentityWithCallSignatures2.ts(24,14): error TS1005: ',' expected.
-objectTypesIdentityWithCallSignatures2.ts(24,14): error TS2304: Cannot find name '('.
 objectTypesIdentityWithCallSignatures2.ts(24,15): error TS1005: ',' expected.
 objectTypesIdentityWithCallSignatures2.ts(24,18): error TS2304: Cannot find name 'RegExp'.
 objectTypesIdentityWithCallSignatures2.ts(24,24): error TS1005: ',' expected.
-objectTypesIdentityWithCallSignatures2.ts(24,24): error TS2304: Cannot find name ')'.
 objectTypesIdentityWithCallSignatures2.ts(24,26): error TS1005: ',' expected.
-objectTypesIdentityWithCallSignatures2.ts(24,26): error TS2304: Cannot find name '{'.
 objectTypesIdentityWithCallSignatures2.ts(24,28): error TS1005: ',' expected.
 objectTypesIdentityWithCallSignatures2.ts(24,28): error TS2304: Cannot find name 'return'.
 objectTypesIdentityWithCallSignatures2.ts(24,35): error TS1005: ',' expected.
 objectTypesIdentityWithCallSignatures2.ts(24,37): error TS1005: ',' expected.
-objectTypesIdentityWithCallSignatures2.ts(24,37): error TS2304: Cannot find name ';'.
 objectTypesIdentityWithCallSignatures2.ts(24,41): error TS1128: Declaration or statement expected.
 
 
-==== objectTypesIdentityWithCallSignatures2.ts (15 errors) ====
+==== objectTypesIdentityWithCallSignatures2.ts (11 errors) ====
     // object types are identical structurally
     
     class A {
@@ -44,20 +40,14 @@ objectTypesIdentityWithCallSignatures2.ts(24,41): error TS1128: Declaration or s
 !!! error TS2304: Cannot find name 'foo'.
                  ~
 !!! error TS1005: ',' expected.
-                 ~
-!!! error TS2304: Cannot find name '('.
                   ~
 !!! error TS1005: ',' expected.
                      ~~~~~~
 !!! error TS2304: Cannot find name 'RegExp'.
                            ~
 !!! error TS1005: ',' expected.
-                           ~
-!!! error TS2304: Cannot find name ')'.
                              ~
 !!! error TS1005: ',' expected.
-                             ~
-!!! error TS2304: Cannot find name '{'.
                                ~~~~~~
 !!! error TS1005: ',' expected.
                                ~~~~~~
@@ -66,8 +56,6 @@ objectTypesIdentityWithCallSignatures2.ts(24,41): error TS1128: Declaration or s
 !!! error TS1005: ',' expected.
                                         ~
 !!! error TS1005: ',' expected.
-                                        ~
-!!! error TS2304: Cannot find name ';'.
                                             ~
 !!! error TS1128: Declaration or statement expected.
     

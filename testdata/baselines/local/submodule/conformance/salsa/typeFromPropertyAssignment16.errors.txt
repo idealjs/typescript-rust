@@ -2,15 +2,12 @@ a.js(3,7): error TS2339: Property 'Inner' does not exist on type 'object'.
 a.js(4,7): error TS2339: Property 'Inner' does not exist on type 'object'.
 a.js(6,5): error TS2304: Cannot find name 'm'.
 a.js(6,6): error TS1005: ',' expected.
-a.js(6,6): error TS2304: Cannot find name '('.
 a.js(6,7): error TS1005: ',' expected.
-a.js(6,7): error TS2304: Cannot find name ')'.
 a.js(6,9): error TS1005: ',' expected.
-a.js(6,9): error TS2304: Cannot find name '{'.
 a.js(7,1): error TS1128: Declaration or statement expected.
 
 
-==== a.js (10 errors) ====
+==== a.js (7 errors) ====
     var Outer = {};
     
     Outer.Inner = function () {}
@@ -25,16 +22,10 @@ a.js(7,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'm'.
          ~
 !!! error TS1005: ',' expected.
-         ~
-!!! error TS2304: Cannot find name '('.
           ~
 !!! error TS1005: ',' expected.
-          ~
-!!! error TS2304: Cannot find name ')'.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name '{'.
     }
     ~
 !!! error TS1128: Declaration or statement expected.

@@ -1,14 +1,11 @@
 computedPropertyNames29_ES5.ts(5,29): error TS1005: ',' expected.
-computedPropertyNames29_ES5.ts(5,29): error TS2304: Cannot find name '('.
 computedPropertyNames29_ES5.ts(5,30): error TS1005: ',' expected.
-computedPropertyNames29_ES5.ts(5,30): error TS2304: Cannot find name ')'.
 computedPropertyNames29_ES5.ts(5,32): error TS1005: ',' expected.
-computedPropertyNames29_ES5.ts(5,32): error TS2304: Cannot find name '{'.
 computedPropertyNames29_ES5.ts(8,16): error TS1005: ';' expected.
 computedPropertyNames29_ES5.ts(10,1): error TS1128: Declaration or statement expected.
 
 
-==== computedPropertyNames29_ES5.ts (8 errors) ====
+==== computedPropertyNames29_ES5.ts (5 errors) ====
     class C {
         bar() {
             () => {
@@ -16,16 +13,10 @@ computedPropertyNames29_ES5.ts(10,1): error TS1128: Declaration or statement exp
                     [this.bar()]() { } // needs capture
                                 ~
 !!! error TS1005: ',' expected.
-                                ~
-!!! error TS2304: Cannot find name '('.
                                  ~
 !!! error TS1005: ',' expected.
-                                 ~
-!!! error TS2304: Cannot find name ')'.
                                    ~
 !!! error TS1005: ',' expected.
-                                   ~
-!!! error TS2304: Cannot find name '{'.
                 };
             }
             return 0;

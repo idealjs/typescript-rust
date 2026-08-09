@@ -3,21 +3,17 @@ throwInEnclosingStatements.ts(16,14): error TS1005: '>' expected.
 throwInEnclosingStatements.ts(27,13): error TS1005: '>' expected.
 throwInEnclosingStatements.ts(42,5): error TS2304: Cannot find name 'biz'.
 throwInEnclosingStatements.ts(42,8): error TS1005: ',' expected.
-throwInEnclosingStatements.ts(42,8): error TS2304: Cannot find name '('.
 throwInEnclosingStatements.ts(42,9): error TS1005: ',' expected.
-throwInEnclosingStatements.ts(42,9): error TS2304: Cannot find name ')'.
 throwInEnclosingStatements.ts(42,11): error TS1005: ',' expected.
-throwInEnclosingStatements.ts(42,11): error TS2304: Cannot find name '{'.
 throwInEnclosingStatements.ts(43,9): error TS1005: ',' expected.
 throwInEnclosingStatements.ts(43,9): error TS2304: Cannot find name 'throw'.
 throwInEnclosingStatements.ts(43,15): error TS1005: ',' expected.
 throwInEnclosingStatements.ts(43,15): error TS2304: Cannot find name 'this'.
 throwInEnclosingStatements.ts(43,19): error TS1005: ',' expected.
-throwInEnclosingStatements.ts(43,19): error TS2304: Cannot find name ';'.
 throwInEnclosingStatements.ts(45,1): error TS1128: Declaration or statement expected.
 
 
-==== throwInEnclosingStatements.ts (17 errors) ====
+==== throwInEnclosingStatements.ts (13 errors) ====
     function fn(x) {
         throw x;
     }
@@ -70,16 +66,10 @@ throwInEnclosingStatements.ts(45,1): error TS1128: Declaration or statement expe
 !!! error TS2304: Cannot find name 'biz'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name ')'.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name '{'.
             throw this;
             ~~~~~
 !!! error TS1005: ',' expected.
@@ -91,8 +81,6 @@ throwInEnclosingStatements.ts(45,1): error TS1128: Declaration or statement expe
 !!! error TS2304: Cannot find name 'this'.
                       ~
 !!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name ';'.
         }
     }
     ~

@@ -1,30 +1,23 @@
 bug25926.js(3,5): error TS2304: Cannot find name 'a'.
 bug25926.js(3,6): error TS1005: ',' expected.
-bug25926.js(3,6): error TS2304: Cannot find name '('.
 bug25926.js(3,7): error TS1005: ',' expected.
-bug25926.js(3,7): error TS2304: Cannot find name ')'.
 bug25926.js(3,9): error TS1005: ',' expected.
-bug25926.js(3,9): error TS2304: Cannot find name '{'.
 bug25926.js(4,9): error TS1005: ',' expected.
 bug25926.js(4,9): error TS2304: Cannot find name 'this'.
 bug25926.js(4,13): error TS1005: ',' expected.
-bug25926.js(4,13): error TS2304: Cannot find name '.'.
 bug25926.js(4,14): error TS1005: ',' expected.
 bug25926.js(4,14): error TS2304: Cannot find name 'b'.
 bug25926.js(4,16): error TS1005: ',' expected.
-bug25926.js(4,16): error TS2304: Cannot find name '='.
 bug25926.js(4,18): error TS1005: ',' expected.
 bug25926.js(4,18): error TS2304: Cannot find name 'n'.
 bug25926.js(4,20): error TS1005: ',' expected.
-bug25926.js(4,20): error TS2304: Cannot find name '=>'.
 bug25926.js(4,23): error TS1005: ',' expected.
 bug25926.js(4,23): error TS2304: Cannot find name 'n'.
 bug25926.js(4,24): error TS1005: ',' expected.
-bug25926.js(4,24): error TS2304: Cannot find name ';'.
 bug25926.js(6,1): error TS1128: Declaration or statement expected.
 
 
-==== bug25926.js (24 errors) ====
+==== bug25926.js (17 errors) ====
     /** @type {{ a(): void; b?(n: number): number; }} */
     const o1 = {
         a() {
@@ -32,16 +25,10 @@ bug25926.js(6,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'a'.
          ~
 !!! error TS1005: ',' expected.
-         ~
-!!! error TS2304: Cannot find name '('.
           ~
 !!! error TS1005: ',' expected.
-          ~
-!!! error TS2304: Cannot find name ')'.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name '{'.
             this.b = n => n;
             ~~~~
 !!! error TS1005: ',' expected.
@@ -49,32 +36,24 @@ bug25926.js(6,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'this'.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name '.'.
                  ~
 !!! error TS1005: ',' expected.
                  ~
 !!! error TS2304: Cannot find name 'b'.
                    ~
 !!! error TS1005: ',' expected.
-                   ~
-!!! error TS2304: Cannot find name '='.
                      ~
 !!! error TS1005: ',' expected.
                      ~
 !!! error TS2304: Cannot find name 'n'.
                        ~~
 !!! error TS1005: ',' expected.
-                       ~~
-!!! error TS2304: Cannot find name '=>'.
                           ~
 !!! error TS1005: ',' expected.
                           ~
 !!! error TS2304: Cannot find name 'n'.
                            ~
 !!! error TS1005: ',' expected.
-                           ~
-!!! error TS2304: Cannot find name ';'.
         }
     };
     ~

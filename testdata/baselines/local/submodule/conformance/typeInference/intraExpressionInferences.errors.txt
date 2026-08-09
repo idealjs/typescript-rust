@@ -2,23 +2,19 @@ intraExpressionInferences.ts(8,8): error TS2345: Argument of type '{ produce: ()
 intraExpressionInferences.ts(13,8): error TS2345: Argument of type '{ produce: (_a: number) => number; consume: (n: T) => any }' is not assignable to parameter of type '{ produce: (n: number) => T; consume: (x: T) => void }'.
 intraExpressionInferences.ts(19,5): error TS2304: Cannot find name 'produce'.
 intraExpressionInferences.ts(19,12): error TS1005: ',' expected.
-intraExpressionInferences.ts(19,12): error TS2304: Cannot find name '('.
 intraExpressionInferences.ts(19,13): error TS1005: ',' expected.
-intraExpressionInferences.ts(19,13): error TS2304: Cannot find name ')'.
 intraExpressionInferences.ts(19,15): error TS1005: ',' expected.
-intraExpressionInferences.ts(19,15): error TS2304: Cannot find name '{'.
 intraExpressionInferences.ts(20,9): error TS1005: ',' expected.
 intraExpressionInferences.ts(20,9): error TS2304: Cannot find name 'return'.
 intraExpressionInferences.ts(20,16): error TS1005: ',' expected.
 intraExpressionInferences.ts(20,17): error TS1005: ',' expected.
-intraExpressionInferences.ts(20,17): error TS2304: Cannot find name ';'.
 intraExpressionInferences.ts(22,5): error TS2304: Cannot find name 'consume'.
 intraExpressionInferences.ts(22,5): error TS2554: Expected 1 arguments, but got 3.
 intraExpressionInferences.ts(22,12): error TS1005: ',' expected.
 intraExpressionInferences.ts(23,1): error TS1005: ',' expected.
 
 
-==== intraExpressionInferences.ts (18 errors) ====
+==== intraExpressionInferences.ts (14 errors) ====
     // Repros from #47599
     
     declare function callIt<T>(obj: {
@@ -52,16 +48,10 @@ intraExpressionInferences.ts(23,1): error TS1005: ',' expected.
 !!! error TS2304: Cannot find name 'produce'.
                ~
 !!! error TS1005: ',' expected.
-               ~
-!!! error TS2304: Cannot find name '('.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name ')'.
                   ~
 !!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name '{'.
             return 0;
             ~~~~~~
 !!! error TS1005: ',' expected.
@@ -71,8 +61,6 @@ intraExpressionInferences.ts(23,1): error TS1005: ',' expected.
 !!! error TS1005: ',' expected.
                     ~
 !!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name ';'.
         },
         consume: n => n.toFixed()
         ~~~~~~~

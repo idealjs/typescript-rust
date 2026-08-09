@@ -4,20 +4,17 @@ test.js(11,5): error TS2349: This expression is not callable.
 test.js(12,5): error TS2349: This expression is not callable.
 test.js(15,3): error TS2304: Cannot find name 'm'.
 test.js(15,4): error TS1005: ',' expected.
-test.js(15,4): error TS2304: Cannot find name '('.
 test.js(15,5): error TS1005: ',' expected.
 test.js(15,5): error TS2448: Block-scoped variable 'x' used before its declaration.
 test.js(15,6): error TS1005: ',' expected.
-test.js(15,6): error TS2304: Cannot find name ')'.
 test.js(15,8): error TS1005: ',' expected.
-test.js(15,8): error TS2304: Cannot find name '{'.
 test.js(16,3): error TS2304: Cannot find name 'p'.
 test.js(16,4): error TS1005: ',' expected.
 test.js(16,8): error TS1005: ';' expected.
 test.js(17,1): error TS1128: Declaration or statement expected.
 
 
-==== test.js (17 errors) ====
+==== test.js (14 errors) ====
     function f(x) {}
     f(); // Always been ok
     ~
@@ -45,20 +42,14 @@ test.js(17,1): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'm'.
        ~
 !!! error TS1005: ',' expected.
-       ~
-!!! error TS2304: Cannot find name '('.
         ~
 !!! error TS1005: ',' expected.
         ~
 !!! error TS2448: Block-scoped variable 'x' used before its declaration.
          ~
 !!! error TS1005: ',' expected.
-         ~
-!!! error TS2304: Cannot find name ')'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '{'.
       p: x => {}
       ~
 !!! error TS2304: Cannot find name 'p'.

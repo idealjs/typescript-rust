@@ -1,31 +1,22 @@
 computedPropertyNames22_ES6.ts(4,25): error TS1005: ',' expected.
-computedPropertyNames22_ES6.ts(4,25): error TS2304: Cannot find name '('.
 computedPropertyNames22_ES6.ts(4,26): error TS1005: ',' expected.
-computedPropertyNames22_ES6.ts(4,26): error TS2304: Cannot find name ')'.
 computedPropertyNames22_ES6.ts(4,28): error TS1005: ',' expected.
-computedPropertyNames22_ES6.ts(4,28): error TS2304: Cannot find name '{'.
 computedPropertyNames22_ES6.ts(5,10): error TS1003: Identifier expected.
 computedPropertyNames22_ES6.ts(6,16): error TS1005: ';' expected.
 computedPropertyNames22_ES6.ts(8,1): error TS1128: Declaration or statement expected.
 
 
-==== computedPropertyNames22_ES6.ts (9 errors) ====
+==== computedPropertyNames22_ES6.ts (6 errors) ====
     class C {
         bar() {
             var obj = {
                 [this.bar()]() { }
                             ~
 !!! error TS1005: ',' expected.
-                            ~
-!!! error TS2304: Cannot find name '('.
                              ~
 !!! error TS1005: ',' expected.
-                             ~
-!!! error TS2304: Cannot find name ')'.
                                ~
 !!! error TS1005: ',' expected.
-                               ~
-!!! error TS2304: Cannot find name '{'.
             };
              ~
 !!! error TS1003: Identifier expected.

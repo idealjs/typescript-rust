@@ -1,15 +1,12 @@
 parserComputedPropertyName4.ts(1,11): error TS2304: Cannot find name 'get'.
 parserComputedPropertyName4.ts(1,15): error TS1005: ',' expected.
 parserComputedPropertyName4.ts(1,18): error TS1005: ',' expected.
-parserComputedPropertyName4.ts(1,18): error TS2304: Cannot find name '('.
 parserComputedPropertyName4.ts(1,19): error TS1005: ',' expected.
-parserComputedPropertyName4.ts(1,19): error TS2304: Cannot find name ')'.
 parserComputedPropertyName4.ts(1,21): error TS1005: ',' expected.
-parserComputedPropertyName4.ts(1,21): error TS2304: Cannot find name '{'.
 parserComputedPropertyName4.ts(1,25): error TS1128: Declaration or statement expected.
 
 
-==== parserComputedPropertyName4.ts (9 errors) ====
+==== parserComputedPropertyName4.ts (6 errors) ====
     var v = { get [e]() { } };
               ~~~
 !!! error TS2304: Cannot find name 'get'.
@@ -17,15 +14,9 @@ parserComputedPropertyName4.ts(1,25): error TS1128: Declaration or statement exp
 !!! error TS1005: ',' expected.
                      ~
 !!! error TS1005: ',' expected.
-                     ~
-!!! error TS2304: Cannot find name '('.
                       ~
 !!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name ')'.
                         ~
 !!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name '{'.
                             ~
 !!! error TS1128: Declaration or statement expected.

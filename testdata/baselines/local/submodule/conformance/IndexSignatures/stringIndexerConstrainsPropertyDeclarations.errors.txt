@@ -6,23 +6,19 @@ stringIndexerConstrainsPropertyDeclarations.ts(36,16): error TS1005: ';' expecte
 stringIndexerConstrainsPropertyDeclarations.ts(90,5): error TS2304: Cannot find name 'get'.
 stringIndexerConstrainsPropertyDeclarations.ts(90,9): error TS1005: ',' expected.
 stringIndexerConstrainsPropertyDeclarations.ts(90,10): error TS1005: ',' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(90,10): error TS2304: Cannot find name '('.
 stringIndexerConstrainsPropertyDeclarations.ts(90,11): error TS1005: ',' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(90,11): error TS2304: Cannot find name ')'.
 stringIndexerConstrainsPropertyDeclarations.ts(90,13): error TS1005: ',' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(90,13): error TS2304: Cannot find name '{'.
 stringIndexerConstrainsPropertyDeclarations.ts(91,9): error TS1005: ',' expected.
 stringIndexerConstrainsPropertyDeclarations.ts(91,9): error TS2304: Cannot find name 'return'.
 stringIndexerConstrainsPropertyDeclarations.ts(91,16): error TS1005: ',' expected.
 stringIndexerConstrainsPropertyDeclarations.ts(91,18): error TS1005: ',' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(91,18): error TS2304: Cannot find name ';'.
 stringIndexerConstrainsPropertyDeclarations.ts(93,5): error TS2304: Cannot find name 'set'.
 stringIndexerConstrainsPropertyDeclarations.ts(93,9): error TS1005: ',' expected.
 stringIndexerConstrainsPropertyDeclarations.ts(93,10): error TS1005: ',' expected.
 stringIndexerConstrainsPropertyDeclarations.ts(93,12): error TS1005: ',' expected.
 
 
-==== stringIndexerConstrainsPropertyDeclarations.ts (22 errors) ====
+==== stringIndexerConstrainsPropertyDeclarations.ts (18 errors) ====
     // String indexer types constrain the types of named properties in their containing type
     
     interface MyString extends String {
@@ -129,16 +125,10 @@ stringIndexerConstrainsPropertyDeclarations.ts(93,12): error TS1005: ',' expecte
 !!! error TS1005: ',' expected.
              ~
 !!! error TS1005: ',' expected.
-             ~
-!!! error TS2304: Cannot find name '('.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name ')'.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name '{'.
             return '';
             ~~~~~~
 !!! error TS1005: ',' expected.
@@ -148,8 +138,6 @@ stringIndexerConstrainsPropertyDeclarations.ts(93,12): error TS1005: ',' expecte
 !!! error TS1005: ',' expected.
                      ~
 !!! error TS1005: ',' expected.
-                     ~
-!!! error TS2304: Cannot find name ';'.
         },
         set X(v) { }, 
         ~~~

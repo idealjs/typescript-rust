@@ -1,9 +1,6 @@
 symbolProperty5.ts(3,25): error TS1005: ',' expected.
-symbolProperty5.ts(3,25): error TS2304: Cannot find name '('.
 symbolProperty5.ts(3,26): error TS1005: ',' expected.
-symbolProperty5.ts(3,26): error TS2304: Cannot find name ')'.
 symbolProperty5.ts(3,28): error TS1005: ',' expected.
-symbolProperty5.ts(3,28): error TS2304: Cannot find name '{'.
 symbolProperty5.ts(4,5): error TS2304: Cannot find name 'get'.
 symbolProperty5.ts(4,32): error TS1005: ',' expected.
 symbolProperty5.ts(4,32): error TS1182: A destructuring declaration must have an initializer.
@@ -12,22 +9,16 @@ symbolProperty5.ts(5,17): error TS1005: ':' expected.
 symbolProperty5.ts(7,1): error TS1128: Declaration or statement expected.
 
 
-==== symbolProperty5.ts (12 errors) ====
+==== symbolProperty5.ts (9 errors) ====
     var x = {
         [Symbol.iterator]: 0,
         [Symbol.toPrimitive]() { },
                             ~
 !!! error TS1005: ',' expected.
-                            ~
-!!! error TS2304: Cannot find name '('.
                              ~
 !!! error TS1005: ',' expected.
-                             ~
-!!! error TS2304: Cannot find name ')'.
                                ~
 !!! error TS1005: ',' expected.
-                               ~
-!!! error TS2304: Cannot find name '{'.
         get [Symbol.toStringTag]() {
         ~~~
 !!! error TS2304: Cannot find name 'get'.

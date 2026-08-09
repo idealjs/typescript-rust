@@ -2,11 +2,8 @@ accessorsOverrideProperty8.ts(15,5): error TS2304: Cannot find name 'get'.
 accessorsOverrideProperty8.ts(15,9): error TS1005: ',' expected.
 accessorsOverrideProperty8.ts(15,9): error TS2304: Cannot find name 'x'.
 accessorsOverrideProperty8.ts(15,10): error TS1005: ',' expected.
-accessorsOverrideProperty8.ts(15,10): error TS2304: Cannot find name '('.
 accessorsOverrideProperty8.ts(15,11): error TS1005: ',' expected.
-accessorsOverrideProperty8.ts(15,11): error TS2304: Cannot find name ')'.
 accessorsOverrideProperty8.ts(15,13): error TS1005: ',' expected.
-accessorsOverrideProperty8.ts(15,13): error TS2304: Cannot find name '{'.
 accessorsOverrideProperty8.ts(15,15): error TS1005: ',' expected.
 accessorsOverrideProperty8.ts(15,15): error TS2304: Cannot find name 'return'.
 accessorsOverrideProperty8.ts(15,22): error TS1005: ',' expected.
@@ -20,7 +17,7 @@ accessorsOverrideProperty8.ts(16,8): error TS2554: Expected 2 arguments, but got
 accessorsOverrideProperty8.ts(17,1): error TS1135: Argument expression expected.
 
 
-==== accessorsOverrideProperty8.ts (20 errors) ====
+==== accessorsOverrideProperty8.ts (17 errors) ====
     type Types = 'boolean' | 'unknown' | 'string';
     
     type Properties<T extends { [key: string]: Types }> = {
@@ -44,16 +41,10 @@ accessorsOverrideProperty8.ts(17,1): error TS1135: Argument expression expected.
 !!! error TS2304: Cannot find name 'x'.
              ~
 !!! error TS1005: ',' expected.
-             ~
-!!! error TS2304: Cannot find name '('.
               ~
 !!! error TS1005: ',' expected.
-              ~
-!!! error TS2304: Cannot find name ')'.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name '{'.
                   ~~~~~~
 !!! error TS1005: ',' expected.
                   ~~~~~~

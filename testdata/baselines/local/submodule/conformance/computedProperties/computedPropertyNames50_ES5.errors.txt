@@ -2,32 +2,24 @@ computedPropertyNames50_ES5.ts(3,5): error TS2304: Cannot find name 'get'.
 computedPropertyNames50_ES5.ts(3,9): error TS1005: ',' expected.
 computedPropertyNames50_ES5.ts(3,9): error TS2304: Cannot find name 'foo'.
 computedPropertyNames50_ES5.ts(3,12): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(3,12): error TS2304: Cannot find name '('.
 computedPropertyNames50_ES5.ts(3,13): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(3,13): error TS2304: Cannot find name ')'.
 computedPropertyNames50_ES5.ts(3,15): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(3,15): error TS2304: Cannot find name '{'.
 computedPropertyNames50_ES5.ts(4,9): error TS1005: ',' expected.
 computedPropertyNames50_ES5.ts(4,9): error TS2304: Cannot find name 'if'.
 computedPropertyNames50_ES5.ts(4,12): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(4,12): error TS2304: Cannot find name '('.
 computedPropertyNames50_ES5.ts(4,13): error TS1005: ',' expected.
 computedPropertyNames50_ES5.ts(4,15): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(4,15): error TS2304: Cannot find name '=='.
 computedPropertyNames50_ES5.ts(4,18): error TS1005: ',' expected.
 computedPropertyNames50_ES5.ts(4,19): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(4,19): error TS2304: Cannot find name ')'.
 computedPropertyNames50_ES5.ts(4,21): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(4,21): error TS2304: Cannot find name '{'.
 computedPropertyNames50_ES5.ts(5,13): error TS1005: ',' expected.
 computedPropertyNames50_ES5.ts(5,13): error TS2304: Cannot find name 'return'.
 computedPropertyNames50_ES5.ts(5,20): error TS1005: ',' expected.
 computedPropertyNames50_ES5.ts(5,22): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(5,22): error TS2304: Cannot find name ';'.
 computedPropertyNames50_ES5.ts(7,5): error TS1128: Declaration or statement expected.
 
 
-==== computedPropertyNames50_ES5.ts (27 errors) ====
+==== computedPropertyNames50_ES5.ts (19 errors) ====
     var x = {
         p1: 10,
         get foo() {
@@ -39,16 +31,10 @@ computedPropertyNames50_ES5.ts(7,5): error TS1128: Declaration or statement expe
 !!! error TS2304: Cannot find name 'foo'.
                ~
 !!! error TS1005: ',' expected.
-               ~
-!!! error TS2304: Cannot find name '('.
                 ~
 !!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name ')'.
                   ~
 !!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name '{'.
             if (1 == 1) {
             ~~
 !!! error TS1005: ',' expected.
@@ -56,24 +42,16 @@ computedPropertyNames50_ES5.ts(7,5): error TS1128: Declaration or statement expe
 !!! error TS2304: Cannot find name 'if'.
                ~
 !!! error TS1005: ',' expected.
-               ~
-!!! error TS2304: Cannot find name '('.
                 ~
 !!! error TS1005: ',' expected.
                   ~~
 !!! error TS1005: ',' expected.
-                  ~~
-!!! error TS2304: Cannot find name '=='.
                      ~
 !!! error TS1005: ',' expected.
                       ~
 !!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name ')'.
                         ~
 !!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name '{'.
                 return 10;
                 ~~~~~~
 !!! error TS1005: ',' expected.
@@ -83,8 +61,6 @@ computedPropertyNames50_ES5.ts(7,5): error TS1128: Declaration or statement expe
 !!! error TS1005: ',' expected.
                          ~
 !!! error TS1005: ',' expected.
-                         ~
-!!! error TS2304: Cannot find name ';'.
             }
         },
         ~

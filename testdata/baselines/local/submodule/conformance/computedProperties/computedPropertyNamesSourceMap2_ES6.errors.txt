@@ -1,9 +1,6 @@
 computedPropertyNamesSourceMap2_ES6.ts(2,14): error TS1005: ',' expected.
-computedPropertyNamesSourceMap2_ES6.ts(2,14): error TS2304: Cannot find name '('.
 computedPropertyNamesSourceMap2_ES6.ts(2,15): error TS1005: ',' expected.
-computedPropertyNamesSourceMap2_ES6.ts(2,15): error TS2304: Cannot find name ')'.
 computedPropertyNamesSourceMap2_ES6.ts(2,17): error TS1005: ',' expected.
-computedPropertyNamesSourceMap2_ES6.ts(2,17): error TS2304: Cannot find name '{'.
 computedPropertyNamesSourceMap2_ES6.ts(3,9): error TS1005: ',' expected.
 computedPropertyNamesSourceMap2_ES6.ts(3,9): error TS2304: Cannot find name 'debugger'.
 computedPropertyNamesSourceMap2_ES6.ts(3,17): error TS1005: ',' expected.
@@ -15,21 +12,15 @@ computedPropertyNamesSourceMap2_ES6.ts(6,11): error TS1005: ':' expected.
 computedPropertyNamesSourceMap2_ES6.ts(8,1): error TS1128: Declaration or statement expected.
 
 
-==== computedPropertyNamesSourceMap2_ES6.ts (15 errors) ====
+==== computedPropertyNamesSourceMap2_ES6.ts (12 errors) ====
     var v = {
         ["hello"]() {
                  ~
 !!! error TS1005: ',' expected.
-                 ~
-!!! error TS2304: Cannot find name '('.
                   ~
 !!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name ')'.
                     ~
 !!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name '{'.
             debugger;
             ~~~~~~~~
 !!! error TS1005: ',' expected.

@@ -2,31 +2,27 @@ thisTypeInAccessors.ts(8,5): error TS2304: Cannot find name 'get'.
 thisTypeInAccessors.ts(8,9): error TS1005: ',' expected.
 thisTypeInAccessors.ts(8,9): error TS2448: Block-scoped variable 'x' used before its declaration.
 thisTypeInAccessors.ts(8,10): error TS1005: ',' expected.
-thisTypeInAccessors.ts(8,10): error TS2304: Cannot find name '('.
 thisTypeInAccessors.ts(8,11): error TS1005: ',' expected.
 thisTypeInAccessors.ts(8,20): error TS1005: ',' expected.
 thisTypeInAccessors.ts(8,23): error TS2304: Cannot find name 'number'.
 thisTypeInAccessors.ts(8,30): error TS1005: ',' expected.
-thisTypeInAccessors.ts(8,30): error TS2304: Cannot find name '{'.
 thisTypeInAccessors.ts(8,32): error TS1005: ',' expected.
 thisTypeInAccessors.ts(8,32): error TS2304: Cannot find name 'return'.
 thisTypeInAccessors.ts(8,39): error TS1005: ',' expected.
 thisTypeInAccessors.ts(8,39): error TS2448: Block-scoped variable 'this' used before its declaration.
 thisTypeInAccessors.ts(8,39): error TS2454: Variable 'this' is used before being assigned.
 thisTypeInAccessors.ts(8,43): error TS1005: ',' expected.
-thisTypeInAccessors.ts(8,43): error TS2304: Cannot find name '.'.
 thisTypeInAccessors.ts(8,44): error TS1005: ',' expected.
 thisTypeInAccessors.ts(8,44): error TS2448: Block-scoped variable 'n' used before its declaration.
 thisTypeInAccessors.ts(8,44): error TS2454: Variable 'n' is used before being assigned.
 thisTypeInAccessors.ts(8,45): error TS1005: ',' expected.
-thisTypeInAccessors.ts(8,45): error TS2304: Cannot find name ';'.
 thisTypeInAccessors.ts(9,5): error TS2304: Cannot find name 'set'.
 thisTypeInAccessors.ts(9,9): error TS1005: ',' expected.
 thisTypeInAccessors.ts(9,10): error TS1005: ',' expected.
 thisTypeInAccessors.ts(9,31): error TS1005: ',' expected.
 
 
-==== thisTypeInAccessors.ts (26 errors) ====
+==== thisTypeInAccessors.ts (22 errors) ====
     interface Foo {
         n: number;
         x: number;
@@ -43,8 +39,6 @@ thisTypeInAccessors.ts(9,31): error TS1005: ',' expected.
 !!! error TS2448: Block-scoped variable 'x' used before its declaration.
              ~
 !!! error TS1005: ',' expected.
-             ~
-!!! error TS2304: Cannot find name '('.
               ~~~~
 !!! error TS1005: ',' expected.
                        ~
@@ -53,8 +47,6 @@ thisTypeInAccessors.ts(9,31): error TS1005: ',' expected.
 !!! error TS2304: Cannot find name 'number'.
                                  ~
 !!! error TS1005: ',' expected.
-                                 ~
-!!! error TS2304: Cannot find name '{'.
                                    ~~~~~~
 !!! error TS1005: ',' expected.
                                    ~~~~~~
@@ -67,8 +59,6 @@ thisTypeInAccessors.ts(9,31): error TS1005: ',' expected.
 !!! error TS2454: Variable 'this' is used before being assigned.
                                               ~
 !!! error TS1005: ',' expected.
-                                              ~
-!!! error TS2304: Cannot find name '.'.
                                                ~
 !!! error TS1005: ',' expected.
                                                ~
@@ -77,8 +67,6 @@ thisTypeInAccessors.ts(9,31): error TS1005: ',' expected.
 !!! error TS2454: Variable 'n' is used before being assigned.
                                                 ~
 !!! error TS1005: ',' expected.
-                                                ~
-!!! error TS2304: Cannot find name ';'.
         set x(this: Foo, n: number) { this.n = n; }
         ~~~
 !!! error TS2304: Cannot find name 'set'.

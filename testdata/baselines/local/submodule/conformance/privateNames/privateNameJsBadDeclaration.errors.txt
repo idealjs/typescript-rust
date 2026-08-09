@@ -1,19 +1,14 @@
 privateNameJsPrototype.js(2,3): error TS2339: Property 'prototype' does not exist on type '() => void'.
 privateNameJsPrototype.js(3,3): error TS1003: Identifier expected.
 privateNameJsPrototype.js(3,3): error TS1127: Invalid character.
-privateNameJsPrototype.js(3,3): error TS2304: Cannot find name '#'.
 privateNameJsPrototype.js(3,4): error TS1005: ',' expected.
 privateNameJsPrototype.js(4,3): error TS1003: Identifier expected.
 privateNameJsPrototype.js(4,3): error TS1127: Invalid character.
-privateNameJsPrototype.js(4,3): error TS2304: Cannot find name '#'.
 privateNameJsPrototype.js(4,4): error TS1005: ',' expected.
 privateNameJsPrototype.js(4,4): error TS2304: Cannot find name 'm'.
 privateNameJsPrototype.js(4,5): error TS1005: ',' expected.
-privateNameJsPrototype.js(4,5): error TS2304: Cannot find name '('.
 privateNameJsPrototype.js(4,6): error TS1005: ',' expected.
-privateNameJsPrototype.js(4,6): error TS2304: Cannot find name ')'.
 privateNameJsPrototype.js(4,8): error TS1005: ',' expected.
-privateNameJsPrototype.js(4,8): error TS2304: Cannot find name '{'.
 privateNameJsPrototype.js(5,3): error TS2304: Cannot find name 'get'.
 privateNameJsPrototype.js(5,7): error TS1005: ';' expected.
 privateNameJsPrototype.js(5,7): error TS1127: Invalid character.
@@ -22,7 +17,7 @@ privateNameJsPrototype.js(5,12): error TS1005: ';' expected.
 privateNameJsPrototype.js(6,1): error TS1128: Declaration or statement expected.
 
 
-==== privateNameJsPrototype.js (22 errors) ====
+==== privateNameJsPrototype.js (17 errors) ====
     function A() { }
     A.prototype = {
       ~~~~~~~~~
@@ -32,8 +27,6 @@ privateNameJsPrototype.js(6,1): error TS1128: Declaration or statement expected.
 !!! error TS1003: Identifier expected.
       ~
 !!! error TS1127: Invalid character.
-      ~
-!!! error TS2304: Cannot find name '#'.
        ~
 !!! error TS1005: ',' expected.
       #m() {},       // Error
@@ -41,24 +34,16 @@ privateNameJsPrototype.js(6,1): error TS1128: Declaration or statement expected.
 !!! error TS1003: Identifier expected.
       ~
 !!! error TS1127: Invalid character.
-      ~
-!!! error TS2304: Cannot find name '#'.
        ~
 !!! error TS1005: ',' expected.
        ~
 !!! error TS2304: Cannot find name 'm'.
         ~
 !!! error TS1005: ',' expected.
-        ~
-!!! error TS2304: Cannot find name '('.
          ~
 !!! error TS1005: ',' expected.
-         ~
-!!! error TS2304: Cannot find name ')'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '{'.
       get #p() { return "" } // Error
       ~~~
 !!! error TS2304: Cannot find name 'get'.

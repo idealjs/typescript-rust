@@ -7,27 +7,21 @@ dependentDestructuredVariables.ts(228,13): error TS2339: Property 'message' does
 dependentDestructuredVariables.ts(258,3): error TS2304: Cannot find name 'method'.
 dependentDestructuredVariables.ts(258,3): error TS2353: Object literal may only specify known properties, and 'method' does not exist in type 'object'.
 dependentDestructuredVariables.ts(258,9): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(258,9): error TS2304: Cannot find name '('.
 dependentDestructuredVariables.ts(258,10): error TS1005: ',' expected.
 dependentDestructuredVariables.ts(258,10): error TS2304: Cannot find name 'type'.
 dependentDestructuredVariables.ts(258,18): error TS1005: ',' expected.
 dependentDestructuredVariables.ts(258,20): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(258,20): error TS2304: Cannot find name '{'.
 dependentDestructuredVariables.ts(259,5): error TS1005: ',' expected.
 dependentDestructuredVariables.ts(259,5): error TS2304: Cannot find name 'if'.
 dependentDestructuredVariables.ts(259,8): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(259,8): error TS2304: Cannot find name '('.
 dependentDestructuredVariables.ts(259,9): error TS1005: ',' expected.
 dependentDestructuredVariables.ts(259,9): error TS2304: Cannot find name 'type'.
 dependentDestructuredVariables.ts(259,14): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(259,14): error TS2304: Cannot find name '=='.
 dependentDestructuredVariables.ts(259,17): error TS1005: ',' expected.
 dependentDestructuredVariables.ts(259,22): error TS1005: ',' expected.
 dependentDestructuredVariables.ts(259,24): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(259,24): error TS2304: Cannot find name '{'.
 dependentDestructuredVariables.ts(260,7): error TS1005: ',' expected.
 dependentDestructuredVariables.ts(260,9): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(260,9): error TS2304: Cannot find name '('.
 dependentDestructuredVariables.ts(260,10): error TS1005: ',' expected.
 dependentDestructuredVariables.ts(260,13): error TS1005: ',' expected.
 dependentDestructuredVariables.ts(261,7): error TS1005: ',' expected.
@@ -38,7 +32,7 @@ dependentDestructuredVariables.ts(262,15): error TS1005: ':' expected.
 dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement expected.
 
 
-==== dependentDestructuredVariables.ts (38 errors) ====
+==== dependentDestructuredVariables.ts (32 errors) ====
     type Action =
         | { kind: 'A', payload: number }
         | { kind: 'B', payload: string };
@@ -315,8 +309,6 @@ dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement
 !!! error TS2353: Object literal may only specify known properties, and 'method' does not exist in type 'object'.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name '('.
              ~~~~
 !!! error TS1005: ',' expected.
              ~~~~
@@ -325,8 +317,6 @@ dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement
 !!! error TS1005: ',' expected.
                        ~
 !!! error TS1005: ',' expected.
-                       ~
-!!! error TS2304: Cannot find name '{'.
         if (type == 'num') {
         ~~
 !!! error TS1005: ',' expected.
@@ -334,31 +324,23 @@ dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement
 !!! error TS2304: Cannot find name 'if'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~~~~
 !!! error TS1005: ',' expected.
             ~~~~
 !!! error TS2304: Cannot find name 'type'.
                  ~~
 !!! error TS1005: ',' expected.
-                 ~~
-!!! error TS2304: Cannot find name '=='.
                     ~~~~~
 !!! error TS1005: ',' expected.
                          ~
 !!! error TS1005: ',' expected.
                            ~
 !!! error TS1005: ',' expected.
-                           ~
-!!! error TS2304: Cannot find name '{'.
           cb(123)
           ~~
 !!! error TS1005: ',' expected.
             ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name '('.
              ~~~
 !!! error TS1005: ',' expected.
                 ~

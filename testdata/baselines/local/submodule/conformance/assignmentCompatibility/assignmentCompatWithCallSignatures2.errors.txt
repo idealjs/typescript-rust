@@ -1,21 +1,17 @@
 assignmentCompatWithCallSignatures2.ts(25,7): error TS2304: Cannot find name 'f'.
 assignmentCompatWithCallSignatures2.ts(25,8): error TS1005: ',' expected.
-assignmentCompatWithCallSignatures2.ts(25,8): error TS2304: Cannot find name '('.
 assignmentCompatWithCallSignatures2.ts(25,9): error TS1005: ',' expected.
 assignmentCompatWithCallSignatures2.ts(25,12): error TS2304: Cannot find name 'number'.
 assignmentCompatWithCallSignatures2.ts(25,18): error TS1005: ',' expected.
-assignmentCompatWithCallSignatures2.ts(25,18): error TS2304: Cannot find name ')'.
 assignmentCompatWithCallSignatures2.ts(25,20): error TS1005: ',' expected.
-assignmentCompatWithCallSignatures2.ts(25,20): error TS2304: Cannot find name '{'.
 assignmentCompatWithCallSignatures2.ts(25,22): error TS1005: ',' expected.
 assignmentCompatWithCallSignatures2.ts(25,22): error TS2304: Cannot find name 'return'.
 assignmentCompatWithCallSignatures2.ts(25,29): error TS1005: ',' expected.
 assignmentCompatWithCallSignatures2.ts(25,31): error TS1005: ',' expected.
-assignmentCompatWithCallSignatures2.ts(25,31): error TS2304: Cannot find name ';'.
 assignmentCompatWithCallSignatures2.ts(25,35): error TS1128: Declaration or statement expected.
 
 
-==== assignmentCompatWithCallSignatures2.ts (15 errors) ====
+==== assignmentCompatWithCallSignatures2.ts (11 errors) ====
     // void returning call signatures can be assigned a non-void returning call signature that otherwise matches
     
     interface T {
@@ -45,20 +41,14 @@ assignmentCompatWithCallSignatures2.ts(25,35): error TS1128: Declaration or stat
 !!! error TS2304: Cannot find name 'f'.
            ~
 !!! error TS1005: ',' expected.
-           ~
-!!! error TS2304: Cannot find name '('.
             ~
 !!! error TS1005: ',' expected.
                ~~~~~~
 !!! error TS2304: Cannot find name 'number'.
                      ~
 !!! error TS1005: ',' expected.
-                     ~
-!!! error TS2304: Cannot find name ')'.
                        ~
 !!! error TS1005: ',' expected.
-                       ~
-!!! error TS2304: Cannot find name '{'.
                          ~~~~~~
 !!! error TS1005: ',' expected.
                          ~~~~~~
@@ -67,8 +57,6 @@ assignmentCompatWithCallSignatures2.ts(25,35): error TS1128: Declaration or stat
 !!! error TS1005: ',' expected.
                                   ~
 !!! error TS1005: ',' expected.
-                                  ~
-!!! error TS2304: Cannot find name ';'.
                                       ~
 !!! error TS1128: Declaration or statement expected.
     a = { f: () => 1 }

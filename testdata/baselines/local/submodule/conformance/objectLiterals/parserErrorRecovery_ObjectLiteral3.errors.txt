@@ -1,17 +1,14 @@
 parserErrorRecovery_ObjectLiteral3.ts(2,1): error TS2304: Cannot find name 'return'.
 parserErrorRecovery_ObjectLiteral3.ts(2,7): error TS1005: ',' expected.
-parserErrorRecovery_ObjectLiteral3.ts(2,7): error TS2304: Cannot find name ';'.
 parserErrorRecovery_ObjectLiteral3.ts(2,8): error TS1005: '}' expected.
 
 
-==== parserErrorRecovery_ObjectLiteral3.ts (4 errors) ====
+==== parserErrorRecovery_ObjectLiteral3.ts (3 errors) ====
     var v = { a: 
     return;
     ~~~~~~
 !!! error TS2304: Cannot find name 'return'.
           ~
 !!! error TS1005: ',' expected.
-          ~
-!!! error TS2304: Cannot find name ';'.
            
 !!! error TS1005: '}' expected.
