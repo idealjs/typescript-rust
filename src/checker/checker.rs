@@ -6756,15 +6756,7 @@ impl Checker {
     /// suppress TS2454. This avoids false positives from imprecise flow
     /// analysis at the cost of missing some genuine errors.
     fn is_symbol_definitely_assigned_at(&mut self, node: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
-        // Pre-scan heuristic: check if there's any assignment to this symbol
-        // in the enclosing function body. This mirrors Go's conservative
-        // `markNodeAssignmentsWorker` which records `lastAssignmentPos` and
-        // uses it to suppress TS2454 when any assignment exists in the same
-        // function scope.
-        if self.symbol_has_assignment_in_enclosing_function(node, symbol) {
-            return true;
-        }
-        // Flow graph analysis for more precise checking.
+        // Flow graph analysis.
         let flow = match self.program.symbol_map().flow_node_of(node) {
             Some(f) => Arc::clone(f),
             None => return true, // no flow info → assume assigned (no false positive)
