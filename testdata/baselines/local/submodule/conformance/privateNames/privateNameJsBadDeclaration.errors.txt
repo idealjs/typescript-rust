@@ -1,101 +1,77 @@
 privateNameJsPrototype.js(2,3): error TS2339: Property 'prototype' does not exist on type '() => void'.
-privateNameJsPrototype.js(3,3): error TS1003: Identifier expected.
-privateNameJsPrototype.js(3,3): error TS1127: Invalid character.
-privateNameJsPrototype.js(3,4): error TS1005: ',' expected.
-privateNameJsPrototype.js(4,3): error TS1003: Identifier expected.
-privateNameJsPrototype.js(4,3): error TS1127: Invalid character.
-privateNameJsPrototype.js(4,4): error TS1005: ',' expected.
-privateNameJsPrototype.js(5,3): error TS2304: Cannot find name 'get'.
-privateNameJsPrototype.js(5,7): error TS1005: ',' expected.
-privateNameJsPrototype.js(5,7): error TS1127: Invalid character.
-privateNameJsPrototype.js(5,8): error TS1005: ',' expected.
-privateNameJsPrototype.js(8,3): error TS2339: Property 'prototype' does not exist on type 'object'.
-privateNameJsPrototype.js(9,3): error TS1003: Identifier expected.
-privateNameJsPrototype.js(9,3): error TS1127: Invalid character.
-privateNameJsPrototype.js(9,4): error TS1005: ',' expected.
-privateNameJsPrototype.js(10,3): error TS1003: Identifier expected.
-privateNameJsPrototype.js(10,3): error TS1127: Invalid character.
-privateNameJsPrototype.js(10,4): error TS1005: ',' expected.
-privateNameJsPrototype.js(11,3): error TS2304: Cannot find name 'get'.
-privateNameJsPrototype.js(11,7): error TS1005: ',' expected.
-privateNameJsPrototype.js(11,7): error TS1127: Invalid character.
-privateNameJsPrototype.js(11,8): error TS1005: ',' expected.
-privateNameJsPrototype.js(15,10): error TS1003: Identifier expected.
-privateNameJsPrototype.js(15,10): error TS1127: Invalid character.
-privateNameJsPrototype.js(15,10): error TS2339: Property '#' does not exist on type 'object'.
-privateNameJsPrototype.js(15,11): error TS1005: ';' expected.
-privateNameJsPrototype.js(15,11): error TS2304: Cannot find name 'z'.
+privateNameJsPrototype.js(5,9): error TS1005: '{' expected.
+privateNameJsPrototype.js(5,10): error TS1012: Unexpected token.
+privateNameJsPrototype.js(5,12): error TS1005: ')' expected.
+privateNameJsPrototype.js(7,1): error TS1005: ',' expected.
+privateNameJsPrototype.js(7,1): error TS2304: Cannot find name 'class'.
+privateNameJsPrototype.js(7,7): error TS1005: ',' expected.
+privateNameJsPrototype.js(7,7): error TS2304: Cannot find name 'B'.
+privateNameJsPrototype.js(7,9): error TS1005: ',' expected.
+privateNameJsPrototype.js(8,1): error TS2304: Cannot find name 'B'.
+privateNameJsPrototype.js(11,9): error TS1005: '{' expected.
+privateNameJsPrototype.js(11,10): error TS1012: Unexpected token.
+privateNameJsPrototype.js(11,12): error TS1005: ')' expected.
+privateNameJsPrototype.js(13,1): error TS1005: ',' expected.
+privateNameJsPrototype.js(13,1): error TS2304: Cannot find name 'class'.
+privateNameJsPrototype.js(13,7): error TS1005: ',' expected.
+privateNameJsPrototype.js(13,7): error TS2304: Cannot find name 'C'.
+privateNameJsPrototype.js(13,9): error TS1005: ',' expected.
+privateNameJsPrototype.js(14,3): error TS1005: ',' expected.
 
 
-==== privateNameJsPrototype.js (27 errors) ====
+==== privateNameJsPrototype.js (19 errors) ====
     function A() { }
     A.prototype = {
       ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type '() => void'.
       #x: 1,         // Error
-      ~
-!!! error TS1003: Identifier expected.
-      ~
-!!! error TS1127: Invalid character.
-       ~
-!!! error TS1005: ',' expected.
       #m() {},       // Error
-      ~
-!!! error TS1003: Identifier expected.
-      ~
-!!! error TS1127: Invalid character.
-       ~
-!!! error TS1005: ',' expected.
       get #p() { return "" } // Error
-      ~~~
-!!! error TS2304: Cannot find name 'get'.
-          ~
-!!! error TS1005: ',' expected.
-          ~
-!!! error TS1127: Invalid character.
-           ~
-!!! error TS1005: ',' expected.
+            ~
+!!! error TS1005: '{' expected.
+             ~
+!!! error TS1012: Unexpected token.
+               ~
+!!! error TS1005: ')' expected.
     }
     class B { }
+    ~~~~~
+!!! error TS1005: ',' expected.
+    ~~~~~
+!!! error TS2304: Cannot find name 'class'.
+          ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS2304: Cannot find name 'B'.
+            ~
+!!! error TS1005: ',' expected.
     B.prototype = {
-      ~~~~~~~~~
-!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+    ~
+!!! error TS2304: Cannot find name 'B'.
       #y: 2,         // Error
-      ~
-!!! error TS1003: Identifier expected.
-      ~
-!!! error TS1127: Invalid character.
-       ~
-!!! error TS1005: ',' expected.
       #m() {},       // Error
-      ~
-!!! error TS1003: Identifier expected.
-      ~
-!!! error TS1127: Invalid character.
-       ~
-!!! error TS1005: ',' expected.
       get #p() { return "" } // Error
-      ~~~
-!!! error TS2304: Cannot find name 'get'.
-          ~
-!!! error TS1005: ',' expected.
-          ~
-!!! error TS1127: Invalid character.
-           ~
-!!! error TS1005: ',' expected.
+            ~
+!!! error TS1005: '{' expected.
+             ~
+!!! error TS1012: Unexpected token.
+               ~
+!!! error TS1005: ')' expected.
     }
     class C {
+    ~~~~~
+!!! error TS1005: ',' expected.
+    ~~~~~
+!!! error TS2304: Cannot find name 'class'.
+          ~
+!!! error TS1005: ',' expected.
+          ~
+!!! error TS2304: Cannot find name 'C'.
+            ~
+!!! error TS1005: ',' expected.
       constructor() {
+      ~~~~~~~~~~~
+!!! error TS1005: ',' expected.
         this.#z = 3;
-             ~
-!!! error TS1003: Identifier expected.
-             ~
-!!! error TS1127: Invalid character.
-             ~
-!!! error TS2339: Property '#' does not exist on type 'object'.
-              ~
-!!! error TS1005: ';' expected.
-              ~
-!!! error TS2304: Cannot find name 'z'.
       }
     }

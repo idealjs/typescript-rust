@@ -1,43 +1,15 @@
-privateNameInInExpressionUnused.ts(2,5): error TS1003: Identifier expected.
-privateNameInInExpressionUnused.ts(2,5): error TS1127: Invalid character.
-privateNameInInExpressionUnused.ts(2,6): error TS1005: ';' expected.
-privateNameInInExpressionUnused.ts(3,5): error TS1003: Identifier expected.
-privateNameInInExpressionUnused.ts(3,5): error TS1127: Invalid character.
-privateNameInInExpressionUnused.ts(3,6): error TS1005: ';' expected.
 privateNameInInExpressionUnused.ts(7,16): error TS1012: Unexpected token.
-privateNameInInExpressionUnused.ts(7,16): error TS1127: Invalid character.
-privateNameInInExpressionUnused.ts(7,17): error TS1005: ';' expected.
-privateNameInInExpressionUnused.ts(7,17): error TS7027: Unreachable code detected.
 
 
-==== privateNameInInExpressionUnused.ts (10 errors) ====
+==== privateNameInInExpressionUnused.ts (1 errors) ====
     class Foo {
         #unused: undefined; // expect unused error
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~
-!!! error TS1005: ';' expected.
         #brand: undefined; // expect no error
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~
-!!! error TS1005: ';' expected.
     
         isFoo(v: any): v is Foo {
             // This should count as using/reading '#brand'
             return #brand in v;
-                   ~
+                   ~~~~~~
 !!! error TS1012: Unexpected token.
-                   ~
-!!! error TS1127: Invalid character.
-                    ~~~~~
-!!! error TS1005: ';' expected.
-                    ~~~~~~~~~~~
         }
-    ~~~~
-!!! error TS7027: Unreachable code detected.
     }

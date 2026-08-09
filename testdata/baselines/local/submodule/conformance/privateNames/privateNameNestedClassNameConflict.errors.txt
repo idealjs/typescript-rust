@@ -1,35 +1,17 @@
-privateNameNestedClassNameConflict.ts(2,5): error TS1003: Identifier expected.
-privateNameNestedClassNameConflict.ts(2,5): error TS1127: Invalid character.
-privateNameNestedClassNameConflict.ts(2,6): error TS1005: ';' expected.
-privateNameNestedClassNameConflict.ts(2,6): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-privateNameNestedClassNameConflict.ts(5,13): error TS1003: Identifier expected.
-privateNameNestedClassNameConflict.ts(5,13): error TS1127: Invalid character.
-privateNameNestedClassNameConflict.ts(5,14): error TS1005: ';' expected.
-privateNameNestedClassNameConflict.ts(5,14): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+privateNameNestedClassNameConflict.ts(2,5): error TS2564: Property '#foo' has no initializer and is not definitely assigned in the constructor.
+privateNameNestedClassNameConflict.ts(5,13): error TS2564: Property '#foo' has no initializer and is not definitely assigned in the constructor.
 
 
-==== privateNameNestedClassNameConflict.ts (8 errors) ====
+==== privateNameNestedClassNameConflict.ts (2 errors) ====
     class A {
         #foo: string;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~
-!!! error TS1005: ';' expected.
-         ~~~
-!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+        ~~~~
+!!! error TS2564: Property '#foo' has no initializer and is not definitely assigned in the constructor.
         constructor() {
             class A {
                 #foo: string;
-                ~
-!!! error TS1003: Identifier expected.
-                ~
-!!! error TS1127: Invalid character.
-                 ~~~
-!!! error TS1005: ';' expected.
-                 ~~~
-!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+                ~~~~
+!!! error TS2564: Property '#foo' has no initializer and is not definitely assigned in the constructor.
             }
         }
     }

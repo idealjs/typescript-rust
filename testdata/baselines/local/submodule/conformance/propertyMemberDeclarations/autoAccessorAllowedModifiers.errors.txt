@@ -1,9 +1,7 @@
 autoAccessorAllowedModifiers.ts(11,14): error TS1005: ';' expected.
-autoAccessorAllowedModifiers.ts(11,14): error TS1127: Invalid character.
-autoAccessorAllowedModifiers.ts(11,15): error TS1005: ';' expected.
 
 
-==== autoAccessorAllowedModifiers.ts (3 errors) ====
+==== autoAccessorAllowedModifiers.ts (1 errors) ====
     abstract class C1 {
         accessor a: any;
         public accessor b: any;
@@ -15,11 +13,7 @@ autoAccessorAllowedModifiers.ts(11,15): error TS1005: ';' expected.
         private static accessor h: any;
         protected static accessor i: any;
         accessor #j: any;
-                 ~
-!!! error TS1005: ';' expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~
+                 ~~
 !!! error TS1005: ';' expected.
         accessor "k": any;
         accessor 108: any;

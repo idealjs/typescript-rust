@@ -1,80 +1,17 @@
-privateNameMethodAssignment.ts(2,5): error TS1003: Identifier expected.
-privateNameMethodAssignment.ts(2,5): error TS1127: Invalid character.
-privateNameMethodAssignment.ts(2,6): error TS1005: ';' expected.
 privateNameMethodAssignment.ts(2,18): error TS1003: Identifier expected.
-privateNameMethodAssignment.ts(4,14): error TS1003: Identifier expected.
-privateNameMethodAssignment.ts(4,14): error TS1127: Invalid character.
-privateNameMethodAssignment.ts(4,15): error TS1005: ';' expected.
-privateNameMethodAssignment.ts(5,11): error TS1003: Identifier expected.
-privateNameMethodAssignment.ts(5,11): error TS1127: Invalid character.
-privateNameMethodAssignment.ts(5,12): error TS1005: ';' expected.
-privateNameMethodAssignment.ts(6,11): error TS1003: Identifier expected.
-privateNameMethodAssignment.ts(6,11): error TS1127: Invalid character.
-privateNameMethodAssignment.ts(6,12): error TS1005: ';' expected.
-privateNameMethodAssignment.ts(7,20): error TS1003: Identifier expected.
-privateNameMethodAssignment.ts(7,20): error TS1127: Invalid character.
-privateNameMethodAssignment.ts(7,21): error TS1005: ',' expected.
-privateNameMethodAssignment.ts(8,22): error TS1003: Identifier expected.
-privateNameMethodAssignment.ts(8,22): error TS1127: Invalid character.
-privateNameMethodAssignment.ts(8,23): error TS1005: ',' expected.
-privateNameMethodAssignment.ts(9,11): error TS1003: Identifier expected.
-privateNameMethodAssignment.ts(9,11): error TS1127: Invalid character.
-privateNameMethodAssignment.ts(9,12): error TS1005: ';' expected.
 
 
-==== privateNameMethodAssignment.ts (22 errors) ====
+==== privateNameMethodAssignment.ts (1 errors) ====
     class A3 {
         #method() { };
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~
-!!! error TS1005: ';' expected.
                      ~
 !!! error TS1003: Identifier expected.
         constructor(a: A3, b: any) {
             this.#method = () => {} // Error, not writable 
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~~
-!!! error TS1005: ';' expected.
             a.#method = () => { }; // Error, not writable 
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~~
-!!! error TS1005: ';' expected.
             b.#method =  () => { } //Error, not writable 
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~~
-!!! error TS1005: ';' expected.
             ({ x: this.#method } = { x: () => {}}); //Error, not writable 
-                       ~
-!!! error TS1003: Identifier expected.
-                       ~
-!!! error TS1127: Invalid character.
-                        ~~~~~~
-!!! error TS1005: ',' expected.
             let x = this.#method;
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~~
-!!! error TS1005: ',' expected.
             b.#method++ //Error, not writable 
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~~
-!!! error TS1005: ';' expected.
         }
     }

@@ -1,28 +1,13 @@
 classStaticBlock12.ts(2,10): error TS1005: ';' expected.
-classStaticBlock12.ts(2,10): error TS1127: Invalid character.
-classStaticBlock12.ts(2,11): error TS1005: ';' expected.
-classStaticBlock12.ts(5,7): error TS1003: Identifier expected.
-classStaticBlock12.ts(5,7): error TS1127: Invalid character.
-classStaticBlock12.ts(5,8): error TS1005: ';' expected.
 
 
-==== classStaticBlock12.ts (6 errors) ====
+==== classStaticBlock12.ts (1 errors) ====
     class C {
       static #x = 1;
-             ~
-!!! error TS1005: ';' expected.
-             ~
-!!! error TS1127: Invalid character.
-              ~
+             ~~
 !!! error TS1005: ';' expected.
       
       static {
         C.#x;
-          ~
-!!! error TS1003: Identifier expected.
-          ~
-!!! error TS1127: Invalid character.
-           ~
-!!! error TS1005: ';' expected.
       }
     }

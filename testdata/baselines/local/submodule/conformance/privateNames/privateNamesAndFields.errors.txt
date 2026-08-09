@@ -1,62 +1,26 @@
-privateNamesAndFields.ts(2,5): error TS1003: Identifier expected.
-privateNamesAndFields.ts(2,5): error TS1127: Invalid character.
-privateNamesAndFields.ts(2,6): error TS1005: ';' expected.
-privateNamesAndFields.ts(2,6): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-privateNamesAndFields.ts(4,14): error TS1003: Identifier expected.
-privateNamesAndFields.ts(4,14): error TS1127: Invalid character.
-privateNamesAndFields.ts(4,15): error TS1005: ';' expected.
-privateNamesAndFields.ts(9,5): error TS1003: Identifier expected.
-privateNamesAndFields.ts(9,5): error TS1127: Invalid character.
-privateNamesAndFields.ts(9,6): error TS1005: ';' expected.
-privateNamesAndFields.ts(9,6): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+privateNamesAndFields.ts(2,5): error TS2564: Property '#foo' has no initializer and is not definitely assigned in the constructor.
+privateNamesAndFields.ts(9,5): error TS2564: Property '#foo' has no initializer and is not definitely assigned in the constructor.
 privateNamesAndFields.ts(11,9): error TS2349: This expression is not callable.
-privateNamesAndFields.ts(12,14): error TS1003: Identifier expected.
-privateNamesAndFields.ts(12,14): error TS1127: Invalid character.
-privateNamesAndFields.ts(12,15): error TS1005: ';' expected.
 
 
-==== privateNamesAndFields.ts (15 errors) ====
+==== privateNamesAndFields.ts (3 errors) ====
     class A {
         #foo: number;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~
-!!! error TS1005: ';' expected.
-         ~~~
-!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+        ~~~~
+!!! error TS2564: Property '#foo' has no initializer and is not definitely assigned in the constructor.
         constructor () {
             this.#foo = 3;
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~
-!!! error TS1005: ';' expected.
         }
     }
     
     class B extends A {
         #foo: string;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~
-!!! error TS1005: ';' expected.
-         ~~~
-!!! error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+        ~~~~
+!!! error TS2564: Property '#foo' has no initializer and is not definitely assigned in the constructor.
         constructor () {
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.
             this.#foo = "some string";
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~
-!!! error TS1005: ';' expected.
         }
     }

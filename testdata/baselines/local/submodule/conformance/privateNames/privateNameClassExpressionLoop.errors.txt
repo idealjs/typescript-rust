@@ -1,20 +1,10 @@
 privateNameClassExpressionLoop.ts(2,23): error TS1005: '>' expected.
 privateNameClassExpressionLoop.ts(3,22): error TS2304: Cannot find name 'C'.
-privateNameClassExpressionLoop.ts(4,9): error TS1003: Identifier expected.
-privateNameClassExpressionLoop.ts(4,9): error TS1127: Invalid character.
-privateNameClassExpressionLoop.ts(4,10): error TS1005: ';' expected.
-privateNameClassExpressionLoop.ts(5,9): error TS1003: Identifier expected.
-privateNameClassExpressionLoop.ts(5,9): error TS1127: Invalid character.
-privateNameClassExpressionLoop.ts(5,10): error TS1005: ';' expected.
 privateNameClassExpressionLoop.ts(6,13): error TS1005: ';' expected.
-privateNameClassExpressionLoop.ts(6,13): error TS1127: Invalid character.
-privateNameClassExpressionLoop.ts(6,14): error TS1005: ';' expected.
 privateNameClassExpressionLoop.ts(7,13): error TS1005: ';' expected.
-privateNameClassExpressionLoop.ts(7,13): error TS1127: Invalid character.
-privateNameClassExpressionLoop.ts(7,14): error TS1005: ';' expected.
 
 
-==== privateNameClassExpressionLoop.ts (14 errors) ====
+==== privateNameClassExpressionLoop.ts (4 errors) ====
     const array = [];
     for (let i = 0; i < 10; ++i) {
                           ~
@@ -23,32 +13,12 @@ privateNameClassExpressionLoop.ts(7,14): error TS1005: ';' expected.
                          ~
 !!! error TS2304: Cannot find name 'C'.
             #myField = "hello";
-            ~
-!!! error TS1003: Identifier expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~~~~
-!!! error TS1005: ';' expected.
             #method() {}
-            ~
-!!! error TS1003: Identifier expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~~~
-!!! error TS1005: ';' expected.
             get #accessor() { return 42; }
-                ~
-!!! error TS1005: ';' expected.
-                ~
-!!! error TS1127: Invalid character.
-                 ~~~~~~~~
+                ~~~~~~~~~
 !!! error TS1005: ';' expected.
             set #accessor(val) { }
-                ~
-!!! error TS1005: ';' expected.
-                ~
-!!! error TS1127: Invalid character.
-                 ~~~~~~~~
+                ~~~~~~~~~
 !!! error TS1005: ';' expected.
         });
     }

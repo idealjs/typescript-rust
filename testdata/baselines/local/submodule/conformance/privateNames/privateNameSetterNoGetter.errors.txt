@@ -1,28 +1,13 @@
 privateNameSetterNoGetter.ts(2,9): error TS1005: ';' expected.
-privateNameSetterNoGetter.ts(2,9): error TS1127: Invalid character.
-privateNameSetterNoGetter.ts(2,10): error TS1005: ';' expected.
-privateNameSetterNoGetter.ts(4,14): error TS1003: Identifier expected.
-privateNameSetterNoGetter.ts(4,14): error TS1127: Invalid character.
-privateNameSetterNoGetter.ts(4,15): error TS1005: ';' expected.
 
 
-==== privateNameSetterNoGetter.ts (6 errors) ====
+==== privateNameSetterNoGetter.ts (1 errors) ====
     const C = class {
         set #x(x) {}
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~
+            ~~
 !!! error TS1005: ';' expected.
         m() {
             this.#x += 2; // Error
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~
-!!! error TS1005: ';' expected.
         }
     }
     

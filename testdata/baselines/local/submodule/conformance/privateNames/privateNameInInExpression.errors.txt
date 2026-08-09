@@ -1,169 +1,96 @@
-error TS2451: Cannot redeclare block-scoped variable 'field'.
-error TS2451: Cannot redeclare block-scoped variable 'field'.
-error TS2451: Cannot redeclare block-scoped variable 'field'.
-error TS2451: Cannot redeclare block-scoped variable 'field'.
-privateNameInInExpression.ts(2,5): error TS1003: Identifier expected.
-privateNameInInExpression.ts(2,5): error TS1127: Invalid character.
-privateNameInInExpression.ts(2,6): error TS1005: ';' expected.
 privateNameInInExpression.ts(3,12): error TS1005: ';' expected.
-privateNameInInExpression.ts(3,12): error TS1127: Invalid character.
-privateNameInInExpression.ts(3,13): error TS1005: ';' expected.
-privateNameInInExpression.ts(4,5): error TS1003: Identifier expected.
-privateNameInInExpression.ts(4,5): error TS1127: Invalid character.
-privateNameInInExpression.ts(4,6): error TS1005: ';' expected.
 privateNameInInExpression.ts(5,12): error TS1005: ';' expected.
-privateNameInInExpression.ts(5,12): error TS1127: Invalid character.
-privateNameInInExpression.ts(5,13): error TS1005: ';' expected.
 privateNameInInExpression.ts(8,19): error TS1012: Unexpected token.
-privateNameInInExpression.ts(8,19): error TS1127: Invalid character.
-privateNameInInExpression.ts(8,20): error TS1005: ',' expected.
-privateNameInInExpression.ts(8,26): error TS1005: ';' expected.
-privateNameInInExpression.ts(8,29): error TS1005: ';' expected.
 privateNameInInExpression.ts(10,19): error TS1012: Unexpected token.
-privateNameInInExpression.ts(10,19): error TS1127: Invalid character.
-privateNameInInExpression.ts(10,20): error TS1005: ',' expected.
-privateNameInInExpression.ts(10,26): error TS1005: ';' expected.
-privateNameInInExpression.ts(10,29): error TS1005: ';' expected.
 privateNameInInExpression.ts(12,19): error TS1012: Unexpected token.
-privateNameInInExpression.ts(12,19): error TS1127: Invalid character.
-privateNameInInExpression.ts(12,20): error TS1005: ',' expected.
-privateNameInInExpression.ts(12,26): error TS1005: ';' expected.
 privateNameInInExpression.ts(14,19): error TS1012: Unexpected token.
-privateNameInInExpression.ts(14,19): error TS1127: Invalid character.
-privateNameInInExpression.ts(14,20): error TS1005: ',' expected.
-privateNameInInExpression.ts(14,26): error TS1005: ';' expected.
 privateNameInInExpression.ts(16,19): error TS1012: Unexpected token.
-privateNameInInExpression.ts(16,19): error TS1127: Invalid character.
-privateNameInInExpression.ts(16,20): error TS1005: ',' expected.
-privateNameInInExpression.ts(16,26): error TS1005: ';' expected.
 privateNameInInExpression.ts(18,23): error TS1012: Unexpected token.
-privateNameInInExpression.ts(18,23): error TS1127: Invalid character.
-privateNameInInExpression.ts(18,24): error TS1005: ')' expected.
-privateNameInInExpression.ts(18,41): error TS1005: ';' expected.
-privateNameInInExpression.ts(18,43): error TS1005: ';' expected.
-privateNameInInExpression.ts(19,5): error TS1128: Declaration or statement expected.
+privateNameInInExpression.ts(21,19): error TS1012: Unexpected token.
+privateNameInInExpression.ts(23,19): error TS1012: Unexpected token.
+privateNameInInExpression.ts(25,20): error TS1012: Unexpected token.
+privateNameInInExpression.ts(27,14): error TS1012: Unexpected token.
+privateNameInInExpression.ts(27,25): error TS1005: ';' expected.
+privateNameInInExpression.ts(29,23): error TS1012: Unexpected token.
+privateNameInInExpression.ts(32,29): error TS1012: Unexpected token.
+privateNameInInExpression.ts(39,17): error TS1012: Unexpected token.
+privateNameInInExpression.ts(43,17): error TS1012: Unexpected token.
+privateNameInInExpression.ts(50,21): error TS1012: Unexpected token.
+privateNameInInExpression.ts(56,21): error TS1012: Unexpected token.
+privateNameInInExpression.ts(60,21): error TS1012: Unexpected token.
+privateNameInInExpression.ts(64,21): error TS1012: Unexpected token.
+privateNameInInExpression.ts(70,13): error TS1012: Unexpected token.
+privateNameInInExpression.ts(76,13): error TS1012: Unexpected token.
+privateNameInInExpression.ts(82,13): error TS1012: Unexpected token.
+privateNameInInExpression.ts(88,13): error TS1012: Unexpected token.
+privateNameInInExpression.ts(94,13): error TS1012: Unexpected token.
+privateNameInInExpression.ts(102,21): error TS1012: Unexpected token.
+privateNameInInExpression.ts(114,12): error TS1012: Unexpected token.
 
 
-!!! error TS2451: Cannot redeclare block-scoped variable 'field'.
-
-!!! error TS2451: Cannot redeclare block-scoped variable 'field'.
-
-!!! error TS2451: Cannot redeclare block-scoped variable 'field'.
-
-!!! error TS2451: Cannot redeclare block-scoped variable 'field'.
-==== privateNameInInExpression.ts (40 errors) ====
+==== privateNameInInExpression.ts (28 errors) ====
     class Foo {
         #field = 1;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~
-!!! error TS1005: ';' expected.
         static #staticField = 2;
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~~~~~~~
+               ~~~~~~~~~~~~
 !!! error TS1005: ';' expected.
         #method() {}
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~
-!!! error TS1005: ';' expected.
         static #staticMethod() {}
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~~~~~~~~
+               ~~~~~~~~~~~~~
 !!! error TS1005: ';' expected.
     
         goodRhs(v: any) {
             const a = #field in v;
-                      ~
+                      ~~~~~~
 !!! error TS1012: Unexpected token.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~~~~~
-!!! error TS1005: ',' expected.
-                             ~~
-!!! error TS1005: ';' expected.
-                                ~
-!!! error TS1005: ';' expected.
     
             const b = #field in v.p1.p2;
-                      ~
+                      ~~~~~~
 !!! error TS1012: Unexpected token.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~~~~~
-!!! error TS1005: ',' expected.
-                             ~~
-!!! error TS1005: ';' expected.
-                                ~
-!!! error TS1005: ';' expected.
     
             const c = #field in (v as {});
-                      ~
+                      ~~~~~~
 !!! error TS1012: Unexpected token.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~~~~~
-!!! error TS1005: ',' expected.
-                             ~~
-!!! error TS1005: ';' expected.
     
             const d = #field in (v as Foo);
-                      ~
+                      ~~~~~~
 !!! error TS1012: Unexpected token.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~~~~~
-!!! error TS1005: ',' expected.
-                             ~~
-!!! error TS1005: ';' expected.
     
             const e = #field in (v as never);
-                      ~
+                      ~~~~~~
 !!! error TS1012: Unexpected token.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~~~~~
-!!! error TS1005: ',' expected.
-                             ~~
-!!! error TS1005: ';' expected.
     
             for (let f in #field in v as any) { /**/ } // unlikely but valid
-                          ~
+                          ~~~~~~
 !!! error TS1012: Unexpected token.
-                          ~
-!!! error TS1127: Invalid character.
-                           ~~~~~
-!!! error TS1005: ')' expected.
-                                            ~
-!!! error TS1005: ';' expected.
-                                              ~
-!!! error TS1005: ';' expected.
         }
-        ~
-!!! error TS1128: Declaration or statement expected.
         badRhs(v: any) {
             const a = #field in (v as unknown); // Bad - RHS of in must be object type or any
+                      ~~~~~~
+!!! error TS1012: Unexpected token.
     
             const b = #fiel in v; // Bad - typo in privateID
+                      ~~~~~
+!!! error TS1012: Unexpected token.
     
             const c = (#field) in v; // Bad - privateID is not an expression on its own
+                       ~~~~~~
+!!! error TS1012: Unexpected token.
     
             for (#field in v) { /**/ } // Bad - 'in' not allowed
+                 ~~~~~~
+!!! error TS1012: Unexpected token.
+                            ~
+!!! error TS1005: ';' expected.
     
             for (let d in #field in v) { /**/ } // Bad - rhs of in should be a object/any
+                          ~~~~~~
+!!! error TS1012: Unexpected token.
         }
         whitespace(v: any) {
             const a = v && /*0*/#field/*1*/
+                                ~~~~~~
+!!! error TS1012: Unexpected token.
                 /*2*/in/*3*/
                     /*4*/v/*5*/
         }
@@ -171,10 +98,14 @@ privateNameInInExpression.ts(19,5): error TS1128: Declaration or statement expec
     
             if (typeof u === 'object') {
                 if (#field in n) {
+                    ~~~~~~
+!!! error TS1012: Unexpected token.
                     n; // good n is never
                 }
     
                 if (#field in u) {
+                    ~~~~~~
+!!! error TS1012: Unexpected token.
                     u; // good u is Foo
                 } else {
                     u; // good u is object | null
@@ -182,50 +113,68 @@ privateNameInInExpression.ts(19,5): error TS1128: Declaration or statement expec
     
                 if (u !== null) {
                     if (#field in u) {
+                        ~~~~~~
+!!! error TS1012: Unexpected token.
                         u; // good u is Foo
                     } else {
                         u; // good u is object
                     }
     
                     if (#method in u) {
+                        ~~~~~~~
+!!! error TS1012: Unexpected token.
                         u; // good u is Foo
                     }
     
                     if (#staticField in u) {
+                        ~~~~~~~~~~~~
+!!! error TS1012: Unexpected token.
                         u; // good u is typeof Foo
                     }
     
                     if (#staticMethod in u) {
+                        ~~~~~~~~~~~~~
+!!! error TS1012: Unexpected token.
                         u; // good u is typeof Foo
                     }
                 }
             }
     
             if (#field in fb) {
+                ~~~~~~
+!!! error TS1012: Unexpected token.
                 fb; // good fb is Foo
             } else {
                 fb; // good fb is Bar
             }
     
             if (#field in fs) {
+                ~~~~~~
+!!! error TS1012: Unexpected token.
                 fs; // good fs is FooSub
             } else {
                 fs; // good fs is never
             }
     
             if (#field in b) {
+                ~~~~~~
+!!! error TS1012: Unexpected token.
                 b; // good b is 'Bar & Foo'
             } else {
                 b; // good b is Bar
             }
     
             if (#field in fsb) {
+                ~~~~~~
+!!! error TS1012: Unexpected token.
                 fsb; // good fsb is FooSub
             } else {
                 fsb; // good fsb is Bar
             }
     
             if (#field in fsfb) {
+                ~~~~~~
+!!! error TS1012: Unexpected token.
                 fsfb; // good fsfb is 'Foo | FooSub'
             } else {
                 fsfb; // good fsfb is Bar
@@ -234,6 +183,8 @@ privateNameInInExpression.ts(19,5): error TS1128: Declaration or statement expec
             class Nested {
                 m(v: any) {
                     if (#field in v) {
+                        ~~~~~~
+!!! error TS1012: Unexpected token.
                         v; // good v is Foo
                     }
                 }
@@ -246,4 +197,6 @@ privateNameInInExpression.ts(19,5): error TS1128: Declaration or statement expec
     
     function badSyntax(v: Foo) {
         return #field in v; // Bad - outside of class
+               ~~~~~~
+!!! error TS1012: Unexpected token.
     }

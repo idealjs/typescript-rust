@@ -1,189 +1,62 @@
 privateNamesAndStaticMethods.ts(2,12): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(2,12): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(2,13): error TS1005: ';' expected.
 privateNamesAndStaticMethods.ts(3,18): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(3,18): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(3,19): error TS1005: ';' expected.
 privateNamesAndStaticMethods.ts(4,18): error TS1003: Identifier expected.
 privateNamesAndStaticMethods.ts(4,19): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(4,19): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(4,20): error TS1005: ';' expected.
 privateNamesAndStaticMethods.ts(7,12): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(7,12): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(7,13): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(7,13): error TS2564: Property '_quux' has no initializer and is not definitely assigned in the constructor.
+privateNamesAndStaticMethods.ts(7,12): error TS2564: Property '#_quux' has no initializer and is not definitely assigned in the constructor.
 privateNamesAndStaticMethods.ts(8,16): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(8,16): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(8,17): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(9,21): error TS1003: Identifier expected.
-privateNamesAndStaticMethods.ts(9,21): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(9,22): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(9,22): error TS7027: Unreachable code detected.
 privateNamesAndStaticMethods.ts(11,16): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(11,16): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(11,17): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(12,14): error TS1003: Identifier expected.
-privateNamesAndStaticMethods.ts(12,14): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(12,15): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(15,11): error TS1003: Identifier expected.
-privateNamesAndStaticMethods.ts(15,11): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(15,12): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(16,11): error TS1003: Identifier expected.
-privateNamesAndStaticMethods.ts(16,11): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(16,12): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(17,11): error TS1003: Identifier expected.
-privateNamesAndStaticMethods.ts(17,11): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(17,12): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(18,11): error TS1003: Identifier expected.
-privateNamesAndStaticMethods.ts(18,11): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(18,12): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(18,21): error TS1003: Identifier expected.
-privateNamesAndStaticMethods.ts(18,21): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(18,22): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(19,11): error TS1003: Identifier expected.
-privateNamesAndStaticMethods.ts(19,11): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(19,12): error TS1005: ';' expected.
 privateNamesAndStaticMethods.ts(24,12): error TS1005: ';' expected.
-privateNamesAndStaticMethods.ts(24,12): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(24,13): error TS1005: ';' expected.
 privateNamesAndStaticMethods.ts(26,9): error TS2349: This expression is not callable.
-privateNamesAndStaticMethods.ts(27,11): error TS1003: Identifier expected.
-privateNamesAndStaticMethods.ts(27,11): error TS1127: Invalid character.
-privateNamesAndStaticMethods.ts(27,12): error TS1005: ';' expected.
 
 
-==== privateNamesAndStaticMethods.ts (52 errors) ====
+==== privateNamesAndStaticMethods.ts (10 errors) ====
     class A {
         static #foo(a: number) {}
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~
+               ~~~~
 !!! error TS1005: ';' expected.
         static async #bar(a: number) {}
-                     ~
-!!! error TS1005: ';' expected.
-                     ~
-!!! error TS1127: Invalid character.
-                      ~~~
+                     ~~~~
 !!! error TS1005: ';' expected.
         static async *#baz(a: number) {
                      ~
 !!! error TS1003: Identifier expected.
-                      ~
-!!! error TS1005: ';' expected.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~~~
+                      ~~~~
 !!! error TS1005: ';' expected.
             return 3;
         }
         static #_quux: number;
-               ~
+               ~~~~~~
 !!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~
-!!! error TS1005: ';' expected.
-                ~~~~~
-!!! error TS2564: Property '_quux' has no initializer and is not definitely assigned in the constructor.
+               ~~~~~~
+!!! error TS2564: Property '#_quux' has no initializer and is not definitely assigned in the constructor.
         static get #quux (): number {
-                   ~
-!!! error TS1005: ';' expected.
-                   ~
-!!! error TS1127: Invalid character.
-                    ~~~~
+                   ~~~~~
 !!! error TS1005: ';' expected.
             return this.#_quux;
-                        ~
-!!! error TS1003: Identifier expected.
-                        ~
-!!! error TS1127: Invalid character.
-                         ~~~~~
-!!! error TS1005: ';' expected.
-                         ~~~~~~
         }
-    ~~~~
-!!! error TS7027: Unreachable code detected.
         static set #quux (val: number) {
-                   ~
-!!! error TS1005: ';' expected.
-                   ~
-!!! error TS1127: Invalid character.
-                    ~~~~
+                   ~~~~~
 !!! error TS1005: ';' expected.
             this.#_quux = val;
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~
-!!! error TS1005: ';' expected.
         }
         constructor () {
             A.#foo(30);
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~
-!!! error TS1005: ';' expected.
             A.#bar(30);
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~
-!!! error TS1005: ';' expected.
             A.#bar(30);
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~
-!!! error TS1005: ';' expected.
             A.#quux = A.#quux + 1;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~
-!!! error TS1005: ';' expected.
-                        ~
-!!! error TS1003: Identifier expected.
-                        ~
-!!! error TS1127: Invalid character.
-                         ~~~~
-!!! error TS1005: ';' expected.
             A.#quux++;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~
-!!! error TS1005: ';' expected.
      }
     }
     
     class B extends A {
         static #foo(a: string) {}
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~
+               ~~~~
 !!! error TS1005: ';' expected.
         constructor () {
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.
             B.#foo("str");
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~
-!!! error TS1005: ';' expected.
         }
     }

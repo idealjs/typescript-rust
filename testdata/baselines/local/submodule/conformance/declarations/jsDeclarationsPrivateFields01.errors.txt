@@ -1,109 +1,34 @@
-file.js(2,5): error TS1003: Identifier expected.
-file.js(2,5): error TS1127: Invalid character.
-file.js(2,6): error TS1005: ';' expected.
-file.js(3,5): error TS1003: Identifier expected.
-file.js(3,5): error TS1127: Invalid character.
-file.js(3,6): error TS1005: ';' expected.
-file.js(5,5): error TS1003: Identifier expected.
-file.js(5,5): error TS1127: Invalid character.
-file.js(5,6): error TS1005: ';' expected.
-file.js(6,21): error TS1003: Identifier expected.
-file.js(6,21): error TS1127: Invalid character.
-file.js(6,22): error TS1005: ';' expected.
-file.js(6,22): error TS7027: Unreachable code detected.
 file.js(9,9): error TS1005: ';' expected.
-file.js(9,9): error TS1127: Invalid character.
-file.js(9,10): error TS1005: ';' expected.
-file.js(10,21): error TS1003: Identifier expected.
-file.js(10,21): error TS1127: Invalid character.
-file.js(10,22): error TS1005: ';' expected.
-file.js(10,22): error TS7027: Unreachable code detected.
+file.js(10,28): error TS2339: Property 'toUpperCase' does not exist on type '"hello"'.
 file.js(13,9): error TS1005: ';' expected.
-file.js(13,9): error TS1127: Invalid character.
-file.js(13,10): error TS1005: ';' expected.
-file.js(18,21): error TS1003: Identifier expected.
-file.js(18,21): error TS1127: Invalid character.
-file.js(18,22): error TS1005: ';' expected.
-file.js(18,22): error TS7027: Unreachable code detected.
 
 
 ==== jsDeclarationsPrivateFields01.ts (0 errors) ====
     
-==== file.js (27 errors) ====
+==== file.js (3 errors) ====
     export class C {
         #hello = "hello";
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~
-!!! error TS1005: ';' expected.
         #world = 100;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~
-!!! error TS1005: ';' expected.
     
         #calcHello() {
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~~~~
-!!! error TS1005: ';' expected.
             return this.#hello;
-                        ~
-!!! error TS1003: Identifier expected.
-                        ~
-!!! error TS1127: Invalid character.
-                         ~~~~~
-!!! error TS1005: ';' expected.
-                         ~~~~~~
         }
-    ~~~~
-!!! error TS7027: Unreachable code detected.
     
         get #screamingHello() {
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~~~~~~~~~~~
+            ~~~~~~~~~~~~~~~
 !!! error TS1005: ';' expected.
             return this.#hello.toUpperCase();
-                        ~
-!!! error TS1003: Identifier expected.
-                        ~
-!!! error TS1127: Invalid character.
-                         ~~~~~
-!!! error TS1005: ';' expected.
-                         ~~~~~~~~~~~~~~~~~~~~
+                               ~~~~~~~~~~~
+!!! error TS2339: Property 'toUpperCase' does not exist on type '"hello"'.
         }
-    ~~~~
-!!! error TS7027: Unreachable code detected.
         /** @param value {string} */
         set #screamingHello(value) {
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~~~~~~~~~~~
+            ~~~~~~~~~~~~~~~
 !!! error TS1005: ';' expected.
             throw "NO";
         }
     
         getWorld() {
             return this.#world;
-                        ~
-!!! error TS1003: Identifier expected.
-                        ~
-!!! error TS1127: Invalid character.
-                         ~~~~~
-!!! error TS1005: ';' expected.
-                         ~~~~~~
         }
-    ~~~~
-!!! error TS7027: Unreachable code detected.
     }

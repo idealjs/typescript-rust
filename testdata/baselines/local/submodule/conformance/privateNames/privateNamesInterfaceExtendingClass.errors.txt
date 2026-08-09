@@ -1,51 +1,21 @@
-privateNamesInterfaceExtendingClass.ts(2,5): error TS1003: Identifier expected.
-privateNamesInterfaceExtendingClass.ts(2,5): error TS1127: Invalid character.
-privateNamesInterfaceExtendingClass.ts(2,6): error TS1005: ';' expected.
-privateNamesInterfaceExtendingClass.ts(4,11): error TS1003: Identifier expected.
-privateNamesInterfaceExtendingClass.ts(4,11): error TS1127: Invalid character.
-privateNamesInterfaceExtendingClass.ts(4,11): error TS2339: Property '#' does not exist on type 'object'.
-privateNamesInterfaceExtendingClass.ts(4,12): error TS1005: ';' expected.
-privateNamesInterfaceExtendingClass.ts(10,7): error TS1003: Identifier expected.
-privateNamesInterfaceExtendingClass.ts(10,7): error TS1127: Invalid character.
-privateNamesInterfaceExtendingClass.ts(10,7): error TS2339: Property '#' does not exist on type 'object'.
-privateNamesInterfaceExtendingClass.ts(10,8): error TS1005: ';' expected.
-privateNamesInterfaceExtendingClass.ts(10,8): error TS2304: Cannot find name 'prop'.
+privateNamesInterfaceExtendingClass.ts(4,11): error TS2339: Property '#prop' does not exist on type 'object'.
+privateNamesInterfaceExtendingClass.ts(10,7): error TS2339: Property '#prop' does not exist on type 'object'.
 
 
-==== privateNamesInterfaceExtendingClass.ts (12 errors) ====
+==== privateNamesInterfaceExtendingClass.ts (2 errors) ====
     class C {
         #prop;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~
-!!! error TS1005: ';' expected.
         func(x: I) {
             x.#prop = 123;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-              ~
-!!! error TS2339: Property '#' does not exist on type 'object'.
-               ~~~~
-!!! error TS1005: ';' expected.
+              ~~~~~
+!!! error TS2339: Property '#prop' does not exist on type 'object'.
         }
     }
     interface I extends C {}
     
     function func(x: I) {
         x.#prop = 123;
-          ~
-!!! error TS1003: Identifier expected.
-          ~
-!!! error TS1127: Invalid character.
-          ~
-!!! error TS2339: Property '#' does not exist on type 'object'.
-           ~~~~
-!!! error TS1005: ';' expected.
-           ~~~~
-!!! error TS2304: Cannot find name 'prop'.
+          ~~~~~
+!!! error TS2339: Property '#prop' does not exist on type 'object'.
     }
     

@@ -1,15 +1,7 @@
 file2.ts(2,21): error TS1005: ';' expected.
-file2.ts(2,21): error TS1127: Invalid character.
-file2.ts(2,22): error TS1005: ';' expected.
 file4.ts(2,14): error TS1005: ';' expected.
-file4.ts(2,14): error TS1127: Invalid character.
-file4.ts(2,15): error TS1005: ';' expected.
 file5.ts(3,14): error TS1005: ';' expected.
-file5.ts(3,14): error TS1127: Invalid character.
-file5.ts(3,15): error TS1005: ';' expected.
 file6.ts(2,14): error TS1005: ';' expected.
-file6.ts(2,14): error TS1127: Invalid character.
-file6.ts(2,15): error TS1005: ';' expected.
 
 
 ==== autoAccessorNoUseDefineForClassFields.ts (0 errors) ====
@@ -20,14 +12,10 @@ file6.ts(2,15): error TS1005: ';' expected.
         static accessor x = 0;
     }
     
-==== file2.ts (3 errors) ====
+==== file2.ts (1 errors) ====
     class C2 {
         static accessor #x = 0;
-                        ~
-!!! error TS1005: ';' expected.
-                        ~
-!!! error TS1127: Invalid character.
-                         ~
+                        ~~
 !!! error TS1005: ';' expected.
     }
     
@@ -42,37 +30,25 @@ file6.ts(2,15): error TS1005: ';' expected.
         accessor x = 0;
     }
     
-==== file4.ts (3 errors) ====
+==== file4.ts (1 errors) ====
     class C4 {
         accessor #x = 0;
-                 ~
-!!! error TS1005: ';' expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~
+                 ~~
 !!! error TS1005: ';' expected.
     }
     
-==== file5.ts (3 errors) ====
+==== file5.ts (1 errors) ====
     class C5 {
         x = 0;
         accessor #x = 1;
-                 ~
-!!! error TS1005: ';' expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~
+                 ~~
 !!! error TS1005: ';' expected.
     }
     
-==== file6.ts (3 errors) ====
+==== file6.ts (1 errors) ====
     class C6 {
         accessor #x = 0;
-                 ~
-!!! error TS1005: ';' expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~
+                 ~~
 !!! error TS1005: ';' expected.
         x = 1;
     }

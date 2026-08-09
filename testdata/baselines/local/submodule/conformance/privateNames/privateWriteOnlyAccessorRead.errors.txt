@@ -1,211 +1,58 @@
 privateWriteOnlyAccessorRead.ts(2,7): error TS1005: ';' expected.
-privateWriteOnlyAccessorRead.ts(2,7): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(2,8): error TS1005: ';' expected.
 privateWriteOnlyAccessorRead.ts(3,7): error TS1005: ';' expected.
-privateWriteOnlyAccessorRead.ts(3,7): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(3,8): error TS1005: ';' expected.
 privateWriteOnlyAccessorRead.ts(4,7): error TS1005: ';' expected.
-privateWriteOnlyAccessorRead.ts(4,7): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(4,8): error TS1005: ';' expected.
 privateWriteOnlyAccessorRead.ts(5,7): error TS1005: ';' expected.
-privateWriteOnlyAccessorRead.ts(5,7): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(5,8): error TS1005: ';' expected.
-privateWriteOnlyAccessorRead.ts(9,22): error TS1003: Identifier expected.
-privateWriteOnlyAccessorRead.ts(9,22): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(9,23): error TS1005: ',' expected.
-privateWriteOnlyAccessorRead.ts(10,10): error TS1003: Identifier expected.
-privateWriteOnlyAccessorRead.ts(10,10): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(10,11): error TS1005: ';' expected.
-privateWriteOnlyAccessorRead.ts(11,10): error TS1003: Identifier expected.
-privateWriteOnlyAccessorRead.ts(11,10): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(11,11): error TS1005: ';' expected.
-privateWriteOnlyAccessorRead.ts(12,10): error TS1003: Identifier expected.
-privateWriteOnlyAccessorRead.ts(12,10): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(12,11): error TS1005: ';' expected.
-privateWriteOnlyAccessorRead.ts(14,16): error TS1003: Identifier expected.
-privateWriteOnlyAccessorRead.ts(14,16): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(14,17): error TS1005: ',' expected.
-privateWriteOnlyAccessorRead.ts(15,16): error TS1003: Identifier expected.
-privateWriteOnlyAccessorRead.ts(15,16): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(15,17): error TS1005: ',' expected.
-privateWriteOnlyAccessorRead.ts(17,18): error TS1003: Identifier expected.
-privateWriteOnlyAccessorRead.ts(17,18): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(17,19): error TS1005: ',' expected.
-privateWriteOnlyAccessorRead.ts(17,24): error TS1005: ',' expected.
-privateWriteOnlyAccessorRead.ts(17,25): error TS1005: ',' expected.
-privateWriteOnlyAccessorRead.ts(19,22): error TS1003: Identifier expected.
-privateWriteOnlyAccessorRead.ts(19,22): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(19,23): error TS1005: ',' expected.
-privateWriteOnlyAccessorRead.ts(19,28): error TS1005: ',' expected.
-privateWriteOnlyAccessorRead.ts(19,29): error TS1005: ',' expected.
-privateWriteOnlyAccessorRead.ts(22,23): error TS1003: Identifier expected.
-privateWriteOnlyAccessorRead.ts(22,23): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(22,24): error TS1005: ',' expected.
-privateWriteOnlyAccessorRead.ts(24,11): error TS1003: Identifier expected.
-privateWriteOnlyAccessorRead.ts(24,11): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(24,12): error TS1005: ',' expected.
-privateWriteOnlyAccessorRead.ts(24,30): error TS1003: Identifier expected.
-privateWriteOnlyAccessorRead.ts(24,30): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(24,31): error TS1005: ',' expected.
-privateWriteOnlyAccessorRead.ts(26,14): error TS1003: Identifier expected.
-privateWriteOnlyAccessorRead.ts(26,14): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(26,15): error TS1005: ',' expected.
-privateWriteOnlyAccessorRead.ts(27,17): error TS1003: Identifier expected.
-privateWriteOnlyAccessorRead.ts(27,17): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(27,18): error TS1005: ',' expected.
-privateWriteOnlyAccessorRead.ts(30,10): error TS1003: Identifier expected.
-privateWriteOnlyAccessorRead.ts(30,10): error TS1127: Invalid character.
-privateWriteOnlyAccessorRead.ts(30,11): error TS1005: ';' expected.
+privateWriteOnlyAccessorRead.ts(12,17): error TS2339: Property 'foo' does not exist on type '(v: { foo: { bar: number } }) => any'.
+privateWriteOnlyAccessorRead.ts(17,25): error TS2339: Property 'foo' does not exist on type '(v: { foo: { bar: number } }) => any'.
+privateWriteOnlyAccessorRead.ts(19,29): error TS2339: Property 'foo' does not exist on type '(v: { foo: { bar: number } }) => any'.
 privateWriteOnlyAccessorRead.ts(33,5): error TS2349: This expression is not callable.
 
 
-==== privateWriteOnlyAccessorRead.ts (59 errors) ====
+==== privateWriteOnlyAccessorRead.ts (8 errors) ====
     class Test {
       set #value(v: { foo: { bar: number } }) {}
-          ~
-!!! error TS1005: ';' expected.
-          ~
-!!! error TS1127: Invalid character.
-           ~~~~~
+          ~~~~~~
 !!! error TS1005: ';' expected.
       set #valueRest(v: number[]) {}
-          ~
-!!! error TS1005: ';' expected.
-          ~
-!!! error TS1127: Invalid character.
-           ~~~~~~~~~
+          ~~~~~~~~~~
 !!! error TS1005: ';' expected.
       set #valueOne(v: number) {}
-          ~
-!!! error TS1005: ';' expected.
-          ~
-!!! error TS1127: Invalid character.
-           ~~~~~~~~
+          ~~~~~~~~~
 !!! error TS1005: ';' expected.
       set #valueCompound(v: number) {}
-          ~
-!!! error TS1005: ';' expected.
-          ~
-!!! error TS1127: Invalid character.
-           ~~~~~~~~~~~~~
+          ~~~~~~~~~~~~~~
 !!! error TS1005: ';' expected.
     
       m() {
         const foo = { bar: 1 };
         console.log(this.#value); // error
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ',' expected.
         this.#value = { foo }; // ok
-             ~
-!!! error TS1003: Identifier expected.
-             ~
-!!! error TS1127: Invalid character.
-              ~~~~~
-!!! error TS1005: ';' expected.
         this.#value = { foo }; // ok
-             ~
-!!! error TS1003: Identifier expected.
-             ~
-!!! error TS1127: Invalid character.
-              ~~~~~
-!!! error TS1005: ';' expected.
         this.#value.foo = foo; // error
-             ~
-!!! error TS1003: Identifier expected.
-             ~
-!!! error TS1127: Invalid character.
-              ~~~~~
-!!! error TS1005: ';' expected.
+                    ~~~
+!!! error TS2339: Property 'foo' does not exist on type '(v: { foo: { bar: number } }) => any'.
     
         ({ o: this.#value } = { o: { foo } }); //ok
-                   ~
-!!! error TS1003: Identifier expected.
-                   ~
-!!! error TS1127: Invalid character.
-                    ~~~~~
-!!! error TS1005: ',' expected.
         ({ ...this.#value } = { foo }); //ok
-                   ~
-!!! error TS1003: Identifier expected.
-                   ~
-!!! error TS1127: Invalid character.
-                    ~~~~~
-!!! error TS1005: ',' expected.
     
         ({ foo: this.#value.foo } = { foo }); //error
-                     ~
-!!! error TS1003: Identifier expected.
-                     ~
-!!! error TS1127: Invalid character.
-                      ~~~~~
-!!! error TS1005: ',' expected.
-                           ~
-!!! error TS1005: ',' expected.
                             ~~~
-!!! error TS1005: ',' expected.
+!!! error TS2339: Property 'foo' does not exist on type '(v: { foo: { bar: number } }) => any'.
         ({
           foo: { ...this.#value.foo },
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ',' expected.
-                               ~
-!!! error TS1005: ',' expected.
                                 ~~~
-!!! error TS1005: ',' expected.
+!!! error TS2339: Property 'foo' does not exist on type '(v: { foo: { bar: number } }) => any'.
         } = { foo }); //error
     
         let r = { o: this.#value }; //error
-                          ~
-!!! error TS1003: Identifier expected.
-                          ~
-!!! error TS1127: Invalid character.
-                           ~~~~~
-!!! error TS1005: ',' expected.
     
         [this.#valueOne, ...this.#valueRest] = [1, 2, 3];
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~~~~
-!!! error TS1005: ',' expected.
-                                 ~
-!!! error TS1003: Identifier expected.
-                                 ~
-!!! error TS1127: Invalid character.
-                                  ~~~~~~~~~
-!!! error TS1005: ',' expected.
         let arr = [
             this.#valueOne,
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~~~~
-!!! error TS1005: ',' expected.
             ...this.#valueRest
-                    ~
-!!! error TS1003: Identifier expected.
-                    ~
-!!! error TS1127: Invalid character.
-                     ~~~~~~~~~
-!!! error TS1005: ',' expected.
         ];
     
         this.#valueCompound += 3;
-             ~
-!!! error TS1003: Identifier expected.
-             ~
-!!! error TS1127: Invalid character.
-              ~~~~~~~~~~~~~
-!!! error TS1005: ';' expected.
       }
     }
     new Test().m();

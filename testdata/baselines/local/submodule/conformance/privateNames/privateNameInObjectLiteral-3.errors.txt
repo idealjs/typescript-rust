@@ -1,20 +1,23 @@
-privateNameInObjectLiteral-3.ts(2,5): error TS2304: Cannot find name 'get'.
-privateNameInObjectLiteral-3.ts(2,9): error TS1005: ',' expected.
-privateNameInObjectLiteral-3.ts(2,9): error TS1127: Invalid character.
-privateNameInObjectLiteral-3.ts(2,10): error TS1005: ',' expected.
+privateNameInObjectLiteral-3.ts(2,13): error TS1005: '{' expected.
+privateNameInObjectLiteral-3.ts(2,14): error TS1012: Unexpected token.
+privateNameInObjectLiteral-3.ts(2,16): error TS1005: ')' expected.
+privateNameInObjectLiteral-3.ts(5,2): error TS1005: ',' expected.
+privateNameInObjectLiteral-3.ts(5,3): error TS1005: '}' expected.
 
 
-==== privateNameInObjectLiteral-3.ts (4 errors) ====
+==== privateNameInObjectLiteral-3.ts (5 errors) ====
     const obj = {
         get #foo() {
-        ~~~
-!!! error TS2304: Cannot find name 'get'.
-            ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~
-!!! error TS1005: ',' expected.
+                ~
+!!! error TS1005: '{' expected.
+                 ~
+!!! error TS1012: Unexpected token.
+                   ~
+!!! error TS1005: ')' expected.
             return ""
         }
     };
+     ~
+!!! error TS1005: ',' expected.
+      
+!!! error TS1005: '}' expected.

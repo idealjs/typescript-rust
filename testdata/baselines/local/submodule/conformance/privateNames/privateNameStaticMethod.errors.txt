@@ -1,50 +1,17 @@
 privateNameStaticMethod.ts(2,12): error TS1005: ';' expected.
-privateNameStaticMethod.ts(2,12): error TS1127: Invalid character.
-privateNameStaticMethod.ts(2,13): error TS1005: ';' expected.
-privateNameStaticMethod.ts(6,12): error TS1003: Identifier expected.
-privateNameStaticMethod.ts(6,12): error TS1127: Invalid character.
-privateNameStaticMethod.ts(6,13): error TS1005: ';' expected.
-privateNameStaticMethod.ts(7,12): error TS1003: Identifier expected.
-privateNameStaticMethod.ts(7,12): error TS1127: Invalid character.
-privateNameStaticMethod.ts(7,13): error TS1005: ';' expected.
-privateNameStaticMethod.ts(8,12): error TS1003: Identifier expected.
-privateNameStaticMethod.ts(8,12): error TS1127: Invalid character.
-privateNameStaticMethod.ts(8,13): error TS1005: ';' expected.
 
 
-==== privateNameStaticMethod.ts (12 errors) ====
+==== privateNameStaticMethod.ts (1 errors) ====
     class A1 {
         static #method(param: string): string {
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~~
+               ~~~~~~~
 !!! error TS1005: ';' expected.
             return "";
         }
         constructor() {
             A1.#method("")
-               ~
-!!! error TS1003: Identifier expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~~
-!!! error TS1005: ';' expected.
             A1.#method(1) // Error
-               ~
-!!! error TS1003: Identifier expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~~
-!!! error TS1005: ';' expected.
             A1.#method()  // Error 
-               ~
-!!! error TS1003: Identifier expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~~
-!!! error TS1005: ';' expected.
     
         }
     }

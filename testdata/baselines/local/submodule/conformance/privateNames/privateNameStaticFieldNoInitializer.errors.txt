@@ -1,28 +1,16 @@
 privateNameStaticFieldNoInitializer.ts(2,12): error TS1005: ';' expected.
-privateNameStaticFieldNoInitializer.ts(2,12): error TS1127: Invalid character.
-privateNameStaticFieldNoInitializer.ts(2,13): error TS1005: ';' expected.
 privateNameStaticFieldNoInitializer.ts(6,12): error TS1005: ';' expected.
-privateNameStaticFieldNoInitializer.ts(6,12): error TS1127: Invalid character.
-privateNameStaticFieldNoInitializer.ts(6,13): error TS1005: ';' expected.
 
 
-==== privateNameStaticFieldNoInitializer.ts (6 errors) ====
+==== privateNameStaticFieldNoInitializer.ts (2 errors) ====
     const C = class {
         static #x;
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~
+               ~~
 !!! error TS1005: ';' expected.
     }
     
     class C2 {
         static #x;
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~
+               ~~
 !!! error TS1005: ';' expected.
     }

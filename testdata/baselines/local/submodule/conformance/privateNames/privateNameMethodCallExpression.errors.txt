@@ -1,41 +1,11 @@
-error TS2451: Cannot redeclare block-scoped variable 'arr'.
-privateNameMethodCallExpression.ts(2,5): error TS1003: Identifier expected.
-privateNameMethodCallExpression.ts(2,5): error TS1127: Invalid character.
-privateNameMethodCallExpression.ts(2,6): error TS1005: ';' expected.
 privateNameMethodCallExpression.ts(2,31): error TS1003: Identifier expected.
-privateNameMethodCallExpression.ts(3,5): error TS1003: Identifier expected.
-privateNameMethodCallExpression.ts(3,5): error TS1127: Invalid character.
-privateNameMethodCallExpression.ts(3,6): error TS1005: ';' expected.
 privateNameMethodCallExpression.ts(3,25): error TS1003: Identifier expected.
-privateNameMethodCallExpression.ts(6,14): error TS1003: Identifier expected.
-privateNameMethodCallExpression.ts(6,14): error TS1127: Invalid character.
-privateNameMethodCallExpression.ts(6,15): error TS1005: ';' expected.
-privateNameMethodCallExpression.ts(7,27): error TS1003: Identifier expected.
-privateNameMethodCallExpression.ts(7,27): error TS1127: Invalid character.
-privateNameMethodCallExpression.ts(7,28): error TS1005: ',' expected.
-privateNameMethodCallExpression.ts(9,18): error TS1003: Identifier expected.
-privateNameMethodCallExpression.ts(9,18): error TS1127: Invalid character.
-privateNameMethodCallExpression.ts(9,19): error TS1005: ';' expected.
-privateNameMethodCallExpression.ts(12,14): error TS1003: Identifier expected.
-privateNameMethodCallExpression.ts(12,14): error TS1127: Invalid character.
-privateNameMethodCallExpression.ts(12,15): error TS1005: ';' expected.
-privateNameMethodCallExpression.ts(14,28): error TS1003: Identifier expected.
-privateNameMethodCallExpression.ts(14,28): error TS1127: Invalid character.
-privateNameMethodCallExpression.ts(14,29): error TS1005: ',' expected.
-privateNameMethodCallExpression.ts(14,36): error TS1005: ',' expected.
-privateNameMethodCallExpression.ts(14,37): error TS1134: Variable declaration expected.
-privateNameMethodCallExpression.ts(14,38): error TS1134: Variable declaration expected.
-privateNameMethodCallExpression.ts(14,40): error TS1134: Variable declaration expected.
-privateNameMethodCallExpression.ts(14,48): error TS1134: Variable declaration expected.
-privateNameMethodCallExpression.ts(14,49): error TS1134: Variable declaration expected.
-privateNameMethodCallExpression.ts(15,15): error TS1005: ';' expected.
-privateNameMethodCallExpression.ts(15,26): error TS1003: Identifier expected.
-privateNameMethodCallExpression.ts(15,26): error TS1127: Invalid character.
-privateNameMethodCallExpression.ts(15,27): error TS1005: ';' expected.
-privateNameMethodCallExpression.ts(15,34): error TS1005: ';' expected.
-privateNameMethodCallExpression.ts(15,41): error TS1005: ';' expected.
-privateNameMethodCallExpression.ts(15,43): error TS2304: Cannot find name 'middle$'.
+privateNameMethodCallExpression.ts(9,13): error TS2351: This expression is not constructable.
+privateNameMethodCallExpression.ts(14,23): error TS2351: This expression is not constructable.
+privateNameMethodCallExpression.ts(15,34): error TS1005: ',' expected.
+privateNameMethodCallExpression.ts(15,41): error TS1134: Variable declaration expected.
 privateNameMethodCallExpression.ts(15,50): error TS1005: ';' expected.
+privateNameMethodCallExpression.ts(15,51): error TS1005: ';' expected.
 privateNameMethodCallExpression.ts(15,53): error TS2304: Cannot find name 'tail'.
 privateNameMethodCallExpression.ts(15,57): error TS1005: ';' expected.
 privateNameMethodCallExpression.ts(16,37): error TS1005: ';' expected.
@@ -53,96 +23,37 @@ privateNameMethodCallExpression.ts(20,72): error TS1005: ';' expected.
 privateNameMethodCallExpression.ts(20,72): error TS1160: Unterminated template literal.
 
 
-!!! error TS2451: Cannot redeclare block-scoped variable 'arr'.
-==== privateNameMethodCallExpression.ts (52 errors) ====
+==== privateNameMethodCallExpression.ts (23 errors) ====
     class AA {
         #method() { this.x = 10; };
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~
-!!! error TS1005: ';' expected.
                                   ~
 !!! error TS1003: Identifier expected.
         #method2(a, ...b) {};
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~~
-!!! error TS1005: ';' expected.
                             ~
 !!! error TS1003: Identifier expected.
         x = 1;
         test() {
             this.#method();
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~~
-!!! error TS1005: ';' expected.
             const func = this.#method;
-                              ~
-!!! error TS1003: Identifier expected.
-                              ~
-!!! error TS1127: Invalid character.
-                               ~~~~~~
-!!! error TS1005: ',' expected.
             func();
             new this.#method();
-                     ~
-!!! error TS1003: Identifier expected.
-                     ~
-!!! error TS1127: Invalid character.
-                      ~~~~~~
-!!! error TS1005: ';' expected.
+                ~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
     
             const arr = [ 1, 2 ];
             this.#method2(0, ...arr, 3);
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~~~
-!!! error TS1005: ';' expected.
     
             const b = new this.#method2(0, ...arr, 3); //Error 
-                               ~
-!!! error TS1003: Identifier expected.
-                               ~
-!!! error TS1127: Invalid character.
-                                ~~~~~~~
-!!! error TS1005: ',' expected.
-                                       ~
-!!! error TS1005: ',' expected.
-                                        ~
-!!! error TS1134: Variable declaration expected.
-                                         ~
-!!! error TS1134: Variable declaration expected.
-                                           ~~~
-!!! error TS1134: Variable declaration expected.
-                                                   ~
-!!! error TS1134: Variable declaration expected.
-                                                    ~
-!!! error TS1134: Variable declaration expected.
+                          ~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
             const str = this.#method2`head${1}middle${2}tail`;
-                  ~~~
-!!! error TS1005: ';' expected.
-                             ~
-!!! error TS1003: Identifier expected.
-                             ~
-!!! error TS1127: Invalid character.
-                              ~~~~~~~
-!!! error TS1005: ';' expected.
                                      ~~~~~~~
-!!! error TS1005: ';' expected.
+!!! error TS1005: ',' expected.
                                             ~
-!!! error TS1005: ';' expected.
-                                              ~~~~~~~
-!!! error TS2304: Cannot find name 'middle$'.
+!!! error TS1134: Variable declaration expected.
                                                      ~
+!!! error TS1005: ';' expected.
+                                                      ~
 !!! error TS1005: ';' expected.
                                                         ~~~~
 !!! error TS2304: Cannot find name 'tail'.

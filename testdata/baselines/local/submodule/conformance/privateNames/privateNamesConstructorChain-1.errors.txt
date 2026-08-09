@@ -1,70 +1,19 @@
-privateNamesConstructorChain-1.ts(2,5): error TS1003: Identifier expected.
-privateNamesConstructorChain-1.ts(2,5): error TS1127: Invalid character.
-privateNamesConstructorChain-1.ts(2,6): error TS1005: ';' expected.
 privateNamesConstructorChain-1.ts(3,12): error TS1005: ';' expected.
-privateNamesConstructorChain-1.ts(3,12): error TS1127: Invalid character.
-privateNamesConstructorChain-1.ts(3,13): error TS1005: ';' expected.
-privateNamesConstructorChain-1.ts(5,21): error TS1003: Identifier expected.
-privateNamesConstructorChain-1.ts(5,21): error TS1127: Invalid character.
-privateNamesConstructorChain-1.ts(5,22): error TS1005: ';' expected.
-privateNamesConstructorChain-1.ts(6,15): error TS1003: Identifier expected.
-privateNamesConstructorChain-1.ts(6,15): error TS1127: Invalid character.
-privateNamesConstructorChain-1.ts(6,16): error TS1005: ';' expected.
-privateNamesConstructorChain-1.ts(11,5): error TS1003: Identifier expected.
-privateNamesConstructorChain-1.ts(11,5): error TS1127: Invalid character.
-privateNamesConstructorChain-1.ts(11,6): error TS1005: ';' expected.
-privateNamesConstructorChain-1.ts(12,5): error TS1003: Identifier expected.
-privateNamesConstructorChain-1.ts(12,5): error TS1127: Invalid character.
-privateNamesConstructorChain-1.ts(12,6): error TS1005: ';' expected.
 
 
-==== privateNamesConstructorChain-1.ts (18 errors) ====
+==== privateNamesConstructorChain-1.ts (1 errors) ====
     class Parent {
         #foo = 3;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~
-!!! error TS1005: ';' expected.
         static #bar = 5;
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~
+               ~~~~
 !!! error TS1005: ';' expected.
         accessChildProps() {
             new Child().#foo; // OK (`#foo` was added when `Parent`'s constructor was called on `child`)
-                        ~
-!!! error TS1003: Identifier expected.
-                        ~
-!!! error TS1127: Invalid character.
-                         ~~~
-!!! error TS1005: ';' expected.
             Child.#bar;       // Error: not found
-                  ~
-!!! error TS1003: Identifier expected.
-                  ~
-!!! error TS1127: Invalid character.
-                   ~~~
-!!! error TS1005: ';' expected.
         }
     }
     
     class Child extends Parent {
         #foo = "foo";       // OK (Child's #foo does not conflict, as `Parent`'s `#foo` is not accessible)
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~
-!!! error TS1005: ';' expected.
         #bar = "bar";       // OK
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~
-!!! error TS1005: ';' expected.
     }

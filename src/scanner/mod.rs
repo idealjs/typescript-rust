@@ -767,6 +767,50 @@ impl Scanner {
                 }
             }
 
+            // Private identifier: `#name` (ES2022 class fields).
+            // Mirrors Go scanner.go:897-925.
+            if c == '#' {
+                // Skip shebang at position 0.
+                if self.pos == 0
+                    && self.pos + 1 < self.end
+                    && self.text.as_bytes()[self.pos + 1] == b'!'
+                {
+                    // Shebang trivia — skip to end of line.
+                    self.pos += 2;
+                    while self.pos < self.end {
+                        let ch = self.text[self.pos..].chars().next().unwrap();
+                        if ch == '\n' || ch == '\r' {
+                            break;
+                        }
+                        self.pos += ch.len_utf8();
+                    }
+                    self.preceding_line_break = true;
+                    continue;
+                }
+                // Check if `#` is followed by an identifier start.
+                self.pos += 1; // consume `#`
+                if self.pos < self.end {
+                    let next_ch = self.text[self.pos..].chars().next().unwrap();
+                    if is_identifier_start(next_ch) {
+                        // Scan the identifier part after `#`.
+                        let text_str: &str = &self.text;
+                        while self.pos < self.end {
+                            let (nc, ns) = decode_char(text_str, self.pos);
+                            if !is_identifier_part(nc) {
+                                break;
+                            }
+                            self.pos += ns;
+                        }
+                        self.token_end = self.pos;
+                        self.token = SyntaxKind::PrivateIdentifier;
+                        break self.token;
+                    }
+                }
+                // Not a private identifier — report as hash token.
+                self.token_end = self.pos;
+                break SyntaxKind::HashToken;
+            }
+
             // Punctuation
             break self.scan_punctuation();
         };

@@ -1,216 +1,45 @@
-privateNameComputedPropertyName1.ts(2,5): error TS1003: Identifier expected.
-privateNameComputedPropertyName1.ts(2,5): error TS1127: Invalid character.
-privateNameComputedPropertyName1.ts(2,6): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(3,5): error TS1003: Identifier expected.
-privateNameComputedPropertyName1.ts(3,5): error TS1127: Invalid character.
-privateNameComputedPropertyName1.ts(3,6): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(3,6): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+privateNameComputedPropertyName1.ts(3,5): error TS2564: Property '#b' has no initializer and is not definitely assigned in the constructor.
 privateNameComputedPropertyName1.ts(5,14): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(5,14): error TS1127: Invalid character.
-privateNameComputedPropertyName1.ts(5,15): error TS1005: ';' expected.
 privateNameComputedPropertyName1.ts(6,14): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(6,14): error TS1127: Invalid character.
-privateNameComputedPropertyName1.ts(6,15): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(6,15): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
-privateNameComputedPropertyName1.ts(8,5): error TS1003: Identifier expected.
-privateNameComputedPropertyName1.ts(8,5): error TS1127: Invalid character.
-privateNameComputedPropertyName1.ts(8,6): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(11,14): error TS1003: Identifier expected.
-privateNameComputedPropertyName1.ts(11,14): error TS1127: Invalid character.
-privateNameComputedPropertyName1.ts(11,15): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(12,14): error TS1003: Identifier expected.
-privateNameComputedPropertyName1.ts(12,14): error TS1127: Invalid character.
-privateNameComputedPropertyName1.ts(12,15): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(17,15): error TS1182: A destructuring declaration must have an initializer.
-privateNameComputedPropertyName1.ts(18,19): error TS1003: Identifier expected.
-privateNameComputedPropertyName1.ts(18,19): error TS1127: Invalid character.
-privateNameComputedPropertyName1.ts(18,20): error TS1005: ']' expected.
-privateNameComputedPropertyName1.ts(18,21): error TS1005: ',' expected.
-privateNameComputedPropertyName1.ts(18,25): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(19,19): error TS1003: Identifier expected.
-privateNameComputedPropertyName1.ts(19,19): error TS1127: Invalid character.
-privateNameComputedPropertyName1.ts(19,20): error TS1005: ']' expected.
-privateNameComputedPropertyName1.ts(19,21): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(19,25): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(20,19): error TS1003: Identifier expected.
-privateNameComputedPropertyName1.ts(20,19): error TS1127: Invalid character.
-privateNameComputedPropertyName1.ts(20,20): error TS1005: ']' expected.
-privateNameComputedPropertyName1.ts(20,21): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(20,25): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(21,19): error TS1003: Identifier expected.
-privateNameComputedPropertyName1.ts(21,19): error TS1127: Invalid character.
-privateNameComputedPropertyName1.ts(21,20): error TS1005: ']' expected.
-privateNameComputedPropertyName1.ts(21,21): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(21,25): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(22,19): error TS1003: Identifier expected.
-privateNameComputedPropertyName1.ts(22,19): error TS1127: Invalid character.
-privateNameComputedPropertyName1.ts(22,20): error TS1005: ']' expected.
-privateNameComputedPropertyName1.ts(22,27): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(22,31): error TS1005: ';' expected.
-privateNameComputedPropertyName1.ts(23,11): error TS1128: Declaration or statement expected.
-privateNameComputedPropertyName1.ts(23,13): error TS2304: Cannot find name 'data'.
-privateNameComputedPropertyName1.ts(24,21): error TS2448: Block-scoped variable 'a' used before its declaration.
-privateNameComputedPropertyName1.ts(24,24): error TS2304: Cannot find name 'b'.
-privateNameComputedPropertyName1.ts(24,27): error TS2304: Cannot find name 'c'.
-privateNameComputedPropertyName1.ts(24,30): error TS2304: Cannot find name 'd'.
-privateNameComputedPropertyName1.ts(24,33): error TS2304: Cannot find name 'e'.
-privateNameComputedPropertyName1.ts(26,20): error TS2304: Cannot find name 'data'.
-privateNameComputedPropertyName1.ts(26,30): error TS1003: Identifier expected.
-privateNameComputedPropertyName1.ts(26,30): error TS1127: Invalid character.
-privateNameComputedPropertyName1.ts(26,31): error TS1005: ']' expected.
-privateNameComputedPropertyName1.ts(26,32): error TS1005: ',' expected.
+privateNameComputedPropertyName1.ts(6,14): error TS2564: Property '#d' has no initializer and is not definitely assigned in the constructor.
+privateNameComputedPropertyName1.ts(35,5): error TS2349: This expression is not callable.
 
 
-==== privateNameComputedPropertyName1.ts (61 errors) ====
+==== privateNameComputedPropertyName1.ts (5 errors) ====
     class A {
         #a = 'a';
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~
-!!! error TS1005: ';' expected.
         #b: string;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~
-!!! error TS1005: ';' expected.
-         ~
-!!! error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+        ~~
+!!! error TS2564: Property '#b' has no initializer and is not definitely assigned in the constructor.
     
         readonly #c = 'c';
-                 ~
-!!! error TS1005: ';' expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~
+                 ~~
 !!! error TS1005: ';' expected.
         readonly #d: string;
-                 ~
+                 ~~
 !!! error TS1005: ';' expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~
-!!! error TS1005: ';' expected.
-                  ~
-!!! error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
+                 ~~
+!!! error TS2564: Property '#d' has no initializer and is not definitely assigned in the constructor.
     
         #e = '';
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~
-!!! error TS1005: ';' expected.
     
         constructor() {
             this.#b = 'b';
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~
-!!! error TS1005: ';' expected.
             this.#d = 'd';
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~
-!!! error TS1005: ';' expected.
         }
     
         test() {
             const data: Record<string, string> = { a: 'a', b: 'b', c: 'c', d: 'd', e: 'e' };
             const {
-                  ~
                 [this.#a]: a,
-    ~~~~~~~~~~~~~~~~~~~~
-!!! error TS1182: A destructuring declaration must have an initializer.
-                      ~
-!!! error TS1003: Identifier expected.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~
-!!! error TS1005: ']' expected.
-                        ~
-!!! error TS1005: ',' expected.
-                            ~
-!!! error TS1005: ';' expected.
                 [this.#b]: b,
-                      ~
-!!! error TS1003: Identifier expected.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~
-!!! error TS1005: ']' expected.
-                        ~
-!!! error TS1005: ';' expected.
-                            ~
-!!! error TS1005: ';' expected.
                 [this.#c]: c,
-                      ~
-!!! error TS1003: Identifier expected.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~
-!!! error TS1005: ']' expected.
-                        ~
-!!! error TS1005: ';' expected.
-                            ~
-!!! error TS1005: ';' expected.
                 [this.#d]: d,
-                      ~
-!!! error TS1003: Identifier expected.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~
-!!! error TS1005: ']' expected.
-                        ~
-!!! error TS1005: ';' expected.
-                            ~
-!!! error TS1005: ';' expected.
                 [this.#e = 'e']: e,
-                      ~
-!!! error TS1003: Identifier expected.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~
-!!! error TS1005: ']' expected.
-                              ~
-!!! error TS1005: ';' expected.
-                                  ~
-!!! error TS1005: ';' expected.
             } = data;
-              ~
-!!! error TS1128: Declaration or statement expected.
-                ~~~~
-!!! error TS2304: Cannot find name 'data'.
             console.log(a, b, c, d, e);
-                        ~
-!!! error TS2448: Block-scoped variable 'a' used before its declaration.
-                           ~
-!!! error TS2304: Cannot find name 'b'.
-                              ~
-!!! error TS2304: Cannot find name 'c'.
-                                 ~
-!!! error TS2304: Cannot find name 'd'.
-                                    ~
-!!! error TS2304: Cannot find name 'e'.
     
             const a1 = data[this.#a];
-                       ~~~~
-!!! error TS2304: Cannot find name 'data'.
-                                 ~
-!!! error TS1003: Identifier expected.
-                                 ~
-!!! error TS1127: Invalid character.
-                                  ~
-!!! error TS1005: ']' expected.
-                                   ~
-!!! error TS1005: ',' expected.
             const b1 = data[this.#b];
             const c1 = data[this.#c];
             const d1 = data[this.#d];
@@ -220,4 +49,6 @@ privateNameComputedPropertyName1.ts(26,32): error TS1005: ',' expected.
     }
     
     new A().test();
+        ~
+!!! error TS2349: This expression is not callable.
     

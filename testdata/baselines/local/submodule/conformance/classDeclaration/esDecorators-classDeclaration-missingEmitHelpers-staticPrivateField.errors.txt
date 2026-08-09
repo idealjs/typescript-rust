@@ -1,9 +1,7 @@
 main.ts(7,17): error TS1005: ';' expected.
-main.ts(7,17): error TS1127: Invalid character.
-main.ts(7,18): error TS1005: ';' expected.
 
 
-==== main.ts (3 errors) ====
+==== main.ts (1 errors) ====
     export {}
     
     declare var dec: any;
@@ -11,11 +9,7 @@ main.ts(7,18): error TS1005: ';' expected.
     // needs: __esDecorate, __runInitializers
     class C {
         @dec static #x: any;
-                    ~
-!!! error TS1005: ';' expected.
-                    ~
-!!! error TS1127: Invalid character.
-                     ~
+                    ~~
 !!! error TS1005: ';' expected.
     }
     

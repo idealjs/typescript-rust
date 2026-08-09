@@ -1,290 +1,50 @@
 privateNameStaticFieldAssignment.ts(2,12): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(2,12): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(2,13): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(4,11): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(4,11): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(4,12): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(5,11): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(5,11): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(5,12): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(6,11): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(6,11): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(6,12): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(7,11): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(7,11): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(7,12): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(8,11): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(8,11): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(8,12): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(9,11): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(9,11): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(9,12): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(10,11): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(10,11): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(10,12): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(11,11): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(11,11): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(11,12): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(12,11): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(12,11): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(12,12): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(13,11): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(13,11): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(13,12): error TS1005: ';' expected.
 privateNameStaticFieldAssignment.ts(13,21): error TS1012: Unexpected token.
 privateNameStaticFieldAssignment.ts(13,23): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(14,11): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(14,11): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(14,12): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(15,11): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(15,11): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(15,12): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(16,11): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(16,11): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(16,12): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(17,22): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(17,22): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(17,23): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(18,22): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(18,22): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(18,23): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(19,22): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(19,22): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(19,23): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(20,22): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(20,22): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(20,23): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(21,22): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(21,22): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(21,23): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(22,22): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(22,22): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(22,23): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(23,22): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(23,22): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(23,23): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(24,22): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(24,22): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(24,23): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(25,22): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(25,22): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(25,23): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(26,22): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(26,22): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(26,23): error TS1005: ';' expected.
 privateNameStaticFieldAssignment.ts(26,32): error TS1012: Unexpected token.
 privateNameStaticFieldAssignment.ts(26,34): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(27,22): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(27,22): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(27,23): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(28,22): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(28,22): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(28,23): error TS1005: ';' expected.
-privateNameStaticFieldAssignment.ts(29,22): error TS1003: Identifier expected.
-privateNameStaticFieldAssignment.ts(29,22): error TS1127: Invalid character.
-privateNameStaticFieldAssignment.ts(29,23): error TS1005: ';' expected.
 
 
-==== privateNameStaticFieldAssignment.ts (85 errors) ====
+==== privateNameStaticFieldAssignment.ts (5 errors) ====
     class A {
         static #field = 0;
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~
+               ~~~~~~
 !!! error TS1005: ';' expected.
         constructor() {
             A.#field = 1;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~
-!!! error TS1005: ';' expected.
             A.#field += 2;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~
-!!! error TS1005: ';' expected.
             A.#field -= 3;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~
-!!! error TS1005: ';' expected.
             A.#field /= 4;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~
-!!! error TS1005: ';' expected.
             A.#field *= 5;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~
-!!! error TS1005: ';' expected.
             A.#field **= 6;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~
-!!! error TS1005: ';' expected.
             A.#field %= 7;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~
-!!! error TS1005: ';' expected.
             A.#field <<= 8;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~
-!!! error TS1005: ';' expected.
             A.#field >>= 9;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~
-!!! error TS1005: ';' expected.
             A.#field >>>= 10;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~
-!!! error TS1005: ';' expected.
                         ~
 !!! error TS1012: Unexpected token.
                           ~~
 !!! error TS1005: ';' expected.
             A.#field &= 11;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~
-!!! error TS1005: ';' expected.
             A.#field |= 12;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~
-!!! error TS1005: ';' expected.
             A.#field ^= 13;
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~
-!!! error TS1005: ';' expected.
             A.getClass().#field = 1;
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ';' expected.
             A.getClass().#field += 2;
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ';' expected.
             A.getClass().#field -= 3;
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ';' expected.
             A.getClass().#field /= 4;
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ';' expected.
             A.getClass().#field *= 5;
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ';' expected.
             A.getClass().#field **= 6;
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ';' expected.
             A.getClass().#field %= 7;
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ';' expected.
             A.getClass().#field <<= 8;
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ';' expected.
             A.getClass().#field >>= 9;
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ';' expected.
             A.getClass().#field >>>= 10;
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ';' expected.
                                    ~
 !!! error TS1012: Unexpected token.
                                      ~~
 !!! error TS1005: ';' expected.
             A.getClass().#field &= 11;
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ';' expected.
             A.getClass().#field |= 12;
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ';' expected.
             A.getClass().#field ^= 13;
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~~~
-!!! error TS1005: ';' expected.
         }
         static getClass() {
             return A;

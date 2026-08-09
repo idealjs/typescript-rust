@@ -1,79 +1,25 @@
-privateNameJsBadAssignment.js(1,9): error TS1003: Identifier expected.
-privateNameJsBadAssignment.js(1,9): error TS1127: Invalid character.
-privateNameJsBadAssignment.js(1,10): error TS1005: ';' expected.
-privateNameJsBadAssignment.js(1,10): error TS2304: Cannot find name 'nope'.
 privateNameJsBadAssignment.js(3,3): error TS2339: Property 'prototype' does not exist on type '() => void'.
-privateNameJsBadAssignment.js(3,13): error TS1003: Identifier expected.
-privateNameJsBadAssignment.js(3,13): error TS1127: Invalid character.
-privateNameJsBadAssignment.js(3,14): error TS1005: ';' expected.
-privateNameJsBadAssignment.js(3,14): error TS2304: Cannot find name 'no'.
-privateNameJsBadAssignment.js(6,3): error TS1003: Identifier expected.
-privateNameJsBadAssignment.js(6,3): error TS1127: Invalid character.
-privateNameJsBadAssignment.js(6,3): error TS2339: Property '#' does not exist on type 'object'.
-privateNameJsBadAssignment.js(6,4): error TS1005: ';' expected.
-privateNameJsBadAssignment.js(6,4): error TS2304: Cannot find name 'foo'.
-privateNameJsBadAssignment.js(9,5): error TS1003: Identifier expected.
-privateNameJsBadAssignment.js(9,5): error TS1127: Invalid character.
-privateNameJsBadAssignment.js(9,6): error TS1005: ';' expected.
-privateNameJsBadAssignment.js(11,14): error TS1003: Identifier expected.
-privateNameJsBadAssignment.js(11,14): error TS1127: Invalid character.
-privateNameJsBadAssignment.js(11,15): error TS1005: ';' expected.
-privateNameJsBadAssignment.js(11,15): error TS2304: Cannot find name 'foo'.
+privateNameJsBadAssignment.js(6,3): error TS2339: Property '#foo' does not exist on type 'object'.
+privateNameJsBadAssignment.js(11,14): error TS2339: Property '#foo' does not exist on type '{ #bar: 6 }'.
 
 
-==== privateNameJsBadAssignment.js (21 errors) ====
+==== privateNameJsBadAssignment.js (3 errors) ====
     exports.#nope = 1;           // Error (outside class body)
-            ~
-!!! error TS1003: Identifier expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~
-!!! error TS1005: ';' expected.
-             ~~~~
-!!! error TS2304: Cannot find name 'nope'.
     function A() { }
     A.prototype.#no = 2;         // Error (outside class body)
       ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type '() => void'.
-                ~
-!!! error TS1003: Identifier expected.
-                ~
-!!! error TS1127: Invalid character.
-                 ~~
-!!! error TS1005: ';' expected.
-                 ~~
-!!! error TS2304: Cannot find name 'no'.
     
     class B {}
     B.#foo = 3;                  // Error (outside class body)
-      ~
-!!! error TS1003: Identifier expected.
-      ~
-!!! error TS1127: Invalid character.
-      ~
-!!! error TS2339: Property '#' does not exist on type 'object'.
-       ~~~
-!!! error TS1005: ';' expected.
-       ~~~
-!!! error TS2304: Cannot find name 'foo'.
+      ~~~~
+!!! error TS2339: Property '#foo' does not exist on type 'object'.
     
     class C {
         #bar = 6;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~
-!!! error TS1005: ';' expected.
         constructor () {
             this.#foo = 3;       // Error (undeclared)
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~
-!!! error TS1005: ';' expected.
-                  ~~~
-!!! error TS2304: Cannot find name 'foo'.
+                 ~~~~
+!!! error TS2339: Property '#foo' does not exist on type '{ #bar: 6 }'.
         }
     }

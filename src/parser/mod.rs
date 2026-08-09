@@ -2846,6 +2846,7 @@ impl Parser {
             || self.token == SyntaxKind::StringLiteral
             || self.token == SyntaxKind::NumericLiteral
             || self.token == SyntaxKind::BigIntLiteral
+            || self.token == SyntaxKind::PrivateIdentifier
     }
 
     fn parse_identifier(&mut self) -> Arc<Node> {
@@ -2916,6 +2917,19 @@ impl Parser {
                 Arc::new(Node::with_loc(
                     SyntaxKind::ComputedPropertyName,
                     NodeData::ComputedPropertyName(ComputedPropertyNameData { expression }),
+                    TextRange::new(pos, end),
+                ))
+            }
+            SyntaxKind::PrivateIdentifier => {
+                // Private identifier as property name: `#field` in class
+                // declaration, or `obj.#prop` in member access.
+                let text = self.scanner.token_value();
+                let pos = self.token_pos();
+                let end = self.token_end();
+                self.next_token();
+                Arc::new(Node::with_loc(
+                    SyntaxKind::PrivateIdentifier,
+                    NodeData::PrivateIdentifier(PrivateIdentifierData { text }),
                     TextRange::new(pos, end),
                 ))
             }

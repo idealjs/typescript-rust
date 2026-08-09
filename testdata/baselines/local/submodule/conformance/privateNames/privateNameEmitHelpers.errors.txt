@@ -1,56 +1,14 @@
-main.ts(2,5): error TS1003: Identifier expected.
-main.ts(2,5): error TS1127: Invalid character.
-main.ts(2,6): error TS1005: ';' expected.
-main.ts(3,5): error TS1003: Identifier expected.
-main.ts(3,5): error TS1127: Invalid character.
-main.ts(3,6): error TS1005: ';' expected.
-main.ts(3,17): error TS1003: Identifier expected.
-main.ts(3,17): error TS1127: Invalid character.
-main.ts(3,18): error TS1005: ';' expected.
 main.ts(4,9): error TS1005: ';' expected.
-main.ts(4,9): error TS1127: Invalid character.
-main.ts(4,10): error TS1005: ';' expected.
-main.ts(4,30): error TS1003: Identifier expected.
-main.ts(4,30): error TS1127: Invalid character.
-main.ts(4,31): error TS1005: ';' expected.
 
 
 ==== privateNameEmitHelpers.ts (0 errors) ====
     
-==== main.ts (15 errors) ====
+==== main.ts (1 errors) ====
     export class C {
         #a = 1;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~
-!!! error TS1005: ';' expected.
         #b() { this.#c = 42; }
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~
-!!! error TS1005: ';' expected.
-                    ~
-!!! error TS1003: Identifier expected.
-                    ~
-!!! error TS1127: Invalid character.
-                     ~
-!!! error TS1005: ';' expected.
         set #c(v: number) { this.#a += v; }
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~
-!!! error TS1005: ';' expected.
-                                 ~
-!!! error TS1003: Identifier expected.
-                                 ~
-!!! error TS1127: Invalid character.
-                                  ~
+            ~~
 !!! error TS1005: ';' expected.
     }
     

@@ -1,32 +1,12 @@
-privateNamesUnique-3.ts(2,5): error TS1003: Identifier expected.
-privateNamesUnique-3.ts(2,5): error TS1127: Invalid character.
-privateNamesUnique-3.ts(2,6): error TS1005: ';' expected.
 privateNamesUnique-3.ts(3,12): error TS1005: ';' expected.
-privateNamesUnique-3.ts(3,12): error TS1127: Invalid character.
-privateNamesUnique-3.ts(3,13): error TS1005: ';' expected.
 privateNamesUnique-3.ts(9,12): error TS1005: ';' expected.
-privateNamesUnique-3.ts(9,12): error TS1127: Invalid character.
-privateNamesUnique-3.ts(9,13): error TS1005: ';' expected.
-privateNamesUnique-3.ts(11,11): error TS1003: Identifier expected.
-privateNamesUnique-3.ts(11,11): error TS1127: Invalid character.
-privateNamesUnique-3.ts(11,12): error TS1005: ';' expected.
 
 
-==== privateNamesUnique-3.ts (12 errors) ====
+==== privateNamesUnique-3.ts (2 errors) ====
     class A {
         #foo = 1;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~
-!!! error TS1005: ';' expected.
         static #foo = true; // error (duplicate)
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~
+               ~~~~
 !!! error TS1005: ';' expected.
                             // because static and instance private names
                             // share the same lexical scope
@@ -34,19 +14,9 @@ privateNamesUnique-3.ts(11,12): error TS1005: ';' expected.
     }
     class B {
         static #foo = true;
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~
+               ~~~~
 !!! error TS1005: ';' expected.
         test(x: B) {
             x.#foo; // error (#foo is a static property on B, not an instance property)
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~
-!!! error TS1005: ';' expected.
         }
     }

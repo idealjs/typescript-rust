@@ -1,12 +1,8 @@
 autoAccessorExperimentalDecorators.ts(13,14): error TS1005: ';' expected.
-autoAccessorExperimentalDecorators.ts(13,14): error TS1127: Invalid character.
-autoAccessorExperimentalDecorators.ts(13,15): error TS1005: ';' expected.
 autoAccessorExperimentalDecorators.ts(16,21): error TS1005: ';' expected.
-autoAccessorExperimentalDecorators.ts(16,21): error TS1127: Invalid character.
-autoAccessorExperimentalDecorators.ts(16,22): error TS1005: ';' expected.
 
 
-==== autoAccessorExperimentalDecorators.ts (6 errors) ====
+==== autoAccessorExperimentalDecorators.ts (2 errors) ====
     declare var dec: (target: any, key: PropertyKey, desc: PropertyDescriptor) => void;
     
     class C1 {
@@ -20,19 +16,11 @@ autoAccessorExperimentalDecorators.ts(16,22): error TS1005: ';' expected.
     class C2 {
         @dec
         accessor #a: any;
-                 ~
-!!! error TS1005: ';' expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~
+                 ~~
 !!! error TS1005: ';' expected.
     
         @dec
         static accessor #b: any;
-                        ~
-!!! error TS1005: ';' expected.
-                        ~
-!!! error TS1127: Invalid character.
-                         ~
+                        ~~
 !!! error TS1005: ';' expected.
     }

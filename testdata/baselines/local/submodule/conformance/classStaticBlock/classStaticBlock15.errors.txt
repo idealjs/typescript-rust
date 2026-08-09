@@ -1,38 +1,20 @@
 classStaticBlock15.ts(4,10): error TS1005: ';' expected.
-classStaticBlock15.ts(4,10): error TS1127: Invalid character.
-classStaticBlock15.ts(4,11): error TS1005: ';' expected.
 classStaticBlock15.ts(5,10): error TS1005: ';' expected.
-classStaticBlock15.ts(5,10): error TS1127: Invalid character.
-classStaticBlock15.ts(5,11): error TS1005: ';' expected.
 classStaticBlock15.ts(6,10): error TS1005: ';' expected.
-classStaticBlock15.ts(6,10): error TS1127: Invalid character.
-classStaticBlock15.ts(6,11): error TS1005: ';' expected.
 
 
-==== classStaticBlock15.ts (9 errors) ====
+==== classStaticBlock15.ts (3 errors) ====
     var _C__1;
     
     class C {
       static #_1 = 1;
-             ~
-!!! error TS1005: ';' expected.
-             ~
-!!! error TS1127: Invalid character.
-              ~~
+             ~~~
 !!! error TS1005: ';' expected.
       static #_3 = 3;
-             ~
-!!! error TS1005: ';' expected.
-             ~
-!!! error TS1127: Invalid character.
-              ~~
+             ~~~
 !!! error TS1005: ';' expected.
       static #_5 = 5;
-             ~
-!!! error TS1005: ';' expected.
-             ~
-!!! error TS1127: Invalid character.
-              ~~
+             ~~~
 !!! error TS1005: ';' expected.
     
       static {}

@@ -1,78 +1,24 @@
-privateNamesInNestedClasses-1.ts(2,4): error TS1003: Identifier expected.
-privateNamesInNestedClasses-1.ts(2,4): error TS1127: Invalid character.
-privateNamesInNestedClasses-1.ts(2,5): error TS1005: ';' expected.
-privateNamesInNestedClasses-1.ts(3,4): error TS1003: Identifier expected.
-privateNamesInNestedClasses-1.ts(3,4): error TS1127: Invalid character.
-privateNamesInNestedClasses-1.ts(3,5): error TS1005: ';' expected.
-privateNamesInNestedClasses-1.ts(6,12): error TS1003: Identifier expected.
-privateNamesInNestedClasses-1.ts(6,12): error TS1127: Invalid character.
-privateNamesInNestedClasses-1.ts(6,13): error TS1005: ';' expected.
-privateNamesInNestedClasses-1.ts(8,18): error TS1003: Identifier expected.
-privateNamesInNestedClasses-1.ts(8,18): error TS1127: Invalid character.
-privateNamesInNestedClasses-1.ts(8,19): error TS1005: ';' expected.
-privateNamesInNestedClasses-1.ts(11,18): error TS1003: Identifier expected.
-privateNamesInNestedClasses-1.ts(11,18): error TS1127: Invalid character.
-privateNamesInNestedClasses-1.ts(11,19): error TS1005: ';' expected.
-privateNamesInNestedClasses-1.ts(14,18): error TS1003: Identifier expected.
-privateNamesInNestedClasses-1.ts(14,18): error TS1127: Invalid character.
-privateNamesInNestedClasses-1.ts(14,19): error TS1005: ';' expected.
 privateNamesInNestedClasses-1.ts(18,12): error TS2349: This expression is not callable.
 privateNamesInNestedClasses-1.ts(19,12): error TS2349: This expression is not callable.
 privateNamesInNestedClasses-1.ts(21,12): error TS2349: This expression is not callable.
 privateNamesInNestedClasses-1.ts(25,5): error TS2349: This expression is not callable.
 
 
-==== privateNamesInNestedClasses-1.ts (22 errors) ====
+==== privateNamesInNestedClasses-1.ts (4 errors) ====
     class A {
        #foo = "A's #foo";
-       ~
-!!! error TS1003: Identifier expected.
-       ~
-!!! error TS1127: Invalid character.
-        ~~~
-!!! error TS1005: ';' expected.
        #bar = "A's #bar";
-       ~
-!!! error TS1003: Identifier expected.
-       ~
-!!! error TS1127: Invalid character.
-        ~~~
-!!! error TS1005: ';' expected.
        method () {
            class B {
                #foo = "B's #foo";
-               ~
-!!! error TS1003: Identifier expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~
-!!! error TS1005: ';' expected.
                bar (a: any) {
                    a.#foo; // OK, no compile-time error, don't know what `a` is
-                     ~
-!!! error TS1003: Identifier expected.
-                     ~
-!!! error TS1127: Invalid character.
-                      ~~~
-!!! error TS1005: ';' expected.
                }
                baz (a: A) {
                    a.#foo; // compile-time error, shadowed
-                     ~
-!!! error TS1003: Identifier expected.
-                     ~
-!!! error TS1127: Invalid character.
-                      ~~~
-!!! error TS1005: ';' expected.
                }
                quux (b: B) {
                    b.#foo; // OK
-                     ~
-!!! error TS1003: Identifier expected.
-                     ~
-!!! error TS1127: Invalid character.
-                      ~~~
-!!! error TS1005: ';' expected.
                }
            }
            const a = new A();

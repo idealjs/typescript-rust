@@ -1,21 +1,12 @@
-privateNamesUnique-4.ts(5,11): error TS1003: Identifier expected.
-privateNamesUnique-4.ts(5,11): error TS1127: Invalid character.
-privateNamesUnique-4.ts(5,12): error TS1005: ';' expected.
-privateNamesUnique-4.ts(5,12): error TS2564: Property 'something' has no initializer and is not definitely assigned in the constructor.
+privateNamesUnique-4.ts(5,11): error TS2564: Property '#something' has no initializer and is not definitely assigned in the constructor.
 
 
-==== privateNamesUnique-4.ts (4 errors) ====
+==== privateNamesUnique-4.ts (1 errors) ====
     class A1 { }
     interface A2 extends A1 { }
     declare const a: A2;
     
     class C { #something: number }
-              ~
-!!! error TS1003: Identifier expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~~~~~~~
-!!! error TS1005: ';' expected.
-               ~~~~~~~~~
-!!! error TS2564: Property 'something' has no initializer and is not definitely assigned in the constructor.
+              ~~~~~~~~~~
+!!! error TS2564: Property '#something' has no initializer and is not definitely assigned in the constructor.
     const c: C = a;

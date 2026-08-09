@@ -1,6 +1,3 @@
-plainJSBinderErrors.js(12,5): error TS1003: Identifier expected.
-plainJSBinderErrors.js(12,5): error TS1127: Invalid character.
-plainJSBinderErrors.js(12,6): error TS1005: ';' expected.
 plainJSBinderErrors.js(27,9): error TS2304: Cannot find name 'with'.
 plainJSBinderErrors.js(27,26): error TS1005: ';' expected.
 plainJSBinderErrors.js(28,20): error TS2304: Cannot find name 'toFixed'.
@@ -8,7 +5,7 @@ plainJSBinderErrors.js(34,13): error TS1116: A 'break' statement can only jump t
 plainJSBinderErrors.js(36,16): error TS2304: Cannot find name 'x'.
 
 
-==== plainJSBinderErrors.js (8 errors) ====
+==== plainJSBinderErrors.js (5 errors) ====
     export default 12
     export default 13
     const await = 1
@@ -21,12 +18,6 @@ plainJSBinderErrors.js(36,16): error TS2304: Cannot find name 'x'.
     }
     class C {
         #constructor = 5
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~~~~~~
-!!! error TS1005: ';' expected.
         deleted() {
             function container(f) {
                 delete f

@@ -1,106 +1,44 @@
-privateNameInInExpressionTransform.ts(2,5): error TS1003: Identifier expected.
-privateNameInInExpressionTransform.ts(2,5): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(2,6): error TS1005: ';' expected.
-privateNameInInExpressionTransform.ts(3,5): error TS1003: Identifier expected.
-privateNameInInExpressionTransform.ts(3,5): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(3,6): error TS1005: ';' expected.
 privateNameInInExpressionTransform.ts(4,12): error TS1005: ';' expected.
-privateNameInInExpressionTransform.ts(4,12): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(4,13): error TS1005: ';' expected.
 privateNameInInExpressionTransform.ts(5,12): error TS1005: ';' expected.
-privateNameInInExpressionTransform.ts(5,12): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(5,13): error TS1005: ';' expected.
-privateNameInInExpressionTransform.ts(8,9): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(8,9): error TS1128: Declaration or statement expected.
-privateNameInInExpressionTransform.ts(9,9): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(9,9): error TS1128: Declaration or statement expected.
-privateNameInInExpressionTransform.ts(10,9): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(10,9): error TS1128: Declaration or statement expected.
-privateNameInInExpressionTransform.ts(11,9): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(11,9): error TS1128: Declaration or statement expected.
+privateNameInInExpressionTransform.ts(8,9): error TS1012: Unexpected token.
+privateNameInInExpressionTransform.ts(9,9): error TS1012: Unexpected token.
+privateNameInInExpressionTransform.ts(10,9): error TS1012: Unexpected token.
+privateNameInInExpressionTransform.ts(11,9): error TS1012: Unexpected token.
 privateNameInInExpressionTransform.ts(18,14): error TS1012: Unexpected token.
-privateNameInInExpressionTransform.ts(18,14): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(18,15): error TS1005: ';' expected.
 privateNameInInExpressionTransform.ts(20,14): error TS1012: Unexpected token.
-privateNameInInExpressionTransform.ts(20,14): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(20,15): error TS1005: ';' expected.
 privateNameInInExpressionTransform.ts(22,14): error TS1012: Unexpected token.
-privateNameInInExpressionTransform.ts(22,14): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(22,15): error TS1005: ';' expected.
 privateNameInInExpressionTransform.ts(24,14): error TS1012: Unexpected token.
-privateNameInInExpressionTransform.ts(24,14): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(24,15): error TS1005: ';' expected.
-privateNameInInExpressionTransform.ts(26,9): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(26,9): error TS1128: Declaration or statement expected.
+privateNameInInExpressionTransform.ts(26,9): error TS1012: Unexpected token.
 privateNameInInExpressionTransform.ts(26,24): error TS1012: Unexpected token.
-privateNameInInExpressionTransform.ts(26,24): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(26,25): error TS1005: ';' expected.
-privateNameInInExpressionTransform.ts(30,9): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(30,9): error TS1128: Declaration or statement expected.
-privateNameInInExpressionTransform.ts(35,5): error TS1003: Identifier expected.
-privateNameInInExpressionTransform.ts(35,5): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(35,6): error TS1005: ';' expected.
-privateNameInInExpressionTransform.ts(37,9): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(37,9): error TS1128: Declaration or statement expected.
+privateNameInInExpressionTransform.ts(30,9): error TS1012: Unexpected token.
+privateNameInInExpressionTransform.ts(37,9): error TS1012: Unexpected token.
 privateNameInInExpressionTransform.ts(42,12): error TS1012: Unexpected token.
-privateNameInInExpressionTransform.ts(42,12): error TS1127: Invalid character.
-privateNameInInExpressionTransform.ts(42,13): error TS1005: ';' expected.
-privateNameInInExpressionTransform.ts(42,13): error TS2304: Cannot find name 'field'.
-privateNameInInExpressionTransform.ts(42,13): error TS7027: Unreachable code detected.
 
 
-==== privateNameInInExpressionTransform.ts (49 errors) ====
+==== privateNameInInExpressionTransform.ts (15 errors) ====
     class Foo {
         #field = 1;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~
-!!! error TS1005: ';' expected.
         #method() {}
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~
-!!! error TS1005: ';' expected.
         static #staticField= 2;
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~~~~~~~
+               ~~~~~~~~~~~~
 !!! error TS1005: ';' expected.
         static #staticMethod() {}
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~~~~~~~~
+               ~~~~~~~~~~~~~
 !!! error TS1005: ';' expected.
     
         check(v: any) {
             #field in v; // expect Foo's 'field' WeakMap
-            ~
-!!! error TS1127: Invalid character.
-            ~
-!!! error TS1128: Declaration or statement expected.
+            ~~~~~~
+!!! error TS1012: Unexpected token.
             #method in v; // expect Foo's 'instances' WeakSet
-            ~
-!!! error TS1127: Invalid character.
-            ~
-!!! error TS1128: Declaration or statement expected.
+            ~~~~~~~
+!!! error TS1012: Unexpected token.
             #staticField in v; // expect Foo's constructor
-            ~
-!!! error TS1127: Invalid character.
-            ~
-!!! error TS1128: Declaration or statement expected.
+            ~~~~~~~~~~~~
+!!! error TS1012: Unexpected token.
             #staticMethod in v; // expect Foo's constructor
-            ~
-!!! error TS1127: Invalid character.
-            ~
-!!! error TS1128: Declaration or statement expected.
+            ~~~~~~~~~~~~~
+!!! error TS1012: Unexpected token.
         }
         precedence(v: any) {
             // '==' and '||' have lower precedence than 'in'
@@ -108,89 +46,48 @@ privateNameInInExpressionTransform.ts(42,13): error TS7027: Unreachable code det
             // '<<' has higher precedence than 'in'
     
             v == #field in v || v; // Good precedence: (v == (#field in v)) || v
-                 ~
+                 ~~~~~~
 !!! error TS1012: Unexpected token.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~
-!!! error TS1005: ';' expected.
     
             v << #field in v << v; // Good precedence (SyntaxError): (v << #field) in (v << v)
-                 ~
+                 ~~~~~~
 !!! error TS1012: Unexpected token.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~
-!!! error TS1005: ';' expected.
     
             v << #field in v == v; // Good precedence (SyntaxError): ((v << #field) in v) == v
-                 ~
+                 ~~~~~~
 !!! error TS1012: Unexpected token.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~
-!!! error TS1005: ';' expected.
     
             v == #field in v in v; // Good precedence: v == ((#field in v) in v)
-                 ~
+                 ~~~~~~
 !!! error TS1012: Unexpected token.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~
-!!! error TS1005: ';' expected.
     
             #field in v && #field in v; // Good precedence: (#field in v) && (#field in v)
-            ~
-!!! error TS1127: Invalid character.
-            ~
-!!! error TS1128: Declaration or statement expected.
-                           ~
+            ~~~~~~
 !!! error TS1012: Unexpected token.
-                           ~
-!!! error TS1127: Invalid character.
-                            ~~~~~
-!!! error TS1005: ';' expected.
+                           ~~~~~~
+!!! error TS1012: Unexpected token.
         }
         invalidLHS(v: any) {
             'prop' in v = 10;
             #field in v = 10;
-            ~
-!!! error TS1127: Invalid character.
-            ~
-!!! error TS1128: Declaration or statement expected.
+            ~~~~~~
+!!! error TS1012: Unexpected token.
         }
     }
     
     class Bar {
         #field = 1;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~
-!!! error TS1005: ';' expected.
         check(v: any) {
             #field in v; // expect Bar's 'field' WeakMap
-            ~
-!!! error TS1127: Invalid character.
-            ~
-!!! error TS1128: Declaration or statement expected.
+            ~~~~~~
+!!! error TS1012: Unexpected token.
         }
     }
     
     function syntaxError(v: Foo) {
         return #field in v; // expect `return in v` so runtime will have a syntax error
-               ~
+               ~~~~~~
 !!! error TS1012: Unexpected token.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~
-!!! error TS1005: ';' expected.
-                ~~~~~
-!!! error TS2304: Cannot find name 'field'.
-                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     }
-    
-!!! error TS7027: Unreachable code detected.
     
     export { }

@@ -1,19 +1,10 @@
-privateNameLateSuperUseDefineForClassFields.ts(3,5): error TS1003: Identifier expected.
-privateNameLateSuperUseDefineForClassFields.ts(3,5): error TS1127: Invalid character.
-privateNameLateSuperUseDefineForClassFields.ts(3,6): error TS1005: ';' expected.
 privateNameLateSuperUseDefineForClassFields.ts(6,9): error TS2349: This expression is not callable.
 
 
-==== privateNameLateSuperUseDefineForClassFields.ts (4 errors) ====
+==== privateNameLateSuperUseDefineForClassFields.ts (1 errors) ====
     class B {}
     class A extends B {
         #x;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~
-!!! error TS1005: ';' expected.
         constructor() {
             void 0;
             super();

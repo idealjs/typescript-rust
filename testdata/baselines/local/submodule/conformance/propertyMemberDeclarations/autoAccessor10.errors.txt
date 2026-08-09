@@ -1,46 +1,28 @@
-autoAccessor10.ts(6,5): error TS1003: Identifier expected.
-autoAccessor10.ts(6,5): error TS1127: Invalid character.
-autoAccessor10.ts(6,6): error TS1005: ';' expected.
 autoAccessor10.ts(11,12): error TS1005: ';' expected.
-autoAccessor10.ts(11,12): error TS1127: Invalid character.
-autoAccessor10.ts(11,13): error TS1005: ';' expected.
-autoAccessor10.ts(16,17): error TS1127: Invalid character.
-autoAccessor10.ts(16,17): error TS1128: Declaration or statement expected.
+autoAccessor10.ts(16,17): error TS1012: Unexpected token.
 
 
-==== autoAccessor10.ts (8 errors) ====
+==== autoAccessor10.ts (2 errors) ====
     class C1 {
         accessor a0 = 1;
     }
     
     class C2 {
         #a1_accessor_storage = 1;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~~~~~~~~~~~~~~
-!!! error TS1005: ';' expected.
         accessor a1 = 2;
     }
     
     class C3 {
         static #a2_accessor_storage = 1;
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~~~~~~~~~~~~~~~
+               ~~~~~~~~~~~~~~~~~~~~
 !!! error TS1005: ';' expected.
         static {
             class C3_Inner {
                 accessor a2 = 2;
                 static {
                     #a2_accessor_storage in C3;
-                    ~
-!!! error TS1127: Invalid character.
-                    ~
-!!! error TS1128: Declaration or statement expected.
+                    ~~~~~~~~~~~~~~~~~~~~
+!!! error TS1012: Unexpected token.
                 }
             }
         }

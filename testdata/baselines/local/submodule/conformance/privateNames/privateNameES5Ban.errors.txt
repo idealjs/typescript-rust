@@ -1,87 +1,33 @@
-privateNameES5Ban.ts(3,5): error TS1003: Identifier expected.
-privateNameES5Ban.ts(3,5): error TS1127: Invalid character.
-privateNameES5Ban.ts(3,6): error TS1005: ';' expected.
-privateNameES5Ban.ts(4,5): error TS1003: Identifier expected.
-privateNameES5Ban.ts(4,5): error TS1127: Invalid character.
-privateNameES5Ban.ts(4,6): error TS1005: ';' expected.
 privateNameES5Ban.ts(5,12): error TS1005: ';' expected.
-privateNameES5Ban.ts(5,12): error TS1127: Invalid character.
-privateNameES5Ban.ts(5,13): error TS1005: ';' expected.
 privateNameES5Ban.ts(6,12): error TS1005: ';' expected.
-privateNameES5Ban.ts(6,12): error TS1127: Invalid character.
-privateNameES5Ban.ts(6,13): error TS1005: ';' expected.
 privateNameES5Ban.ts(7,9): error TS1005: ';' expected.
-privateNameES5Ban.ts(7,9): error TS1127: Invalid character.
-privateNameES5Ban.ts(7,10): error TS1005: ';' expected.
 privateNameES5Ban.ts(8,9): error TS1005: ';' expected.
-privateNameES5Ban.ts(8,9): error TS1127: Invalid character.
-privateNameES5Ban.ts(8,10): error TS1005: ';' expected.
 privateNameES5Ban.ts(9,16): error TS1005: ';' expected.
-privateNameES5Ban.ts(9,16): error TS1127: Invalid character.
-privateNameES5Ban.ts(9,17): error TS1005: ';' expected.
 privateNameES5Ban.ts(10,16): error TS1005: ';' expected.
-privateNameES5Ban.ts(10,16): error TS1127: Invalid character.
-privateNameES5Ban.ts(10,17): error TS1005: ';' expected.
 
 
-==== privateNameES5Ban.ts (24 errors) ====
+==== privateNameES5Ban.ts (6 errors) ====
     class A {
         constructor() {}
         #field = 123;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~
-!!! error TS1005: ';' expected.
         #method() {}
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~
-!!! error TS1005: ';' expected.
         static #sField = "hello world";
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~~
+               ~~~~~~~
 !!! error TS1005: ';' expected.
         static #sMethod() {}
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~~~
+               ~~~~~~~~
 !!! error TS1005: ';' expected.
         get #acc() { return ""; }
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~
+            ~~~~
 !!! error TS1005: ';' expected.
         set #acc(x: string) {}
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~
+            ~~~~
 !!! error TS1005: ';' expected.
         static get #sAcc() { return 0; }
-                   ~
-!!! error TS1005: ';' expected.
-                   ~
-!!! error TS1127: Invalid character.
-                    ~~~~
+                   ~~~~~
 !!! error TS1005: ';' expected.
         static set #sAcc(x: number) {}
-                   ~
-!!! error TS1005: ';' expected.
-                   ~
-!!! error TS1127: Invalid character.
-                    ~~~~
+                   ~~~~~
 !!! error TS1005: ';' expected.
     }
     

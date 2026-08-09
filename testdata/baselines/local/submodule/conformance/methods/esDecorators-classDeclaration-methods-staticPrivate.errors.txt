@@ -1,31 +1,19 @@
 esDecorators-classDeclaration-methods-staticPrivate.ts(4,17): error TS1005: ';' expected.
-esDecorators-classDeclaration-methods-staticPrivate.ts(4,17): error TS1127: Invalid character.
-esDecorators-classDeclaration-methods-staticPrivate.ts(4,18): error TS1005: ';' expected.
 esDecorators-classDeclaration-methods-staticPrivate.ts(9,12): error TS1005: ';' expected.
-esDecorators-classDeclaration-methods-staticPrivate.ts(9,12): error TS1127: Invalid character.
-esDecorators-classDeclaration-methods-staticPrivate.ts(9,13): error TS1005: ';' expected.
 
 
-==== esDecorators-classDeclaration-methods-staticPrivate.ts (6 errors) ====
+==== esDecorators-classDeclaration-methods-staticPrivate.ts (2 errors) ====
     declare let dec: any;
     
     class C {
         @dec static #method1() {}
-                    ~
-!!! error TS1005: ';' expected.
-                    ~
-!!! error TS1127: Invalid character.
-                     ~~~~~~~
+                    ~~~~~~~~
 !!! error TS1005: ';' expected.
     }
     
     @dec
     class D {
         static #method1() {}
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~~~
+               ~~~~~~~~
 !!! error TS1005: ';' expected.
     }

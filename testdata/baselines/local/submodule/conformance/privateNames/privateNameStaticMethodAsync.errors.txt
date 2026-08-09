@@ -1,194 +1,38 @@
 privateNameStaticMethodAsync.ts(2,18): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(2,18): error TS1127: Invalid character.
-privateNameStaticMethodAsync.ts(2,19): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(4,30): error TS1003: Identifier expected.
-privateNameStaticMethodAsync.ts(4,30): error TS1127: Invalid character.
-privateNameStaticMethodAsync.ts(4,31): error TS1005: ',' expected.
-privateNameStaticMethodAsync.ts(4,34): error TS1005: ',' expected.
-privateNameStaticMethodAsync.ts(4,35): error TS1134: Variable declaration expected.
-privateNameStaticMethodAsync.ts(5,16): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,18): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,25): error TS1005: ',' expected.
-privateNameStaticMethodAsync.ts(5,26): error TS1127: Invalid character.
-privateNameStaticMethodAsync.ts(5,26): error TS1138: Parameter declaration expected.
-privateNameStaticMethodAsync.ts(5,30): error TS1005: ',' expected.
-privateNameStaticMethodAsync.ts(5,32): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,33): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,39): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,40): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,46): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,49): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,50): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,52): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,55): error TS1138: Parameter declaration expected.
-privateNameStaticMethodAsync.ts(5,62): error TS1005: ',' expected.
-privateNameStaticMethodAsync.ts(5,66): error TS1005: ',' expected.
-privateNameStaticMethodAsync.ts(5,67): error TS1127: Invalid character.
-privateNameStaticMethodAsync.ts(5,67): error TS1138: Parameter declaration expected.
-privateNameStaticMethodAsync.ts(5,71): error TS1005: ',' expected.
-privateNameStaticMethodAsync.ts(5,73): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,74): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,80): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,81): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,82): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,88): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,91): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(5,92): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(7,5): error TS2304: Cannot find name 'static'.
-privateNameStaticMethodAsync.ts(7,13): error TS1012: Unexpected token.
-privateNameStaticMethodAsync.ts(7,13): error TS1127: Invalid character.
-privateNameStaticMethodAsync.ts(7,14): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(7,14): error TS2304: Cannot find name 'baz'.
-privateNameStaticMethodAsync.ts(7,20): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(8,5): error TS2304: Cannot find name 'static'.
-privateNameStaticMethodAsync.ts(8,12): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(8,12): error TS2304: Cannot find name 'async'.
-privateNameStaticMethodAsync.ts(8,19): error TS1012: Unexpected token.
-privateNameStaticMethodAsync.ts(8,19): error TS1127: Invalid character.
-privateNameStaticMethodAsync.ts(8,20): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(8,20): error TS2304: Cannot find name 'qux'.
-privateNameStaticMethodAsync.ts(8,26): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(11,5): error TS2304: Cannot find name 'async'.
-privateNameStaticMethodAsync.ts(11,11): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(11,11): error TS2304: Cannot find name 'static'.
-privateNameStaticMethodAsync.ts(11,19): error TS1012: Unexpected token.
-privateNameStaticMethodAsync.ts(11,19): error TS1127: Invalid character.
-privateNameStaticMethodAsync.ts(11,20): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(11,20): error TS2304: Cannot find name 'bazBad'.
-privateNameStaticMethodAsync.ts(11,29): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(12,1): error TS1128: Declaration or statement expected.
+privateNameStaticMethodAsync.ts(7,12): error TS1003: Identifier expected.
+privateNameStaticMethodAsync.ts(7,13): error TS1005: ';' expected.
+privateNameStaticMethodAsync.ts(8,18): error TS1003: Identifier expected.
+privateNameStaticMethodAsync.ts(8,19): error TS1005: ';' expected.
+privateNameStaticMethodAsync.ts(11,18): error TS1003: Identifier expected.
+privateNameStaticMethodAsync.ts(11,19): error TS1005: ';' expected.
 
 
-==== privateNameStaticMethodAsync.ts (59 errors) ====
+==== privateNameStaticMethodAsync.ts (7 errors) ====
     const C = class {
         static async #bar() { return await Promise.resolve(42); }
-                     ~
-!!! error TS1005: ';' expected.
-                     ~
-!!! error TS1127: Invalid character.
-                      ~~~
+                     ~~~~
 !!! error TS1005: ';' expected.
         static async foo() {
             const b = await this.#bar();
-                                 ~
-!!! error TS1003: Identifier expected.
-                                 ~
-!!! error TS1127: Invalid character.
-                                  ~~~
-!!! error TS1005: ',' expected.
-                                     ~
-!!! error TS1005: ',' expected.
-                                      ~
-!!! error TS1134: Variable declaration expected.
             return b + (this.#baz().next().value || 0) + ((await this.#qux().next()).value || 0);
-                   ~
-!!! error TS1005: ';' expected.
-                     ~
-!!! error TS1005: ';' expected.
-                            ~
-!!! error TS1005: ',' expected.
-                             ~
-!!! error TS1127: Invalid character.
-                             ~
-!!! error TS1138: Parameter declaration expected.
-                                 ~
-!!! error TS1005: ',' expected.
-                                   ~
-!!! error TS1005: ';' expected.
-                                    ~~~~
-!!! error TS1005: ';' expected.
-                                          ~
-!!! error TS1005: ';' expected.
-                                           ~~~~~
-!!! error TS1005: ';' expected.
-                                                 ~~
-!!! error TS1005: ';' expected.
-                                                    ~
-!!! error TS1005: ';' expected.
-                                                     ~
-!!! error TS1005: ';' expected.
-                                                       ~
-!!! error TS1005: ';' expected.
-                                                          ~
-!!! error TS1138: Parameter declaration expected.
-                                                                 ~~~~
-!!! error TS1005: ',' expected.
-                                                                     ~
-!!! error TS1005: ',' expected.
-                                                                      ~
-!!! error TS1127: Invalid character.
-                                                                      ~
-!!! error TS1138: Parameter declaration expected.
-                                                                          ~
-!!! error TS1005: ',' expected.
-                                                                            ~
-!!! error TS1005: ';' expected.
-                                                                             ~~~~
-!!! error TS1005: ';' expected.
-                                                                                   ~
-!!! error TS1005: ';' expected.
-                                                                                    ~
-!!! error TS1005: ';' expected.
-                                                                                     ~~~~~
-!!! error TS1005: ';' expected.
-                                                                                           ~~
-!!! error TS1005: ';' expected.
-                                                                                              ~
-!!! error TS1005: ';' expected.
-                                                                                               ~
-!!! error TS1005: ';' expected.
         }
         static *#baz() { yield 42; }
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-                ~
-!!! error TS1012: Unexpected token.
-                ~
-!!! error TS1127: Invalid character.
-                 ~~~
-!!! error TS1005: ';' expected.
-                 ~~~
-!!! error TS2304: Cannot find name 'baz'.
-                       ~
+               ~
+!!! error TS1003: Identifier expected.
+                ~~~~
 !!! error TS1005: ';' expected.
         static async *#qux() {
-        ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-               ~~~~~
-!!! error TS1005: ';' expected.
-               ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-                      ~
-!!! error TS1012: Unexpected token.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~~~
-!!! error TS1005: ';' expected.
-                       ~~~
-!!! error TS2304: Cannot find name 'qux'.
-                             ~
+                     ~
+!!! error TS1003: Identifier expected.
+                      ~~~~
 !!! error TS1005: ';' expected.
             yield (await Promise.resolve(42));
         }
         async static *#bazBad() { yield 42; }
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~~~~~~
-!!! error TS1005: ';' expected.
-              ~~~~~~
-!!! error TS2304: Cannot find name 'static'.
-                      ~
-!!! error TS1012: Unexpected token.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~~~~~~
-!!! error TS1005: ';' expected.
-                       ~~~~~~
-!!! error TS2304: Cannot find name 'bazBad'.
-                                ~
+                     ~
+!!! error TS1003: Identifier expected.
+                      ~~~~~~~
 !!! error TS1005: ';' expected.
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
     
     

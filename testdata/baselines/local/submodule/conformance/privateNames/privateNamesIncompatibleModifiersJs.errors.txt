@@ -1,169 +1,79 @@
-privateNamesIncompatibleModifiersJs.js(5,5): error TS1003: Identifier expected.
-privateNamesIncompatibleModifiersJs.js(5,5): error TS1127: Invalid character.
-privateNamesIncompatibleModifiersJs.js(5,6): error TS1005: ';' expected.
-privateNamesIncompatibleModifiersJs.js(10,5): error TS1003: Identifier expected.
-privateNamesIncompatibleModifiersJs.js(10,5): error TS1127: Invalid character.
-privateNamesIncompatibleModifiersJs.js(10,6): error TS1005: ';' expected.
-privateNamesIncompatibleModifiersJs.js(15,5): error TS1003: Identifier expected.
-privateNamesIncompatibleModifiersJs.js(15,5): error TS1127: Invalid character.
-privateNamesIncompatibleModifiersJs.js(15,6): error TS1005: ';' expected.
-privateNamesIncompatibleModifiersJs.js(20,5): error TS1003: Identifier expected.
-privateNamesIncompatibleModifiersJs.js(20,5): error TS1127: Invalid character.
-privateNamesIncompatibleModifiersJs.js(20,6): error TS1005: ';' expected.
-privateNamesIncompatibleModifiersJs.js(25,5): error TS1003: Identifier expected.
-privateNamesIncompatibleModifiersJs.js(25,5): error TS1127: Invalid character.
-privateNamesIncompatibleModifiersJs.js(25,6): error TS1005: ';' expected.
-privateNamesIncompatibleModifiersJs.js(30,5): error TS1003: Identifier expected.
-privateNamesIncompatibleModifiersJs.js(30,5): error TS1127: Invalid character.
-privateNamesIncompatibleModifiersJs.js(30,6): error TS1005: ';' expected.
 privateNamesIncompatibleModifiersJs.js(35,9): error TS1005: ';' expected.
-privateNamesIncompatibleModifiersJs.js(35,9): error TS1127: Invalid character.
-privateNamesIncompatibleModifiersJs.js(35,10): error TS1005: ';' expected.
 privateNamesIncompatibleModifiersJs.js(39,9): error TS1005: ';' expected.
-privateNamesIncompatibleModifiersJs.js(39,9): error TS1127: Invalid character.
-privateNamesIncompatibleModifiersJs.js(39,10): error TS1005: ';' expected.
 privateNamesIncompatibleModifiersJs.js(44,9): error TS1005: ';' expected.
-privateNamesIncompatibleModifiersJs.js(44,9): error TS1127: Invalid character.
-privateNamesIncompatibleModifiersJs.js(44,10): error TS1005: ';' expected.
 privateNamesIncompatibleModifiersJs.js(48,9): error TS1005: ';' expected.
-privateNamesIncompatibleModifiersJs.js(48,9): error TS1127: Invalid character.
-privateNamesIncompatibleModifiersJs.js(48,10): error TS1005: ';' expected.
 privateNamesIncompatibleModifiersJs.js(53,9): error TS1005: ';' expected.
-privateNamesIncompatibleModifiersJs.js(53,9): error TS1127: Invalid character.
-privateNamesIncompatibleModifiersJs.js(53,10): error TS1005: ';' expected.
 privateNamesIncompatibleModifiersJs.js(57,9): error TS1005: ';' expected.
-privateNamesIncompatibleModifiersJs.js(57,9): error TS1127: Invalid character.
-privateNamesIncompatibleModifiersJs.js(57,10): error TS1005: ';' expected.
 
 
-==== privateNamesIncompatibleModifiersJs.js (36 errors) ====
+==== privateNamesIncompatibleModifiersJs.js (6 errors) ====
     class A {
         /**
          * @public
          */
         #a = 1;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~
-!!! error TS1005: ';' expected.
     
         /**
          * @private
          */
         #b = 1;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~
-!!! error TS1005: ';' expected.
     
         /**
          * @protected
          */
         #c = 1;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~
-!!! error TS1005: ';' expected.
     
         /**
          * @public
          */
         #aMethod() { return 1; }
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~~
-!!! error TS1005: ';' expected.
     
         /**
          * @private
          */
         #bMethod() { return 1; }
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~~
-!!! error TS1005: ';' expected.
     
         /**
          * @protected
          */
         #cMethod() { return 1; }
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~~
-!!! error TS1005: ';' expected.
     
         /**
          * @public
          */
         get #aProp() { return 1; }
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~~
+            ~~~~~~
 !!! error TS1005: ';' expected.
         /**
          * @public
          */
         set #aProp(value) { }
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~~
+            ~~~~~~
 !!! error TS1005: ';' expected.
     
         /**
          * @private
          */
         get #bProp() { return 1; }
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~~
+            ~~~~~~
 !!! error TS1005: ';' expected.
         /**
          * @private
          */
         set #bProp(value) { }
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~~
+            ~~~~~~
 !!! error TS1005: ';' expected.
     
         /**
         * @protected
         */
         get #cProp() { return 1; }
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~~
+            ~~~~~~
 !!! error TS1005: ';' expected.
         /**
          * @protected
          */
         set #cProp(value) { }
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~~
+            ~~~~~~
 !!! error TS1005: ';' expected.
     }

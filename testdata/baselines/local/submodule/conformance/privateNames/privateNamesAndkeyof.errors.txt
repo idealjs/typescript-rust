@@ -1,53 +1,23 @@
-privateNamesAndkeyof.ts(2,5): error TS1003: Identifier expected.
-privateNamesAndkeyof.ts(2,5): error TS1127: Invalid character.
-privateNamesAndkeyof.ts(2,6): error TS1005: ';' expected.
-privateNamesAndkeyof.ts(3,5): error TS1003: Identifier expected.
-privateNamesAndkeyof.ts(3,5): error TS1127: Invalid character.
-privateNamesAndkeyof.ts(3,6): error TS1005: ';' expected.
 privateNamesAndkeyof.ts(3,21): error TS1003: Identifier expected.
 privateNamesAndkeyof.ts(4,9): error TS1005: ';' expected.
-privateNamesAndkeyof.ts(4,9): error TS1127: Invalid character.
-privateNamesAndkeyof.ts(4,10): error TS1005: ';' expected.
 privateNamesAndkeyof.ts(4,33): error TS1003: Identifier expected.
 privateNamesAndkeyof.ts(5,9): error TS1005: ';' expected.
-privateNamesAndkeyof.ts(5,9): error TS1127: Invalid character.
-privateNamesAndkeyof.ts(5,10): error TS1005: ';' expected.
 privateNamesAndkeyof.ts(5,36): error TS1003: Identifier expected.
 
 
-==== privateNamesAndkeyof.ts (15 errors) ====
+==== privateNamesAndkeyof.ts (5 errors) ====
     class A {
         #fooField = 3;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~~~
-!!! error TS1005: ';' expected.
         #fooMethod() { };
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~~~~
-!!! error TS1005: ';' expected.
                         ~
 !!! error TS1003: Identifier expected.
         get #fooProp() { return 1; };
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~~~~
+            ~~~~~~~~
 !!! error TS1005: ';' expected.
                                     ~
 !!! error TS1003: Identifier expected.
         set #fooProp(value: number) { };
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~~~~
+            ~~~~~~~~
 !!! error TS1005: ';' expected.
                                        ~
 !!! error TS1003: Identifier expected.

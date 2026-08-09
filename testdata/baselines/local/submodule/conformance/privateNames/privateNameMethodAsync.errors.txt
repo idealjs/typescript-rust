@@ -1,137 +1,29 @@
 privateNameMethodAsync.ts(2,11): error TS1005: ';' expected.
-privateNameMethodAsync.ts(2,11): error TS1127: Invalid character.
-privateNameMethodAsync.ts(2,12): error TS1005: ';' expected.
-privateNameMethodAsync.ts(4,30): error TS1003: Identifier expected.
-privateNameMethodAsync.ts(4,30): error TS1127: Invalid character.
-privateNameMethodAsync.ts(4,31): error TS1005: ',' expected.
-privateNameMethodAsync.ts(4,34): error TS1005: ',' expected.
-privateNameMethodAsync.ts(4,35): error TS1134: Variable declaration expected.
-privateNameMethodAsync.ts(5,16): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,18): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,25): error TS1005: ',' expected.
-privateNameMethodAsync.ts(5,26): error TS1127: Invalid character.
-privateNameMethodAsync.ts(5,26): error TS1138: Parameter declaration expected.
-privateNameMethodAsync.ts(5,30): error TS1005: ',' expected.
-privateNameMethodAsync.ts(5,32): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,33): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,39): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,40): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,46): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,49): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,50): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,52): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,55): error TS1138: Parameter declaration expected.
-privateNameMethodAsync.ts(5,62): error TS1005: ',' expected.
-privateNameMethodAsync.ts(5,66): error TS1005: ',' expected.
-privateNameMethodAsync.ts(5,67): error TS1127: Invalid character.
-privateNameMethodAsync.ts(5,67): error TS1138: Parameter declaration expected.
-privateNameMethodAsync.ts(5,71): error TS1005: ',' expected.
-privateNameMethodAsync.ts(5,73): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,74): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,80): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,81): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,82): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,88): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,91): error TS1005: ';' expected.
-privateNameMethodAsync.ts(5,92): error TS1005: ';' expected.
-privateNameMethodAsync.ts(7,6): error TS1012: Unexpected token.
-privateNameMethodAsync.ts(7,6): error TS1127: Invalid character.
-privateNameMethodAsync.ts(7,7): error TS1005: ',' expected.
-privateNameMethodAsync.ts(7,10): error TS1005: ',' expected.
-privateNameMethodAsync.ts(7,11): error TS1134: Variable declaration expected.
+privateNameMethodAsync.ts(7,5): error TS1003: Identifier expected.
+privateNameMethodAsync.ts(7,6): error TS1005: ';' expected.
+privateNameMethodAsync.ts(8,11): error TS1003: Identifier expected.
+privateNameMethodAsync.ts(8,12): error TS1005: ';' expected.
 
 
-==== privateNameMethodAsync.ts (41 errors) ====
+==== privateNameMethodAsync.ts (5 errors) ====
     const C = class {
         async #bar() { return await Promise.resolve(42); }
-              ~
-!!! error TS1005: ';' expected.
-              ~
-!!! error TS1127: Invalid character.
-               ~~~
+              ~~~~
 !!! error TS1005: ';' expected.
         async foo() {
             const b = await this.#bar();
-                                 ~
-!!! error TS1003: Identifier expected.
-                                 ~
-!!! error TS1127: Invalid character.
-                                  ~~~
-!!! error TS1005: ',' expected.
-                                     ~
-!!! error TS1005: ',' expected.
-                                      ~
-!!! error TS1134: Variable declaration expected.
             return b + (this.#baz().next().value || 0) + ((await this.#qux().next()).value || 0);
-                   ~
-!!! error TS1005: ';' expected.
-                     ~
-!!! error TS1005: ';' expected.
-                            ~
-!!! error TS1005: ',' expected.
-                             ~
-!!! error TS1127: Invalid character.
-                             ~
-!!! error TS1138: Parameter declaration expected.
-                                 ~
-!!! error TS1005: ',' expected.
-                                   ~
-!!! error TS1005: ';' expected.
-                                    ~~~~
-!!! error TS1005: ';' expected.
-                                          ~
-!!! error TS1005: ';' expected.
-                                           ~~~~~
-!!! error TS1005: ';' expected.
-                                                 ~~
-!!! error TS1005: ';' expected.
-                                                    ~
-!!! error TS1005: ';' expected.
-                                                     ~
-!!! error TS1005: ';' expected.
-                                                       ~
-!!! error TS1005: ';' expected.
-                                                          ~
-!!! error TS1138: Parameter declaration expected.
-                                                                 ~~~~
-!!! error TS1005: ',' expected.
-                                                                     ~
-!!! error TS1005: ',' expected.
-                                                                      ~
-!!! error TS1127: Invalid character.
-                                                                      ~
-!!! error TS1138: Parameter declaration expected.
-                                                                          ~
-!!! error TS1005: ',' expected.
-                                                                            ~
-!!! error TS1005: ';' expected.
-                                                                             ~~~~
-!!! error TS1005: ';' expected.
-                                                                                   ~
-!!! error TS1005: ';' expected.
-                                                                                    ~
-!!! error TS1005: ';' expected.
-                                                                                     ~~~~~
-!!! error TS1005: ';' expected.
-                                                                                           ~~
-!!! error TS1005: ';' expected.
-                                                                                              ~
-!!! error TS1005: ';' expected.
-                                                                                               ~
-!!! error TS1005: ';' expected.
         }
         *#baz() { yield 42; }
-         ~
-!!! error TS1012: Unexpected token.
-         ~
-!!! error TS1127: Invalid character.
-          ~~~
-!!! error TS1005: ',' expected.
-             ~
-!!! error TS1005: ',' expected.
-              ~
-!!! error TS1134: Variable declaration expected.
+        ~
+!!! error TS1003: Identifier expected.
+         ~~~~
+!!! error TS1005: ';' expected.
         async *#qux() {
+              ~
+!!! error TS1003: Identifier expected.
+               ~~~~
+!!! error TS1005: ';' expected.
             yield (await Promise.resolve(42));
         }
     }

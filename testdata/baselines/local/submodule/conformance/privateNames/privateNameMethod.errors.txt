@@ -1,50 +1,20 @@
-privateNameMethod.ts(2,5): error TS1003: Identifier expected.
-privateNameMethod.ts(2,5): error TS1127: Invalid character.
-privateNameMethod.ts(2,6): error TS1005: ';' expected.
-privateNameMethod.ts(6,14): error TS1003: Identifier expected.
-privateNameMethod.ts(6,14): error TS1127: Invalid character.
-privateNameMethod.ts(6,15): error TS1005: ';' expected.
-privateNameMethod.ts(7,14): error TS1003: Identifier expected.
-privateNameMethod.ts(7,14): error TS1127: Invalid character.
-privateNameMethod.ts(7,15): error TS1005: ';' expected.
-privateNameMethod.ts(8,14): error TS1003: Identifier expected.
-privateNameMethod.ts(8,14): error TS1127: Invalid character.
-privateNameMethod.ts(8,15): error TS1005: ';' expected.
+privateNameMethod.ts(7,22): error TS2345: Argument of type '1' is not assignable to parameter of type 'string'.
+privateNameMethod.ts(8,9): error TS2554: Expected 1 arguments, but got 0.
 
 
-==== privateNameMethod.ts (12 errors) ====
+==== privateNameMethod.ts (2 errors) ====
     class A1 {
         #method(param: string): string {
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~
-!!! error TS1005: ';' expected.
             return "";
         }
         constructor(name: string) {
             this.#method("")
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~~
-!!! error TS1005: ';' expected.
             this.#method(1) // Error
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~~
-!!! error TS1005: ';' expected.
+                         ~
+!!! error TS2345: Argument of type '1' is not assignable to parameter of type 'string'.
             this.#method()  // Error 
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~~
-!!! error TS1005: ';' expected.
+            ~~~~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 0.
     
         }
     }

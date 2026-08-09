@@ -1,80 +1,26 @@
 privateNameStaticMethodClassExpression.ts(1,17): error TS2304: Cannot find name 'D'.
 privateNameStaticMethodClassExpression.ts(2,12): error TS1005: ';' expected.
-privateNameStaticMethodClassExpression.ts(2,12): error TS1127: Invalid character.
-privateNameStaticMethodClassExpression.ts(2,13): error TS1005: ';' expected.
-privateNameStaticMethodClassExpression.ts(2,23): error TS1003: Identifier expected.
-privateNameStaticMethodClassExpression.ts(2,23): error TS1127: Invalid character.
-privateNameStaticMethodClassExpression.ts(2,24): error TS1005: ';' expected.
 privateNameStaticMethodClassExpression.ts(3,12): error TS1005: ';' expected.
-privateNameStaticMethodClassExpression.ts(3,12): error TS1127: Invalid character.
-privateNameStaticMethodClassExpression.ts(3,13): error TS1005: ';' expected.
-privateNameStaticMethodClassExpression.ts(5,34): error TS1003: Identifier expected.
-privateNameStaticMethodClassExpression.ts(5,34): error TS1127: Invalid character.
-privateNameStaticMethodClassExpression.ts(5,35): error TS1005: ';' expected.
 privateNameStaticMethodClassExpression.ts(5,42): error TS1003: Identifier expected.
-privateNameStaticMethodClassExpression.ts(9,14): error TS1003: Identifier expected.
-privateNameStaticMethodClassExpression.ts(9,14): error TS1127: Invalid character.
-privateNameStaticMethodClassExpression.ts(9,15): error TS1005: ';' expected.
-privateNameStaticMethodClassExpression.ts(9,15): error TS2304: Cannot find name 'method'.
-privateNameStaticMethodClassExpression.ts(10,14): error TS1003: Identifier expected.
-privateNameStaticMethodClassExpression.ts(10,14): error TS1127: Invalid character.
-privateNameStaticMethodClassExpression.ts(10,15): error TS1005: ';' expected.
-privateNameStaticMethodClassExpression.ts(10,15): error TS2304: Cannot find name 'field'.
 
 
-==== privateNameStaticMethodClassExpression.ts (22 errors) ====
+==== privateNameStaticMethodClassExpression.ts (4 errors) ====
     const C = class D {
                     ~
 !!! error TS2304: Cannot find name 'D'.
         static #field = D.#method();
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~
-!!! error TS1005: ';' expected.
-                          ~
-!!! error TS1003: Identifier expected.
-                          ~
-!!! error TS1127: Invalid character.
-                           ~~~~~~
+               ~~~~~~
 !!! error TS1005: ';' expected.
         static #method() { return 42; }
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~~~~~~
+               ~~~~~~~
 !!! error TS1005: ';' expected.
         static getClass() { return D; }
         static getField() { return C.#field };
-                                     ~
-!!! error TS1003: Identifier expected.
-                                     ~
-!!! error TS1127: Invalid character.
-                                      ~~~~~
-!!! error TS1005: ';' expected.
                                              ~
 !!! error TS1003: Identifier expected.
     }
     
     console.log(C.getClass().getField());
     C.getClass().#method; // Error
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~~
-!!! error TS1005: ';' expected.
-                  ~~~~~~
-!!! error TS2304: Cannot find name 'method'.
     C.getClass().#field; // Error
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~
-!!! error TS1005: ';' expected.
-                  ~~~~~
-!!! error TS2304: Cannot find name 'field'.
     

@@ -1,245 +1,35 @@
-privateNamesInGenericClasses.ts(2,5): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(2,5): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(2,6): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(3,5): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(3,5): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(3,6): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(3,32): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(3,32): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(3,33): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(3,33): error TS7027: Unreachable code detected.
 privateNamesInGenericClasses.ts(4,9): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(4,9): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(4,10): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(4,34): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(4,34): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(4,35): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(4,35): error TS7027: Unreachable code detected.
 privateNamesInGenericClasses.ts(5,9): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(5,9): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(5,10): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(5,33): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(5,33): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(5,34): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(7,29): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(7,29): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(7,30): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(7,30): error TS7027: Unreachable code detected.
-privateNamesInGenericClasses.ts(8,30): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(8,30): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(8,31): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(8,31): error TS2349: This expression is not callable.
-privateNamesInGenericClasses.ts(8,31): error TS7027: Unreachable code detected.
-privateNamesInGenericClasses.ts(9,30): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(9,30): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(9,31): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(9,31): error TS7027: Unreachable code detected.
-privateNamesInGenericClasses.ts(11,34): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(11,34): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(11,35): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(11,35): error TS7027: Unreachable code detected.
-privateNamesInGenericClasses.ts(12,35): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(12,35): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(12,36): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(12,36): error TS7027: Unreachable code detected.
-privateNamesInGenericClasses.ts(13,35): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(13,35): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(13,36): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(13,36): error TS7027: Unreachable code detected.
-privateNamesInGenericClasses.ts(15,35): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(15,35): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(15,36): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(15,36): error TS7027: Unreachable code detected.
-privateNamesInGenericClasses.ts(16,36): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(16,36): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(16,37): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(16,37): error TS7027: Unreachable code detected.
-privateNamesInGenericClasses.ts(17,36): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(17,36): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(17,37): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(17,37): error TS7027: Unreachable code detected.
-privateNamesInGenericClasses.ts(22,3): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(22,3): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(22,4): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(22,4): error TS2304: Cannot find name 'foo'.
-privateNamesInGenericClasses.ts(23,3): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(23,3): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(23,4): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(23,4): error TS2304: Cannot find name 'method'.
-privateNamesInGenericClasses.ts(24,3): error TS1003: Identifier expected.
-privateNamesInGenericClasses.ts(24,3): error TS1127: Invalid character.
-privateNamesInGenericClasses.ts(24,4): error TS1005: ';' expected.
-privateNamesInGenericClasses.ts(24,4): error TS2304: Cannot find name 'prop'.
 
 
-==== privateNamesInGenericClasses.ts (72 errors) ====
+==== privateNamesInGenericClasses.ts (2 errors) ====
     class C<T> {
         #foo: T;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~
-!!! error TS1005: ';' expected.
         #method(): T { return this.#foo; }
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~
-!!! error TS1005: ';' expected.
-                                   ~
-!!! error TS1003: Identifier expected.
-                                   ~
-!!! error TS1127: Invalid character.
-                                    ~~~
-!!! error TS1005: ';' expected.
-                                    ~~~~~
-!!! error TS7027: Unreachable code detected.
         get #prop(): T { return this.#foo; }
-            ~
+            ~~~~~
 !!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~
-!!! error TS1005: ';' expected.
-                                     ~
-!!! error TS1003: Identifier expected.
-                                     ~
-!!! error TS1127: Invalid character.
-                                      ~~~
-!!! error TS1005: ';' expected.
-                                      ~~~~~
-!!! error TS7027: Unreachable code detected.
         set #prop(value : T) { this.#foo = value; }
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~~
-!!! error TS1005: ';' expected.
-                                    ~
-!!! error TS1003: Identifier expected.
-                                    ~
-!!! error TS1127: Invalid character.
-                                     ~~~
+            ~~~~~
 !!! error TS1005: ';' expected.
         
         bar(x: C<T>) { return x.#foo; }          // OK
-                                ~
-!!! error TS1003: Identifier expected.
-                                ~
-!!! error TS1127: Invalid character.
-                                 ~~~
-!!! error TS1005: ';' expected.
-                                 ~~~~~
-!!! error TS7027: Unreachable code detected.
         bar2(x: C<T>) { return x.#method(); }    // OK
-                                 ~
-!!! error TS1003: Identifier expected.
-                                 ~
-!!! error TS1127: Invalid character.
-                                  ~~~~~~
-!!! error TS1005: ';' expected.
-                                  ~~~~~~
-!!! error TS2349: This expression is not callable.
-                                  ~~~~~~~~~~
-!!! error TS7027: Unreachable code detected.
         bar3(x: C<T>) { return x.#prop; }        // OK
-                                 ~
-!!! error TS1003: Identifier expected.
-                                 ~
-!!! error TS1127: Invalid character.
-                                  ~~~~
-!!! error TS1005: ';' expected.
-                                  ~~~~~~
-!!! error TS7027: Unreachable code detected.
     
         baz(x: C<number>) { return x.#foo; }     // OK
-                                     ~
-!!! error TS1003: Identifier expected.
-                                     ~
-!!! error TS1127: Invalid character.
-                                      ~~~
-!!! error TS1005: ';' expected.
-                                      ~~~~~
-!!! error TS7027: Unreachable code detected.
         baz2(x: C<number>) { return x.#method; } // OK
-                                      ~
-!!! error TS1003: Identifier expected.
-                                      ~
-!!! error TS1127: Invalid character.
-                                       ~~~~~~
-!!! error TS1005: ';' expected.
-                                       ~~~~~~~~
-!!! error TS7027: Unreachable code detected.
         baz3(x: C<number>) { return x.#prop; }   // OK
-                                      ~
-!!! error TS1003: Identifier expected.
-                                      ~
-!!! error TS1127: Invalid character.
-                                       ~~~~
-!!! error TS1005: ';' expected.
-                                       ~~~~~~
-!!! error TS7027: Unreachable code detected.
     
         quux(x: C<string>) { return x.#foo; }    // OK
-                                      ~
-!!! error TS1003: Identifier expected.
-                                      ~
-!!! error TS1127: Invalid character.
-                                       ~~~
-!!! error TS1005: ';' expected.
-                                       ~~~~~
-!!! error TS7027: Unreachable code detected.
         quux2(x: C<string>) { return x.#method; }// OK
-                                       ~
-!!! error TS1003: Identifier expected.
-                                       ~
-!!! error TS1127: Invalid character.
-                                        ~~~~~~
-!!! error TS1005: ';' expected.
-                                        ~~~~~~~~
-!!! error TS7027: Unreachable code detected.
         quux3(x: C<string>) { return x.#prop; }  // OK
-                                       ~
-!!! error TS1003: Identifier expected.
-                                       ~
-!!! error TS1127: Invalid character.
-                                        ~~~~
-!!! error TS1005: ';' expected.
-                                        ~~~~~~
-!!! error TS7027: Unreachable code detected.
     }
     
     declare let a: C<number>;
     declare let b: C<string>;
     a.#foo;                                   // Error
-      ~
-!!! error TS1003: Identifier expected.
-      ~
-!!! error TS1127: Invalid character.
-       ~~~
-!!! error TS1005: ';' expected.
-       ~~~
-!!! error TS2304: Cannot find name 'foo'.
     a.#method;                                // Error
-      ~
-!!! error TS1003: Identifier expected.
-      ~
-!!! error TS1127: Invalid character.
-       ~~~~~~
-!!! error TS1005: ';' expected.
-       ~~~~~~
-!!! error TS2304: Cannot find name 'method'.
     a.#prop;                                  // Error
-      ~
-!!! error TS1003: Identifier expected.
-      ~
-!!! error TS1127: Invalid character.
-       ~~~~
-!!! error TS1005: ';' expected.
-       ~~~~
-!!! error TS2304: Cannot find name 'prop'.
     a = b;                                    // Error
     b = a;                                    // Error

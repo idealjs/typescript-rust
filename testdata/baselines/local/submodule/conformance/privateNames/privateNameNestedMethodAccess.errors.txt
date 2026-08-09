@@ -1,70 +1,13 @@
-privateNameNestedMethodAccess.ts(2,5): error TS1003: Identifier expected.
-privateNameNestedMethodAccess.ts(2,5): error TS1127: Invalid character.
-privateNameNestedMethodAccess.ts(2,6): error TS1005: ';' expected.
-privateNameNestedMethodAccess.ts(3,5): error TS1003: Identifier expected.
-privateNameNestedMethodAccess.ts(3,5): error TS1127: Invalid character.
-privateNameNestedMethodAccess.ts(3,6): error TS1005: ';' expected.
-privateNameNestedMethodAccess.ts(3,22): error TS1003: Identifier expected.
-privateNameNestedMethodAccess.ts(3,22): error TS1127: Invalid character.
-privateNameNestedMethodAccess.ts(3,23): error TS1005: ';' expected.
 privateNameNestedMethodAccess.ts(4,9): error TS1005: ';' expected.
-privateNameNestedMethodAccess.ts(4,9): error TS1127: Invalid character.
-privateNameNestedMethodAccess.ts(4,10): error TS1005: ';' expected.
 privateNameNestedMethodAccess.ts(7,22): error TS2304: Cannot find name 'D'.
-privateNameNestedMethodAccess.ts(8,13): error TS1003: Identifier expected.
-privateNameNestedMethodAccess.ts(8,13): error TS1127: Invalid character.
-privateNameNestedMethodAccess.ts(8,14): error TS1005: ';' expected.
-privateNameNestedMethodAccess.ts(10,25): error TS1003: Identifier expected.
-privateNameNestedMethodAccess.ts(10,25): error TS1127: Invalid character.
-privateNameNestedMethodAccess.ts(10,26): error TS1005: ';' expected.
-privateNameNestedMethodAccess.ts(11,25): error TS1003: Identifier expected.
-privateNameNestedMethodAccess.ts(11,25): error TS1127: Invalid character.
-privateNameNestedMethodAccess.ts(11,26): error TS1005: ';' expected.
-privateNameNestedMethodAccess.ts(12,25): error TS1003: Identifier expected.
-privateNameNestedMethodAccess.ts(12,25): error TS1127: Invalid character.
-privateNameNestedMethodAccess.ts(12,26): error TS1005: ';' expected.
-privateNameNestedMethodAccess.ts(13,25): error TS1003: Identifier expected.
-privateNameNestedMethodAccess.ts(13,25): error TS1127: Invalid character.
-privateNameNestedMethodAccess.ts(13,26): error TS1005: ';' expected.
-privateNameNestedMethodAccess.ts(17,19): error TS1003: Identifier expected.
-privateNameNestedMethodAccess.ts(17,19): error TS1127: Invalid character.
-privateNameNestedMethodAccess.ts(17,20): error TS1005: ';' expected.
-privateNameNestedMethodAccess.ts(18,19): error TS1003: Identifier expected.
-privateNameNestedMethodAccess.ts(18,19): error TS1127: Invalid character.
-privateNameNestedMethodAccess.ts(18,20): error TS1005: ';' expected.
-privateNameNestedMethodAccess.ts(19,19): error TS1003: Identifier expected.
-privateNameNestedMethodAccess.ts(19,19): error TS1127: Invalid character.
-privateNameNestedMethodAccess.ts(19,20): error TS1005: ';' expected.
 
 
-==== privateNameNestedMethodAccess.ts (37 errors) ====
+==== privateNameNestedMethodAccess.ts (2 errors) ====
     class C {
         #foo = 42;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~
-!!! error TS1005: ';' expected.
         #bar() { new C().#baz; }
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~
-!!! error TS1005: ';' expected.
-                         ~
-!!! error TS1003: Identifier expected.
-                         ~
-!!! error TS1127: Invalid character.
-                          ~~~
-!!! error TS1005: ';' expected.
         get #baz() { return 42; }
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~~~
+            ~~~~
 !!! error TS1005: ';' expected.
     
         m() {
@@ -72,65 +15,17 @@ privateNameNestedMethodAccess.ts(19,20): error TS1005: ';' expected.
                          ~
 !!! error TS2304: Cannot find name 'D'.
                 #bar() {}
-                ~
-!!! error TS1003: Identifier expected.
-                ~
-!!! error TS1127: Invalid character.
-                 ~~~
-!!! error TS1005: ';' expected.
                 constructor() {
                     new C().#foo;
-                            ~
-!!! error TS1003: Identifier expected.
-                            ~
-!!! error TS1127: Invalid character.
-                             ~~~
-!!! error TS1005: ';' expected.
                     new C().#bar; // Error
-                            ~
-!!! error TS1003: Identifier expected.
-                            ~
-!!! error TS1127: Invalid character.
-                             ~~~
-!!! error TS1005: ';' expected.
                     new C().#baz;
-                            ~
-!!! error TS1003: Identifier expected.
-                            ~
-!!! error TS1127: Invalid character.
-                             ~~~
-!!! error TS1005: ';' expected.
                     new D().#bar;
-                            ~
-!!! error TS1003: Identifier expected.
-                            ~
-!!! error TS1127: Invalid character.
-                             ~~~
-!!! error TS1005: ';' expected.
                 }
     
                 n(x: any) {
                     x.#foo;
-                      ~
-!!! error TS1003: Identifier expected.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~~~
-!!! error TS1005: ';' expected.
                     x.#bar;
-                      ~
-!!! error TS1003: Identifier expected.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~~~
-!!! error TS1005: ';' expected.
                     x.#unknown; // Error
-                      ~
-!!! error TS1003: Identifier expected.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~~~~~~~
-!!! error TS1005: ';' expected.
                 }
             }
         }

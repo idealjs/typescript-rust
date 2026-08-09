@@ -268,12 +268,9 @@ objectLiteralErrors.ts(48,9): error TS1005: ',' expected.
 objectLiteralErrors.ts(49,5): error TS2304: Cannot find name 'y'.
 objectLiteralErrors.ts(49,7): error TS1005: ',' expected.
 objectLiteralErrors.ts(49,9): error TS1005: ',' expected.
-objectLiteralErrors.ts(50,5): error TS1003: Identifier expected.
-objectLiteralErrors.ts(50,5): error TS1127: Invalid character.
-objectLiteralErrors.ts(50,6): error TS1005: ',' expected.
 
 
-==== objectLiteralErrors.ts (273 errors) ====
+==== objectLiteralErrors.ts (270 errors) ====
     // Multiple properties with the same name
     var e1 = { a: 0, a: 0 };
     var e2 = { a: '', a: '' };
@@ -864,10 +861,4 @@ objectLiteralErrors.ts(50,6): error TS1005: ',' expected.
             ~
 !!! error TS1005: ',' expected.
         #z: 3
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~
-!!! error TS1005: ',' expected.
     }

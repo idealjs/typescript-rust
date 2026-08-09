@@ -1,40 +1,18 @@
 esDecorators-contextualTypes.ts(7,12): error TS1005: ';' expected.
-esDecorators-contextualTypes.ts(7,12): error TS1127: Invalid character.
-esDecorators-contextualTypes.ts(7,13): error TS1005: ';' expected.
 esDecorators-contextualTypes.ts(10,16): error TS1005: ';' expected.
 esDecorators-contextualTypes.ts(13,16): error TS1005: ';' expected.
 esDecorators-contextualTypes.ts(16,16): error TS1005: ';' expected.
-esDecorators-contextualTypes.ts(16,16): error TS1127: Invalid character.
-esDecorators-contextualTypes.ts(16,17): error TS1005: ';' expected.
 esDecorators-contextualTypes.ts(19,16): error TS1005: ';' expected.
-esDecorators-contextualTypes.ts(19,16): error TS1127: Invalid character.
-esDecorators-contextualTypes.ts(19,17): error TS1005: ';' expected.
 esDecorators-contextualTypes.ts(25,21): error TS1005: ';' expected.
-esDecorators-contextualTypes.ts(25,21): error TS1127: Invalid character.
-esDecorators-contextualTypes.ts(25,22): error TS1005: ';' expected.
 esDecorators-contextualTypes.ts(31,12): error TS1005: ';' expected.
-esDecorators-contextualTypes.ts(31,12): error TS1127: Invalid character.
-esDecorators-contextualTypes.ts(31,13): error TS1005: ';' expected.
-esDecorators-contextualTypes.ts(37,5): error TS1003: Identifier expected.
-esDecorators-contextualTypes.ts(37,5): error TS1127: Invalid character.
-esDecorators-contextualTypes.ts(37,6): error TS1005: ';' expected.
 esDecorators-contextualTypes.ts(40,9): error TS1005: ';' expected.
 esDecorators-contextualTypes.ts(43,9): error TS1005: ';' expected.
 esDecorators-contextualTypes.ts(46,9): error TS1005: ';' expected.
-esDecorators-contextualTypes.ts(46,9): error TS1127: Invalid character.
-esDecorators-contextualTypes.ts(46,10): error TS1005: ';' expected.
 esDecorators-contextualTypes.ts(49,9): error TS1005: ';' expected.
-esDecorators-contextualTypes.ts(49,9): error TS1127: Invalid character.
-esDecorators-contextualTypes.ts(49,10): error TS1005: ';' expected.
 esDecorators-contextualTypes.ts(55,14): error TS1005: ';' expected.
-esDecorators-contextualTypes.ts(55,14): error TS1127: Invalid character.
-esDecorators-contextualTypes.ts(55,15): error TS1005: ';' expected.
-esDecorators-contextualTypes.ts(61,5): error TS1003: Identifier expected.
-esDecorators-contextualTypes.ts(61,5): error TS1127: Invalid character.
-esDecorators-contextualTypes.ts(61,6): error TS1005: ';' expected.
 
 
-==== esDecorators-contextualTypes.ts (34 errors) ====
+==== esDecorators-contextualTypes.ts (12 errors) ====
     @((t, c) => { })
     class C {
         @((t, c) => { })
@@ -42,11 +20,7 @@ esDecorators-contextualTypes.ts(61,6): error TS1005: ';' expected.
     
         @((t, c) => { })
         static #f() {}
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~
+               ~~
 !!! error TS1005: ';' expected.
     
         @((t, c) => { })
@@ -61,20 +35,12 @@ esDecorators-contextualTypes.ts(61,6): error TS1005: ';' expected.
     
         @((t, c) => { })
         static get #x() { return 1; }
-                   ~
-!!! error TS1005: ';' expected.
-                   ~
-!!! error TS1127: Invalid character.
-                    ~
+                   ~~
 !!! error TS1005: ';' expected.
     
         @((t, c) => { })
         static set #x(value) { }
-                   ~
-!!! error TS1005: ';' expected.
-                   ~
-!!! error TS1127: Invalid character.
-                    ~
+                   ~~
 !!! error TS1005: ';' expected.
     
         @((t, c) => { })
@@ -82,11 +48,7 @@ esDecorators-contextualTypes.ts(61,6): error TS1005: ';' expected.
     
         @((t, c) => { })
         static accessor #y = 1;
-                        ~
-!!! error TS1005: ';' expected.
-                        ~
-!!! error TS1127: Invalid character.
-                         ~
+                        ~~
 !!! error TS1005: ';' expected.
     
         @((t, c) => { })
@@ -94,11 +56,7 @@ esDecorators-contextualTypes.ts(61,6): error TS1005: ';' expected.
     
         @((t, c) => { })
         static #z = 1;
-               ~
-!!! error TS1005: ';' expected.
-               ~
-!!! error TS1127: Invalid character.
-                ~
+               ~~
 !!! error TS1005: ';' expected.
     
         @((t, c) => { })
@@ -106,12 +64,6 @@ esDecorators-contextualTypes.ts(61,6): error TS1005: ';' expected.
     
         @((t, c) => { })
         #g() {}
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~
-!!! error TS1005: ';' expected.
     
         @((t, c) => { })
         get a() { return 1; }
@@ -125,20 +77,12 @@ esDecorators-contextualTypes.ts(61,6): error TS1005: ';' expected.
     
         @((t, c) => { })
         get #a() { return 1; }
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~
+            ~~
 !!! error TS1005: ';' expected.
     
         @((t, c) => { })
         set #a(value) { }
-            ~
-!!! error TS1005: ';' expected.
-            ~
-!!! error TS1127: Invalid character.
-             ~
+            ~~
 !!! error TS1005: ';' expected.
     
         @((t, c) => { })
@@ -146,11 +90,7 @@ esDecorators-contextualTypes.ts(61,6): error TS1005: ';' expected.
     
         @((t, c) => { })
         accessor #b = 1;
-                 ~
-!!! error TS1005: ';' expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~
+                 ~~
 !!! error TS1005: ';' expected.
     
         @((t, c) => { })
@@ -158,10 +98,4 @@ esDecorators-contextualTypes.ts(61,6): error TS1005: ';' expected.
     
         @((t, c) => { })
         #c = 1;
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~
-!!! error TS1005: ';' expected.
     }

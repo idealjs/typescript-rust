@@ -1,53 +1,23 @@
 esDecorators-classDeclaration-fields-staticPrivateAccessor.ts(4,26): error TS1005: ';' expected.
-esDecorators-classDeclaration-fields-staticPrivateAccessor.ts(4,26): error TS1127: Invalid character.
-esDecorators-classDeclaration-fields-staticPrivateAccessor.ts(4,27): error TS1005: ';' expected.
 esDecorators-classDeclaration-fields-staticPrivateAccessor.ts(9,21): error TS1005: ';' expected.
-esDecorators-classDeclaration-fields-staticPrivateAccessor.ts(9,21): error TS1127: Invalid character.
-esDecorators-classDeclaration-fields-staticPrivateAccessor.ts(9,22): error TS1005: ';' expected.
-esDecorators-classDeclaration-fields-staticPrivateAccessor.ts(11,14): error TS1003: Identifier expected.
-esDecorators-classDeclaration-fields-staticPrivateAccessor.ts(11,14): error TS1127: Invalid character.
-esDecorators-classDeclaration-fields-staticPrivateAccessor.ts(11,15): error TS1005: ';' expected.
-esDecorators-classDeclaration-fields-staticPrivateAccessor.ts(12,14): error TS1003: Identifier expected.
-esDecorators-classDeclaration-fields-staticPrivateAccessor.ts(12,14): error TS1127: Invalid character.
-esDecorators-classDeclaration-fields-staticPrivateAccessor.ts(12,15): error TS1005: ';' expected.
 
 
-==== esDecorators-classDeclaration-fields-staticPrivateAccessor.ts (12 errors) ====
+==== esDecorators-classDeclaration-fields-staticPrivateAccessor.ts (2 errors) ====
     declare let dec: any;
     
     class C {
         @dec static accessor #field1 = 0;
-                             ~
-!!! error TS1005: ';' expected.
-                             ~
-!!! error TS1127: Invalid character.
-                              ~~~~~~
+                             ~~~~~~~
 !!! error TS1005: ';' expected.
     }
     
     @dec
     class D {
         static accessor #field1 = 0;
-                        ~
-!!! error TS1005: ';' expected.
-                        ~
-!!! error TS1127: Invalid character.
-                         ~~~~~~
+                        ~~~~~~~
 !!! error TS1005: ';' expected.
         static {
             this.#field1;
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~~
-!!! error TS1005: ';' expected.
             this.#field1 = 1;
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~~
-!!! error TS1005: ';' expected.
         }
     }

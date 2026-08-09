@@ -1,32 +1,14 @@
-nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts(4,3): error TS1003: Identifier expected.
-nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts(4,3): error TS1127: Invalid character.
-nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts(4,4): error TS1005: ';' expected.
-nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts(7,10): error TS1003: Identifier expected.
-nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts(7,10): error TS1127: Invalid character.
-nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts(7,11): error TS1005: ';' expected.
 nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts(12,13): error TS2304: Cannot find name 'Error'.
 
 
-==== nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts (7 errors) ====
+==== nullishCoalescingAssignmentVsPrivateFieldsJsEmit1.ts (1 errors) ====
     // https://github.com/microsoft/TypeScript/issues/61109
     
     class Cls {
       #privateProp: number | undefined;
-      ~
-!!! error TS1003: Identifier expected.
-      ~
-!!! error TS1127: Invalid character.
-       ~~~~~~~~~~~
-!!! error TS1005: ';' expected.
     
       problem() {
         this.#privateProp ??= false ? neverThis() : 20;
-             ~
-!!! error TS1003: Identifier expected.
-             ~
-!!! error TS1127: Invalid character.
-              ~~~~~~~~~~~
-!!! error TS1005: ';' expected.
       }
     }
     

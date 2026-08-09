@@ -1,42 +1,9 @@
-error TS2451: Cannot redeclare block-scoped variable 'arr'.
-privateNameFieldCallExpression.ts(2,5): error TS1003: Identifier expected.
-privateNameFieldCallExpression.ts(2,5): error TS1127: Invalid character.
-privateNameFieldCallExpression.ts(2,6): error TS1005: ';' expected.
-privateNameFieldCallExpression.ts(3,5): error TS1003: Identifier expected.
-privateNameFieldCallExpression.ts(3,5): error TS1127: Invalid character.
-privateNameFieldCallExpression.ts(3,6): error TS1005: ';' expected.
-privateNameFieldCallExpression.ts(6,14): error TS1003: Identifier expected.
-privateNameFieldCallExpression.ts(6,14): error TS1127: Invalid character.
-privateNameFieldCallExpression.ts(6,15): error TS1005: ';' expected.
-privateNameFieldCallExpression.ts(7,14): error TS1003: Identifier expected.
-privateNameFieldCallExpression.ts(7,14): error TS1127: Invalid character.
-privateNameFieldCallExpression.ts(7,15): error TS1005: ';' expected.
-privateNameFieldCallExpression.ts(8,27): error TS1003: Identifier expected.
-privateNameFieldCallExpression.ts(8,27): error TS1127: Invalid character.
-privateNameFieldCallExpression.ts(8,28): error TS1005: ',' expected.
-privateNameFieldCallExpression.ts(10,18): error TS1003: Identifier expected.
-privateNameFieldCallExpression.ts(10,18): error TS1127: Invalid character.
-privateNameFieldCallExpression.ts(10,19): error TS1005: ';' expected.
-privateNameFieldCallExpression.ts(13,14): error TS1003: Identifier expected.
-privateNameFieldCallExpression.ts(13,14): error TS1127: Invalid character.
-privateNameFieldCallExpression.ts(13,15): error TS1005: ';' expected.
-privateNameFieldCallExpression.ts(14,28): error TS1003: Identifier expected.
-privateNameFieldCallExpression.ts(14,28): error TS1127: Invalid character.
-privateNameFieldCallExpression.ts(14,29): error TS1005: ',' expected.
-privateNameFieldCallExpression.ts(14,39): error TS1005: ',' expected.
-privateNameFieldCallExpression.ts(14,40): error TS1134: Variable declaration expected.
-privateNameFieldCallExpression.ts(14,41): error TS1134: Variable declaration expected.
-privateNameFieldCallExpression.ts(14,43): error TS1134: Variable declaration expected.
-privateNameFieldCallExpression.ts(14,51): error TS1134: Variable declaration expected.
-privateNameFieldCallExpression.ts(14,52): error TS1134: Variable declaration expected.
-privateNameFieldCallExpression.ts(15,15): error TS1005: ';' expected.
-privateNameFieldCallExpression.ts(15,26): error TS1003: Identifier expected.
-privateNameFieldCallExpression.ts(15,26): error TS1127: Invalid character.
-privateNameFieldCallExpression.ts(15,27): error TS1005: ';' expected.
-privateNameFieldCallExpression.ts(15,37): error TS1005: ';' expected.
-privateNameFieldCallExpression.ts(15,44): error TS1005: ';' expected.
-privateNameFieldCallExpression.ts(15,46): error TS2304: Cannot find name 'middle$'.
+privateNameFieldCallExpression.ts(10,13): error TS2351: This expression is not constructable.
+privateNameFieldCallExpression.ts(14,23): error TS2351: This expression is not constructable.
+privateNameFieldCallExpression.ts(15,37): error TS1005: ',' expected.
+privateNameFieldCallExpression.ts(15,44): error TS1134: Variable declaration expected.
 privateNameFieldCallExpression.ts(15,53): error TS1005: ';' expected.
+privateNameFieldCallExpression.ts(15,54): error TS1005: ';' expected.
 privateNameFieldCallExpression.ts(15,56): error TS2304: Cannot find name 'tail'.
 privateNameFieldCallExpression.ts(15,60): error TS1005: ';' expected.
 privateNameFieldCallExpression.ts(16,40): error TS1005: ';' expected.
@@ -47,98 +14,33 @@ privateNameFieldCallExpression.ts(16,52): error TS1005: ';' expected.
 privateNameFieldCallExpression.ts(16,55): error TS1160: Unterminated template literal.
 
 
-!!! error TS2451: Cannot redeclare block-scoped variable 'arr'.
-==== privateNameFieldCallExpression.ts (46 errors) ====
+==== privateNameFieldCallExpression.ts (14 errors) ====
     class A {
         #fieldFunc = function() { this.x = 10; };
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~~~~
-!!! error TS1005: ';' expected.
         #fieldFunc2 = function(a, ...b) {};
-        ~
-!!! error TS1003: Identifier expected.
-        ~
-!!! error TS1127: Invalid character.
-         ~~~~~~~~~~
-!!! error TS1005: ';' expected.
         x = 1;
         test() {
             this.#fieldFunc();
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~~~~~
-!!! error TS1005: ';' expected.
             this.#fieldFunc?.();
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~~~~~
-!!! error TS1005: ';' expected.
             const func = this.#fieldFunc;
-                              ~
-!!! error TS1003: Identifier expected.
-                              ~
-!!! error TS1127: Invalid character.
-                               ~~~~~~~~~
-!!! error TS1005: ',' expected.
             func();
             new this.#fieldFunc();
-                     ~
-!!! error TS1003: Identifier expected.
-                     ~
-!!! error TS1127: Invalid character.
-                      ~~~~~~~~~
-!!! error TS1005: ';' expected.
+                ~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
     
             const arr = [ 1, 2 ];
             this.#fieldFunc2(0, ...arr, 3);
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~~~~~~~~~~
-!!! error TS1005: ';' expected.
             const b = new this.#fieldFunc2(0, ...arr, 3);
-                               ~
-!!! error TS1003: Identifier expected.
-                               ~
-!!! error TS1127: Invalid character.
-                                ~~~~~~~~~~
-!!! error TS1005: ',' expected.
-                                          ~
-!!! error TS1005: ',' expected.
-                                           ~
-!!! error TS1134: Variable declaration expected.
-                                            ~
-!!! error TS1134: Variable declaration expected.
-                                              ~~~
-!!! error TS1134: Variable declaration expected.
-                                                      ~
-!!! error TS1134: Variable declaration expected.
-                                                       ~
-!!! error TS1134: Variable declaration expected.
+                          ~~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
             const str = this.#fieldFunc2`head${1}middle${2}tail`;
-                  ~~~
-!!! error TS1005: ';' expected.
-                             ~
-!!! error TS1003: Identifier expected.
-                             ~
-!!! error TS1127: Invalid character.
-                              ~~~~~~~~~~
-!!! error TS1005: ';' expected.
                                         ~~~~~~~
-!!! error TS1005: ';' expected.
+!!! error TS1005: ',' expected.
                                                ~
-!!! error TS1005: ';' expected.
-                                                 ~~~~~~~
-!!! error TS2304: Cannot find name 'middle$'.
+!!! error TS1134: Variable declaration expected.
                                                         ~
+!!! error TS1005: ';' expected.
+                                                         ~
 !!! error TS1005: ';' expected.
                                                            ~~~~
 !!! error TS2304: Cannot find name 'tail'.

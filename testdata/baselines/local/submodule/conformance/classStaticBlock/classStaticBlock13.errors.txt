@@ -1,45 +1,17 @@
 classStaticBlock13.ts(2,10): error TS1005: ';' expected.
-classStaticBlock13.ts(2,10): error TS1127: Invalid character.
-classStaticBlock13.ts(2,11): error TS1005: ';' expected.
-classStaticBlock13.ts(5,19): error TS1003: Identifier expected.
-classStaticBlock13.ts(5,19): error TS1127: Invalid character.
-classStaticBlock13.ts(5,20): error TS1005: ',' expected.
-classStaticBlock13.ts(9,14): error TS1003: Identifier expected.
-classStaticBlock13.ts(9,14): error TS1127: Invalid character.
-classStaticBlock13.ts(9,15): error TS1005: ';' expected.
-classStaticBlock13.ts(9,15): error TS7027: Unreachable code detected.
 
 
-==== classStaticBlock13.ts (10 errors) ====
+==== classStaticBlock13.ts (1 errors) ====
     class C {
       static #x = 123;
-             ~
-!!! error TS1005: ';' expected.
-             ~
-!!! error TS1127: Invalid character.
-              ~
+             ~~
 !!! error TS1005: ';' expected.
     
       static {
         console.log(C.#x)
-                      ~
-!!! error TS1003: Identifier expected.
-                      ~
-!!! error TS1127: Invalid character.
-                       ~
-!!! error TS1005: ',' expected.
       }
     
       foo () {
         return C.#x;
-                 ~
-!!! error TS1003: Identifier expected.
-                 ~
-!!! error TS1127: Invalid character.
-                  ~
-!!! error TS1005: ';' expected.
-                  ~~
       }
-    ~~
-!!! error TS7027: Unreachable code detected.
     }

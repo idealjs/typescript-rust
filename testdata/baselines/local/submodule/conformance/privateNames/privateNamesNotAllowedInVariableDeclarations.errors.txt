@@ -1,10 +1,16 @@
-privateNamesNotAllowedInVariableDeclarations.ts(1,7): error TS1127: Invalid character.
+privateNamesNotAllowedInVariableDeclarations.ts(1,7): error TS1123: Variable declaration list cannot be empty.
 privateNamesNotAllowedInVariableDeclarations.ts(1,7): error TS1134: Variable declaration expected.
+privateNamesNotAllowedInVariableDeclarations.ts(1,12): error TS1134: Variable declaration expected.
+privateNamesNotAllowedInVariableDeclarations.ts(1,14): error TS1134: Variable declaration expected.
 
 
-==== privateNamesNotAllowedInVariableDeclarations.ts (2 errors) ====
+==== privateNamesNotAllowedInVariableDeclarations.ts (4 errors) ====
     const #foo = 3;
-          ~
-!!! error TS1127: Invalid character.
-          ~
+          ~~~~~~~~
+!!! error TS1123: Variable declaration list cannot be empty.
+          ~~~~
+!!! error TS1134: Variable declaration expected.
+               ~
+!!! error TS1134: Variable declaration expected.
+                 ~
 !!! error TS1134: Variable declaration expected.
