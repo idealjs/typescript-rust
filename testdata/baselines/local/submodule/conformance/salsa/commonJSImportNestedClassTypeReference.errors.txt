@@ -1,21 +1,17 @@
-main.js(1,15): error TS2304: Cannot find name 'require'.
 mod1.js(2,4): error TS2339: Property 'K' does not exist on type 'object'.
-mod1.js(7,1): error TS2304: Cannot find name 'exports'.
 mod1.js(7,16): error TS2339: Property 'K' does not exist on type 'object'.
 
 
 ==== commonJSImportNestedClassTypeReference.ts (0 errors) ====
     
-==== main.js (1 errors) ====
+==== main.js (0 errors) ====
     const { K } = require("./mod1");
-                  ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     /** @param {K} k */
     function f(k) {
         k.values()
     }
     
-==== mod1.js (3 errors) ====
+==== mod1.js (2 errors) ====
     var NS = {}
     NS.K =class {
        ~
@@ -25,7 +21,5 @@ mod1.js(7,16): error TS2339: Property 'K' does not exist on type 'object'.
         }
     }
     exports.K = NS.K;
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
                    ~
 !!! error TS2339: Property 'K' does not exist on type 'object'.

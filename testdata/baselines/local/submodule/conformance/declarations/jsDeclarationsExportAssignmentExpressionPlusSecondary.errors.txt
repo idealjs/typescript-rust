@@ -1,12 +1,11 @@
 index.js(5,7): error TS1003: Identifier expected.
 index.js(5,8): error TS1005: ';' expected.
-index.js(5,8): error TS2304: Cannot find name 'exports'.
 index.js(12,7): error TS1003: Identifier expected.
 index.js(12,8): error TS1005: ';' expected.
-index.js(12,8): error TS2304: Cannot find name 'exports'.
+index.js(12,16): error TS2339: Property 'Strings' does not exist on type '{ thing: "ok"; also: "ok"; desc: { item: "ok" } }'.
 
 
-==== index.js (6 errors) ====
+==== index.js (5 errors) ====
     const Strings = {
         a: "A",
         b: "B"
@@ -16,8 +15,6 @@ index.js(12,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         thing: "ok",
         also: "ok",
         desc: {
@@ -29,5 +26,5 @@ index.js(12,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+                   ~~~~~~~
+!!! error TS2339: Property 'Strings' does not exist on type '{ thing: "ok"; also: "ok"; desc: { item: "ok" } }'.

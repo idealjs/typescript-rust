@@ -1,6 +1,5 @@
 mixed.js(14,7): error TS1003: Identifier expected.
 mixed.js(14,8): error TS1005: ';' expected.
-mixed.js(14,8): error TS2304: Cannot find name 'exports'.
 
 
 ==== index.js (0 errors) ====
@@ -31,7 +30,7 @@ mixed.js(14,8): error TS2304: Cannot find name 'exports'.
      * @returns {T}
      */
     
-==== mixed.js (3 errors) ====
+==== mixed.js (2 errors) ====
     /**
      * @typedef {{x: string} | number | LocalThing | ExportedThing} SomeType
      */
@@ -50,8 +49,6 @@ mixed.js(14,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         doTheThing,
         ExportedThing,
     };

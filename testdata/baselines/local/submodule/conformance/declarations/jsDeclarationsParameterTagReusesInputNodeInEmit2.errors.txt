@@ -1,10 +1,9 @@
 base.js(9,13): error TS2339: Property 'Base' does not exist on type '() => object'.
 base.js(11,7): error TS1003: Identifier expected.
 base.js(11,8): error TS1005: ';' expected.
-base.js(11,8): error TS2304: Cannot find name 'exports'.
 
 
-==== base.js (4 errors) ====
+==== base.js (3 errors) ====
     class Base {
         constructor() {}
     }
@@ -22,8 +21,6 @@ base.js(11,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
 ==== file.js (0 errors) ====
     /** @typedef {typeof import('./base')} BaseFactory */

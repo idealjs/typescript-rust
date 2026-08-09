@@ -1,14 +1,11 @@
 enumTagOnExports.js(2,7): error TS1003: Identifier expected.
 enumTagOnExports.js(2,8): error TS1005: ';' expected.
-enumTagOnExports.js(2,8): error TS2304: Cannot find name 'exports'.
 
 
-==== enumTagOnExports.js (3 errors) ====
+==== enumTagOnExports.js (2 errors) ====
     /** @enum {string} */
     module.exports = {};
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.

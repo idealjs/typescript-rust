@@ -18,63 +18,38 @@ a.ts(18,1): error TS2304: Cannot find name 'b'.
 a.ts(19,1): error TS2304: Cannot find name 'b'.
 a.ts(20,1): error TS2304: Cannot find name 'b'.
 a.ts(21,1): error TS2304: Cannot find name 'b'.
-b.js(1,20): error TS2304: Cannot find name 'exports'.
-b.js(3,1): error TS2304: Cannot find name 'exports'.
-b.js(5,26): error TS2304: Cannot find name 'module'.
 b.js(7,7): error TS1003: Identifier expected.
 b.js(7,8): error TS1005: ';' expected.
-b.js(7,8): error TS2304: Cannot find name 'exports'.
-b.js(9,33): error TS2304: Cannot find name 'exports'.
-b.js(9,43): error TS2304: Cannot find name 'module'.
-b.js(12,33): error TS2304: Cannot find name 'module'.
-b.js(12,50): error TS2304: Cannot find name 'exports'.
-b.js(16,53): error TS2304: Cannot find name 'exports'.
-b.js(19,53): error TS2304: Cannot find name 'module'.
-b.js(22,33): error TS2304: Cannot find name 'module'.
-b.js(22,50): error TS2304: Cannot find name 'exports'.
 b.js(23,27): error TS2339: Property 'func9' does not exist on type 'object'.
-b.js(25,33): error TS2304: Cannot find name 'exports'.
-b.js(25,43): error TS2304: Cannot find name 'module'.
 b.js(26,27): error TS2339: Property 'func10' does not exist on type 'object'.
-b.js(28,1): error TS2304: Cannot find name 'exports'.
-b.js(28,11): error TS2304: Cannot find name 'module'.
-b.js(29,1): error TS2304: Cannot find name 'exports'.
+b.js(29,9): error TS2339: Property 'func11' does not exist on type 'object'.
 b.js(30,7): error TS1003: Identifier expected.
 b.js(30,8): error TS1005: ';' expected.
-b.js(30,8): error TS2304: Cannot find name 'exports'.
-b.js(32,1): error TS2304: Cannot find name 'exports'.
-b.js(32,11): error TS2304: Cannot find name 'module'.
-b.js(33,1): error TS2304: Cannot find name 'exports'.
+b.js(30,16): error TS2339: Property 'func12' does not exist on type 'object'.
+b.js(33,9): error TS2339: Property 'func11' does not exist on type 'object'.
 b.js(34,7): error TS1003: Identifier expected.
 b.js(34,8): error TS1005: ';' expected.
-b.js(34,8): error TS2304: Cannot find name 'exports'.
-b.js(36,1): error TS2304: Cannot find name 'exports'.
-b.js(36,11): error TS2304: Cannot find name 'module'.
-b.js(37,1): error TS2304: Cannot find name 'exports'.
+b.js(34,16): error TS2339: Property 'func12' does not exist on type 'object'.
+b.js(37,9): error TS2339: Property 'func13' does not exist on type 'object'.
 b.js(38,7): error TS1003: Identifier expected.
 b.js(38,8): error TS1005: ';' expected.
-b.js(38,8): error TS2304: Cannot find name 'exports'.
-b.js(40,1): error TS2304: Cannot find name 'exports'.
-b.js(40,11): error TS2304: Cannot find name 'module'.
-b.js(41,1): error TS2304: Cannot find name 'exports'.
+b.js(38,16): error TS2339: Property 'func14' does not exist on type 'object'.
+b.js(41,9): error TS2339: Property 'func15' does not exist on type 'object'.
 b.js(42,7): error TS1003: Identifier expected.
 b.js(42,8): error TS1005: ';' expected.
-b.js(42,8): error TS2304: Cannot find name 'exports'.
+b.js(42,16): error TS2339: Property 'func16' does not exist on type 'object'.
 b.js(44,7): error TS1003: Identifier expected.
 b.js(44,8): error TS1005: ';' expected.
-b.js(44,8): error TS2304: Cannot find name 'exports'.
-b.js(44,18): error TS2304: Cannot find name 'exports'.
-b.js(45,1): error TS2304: Cannot find name 'exports'.
+b.js(45,9): error TS2339: Property 'func17' does not exist on type 'object'.
 b.js(46,7): error TS1003: Identifier expected.
 b.js(46,8): error TS1005: ';' expected.
-b.js(46,8): error TS2304: Cannot find name 'exports'.
+b.js(46,16): error TS2339: Property 'func18' does not exist on type 'object'.
 b.js(48,7): error TS1003: Identifier expected.
 b.js(48,8): error TS1005: ';' expected.
-b.js(48,8): error TS2304: Cannot find name 'exports'.
-b.js(49,1): error TS2304: Cannot find name 'exports'.
+b.js(49,9): error TS2339: Property 'func19' does not exist on type 'object'.
 b.js(50,7): error TS1003: Identifier expected.
 b.js(50,8): error TS1005: ';' expected.
-b.js(50,8): error TS2304: Cannot find name 'exports'.
+b.js(50,16): error TS2339: Property 'func20' does not exist on type 'object'.
 
 
 ==== moduleExportAlias.ts (0 errors) ====
@@ -143,169 +118,119 @@ b.js(50,8): error TS2304: Cannot find name 'exports'.
 !!! error TS2304: Cannot find name 'b'.
     
     
-==== b.js (57 errors) ====
+==== b.js (32 errors) ====
     var exportsAlias = exports;
-                       ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     exportsAlias.func1 = function () { };
     exports.func2 = function () { };
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
     var moduleExportsAlias = module.exports;
-                             ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
     moduleExportsAlias.func3 = function () { };
     module.exports.func4 = function () { };
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
     var multipleDeclarationAlias1 = exports = module.exports;
-                                    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-                                              ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
     multipleDeclarationAlias1.func5 = function () { };
     
     var multipleDeclarationAlias2 = module.exports = exports;
-                                    ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
-                                                     ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     multipleDeclarationAlias2.func6 = function () { };
     
     var someOtherVariable;
     var multipleDeclarationAlias3 = someOtherVariable = exports;
-                                                        ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     multipleDeclarationAlias3.func7 = function () { };
     
     var multipleDeclarationAlias4 = someOtherVariable = module.exports;
-                                                        ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
     multipleDeclarationAlias4.func8 = function () { };
     
     var multipleDeclarationAlias5 = module.exports = exports = {};
-                                    ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
-                                                     ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     multipleDeclarationAlias5.func9 = function () { };
                               ~~~~~
 !!! error TS2339: Property 'func9' does not exist on type 'object'.
     
     var multipleDeclarationAlias6 = exports = module.exports = {};
-                                    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-                                              ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
     multipleDeclarationAlias6.func10 = function () { };
                               ~~~~~~
 !!! error TS2339: Property 'func10' does not exist on type 'object'.
     
     exports = module.exports = someOtherVariable = {};
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-              ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
     exports.func11 = function () { };
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+            ~~~~~~
+!!! error TS2339: Property 'func11' does not exist on type 'object'.
     module.exports.func12 = function () { };
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+                   ~~~~~~
+!!! error TS2339: Property 'func12' does not exist on type 'object'.
     
     exports = module.exports = someOtherVariable = {};
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-              ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
     exports.func11 = function () { };
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+            ~~~~~~
+!!! error TS2339: Property 'func11' does not exist on type 'object'.
     module.exports.func12 = function () { };
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+                   ~~~~~~
+!!! error TS2339: Property 'func12' does not exist on type 'object'.
     
     exports = module.exports = {};
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-              ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
     exports.func13 = function () { };
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+            ~~~~~~
+!!! error TS2339: Property 'func13' does not exist on type 'object'.
     module.exports.func14 = function () { };
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+                   ~~~~~~
+!!! error TS2339: Property 'func14' does not exist on type 'object'.
     
     exports = module.exports = {};
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-              ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
     exports.func15 = function () { };
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+            ~~~~~~
+!!! error TS2339: Property 'func15' does not exist on type 'object'.
     module.exports.func16 = function () { };
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+                   ~~~~~~
+!!! error TS2339: Property 'func16' does not exist on type 'object'.
     
     module.exports = exports = {};
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-                     ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     exports.func17 = function () { };
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+            ~~~~~~
+!!! error TS2339: Property 'func17' does not exist on type 'object'.
     module.exports.func18 = function () { };
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+                   ~~~~~~
+!!! error TS2339: Property 'func18' does not exist on type 'object'.
     
     module.exports = {};
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     exports.func19 = function () { };
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+            ~~~~~~
+!!! error TS2339: Property 'func19' does not exist on type 'object'.
     module.exports.func20 = function () { };
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+                   ~~~~~~
+!!! error TS2339: Property 'func20' does not exist on type 'object'.
     

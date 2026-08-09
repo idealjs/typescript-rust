@@ -1,13 +1,10 @@
-/importer-cjs.cjs(1,13): error TS2304: Cannot find name 'require'.
 /importer-cts.cts(8,5): error TS2304: Cannot find name 'Foo3'.
 
 
 ==== esmModuleExports2.ts (0 errors) ====
     
-==== /importer-cjs.cjs (1 errors) ====
+==== /importer-cjs.cjs (0 errors) ====
     const Foo = require("./exporter.mjs");
-                ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     new Foo();
     
 ==== /importer-cts.cts (1 errors) ====

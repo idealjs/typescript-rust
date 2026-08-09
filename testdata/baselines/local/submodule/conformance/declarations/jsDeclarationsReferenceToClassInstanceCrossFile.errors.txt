@@ -1,16 +1,12 @@
-index.js(1,21): error TS2304: Cannot find name 'require'.
 index.js(9,14): error TS2339: Property 'objects' does not exist on type '{ addRectangle: () => any }'.
 index.js(18,14): error TS2339: Property 'objects' does not exist on type '{ addRectangle: () => any }'.
 index.js(23,7): error TS1003: Identifier expected.
 index.js(23,8): error TS1005: ';' expected.
-index.js(23,8): error TS2304: Cannot find name 'exports'.
 rectangle.js(7,7): error TS1003: Identifier expected.
 rectangle.js(7,8): error TS1005: ';' expected.
-rectangle.js(7,8): error TS2304: Cannot find name 'exports'.
-test.js(1,18): error TS2304: Cannot find name 'require'.
 
 
-==== rectangle.js (3 errors) ====
+==== rectangle.js (2 errors) ====
     class Rectangle {
         constructor() {
             console.log("I'm a rectangle!");
@@ -22,12 +18,8 @@ test.js(1,18): error TS2304: Cannot find name 'require'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-==== index.js (6 errors) ====
+==== index.js (4 errors) ====
     const {Rectangle} = require('./rectangle');
-                        ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     
     class Render {
         constructor() {
@@ -58,12 +50,8 @@ test.js(1,18): error TS2304: Cannot find name 'require'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-==== test.js (1 errors) ====
+==== test.js (0 errors) ====
     const {Render} = require("./index");
-                     ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     let render = new Render();
     
     render.addRectangle();

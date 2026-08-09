@@ -1,5 +1,3 @@
-38379.js(1,17): error TS2304: Cannot find name 'require'.
-38379.js(2,15): error TS2304: Cannot find name 'require'.
 ex.d.ts(2,52): error TS2304: Cannot find name 'Error'.
 ex2.d.ts(1,53): error TS2304: Cannot find name 'Error'.
 
@@ -14,13 +12,9 @@ ex2.d.ts(1,53): error TS2304: Cannot find name 'Error'.
                                                         ~~~~~
 !!! error TS2304: Cannot find name 'Error'.
     export = art;
-==== 38379.js (2 errors) ====
+==== 38379.js (0 errors) ====
     const { art } = require('./ex')
-                    ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     const artoo = require('./ex2')
-                  ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     let x = 1
     art(x)
     let y = 1

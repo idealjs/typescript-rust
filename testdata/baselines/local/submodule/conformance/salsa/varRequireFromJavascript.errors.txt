@@ -1,6 +1,5 @@
 ex.js(4,14): error TS2339: Property 'n' does not exist on type '{ m: () => any }'.
 ex.js(7,21): error TS2339: Property 'n' does not exist on type '{ m: () => any }'.
-use.js(1,10): error TS2304: Cannot find name 'require'.
 
 
 ==== ex.js (2 errors) ====
@@ -18,10 +17,8 @@ use.js(1,10): error TS2304: Cannot find name 'require'.
         }
     }
     
-==== use.js (1 errors) ====
+==== use.js (0 errors) ====
     var ex = require('./ex')
-             ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     
     // values work
     var crunch = new ex.Crunch(1);

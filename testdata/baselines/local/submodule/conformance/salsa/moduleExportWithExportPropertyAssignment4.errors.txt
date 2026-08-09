@@ -1,29 +1,25 @@
 mod1.js(2,7): error TS1003: Identifier expected.
 mod1.js(2,8): error TS1005: ';' expected.
-mod1.js(2,8): error TS2304: Cannot find name 'exports'.
 mod1.js(6,7): error TS1003: Identifier expected.
 mod1.js(6,8): error TS1005: ';' expected.
-mod1.js(6,8): error TS2304: Cannot find name 'exports'.
 mod1.js(10,7): error TS1003: Identifier expected.
 mod1.js(10,8): error TS1005: ';' expected.
-mod1.js(10,8): error TS2304: Cannot find name 'exports'.
+mod1.js(10,16): error TS2339: Property 'bothAfter' does not exist on type '() => void'.
 mod1.js(11,7): error TS1003: Identifier expected.
 mod1.js(11,8): error TS1005: ';' expected.
-mod1.js(11,8): error TS2304: Cannot find name 'exports'.
+mod1.js(11,16): error TS2339: Property 'justProperty' does not exist on type '() => void'.
 
 
 ==== requires.d.ts (0 errors) ====
     declare var module: { exports: any };
     declare function require(name: string): any;
-==== mod1.js (12 errors) ====
+==== mod1.js (10 errors) ====
     /// <reference path='./requires.d.ts' />
     module.exports.bothBefore = 'string'
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     A.justExport = 4
     A.bothBefore = 2
     A.bothAfter = 3
@@ -32,8 +28,6 @@ mod1.js(11,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     function A() {
         this.p = 1
     }
@@ -42,15 +36,15 @@ mod1.js(11,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+                   ~~~~~~~~~
+!!! error TS2339: Property 'bothAfter' does not exist on type '() => void'.
     module.exports.justProperty = 'string'
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+                   ~~~~~~~~~~~~
+!!! error TS2339: Property 'justProperty' does not exist on type '() => void'.
     
 ==== a.js (0 errors) ====
     /// <reference path='./requires.d.ts' />

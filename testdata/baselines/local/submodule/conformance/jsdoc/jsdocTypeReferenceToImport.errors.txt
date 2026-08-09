@@ -1,18 +1,12 @@
 ex.d.ts(2,5): error TS2564: Property 'start' has no initializer and is not definitely assigned in the constructor.
 ex.d.ts(3,5): error TS2564: Property 'end' has no initializer and is not definitely assigned in the constructor.
-jsdocTypeReferenceToImport.js(1,11): error TS2304: Cannot find name 'require'.
-jsdocTypeReferenceToImport.js(2,11): error TS2304: Cannot find name 'require'.
 
 
 ==== jsdocTypeReferenceToImport.ts (0 errors) ====
     // #34802
-==== jsdocTypeReferenceToImport.js (2 errors) ====
+==== jsdocTypeReferenceToImport.js (0 errors) ====
     const C = require('./ex').C;
-              ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     const D = require('./ex')?.C;
-              ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     /** @type {C} c */
     var c = new C()
     c.start

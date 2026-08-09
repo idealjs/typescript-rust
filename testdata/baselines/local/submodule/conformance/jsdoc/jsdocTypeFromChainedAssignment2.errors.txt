@@ -1,19 +1,10 @@
-mod.js(2,1): error TS2304: Cannot find name 'exports'.
-mod.js(2,13): error TS2304: Cannot find name 'exports'.
 mod.js(6,7): error TS1003: Identifier expected.
 mod.js(6,8): error TS1005: ';' expected.
-mod.js(6,8): error TS2304: Cannot find name 'exports'.
-mod.js(6,20): error TS2304: Cannot find name 'module'.
-use.js(1,11): error TS2304: Cannot find name 'require'.
 
 
-==== mod.js (6 errors) ====
+==== mod.js (2 errors) ====
     /** @param {number} n */
     exports.f = exports.g = function fg(n) {
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-                ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         return n + 1
     }
     /** @param {string} mom */
@@ -22,17 +13,11 @@ use.js(1,11): error TS2304: Cannot find name 'require'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-                       ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
         return `hi, ${mom}!`;
     }
     
-==== use.js (1 errors) ====
+==== use.js (0 errors) ====
     var mod = require('./mod');
-              ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     mod.f('no')
     mod.g('also no')
     mod.h(0)

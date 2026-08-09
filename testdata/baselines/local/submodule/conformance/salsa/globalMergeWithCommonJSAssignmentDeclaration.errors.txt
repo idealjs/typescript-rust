@@ -1,9 +1,8 @@
 bug27099.js(3,7): error TS1003: Identifier expected.
 bug27099.js(3,8): error TS1005: ';' expected.
-bug27099.js(3,8): error TS2304: Cannot find name 'exports'.
 
 
-==== bug27099.js (3 errors) ====
+==== bug27099.js (2 errors) ====
     window.name = 1;
     window.console; // should not have error: Property 'console' does not exist on type 'typeof window'.
     module.exports = 'anything';
@@ -11,6 +10,4 @@ bug27099.js(3,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     

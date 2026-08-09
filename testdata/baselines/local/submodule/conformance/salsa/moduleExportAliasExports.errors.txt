@@ -1,27 +1,15 @@
-Eloquent.js(3,1): error TS2304: Cannot find name 'exports'.
-Eloquent.js(4,1): error TS2304: Cannot find name 'exports'.
 Eloquent.js(5,7): error TS1003: Identifier expected.
 Eloquent.js(5,8): error TS1005: ';' expected.
-Eloquent.js(5,8): error TS2304: Cannot find name 'exports'.
-Eloquent.js(5,18): error TS2304: Cannot find name 'exports'.
 
 
-==== Eloquent.js (6 errors) ====
+==== Eloquent.js (2 errors) ====
     // bug #27365, crashes from github.com/marijnh/Eloquent-JavaScript
     (function() {
     exports.bigOak = 1
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     exports.everywhere = 2
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     module.exports = exports
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-                     ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     })()

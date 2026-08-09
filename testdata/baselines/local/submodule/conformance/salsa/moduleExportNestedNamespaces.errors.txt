@@ -1,31 +1,24 @@
 mod.js(1,7): error TS1003: Identifier expected.
 mod.js(1,8): error TS1005: ';' expected.
-mod.js(1,8): error TS2304: Cannot find name 'exports'.
 mod.js(2,7): error TS1003: Identifier expected.
 mod.js(2,8): error TS1005: ';' expected.
-mod.js(2,8): error TS2304: Cannot find name 'exports'.
 mod.js(5,7): error TS1003: Identifier expected.
 mod.js(5,8): error TS1005: ';' expected.
-mod.js(5,8): error TS2304: Cannot find name 'exports'.
 use.js(3,13): error TS2304: Cannot find name 's'.
 use.js(5,19): error TS2304: Cannot find name 's'.
 
 
-==== mod.js (9 errors) ====
+==== mod.js (6 errors) ====
     module.exports.n = {};
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     module.exports.n.K = function C() {
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         this.x = 10;
     }
     module.exports.Classic = class {
@@ -33,8 +26,6 @@ use.js(5,19): error TS2304: Cannot find name 's'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         constructor() {
             this.p = 1
         }

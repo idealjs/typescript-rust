@@ -1,7 +1,5 @@
-index.js(1,15): error TS2304: Cannot find name 'require'.
 index.js(2,7): error TS1003: Identifier expected.
 index.js(2,8): error TS1005: ';' expected.
-index.js(2,8): error TS2304: Cannot find name 'exports'.
 
 
 ==== some-mod.d.ts (0 errors) ====
@@ -10,14 +8,10 @@ index.js(2,8): error TS2304: Cannot find name 'exports'.
     }
     declare function getItems(): Item[];
     export = getItems;
-==== index.js (4 errors) ====
+==== index.js (2 errors) ====
     const items = require("./some-mod")();
-                  ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     module.exports = items;
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.

@@ -1,13 +1,11 @@
-bug43713.js(1,19): error TS2304: Cannot find name 'require'.
 commonJSAliasedExport.js(6,7): error TS1003: Identifier expected.
 commonJSAliasedExport.js(6,8): error TS1005: ';' expected.
-commonJSAliasedExport.js(6,8): error TS2304: Cannot find name 'exports'.
 commonJSAliasedExport.js(7,7): error TS1003: Identifier expected.
 commonJSAliasedExport.js(7,8): error TS1005: ';' expected.
-commonJSAliasedExport.js(7,8): error TS2304: Cannot find name 'exports'.
+commonJSAliasedExport.js(7,16): error TS2339: Property 'funky' does not exist on type '(ast: any) => any'.
 
 
-==== commonJSAliasedExport.js (6 errors) ====
+==== commonJSAliasedExport.js (5 errors) ====
     const donkey = (ast) =>  ast;
     
     function funky(declaration) {
@@ -18,20 +16,16 @@ commonJSAliasedExport.js(7,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     module.exports.funky = funky;
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+                   ~~~~~
+!!! error TS2339: Property 'funky' does not exist on type '(ast: any) => any'.
     
-==== bug43713.js (1 errors) ====
+==== bug43713.js (0 errors) ====
     const { funky } = require('./commonJSAliasedExport');
-                      ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     /** @type {boolean} */
     var diddy
     var diddy = funky(1)

@@ -1,21 +1,15 @@
-bug28014.js(1,1): error TS2304: Cannot find name 'exports'.
 bug28014.js(3,7): error TS1003: Identifier expected.
 bug28014.js(3,8): error TS1005: ';' expected.
-bug28014.js(3,8): error TS2304: Cannot find name 'exports'.
 
 
-==== bug28014.js (4 errors) ====
+==== bug28014.js (2 errors) ====
     exports.version = 1
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     function alias() { }
     module.exports = alias
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
 ==== importer.js (0 errors) ====
     import('./bug28014')

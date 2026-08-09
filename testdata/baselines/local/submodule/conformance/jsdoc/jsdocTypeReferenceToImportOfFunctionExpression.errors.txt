@@ -1,16 +1,13 @@
-MC.js(1,12): error TS2304: Cannot find name 'require'.
 MC.js(6,7): error TS1003: Identifier expected.
 MC.js(6,8): error TS1005: ';' expected.
-MC.js(6,8): error TS2304: Cannot find name 'exports'.
 MW.js(8,10): error TS2339: Property 'compiler' does not exist on type 'object'.
 MW.js(12,7): error TS1003: Identifier expected.
 MW.js(12,8): error TS1005: ';' expected.
-MW.js(12,8): error TS2304: Cannot find name 'exports'.
 
 
 ==== jsdocTypeReferenceToImportOfFunctionExpression.ts (0 errors) ====
     
-==== MW.js (4 errors) ====
+==== MW.js (3 errors) ====
     /** @typedef {import("./MC")} MC */
     
     class MW {
@@ -29,13 +26,9 @@ MW.js(12,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
-==== MC.js (4 errors) ====
+==== MC.js (2 errors) ====
     const MW = require("./MW");
-               ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     
     /** @typedef {number} Meyerhauser */
     
@@ -45,8 +38,6 @@ MW.js(12,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         /** @type {any} */
         var x = {}
         return new MW(x);

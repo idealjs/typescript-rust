@@ -1,35 +1,26 @@
-index.js(3,19): error TS2304: Cannot find name 'require'.
 index.js(4,7): error TS1003: Identifier expected.
 index.js(4,8): error TS1005: ';' expected.
-index.js(4,8): error TS2304: Cannot find name 'exports'.
 index.js(5,7): error TS1003: Identifier expected.
 index.js(5,8): error TS1005: ';' expected.
-index.js(5,8): error TS2304: Cannot find name 'exports'.
 
 
 ==== index.d.ts (0 errors) ====
     declare module "fs" {
         export class Something {}
     }
-==== index.js (7 errors) ====
+==== index.js (4 errors) ====
     /// <reference types="node" />
     
     const Something = require("fs").Something;
-                      ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     module.exports.A = {}
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     module.exports.A.B = {
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         thing: new Something()
     }

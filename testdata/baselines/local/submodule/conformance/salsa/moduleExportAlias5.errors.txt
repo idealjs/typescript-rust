@@ -1,21 +1,15 @@
-bug24754.js(4,1): error TS2304: Cannot find name 'exports'.
-bug24754.js(4,11): error TS2304: Cannot find name 'module'.
-bug24754.js(5,1): error TS2304: Cannot find name 'exports'.
+bug24754.js(5,9): error TS2339: Property 'version' does not exist on type '() => void'.
 bug24754.js(7,9): error TS2339: Property 'WebpackOptionsDefaulter' does not exist on type '() => void'.
 
 
-==== bug24754.js (4 errors) ====
+==== bug24754.js (2 errors) ====
     // #24754
     const webpack = function (){
     }
     exports = module.exports = webpack;
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-              ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
     exports.version = 1001;
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+            ~~~~~~~
+!!! error TS2339: Property 'version' does not exist on type '() => void'.
     
     webpack.WebpackOptionsDefaulter = 1111;
             ~~~~~~~~~~~~~~~~~~~~~~~

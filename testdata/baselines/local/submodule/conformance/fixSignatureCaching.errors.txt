@@ -105,18 +105,15 @@ fixSignatureCaching.ts(967,22): error TS2339: Property 'isPhoneSized' does not e
 fixSignatureCaching.ts(971,18): error TS2339: Property '_impl' does not exist on type '(userAgent: any, maxPhoneWidth: any) => void'.
 fixSignatureCaching.ts(973,18): error TS2339: Property 'version' does not exist on type '(userAgent: any, maxPhoneWidth: any) => void'.
 fixSignatureCaching.ts(977,4): error TS2554: Expected 1 arguments, but got 0.
-fixSignatureCaching.ts(978,16): error TS2304: Cannot find name 'module'.
-fixSignatureCaching.ts(978,42): error TS2304: Cannot find name 'module'.
 fixSignatureCaching.ts(979,43): error TS1003: Identifier expected.
 fixSignatureCaching.ts(979,44): error TS1005: ';' expected.
-fixSignatureCaching.ts(979,44): error TS2304: Cannot find name 'exports'.
 fixSignatureCaching.ts(980,23): error TS2304: Cannot find name 'define'.
 fixSignatureCaching.ts(980,48): error TS2304: Cannot find name 'define'.
 fixSignatureCaching.ts(981,16): error TS2304: Cannot find name 'define'.
 fixSignatureCaching.ts(986,19): error TS2304: Cannot find name 'Error'.
 
 
-==== fixSignatureCaching.ts (116 errors) ====
+==== fixSignatureCaching.ts (113 errors) ====
     // Repro from #10697
     
     (function (define, undefined) {
@@ -2283,18 +2280,12 @@ fixSignatureCaching.ts(986,19): error TS2304: Cannot find name 'Error'.
        ~~~~~~~~~~~~~~~~~~~~~~~
         if (typeof module !== 'undefined' && module.exports) {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                   ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
-                                             ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
             return function (factory) { module.exports = factory(); };
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                                               ~
 !!! error TS1003: Identifier expected.
                                                ~~~~~~~
 !!! error TS1005: ';' expected.
-                                               ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         } else if (typeof define === 'function' && define.amd) {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                           ~~~~~~

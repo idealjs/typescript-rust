@@ -1,26 +1,19 @@
-npmlog.js(5,14): error TS2304: Cannot find name 'module'.
 npmlog.js(8,7): error TS1003: Identifier expected.
 npmlog.js(8,8): error TS1005: ';' expected.
-npmlog.js(8,8): error TS2304: Cannot find name 'exports'.
 npmlog.js(10,8): error TS2339: Property 'x' does not exist on type '{ on: (s: any) => any }'.
 npmlog.js(11,7): error TS1003: Identifier expected.
 npmlog.js(11,8): error TS1005: ';' expected.
-npmlog.js(11,8): error TS2304: Cannot find name 'exports'.
 npmlog.js(12,8): error TS2339: Property 'y' does not exist on type '{ on: (s: any) => any }'.
 npmlog.js(13,7): error TS1003: Identifier expected.
 npmlog.js(13,8): error TS1005: ';' expected.
-npmlog.js(13,8): error TS2304: Cannot find name 'exports'.
-use.js(1,14): error TS2304: Cannot find name 'require'.
 
 
-==== npmlog.js (12 errors) ====
+==== npmlog.js (8 errors) ====
     class EE {
         /** @param {string} s */
         on(s) { }
     }
     var npmlog = module.exports = new EE()
-                 ~~~~~~
-!!! error TS2304: Cannot find name 'module'.
     
     npmlog.on('hi') // both references should see EE.on
     module.exports.on('hi') // here too
@@ -28,8 +21,6 @@ use.js(1,14): error TS2304: Cannot find name 'require'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
     npmlog.x = 1
            ~
@@ -39,8 +30,6 @@ use.js(1,14): error TS2304: Cannot find name 'require'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     npmlog.y
            ~
 !!! error TS2339: Property 'y' does not exist on type '{ on: (s: any) => any }'.
@@ -49,12 +38,8 @@ use.js(1,14): error TS2304: Cannot find name 'require'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
-==== use.js (1 errors) ====
+==== use.js (0 errors) ====
     var npmlog = require('./npmlog')
-                 ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     npmlog.x
     npmlog.on

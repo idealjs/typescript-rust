@@ -1,25 +1,16 @@
-importer.js(1,13): error TS2304: Cannot find name 'require'.
 mod1.js(2,1): error TS2304: Cannot find name 'Object'.
-mod1.js(2,23): error TS2304: Cannot find name 'exports'.
 mod1.js(8,1): error TS2304: Cannot find name 'Object'.
-mod1.js(8,23): error TS2304: Cannot find name 'exports'.
 mod1.js(11,1): error TS2304: Cannot find name 'Object'.
-mod1.js(11,23): error TS2304: Cannot find name 'exports'.
 mod1.js(14,1): error TS2304: Cannot find name 'Object'.
-mod1.js(14,23): error TS2304: Cannot find name 'exports'.
 mod1.js(15,1): error TS2304: Cannot find name 'Object'.
-mod1.js(15,23): error TS2304: Cannot find name 'exports'.
 mod1.js(16,1): error TS2304: Cannot find name 'Object'.
-mod1.js(16,23): error TS2304: Cannot find name 'exports'.
 
 
-==== mod1.js (12 errors) ====
+==== mod1.js (6 errors) ====
     const obj = { value: 42, writable: true };
     Object.defineProperty(exports, "thing", obj);
     ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
-                          ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
     /**
      * @type {string}
@@ -28,37 +19,25 @@ mod1.js(16,23): error TS2304: Cannot find name 'exports'.
     Object.defineProperty(exports, str, { value: 42, writable: true });
     ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
-                          ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
     const propName = "prop"
     Object.defineProperty(exports, propName, { value: 42, writable: true });
     ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
-                          ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
     
     Object.defineProperty(exports, "bad1", { });
     ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
-                          ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     Object.defineProperty(exports, "bad2", { get() { return 12 }, value: "no" });
     ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
-                          ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     Object.defineProperty(exports, "bad3", { writable: true });
     ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
-                          ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
-==== importer.js (1 errors) ====
+==== importer.js (0 errors) ====
     const mod = require("./mod1");
-                ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     mod.thing;
     mod.other;
     mod.prop;

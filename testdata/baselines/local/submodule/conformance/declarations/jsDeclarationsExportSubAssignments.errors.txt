@@ -1,12 +1,11 @@
 cls.js(6,7): error TS1003: Identifier expected.
 cls.js(6,8): error TS1005: ';' expected.
-cls.js(6,8): error TS2304: Cannot find name 'exports'.
 cls.js(7,7): error TS1003: Identifier expected.
 cls.js(7,8): error TS1005: ';' expected.
-cls.js(7,8): error TS2304: Cannot find name 'exports'.
+cls.js(7,16): error TS2339: Property 'Strings' does not exist on type 'object'.
 
 
-==== cls.js (6 errors) ====
+==== cls.js (5 errors) ====
     const Strings = {
         a: "A",
         b: "B"
@@ -17,12 +16,10 @@ cls.js(7,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     module.exports.Strings = Strings;
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+                   ~~~~~~~
+!!! error TS2339: Property 'Strings' does not exist on type 'object'.

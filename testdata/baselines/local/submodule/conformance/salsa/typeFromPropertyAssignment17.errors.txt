@@ -1,20 +1,17 @@
 minimatch.js(2,7): error TS1003: Identifier expected.
 minimatch.js(2,8): error TS1005: ';' expected.
-minimatch.js(2,8): error TS2304: Cannot find name 'exports'.
 
 
 ==== types.d.ts (0 errors) ====
     declare var require: any;
     declare var module: any;
-==== minimatch.js (3 errors) ====
+==== minimatch.js (2 errors) ====
     /// <reference path='./types.d.ts'/>
     module.exports = minimatch
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     minimatch.M = M
     minimatch.filter = filter
     function filter() {

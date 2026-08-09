@@ -13,11 +13,10 @@ mod1.js(18,28): error TS2304: Cannot find name 'Number'.
 mod1.js(18,35): error TS2304: Cannot find name 'str'.
 mod1.js(21,7): error TS1003: Identifier expected.
 mod1.js(21,8): error TS1005: ';' expected.
-mod1.js(21,8): error TS2304: Cannot find name 'exports'.
 validator.ts(5,16): error TS2351: This expression is not constructable.
 
 
-==== mod1.js (16 errors) ====
+==== mod1.js (15 errors) ====
     /**
      * @constructor
      * @param {string} name
@@ -69,8 +68,6 @@ validator.ts(5,16): error TS2351: This expression is not constructable.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
 ==== validator.ts (1 errors) ====
     import "./";

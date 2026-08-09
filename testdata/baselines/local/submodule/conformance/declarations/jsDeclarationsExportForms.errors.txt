@@ -1,19 +1,11 @@
-cjs.js(1,12): error TS2304: Cannot find name 'require'.
 cjs.js(2,7): error TS1003: Identifier expected.
 cjs.js(2,8): error TS1005: ';' expected.
-cjs.js(2,8): error TS2304: Cannot find name 'exports'.
-cjs2.js(1,12): error TS2304: Cannot find name 'require'.
 cjs2.js(2,7): error TS1003: Identifier expected.
 cjs2.js(2,8): error TS1005: ';' expected.
-cjs2.js(2,8): error TS2304: Cannot find name 'exports'.
-cjs3.js(1,12): error TS2304: Cannot find name 'require'.
 cjs3.js(2,7): error TS1003: Identifier expected.
 cjs3.js(2,8): error TS1005: ';' expected.
-cjs3.js(2,8): error TS2304: Cannot find name 'exports'.
-cjs4.js(1,12): error TS2304: Cannot find name 'require'.
 cjs4.js(2,7): error TS1003: Identifier expected.
 cjs4.js(2,8): error TS1005: ';' expected.
-cjs4.js(2,8): error TS2304: Cannot find name 'exports'.
 
 
 ==== cls.js (0 errors) ====
@@ -45,53 +37,37 @@ cjs4.js(2,8): error TS2304: Cannot find name 'exports'.
     import * as ns from "./cls";
     export { ns as classContainer };
     
-==== cjs.js (4 errors) ====
+==== cjs.js (2 errors) ====
     const ns = require("./cls");
-               ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     module.exports = { ns };
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
-==== cjs2.js (4 errors) ====
+==== cjs2.js (2 errors) ====
     const ns = require("./cls");
-               ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     module.exports = ns;
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
-==== cjs3.js (4 errors) ====
+==== cjs3.js (2 errors) ====
     const ns = require("./cls");
-               ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     module.exports.ns = ns;
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
-==== cjs4.js (4 errors) ====
+==== cjs4.js (2 errors) ====
     const ns = require("./cls");
-               ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     module.exports.names = ns;
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
 ==== includeAll.js (0 errors) ====
     import "./cjs4";

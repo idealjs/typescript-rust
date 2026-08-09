@@ -1,17 +1,13 @@
 error TS2300: Duplicate identifier 'Foo'.
-mod1.js(7,1): error TS2304: Cannot find name 'exports'.
 mod1.js(10,7): error TS1003: Identifier expected.
 mod1.js(10,8): error TS1005: ';' expected.
-mod1.js(10,8): error TS2304: Cannot find name 'exports'.
-mod1.js(20,1): error TS2304: Cannot find name 'exports'.
+mod1.js(20,9): error TS2339: Property 'Quid' does not exist on type '{ Baz: any }'.
 mod1.js(23,7): error TS1003: Identifier expected.
 mod1.js(23,8): error TS1005: ';' expected.
-mod1.js(23,8): error TS2304: Cannot find name 'exports'.
-use.js(1,11): error TS2304: Cannot find name 'require'.
 
 
 !!! error TS2300: Duplicate identifier 'Foo'.
-==== mod1.js (8 errors) ====
+==== mod1.js (5 errors) ====
     // error
     
     /** @typedef {number} Foo */
@@ -19,8 +15,6 @@ use.js(1,11): error TS2304: Cannot find name 'require'.
     
     /** @typedef {number} Bar */
     exports.Bar = class { }
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
     /** @typedef {number} Baz */
     module.exports = {
@@ -28,8 +22,6 @@ use.js(1,11): error TS2304: Cannot find name 'require'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         Baz: class { }
     }
     
@@ -40,8 +32,8 @@ use.js(1,11): error TS2304: Cannot find name 'require'.
     
     /** @typedef {number} Quid */
     exports.Quid = 2;
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
+            ~~~~
+!!! error TS2339: Property 'Quid' does not exist on type '{ Baz: any }'.
     
     /** @typedef {number} Quack */
     module.exports = {
@@ -49,15 +41,11 @@ use.js(1,11): error TS2304: Cannot find name 'require'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         Quack: 2
     }
     
-==== use.js (1 errors) ====
+==== use.js (0 errors) ====
     var mod = require('./mod1.js');
-              ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     /** @type {import("./mod1.js").Baz} */
     var b;
     /** @type {mod.Baz} */

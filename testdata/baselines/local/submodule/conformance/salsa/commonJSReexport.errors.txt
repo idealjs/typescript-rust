@@ -1,44 +1,32 @@
 first.js(2,7): error TS1003: Identifier expected.
 first.js(2,8): error TS1005: ';' expected.
-first.js(2,8): error TS2304: Cannot find name 'exports'.
-main.js(1,22): error TS2304: Cannot find name 'require'.
 second.js(1,7): error TS1003: Identifier expected.
 second.js(1,8): error TS1005: ';' expected.
-second.js(1,8): error TS2304: Cannot find name 'exports'.
-second.js(2,11): error TS2304: Cannot find name 'require'.
 
 
 ==== commonJSReexport.ts (0 errors) ====
     // #41422, based on prettier's exports
     
-==== first.js (3 errors) ====
+==== first.js (2 errors) ====
     const hardline = { type: "hard" }
     module.exports = {
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
       hardline
     }
     
     
-==== second.js (4 errors) ====
+==== second.js (2 errors) ====
     module.exports = {
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
       nested: require('./first')
-              ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     };
     
-==== main.js (1 errors) ====
+==== main.js (0 errors) ====
     const { hardline } = require('./second').nested;
-                         ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     hardline

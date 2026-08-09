@@ -2,14 +2,11 @@ errors.js(1,26): error TS2304: Cannot find name 'Error'.
 errors.js(3,9): error TS2349: This expression is not callable.
 errors.js(7,7): error TS1003: Identifier expected.
 errors.js(7,8): error TS1005: ';' expected.
-errors.js(7,8): error TS2304: Cannot find name 'exports'.
-index.js(2,16): error TS2304: Cannot find name 'require'.
 index.js(4,7): error TS1003: Identifier expected.
 index.js(4,8): error TS1005: ';' expected.
-index.js(4,8): error TS2304: Cannot find name 'exports'.
 
 
-==== errors.js (5 errors) ====
+==== errors.js (4 errors) ====
     class FancyError extends Error {
                              ~~~~~
 !!! error TS2304: Cannot find name 'Error'.
@@ -25,23 +22,17 @@ index.js(4,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         FancyError
     };
     
-==== index.js (4 errors) ====
+==== index.js (2 errors) ====
     // issue arises here on compilation
     const errors = require("./errors");
-                   ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     
     module.exports = {
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         errors
     };

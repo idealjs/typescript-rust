@@ -1,9 +1,8 @@
 loop.js(4,7): error TS1003: Identifier expected.
 loop.js(4,8): error TS1005: ';' expected.
-loop.js(4,8): error TS2304: Cannot find name 'exports'.
 
 
-==== loop.js (3 errors) ====
+==== loop.js (2 errors) ====
     var loop1 = loop2;
     var loop2 = loop1;
     
@@ -12,5 +11,3 @@ loop.js(4,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.

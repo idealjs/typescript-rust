@@ -1,13 +1,10 @@
-reexport.js(2,15): error TS2304: Cannot find name 'require'.
 reexport.js(3,7): error TS1003: Identifier expected.
 reexport.js(3,8): error TS1005: ';' expected.
-reexport.js(3,8): error TS2304: Cannot find name 'exports'.
 thing.js(3,7): error TS1003: Identifier expected.
 thing.js(3,8): error TS1005: ';' expected.
-thing.js(3,8): error TS2304: Cannot find name 'exports'.
 
 
-==== thing.js (3 errors) ====
+==== thing.js (2 errors) ====
     'use strict';
     class Thing {}
     module.exports = { Thing }
@@ -15,18 +12,12 @@ thing.js(3,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
-==== reexport.js (4 errors) ====
+==== reexport.js (2 errors) ====
     'use strict';
     const Thing = require('./thing').Thing
-                  ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     module.exports = { Thing }
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.

@@ -2,10 +2,9 @@ index.js(3,5): error TS2339: Property 'foo' does not exist on type '() => void'.
 index.js(4,5): error TS2339: Property 'default' does not exist on type '() => void'.
 index.js(5,7): error TS1003: Identifier expected.
 index.js(5,8): error TS1005: ';' expected.
-index.js(5,8): error TS2304: Cannot find name 'exports'.
 
 
-==== index.js (5 errors) ====
+==== index.js (4 errors) ====
     function foo() {}
     
     foo.foo = foo;
@@ -19,5 +18,3 @@ index.js(5,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.

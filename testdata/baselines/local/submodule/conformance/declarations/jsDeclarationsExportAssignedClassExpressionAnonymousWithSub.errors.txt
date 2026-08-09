@@ -1,19 +1,15 @@
 index.js(1,7): error TS1003: Identifier expected.
 index.js(1,8): error TS1005: ';' expected.
-index.js(1,8): error TS2304: Cannot find name 'exports'.
 index.js(9,7): error TS1003: Identifier expected.
 index.js(9,8): error TS1005: ';' expected.
-index.js(9,8): error TS2304: Cannot find name 'exports'.
 
 
-==== index.js (6 errors) ====
+==== index.js (4 errors) ====
     module.exports = class {
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         /**
          * @param {number} p
          */
@@ -26,8 +22,6 @@ index.js(9,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         constructor() {
             this.instance = new module.exports(10);
         }

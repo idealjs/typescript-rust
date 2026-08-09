@@ -886,6 +886,14 @@ impl Checker {
             "scrollBy",
             // Value constructor also referenced as a type.
             "Function",
+            // CommonJS globals.
+            "exports",
+            "require",
+            "module",
+            "__dirname",
+            "__filename",
+            "global",
+            "process",
         ];
         // Type-position globals (e.g. `HTMLElement`, `Event`).
         const DOM_TYPES: &[&str] = &[

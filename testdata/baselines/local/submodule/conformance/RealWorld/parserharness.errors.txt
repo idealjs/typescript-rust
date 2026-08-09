@@ -7,8 +7,7 @@ parserharness.ts(30,17): error TS2339: Property 'replace' does not exist on type
 parserharness.ts(37,17): error TS2339: Property 'join' does not exist on type 'string[]'.
 parserharness.ts(42,12): error TS2304: Cannot find name 'ActiveXObject'.
 parserharness.ts(43,5): error TS2304: Cannot find name 'eval'.
-parserharness.ts(44,19): error TS2304: Cannot find name 'require'.
-parserharness.ts(45,14): error TS2304: Cannot find name 'require'.
+parserharness.ts(45,14): error TS2349: This expression is not callable.
 parserharness.ts(48,15): error TS2304: Cannot find name 'Error'.
 parserharness.ts(84,47): error TS2304: Cannot find name 'Error'.
 parserharness.ts(90,24): error TS2339: Property 'indexOf' does not exist on type 'string[]'.
@@ -76,7 +75,7 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
 !!! error TS6053: File '/services/typescriptServices.ts' not found.
 
 !!! error TS6053: File '/.src/diff.ts' not found.
-==== parserharness.ts (65 errors) ====
+==== parserharness.ts (64 errors) ====
     ﻿// @target: es2015
     //﻿
     // Copyright (c) Microsoft Corporation.  All rights reserved.
@@ -131,11 +130,9 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
      ~~~~
 !!! error TS2304: Cannot find name 'eval'.
     } else if (typeof require === "function") {
-                   ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
         var vm = require('vm');
               ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
+!!! error TS2349: This expression is not callable.
         vm.runInThisContext(typescriptServiceFile, 'typescriptServices.js');
     } else {
         throw new Error('Unknown context');

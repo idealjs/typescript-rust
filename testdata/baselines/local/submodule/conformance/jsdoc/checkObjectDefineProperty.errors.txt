@@ -10,7 +10,6 @@ index.js(23,11): error TS2339: Property 'zip' does not exist on type 'object'.
 index.js(28,11): error TS2339: Property 'houseNumber' does not exist on type 'object'.
 index.js(44,7): error TS1003: Identifier expected.
 index.js(44,8): error TS1005: ';' expected.
-index.js(44,8): error TS2304: Cannot find name 'exports'.
 validate.ts(3,3): error TS2339: Property 'name' does not exist on type 'object'.
 validate.ts(4,3): error TS2339: Property 'middleInit' does not exist on type 'object'.
 validate.ts(5,3): error TS2339: Property 'lastName' does not exist on type 'object'.
@@ -26,7 +25,7 @@ validate.ts(16,3): error TS2339: Property 'zipStr' does not exist on type 'objec
 validate.ts(17,3): error TS2339: Property 'middleInit' does not exist on type 'object'.
 
 
-==== index.js (13 errors) ====
+==== index.js (12 errors) ====
     const x = {};
     Object.defineProperty(x, "name", { value: "Charles", writable: true });
     ~~~~~~
@@ -95,8 +94,6 @@ validate.ts(17,3): error TS2339: Property 'middleInit' does not exist on type 'o
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
 ==== validate.ts (13 errors) ====
     // Validate in TS as simple validations would usually be interpreted as more special assignments

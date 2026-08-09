@@ -1,5 +1,4 @@
 ex.d.ts(3,5): error TS2564: Property 'n' has no initializer and is not definitely assigned in the constructor.
-use.js(1,10): error TS2304: Cannot find name 'require'.
 
 
 ==== ex.d.ts (1 errors) ====
@@ -12,10 +11,8 @@ use.js(1,10): error TS2304: Cannot find name 'require'.
         constructor(n: number)
     }
     
-==== use.js (1 errors) ====
+==== use.js (0 errors) ====
     var ex = require('./ex')
-             ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     
     // values work
     var crunch = new ex.Crunch(1);

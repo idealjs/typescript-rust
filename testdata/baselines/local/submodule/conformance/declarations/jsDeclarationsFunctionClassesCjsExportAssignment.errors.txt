@@ -2,16 +2,13 @@ context.js(38,9): error TS2339: Property 'prototype' does not exist on type '(in
 context.js(45,16): error TS2304: Cannot find name 'input'.
 context.js(48,7): error TS1003: Identifier expected.
 context.js(48,8): error TS1005: ';' expected.
-context.js(48,8): error TS2304: Cannot find name 'exports'.
 hook.js(10,7): error TS1003: Identifier expected.
 hook.js(10,8): error TS1005: ';' expected.
-hook.js(10,8): error TS2304: Cannot find name 'exports'.
 timer.js(7,7): error TS1003: Identifier expected.
 timer.js(7,8): error TS1005: ';' expected.
-timer.js(7,8): error TS2304: Cannot find name 'exports'.
 
 
-==== timer.js (3 errors) ====
+==== timer.js (2 errors) ====
     /**
      * @param {number} timeout
      */
@@ -23,9 +20,7 @@ timer.js(7,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-==== hook.js (3 errors) ====
+==== hook.js (2 errors) ====
     /**
      * @typedef {(arg: import("./context")) => void} HookHandler
      */
@@ -40,10 +35,8 @@ timer.js(7,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
-==== context.js (5 errors) ====
+==== context.js (4 errors) ====
     /**
      * Imports
      *
@@ -100,5 +93,3 @@ timer.js(7,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.

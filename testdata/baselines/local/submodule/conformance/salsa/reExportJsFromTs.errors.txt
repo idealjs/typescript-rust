@@ -1,18 +1,15 @@
 /lib/constants.js(1,7): error TS1003: Identifier expected.
 /lib/constants.js(1,8): error TS1005: ';' expected.
-/lib/constants.js(1,8): error TS2304: Cannot find name 'exports'.
 
 
 ==== reExportJsFromTs.ts (0 errors) ====
     
-==== /lib/constants.js (3 errors) ====
+==== /lib/constants.js (2 errors) ====
     module.exports = {
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
       str: 'x',
     };
     

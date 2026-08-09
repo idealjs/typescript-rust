@@ -1,4 +1,3 @@
-privateNameBadAssignment.ts(1,1): error TS2304: Cannot find name 'exports'.
 privateNameBadAssignment.ts(1,9): error TS1003: Identifier expected.
 privateNameBadAssignment.ts(1,9): error TS1127: Invalid character.
 privateNameBadAssignment.ts(1,10): error TS1005: ';' expected.
@@ -16,7 +15,6 @@ privateNameBadAssignment.ts(6,4): error TS2304: Cannot find name 'foo'.
 privateNameBadAssignment.ts(9,5): error TS1003: Identifier expected.
 privateNameBadAssignment.ts(9,5): error TS1127: Invalid character.
 privateNameBadAssignment.ts(9,6): error TS1005: ';' expected.
-privateNameBadAssignment.ts(11,9): error TS2304: Cannot find name 'exports'.
 privateNameBadAssignment.ts(11,17): error TS1003: Identifier expected.
 privateNameBadAssignment.ts(11,17): error TS1127: Invalid character.
 privateNameBadAssignment.ts(11,18): error TS1005: ';' expected.
@@ -26,10 +24,8 @@ privateNameBadAssignment.ts(12,15): error TS1005: ';' expected.
 privateNameBadAssignment.ts(12,15): error TS2304: Cannot find name 'foo'.
 
 
-==== privateNameBadAssignment.ts (26 errors) ====
+==== privateNameBadAssignment.ts (24 errors) ====
     exports.#nope = 1;           // Error (outside class body)
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
             ~
 !!! error TS1003: Identifier expected.
             ~
@@ -74,8 +70,6 @@ privateNameBadAssignment.ts(12,15): error TS2304: Cannot find name 'foo'.
 !!! error TS1005: ';' expected.
         constructor () {
             exports.#bar = 6;    // Error
-            ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
                     ~
 !!! error TS1003: Identifier expected.
                     ~

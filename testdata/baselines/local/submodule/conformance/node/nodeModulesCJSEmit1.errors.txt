@@ -1,31 +1,22 @@
 /1.cjs(1,7): error TS1003: Identifier expected.
 /1.cjs(1,8): error TS1005: ';' expected.
-/1.cjs(1,8): error TS2304: Cannot find name 'exports'.
-/2.cjs(1,1): error TS2304: Cannot find name 'exports'.
-/3.cjs(2,1): error TS2304: Cannot find name 'exports'.
 
 
 ==== nodeModulesCJSEmit1.ts (0 errors) ====
     
-==== /1.cjs (3 errors) ====
+==== /1.cjs (2 errors) ====
     module.exports = {};
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
-==== /2.cjs (1 errors) ====
+==== /2.cjs (0 errors) ====
     exports.foo = 0;
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
-==== /3.cjs (1 errors) ====
+==== /3.cjs (0 errors) ====
     import "foo";
     exports.foo = {};
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
 ==== /4.cjs (0 errors) ====
     ;

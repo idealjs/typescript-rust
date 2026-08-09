@@ -1,12 +1,10 @@
 mod1.js(5,7): error TS1003: Identifier expected.
 mod1.js(5,8): error TS1005: ';' expected.
-mod1.js(5,8): error TS2304: Cannot find name 'exports'.
-mod3.js(6,1): error TS2304: Cannot find name 'exports'.
 
 
 ==== commonjs.d.ts (0 errors) ====
     declare var module: { exports: any};
-==== mod1.js (3 errors) ====
+==== mod1.js (2 errors) ====
     /// <reference path="./commonjs.d.ts"/>
     /** @typedef {{ type: "a", x: 1 }} A */
     /** @typedef {{ type: "b", y: 1 }} B */
@@ -16,8 +14,6 @@ mod3.js(6,1): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     function C() {
         this.p = 1
     }
@@ -32,15 +28,13 @@ mod3.js(6,1): error TS2304: Cannot find name 'exports'.
         this.p = 1
     }
     
-==== mod3.js (1 errors) ====
+==== mod3.js (0 errors) ====
     /// <reference path="./commonjs.d.ts"/>
     /** @typedef {{ type: "a", x: 1 }} A */
     /** @typedef {{ type: "b", y: 1 }} B */
     /** @typedef {A | B} Both */
     
     exports.C = function() {
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
         this.p = 1
     }
     

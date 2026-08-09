@@ -1,30 +1,21 @@
 mod.js(1,7): error TS1003: Identifier expected.
 mod.js(1,8): error TS1005: ';' expected.
-mod.js(1,8): error TS2304: Cannot find name 'exports'.
 mod.js(2,7): error TS1003: Identifier expected.
 mod.js(2,8): error TS1005: ';' expected.
-mod.js(2,8): error TS2304: Cannot find name 'exports'.
-npm.js(1,11): error TS2304: Cannot find name 'require'.
 
 
-==== mod.js (6 errors) ====
+==== mod.js (4 errors) ====
     module.exports = function x() { }
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     module.exports() // should be callable
           ~
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
     
-==== npm.js (1 errors) ====
+==== npm.js (0 errors) ====
     var mod = require('./mod')
-              ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     mod() // should be callable from here too

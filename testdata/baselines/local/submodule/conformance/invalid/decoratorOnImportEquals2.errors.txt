@@ -1,13 +1,12 @@
 decoratorOnImportEquals2_1.ts(2,1): error TS2304: Cannot find name 'import'.
 decoratorOnImportEquals2_1.ts(2,8): error TS1005: ';' expected.
 decoratorOnImportEquals2_1.ts(2,8): error TS2304: Cannot find name 'lib'.
-decoratorOnImportEquals2_1.ts(2,14): error TS2304: Cannot find name 'require'.
 
 
 ==== decoratorOnImportEquals2_0.ts (0 errors) ====
     export var X;
     
-==== decoratorOnImportEquals2_1.ts (4 errors) ====
+==== decoratorOnImportEquals2_1.ts (3 errors) ====
     @dec
     import lib = require('./decoratorOnImportEquals2_0');
     ~~~~~~
@@ -16,7 +15,5 @@ decoratorOnImportEquals2_1.ts(2,14): error TS2304: Cannot find name 'require'.
 !!! error TS1005: ';' expected.
            ~~~
 !!! error TS2304: Cannot find name 'lib'.
-                 ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     
     declare function dec<T>(target: T): T;

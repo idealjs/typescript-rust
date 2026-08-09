@@ -1,16 +1,13 @@
 error TS2300: Duplicate identifier 'myTypes'.
 error TS2300: Duplicate identifier 'testFnTypes'.
-file.js(20,1): error TS2304: Cannot find name 'exports'.
-file2.js(1,19): error TS2304: Cannot find name 'require'.
 file2.js(28,7): error TS1003: Identifier expected.
 file2.js(28,8): error TS1005: ';' expected.
-file2.js(28,8): error TS2304: Cannot find name 'exports'.
 
 
 !!! error TS2300: Duplicate identifier 'myTypes'.
 
 !!! error TS2300: Duplicate identifier 'testFnTypes'.
-==== file.js (1 errors) ====
+==== file.js (0 errors) ====
     /**
      * @namespace myTypes
      * @global
@@ -31,12 +28,8 @@ file2.js(28,8): error TS2304: Cannot find name 'exports'.
     /** @typedef {myTypes.typeB|Function} myTypes.typeC */
     
     exports.myTypes = myTypes;
-    ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
-==== file2.js (4 errors) ====
+==== file2.js (2 errors) ====
     const {myTypes} = require('./file.js');
-                      ~~~~~~~
-!!! error TS2304: Cannot find name 'require'.
     
     /**
      * @namespace testFnTypes
@@ -68,5 +61,3 @@ file2.js(28,8): error TS2304: Cannot find name 'exports'.
 !!! error TS1003: Identifier expected.
            ~~~~~~~
 !!! error TS1005: ';' expected.
-           ~~~~~~~
-!!! error TS2304: Cannot find name 'exports'.
