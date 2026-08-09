@@ -3629,6 +3629,21 @@ impl Parser {
                             }),
                             TextRange::new(pos, end),
                         ));
+                    } else if self.token == SyntaxKind::OpenBracketToken {
+                        // Optional element access: `a?.[0]`
+                        self.next_token();
+                        let argument = self.parse_expression();
+                        self.expect(SyntaxKind::CloseBracketToken);
+                        let end = self.token_pos();
+                        expr = Arc::new(Node::with_loc(
+                            SyntaxKind::ElementAccessExpression,
+                            NodeData::ElementAccessExpression(ElementAccessExpressionData {
+                                expression: expr,
+                                question_dot_token: Some(question_dot),
+                                argument_expression: argument,
+                            }),
+                            TextRange::new(pos, end),
+                        ));
                     } else {
                         let name = self.parse_property_name();
                         let end = name.end();

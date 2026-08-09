@@ -2,12 +2,10 @@ noPropertyAccessFromIndexSignature1.ts(11,6): error TS2304: Cannot find name 'k'
 noPropertyAccessFromIndexSignature1.ts(11,7): error TS1005: ']' expected.
 noPropertyAccessFromIndexSignature1.ts(11,15): error TS1003: Identifier expected.
 noPropertyAccessFromIndexSignature1.ts(32,3): error TS2339: Property 'bar' does not exist on type '{ foo: any; :: error; string: error; ]: string }'.
-noPropertyAccessFromIndexSignature1.ts(37,4): error TS2339: Property '' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
 noPropertyAccessFromIndexSignature1.ts(40,4): error TS2339: Property 'bar' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
-noPropertyAccessFromIndexSignature1.ts(41,4): error TS2339: Property '' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
 
 
-==== noPropertyAccessFromIndexSignature1.ts (7 errors) ====
+==== noPropertyAccessFromIndexSignature1.ts (5 errors) ====
     interface A {
         foo: string
     }
@@ -53,16 +51,9 @@ noPropertyAccessFromIndexSignature1.ts(41,4): error TS2339: Property '' does not
     // optional access property
     d?.foo;
     d?.["foo"]
-       ~~~~~~~
-    
     
     // optional access index signature
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     d?.bar;
-    
-!!! error TS2339: Property '' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
        ~~~
 !!! error TS2339: Property 'bar' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.
     d?.["bar"];
-       ~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: any; :: error; string: error; ]: string } | undefined'.

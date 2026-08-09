@@ -4,10 +4,9 @@ optionalChainingInference.ts(12,26): error TS2345: Argument of type '{ value: nu
 optionalChainingInference.ts(14,56): error TS2339: Property 'length' does not exist on type 'string | undefined'.
 optionalChainingInference.ts(15,26): error TS2345: Argument of type '{ value: number | undefined }' is not assignable to parameter of type '{ value: T | undefined }'.
 optionalChainingInference.ts(17,21): error TS2349: This expression is not callable.
-optionalChainingInference.ts(20,25): error TS2339: Property '' does not exist on type 'string | undefined'.
 
 
-==== optionalChainingInference.ts (7 errors) ====
+==== optionalChainingInference.ts (6 errors) ====
     // https://github.com/microsoft/TypeScript/issues/34579
     declare function unbox<T>(box: { value: T | undefined }): T;
     declare const su: string | undefined;
@@ -40,8 +39,6 @@ optionalChainingInference.ts(20,25): error TS2339: Property '' does not exist on
     const v4: number = unbox(b4);
     
     const b5 = { value: su?.["length"] };
-                            ~~~~~~~~~~~
-!!! error TS2339: Property '' does not exist on type 'string | undefined'.
     const v5: number = unbox(b5);
     
     const b6 = { value: osu?.prop.length };

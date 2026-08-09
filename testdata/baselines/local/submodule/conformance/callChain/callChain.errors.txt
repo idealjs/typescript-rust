@@ -2,10 +2,6 @@ callChain.ts(2,1): error TS2349: This expression is not callable.
 callChain.ts(3,1): error TS2349: This expression is not callable.
 callChain.ts(4,1): error TS2349: This expression is not callable.
 callChain.ts(5,1): error TS2349: This expression is not callable.
-callChain.ts(12,5): error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
-callChain.ts(13,5): error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
-callChain.ts(14,5): error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
-callChain.ts(15,5): error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
 callChain.ts(18,1): error TS2349: This expression is not callable.
 callChain.ts(19,1): error TS2349: This expression is not callable.
 callChain.ts(20,1): error TS2349: This expression is not callable.
@@ -18,7 +14,7 @@ callChain.ts(33,31): error TS2349: This expression is not callable.
 callChain.ts(37,1): error TS2349: This expression is not callable.
 
 
-==== callChain.ts (18 errors) ====
+==== callChain.ts (14 errors) ====
     declare const o1: undefined | ((...args: any[]) => number);
     o1?.();
     ~~
@@ -39,17 +35,9 @@ callChain.ts(37,1): error TS2349: This expression is not callable.
     o2?.b(...[1, 2]);
     o2?.b(1, ...[2, 3], 4);
     o2?.["b"]();
-        ~~~~~
-!!! error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
     o2?.["b"](1);
-        ~~~~~
-!!! error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
     o2?.["b"](...[1, 2]);
-        ~~~~~
-!!! error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
     o2?.["b"](1, ...[2, 3], 4);
-        ~~~~~
-!!! error TS2339: Property '' does not exist on type 'undefined | { b: (args: any[]) => number }'.
     
     declare const o3: { b: ((...args: any[]) => { c: string }) | undefined };
     o3.b?.().c;

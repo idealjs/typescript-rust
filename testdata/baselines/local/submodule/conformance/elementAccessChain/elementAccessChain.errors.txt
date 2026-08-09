@@ -1,42 +1,22 @@
-elementAccessChain.ts(2,5): error TS2339: Property '' does not exist on type 'undefined | { b: string }'.
-elementAccessChain.ts(5,5): error TS2339: Property '' does not exist on type 'undefined | { b: { c: string } }'.
-elementAccessChain.ts(10,7): error TS2339: Property '' does not exist on type 'undefined | { c: string }'.
-elementAccessChain.ts(13,7): error TS2339: Property '' does not exist on type '{ c: { d: { e: string } } }'.
-elementAccessChain.ts(14,7): error TS2339: Property '' does not exist on type '{ c: { d: { e: string } } }'.
 elementAccessChain.ts(17,4): error TS2339: Property 'b' does not exist on type 'object'.
 elementAccessChain.ts(18,4): error TS2339: Property 'b' does not exist on type 'object'.
-elementAccessChain.ts(24,15): error TS2339: Property '' does not exist on type 'undefined | { x: number }'.
-elementAccessChain.ts(27,5): error TS2339: Property '' does not exist on type 'undefined | { b: { c: string } }'.
-elementAccessChain.ts(28,5): error TS2339: Property '' does not exist on type 'undefined | { b: { c: string } }'.
-elementAccessChain.ts(29,5): error TS2339: Property '' does not exist on type 'undefined | { b: { c: string } }'.
-elementAccessChain.ts(30,5): error TS2339: Property '' does not exist on type 'undefined | { b: { c: string } }'.
 
 
-==== elementAccessChain.ts (12 errors) ====
+==== elementAccessChain.ts (2 errors) ====
     declare const o1: undefined | { b: string };
     o1?.["b"];
-        ~~~~~
-!!! error TS2339: Property '' does not exist on type 'undefined | { b: string }'.
     
     declare const o2: undefined | { b: { c: string } };
     o2?.["b"].c;
-        ~~~~~
-!!! error TS2339: Property '' does not exist on type 'undefined | { b: { c: string } }'.
     o2?.b["c"];
     
     declare const o3: { b: undefined | { c: string } };
     o3["b"]?.c;
     o3.b?.["c"];
-          ~~~~~
-!!! error TS2339: Property '' does not exist on type 'undefined | { c: string }'.
     
     declare const o4: { b?: { c: { d?: { e: string } } } };
     o4.b?.["c"].d?.e;
-          ~~~~~
-!!! error TS2339: Property '' does not exist on type '{ c: { d: { e: string } } }'.
     o4.b?.["c"].d?.["e"];
-          ~~~~~
-!!! error TS2339: Property '' does not exist on type '{ c: { d: { e: string } } }'.
     
     declare const o5: { b?(): { c: { d?: { e: string } } } };
     o5.b?.()["c"].d?.e;
@@ -51,19 +31,9 @@ elementAccessChain.ts(30,5): error TS2339: Property '' does not exist on type 'u
     // GH#33744
     declare const o6: <T>() => undefined | ({ x: number });
     o6<number>()?.["x"];
-                  ~~~~~
-!!! error TS2339: Property '' does not exist on type 'undefined | { x: number }'.
     
     // GH#36031
     o2?.["b"]!.c;
-        ~~~~~
-!!! error TS2339: Property '' does not exist on type 'undefined | { b: { c: string } }'.
     o2?.["b"]!["c"];
-        ~~~~~
-!!! error TS2339: Property '' does not exist on type 'undefined | { b: { c: string } }'.
     o2?.["b"]!.c!;
-        ~~~~~
-!!! error TS2339: Property '' does not exist on type 'undefined | { b: { c: string } }'.
     o2?.["b"]!["c"]!;
-        ~~~~~
-!!! error TS2339: Property '' does not exist on type 'undefined | { b: { c: string } }'.

@@ -1,10 +1,8 @@
 deleteChain.ts(19,11): error TS2339: Property 'b' does not exist on type 'object'.
 deleteChain.ts(20,12): error TS2339: Property 'b' does not exist on type 'object'.
-deleteChain.ts(23,14): error TS2339: Property '' does not exist on type '{ c: { d: { e: string } } }'.
-deleteChain.ts(24,15): error TS2339: Property '' does not exist on type '{ c: { d: { e: string } } }'.
 
 
-==== deleteChain.ts (4 errors) ====
+==== deleteChain.ts (2 errors) ====
     declare const o1: undefined | { b: string };
     delete o1?.b;
     delete (o1?.b);
@@ -32,8 +30,4 @@ deleteChain.ts(24,15): error TS2339: Property '' does not exist on type '{ c: { 
     
     declare const o6: { b?: { c: { d?: { e: string } } } };
     delete o6.b?.['c'].d?.['e'];
-                 ~~~~~
-!!! error TS2339: Property '' does not exist on type '{ c: { d: { e: string } } }'.
     delete (o6.b?.['c'].d?.['e']);
-                  ~~~~~
-!!! error TS2339: Property '' does not exist on type '{ c: { d: { e: string } } }'.

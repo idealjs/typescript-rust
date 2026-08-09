@@ -25,58 +25,43 @@ controlFlowOptionalChain.ts(130,8): error TS18048: 'o6' is possibly 'undefined'.
 controlFlowOptionalChain.ts(134,4): error TS18048: 'o6' is possibly 'undefined'.
 controlFlowOptionalChain.ts(148,9): error TS2349: This expression is not callable.
 controlFlowOptionalChain.ts(157,9): error TS2349: This expression is not callable.
-controlFlowOptionalChain.ts(168,12): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(171,12): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(172,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
-controlFlowOptionalChain.ts(177,12): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(180,12): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(181,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
-controlFlowOptionalChain.ts(189,12): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | null'.
 controlFlowOptionalChain.ts(192,12): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | null'.
 controlFlowOptionalChain.ts(193,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | null'.
-controlFlowOptionalChain.ts(198,12): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | null | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | null'.
 controlFlowOptionalChain.ts(201,12): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | null | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | null'.
 controlFlowOptionalChain.ts(202,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | null | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | null'.
 controlFlowOptionalChain.ts(208,11): error TS18048: 'o' is possibly 'undefined'.
-controlFlowOptionalChain.ts(210,12): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | undefined | { foo: string | number; baz: object }'.
 controlFlowOptionalChain.ts(213,12): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object }'.
 controlFlowOptionalChain.ts(214,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object }'.
-controlFlowOptionalChain.ts(219,12): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object }'.
 controlFlowOptionalChain.ts(222,12): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object }'.
 controlFlowOptionalChain.ts(223,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object }'.
-controlFlowOptionalChain.ts(231,12): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(234,12): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(235,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
-controlFlowOptionalChain.ts(240,12): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object }'.
 controlFlowOptionalChain.ts(243,12): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object }'.
 controlFlowOptionalChain.ts(244,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object }'.
-controlFlowOptionalChain.ts(252,12): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(255,12): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(256,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
-controlFlowOptionalChain.ts(261,12): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(264,12): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(265,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(271,11): error TS18048: 'o' is possibly 'undefined'.
-controlFlowOptionalChain.ts(273,12): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | undefined | { foo: string | number; baz: object }'.
 controlFlowOptionalChain.ts(276,12): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object }'.
 controlFlowOptionalChain.ts(277,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object }'.
-controlFlowOptionalChain.ts(282,12): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object }'.
 controlFlowOptionalChain.ts(285,12): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object }'.
 controlFlowOptionalChain.ts(286,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object }'.
-controlFlowOptionalChain.ts(294,12): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | null'.
 controlFlowOptionalChain.ts(297,12): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | null'.
 controlFlowOptionalChain.ts(298,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | null'.
 controlFlowOptionalChain.ts(307,11): error TS18048: 'o' is possibly 'undefined'.
 controlFlowOptionalChain.ts(334,11): error TS18048: 'o' is possibly 'undefined'.
 controlFlowOptionalChain.ts(358,11): error TS18048: 'o' is possibly 'undefined'.
 controlFlowOptionalChain.ts(385,11): error TS18048: 'o' is possibly 'undefined'.
-controlFlowOptionalChain.ts(387,19): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(390,19): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(391,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(393,27): error TS2304: Cannot find name 'Error'.
 controlFlowOptionalChain.ts(394,11): error TS18048: 'o' is possibly 'undefined'.
 controlFlowOptionalChain.ts(400,11): error TS18048: 'o' is possibly 'undefined'.
-controlFlowOptionalChain.ts(402,19): error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | null'.
 controlFlowOptionalChain.ts(405,19): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | null'.
 controlFlowOptionalChain.ts(406,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | null'.
 controlFlowOptionalChain.ts(408,27): error TS2304: Cannot find name 'Error'.
@@ -107,7 +92,7 @@ controlFlowOptionalChain.ts(532,20): error TS2304: Cannot find name 'Math'.
 controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not exist on type '{ type: "rectangle"; width: number; height: number } | { type: "circle"; radius: number }'.
 
 
-==== controlFlowOptionalChain.ts (107 errors) ====
+==== controlFlowOptionalChain.ts (92 errors) ====
     // assignments in shortcutting chain
     declare const o: undefined | {
         [key: string]: any;
@@ -330,8 +315,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
             o.foo;
         }
         if (o?.["foo"] === value) {
-               ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
             o["foo"];
         }
         if (o?.bar() === value) {
@@ -345,8 +328,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
             o.foo;
         }
         if (o?.["foo"] == value) {
-               ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
             o["foo"];
         }
         if (o?.bar() == value) {
@@ -363,8 +344,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
             o.foo;
         }
         if (o?.["foo"] === value) {
-               ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | null'.
             o["foo"];
         }
         if (o?.bar() === value) {
@@ -378,8 +357,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
             o.foo;
         }
         if (o?.["foo"] == value) {
-               ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | null | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | null'.
             o["foo"];
         }
         if (o?.bar() == value) {
@@ -398,8 +375,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
 !!! error TS18048: 'o' is possibly 'undefined'.
         }
         if (o?.["foo"] === value) {
-               ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | undefined | { foo: string | number; baz: object }'.
             o["foo"];  // Error
         }
         if (o?.bar() === value) {
@@ -413,8 +388,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
             o.foo;  // Error
         }
         if (o?.["foo"] == value) {
-               ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object }'.
             o["foo"];  // Error
         }
         if (o?.bar() == value) {
@@ -431,8 +404,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
             o.foo;
         }
         if (o?.["foo"] === value) {
-               ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
             o["foo"];
         }
         if (o?.bar() === value) {
@@ -446,8 +417,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
             o.foo;  // Error
         }
         if (o?.["foo"] == value) {
-               ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object }'.
             o["foo"];  // Error
         }
         if (o?.bar() == value) {
@@ -464,8 +433,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
             o.foo;
         }
         if (o?.["foo"] !== undefined) {
-               ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
             o["foo"];
         }
         if (o?.bar() !== undefined) {
@@ -479,8 +446,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
             o.foo;
         }
         if (o?.["foo"] != undefined) {
-               ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined'.
             o["foo"];
         }
         if (o?.bar() != undefined) {
@@ -499,8 +464,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
 !!! error TS18048: 'o' is possibly 'undefined'.
         }
         if (o?.["foo"] !== null) {
-               ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | undefined | { foo: string | number; baz: object }'.
             o["foo"];  // Error
         }
         if (o?.bar() !== null) {
@@ -514,8 +477,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
             o.foo;
         }
         if (o?.["foo"] != null) {
-               ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object } | { foo: string | number; baz: object } | undefined | { foo: string | number; baz: object } | { foo: string | number; baz: object }'.
             o["foo"];
         }
         if (o?.bar() != null) {
@@ -532,8 +493,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
             o.foo;
         }
         if (o?.["foo"] !== undefined) {
-               ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | { foo: string | number; baz: object } | null'.
             o["foo"];
         }
         if (o?.bar() !== undefined) {
@@ -639,8 +598,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
 !!! error TS18048: 'o' is possibly 'undefined'.
         }
         if (typeof o?.["foo"] === "number") {
-                      ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | undefined'.
             o["foo"];
         }
         if (typeof o?.bar() === "number") {
@@ -666,8 +623,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
 !!! error TS18048: 'o' is possibly 'undefined'.
         }
         if (typeof o?.["foo"] === "number") {
-                      ~~~~~~~~
-!!! error TS2339: Property '' does not exist on type '{ foo: string | number; baz: object } | null'.
             o["foo"];
         }
         if (typeof o?.bar() === "number") {
