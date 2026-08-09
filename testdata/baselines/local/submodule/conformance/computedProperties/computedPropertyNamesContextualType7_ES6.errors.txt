@@ -1,7 +1,8 @@
+computedPropertyNamesContextualType7_ES6.ts(11,5): error TS2345: Argument of type '{ 0: () => void; ["hi" + "bye"]: true; [0 + 1]: 0; [+"hi"]: number[] }' is not assignable to parameter of type 'object'.
 computedPropertyNamesContextualType7_ES6.ts(18,3): error TS2345: Argument of type '{ p: "" }' is not assignable to parameter of type 'object'.
 
 
-==== computedPropertyNamesContextualType7_ES6.ts (1 errors) ====
+==== computedPropertyNamesContextualType7_ES6.ts (2 errors) ====
     interface I<T> {
         [n: number]: T;
     }
@@ -13,11 +14,18 @@ computedPropertyNamesContextualType7_ES6.ts(18,3): error TS2345: Argument of typ
     declare function g<T>(obj: J<T>): T;
     
     foo({
+        ~
         0: () => { },
+    ~~~~~~~~~~~~~~~~~
         ["hi" + "bye"]: true,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
         [0 + 1]: 0,
+    ~~~~~~~~~~~~~~~
         [+"hi"]: [0]
+    ~~~~~~~~~~~~~~~~
     });
+    ~
+!!! error TS2345: Argument of type '{ 0: () => void; ["hi" + "bye"]: true; [0 + 1]: 0; [+"hi"]: number[] }' is not assignable to parameter of type 'object'.
     
     g({ p: "" });
       ~~~~~~~~~

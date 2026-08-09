@@ -1,16 +1,13 @@
 privateNameUnused.ts(10,17): error TS1003: Identifier expected.
 privateNameUnused.ts(11,18): error TS1003: Identifier expected.
-privateNameUnused.ts(18,9): error TS1005: ';' expected.
 privateNameUnused.ts(18,29): error TS1003: Identifier expected.
-privateNameUnused.ts(19,9): error TS1005: ';' expected.
 privateNameUnused.ts(19,34): error TS1003: Identifier expected.
-privateNameUnused.ts(21,9): error TS1005: ';' expected.
 privateNameUnused.ts(21,31): error TS1003: Identifier expected.
-privateNameUnused.ts(22,9): error TS1005: ';' expected.
 privateNameUnused.ts(22,36): error TS1003: Identifier expected.
+privateNameUnused.ts(24,26): error TS2339: Property '#used' does not exist on type '{ ;: any; ;: any; ;: any; ;: any }'.
 
 
-==== privateNameUnused.ts (10 errors) ====
+==== privateNameUnused.ts (7 errors) ====
     export class A {
         #used = "used";
         #unused = "unused";
@@ -33,27 +30,21 @@ privateNameUnused.ts(22,36): error TS1003: Identifier expected.
     
     export class A3 {
         get #used() { return 0 };
-            ~~~~~
-!!! error TS1005: ';' expected.
                                 ~
 !!! error TS1003: Identifier expected.
         set #used(value: number) {  };
-            ~~~~~
-!!! error TS1005: ';' expected.
                                      ~
 !!! error TS1003: Identifier expected.
         
         get #unused() { return 0 };
-            ~~~~~~~
-!!! error TS1005: ';' expected.
                                   ~
 !!! error TS1003: Identifier expected.
         set #unused(value: number) {  };
-            ~~~~~~~
-!!! error TS1005: ';' expected.
                                        ~
 !!! error TS1003: Identifier expected.
         constructor () {
             console.log(this.#used);
+                             ~~~~~
+!!! error TS2339: Property '#used' does not exist on type '{ ;: any; ;: any; ;: any; ;: any }'.
         }
     }

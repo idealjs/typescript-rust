@@ -1,9 +1,8 @@
-arrayTypeOfFunctionTypes2.ts(13,9): error TS2304: Cannot find name 'Array'.
 arrayTypeOfFunctionTypes2.ts(15,14): error TS2351: This expression is not constructable.
 arrayTypeOfFunctionTypes2.ts(16,11): error TS2349: This expression is not callable.
 
 
-==== arrayTypeOfFunctionTypes2.ts (3 errors) ====
+==== arrayTypeOfFunctionTypes2.ts (2 errors) ====
     // valid uses of arrays of function types
     
     var x: new () => string[];
@@ -17,8 +16,6 @@ arrayTypeOfFunctionTypes2.ts(16,11): error TS2349: This expression is not callab
     var r4b = new r3();
     
     var x3: Array<new () => string>;
-            ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     var r5 = x2[1];
     var r6 = new r5();
                  ~~

@@ -1,9 +1,10 @@
 typeGuardsInProperties.ts(7,13): error TS2564: Property 'pp1' has no initializer and is not definitely assigned in the constructor.
 typeGuardsInProperties.ts(8,5): error TS2564: Property 'pp2' has no initializer and is not definitely assigned in the constructor.
-typeGuardsInProperties.ts(10,9): error TS1005: ';' expected.
+typeGuardsInProperties.ts(16,32): error TS2339: Property 'pp3' does not exist on type '{ pp1: string | number; pp2: string | number; method: () => any }'.
+typeGuardsInProperties.ts(16,57): error TS2339: Property 'pp3' does not exist on type '{ pp1: string | number; pp2: string | number; method: () => any }'.
 
 
-==== typeGuardsInProperties.ts (3 errors) ====
+==== typeGuardsInProperties.ts (4 errors) ====
     // Note that type guards affect types of variables and parameters only and 
     // have no effect on members of objects such as properties. 
     
@@ -18,14 +19,16 @@ typeGuardsInProperties.ts(10,9): error TS1005: ';' expected.
 !!! error TS2564: Property 'pp2' has no initializer and is not definitely assigned in the constructor.
         // Inside public accessor getter
         get pp3() {
-            ~~~
-!!! error TS1005: ';' expected.
             return strOrNum;
         }
         method() {
             strOrNum = typeof this.pp1 === "string" && this.pp1; // string | number
             strOrNum = typeof this.pp2 === "string" && this.pp2; // string | number
             strOrNum = typeof this.pp3 === "string" && this.pp3; // string | number
+                                   ~~~
+!!! error TS2339: Property 'pp3' does not exist on type '{ pp1: string | number; pp2: string | number; method: () => any }'.
+                                                            ~~~
+!!! error TS2339: Property 'pp3' does not exist on type '{ pp1: string | number; pp2: string | number; method: () => any }'.
         }
     }
     var c1: C1;

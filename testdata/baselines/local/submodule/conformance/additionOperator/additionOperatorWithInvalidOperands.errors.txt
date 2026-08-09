@@ -1,9 +1,7 @@
-additionOperatorWithInvalidOperands.ts(11,16): error TS2304: Cannot find name 'Object'.
-additionOperatorWithInvalidOperands.ts(12,16): error TS2304: Cannot find name 'Number'.
 additionOperatorWithInvalidOperands.ts(39,19): error TS2339: Property 'foo' does not exist on type 'object'.
 
 
-==== additionOperatorWithInvalidOperands.ts (3 errors) ====
+==== additionOperatorWithInvalidOperands.ts (1 errors) ====
     function foo() { }
     class C {
         public a: string;
@@ -15,11 +13,7 @@ additionOperatorWithInvalidOperands.ts(39,19): error TS2339: Property 'foo' does
     declare var a: boolean;
     declare var b: number;
     declare var c: Object;
-                   ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     declare var d: Number;
-                   ~~~~~~
-!!! error TS2304: Cannot find name 'Number'.
     
     // boolean + every type except any and string
     var r1 = a + a;

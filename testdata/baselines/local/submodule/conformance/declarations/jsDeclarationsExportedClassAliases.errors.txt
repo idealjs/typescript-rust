@@ -1,4 +1,3 @@
-errors.js(1,26): error TS2304: Cannot find name 'Error'.
 errors.js(3,9): error TS2349: This expression is not callable.
 errors.js(7,7): error TS1003: Identifier expected.
 errors.js(7,8): error TS1005: ';' expected.
@@ -6,10 +5,8 @@ index.js(4,7): error TS1003: Identifier expected.
 index.js(4,8): error TS1005: ';' expected.
 
 
-==== errors.js (4 errors) ====
+==== errors.js (3 errors) ====
     class FancyError extends Error {
-                             ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
         constructor(status) {
             super(`error with status ${status}`);
             ~~~~~

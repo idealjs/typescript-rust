@@ -1,8 +1,0 @@
-iterableArrayPattern29.ts(2,28): error TS2304: Cannot find name 'Map'.
-
-
-==== iterableArrayPattern29.ts (1 errors) ====
-    function takeFirstTwoEntries(...[[k1, v1], [k2, v2]]: [string, number][]) { }
-    takeFirstTwoEntries(...new Map([["", true], ["hello", true]]));
-                               ~~~
-!!! error TS2304: Cannot find name 'Map'.

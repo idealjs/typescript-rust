@@ -1,58 +1,79 @@
-privateWriteOnlyAccessorRead.ts(2,7): error TS1005: ';' expected.
-privateWriteOnlyAccessorRead.ts(3,7): error TS1005: ';' expected.
-privateWriteOnlyAccessorRead.ts(4,7): error TS1005: ';' expected.
-privateWriteOnlyAccessorRead.ts(5,7): error TS1005: ';' expected.
-privateWriteOnlyAccessorRead.ts(12,17): error TS2339: Property 'foo' does not exist on type '(v: { foo: { bar: number } }) => any'.
-privateWriteOnlyAccessorRead.ts(17,25): error TS2339: Property 'foo' does not exist on type '(v: { foo: { bar: number } }) => any'.
-privateWriteOnlyAccessorRead.ts(19,29): error TS2339: Property 'foo' does not exist on type '(v: { foo: { bar: number } }) => any'.
+privateWriteOnlyAccessorRead.ts(9,22): error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
+privateWriteOnlyAccessorRead.ts(10,10): error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
+privateWriteOnlyAccessorRead.ts(11,10): error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
+privateWriteOnlyAccessorRead.ts(12,10): error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
+privateWriteOnlyAccessorRead.ts(14,16): error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
+privateWriteOnlyAccessorRead.ts(15,16): error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
+privateWriteOnlyAccessorRead.ts(17,18): error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
+privateWriteOnlyAccessorRead.ts(19,22): error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
+privateWriteOnlyAccessorRead.ts(22,23): error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
+privateWriteOnlyAccessorRead.ts(24,11): error TS2339: Property '#valueOne' does not exist on type '{ m: () => any }'.
+privateWriteOnlyAccessorRead.ts(24,30): error TS2339: Property '#valueRest' does not exist on type '{ m: () => any }'.
+privateWriteOnlyAccessorRead.ts(26,14): error TS2339: Property '#valueOne' does not exist on type '{ m: () => any }'.
+privateWriteOnlyAccessorRead.ts(27,17): error TS2339: Property '#valueRest' does not exist on type '{ m: () => any }'.
+privateWriteOnlyAccessorRead.ts(30,10): error TS2339: Property '#valueCompound' does not exist on type '{ m: () => any }'.
 privateWriteOnlyAccessorRead.ts(33,5): error TS2349: This expression is not callable.
 
 
-==== privateWriteOnlyAccessorRead.ts (8 errors) ====
+==== privateWriteOnlyAccessorRead.ts (15 errors) ====
     class Test {
       set #value(v: { foo: { bar: number } }) {}
-          ~~~~~~
-!!! error TS1005: ';' expected.
       set #valueRest(v: number[]) {}
-          ~~~~~~~~~~
-!!! error TS1005: ';' expected.
       set #valueOne(v: number) {}
-          ~~~~~~~~~
-!!! error TS1005: ';' expected.
       set #valueCompound(v: number) {}
-          ~~~~~~~~~~~~~~
-!!! error TS1005: ';' expected.
     
       m() {
         const foo = { bar: 1 };
         console.log(this.#value); // error
+                         ~~~~~~
+!!! error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
         this.#value = { foo }; // ok
+             ~~~~~~
+!!! error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
         this.#value = { foo }; // ok
+             ~~~~~~
+!!! error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
         this.#value.foo = foo; // error
-                    ~~~
-!!! error TS2339: Property 'foo' does not exist on type '(v: { foo: { bar: number } }) => any'.
+             ~~~~~~
+!!! error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
     
         ({ o: this.#value } = { o: { foo } }); //ok
+                   ~~~~~~
+!!! error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
         ({ ...this.#value } = { foo }); //ok
+                   ~~~~~~
+!!! error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
     
         ({ foo: this.#value.foo } = { foo }); //error
-                            ~~~
-!!! error TS2339: Property 'foo' does not exist on type '(v: { foo: { bar: number } }) => any'.
+                     ~~~~~~
+!!! error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
         ({
           foo: { ...this.#value.foo },
-                                ~~~
-!!! error TS2339: Property 'foo' does not exist on type '(v: { foo: { bar: number } }) => any'.
+                         ~~~~~~
+!!! error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
         } = { foo }); //error
     
         let r = { o: this.#value }; //error
+                          ~~~~~~
+!!! error TS2339: Property '#value' does not exist on type '{ m: () => any }'.
     
         [this.#valueOne, ...this.#valueRest] = [1, 2, 3];
+              ~~~~~~~~~
+!!! error TS2339: Property '#valueOne' does not exist on type '{ m: () => any }'.
+                                 ~~~~~~~~~~
+!!! error TS2339: Property '#valueRest' does not exist on type '{ m: () => any }'.
         let arr = [
             this.#valueOne,
+                 ~~~~~~~~~
+!!! error TS2339: Property '#valueOne' does not exist on type '{ m: () => any }'.
             ...this.#valueRest
+                    ~~~~~~~~~~
+!!! error TS2339: Property '#valueRest' does not exist on type '{ m: () => any }'.
         ];
     
         this.#valueCompound += 3;
+             ~~~~~~~~~~~~~~
+!!! error TS2339: Property '#valueCompound' does not exist on type '{ m: () => any }'.
       }
     }
     new Test().m();

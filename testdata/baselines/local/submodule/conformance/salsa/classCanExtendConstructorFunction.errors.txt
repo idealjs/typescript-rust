@@ -4,7 +4,6 @@ first.js(16,7): error TS2339: Property 'prototype' does not exist on type '(numb
 first.js(17,7): error TS2339: Property 'prototype' does not exist on type '(numberOxen: any) => void'.
 first.js(23,9): error TS2349: This expression is not callable.
 first.js(24,14): error TS2339: Property 'foonly' does not exist on type '{ load: (files: any, format: any) => any }'.
-first.js(33,23): error TS2304: Cannot find name 'Error'.
 first.js(36,19): error TS2339: Property 'speed' does not exist on type '{ load: (files: any, format: any) => any }'.
 first.js(37,23): error TS2339: Property 'weight' does not exist on type '{ load: (files: any, format: any) => any }'.
 first.js(37,35): error TS1005: '>' expected.
@@ -21,7 +20,7 @@ second.ts(25,3): error TS2339: Property 'drunkOO' does not exist on type 'object
 second.ts(26,3): error TS2339: Property 'numberOxen' does not exist on type 'object'.
 
 
-==== first.js (12 errors) ====
+==== first.js (11 errors) ====
     /**
      * @constructor
      * @param {number} numberOxen
@@ -67,8 +66,6 @@ second.ts(26,3): error TS2339: Property 'numberOxen' does not exist on type 'obj
         load(files, format) {
             if (format === "xmlolololol") {
                 throw new Error("please do not use XML. It was a joke.");
-                          ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
             }
             else {
                 super.speed() // run faster

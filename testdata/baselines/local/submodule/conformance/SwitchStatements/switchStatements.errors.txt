@@ -1,15 +1,11 @@
-switchStatements.ts(14,14): error TS2304: Cannot find name 'Date'.
-switchStatements.ts(15,14): error TS2304: Cannot find name 'Object'.
 switchStatements.ts(25,12): error TS2304: Cannot find name 'T'.
 switchStatements.ts(30,11): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
 switchStatements.ts(31,21): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
-switchStatements.ts(44,13): error TS2304: Cannot find name 'Date'.
-switchStatements.ts(45,13): error TS2304: Cannot find name 'Object'.
 switchStatements.ts(52,11): error TS2304: Cannot find name 'T'.
 switchStatements.ts(52,17): error TS2304: Cannot find name 'T'.
 
 
-==== switchStatements.ts (9 errors) ====
+==== switchStatements.ts (5 errors) ====
     namespace M {
         export function fn(x: number) {
             return '';
@@ -24,11 +20,7 @@ switchStatements.ts(52,17): error TS2304: Cannot find name 'T'.
         case null:
         case undefined:
         case new Date(12):
-                 ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         case new Object():
-                 ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         case /[a-z]/:
         case[]:
         case {}:
@@ -64,11 +56,7 @@ switchStatements.ts(52,17): error TS2304: Cannot find name 'T'.
     switch (null) { }
     switch (undefined) { }
     switch (new Date(12)) { }
-                ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     switch (new Object()) { }
-                ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     switch (/[a-z]/) { }
     switch ([]) { }
     switch ({}) { }

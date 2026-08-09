@@ -1,8 +1,8 @@
-duplicateNumericIndexers.ts(19,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+duplicateNumericIndexers.ts(19,5): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 duplicateNumericIndexers.ts(19,7): error TS1005: ']' expected.
 duplicateNumericIndexers.ts(19,15): error TS1005: ';' expected.
 duplicateNumericIndexers.ts(19,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-duplicateNumericIndexers.ts(20,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+duplicateNumericIndexers.ts(20,5): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 duplicateNumericIndexers.ts(20,7): error TS1005: ']' expected.
 duplicateNumericIndexers.ts(20,15): error TS1005: ';' expected.
 duplicateNumericIndexers.ts(20,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
@@ -29,7 +29,7 @@ duplicateNumericIndexers.ts(20,15): error TS2564: Property ']' has no initialize
     class C {
         [x: number]: string;
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -38,7 +38,7 @@ duplicateNumericIndexers.ts(20,15): error TS2564: Property ']' has no initialize
 !!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         [x: number]: string;
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~

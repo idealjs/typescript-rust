@@ -1,15 +1,15 @@
 throwStatements.ts(24,54): error TS2339: Property 'toString' does not exist on type 'number'.
-throwStatements.ts(31,17): error TS2304: Cannot find name 'Date'.
-throwStatements.ts(33,20): error TS2304: Cannot find name 'Object'.
+throwStatements.ts(31,17): error TS2351: This expression is not constructable.
+throwStatements.ts(33,20): error TS2351: This expression is not constructable.
 throwStatements.ts(38,28): error TS2351: This expression is not constructable.
 throwStatements.ts(43,18): error TS2351: This expression is not constructable.
 throwStatements.ts(45,25): error TS2351: This expression is not constructable.
 throwStatements.ts(52,7): error TS2349: This expression is not callable.
 throwStatements.ts(55,7): error TS2349: This expression is not callable.
 throwStatements.ts(76,13): error TS2304: Cannot find name 'T'.
-throwStatements.ts(81,11): error TS2304: Cannot find name 'Date'.
+throwStatements.ts(81,11): error TS2351: This expression is not constructable.
 throwStatements.ts(82,11): error TS2351: This expression is not constructable.
-throwStatements.ts(83,11): error TS2304: Cannot find name 'Object'.
+throwStatements.ts(83,11): error TS2351: This expression is not constructable.
 throwStatements.ts(84,11): error TS2351: This expression is not constructable.
 
 
@@ -48,11 +48,11 @@ throwStatements.ts(84,11): error TS2351: This expression is not constructable.
     throw aString;
     var aDate = new Date(12);
                     ~~~~
-!!! error TS2304: Cannot find name 'Date'.
+!!! error TS2351: This expression is not constructable.
     throw aDate;
     var anObject = new Object();
                        ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
+!!! error TS2351: This expression is not constructable.
     throw anObject;
     
     var anAny = null;
@@ -114,13 +114,13 @@ throwStatements.ts(84,11): error TS2351: This expression is not constructable.
     throw /[a-z]/;
     throw new Date();
               ~~~~
-!!! error TS2304: Cannot find name 'Date'.
+!!! error TS2351: This expression is not constructable.
     throw new C();
               ~
 !!! error TS2351: This expression is not constructable.
     throw new Object();
               ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
+!!! error TS2351: This expression is not constructable.
     throw new D<number>();
               ~
 !!! error TS2351: This expression is not constructable.

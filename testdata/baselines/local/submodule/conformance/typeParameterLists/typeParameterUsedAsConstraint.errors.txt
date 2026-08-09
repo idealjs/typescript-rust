@@ -1,5 +1,3 @@
-typeParameterUsedAsConstraint.ts(17,23): error TS2304: Cannot find name 'Date'.
-typeParameterUsedAsConstraint.ts(18,36): error TS2304: Cannot find name 'Date'.
 typeParameterUsedAsConstraint.ts(19,36): error TS2304: Cannot find name 'V'.
 typeParameterUsedAsConstraint.ts(22,11): error TS1005: '>' expected.
 typeParameterUsedAsConstraint.ts(22,13): error TS1005: ',' expected.
@@ -10,7 +8,7 @@ typeParameterUsedAsConstraint.ts(22,25): error TS1134: Variable declaration expe
 typeParameterUsedAsConstraint.ts(22,26): error TS1134: Variable declaration expected.
 
 
-==== typeParameterUsedAsConstraint.ts (10 errors) ====
+==== typeParameterUsedAsConstraint.ts (8 errors) ====
     class C<T, U extends T> { }
     class C2<T extends U, U> { }
     class C3<T extends Date, U extends T> { }
@@ -28,11 +26,7 @@ typeParameterUsedAsConstraint.ts(22,26): error TS1134: Variable declaration expe
     function f<T, U extends T>() { }
     function f2<T extends U, U>() { }
     function f3<T extends Date, U extends T>() { }
-                          ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     function f4<T extends U, U extends Date>() { }
-                                       ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     function f5<T extends U, U extends V, V>() { }
                                        ~
 !!! error TS2304: Cannot find name 'V'.

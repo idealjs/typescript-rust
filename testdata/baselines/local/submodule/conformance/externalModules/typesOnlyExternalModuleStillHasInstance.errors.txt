@@ -1,4 +1,3 @@
-foo_1.ts(5,13): error TS2304: Cannot find name 'Object'.
 foo_1.ts(5,23): error TS2304: Cannot find name 'foo0'.
 
 
@@ -14,13 +13,11 @@ foo_1.ts(5,23): error TS2304: Cannot find name 'foo0'.
     	}
     }
     
-==== foo_1.ts (2 errors) ====
+==== foo_1.ts (1 errors) ====
     import foo0 = require('./foo_0');
     // Per 11.2.3, foo_0 should still be "instantiated", albeit with no members
     
     var x: typeof foo0 = {};
     var y: {M2: Object} = foo0;
-                ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                           ~~~~
 !!! error TS2304: Cannot find name 'foo0'.

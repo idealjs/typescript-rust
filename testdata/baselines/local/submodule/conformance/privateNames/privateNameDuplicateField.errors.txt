@@ -1,102 +1,38 @@
-privateNameDuplicateField.ts(18,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(24,13): error TS1005: ';' expected.
 privateNameDuplicateField.ts(30,16): error TS1005: ';' expected.
 privateNameDuplicateField.ts(36,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(42,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(48,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(68,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(74,13): error TS1005: ';' expected.
 privateNameDuplicateField.ts(80,16): error TS1005: ';' expected.
 privateNameDuplicateField.ts(86,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(92,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(98,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(106,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(112,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(118,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(119,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(124,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(125,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(130,13): error TS1005: ';' expected.
 privateNameDuplicateField.ts(131,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(136,13): error TS1005: ';' expected.
 privateNameDuplicateField.ts(137,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(142,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(143,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(148,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(149,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(156,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(162,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(168,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(169,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(174,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(175,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(180,13): error TS1005: ';' expected.
 privateNameDuplicateField.ts(181,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(186,13): error TS1005: ';' expected.
 privateNameDuplicateField.ts(187,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(192,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(193,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(198,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(199,20): error TS1005: ';' expected.
 privateNameDuplicateField.ts(206,16): error TS1005: ';' expected.
 privateNameDuplicateField.ts(212,16): error TS1005: ';' expected.
 privateNameDuplicateField.ts(218,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(219,13): error TS1005: ';' expected.
 privateNameDuplicateField.ts(224,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(225,13): error TS1005: ';' expected.
 privateNameDuplicateField.ts(230,16): error TS1005: ';' expected.
 privateNameDuplicateField.ts(231,16): error TS1005: ';' expected.
 privateNameDuplicateField.ts(236,16): error TS1005: ';' expected.
 privateNameDuplicateField.ts(237,16): error TS1005: ';' expected.
 privateNameDuplicateField.ts(242,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(243,20): error TS1005: ';' expected.
 privateNameDuplicateField.ts(248,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(249,20): error TS1005: ';' expected.
 privateNameDuplicateField.ts(256,16): error TS1005: ';' expected.
 privateNameDuplicateField.ts(262,16): error TS1005: ';' expected.
 privateNameDuplicateField.ts(268,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(269,13): error TS1005: ';' expected.
 privateNameDuplicateField.ts(274,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(275,13): error TS1005: ';' expected.
 privateNameDuplicateField.ts(280,16): error TS1005: ';' expected.
 privateNameDuplicateField.ts(281,16): error TS1005: ';' expected.
 privateNameDuplicateField.ts(286,16): error TS1005: ';' expected.
 privateNameDuplicateField.ts(287,16): error TS1005: ';' expected.
 privateNameDuplicateField.ts(292,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(293,20): error TS1005: ';' expected.
 privateNameDuplicateField.ts(298,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(299,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(307,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(313,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(319,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(320,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(325,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(326,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(331,20): error TS1005: ';' expected.
 privateNameDuplicateField.ts(332,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(337,20): error TS1005: ';' expected.
 privateNameDuplicateField.ts(338,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(343,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(344,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(348,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(349,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(356,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(362,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(369,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(370,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(375,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(376,13): error TS1005: ';' expected.
-privateNameDuplicateField.ts(381,20): error TS1005: ';' expected.
 privateNameDuplicateField.ts(382,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(387,20): error TS1005: ';' expected.
 privateNameDuplicateField.ts(388,16): error TS1005: ';' expected.
-privateNameDuplicateField.ts(393,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(394,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(399,20): error TS1005: ';' expected.
-privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
 
 
-==== privateNameDuplicateField.ts (96 errors) ====
+==== privateNameDuplicateField.ts (32 errors) ====
     function Field() {
     
         // Error
@@ -115,16 +51,12 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         class A_Field_Getter {
             #foo = "foo";
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
         class A_Field_Setter {
             #foo = "foo";
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
@@ -147,16 +79,12 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         class A_Field_StaticGetter {
             #foo = "foo";
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
         class A_Field_StaticSetter {
             #foo = "foo";
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     }
     
@@ -177,16 +105,12 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         class A_Method_Getter {
             #foo() { }
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
         class A_Method_Setter {
             #foo() { }
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
@@ -209,16 +133,12 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         class A_Method_StaticGetter {
             #foo() { }
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
         class A_Method_StaticSetter {
             #foo() { }
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     }
     
@@ -227,44 +147,30 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         // Error
         class A_Getter_Field {
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
             #foo = "foo";
         }
     
         // Error
         class A_Getter_Method {
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
             #foo() { }
         }
     
         // Error
         class A_Getter_Getter {
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         //OK
         class A_Getter_Setter {
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
         class A_Getter_StaticField {
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
             static #foo() { }
                    ~~~~
 !!! error TS1005: ';' expected.
@@ -273,8 +179,6 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         // Error
         class A_Getter_StaticMethod {
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
             static #foo() { }
                    ~~~~
 !!! error TS1005: ';' expected.
@@ -283,21 +187,13 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         // Error
         class A_Getter_StaticGetter {
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
         class A_Getter_StaticSetter {
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     }
     
@@ -305,44 +201,30 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         // Error
         class A_Setter_Field {
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
             #foo = "foo";
         }
     
         // Error
         class A_Setter_Method {
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
             #foo() { }
         }
     
         // OK
         class A_Setter_Getter {
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
         class A_Setter_Setter {
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
         class A_Setter_StaticField {
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
             static #foo = "foo";
                    ~~~~
 !!! error TS1005: ';' expected.
@@ -351,8 +233,6 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         // Error
         class A_Setter_StaticMethod {
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
             static #foo() { }
                    ~~~~
 !!! error TS1005: ';' expected.
@@ -361,21 +241,13 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         // Error
         class A_Setter_StaticGetter {
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
         class A_Setter_StaticSetter {
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     }
     
@@ -402,8 +274,6 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
                    ~~~~
 !!! error TS1005: ';' expected.
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
@@ -412,8 +282,6 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
                    ~~~~
 !!! error TS1005: ';' expected.
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
@@ -442,8 +310,6 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
                    ~~~~
 !!! error TS1005: ';' expected.
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
@@ -452,8 +318,6 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
                    ~~~~
 !!! error TS1005: ';' expected.
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     }
     
@@ -480,8 +344,6 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
                    ~~~~
 !!! error TS1005: ';' expected.
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
@@ -490,8 +352,6 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
                    ~~~~
 !!! error TS1005: ';' expected.
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
@@ -520,8 +380,6 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
                    ~~~~
 !!! error TS1005: ';' expected.
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
@@ -530,8 +388,6 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
                    ~~~~
 !!! error TS1005: ';' expected.
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     }
     
@@ -540,44 +396,30 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         // Error
         class A_StaticGetter_Field {
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
             #foo = "foo";
         }
     
         // Error
         class A_StaticGetter_Method {
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
             #foo() { }
         }
     
         // Error
         class A_StaticGetter_Getter {
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
         class A_StaticGetter_Setter {
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
         class A_StaticGetter_StaticField {
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
             static #foo() { }
                    ~~~~
 !!! error TS1005: ';' expected.
@@ -586,8 +428,6 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         // Error
         class A_StaticGetter_StaticMethod {
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
             static #foo() { }
                    ~~~~
 !!! error TS1005: ';' expected.
@@ -596,20 +436,12 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         // Error
         class A_StaticGetter_StaticGetter {
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
         // OK
         class A_StaticGetter_StaticSetter {
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     }
     
@@ -617,16 +449,12 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         // Error
         class A_StaticSetter_Field {
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
             #foo = "foo";
         }
     
         // Error
         class A_StaticSetter_Method {
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
             #foo() { }
         }
     
@@ -634,28 +462,18 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         // Error
         class A_StaticSetter_Getter {
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
             get #foo() { return ""}
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
         class A_StaticSetter_Setter {
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
             set #foo(value: string) { }
-                ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
         class A_StaticSetter_StaticField {
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
             static #foo = "foo";
                    ~~~~
 !!! error TS1005: ';' expected.
@@ -664,8 +482,6 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         // Error
         class A_StaticSetter_StaticMethod {
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
             static #foo() { }
                    ~~~~
 !!! error TS1005: ';' expected.
@@ -674,20 +490,12 @@ privateNameDuplicateField.ts(400,20): error TS1005: ';' expected.
         // OK
         class A_StaticSetter_StaticGetter {
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
             static get #foo() { return ""}
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     
         // Error
         class A_StaticSetter_StaticSetter {
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
             static set #foo(value: string) { }
-                       ~~~~
-!!! error TS1005: ';' expected.
         }
     }

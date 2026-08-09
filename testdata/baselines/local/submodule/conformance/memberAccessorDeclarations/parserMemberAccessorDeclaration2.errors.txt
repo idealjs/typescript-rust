@@ -1,9 +1,0 @@
-parserMemberAccessorDeclaration2.ts(2,7): error TS1005: ';' expected.
-
-
-==== parserMemberAccessorDeclaration2.ts (1 errors) ====
-    class C {
-      get "b"() { }
-          ~~~
-!!! error TS1005: ';' expected.
-    }

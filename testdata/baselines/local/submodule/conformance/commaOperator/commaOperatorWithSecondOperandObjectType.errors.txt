@@ -1,19 +1,14 @@
-commaOperatorWithSecondOperandObjectType.ts(5,13): error TS2304: Cannot find name 'Object'.
 commaOperatorWithSecondOperandObjectType.ts(8,5): error TS2564: Property 'num' has no initializer and is not definitely assigned in the constructor.
-commaOperatorWithSecondOperandObjectType.ts(30,15): error TS2304: Cannot find name 'Date'.
 commaOperatorWithSecondOperandObjectType.ts(31,8): error TS2339: Property 'toLowerCase' does not exist on type 'string'.
-commaOperatorWithSecondOperandObjectType.ts(37,39): error TS2304: Cannot find name 'Date'.
 commaOperatorWithSecondOperandObjectType.ts(38,32): error TS2339: Property 'toLowerCase' does not exist on type 'string'.
 
 
-==== commaOperatorWithSecondOperandObjectType.ts (6 errors) ====
+==== commaOperatorWithSecondOperandObjectType.ts (3 errors) ====
     var ANY: any;
     var BOOLEAN: boolean;
     var NUMBER: number;
     var STRING: string;
     var OBJECT: Object;
-                ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     
     class CLASS {
         num: number;
@@ -41,8 +36,6 @@ commaOperatorWithSecondOperandObjectType.ts(38,32): error TS2339: Property 'toLo
     true, {}
     !BOOLEAN, []
     "string", new Date()
-                  ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     STRING.toLowerCase(), new CLASS()
            ~~~~~~~~~~~
 !!! error TS2339: Property 'toLowerCase' does not exist on type 'string'.
@@ -52,8 +45,6 @@ commaOperatorWithSecondOperandObjectType.ts(38,32): error TS2339: Property 'toLo
     var resultIsObject8 = (true, {});
     var resultIsObject9 = (!BOOLEAN, { a: 1, b: "s" });
     var resultIsObject10 = ("string", new Date());
-                                          ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     var resultIsObject11 = (STRING.toLowerCase(), new CLASS());
                                    ~~~~~~~~~~~
 !!! error TS2339: Property 'toLowerCase' does not exist on type 'string'.

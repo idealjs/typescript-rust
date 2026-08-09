@@ -1,5 +1,4 @@
 error TS2451: Cannot redeclare block-scoped variable 'x'.
-for-inStatementsArray.ts(1,8): error TS2304: Cannot find name 'Date'.
 for-inStatementsArray.ts(5,16): error TS2448: Block-scoped variable 'x' used before its declaration.
 for-inStatementsArray.ts(6,17): error TS2448: Block-scoped variable 'x' used before its declaration.
 for-inStatementsArray.ts(7,17): error TS2448: Block-scoped variable 'x' used before its declaration.
@@ -12,10 +11,8 @@ for-inStatementsArray.ts(36,12): error TS1005: ';' expected.
 
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'x'.
-==== for-inStatementsArray.ts (10 errors) ====
+==== for-inStatementsArray.ts (9 errors) ====
     let a: Date[];
-           ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     let b: boolean[];
     
     for (let x in a) {

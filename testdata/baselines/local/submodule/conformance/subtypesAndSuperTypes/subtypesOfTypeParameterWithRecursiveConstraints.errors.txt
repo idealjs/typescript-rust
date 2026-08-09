@@ -1,91 +1,91 @@
 subtypesOfTypeParameterWithRecursiveConstraints.ts(3,16): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(58,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(62,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(62,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(62,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(62,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(62,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(63,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(67,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(67,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(67,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(67,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(67,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(68,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(72,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(72,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(72,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(72,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(72,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(73,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(77,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(77,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(77,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(77,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(77,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(78,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(82,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(82,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(82,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(82,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(82,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(83,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(87,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(87,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(87,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(87,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(87,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(88,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(92,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(92,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(92,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(92,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(92,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(93,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(97,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(97,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(97,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(97,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(97,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(98,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(102,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(102,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(102,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(102,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(102,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(103,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(114,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(114,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(114,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(114,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(114,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(115,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(119,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(119,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(119,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(119,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(119,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(120,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(124,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(124,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(124,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(124,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(124,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(125,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(129,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(129,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(129,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(129,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(129,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(130,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(134,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(134,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(134,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(134,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(134,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(135,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(139,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(139,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(139,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(139,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(139,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(140,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(144,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(144,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(144,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(144,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(144,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(145,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(149,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(149,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(149,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(149,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(149,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(150,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithRecursiveConstraints.ts(154,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(154,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(154,11): error TS1005: ']' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(154,19): error TS1005: ';' expected.
 subtypesOfTypeParameterWithRecursiveConstraints.ts(154,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
@@ -160,7 +160,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D1<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<T> {
             [x: string]: T;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -175,7 +175,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D2<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<T> {
             [x: string]: T;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -190,7 +190,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D3<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<T> {
             [x: string]: T;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -205,7 +205,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D4<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<U> {
             [x: string]: U;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -220,7 +220,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D5<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<U> {
             [x: string]: U;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -235,7 +235,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D6<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<U> {
             [x: string]: U;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -250,7 +250,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D7<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<V> {
             [x: string]: V;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -265,7 +265,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D8<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<V> {
             [x: string]: V;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -280,7 +280,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D9<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base<V> {
             [x: string]: V;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -302,7 +302,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D1<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<T> {
             [x: string]: T;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -317,7 +317,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D2<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<T> {
             [x: string]: T;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -332,7 +332,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D3<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<T> {
             [x: string]: T;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -347,7 +347,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D4<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<U> {
             [x: string]: U;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -362,7 +362,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D5<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<U> {
             [x: string]: U;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -377,7 +377,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D6<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<U> {
             [x: string]: U;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -392,7 +392,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D7<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<V> {
             [x: string]: V;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -407,7 +407,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D8<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<V> {
             [x: string]: V;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -422,7 +422,7 @@ subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Propert
         class D9<T extends Foo<U>, U extends Foo<T>, V extends Foo<V>> extends Base2<V> {
             [x: string]: V;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~

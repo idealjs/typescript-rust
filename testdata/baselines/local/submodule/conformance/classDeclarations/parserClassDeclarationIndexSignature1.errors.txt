@@ -1,4 +1,4 @@
-parserClassDeclarationIndexSignature1.ts(2,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+parserClassDeclarationIndexSignature1.ts(2,5): error TS2564: Property '[index' has no initializer and is not definitely assigned in the constructor.
 parserClassDeclarationIndexSignature1.ts(2,11): error TS1005: ']' expected.
 parserClassDeclarationIndexSignature1.ts(2,18): error TS1005: ';' expected.
 parserClassDeclarationIndexSignature1.ts(2,18): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
@@ -8,7 +8,7 @@ parserClassDeclarationIndexSignature1.ts(2,18): error TS2564: Property ']' has n
     class C {
         [index:number]:number
         ~~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[index' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                      ~

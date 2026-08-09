@@ -1,29 +1,14 @@
-objectTypeWithStringNamedNumericProperty.ts(7,11): error TS2304: Cannot find name 'Object'.
-objectTypeWithStringNamedNumericProperty.ts(11,12): error TS2304: Cannot find name 'Date'.
-objectTypeWithStringNamedNumericProperty.ts(12,13): error TS2304: Cannot find name 'RegExp'.
-objectTypeWithStringNamedNumericProperty.ts(13,11): error TS2304: Cannot find name 'Date'.
 objectTypeWithStringNamedNumericProperty.ts(33,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
 objectTypeWithStringNamedNumericProperty.ts(34,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
-objectTypeWithStringNamedNumericProperty.ts(38,11): error TS2304: Cannot find name 'Object'.
-objectTypeWithStringNamedNumericProperty.ts(42,12): error TS2304: Cannot find name 'Date'.
-objectTypeWithStringNamedNumericProperty.ts(43,13): error TS2304: Cannot find name 'RegExp'.
-objectTypeWithStringNamedNumericProperty.ts(44,11): error TS2304: Cannot find name 'Date'.
 objectTypeWithStringNamedNumericProperty.ts(64,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
 objectTypeWithStringNamedNumericProperty.ts(65,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
-objectTypeWithStringNamedNumericProperty.ts(69,11): error TS2304: Cannot find name 'Object'.
-objectTypeWithStringNamedNumericProperty.ts(73,12): error TS2304: Cannot find name 'Date'.
-objectTypeWithStringNamedNumericProperty.ts(74,13): error TS2304: Cannot find name 'RegExp'.
-objectTypeWithStringNamedNumericProperty.ts(75,11): error TS2304: Cannot find name 'Date'.
 objectTypeWithStringNamedNumericProperty.ts(94,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
 objectTypeWithStringNamedNumericProperty.ts(95,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
-objectTypeWithStringNamedNumericProperty.ts(99,15): error TS2304: Cannot find name 'Object'.
-objectTypeWithStringNamedNumericProperty.ts(103,16): error TS2304: Cannot find name 'Date'.
-objectTypeWithStringNamedNumericProperty.ts(105,11): error TS2304: Cannot find name 'Date'.
 objectTypeWithStringNamedNumericProperty.ts(124,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
 objectTypeWithStringNamedNumericProperty.ts(125,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
 
 
-==== objectTypeWithStringNamedNumericProperty.ts (23 errors) ====
+==== objectTypeWithStringNamedNumericProperty.ts (8 errors) ====
     // string named numeric properties are legal and distinct when indexed by string values
     // indexed numerically the value is converted to a number
     // no errors expected below
@@ -31,20 +16,12 @@ objectTypeWithStringNamedNumericProperty.ts(125,13): error TS1121: Octal literal
     class C {
         "0.1": void;
         ".1": Object;
-              ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         "1": number;
         "1.": string;
         "1..": boolean;
         "1.0": Date;
-               ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         "-1.0": RegExp;
-                ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
         "-1": Date;
-              ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     }
     
     declare var c: C;
@@ -74,20 +51,12 @@ objectTypeWithStringNamedNumericProperty.ts(125,13): error TS1121: Octal literal
     interface I {
         "0.1": void;
         ".1": Object;
-              ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         "1": number;
         "1.": string;
         "1..": boolean;
         "1.0": Date;
-               ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         "-1.0": RegExp;
-                ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
         "-1": Date;
-              ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     }
     
     declare var i: I;
@@ -117,20 +86,12 @@ objectTypeWithStringNamedNumericProperty.ts(125,13): error TS1121: Octal literal
     declare var a: {
         "0.1": void;
         ".1": Object;
-              ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         "1": number;
         "1.": string;
         "1..": boolean;
         "1.0": Date;
-               ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         "-1.0": RegExp;
-                ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
         "-1": Date;
-              ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     }
     
     var r1 = a['0.1'];
@@ -159,18 +120,12 @@ objectTypeWithStringNamedNumericProperty.ts(125,13): error TS1121: Octal literal
     var b = {
         "0.1": <void>null,
         ".1": new Object(),
-                  ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         "1": 1,
         "1.": "",
         "1..": true,
         "1.0": new Date(),
-                   ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         "-1.0": /123/,
         "-1": Date
-              ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     };
     
     var r1 = b['0.1'];

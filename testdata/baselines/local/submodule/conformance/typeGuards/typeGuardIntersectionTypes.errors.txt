@@ -1,11 +1,9 @@
-typeGuardIntersectionTypes.ts(17,18): error TS2304: Cannot find name 'Object'.
 typeGuardIntersectionTypes.ts(45,12): error TS2322: Type '{ b: string }' is not assignable to type '{ a: string } & { b: string } | null'.
 typeGuardIntersectionTypes.ts(61,50): error TS2322: Type '{ wings?: boolean | undefined; legs?: number | undefined }' is not assignable to type 'boolean'.
 typeGuardIntersectionTypes.ts(62,51): error TS2322: Type '{ wings?: boolean | undefined; legs?: number | undefined }' is not assignable to type 'boolean'.
-typeGuardIntersectionTypes.ts(100,26): error TS2304: Cannot find name 'Object'.
 
 
-==== typeGuardIntersectionTypes.ts (5 errors) ====
+==== typeGuardIntersectionTypes.ts (3 errors) ====
     interface X {
         x: string;
     }
@@ -23,8 +21,6 @@ typeGuardIntersectionTypes.ts(100,26): error TS2304: Cannot find name 'Object'.
     declare function isZ(obj: any): obj is Z;
     
     function f1(obj: Object) {
-                     ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         if (isX(obj) || isY(obj) || isZ(obj)) {
             obj;
         }
@@ -114,8 +110,6 @@ typeGuardIntersectionTypes.ts(100,26): error TS2304: Cannot find name 'Object'.
     }
     
     function beastFoo(beast: Object) {
-                             ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         if (hasWings(beast) && hasLegs(beast)) {
             beast;  // Winged & Legged
         }

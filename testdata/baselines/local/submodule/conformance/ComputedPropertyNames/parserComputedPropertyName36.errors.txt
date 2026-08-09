@@ -1,9 +1,9 @@
-parserComputedPropertyName36.ts(2,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+parserComputedPropertyName36.ts(2,5): error TS2564: Property '[public ]' has no initializer and is not definitely assigned in the constructor.
 
 
 ==== parserComputedPropertyName36.ts (1 errors) ====
     class C {
         [public ]: string;
         ~~~~~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[public ]' has no initializer and is not definitely assigned in the constructor.
     }

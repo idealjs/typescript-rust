@@ -1,12 +1,8 @@
 privateNameES5Ban.ts(5,12): error TS1005: ';' expected.
 privateNameES5Ban.ts(6,12): error TS1005: ';' expected.
-privateNameES5Ban.ts(7,9): error TS1005: ';' expected.
-privateNameES5Ban.ts(8,9): error TS1005: ';' expected.
-privateNameES5Ban.ts(9,16): error TS1005: ';' expected.
-privateNameES5Ban.ts(10,16): error TS1005: ';' expected.
 
 
-==== privateNameES5Ban.ts (6 errors) ====
+==== privateNameES5Ban.ts (2 errors) ====
     class A {
         constructor() {}
         #field = 123;
@@ -18,16 +14,8 @@ privateNameES5Ban.ts(10,16): error TS1005: ';' expected.
                ~~~~~~~~
 !!! error TS1005: ';' expected.
         get #acc() { return ""; }
-            ~~~~
-!!! error TS1005: ';' expected.
         set #acc(x: string) {}
-            ~~~~
-!!! error TS1005: ';' expected.
         static get #sAcc() { return 0; }
-                   ~~~~~
-!!! error TS1005: ';' expected.
         static set #sAcc(x: number) {}
-                   ~~~~~
-!!! error TS1005: ';' expected.
     }
     

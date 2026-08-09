@@ -1,7 +1,6 @@
 functionConstraintSatisfaction.ts(41,15): error TS2304: Cannot find name 'U'.
 functionConstraintSatisfaction.ts(41,21): error TS2304: Cannot find name 'U'.
 functionConstraintSatisfaction.ts(43,16): error TS2304: Cannot find name 'U'.
-functionConstraintSatisfaction.ts(43,26): error TS2304: Cannot find name 'Date'.
 functionConstraintSatisfaction.ts(43,30): error TS1005: '?' expected.
 functionConstraintSatisfaction.ts(43,31): error TS1005: ':' expected.
 functionConstraintSatisfaction.ts(43,42): error TS1005: '>' expected.
@@ -15,7 +14,7 @@ functionConstraintSatisfaction.ts(44,25): error TS2304: Cannot find name 'U'.
 functionConstraintSatisfaction.ts(44,31): error TS2304: Cannot find name 'V'.
 
 
-==== functionConstraintSatisfaction.ts (15 errors) ====
+==== functionConstraintSatisfaction.ts (14 errors) ====
     // satisfaction of a constraint to Function, no errors expected
     
     function foo<T extends Function>(x: T): T { return x; }
@@ -65,8 +64,6 @@ functionConstraintSatisfaction.ts(44,31): error TS2304: Cannot find name 'V'.
     var r11 = foo(<U extends Date>(x: U) => x);
                    ~
 !!! error TS2304: Cannot find name 'U'.
-                             ~~~~
-!!! error TS2304: Cannot find name 'Date'.
                                  ~
 !!! error TS1005: '?' expected.
                                   ~

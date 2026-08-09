@@ -1,8 +1,6 @@
 unknownType1.ts(53,5): error TS2349: This expression is not callable.
 unknownType1.ts(65,5): error TS2349: This expression is not callable.
 unknownType1.ts(66,9): error TS2351: This expression is not constructable.
-unknownType1.ts(77,22): error TS2304: Cannot find name 'Error'.
-unknownType1.ts(98,13): error TS2304: Cannot find name 'Error'.
 unknownType1.ts(110,9): error TS2322: Type 'unknown' is not assignable to type 'object'.
 unknownType1.ts(111,9): error TS2322: Type 'unknown' is not assignable to type 'string'.
 unknownType1.ts(112,9): error TS2322: Type 'unknown' is not assignable to type 'string[]'.
@@ -17,7 +15,7 @@ unknownType1.ts(171,9): error TS2322: Type 'U' is not assignable to type 'object
 unknownType1.ts(181,12): error TS2322: Type 'T' is not assignable to type 'object'.
 
 
-==== unknownType1.ts (17 errors) ====
+==== unknownType1.ts (15 errors) ====
     // In an intersection everything absorbs unknown
     
     type T00 = unknown & null;  // null
@@ -101,8 +99,6 @@ unknownType1.ts(181,12): error TS2322: Type 'T' is not assignable to type 'objec
             x;  // string | number
         }
         if (x instanceof Error) {
-                         ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
             x;  // Error
         }
         if (isFunction(x)) {
@@ -124,8 +120,6 @@ unknownType1.ts(181,12): error TS2322: Type 'T' is not assignable to type 'objec
         x = "hello";
         x = [1, 2, 3];
         x = new Error();
-                ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
         x = x;
         x = pAny;
         x = pNever;

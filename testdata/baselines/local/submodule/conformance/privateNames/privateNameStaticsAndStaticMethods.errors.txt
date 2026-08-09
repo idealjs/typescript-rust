@@ -1,16 +1,12 @@
 privateNameStaticsAndStaticMethods.ts(2,12): error TS1005: ';' expected.
 privateNameStaticsAndStaticMethods.ts(3,18): error TS1005: ';' expected.
-privateNameStaticsAndStaticMethods.ts(4,18): error TS1003: Identifier expected.
-privateNameStaticsAndStaticMethods.ts(4,19): error TS1005: ';' expected.
 privateNameStaticsAndStaticMethods.ts(7,12): error TS1005: ';' expected.
 privateNameStaticsAndStaticMethods.ts(7,12): error TS2564: Property '#_quux' has no initializer and is not definitely assigned in the constructor.
-privateNameStaticsAndStaticMethods.ts(8,16): error TS1005: ';' expected.
-privateNameStaticsAndStaticMethods.ts(11,16): error TS1005: ';' expected.
 privateNameStaticsAndStaticMethods.ts(24,12): error TS1005: ';' expected.
 privateNameStaticsAndStaticMethods.ts(26,9): error TS2349: This expression is not callable.
 
 
-==== privateNameStaticsAndStaticMethods.ts (10 errors) ====
+==== privateNameStaticsAndStaticMethods.ts (6 errors) ====
     class A {
         static #foo(a: number) {}
                ~~~~
@@ -19,10 +15,6 @@ privateNameStaticsAndStaticMethods.ts(26,9): error TS2349: This expression is no
                      ~~~~
 !!! error TS1005: ';' expected.
         static async *#baz(a: number) {
-                     ~
-!!! error TS1003: Identifier expected.
-                      ~~~~
-!!! error TS1005: ';' expected.
             return 3;
         }
         static #_quux: number;
@@ -31,13 +23,9 @@ privateNameStaticsAndStaticMethods.ts(26,9): error TS2349: This expression is no
                ~~~~~~
 !!! error TS2564: Property '#_quux' has no initializer and is not definitely assigned in the constructor.
         static get #quux (): number {
-                   ~~~~~
-!!! error TS1005: ';' expected.
             return this.#_quux;
         }
         static set #quux (val: number) {
-                   ~~~~~
-!!! error TS1005: ';' expected.
             this.#_quux = val;
         }
         constructor () {

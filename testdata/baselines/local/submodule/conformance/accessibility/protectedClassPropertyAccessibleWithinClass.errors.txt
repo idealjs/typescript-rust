@@ -1,33 +1,25 @@
-protectedClassPropertyAccessibleWithinClass.ts(5,19): error TS1005: ';' expected.
-protectedClassPropertyAccessibleWithinClass.ts(6,19): error TS1005: ';' expected.
-protectedClassPropertyAccessibleWithinClass.ts(10,26): error TS1005: ';' expected.
-protectedClassPropertyAccessibleWithinClass.ts(11,26): error TS1005: ';' expected.
-protectedClassPropertyAccessibleWithinClass.ts(19,19): error TS1005: ';' expected.
-protectedClassPropertyAccessibleWithinClass.ts(20,19): error TS1005: ';' expected.
-protectedClassPropertyAccessibleWithinClass.ts(24,26): error TS1005: ';' expected.
-protectedClassPropertyAccessibleWithinClass.ts(25,26): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinClass.ts(6,31): error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any }'.
+protectedClassPropertyAccessibleWithinClass.ts(11,38): error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any }'.
+protectedClassPropertyAccessibleWithinClass.ts(20,39): error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any }'.
+protectedClassPropertyAccessibleWithinClass.ts(26,22): error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any }'.
 
 
-==== protectedClassPropertyAccessibleWithinClass.ts (8 errors) ====
+==== protectedClassPropertyAccessibleWithinClass.ts (4 errors) ====
     // no errors
     
     class C {
         protected x: string;
         protected get y() { return this.x; }
-                      ~
-!!! error TS1005: ';' expected.
         protected set y(x) { this.y = this.x; }
-                      ~
-!!! error TS1005: ';' expected.
+                                  ~
+!!! error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any }'.
         protected foo() { return this.foo; }
     
         protected static x: string;
         protected static get y() { return this.x; }
-                             ~
-!!! error TS1005: ';' expected.
         protected static set y(x) { this.y = this.x; }
-                             ~
-!!! error TS1005: ';' expected.
+                                         ~
+!!! error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any }'.
         protected static foo() { return this.foo; }
         protected static bar() { this.foo(); }
     }
@@ -36,21 +28,17 @@ protectedClassPropertyAccessibleWithinClass.ts(25,26): error TS1005: ';' expecte
     class C2 {
         protected x: string;
         protected get y() { () => this.x; return null; }
-                      ~
-!!! error TS1005: ';' expected.
         protected set y(x) { () => { this.y = this.x; } }
-                      ~
-!!! error TS1005: ';' expected.
+                                          ~
+!!! error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any }'.
         protected foo() { () => this.foo; }
     
         protected static x: string;
         protected static get y() { () => this.x; return null; }
-                             ~
-!!! error TS1005: ';' expected.
         protected static set y(x) {
-                             ~
-!!! error TS1005: ';' expected.
             () => { this.y = this.x; }
+                         ~
+!!! error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any }'.
          }
         protected static foo() { () => this.foo; }
         protected static bar() { () => this.foo(); }

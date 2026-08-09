@@ -14,27 +14,20 @@ uniqueSymbols.ts(155,27): error TS2339: Property 's' does not exist on type 'N'.
 uniqueSymbols.ts(159,18): error TS2339: Property 's' does not exist on type 'N'.
 uniqueSymbols.ts(163,20): error TS2339: Property 's' does not exist on type 'N'.
 uniqueSymbols.ts(167,11): error TS2339: Property 's' does not exist on type 'N'.
-uniqueSymbols.ts(172,11): error TS1003: Identifier expected.
-uniqueSymbols.ts(172,13): error TS1005: ';' expected.
-uniqueSymbols.ts(173,5): error TS1003: Identifier expected.
-uniqueSymbols.ts(173,7): error TS1005: ';' expected.
 uniqueSymbols.ts(181,5): error TS2339: Property 's' does not exist on type 'N'.
 uniqueSymbols.ts(186,17): error TS2339: Property 's' does not exist on type 'N'.
 uniqueSymbols.ts(189,5): error TS2339: Property 's' does not exist on type 'N'.
 uniqueSymbols.ts(194,3): error TS2339: Property 's' does not exist on type 'N'.
-uniqueSymbols.ts(198,1): error TS2304: Cannot find name 'Math'.
-uniqueSymbols.ts(199,1): error TS2304: Cannot find name 'Math'.
 uniqueSymbols.ts(199,23): error TS2339: Property 's' does not exist on type 'N'.
-uniqueSymbols.ts(200,1): error TS2304: Cannot find name 'Math'.
-uniqueSymbols.ts(212,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
-uniqueSymbols.ts(213,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+uniqueSymbols.ts(212,5): error TS2564: Property '[s]' has no initializer and is not definitely assigned in the constructor.
+uniqueSymbols.ts(213,5): error TS2564: Property '[N.s]' has no initializer and is not definitely assigned in the constructor.
 uniqueSymbols.ts(221,16): error TS2304: Cannot find name 'AsyncIterableIterator'.
 uniqueSymbols.ts(240,16): error TS2304: Cannot find name 'p'.
 uniqueSymbols.ts(248,16): error TS2304: Cannot find name 'p'.
 uniqueSymbols.ts(251,16): error TS2304: Cannot find name 'p'.
 
 
-==== uniqueSymbols.ts (34 errors) ====
+==== uniqueSymbols.ts (27 errors) ====
     // declarations with call initializer
     const constCall = Symbol();
     let letCall = Symbol();
@@ -239,15 +232,7 @@ uniqueSymbols.ts(251,16): error TS2304: Cannot find name 'p'.
         method1() { return s; }
         async method2() { return s; }
         async * method3() { yield s; }
-              ~
-!!! error TS1003: Identifier expected.
-                ~~~~~~~
-!!! error TS1005: ';' expected.
         * method4() { yield s; }
-        ~
-!!! error TS1003: Identifier expected.
-          ~~~~~~~
-!!! error TS1005: ';' expected.
         method5(p = s) { return p; }
     }
     
@@ -281,16 +266,10 @@ uniqueSymbols.ts(251,16): error TS2304: Cannot find name 'p'.
     
     // conditionals
     Math.random() * 2 ? s : "a";
-    ~~~~
-!!! error TS2304: Cannot find name 'Math'.
     Math.random() * 2 ? N.s : "a";
-    ~~~~
-!!! error TS2304: Cannot find name 'Math'.
                           ~
 !!! error TS2339: Property 's' does not exist on type 'N'.
     Math.random() * 2 ? N["s"] : "a";
-    ~~~~
-!!! error TS2304: Cannot find name 'Math'.
     
     // computed property names
     ({
@@ -304,10 +283,10 @@ uniqueSymbols.ts(251,16): error TS2304: Cannot find name 'p'.
     
         [s]: "a";
         ~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[s]' has no initializer and is not definitely assigned in the constructor.
         [N.s]: "b";
         ~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[N.s]' has no initializer and is not definitely assigned in the constructor.
     }
     
     // contextual types

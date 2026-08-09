@@ -1,8 +1,6 @@
 error TS2451: Cannot redeclare block-scoped variable 'i'.
-source.js(8,24): error TS2304: Cannot find name 'Array'.
 source.js(11,5): error TS2339: Property 'prototype' does not exist on type '(len: any) => void'.
 source.js(16,13): error TS2304: Cannot find name 'other'.
-source.js(17,23): error TS2304: Cannot find name 'Error'.
 source.js(20,33): error TS1005: '>' expected.
 source.js(20,34): error TS1005: ')' expected.
 source.js(20,34): error TS2304: Cannot find name 'storage'.
@@ -31,7 +29,7 @@ source.js(27,53): error TS1005: ';' expected.
 
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'i'.
-==== source.js (29 errors) ====
+==== source.js (27 errors) ====
     /**
      * @param {number} len
      */
@@ -40,8 +38,6 @@ source.js(27,53): error TS1005: ';' expected.
          * @type {number[]}
          */
         this.storage = new Array(len);
-                           ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     }
     
     Vec.prototype = {
@@ -55,8 +51,6 @@ source.js(27,53): error TS1005: ';' expected.
                 ~~~~~
 !!! error TS2304: Cannot find name 'other'.
                 throw new Error(`Dot product only applicable for vectors of equal length`);
-                          ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
             }
             let sum = 0;
             for (let i = 0; i < this.storage.length; i++) {

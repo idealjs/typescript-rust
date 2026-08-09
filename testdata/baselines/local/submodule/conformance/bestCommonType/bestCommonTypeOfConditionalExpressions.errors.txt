@@ -1,13 +1,9 @@
 bestCommonTypeOfConditionalExpressions.ts(7,14): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 bestCommonTypeOfConditionalExpressions.ts(8,30): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 bestCommonTypeOfConditionalExpressions.ts(9,31): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
-bestCommonTypeOfConditionalExpressions.ts(18,42): error TS2304: Cannot find name 'Object'.
-bestCommonTypeOfConditionalExpressions.ts(19,63): error TS2304: Cannot find name 'Object'.
-bestCommonTypeOfConditionalExpressions.ts(20,21): error TS2304: Cannot find name 'Object'.
-bestCommonTypeOfConditionalExpressions.ts(24,34): error TS2304: Cannot find name 'Object'.
 
 
-==== bestCommonTypeOfConditionalExpressions.ts (7 errors) ====
+==== bestCommonTypeOfConditionalExpressions.ts (3 errors) ====
     // conditional expressions return the best common type of the branches plus contextual type (using the first candidate if multiple BCTs exist)
     // no errors expected here
     
@@ -32,19 +28,11 @@ bestCommonTypeOfConditionalExpressions.ts(24,34): error TS2304: Cannot find name
     var r4 = true ? a : b; // typeof a
     var r5 = true ? b : a; // typeof b
     var r6 = true ? (x: number) => { } : (x: Object) => { }; // returns number => void
-                                             ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     var r7: (x: Object) => void = true ? (x: number) => { } : (x: Object) => { }; 
-                                                                  ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     var r8 = true ? (x: Object) => { } : (x: number) => { }; // returns Object => void
-                        ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     var r10: Base = true ? derived : derived2; // no error since we use the contextual type in BCT
     var r11 = true ? base : derived2;
     
     function foo5<T, U>(t: T, u: U): Object {
-                                     ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         return true ? t : u; // BCT is Object
     }

@@ -1,38 +1,32 @@
-genericSetterInClassType.ts(3,13): error TS1005: ';' expected.
-genericSetterInClassType.ts(6,13): error TS1005: ';' expected.
-genericSetterInClassType.ts(15,13): error TS1005: ';' expected.
-genericSetterInClassType.ts(19,13): error TS1005: ';' expected.
+genericSetterInClassType.ts(10,7): error TS2339: Property 'y' does not exist on type 'object'.
+genericSetterInClassType.ts(10,13): error TS2339: Property 'y' does not exist on type 'object'.
 genericSetterInClassType.ts(24,9): error TS2349: This expression is not callable.
 
 
-==== genericSetterInClassType.ts (5 errors) ====
+==== genericSetterInClassType.ts (3 errors) ====
     namespace Generic {
         class C<T> {
             get y(): T {
-                ~
-!!! error TS1005: ';' expected.
                 return 1 as never;
             }
             set y(v) { }
-                ~
-!!! error TS1005: ';' expected.
         }
     
         var c = new C<number>();
         c.y = c.y;
+          ~
+!!! error TS2339: Property 'y' does not exist on type 'object'.
+                ~
+!!! error TS2339: Property 'y' does not exist on type 'object'.
     
         class Box<T> {
             #value!: T;
             
             get value() {
-                ~~~~~
-!!! error TS1005: ';' expected.
                 return this.#value;
             }
         
             set value(value) {
-                ~~~~~
-!!! error TS1005: ';' expected.
                 this.#value = value;
             }
         }

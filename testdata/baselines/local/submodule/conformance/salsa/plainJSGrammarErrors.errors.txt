@@ -5,11 +5,6 @@ plainJSGrammarErrors.js(22,11): error TS1005: ';' expected.
 plainJSGrammarErrors.js(23,11): error TS1005: ';' expected.
 plainJSGrammarErrors.js(29,12): error TS1005: ';' expected.
 plainJSGrammarErrors.js(30,12): error TS1005: ';' expected.
-plainJSGrammarErrors.js(34,9): error TS1005: ';' expected.
-plainJSGrammarErrors.js(35,9): error TS1005: ';' expected.
-plainJSGrammarErrors.js(36,9): error TS1005: ';' expected.
-plainJSGrammarErrors.js(37,9): error TS1005: ';' expected.
-plainJSGrammarErrors.js(38,9): error TS1005: ';' expected.
 plainJSGrammarErrors.js(46,25): error TS1005: '{' expected.
 plainJSGrammarErrors.js(46,33): error TS1005: ';' expected.
 plainJSGrammarErrors.js(46,35): error TS1005: ';' expected.
@@ -27,7 +22,7 @@ plainJSGrammarErrors.js(56,33): error TS1003: Identifier expected.
 plainJSGrammarErrors.js(56,34): error TS1003: Identifier expected.
 
 
-==== plainJSGrammarErrors.js (27 errors) ====
+==== plainJSGrammarErrors.js (22 errors) ====
     class C {
         // #private mistakes
         q = #unbound
@@ -76,20 +71,10 @@ plainJSGrammarErrors.js(56,34): error TS1003: Identifier expected.
     
         // accessor mistakes
         get incorporeal();
-            ~~~~~~~~~~~
-!!! error TS1005: ';' expected.
         get parametric(n) { return 1 }
-            ~~~~~~~~~~
-!!! error TS1005: ';' expected.
         set invariant() { }
-            ~~~~~~~~~
-!!! error TS1005: ';' expected.
         set binary(fst, snd) { }
-            ~~~~~~
-!!! error TS1005: ';' expected.
         set variable(...n) { }
-            ~~~~~~~~
-!!! error TS1005: ';' expected.
     
         // other
         "constructor" = 16

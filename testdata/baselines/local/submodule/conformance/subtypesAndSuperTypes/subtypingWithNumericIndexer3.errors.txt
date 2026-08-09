@@ -1,36 +1,36 @@
-subtypingWithNumericIndexer3.ts(8,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer3.ts(8,5): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer3.ts(8,7): error TS1005: ']' expected.
 subtypingWithNumericIndexer3.ts(8,15): error TS1005: ';' expected.
 subtypingWithNumericIndexer3.ts(8,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-subtypingWithNumericIndexer3.ts(12,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer3.ts(12,5): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer3.ts(12,7): error TS1005: ']' expected.
 subtypingWithNumericIndexer3.ts(12,15): error TS1005: ';' expected.
 subtypingWithNumericIndexer3.ts(12,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-subtypingWithNumericIndexer3.ts(16,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer3.ts(16,5): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer3.ts(16,7): error TS1005: ']' expected.
 subtypingWithNumericIndexer3.ts(16,15): error TS1005: ';' expected.
 subtypingWithNumericIndexer3.ts(16,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-subtypingWithNumericIndexer3.ts(21,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer3.ts(21,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer3.ts(21,11): error TS1005: ']' expected.
 subtypingWithNumericIndexer3.ts(21,19): error TS1005: ';' expected.
 subtypingWithNumericIndexer3.ts(21,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-subtypingWithNumericIndexer3.ts(25,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer3.ts(25,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer3.ts(25,11): error TS1005: ']' expected.
 subtypingWithNumericIndexer3.ts(25,19): error TS1005: ';' expected.
 subtypingWithNumericIndexer3.ts(25,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-subtypingWithNumericIndexer3.ts(29,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer3.ts(29,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer3.ts(29,11): error TS1005: ']' expected.
 subtypingWithNumericIndexer3.ts(29,19): error TS1005: ';' expected.
 subtypingWithNumericIndexer3.ts(29,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-subtypingWithNumericIndexer3.ts(33,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer3.ts(33,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer3.ts(33,11): error TS1005: ']' expected.
 subtypingWithNumericIndexer3.ts(33,19): error TS1005: ';' expected.
 subtypingWithNumericIndexer3.ts(33,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-subtypingWithNumericIndexer3.ts(37,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer3.ts(37,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer3.ts(37,11): error TS1005: ']' expected.
 subtypingWithNumericIndexer3.ts(37,19): error TS1005: ';' expected.
 subtypingWithNumericIndexer3.ts(37,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-subtypingWithNumericIndexer3.ts(41,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+subtypingWithNumericIndexer3.ts(41,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 subtypingWithNumericIndexer3.ts(41,11): error TS1005: ']' expected.
 subtypingWithNumericIndexer3.ts(41,19): error TS1005: ';' expected.
 subtypingWithNumericIndexer3.ts(41,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
@@ -46,7 +46,7 @@ subtypingWithNumericIndexer3.ts(41,19): error TS2564: Property ']' has no initia
     class A {
         [x: number]: Derived;
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -58,7 +58,7 @@ subtypingWithNumericIndexer3.ts(41,19): error TS2564: Property ']' has no initia
     class B extends A {
         [x: number]: Base; // error
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -70,7 +70,7 @@ subtypingWithNumericIndexer3.ts(41,19): error TS2564: Property ']' has no initia
     class B2 extends A {
         [x: number]: Derived2; // ok
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -83,7 +83,7 @@ subtypingWithNumericIndexer3.ts(41,19): error TS2564: Property ']' has no initia
         class A<T extends Derived> {
             [x: number]: T;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -95,7 +95,7 @@ subtypingWithNumericIndexer3.ts(41,19): error TS2564: Property ']' has no initia
         class B extends A<Base> {
             [x: number]: Derived; // error
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -107,7 +107,7 @@ subtypingWithNumericIndexer3.ts(41,19): error TS2564: Property ']' has no initia
         class B2 extends A<Derived> {
             [x: number]: Derived2; // ok
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -119,7 +119,7 @@ subtypingWithNumericIndexer3.ts(41,19): error TS2564: Property ']' has no initia
         class B3<T extends Derived> extends A<T> {
             [x: number]: Base; // error
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -131,7 +131,7 @@ subtypingWithNumericIndexer3.ts(41,19): error TS2564: Property ']' has no initia
         class B4<T extends Derived> extends A<T> {
             [x: number]: Derived; // error
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -143,7 +143,7 @@ subtypingWithNumericIndexer3.ts(41,19): error TS2564: Property ']' has no initia
         class B5<T extends Derived2> extends A<T> {
             [x: number]: Derived2; // error
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~

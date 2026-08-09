@@ -8,10 +8,10 @@ strictPropertyInitialization.ts(75,5): error TS2564: Property '#b' has no initia
 strictPropertyInitialization.ts(90,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 strictPropertyInitialization.ts(111,5): error TS2564: Property '#d' has no initializer and is not definitely assigned in the constructor.
 strictPropertyInitialization.ts(128,5): error TS2564: Property '#b' has no initializer and is not definitely assigned in the constructor.
-strictPropertyInitialization.ts(139,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
-strictPropertyInitialization.ts(140,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
-strictPropertyInitialization.ts(141,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
-strictPropertyInitialization.ts(155,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+strictPropertyInitialization.ts(139,5): error TS2564: Property '[a]' has no initializer and is not definitely assigned in the constructor.
+strictPropertyInitialization.ts(140,5): error TS2564: Property '[b]' has no initializer and is not definitely assigned in the constructor.
+strictPropertyInitialization.ts(141,5): error TS2564: Property '['c']' has no initializer and is not definitely assigned in the constructor.
+strictPropertyInitialization.ts(155,5): error TS2564: Property '[E.A]' has no initializer and is not definitely assigned in the constructor.
 
 
 ==== strictPropertyInitialization.ts (14 errors) ====
@@ -175,13 +175,13 @@ strictPropertyInitialization.ts(155,5): error TS2564: Property '' has no initial
     class C12 {
         [a]: number;
         ~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[a]' has no initializer and is not definitely assigned in the constructor.
         [b]: number;
         ~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[b]' has no initializer and is not definitely assigned in the constructor.
         ['c']: number;
         ~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '['c']' has no initializer and is not definitely assigned in the constructor.
     
         constructor() {
             this[a] = 1;
@@ -197,7 +197,7 @@ strictPropertyInitialization.ts(155,5): error TS2564: Property '' has no initial
     class C13 {
         [E.A]: number;
         ~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[E.A]' has no initializer and is not definitely assigned in the constructor.
         constructor() {
             this[E.A] = 1;
         }

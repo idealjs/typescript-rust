@@ -1,10 +1,8 @@
 derivedClassWithoutExplicitConstructor.ts(12,22): error TS2554: Expected 0 arguments, but got 1.
-derivedClassWithoutExplicitConstructor.ts(19,19): error TS2304: Cannot find name 'Date'.
 derivedClassWithoutExplicitConstructor.ts(25,16): error TS2554: Expected 0 arguments, but got 1.
-derivedClassWithoutExplicitConstructor.ts(25,20): error TS2304: Cannot find name 'Date'.
 
 
-==== derivedClassWithoutExplicitConstructor.ts (4 errors) ====
+==== derivedClassWithoutExplicitConstructor.ts (2 errors) ====
     class Base {
         a = 1;
         constructor(x: number) { this.a = x; }
@@ -26,8 +24,6 @@ derivedClassWithoutExplicitConstructor.ts(25,20): error TS2304: Cannot find name
     }
     
     class D<T extends Date> extends Base2<T> {
-                      ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         x = 2
         y: T = null;
     }
@@ -36,5 +32,3 @@ derivedClassWithoutExplicitConstructor.ts(25,20): error TS2304: Cannot find name
     var d2 = new D(new Date()); // ok
                    ~~~~~~~~~~
 !!! error TS2554: Expected 0 arguments, but got 1.
-                       ~~~~
-!!! error TS2304: Cannot find name 'Date'.

@@ -1,12 +1,12 @@
-privateIndexer.ts(4,13): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+privateIndexer.ts(4,13): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 privateIndexer.ts(4,15): error TS1005: ']' expected.
 privateIndexer.ts(4,23): error TS1005: ';' expected.
 privateIndexer.ts(4,23): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-privateIndexer.ts(8,13): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+privateIndexer.ts(8,13): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 privateIndexer.ts(8,15): error TS1005: ']' expected.
 privateIndexer.ts(8,23): error TS1005: ';' expected.
 privateIndexer.ts(8,23): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-privateIndexer.ts(12,13): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+privateIndexer.ts(12,13): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 privateIndexer.ts(12,15): error TS1005: ']' expected.
 privateIndexer.ts(12,23): error TS1005: ';' expected.
 privateIndexer.ts(12,23): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
@@ -18,7 +18,7 @@ privateIndexer.ts(12,23): error TS2564: Property ']' has no initializer and is n
     class C {
         private [x: string]: string;
                 ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
                   ~
 !!! error TS1005: ']' expected.
                           ~
@@ -30,7 +30,7 @@ privateIndexer.ts(12,23): error TS2564: Property ']' has no initializer and is n
     class D {
         private [x: number]: string;
                 ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
                   ~
 !!! error TS1005: ']' expected.
                           ~
@@ -42,7 +42,7 @@ privateIndexer.ts(12,23): error TS2564: Property ']' has no initializer and is n
     class E<T> {
         private [x: string]: T;
                 ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
                   ~
 !!! error TS1005: ']' expected.
                           ~

@@ -1,9 +1,7 @@
 anonymousClassAccessorsDeclarationEmit1.ts(15,16): error TS2304: Cannot find name 'B'.
-anonymousClassAccessorsDeclarationEmit1.ts(16,9): error TS1005: ';' expected.
-anonymousClassAccessorsDeclarationEmit1.ts(19,9): error TS1005: ';' expected.
 
 
-==== anonymousClassAccessorsDeclarationEmit1.ts (3 errors) ====
+==== anonymousClassAccessorsDeclarationEmit1.ts (1 errors) ====
     export abstract class Base {
       accessor a = 1;
     }
@@ -22,12 +20,8 @@ anonymousClassAccessorsDeclarationEmit1.ts(19,9): error TS1005: ';' expected.
                    ~
 !!! error TS2304: Cannot find name 'B'.
         get myName(): string {
-            ~~~~~~
-!!! error TS1005: ';' expected.
           return "B";
         }
         set myName(arg: string) {}
-            ~~~~~~
-!!! error TS1005: ';' expected.
       };
     }

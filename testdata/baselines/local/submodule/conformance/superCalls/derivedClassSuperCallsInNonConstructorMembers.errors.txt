@@ -3,21 +3,17 @@ derivedClassSuperCallsInNonConstructorMembers.ts(8,8): error TS2304: Cannot find
 derivedClassSuperCallsInNonConstructorMembers.ts(8,13): error TS1005: ';' expected.
 derivedClassSuperCallsInNonConstructorMembers.ts(8,14): error TS1005: ';' expected.
 derivedClassSuperCallsInNonConstructorMembers.ts(10,9): error TS2349: This expression is not callable.
-derivedClassSuperCallsInNonConstructorMembers.ts(12,9): error TS1005: ';' expected.
 derivedClassSuperCallsInNonConstructorMembers.ts(13,9): error TS2349: This expression is not callable.
-derivedClassSuperCallsInNonConstructorMembers.ts(16,9): error TS1005: ';' expected.
 derivedClassSuperCallsInNonConstructorMembers.ts(17,9): error TS2349: This expression is not callable.
 derivedClassSuperCallsInNonConstructorMembers.ts(20,15): error TS2304: Cannot find name 'super'.
 derivedClassSuperCallsInNonConstructorMembers.ts(20,20): error TS1005: ';' expected.
 derivedClassSuperCallsInNonConstructorMembers.ts(20,21): error TS1005: ';' expected.
 derivedClassSuperCallsInNonConstructorMembers.ts(22,9): error TS2349: This expression is not callable.
-derivedClassSuperCallsInNonConstructorMembers.ts(24,16): error TS1005: ';' expected.
 derivedClassSuperCallsInNonConstructorMembers.ts(25,9): error TS2349: This expression is not callable.
-derivedClassSuperCallsInNonConstructorMembers.ts(28,16): error TS1005: ';' expected.
 derivedClassSuperCallsInNonConstructorMembers.ts(29,9): error TS2349: This expression is not callable.
 
 
-==== derivedClassSuperCallsInNonConstructorMembers.ts (17 errors) ====
+==== derivedClassSuperCallsInNonConstructorMembers.ts (13 errors) ====
     // error to use super calls outside a constructor
     
     class Base {
@@ -40,16 +36,12 @@ derivedClassSuperCallsInNonConstructorMembers.ts(29,9): error TS2349: This expre
 !!! error TS2349: This expression is not callable.
         }
         get C() {
-            ~
-!!! error TS1005: ';' expected.
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.
             return 1;
         }
         set C(v) {
-            ~
-!!! error TS1005: ';' expected.
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.
@@ -68,16 +60,12 @@ derivedClassSuperCallsInNonConstructorMembers.ts(29,9): error TS2349: This expre
 !!! error TS2349: This expression is not callable.
         }
         static get C() {
-                   ~
-!!! error TS1005: ';' expected.
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.
             return 1;
         }
         static set C(v) {
-                   ~
-!!! error TS1005: ';' expected.
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.

@@ -1,11 +1,9 @@
-accessorsOverrideProperty9.ts(11,14): error TS1005: ';' expected.
+accessorsOverrideProperty9.ts(28,12): error TS2420: Class 'MixedClass' incorrectly implements interface '{ members: error }'.
 accessorsOverrideProperty9.ts(30,7): error TS2349: This expression is not callable.
-accessorsOverrideProperty9.ts(33,16): error TS1005: ';' expected.
 accessorsOverrideProperty9.ts(38,10): error TS2322: Type 'object' is not assignable to type 'TBaseClass & object'.
-accessorsOverrideProperty9.ts(44,14): error TS1005: ';' expected.
 
 
-==== accessorsOverrideProperty9.ts (5 errors) ====
+==== accessorsOverrideProperty9.ts (3 errors) ====
     // #41347, based on microsoft/rushstack
     
     // Mixin utilities
@@ -17,8 +15,6 @@ accessorsOverrideProperty9.ts(44,14): error TS1005: ';' expected.
     // Base class
     class ApiItem {
       public get members(): ReadonlyArray<ApiItem> {
-                 ~~~~~~~
-!!! error TS1005: ';' expected.
         return [];
       }
     }
@@ -36,20 +32,30 @@ accessorsOverrideProperty9.ts(44,14): error TS1005: ';' expected.
       baseClass: TBaseClass
     ): TBaseClass & (new (...args: any[]) => ApiItemContainerMixin) {
       abstract class MixedClass extends baseClass implements ApiItemContainerMixin {
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         public constructor(...args: any[]) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           super(...args);
+    ~~~~~~~~~~~~~~~~~~~~~
           ~~~~~
 !!! error TS2349: This expression is not callable.
         }
+    ~~~~~
+    
     
         public get members(): ReadonlyArray<ApiItem> {
-                   ~~~~~~~
-!!! error TS1005: ';' expected.
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           return [];
+    ~~~~~~~~~~~~~~~~
         }
+    ~~~~~
       }
+    ~~~
+    
     
       return MixedClass;
+    ~~
+!!! error TS2420: Class 'MixedClass' incorrectly implements interface '{ members: error }'.
              ~~~~~~~~~~
 !!! error TS2322: Type 'object' is not assignable to type 'TBaseClass & object'.
     }
@@ -58,8 +64,6 @@ accessorsOverrideProperty9.ts(44,14): error TS1005: ';' expected.
     export class ApiEnum extends ApiItemContainerMixin(ApiItem) {
       // This worked prior to TypeScript 4.0:
       public get members(): ReadonlyArray<ApiEnumMember> {
-                 ~~~~~~~
-!!! error TS1005: ';' expected.
         return [];
       }
     }

@@ -1,12 +1,10 @@
 comparisonOperatorWithIdenticalObjects.ts(2,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 comparisonOperatorWithIdenticalObjects.ts(3,12): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
 comparisonOperatorWithIdenticalObjects.ts(4,12): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
-comparisonOperatorWithIdenticalObjects.ts(6,15): error TS2304: Cannot find name 'Object'.
 comparisonOperatorWithIdenticalObjects.ts(8,16): error TS2322: Type 'null' is not assignable to type 'string'.
 comparisonOperatorWithIdenticalObjects.ts(12,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 comparisonOperatorWithIdenticalObjects.ts(13,12): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
 comparisonOperatorWithIdenticalObjects.ts(14,12): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
-comparisonOperatorWithIdenticalObjects.ts(16,15): error TS2304: Cannot find name 'Object'.
 comparisonOperatorWithIdenticalObjects.ts(18,16): error TS2322: Type 'null' is not assignable to type 'string'.
 comparisonOperatorWithIdenticalObjects.ts(23,13): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 comparisonOperatorWithIdenticalObjects.ts(25,16): error TS2322: Type 'null' is not assignable to type 'string'.
@@ -26,7 +24,7 @@ comparisonOperatorWithIdenticalObjects.ts(74,19): error TS1005: '>' expected.
 comparisonOperatorWithIdenticalObjects.ts(75,19): error TS1005: '>' expected.
 
 
-==== comparisonOperatorWithIdenticalObjects.ts (26 errors) ====
+==== comparisonOperatorWithIdenticalObjects.ts (24 errors) ====
     class A1 {
         public a: string;
                ~
@@ -39,8 +37,6 @@ comparisonOperatorWithIdenticalObjects.ts(75,19): error TS1005: '>' expected.
 !!! error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
         public d: any;
         public e: Object;
-                  ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         public fn(a: string): string {
             return null;
                    ~~~~
@@ -59,8 +55,6 @@ comparisonOperatorWithIdenticalObjects.ts(75,19): error TS1005: '>' expected.
 !!! error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
         public d: any;
         public e: Object;
-                  ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         public fn(b: string): string {
             return null;
                    ~~~~

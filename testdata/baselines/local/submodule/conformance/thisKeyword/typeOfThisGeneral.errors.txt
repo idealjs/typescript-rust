@@ -4,10 +4,8 @@ typeOfThisGeneral.ts(14,14): error TS1005: ',' expected.
 typeOfThisGeneral.ts(14,15): error TS1134: Variable declaration expected.
 typeOfThisGeneral.ts(18,14): error TS1005: ',' expected.
 typeOfThisGeneral.ts(18,15): error TS1134: Variable declaration expected.
-typeOfThisGeneral.ts(22,9): error TS1005: ';' expected.
 typeOfThisGeneral.ts(24,14): error TS1005: ',' expected.
 typeOfThisGeneral.ts(24,15): error TS1134: Variable declaration expected.
-typeOfThisGeneral.ts(27,9): error TS1005: ';' expected.
 typeOfThisGeneral.ts(29,14): error TS1005: ',' expected.
 typeOfThisGeneral.ts(29,15): error TS1134: Variable declaration expected.
 typeOfThisGeneral.ts(37,14): error TS1005: ',' expected.
@@ -18,11 +16,9 @@ typeOfThisGeneral.ts(42,24): error TS1005: ',' expected.
 typeOfThisGeneral.ts(48,14): error TS1005: ',' expected.
 typeOfThisGeneral.ts(48,15): error TS1134: Variable declaration expected.
 typeOfThisGeneral.ts(48,24): error TS1005: ',' expected.
-typeOfThisGeneral.ts(53,16): error TS1005: ';' expected.
 typeOfThisGeneral.ts(56,14): error TS1005: ',' expected.
 typeOfThisGeneral.ts(56,15): error TS1134: Variable declaration expected.
 typeOfThisGeneral.ts(56,24): error TS1005: ',' expected.
-typeOfThisGeneral.ts(61,16): error TS1005: ';' expected.
 typeOfThisGeneral.ts(64,14): error TS1005: ',' expected.
 typeOfThisGeneral.ts(64,15): error TS1134: Variable declaration expected.
 typeOfThisGeneral.ts(64,24): error TS1005: ',' expected.
@@ -36,12 +32,10 @@ typeOfThisGeneral.ts(87,14): error TS1005: ',' expected.
 typeOfThisGeneral.ts(87,15): error TS1134: Variable declaration expected.
 typeOfThisGeneral.ts(87,35): error TS1005: ',' expected.
 typeOfThisGeneral.ts(87,40): error TS1005: ',' expected.
-typeOfThisGeneral.ts(91,9): error TS1005: ';' expected.
 typeOfThisGeneral.ts(93,14): error TS1005: ',' expected.
 typeOfThisGeneral.ts(93,15): error TS1134: Variable declaration expected.
 typeOfThisGeneral.ts(93,35): error TS1005: ',' expected.
 typeOfThisGeneral.ts(93,40): error TS1005: ',' expected.
-typeOfThisGeneral.ts(96,9): error TS1005: ';' expected.
 typeOfThisGeneral.ts(98,14): error TS1005: ',' expected.
 typeOfThisGeneral.ts(98,15): error TS1134: Variable declaration expected.
 typeOfThisGeneral.ts(98,35): error TS1005: ',' expected.
@@ -56,11 +50,9 @@ typeOfThisGeneral.ts(111,24): error TS1005: ',' expected.
 typeOfThisGeneral.ts(117,14): error TS1005: ',' expected.
 typeOfThisGeneral.ts(117,15): error TS1134: Variable declaration expected.
 typeOfThisGeneral.ts(117,24): error TS1005: ',' expected.
-typeOfThisGeneral.ts(122,16): error TS1005: ';' expected.
 typeOfThisGeneral.ts(125,14): error TS1005: ',' expected.
 typeOfThisGeneral.ts(125,15): error TS1134: Variable declaration expected.
 typeOfThisGeneral.ts(125,24): error TS1005: ',' expected.
-typeOfThisGeneral.ts(130,16): error TS1005: ';' expected.
 typeOfThisGeneral.ts(133,14): error TS1005: ',' expected.
 typeOfThisGeneral.ts(133,15): error TS1134: Variable declaration expected.
 typeOfThisGeneral.ts(133,24): error TS1005: ',' expected.
@@ -83,7 +75,7 @@ typeOfThisGeneral.ts(173,7): error TS1134: Variable declaration expected.
 typeOfThisGeneral.ts(173,16): error TS1005: ',' expected.
 
 
-==== typeOfThisGeneral.ts (83 errors) ====
+==== typeOfThisGeneral.ts (75 errors) ====
     class MyTestClass {
         private canary: number;
         static staticCanary: number;
@@ -118,8 +110,6 @@ typeOfThisGeneral.ts(173,16): error TS1005: ',' expected.
     
         //type of 'this' in member accessor(get and set) body is the class instance type
         get prop() {
-            ~~~~
-!!! error TS1005: ';' expected.
             var p = this;
             var p!: MyTestClass;
                  ~
@@ -129,8 +119,6 @@ typeOfThisGeneral.ts(173,16): error TS1005: ',' expected.
             return this;
         }
         set prop(v) {
-            ~~~~
-!!! error TS1005: ';' expected.
             var p = this;
             var p!: MyTestClass;
                  ~
@@ -177,8 +165,6 @@ typeOfThisGeneral.ts(173,16): error TS1005: ',' expected.
         }
     
         static get staticProp() {
-                   ~~~~~~~~~~
-!!! error TS1005: ';' expected.
             //type of 'this' in static accessor body is constructor function type
             var p = this;
             var p!: typeof MyTestClass;
@@ -193,8 +179,6 @@ typeOfThisGeneral.ts(173,16): error TS1005: ',' expected.
             return this;
         }
         static set staticProp(v: typeof MyTestClass) {
-                   ~~~~~~~~~~
-!!! error TS1005: ';' expected.
             //type of 'this' in static accessor body is constructor function type
             var p = this;
             var p!: typeof MyTestClass;
@@ -251,8 +235,6 @@ typeOfThisGeneral.ts(173,16): error TS1005: ',' expected.
     
         //type of 'this' in member accessor(get and set) body is the class instance type
         get prop() {
-            ~~~~
-!!! error TS1005: ';' expected.
             var p = this;
             var p!: MyGenericTestClass<T, U>;
                  ~
@@ -266,8 +248,6 @@ typeOfThisGeneral.ts(173,16): error TS1005: ',' expected.
             return this;
         }
         set prop(v) {
-            ~~~~
-!!! error TS1005: ';' expected.
             var p = this;
             var p!: MyGenericTestClass<T, U>;
                  ~
@@ -322,8 +302,6 @@ typeOfThisGeneral.ts(173,16): error TS1005: ',' expected.
         }
     
         static get staticProp() {
-                   ~~~~~~~~~~
-!!! error TS1005: ';' expected.
             //type of 'this' in static accessor body is constructor function type
             var p = this;
             var p!: typeof MyGenericTestClass;
@@ -338,8 +316,6 @@ typeOfThisGeneral.ts(173,16): error TS1005: ',' expected.
             return this;
         }
         static set staticProp(v: typeof MyGenericTestClass) {
-                   ~~~~~~~~~~
-!!! error TS1005: ';' expected.
             //type of 'this' in static accessor body is constructor function type
             var p = this;
             var p!: typeof MyGenericTestClass;

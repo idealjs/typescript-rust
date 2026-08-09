@@ -1,16 +1,16 @@
-assignmentCompatWithStringIndexer.ts(8,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithStringIndexer.ts(8,5): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithStringIndexer.ts(8,7): error TS1005: ']' expected.
 assignmentCompatWithStringIndexer.ts(8,15): error TS1005: ';' expected.
 assignmentCompatWithStringIndexer.ts(8,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-assignmentCompatWithStringIndexer.ts(23,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithStringIndexer.ts(23,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithStringIndexer.ts(23,11): error TS1005: ']' expected.
 assignmentCompatWithStringIndexer.ts(23,19): error TS1005: ';' expected.
 assignmentCompatWithStringIndexer.ts(23,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-assignmentCompatWithStringIndexer.ts(27,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithStringIndexer.ts(27,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithStringIndexer.ts(27,11): error TS1005: ']' expected.
 assignmentCompatWithStringIndexer.ts(27,19): error TS1005: ';' expected.
 assignmentCompatWithStringIndexer.ts(27,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-assignmentCompatWithStringIndexer.ts(36,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithStringIndexer.ts(36,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithStringIndexer.ts(36,11): error TS1005: ']' expected.
 assignmentCompatWithStringIndexer.ts(36,19): error TS1005: ';' expected.
 assignmentCompatWithStringIndexer.ts(36,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
@@ -26,7 +26,7 @@ assignmentCompatWithStringIndexer.ts(36,19): error TS2564: Property ']' has no i
     class A {
         [x: string]: Base;
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -49,7 +49,7 @@ assignmentCompatWithStringIndexer.ts(36,19): error TS2564: Property ']' has no i
         class A<T extends Base> {
             [x: string]: T;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -61,7 +61,7 @@ assignmentCompatWithStringIndexer.ts(36,19): error TS2564: Property ']' has no i
         class B extends A<Base> {
             [x: string]: Derived; // ok
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -78,7 +78,7 @@ assignmentCompatWithStringIndexer.ts(36,19): error TS2564: Property ']' has no i
         class B2 extends A<Base> {
             [x: string]: Derived2; // ok
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~

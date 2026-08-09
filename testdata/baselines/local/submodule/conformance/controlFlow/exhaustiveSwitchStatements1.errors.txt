@@ -1,12 +1,8 @@
 exhaustiveSwitchStatements1.ts(1,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
 exhaustiveSwitchStatements1.ts(20,5): error TS2454: Variable 'z' is used before being assigned.
-exhaustiveSwitchStatements1.ts(28,28): error TS2304: Cannot find name 'Error'.
+exhaustiveSwitchStatements1.ts(28,28): error TS2351: This expression is not constructable.
 exhaustiveSwitchStatements1.ts(36,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
 exhaustiveSwitchStatements1.ts(43,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
-exhaustiveSwitchStatements1.ts(70,31): error TS2304: Cannot find name 'Math'.
-exhaustiveSwitchStatements1.ts(71,33): error TS2304: Cannot find name 'Math'.
-exhaustiveSwitchStatements1.ts(82,35): error TS2304: Cannot find name 'Math'.
-exhaustiveSwitchStatements1.ts(83,37): error TS2304: Cannot find name 'Math'.
 exhaustiveSwitchStatements1.ts(102,9): error TS2454: Variable 's' is used before being assigned.
 exhaustiveSwitchStatements1.ts(112,9): error TS2454: Variable 's' is used before being assigned.
 exhaustiveSwitchStatements1.ts(115,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
@@ -17,7 +13,7 @@ exhaustiveSwitchStatements1.ts(194,12): error TS2454: Variable 'x' is used befor
 exhaustiveSwitchStatements1.ts(203,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
 
 
-==== exhaustiveSwitchStatements1.ts (17 errors) ====
+==== exhaustiveSwitchStatements1.ts (13 errors) ====
     function f1(x: 1 | 2): string {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         if (!!true) {
@@ -64,7 +60,7 @@ exhaustiveSwitchStatements1.ts(203,1): error TS2366: Function lacks ending retur
             // Default considered reachable to allow defensive coding
             default: throw new Error("Bad input");
                                ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
+!!! error TS2351: This expression is not constructable.
         }
     }
     
@@ -130,11 +126,7 @@ exhaustiveSwitchStatements1.ts(203,1): error TS2366: Function lacks ending retur
             case "square": area = s.size * s.size; break;
             case "rectangle": area = s.width * s.height; break;
             case "circle": area = Math.PI * s.radius * s.radius; break;
-                                  ~~~~
-!!! error TS2304: Cannot find name 'Math'.
             case "triangle": area = Math.sqrt(3) / 4 * s.side * s.side; break;
-                                    ~~~~
-!!! error TS2304: Cannot find name 'Math'.
         }
         return area;
     }
@@ -146,11 +138,7 @@ exhaustiveSwitchStatements1.ts(203,1): error TS2366: Function lacks ending retur
                 case "square": return s.size * s.size;
                 case "rectangle": return s.width * s.height;
                 case "circle": return Math.PI * s.radius * s.radius;
-                                      ~~~~
-!!! error TS2304: Cannot find name 'Math'.
                 case "triangle": return Math.sqrt(3) / 4 * s.side * s.side;
-                                        ~~~~
-!!! error TS2304: Cannot find name 'Math'.
             }
         })();
         return area;

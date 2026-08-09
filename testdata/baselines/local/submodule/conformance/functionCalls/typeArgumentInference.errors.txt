@@ -33,16 +33,13 @@ typeArgumentInference.ts(68,29): error TS2345: Argument of type '0' is not assig
 typeArgumentInference.ts(68,32): error TS2345: Argument of type 'any[]' is not assignable to parameter of type 'string'.
 typeArgumentInference.ts(70,54): error TS2345: Argument of type '{ a: 0 }' is not assignable to parameter of type 'null | null'.
 typeArgumentInference.ts(70,64): error TS2345: Argument of type '{ b: "" }' is not assignable to parameter of type 'null | null'.
-typeArgumentInference.ts(80,9): error TS2304: Cannot find name 'Date'.
 typeArgumentInference.ts(82,36): error TS2345: Argument of type '{ x: 6; z: any }' is not assignable to parameter of type 'undefined | undefined'.
-typeArgumentInference.ts(82,51): error TS2304: Cannot find name 'Date'.
 typeArgumentInference.ts(82,61): error TS2345: Argument of type '{ x: 6; y: "" }' is not assignable to parameter of type 'undefined | undefined'.
 typeArgumentInference.ts(84,41): error TS2345: Argument of type '{ x: 6; z: any }' is not assignable to parameter of type 'undefined | undefined'.
-typeArgumentInference.ts(84,56): error TS2304: Cannot find name 'Date'.
 typeArgumentInference.ts(84,66): error TS2345: Argument of type '{ x: 6; y: "" }' is not assignable to parameter of type 'undefined | undefined'.
 
 
-==== typeArgumentInference.ts (42 errors) ====
+==== typeArgumentInference.ts (39 errors) ====
     // Generic call with no parameters
     function noParams<T>() { }
     noParams();
@@ -193,22 +190,16 @@ typeArgumentInference.ts(84,66): error TS2345: Argument of type '{ x: 6; y: "" }
     interface A92 {
         x: number;
         z?: Date;
-            ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     }
     var a9e = someGenerics9(undefined, { x: 6, z: new Date() }, { x: 6, y: '' });
                                        ~~~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2345: Argument of type '{ x: 6; z: any }' is not assignable to parameter of type 'undefined | undefined'.
-                                                      ~~~~
-!!! error TS2304: Cannot find name 'Date'.
                                                                 ~~~~~~~~~~~~~~~
 !!! error TS2345: Argument of type '{ x: 6; y: "" }' is not assignable to parameter of type 'undefined | undefined'.
     var a9e: {};
     var a9f = someGenerics9<A92>(undefined, { x: 6, z: new Date() }, { x: 6, y: '' });
                                             ~~~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2345: Argument of type '{ x: 6; z: any }' is not assignable to parameter of type 'undefined | undefined'.
-                                                           ~~~~
-!!! error TS2304: Cannot find name 'Date'.
                                                                      ~~~~~~~~~~~~~~~
 !!! error TS2345: Argument of type '{ x: 6; y: "" }' is not assignable to parameter of type 'undefined | undefined'.
     var a9f: A92;

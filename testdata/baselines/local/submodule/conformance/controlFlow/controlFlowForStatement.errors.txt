@@ -6,7 +6,6 @@ controlFlowForStatement.ts(17,23): error TS2339: Property 'toExponential' does n
 controlFlowForStatement.ts(18,9): error TS2454: Variable 'x' is used before being assigned.
 controlFlowForStatement.ts(23,25): error TS2454: Variable 'x' is used before being assigned.
 controlFlowForStatement.ts(24,9): error TS2454: Variable 'x' is used before being assigned.
-controlFlowForStatement.ts(28,40): error TS2304: Cannot find name 'RegExp'.
 controlFlowForStatement.ts(29,30): error TS2454: Variable 'x' is used before being assigned.
 controlFlowForStatement.ts(30,9): error TS2454: Variable 'x' is used before being assigned.
 controlFlowForStatement.ts(35,19): error TS2454: Variable 'x' is used before being assigned.
@@ -15,7 +14,7 @@ controlFlowForStatement.ts(37,20): error TS2454: Variable 'x' is used before bei
 controlFlowForStatement.ts(40,5): error TS2454: Variable 'x' is used before being assigned.
 
 
-==== controlFlowForStatement.ts (15 errors) ====
+==== controlFlowForStatement.ts (14 errors) ====
     declare let cond: boolean;
     function a() {
         let x: string | number | boolean;
@@ -60,8 +59,6 @@ controlFlowForStatement.ts(40,5): error TS2454: Variable 'x' is used before bein
     }
     function e() {
         let x: string | number | boolean | RegExp;
-                                           ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
         for (x = "" || 0; typeof x !== "string"; x = "" || true) {
                                  ~
 !!! error TS2454: Variable 'x' is used before being assigned.

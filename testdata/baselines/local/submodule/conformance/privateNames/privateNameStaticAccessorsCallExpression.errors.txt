@@ -1,9 +1,10 @@
-privateNameStaticAccessorsCallExpression.ts(2,16): error TS1005: ';' expected.
-privateNameStaticAccessorsCallExpression.ts(3,16): error TS1005: ';' expected.
 privateNameStaticAccessorsCallExpression.ts(4,12): error TS1005: ';' expected.
-privateNameStaticAccessorsCallExpression.ts(9,13): error TS2351: This expression is not constructable.
-privateNameStaticAccessorsCallExpression.ts(12,32): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
-privateNameStaticAccessorsCallExpression.ts(13,23): error TS2351: This expression is not constructable.
+privateNameStaticAccessorsCallExpression.ts(6,14): error TS2339: Property '#fieldFunc' does not exist on type '{ static: any; #x: 1; middle$: any; {: any; 2: any }'.
+privateNameStaticAccessorsCallExpression.ts(7,27): error TS2339: Property '#fieldFunc' does not exist on type '{ static: any; #x: 1; middle$: any; {: any; 2: any }'.
+privateNameStaticAccessorsCallExpression.ts(9,18): error TS2339: Property '#fieldFunc' does not exist on type '{ static: any; #x: 1; middle$: any; {: any; 2: any }'.
+privateNameStaticAccessorsCallExpression.ts(12,14): error TS2339: Property '#fieldFunc2' does not exist on type '{ static: any; #x: 1; middle$: any; {: any; 2: any }'.
+privateNameStaticAccessorsCallExpression.ts(13,28): error TS2339: Property '#fieldFunc2' does not exist on type '{ static: any; #x: 1; middle$: any; {: any; 2: any }'.
+privateNameStaticAccessorsCallExpression.ts(14,26): error TS2339: Property '#fieldFunc2' does not exist on type '{ static: any; #x: 1; middle$: any; {: any; 2: any }'.
 privateNameStaticAccessorsCallExpression.ts(14,37): error TS1005: ',' expected.
 privateNameStaticAccessorsCallExpression.ts(14,44): error TS1134: Variable declaration expected.
 privateNameStaticAccessorsCallExpression.ts(14,53): error TS1005: ';' expected.
@@ -18,33 +19,35 @@ privateNameStaticAccessorsCallExpression.ts(15,49): error TS1005: ';' expected.
 privateNameStaticAccessorsCallExpression.ts(15,52): error TS1160: Unterminated template literal.
 
 
-==== privateNameStaticAccessorsCallExpression.ts (18 errors) ====
+==== privateNameStaticAccessorsCallExpression.ts (19 errors) ====
     class A {
         static get #fieldFunc() {  return function() { A.#x = 10; } }
-                   ~~~~~~~~~~
-!!! error TS1005: ';' expected.
         static get #fieldFunc2() { return  function(a, ...b) {}; }
-                   ~~~~~~~~~~~
-!!! error TS1005: ';' expected.
         static #x = 1;
                ~~
 !!! error TS1005: ';' expected.
         static test() {
             this.#fieldFunc();
+                 ~~~~~~~~~~
+!!! error TS2339: Property '#fieldFunc' does not exist on type '{ static: any; #x: 1; middle$: any; {: any; 2: any }'.
             const func = this.#fieldFunc;
+                              ~~~~~~~~~~
+!!! error TS2339: Property '#fieldFunc' does not exist on type '{ static: any; #x: 1; middle$: any; {: any; 2: any }'.
             func();
             new this.#fieldFunc();
-                ~~~~~~~~~~~~~~~
-!!! error TS2351: This expression is not constructable.
+                     ~~~~~~~~~~
+!!! error TS2339: Property '#fieldFunc' does not exist on type '{ static: any; #x: 1; middle$: any; {: any; 2: any }'.
     
             const arr = [ 1, 2 ];
             this.#fieldFunc2(0, ...arr, 3);
-                                   ~~~
-!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+                 ~~~~~~~~~~~
+!!! error TS2339: Property '#fieldFunc2' does not exist on type '{ static: any; #x: 1; middle$: any; {: any; 2: any }'.
             const b = new this.#fieldFunc2(0, ...arr, 3);
-                          ~~~~~~~~~~~~~~~~
-!!! error TS2351: This expression is not constructable.
+                               ~~~~~~~~~~~
+!!! error TS2339: Property '#fieldFunc2' does not exist on type '{ static: any; #x: 1; middle$: any; {: any; 2: any }'.
             const str = this.#fieldFunc2`head${1}middle${2}tail`;
+                             ~~~~~~~~~~~
+!!! error TS2339: Property '#fieldFunc2' does not exist on type '{ static: any; #x: 1; middle$: any; {: any; 2: any }'.
                                         ~~~~~~~
 !!! error TS1005: ',' expected.
                                                ~

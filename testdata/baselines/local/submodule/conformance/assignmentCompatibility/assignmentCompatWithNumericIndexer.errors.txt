@@ -1,12 +1,12 @@
-assignmentCompatWithNumericIndexer.ts(8,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithNumericIndexer.ts(8,5): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithNumericIndexer.ts(8,7): error TS1005: ']' expected.
 assignmentCompatWithNumericIndexer.ts(8,15): error TS1005: ';' expected.
 assignmentCompatWithNumericIndexer.ts(8,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-assignmentCompatWithNumericIndexer.ts(22,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithNumericIndexer.ts(22,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithNumericIndexer.ts(22,11): error TS1005: ']' expected.
 assignmentCompatWithNumericIndexer.ts(22,19): error TS1005: ';' expected.
 assignmentCompatWithNumericIndexer.ts(22,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-assignmentCompatWithNumericIndexer.ts(26,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithNumericIndexer.ts(26,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithNumericIndexer.ts(26,11): error TS1005: ']' expected.
 assignmentCompatWithNumericIndexer.ts(26,19): error TS1005: ';' expected.
 assignmentCompatWithNumericIndexer.ts(26,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
@@ -31,7 +31,7 @@ assignmentCompatWithNumericIndexer.ts(31,29): error TS1005: ',' expected.
     class A {
         [x: number]: Base;
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -53,7 +53,7 @@ assignmentCompatWithNumericIndexer.ts(31,29): error TS1005: ',' expected.
         class A<T extends Base> {
             [x: number]: T;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~
@@ -65,7 +65,7 @@ assignmentCompatWithNumericIndexer.ts(31,29): error TS1005: ',' expected.
         class B extends A<Base> {
             [x: number]: Derived; // ok
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~

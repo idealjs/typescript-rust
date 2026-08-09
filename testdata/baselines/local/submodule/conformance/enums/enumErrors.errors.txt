@@ -1,6 +1,3 @@
-enumErrors.ts(9,13): error TS2304: Cannot find name 'Number'.
-enumErrors.ts(27,13): error TS2304: Cannot find name 'Date'.
-enumErrors.ts(36,13): error TS2304: Cannot find name 'Date'.
 enumErrors.ts(48,18): error TS1005: ',' expected.
 enumErrors.ts(49,5): error TS1005: ',' expected.
 enumErrors.ts(49,24): error TS1005: ',' expected.
@@ -15,7 +12,7 @@ enumErrors.ts(53,30): error TS1005: ',' expected.
 enumErrors.ts(53,33): error TS1005: ',' expected.
 
 
-==== enumErrors.ts (15 errors) ====
+==== enumErrors.ts (12 errors) ====
     // Enum named with PredefinedTypes
     enum any { }
     enum number { }
@@ -25,8 +22,6 @@ enumErrors.ts(53,33): error TS1005: ',' expected.
     // Enum with computed member initializer of type Number
     enum E5 {
         C = new Number(30)
-                ~~~~~~
-!!! error TS2304: Cannot find name 'Number'.
     }
     
     enum E9 {
@@ -45,8 +40,6 @@ enumErrors.ts(53,33): error TS1005: ',' expected.
     enum E11 {
         A = true,
         B = new Date(),
-                ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         C = window,
         D = {},
         E = (() => 'foo')(),
@@ -56,8 +49,6 @@ enumErrors.ts(53,33): error TS1005: ',' expected.
     enum E12 {
         A = '',
         B = new Date(),
-                ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         C = window,
         D = {},
         E = 1 + 1,

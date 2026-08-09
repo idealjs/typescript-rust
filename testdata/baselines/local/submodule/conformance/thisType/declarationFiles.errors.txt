@@ -1,12 +1,10 @@
-declarationFiles.ts(8,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+declarationFiles.ts(8,5): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 declarationFiles.ts(8,7): error TS1005: ']' expected.
 declarationFiles.ts(8,15): error TS1005: ';' expected.
 declarationFiles.ts(17,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 declarationFiles.ts(18,5): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
 declarationFiles.ts(19,5): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
-declarationFiles.ts(19,15): error TS2304: Cannot find name 'Date'.
 declarationFiles.ts(20,5): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
-declarationFiles.ts(20,15): error TS2304: Cannot find name 'Date'.
 declarationFiles.ts(22,5): error TS2564: Property 'f' has no initializer and is not definitely assigned in the constructor.
 declarationFiles.ts(23,5): error TS2564: Property 'g' has no initializer and is not definitely assigned in the constructor.
 declarationFiles.ts(24,5): error TS2564: Property 'h' has no initializer and is not definitely assigned in the constructor.
@@ -14,7 +12,7 @@ declarationFiles.ts(25,5): error TS2564: Property 'i' has no initializer and is 
 declarationFiles.ts(26,5): error TS2564: Property 'j' has no initializer and is not definitely assigned in the constructor.
 
 
-==== declarationFiles.ts (14 errors) ====
+==== declarationFiles.ts (12 errors) ====
     class C1 {
         x: this;
         f(x: this): this { return undefined; }
@@ -24,7 +22,7 @@ declarationFiles.ts(26,5): error TS2564: Property 'j' has no initializer and is 
     class C2 {
         [x: string]: this;
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -46,13 +44,9 @@ declarationFiles.ts(26,5): error TS2564: Property 'j' has no initializer and is 
         c: this | Date;
         ~
 !!! error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
-                  ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         d: this & Date;
         ~
 !!! error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
-                  ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         e: (((this)));
         f: (x: this) => this;
         ~

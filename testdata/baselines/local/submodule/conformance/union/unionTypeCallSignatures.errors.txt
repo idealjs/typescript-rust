@@ -1,4 +1,3 @@
-unionTypeCallSignatures.ts(2,33): error TS2304: Cannot find name 'Date'.
 unionTypeCallSignatures.ts(9,13): error TS2349: This expression is not callable.
 unionTypeCallSignatures.ts(10,16): error TS2349: This expression is not callable.
 unionTypeCallSignatures.ts(14,13): error TS2349: This expression is not callable.
@@ -45,11 +44,9 @@ unionTypeCallSignatures.ts(74,12): error TS2349: This expression is not callable
 unionTypeCallSignatures.ts(75,12): error TS2349: This expression is not callable.
 
 
-==== unionTypeCallSignatures.ts (45 errors) ====
+==== unionTypeCallSignatures.ts (44 errors) ====
     ﻿// @target: es2015
     declare var numOrDate: number | Date;
-                                 ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     declare var strOrBoolean: string | boolean;
     declare var strOrNum: string | number;
     

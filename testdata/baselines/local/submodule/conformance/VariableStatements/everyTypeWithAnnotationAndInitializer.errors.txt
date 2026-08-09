@@ -2,13 +2,9 @@ everyTypeWithAnnotationAndInitializer.ts(6,5): error TS2564: Property 'id' has n
 everyTypeWithAnnotationAndInitializer.ts(10,5): error TS2564: Property 'source' has no initializer and is not definitely assigned in the constructor.
 everyTypeWithAnnotationAndInitializer.ts(19,9): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 everyTypeWithAnnotationAndInitializer.ts(22,54): error TS2339: Property 'toString' does not exist on type 'number'.
-everyTypeWithAnnotationAndInitializer.ts(27,12): error TS2304: Cannot find name 'Date'.
-everyTypeWithAnnotationAndInitializer.ts(27,23): error TS2304: Cannot find name 'Date'.
-everyTypeWithAnnotationAndInitializer.ts(28,15): error TS2304: Cannot find name 'Object'.
-everyTypeWithAnnotationAndInitializer.ts(28,28): error TS2304: Cannot find name 'Object'.
 
 
-==== everyTypeWithAnnotationAndInitializer.ts (8 errors) ====
+==== everyTypeWithAnnotationAndInitializer.ts (4 errors) ====
     interface I {
         id: number;
     }
@@ -44,15 +40,7 @@ everyTypeWithAnnotationAndInitializer.ts(28,28): error TS2304: Cannot find name 
     var aNumber: number = 9.9;
     var aString: string = 'this is a string';
     var aDate: Date = new Date(12);
-               ~~~~
-!!! error TS2304: Cannot find name 'Date'.
-                          ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     var anObject: Object = new Object();
-                  ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
-                               ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     
     var anAny: any = null;
     var aSecondAny: any = undefined;

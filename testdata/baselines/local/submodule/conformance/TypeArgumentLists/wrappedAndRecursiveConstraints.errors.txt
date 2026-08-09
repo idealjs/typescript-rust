@@ -1,13 +1,10 @@
-wrappedAndRecursiveConstraints.ts(3,19): error TS2304: Cannot find name 'Date'.
 wrappedAndRecursiveConstraints.ts(5,25): error TS2304: Cannot find name 'U'.
 
 
-==== wrappedAndRecursiveConstraints.ts (2 errors) ====
+==== wrappedAndRecursiveConstraints.ts (1 errors) ====
     // no errors expected
     
     class C<T extends Date> {
-                      ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         constructor(public data: T) { }
         foo<U extends T>(x: U) {
                             ~

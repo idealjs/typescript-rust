@@ -1,6 +1,5 @@
 for-inStatementsInvalid.ts(2,19): error TS1005: ';' expected.
 for-inStatementsInvalid.ts(5,20): error TS1005: ';' expected.
-for-inStatementsInvalid.ts(7,14): error TS2304: Cannot find name 'RegExp'.
 for-inStatementsInvalid.ts(8,19): error TS1005: ';' expected.
 for-inStatementsInvalid.ts(13,15): error TS2349: This expression is not callable.
 for-inStatementsInvalid.ts(24,23): error TS2304: Cannot find name 'T'.
@@ -8,7 +7,7 @@ for-inStatementsInvalid.ts(37,28): error TS2339: Property 'baz' does not exist o
 for-inStatementsInvalid.ts(38,28): error TS2339: Property 'baz' does not exist on type '{ biz: () => number }'.
 
 
-==== for-inStatementsInvalid.ts (8 errors) ====
+==== for-inStatementsInvalid.ts (7 errors) ====
     var aNumber: number;
     for (aNumber in {}) { }
                       ~
@@ -20,8 +19,6 @@ for-inStatementsInvalid.ts(38,28): error TS2339: Property 'baz' does not exist o
 !!! error TS1005: ';' expected.
     
     var aRegExp: RegExp;
-                 ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
     for (aRegExp in {}) { }
                       ~
 !!! error TS1005: ';' expected.

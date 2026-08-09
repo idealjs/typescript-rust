@@ -1,5 +1,3 @@
-taggedTemplateContextualTyping1.ts(3,36): error TS2304: Cannot find name 'TemplateStringsArray'.
-taggedTemplateContextualTyping1.ts(4,36): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateContextualTyping1.ts(6,12): error TS2322: Type 'undefined' is not assignable to type 'T'.
 taggedTemplateContextualTyping1.ts(13,10): error TS1005: ';' expected.
 taggedTemplateContextualTyping1.ts(14,10): error TS1005: ';' expected.
@@ -7,15 +5,11 @@ taggedTemplateContextualTyping1.ts(15,10): error TS1005: ';' expected.
 taggedTemplateContextualTyping1.ts(16,10): error TS1005: ';' expected.
 
 
-==== taggedTemplateContextualTyping1.ts (7 errors) ====
+==== taggedTemplateContextualTyping1.ts (5 errors) ====
     type FuncType = (x: <T>(p: T) => T) => typeof x;
     
     function tempTag1<T>(templateStrs: TemplateStringsArray, f: FuncType, x: T): T;
-                                       ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     function tempTag1<T>(templateStrs: TemplateStringsArray, f: FuncType, h: FuncType, x: T): T;
-                                       ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     function tempTag1<T>(...rest: any[]): T {
         return undefined;
                ~~~~~~~~~

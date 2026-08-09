@@ -1,9 +1,7 @@
 emitClassDeclarationWithTypeArgumentInES6.ts(3,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-emitClassDeclarationWithTypeArgumentInES6.ts(9,9): error TS1005: ';' expected.
-emitClassDeclarationWithTypeArgumentInES6.ts(12,9): error TS1005: ';' expected.
 
 
-==== emitClassDeclarationWithTypeArgumentInES6.ts (3 errors) ====
+==== emitClassDeclarationWithTypeArgumentInES6.ts (1 errors) ====
     ﻿// @target: es6
     class B<T> {
         x: T;
@@ -15,13 +13,9 @@ emitClassDeclarationWithTypeArgumentInES6.ts(12,9): error TS1005: ';' expected.
             return this.x;
         }
         get BB(): T {
-         ~~
-!!! error TS1005: ';' expected.
             return this.B;
         }
         set BBWith(c: T) {
-         ~~~~~~
-!!! error TS1005: ';' expected.
             this.B = c;
         }
     }

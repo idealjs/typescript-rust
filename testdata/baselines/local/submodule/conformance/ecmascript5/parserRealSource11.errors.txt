@@ -16,7 +16,7 @@ parserRealSource11.ts(51,22): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(53,22): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(54,22): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(55,22): error TS2304: Cannot find name 'NodeType'.
-parserRealSource11.ts(59,31): error TS2304: Cannot find name 'Error'.
+parserRealSource11.ts(59,31): error TS2351: This expression is not constructable.
 parserRealSource11.ts(64,30): error TS2304: Cannot find name 'Emitter'.
 parserRealSource11.ts(64,48): error TS2304: Cannot find name 'TokenID'.
 parserRealSource11.ts(66,26): error TS2339: Property 'nodeType' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any }'.
@@ -32,7 +32,7 @@ parserRealSource11.ts(99,22): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(100,22): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(103,22): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(108,22): error TS2304: Cannot find name 'NodeType'.
-parserRealSource11.ts(114,31): error TS2304: Cannot find name 'Error'.
+parserRealSource11.ts(114,31): error TS2351: This expression is not constructable.
 parserRealSource11.ts(119,31): error TS2304: Cannot find name 'PrintContext'.
 parserRealSource11.ts(130,17): error TS2304: Cannot find name 'hasFlag'.
 parserRealSource11.ts(130,37): error TS2304: Cannot find name 'ASTFlags'.
@@ -47,7 +47,6 @@ parserRealSource11.ts(151,57): error TS2304: Cannot find name 'StringHashTable'.
 parserRealSource11.ts(155,26): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(155,46): error TS2339: Property 'nodeType' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any }'.
 parserRealSource11.ts(167,36): error TS2304: Cannot find name 'parseInt'.
-parserRealSource11.ts(169,33): error TS2304: Cannot find name 'String'.
 parserRealSource11.ts(184,13): error TS2349: This expression is not callable.
 parserRealSource11.ts(184,19): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(192,32): error TS2304: Cannot find name 'SymbolScope'.
@@ -124,7 +123,7 @@ parserRealSource11.ts(423,52): error TS2339: Property 'operand' does not exist o
 parserRealSource11.ts(427,22): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(431,26): error TS2339: Property 'operand' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any; targetType: error; castTerm: error }'.
 parserRealSource11.ts(431,60): error TS2339: Property 'operand' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any; targetType: error; castTerm: error }'.
-parserRealSource11.ts(436,31): error TS2304: Cannot find name 'Error'.
+parserRealSource11.ts(436,31): error TS2351: This expression is not constructable.
 parserRealSource11.ts(441,30): error TS2304: Cannot find name 'Emitter'.
 parserRealSource11.ts(441,48): error TS2304: Cannot find name 'TokenID'.
 parserRealSource11.ts(444,26): error TS2339: Property 'nodeType' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any; targetType: error; castTerm: error }'.
@@ -177,7 +176,7 @@ parserRealSource11.ts(504,58): error TS2304: Cannot find name 'TokenID'.
 parserRealSource11.ts(506,22): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(507,49): error TS2339: Property 'operand' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any; targetType: error; castTerm: error }'.
 parserRealSource11.ts(507,58): error TS2304: Cannot find name 'TokenID'.
-parserRealSource11.ts(510,31): error TS2304: Cannot find name 'Error'.
+parserRealSource11.ts(510,31): error TS2351: This expression is not constructable.
 parserRealSource11.ts(518,32): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(521,13): error TS2349: This expression is not callable.
 parserRealSource11.ts(522,33): error TS2339: Property 'target' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any; signature: error }'.
@@ -244,7 +243,7 @@ parserRealSource11.ts(620,22): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(622,22): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(624,22): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(626,22): error TS2304: Cannot find name 'NodeType'.
-parserRealSource11.ts(630,31): error TS2304: Cannot find name 'Error'.
+parserRealSource11.ts(630,31): error TS2351: This expression is not constructable.
 parserRealSource11.ts(635,30): error TS2304: Cannot find name 'Emitter'.
 parserRealSource11.ts(635,48): error TS2304: Cannot find name 'TokenID'.
 parserRealSource11.ts(636,30): error TS2304: Cannot find name 'nodeTypeToTokTable'.
@@ -281,8 +280,8 @@ parserRealSource11.ts(687,63): error TS2304: Cannot find name 'TokenID'.
 parserRealSource11.ts(694,53): error TS2339: Property 'operand2' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any }'.
 parserRealSource11.ts(694,63): error TS2304: Cannot find name 'TokenID'.
 parserRealSource11.ts(696,26): error TS2304: Cannot find name 'NodeType'.
-parserRealSource11.ts(697,35): error TS2304: Cannot find name 'Error'.
-parserRealSource11.ts(699,35): error TS2304: Cannot find name 'Error'.
+parserRealSource11.ts(697,35): error TS2351: This expression is not constructable.
+parserRealSource11.ts(699,35): error TS2351: This expression is not constructable.
 parserRealSource11.ts(711,13): error TS2349: This expression is not callable.
 parserRealSource11.ts(711,19): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(714,36): error TS2304: Cannot find name 'TypeFlow'.
@@ -301,7 +300,6 @@ parserRealSource11.ts(747,30): error TS2304: Cannot find name 'Emitter'.
 parserRealSource11.ts(747,48): error TS2304: Cannot find name 'TokenID'.
 parserRealSource11.ts(754,40): error TS2339: Property 'value' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any; isNegativeZero: false }'.
 parserRealSource11.ts(756,22): error TS2339: Property 'hasEmptyFraction' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any; isNegativeZero: false }'.
-parserRealSource11.ts(764,17): error TS2304: Cannot find name 'Math'.
 parserRealSource11.ts(764,33): error TS2339: Property 'value' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any; isNegativeZero: false }'.
 parserRealSource11.ts(764,48): error TS2339: Property 'value' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any; isNegativeZero: false }'.
 parserRealSource11.ts(765,29): error TS2339: Property 'value' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any; isNegativeZero: false }'.
@@ -684,7 +682,6 @@ parserRealSource11.ts(2067,13): error TS2349: This expression is not callable.
 parserRealSource11.ts(2067,19): error TS2304: Cannot find name 'NodeType'.
 parserRealSource11.ts(2070,30): error TS2304: Cannot find name 'Emitter'.
 parserRealSource11.ts(2070,48): error TS2304: Cannot find name 'TokenID'.
-parserRealSource11.ts(2071,23): error TS2304: Cannot find name 'Error'.
 parserRealSource11.ts(2074,36): error TS2304: Cannot find name 'TypeFlow'.
 parserRealSource11.ts(2077,28): error TS2304: Cannot find name 'getTypeLink'.
 parserRealSource11.ts(2080,22): error TS2339: Property 'term' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any }'.
@@ -800,7 +797,7 @@ parserRealSource11.ts(2345,13): error TS1128: Declaration or statement expected.
 
 
 !!! error TS6053: File '/.src/typescript.ts' not found.
-==== parserRealSource11.ts (798 errors) ====
+==== parserRealSource11.ts (795 errors) ====
     // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
     // See LICENSE.txt in the project root for complete license information.
     
@@ -895,7 +892,7 @@ parserRealSource11.ts(2345,13): error TS1128: Declaration or statement expected.
                     default:
                         throw new Error("please implement in derived class");
                                   ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
+!!! error TS2351: This expression is not constructable.
                 }
                 return this;
             }
@@ -982,7 +979,7 @@ parserRealSource11.ts(2345,13): error TS1128: Declaration or statement expected.
                     default:
                         throw new Error("please implement in derived class");
                                   ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
+!!! error TS2351: This expression is not constructable.
                 }
                 emitter.emitParensAndCommentsInPlace(this, false);
             }
@@ -1066,8 +1063,6 @@ parserRealSource11.ts(2345,13): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'parseInt'.
                         resolved += name.substr(start, i - start);
                         resolved += String.fromCharCode(charCode);
-                                    ~~~~~~
-!!! error TS2304: Cannot find name 'String'.
                         i += 6;
                         start = i;
                         continue;
@@ -1488,7 +1483,7 @@ parserRealSource11.ts(2345,13): error TS1128: Declaration or statement expected.
                     default:
                         throw new Error("please implement in derived class");
                                   ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
+!!! error TS2351: This expression is not constructable.
                 }
                 return this;
             }
@@ -1668,7 +1663,7 @@ parserRealSource11.ts(2345,13): error TS1128: Declaration or statement expected.
                     default:
                         throw new Error("please implement in derived class");
                                   ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
+!!! error TS2351: This expression is not constructable.
                 }
                 emitter.recordSourceMappingEnd(this);
                 emitter.emitParensAndCommentsInPlace(this, false);
@@ -1922,7 +1917,7 @@ parserRealSource11.ts(2345,13): error TS1128: Declaration or statement expected.
                     default:
                         throw new Error("please implement in derived class");
                                   ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
+!!! error TS2351: This expression is not constructable.
                 }
                 return this;
             }
@@ -2063,11 +2058,11 @@ parserRealSource11.ts(2345,13): error TS1128: Declaration or statement expected.
 !!! error TS2304: Cannot find name 'NodeType'.
                             throw new Error("should be de-sugared during type check");
                                       ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
+!!! error TS2351: This expression is not constructable.
                         default:
                             throw new Error("please implement in derived class");
                                       ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
+!!! error TS2351: This expression is not constructable.
                     }
                 }
                 emitter.recordSourceMappingEnd(this);
@@ -2169,8 +2164,6 @@ parserRealSource11.ts(2345,13): error TS1128: Declaration or statement expected.
     
             public printLabel() {
                 if (Math.floor(this.value) != this.value) {
-                    ~~~~
-!!! error TS2304: Cannot find name 'Math'.
                                     ~~~~~
 !!! error TS2339: Property 'value' does not exist on type '{ minChar: number; limChar: number; type: error; flags: any; passCreated: number; preComments: error[]; postComments: error[]; isParenthesized: false; isExpression: () => any; isStatementOrExpression: () => any; isCompoundStatement: () => any; isLeaf: () => any; typeCheck: (typeFlow: error) => any; emit: (emitter: error, tokenId: error, startLine: boolean) => any; print: (context: error) => any; printLabel: () => any; addToControlFlow: (context: error) => void; netFreeUses: (container: error, freeUses: error) => any; treeViewLabel: () => any; isNegativeZero: false }'.
                                                    ~~~~~
@@ -4242,8 +4235,6 @@ parserRealSource11.ts(2345,13): error TS1128: Declaration or statement expected.
                                                    ~~~~~~~
 !!! error TS2304: Cannot find name 'TokenID'.
                 throw new Error("should not emit a type ref");
-                          ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
             }
     
             public typeCheck(typeFlow: TypeFlow) {

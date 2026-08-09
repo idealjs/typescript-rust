@@ -1,10 +1,8 @@
 privateNameClassExpressionLoop.ts(2,23): error TS1005: '>' expected.
 privateNameClassExpressionLoop.ts(3,22): error TS2304: Cannot find name 'C'.
-privateNameClassExpressionLoop.ts(6,13): error TS1005: ';' expected.
-privateNameClassExpressionLoop.ts(7,13): error TS1005: ';' expected.
 
 
-==== privateNameClassExpressionLoop.ts (4 errors) ====
+==== privateNameClassExpressionLoop.ts (2 errors) ====
     const array = [];
     for (let i = 0; i < 10; ++i) {
                           ~
@@ -15,10 +13,6 @@ privateNameClassExpressionLoop.ts(7,13): error TS1005: ';' expected.
             #myField = "hello";
             #method() {}
             get #accessor() { return 42; }
-                ~~~~~~~~~
-!!! error TS1005: ';' expected.
             set #accessor(val) { }
-                ~~~~~~~~~
-!!! error TS1005: ';' expected.
         });
     }

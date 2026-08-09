@@ -8,41 +8,25 @@ parserharness.ts(37,17): error TS2339: Property 'join' does not exist on type 's
 parserharness.ts(42,12): error TS2304: Cannot find name 'ActiveXObject'.
 parserharness.ts(43,5): error TS2304: Cannot find name 'eval'.
 parserharness.ts(45,14): error TS2349: This expression is not callable.
-parserharness.ts(48,15): error TS2304: Cannot find name 'Error'.
-parserharness.ts(84,47): error TS2304: Cannot find name 'Error'.
 parserharness.ts(90,24): error TS2339: Property 'indexOf' does not exist on type 'string[]'.
 parserharness.ts(90,39): error TS1005: '>' expected.
 parserharness.ts(91,24): error TS2339: Property 'push' does not exist on type 'string[]'.
 parserharness.ts(97,32): error TS2339: Property 'match' does not exist on type 'string'.
-parserharness.ts(105,38): error TS2304: Cannot find name 'Error'.
 parserharness.ts(112,21): error TS2339: Property 'forEach' does not exist on type 'any[]'.
-parserharness.ts(113,38): error TS2304: Cannot find name 'Error'.
-parserharness.ts(119,38): error TS2304: Cannot find name 'Error'.
-parserharness.ts(125,38): error TS2304: Cannot find name 'Error'.
-parserharness.ts(131,38): error TS2304: Cannot find name 'Error'.
-parserharness.ts(142,38): error TS2304: Cannot find name 'Error'.
 parserharness.ts(154,54): error TS1005: '>' expected.
-parserharness.ts(161,38): error TS2304: Cannot find name 'Error'.
 parserharness.ts(168,48): error TS1005: '>' expected.
 parserharness.ts(171,47): error TS1005: '>' expected.
-parserharness.ts(179,42): error TS2304: Cannot find name 'Error'.
 parserharness.ts(187,43): error TS1005: '>' expected.
-parserharness.ts(194,38): error TS2304: Cannot find name 'Error'.
 parserharness.ts(204,29): error TS2339: Property 'split' does not exist on type 'string'.
 parserharness.ts(206,29): error TS2339: Property 'split' does not exist on type 'string'.
 parserharness.ts(214,18): error TS2339: Property 'indexOf' does not exist on type 'string'.
 parserharness.ts(214,38): error TS1005: '>' expected.
-parserharness.ts(220,23): error TS2304: Cannot find name 'Error'.
-parserharness.ts(245,65): error TS2304: Cannot find name 'Error'.
-parserharness.ts(250,50): error TS2304: Cannot find name 'Error'.
 parserharness.ts(258,17): error TS2339: Property 'push' does not exist on type '{ start: (fileName: string, priority: number) => void; end: (fileName: string) => void; scenarioStart: (scenario: { id: string; desc: string; pass: boolean; bugs: string[] }) => void; scenarioEnd: (scenario: { id: string; desc: string; pass: boolean; bugs: string[] }, error: error) => void; testStart: (test: { id: string; desc: string; pass: boolean; perfResults: { mean: number; min: number; max: number; stdDev: number; trials: number[] } }) => void; pass: (test: { id: string; desc: string; pass: boolean; perfResults: { mean: number; min: number; max: number; stdDev: number; trials: number[] } }) => void; bug: (test: { id: string; desc: string; pass: boolean; perfResults: { mean: number; min: number; max: number; stdDev: number; trials: number[] } }) => void; fail: (test: { id: string; desc: string; pass: boolean; perfResults: { mean: number; min: number; max: number; stdDev: number; trials: number[] } }) => void; error: (test: { id: string; desc: string; pass: boolean; perfResults: { mean: number; min: number; max: number; stdDev: number; trials: number[] } }, error: error) => void; comment: (comment: string) => void; verify: (test: { id: string; desc: string; pass: boolean; perfResults: { mean: number; min: number; max: number; stdDev: number; trials: number[] } }, passed: boolean, actual: any, expected: any, message: string) => void }[]'.
 parserharness.ts(261,43): error TS1005: '>' expected.
-parserharness.ts(279,23): error TS2304: Cannot find name 'Error'.
 parserharness.ts(291,27): error TS2339: Property 'push' does not exist on type 'error[]'.
 parserharness.ts(302,24): error TS2339: Property 'length' does not exist on type '(done: (e: error) => void) => void'.
 parserharness.ts(332,35): error TS2339: Property 'block' does not exist on type '{ error: error; passed: null; bugs: string[]; children: error[]; addChild: (child: error) => void; call: (fn: (done: (e: error) => void) => void, done: (e: error) => void) => any; run: (done: (e: error) => void) => any; runBlock: (done: (e: error) => void) => any; runChild: (index: number, done: (e: error) => void) => any }'.
 parserharness.ts(364,13): error TS2349: This expression is not callable.
-parserharness.ts(370,23): error TS2304: Cannot find name 'Error'.
 parserharness.ts(377,22): error TS2339: Property 'currentStack' does not exist on type 'object'.
 parserharness.ts(393,30): error TS2339: Property 'currentStack' does not exist on type 'object'.
 parserharness.ts(407,13): error TS2349: This expression is not callable.
@@ -75,7 +59,7 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
 !!! error TS6053: File '/services/typescriptServices.ts' not found.
 
 !!! error TS6053: File '/.src/diff.ts' not found.
-==== parserharness.ts (64 errors) ====
+==== parserharness.ts (48 errors) ====
     ﻿// @target: es2015
     //﻿
     // Copyright (c) Microsoft Corporation.  All rights reserved.
@@ -136,8 +120,6 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
         vm.runInThisContext(typescriptServiceFile, 'typescriptServices.js');
     } else {
         throw new Error('Unknown context');
-               ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     }
     
     declare namespace process {
@@ -174,8 +156,6 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
         export namespace Assert {
             export var bugIds: string[] = [];
             export var throwAssertError = (error: Error) => {
-                                               ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
                 throw error;
             };
     
@@ -205,8 +185,6 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
             export function is(result: boolean, msg?: string) {
                 if (!result) {
                     throwAssertError(new Error(msg || "Expected true, got false."));
-                                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
                 }
             }
     
@@ -217,32 +195,24 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
                      ~~~~~~~
 !!! error TS2339: Property 'forEach' does not exist on type 'any[]'.
                     throwAssertError(new Error('Expected array to have ' + length + ' elements. Actual elements were:' + actual));
-                                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
                 }
             }
     
             export function equal(actual, expected) {
                 if (actual !== expected) {
                     throwAssertError(new Error("Expected " + actual + " to equal " + expected));
-                                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
                 }
             }
     
             export function notEqual(actual, expected) {
                 if (actual === expected) {
                     throwAssertError(new Error("Expected " + actual + " to *not* equal " + expected));
-                                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
                 }
             }
     
             export function notNull(result) {
                 if (result === null) {
                     throwAssertError(new Error("Expected " + result + " to *not* be null"));
-                                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
                 }
             }
     
@@ -254,8 +224,6 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
                     });
     
                     throwAssertError(new Error("Expected compiler warning at (" + line + ", " + column + "): " + desc + "\nActual errors follow: " + actual));
-                                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
                 }
             }
     
@@ -277,8 +245,6 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
                         }
                     }
                     throwAssertError(new Error(errorString));
-                                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
                 }
             }
     
@@ -301,8 +267,6 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
     
                     if (!found) {
                         throwAssertError(new Error("Expected array to contain \"" + contains[i] + "\""));
-                                          ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
                     }
                 }
             }
@@ -320,8 +284,6 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
     
                 if (foundCount !== 1) {
                     throwAssertError(new Error("Expected array to match element only once (instead of " + foundCount + " times)"));
-                                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
                 }
             }
         }
@@ -356,8 +318,6 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
             var content = IO.readFile(Harness.userSpecifiedroot + path);
             if (content == null) {
                 throw new Error("failed to read file at: '" + Harness.userSpecifiedroot + path + "'");
-                       ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
             }
     
             return content;
@@ -383,15 +343,11 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
             public end(fileName?: string) { }
             public scenarioStart(scenario: IScenarioMetadata) { }
             public scenarioEnd(scenario: IScenarioMetadata, error?: Error) { }
-                                                                 ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
             public testStart(test: ITestMetadata) { }
             public pass(test: ITestMetadata) { }
             public bug(test: ITestMetadata) { }
             public fail(test: ITestMetadata) { }
             public error(test: ITestMetadata, error: Error) { }
-                                                  ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
             public comment(comment: string) { }
             public verify(test: ITestMetadata, passed: boolean, actual: any, expected: any, message: string) { }
         }
@@ -425,8 +381,6 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
     
             // The error, if any, that occurred when running 'block'
             public error: Error = null;
-                       ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     
             // Whether or not this object has any failures (including in its descendants)
             public passed = null;
@@ -526,8 +480,6 @@ parserharness.ts(464,5): error TS1128: Declaration or statement expected.
     
             public addChild(child: Runnable): void {
                 throw new Error("Testcases may not be nested inside other testcases");
-                       ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
             }
     
             /** Run the test case block and fail the test if it raised an error. If no error is raised, the test passes. */

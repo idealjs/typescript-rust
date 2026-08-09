@@ -1,12 +1,9 @@
 parserMemberAccessorDeclaration11.ts(2,13): error TS1005: ';' expected.
-parserMemberAccessorDeclaration11.ts(2,17): error TS1005: ';' expected.
 
 
-==== parserMemberAccessorDeclaration11.ts (2 errors) ====
+==== parserMemberAccessorDeclaration11.ts (1 errors) ====
     class C {
         declare get Foo() { }
                 ~~~
-!!! error TS1005: ';' expected.
-                    ~~~
 !!! error TS1005: ';' expected.
     }

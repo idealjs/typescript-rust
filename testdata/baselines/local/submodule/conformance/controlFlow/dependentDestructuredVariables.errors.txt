@@ -1,5 +1,3 @@
-dependentDestructuredVariables.ts(149,39): error TS2304: Cannot find name 'Array'.
-dependentDestructuredVariables.ts(155,39): error TS2304: Cannot find name 'Array'.
 dependentDestructuredVariables.ts(195,9): error TS2367: This comparison appears to be unintentional because the types '["A", number] | ["B", string]' and '"A"' have no overlap.
 dependentDestructuredVariables.ts(204,9): error TS2367: This comparison appears to be unintentional because the types '["A", number] | ["B", string]' and '"A"' have no overlap.
 dependentDestructuredVariables.ts(213,9): error TS2367: This comparison appears to be unintentional because the types '["A", number] | ["B"]' and '"A"' have no overlap.
@@ -20,12 +18,9 @@ dependentDestructuredVariables.ts(323,9): error TS2367: This comparison appears 
 dependentDestructuredVariables.ts(393,35): error TS2304: Cannot find name 'CloseEvent'.
 dependentDestructuredVariables.ts(397,52): error TS2304: Cannot find name 'K'.
 dependentDestructuredVariables.ts(431,15): error TS2322: Type 'any' is not assignable to type 'never'.
-dependentDestructuredVariables.ts(438,7): error TS2304: Cannot find name 'Math'.
-dependentDestructuredVariables.ts(447,7): error TS2304: Cannot find name 'Math'.
-dependentDestructuredVariables.ts(458,7): error TS2304: Cannot find name 'Math'.
 
 
-==== dependentDestructuredVariables.ts (25 errors) ====
+==== dependentDestructuredVariables.ts (20 errors) ====
     type Action =
         | { kind: 'A', payload: number }
         | { kind: 'B', payload: string };
@@ -175,16 +170,12 @@ dependentDestructuredVariables.ts(458,7): error TS2304: Cannot find name 'Math'.
     interface A<T> { variant: 'a', value: T }
     
     interface B<T> { variant: 'b', value: Array<T> }
-                                          ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     
     type AB<T> = A<T> | B<T>;
     
     declare function printValue<T>(t: T): void;
     
     declare function printValueList<T>(t: Array<T>): void;
-                                          ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     
     function unrefined1<T>(ab: AB<T>): void {
         const { variant, value } = ab;
@@ -508,8 +499,6 @@ dependentDestructuredVariables.ts(458,7): error TS2304: Cannot find name 'Math'.
     
     function parameterReassigned1([x, y]: [1, 2] | [3, 4]) {
       if (Math.random()) {
-          ~~~~
-!!! error TS2304: Cannot find name 'Math'.
         x = 1;
       }
       if (y === 2) {
@@ -519,8 +508,6 @@ dependentDestructuredVariables.ts(458,7): error TS2304: Cannot find name 'Math'.
     
     function parameterReassigned2([x, y]: [1, 2] | [3, 4]) {
       if (Math.random()) {
-          ~~~~
-!!! error TS2304: Cannot find name 'Math'.
         y = 2;
       }
       if (y === 2) {
@@ -532,8 +519,6 @@ dependentDestructuredVariables.ts(458,7): error TS2304: Cannot find name 'Math'.
     
     const parameterReassignedContextualRest1: (...args: [1, 2] | [3, 4]) => void = (x, y) => {
       if (Math.random()) {
-          ~~~~
-!!! error TS2304: Cannot find name 'Math'.
         y = 2;
       }
       if (y === 2) {

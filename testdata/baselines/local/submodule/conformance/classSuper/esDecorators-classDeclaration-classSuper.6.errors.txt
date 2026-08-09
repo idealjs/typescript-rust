@@ -1,11 +1,7 @@
-esDecorators-classDeclaration-classSuper.6.ts(12,16): error TS1005: ';' expected.
-esDecorators-classDeclaration-classSuper.6.ts(13,16): error TS1005: ';' expected.
 esDecorators-classDeclaration-classSuper.6.ts(16,9): error TS2349: This expression is not callable.
-esDecorators-classDeclaration-classSuper.6.ts(22,9): error TS1005: ';' expected.
-esDecorators-classDeclaration-classSuper.6.ts(23,9): error TS1005: ';' expected.
 
 
-==== esDecorators-classDeclaration-classSuper.6.ts (5 errors) ====
+==== esDecorators-classDeclaration-classSuper.6.ts (1 errors) ====
     declare var dec: any;
     
     declare class Base {
@@ -18,11 +14,7 @@ esDecorators-classDeclaration-classSuper.6.ts(23,9): error TS1005: ';' expected.
     class C extends Base {
         static m() { super.method(); }
         static get x() { return super.method(); }
-                   ~
-!!! error TS1005: ';' expected.
         static set x(v: number) { super.method(); }
-                   ~
-!!! error TS1005: ';' expected.
     
         constructor() {
             super();
@@ -34,9 +26,5 @@ esDecorators-classDeclaration-classSuper.6.ts(23,9): error TS1005: ';' expected.
         a = super.method();
         m() { super.method(); }
         get x() { return super.method(); }
-            ~
-!!! error TS1005: ';' expected.
         set x(v: number) { super.method(); }
-            ~
-!!! error TS1005: ';' expected.
     }

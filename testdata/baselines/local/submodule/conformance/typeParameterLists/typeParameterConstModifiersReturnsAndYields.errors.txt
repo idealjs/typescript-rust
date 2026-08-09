@@ -1,6 +1,5 @@
 typeParameterConstModifiersReturnsAndYields.ts(5,23): error TS2345: Argument of type '() => string[]' is not assignable to parameter of type '() => T'.
 typeParameterConstModifiersReturnsAndYields.ts(6,23): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
-typeParameterConstModifiersReturnsAndYields.ts(6,33): error TS2304: Cannot find name 'Math'.
 typeParameterConstModifiersReturnsAndYields.ts(7,23): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
 typeParameterConstModifiersReturnsAndYields.ts(8,23): error TS2345: Argument of type '() => boolean' is not assignable to parameter of type '() => T'.
 typeParameterConstModifiersReturnsAndYields.ts(9,23): error TS2345: Argument of type '() => bigint' is not assignable to parameter of type '() => T'.
@@ -9,7 +8,6 @@ typeParameterConstModifiersReturnsAndYields.ts(11,23): error TS2345: Argument of
 typeParameterConstModifiersReturnsAndYields.ts(12,23): error TS2345: Argument of type '() => 0' is not assignable to parameter of type '() => T'.
 typeParameterConstModifiersReturnsAndYields.ts(14,23): error TS2345: Argument of type '() => string[]' is not assignable to parameter of type '() => T'.
 typeParameterConstModifiersReturnsAndYields.ts(15,24): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
-typeParameterConstModifiersReturnsAndYields.ts(15,43): error TS2304: Cannot find name 'Math'.
 typeParameterConstModifiersReturnsAndYields.ts(16,24): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
 typeParameterConstModifiersReturnsAndYields.ts(17,24): error TS2345: Argument of type '() => boolean' is not assignable to parameter of type '() => T'.
 typeParameterConstModifiersReturnsAndYields.ts(18,24): error TS2345: Argument of type '() => bigint' is not assignable to parameter of type '() => T'.
@@ -52,7 +50,7 @@ typeParameterConstModifiersReturnsAndYields.ts(108,31): error TS2345: Argument o
 typeParameterConstModifiersReturnsAndYields.ts(109,43): error TS2554: Expected 1 arguments, but got 2.
 
 
-==== typeParameterConstModifiersReturnsAndYields.ts (52 errors) ====
+==== typeParameterConstModifiersReturnsAndYields.ts (50 errors) ====
     enum E { Val, Val2 }
     
     declare function test1<const T>(create: () => T): T;
@@ -63,8 +61,6 @@ typeParameterConstModifiersReturnsAndYields.ts(109,43): error TS2554: Expected 1
     const result2 = test1(() => `a${Math.random()}`);
                           ~~~~~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
-                                    ~~~~
-!!! error TS2304: Cannot find name 'Math'.
     const result3 = test1(() => 'a');
                           ~~~~~~~~~
 !!! error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
@@ -90,8 +86,6 @@ typeParameterConstModifiersReturnsAndYields.ts(109,43): error TS2554: Expected 1
     const result10 = test1(() => { return `a${Math.random()}`; });
                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.
-                                              ~~~~
-!!! error TS2304: Cannot find name 'Math'.
     const result11 = test1(() => { return 'a'; });
                            ~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => T'.

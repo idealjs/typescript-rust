@@ -1,17 +1,13 @@
 uniqueSymbolsErrors.ts(3,15): error TS1182: A destructuring declaration must have an initializer.
 uniqueSymbolsErrors.ts(24,42): error TS1135: Argument expression expected.
 uniqueSymbolsErrors.ts(26,56): error TS1135: Argument expression expected.
-uniqueSymbolsErrors.ts(29,9): error TS1005: ';' expected.
 uniqueSymbolsErrors.ts(29,42): error TS1135: Argument expression expected.
-uniqueSymbolsErrors.ts(30,9): error TS1005: ';' expected.
 uniqueSymbolsErrors.ts(35,55): error TS1135: Argument expression expected.
 uniqueSymbolsErrors.ts(37,69): error TS1135: Argument expression expected.
-uniqueSymbolsErrors.ts(40,16): error TS1005: ';' expected.
 uniqueSymbolsErrors.ts(40,55): error TS1135: Argument expression expected.
-uniqueSymbolsErrors.ts(41,16): error TS1005: ';' expected.
 
 
-==== uniqueSymbolsErrors.ts (11 errors) ====
+==== uniqueSymbolsErrors.ts (7 errors) ====
     // declarations
     declare const invalidUniqueType: unique number;
     declare const {}: unique symbol;
@@ -47,13 +43,9 @@ uniqueSymbolsErrors.ts(41,16): error TS1005: ';' expected.
         invalidTypeParameterConstraint<T extends unique symbol>(): void { return; }
         invalidTypeParameterDefault<T = unique symbol>(): void { return; }
         get invalidGetter(): unique symbol { return; }
-            ~~~~~~~~~~~~~
-!!! error TS1005: ';' expected.
                                              ~~~~~~~~
 !!! error TS1135: Argument expression expected.
         set invalidSetter(arg: unique symbol) { return; }
-            ~~~~~~~~~~~~~
-!!! error TS1005: ';' expected.
     
         static invalidStaticPropertyType: unique symbol;
         static invalidStaticArgType(arg: unique symbol): void { return; }
@@ -68,13 +60,9 @@ uniqueSymbolsErrors.ts(41,16): error TS1005: ';' expected.
         static invalidStaticTypeParameterConstraint<T extends unique symbol>(): void { return; }
         static invalidStaticTypeParameterDefault<T = unique symbol>(): void { return; }
         static get invalidStaticGetter(): unique symbol { return; }
-                   ~~~~~~~~~~~~~~~~~~~
-!!! error TS1005: ';' expected.
                                                           ~~~~~~~~
 !!! error TS1135: Argument expression expected.
         static set invalidStaticSetter(arg: unique symbol) { return; }
-                   ~~~~~~~~~~~~~~~~~~~
-!!! error TS1005: ';' expected.
     }
     
     // interfaces

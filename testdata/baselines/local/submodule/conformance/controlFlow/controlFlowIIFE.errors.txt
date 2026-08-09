@@ -2,14 +2,13 @@ controlFlowIIFE.ts(7,22): error TS2339: Property 'length' does not exist on type
 controlFlowIIFE.ts(16,22): error TS2339: Property 'length' does not exist on type 'string | number'.
 controlFlowIIFE.ts(25,25): error TS2339: Property 'length' does not exist on type 'string | number'.
 controlFlowIIFE.ts(25,34): error TS2454: Variable 'y' is used before being assigned.
-controlFlowIIFE.ts(42,15): error TS2304: Cannot find name 'Error'.
 controlFlowIIFE.ts(45,10): error TS2339: Property 'slice' does not exist on type 'string | undefined'.
 controlFlowIIFE.ts(55,5): error TS2454: Variable 'v' is used before being assigned.
 controlFlowIIFE.ts(64,5): error TS2454: Variable 'v' is used before being assigned.
 controlFlowIIFE.ts(72,5): error TS2454: Variable 'v' is used before being assigned.
 
 
-==== controlFlowIIFE.ts (9 errors) ====
+==== controlFlowIIFE.ts (8 errors) ====
     declare function getStringOrNumber(): string | number;
     
     function f1() {
@@ -60,8 +59,6 @@ controlFlowIIFE.ts(72,5): error TS2454: Variable 'v' is used before being assign
     let test: string | undefined;
     if (!test) {
         throw new Error('Test is not defined');
-                  ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     }
     (() => {
         test.slice(1); // No error

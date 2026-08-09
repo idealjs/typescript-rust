@@ -1,4 +1,4 @@
-parserES5SymbolIndexer2.ts(2,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+parserES5SymbolIndexer2.ts(2,5): error TS2564: Property '[s' has no initializer and is not definitely assigned in the constructor.
 parserES5SymbolIndexer2.ts(2,7): error TS1005: ']' expected.
 parserES5SymbolIndexer2.ts(2,15): error TS1005: ';' expected.
 parserES5SymbolIndexer2.ts(2,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
@@ -8,7 +8,7 @@ parserES5SymbolIndexer2.ts(2,15): error TS2564: Property ']' has no initializer 
     class C {
         [s: symbol]: string;
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[s' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~

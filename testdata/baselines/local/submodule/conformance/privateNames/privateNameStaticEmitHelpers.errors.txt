@@ -1,11 +1,10 @@
 main.ts(2,12): error TS1005: ';' expected.
 main.ts(3,12): error TS1005: ';' expected.
-main.ts(4,16): error TS1005: ';' expected.
 
 
 ==== privateNameStaticEmitHelpers.ts (0 errors) ====
     
-==== main.ts (3 errors) ====
+==== main.ts (2 errors) ====
     export class S {
         static #a = 1;
                ~~
@@ -14,8 +13,6 @@ main.ts(4,16): error TS1005: ';' expected.
                ~~
 !!! error TS1005: ';' expected.
         static get #c() { return S.#b(); }
-                   ~~
-!!! error TS1005: ';' expected.
     }
     
 ==== index.d.ts (0 errors) ====

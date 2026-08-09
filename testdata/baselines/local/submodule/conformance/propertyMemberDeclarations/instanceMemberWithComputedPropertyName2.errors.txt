@@ -1,4 +1,4 @@
-instanceMemberWithComputedPropertyName2.ts(5,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+instanceMemberWithComputedPropertyName2.ts(5,5): error TS2564: Property '[x]' has no initializer and is not definitely assigned in the constructor.
 
 
 ==== instanceMemberWithComputedPropertyName2.ts (1 errors) ====
@@ -8,5 +8,5 @@ instanceMemberWithComputedPropertyName2.ts(5,5): error TS2564: Property '' has n
     class C {
         [x]: string;
         ~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x]' has no initializer and is not definitely assigned in the constructor.
     }

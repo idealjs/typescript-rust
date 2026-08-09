@@ -3,18 +3,16 @@ controlFlowWhileStatement.ts(12,12): error TS2454: Variable 'cond' is used befor
 controlFlowWhileStatement.ts(21,12): error TS2454: Variable 'cond' is used before being assigned.
 controlFlowWhileStatement.ts(31,18): error TS2339: Property 'length' does not exist on type '""'.
 controlFlowWhileStatement.ts(39,12): error TS2454: Variable 'cond' is used before being assigned.
-controlFlowWhileStatement.ts(47,40): error TS2304: Cannot find name 'RegExp'.
 controlFlowWhileStatement.ts(49,12): error TS2454: Variable 'cond' is used before being assigned.
 controlFlowWhileStatement.ts(50,13): error TS2454: Variable 'cond' is used before being assigned.
 controlFlowWhileStatement.ts(54,13): error TS2454: Variable 'cond' is used before being assigned.
-controlFlowWhileStatement.ts(63,40): error TS2304: Cannot find name 'RegExp'.
 controlFlowWhileStatement.ts(66,13): error TS2454: Variable 'cond' is used before being assigned.
 controlFlowWhileStatement.ts(70,13): error TS2454: Variable 'cond' is used before being assigned.
 controlFlowWhileStatement.ts(92,12): error TS2454: Variable 'cond' is used before being assigned.
 controlFlowWhileStatement.ts(101,12): error TS2454: Variable 'cond' is used before being assigned.
 
 
-==== controlFlowWhileStatement.ts (14 errors) ====
+==== controlFlowWhileStatement.ts (12 errors) ====
     let cond: boolean;
     function a() {
         let x: string | number;
@@ -72,8 +70,6 @@ controlFlowWhileStatement.ts(101,12): error TS2454: Variable 'cond' is used befo
     }
     function f() {
         let x: string | number | boolean | RegExp | Function;
-                                           ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
         x = "";
         while (cond) {
                ~~~~
@@ -96,8 +92,6 @@ controlFlowWhileStatement.ts(101,12): error TS2454: Variable 'cond' is used befo
     }
     function g() {
         let x: string | number | boolean | RegExp | Function;
-                                           ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
         x = "";
         while (true) {
             if (cond) {

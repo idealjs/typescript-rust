@@ -1,16 +1,13 @@
-commaOperatorWithSecondOperandAnyType.ts(5,13): error TS2304: Cannot find name 'Object'.
 commaOperatorWithSecondOperandAnyType.ts(27,10): error TS2339: Property 'charAt' does not exist on type '"string"'.
 commaOperatorWithSecondOperandAnyType.ts(34,30): error TS2339: Property 'charAt' does not exist on type '"string"'.
 
 
-==== commaOperatorWithSecondOperandAnyType.ts (3 errors) ====
+==== commaOperatorWithSecondOperandAnyType.ts (2 errors) ====
     var ANY: any;
     var BOOLEAN: boolean;
     var NUMBER: number;
     var STRING: string;
     var OBJECT: Object;
-                ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     
     //The second operand type is any
     ANY, ANY;

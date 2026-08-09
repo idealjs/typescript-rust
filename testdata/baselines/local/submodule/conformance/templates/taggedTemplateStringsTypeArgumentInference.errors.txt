@@ -1,39 +1,29 @@
 taggedTemplateStringsTypeArgumentInference.ts(6,10): error TS1005: ';' expected.
-taggedTemplateStringsTypeArgumentInference.ts(9,32): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateStringsTypeArgumentInference.ts(10,17): error TS1005: ';' expected.
 taggedTemplateStringsTypeArgumentInference.ts(14,16): error TS1005: ';' expected.
-taggedTemplateStringsTypeArgumentInference.ts(16,34): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateStringsTypeArgumentInference.ts(17,16): error TS1005: ';' expected.
-taggedTemplateStringsTypeArgumentInference.ts(20,34): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateStringsTypeArgumentInference.ts(21,16): error TS1005: ';' expected.
-taggedTemplateStringsTypeArgumentInference.ts(23,37): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateStringsTypeArgumentInference.ts(24,16): error TS1005: ';' expected.
-taggedTemplateStringsTypeArgumentInference.ts(27,33): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateStringsTypeArgumentInference.ts(28,15): error TS1005: ';' expected.
 taggedTemplateStringsTypeArgumentInference.ts(29,15): error TS1005: ';' expected.
 taggedTemplateStringsTypeArgumentInference.ts(30,15): error TS1005: ';' expected.
-taggedTemplateStringsTypeArgumentInference.ts(33,36): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateStringsTypeArgumentInference.ts(34,15): error TS1005: ';' expected.
 taggedTemplateStringsTypeArgumentInference.ts(35,15): error TS1005: ';' expected.
 taggedTemplateStringsTypeArgumentInference.ts(36,15): error TS1005: ';' expected.
-taggedTemplateStringsTypeArgumentInference.ts(39,36): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateStringsTypeArgumentInference.ts(40,15): error TS1005: ';' expected.
 taggedTemplateStringsTypeArgumentInference.ts(41,15): error TS1005: ';' expected.
 taggedTemplateStringsTypeArgumentInference.ts(42,15): error TS1005: ';' expected.
-taggedTemplateStringsTypeArgumentInference.ts(45,33): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateStringsTypeArgumentInference.ts(46,15): error TS1005: ';' expected.
 taggedTemplateStringsTypeArgumentInference.ts(47,15): error TS1005: ';' expected.
 taggedTemplateStringsTypeArgumentInference.ts(48,15): error TS1005: ';' expected.
-taggedTemplateStringsTypeArgumentInference.ts(51,39): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateStringsTypeArgumentInference.ts(52,15): error TS1005: ';' expected.
 taggedTemplateStringsTypeArgumentInference.ts(53,15): error TS1005: ';' expected.
 taggedTemplateStringsTypeArgumentInference.ts(54,15): error TS1005: ';' expected.
-taggedTemplateStringsTypeArgumentInference.ts(57,33): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateStringsTypeArgumentInference.ts(58,23): error TS1005: ',' expected.
 taggedTemplateStringsTypeArgumentInference.ts(58,41): error TS1128: Declaration or statement expected.
 
 
-==== taggedTemplateStringsTypeArgumentInference.ts (33 errors) ====
+==== taggedTemplateStringsTypeArgumentInference.ts (23 errors) ====
     ﻿// @target: es2015
     
     
@@ -45,8 +35,6 @@ taggedTemplateStringsTypeArgumentInference.ts(58,41): error TS1128: Declaration 
     
     // Generic tag with parameter which does not use type parameter
     function noGenericParams<T>(n: TemplateStringsArray) { }
-                                ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     noGenericParams ``;
                  ~~
 !!! error TS1005: ';' expected.
@@ -58,31 +46,23 @@ taggedTemplateStringsTypeArgumentInference.ts(58,41): error TS1128: Declaration 
 !!! error TS1005: ';' expected.
     
     function someGenerics1b<T, U>(n: TemplateStringsArray, m: U) { }
-                                  ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     someGenerics1b `${3}`;
                 ~~~
 !!! error TS1005: ';' expected.
     
     // Generic tag with argument of function type whose parameter is of type parameter type
     function someGenerics2a<T>(strs: TemplateStringsArray, n: (x: T) => void) { }
-                                  ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     someGenerics2a `${(n: string) => n}`;
                 ~~~
 !!! error TS1005: ';' expected.
     
     function someGenerics2b<T, U>(strs: TemplateStringsArray, n: (x: T, y: U) => void) { }
-                                     ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     someGenerics2b `${ (n: string, x: number) => n }`;
                 ~~~
 !!! error TS1005: ';' expected.
     
     // Generic tag with argument of function type whose parameter is not of type parameter type but body/return type uses type parameter
     function someGenerics3<T>(strs: TemplateStringsArray, producer: () => T) { }
-                                 ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     someGenerics3 `${() => ''}`;
                ~~~
 !!! error TS1005: ';' expected.
@@ -95,8 +75,6 @@ taggedTemplateStringsTypeArgumentInference.ts(58,41): error TS1128: Declaration 
     
     // 2 parameter generic tag with argument 1 of type parameter type and argument 2 of function type whose parameter is of type parameter type
     function someGenerics4<T, U>(strs: TemplateStringsArray, n: T, f: (x: U) => void) { }
-                                    ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     someGenerics4 `${4}${ () => null }`;
                ~~~
 !!! error TS1005: ';' expected.
@@ -109,8 +87,6 @@ taggedTemplateStringsTypeArgumentInference.ts(58,41): error TS1128: Declaration 
     
     // 2 parameter generic tag with argument 2 of type parameter type and argument 1 of function type whose parameter is of type parameter type
     function someGenerics5<U, T>(strs: TemplateStringsArray, n: T, f: (x: U) => void) { }
-                                    ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     someGenerics5 `${ 4 } ${ () => null }`;
                ~~~
 !!! error TS1005: ';' expected.
@@ -123,8 +99,6 @@ taggedTemplateStringsTypeArgumentInference.ts(58,41): error TS1128: Declaration 
     
     // Generic tag with multiple arguments of function types that each have parameters of the same generic type
     function someGenerics6<A>(strs: TemplateStringsArray, a: (a: A) => A, b: (b: A) => A, c: (c: A) => A) { }
-                                 ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     someGenerics6 `${ n => n }${ n => n}${ n => n}`;
                ~~~
 !!! error TS1005: ';' expected.
@@ -137,8 +111,6 @@ taggedTemplateStringsTypeArgumentInference.ts(58,41): error TS1128: Declaration 
     
     // Generic tag with multiple arguments of function types that each have parameters of different generic type
     function someGenerics7<A, B, C>(strs: TemplateStringsArray, a: (a: A) => A, b: (b: B) => B, c: (c: C) => C) { }
-                                       ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     someGenerics7 `${ n => n }${ n => n }${ n => n }`;
                ~~~
 !!! error TS1005: ';' expected.
@@ -151,8 +123,6 @@ taggedTemplateStringsTypeArgumentInference.ts(58,41): error TS1128: Declaration 
     
     // Generic tag with argument of generic function type
     function someGenerics8<T>(strs: TemplateStringsArray, n: T): T { return n; }
-                                 ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     var x = someGenerics8 `${ someGenerics7 }`;
                        ~~~
 !!! error TS1005: ',' expected.

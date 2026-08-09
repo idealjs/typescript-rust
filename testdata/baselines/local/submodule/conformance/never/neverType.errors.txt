@@ -1,25 +1,15 @@
-neverType.ts(2,15): error TS2304: Cannot find name 'Error'.
-neverType.ts(6,15): error TS2304: Cannot find name 'Error'.
-neverType.ts(17,15): error TS2304: Cannot find name 'Error'.
 neverType.ts(25,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
 neverType.ts(37,12): error TS2349: This expression is not callable.
-neverType.ts(52,19): error TS2304: Cannot find name 'Error'.
-neverType.ts(58,19): error TS2304: Cannot find name 'Error'.
 neverType.ts(88,6): error TS2345: Argument of type '() => void' is not assignable to parameter of type '() => string'.
-neverType.ts(88,24): error TS2304: Cannot find name 'Error'.
 
 
-==== neverType.ts (9 errors) ====
+==== neverType.ts (3 errors) ====
     function error(message: string): never {
         throw new Error(message);
-                  ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     }
     
     function errorVoid(message: string) {
         throw new Error(message);
-                  ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     }
     
     function fail() {
@@ -31,8 +21,6 @@ neverType.ts(88,24): error TS2304: Cannot find name 'Error'.
             return fail();
         }
         throw new Error();
-                  ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     }
     
     function infiniteLoop1() {
@@ -77,16 +65,12 @@ neverType.ts(88,24): error TS2304: Cannot find name 'Error'.
     class C {
         void1() {
             throw new Error();
-                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
         }
         void2() {
             while (true) {}
         }
         never1(): never {
             throw new Error();
-                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
         }
         never2(): never {
             while (true) {}
@@ -119,6 +103,4 @@ neverType.ts(88,24): error TS2304: Cannot find name 'Error'.
     test(() => { throw new Error(); })
          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2345: Argument of type '() => void' is not assignable to parameter of type '() => string'.
-                           ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     test(errorCallback);

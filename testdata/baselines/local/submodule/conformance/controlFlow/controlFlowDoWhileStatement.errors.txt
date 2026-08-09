@@ -3,16 +3,14 @@ controlFlowDoWhileStatement.ts(16,14): error TS2454: Variable 'cond' is used bef
 controlFlowDoWhileStatement.ts(26,14): error TS2454: Variable 'cond' is used before being assigned.
 controlFlowDoWhileStatement.ts(34,20): error TS2339: Property 'length' does not exist on type '1000'.
 controlFlowDoWhileStatement.ts(42,14): error TS2454: Variable 'cond' is used before being assigned.
-controlFlowDoWhileStatement.ts(46,40): error TS2304: Cannot find name 'RegExp'.
 controlFlowDoWhileStatement.ts(49,13): error TS2454: Variable 'cond' is used before being assigned.
 controlFlowDoWhileStatement.ts(53,13): error TS2454: Variable 'cond' is used before being assigned.
 controlFlowDoWhileStatement.ts(58,14): error TS2454: Variable 'cond' is used before being assigned.
-controlFlowDoWhileStatement.ts(62,40): error TS2304: Cannot find name 'RegExp'.
 controlFlowDoWhileStatement.ts(65,13): error TS2454: Variable 'cond' is used before being assigned.
 controlFlowDoWhileStatement.ts(69,13): error TS2454: Variable 'cond' is used before being assigned.
 
 
-==== controlFlowDoWhileStatement.ts (12 errors) ====
+==== controlFlowDoWhileStatement.ts (10 errors) ====
     let cond: boolean;
     function a() {
         let x: string | number;
@@ -69,8 +67,6 @@ controlFlowDoWhileStatement.ts(69,13): error TS2454: Variable 'cond' is used bef
     }
     function f() {
         let x: string | number | boolean | RegExp | Function;
-                                           ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
         x = "";
         do {
             if (cond) {
@@ -93,8 +89,6 @@ controlFlowDoWhileStatement.ts(69,13): error TS2454: Variable 'cond' is used bef
     }
     function g() {
         let x: string | number | boolean | RegExp | Function;
-                                           ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
         x = "";
         do {
             if (cond) {

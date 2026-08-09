@@ -10,28 +10,12 @@ privateNamesIncompatibleModifiers.ts(10,15): error TS1005: ';' expected.
 privateNamesIncompatibleModifiers.ts(11,14): error TS1005: ';' expected.
 privateNamesIncompatibleModifiers.ts(12,13): error TS1005: ';' expected.
 privateNamesIncompatibleModifiers.ts(13,11): error TS1005: ';' expected.
-privateNamesIncompatibleModifiers.ts(14,5): error TS1003: Identifier expected.
-privateNamesIncompatibleModifiers.ts(14,6): error TS1005: ';' expected.
-privateNamesIncompatibleModifiers.ts(15,11): error TS1003: Identifier expected.
-privateNamesIncompatibleModifiers.ts(15,12): error TS1005: ';' expected.
-privateNamesIncompatibleModifiers.ts(17,16): error TS1005: ';' expected.
-privateNamesIncompatibleModifiers.ts(18,16): error TS1005: ';' expected.
-privateNamesIncompatibleModifiers.ts(19,17): error TS1005: ';' expected.
-privateNamesIncompatibleModifiers.ts(20,17): error TS1005: ';' expected.
-privateNamesIncompatibleModifiers.ts(21,19): error TS1005: ';' expected.
-privateNamesIncompatibleModifiers.ts(22,19): error TS1005: ';' expected.
-privateNamesIncompatibleModifiers.ts(23,18): error TS1005: ';' expected.
-privateNamesIncompatibleModifiers.ts(24,18): error TS1005: ';' expected.
 privateNamesIncompatibleModifiers.ts(25,13): error TS1005: ';' expected.
-privateNamesIncompatibleModifiers.ts(25,17): error TS1005: ';' expected.
 privateNamesIncompatibleModifiers.ts(26,13): error TS1005: ';' expected.
-privateNamesIncompatibleModifiers.ts(26,17): error TS1005: ';' expected.
-privateNamesIncompatibleModifiers.ts(27,15): error TS1005: ';' expected.
-privateNamesIncompatibleModifiers.ts(28,15): error TS1005: ';' expected.
 privateNamesIncompatibleModifiers.ts(32,14): error TS1005: ';' expected.
 
 
-==== privateNamesIncompatibleModifiers.ts (31 errors) ====
+==== privateNamesIncompatibleModifiers.ts (15 errors) ====
     class A {
         public #foo = 3;         // Error
                ~~~~
@@ -70,56 +54,24 @@ privateNamesIncompatibleModifiers.ts(32,14): error TS1005: ';' expected.
               ~~~~~~~~~~~~
 !!! error TS1005: ';' expected.
         *#genMethod() { return 1; }                //OK
-        ~
-!!! error TS1003: Identifier expected.
-         ~~~~~~~~~~
-!!! error TS1005: ';' expected.
         async *#asyncGenMethod() { return 1; }     //OK
-              ~
-!!! error TS1003: Identifier expected.
-               ~~~~~~~~~~~~~~~
-!!! error TS1005: ';' expected.
     
         public get #fooProp() { return  3; }         // Error
-                   ~~~~~~~~
-!!! error TS1005: ';' expected.
         public set #fooProp(value: number) {  }      // Error
-                   ~~~~~~~~
-!!! error TS1005: ';' expected.
         private get #barProp() { return  3; }        // Error
-                    ~~~~~~~~
-!!! error TS1005: ';' expected.
         private set #barProp(value: number) {  }     // Error
-                    ~~~~~~~~
-!!! error TS1005: ';' expected.
         protected get #bazProp() { return  3; }      // Error
-                      ~~~~~~~~
-!!! error TS1005: ';' expected.
         protected set #bazProp(value: number) {  }   // Error
-                      ~~~~~~~~
-!!! error TS1005: ';' expected.
         readonly get #quxProp() { return  3; }       // Error
-                     ~~~~~~~~
-!!! error TS1005: ';' expected.
         readonly set #quxProp(value: number) {  }    // Error
-                     ~~~~~~~~
-!!! error TS1005: ';' expected.
         declare get #whatProp()                      // Error
                 ~~~
-!!! error TS1005: ';' expected.
-                    ~~~~~~~~~
 !!! error TS1005: ';' expected.
         declare set #whatProp(value: number)         // Error
                 ~~~
 !!! error TS1005: ';' expected.
-                    ~~~~~~~~~
-!!! error TS1005: ';' expected.
         async get #asyncProp() { return 1; }         // Error
-                  ~~~~~~~~~~
-!!! error TS1005: ';' expected.
         async set #asyncProp(value: number) { }      // Error
-                  ~~~~~~~~~~
-!!! error TS1005: ';' expected.
     }
     
     abstract class B {

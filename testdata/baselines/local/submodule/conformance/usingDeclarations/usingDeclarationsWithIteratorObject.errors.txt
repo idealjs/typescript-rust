@@ -1,10 +1,8 @@
 usingDeclarationsWithIteratorObject.ts(2,19): error TS2304: Cannot find name 'IteratorObject'.
 usingDeclarationsWithIteratorObject.ts(15,20): error TS2339: Property 'values' does not exist on type 'any[]'.
-usingDeclarationsWithIteratorObject.ts(16,21): error TS2304: Cannot find name 'Map'.
-usingDeclarationsWithIteratorObject.ts(17,21): error TS2304: Cannot find name 'Set'.
 
 
-==== usingDeclarationsWithIteratorObject.ts (4 errors) ====
+==== usingDeclarationsWithIteratorObject.ts (2 errors) ====
     declare const i: Iterator<string, undefined>;
     declare const io: IteratorObject<string, undefined, unknown>;
                       ~~~~~~~~~~~~~~
@@ -25,11 +23,7 @@ usingDeclarationsWithIteratorObject.ts(17,21): error TS2304: Cannot find name 'S
                        ~~~~~~
 !!! error TS2339: Property 'values' does not exist on type 'any[]'.
         using it5 = new Map<string, string>().entries();
-                        ~~~
-!!! error TS2304: Cannot find name 'Map'.
         using it6 = new Set<string>().keys();
-                        ~~~
-!!! error TS2304: Cannot find name 'Set'.
     
         // should fail
         using it7 = i;

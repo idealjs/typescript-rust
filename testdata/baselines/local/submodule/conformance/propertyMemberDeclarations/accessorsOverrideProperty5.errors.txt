@@ -1,10 +1,8 @@
 error TS2300: Duplicate identifier 'B'.
-accessorsOverrideProperty5.ts(7,9): error TS1005: ';' expected.
-accessorsOverrideProperty5.ts(8,9): error TS1005: ';' expected.
 
 
 !!! error TS2300: Duplicate identifier 'B'.
-==== accessorsOverrideProperty5.ts (2 errors) ====
+==== accessorsOverrideProperty5.ts (0 errors) ====
     interface I {
         p: number
     }
@@ -12,9 +10,5 @@ accessorsOverrideProperty5.ts(8,9): error TS1005: ';' expected.
     class B { }
     class C extends B {
         get p() { return 1 }
-            ~
-!!! error TS1005: ';' expected.
         set p(value) { }
-            ~
-!!! error TS1005: ';' expected.
     }

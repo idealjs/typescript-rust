@@ -1,9 +1,8 @@
 error TS6053: File 'react.d.ts' not found.
-file.tsx(26,13): error TS2304: Cannot find name 'Array'.
 
 
 !!! error TS6053: File '/.lib/react.d.ts' not found.
-==== file.tsx (1 errors) ====
+==== file.tsx (0 errors) ====
     /// <reference path="/.lib/react.d.ts" />
     
     import React = require('react')
@@ -30,8 +29,6 @@ file.tsx(26,13): error TS2304: Cannot find name 'Array'.
     
     interface InferParamProp<T> {
         values: Array<T>;
-                ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
         selectHandler: (selectedVal: T) => void;
     }
     

@@ -1,10 +1,4 @@
-parserAstSpans1.ts(79,16): error TS1005: ';' expected.
-parserAstSpans1.ts(85,16): error TS1005: ';' expected.
-parserAstSpans1.ts(94,16): error TS1005: ';' expected.
-parserAstSpans1.ts(100,16): error TS1005: ';' expected.
 parserAstSpans1.ts(110,9): error TS2349: This expression is not callable.
-parserAstSpans1.ts(119,16): error TS1005: ';' expected.
-parserAstSpans1.ts(125,16): error TS1005: ';' expected.
 parserAstSpans1.ts(147,19): error TS2554: Expected 0 arguments, but got 1.
 parserAstSpans1.ts(190,6): error TS2339: Property 'i2_f1' does not exist on type '{ p1: number; f1: () => void; l1: () => void; nc_p1: number; nc_f1: () => void; nc_l1: () => void }'.
 parserAstSpans1.ts(191,6): error TS2339: Property 'i2_nc_f1' does not exist on type '{ p1: number; f1: () => void; l1: () => void; nc_p1: number; nc_f1: () => void; nc_l1: () => void }'.
@@ -17,7 +11,7 @@ parserAstSpans1.ts(205,6): error TS2339: Property 'i2_nc_l1' does not exist on t
 parserAstSpans1.ts(216,9): error TS2349: This expression is not callable.
 
 
-==== parserAstSpans1.ts (17 errors) ====
+==== parserAstSpans1.ts (11 errors) ====
     /** i1 is interface with properties*/
     interface i1 {
         /** i1_p1*/
@@ -97,16 +91,12 @@ parserAstSpans1.ts(216,9): error TS2349: This expression is not callable.
         }
         /** c2 c2_prop*/
         public get c2_prop() {
-                   ~~~~~~~
-!!! error TS1005: ';' expected.
             return 10;
         }
         public c2_nc_p1!: number;
         public c2_nc_f1() {
         }
         public get c2_nc_prop() {
-                   ~~~~~~~~~~
-!!! error TS1005: ';' expected.
             return 10;
         }
         /** c2 p1*/
@@ -116,16 +106,12 @@ parserAstSpans1.ts(216,9): error TS2349: This expression is not callable.
         }
         /** c2 prop*/
         public get prop() {
-                   ~~~~
-!!! error TS1005: ';' expected.
             return 10;
         }
         public nc_p1!: number;
         public nc_f1() {
         }
         public get nc_prop() {
-                   ~~~~~~~
-!!! error TS1005: ';' expected.
             return 10;
         }
         /** c2 constructor*/
@@ -147,16 +133,12 @@ parserAstSpans1.ts(216,9): error TS2349: This expression is not callable.
         }
         /** c3 prop*/
         public get prop() {
-                   ~~~~
-!!! error TS1005: ';' expected.
             return 10;
         }
         public nc_p1!: number;
         public nc_f1() {
         }
         public get nc_prop() {
-                   ~~~~~~~
-!!! error TS1005: ';' expected.
             return 10;
         }
     }

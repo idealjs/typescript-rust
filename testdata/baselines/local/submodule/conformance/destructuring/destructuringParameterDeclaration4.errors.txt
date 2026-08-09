@@ -1,16 +1,14 @@
-destructuringParameterDeclaration4.ts(9,18): error TS2304: Cannot find name 'Array'.
 destructuringParameterDeclaration4.ts(15,17): error TS1047: A rest parameter cannot be optional.
 destructuringParameterDeclaration4.ts(16,16): error TS1048: A rest parameter cannot have an initializer.
 destructuringParameterDeclaration4.ts(21,19): error TS2345: Argument of type 'true' is not assignable to parameter of type 'number | string'.
 destructuringParameterDeclaration4.ts(22,7): error TS2304: Cannot find name 'array2'.
 destructuringParameterDeclaration4.ts(30,24): error TS1003: Identifier expected.
 destructuringParameterDeclaration4.ts(30,27): error TS1005: ',' expected.
-destructuringParameterDeclaration4.ts(34,25): error TS2304: Cannot find name 'Number'.
 destructuringParameterDeclaration4.ts(35,22): error TS2304: Cannot find name 'E1'.
 destructuringParameterDeclaration4.ts(35,28): error TS2304: Cannot find name 'E'.
 
 
-==== destructuringParameterDeclaration4.ts (10 errors) ====
+==== destructuringParameterDeclaration4.ts (8 errors) ====
     ﻿// @target: es2015
     // If the parameter is a rest parameter, the parameter type is any[]
     // A type annotation for a rest parameter must denote an array type.
@@ -20,8 +18,6 @@ destructuringParameterDeclaration4.ts(35,28): error TS2304: Cannot find name 'E'
     
     type arrayString = Array<String>
     type someArray = Array<String> | number[];
-                  ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     type stringOrNumArray = Array<String|Number>;
     
     function a0(...x: [number, number, string]) { }  // Error, rest parameter must be array type
@@ -59,8 +55,6 @@ destructuringParameterDeclaration4.ts(35,28): error TS2304: Cannot find name 'E'
     
     // Rest parameter with generic
     function foo1<T extends Number>(...a: T[]) { }
-                         ~~~~~~
-!!! error TS2304: Cannot find name 'Number'.
     foo1(1, 2, "string", E1.a, E.b);  // Error
                       ~~
 !!! error TS2304: Cannot find name 'E1'.

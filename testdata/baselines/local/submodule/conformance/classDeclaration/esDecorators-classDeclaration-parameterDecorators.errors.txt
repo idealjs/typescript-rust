@@ -2,29 +2,25 @@ esDecorators-classDeclaration-parameterDecorators.ts(4,17): error TS1138: Parame
 esDecorators-classDeclaration-parameterDecorators.ts(4,22): error TS1005: ',' expected.
 esDecorators-classDeclaration-parameterDecorators.ts(5,12): error TS1138: Parameter declaration expected.
 esDecorators-classDeclaration-parameterDecorators.ts(5,17): error TS1005: ',' expected.
-esDecorators-classDeclaration-parameterDecorators.ts(6,9): error TS1005: ';' expected.
 esDecorators-classDeclaration-parameterDecorators.ts(6,11): error TS1138: Parameter declaration expected.
 esDecorators-classDeclaration-parameterDecorators.ts(6,16): error TS1005: ',' expected.
 esDecorators-classDeclaration-parameterDecorators.ts(7,19): error TS1138: Parameter declaration expected.
 esDecorators-classDeclaration-parameterDecorators.ts(7,24): error TS1005: ',' expected.
-esDecorators-classDeclaration-parameterDecorators.ts(8,16): error TS1005: ';' expected.
 esDecorators-classDeclaration-parameterDecorators.ts(8,18): error TS1138: Parameter declaration expected.
 esDecorators-classDeclaration-parameterDecorators.ts(8,23): error TS1005: ',' expected.
 esDecorators-classDeclaration-parameterDecorators.ts(12,17): error TS1138: Parameter declaration expected.
 esDecorators-classDeclaration-parameterDecorators.ts(12,22): error TS1005: ',' expected.
 esDecorators-classDeclaration-parameterDecorators.ts(13,12): error TS1138: Parameter declaration expected.
 esDecorators-classDeclaration-parameterDecorators.ts(13,17): error TS1005: ',' expected.
-esDecorators-classDeclaration-parameterDecorators.ts(14,9): error TS1005: ';' expected.
 esDecorators-classDeclaration-parameterDecorators.ts(14,11): error TS1138: Parameter declaration expected.
 esDecorators-classDeclaration-parameterDecorators.ts(14,16): error TS1005: ',' expected.
 esDecorators-classDeclaration-parameterDecorators.ts(15,19): error TS1138: Parameter declaration expected.
 esDecorators-classDeclaration-parameterDecorators.ts(15,24): error TS1005: ',' expected.
-esDecorators-classDeclaration-parameterDecorators.ts(16,16): error TS1005: ';' expected.
 esDecorators-classDeclaration-parameterDecorators.ts(16,18): error TS1138: Parameter declaration expected.
 esDecorators-classDeclaration-parameterDecorators.ts(16,23): error TS1005: ',' expected.
 
 
-==== esDecorators-classDeclaration-parameterDecorators.ts (24 errors) ====
+==== esDecorators-classDeclaration-parameterDecorators.ts (20 errors) ====
     declare let dec: any;
     
     class C {
@@ -39,8 +35,6 @@ esDecorators-classDeclaration-parameterDecorators.ts(16,23): error TS1005: ',' e
                     ~
 !!! error TS1005: ',' expected.
         set x(@dec x: any) {}
-            ~
-!!! error TS1005: ';' expected.
               ~
 !!! error TS1138: Parameter declaration expected.
                    ~
@@ -51,8 +45,6 @@ esDecorators-classDeclaration-parameterDecorators.ts(16,23): error TS1005: ',' e
                            ~
 !!! error TS1005: ',' expected.
         static set x(@dec x: any) {}
-                   ~
-!!! error TS1005: ';' expected.
                      ~
 !!! error TS1138: Parameter declaration expected.
                           ~
@@ -71,8 +63,6 @@ esDecorators-classDeclaration-parameterDecorators.ts(16,23): error TS1005: ',' e
                     ~
 !!! error TS1005: ',' expected.
         set x(@dec x: any) {}
-            ~
-!!! error TS1005: ';' expected.
               ~
 !!! error TS1138: Parameter declaration expected.
                    ~
@@ -83,8 +73,6 @@ esDecorators-classDeclaration-parameterDecorators.ts(16,23): error TS1005: ',' e
                            ~
 !!! error TS1005: ',' expected.
         static set x(@dec x: any) {}
-                   ~
-!!! error TS1005: ';' expected.
                      ~
 !!! error TS1138: Parameter declaration expected.
                           ~

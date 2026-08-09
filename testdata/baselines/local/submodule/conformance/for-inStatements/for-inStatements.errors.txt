@@ -1,7 +1,7 @@
 for-inStatements.ts(2,19): error TS1005: ';' expected.
 for-inStatements.ts(5,17): error TS1005: ';' expected.
 for-inStatements.ts(12,15): error TS2349: This expression is not callable.
-for-inStatements.ts(15,19): error TS2304: Cannot find name 'Date'.
+for-inStatements.ts(15,19): error TS2351: This expression is not constructable.
 for-inStatements.ts(26,23): error TS2304: Cannot find name 'T'.
 for-inStatements.ts(39,28): error TS2339: Property 'baz' does not exist on type '{ biz: () => any }'.
 for-inStatements.ts(40,28): error TS2339: Property 'baz' does not exist on type '{ biz: () => any }'.
@@ -30,7 +30,7 @@ for-inStatements.ts(40,28): error TS2339: Property 'baz' does not exist on type 
     for (var x in /[a-z]/) { }
     for (var x in new Date()) { }
                       ~~~~
-!!! error TS2304: Cannot find name 'Date'.
+!!! error TS2351: This expression is not constructable.
     
     var c: any, d: any, e: any;
     

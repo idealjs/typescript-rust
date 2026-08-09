@@ -1,39 +1,27 @@
-conditionalOperatorConditionIsObjectType.ts(2,25): error TS2304: Cannot find name 'Object'.
-conditionalOperatorConditionIsObjectType.ts(8,28): error TS2304: Cannot find name 'Object'.
-conditionalOperatorConditionIsObjectType.ts(14,28): error TS2304: Cannot find name 'Object'.
 conditionalOperatorConditionIsObjectType.ts(28,19): error TS2339: Property 'length' does not exist on type 'string'.
 conditionalOperatorConditionIsObjectType.ts(29,19): error TS2339: Property 'length' does not exist on type 'string'.
-conditionalOperatorConditionIsObjectType.ts(37,5): error TS2304: Cannot find name 'Date'.
 conditionalOperatorConditionIsObjectType.ts(39,3): error TS2339: Property 'doIt' does not exist on type 'object'.
-conditionalOperatorConditionIsObjectType.ts(41,5): error TS2304: Cannot find name 'Date'.
 conditionalOperatorConditionIsObjectType.ts(51,38): error TS2339: Property 'length' does not exist on type 'string'.
 conditionalOperatorConditionIsObjectType.ts(52,42): error TS2339: Property 'length' does not exist on type 'string'.
-conditionalOperatorConditionIsObjectType.ts(59,28): error TS2304: Cannot find name 'Date'.
 conditionalOperatorConditionIsObjectType.ts(61,25): error TS2339: Property 'doIt' does not exist on type 'object'.
 conditionalOperatorConditionIsObjectType.ts(63,34): error TS2339: Property 'doIt' does not exist on type 'object'.
 
 
-==== conditionalOperatorConditionIsObjectType.ts (13 errors) ====
+==== conditionalOperatorConditionIsObjectType.ts (7 errors) ====
     //Cond ? Expr1 : Expr2,  Cond is of object type, Expr1 and Expr2 have the same type
     declare var condObject: Object;
-                            ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     
     declare var exprAny1: any;
     declare var exprBoolean1: boolean;
     declare var exprNumber1: number;
     declare var exprString1: string;
     declare var exprIsObject1: Object;
-                               ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     
     declare var exprAny2: any;
     declare var exprBoolean2: boolean;
     declare var exprNumber2: number;
     declare var exprString2: string;
     declare var exprIsObject2: Object;
-                               ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     
     function foo() { };
     class C { static doIt: () => void };
@@ -61,16 +49,12 @@ conditionalOperatorConditionIsObjectType.ts(63,34): error TS2339: Property 'doIt
     //Cond is an object type expression
     foo() ? exprAny1 : exprAny2;
     new Date() ? exprBoolean1 : exprBoolean2;
-        ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     new C() ? exprNumber1 : exprNumber2;
     C.doIt() ? exprString1 : exprString2;
       ~~~~
 !!! error TS2339: Property 'doIt' does not exist on type 'object'.
     condObject.valueOf() ? exprIsObject1 : exprIsObject2;
     new Date() ? exprString1 : exprBoolean1; // union
-        ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     
     //Results shoud be same as Expr1 and Expr2
     var resultIsAny1 = condObject ? exprAny1 : exprAny2;
@@ -93,8 +77,6 @@ conditionalOperatorConditionIsObjectType.ts(63,34): error TS2339: Property 'doIt
     
     var resultIsAny3 = foo() ? exprAny1 : exprAny2;
     var resultIsBoolean3 = new Date() ? exprBoolean1 : exprBoolean2;
-                               ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     var resultIsNumber3 = new C() ? exprNumber1 : exprNumber2;
     var resultIsString3 = C.doIt() ? exprString1 : exprString2;
                             ~~~~

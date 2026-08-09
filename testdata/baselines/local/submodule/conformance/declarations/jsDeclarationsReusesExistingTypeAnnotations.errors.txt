@@ -1,22 +1,14 @@
-index.js(17,9): error TS1005: ';' expected.
-index.js(22,9): error TS1005: ';' expected.
-index.js(27,9): error TS1005: ';' expected.
-index.js(32,9): error TS1005: ';' expected.
-index.js(40,9): error TS1005: ';' expected.
-index.js(45,9): error TS1005: ';' expected.
-index.js(50,9): error TS1005: ';' expected.
-index.js(55,9): error TS1005: ';' expected.
-index.js(60,9): error TS1005: ';' expected.
-index.js(65,9): error TS1005: ';' expected.
-index.js(70,9): error TS1005: ';' expected.
-index.js(75,9): error TS1005: ';' expected.
-index.js(83,9): error TS1005: ';' expected.
-index.js(88,9): error TS1005: ';' expected.
-index.js(93,9): error TS1005: ';' expected.
-index.js(98,9): error TS1005: ';' expected.
+index.js(46,14): error TS2339: Property 'p1' does not exist on type 'object'.
+index.js(56,14): error TS2339: Property 'p2' does not exist on type 'object'.
+index.js(66,14): error TS2339: Property 'p3' does not exist on type 'object'.
+index.js(76,14): error TS2339: Property 'p4' does not exist on type 'object'.
+index.js(84,14): error TS2339: Property 'p1' does not exist on type 'object'.
+index.js(89,14): error TS2339: Property 'p2' does not exist on type 'object'.
+index.js(94,14): error TS2339: Property 'p3' does not exist on type 'object'.
+index.js(99,14): error TS2339: Property 'p4' does not exist on type 'object'.
 
 
-==== index.js (16 errors) ====
+==== index.js (8 errors) ====
     class С1 {
         /** @type {string=} */
         p1 = undefined;
@@ -34,29 +26,21 @@ index.js(98,9): error TS1005: ';' expected.
     class С2 {
         /** @type {string=} */
         get p1() {
-            ~~
-!!! error TS1005: ';' expected.
             return undefined;
         }
     
         /** @type {string | undefined} */
         get p2() {
-            ~~
-!!! error TS1005: ';' expected.
             return undefined;
         }
     
         /** @type {?string} */
         get p3() {
-            ~~
-!!! error TS1005: ';' expected.
             return null;
         }
     
         /** @type {string | null} */
         get p4() {
-            ~~
-!!! error TS1005: ';' expected.
             return null;
         }
     }
@@ -65,58 +49,50 @@ index.js(98,9): error TS1005: ';' expected.
     class С3 {
         /** @type {string=} */
         get p1() {
-            ~~
-!!! error TS1005: ';' expected.
             return undefined;
         }
     
         /** @param {string=} value */
         set p1(value) {
-            ~~
-!!! error TS1005: ';' expected.
             this.p1 = value;
+                 ~~
+!!! error TS2339: Property 'p1' does not exist on type 'object'.
         }
     
         /** @type {string | undefined} */
         get p2() {
-            ~~
-!!! error TS1005: ';' expected.
             return undefined;
         }
     
         /** @param {string | undefined} value */
         set p2(value) {
-            ~~
-!!! error TS1005: ';' expected.
             this.p2 = value;
+                 ~~
+!!! error TS2339: Property 'p2' does not exist on type 'object'.
         }
     
         /** @type {?string} */
         get p3() {
-            ~~
-!!! error TS1005: ';' expected.
             return null;
         }
     
         /** @param {?string} value */
         set p3(value) {
-            ~~
-!!! error TS1005: ';' expected.
             this.p3 = value;
+                 ~~
+!!! error TS2339: Property 'p3' does not exist on type 'object'.
         }
     
         /** @type {string | null} */
         get p4() {
-            ~~
-!!! error TS1005: ';' expected.
             return null;
         }
     
         /** @param {string | null} value */
         set p4(value) {
-            ~~
-!!! error TS1005: ';' expected.
             this.p4 = value;
+                 ~~
+!!! error TS2339: Property 'p4' does not exist on type 'object'.
         }
     }
     
@@ -124,29 +100,29 @@ index.js(98,9): error TS1005: ';' expected.
     class С4 {
         /** @param {string=} value */
         set p1(value) {
-            ~~
-!!! error TS1005: ';' expected.
             this.p1 = value;
+                 ~~
+!!! error TS2339: Property 'p1' does not exist on type 'object'.
         }
     
         /** @param {string | undefined} value */
         set p2(value) {
-            ~~
-!!! error TS1005: ';' expected.
             this.p2 = value;
+                 ~~
+!!! error TS2339: Property 'p2' does not exist on type 'object'.
         }
     
         /** @param {?string} value */
         set p3(value) {
-            ~~
-!!! error TS1005: ';' expected.
             this.p3 = value;
+                 ~~
+!!! error TS2339: Property 'p3' does not exist on type 'object'.
         }
     
         /** @param {string | null} value */
         set p4(value) {
-            ~~
-!!! error TS1005: ';' expected.
             this.p4 = value;
+                 ~~
+!!! error TS2339: Property 'p4' does not exist on type 'object'.
         }
     }

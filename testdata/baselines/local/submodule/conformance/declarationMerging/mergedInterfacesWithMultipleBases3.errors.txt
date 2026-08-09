@@ -4,14 +4,13 @@ mergedInterfacesWithMultipleBases3.ts(13,5): error TS2564: Property 'c' has no i
 mergedInterfacesWithMultipleBases3.ts(17,5): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
 mergedInterfacesWithMultipleBases3.ts(28,1): error TS2420: Class 'D' incorrectly implements interface '{ y: T; z: T }'.
 mergedInterfacesWithMultipleBases3.ts(29,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
-mergedInterfacesWithMultipleBases3.ts(30,8): error TS2304: Cannot find name 'Date'.
 mergedInterfacesWithMultipleBases3.ts(31,5): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
 mergedInterfacesWithMultipleBases3.ts(32,5): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
 mergedInterfacesWithMultipleBases3.ts(33,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 mergedInterfacesWithMultipleBases3.ts(34,5): error TS2564: Property 'z' has no initializer and is not definitely assigned in the constructor.
 
 
-==== mergedInterfacesWithMultipleBases3.ts (11 errors) ====
+==== mergedInterfacesWithMultipleBases3.ts (10 errors) ====
     // merged interfaces behave as if all extends clauses from each declaration are merged together
     // no errors expected
     
@@ -55,8 +54,6 @@ mergedInterfacesWithMultipleBases3.ts(34,5): error TS2564: Property 'z' has no i
 !!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         b: Date;
     ~~~~~~~~~~~~
-           ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         c: string;
     ~~~~~~~~~~~~~~
         ~

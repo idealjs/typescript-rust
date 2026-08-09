@@ -4191,6 +4191,55 @@ impl Parser {
         Arc::new(Node::with_loc(kind, data, TextRange::new(pos, end)))
     }
 
+    /// Parse a `get`/`set` accessor in a class body (with modifiers).
+    /// Mirrors Go's parseAccessorDeclaration (parser.go:1886-1937).
+    fn parse_class_accessor(
+        &mut self,
+        pos: usize,
+        modifiers: Option<Arc<ModifierList>>,
+        is_get: bool,
+    ) -> Arc<Node> {
+        self.next_token(); // consume `get`/`set`
+        let name = self.parse_property_name();
+        let type_parameters = self.parse_optional_type_parameters();
+        let parameters = self.parse_parameter_list();
+        let type_node = self.parse_optional_return_type();
+        let body = if self.token == SyntaxKind::OpenBraceToken {
+            Some(self.parse_block())
+        } else {
+            self.parse_semicolon();
+            None
+        };
+        let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
+        let kind = if is_get {
+            SyntaxKind::GetAccessor
+        } else {
+            SyntaxKind::SetAccessor
+        };
+        let data = if is_get {
+            NodeData::GetAccessorDeclaration(GetAccessorDeclarationData {
+                modifiers,
+                name,
+                type_parameters,
+                parameters,
+                type_node,
+                full_signature: None,
+                body,
+            })
+        } else {
+            NodeData::SetAccessorDeclaration(SetAccessorDeclarationData {
+                modifiers,
+                name,
+                type_parameters,
+                parameters,
+                type_node,
+                full_signature: None,
+                body,
+            })
+        };
+        Arc::new(Node::with_loc(kind, data, TextRange::new(pos, end)))
+    }
+
     fn parse_jsx_element_or_fragment(&mut self, in_expression_context: bool) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::LessThanToken);
@@ -6193,16 +6242,40 @@ impl Parser {
             }
         }
 
+        // Handle `get`/`set` accessors in class body.
+        // `get x() {}` — only treat `get` as accessor keyword when followed by
+        // a property name. `{ get: 1 }` is a regular property named "get".
+        if self.token == SyntaxKind::GetKeyword && self.is_get_or_set_accessor() {
+            return self.parse_class_accessor(pos, modifiers, true);
+        }
+        if self.token == SyntaxKind::SetKeyword && self.is_get_or_set_accessor() {
+            return self.parse_class_accessor(pos, modifiers, false);
+        }
+
+        // Generator method: `*name() {}` or `async *name() {}`.
+        let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
+
         let name = self.parse_property_name();
         let postfix_token = self
             .parse_optional_token(SyntaxKind::QuestionToken)
             .or_else(|| self.parse_optional_token(SyntaxKind::ExclamationToken));
 
-        if self.token == SyntaxKind::OpenParenToken || self.token == SyntaxKind::LessThanToken {
+        if self.token == SyntaxKind::OpenParenToken
+            || self.token == SyntaxKind::LessThanToken
+            || asterisk_token.is_some()
+        {
             // Check if this is a constructor (`constructor(...) {}`).
             let is_constructor =
                 name.kind == SyntaxKind::Identifier && name.text() == "constructor";
             let type_parameters = self.parse_optional_type_parameters();
+
+            // Set yield/await context for generator/async methods.
+            let prev_yield = self.yield_context;
+            let prev_await = self.await_context;
+            if asterisk_token.is_some() {
+                self.yield_context = true;
+            }
+
             let parameters = self.parse_parameter_list();
             let type_node = self.parse_optional_return_type();
             let body = if self.token == SyntaxKind::OpenBraceToken {
@@ -6211,6 +6284,9 @@ impl Parser {
                 self.parse_semicolon();
                 None
             };
+            self.yield_context = prev_yield;
+            self.await_context = prev_await;
+
             let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
             if is_constructor {
                 return Arc::new(Node::with_loc(
@@ -6230,7 +6306,7 @@ impl Parser {
                 SyntaxKind::MethodDeclaration,
                 NodeData::MethodDeclaration(MethodDeclarationData {
                     modifiers,
-                    asterisk_token: None,
+                    asterisk_token,
                     name,
                     postfix_token,
                     type_parameters,

@@ -2,19 +2,12 @@ derivedClassWithoutExplicitConstructor2.ts(14,22): error TS2554: Expected 0 argu
 derivedClassWithoutExplicitConstructor2.ts(15,22): error TS2554: Expected 0 arguments, but got 2.
 derivedClassWithoutExplicitConstructor2.ts(16,22): error TS2554: Expected 0 arguments, but got 3.
 derivedClassWithoutExplicitConstructor2.ts(19,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
-derivedClassWithoutExplicitConstructor2.ts(25,19): error TS2304: Cannot find name 'Date'.
 derivedClassWithoutExplicitConstructor2.ts(31,16): error TS2554: Expected 0 arguments, but got 1.
-derivedClassWithoutExplicitConstructor2.ts(31,20): error TS2304: Cannot find name 'Date'.
 derivedClassWithoutExplicitConstructor2.ts(32,16): error TS2554: Expected 0 arguments, but got 2.
-derivedClassWithoutExplicitConstructor2.ts(32,20): error TS2304: Cannot find name 'Date'.
-derivedClassWithoutExplicitConstructor2.ts(32,32): error TS2304: Cannot find name 'Date'.
 derivedClassWithoutExplicitConstructor2.ts(33,16): error TS2554: Expected 0 arguments, but got 3.
-derivedClassWithoutExplicitConstructor2.ts(33,20): error TS2304: Cannot find name 'Date'.
-derivedClassWithoutExplicitConstructor2.ts(33,32): error TS2304: Cannot find name 'Date'.
-derivedClassWithoutExplicitConstructor2.ts(33,44): error TS2304: Cannot find name 'Date'.
 
 
-==== derivedClassWithoutExplicitConstructor2.ts (14 errors) ====
+==== derivedClassWithoutExplicitConstructor2.ts (7 errors) ====
     class Base {
         a = 1;
         constructor(x: number, y?: number, z?: number);
@@ -48,8 +41,6 @@ derivedClassWithoutExplicitConstructor2.ts(33,44): error TS2304: Cannot find nam
     }
     
     class D<T extends Date> extends Base2<T> {
-                      ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         x = 2
         y: T = null;
     }
@@ -58,21 +49,9 @@ derivedClassWithoutExplicitConstructor2.ts(33,44): error TS2304: Cannot find nam
     var d2 = new D(new Date()); // ok
                    ~~~~~~~~~~
 !!! error TS2554: Expected 0 arguments, but got 1.
-                       ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     var d3 = new D(new Date(), new Date());
                    ~~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2554: Expected 0 arguments, but got 2.
-                       ~~~~
-!!! error TS2304: Cannot find name 'Date'.
-                                   ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     var d4 = new D(new Date(), new Date(), new Date());
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2554: Expected 0 arguments, but got 3.
-                       ~~~~
-!!! error TS2304: Cannot find name 'Date'.
-                                   ~~~~
-!!! error TS2304: Cannot find name 'Date'.
-                                               ~~~~
-!!! error TS2304: Cannot find name 'Date'.

@@ -1,12 +1,7 @@
 anyAssignableToEveryType.ts(4,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-anyAssignableToEveryType.ts(18,8): error TS2304: Cannot find name 'Date'.
-anyAssignableToEveryType.ts(21,8): error TS2304: Cannot find name 'Object'.
-anyAssignableToEveryType.ts(32,8): error TS2304: Cannot find name 'Number'.
-anyAssignableToEveryType.ts(33,8): error TS2304: Cannot find name 'String'.
-anyAssignableToEveryType.ts(35,44): error TS2304: Cannot find name 'Date'.
 
 
-==== anyAssignableToEveryType.ts (6 errors) ====
+==== anyAssignableToEveryType.ts (1 errors) ====
     var a: any;
     
     class C {
@@ -27,13 +22,9 @@ anyAssignableToEveryType.ts(35,44): error TS2304: Cannot find name 'Date'.
     var c: string = a;
     var d: boolean = a;
     var e: Date = a;
-           ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     var f: any = a;
     var g: void = a;
     var h: Object = a;
-           ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     var i: {} = a;
     var j: () => {} = a;
     var k: Function = a;
@@ -45,15 +36,9 @@ anyAssignableToEveryType.ts(35,44): error TS2304: Cannot find name 'Date'.
     var n: { foo: string } = a;
     var o: <T>(x: T) => T = a;
     var p: Number = a;
-           ~~~~~~
-!!! error TS2304: Cannot find name 'Number'.
     var q: String = a;
-           ~~~~~~
-!!! error TS2304: Cannot find name 'String'.
     
     function foo<T, U /*extends T*/, V extends Date>(x: T, y: U, z: V) {
-                                               ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         x = a;
         y = a;
         z = a;

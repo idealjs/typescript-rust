@@ -1,5 +1,3 @@
-inferTypes1.ts(123,11): error TS2304: Cannot find name 'Date'.
-inferTypes1.ts(128,25): error TS2304: Cannot find name 'Date'.
 inferTypes1.ts(181,53): error TS1005: '?' expected.
 inferTypes1.ts(181,55): error TS1005: ':' expected.
 inferTypes1.ts(181,63): error TS1005: '=>' expected.
@@ -9,7 +7,7 @@ inferTypes1.ts(181,85): error TS2304: Cannot find name 'obj'.
 inferTypes1.ts(184,16): error TS2349: This expression is not callable.
 
 
-==== inferTypes1.ts (9 errors) ====
+==== inferTypes1.ts (7 errors) ====
     type Unpacked<T> =
         T extends (infer U)[] ? U :
         T extends (...args: any[]) => infer U ? U :
@@ -133,15 +131,11 @@ inferTypes1.ts(184,16): error TS2349: This expression is not callable.
         str: "literalstring",
         fn: () => void,
         date: Date,
-              ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         customClass: MyClass,
         obj: {
             prop: "property",
             clz: MyClass,
             nested: { attr: Date }
-                            ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         },
     }
     

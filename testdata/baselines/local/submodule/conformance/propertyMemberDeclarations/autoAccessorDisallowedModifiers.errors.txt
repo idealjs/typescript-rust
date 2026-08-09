@@ -1,6 +1,4 @@
 autoAccessorDisallowedModifiers.ts(4,13): error TS1005: ';' expected.
-autoAccessorDisallowedModifiers.ts(11,18): error TS1005: ';' expected.
-autoAccessorDisallowedModifiers.ts(12,18): error TS1005: ';' expected.
 autoAccessorDisallowedModifiers.ts(16,22): error TS1005: ';' expected.
 autoAccessorDisallowedModifiers.ts(27,1): error TS1275: 'accessor' modifier can only appear on a property declaration.
 autoAccessorDisallowedModifiers.ts(31,1): error TS1275: 'accessor' modifier can only appear on a property declaration.
@@ -16,7 +14,7 @@ autoAccessorDisallowedModifiers.ts(38,17): error TS1005: ';' expected.
 autoAccessorDisallowedModifiers.ts(38,17): error TS2304: Cannot find name 'N2'.
 
 
-==== autoAccessorDisallowedModifiers.ts (16 errors) ====
+==== autoAccessorDisallowedModifiers.ts (14 errors) ====
     abstract class C1 {
         accessor accessor a: any;
         readonly accessor b: any;
@@ -30,11 +28,7 @@ autoAccessorDisallowedModifiers.ts(38,17): error TS2304: Cannot find name 'N2'.
         accessor static h: any;
         accessor i() {}
         accessor get j() { return false; }
-                     ~
-!!! error TS1005: ';' expected.
         accessor set k(v: any) {}
-                     ~
-!!! error TS1005: ';' expected.
         accessor constructor() {}
         accessor l?: any;
         accessor readonly m: any;

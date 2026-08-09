@@ -1,8 +1,7 @@
 superCallParameterContextualTyping1.ts(11,21): error TS2349: This expression is not callable.
-superCallParameterContextualTyping1.ts(11,36): error TS2304: Cannot find name 'String'.
 
 
-==== superCallParameterContextualTyping1.ts (2 errors) ====
+==== superCallParameterContextualTyping1.ts (1 errors) ====
     ﻿// @target: es2015
     
     class A<T1, T2> {
@@ -16,6 +15,4 @@ superCallParameterContextualTyping1.ts(11,36): error TS2304: Cannot find name 'S
         constructor() { super(value => String(value.toExponential())); }
                      ~~~~~
 !!! error TS2349: This expression is not callable.
-                                    ~~~~~~
-!!! error TS2304: Cannot find name 'String'.
     }

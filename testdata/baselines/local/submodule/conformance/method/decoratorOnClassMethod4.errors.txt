@@ -1,15 +1,9 @@
-decoratorOnClassMethod4.ts(1,71): error TS2304: Cannot find name 'TypedPropertyDescriptor'.
-decoratorOnClassMethod4.ts(1,100): error TS2304: Cannot find name 'TypedPropertyDescriptor'.
 decoratorOnClassMethod4.ts(4,23): error TS1003: Identifier expected.
 decoratorOnClassMethod4.ts(5,1): error TS1128: Declaration or statement expected.
 
 
-==== decoratorOnClassMethod4.ts (4 errors) ====
+==== decoratorOnClassMethod4.ts (2 errors) ====
     declare function dec<T>(target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<T>): TypedPropertyDescriptor<T>;
-                                                                          ~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TypedPropertyDescriptor'.
-                                                                                                       ~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TypedPropertyDescriptor'.
     
     class C {
         @dec ["method"]() {}

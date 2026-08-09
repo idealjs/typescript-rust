@@ -17,10 +17,9 @@ typeGuardsWithInstanceOfByConstructorSignature.ts(166,11): error TS2339: Propert
 typeGuardsWithInstanceOfByConstructorSignature.ts(182,11): error TS2339: Property 'bar' does not exist on type '{ foo: number }'.
 typeGuardsWithInstanceOfByConstructorSignature.ts(187,11): error TS2339: Property 'foo1' does not exist on type '{ foo: number }'.
 typeGuardsWithInstanceOfByConstructorSignature.ts(188,11): error TS2339: Property 'foo2' does not exist on type '{ foo: number }'.
-typeGuardsWithInstanceOfByConstructorSignature.ts(192,22): error TS2304: Cannot find name 'Object'.
 
 
-==== typeGuardsWithInstanceOfByConstructorSignature.ts (20 errors) ====
+==== typeGuardsWithInstanceOfByConstructorSignature.ts (19 errors) ====
     interface AConstructor {
         new (): A;
     }
@@ -251,8 +250,6 @@ typeGuardsWithInstanceOfByConstructorSignature.ts(192,22): error TS2304: Cannot 
     
     declare var obj17: any;
     if (obj17 instanceof Object) { // can't narrow type from 'any' to 'Object'
-                         ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         obj17.foo1;
         obj17.foo2;
     }

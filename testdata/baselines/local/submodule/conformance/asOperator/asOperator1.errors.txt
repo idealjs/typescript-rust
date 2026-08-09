@@ -1,16 +1,13 @@
 asOperator1.ts(3,26): error TS2339: Property 'length' does not exist on type 'string'.
-asOperator1.ts(4,9): error TS2304: Cannot find name 'Date'.
 
 
-==== asOperator1.ts (2 errors) ====
+==== asOperator1.ts (1 errors) ====
     var as = 43;
     var x = undefined as number;
     var y = (null as string).length;
                              ~~~~~~
 !!! error TS2339: Property 'length' does not exist on type 'string'.
     var z = Date as any as string;
-            ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     
     // Should parse as a union type, not a bitwise 'or' of (32 as number) and 'string'
     var j = 32 as number|string;

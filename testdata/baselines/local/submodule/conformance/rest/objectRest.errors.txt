@@ -7,9 +7,6 @@ error TS2451: Cannot redeclare block-scoped variable 'renamed'.
 error TS2451: Cannot redeclare block-scoped variable 'x'.
 error TS2451: Cannot redeclare block-scoped variable 'removed'.
 error TS2451: Cannot redeclare block-scoped variable 'o'.
-objectRest.ts(24,9): error TS1005: ';' expected.
-objectRest.ts(25,9): error TS1005: ';' expected.
-objectRest.ts(26,9): error TS1005: ';' expected.
 objectRest.ts(46,41): error TS1012: Unexpected token.
 objectRest.ts(46,44): error TS1005: ',' expected.
 
@@ -31,7 +28,7 @@ objectRest.ts(46,44): error TS1005: ',' expected.
 !!! error TS2451: Cannot redeclare block-scoped variable 'removed'.
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'o'.
-==== objectRest.ts (5 errors) ====
+==== objectRest.ts (2 errors) ====
     var o = { a: 1, b: 'no' }
     var { ...clone } = o;
     var { a, ...justB } = o;
@@ -56,14 +53,8 @@ objectRest.ts(46,44): error TS1005: ',' expected.
         private x!: number;
         protected y!: number;
         set z(value: number) { }
-            ~
-!!! error TS1005: ';' expected.
         get both(): number { return 12 }
-            ~~~~
-!!! error TS1005: ';' expected.
         set both(value: number) { }
-            ~~~~
-!!! error TS1005: ';' expected.
         m() { }
         removed!: string;
         remainder!: string;

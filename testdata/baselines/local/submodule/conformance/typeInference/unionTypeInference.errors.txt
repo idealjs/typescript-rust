@@ -1,9 +1,8 @@
 unionTypeInference.ts(13,24): error TS2345: Argument of type '1' is not assignable to parameter of type 'string | string'.
 unionTypeInference.ts(31,15): error TS2345: Argument of type '42' is not assignable to parameter of type 'string & number'.
-unionTypeInference.ts(63,25): error TS2304: Cannot find name 'Object'.
 
 
-==== unionTypeInference.ts (3 errors) ====
+==== unionTypeInference.ts (2 errors) ====
     declare const b: boolean;
     declare const s: string;
     declare const sn: string | number;
@@ -71,8 +70,6 @@ unionTypeInference.ts(63,25): error TS2304: Cannot find name 'Object'.
     async function fun<T>(deepPromised: DeepPromised<T>) {
         const deepPromisedWithIndexer: DeepPromised<{ [name: string]: {} | null | undefined }> = deepPromised;
         for (const value of Object.values(deepPromisedWithIndexer)) {
-                            ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
             const awaitedValue = await value;
             if (awaitedValue)
                 await fun(awaitedValue);

@@ -1,4 +1,4 @@
-main.ts(4,9): error TS1005: ';' expected.
+main.ts(3,17): error TS2339: Property '#c' does not exist on type '{ #a: 1; #b: () => any }'.
 
 
 ==== privateNameEmitHelpers.ts (0 errors) ====
@@ -7,9 +7,9 @@ main.ts(4,9): error TS1005: ';' expected.
     export class C {
         #a = 1;
         #b() { this.#c = 42; }
+                    ~~
+!!! error TS2339: Property '#c' does not exist on type '{ #a: 1; #b: () => any }'.
         set #c(v: number) { this.#a += v; }
-            ~~
-!!! error TS1005: ';' expected.
     }
     
 ==== index.d.ts (0 errors) ====

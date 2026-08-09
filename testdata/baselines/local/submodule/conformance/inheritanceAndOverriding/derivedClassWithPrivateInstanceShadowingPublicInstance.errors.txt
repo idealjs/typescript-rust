@@ -1,9 +1,5 @@
 derivedClassWithPrivateInstanceShadowingPublicInstance.ts(2,12): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-derivedClassWithPrivateInstanceShadowingPublicInstance.ts(7,16): error TS1005: ';' expected.
-derivedClassWithPrivateInstanceShadowingPublicInstance.ts(8,16): error TS1005: ';' expected.
 derivedClassWithPrivateInstanceShadowingPublicInstance.ts(13,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-derivedClassWithPrivateInstanceShadowingPublicInstance.ts(18,17): error TS1005: ';' expected.
-derivedClassWithPrivateInstanceShadowingPublicInstance.ts(19,17): error TS1005: ';' expected.
 derivedClassWithPrivateInstanceShadowingPublicInstance.ts(22,14): error TS2339: Property 'x' does not exist on type 'object'.
 derivedClassWithPrivateInstanceShadowingPublicInstance.ts(23,18): error TS2339: Property 'x' does not exist on type 'object'.
 derivedClassWithPrivateInstanceShadowingPublicInstance.ts(25,15): error TS2339: Property 'fn' does not exist on type 'object'.
@@ -14,7 +10,7 @@ derivedClassWithPrivateInstanceShadowingPublicInstance.ts(31,18): error TS2339: 
 derivedClassWithPrivateInstanceShadowingPublicInstance.ts(32,9): error TS2339: Property 'a' does not exist on type 'object'.
 
 
-==== derivedClassWithPrivateInstanceShadowingPublicInstance.ts (14 errors) ====
+==== derivedClassWithPrivateInstanceShadowingPublicInstance.ts (10 errors) ====
     class Base {
         public x: string;
                ~
@@ -24,11 +20,7 @@ derivedClassWithPrivateInstanceShadowingPublicInstance.ts(32,9): error TS2339: P
         }
     
         public get a() { return 1; }
-                   ~
-!!! error TS1005: ';' expected.
         public set a(v) { }
-                   ~
-!!! error TS1005: ';' expected.
     }
     
     // error, not a subtype
@@ -41,11 +33,7 @@ derivedClassWithPrivateInstanceShadowingPublicInstance.ts(32,9): error TS2339: P
         }
     
         private get a() { return 1; }
-                    ~
-!!! error TS1005: ';' expected.
         private set a(v) { }
-                    ~
-!!! error TS1005: ';' expected.
     }
     
     var r = Base.x; // ok

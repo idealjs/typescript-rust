@@ -1,12 +1,9 @@
-decoratorOnClassMethodParameter1.es6.ts(1,30): error TS2304: Cannot find name 'Object'.
 decoratorOnClassMethodParameter1.es6.ts(4,12): error TS1138: Parameter declaration expected.
 decoratorOnClassMethodParameter1.es6.ts(4,17): error TS1005: ',' expected.
 
 
-==== decoratorOnClassMethodParameter1.es6.ts (3 errors) ====
+==== decoratorOnClassMethodParameter1.es6.ts (2 errors) ====
     declare function dec(target: Object, propertyKey: string | symbol, parameterIndex: number): void;
-                                 ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     
     export default class {
         method(@dec p: number) {}

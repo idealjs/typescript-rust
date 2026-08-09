@@ -1,12 +1,8 @@
 error TS2451: Cannot redeclare block-scoped variable 'x'.
-awaitUsingDeclarations.1.ts(28,11): error TS1003: Identifier expected.
-awaitUsingDeclarations.1.ts(28,13): error TS1005: ';' expected.
-awaitUsingDeclarations.1.ts(30,9): error TS2304: Cannot find name 'yield'.
-awaitUsingDeclarations.1.ts(39,9): error TS2304: Cannot find name 'Math'.
 
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'x'.
-==== awaitUsingDeclarations.1.ts (4 errors) ====
+==== awaitUsingDeclarations.1.ts (0 errors) ====
     await using d1 = { async [Symbol.asyncDispose]() {} };
     
     async function af() {
@@ -35,14 +31,8 @@ awaitUsingDeclarations.1.ts(39,9): error TS2304: Cannot find name 'Math'.
         }
     
         async * ag() {
-              ~
-!!! error TS1003: Identifier expected.
-                ~~
-!!! error TS1005: ';' expected.
             await using d15 = { async [Symbol.asyncDispose]() {} };
             yield;
-            ~~~~~
-!!! error TS2304: Cannot find name 'yield'.
             await null;
         }
     }
@@ -52,8 +42,6 @@ awaitUsingDeclarations.1.ts(39,9): error TS2304: Cannot find name 'Math'.
     }
     
     switch (Math.random()) {
-            ~~~~
-!!! error TS2304: Cannot find name 'Math'.
         case 0: {
             await using d20 = { async [Symbol.asyncDispose]() {} };
             break;

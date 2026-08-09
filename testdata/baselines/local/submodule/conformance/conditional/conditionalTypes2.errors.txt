@@ -1,11 +1,10 @@
-conditionalTypes2.ts(37,15): error TS2304: Cannot find name 'Error'.
 conditionalTypes2.ts(69,12): error TS2345: Argument of type '<unknown type>' is not assignable to parameter of type '{ foo: string; bar: string }'.
 conditionalTypes2.ts(75,12): error TS2345: Argument of type '<unknown type>' is not assignable to parameter of type '{ foo: string; bat: string }'.
 conditionalTypes2.ts(195,7): error TS2322: Type '{ a: 4 }' is not assignable to type 'never'.
 conditionalTypes2.ts(238,4): error TS2345: Argument of type '(x: { x: string }) => void' is not assignable to parameter of type '(x: <unknown type>) => void'.
 
 
-==== conditionalTypes2.ts (5 errors) ====
+==== conditionalTypes2.ts (4 errors) ====
     interface Covariant<T> {
         foo: T extends string ? T : number;
     }
@@ -43,8 +42,6 @@ conditionalTypes2.ts(238,4): error TS2345: Argument of type '(x: { x: string }) 
             return item;
         }
         throw new Error();
-                  ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     }
     
     function f10<T>(x: T) {

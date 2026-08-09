@@ -3,9 +3,7 @@ parserRealSource14.ts(33,36): error TS2339: Property 'map' does not exist on typ
 parserRealSource14.ts(43,27): error TS2339: Property 'pop' does not exist on type 'error[]'.
 parserRealSource14.ts(50,27): error TS2339: Property 'pop' does not exist on type 'error[]'.
 parserRealSource14.ts(53,23): error TS2339: Property 'push' does not exist on type 'error[]'.
-parserRealSource14.ts(58,27): error TS2304: Cannot find name 'Error'.
 parserRealSource14.ts(63,38): error TS2339: Property 'length' does not exist on type '() => any'.
-parserRealSource14.ts(64,27): error TS2304: Cannot find name 'Error'.
 parserRealSource14.ts(70,35): error TS2339: Property 'NodeType' does not exist on type 'TypeScript'.
 parserRealSource14.ts(94,56): error TS2339: Property 'NodeType' does not exist on type 'TypeScript'.
 parserRealSource14.ts(95,56): error TS2339: Property 'NodeType' does not exist on type 'TypeScript'.
@@ -101,7 +99,7 @@ parserRealSource14.ts(572,20): error TS2339: Property 'getAstWalkerFactory' does
 
 
 !!! error TS6053: File '/.src/typescript.ts' not found.
-==== parserRealSource14.ts (99 errors) ====
+==== parserRealSource14.ts (97 errors) ====
     // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
     // See LICENSE.txt in the project root for complete license information.
     
@@ -168,8 +166,6 @@ parserRealSource14.ts(572,20): error TS2339: Property 'getAstWalkerFactory' does
             public up() {
                 if (this.top <= -1)
                     throw new Error("Invalid call to 'up'");
-                              ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
                 this.top--;
             }
     
@@ -178,8 +174,6 @@ parserRealSource14.ts(572,20): error TS2339: Property 'getAstWalkerFactory' does
                                          ~~~~~~
 !!! error TS2339: Property 'length' does not exist on type '() => any'.
                     throw new Error("Invalid call to 'down'");
-                              ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
                 this.top++;
             }
     

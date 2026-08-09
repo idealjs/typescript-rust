@@ -1,14 +1,10 @@
-discriminatedUnionTypes2.ts(36,61): error TS2304: Cannot find name 'Error'.
 discriminatedUnionTypes2.ts(40,11): error TS2339: Property 'value' does not exist on type '{ error: undefined; value: number } | { error: error }'.
 discriminatedUnionTypes2.ts(47,5): error TS2345: Argument of type '{ value: 10 }' is not assignable to parameter of type '{ error: undefined; value: number } | { error: error }'.
-discriminatedUnionTypes2.ts(48,18): error TS2304: Cannot find name 'Error'.
-discriminatedUnionTypes2.ts(53,12): error TS2304: Cannot find name 'Error'.
-discriminatedUnionTypes2.ts(69,22): error TS2304: Cannot find name 'Error'.
 discriminatedUnionTypes2.ts(115,17): error TS2339: Property 'name' does not exist on type '{ type: "a"; data: string } | { type: "b"; name: string } | { type: "c"; other: string } & { type: "b"; name: string } | { type: "c"; other: string }'.
 discriminatedUnionTypes2.ts(118,17): error TS2339: Property 'other' does not exist on type '{ type: "a"; data: string } | { type: "b"; name: string } | { type: "c"; other: string } & { type: "b"; name: string } | { type: "c"; other: string }'.
 
 
-==== discriminatedUnionTypes2.ts (8 errors) ====
+==== discriminatedUnionTypes2.ts (4 errors) ====
     function f10(x : { kind: false, a: string } | { kind: true, b: string } | { kind: string, c: string }) {
         if (x.kind === false) {
             x.a;
@@ -45,8 +41,6 @@ discriminatedUnionTypes2.ts(118,17): error TS2339: Property 'other' does not exi
     }
     
     type Result<T> = { error?: undefined, value: T } | { error: Error };
-                                                                ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     
     function f15(x: Result<number>) {
         if (!x.error) {
@@ -63,15 +57,11 @@ discriminatedUnionTypes2.ts(118,17): error TS2339: Property 'other' does not exi
         ~~~~~~~~~~~~~
 !!! error TS2345: Argument of type '{ value: 10 }' is not assignable to parameter of type '{ error: undefined; value: number } | { error: error }'.
     f15({ error: new Error("boom") });
-                     ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     
     // Repro from #24193
     
     interface WithError {
         error: Error
-               ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
         data: null
     }
     
@@ -88,8 +78,6 @@ discriminatedUnionTypes2.ts(118,17): error TS2339: Property 'other' does not exi
             const data: Data = carrier.data
         } else {
             const error: Error = carrier.error
-                         ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
             const data: null = carrier.data
         }
     }

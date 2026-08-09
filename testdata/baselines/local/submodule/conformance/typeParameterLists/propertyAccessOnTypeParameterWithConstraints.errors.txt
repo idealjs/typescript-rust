@@ -1,9 +1,6 @@
-propertyAccessOnTypeParameterWithConstraints.ts(4,19): error TS2304: Cannot find name 'Date'.
-propertyAccessOnTypeParameterWithConstraints.ts(17,10): error TS2304: Cannot find name 'Date'.
 propertyAccessOnTypeParameterWithConstraints.ts(24,10): error TS2349: This expression is not callable.
 propertyAccessOnTypeParameterWithConstraints.ts(25,11): error TS2349: This expression is not callable.
 propertyAccessOnTypeParameterWithConstraints.ts(28,11): error TS2304: Cannot find name 'T'.
-propertyAccessOnTypeParameterWithConstraints.ts(28,21): error TS2304: Cannot find name 'Date'.
 propertyAccessOnTypeParameterWithConstraints.ts(28,25): error TS1005: '?' expected.
 propertyAccessOnTypeParameterWithConstraints.ts(28,26): error TS1005: ':' expected.
 propertyAccessOnTypeParameterWithConstraints.ts(30,18): error TS1003: Identifier expected.
@@ -24,13 +21,11 @@ propertyAccessOnTypeParameterWithConstraints.ts(34,27): error TS1005: ',' expect
 propertyAccessOnTypeParameterWithConstraints.ts(34,28): error TS1005: '}' expected.
 
 
-==== propertyAccessOnTypeParameterWithConstraints.ts (24 errors) ====
+==== propertyAccessOnTypeParameterWithConstraints.ts (21 errors) ====
     // generic types should behave as if they have properties of their constraint type
     // no errors expected 
     
     class C<T extends Date> {
-                      ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         f() {
             var x: T;
             var a = x['getDate'](); // number
@@ -44,8 +39,6 @@ propertyAccessOnTypeParameterWithConstraints.ts(34,28): error TS1005: '}' expect
         foo: T;
     }
     var i: I<Date>;
-             ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     var r2 = i.foo.getDate();
     var r2b = i.foo['getDate']();
     
@@ -63,8 +56,6 @@ propertyAccessOnTypeParameterWithConstraints.ts(34,28): error TS1005: '}' expect
         foo: <T extends Date>(x: T) => {
               ~
 !!! error TS2304: Cannot find name 'T'.
-                        ~~~~
-!!! error TS2304: Cannot find name 'Date'.
                             ~
 !!! error TS1005: '?' expected.
                              ~

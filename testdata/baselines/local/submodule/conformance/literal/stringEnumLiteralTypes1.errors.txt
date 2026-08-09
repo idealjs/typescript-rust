@@ -1,10 +1,9 @@
 stringEnumLiteralTypes1.ts(27,18): error TS1005: '>' expected.
-stringEnumLiteralTypes1.ts(46,15): error TS2304: Cannot find name 'Error'.
 stringEnumLiteralTypes1.ts(61,12): error TS2349: This expression is not callable.
 stringEnumLiteralTypes1.ts(98,12): error TS2349: This expression is not callable.
 
 
-==== stringEnumLiteralTypes1.ts (4 errors) ====
+==== stringEnumLiteralTypes1.ts (3 errors) ====
     const enum Choice { Unknown = "", Yes = "yes", No = "no" };
     
     type YesNo = Choice.Yes | Choice.No;
@@ -53,8 +52,6 @@ stringEnumLiteralTypes1.ts(98,12): error TS2349: This expression is not callable
     
     function assertNever(x: never): never {
         throw new Error("Unexpected value");
-                  ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     }
     
     function f10(x: YesNo) {

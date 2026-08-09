@@ -59,12 +59,10 @@ controlFlowOptionalChain.ts(358,11): error TS18048: 'o' is possibly 'undefined'.
 controlFlowOptionalChain.ts(385,11): error TS18048: 'o' is possibly 'undefined'.
 controlFlowOptionalChain.ts(390,19): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | undefined'.
 controlFlowOptionalChain.ts(391,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | undefined'.
-controlFlowOptionalChain.ts(393,27): error TS2304: Cannot find name 'Error'.
 controlFlowOptionalChain.ts(394,11): error TS18048: 'o' is possibly 'undefined'.
 controlFlowOptionalChain.ts(400,11): error TS18048: 'o' is possibly 'undefined'.
 controlFlowOptionalChain.ts(405,19): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | null'.
 controlFlowOptionalChain.ts(406,11): error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | null'.
-controlFlowOptionalChain.ts(408,27): error TS2304: Cannot find name 'Error'.
 controlFlowOptionalChain.ts(409,11): error TS18048: 'o' is possibly 'undefined'.
 controlFlowOptionalChain.ts(415,11): error TS18048: 'o' is possibly 'undefined'.
 controlFlowOptionalChain.ts(418,11): error TS18048: 'o' is possibly 'undefined'.
@@ -88,11 +86,10 @@ controlFlowOptionalChain.ts(481,11): error TS18048: 'o' is possibly 'undefined'.
 controlFlowOptionalChain.ts(485,11): error TS18048: 'o' is possibly 'undefined'.
 controlFlowOptionalChain.ts(492,15): error TS18048: 'o' is possibly 'undefined'.
 controlFlowOptionalChain.ts(509,15): error TS18048: 'o' is possibly 'undefined'.
-controlFlowOptionalChain.ts(532,20): error TS2304: Cannot find name 'Math'.
 controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not exist on type '{ type: "rectangle"; width: number; height: number } | { type: "circle"; radius: number }'.
 
 
-==== controlFlowOptionalChain.ts (92 errors) ====
+==== controlFlowOptionalChain.ts (89 errors) ====
     // assignments in shortcutting chain
     declare const o: undefined | {
         [key: string]: any;
@@ -608,8 +605,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
 !!! error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | undefined'.
         }
         if (o?.baz instanceof Error) {
-                              ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
             o.baz;
               ~~~
 !!! error TS18048: 'o' is possibly 'undefined'.
@@ -633,8 +628,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
 !!! error TS2339: Property 'bar' does not exist on type '{ foo: string | number; baz: object } | null'.
         }
         if (o?.baz instanceof Error) {
-                              ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
             o.baz;
               ~~~
 !!! error TS18048: 'o' is possibly 'undefined'.
@@ -805,8 +798,6 @@ controlFlowOptionalChain.ts(532,36): error TS2339: Property 'radius' does not ex
         switch (shape?.type) {
             case 'circle':
                 return Math.PI * shape.radius ** 2
-                       ~~~~
-!!! error TS2304: Cannot find name 'Math'.
                                        ~~~~~~
 !!! error TS2339: Property 'radius' does not exist on type '{ type: "rectangle"; width: number; height: number } | { type: "circle"; radius: number }'.
             case 'rectangle':

@@ -1,16 +1,14 @@
 parserUsingConstructorAsIdentifier.ts(3,13): error TS2304: Cannot find name 'PluginUtilities'.
 parserUsingConstructorAsIdentifier.ts(5,17): error TS2304: Cannot find name 'initializeProperties'.
 parserUsingConstructorAsIdentifier.ts(8,17): error TS2304: Cannot find name 'initializeProperties'.
-parserUsingConstructorAsIdentifier.ts(17,41): error TS2304: Cannot find name 'Object'.
 parserUsingConstructorAsIdentifier.ts(18,17): error TS2304: Cannot find name 'PluginUtilities'.
-parserUsingConstructorAsIdentifier.ts(19,17): error TS2304: Cannot find name 'Object'.
 parserUsingConstructorAsIdentifier.ts(21,21): error TS2304: Cannot find name 'initializeProperties'.
 parserUsingConstructorAsIdentifier.ts(24,21): error TS2304: Cannot find name 'initializeProperties'.
 parserUsingConstructorAsIdentifier.ts(35,56): error TS1005: '>' expected.
 parserUsingConstructorAsIdentifier.ts(36,17): error TS2304: Cannot find name 'initializeProperties'.
 
 
-==== parserUsingConstructorAsIdentifier.ts (10 errors) ====
+==== parserUsingConstructorAsIdentifier.ts (8 errors) ====
             function define(constructor, instanceMembers, staticMembers) {
                 constructor = constructor || function () { };
                 PluginUtilities.Utilities.markSupportedForProcessing(constructor);
@@ -34,14 +32,10 @@ parserUsingConstructorAsIdentifier.ts(36,17): error TS2304: Cannot find name 'in
                     constructor = constructor || function () { };
                     var basePrototype = baseClass.prototype;
                     constructor.prototype = Object.create(basePrototype);
-                                            ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                     PluginUtilities.Utilities.markSupportedForProcessing(constructor);
                     ~~~~~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'PluginUtilities'.
                     Object.defineProperty(constructor.prototype, "constructor", { value: constructor, writable: true, configurable: true, enumerable: true });
-                    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                     if (instanceMembers) {
                         initializeProperties(constructor.prototype, instanceMembers);
                         ~~~~~~~~~~~~~~~~~~~~

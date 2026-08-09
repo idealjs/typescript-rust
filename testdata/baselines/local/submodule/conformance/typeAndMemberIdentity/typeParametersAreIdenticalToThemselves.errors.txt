@@ -1,16 +1,12 @@
 typeParametersAreIdenticalToThemselves.ts(26,22): error TS2304: Cannot find name 'U'.
 typeParametersAreIdenticalToThemselves.ts(27,22): error TS2304: Cannot find name 'U'.
 typeParametersAreIdenticalToThemselves.ts(28,22): error TS2304: Cannot find name 'U'.
-typeParametersAreIdenticalToThemselves.ts(34,20): error TS2304: Cannot find name 'Date'.
-typeParametersAreIdenticalToThemselves.ts(35,20): error TS2304: Cannot find name 'Date'.
-typeParametersAreIdenticalToThemselves.ts(36,20): error TS2304: Cannot find name 'Date'.
-typeParametersAreIdenticalToThemselves.ts(39,20): error TS2304: Cannot find name 'Date'.
 typeParametersAreIdenticalToThemselves.ts(44,22): error TS2304: Cannot find name 'U'.
 typeParametersAreIdenticalToThemselves.ts(45,22): error TS2304: Cannot find name 'U'.
 typeParametersAreIdenticalToThemselves.ts(46,22): error TS2304: Cannot find name 'U'.
 
 
-==== typeParametersAreIdenticalToThemselves.ts (10 errors) ====
+==== typeParametersAreIdenticalToThemselves.ts (6 errors) ====
     // type parameters from the same declaration are identical to themself
     
     function foo1<T>(x: T);
@@ -51,19 +47,11 @@ typeParametersAreIdenticalToThemselves.ts(46,22): error TS2304: Cannot find name
         foo3<T>(x: T) { }
     
         foo4<T extends Date>(x: T);
-                       ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         foo4<T extends Date>(x: T); // no error, different declaration for each T
-                       ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         foo4<T extends Date>(x: T) { }
-                       ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     }
     
     class C2<T extends Date> {
-                       ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         foo1(x: T);
         foo1(x: T); // error, same T
         foo1(x: T) { }

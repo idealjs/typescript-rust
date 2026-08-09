@@ -1,8 +1,5 @@
 numericIndexerConstrainsPropertyDeclarations.ts(8,7): error TS1005: ']' expected.
 numericIndexerConstrainsPropertyDeclarations.ts(8,15): error TS1005: ';' expected.
-numericIndexerConstrainsPropertyDeclarations.ts(23,9): error TS1005: ';' expected.
-numericIndexerConstrainsPropertyDeclarations.ts(26,9): error TS1005: ';' expected.
-numericIndexerConstrainsPropertyDeclarations.ts(36,16): error TS1005: ';' expected.
 numericIndexerConstrainsPropertyDeclarations.ts(88,9): error TS2304: Cannot find name 'Myn'.
 numericIndexerConstrainsPropertyDeclarations.ts(90,10): error TS1005: '{' expected.
 numericIndexerConstrainsPropertyDeclarations.ts(90,11): error TS1012: Unexpected token.
@@ -19,7 +16,7 @@ numericIndexerConstrainsPropertyDeclarations.ts(94,11): error TS1005: ';' expect
 numericIndexerConstrainsPropertyDeclarations.ts(97,2): error TS1005: '}' expected.
 
 
-==== numericIndexerConstrainsPropertyDeclarations.ts (19 errors) ====
+==== numericIndexerConstrainsPropertyDeclarations.ts (16 errors) ====
     // String indexer types constrain the types of named properties in their containing type
     
     interface MyNumber extends Number {
@@ -47,13 +44,9 @@ numericIndexerConstrainsPropertyDeclarations.ts(97,2): error TS1005: '}' expecte
         3.0: MyNumber // error
     
         get X() { // ok
-            ~
-!!! error TS1005: ';' expected.
             return '';
         }
         set X(v) { } // ok
-            ~
-!!! error TS1005: ';' expected.
     
         foo() { 
             return '';
@@ -64,8 +57,6 @@ numericIndexerConstrainsPropertyDeclarations.ts(97,2): error TS1005: '}' expecte
     
         static foo() { } // ok
         static get X() { // ok
-                   ~
-!!! error TS1005: ';' expected.
             return 1;
         }
     }

@@ -4,10 +4,9 @@ invalidMultipleVariableDeclarations.ts(11,5): error TS2564: Property 'name' has 
 invalidMultipleVariableDeclarations.ts(15,5): error TS2564: Property 'source' has no initializer and is not definitely assigned in the constructor.
 invalidMultipleVariableDeclarations.ts(24,9): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 invalidMultipleVariableDeclarations.ts(27,54): error TS2339: Property 'toString' does not exist on type 'number'.
-invalidMultipleVariableDeclarations.ts(50,16): error TS2304: Cannot find name 'Array'.
 
 
-==== invalidMultipleVariableDeclarations.ts (7 errors) ====
+==== invalidMultipleVariableDeclarations.ts (6 errors) ====
     interface I {
         id: number;
     }
@@ -70,8 +69,6 @@ invalidMultipleVariableDeclarations.ts(50,16): error TS2304: Cannot find name 'A
     
     var arr2 = [new D<string>()];
     var arr2 = new Array<D<number>>();
-                   ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     
     var m: typeof M;
     var m = M.A;

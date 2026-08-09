@@ -1,26 +1,17 @@
 fixSignatureCaching.ts(3,1): error TS2554: Expected 2 arguments, but got 1.
 fixSignatureCaching.ts(9,10): error TS2339: Property 'mobileDetectRules' does not exist on type 'object'.
 fixSignatureCaching.ts(284,10): error TS2339: Property 'detectMobileBrowsers' does not exist on type 'object'.
-fixSignatureCaching.ts(290,22): error TS2304: Cannot find name 'Object'.
 fixSignatureCaching.ts(291,9): error TS2304: Cannot find name 'isArray'.
 fixSignatureCaching.ts(293,10): error TS2339: Property 'FALLBACK_PHONE' does not exist on type 'object'.
 fixSignatureCaching.ts(294,10): error TS2339: Property 'FALLBACK_TABLET' does not exist on type 'object'.
 fixSignatureCaching.ts(295,10): error TS2339: Property 'FALLBACK_MOBILE' does not exist on type 'object'.
 fixSignatureCaching.ts(297,5): error TS2304: Cannot find name 'isArray'.
-fixSignatureCaching.ts(297,29): error TS2304: Cannot find name 'Array'.
-fixSignatureCaching.ts(298,9): error TS2304: Cannot find name 'Array'.
-fixSignatureCaching.ts(298,51): error TS2304: Cannot find name 'Object'.
 fixSignatureCaching.ts(299,5): error TS2304: Cannot find name 'isArray'.
-fixSignatureCaching.ts(299,28): error TS2304: Cannot find name 'Array'.
-fixSignatureCaching.ts(300,37): error TS2304: Cannot find name 'Object'.
-fixSignatureCaching.ts(301,11): error TS2304: Cannot find name 'Array'.
 fixSignatureCaching.ts(313,28): error TS1005: '>' expected.
-fixSignatureCaching.ts(324,35): error TS2304: Cannot find name 'RegExp'.
 fixSignatureCaching.ts(330,74): error TS2339: Property 'mobileDetectRules' does not exist on type 'object'.
 fixSignatureCaching.ts(331,44): error TS1005: ';' expected.
 fixSignatureCaching.ts(334,22): error TS2304: Cannot find name 'isArray'.
 fixSignatureCaching.ts(338,36): error TS1005: '>' expected.
-fixSignatureCaching.ts(344,37): error TS2304: Cannot find name 'RegExp'.
 fixSignatureCaching.ts(349,9): error TS2349: This expression is not callable.
 fixSignatureCaching.ts(350,9): error TS2349: This expression is not callable.
 fixSignatureCaching.ts(351,9): error TS2349: This expression is not callable.
@@ -51,7 +42,6 @@ fixSignatureCaching.ts(432,28): error TS2339: Property 'getVersionStr' does not 
 fixSignatureCaching.ts(433,31): error TS2339: Property 'prepareVersionNo' does not exist on type 'object'.
 fixSignatureCaching.ts(433,59): error TS2304: Cannot find name 'NaN'.
 fixSignatureCaching.ts(443,10): error TS2339: Property 'prepareVersionNo' does not exist on type 'object'.
-fixSignatureCaching.ts(455,16): error TS2304: Cannot find name 'Number'.
 fixSignatureCaching.ts(458,10): error TS2339: Property 'isMobileFallback' does not exist on type 'object'.
 fixSignatureCaching.ts(459,21): error TS2339: Property 'detectMobileBrowsers' does not exist on type 'object'.
 fixSignatureCaching.ts(460,18): error TS2339: Property 'detectMobileBrowsers' does not exist on type 'object'.
@@ -94,8 +84,6 @@ fixSignatureCaching.ts(872,25): error TS2339: Property 'getVersion' does not exi
 fixSignatureCaching.ts(893,25): error TS2339: Property 'getVersionStr' does not exist on type 'object'.
 fixSignatureCaching.ts(915,36): error TS2339: Property 'findMatches' does not exist on type 'object'.
 fixSignatureCaching.ts(915,53): error TS2339: Property 'mobileDetectRules' does not exist on type 'object'.
-fixSignatureCaching.ts(927,38): error TS2304: Cannot find name 'RegExp'.
-fixSignatureCaching.ts(928,31): error TS2304: Cannot find name 'RegExp'.
 fixSignatureCaching.ts(944,33): error TS2339: Property 'isPhoneSized' does not exist on type '(userAgent: any, maxPhoneWidth: any) => void'.
 fixSignatureCaching.ts(955,42): error TS2339: Property 'mobileGrade' does not exist on type 'object'.
 fixSignatureCaching.ts(963,22): error TS2339: Property 'isPhoneSized' does not exist on type '(userAgent: any, maxPhoneWidth: any) => void'.
@@ -110,10 +98,9 @@ fixSignatureCaching.ts(979,44): error TS1005: ';' expected.
 fixSignatureCaching.ts(980,23): error TS2304: Cannot find name 'define'.
 fixSignatureCaching.ts(980,48): error TS2304: Cannot find name 'define'.
 fixSignatureCaching.ts(981,16): error TS2304: Cannot find name 'define'.
-fixSignatureCaching.ts(986,19): error TS2304: Cannot find name 'Error'.
 
 
-==== fixSignatureCaching.ts (113 errors) ====
+==== fixSignatureCaching.ts (100 errors) ====
     // Repro from #10697
     
     (function (define, undefined) {
@@ -696,8 +683,6 @@ fixSignatureCaching.ts(986,19): error TS2304: Cannot find name 'Error'.
     
         var hasOwnProp = Object.prototype.hasOwnProperty,
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                         ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
             isArray;
     ~~~~~~~~~~~~~~~~
             ~~~~~~~
@@ -722,28 +707,16 @@ fixSignatureCaching.ts(986,19): error TS2304: Cannot find name 'Error'.
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         ~~~~~~~
 !!! error TS2304: Cannot find name 'isArray'.
-                                ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
             Array.isArray : function (value) { return Object.prototype.toString.call(value) === '[object Array]'; };
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
-                                                      ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         isArray = 'isArray' in Array
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         ~~~~~~~
 !!! error TS2304: Cannot find name 'isArray'.
-                               ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
             ? function (value) { return Object.prototype.toString.call(value) === '[object Array]'; }
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                                        ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
             : Array.isArray;
     ~~~~~~~~~~~~~~~~~~~~~~~~
-              ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     
     
         function equalIC(a, b) {
@@ -792,8 +765,6 @@ fixSignatureCaching.ts(986,19): error TS2304: Cannot find name 'Error'.
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                     object[key] = new RegExp(object[key], 'i');
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                                      ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
                 }
     ~~~~~~~~~~~~~
             }
@@ -842,8 +813,6 @@ fixSignatureCaching.ts(986,19): error TS2304: Cannot find name 'Error'.
     ~~~~~~~~~~~~~~~~~~~~~
                         values[i] = new RegExp(value, 'i');
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                                        ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
                     }
     ~~~~~~~~~~~~~~~~~
                     mobileDetectRules.props[key] = values;
@@ -1126,8 +1095,6 @@ fixSignatureCaching.ts(986,19): error TS2304: Cannot find name 'Error'.
     ~~~~~~~~~
             return Number(version);
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                   ~~~~~~
-!!! error TS2304: Cannot find name 'Number'.
         };
     ~~~~~~
     
@@ -2156,12 +2123,8 @@ fixSignatureCaching.ts(986,19): error TS2304: Cannot find name 'Error'.
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 if (!(pattern instanceof RegExp)) {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                                         ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
                     pattern = new RegExp(pattern, 'i');
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                                  ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
                 }
     ~~~~~~~~~~~~~
                 return pattern.test(this.ua);
@@ -2306,8 +2269,6 @@ fixSignatureCaching.ts(986,19): error TS2304: Cannot find name 'Error'.
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             throw new Error('unknown environment');
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
         }
     ~~~~~
     })());

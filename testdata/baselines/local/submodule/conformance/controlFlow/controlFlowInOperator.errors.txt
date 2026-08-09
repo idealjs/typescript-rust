@@ -1,10 +1,9 @@
 controlFlowInOperator.ts(40,39): error TS1005: '>' expected.
-controlFlowInOperator.ts(46,9): error TS2304: Cannot find name 'Error'.
 controlFlowInOperator.ts(51,24): error TS1005: '>' expected.
 controlFlowInOperator.ts(60,24): error TS1005: '>' expected.
 
 
-==== controlFlowInOperator.ts (4 errors) ====
+==== controlFlowInOperator.ts (3 errors) ====
     const a = 'a';
     const b = 'b';
     const d = 'd';
@@ -53,8 +52,6 @@ controlFlowInOperator.ts(60,24): error TS1005: '>' expected.
         }
       }
       throw Error("heat death of the universe");
-            ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     }
     
     function uniqueID_54790_2(id: string | number, seenIDs: object) {

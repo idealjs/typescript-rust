@@ -1,4 +1,3 @@
-spreadMethods.ts(4,9): error TS1005: ';' expected.
 spreadMethods.ts(22,35): error TS1005: '{' expected.
 spreadMethods.ts(22,36): error TS1012: Unexpected token.
 spreadMethods.ts(22,38): error TS1005: ')' expected.
@@ -29,13 +28,11 @@ spreadMethods.ts(36,1): error TS2304: Cannot find name 'so'.
 spreadMethods.ts(37,1): error TS2304: Cannot find name 'so'.
 
 
-==== spreadMethods.ts (29 errors) ====
+==== spreadMethods.ts (28 errors) ====
     class K {
         p = 12;
         m() { }
         get g() { return 0; }
-            ~
-!!! error TS1005: ';' expected.
     }
     interface I {
         p: number;

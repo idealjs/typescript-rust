@@ -3,13 +3,9 @@ subtypesOfTypeParameter.ts(8,5): error TS2564: Property 'foo' has no initializer
 subtypesOfTypeParameter.ts(17,12): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameter.ts(18,15): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameter.ts(24,11): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameter.ts(47,25): error TS2304: Cannot find name 'Date'.
-subtypesOfTypeParameter.ts(48,29): error TS2304: Cannot find name 'Date'.
-subtypesOfTypeParameter.ts(100,26): error TS2304: Cannot find name 'Object'.
-subtypesOfTypeParameter.ts(101,30): error TS2304: Cannot find name 'Object'.
 
 
-==== subtypesOfTypeParameter.ts (9 errors) ====
+==== subtypesOfTypeParameter.ts (5 errors) ====
     // checking whether other types are subtypes of type parameters
     
     class C3<T> {
@@ -67,11 +63,7 @@ subtypesOfTypeParameter.ts(101,30): error TS2304: Cannot find name 'Object'.
         var r3 = true ? x : true;
     
         var r4 = true ? new Date() : x;
-                            ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         var r4 = true ? x : new Date();
-                                ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     
         var r5 = true ? /1/ : x;
         var r5 = true ? x : /1/;
@@ -124,11 +116,7 @@ subtypesOfTypeParameter.ts(101,30): error TS2304: Cannot find name 'Object'.
         }
     
         var r19 = true ? new Object() : x; // BCT is Object
-                             ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         var r19 = true ? x : new Object(); // BCT is Object
-                                 ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     
         var r20 = true ? {} : x; // ok
         var r20 = true ? x : {}; // ok

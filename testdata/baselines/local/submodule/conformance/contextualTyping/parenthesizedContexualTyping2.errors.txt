@@ -9,11 +9,9 @@ parenthesizedContexualTyping2.ts(20,97): error TS2554: Expected 2 arguments, but
 parenthesizedContexualTyping2.ts(21,100): error TS2554: Expected 2 arguments, but got 3.
 parenthesizedContexualTyping2.ts(22,104): error TS2554: Expected 2 arguments, but got 3.
 parenthesizedContexualTyping2.ts(23,106): error TS2554: Expected 2 arguments, but got 3.
-parenthesizedContexualTyping2.ts(26,14): error TS2304: Cannot find name 'Math'.
 parenthesizedContexualTyping2.ts(26,34): error TS1005: '>' expected.
 parenthesizedContexualTyping2.ts(26,96): error TS2345: Argument of type '10' is not assignable to parameter of type 'T'.
 parenthesizedContexualTyping2.ts(27,13): error TS2345: Argument of type '((x: any, : any) => any) | any' is not assignable to parameter of type '(x: (p: T) => T) => error'.
-parenthesizedContexualTyping2.ts(27,14): error TS2304: Cannot find name 'Math'.
 parenthesizedContexualTyping2.ts(27,34): error TS1005: '>' expected.
 parenthesizedContexualTyping2.ts(27,39): error TS1005: ',' expected.
 parenthesizedContexualTyping2.ts(27,45): error TS1005: ',' expected.
@@ -29,7 +27,7 @@ parenthesizedContexualTyping2.ts(27,74): error TS1005: ')' expected.
 parenthesizedContexualTyping2.ts(27,76): error TS1128: Declaration or statement expected.
 
 
-==== parenthesizedContexualTyping2.ts (29 errors) ====
+==== parenthesizedContexualTyping2.ts (27 errors) ====
     // These tests ensure that in cases where it may *appear* that a value has a type,
     // they actually are properly being contextually typed. The way we test this is
     // that we invoke contextually typed arguments with type arguments.
@@ -78,8 +76,6 @@ parenthesizedContexualTyping2.ts(27,76): error TS1128: Declaration or statement 
     
     // Ternaries in parens
     var i = fun((Math.random() < 0.5 ? x => { x<number>(undefined); return x; } : x => undefined), 10);
-                 ~~~~
-!!! error TS2304: Cannot find name 'Math'.
                                      ~
 !!! error TS1005: '>' expected.
                                                                                                    ~~
@@ -87,8 +83,6 @@ parenthesizedContexualTyping2.ts(27,76): error TS1128: Declaration or statement 
     var j = fun((Math.random() < 0.5 ? (x => { x<number>(undefined); return x; }) : (x => undefined)), 10);
                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2345: Argument of type '((x: any, : any) => any) | any' is not assignable to parameter of type '(x: (p: T) => T) => error'.
-                 ~~~~
-!!! error TS2304: Cannot find name 'Math'.
                                      ~
 !!! error TS1005: '>' expected.
                                           ~~

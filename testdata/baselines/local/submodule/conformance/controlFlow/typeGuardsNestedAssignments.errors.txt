@@ -2,7 +2,6 @@ typeGuardsNestedAssignments.ts(11,9): error TS2454: Variable 'foo' is used befor
 typeGuardsNestedAssignments.ts(18,40): error TS2454: Variable 'foo1' is used before being assigned.
 typeGuardsNestedAssignments.ts(19,9): error TS2454: Variable 'foo1' is used before being assigned.
 typeGuardsNestedAssignments.ts(20,9): error TS2454: Variable 'foo2' is used before being assigned.
-typeGuardsNestedAssignments.ts(25,14): error TS2304: Cannot find name 'Object'.
 typeGuardsNestedAssignments.ts(27,9): error TS2454: Variable 'obj' is used before being assigned.
 typeGuardsNestedAssignments.ts(34,9): error TS2454: Variable 'x' is used before being assigned.
 typeGuardsNestedAssignments.ts(41,12): error TS2304: Cannot find name 'RegExpExecArray'.
@@ -10,7 +9,7 @@ typeGuardsNestedAssignments.ts(44,20): error TS2454: Variable 'match' is used be
 typeGuardsNestedAssignments.ts(44,38): error TS2454: Variable 'match' is used before being assigned.
 
 
-==== typeGuardsNestedAssignments.ts (10 errors) ====
+==== typeGuardsNestedAssignments.ts (9 errors) ====
     class Foo {
         x: string = "";
     }
@@ -44,8 +43,6 @@ typeGuardsNestedAssignments.ts(44,38): error TS2454: Variable 'match' is used be
     
     function f3() {
         let obj: Object | null;
-                 ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         if ((obj = getFooOrNull()) instanceof Foo) {
             obj;
             ~~~

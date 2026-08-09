@@ -1,34 +1,22 @@
-typeGuardsInClassAccessors.ts(10,9): error TS1005: ';' expected.
 typeGuardsInClassAccessors.ts(12,48): error TS2339: Property 'length' does not exist on type 'string | number'.
 typeGuardsInClassAccessors.ts(16,48): error TS2339: Property 'length' does not exist on type 'string | number'.
-typeGuardsInClassAccessors.ts(21,9): error TS1005: ';' expected.
 typeGuardsInClassAccessors.ts(23,48): error TS2339: Property 'length' does not exist on type 'string | number'.
-typeGuardsInClassAccessors.ts(26,50): error TS2339: Property 'length' does not exist on type 'string | number'.
 typeGuardsInClassAccessors.ts(30,48): error TS2339: Property 'length' does not exist on type 'string | number'.
-typeGuardsInClassAccessors.ts(33,17): error TS1005: ';' expected.
 typeGuardsInClassAccessors.ts(35,48): error TS2339: Property 'length' does not exist on type 'string | number'.
 typeGuardsInClassAccessors.ts(39,48): error TS2339: Property 'length' does not exist on type 'string | number'.
-typeGuardsInClassAccessors.ts(44,17): error TS1005: ';' expected.
 typeGuardsInClassAccessors.ts(46,48): error TS2339: Property 'length' does not exist on type 'string | number'.
-typeGuardsInClassAccessors.ts(49,50): error TS2339: Property 'length' does not exist on type 'string | number'.
 typeGuardsInClassAccessors.ts(53,48): error TS2339: Property 'length' does not exist on type 'string | number'.
-typeGuardsInClassAccessors.ts(56,16): error TS1005: ';' expected.
 typeGuardsInClassAccessors.ts(58,48): error TS2339: Property 'length' does not exist on type 'string | number'.
 typeGuardsInClassAccessors.ts(62,48): error TS2339: Property 'length' does not exist on type 'string | number'.
-typeGuardsInClassAccessors.ts(67,16): error TS1005: ';' expected.
 typeGuardsInClassAccessors.ts(69,48): error TS2339: Property 'length' does not exist on type 'string | number'.
-typeGuardsInClassAccessors.ts(72,50): error TS2339: Property 'length' does not exist on type 'string | number'.
 typeGuardsInClassAccessors.ts(76,48): error TS2339: Property 'length' does not exist on type 'string | number'.
-typeGuardsInClassAccessors.ts(79,24): error TS1005: ';' expected.
 typeGuardsInClassAccessors.ts(81,48): error TS2339: Property 'length' does not exist on type 'string | number'.
 typeGuardsInClassAccessors.ts(85,48): error TS2339: Property 'length' does not exist on type 'string | number'.
-typeGuardsInClassAccessors.ts(90,24): error TS1005: ';' expected.
 typeGuardsInClassAccessors.ts(92,48): error TS2339: Property 'length' does not exist on type 'string | number'.
-typeGuardsInClassAccessors.ts(95,50): error TS2339: Property 'length' does not exist on type 'string | number'.
 typeGuardsInClassAccessors.ts(99,48): error TS2339: Property 'length' does not exist on type 'string | number'.
 
 
-==== typeGuardsInClassAccessors.ts (28 errors) ====
+==== typeGuardsInClassAccessors.ts (16 errors) ====
     // Note that type guards affect types of variables and parameters only and 
     // have no effect on members of objects such as properties. 
     
@@ -39,8 +27,6 @@ typeGuardsInClassAccessors.ts(99,48): error TS2339: Property 'length' does not e
     class ClassWithAccessors {
         // Inside public accessor getter
         get p1() {
-            ~~
-!!! error TS1005: ';' expected.
             // global vars in function declaration
             num = typeof var1 === "string" && var1.length; // string
                                                    ~~~~~~
@@ -56,8 +42,6 @@ typeGuardsInClassAccessors.ts(99,48): error TS2339: Property 'length' does not e
         }
         // Inside public accessor setter
         set p1(param: string | number) {
-            ~~
-!!! error TS1005: ';' expected.
             // global vars in function declaration
             num = typeof var1 === "string" && var1.length; // string
                                                    ~~~~~~
@@ -65,8 +49,6 @@ typeGuardsInClassAccessors.ts(99,48): error TS2339: Property 'length' does not e
     
             // parameter of function declaration
             num = typeof param === "string" && param.length; // string
-                                                     ~~~~~~
-!!! error TS2339: Property 'length' does not exist on type 'string | number'.
     
             // variables in function declaration
             var var2: string | number;
@@ -76,8 +58,6 @@ typeGuardsInClassAccessors.ts(99,48): error TS2339: Property 'length' does not e
         }
         // Inside private accessor getter
         private get pp1() {
-                    ~~~
-!!! error TS1005: ';' expected.
             // global vars in function declaration
             num = typeof var1 === "string" && var1.length; // string
                                                    ~~~~~~
@@ -93,8 +73,6 @@ typeGuardsInClassAccessors.ts(99,48): error TS2339: Property 'length' does not e
         }
         // Inside private accessor setter
         private set pp1(param: string | number) {
-                    ~~~
-!!! error TS1005: ';' expected.
             // global vars in function declaration
             num = typeof var1 === "string" && var1.length; // string
                                                    ~~~~~~
@@ -102,8 +80,6 @@ typeGuardsInClassAccessors.ts(99,48): error TS2339: Property 'length' does not e
     
             // parameter of function declaration
             num = typeof param === "string" && param.length; // string
-                                                     ~~~~~~
-!!! error TS2339: Property 'length' does not exist on type 'string | number'.
     
             // variables in function declaration
             var var2: string | number;
@@ -113,8 +89,6 @@ typeGuardsInClassAccessors.ts(99,48): error TS2339: Property 'length' does not e
         }
         // Inside static accessor getter
         static get s1() {
-                   ~~
-!!! error TS1005: ';' expected.
             // global vars in function declaration
             num = typeof var1 === "string" && var1.length; // string
                                                    ~~~~~~
@@ -130,8 +104,6 @@ typeGuardsInClassAccessors.ts(99,48): error TS2339: Property 'length' does not e
         }
         // Inside static accessor setter
         static set s1(param: string | number) {
-                   ~~
-!!! error TS1005: ';' expected.
             // global vars in function declaration
             num = typeof var1 === "string" && var1.length; // string
                                                    ~~~~~~
@@ -139,8 +111,6 @@ typeGuardsInClassAccessors.ts(99,48): error TS2339: Property 'length' does not e
     
             // parameter of function declaration
             num = typeof param === "string" && param.length; // string
-                                                     ~~~~~~
-!!! error TS2339: Property 'length' does not exist on type 'string | number'.
     
             // variables in function declaration
             var var2: string | number;
@@ -150,8 +120,6 @@ typeGuardsInClassAccessors.ts(99,48): error TS2339: Property 'length' does not e
         }
         // Inside private static accessor getter
         private static get ss1() {
-                           ~~~
-!!! error TS1005: ';' expected.
             // global vars in function declaration
             num = typeof var1 === "string" && var1.length; // string
                                                    ~~~~~~
@@ -167,8 +135,6 @@ typeGuardsInClassAccessors.ts(99,48): error TS2339: Property 'length' does not e
         }
         // Inside private static accessor setter
         private static set ss1(param: string | number) {
-                           ~~~
-!!! error TS1005: ';' expected.
             // global vars in function declaration
             num = typeof var1 === "string" && var1.length; // string
                                                    ~~~~~~
@@ -176,8 +142,6 @@ typeGuardsInClassAccessors.ts(99,48): error TS2339: Property 'length' does not e
     
             // parameter of function declaration
             num = typeof param === "string" && param.length; // string
-                                                     ~~~~~~
-!!! error TS2339: Property 'length' does not exist on type 'string | number'.
     
             // variables in function declaration
             var var2: string | number;

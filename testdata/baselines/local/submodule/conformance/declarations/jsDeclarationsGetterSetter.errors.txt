@@ -1,37 +1,18 @@
-index.js(2,9): error TS1005: ';' expected.
-index.js(11,9): error TS1005: ';' expected.
-index.js(16,9): error TS1005: ';' expected.
-index.js(19,9): error TS1005: ';' expected.
-index.js(24,1): error TS2304: Cannot find name 'Object'.
 index.js(24,25): error TS2339: Property 'prototype' does not exist on type 'object'.
-index.js(31,1): error TS2304: Cannot find name 'Object'.
 index.js(31,25): error TS2339: Property 'prototype' does not exist on type 'object'.
-index.js(39,1): error TS2304: Cannot find name 'Object'.
 index.js(39,25): error TS2339: Property 'prototype' does not exist on type 'object'.
-index.js(50,1): error TS2304: Cannot find name 'Object'.
 index.js(50,25): error TS2339: Property 'prototype' does not exist on type 'object'.
-index.js(58,1): error TS2304: Cannot find name 'Object'.
 index.js(58,25): error TS2339: Property 'prototype' does not exist on type 'object'.
-index.js(64,1): error TS2304: Cannot find name 'Object'.
 index.js(64,25): error TS2339: Property 'prototype' does not exist on type 'object'.
-index.js(76,1): error TS2304: Cannot find name 'Object'.
 index.js(76,25): error TS2339: Property 'prototype' does not exist on type 'object'.
-index.js(89,1): error TS2304: Cannot find name 'Object'.
 index.js(89,25): error TS2339: Property 'prototype' does not exist on type 'object'.
-index.js(90,10): error TS2304: Cannot find name 'Math'.
-index.js(102,1): error TS2304: Cannot find name 'Object'.
 index.js(102,25): error TS2339: Property 'prototype' does not exist on type 'object'.
-index.js(103,10): error TS2304: Cannot find name 'Math'.
-index.js(115,1): error TS2304: Cannot find name 'Object'.
 index.js(115,25): error TS2339: Property 'prototype' does not exist on type 'object'.
-index.js(116,10): error TS2304: Cannot find name 'Math'.
 
 
-==== index.js (27 errors) ====
+==== index.js (10 errors) ====
     export class A {
         get x() {
-            ~
-!!! error TS1005: ';' expected.
             return 12;
         }
     }
@@ -41,27 +22,19 @@ index.js(116,10): error TS2304: Cannot find name 'Math'.
          * @param {number} _arg
          */
         set x(_arg) {
-            ~
-!!! error TS1005: ';' expected.
         }
     }
     
     export class C {
         get x() {
-            ~
-!!! error TS1005: ';' expected.
             return 12;
         }
         set x(_arg) {
-            ~
-!!! error TS1005: ';' expected.
         }
     }
     
     export class D {}
     Object.defineProperty(D.prototype, "x", {
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                             ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type 'object'.
         get() {
@@ -71,8 +44,6 @@ index.js(116,10): error TS2304: Cannot find name 'Math'.
     
     export class E {}
     Object.defineProperty(E.prototype, "x", {
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                             ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type 'object'.
         /**
@@ -83,8 +54,6 @@ index.js(116,10): error TS2304: Cannot find name 'Math'.
     
     export class F {}
     Object.defineProperty(F.prototype, "x", {
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                             ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type 'object'.
         get() {
@@ -98,8 +67,6 @@ index.js(116,10): error TS2304: Cannot find name 'Math'.
     
     export class G {}
     Object.defineProperty(G.prototype, "x", {
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                             ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type 'object'.
         /**
@@ -110,8 +77,6 @@ index.js(116,10): error TS2304: Cannot find name 'Math'.
     
     export class H {}
     Object.defineProperty(H.prototype, "x", {
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                             ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type 'object'.
         set() {}
@@ -120,8 +85,6 @@ index.js(116,10): error TS2304: Cannot find name 'Math'.
     
     export class I {}
     Object.defineProperty(I.prototype, "x", {
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                             ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type 'object'.
         /**
@@ -136,8 +99,6 @@ index.js(116,10): error TS2304: Cannot find name 'Math'.
     const jSetter = (v) => {}
     export class J {}
     Object.defineProperty(J.prototype, "x", {
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                             ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type 'object'.
         set: jSetter
@@ -153,13 +114,9 @@ index.js(116,10): error TS2304: Cannot find name 'Math'.
     const kSetter2 = (v) => {}
     export class K {}
     Object.defineProperty(K.prototype, "x", {
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                             ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type 'object'.
         set: Math.random() ? kSetter1 : kSetter2
-             ~~~~
-!!! error TS2304: Cannot find name 'Math'.
     });
     
     /**
@@ -172,13 +129,9 @@ index.js(116,10): error TS2304: Cannot find name 'Math'.
     const lSetter2 = (v) => {}
     export class L {}
     Object.defineProperty(L.prototype, "x", {
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                             ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type 'object'.
         set: Math.random() ? lSetter1 : lSetter2
-             ~~~~
-!!! error TS2304: Cannot find name 'Math'.
     });
     
     /**
@@ -191,11 +144,7 @@ index.js(116,10): error TS2304: Cannot find name 'Math'.
     const mSetter2 = (v) => {}
     export class M {}
     Object.defineProperty(M.prototype, "x", {
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                             ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type 'object'.
         set: Math.random() ? mSetter1 : mSetter2
-             ~~~~
-!!! error TS2304: Cannot find name 'Math'.
     });

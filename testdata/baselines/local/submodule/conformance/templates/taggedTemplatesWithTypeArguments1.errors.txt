@@ -1,16 +1,10 @@
-taggedTemplatesWithTypeArguments1.ts(1,29): error TS2304: Cannot find name 'TemplateStringsArray'.
-taggedTemplatesWithTypeArguments1.ts(1,65): error TS2304: Cannot find name 'Array'.
 taggedTemplatesWithTypeArguments1.ts(9,27): error TS1005: ',' expected.
 taggedTemplatesWithTypeArguments1.ts(11,13): error TS1005: ';' expected.
 taggedTemplatesWithTypeArguments1.ts(11,23): error TS1128: Declaration or statement expected.
 
 
-==== taggedTemplatesWithTypeArguments1.ts (5 errors) ====
+==== taggedTemplatesWithTypeArguments1.ts (3 errors) ====
     declare function f<T>(strs: TemplateStringsArray, ...callbacks: Array<(x: T) => any>): void;
-                                ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
-                                                                    ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     
     interface Stuff {
         x: number;

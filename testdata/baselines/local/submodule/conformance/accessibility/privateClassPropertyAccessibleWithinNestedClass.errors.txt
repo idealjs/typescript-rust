@@ -1,15 +1,13 @@
 privateClassPropertyAccessibleWithinNestedClass.ts(4,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-privateClassPropertyAccessibleWithinNestedClass.ts(5,17): error TS1005: ';' expected.
-privateClassPropertyAccessibleWithinNestedClass.ts(6,17): error TS1005: ';' expected.
-privateClassPropertyAccessibleWithinNestedClass.ts(10,24): error TS1005: ';' expected.
-privateClassPropertyAccessibleWithinNestedClass.ts(11,24): error TS1005: ';' expected.
+privateClassPropertyAccessibleWithinNestedClass.ts(6,29): error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any; bar: () => any }'.
+privateClassPropertyAccessibleWithinNestedClass.ts(11,36): error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any; bar: () => any }'.
 privateClassPropertyAccessibleWithinNestedClass.ts(19,26): error TS2454: Variable 'x' is used before being assigned.
 privateClassPropertyAccessibleWithinNestedClass.ts(20,26): error TS2454: Variable 'x' is used before being assigned.
 privateClassPropertyAccessibleWithinNestedClass.ts(21,26): error TS2454: Variable 'x' is used before being assigned.
 privateClassPropertyAccessibleWithinNestedClass.ts(22,26): error TS2454: Variable 'x' is used before being assigned.
 
 
-==== privateClassPropertyAccessibleWithinNestedClass.ts (9 errors) ====
+==== privateClassPropertyAccessibleWithinNestedClass.ts (7 errors) ====
     // no errors
     
     class C {
@@ -17,20 +15,16 @@ privateClassPropertyAccessibleWithinNestedClass.ts(22,26): error TS2454: Variabl
                 ~
 !!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         private get y() { return this.x; }
-                    ~
-!!! error TS1005: ';' expected.
         private set y(x) { this.y = this.x; }
-                    ~
-!!! error TS1005: ';' expected.
+                                ~
+!!! error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any; bar: () => any }'.
         private foo() { return this.foo; }
     
         private static x: string;
         private static get y() { return this.x; }
-                           ~
-!!! error TS1005: ';' expected.
         private static set y(x) { this.y = this.x; }
-                           ~
-!!! error TS1005: ';' expected.
+                                       ~
+!!! error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any; bar: () => any }'.
         private static foo() { return this.foo; }
         private static bar() { this.foo(); }
     

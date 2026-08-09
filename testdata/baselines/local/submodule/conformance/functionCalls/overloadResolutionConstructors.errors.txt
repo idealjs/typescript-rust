@@ -1,9 +1,8 @@
 overloadResolutionConstructors.ts(27,9): error TS2345: Argument of type 'object' is not assignable to parameter of type 'string'.
-overloadResolutionConstructors.ts(37,8): error TS2304: Cannot find name 'Date'.
 overloadResolutionConstructors.ts(67,1): error TS2554: Expected 1 arguments, but got 0.
 
 
-==== overloadResolutionConstructors.ts (3 errors) ====
+==== overloadResolutionConstructors.ts (2 errors) ====
     class SomeBase {
         private n;
     
@@ -43,8 +42,6 @@ overloadResolutionConstructors.ts(67,1): error TS2554: Expected 1 arguments, but
     
     var d = new fn2<Date>(0, undefined);
     var d: Date;
-           ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     
     // Generic and non - generic overload where generic overload is the only candidate when called without type arguments
     var s = new fn2(0, '');

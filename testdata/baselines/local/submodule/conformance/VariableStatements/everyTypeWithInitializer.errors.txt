@@ -1,9 +1,7 @@
 everyTypeWithInitializer.ts(22,54): error TS2339: Property 'toString' does not exist on type 'number'.
-everyTypeWithInitializer.ts(27,17): error TS2304: Cannot find name 'Date'.
-everyTypeWithInitializer.ts(28,20): error TS2304: Cannot find name 'Object'.
 
 
-==== everyTypeWithInitializer.ts (3 errors) ====
+==== everyTypeWithInitializer.ts (1 errors) ====
     interface I {
         id: number;
     }
@@ -33,11 +31,7 @@ everyTypeWithInitializer.ts(28,20): error TS2304: Cannot find name 'Object'.
     var aNumber = 9.9;
     var aString = 'this is a string';
     var aDate = new Date(12);
-                    ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     var anObject = new Object();
-                       ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     
     var anAny = null;
     var anOtherAny = <any> new C();

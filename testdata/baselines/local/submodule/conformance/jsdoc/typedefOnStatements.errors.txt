@@ -4,7 +4,7 @@ typedefOnStatements.js(33,1): error TS2304: Cannot find name 'with'.
 typedefOnStatements.js(33,7): error TS2304: Cannot find name 'name'.
 typedefOnStatements.js(33,13): error TS1005: ';' expected.
 typedefOnStatements.js(36,9): error TS2304: Cannot find name 'name'.
-typedefOnStatements.js(44,11): error TS2304: Cannot find name 'Error'.
+typedefOnStatements.js(44,11): error TS2351: This expression is not constructable.
 
 
 ==== typedefOnStatements.js (7 errors) ====
@@ -69,7 +69,7 @@ typedefOnStatements.js(44,11): error TS2304: Cannot find name 'Error'.
     /** @typedef {{ p: string }} P */
     throw new Error('Unreachable')
               ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
+!!! error TS2351: This expression is not constructable.
     
     /** @typedef {{ q: string }} Q */
     try {

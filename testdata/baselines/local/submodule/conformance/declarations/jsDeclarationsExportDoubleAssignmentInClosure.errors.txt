@@ -3,12 +3,11 @@ index.js(3,12): error TS1005: ';' expected.
 index.js(4,30): error TS2304: Cannot find name 'create'.
 index.js(4,37): error TS2304: Cannot find name 'base'.
 index.js(4,45): error TS2304: Cannot find name 'defineProperties'.
-index.js(4,62): error TS2304: Cannot find name 'Object'.
 index.js(4,73): error TS2304: Cannot find name 'descriptors'.
 index.js(9,13): error TS2339: Property 'methods' does not exist on type '(o: any) => any | any'.
 
 
-==== index.js (8 errors) ====
+==== index.js (7 errors) ====
     // @ts-nocheck
     function foo() {
         module.exports = exports = function (o) {
@@ -23,8 +22,6 @@ index.js(9,13): error TS2339: Property 'methods' does not exist on type '(o: any
 !!! error TS2304: Cannot find name 'base'.
                                                 ~~~~~~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'defineProperties'.
-                                                                 ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                                                                             ~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'descriptors'.
         };

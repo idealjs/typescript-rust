@@ -1,18 +1,10 @@
-asyncMethodWithSuper_es6.ts(127,11): error TS1003: Identifier expected.
-asyncMethodWithSuper_es6.ts(127,13): error TS1005: ';' expected.
-asyncMethodWithSuper_es6.ts(141,11): error TS1003: Identifier expected.
-asyncMethodWithSuper_es6.ts(141,13): error TS1005: ';' expected.
-asyncMethodWithSuper_es6.ts(157,11): error TS1003: Identifier expected.
-asyncMethodWithSuper_es6.ts(157,13): error TS1005: ';' expected.
-asyncMethodWithSuper_es6.ts(171,11): error TS1003: Identifier expected.
-asyncMethodWithSuper_es6.ts(171,13): error TS1005: ';' expected.
-asyncMethodWithSuper_es6.ts(190,9): error TS1005: ';' expected.
-asyncMethodWithSuper_es6.ts(191,9): error TS1005: ';' expected.
-asyncMethodWithSuper_es6.ts(194,16): error TS1005: ';' expected.
-asyncMethodWithSuper_es6.ts(195,16): error TS1005: ';' expected.
+asyncMethodWithSuper_es6.ts(201,36): error TS2339: Property 'getter' does not exist on type '{ method: (x: string) => any; a: () => any; b: () => any; c: () => any; d: () => any; e: () => any; f: () => any }'.
+asyncMethodWithSuper_es6.ts(202,36): error TS2339: Property 'setter' does not exist on type '{ method: (x: string) => any; a: () => any; b: () => any; c: () => any; d: () => any; e: () => any; f: () => any }'.
+asyncMethodWithSuper_es6.ts(207,43): error TS2339: Property 'getter' does not exist on type '{ method: (x: string) => any; a: () => any; b: () => any; c: () => any; d: () => any; e: () => any; f: () => any }'.
+asyncMethodWithSuper_es6.ts(208,43): error TS2339: Property 'setter' does not exist on type '{ method: (x: string) => any; a: () => any; b: () => any; c: () => any; d: () => any; e: () => any; f: () => any }'.
 
 
-==== asyncMethodWithSuper_es6.ts (12 errors) ====
+==== asyncMethodWithSuper_es6.ts (4 errors) ====
     class A {
         x() {
         }
@@ -140,10 +132,6 @@ asyncMethodWithSuper_es6.ts(195,16): error TS1005: ';' expected.
         }
     
         async * property_access_only_read_only_in_generator() {
-              ~
-!!! error TS1003: Identifier expected.
-                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS1005: ';' expected.
             // call with property access
             super.x();
     
@@ -158,10 +146,6 @@ asyncMethodWithSuper_es6.ts(195,16): error TS1005: ';' expected.
         }
     
         async * property_access_only_write_only_in_generator() {
-              ~
-!!! error TS1003: Identifier expected.
-                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS1005: ';' expected.
             const f = () => {};
     
             // property access (assign)
@@ -178,10 +162,6 @@ asyncMethodWithSuper_es6.ts(195,16): error TS1005: ';' expected.
         }
     
         async * element_access_only_read_only_in_generator() {
-              ~
-!!! error TS1003: Identifier expected.
-                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS1005: ';' expected.
             // call with element access
             super["x"]();
     
@@ -196,10 +176,6 @@ asyncMethodWithSuper_es6.ts(195,16): error TS1005: ';' expected.
         }
     
         async * element_access_only_write_only_in_generator() {
-              ~
-!!! error TS1003: Identifier expected.
-                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS1005: ';' expected.
             const f = () => {};
     
             // element access (assign)
@@ -219,32 +195,32 @@ asyncMethodWithSuper_es6.ts(195,16): error TS1005: ';' expected.
     // https://github.com/microsoft/TypeScript/issues/46828
     class Base {
         set setter(x: any) {}
-            ~~~~~~
-!!! error TS1005: ';' expected.
         get getter(): any { return; }
-            ~~~~~~
-!!! error TS1005: ';' expected.
         method(x: string): any {}
     
         static set setter(x: any) {}
-                   ~~~~~~
-!!! error TS1005: ';' expected.
         static get getter(): any { return; }
-                   ~~~~~~
-!!! error TS1005: ';' expected.
         static method(x: string): any {}
     }
     
     class Derived extends Base {
         a() { return async () => super.method('') }
         b() { return async () => super.getter }
+                                       ~~~~~~
+!!! error TS2339: Property 'getter' does not exist on type '{ method: (x: string) => any; a: () => any; b: () => any; c: () => any; d: () => any; e: () => any; f: () => any }'.
         c() { return async () => super.setter = '' }
+                                       ~~~~~~
+!!! error TS2339: Property 'setter' does not exist on type '{ method: (x: string) => any; a: () => any; b: () => any; c: () => any; d: () => any; e: () => any; f: () => any }'.
         d() { return async () => super["method"]('') }
         e() { return async () => super["getter"] }
         f() { return async () => super["setter"] = '' }
         static a() { return async () => super.method('') }
         static b() { return async () => super.getter }
+                                              ~~~~~~
+!!! error TS2339: Property 'getter' does not exist on type '{ method: (x: string) => any; a: () => any; b: () => any; c: () => any; d: () => any; e: () => any; f: () => any }'.
         static c() { return async () => super.setter = '' }
+                                              ~~~~~~
+!!! error TS2339: Property 'setter' does not exist on type '{ method: (x: string) => any; a: () => any; b: () => any; c: () => any; d: () => any; e: () => any; f: () => any }'.
         static d() { return async () => super["method"]('') }
         static e() { return async () => super["getter"] }
         static f() { return async () => super["setter"] = '' }

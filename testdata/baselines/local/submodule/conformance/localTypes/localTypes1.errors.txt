@@ -6,14 +6,13 @@ localTypes1.ts(74,13): error TS2564: Property 'x' has no initializer and is not 
 localTypes1.ts(83,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 localTypes1.ts(95,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 localTypes1.ts(103,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-localTypes1.ts(107,9): error TS1005: ';' expected.
 localTypes1.ts(112,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 localTypes1.ts(120,9): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 localTypes1.ts(124,13): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
 localTypes1.ts(128,17): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
 
 
-==== localTypes1.ts (13 errors) ====
+==== localTypes1.ts (12 errors) ====
     function f1() {
         enum E {
             A, B, C
@@ -137,8 +136,6 @@ localTypes1.ts(128,17): error TS2564: Property 'c' has no initializer and is not
             return new C();
         }
         get p() {
-            ~
-!!! error TS1005: ';' expected.
             enum E {
                 A, B, C
             }

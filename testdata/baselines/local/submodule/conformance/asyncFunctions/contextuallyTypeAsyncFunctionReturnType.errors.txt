@@ -1,8 +1,7 @@
-contextuallyTypeAsyncFunctionReturnType.ts(58,20): error TS2304: Cannot find name 'Error'.
 contextuallyTypeAsyncFunctionReturnType.ts(81,10): error TS2339: Property 'filter' does not exist on type '{ isApplicationScoped: boolean; publisherId: string | null }[]'.
 
 
-==== contextuallyTypeAsyncFunctionReturnType.ts (2 errors) ====
+==== contextuallyTypeAsyncFunctionReturnType.ts (1 errors) ====
     interface Obj { key: "value"; }
     
     async function fn1(): Promise<Obj> {
@@ -61,8 +60,6 @@ contextuallyTypeAsyncFunctionReturnType.ts(81,10): error TS2339: Property 'filte
             resolve();
           } else {
             reject(new Error("windows-process-tree"));
-                       ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
           }
         });
       });

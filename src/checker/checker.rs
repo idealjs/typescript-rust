@@ -962,6 +962,34 @@ impl Checker {
             "Float32Array",
             "Float64Array",
             "DataView",
+            // ES built-in constructors/types frequently referenced in value
+            // and type position when lib.d.ts is not fully merged.
+            "Object",
+            "Array",
+            "Number",
+            "String",
+            "Boolean",
+            "Date",
+            "Math",
+            "Error",
+            "RegExp",
+            "Intl",
+            "JSON",
+            "Map",
+            "Set",
+            "WeakMap",
+            "WeakSet",
+            "TemplateStringsArray",
+            "TypedPropertyDescriptor",
+            "ReadonlyArray",
+            "BigInt",
+            "Proxy",
+            "Reflect",
+            "FinalizationRegistry",
+            "WeakRef",
+            "SharedArrayBuffer",
+            "Atomics",
+            "globalThis",
         ];
         // Built-in utility (mapped) types that ambient declarations depend on.
         const UTILITY_TYPES: &[&str] = &[
@@ -4777,7 +4805,19 @@ impl Checker {
             NodeData::Identifier(id) => id.text.clone(),
             NodeData::StringLiteral(s) => s.text.clone(),
             NodeData::NumericLiteral(n) => n.text.clone(),
-            NodeData::ComputedPropertyName(_) => String::new(),
+            NodeData::ComputedPropertyName(_) => {
+                // Use source text including brackets, matching TS behavior.
+                let Some(file) = &self.current_file else {
+                    return String::new();
+                };
+                let pos = node.loc.pos();
+                let end = node.loc.end();
+                if pos < end && end <= file.text.len() {
+                    file.text[pos..end].to_string()
+                } else {
+                    String::new()
+                }
+            }
             _ => node.text().to_string(),
         }
     }
@@ -5762,6 +5802,20 @@ impl Checker {
         match &node.data {
             crate::ast::NodeData::Identifier(d) => d.text.clone(),
             crate::ast::NodeData::PrivateIdentifier(d) => d.text.clone(),
+            crate::ast::NodeData::ComputedPropertyName(_) => {
+                // Reported with the source text including the brackets,
+                // e.g. `[Symbol.toPrimitive]` or `["a"]`, matching TS.
+                let Some(file) = &self.current_file else {
+                    return String::new();
+                };
+                let pos = node.loc.pos();
+                let end = node.loc.end();
+                if pos < end && end <= file.text.len() {
+                    file.text[pos..end].to_string()
+                } else {
+                    String::new()
+                }
+            }
             _ => String::new(),
         }
     }

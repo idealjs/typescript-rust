@@ -1,8 +1,7 @@
 validMultipleVariableDeclarations.ts(20,5): error TS2322: Type '{ x: 0; y: undefined }' is not assignable to type '{ x: number; y: number }'.
-validMultipleVariableDeclarations.ts(37,13): error TS2304: Cannot find name 'Array'.
 
 
-==== validMultipleVariableDeclarations.ts (2 errors) ====
+==== validMultipleVariableDeclarations.ts (1 errors) ====
     // all expected to be valid
     
     var x: number;
@@ -42,6 +41,4 @@ validMultipleVariableDeclarations.ts(37,13): error TS2304: Cannot find name 'Arr
     var a = <string[]>[];
     var a: string[] = [];
     var a = new Array<string>();
-                ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     var a: typeof a;

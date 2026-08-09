@@ -1,10 +1,8 @@
 emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts(3,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts(4,5): error TS2564: Property 'B' has no initializer and is not definitely assigned in the constructor.
-emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts(17,9): error TS1005: ';' expected.
-emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts(20,9): error TS1005: ';' expected.
 
 
-==== emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts (4 errors) ====
+==== emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts (2 errors) ====
     ﻿// @strict: false
     class B<T> {
         x: T;
@@ -26,13 +24,9 @@ emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts(20,9): error TS1005: ';'
         }
     
         get BB(): T {
-         ~~
-!!! error TS1005: ';' expected.
             return this.B;
         }
         set BBWith(c: T) {
-         ~~~~~~
-!!! error TS1005: ';' expected.
             this.B = c;
         }
     }

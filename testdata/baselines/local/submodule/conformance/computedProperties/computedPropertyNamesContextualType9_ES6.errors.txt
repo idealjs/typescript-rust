@@ -1,0 +1,18 @@
+computedPropertyNamesContextualType9_ES6.ts(6,5): error TS2322: Type '{ [+"foo"]: ""; [+"bar"]: 0 }' is not assignable to type 'object'.
+
+
+==== computedPropertyNamesContextualType9_ES6.ts (1 errors) ====
+    interface I {
+        [s: string]: boolean;
+        [s: number]: boolean;
+    }
+    
+    var o: I = {
+        ~~~~~~~~
+        [+"foo"]: "",
+    ~~~~~~~~~~~~~~~~~
+        [+"bar"]: 0
+    ~~~~~~~~~~~~~~~
+    }
+    ~
+!!! error TS2322: Type '{ [+"foo"]: ""; [+"bar"]: 0 }' is not assignable to type 'object'.

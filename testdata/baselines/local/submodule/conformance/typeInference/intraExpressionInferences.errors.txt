@@ -8,27 +8,18 @@ intraExpressionInferences.ts(147,12): error TS2345: Argument of type '{ generato
 intraExpressionInferences.ts(148,11): error TS2345: Argument of type '{ generator: (bob: any) => number | number; receiver: (t: T) => any }' is not assignable to parameter of type '{ generator: (bob: any) => T; receiver: (t: T) => any }'.
 intraExpressionInferences.ts(149,11): error TS2345: Argument of type '(bob: any) => number | number' is not assignable to parameter of type '(bob: any) => T'.
 intraExpressionInferences.ts(170,9): error TS2345: Argument of type '{ fetch: (params: { one: number; two: string }) => number; map: (number: TDone) => any }' is not assignable to parameter of type '{ fetch: (params: TParams, foo: number) => TDone; map: (data: TDone) => TMapped }'.
-intraExpressionInferences.ts(172,22): error TS2304: Cannot find name 'String'.
 intraExpressionInferences.ts(175,9): error TS2345: Argument of type '{ fetch: (params: { one: number; two: string }, foo: number) => number; map: (number: TDone) => any }' is not assignable to parameter of type '{ fetch: (params: TParams, foo: number) => TDone; map: (data: TDone) => TMapped }'.
-intraExpressionInferences.ts(177,22): error TS2304: Cannot find name 'String'.
 intraExpressionInferences.ts(180,9): error TS2345: Argument of type '{ fetch: (params: { one: number; two: string }, foo: number) => number; map: (number: TDone) => any }' is not assignable to parameter of type '{ fetch: (params: TParams, foo: number) => TDone; map: (data: TDone) => TMapped }'.
-intraExpressionInferences.ts(182,22): error TS2304: Cannot find name 'String'.
 intraExpressionInferences.ts(223,26): error TS2345: Argument of type '{ prop: { produce: (a: number) => number[]; consume: (arg: T) => any } }' is not assignable to parameter of type '{ prop: { produce: (arg1: number) => T; consume: (arg2: T) => void } }'.
 intraExpressionInferences.ts(236,38): error TS2345: Argument of type '{ a: (arg: string) => string[]; consume1: (arg1: T) => void; consume2: (arg2: T) => void }' is not assignable to parameter of type '{ a: (arg: string) => T; consume1: (arg1: T) => void; consume2: (arg2: T) => void }'.
 intraExpressionInferences.ts(249,78): error TS2345: Argument of type '{ a: (arg: string) => string[]; b: (arg: string) => any; consume1: (arg1: T) => void; consume2: (arg2: T2) => void }' is not assignable to parameter of type '{ a: (arg: string) => T; b: (arg: string) => T2; consume1: (arg1: T) => void; consume2: (arg2: T2) => void }'.
-intraExpressionInferences.ts(251,15): error TS2304: Cannot find name 'Number'.
 intraExpressionInferences.ts(262,64): error TS2345: Argument of type '{ a: (arg: string) => string[]; b: ((arg: any) => string) | ((arg: any) => string); c: (arg: T2) => any }' is not assignable to parameter of type '{ a: (arg1: string) => T; b: (arg2: T) => T2; c: (arg2: T2) => T3 }'.
-intraExpressionInferences.ts(264,6): error TS2304: Cannot find name 'Math'.
-intraExpressionInferences.ts(265,15): error TS2304: Cannot find name 'Boolean'.
 intraExpressionInferences.ts(278,24): error TS2345: Argument of type '{ a: (arg: string) => string[]; nested: { b: (arg: T) => any; nested2: { c: (arg: T2) => any } } }' is not assignable to parameter of type '{ a: (arg1: string) => T; nested: { b: (arg2: T) => T2; nested2: { c: (arg2: T2) => T3 } } }'.
-intraExpressionInferences.ts(283,19): error TS2304: Cannot find name 'Boolean'.
 intraExpressionInferences.ts(299,26): error TS2345: Argument of type '{ a: (arg: string) => string[]; nested: { b: (arg: T) => any; c: (arg: T) => any; nested2: { d: (arg: T3) => any } } }' is not assignable to parameter of type '{ a: (arg1: string) => T; nested: { b: (arg2: T) => T2; c: (arg3: T) => T3; nested2: { d: (arg4: T3) => T4 } } }'.
-intraExpressionInferences.ts(303,17): error TS2304: Cannot find name 'Number'.
-intraExpressionInferences.ts(305,19): error TS2304: Cannot find name 'Boolean'.
 intraExpressionInferences.ts(321,28): error TS2345: Argument of type '{ foo: { bar: { baz: { producer: (arg: string) => number } } }; consumer: (val: T) => void }' is not assignable to parameter of type '{ foo: { bar: { baz: { producer: (arg: string) => T } } }; consumer: (val: T) => unknown }'.
 
 
-==== intraExpressionInferences.ts (28 errors) ====
+==== intraExpressionInferences.ts (19 errors) ====
     // Repros from #47599
     
     declare function callIt<T>(obj: {
@@ -228,8 +219,6 @@ intraExpressionInferences.ts(321,28): error TS2345: Argument of type '{ foo: { b
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         map: (number) => String(number)
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                         ~~~~~~
-!!! error TS2304: Cannot find name 'String'.
     });
     ~
 !!! error TS2345: Argument of type '{ fetch: (params: { one: number; two: string }) => number; map: (number: TDone) => any }' is not assignable to parameter of type '{ fetch: (params: TParams, foo: number) => TDone; map: (data: TDone) => TMapped }'.
@@ -240,8 +229,6 @@ intraExpressionInferences.ts(321,28): error TS2345: Argument of type '{ foo: { b
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         map: (number) => String(number)
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                         ~~~~~~
-!!! error TS2304: Cannot find name 'String'.
     });
     ~
 !!! error TS2345: Argument of type '{ fetch: (params: { one: number; two: string }, foo: number) => number; map: (number: TDone) => any }' is not assignable to parameter of type '{ fetch: (params: TParams, foo: number) => TDone; map: (data: TDone) => TMapped }'.
@@ -252,8 +239,6 @@ intraExpressionInferences.ts(321,28): error TS2345: Argument of type '{ foo: { b
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         map: (number) => String(number)
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                         ~~~~~~
-!!! error TS2304: Cannot find name 'String'.
     });
     ~
 !!! error TS2345: Argument of type '{ fetch: (params: { one: number; two: string }, foo: number) => number; map: (number: TDone) => any }' is not assignable to parameter of type '{ fetch: (params: TParams, foo: number) => TDone; map: (data: TDone) => TMapped }'.
@@ -341,8 +326,6 @@ intraExpressionInferences.ts(321,28): error TS2345: Argument of type '{ foo: { b
     ~~~~~~~~~~~~~~~~~~~~
       b: (arg) => Number(arg),
     ~~~~~~~~~~~~~~~~~~~~~~~~~~
-                  ~~~~~~
-!!! error TS2304: Cannot find name 'Number'.
       consume1: (arg1) => {},
     ~~~~~~~~~~~~~~~~~~~~~~~~~
       consume2: (arg2) => {},
@@ -363,12 +346,8 @@ intraExpressionInferences.ts(321,28): error TS2345: Argument of type '{ foo: { b
     ~~~~~~~~~~~~~~~~~~~~
       b: Math.random() ? (arg) => "first" as const : (arg) => "two" as const,
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-         ~~~~
-!!! error TS2304: Cannot find name 'Math'.
       c: (arg) => Boolean(arg),
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                  ~~~~~~~
-!!! error TS2304: Cannot find name 'Boolean'.
     });
     ~
 !!! error TS2345: Argument of type '{ a: (arg: string) => string[]; b: ((arg: any) => string) | ((arg: any) => string); c: (arg: T2) => any }' is not assignable to parameter of type '{ a: (arg1: string) => T; b: (arg2: T) => T2; c: (arg2: T2) => T3 }'.
@@ -395,8 +374,6 @@ intraExpressionInferences.ts(321,28): error TS2345: Argument of type '{ foo: { b
     ~~~~~~~~~~~~~~
           c: (arg) => Boolean(arg),
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                      ~~~~~~~
-!!! error TS2304: Cannot find name 'Boolean'.
         },
     ~~~~~~
       },
@@ -426,14 +403,10 @@ intraExpressionInferences.ts(321,28): error TS2345: Argument of type '{ foo: { b
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         c: (arg) => Number(arg),
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                    ~~~~~~
-!!! error TS2304: Cannot find name 'Number'.
         nested2: {
     ~~~~~~~~~~~~~~
           d: (arg) => Boolean(arg),
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                      ~~~~~~~
-!!! error TS2304: Cannot find name 'Boolean'.
         },
     ~~~~~~
       },

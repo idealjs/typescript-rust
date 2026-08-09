@@ -1,6 +1,4 @@
 argument.js(10,9): error TS1005: ';' expected.
-argument.js(17,5): error TS1003: Identifier expected.
-argument.js(17,6): error TS1005: ';' expected.
 
 
 ==== supplement.d.ts (0 errors) ====
@@ -20,7 +18,7 @@ argument.js(17,6): error TS1005: ';' expected.
             return json;
         }
     }
-==== argument.js (3 errors) ====
+==== argument.js (1 errors) ====
     import { Base } from "./base.js";
     export class Argument extends Base {
         /**
@@ -40,8 +38,4 @@ argument.js(17,6): error TS1005: ';' expected.
          * @param {*} defs
          */
         *validate(defs) { }
-        ~
-!!! error TS1003: Identifier expected.
-         ~~~~~~~~
-!!! error TS1005: ';' expected.
     }

@@ -1,8 +1,0 @@
-templateStringInInstanceOfES6.ts(2,35): error TS2304: Cannot find name 'String'.
-
-
-==== templateStringInInstanceOfES6.ts (1 errors) ====
-    ﻿// @target: ES6
-    var x = `abc${ 0 }def` instanceof String;
-                                   ~~~~~~
-!!! error TS2304: Cannot find name 'String'.

@@ -1,7 +1,7 @@
 esDecorators-classDeclaration-classSuper.7.ts(5,3): error TS2349: This expression is not callable.
-esDecorators-classDeclaration-classSuper.7.ts(29,13): error TS1005: ';' expected.
+esDecorators-classDeclaration-classSuper.7.ts(25,8): error TS2339: Property 'val' does not exist on type 'object'.
 esDecorators-classDeclaration-classSuper.7.ts(33,3): error TS2349: This expression is not callable.
-esDecorators-classDeclaration-classSuper.7.ts(38,13): error TS1005: ';' expected.
+esDecorators-classDeclaration-classSuper.7.ts(34,8): error TS2339: Property 'val' does not exist on type 'object'.
 
 
 ==== esDecorators-classDeclaration-classSuper.7.ts (4 errors) ====
@@ -32,12 +32,12 @@ esDecorators-classDeclaration-classSuper.7.ts(38,13): error TS1005: ';' expected
     class C {
     	public constructor() {
     		this.val;
+    		     ~~~
+!!! error TS2339: Property 'val' does not exist on type 'object'.
     	}
     
     	@foo
     	public get val(): number { return 3; }
-    	           ~~~
-!!! error TS1005: ';' expected.
     }
     class D extends A {
     	public constructor() {
@@ -45,10 +45,10 @@ esDecorators-classDeclaration-classSuper.7.ts(38,13): error TS1005: ';' expected
     		~~~~~
 !!! error TS2349: This expression is not callable.
     		this.val;
+    		     ~~~
+!!! error TS2339: Property 'val' does not exist on type 'object'.
     	}
     
     	@foo
     	public get val(): number { return 3; }
-    	           ~~~
-!!! error TS1005: ';' expected.
     }

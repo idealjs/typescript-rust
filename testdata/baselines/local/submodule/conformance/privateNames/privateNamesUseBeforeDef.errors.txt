@@ -1,9 +1,8 @@
 privateNamesUseBeforeDef.ts(8,24): error TS1003: Identifier expected.
-privateNamesUseBeforeDef.ts(13,9): error TS1005: ';' expected.
 privateNamesUseBeforeDef.ts(13,28): error TS1003: Identifier expected.
 
 
-==== privateNamesUseBeforeDef.ts (3 errors) ====
+==== privateNamesUseBeforeDef.ts (2 errors) ====
     class A {
         #foo = this.#bar; // Error
         #bar = 3;
@@ -19,8 +18,6 @@ privateNamesUseBeforeDef.ts(13,28): error TS1003: Identifier expected.
     class A3 {
         #foo = this.#bar; // No Error
         get #bar() { return 3 };
-            ~~~~
-!!! error TS1005: ';' expected.
                                ~
 !!! error TS1003: Identifier expected.
     }

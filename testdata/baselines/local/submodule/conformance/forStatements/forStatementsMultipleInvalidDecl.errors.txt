@@ -12,7 +12,7 @@ forStatementsMultipleInvalidDecl.ts(47,21): error TS2351: This expression is not
 forStatementsMultipleInvalidDecl.ts(47,30): error TS2351: This expression is not constructable.
 forStatementsMultipleInvalidDecl.ts(47,40): error TS2351: This expression is not constructable.
 forStatementsMultipleInvalidDecl.ts(49,21): error TS2351: This expression is not constructable.
-forStatementsMultipleInvalidDecl.ts(50,21): error TS2304: Cannot find name 'Array'.
+forStatementsMultipleInvalidDecl.ts(50,21): error TS2351: This expression is not constructable.
 
 
 ==== forStatementsMultipleInvalidDecl.ts (15 errors) ====
@@ -95,7 +95,7 @@ forStatementsMultipleInvalidDecl.ts(50,21): error TS2304: Cannot find name 'Arra
 !!! error TS2351: This expression is not constructable.
     for( var arr2 = new Array<D<number>>();;){}
                         ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
+!!! error TS2351: This expression is not constructable.
     
     for(var m: typeof M;;){}
     for( var m = M.A;;){}

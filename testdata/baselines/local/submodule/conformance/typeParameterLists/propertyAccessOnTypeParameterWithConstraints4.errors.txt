@@ -1,9 +1,6 @@
-propertyAccessOnTypeParameterWithConstraints4.ts(1,19): error TS2304: Cannot find name 'Date'.
-propertyAccessOnTypeParameterWithConstraints4.ts(14,18): error TS2304: Cannot find name 'Date'.
 propertyAccessOnTypeParameterWithConstraints4.ts(21,18): error TS2349: This expression is not callable.
 propertyAccessOnTypeParameterWithConstraints4.ts(22,19): error TS2349: This expression is not callable.
 propertyAccessOnTypeParameterWithConstraints4.ts(25,11): error TS2304: Cannot find name 'T'.
-propertyAccessOnTypeParameterWithConstraints4.ts(25,21): error TS2304: Cannot find name 'Date'.
 propertyAccessOnTypeParameterWithConstraints4.ts(25,25): error TS1005: '?' expected.
 propertyAccessOnTypeParameterWithConstraints4.ts(25,26): error TS1005: ':' expected.
 propertyAccessOnTypeParameterWithConstraints4.ts(25,32): error TS1005: '=>' expected.
@@ -20,13 +17,10 @@ propertyAccessOnTypeParameterWithConstraints4.ts(26,17): error TS2304: Cannot fi
 propertyAccessOnTypeParameterWithConstraints4.ts(26,18): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints4.ts(26,31): error TS1005: '{' expected.
 propertyAccessOnTypeParameterWithConstraints4.ts(27,20): error TS2304: Cannot find name 'x'.
-propertyAccessOnTypeParameterWithConstraints4.ts(32,20): error TS2304: Cannot find name 'Date'.
 
 
-==== propertyAccessOnTypeParameterWithConstraints4.ts (23 errors) ====
+==== propertyAccessOnTypeParameterWithConstraints4.ts (19 errors) ====
     class C<T extends Date> {
-                      ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         f() {
             var x: T = {} as any;
             var a = x['notHere'](); // should be string
@@ -40,8 +34,6 @@ propertyAccessOnTypeParameterWithConstraints4.ts(32,20): error TS2304: Cannot fi
         foo: T;
     }
     declare var i: I<Date>;
-                     ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     var r2 = i.foo.notHere();
     var r2b = i.foo['notHere']();
     
@@ -59,8 +51,6 @@ propertyAccessOnTypeParameterWithConstraints4.ts(32,20): error TS2304: Cannot fi
         foo: <T extends Date>(x: T): T => {
               ~
 !!! error TS2304: Cannot find name 'T'.
-                        ~~~~
-!!! error TS2304: Cannot find name 'Date'.
                             ~
 !!! error TS1005: '?' expected.
                              ~
@@ -100,5 +90,3 @@ propertyAccessOnTypeParameterWithConstraints4.ts(32,20): error TS2304: Cannot fi
     }
     
     var r4 = b.foo(new Date());
-                       ~~~~
-!!! error TS2304: Cannot find name 'Date'.

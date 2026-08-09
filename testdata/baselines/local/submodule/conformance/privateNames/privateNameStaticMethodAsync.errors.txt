@@ -1,13 +1,7 @@
 privateNameStaticMethodAsync.ts(2,18): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(7,12): error TS1003: Identifier expected.
-privateNameStaticMethodAsync.ts(7,13): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(8,18): error TS1003: Identifier expected.
-privateNameStaticMethodAsync.ts(8,19): error TS1005: ';' expected.
-privateNameStaticMethodAsync.ts(11,18): error TS1003: Identifier expected.
-privateNameStaticMethodAsync.ts(11,19): error TS1005: ';' expected.
 
 
-==== privateNameStaticMethodAsync.ts (7 errors) ====
+==== privateNameStaticMethodAsync.ts (1 errors) ====
     const C = class {
         static async #bar() { return await Promise.resolve(42); }
                      ~~~~
@@ -17,22 +11,10 @@ privateNameStaticMethodAsync.ts(11,19): error TS1005: ';' expected.
             return b + (this.#baz().next().value || 0) + ((await this.#qux().next()).value || 0);
         }
         static *#baz() { yield 42; }
-               ~
-!!! error TS1003: Identifier expected.
-                ~~~~
-!!! error TS1005: ';' expected.
         static async *#qux() {
-                     ~
-!!! error TS1003: Identifier expected.
-                      ~~~~
-!!! error TS1005: ';' expected.
             yield (await Promise.resolve(42));
         }
         async static *#bazBad() { yield 42; }
-                     ~
-!!! error TS1003: Identifier expected.
-                      ~~~~~~~
-!!! error TS1005: ';' expected.
     }
     
     

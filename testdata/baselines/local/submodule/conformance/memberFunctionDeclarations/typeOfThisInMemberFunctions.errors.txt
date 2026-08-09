@@ -1,9 +1,8 @@
 typeOfThisInMemberFunctions.ts(12,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-typeOfThisInMemberFunctions.ts(22,19): error TS2304: Cannot find name 'Date'.
 typeOfThisInMemberFunctions.ts(23,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 
 
-==== typeOfThisInMemberFunctions.ts (3 errors) ====
+==== typeOfThisInMemberFunctions.ts (2 errors) ====
     class C {
         foo() {
             var r = this;
@@ -28,8 +27,6 @@ typeOfThisInMemberFunctions.ts(23,5): error TS2564: Property 'x' has no initiali
     }
     
     class E<T extends Date> {
-                      ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         x: T;
         ~
 !!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.

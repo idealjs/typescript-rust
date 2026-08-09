@@ -1,11 +1,9 @@
-file.js(9,9): error TS1005: ';' expected.
 file.js(10,28): error TS2339: Property 'toUpperCase' does not exist on type '"hello"'.
-file.js(13,9): error TS1005: ';' expected.
 
 
 ==== jsDeclarationsPrivateFields01.ts (0 errors) ====
     
-==== file.js (3 errors) ====
+==== file.js (1 errors) ====
     export class C {
         #hello = "hello";
         #world = 100;
@@ -15,16 +13,12 @@ file.js(13,9): error TS1005: ';' expected.
         }
     
         get #screamingHello() {
-            ~~~~~~~~~~~~~~~
-!!! error TS1005: ';' expected.
             return this.#hello.toUpperCase();
                                ~~~~~~~~~~~
 !!! error TS2339: Property 'toUpperCase' does not exist on type '"hello"'.
         }
         /** @param value {string} */
         set #screamingHello(value) {
-            ~~~~~~~~~~~~~~~
-!!! error TS1005: ';' expected.
             throw "NO";
         }
     

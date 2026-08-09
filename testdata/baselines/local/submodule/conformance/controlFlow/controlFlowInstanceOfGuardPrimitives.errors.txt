@@ -1,18 +1,11 @@
-controlFlowInstanceOfGuardPrimitives.ts(1,47): error TS2304: Cannot find name 'Date'.
-controlFlowInstanceOfGuardPrimitives.ts(2,26): error TS2304: Cannot find name 'Object'.
 controlFlowInstanceOfGuardPrimitives.ts(3,53): error TS2339: Property 'getFullYear' does not exist on type 'string | number | error'.
 controlFlowInstanceOfGuardPrimitives.ts(5,62): error TS2339: Property 'length' does not exist on type 'string'.
 controlFlowInstanceOfGuardPrimitives.ts(7,54): error TS2339: Property 'toPrecision' does not exist on type 'number | error'.
-controlFlowInstanceOfGuardPrimitives.ts(11,17): error TS2304: Cannot find name 'Date'.
 
 
-==== controlFlowInstanceOfGuardPrimitives.ts (6 errors) ====
+==== controlFlowInstanceOfGuardPrimitives.ts (3 errors) ====
     function distinguish(thing: string | number | Date) {
-                                                  ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         if (thing instanceof Object) {
-                             ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
             console.log("Aha!! It's a Date in " + thing.getFullYear());
                                                         ~~~~~~~~~~~
 !!! error TS2339: Property 'getFullYear' does not exist on type 'string | number | error'.
@@ -28,7 +21,5 @@ controlFlowInstanceOfGuardPrimitives.ts(11,17): error TS2304: Cannot find name '
     }
     
     distinguish(new Date());
-                    ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     distinguish("beef");
     distinguish(3.14159265);

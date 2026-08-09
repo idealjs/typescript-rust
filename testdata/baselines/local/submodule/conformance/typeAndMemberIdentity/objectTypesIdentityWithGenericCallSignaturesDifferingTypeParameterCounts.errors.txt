@@ -8,17 +8,9 @@ objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,2
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,30): error TS2304: Cannot find name 'F'.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,31): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(24,48): error TS2304: Cannot find name 'x'.
-objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(59,45): error TS2304: Cannot find name 'Date'.
-objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(67,45): error TS2304: Cannot find name 'Date'.
-objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(82,48): error TS2304: Cannot find name 'Date'.
-objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(90,29): error TS2304: Cannot find name 'Date'.
-objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(90,35): error TS2304: Cannot find name 'RegExp'.
-objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(90,43): error TS2304: Cannot find name 'Date'.
-objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(94,29): error TS2304: Cannot find name 'Date'.
-objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(94,35): error TS2304: Cannot find name 'RegExp'.
 
 
-==== objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts (18 errors) ====
+==== objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts (10 errors) ====
     // object types are identical structurally
     
     class A {
@@ -98,8 +90,6 @@ objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(94,3
     
     function foo6(x: A);
     function foo6(x: I<string, number, boolean, Date>); // ok
-                                                ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     function foo6(x: any) { }
     
     function foo7(x: A);
@@ -108,8 +98,6 @@ objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(94,3
     
     function foo8(x: B<string, string>);
     function foo8(x: I<string, string, boolean, Date>); // error
-                                                ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     function foo8(x: any) { }
     
     function foo9(x: B<string, number>);
@@ -125,8 +113,6 @@ objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(94,3
     function foo11(x: any) { }
     
     function foo12(x: I<B<string, number>, number, Date, string>);
-                                                   ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     function foo12(x: C<B<string, number>, number, Date>); // error
     function foo12(x: any) { }
     
@@ -135,20 +121,10 @@ objectTypesIdentityWithGenericCallSignaturesDifferingTypeParameterCounts.ts(94,3
     function foo12b(x: any) { }
     
     function foo13(x: I<string, Date, RegExp, Date>);
-                                ~~~~
-!!! error TS2304: Cannot find name 'Date'.
-                                      ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
-                                              ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     function foo13(x: typeof a); // ok
     function foo13(x: any) { }
     
     function foo14(x: I<string, Date, RegExp, boolean>);
-                                ~~~~
-!!! error TS2304: Cannot find name 'Date'.
-                                      ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
     function foo14(x: typeof b); // ok
     function foo14(x: any) { }
     

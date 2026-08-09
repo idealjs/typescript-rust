@@ -1,19 +1,10 @@
 error TS2451: Cannot redeclare block-scoped variable 'x'.
-usingDeclarations.1.ts(44,9): error TS1005: ';' expected.
-usingDeclarations.1.ts(49,9): error TS1005: ';' expected.
-usingDeclarations.1.ts(58,5): error TS1003: Identifier expected.
-usingDeclarations.1.ts(58,7): error TS1005: ';' expected.
-usingDeclarations.1.ts(60,9): error TS2304: Cannot find name 'yield'.
-usingDeclarations.1.ts(63,11): error TS1003: Identifier expected.
-usingDeclarations.1.ts(63,13): error TS1005: ';' expected.
-usingDeclarations.1.ts(65,9): error TS2304: Cannot find name 'yield'.
 usingDeclarations.1.ts(73,9): error TS2349: This expression is not callable.
 usingDeclarations.1.ts(81,9): error TS2349: This expression is not callable.
-usingDeclarations.1.ts(93,9): error TS2304: Cannot find name 'Math'.
 
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'x'.
-==== usingDeclarations.1.ts (11 errors) ====
+==== usingDeclarations.1.ts (2 errors) ====
     using d1 = { [Symbol.dispose]() {} };
     
     function f() {
@@ -58,15 +49,11 @@ usingDeclarations.1.ts(93,9): error TS2304: Cannot find name 'Math'.
         }
     
         get x() {
-            ~
-!!! error TS1005: ';' expected.
             using d11 = { [Symbol.dispose]() {} };
             return 0;
         }
     
         set x(v) {
-            ~
-!!! error TS1005: ';' expected.
             using d12 = { [Symbol.dispose]() {} };
         }
     
@@ -76,25 +63,13 @@ usingDeclarations.1.ts(93,9): error TS2304: Cannot find name 'Math'.
         }
     
         * g() {
-        ~
-!!! error TS1003: Identifier expected.
-          ~
-!!! error TS1005: ';' expected.
             using d14 = { [Symbol.dispose]() {} };
             yield;
-            ~~~~~
-!!! error TS2304: Cannot find name 'yield'.
         }
     
         async * ag() {
-              ~
-!!! error TS1003: Identifier expected.
-                ~~
-!!! error TS1005: ';' expected.
             using d15 = { [Symbol.dispose]() {} };
             yield;
-            ~~~~~
-!!! error TS2304: Cannot find name 'yield'.
             await null;
         }
     }
@@ -127,8 +102,6 @@ usingDeclarations.1.ts(93,9): error TS2304: Cannot find name 'Math'.
     }
     
     switch (Math.random()) {
-            ~~~~
-!!! error TS2304: Cannot find name 'Math'.
         case 0: {
             using d20 = { [Symbol.dispose]() {} };
             break;

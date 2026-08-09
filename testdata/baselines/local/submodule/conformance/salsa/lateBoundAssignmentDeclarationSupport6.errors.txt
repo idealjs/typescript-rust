@@ -1,7 +1,5 @@
 lateBoundAssignmentDeclarationSupport6.js(7,3): error TS2339: Property 'prototype' does not exist on type '() => void'.
-lateBoundAssignmentDeclarationSupport6.js(8,1): error TS2304: Cannot find name 'Object'.
 lateBoundAssignmentDeclarationSupport6.js(8,25): error TS2339: Property 'prototype' does not exist on type '() => void'.
-lateBoundAssignmentDeclarationSupport6.js(9,1): error TS2304: Cannot find name 'Object'.
 lateBoundAssignmentDeclarationSupport6.js(9,25): error TS2339: Property 'prototype' does not exist on type '() => void'.
 lateBoundAssignmentDeclarationSupport6.js(10,19): error TS2351: This expression is not constructable.
 lateBoundAssignmentDeclarationSupport6.js(13,7): error TS1003: Identifier expected.
@@ -10,7 +8,7 @@ lateBoundAssignmentDeclarationSupport6.js(14,7): error TS1003: Identifier expect
 lateBoundAssignmentDeclarationSupport6.js(14,8): error TS1005: ';' expected.
 
 
-==== lateBoundAssignmentDeclarationSupport6.js (10 errors) ====
+==== lateBoundAssignmentDeclarationSupport6.js (8 errors) ====
     // currently unsupported
     const _sym = Symbol();
     const _str = "my-fake-sym";
@@ -21,13 +19,9 @@ lateBoundAssignmentDeclarationSupport6.js(14,8): error TS1005: ';' expected.
       ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type '() => void'.
     Object.defineProperty(F.prototype, _str, {value: "ok"});
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                             ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type '() => void'.
     Object.defineProperty(F.prototype, _sym, {value: "ok"});
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                             ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type '() => void'.
     const inst =  new F();

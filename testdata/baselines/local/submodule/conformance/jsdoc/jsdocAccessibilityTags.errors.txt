@@ -1,5 +1,3 @@
-jsdocAccessibilityTag.js(21,9): error TS1005: ';' expected.
-jsdocAccessibilityTag.js(23,9): error TS1005: ';' expected.
 jsdocAccessibilityTag.js(32,14): error TS2339: Property 'priv2' does not exist on type '{ h: () => any }'.
 jsdocAccessibilityTag.js(38,14): error TS2339: Property 'prot2' does not exist on type '{ h: () => any }'.
 jsdocAccessibilityTag.js(44,14): error TS2339: Property 'pub2' does not exist on type '{ h: () => any }'.
@@ -21,7 +19,7 @@ jsdocAccessibilityTag.js(61,21): error TS2349: This expression is not callable.
 jsdocAccessibilityTag.js(61,37): error TS2349: This expression is not callable.
 
 
-==== jsdocAccessibilityTag.js (21 errors) ====
+==== jsdocAccessibilityTag.js (19 errors) ====
     class A {
         /**
          * Ap docs
@@ -43,12 +41,8 @@ jsdocAccessibilityTag.js(61,37): error TS2349: This expression is not callable.
         pub = 6;
         /** @public */
         get ack() { return this.priv }
-            ~~~
-!!! error TS1005: ';' expected.
         /** @private */
         set ack(value) { }
-            ~~~
-!!! error TS1005: ';' expected.
     }
     class C {
         constructor() {

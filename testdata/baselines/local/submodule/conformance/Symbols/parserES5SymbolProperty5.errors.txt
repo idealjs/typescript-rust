@@ -1,9 +1,9 @@
-parserES5SymbolProperty5.ts(2,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+parserES5SymbolProperty5.ts(2,5): error TS2564: Property '[Symbol.isRegExp]' has no initializer and is not definitely assigned in the constructor.
 
 
 ==== parserES5SymbolProperty5.ts (1 errors) ====
     class C {
         [Symbol.isRegExp]: string;
         ~~~~~~~~~~~~~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[Symbol.isRegExp]' has no initializer and is not definitely assigned in the constructor.
     }

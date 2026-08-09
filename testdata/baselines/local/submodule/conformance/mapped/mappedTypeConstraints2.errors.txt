@@ -6,11 +6,10 @@ mappedTypeConstraints2.ts(59,52): error TS1005: ',' expected.
 mappedTypeConstraints2.ts(59,54): error TS1005: ';' expected.
 mappedTypeConstraints2.ts(59,57): error TS2304: Cannot find name 'foo'.
 mappedTypeConstraints2.ts(59,67): error TS2304: Cannot find name 't'.
-mappedTypeConstraints2.ts(73,30): error TS2304: Cannot find name 'Object'.
 mappedTypeConstraints2.ts(77,39): error TS1005: '>' expected.
 
 
-==== mappedTypeConstraints2.ts (10 errors) ====
+==== mappedTypeConstraints2.ts (9 errors) ====
     type Mapped1<K extends string> = { [P in K]: { a: P } };
     
     function f1<K extends string>(obj: Mapped1<K>, key: K) {
@@ -100,8 +99,6 @@ mappedTypeConstraints2.ts(77,39): error TS1005: '>' expected.
     
     function validate<T extends object>(obj: T, bounds: NumericBoundsOf<T>) {
         for (const [key, val] of Object.entries(obj)) {
-                                 ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
             const boundsForKey = bounds[key as keyof NumericBoundsOf<T>];
             if (boundsForKey) {
                 const { min, max } = boundsForKey;

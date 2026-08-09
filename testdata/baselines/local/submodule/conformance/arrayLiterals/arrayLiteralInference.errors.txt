@@ -1,11 +1,9 @@
-arrayLiteralInference.ts(23,31): error TS2304: Cannot find name 'Map'.
-arrayLiteralInference.ts(23,67): error TS2304: Cannot find name 'Map'.
 arrayLiteralInference.ts(33,5): error TS2322: Type 'boolean[]' is not assignable to type 'boolean[][]'.
 arrayLiteralInference.ts(33,27): error TS2345: Argument of type 'boolean[]' is not assignable to parameter of type 'boolean'.
 arrayLiteralInference.ts(33,35): error TS2345: Argument of type 'boolean[]' is not assignable to parameter of type 'boolean'.
 
 
-==== arrayLiteralInference.ts (5 errors) ====
+==== arrayLiteralInference.ts (3 errors) ====
     // Repro from #31204
     
     export enum AppType {
@@ -29,10 +27,6 @@ arrayLiteralInference.ts(33,35): error TS2345: Argument of type 'boolean[]' is n
     }
     
     const appTypeStylesWithError: Map<AppType, Array<AppStyle>> = new Map([
-                                  ~~~
-!!! error TS2304: Cannot find name 'Map'.
-                                                                      ~~~
-!!! error TS2304: Cannot find name 'Map'.
         [AppType.Standard, [AppStyle.Standard, AppStyle.MiniApp]],
         [AppType.Relationship, [AppStyle.Standard, AppStyle.Tree, AppStyle.TreeEntity]],
         [AppType.AdvancedList, [AppStyle.Standard, AppStyle.MiniApp]]

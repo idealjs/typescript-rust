@@ -1,26 +1,17 @@
-parenthesizedContexualTyping3.ts(6,31): error TS2304: Cannot find name 'TemplateStringsArray'.
-parenthesizedContexualTyping3.ts(7,31): error TS2304: Cannot find name 'TemplateStringsArray'.
-parenthesizedContexualTyping3.ts(8,31): error TS2304: Cannot find name 'TemplateStringsArray'.
 parenthesizedContexualTyping3.ts(12,17): error TS1005: ',' expected.
 parenthesizedContexualTyping3.ts(12,23): error TS1005: ';' expected.
 parenthesizedContexualTyping3.ts(12,28): error TS1128: Declaration or statement expected.
 
 
-==== parenthesizedContexualTyping3.ts (6 errors) ====
+==== parenthesizedContexualTyping3.ts (3 errors) ====
     // Contextual typing for parenthesized substitution expressions in tagged templates.
     
     /**
      * tempFun - Can't have fun for too long.
      */
     function tempFun<T>(tempStrs: TemplateStringsArray, g: (x: T) => T, x: T): T;
-                                  ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     function tempFun<T>(tempStrs: TemplateStringsArray, g: (x: T) => T, h: (y: T) => T, x: T): T;
-                                  ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     function tempFun<T>(tempStrs: TemplateStringsArray, g: (x: T) => T, x: T): T {
-                                  ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
         return g(x);
     }
     

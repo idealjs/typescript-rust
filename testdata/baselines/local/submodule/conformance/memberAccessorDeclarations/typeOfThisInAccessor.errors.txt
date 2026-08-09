@@ -1,26 +1,18 @@
-typeOfThisInAccessor.ts(2,9): error TS1005: ';' expected.
-typeOfThisInAccessor.ts(7,16): error TS1005: ';' expected.
 typeOfThisInAccessor.ts(14,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
-typeOfThisInAccessor.ts(15,9): error TS1005: ';' expected.
-typeOfThisInAccessor.ts(20,16): error TS1005: ';' expected.
 typeOfThisInAccessor.ts(27,10): error TS1005: '{' expected.
 typeOfThisInAccessor.ts(27,11): error TS1012: Unexpected token.
 typeOfThisInAccessor.ts(27,13): error TS1005: ')' expected.
 typeOfThisInAccessor.ts(31,2): error TS1005: '}' expected.
 
 
-==== typeOfThisInAccessor.ts (9 errors) ====
+==== typeOfThisInAccessor.ts (5 errors) ====
     class C {
         get x() {
-            ~
-!!! error TS1005: ';' expected.
             var r = this; // C
             return 1;
         }
     
         static get y() {
-                   ~
-!!! error TS1005: ';' expected.
             var r2 = this; // typeof C
             return 1;
         }
@@ -31,15 +23,11 @@ typeOfThisInAccessor.ts(31,2): error TS1005: '}' expected.
         ~
 !!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
         get x() {
-            ~
-!!! error TS1005: ';' expected.
             var r = this; // D<T>
             return 1;
         }
     
         static get y() {
-                   ~
-!!! error TS1005: ';' expected.
             var r2 = this; // typeof D
             return 1;
         }

@@ -1,14 +1,12 @@
 unknownType2.ts(5,5): error TS2322: Type '(x: unknown) => unknown | string' is not assignable to type '(x: unknown) => "yes" | "no" | "idk"'.
-unknownType2.ts(48,10): error TS2304: Cannot find name 'Object'.
 unknownType2.ts(198,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
-unknownType2.ts(205,23): error TS2304: Cannot find name 'Error'.
+unknownType2.ts(205,23): error TS2351: This expression is not constructable.
 unknownType2.ts(211,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
 unknownType2.ts(216,20): error TS2322: Type '"maybe"' is not assignable to type '"yes" | "no" | "idk"'.
-unknownType2.ts(218,23): error TS2304: Cannot find name 'Error'.
-unknownType2.ts(228,15): error TS2304: Cannot find name 'Error'.
+unknownType2.ts(218,23): error TS2351: This expression is not constructable.
 
 
-==== unknownType2.ts (8 errors) ====
+==== unknownType2.ts (6 errors) ====
     type isUnknown<T> = unknown extends T ? true : false;
     type isTrue<T extends true> = T;
     
@@ -59,8 +57,6 @@ unknownType2.ts(228,15): error TS2304: Cannot find name 'Error'.
     }
     
     if (u == Object) {
-             ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         type E = isTrue<isUnknown<typeof u>>
     }
     
@@ -227,7 +223,7 @@ unknownType2.ts(228,15): error TS2304: Cannot find name 'Error'.
                 throw new Error('unknown response');
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                           ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
+!!! error TS2351: This expression is not constructable.
         }
     ~~~~~
         // Arguably this should be never.
@@ -259,7 +255,7 @@ unknownType2.ts(228,15): error TS2304: Cannot find name 'Error'.
                 throw new Error('Can you repeat the question?');
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                           ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
+!!! error TS2351: This expression is not constructable.
         }
     ~~~~~
         // Arguably this should be never.
@@ -279,8 +275,6 @@ unknownType2.ts(228,15): error TS2304: Cannot find name 'Error'.
 !!! error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
       if (x !== undefined && typeof x !== 'string') {
         throw new Error();
-                  ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
       }
       return x;
     }

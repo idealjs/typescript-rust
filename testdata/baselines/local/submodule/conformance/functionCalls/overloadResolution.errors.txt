@@ -1,5 +1,4 @@
 overloadResolution.ts(27,5): error TS2345: Argument of type 'object' is not assignable to parameter of type 'string'.
-overloadResolution.ts(35,8): error TS2304: Cannot find name 'Date'.
 overloadResolution.ts(38,13): error TS2345: Argument of type '0' is not assignable to parameter of type 'string'.
 overloadResolution.ts(38,16): error TS2345: Argument of type '""' is not assignable to parameter of type 'number'.
 overloadResolution.ts(52,13): error TS2345: Argument of type '3' is not assignable to parameter of type 'T'.
@@ -22,7 +21,7 @@ overloadResolution.ts(91,22): error TS2339: Property 'toFixed' does not exist on
 overloadResolution.ts(92,22): error TS2339: Property 'substr' does not exist on type 'string'.
 
 
-==== overloadResolution.ts (22 errors) ====
+==== overloadResolution.ts (21 errors) ====
     class SomeBase {
         private n;
     
@@ -60,8 +59,6 @@ overloadResolution.ts(92,22): error TS2339: Property 'substr' does not exist on 
     
     var d = fn2<Date>(0, undefined);
     var d: Date;
-           ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     
     // Generic and non - generic overload where generic overload is the only candidate when called without type arguments
     var s = fn2(0, '');

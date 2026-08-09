@@ -1,9 +1,0 @@
-parserMemberAccessorDeclaration15.ts(2,8): error TS1005: ';' expected.
-
-
-==== parserMemberAccessorDeclaration15.ts (1 errors) ====
-    class C {
-       set Foo(public a: number) { }
-           ~~~
-!!! error TS1005: ';' expected.
-    }

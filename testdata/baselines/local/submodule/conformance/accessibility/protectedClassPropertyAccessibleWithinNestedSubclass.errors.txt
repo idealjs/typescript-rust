@@ -1,12 +1,10 @@
 protectedClassPropertyAccessibleWithinNestedSubclass.ts(2,15): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-protectedClassPropertyAccessibleWithinNestedSubclass.ts(7,19): error TS1005: ';' expected.
-protectedClassPropertyAccessibleWithinNestedSubclass.ts(8,19): error TS1005: ';' expected.
-protectedClassPropertyAccessibleWithinNestedSubclass.ts(11,26): error TS1005: ';' expected.
-protectedClassPropertyAccessibleWithinNestedSubclass.ts(12,26): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinNestedSubclass.ts(8,31): error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any; bar: () => any }'.
+protectedClassPropertyAccessibleWithinNestedSubclass.ts(12,38): error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any; bar: () => any }'.
 protectedClassPropertyAccessibleWithinNestedSubclass.ts(36,15): error TS2564: Property 'z' has no initializer and is not definitely assigned in the constructor.
 
 
-==== protectedClassPropertyAccessibleWithinNestedSubclass.ts (6 errors) ====
+==== protectedClassPropertyAccessibleWithinNestedSubclass.ts (4 errors) ====
     class B {
         protected x: string;
                   ~
@@ -16,19 +14,15 @@ protectedClassPropertyAccessibleWithinNestedSubclass.ts(36,15): error TS2564: Pr
     
     class C extends B {
         protected get y() { return this.x; }
-                      ~
-!!! error TS1005: ';' expected.
         protected set y(x) { this.y = this.x; }
-                      ~
-!!! error TS1005: ';' expected.
+                                  ~
+!!! error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any; bar: () => any }'.
         protected foo() { return this.x; }
     
         protected static get y() { return this.x; }
-                             ~
-!!! error TS1005: ';' expected.
         protected static set y(x) { this.y = this.x; }
-                             ~
-!!! error TS1005: ';' expected.
+                                         ~
+!!! error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any; bar: () => any }'.
         protected static foo() { return this.x; }
         protected static bar() { this.foo(); }
         

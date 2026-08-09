@@ -1,18 +1,14 @@
 error TS2300: Duplicate identifier 'C'.
-esDecorators-emitDecoratorMetadata.ts(11,9): error TS1005: ';' expected.
 esDecorators-emitDecoratorMetadata.ts(14,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
-esDecorators-emitDecoratorMetadata.ts(20,16): error TS1005: ';' expected.
 esDecorators-emitDecoratorMetadata.ts(26,2): error TS1012: Unexpected token.
 esDecorators-emitDecoratorMetadata.ts(26,3): error TS1005: ')' expected.
 esDecorators-emitDecoratorMetadata.ts(26,7): error TS1005: ';' expected.
-esDecorators-emitDecoratorMetadata.ts(33,9): error TS1005: ';' expected.
 esDecorators-emitDecoratorMetadata.ts(36,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
-esDecorators-emitDecoratorMetadata.ts(42,16): error TS1005: ';' expected.
 esDecorators-emitDecoratorMetadata.ts(46,2): error TS1128: Declaration or statement expected.
 
 
 !!! error TS2300: Duplicate identifier 'C'.
-==== esDecorators-emitDecoratorMetadata.ts (10 errors) ====
+==== esDecorators-emitDecoratorMetadata.ts (6 errors) ====
     declare let dec: any;
     
     @dec
@@ -24,8 +20,6 @@ esDecorators-emitDecoratorMetadata.ts(46,2): error TS1128: Declaration or statem
     
         @dec
         set x(x: number) {}
-            ~
-!!! error TS1005: ';' expected.
     
         @dec
         y: number;
@@ -37,8 +31,6 @@ esDecorators-emitDecoratorMetadata.ts(46,2): error TS1128: Declaration or statem
     
         @dec
         static set x(x: number) {}
-                   ~
-!!! error TS1005: ';' expected.
     
         @dec
         static y: number;
@@ -58,8 +50,6 @@ esDecorators-emitDecoratorMetadata.ts(46,2): error TS1128: Declaration or statem
     
         @dec
         set x(x: number) {}
-            ~
-!!! error TS1005: ';' expected.
     
         @dec
         y: number;
@@ -71,8 +61,6 @@ esDecorators-emitDecoratorMetadata.ts(46,2): error TS1128: Declaration or statem
     
         @dec
         static set x(x: number) {}
-                   ~
-!!! error TS1005: ';' expected.
     
         @dec
         static y: number;

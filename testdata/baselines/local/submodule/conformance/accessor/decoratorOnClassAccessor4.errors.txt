@@ -1,14 +1,8 @@
-decoratorOnClassAccessor4.ts(1,71): error TS2304: Cannot find name 'TypedPropertyDescriptor'.
-decoratorOnClassAccessor4.ts(1,100): error TS2304: Cannot find name 'TypedPropertyDescriptor'.
 decoratorOnClassAccessor4.ts(4,14): error TS1005: ';' expected.
 
 
-==== decoratorOnClassAccessor4.ts (3 errors) ====
+==== decoratorOnClassAccessor4.ts (1 errors) ====
     declare function dec<T>(target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<T>): TypedPropertyDescriptor<T>;
-                                                                          ~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TypedPropertyDescriptor'.
-                                                                                                       ~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TypedPropertyDescriptor'.
     
     class C {
         @dec set accessor(value: number) { }

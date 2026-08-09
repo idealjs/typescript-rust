@@ -1,13 +1,8 @@
 assignFromStringInterface2.ts(14,28): error TS2304: Cannot find name 'RegExpMatchArray'.
-assignFromStringInterface2.ts(15,19): error TS2304: Cannot find name 'RegExp'.
 assignFromStringInterface2.ts(15,28): error TS2304: Cannot find name 'RegExpMatchArray'.
-assignFromStringInterface2.ts(18,26): error TS2304: Cannot find name 'RegExp'.
-assignFromStringInterface2.ts(19,26): error TS2304: Cannot find name 'RegExp'.
-assignFromStringInterface2.ts(21,20): error TS2304: Cannot find name 'RegExp'.
-assignFromStringInterface2.ts(24,22): error TS2304: Cannot find name 'RegExp'.
 
 
-==== assignFromStringInterface2.ts (7 errors) ====
+==== assignFromStringInterface2.ts (2 errors) ====
     interface String {
         doStuff(): string;
     }
@@ -25,27 +20,17 @@ assignFromStringInterface2.ts(24,22): error TS2304: Cannot find name 'RegExp'.
                                ~~~~~~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'RegExpMatchArray'.
         match(regexp: RegExp): RegExpMatchArray;
-                      ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
                                ~~~~~~~~~~~~~~~~
 !!! error TS2304: Cannot find name 'RegExpMatchArray'.
         replace(searchValue: string, replaceValue: string): string;
         replace(searchValue: string, replaceValue: (substring: string, ...args: any[]) => string): string;
         replace(searchValue: RegExp, replaceValue: string): string;
-                             ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
         replace(searchValue: RegExp, replaceValue: (substring: string, ...args: any[]) => string): string;
-                             ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
         search(regexp: string): number;
         search(regexp: RegExp): number;
-                       ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
         slice(start?: number, end?: number): string;
         split(separator: string, limit?: number): string[];
         split(separator: RegExp, limit?: number): string[];
-                         ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
         substring(start: number, end?: number): string;
         toLowerCase(): string;
         toLocaleLowerCase(): string;

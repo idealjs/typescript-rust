@@ -1,29 +1,19 @@
 derivedClassWithAny.ts(2,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-derivedClassWithAny.ts(3,9): error TS1005: ';' expected.
-derivedClassWithAny.ts(9,16): error TS1005: ';' expected.
-derivedClassWithAny.ts(19,9): error TS1005: ';' expected.
-derivedClassWithAny.ts(27,16): error TS1005: ';' expected.
 derivedClassWithAny.ts(37,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-derivedClassWithAny.ts(38,9): error TS1005: ';' expected.
-derivedClassWithAny.ts(44,16): error TS1005: ';' expected.
 
 
-==== derivedClassWithAny.ts (8 errors) ====
+==== derivedClassWithAny.ts (2 errors) ====
     class C {
         x: number;
         ~
 !!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         get X(): number { return 1; }
-            ~
-!!! error TS1005: ';' expected.
         foo(): number {
             return 1;
         }
     
         static y: number;
         static get Y(): number {
-                   ~
-!!! error TS1005: ';' expected.
             return 1;
         }
         static bar(): number {
@@ -34,8 +24,6 @@ derivedClassWithAny.ts(44,16): error TS1005: ';' expected.
     class D extends C {
         x: any;
         get X(): any {
-            ~
-!!! error TS1005: ';' expected.
             return null;
         }
         foo(): any {
@@ -44,8 +32,6 @@ derivedClassWithAny.ts(44,16): error TS1005: ';' expected.
     
         static y: any;
         static get Y(): any {
-                   ~
-!!! error TS1005: ';' expected.
             return null;
         }
         static bar(): any {
@@ -59,16 +45,12 @@ derivedClassWithAny.ts(44,16): error TS1005: ';' expected.
         ~
 !!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         get X(): string{ return ''; }
-            ~
-!!! error TS1005: ';' expected.
         foo(): string {
             return '';
         }
     
         static y: string;
         static get Y(): string {
-                   ~
-!!! error TS1005: ';' expected.
             return '';
         }
         static bar(): string {

@@ -1,16 +1,13 @@
-commaOperatorWithSecondOperandNumberType.ts(5,13): error TS2304: Cannot find name 'Object'.
 commaOperatorWithSecondOperandNumberType.ts(27,8): error TS2339: Property 'trim' does not exist on type 'string'.
 commaOperatorWithSecondOperandNumberType.ts(34,32): error TS2339: Property 'trim' does not exist on type 'string'.
 
 
-==== commaOperatorWithSecondOperandNumberType.ts (3 errors) ====
+==== commaOperatorWithSecondOperandNumberType.ts (2 errors) ====
     var ANY: any;
     var BOOLEAN: boolean;
     var NUMBER: number;
     var STRING: string;
     var OBJECT: Object;
-                ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     
     //The second operand type is number
     ANY, NUMBER;

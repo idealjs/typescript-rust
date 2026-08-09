@@ -1,21 +1,11 @@
-stringLiteralTypeIsSubtypeOfString.ts(15,16): error TS2304: Cannot find name 'Object'.
-stringLiteralTypeIsSubtypeOfString.ts(31,16): error TS2304: Cannot find name 'Date'.
-stringLiteralTypeIsSubtypeOfString.ts(35,16): error TS2304: Cannot find name 'RegExp'.
-stringLiteralTypeIsSubtypeOfString.ts(42,20): error TS2304: Cannot find name 'String'.
 stringLiteralTypeIsSubtypeOfString.ts(50,25): error TS2304: Cannot find name 'RegExpMatchArray'.
 stringLiteralTypeIsSubtypeOfString.ts(64,11): error TS1005: ']' expected.
 stringLiteralTypeIsSubtypeOfString.ts(64,19): error TS1005: ';' expected.
-stringLiteralTypeIsSubtypeOfString.ts(85,24): error TS2304: Cannot find name 'String'.
-stringLiteralTypeIsSubtypeOfString.ts(86,24): error TS2304: Cannot find name 'String'.
-stringLiteralTypeIsSubtypeOfString.ts(87,24): error TS2304: Cannot find name 'String'.
 stringLiteralTypeIsSubtypeOfString.ts(94,27): error TS2304: Cannot find name 'T'.
-stringLiteralTypeIsSubtypeOfString.ts(98,24): error TS2304: Cannot find name 'String'.
 stringLiteralTypeIsSubtypeOfString.ts(98,42): error TS2304: Cannot find name 'T'.
-stringLiteralTypeIsSubtypeOfString.ts(99,24): error TS2304: Cannot find name 'String'.
-stringLiteralTypeIsSubtypeOfString.ts(100,24): error TS2304: Cannot find name 'String'.
 
 
-==== stringLiteralTypeIsSubtypeOfString.ts (15 errors) ====
+==== stringLiteralTypeIsSubtypeOfString.ts (5 errors) ====
     // string literal types are subtypes of string, any
     
     // ok
@@ -31,8 +21,6 @@ stringLiteralTypeIsSubtypeOfString.ts(100,24): error TS2304: Cannot find name 'S
     // errors
     function f3(x: 'a');
     function f3(x: Object);
-                   ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     function f3(x: any) { }
     
     function f4(x: 'a');
@@ -49,14 +37,10 @@ stringLiteralTypeIsSubtypeOfString.ts(100,24): error TS2304: Cannot find name 'S
     
     function f7(x: 'a');
     function f7(x: Date);
-                   ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     function f7(x: any) { }
     
     function f8(x: 'a');
     function f8(x: RegExp);
-                   ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
     function f8(x: any) { }
     
     function f9(x: 'a');
@@ -64,8 +48,6 @@ stringLiteralTypeIsSubtypeOfString.ts(100,24): error TS2304: Cannot find name 'S
     function f9(x: any) { }
     
     class C implements String {
-                       ~~~~~~
-!!! error TS2304: Cannot find name 'String'.
         toString(): string { return null; }
         charAt(pos: number): string { return null; }
         charCodeAt(index: number): number { return null; }
@@ -115,14 +97,8 @@ stringLiteralTypeIsSubtypeOfString.ts(100,24): error TS2304: Cannot find name 'S
     function f12<T>(x: any) { }
     
     function f13<T extends String>(x: 'a');
-                           ~~~~~~
-!!! error TS2304: Cannot find name 'String'.
     function f13<T extends String>(x: T);
-                           ~~~~~~
-!!! error TS2304: Cannot find name 'String'.
     function f13<T extends String>(x: any) { }
-                           ~~~~~~
-!!! error TS2304: Cannot find name 'String'.
     
     enum E { A }
     function f14(x: 'a');
@@ -136,13 +112,7 @@ stringLiteralTypeIsSubtypeOfString.ts(100,24): error TS2304: Cannot find name 'S
     function f15<T, U extends T>(x: any) { }
     
     function f16<T extends String, U extends T>(x: 'a');
-                           ~~~~~~
-!!! error TS2304: Cannot find name 'String'.
                                              ~
 !!! error TS2304: Cannot find name 'T'.
     function f16<T extends String, U extends T>(x: U);
-                           ~~~~~~
-!!! error TS2304: Cannot find name 'String'.
     function f16<T extends String, U extends T>(x: any) { }
-                           ~~~~~~
-!!! error TS2304: Cannot find name 'String'.

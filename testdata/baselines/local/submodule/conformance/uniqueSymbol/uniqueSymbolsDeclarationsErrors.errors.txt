@@ -1,12 +1,8 @@
 uniqueSymbolsDeclarationsErrors.ts(8,16): error TS2304: Cannot find name 'p'.
 uniqueSymbolsDeclarationsErrors.ts(11,16): error TS2304: Cannot find name 'p'.
-uniqueSymbolsDeclarationsErrors.ts(55,9): error TS1005: ';' expected.
-uniqueSymbolsDeclarationsErrors.ts(56,9): error TS1005: ';' expected.
-uniqueSymbolsDeclarationsErrors.ts(57,16): error TS1005: ';' expected.
-uniqueSymbolsDeclarationsErrors.ts(58,16): error TS1005: ';' expected.
 
 
-==== uniqueSymbolsDeclarationsErrors.ts (6 errors) ====
+==== uniqueSymbolsDeclarationsErrors.ts (2 errors) ====
     declare const s: unique symbol;
     interface I { readonly readonlyType: unique symbol; }
     
@@ -66,15 +62,7 @@ uniqueSymbolsDeclarationsErrors.ts(58,16): error TS1005: ';' expected.
     
     export class ClassWithPrivateNamedAccessors {
         get [s](): any { return undefined; }
-            ~
-!!! error TS1005: ';' expected.
         set [s](v: any) { }
-            ~
-!!! error TS1005: ';' expected.
         static get [s](): any { return undefined; }
-                   ~
-!!! error TS1005: ';' expected.
         static set [s](v: any) { }
-                   ~
-!!! error TS1005: ';' expected.
     }

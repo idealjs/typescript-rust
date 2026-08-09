@@ -1,8 +1,7 @@
 enumClassification.ts(74,15): error TS2339: Property 'length' does not exist on type '"foo"'.
-enumClassification.ts(77,9): error TS2304: Cannot find name 'Math'.
 
 
-==== enumClassification.ts (2 errors) ====
+==== enumClassification.ts (1 errors) ====
     // An enum type where each member has no initializer or an initializer that specififes
     // a numeric literal, a string literal, or a single identifier naming another member in
     // the enum type is classified as a literal enum type. An enum type that doesn't adhere
@@ -82,6 +81,4 @@ enumClassification.ts(77,9): error TS2304: Cannot find name 'Math'.
         B = A + 1,
         C = +"123",
         D = Math.sin(1)
-            ~~~~
-!!! error TS2304: Cannot find name 'Math'.
     }

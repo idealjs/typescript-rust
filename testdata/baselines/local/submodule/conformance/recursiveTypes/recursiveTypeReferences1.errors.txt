@@ -1,12 +1,4 @@
-recursiveTypeReferences1.ts(1,28): error TS2304: Cannot find name 'Array'.
-recursiveTypeReferences1.ts(1,28): error TS2304: Cannot find name 'Array'.
 recursiveTypeReferences1.ts(45,7): error TS2322: Type 'number' is not assignable to type '{ value: error | number }'.
-recursiveTypeReferences1.ts(49,20): error TS2304: Cannot find name 'Array'.
-recursiveTypeReferences1.ts(51,43): error TS2304: Cannot find name 'Array'.
-recursiveTypeReferences1.ts(52,30): error TS2304: Cannot find name 'Array'.
-recursiveTypeReferences1.ts(52,52): error TS2304: Cannot find name 'Array'.
-recursiveTypeReferences1.ts(53,30): error TS2304: Cannot find name 'Array'.
-recursiveTypeReferences1.ts(53,63): error TS2304: Cannot find name 'Array'.
 recursiveTypeReferences1.ts(87,15): error TS2345: Argument of type 'T | error[]' is not assignable to parameter of type 'T | error[]'.
 recursiveTypeReferences1.ts(95,15): error TS2345: Argument of type 'T | error[]' is not assignable to parameter of type 'T | error[]'.
 recursiveTypeReferences1.ts(99,14): error TS2304: Cannot find name 'HTMLHeadingElement'.
@@ -28,12 +20,8 @@ recursiveTypeReferences1.ts(127,3): error TS2304: Cannot find name 'assert'.
 recursiveTypeReferences1.ts(127,10): error TS2304: Cannot find name 'isFinite'.
 
 
-==== recursiveTypeReferences1.ts (28 errors) ====
+==== recursiveTypeReferences1.ts (20 errors) ====
     type ValueOrArray<T> = T | Array<ValueOrArray<T>>;
-                               ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
-                               ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     
     const a0: ValueOrArray<number> = 1;
     const a1: ValueOrArray<number> = [1, [2, 3], [4, [5, [6, 7]]]];
@@ -84,22 +72,10 @@ recursiveTypeReferences1.ts(127,10): error TS2304: Cannot find name 'isFinite'.
     const b22: Box2 = { value: { value: { value: 42 }}};
     
     type RecArray<T> = Array<T | RecArray<T>>;
-                       ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     
     declare function flat<T>(a: RecArray<T>): Array<T>;
-                                              ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     declare function flat1<T>(a: Array<T | Array<T>>): Array<T>
-                                 ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
-                                                       ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     declare function flat2<T>(a: Array<T | Array<T | Array<T>>>): Array<T>;
-                                 ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
-                                                                  ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     
     flat([1, [2, [3]]]);  // number[]
     flat([[[0]]]);  // number[]

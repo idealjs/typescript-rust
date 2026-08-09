@@ -1,15 +1,10 @@
-controlFlowIfStatement.ts(1,36): error TS2304: Cannot find name 'RegExp'.
 controlFlowIfStatement.ts(17,9): error TS2454: Variable 'cond' is used before being assigned.
 controlFlowIfStatement.ts(28,9): error TS2454: Variable 'cond' is used before being assigned.
-controlFlowIfStatement.ts(39,16): error TS2304: Cannot find name 'JSON'.
-controlFlowIfStatement.ts(47,19): error TS2304: Cannot find name 'Error'.
 controlFlowIfStatement.ts(50,16): error TS2322: Type 'T' is not assignable to type 'never'.
 
 
-==== controlFlowIfStatement.ts (6 errors) ====
+==== controlFlowIfStatement.ts (3 errors) ====
     let x: string | number | boolean | RegExp;
-                                       ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
     let cond: boolean;
     
     x = /a/;
@@ -52,8 +47,6 @@ controlFlowIfStatement.ts(50,16): error TS2322: Type 'T' is not assignable to ty
     function c<T>(data: string | T): T {
         if (typeof data === 'string') {
             return JSON.parse(data);
-                   ~~~~
-!!! error TS2304: Cannot find name 'JSON'.
         }
         else {
             return data;
@@ -62,8 +55,6 @@ controlFlowIfStatement.ts(50,16): error TS2322: Type 'T' is not assignable to ty
     function d<T extends string>(data: string | T): never {
         if (typeof data === 'string') {
             throw new Error('will always happen');
-                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
         }
         else {
             return data;

@@ -1,35 +1,26 @@
-derivedClassOverridesPublicMembers.ts(7,9): error TS1005: ';' expected.
-derivedClassOverridesPublicMembers.ts(8,9): error TS1005: ';' expected.
 derivedClassOverridesPublicMembers.ts(9,5): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
-derivedClassOverridesPublicMembers.ts(13,16): error TS1005: ';' expected.
-derivedClassOverridesPublicMembers.ts(14,16): error TS1005: ';' expected.
-derivedClassOverridesPublicMembers.ts(23,9): error TS1005: ';' expected.
-derivedClassOverridesPublicMembers.ts(24,9): error TS1005: ';' expected.
 derivedClassOverridesPublicMembers.ts(25,5): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
-derivedClassOverridesPublicMembers.ts(29,16): error TS1005: ';' expected.
-derivedClassOverridesPublicMembers.ts(30,16): error TS1005: ';' expected.
 derivedClassOverridesPublicMembers.ts(33,32): error TS2349: This expression is not callable.
 derivedClassOverridesPublicMembers.ts(42,18): error TS2339: Property 'r' does not exist on type 'object'.
 derivedClassOverridesPublicMembers.ts(43,18): error TS2339: Property 's' does not exist on type 'object'.
 derivedClassOverridesPublicMembers.ts(44,18): error TS2339: Property 't' does not exist on type 'object'.
 derivedClassOverridesPublicMembers.ts(45,19): error TS2339: Property 'u' does not exist on type 'object'.
 derivedClassOverridesPublicMembers.ts(46,9): error TS2339: Property 't' does not exist on type 'object'.
-derivedClassOverridesPublicMembers.ts(49,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+derivedClassOverridesPublicMembers.ts(49,5): error TS2564: Property '[i' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesPublicMembers.ts(49,7): error TS1005: ']' expected.
 derivedClassOverridesPublicMembers.ts(49,15): error TS1005: ';' expected.
-derivedClassOverridesPublicMembers.ts(49,18): error TS2304: Cannot find name 'Object'.
-derivedClassOverridesPublicMembers.ts(50,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+derivedClassOverridesPublicMembers.ts(50,5): error TS2564: Property '[i' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesPublicMembers.ts(50,7): error TS1005: ']' expected.
 derivedClassOverridesPublicMembers.ts(50,15): error TS1005: ';' expected.
-derivedClassOverridesPublicMembers.ts(54,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+derivedClassOverridesPublicMembers.ts(54,5): error TS2564: Property '[i' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesPublicMembers.ts(54,7): error TS1005: ']' expected.
 derivedClassOverridesPublicMembers.ts(54,15): error TS1005: ';' expected.
-derivedClassOverridesPublicMembers.ts(55,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+derivedClassOverridesPublicMembers.ts(55,5): error TS2564: Property '[i' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesPublicMembers.ts(55,7): error TS1005: ']' expected.
 derivedClassOverridesPublicMembers.ts(55,15): error TS1005: ';' expected.
 
 
-==== derivedClassOverridesPublicMembers.ts (29 errors) ====
+==== derivedClassOverridesPublicMembers.ts (20 errors) ====
     var x: { foo: string; }
     var y: { foo: string; bar: string; }
     
@@ -37,11 +28,7 @@ derivedClassOverridesPublicMembers.ts(55,15): error TS1005: ';' expected.
         a: typeof x;
         b(a: typeof x) { }
         get c() { return x; }
-            ~
-!!! error TS1005: ';' expected.
         set c(v: typeof x) { }
-            ~
-!!! error TS1005: ';' expected.
         d: (a: typeof x) => void;
         ~
 !!! error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
@@ -49,11 +36,7 @@ derivedClassOverridesPublicMembers.ts(55,15): error TS1005: ';' expected.
         static r: typeof x;
         static s(a: typeof x) { }
         static get t() { return x; }
-                   ~
-!!! error TS1005: ';' expected.
         static set t(v: typeof x) { }
-                   ~
-!!! error TS1005: ';' expected.
         static u: (a: typeof x) => void;
     
         constructor(a: typeof x) { }
@@ -63,11 +46,7 @@ derivedClassOverridesPublicMembers.ts(55,15): error TS1005: ';' expected.
         a: typeof y;
         b(a: typeof y) { }
         get c() { return y; }
-            ~
-!!! error TS1005: ';' expected.
         set c(v: typeof y) { }
-            ~
-!!! error TS1005: ';' expected.
         d: (a: typeof y) => void;
         ~
 !!! error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
@@ -75,11 +54,7 @@ derivedClassOverridesPublicMembers.ts(55,15): error TS1005: ';' expected.
         static r: typeof y;
         static s(a: typeof y) { }
         static get t() { return y; }
-                   ~
-!!! error TS1005: ';' expected.
         static set t(a: typeof y) { }
-                   ~
-!!! error TS1005: ';' expected.
         static u: (a: typeof y) => void;
     
         constructor(a: typeof y) { super(x) }
@@ -112,16 +87,14 @@ derivedClassOverridesPublicMembers.ts(55,15): error TS1005: ';' expected.
     class Base2 {
         [i: string]: Object;
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[i' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
-                     ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         [i: number]: typeof x;
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[i' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
@@ -131,14 +104,14 @@ derivedClassOverridesPublicMembers.ts(55,15): error TS1005: ';' expected.
     class Derived2 extends Base2 {
         [i: string]: typeof x;
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[i' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
         [i: number]: typeof y;
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[i' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~

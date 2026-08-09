@@ -1,10 +1,3 @@
-index.js(2,1): error TS2304: Cannot find name 'Object'.
-index.js(3,1): error TS2304: Cannot find name 'Object'.
-index.js(4,1): error TS2304: Cannot find name 'Object'.
-index.js(5,1): error TS2304: Cannot find name 'Object'.
-index.js(6,1): error TS2304: Cannot find name 'Object'.
-index.js(7,1): error TS2304: Cannot find name 'Object'.
-index.js(10,20): error TS2304: Cannot find name 'Number'.
 index.js(10,27): error TS2304: Cannot find name 'str'.
 index.js(23,11): error TS2339: Property 'zip' does not exist on type 'object'.
 index.js(28,11): error TS2339: Property 'houseNumber' does not exist on type 'object'.
@@ -25,31 +18,17 @@ validate.ts(16,3): error TS2339: Property 'zipStr' does not exist on type 'objec
 validate.ts(17,3): error TS2339: Property 'middleInit' does not exist on type 'object'.
 
 
-==== index.js (12 errors) ====
+==== index.js (5 errors) ====
     const x = {};
     Object.defineProperty(x, "name", { value: "Charles", writable: true });
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     Object.defineProperty(x, "middleInit", { value: "H" });
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     Object.defineProperty(x, "lastName", { value: "Smith", writable: false });
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     Object.defineProperty(x, "zip", { get() { return 98122 }, set(_) { /*ignore*/ } });
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     Object.defineProperty(x, "houseNumber", { get() { return 21.75 } });
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     Object.defineProperty(x, "zipStr", {
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         /** @param {string} str */
         set(str) {
             this.zip = Number(str) 
-                       ~~~~~~
-!!! error TS2304: Cannot find name 'Number'.
                               ~~~
 !!! error TS2304: Cannot find name 'str'.
         }

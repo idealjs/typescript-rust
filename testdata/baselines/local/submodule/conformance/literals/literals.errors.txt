@@ -1,9 +1,8 @@
 literals.ts(19,9): error TS1121: Octal literals are not allowed. Use the syntax '0o01'.
 literals.ts(24,9): error TS1121: Octal literals are not allowed. Use the syntax '0o03'.
-literals.ts(35,8): error TS2304: Cannot find name 'RegExp'.
 
 
-==== literals.ts (3 errors) ====
+==== literals.ts (2 errors) ====
     //typeof null is Null
     //typeof true is Boolean
     //typeof false is Boolean
@@ -43,7 +42,5 @@ literals.ts(35,8): error TS2304: Cannot find name 'RegExp'.
         bar";
     
     var r: RegExp;
-           ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
     var r = /what/;
     var r = /\\\\/;

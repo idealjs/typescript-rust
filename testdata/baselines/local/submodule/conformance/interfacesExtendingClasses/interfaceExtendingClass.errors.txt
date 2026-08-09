@@ -1,34 +1,28 @@
 interfaceExtendingClass.ts(2,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-interfaceExtendingClass.ts(4,9): error TS1005: ';' expected.
-interfaceExtendingClass.ts(7,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+interfaceExtendingClass.ts(7,5): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 interfaceExtendingClass.ts(7,7): error TS1005: ']' expected.
 interfaceExtendingClass.ts(7,15): error TS1005: ';' expected.
-interfaceExtendingClass.ts(7,18): error TS2304: Cannot find name 'Object'.
 interfaceExtendingClass.ts(14,12): error TS2339: Property 'x' does not exist on type 'object'.
 interfaceExtendingClass.ts(15,12): error TS2339: Property 'y' does not exist on type 'object'.
 interfaceExtendingClass.ts(16,12): error TS2339: Property 'Z' does not exist on type 'object'.
 
 
-==== interfaceExtendingClass.ts (9 errors) ====
+==== interfaceExtendingClass.ts (7 errors) ====
     class Foo {
         x: string;
         ~
 !!! error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
         y() { }
         get Z() {
-            ~
-!!! error TS1005: ';' expected.
             return 1;
         }
         [x: string]: Object;
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~
 !!! error TS1005: ';' expected.
-                     ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     }
     
     interface I extends Foo {

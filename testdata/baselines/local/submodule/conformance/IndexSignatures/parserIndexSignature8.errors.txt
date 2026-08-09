@@ -1,8 +1,0 @@
-parserIndexSignature8.ts(2,21): error TS2304: Cannot find name 'RegExp'.
-
-
-==== parserIndexSignature8.ts (1 errors) ====
-    var foo: { [index: any]; }; // expect an error here
-    var foo2: { [index: RegExp]; }; // expect an error here
-                        ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.

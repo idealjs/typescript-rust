@@ -1,16 +1,14 @@
-symbolDeclarationEmit12.ts(4,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+symbolDeclarationEmit12.ts(4,9): error TS2564: Property '[Symbol.iterator]' has no initializer and is not definitely assigned in the constructor.
 symbolDeclarationEmit12.ts(7,20): error TS2322: Type 'undefined' is not assignable to type 'object'.
-symbolDeclarationEmit12.ts(9,13): error TS1005: ';' expected.
-symbolDeclarationEmit12.ts(10,13): error TS1005: ';' expected.
 
 
-==== symbolDeclarationEmit12.ts (4 errors) ====
+==== symbolDeclarationEmit12.ts (2 errors) ====
     namespace M {
         interface I { }
         export class C {
             [Symbol.iterator]: I;
             ~~~~~~~~~~~~~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[Symbol.iterator]' has no initializer and is not definitely assigned in the constructor.
             [Symbol.toPrimitive](x: I) { }
             [Symbol.isConcatSpreadable](): I {
                 return undefined
@@ -18,10 +16,6 @@ symbolDeclarationEmit12.ts(10,13): error TS1005: ';' expected.
 !!! error TS2322: Type 'undefined' is not assignable to type 'object'.
             }
             get [Symbol.toPrimitive]() { return undefined; }
-                ~
-!!! error TS1005: ';' expected.
             set [Symbol.toPrimitive](x: I) { }
-                ~
-!!! error TS1005: ';' expected.
         }
     }

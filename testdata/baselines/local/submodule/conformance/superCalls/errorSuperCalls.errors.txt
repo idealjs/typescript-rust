@@ -1,25 +1,19 @@
 errorSuperCalls.ts(4,9): error TS2349: This expression is not callable.
 errorSuperCalls.ts(9,9): error TS2349: This expression is not callable.
-errorSuperCalls.ts(13,9): error TS1005: ';' expected.
 errorSuperCalls.ts(14,9): error TS2349: This expression is not callable.
-errorSuperCalls.ts(17,9): error TS1005: ';' expected.
 errorSuperCalls.ts(18,9): error TS2349: This expression is not callable.
 errorSuperCalls.ts(26,9): error TS2349: This expression is not callable.
 errorSuperCalls.ts(30,16): error TS2349: This expression is not callable.
-errorSuperCalls.ts(33,16): error TS1005: ';' expected.
 errorSuperCalls.ts(34,9): error TS2349: This expression is not callable.
-errorSuperCalls.ts(37,16): error TS1005: ';' expected.
 errorSuperCalls.ts(38,9): error TS2349: This expression is not callable.
 errorSuperCalls.ts(46,9): error TS2349: This expression is not callable.
 errorSuperCalls.ts(47,9): error TS2349: This expression is not callable.
 errorSuperCalls.ts(62,9): error TS2349: This expression is not callable.
-errorSuperCalls.ts(66,9): error TS1005: ';' expected.
 errorSuperCalls.ts(67,9): error TS2349: This expression is not callable.
-errorSuperCalls.ts(70,9): error TS1005: ';' expected.
 errorSuperCalls.ts(71,9): error TS2349: This expression is not callable.
 
 
-==== errorSuperCalls.ts (19 errors) ====
+==== errorSuperCalls.ts (13 errors) ====
     //super call in class constructor with no base type
     class NoBase {
         constructor() {
@@ -37,16 +31,12 @@ errorSuperCalls.ts(71,9): error TS2349: This expression is not callable.
     
         //super call in class accessor (get and set) with no base type
         get foo() {
-            ~~~
-!!! error TS1005: ';' expected.
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.
             return null;
         }
         set foo(v) {
-            ~~~
-!!! error TS1005: ';' expected.
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.
@@ -69,16 +59,12 @@ errorSuperCalls.ts(71,9): error TS2349: This expression is not callable.
     
         //super call in static class accessor (get and set) with no base type
         static get q() {
-                   ~
-!!! error TS1005: ';' expected.
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.
             return null;
         }
         static set q(n) {
-                   ~
-!!! error TS1005: ';' expected.
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.
@@ -116,16 +102,12 @@ errorSuperCalls.ts(71,9): error TS2349: This expression is not callable.
     
         //super call in class accessor (get and set) of derived type
         get foo() {
-            ~~~
-!!! error TS1005: ';' expected.
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.
             return null;
         }
         set foo(n) {
-            ~~~
-!!! error TS1005: ';' expected.
             super();
             ~~~~~
 !!! error TS2349: This expression is not callable.

@@ -1,31 +1,25 @@
-esDecorators-classDeclaration-accessors-staticPrivate.ts(4,24): error TS1005: ';' expected.
-esDecorators-classDeclaration-accessors-staticPrivate.ts(5,24): error TS1005: ';' expected.
-esDecorators-classDeclaration-accessors-staticPrivate.ts(10,16): error TS1005: ';' expected.
-esDecorators-classDeclaration-accessors-staticPrivate.ts(11,16): error TS1005: ';' expected.
+esDecorators-classDeclaration-accessors-staticPrivate.ts(13,14): error TS2339: Property '#method1' does not exist on type 'object'.
+esDecorators-classDeclaration-accessors-staticPrivate.ts(14,14): error TS2339: Property '#method1' does not exist on type 'object'.
 
 
-==== esDecorators-classDeclaration-accessors-staticPrivate.ts (4 errors) ====
+==== esDecorators-classDeclaration-accessors-staticPrivate.ts (2 errors) ====
     declare let dec: any;
     
     class C {
         @dec(1) static get #method1() { return 0; }
-                           ~~~~~~~~
-!!! error TS1005: ';' expected.
         @dec(2) static set #method1(value) {}
-                           ~~~~~~~~
-!!! error TS1005: ';' expected.
     }
     
     @dec
     class D {
         static get #method1() { return 0; }
-                   ~~~~~~~~
-!!! error TS1005: ';' expected.
         static set #method1(value) {}
-                   ~~~~~~~~
-!!! error TS1005: ';' expected.
         static {
             this.#method1;
+                 ~~~~~~~~
+!!! error TS2339: Property '#method1' does not exist on type 'object'.
             this.#method1 = 1;
+                 ~~~~~~~~
+!!! error TS2339: Property '#method1' does not exist on type 'object'.
         }
     }

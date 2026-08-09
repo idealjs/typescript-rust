@@ -1,15 +1,11 @@
 typeGuardOfFromPropNameInUnionType.ts(1,11): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 typeGuardOfFromPropNameInUnionType.ts(2,11): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
-typeGuardOfFromPropNameInUnionType.ts(3,14): error TS2304: Cannot find name 'Object'.
-typeGuardOfFromPropNameInUnionType.ts(4,14): error TS2304: Cannot find name 'Date'.
-typeGuardOfFromPropNameInUnionType.ts(16,25): error TS2304: Cannot find name 'Date'.
-typeGuardOfFromPropNameInUnionType.ts(18,25): error TS2304: Cannot find name 'Object'.
 typeGuardOfFromPropNameInUnionType.ts(51,28): error TS2564: Property 'prop' has no initializer and is not definitely assigned in the constructor.
 typeGuardOfFromPropNameInUnionType.ts(72,15): error TS2564: Property 'prop' has no initializer and is not definitely assigned in the constructor.
 typeGuardOfFromPropNameInUnionType.ts(84,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 
 
-==== typeGuardOfFromPropNameInUnionType.ts (9 errors) ====
+==== typeGuardOfFromPropNameInUnionType.ts (5 errors) ====
     class A { a: string; }
               ~
 !!! error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
@@ -17,11 +13,7 @@ typeGuardOfFromPropNameInUnionType.ts(84,5): error TS2564: Property 'a' has no i
               ~
 !!! error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
     class C { b: Object; }
-                 ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     class D { a: Date; }
-                 ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     
     function namedClasses(x: A | B) {
         if ("a" in x) {
@@ -34,12 +26,8 @@ typeGuardOfFromPropNameInUnionType.ts(84,5): error TS2564: Property 'a' has no i
     function multipleClasses(x: A | B | C | D) {
         if ("a" in x) {
             let y: string | Date = x.a;
-                            ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         } else {
             let z: number | Object = x.b;
-                            ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         }
     }
     

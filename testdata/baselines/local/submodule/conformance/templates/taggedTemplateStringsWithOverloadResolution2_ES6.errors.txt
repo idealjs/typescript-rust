@@ -1,14 +1,11 @@
-taggedTemplateStringsWithOverloadResolution2_ES6.ts(2,21): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateStringsWithOverloadResolution2_ES6.ts(8,14): error TS1005: ',' expected.
 taggedTemplateStringsWithOverloadResolution2_ES6.ts(8,17): error TS1134: Variable declaration expected.
 taggedTemplateStringsWithOverloadResolution2_ES6.ts(8,18): error TS1128: Declaration or statement expected.
 
 
-==== taggedTemplateStringsWithOverloadResolution2_ES6.ts (4 errors) ====
+==== taggedTemplateStringsWithOverloadResolution2_ES6.ts (3 errors) ====
     ﻿//@target: es6
     function foo1(strs: TemplateStringsArray, x: number): string;
-                     ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     function foo1(strs: string[], x: number): number;
     function foo1(...stuff: any[]): any {
         return undefined;

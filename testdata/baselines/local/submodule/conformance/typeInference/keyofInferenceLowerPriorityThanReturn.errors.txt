@@ -1,8 +1,7 @@
-keyofInferenceLowerPriorityThanReturn.ts(41,15): error TS2304: Cannot find name 'Error'.
 keyofInferenceLowerPriorityThanReturn.ts(45,57): error TS2339: Property 'tableColumns' does not exist on type 'object'.
 
 
-==== keyofInferenceLowerPriorityThanReturn.ts (2 errors) ====
+==== keyofInferenceLowerPriorityThanReturn.ts (1 errors) ====
     // #22736
     declare class Write {
         protected dummy: Write;
@@ -44,8 +43,6 @@ keyofInferenceLowerPriorityThanReturn.ts(45,57): error TS2339: Property 'tableCo
     
     function insertOnConflictDoNothing<Req extends object, Def extends object>(_table: Table<Req, Def>, _conflictTarget: ConflictTarget<Req & Def>): boolean {
         throw new Error();
-                  ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     }
     
     function f() {

@@ -1,7 +1,5 @@
 error TS2451: Cannot redeclare block-scoped variable 'x'.
 error TS2451: Cannot redeclare block-scoped variable 'x'.
-builtinIteratorReturn.ts(2,20): error TS2304: Cannot find name 'Map'.
-builtinIteratorReturn.ts(3,20): error TS2304: Cannot find name 'Set'.
 builtinIteratorReturn.ts(5,12): error TS2349: This expression is not callable.
 builtinIteratorReturn.ts(6,18): error TS2339: Property 'values' does not exist on type 'number[]'.
 builtinIteratorReturn.ts(7,18): error TS2339: Property 'keys' does not exist on type 'number[]'.
@@ -11,14 +9,10 @@ builtinIteratorReturn.ts(8,18): error TS2339: Property 'entries' does not exist 
 !!! error TS2451: Cannot redeclare block-scoped variable 'x'.
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'x'.
-==== builtinIteratorReturn.ts (6 errors) ====
+==== builtinIteratorReturn.ts (4 errors) ====
     declare const array: number[];
     declare const map: Map<string, number>;
-                       ~~~
-!!! error TS2304: Cannot find name 'Map'.
     declare const set: Set<number>;
-                       ~~~
-!!! error TS2304: Cannot find name 'Set'.
     
     const i0 = array[Symbol.iterator]();
                ~~~~~~~~~~~~~~~~~~~~~~

@@ -1,4 +1,4 @@
-parserComputedPropertyName28.ts(3,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+parserComputedPropertyName28.ts(3,5): error TS2564: Property '[e2]' has no initializer and is not definitely assigned in the constructor.
 
 
 ==== parserComputedPropertyName28.ts (1 errors) ====
@@ -6,5 +6,5 @@ parserComputedPropertyName28.ts(3,5): error TS2564: Property '' has no initializ
         [e]: number = 0;
         [e2]: number
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[e2]' has no initializer and is not definitely assigned in the constructor.
     }

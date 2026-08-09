@@ -1,4 +1,4 @@
-typeOfThisInInstanceMember2.ts(14,9): error TS1005: ';' expected.
+typeOfThisInInstanceMember2.ts(9,11): error TS2339: Property 'y' does not exist on type '{ x: any; foo: () => any; z: T }'.
 typeOfThisInInstanceMember2.ts(18,5): error TS2564: Property 'z' has no initializer and is not definitely assigned in the constructor.
 typeOfThisInInstanceMember2.ts(30,4): error TS2339: Property 'forEach' does not exist on type 'any[]'.
 
@@ -13,13 +13,13 @@ typeOfThisInInstanceMember2.ts(30,4): error TS2339: Property 'forEach' does not 
             var t = this;
             t.x;
             t.y;
+              ~
+!!! error TS2339: Property 'y' does not exist on type '{ x: any; foo: () => any; z: T }'.
             t.z;
             var r = t.foo();
         }
     
         get y() {
-            ~
-!!! error TS1005: ';' expected.
             return this;
         }
     

@@ -1,22 +1,14 @@
-assertionTypePredicates1.ts(16,29): error TS2304: Cannot find name 'Error'.
 assertionTypePredicates1.ts(29,14): error TS2339: Property 'length' does not exist on type 'string'.
 assertionTypePredicates1.ts(54,11): error TS2339: Property 'length' does not exist on type 'string'.
 assertionTypePredicates1.ts(58,11): error TS2339: Property 'length' does not exist on type 'string | string | undefined'.
 assertionTypePredicates1.ts(68,7): error TS2339: Property 'length' does not exist on type 'string'.
 assertionTypePredicates1.ts(79,11): error TS2339: Property 'length' does not exist on type 'string'.
 assertionTypePredicates1.ts(83,11): error TS2339: Property 'length' does not exist on type 'string | string | undefined'.
-assertionTypePredicates1.ts(98,19): error TS2304: Cannot find name 'Error'.
-assertionTypePredicates1.ts(105,19): error TS2304: Cannot find name 'Error'.
-assertionTypePredicates1.ts(109,19): error TS2304: Cannot find name 'Error'.
 assertionTypePredicates1.ts(119,18): error TS2339: Property 'z' does not exist on type '{ assert: (value: unknown) => void; isTest2: () => boolean; assertIsTest2: () => void; assertThis: () => void; bar: () => any; foo: (x: unknown) => any; baz: (x: number) => any }'.
 assertionTypePredicates1.ts(122,14): error TS2339: Property 'z' does not exist on type '{ assert: (value: unknown) => void; isTest2: () => boolean; assertIsTest2: () => void; assertThis: () => void; bar: () => any; foo: (x: unknown) => any; baz: (x: number) => any }'.
-assertionTypePredicates1.ts(162,9): error TS1005: ';' expected.
-assertionTypePredicates1.ts(163,9): error TS1005: ';' expected.
-assertionTypePredicates1.ts(164,9): error TS1005: ';' expected.
-assertionTypePredicates1.ts(165,9): error TS1005: ';' expected.
 
 
-==== assertionTypePredicates1.ts (16 errors) ====
+==== assertionTypePredicates1.ts (8 errors) ====
     declare function isString(value: unknown): value is string;
     declare function isArrayOfStrings(value: unknown): value is string[];
     
@@ -33,8 +25,6 @@ assertionTypePredicates1.ts(165,9): error TS1005: ';' expected.
         }
         if (!!true) {
             assert(x instanceof Error);
-                                ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
             x.message;
         }
         if (!!true) {
@@ -129,8 +119,6 @@ assertionTypePredicates1.ts(165,9): error TS1005: ';' expected.
         assert(value: unknown): asserts value {
             if (value) return;
             throw new Error();
-                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
         }
         isTest2(): this is Test2 {
             return this instanceof Test2;
@@ -138,14 +126,10 @@ assertionTypePredicates1.ts(165,9): error TS1005: ';' expected.
         assertIsTest2(): asserts this is Test2 {
             if (this instanceof Test2) return;
             throw new Error();
-                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
         }
         assertThis(): asserts this {
             if (!this) return;
             throw new Error();
-                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
         }
         bar() {
             this.assertThis();
@@ -203,17 +187,9 @@ assertionTypePredicates1.ts(165,9): error TS1005: ';' expected.
     
     declare class Wat {
         get p1(): this is string;
-            ~~
-!!! error TS1005: ';' expected.
         set p1(x: this is string);
-            ~~
-!!! error TS1005: ';' expected.
         get p2(): asserts this is string;
-            ~~
-!!! error TS1005: ';' expected.
         set p2(x: asserts this is string);
-            ~~
-!!! error TS1005: ';' expected.
     }
     
     function f20(x: unknown) {

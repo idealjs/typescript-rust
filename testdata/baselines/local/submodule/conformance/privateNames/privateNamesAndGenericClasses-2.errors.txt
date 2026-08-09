@@ -1,12 +1,11 @@
 privateNamesAndGenericClasses-2.ts(2,5): error TS2564: Property '#foo' has no initializer and is not definitely assigned in the constructor.
-privateNamesAndGenericClasses-2.ts(10,9): error TS1005: ';' expected.
-privateNamesAndGenericClasses-2.ts(14,9): error TS1005: ';' expected.
 privateNamesAndGenericClasses-2.ts(19,15): error TS2345: Argument of type '3' is not assignable to parameter of type 'T'.
 privateNamesAndGenericClasses-2.ts(20,15): error TS2345: Argument of type '"hello"' is not assignable to parameter of type 'T'.
-privateNamesAndGenericClasses-2.ts(23,7): error TS2322: Type '() => T' is not assignable to type 'number'.
+privateNamesAndGenericClasses-2.ts(22,3): error TS2339: Property 'baz' does not exist on type '{ #foo: T; #bar: () => T }'.
+privateNamesAndGenericClasses-2.ts(23,21): error TS2339: Property 'baz' does not exist on type '{ #foo: T; #bar: () => T }'.
 
 
-==== privateNamesAndGenericClasses-2.ts (6 errors) ====
+==== privateNamesAndGenericClasses-2.ts (5 errors) ====
     class C<T> {
         #foo: T;
         ~~~~
@@ -19,14 +18,10 @@ privateNamesAndGenericClasses-2.ts(23,7): error TS2322: Type '() => T' is not as
           t = this.#bar();
         }
         set baz(t: T) {
-            ~~~
-!!! error TS1005: ';' expected.
           this.#foo = t;
     
         }
         get baz(): T {
-            ~~~
-!!! error TS1005: ';' expected.
           return this.#foo;
         }
     }
@@ -39,9 +34,11 @@ privateNamesAndGenericClasses-2.ts(23,7): error TS2322: Type '() => T' is not as
 !!! error TS2345: Argument of type '"hello"' is not assignable to parameter of type 'T'.
     
     a.baz = 5                                 // OK
+      ~~~
+!!! error TS2339: Property 'baz' does not exist on type '{ #foo: T; #bar: () => T }'.
     const x: number = a.baz                   // OK
-          ~~~~~~~~~~~~~~~~~
-!!! error TS2322: Type '() => T' is not assignable to type 'number'.
+                        ~~~
+!!! error TS2339: Property 'baz' does not exist on type '{ #foo: T; #bar: () => T }'.
     a.#foo;                                   // Error
     a = b;                                    // Error
     b = a;                                    // Error

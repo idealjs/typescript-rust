@@ -1,16 +1,12 @@
 esDecorators-classExpression-commentPreservation.ts(6,1): error TS1012: Unexpected token.
 esDecorators-classExpression-commentPreservation.ts(6,2): error TS1005: ')' expected.
-esDecorators-classExpression-commentPreservation.ts(23,9): error TS1005: ';' expected.
-esDecorators-classExpression-commentPreservation.ts(30,9): error TS1005: ';' expected.
 esDecorators-classExpression-commentPreservation.ts(51,12): error TS1005: ';' expected.
-esDecorators-classExpression-commentPreservation.ts(58,16): error TS1005: ';' expected.
-esDecorators-classExpression-commentPreservation.ts(65,16): error TS1005: ';' expected.
 esDecorators-classExpression-commentPreservation.ts(72,12): error TS1005: ';' expected.
 esDecorators-classExpression-commentPreservation.ts(79,21): error TS1005: ';' expected.
 esDecorators-classExpression-commentPreservation.ts(81,1): error TS1128: Declaration or statement expected.
 
 
-==== esDecorators-classExpression-commentPreservation.ts (10 errors) ====
+==== esDecorators-classExpression-commentPreservation.ts (6 errors) ====
     declare var dec: any;
     
     /*1*/
@@ -38,8 +34,6 @@ esDecorators-classExpression-commentPreservation.ts(81,1): error TS1128: Declara
         @dec
         /*10*/
         get x() { return 1; }
-            ~
-!!! error TS1005: ';' expected.
     
         /*11*/
         @dec
@@ -47,8 +41,6 @@ esDecorators-classExpression-commentPreservation.ts(81,1): error TS1128: Declara
         @dec
         /*13*/
         set x(value: number) { }
-            ~
-!!! error TS1005: ';' expected.
     
         /*14*/
         @dec
@@ -79,8 +71,6 @@ esDecorators-classExpression-commentPreservation.ts(81,1): error TS1128: Declara
         @dec
         /*25*/
         static get #x() { return 1; }
-                   ~~
-!!! error TS1005: ';' expected.
     
         /*26*/
         @dec
@@ -88,8 +78,6 @@ esDecorators-classExpression-commentPreservation.ts(81,1): error TS1128: Declara
         @dec
         /*28*/
         static set #x(value: number) { }
-                   ~~
-!!! error TS1005: ';' expected.
     
         /*29*/
         @dec

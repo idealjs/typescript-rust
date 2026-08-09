@@ -1,5 +1,5 @@
 forStatementsMultipleValidDecl.ts(15,10): error TS2322: Type '{ x: 0; y: undefined }' is not assignable to type '{ x: number; y: number }'.
-forStatementsMultipleValidDecl.ts(32,18): error TS2304: Cannot find name 'Array'.
+forStatementsMultipleValidDecl.ts(32,18): error TS2351: This expression is not constructable.
 
 
 ==== forStatementsMultipleValidDecl.ts (2 errors) ====
@@ -38,5 +38,5 @@ forStatementsMultipleValidDecl.ts(32,18): error TS2304: Cannot find name 'Array'
     for (var a: string[] = []; ;) { }
     for (var a = new Array<string>(); ;) { }
                      ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
+!!! error TS2351: This expression is not constructable.
     for (var a: typeof a; ;) { }

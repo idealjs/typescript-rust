@@ -1,11 +1,7 @@
 privateNameMethodAsync.ts(2,11): error TS1005: ';' expected.
-privateNameMethodAsync.ts(7,5): error TS1003: Identifier expected.
-privateNameMethodAsync.ts(7,6): error TS1005: ';' expected.
-privateNameMethodAsync.ts(8,11): error TS1003: Identifier expected.
-privateNameMethodAsync.ts(8,12): error TS1005: ';' expected.
 
 
-==== privateNameMethodAsync.ts (5 errors) ====
+==== privateNameMethodAsync.ts (1 errors) ====
     const C = class {
         async #bar() { return await Promise.resolve(42); }
               ~~~~
@@ -15,15 +11,7 @@ privateNameMethodAsync.ts(8,12): error TS1005: ';' expected.
             return b + (this.#baz().next().value || 0) + ((await this.#qux().next()).value || 0);
         }
         *#baz() { yield 42; }
-        ~
-!!! error TS1003: Identifier expected.
-         ~~~~
-!!! error TS1005: ';' expected.
         async *#qux() {
-              ~
-!!! error TS1003: Identifier expected.
-               ~~~~
-!!! error TS1005: ';' expected.
             yield (await Promise.resolve(42));
         }
     }

@@ -1,18 +1,12 @@
 generatorTypeCheck56.ts(2,19): error TS2304: Cannot find name 'C'.
-generatorTypeCheck56.ts(3,9): error TS1003: Identifier expected.
-generatorTypeCheck56.ts(3,10): error TS1005: ';' expected.
 
 
-==== generatorTypeCheck56.ts (3 errors) ====
+==== generatorTypeCheck56.ts (1 errors) ====
     function* g() {
         var x = class C {
                       ~
 !!! error TS2304: Cannot find name 'C'.
             *[yield 0]() {
-            ~
-!!! error TS1003: Identifier expected.
-             ~
-!!! error TS1005: ';' expected.
                 yield 0;
             }
         };

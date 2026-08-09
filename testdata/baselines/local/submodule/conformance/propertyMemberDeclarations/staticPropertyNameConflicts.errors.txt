@@ -1,23 +1,23 @@
 staticPropertyNameConflicts.ts(12,5): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
-staticPropertyNameConflicts.ts(17,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(17,5): error TS2564: Property '[FunctionPropertyNames.name]' has no initializer and is not definitely assigned in the constructor.
 staticPropertyNameConflicts.ts(33,5): error TS2564: Property 'length' has no initializer and is not definitely assigned in the constructor.
-staticPropertyNameConflicts.ts(38,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(38,5): error TS2564: Property '[FunctionPropertyNames.length]' has no initializer and is not definitely assigned in the constructor.
 staticPropertyNameConflicts.ts(54,5): error TS2564: Property 'prototype' has no initializer and is not definitely assigned in the constructor.
-staticPropertyNameConflicts.ts(59,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(59,5): error TS2564: Property '[FunctionPropertyNames.prototype]' has no initializer and is not definitely assigned in the constructor.
 staticPropertyNameConflicts.ts(75,5): error TS2564: Property 'caller' has no initializer and is not definitely assigned in the constructor.
-staticPropertyNameConflicts.ts(80,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(80,5): error TS2564: Property '[FunctionPropertyNames.caller]' has no initializer and is not definitely assigned in the constructor.
 staticPropertyNameConflicts.ts(96,5): error TS2564: Property 'arguments' has no initializer and is not definitely assigned in the constructor.
-staticPropertyNameConflicts.ts(101,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(101,5): error TS2564: Property '[FunctionPropertyNames.arguments]' has no initializer and is not definitely assigned in the constructor.
 staticPropertyNameConflicts.ts(229,9): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
-staticPropertyNameConflicts.ts(235,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(235,5): error TS2564: Property '[FunctionPropertyNames.name]' has no initializer and is not definitely assigned in the constructor.
 staticPropertyNameConflicts.ts(254,9): error TS2564: Property 'length' has no initializer and is not definitely assigned in the constructor.
-staticPropertyNameConflicts.ts(260,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(260,5): error TS2564: Property '[FunctionPropertyNames.length]' has no initializer and is not definitely assigned in the constructor.
 staticPropertyNameConflicts.ts(279,9): error TS2564: Property 'prototype' has no initializer and is not definitely assigned in the constructor.
-staticPropertyNameConflicts.ts(285,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(285,5): error TS2564: Property '[FunctionPropertyNames.prototype]' has no initializer and is not definitely assigned in the constructor.
 staticPropertyNameConflicts.ts(304,9): error TS2564: Property 'caller' has no initializer and is not definitely assigned in the constructor.
-staticPropertyNameConflicts.ts(310,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(310,5): error TS2564: Property '[FunctionPropertyNames.caller]' has no initializer and is not definitely assigned in the constructor.
 staticPropertyNameConflicts.ts(329,9): error TS2564: Property 'arguments' has no initializer and is not definitely assigned in the constructor.
-staticPropertyNameConflicts.ts(335,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+staticPropertyNameConflicts.ts(335,5): error TS2564: Property '[FunctionPropertyNames.arguments]' has no initializer and is not definitely assigned in the constructor.
 
 
 ==== staticPropertyNameConflicts.ts (20 errors) ====
@@ -41,7 +41,7 @@ staticPropertyNameConflicts.ts(335,5): error TS2564: Property '' has no initiali
         static [FunctionPropertyNames.name]: number; // error without useDefineForClassFields
         [FunctionPropertyNames.name]: number; // ok
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[FunctionPropertyNames.name]' has no initializer and is not definitely assigned in the constructor.
     }
     
     class StaticNameFn {
@@ -66,7 +66,7 @@ staticPropertyNameConflicts.ts(335,5): error TS2564: Property '' has no initiali
         static [FunctionPropertyNames.length]: number; // error without useDefineForClassFields
         [FunctionPropertyNames.length]: number; // ok
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[FunctionPropertyNames.length]' has no initializer and is not definitely assigned in the constructor.
     }
     
     class StaticLengthFn {
@@ -91,7 +91,7 @@ staticPropertyNameConflicts.ts(335,5): error TS2564: Property '' has no initiali
         static [FunctionPropertyNames.prototype]: number; // always an error
         [FunctionPropertyNames.prototype]: string; // ok
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[FunctionPropertyNames.prototype]' has no initializer and is not definitely assigned in the constructor.
     }
     
     class StaticPrototypeFn {
@@ -116,7 +116,7 @@ staticPropertyNameConflicts.ts(335,5): error TS2564: Property '' has no initiali
         static [FunctionPropertyNames.caller]: number; // error without useDefineForClassFields
         [FunctionPropertyNames.caller]: string; // ok
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[FunctionPropertyNames.caller]' has no initializer and is not definitely assigned in the constructor.
     }
     
     class StaticCallerFn {
@@ -141,7 +141,7 @@ staticPropertyNameConflicts.ts(335,5): error TS2564: Property '' has no initiali
         static [FunctionPropertyNames.arguments]: number; // error without useDefineForClassFields
         [FunctionPropertyNames.arguments]: string; // ok
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[FunctionPropertyNames.arguments]' has no initializer and is not definitely assigned in the constructor.
     }
     
     class StaticArgumentsFn {
@@ -279,7 +279,7 @@ staticPropertyNameConflicts.ts(335,5): error TS2564: Property '' has no initiali
         static [FunctionPropertyNames.name]: number; // error without useDefineForClassFields
         [FunctionPropertyNames.name]: string; // ok
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[FunctionPropertyNames.name]' has no initializer and is not definitely assigned in the constructor.
     }
     
     namespace TestOnDefaultExportedClass_2 {
@@ -308,7 +308,7 @@ staticPropertyNameConflicts.ts(335,5): error TS2564: Property '' has no initiali
         static [FunctionPropertyNames.length]: number; // error without useDefineForClassFields
         [FunctionPropertyNames.length]: string; // ok
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[FunctionPropertyNames.length]' has no initializer and is not definitely assigned in the constructor.
     }
     
     namespace TestOnDefaultExportedClass_4 {
@@ -337,7 +337,7 @@ staticPropertyNameConflicts.ts(335,5): error TS2564: Property '' has no initiali
         static [FunctionPropertyNames.prototype]: number; // always an error
         [FunctionPropertyNames.prototype]: string; // ok
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[FunctionPropertyNames.prototype]' has no initializer and is not definitely assigned in the constructor.
     }
     
     namespace TestOnDefaultExportedClass_6 {
@@ -366,7 +366,7 @@ staticPropertyNameConflicts.ts(335,5): error TS2564: Property '' has no initiali
         static [FunctionPropertyNames.caller]: number; // error without useDefineForClassFields
         [FunctionPropertyNames.caller]: string; // ok
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[FunctionPropertyNames.caller]' has no initializer and is not definitely assigned in the constructor.
     }
     
     namespace TestOnDefaultExportedClass_8 {
@@ -395,7 +395,7 @@ staticPropertyNameConflicts.ts(335,5): error TS2564: Property '' has no initiali
         static [FunctionPropertyNames.arguments]: number; // error without useDefineForClassFields
         [FunctionPropertyNames.arguments]: string; // ok
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[FunctionPropertyNames.arguments]' has no initializer and is not definitely assigned in the constructor.
     }
     
     namespace TestOnDefaultExportedClass_10 {

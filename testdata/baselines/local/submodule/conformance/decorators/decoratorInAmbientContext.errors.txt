@@ -1,7 +1,7 @@
 decoratorInAmbientContext.ts(5,24): error TS1005: ';' expected.
 decoratorInAmbientContext.ts(5,24): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 decoratorInAmbientContext.ts(6,24): error TS1005: ';' expected.
-decoratorInAmbientContext.ts(6,24): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+decoratorInAmbientContext.ts(6,24): error TS2564: Property '[b]' has no initializer and is not definitely assigned in the constructor.
 
 
 ==== decoratorInAmbientContext.ts (4 errors) ====
@@ -18,5 +18,5 @@ decoratorInAmbientContext.ts(6,24): error TS2564: Property '' has no initializer
                            ~
 !!! error TS1005: ';' expected.
                            ~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[b]' has no initializer and is not definitely assigned in the constructor.
     }

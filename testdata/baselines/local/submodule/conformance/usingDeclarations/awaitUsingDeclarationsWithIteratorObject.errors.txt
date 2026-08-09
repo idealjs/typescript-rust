@@ -1,10 +1,8 @@
 awaitUsingDeclarationsWithIteratorObject.ts(2,19): error TS2304: Cannot find name 'IteratorObject'.
 awaitUsingDeclarationsWithIteratorObject.ts(15,26): error TS2339: Property 'values' does not exist on type 'any[]'.
-awaitUsingDeclarationsWithIteratorObject.ts(16,27): error TS2304: Cannot find name 'Map'.
-awaitUsingDeclarationsWithIteratorObject.ts(17,27): error TS2304: Cannot find name 'Set'.
 
 
-==== awaitUsingDeclarationsWithIteratorObject.ts (4 errors) ====
+==== awaitUsingDeclarationsWithIteratorObject.ts (2 errors) ====
     declare const i: Iterator<string, undefined>;
     declare const io: IteratorObject<string, undefined, unknown>;
                       ~~~~~~~~~~~~~~
@@ -25,11 +23,7 @@ awaitUsingDeclarationsWithIteratorObject.ts(17,27): error TS2304: Cannot find na
                              ~~~~~~
 !!! error TS2339: Property 'values' does not exist on type 'any[]'.
         await using it5 = new Map<string, string>().entries();
-                              ~~~
-!!! error TS2304: Cannot find name 'Map'.
         await using it6 = new Set<string>().keys();
-                              ~~~
-!!! error TS2304: Cannot find name 'Set'.
     
         // should fail
         await using it7 = i;

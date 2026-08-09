@@ -1,5 +1,4 @@
 unionAndIntersectionInference1.ts(10,12): error TS2322: Type 'r | r' is not assignable to type 'r'.
-unionAndIntersectionInference1.ts(13,13): error TS2304: Cannot find name 'Math'.
 unionAndIntersectionInference1.ts(15,26): error TS2345: Argument of type 'string | { i am a very certain type: error }' is not assignable to parameter of type 'a | { i am a very certain type: error }'.
 unionAndIntersectionInference1.ts(15,33): error TS2345: Argument of type '(text: a) => string' is not assignable to parameter of type '(value: a) => r'.
 unionAndIntersectionInference1.ts(15,51): error TS2345: Argument of type '(y: { i am a very certain type: error }) => string' is not assignable to parameter of type '(value: { i am a very certain type: error }) => r'.
@@ -18,7 +17,7 @@ unionAndIntersectionInference1.ts(95,22): error TS1134: Variable declaration exp
 unionAndIntersectionInference1.ts(95,33): error TS1005: ',' expected.
 
 
-==== unionAndIntersectionInference1.ts (18 errors) ====
+==== unionAndIntersectionInference1.ts (17 errors) ====
     // Repro from #2264
     
     interface Y { 'i am a very certain type': Y }
@@ -34,8 +33,6 @@ unionAndIntersectionInference1.ts(95,33): error TS1005: ',' expected.
     }
     
     var value = Math.random() > 0.5 ? 'hey!' : <Y>undefined;
-                ~~~~
-!!! error TS2304: Cannot find name 'Math'.
     
     var result = destructure(value, text => 'string', y => 'other one'); // text: string, y: Y
                              ~~~~~

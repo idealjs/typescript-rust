@@ -2,12 +2,11 @@ typeGuardsWithInstanceOf.ts(4,11): error TS1005: ',' expected.
 typeGuardsWithInstanceOf.ts(4,12): error TS1134: Variable declaration expected.
 typeGuardsWithInstanceOf.ts(5,12): error TS1005: ',' expected.
 typeGuardsWithInstanceOf.ts(5,13): error TS1134: Variable declaration expected.
-typeGuardsWithInstanceOf.ts(7,25): error TS2304: Cannot find name 'RegExp'.
 typeGuardsWithInstanceOf.ts(38,11): error TS2339: Property 'onChanges' does not exist on type '{ validate: () => any } | never'.
 typeGuardsWithInstanceOf.ts(39,11): error TS2339: Property 'onChanges' does not exist on type '{ validate: () => any } | never'.
 
 
-==== typeGuardsWithInstanceOf.ts (7 errors) ====
+==== typeGuardsWithInstanceOf.ts (6 errors) ====
     ﻿// @target: es2015
     
     interface I { global: string; }
@@ -23,8 +22,6 @@ typeGuardsWithInstanceOf.ts(39,11): error TS2339: Property 'onChanges' does not 
 !!! error TS1134: Variable declaration expected.
     
     if (!(result instanceof RegExp)) {
-                         ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
         result = result2;
     } else if (!result.global) {
     }

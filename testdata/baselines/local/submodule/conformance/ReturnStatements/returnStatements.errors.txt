@@ -1,10 +1,8 @@
-returnStatements.ts(7,17): error TS2304: Cannot find name 'Date'.
-returnStatements.ts(7,35): error TS2304: Cannot find name 'Date'.
 returnStatements.ts(13,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
 returnStatements.ts(17,5): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 
 
-==== returnStatements.ts (4 errors) ====
+==== returnStatements.ts (2 errors) ====
     // all the following should be valid
     function fn1(): number { return 1; }
     function fn2(): string { return ''; }
@@ -12,10 +10,6 @@ returnStatements.ts(17,5): error TS2564: Property 'name' has no initializer and 
     function fn4(): void { return; }
     function fn5(): boolean { return true; }
     function fn6(): Date { return new Date(12); }
-                    ~~~~
-!!! error TS2304: Cannot find name 'Date'.
-                                      ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     function fn7(): any { return null; }
     function fn8(): any { return; } // OK, eq. to 'return undefined'
     

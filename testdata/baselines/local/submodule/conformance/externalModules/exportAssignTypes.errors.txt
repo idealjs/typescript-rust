@@ -1,9 +1,7 @@
 consumer.ts(2,18): error TS2304: Cannot find name 'iString'.
 consumer.ts(5,18): error TS2304: Cannot find name 'iNumber'.
 consumer.ts(8,19): error TS2304: Cannot find name 'iBoolean'.
-consumer.ts(11,9): error TS2304: Cannot find name 'Array'.
 consumer.ts(11,25): error TS2304: Cannot find name 'iArray'.
-consumer.ts(14,9): error TS2304: Cannot find name 'Object'.
 consumer.ts(14,18): error TS2304: Cannot find name 'iObject'.
 consumer.ts(17,10): error TS2304: Cannot find name 'iAny'.
 consumer.ts(20,27): error TS2304: Cannot find name 'iGeneric'.
@@ -39,7 +37,7 @@ consumer.ts(20,27): error TS2304: Cannot find name 'iGeneric'.
     }
     export = x;
     
-==== consumer.ts (9 errors) ====
+==== consumer.ts (7 errors) ====
     import iString = require('./expString');
     var v1: string = iString;
                      ~~~~~~~
@@ -57,15 +55,11 @@ consumer.ts(20,27): error TS2304: Cannot find name 'iGeneric'.
     
     import iArray = require('./expArray');
     var v4: Array<number> = iArray;
-            ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
                             ~~~~~~
 !!! error TS2304: Cannot find name 'iArray'.
     
     import iObject = require('./expObject');
     var v5: Object = iObject;
-            ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                      ~~~~~~~
 !!! error TS2304: Cannot find name 'iObject'.
     

@@ -1,8 +1,7 @@
 TypeGuardWithArrayUnion.ts(2,5): error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
-TypeGuardWithArrayUnion.ts(6,28): error TS2304: Cannot find name 'Array'.
 
 
-==== TypeGuardWithArrayUnion.ts (2 errors) ====
+==== TypeGuardWithArrayUnion.ts (1 errors) ====
     class Message {
         value: string;
         ~~~~~
@@ -11,8 +10,6 @@ TypeGuardWithArrayUnion.ts(6,28): error TS2304: Cannot find name 'Array'.
     
     function saySize(message: Message | Message[]) {
         if (message instanceof Array) {
-                               ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
             return message.length;  // Should have type Message[] here
         }
     }

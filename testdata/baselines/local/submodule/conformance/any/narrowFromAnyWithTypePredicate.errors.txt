@@ -1,6 +1,3 @@
-narrowFromAnyWithTypePredicate.ts(3,36): error TS2304: Cannot find name 'Object'.
-narrowFromAnyWithTypePredicate.ts(5,35): error TS2304: Cannot find name 'Error'.
-narrowFromAnyWithTypePredicate.ts(6,34): error TS2304: Cannot find name 'Date'.
 narrowFromAnyWithTypePredicate.ts(18,5): error TS2349: This expression is not callable.
 narrowFromAnyWithTypePredicate.ts(22,7): error TS2339: Property 'method' does not exist on type 'error | never | error | object'.
 narrowFromAnyWithTypePredicate.ts(23,5): error TS2349: This expression is not callable.
@@ -10,19 +7,13 @@ narrowFromAnyWithTypePredicate.ts(32,7): error TS2339: Property 'getDate' does n
 narrowFromAnyWithTypePredicate.ts(33,7): error TS2339: Property 'getHuors' does not exist on type 'error | never | error | object | error | never | error | never | error | never | error | object | error | never | error | never'.
 
 
-==== narrowFromAnyWithTypePredicate.ts (10 errors) ====
+==== narrowFromAnyWithTypePredicate.ts (7 errors) ====
     declare var x: any;
     declare function isFunction(x): x is Function;
     declare function isObject(x): x is Object;
-                                       ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     declare function isAnything(x): x is {};
     declare function isError(x): x is Error;
-                                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     declare function isDate(x): x is Date;
-                                     ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     
     
     if (isFunction(x)) { // 'any' is not narrowed when target type is 'Function'

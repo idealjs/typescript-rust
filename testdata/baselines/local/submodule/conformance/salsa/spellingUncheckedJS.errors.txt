@@ -7,13 +7,12 @@ spellingUncheckedJS.js(22,22): error TS2339: Property 'none' does not exist on t
 spellingUncheckedJS.js(30,8): error TS2339: Property 'spaaaace' does not exist on type '{ spaaace: number }'.
 spellingUncheckedJS.js(31,8): error TS2339: Property 'spaace' does not exist on type '{ spaaace: number }'.
 spellingUncheckedJS.js(32,8): error TS2339: Property 'fresh' does not exist on type '{ spaaace: number }'.
-spellingUncheckedJS.js(34,5): error TS2304: Cannot find name 'Date'.
 spellingUncheckedJS.js(37,14): error TS2304: Cannot find name 'setIntegral'.
 spellingUncheckedJS.js(38,1): error TS2304: Cannot find name 'AudioBuffin'.
 spellingUncheckedJS.js(40,1): error TS2304: Cannot find name 'Jon'.
 
 
-==== spellingUncheckedJS.js (12 errors) ====
+==== spellingUncheckedJS.js (11 errors) ====
     export var inModule = 1
     inmodule.toFixed()
     ~~~~~~~~
@@ -64,8 +63,6 @@ spellingUncheckedJS.js(40,1): error TS2304: Cannot find name 'Jon'.
 !!! error TS2339: Property 'fresh' does not exist on type '{ spaaace: number }'.
     other.puuuce // OK, from another file
     new Date().getGMTDate() // OK, from another file
-        ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     
     // No suggestions for globals from other files
     const atoc = setIntegral(() => console.log('ok'), 500)

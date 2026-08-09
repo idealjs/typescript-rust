@@ -1,10 +1,8 @@
 computedPropertyNames38_ES6.ts(5,7): error TS1005: ']' expected.
 computedPropertyNames38_ES6.ts(5,15): error TS1005: ';' expected.
-computedPropertyNames38_ES6.ts(8,9): error TS1005: ';' expected.
-computedPropertyNames38_ES6.ts(9,9): error TS1005: ';' expected.
 
 
-==== computedPropertyNames38_ES6.ts (4 errors) ====
+==== computedPropertyNames38_ES6.ts (2 errors) ====
     class Foo { x }
     class Foo2 { x; y }
     
@@ -17,9 +15,5 @@ computedPropertyNames38_ES6.ts(9,9): error TS1005: ';' expected.
     
         // Computed properties
         get [1 << 6]() { return new Foo }
-            ~
-!!! error TS1005: ';' expected.
         set [1 << 6](p: Foo2) { }
-            ~
-!!! error TS1005: ';' expected.
     }

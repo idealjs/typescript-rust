@@ -2,12 +2,6 @@ unknownControlFlow.ts(18,9): error TS2322: Type 'unknown' is not assignable to t
 unknownControlFlow.ts(19,9): error TS2322: Type 'unknown' is not assignable to type 'object | null | undefined'.
 unknownControlFlow.ts(20,9): error TS2322: Type 'unknown' is not assignable to type 'object | { x: string } | null | undefined'.
 unknownControlFlow.ts(21,9): error TS2322: Type 'unknown' is not assignable to type 'object | object | null | undefined'.
-unknownControlFlow.ts(214,27): error TS2304: Cannot find name 'Error'.
-unknownControlFlow.ts(219,32): error TS2304: Cannot find name 'Error'.
-unknownControlFlow.ts(252,9): error TS2304: Cannot find name 'Array'.
-unknownControlFlow.ts(252,29): error TS2304: Cannot find name 'Array'.
-unknownControlFlow.ts(255,9): error TS2304: Cannot find name 'Object'.
-unknownControlFlow.ts(255,35): error TS2304: Cannot find name 'Object'.
 unknownControlFlow.ts(291,5): error TS2345: Argument of type 'null' is not assignable to parameter of type 'null & object'.
 unknownControlFlow.ts(293,5): error TS2345: Argument of type 'null' is not assignable to parameter of type 'null & object'.
 unknownControlFlow.ts(305,9): error TS2367: This comparison appears to be unintentional because the types 'T & object | null' and '42' have no overlap.
@@ -16,14 +10,11 @@ unknownControlFlow.ts(323,9): error TS2367: This comparison appears to be uninte
 unknownControlFlow.ts(332,9): error TS2367: This comparison appears to be unintentional because the types 'T & object | null' and '42' have no overlap.
 unknownControlFlow.ts(341,9): error TS2367: This comparison appears to be unintentional because the types 'T & object | null' and '42' have no overlap.
 unknownControlFlow.ts(350,9): error TS2367: This comparison appears to be unintentional because the types 'T & object | null' and '42' have no overlap.
-unknownControlFlow.ts(379,19): error TS2304: Cannot find name 'Error'.
-unknownControlFlow.ts(389,15): error TS2304: Cannot find name 'Error'.
 unknownControlFlow.ts(427,9): error TS2322: Type 'T_AB & undefined' is not assignable to type 'never'.
-unknownControlFlow.ts(437,15): error TS2304: Cannot find name 'Error'.
 unknownControlFlow.ts(448,21): error TS2345: Argument of type '"right" & { right: "right" }' is not assignable to parameter of type 'never'.
 
 
-==== unknownControlFlow.ts (23 errors) ====
+==== unknownControlFlow.ts (14 errors) ====
     type T01 = {} & string;  // {} & string
     type T02 = {} & 'a';  // 'a'
     type T03 = {} & object;  // object
@@ -246,15 +237,11 @@ unknownControlFlow.ts(448,21): error TS2345: Argument of type '"right" & { right
     
     function ensureNotNull<T>(x: T) {
         if (x === null) throw Error();
-                              ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
         return x;  // T & ({} | undefined)
     }
     
     function ensureNotUndefined<T>(x: T) {
         if (x === undefined) throw Error();
-                                   ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
         return x;  // T & ({} | null)
     }
     
@@ -288,17 +275,9 @@ unknownControlFlow.ts(448,21): error TS2345: Argument of type '"right" & { right
             return false;
         }
         if (Array.isArray(a) || Array.isArray(b)) {
-            ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
-                                ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
             return false;
         }
         if (Object.keys(a).length !== Object.keys(b).length) { // Error here
-            ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
-                                      ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
             return false;
         }
         return true;
@@ -439,8 +418,6 @@ unknownControlFlow.ts(448,21): error TS2345: Argument of type '"right" & { right
     function SendBlob(encoding: unknown) {
         if (encoding !== undefined && encoding !== 'utf8') {
             throw new Error('encoding');
-                      ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
         }
         encoding;
     };
@@ -451,8 +428,6 @@ unknownControlFlow.ts(448,21): error TS2345: Argument of type '"right" & { right
         }
         if (value === 42) {
             throw Error('Meaning of life value');
-                  ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
         }
         return value;
     }
@@ -503,8 +478,6 @@ unknownControlFlow.ts(448,21): error TS2345: Argument of type '"right" & { right
     
     function assertNever(v: never): never {
         throw new Error('never');
-                  ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     }
     
     function fx20(value: Either) {

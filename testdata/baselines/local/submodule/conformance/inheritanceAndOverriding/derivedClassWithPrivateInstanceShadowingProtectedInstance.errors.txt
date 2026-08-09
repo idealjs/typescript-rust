@@ -1,12 +1,8 @@
 derivedClassWithPrivateInstanceShadowingProtectedInstance.ts(2,15): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-derivedClassWithPrivateInstanceShadowingProtectedInstance.ts(7,19): error TS1005: ';' expected.
-derivedClassWithPrivateInstanceShadowingProtectedInstance.ts(8,19): error TS1005: ';' expected.
 derivedClassWithPrivateInstanceShadowingProtectedInstance.ts(13,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-derivedClassWithPrivateInstanceShadowingProtectedInstance.ts(18,17): error TS1005: ';' expected.
-derivedClassWithPrivateInstanceShadowingProtectedInstance.ts(19,17): error TS1005: ';' expected.
 
 
-==== derivedClassWithPrivateInstanceShadowingProtectedInstance.ts (6 errors) ====
+==== derivedClassWithPrivateInstanceShadowingProtectedInstance.ts (2 errors) ====
     class Base {
         protected x: string;
                   ~
@@ -16,11 +12,7 @@ derivedClassWithPrivateInstanceShadowingProtectedInstance.ts(19,17): error TS100
         }
     
         protected get a() { return 1; }
-                      ~
-!!! error TS1005: ';' expected.
         protected set a(v) { }
-                      ~
-!!! error TS1005: ';' expected.
     }
     
     // error, not a subtype
@@ -33,9 +25,5 @@ derivedClassWithPrivateInstanceShadowingProtectedInstance.ts(19,17): error TS100
         }
     
         private get a() { return 1; }
-                    ~
-!!! error TS1005: ';' expected.
         private set a(v) { }
-                    ~
-!!! error TS1005: ';' expected.
     }

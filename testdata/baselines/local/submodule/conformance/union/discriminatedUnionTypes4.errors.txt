@@ -1,10 +1,9 @@
-discriminatedUnionTypes4.ts(19,13): error TS2304: Cannot find name 'Error'.
 discriminatedUnionTypes4.ts(28,11): error TS2345: Argument of type '{ type: `${error}`; meow: string } | { type: `${error}`; bark: string }' is not assignable to parameter of type 'never'.
 discriminatedUnionTypes4.ts(41,7): error TS2349: This expression is not callable.
 discriminatedUnionTypes4.ts(54,7): error TS2349: This expression is not callable.
 
 
-==== discriminatedUnionTypes4.ts (4 errors) ====
+==== discriminatedUnionTypes4.ts (3 errors) ====
     // https://github.com/microsoft/TypeScript/issues/61207
     
     enum AnimalType {
@@ -24,8 +23,6 @@ discriminatedUnionTypes4.ts(54,7): error TS2349: This expression is not callable
     
     function check(p: never) {
       throw new Error("Error!");
-                ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     }
     
     function action1(animal: Animal) {

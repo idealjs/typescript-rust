@@ -1,22 +1,16 @@
 mod1.js(8,8): error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
-mod1.js(11,1): error TS2304: Cannot find name 'Object'.
 mod1.js(11,30): error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
-mod1.js(12,1): error TS2304: Cannot find name 'Object'.
 mod1.js(12,30): error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
-mod1.js(13,1): error TS2304: Cannot find name 'Object'.
 mod1.js(13,30): error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
-mod1.js(14,1): error TS2304: Cannot find name 'Object'.
 mod1.js(14,30): error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
-mod1.js(15,1): error TS2304: Cannot find name 'Object'.
 mod1.js(15,30): error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
-mod1.js(18,28): error TS2304: Cannot find name 'Number'.
 mod1.js(18,35): error TS2304: Cannot find name 'str'.
 mod1.js(21,7): error TS1003: Identifier expected.
 mod1.js(21,8): error TS1005: ';' expected.
 validator.ts(5,16): error TS2351: This expression is not constructable.
 
 
-==== mod1.js (15 errors) ====
+==== mod1.js (9 errors) ====
     /**
      * @constructor
      * @param {string} name
@@ -30,35 +24,23 @@ validator.ts(5,16): error TS2351: This expression is not constructable.
         return "Person called " + this.name;
     };
     Object.defineProperty(Person.prototype, "thing", { value: 42, writable: true });
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                                  ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
     Object.defineProperty(Person.prototype, "readonlyProp", { value: "Smith", writable: false });
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                                  ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
     Object.defineProperty(Person.prototype, "rwAccessors", { get() { return 98122 }, set(_) { /*ignore*/ } });
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                                  ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
     Object.defineProperty(Person.prototype, "readonlyAccessor", { get() { return 21.75 } });
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                                  ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
     Object.defineProperty(Person.prototype, "setonlyAccessor", {
-    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
                                  ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
         /** @param {string} str */
         set(str) {
             this.rwAccessors = Number(str)
-                               ~~~~~~
-!!! error TS2304: Cannot find name 'Number'.
                                       ~~~
 !!! error TS2304: Cannot find name 'str'.
         }

@@ -17,10 +17,9 @@ typeGuardsWithInstanceOfBySymbolHasInstance.ts(175,11): error TS2339: Property '
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(192,11): error TS2339: Property 'bar' does not exist on type '{ foo: number }'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(197,11): error TS2339: Property 'foo1' does not exist on type '{ foo: number }'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(198,11): error TS2339: Property 'foo2' does not exist on type '{ foo: number }'.
-typeGuardsWithInstanceOfBySymbolHasInstance.ts(202,22): error TS2304: Cannot find name 'Object'.
 
 
-==== typeGuardsWithInstanceOfBySymbolHasInstance.ts (20 errors) ====
+==== typeGuardsWithInstanceOfBySymbolHasInstance.ts (19 errors) ====
     interface AConstructor {
         new (): A;
         [Symbol.hasInstance](value: unknown): value is A;
@@ -261,8 +260,6 @@ typeGuardsWithInstanceOfBySymbolHasInstance.ts(202,22): error TS2304: Cannot fin
     
     declare var obj17: any;
     if (obj17 instanceof Object) { // can't narrow type from 'any' to 'Object'
-                         ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         obj17.foo1;
         obj17.foo2;
     }

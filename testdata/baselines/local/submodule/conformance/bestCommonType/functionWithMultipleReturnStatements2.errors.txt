@@ -1,10 +1,8 @@
 functionWithMultipleReturnStatements2.ts(36,5): error TS7027: Unreachable code detected.
-functionWithMultipleReturnStatements2.ts(36,16): error TS2304: Cannot find name 'Object'.
-functionWithMultipleReturnStatements2.ts(80,20): error TS2304: Cannot find name 'Object'.
-functionWithMultipleReturnStatements2.ts(87,20): error TS2304: Cannot find name 'Object'.
+functionWithMultipleReturnStatements2.ts(36,16): error TS2351: This expression is not constructable.
 
 
-==== functionWithMultipleReturnStatements2.ts (4 errors) ====
+==== functionWithMultipleReturnStatements2.ts (2 errors) ====
     // return type of a function with multiple returns is the BCT of each return statement
     // no errors expected here
     
@@ -43,7 +41,7 @@ functionWithMultipleReturnStatements2.ts(87,20): error TS2304: Cannot find name 
         return new Object();
         ~~~~~~~~~~~~~~~~~~~~
                    ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
+!!! error TS2351: This expression is not constructable.
     }
     
 !!! error TS7027: Unreachable code detected.
@@ -90,8 +88,6 @@ functionWithMultipleReturnStatements2.ts(87,20): error TS2304: Cannot find name 
             return (x: number) => { }
         } else {
             return (x: Object) => { }
-                       ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         }
     }
     
@@ -99,8 +95,6 @@ functionWithMultipleReturnStatements2.ts(87,20): error TS2304: Cannot find name 
     function f12() {
         if (true) {
             return (x: Object) => { }
-                       ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         } else {
             return (x: number) => { }        
         }

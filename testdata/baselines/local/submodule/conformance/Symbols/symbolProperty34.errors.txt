@@ -1,4 +1,4 @@
-symbolProperty34.ts(7,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+symbolProperty34.ts(7,5): error TS2564: Property '[s' has no initializer and is not definitely assigned in the constructor.
 symbolProperty34.ts(7,7): error TS1005: ']' expected.
 symbolProperty34.ts(7,15): error TS1005: ';' expected.
 symbolProperty34.ts(7,15): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
@@ -13,7 +13,7 @@ symbolProperty34.ts(7,15): error TS2564: Property ']' has no initializer and is 
     class C2 {
         [s: symbol]: () => { x: number };
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[s' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~

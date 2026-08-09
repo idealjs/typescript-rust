@@ -1,66 +1,66 @@
 index.js(5,5): error TS2564: Property 'field' has no initializer and is not definitely assigned in the constructor.
 index.js(9,5): error TS2564: Property 'other' has no initializer and is not definitely assigned in the constructor.
-index.js(13,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(13,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(13,9): error TS1005: ']' expected.
 index.js(13,17): error TS1005: ';' expected.
 index.js(13,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(19,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(19,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(19,9): error TS1005: ']' expected.
 index.js(19,17): error TS1005: ';' expected.
 index.js(19,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(23,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(23,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(23,9): error TS1005: ']' expected.
 index.js(23,17): error TS1005: ';' expected.
 index.js(23,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(27,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(27,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(27,9): error TS1005: ']' expected.
 index.js(27,17): error TS1005: ';' expected.
 index.js(27,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(28,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(28,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(28,9): error TS1005: ']' expected.
 index.js(28,17): error TS1005: ';' expected.
 index.js(28,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(32,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(32,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(32,9): error TS1005: ']' expected.
 index.js(32,17): error TS1005: ';' expected.
 index.js(32,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(39,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(39,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(39,9): error TS1005: ']' expected.
 index.js(39,17): error TS1005: ';' expected.
 index.js(39,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(43,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(43,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(43,9): error TS1005: ']' expected.
 index.js(43,17): error TS1005: ';' expected.
 index.js(43,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(47,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(47,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(47,9): error TS1005: ']' expected.
 index.js(47,17): error TS1005: ';' expected.
 index.js(47,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(48,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(48,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(48,9): error TS1005: ']' expected.
 index.js(48,17): error TS1005: ';' expected.
 index.js(48,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(52,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(52,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(52,9): error TS1005: ']' expected.
 index.js(52,17): error TS1005: ';' expected.
 index.js(52,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(53,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(53,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(53,9): error TS1005: ']' expected.
 index.js(53,17): error TS1005: ';' expected.
 index.js(53,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(59,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(59,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(59,9): error TS1005: ']' expected.
 index.js(59,17): error TS1005: ';' expected.
 index.js(59,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(63,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(63,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(63,9): error TS1005: ']' expected.
 index.js(63,17): error TS1005: ';' expected.
 index.js(63,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(67,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(67,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(67,9): error TS1005: ']' expected.
 index.js(67,17): error TS1005: ';' expected.
 index.js(67,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
-index.js(68,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+index.js(68,5): error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
 index.js(68,9): error TS1005: ']' expected.
 index.js(68,17): error TS1005: ';' expected.
 index.js(68,17): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
@@ -85,7 +85,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
     export class O {
         [idx: string]: string;
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -99,7 +99,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
     export class Q extends O {
         [idx: string]: "ok";
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -111,7 +111,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
     export class R extends O {
         [idx: number]: "ok";
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -123,7 +123,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
     export class S extends O {
         [idx: string]: "ok";
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -132,7 +132,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
 !!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         [idx: number]: never;
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -144,7 +144,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
     export class T {
         [idx: number]: string;
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -159,7 +159,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
     export class V extends T {
         [idx: string]: string;
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -171,7 +171,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
     export class W extends T {
         [idx: number]: "ok";
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -183,7 +183,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
     export class X extends T {
         [idx: string]: string;
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -192,7 +192,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
 !!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         [idx: number]: "ok";
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -204,7 +204,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
     export class Y {
         [idx: string]: {x: number};
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -213,7 +213,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
 !!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         [idx: number]: {x: number, y: number};
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -227,7 +227,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
     export class AA extends Y {
         [idx: string]: {x: number, y: number};
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -239,7 +239,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
     export class BB extends Y {
         [idx: number]: {x: 0, y: 0};
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -251,7 +251,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
     export class CC extends Y {
         [idx: string]: {x: number, y: number};
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~
@@ -260,7 +260,7 @@ index.js(68,17): error TS2564: Property ']' has no initializer and is not defini
 !!! error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
         [idx: number]: {x: 0, y: 0};
         ~~~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[idx' has no initializer and is not definitely assigned in the constructor.
             ~
 !!! error TS1005: ']' expected.
                     ~

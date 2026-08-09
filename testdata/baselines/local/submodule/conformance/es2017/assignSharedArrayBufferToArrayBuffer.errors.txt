@@ -1,7 +1,0 @@
-assignSharedArrayBufferToArrayBuffer.ts(1,28): error TS2304: Cannot find name 'SharedArrayBuffer'.
-
-
-==== assignSharedArrayBufferToArrayBuffer.ts (1 errors) ====
-    var foo: ArrayBuffer = new SharedArrayBuffer(1024); // should error
-                               ~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'SharedArrayBuffer'.

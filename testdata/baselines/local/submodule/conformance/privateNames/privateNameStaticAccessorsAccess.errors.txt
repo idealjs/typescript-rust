@@ -1,19 +1,13 @@
-privateNameStaticAccessorsAccess.ts(3,16): error TS1005: ';' expected.
-privateNameStaticAccessorsAccess.ts(4,16): error TS1005: ';' expected.
 privateNameStaticAccessorsAccess.ts(16,4): error TS2339: Property '#prop' does not exist on type 'object'.
 privateNameStaticAccessorsAccess.ts(19,8): error TS2339: Property '#prop' does not exist on type 'object'.
 privateNameStaticAccessorsAccess.ts(24,12): error TS2339: Property '#prop' does not exist on type 'object'.
 
 
-==== privateNameStaticAccessorsAccess.ts (5 errors) ====
+==== privateNameStaticAccessorsAccess.ts (3 errors) ====
     export {}
     class A2 {
         static get #prop() { return ""; }
-                   ~~~~~
-!!! error TS1005: ';' expected.
         static set #prop(param: string) { }
-                   ~~~~~
-!!! error TS1005: ';' expected.
     
         constructor() {
             console.log(A2.#prop);

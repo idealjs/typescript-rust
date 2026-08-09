@@ -1,9 +1,0 @@
-parserAccessors6.ts(2,7): error TS1005: ';' expected.
-
-
-==== parserAccessors6.ts (1 errors) ====
-    declare class C {
-      set foo(v) { }
-          ~~~
-!!! error TS1005: ';' expected.
-    }

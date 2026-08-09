@@ -1,4 +1,4 @@
-privateNameAndIndexSignature.ts(2,5): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+privateNameAndIndexSignature.ts(2,5): error TS2564: Property '[k' has no initializer and is not definitely assigned in the constructor.
 privateNameAndIndexSignature.ts(2,7): error TS1005: ']' expected.
 privateNameAndIndexSignature.ts(2,15): error TS1005: ';' expected.
 privateNameAndIndexSignature.ts(6,14): error TS2339: Property '#f' does not exist on type '{ ]: any; #foo: 3 }'.
@@ -8,7 +8,7 @@ privateNameAndIndexSignature.ts(6,14): error TS2339: Property '#f' does not exis
     class A {
         [k: string]: any;
         ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[k' has no initializer and is not definitely assigned in the constructor.
           ~
 !!! error TS1005: ']' expected.
                   ~

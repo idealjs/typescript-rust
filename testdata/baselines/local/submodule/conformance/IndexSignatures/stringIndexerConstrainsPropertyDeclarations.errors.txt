@@ -1,8 +1,5 @@
 stringIndexerConstrainsPropertyDeclarations.ts(8,7): error TS1005: ']' expected.
 stringIndexerConstrainsPropertyDeclarations.ts(8,15): error TS1005: ';' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(23,9): error TS1005: ';' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(26,9): error TS1005: ';' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(36,16): error TS1005: ';' expected.
 stringIndexerConstrainsPropertyDeclarations.ts(90,10): error TS1005: '{' expected.
 stringIndexerConstrainsPropertyDeclarations.ts(90,11): error TS1012: Unexpected token.
 stringIndexerConstrainsPropertyDeclarations.ts(90,13): error TS1005: ')' expected.
@@ -18,7 +15,7 @@ stringIndexerConstrainsPropertyDeclarations.ts(94,11): error TS1005: ';' expecte
 stringIndexerConstrainsPropertyDeclarations.ts(97,2): error TS1005: '}' expected.
 
 
-==== stringIndexerConstrainsPropertyDeclarations.ts (18 errors) ====
+==== stringIndexerConstrainsPropertyDeclarations.ts (15 errors) ====
     // String indexer types constrain the types of named properties in their containing type
     
     interface MyString extends String {
@@ -46,13 +43,9 @@ stringIndexerConstrainsPropertyDeclarations.ts(97,2): error TS1005: '}' expected
         f: MyString; // error
     
         get X() { // ok
-            ~
-!!! error TS1005: ';' expected.
             return '';
         }
         set X(v) { } // ok
-            ~
-!!! error TS1005: ';' expected.
     
         foo() { // error
             return '';
@@ -63,8 +56,6 @@ stringIndexerConstrainsPropertyDeclarations.ts(97,2): error TS1005: '}' expected
     
         static foo() { } // ok
         static get X() { // ok
-                   ~
-!!! error TS1005: ';' expected.
             return 1;
         }
     }

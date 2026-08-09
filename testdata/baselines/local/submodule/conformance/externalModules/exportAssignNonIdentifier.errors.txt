@@ -1,7 +1,5 @@
 foo3.ts(1,16): error TS2304: Cannot find name 'Foo3'.
 foo6.ts(1,14): error TS1012: Unexpected token.
-foo7.ts(1,10): error TS2304: Cannot find name 'Date'.
-foo7.ts(1,18): error TS2304: Cannot find name 'String'.
 
 
 ==== foo1.ts (0 errors) ====
@@ -27,12 +25,8 @@ foo7.ts(1,18): error TS2304: Cannot find name 'String'.
                  ~
 !!! error TS1012: Unexpected token.
     
-==== foo7.ts (2 errors) ====
+==== foo7.ts (0 errors) ====
     export = Date || String; // Ok
-             ~~~~
-!!! error TS2304: Cannot find name 'Date'.
-                     ~~~~~~
-!!! error TS2304: Cannot find name 'String'.
     
 ==== foo8.ts (0 errors) ====
     export = null; // Ok

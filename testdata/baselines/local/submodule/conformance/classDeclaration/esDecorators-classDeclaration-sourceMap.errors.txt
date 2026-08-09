@@ -1,13 +1,9 @@
-esDecorators-classDeclaration-sourceMap.ts(12,9): error TS1005: ';' expected.
-esDecorators-classDeclaration-sourceMap.ts(16,9): error TS1005: ';' expected.
 esDecorators-classDeclaration-sourceMap.ts(28,12): error TS1005: ';' expected.
-esDecorators-classDeclaration-sourceMap.ts(32,16): error TS1005: ';' expected.
-esDecorators-classDeclaration-sourceMap.ts(36,16): error TS1005: ';' expected.
 esDecorators-classDeclaration-sourceMap.ts(40,12): error TS1005: ';' expected.
 esDecorators-classDeclaration-sourceMap.ts(44,21): error TS1005: ';' expected.
 
 
-==== esDecorators-classDeclaration-sourceMap.ts (7 errors) ====
+==== esDecorators-classDeclaration-sourceMap.ts (3 errors) ====
     declare var dec: any;
     
     @dec
@@ -20,14 +16,10 @@ esDecorators-classDeclaration-sourceMap.ts(44,21): error TS1005: ';' expected.
         @dec
         @dec
         get x() { return 1; }
-            ~
-!!! error TS1005: ';' expected.
     
         @dec
         @dec
         set x(value: number) { }
-            ~
-!!! error TS1005: ';' expected.
     
         @dec
         @dec
@@ -46,14 +38,10 @@ esDecorators-classDeclaration-sourceMap.ts(44,21): error TS1005: ';' expected.
         @dec
         @dec
         static get #x() { return 1; }
-                   ~~
-!!! error TS1005: ';' expected.
     
         @dec
         @dec
         static set #x(value: number) { }
-                   ~~
-!!! error TS1005: ';' expected.
     
         @dec
         @dec

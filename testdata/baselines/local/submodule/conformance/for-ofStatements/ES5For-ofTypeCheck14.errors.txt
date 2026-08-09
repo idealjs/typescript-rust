@@ -1,8 +1,0 @@
-ES5For-ofTypeCheck14.ts(1,29): error TS2304: Cannot find name 'Set'.
-
-
-==== ES5For-ofTypeCheck14.ts (1 errors) ====
-    declare var union: string | Set<number>
-                                ~~~
-!!! error TS2304: Cannot find name 'Set'.
-    for (const e of union) { }

@@ -1,36 +1,28 @@
-errorSuperPropertyAccess.ts(6,23): error TS2339: Property 'prototype' does not exist on type '{ fn: () => any; m: any; n: any; static2: () => any; static2: (n: any) => any }'.
-errorSuperPropertyAccess.ts(7,23): error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any; static2: () => any; static2: (n: any) => any }'.
-errorSuperPropertyAccess.ts(11,23): error TS2339: Property 'prototype' does not exist on type '{ fn: () => any; m: any; n: any; static2: () => any; static2: (n: any) => any }'.
-errorSuperPropertyAccess.ts(12,23): error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any; static2: () => any; static2: (n: any) => any }'.
-errorSuperPropertyAccess.ts(21,15): error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any; static2: () => any; static2: (n: any) => any }'.
-errorSuperPropertyAccess.ts(24,23): error TS1005: ';' expected.
-errorSuperPropertyAccess.ts(25,15): error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any; static2: () => any; static2: (n: any) => any }'.
-errorSuperPropertyAccess.ts(29,23): error TS1005: ';' expected.
-errorSuperPropertyAccess.ts(30,15): error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any; static2: () => any; static2: (n: any) => any }'.
+errorSuperPropertyAccess.ts(6,23): error TS2339: Property 'prototype' does not exist on type '{ fn: () => any; m: any; n: any }'.
+errorSuperPropertyAccess.ts(7,23): error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any }'.
+errorSuperPropertyAccess.ts(11,23): error TS2339: Property 'prototype' does not exist on type '{ fn: () => any; m: any; n: any }'.
+errorSuperPropertyAccess.ts(12,23): error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any }'.
+errorSuperPropertyAccess.ts(21,15): error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any }'.
+errorSuperPropertyAccess.ts(25,15): error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any }'.
+errorSuperPropertyAccess.ts(30,15): error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any }'.
 errorSuperPropertyAccess.ts(56,9): error TS2349: This expression is not callable.
-errorSuperPropertyAccess.ts(64,9): error TS1005: ';' expected.
-errorSuperPropertyAccess.ts(68,9): error TS1005: ';' expected.
 errorSuperPropertyAccess.ts(86,9): error TS2349: This expression is not callable.
 errorSuperPropertyAccess.ts(87,15): error TS2341: Property 'privateMember' is private and only accessible within class 'SomeBase'.
 errorSuperPropertyAccess.ts(91,23): error TS2341: Property 'privateMember' is private and only accessible within class 'SomeBase'.
-errorSuperPropertyAccess.ts(94,9): error TS1005: ';' expected.
 errorSuperPropertyAccess.ts(95,23): error TS2341: Property 'privateMember' is private and only accessible within class 'SomeBase'.
-errorSuperPropertyAccess.ts(98,9): error TS1005: ';' expected.
 errorSuperPropertyAccess.ts(99,19): error TS2341: Property 'privateMember' is private and only accessible within class 'SomeBase'.
-errorSuperPropertyAccess.ts(109,15): error TS2339: Property 'publicStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
-errorSuperPropertyAccess.ts(110,15): error TS2339: Property 'privateStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
-errorSuperPropertyAccess.ts(111,15): error TS2339: Property 'privateStaticFunc' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
-errorSuperPropertyAccess.ts(113,16): error TS1005: ';' expected.
-errorSuperPropertyAccess.ts(114,15): error TS2339: Property 'publicStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
-errorSuperPropertyAccess.ts(115,15): error TS2339: Property 'privateStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
-errorSuperPropertyAccess.ts(116,15): error TS2339: Property 'privateStaticFunc' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
-errorSuperPropertyAccess.ts(119,16): error TS1005: ';' expected.
-errorSuperPropertyAccess.ts(120,15): error TS2339: Property 'publicStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
-errorSuperPropertyAccess.ts(121,15): error TS2339: Property 'privateStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
-errorSuperPropertyAccess.ts(122,15): error TS2339: Property 'privateStaticFunc' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
+errorSuperPropertyAccess.ts(109,15): error TS2339: Property 'publicStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
+errorSuperPropertyAccess.ts(110,15): error TS2339: Property 'privateStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
+errorSuperPropertyAccess.ts(111,15): error TS2339: Property 'privateStaticFunc' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
+errorSuperPropertyAccess.ts(114,15): error TS2339: Property 'publicStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
+errorSuperPropertyAccess.ts(115,15): error TS2339: Property 'privateStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
+errorSuperPropertyAccess.ts(116,15): error TS2339: Property 'privateStaticFunc' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
+errorSuperPropertyAccess.ts(120,15): error TS2339: Property 'publicStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
+errorSuperPropertyAccess.ts(121,15): error TS2339: Property 'privateStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
+errorSuperPropertyAccess.ts(122,15): error TS2339: Property 'privateStaticFunc' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
 
 
-==== errorSuperPropertyAccess.ts (30 errors) ====
+==== errorSuperPropertyAccess.ts (22 errors) ====
     //super property access in constructor of class with no base type
     //super property access in instance member function of class with no base type
     //super property access in instance member accessor(get and set) of class with no base type
@@ -38,19 +30,19 @@ errorSuperPropertyAccess.ts(122,15): error TS2339: Property 'privateStaticFunc' 
         constructor() {
             var a = super.prototype;
                           ~~~~~~~~~
-!!! error TS2339: Property 'prototype' does not exist on type '{ fn: () => any; m: any; n: any; static2: () => any; static2: (n: any) => any }'.
+!!! error TS2339: Property 'prototype' does not exist on type '{ fn: () => any; m: any; n: any }'.
             var b = super.hasOwnProperty('');
                           ~~~~~~~~~~~~~~
-!!! error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any; static2: () => any; static2: (n: any) => any }'.
+!!! error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any }'.
         }
     
         fn() {
             var a = super.prototype;
                           ~~~~~~~~~
-!!! error TS2339: Property 'prototype' does not exist on type '{ fn: () => any; m: any; n: any; static2: () => any; static2: (n: any) => any }'.
+!!! error TS2339: Property 'prototype' does not exist on type '{ fn: () => any; m: any; n: any }'.
             var b = super.hasOwnProperty('');
                           ~~~~~~~~~~~~~~
-!!! error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any; static2: () => any; static2: (n: any) => any }'.
+!!! error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any }'.
         }
     
         m = super.prototype;
@@ -61,24 +53,20 @@ errorSuperPropertyAccess.ts(122,15): error TS2339: Property 'privateStaticFunc' 
         public static static1() {
             super.hasOwnProperty('');
                   ~~~~~~~~~~~~~~
-!!! error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any; static2: () => any; static2: (n: any) => any }'.
+!!! error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any }'.
         }
     
         public static get static2() {
-                          ~~~~~~~
-!!! error TS1005: ';' expected.
             super.hasOwnProperty('');
                   ~~~~~~~~~~~~~~
-!!! error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any; static2: () => any; static2: (n: any) => any }'.
+!!! error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any }'.
             return '';
         }
     
         public static set static2(n) {
-                          ~~~~~~~
-!!! error TS1005: ';' expected.
             super.hasOwnProperty('');
                   ~~~~~~~~~~~~~~
-!!! error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any; static2: () => any; static2: (n: any) => any }'.
+!!! error TS2339: Property 'hasOwnProperty' does not exist on type '{ fn: () => any; m: any; n: any }'.
         }
     }
     
@@ -115,14 +103,10 @@ errorSuperPropertyAccess.ts(122,15): error TS2339: Property 'privateStaticFunc' 
         }
     
         get a() {
-            ~
-!!! error TS1005: ';' expected.
             var x = super.publicMember;
             return undefined;
         }
         set a(n) {
-            ~
-!!! error TS1005: ';' expected.
             n = super.publicMember;
         }
         fn2() {
@@ -155,16 +139,12 @@ errorSuperPropertyAccess.ts(122,15): error TS2339: Property 'privateStaticFunc' 
         }
     
         get a() {
-            ~
-!!! error TS1005: ';' expected.
             var x = super.privateMember;
                           ~~~~~~~~~~~~~
 !!! error TS2341: Property 'privateMember' is private and only accessible within class 'SomeBase'.
             return undefined;
         }
         set a(n) {
-            ~
-!!! error TS1005: ';' expected.
             n = super.privateMember;
                       ~~~~~~~~~~~~~
 !!! error TS2341: Property 'privateMember' is private and only accessible within class 'SomeBase'.
@@ -179,40 +159,36 @@ errorSuperPropertyAccess.ts(122,15): error TS2339: Property 'privateStaticFunc' 
         static fn() {
             super.publicStaticMember = 3;
                   ~~~~~~~~~~~~~~~~~~
-!!! error TS2339: Property 'publicStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
+!!! error TS2339: Property 'publicStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
             super.privateStaticMember = 3;
                   ~~~~~~~~~~~~~~~~~~~
-!!! error TS2339: Property 'privateStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
+!!! error TS2339: Property 'privateStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
             super.privateStaticFunc();
                   ~~~~~~~~~~~~~~~~~
-!!! error TS2339: Property 'privateStaticFunc' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
+!!! error TS2339: Property 'privateStaticFunc' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
         }
         static get a() {
-                   ~
-!!! error TS1005: ';' expected.
             super.publicStaticMember = 3;
                   ~~~~~~~~~~~~~~~~~~
-!!! error TS2339: Property 'publicStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
+!!! error TS2339: Property 'publicStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
             super.privateStaticMember = 3;
                   ~~~~~~~~~~~~~~~~~~~
-!!! error TS2339: Property 'privateStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
+!!! error TS2339: Property 'privateStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
             super.privateStaticFunc();
                   ~~~~~~~~~~~~~~~~~
-!!! error TS2339: Property 'privateStaticFunc' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
+!!! error TS2339: Property 'privateStaticFunc' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
             return '';
         }
         static set a(n) {
-                   ~
-!!! error TS1005: ';' expected.
             super.publicStaticMember = 3;
                   ~~~~~~~~~~~~~~~~~~
-!!! error TS2339: Property 'publicStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
+!!! error TS2339: Property 'publicStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
             super.privateStaticMember = 3;
                   ~~~~~~~~~~~~~~~~~~~
-!!! error TS2339: Property 'privateStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
+!!! error TS2339: Property 'privateStaticMember' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
             super.privateStaticFunc();
                   ~~~~~~~~~~~~~~~~~
-!!! error TS2339: Property 'privateStaticFunc' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0; a: (n: any) => any }'.
+!!! error TS2339: Property 'privateStaticFunc' does not exist on type '{ privateFunc: () => any; privateMember: 0; publicFunc: () => any; publicMember: 0 }'.
         }
     }
     

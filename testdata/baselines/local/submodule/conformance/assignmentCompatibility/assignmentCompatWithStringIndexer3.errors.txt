@@ -1,5 +1,5 @@
 assignmentCompatWithStringIndexer3.ts(7,16): error TS2304: Cannot find name 'A'.
-assignmentCompatWithStringIndexer3.ts(14,9): error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithStringIndexer3.ts(14,9): error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
 assignmentCompatWithStringIndexer3.ts(14,11): error TS1005: ']' expected.
 assignmentCompatWithStringIndexer3.ts(14,19): error TS1005: ';' expected.
 assignmentCompatWithStringIndexer3.ts(14,19): error TS2564: Property ']' has no initializer and is not definitely assigned in the constructor.
@@ -32,7 +32,7 @@ assignmentCompatWithStringIndexer3.ts(19,29): error TS1005: ',' expected.
         class A<T extends Derived> {
             [x: string]: T;
             ~~
-!!! error TS2564: Property '' has no initializer and is not definitely assigned in the constructor.
+!!! error TS2564: Property '[x' has no initializer and is not definitely assigned in the constructor.
               ~
 !!! error TS1005: ']' expected.
                       ~

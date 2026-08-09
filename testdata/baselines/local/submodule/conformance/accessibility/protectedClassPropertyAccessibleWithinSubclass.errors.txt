@@ -1,11 +1,9 @@
 protectedClassPropertyAccessibleWithinSubclass.ts(4,15): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-protectedClassPropertyAccessibleWithinSubclass.ts(9,19): error TS1005: ';' expected.
-protectedClassPropertyAccessibleWithinSubclass.ts(10,19): error TS1005: ';' expected.
-protectedClassPropertyAccessibleWithinSubclass.ts(14,26): error TS1005: ';' expected.
-protectedClassPropertyAccessibleWithinSubclass.ts(15,26): error TS1005: ';' expected.
+protectedClassPropertyAccessibleWithinSubclass.ts(10,31): error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any; bar: () => any }'.
+protectedClassPropertyAccessibleWithinSubclass.ts(15,38): error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any; bar: () => any }'.
 
 
-==== protectedClassPropertyAccessibleWithinSubclass.ts (5 errors) ====
+==== protectedClassPropertyAccessibleWithinSubclass.ts (3 errors) ====
     // no errors
     
     class B {
@@ -17,20 +15,16 @@ protectedClassPropertyAccessibleWithinSubclass.ts(15,26): error TS1005: ';' expe
     
     class C extends B {
         protected get y() { return this.x; }
-                      ~
-!!! error TS1005: ';' expected.
         protected set y(x) { this.y = this.x; }
-                      ~
-!!! error TS1005: ';' expected.
+                                  ~
+!!! error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any; bar: () => any }'.
         protected foo() { return this.x; }
         protected bar() { return this.foo(); }
     
         protected static get y() { return this.x; }
-                             ~
-!!! error TS1005: ';' expected.
         protected static set y(x) { this.y = this.x; }
-                             ~
-!!! error TS1005: ';' expected.
+                                         ~
+!!! error TS2339: Property 'y' does not exist on type '{ x: string; foo: () => any; bar: () => any }'.
         protected static foo() { return this.x; }
         protected static bar() { this.foo(); }
     }

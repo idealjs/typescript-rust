@@ -1,10 +1,7 @@
-instantiationExpressions.ts(18,16): error TS2304: Cannot find name 'Array'.
-instantiationExpressions.ts(19,16): error TS2304: Cannot find name 'Array'.
-instantiationExpressions.ts(20,16): error TS2304: Cannot find name 'Array'.
 instantiationExpressions.ts(34,16): error TS2339: Property 'f' does not exist on type 'object'.
 
 
-==== instantiationExpressions.ts (4 errors) ====
+==== instantiationExpressions.ts (1 errors) ====
     declare function fx<T>(x: T): T;
     declare function fx<T>(x: T, n: number): T;
     declare function fx<T, U>(t: [T, U]): [T, U];
@@ -23,14 +20,8 @@ instantiationExpressions.ts(34,16): error TS2339: Property 'f' does not exist on
     
     function f2() {
         const A0 = Array<>;  // Error
-                   ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
         const A1 = Array<string>;  // new (...) => string[]
-                   ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
         const A2 = Array<string, number>;  // Error
-                   ~~~~~
-!!! error TS2304: Cannot find name 'Array'.
     }
     
     type T20 = typeof Array<>;  // Error

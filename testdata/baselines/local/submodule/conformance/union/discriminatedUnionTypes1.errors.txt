@@ -1,14 +1,9 @@
-discriminatedUnionTypes1.ts(24,16): error TS2304: Cannot find name 'Math'.
-discriminatedUnionTypes1.ts(38,31): error TS2304: Cannot find name 'Math'.
-discriminatedUnionTypes1.ts(43,15): error TS2304: Cannot find name 'Error'.
-discriminatedUnionTypes1.ts(50,31): error TS2304: Cannot find name 'Math'.
 discriminatedUnionTypes1.ts(51,25): error TS2349: This expression is not callable.
-discriminatedUnionTypes1.ts(59,31): error TS2304: Cannot find name 'Math'.
 discriminatedUnionTypes1.ts(61,12): error TS2349: This expression is not callable.
-discriminatedUnionTypes1.ts(139,23): error TS2304: Cannot find name 'Error'.
+discriminatedUnionTypes1.ts(139,23): error TS2351: This expression is not constructable.
 
 
-==== discriminatedUnionTypes1.ts (8 errors) ====
+==== discriminatedUnionTypes1.ts (3 errors) ====
     interface Square {
         kind: "square";
         size: number;
@@ -33,8 +28,6 @@ discriminatedUnionTypes1.ts(139,23): error TS2304: Cannot find name 'Error'.
         }
         else if (s.kind === "circle") {
             return Math.PI * s.radius * s.radius;
-                   ~~~~
-!!! error TS2304: Cannot find name 'Math'.
         }
         else if (s.kind === "rectangle") {
             return s.width * s.height;
@@ -49,15 +42,11 @@ discriminatedUnionTypes1.ts(139,23): error TS2304: Cannot find name 'Error'.
             case "square": return s.size * s.size;
             case "rectangle": return s.width * s.height;
             case "circle": return Math.PI * s.radius * s.radius;
-                                  ~~~~
-!!! error TS2304: Cannot find name 'Math'.
         }
     }
     
     function assertNever(x: never): never {
         throw new Error("Unexpected object: " + x);
-                  ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
     }
     
     function area3(s: Shape) {
@@ -65,8 +54,6 @@ discriminatedUnionTypes1.ts(139,23): error TS2304: Cannot find name 'Error'.
             case "square": return s.size * s.size;
             case "rectangle": return s.width * s.height;
             case "circle": return Math.PI * s.radius * s.radius;
-                                  ~~~~
-!!! error TS2304: Cannot find name 'Math'.
             default: return assertNever(s);
                             ~~~~~~~~~~~
 !!! error TS2349: This expression is not callable.
@@ -78,8 +65,6 @@ discriminatedUnionTypes1.ts(139,23): error TS2304: Cannot find name 'Error'.
             case "square": return s.size * s.size;
             case "rectangle": return s.width * s.height;
             case "circle": return Math.PI * s.radius * s.radius;
-                                  ~~~~
-!!! error TS2304: Cannot find name 'Math'.
         }
         return assertNever(s);
                ~~~~~~~~~~~
@@ -163,7 +148,7 @@ discriminatedUnionTypes1.ts(139,23): error TS2304: Cannot find name 'Error'.
             case "D":
                 throw new Error();
                           ~~~~~
-!!! error TS2304: Cannot find name 'Error'.
+!!! error TS2351: This expression is not constructable.
         }
         m;  // { kind: "B" | "C", y: number }
     }

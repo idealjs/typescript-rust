@@ -1,19 +1,13 @@
-taggedTemplateStringsWithOverloadResolution3_ES6.ts(3,20): error TS2304: Cannot find name 'TemplateStringsArray'.
-taggedTemplateStringsWithOverloadResolution3_ES6.ts(4,20): error TS2304: Cannot find name 'TemplateStringsArray'.
 taggedTemplateStringsWithOverloadResolution3_ES6.ts(7,5): error TS2322: Type '(strs: error, s: string) => string' is not assignable to type 'string'.
 taggedTemplateStringsWithOverloadResolution3_ES6.ts(7,21): error TS1005: ',' expected.
 taggedTemplateStringsWithOverloadResolution3_ES6.ts(7,35): error TS1128: Declaration or statement expected.
 
 
-==== taggedTemplateStringsWithOverloadResolution3_ES6.ts (5 errors) ====
+==== taggedTemplateStringsWithOverloadResolution3_ES6.ts (3 errors) ====
     ﻿//@target: es6
     // Ambiguous call picks the first overload in declaration order
     function fn1(strs: TemplateStringsArray, s: string): string;
-                    ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     function fn1(strs: TemplateStringsArray, n: number): number;
-                    ~~~~~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'TemplateStringsArray'.
     function fn1() { return null; }
     
     var s: string = fn1 `${ undefined }`;

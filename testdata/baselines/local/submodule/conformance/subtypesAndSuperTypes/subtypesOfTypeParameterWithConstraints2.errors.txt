@@ -1,26 +1,9 @@
-subtypesOfTypeParameterWithConstraints2.ts(23,36): error TS2304: Cannot find name 'Date'.
-subtypesOfTypeParameterWithConstraints2.ts(28,29): error TS2304: Cannot find name 'Date'.
-subtypesOfTypeParameterWithConstraints2.ts(29,25): error TS2304: Cannot find name 'Date'.
-subtypesOfTypeParameterWithConstraints2.ts(32,29): error TS2304: Cannot find name 'Date'.
-subtypesOfTypeParameterWithConstraints2.ts(33,25): error TS2304: Cannot find name 'Date'.
 subtypesOfTypeParameterWithConstraints2.ts(38,12): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithConstraints2.ts(39,15): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithConstraints2.ts(45,11): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
-subtypesOfTypeParameterWithConstraints2.ts(50,23): error TS2304: Cannot find name 'Number'.
-subtypesOfTypeParameterWithConstraints2.ts(59,23): error TS2304: Cannot find name 'Number'.
-subtypesOfTypeParameterWithConstraints2.ts(64,23): error TS2304: Cannot find name 'String'.
-subtypesOfTypeParameterWithConstraints2.ts(69,23): error TS2304: Cannot find name 'Boolean'.
-subtypesOfTypeParameterWithConstraints2.ts(74,23): error TS2304: Cannot find name 'Date'.
-subtypesOfTypeParameterWithConstraints2.ts(75,25): error TS2304: Cannot find name 'Date'.
-subtypesOfTypeParameterWithConstraints2.ts(76,29): error TS2304: Cannot find name 'Date'.
-subtypesOfTypeParameterWithConstraints2.ts(79,23): error TS2304: Cannot find name 'RegExp'.
-subtypesOfTypeParameterWithConstraints2.ts(149,24): error TS2304: Cannot find name 'Number'.
-subtypesOfTypeParameterWithConstraints2.ts(150,26): error TS2304: Cannot find name 'Object'.
-subtypesOfTypeParameterWithConstraints2.ts(151,30): error TS2304: Cannot find name 'Object'.
-subtypesOfTypeParameterWithConstraints2.ts(154,24): error TS2304: Cannot find name 'Number'.
 
 
-==== subtypesOfTypeParameterWithConstraints2.ts (20 errors) ====
+==== subtypesOfTypeParameterWithConstraints2.ts (3 errors) ====
     // checking whether other types are subtypes of type parameters with constraints
     
     function f1<T extends U, U>(x: T, y: U) {
@@ -44,26 +27,16 @@ subtypesOfTypeParameterWithConstraints2.ts(154,24): error TS2304: Cannot find na
     
     // Date > U > T
     function f3<T extends U, U extends Date>(x: T, y: U) {
-                                       ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         var r = true ? x : y;
         var r = true ? y : x;
     
         // ok
         var r2 = true ? x : new Date(); 
-                                ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         var r2 = true ? new Date() : x;
-                            ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     
         // ok
         var r3 = true ? y : new Date(); 
-                                ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         var r3 = true ? new Date() : y;
-                            ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     }
     
     
@@ -87,8 +60,6 @@ subtypesOfTypeParameterWithConstraints2.ts(154,24): error TS2304: Cannot find na
     }
     
     function f4<T extends Number>(x: T) {
-                          ~~~~~~
-!!! error TS2304: Cannot find name 'Number'.
         var r0 = true ? x : null; // ok
         var r0 = true ? null : x; // ok
     
@@ -98,40 +69,26 @@ subtypesOfTypeParameterWithConstraints2.ts(154,24): error TS2304: Cannot find na
     }
     
     function f5<T extends Number>(x: T) {
-                          ~~~~~~
-!!! error TS2304: Cannot find name 'Number'.
         var r1 = true ? 1 : x; // ok
         var r1 = true ? x : 1; // ok
     }
     
     function f6<T extends String>(x: T) {
-                          ~~~~~~
-!!! error TS2304: Cannot find name 'String'.
         var r2 = true ? '' : x; // ok
         var r2 = true ? x : ''; // ok
     }
     
     function f7<T extends Boolean>(x: T) {
-                          ~~~~~~~
-!!! error TS2304: Cannot find name 'Boolean'.
         var r3 = true ? true : x; // ok
         var r3 = true ? x : true; // ok
     }
     
     function f8<T extends Date>(x: T) {
-                          ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         var r4 = true ? new Date() : x; // ok
-                            ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         var r4 = true ? x : new Date(); // ok
-                                ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     }
     
     function f9<T extends RegExp>(x: T) {
-                          ~~~~~~
-!!! error TS2304: Cannot find name 'RegExp'.
         var r5 = true ? /1/ : x; // ok
         var r5 = true ? x : /1/; // ok
     }
@@ -202,19 +159,11 @@ subtypesOfTypeParameterWithConstraints2.ts(154,24): error TS2304: Cannot find na
     }
     
     function f20<T extends Number>(x: T) {
-                           ~~~~~~
-!!! error TS2304: Cannot find name 'Number'.
         var r19 = true ? new Object() : x; // ok
-                             ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
         var r19 = true ? x : new Object(); // ok
-                                 ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     }
     
     function f21<T extends Number>(x: T) {
-                           ~~~~~~
-!!! error TS2304: Cannot find name 'Number'.
         var r20 = true ? {} : x; // ok
         var r20 = true ? x : {}; // ok
     }

@@ -5,8 +5,6 @@ parserRealSource1.ts(68,34): error TS2339: Property 'logger' does not exist on t
 parserRealSource1.ts(69,32): error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
 parserRealSource1.ts(70,32): error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
 parserRealSource1.ts(80,18): error TS2339: Property 'logger' does not exist on type '{ _information: boolean; _debug: boolean; _warning: boolean; _error: boolean; _fatal: boolean; information: () => boolean; debug: () => boolean; warning: () => boolean; error: () => boolean; fatal: () => boolean; log: (s: string) => void }'.
-parserRealSource1.ts(98,26): error TS2304: Cannot find name 'Date'.
-parserRealSource1.ts(100,24): error TS2304: Cannot find name 'Date'.
 parserRealSource1.ts(101,20): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
 parserRealSource1.ts(109,28): error TS2339: Property 'charCodeAt' does not exist on type 'string'.
 parserRealSource1.ts(140,30): error TS2339: Property 'length' does not exist on type 'string'.
@@ -18,7 +16,7 @@ parserRealSource1.ts(149,39): error TS1005: '>' expected.
 
 
 !!! error TS6053: File '/.src/typescript.ts' not found.
-==== parserRealSource1.ts (16 errors) ====
+==== parserRealSource1.ts (14 errors) ====
     // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
     // See LICENSE.txt in the project root for complete license information.
     
@@ -129,12 +127,8 @@ parserRealSource1.ts(149,39): error TS1005: '>' expected.
     
         export function timeFunction(logger: ILogger, funcDescription: string, func: () =>any): any {
             var start = +new Date();
-                             ~~~~
-!!! error TS2304: Cannot find name 'Date'.
             var result = func();
             var end = +new Date();
-                           ~~~~
-!!! error TS2304: Cannot find name 'Date'.
             logger.log(funcDescription + " completed in " + (end - start) + " msec");
                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.

@@ -1,9 +1,3 @@
-twoAccessorsWithSameName.ts(2,9): error TS1005: ';' expected.
-twoAccessorsWithSameName.ts(3,9): error TS1005: ';' expected.
-twoAccessorsWithSameName.ts(7,9): error TS1005: ';' expected.
-twoAccessorsWithSameName.ts(8,9): error TS1005: ';' expected.
-twoAccessorsWithSameName.ts(12,9): error TS1005: ';' expected.
-twoAccessorsWithSameName.ts(15,9): error TS1005: ';' expected.
 twoAccessorsWithSameName.ts(19,10): error TS1005: '{' expected.
 twoAccessorsWithSameName.ts(19,11): error TS1012: Unexpected token.
 twoAccessorsWithSameName.ts(19,13): error TS1005: ')' expected.
@@ -31,34 +25,22 @@ twoAccessorsWithSameName.ts(33,14): error TS1005: ';' expected.
 twoAccessorsWithSameName.ts(34,2): error TS1005: '}' expected.
 
 
-==== twoAccessorsWithSameName.ts (31 errors) ====
+==== twoAccessorsWithSameName.ts (25 errors) ====
     class C {
         get x() { return 1; }
-            ~
-!!! error TS1005: ';' expected.
         get x() { return 1; } // error
-            ~
-!!! error TS1005: ';' expected.
     }
     
     class D {
         set x(v) {  }
-            ~
-!!! error TS1005: ';' expected.
         set x(v) {  } // error
-            ~
-!!! error TS1005: ';' expected.
     }
     
     class E {
         get x() {
-            ~
-!!! error TS1005: ';' expected.
             return 1;
         }
         set x(v) { }
-            ~
-!!! error TS1005: ';' expected.
     }
     
     var x = {

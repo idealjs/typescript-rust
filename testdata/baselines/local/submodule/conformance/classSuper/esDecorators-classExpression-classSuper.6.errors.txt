@@ -1,14 +1,10 @@
 esDecorators-classExpression-classSuper.6.ts(9,2): error TS1012: Unexpected token.
 esDecorators-classExpression-classSuper.6.ts(9,3): error TS1005: ')' expected.
-esDecorators-classExpression-classSuper.6.ts(12,16): error TS1005: ';' expected.
-esDecorators-classExpression-classSuper.6.ts(13,16): error TS1005: ';' expected.
 esDecorators-classExpression-classSuper.6.ts(16,9): error TS2349: This expression is not callable.
-esDecorators-classExpression-classSuper.6.ts(22,9): error TS1005: ';' expected.
-esDecorators-classExpression-classSuper.6.ts(23,9): error TS1005: ';' expected.
 esDecorators-classExpression-classSuper.6.ts(24,2): error TS1128: Declaration or statement expected.
 
 
-==== esDecorators-classExpression-classSuper.6.ts (8 errors) ====
+==== esDecorators-classExpression-classSuper.6.ts (4 errors) ====
     declare var dec: any;
     
     declare class Base {
@@ -25,11 +21,7 @@ esDecorators-classExpression-classSuper.6.ts(24,2): error TS1128: Declaration or
     class C extends Base {
         static m() { super.method(); }
         static get x() { return super.method(); }
-                   ~
-!!! error TS1005: ';' expected.
         static set x(v: number) { super.method(); }
-                   ~
-!!! error TS1005: ';' expected.
     
         constructor() {
             super();
@@ -41,11 +33,7 @@ esDecorators-classExpression-classSuper.6.ts(24,2): error TS1128: Declaration or
         a = super.method();
         m() { super.method(); }
         get x() { return super.method(); }
-            ~
-!!! error TS1005: ';' expected.
         set x(v: number) { super.method(); }
-            ~
-!!! error TS1005: ';' expected.
     });
      ~
 !!! error TS1128: Declaration or statement expected.

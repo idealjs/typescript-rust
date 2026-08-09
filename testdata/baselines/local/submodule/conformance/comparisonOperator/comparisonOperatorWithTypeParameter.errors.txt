@@ -1,4 +1,3 @@
-comparisonOperatorWithTypeParameter.ts(2,8): error TS2304: Cannot find name 'Object'.
 comparisonOperatorWithTypeParameter.ts(6,20): error TS1005: '>' expected.
 comparisonOperatorWithTypeParameter.ts(10,15): error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
 comparisonOperatorWithTypeParameter.ts(11,15): error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
@@ -33,11 +32,9 @@ comparisonOperatorWithTypeParameter.ts(61,20): error TS1005: '>' expected.
 comparisonOperatorWithTypeParameter.ts(70,20): error TS1005: '>' expected.
 
 
-==== comparisonOperatorWithTypeParameter.ts (33 errors) ====
+==== comparisonOperatorWithTypeParameter.ts (32 errors) ====
     var a: {};
     var b: Object;
-           ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     
     function foo<T, U/* extends T*/, V/* extends U*/>(t: T, u: U, v: V) {
         // errors

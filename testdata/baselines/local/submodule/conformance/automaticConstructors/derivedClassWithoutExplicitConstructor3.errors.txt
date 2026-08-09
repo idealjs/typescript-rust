@@ -2,15 +2,11 @@ derivedClassWithoutExplicitConstructor3.ts(11,9): error TS2349: This expression 
 derivedClassWithoutExplicitConstructor3.ts(21,9): error TS2554: Expected 2 arguments, but got 0.
 derivedClassWithoutExplicitConstructor3.ts(22,23): error TS2554: Expected 0 arguments, but got 1.
 derivedClassWithoutExplicitConstructor3.ts(33,9): error TS2349: This expression is not callable.
-derivedClassWithoutExplicitConstructor3.ts(39,20): error TS2304: Cannot find name 'Date'.
 derivedClassWithoutExplicitConstructor3.ts(45,17): error TS2554: Expected 0 arguments, but got 1.
-derivedClassWithoutExplicitConstructor3.ts(45,21): error TS2304: Cannot find name 'Date'.
 derivedClassWithoutExplicitConstructor3.ts(46,17): error TS2554: Expected 0 arguments, but got 2.
-derivedClassWithoutExplicitConstructor3.ts(46,21): error TS2304: Cannot find name 'Date'.
-derivedClassWithoutExplicitConstructor3.ts(46,33): error TS2304: Cannot find name 'Date'.
 
 
-==== derivedClassWithoutExplicitConstructor3.ts (10 errors) ====
+==== derivedClassWithoutExplicitConstructor3.ts (6 errors) ====
     // automatic constructors with a class hieararchy of depth > 2
     
     class Base {
@@ -58,8 +54,6 @@ derivedClassWithoutExplicitConstructor3.ts(46,33): error TS2304: Cannot find nam
     
     
     class D2<T extends Date> extends D<T> {
-                       ~~~~
-!!! error TS2304: Cannot find name 'Date'.
         x = 2
         y: T = null;
     }
@@ -68,12 +62,6 @@ derivedClassWithoutExplicitConstructor3.ts(46,33): error TS2304: Cannot find nam
     var d2 = new D2(new Date()); // error
                     ~~~~~~~~~~
 !!! error TS2554: Expected 0 arguments, but got 1.
-                        ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     var d3 = new D2(new Date(), new Date()); // ok
                     ~~~~~~~~~~~~~~~~~~~~~~
 !!! error TS2554: Expected 0 arguments, but got 2.
-                        ~~~~
-!!! error TS2304: Cannot find name 'Date'.
-                                    ~~~~
-!!! error TS2304: Cannot find name 'Date'.

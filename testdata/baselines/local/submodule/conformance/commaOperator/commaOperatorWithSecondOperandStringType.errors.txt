@@ -1,20 +1,13 @@
-commaOperatorWithSecondOperandStringType.ts(5,13): error TS2304: Cannot find name 'Object'.
-commaOperatorWithSecondOperandStringType.ts(25,11): error TS2304: Cannot find name 'Date'.
 commaOperatorWithSecondOperandStringType.ts(28,20): error TS2339: Property 'toString' does not exist on type 'number'.
-commaOperatorWithSecondOperandStringType.ts(29,14): error TS2304: Cannot find name 'Object'.
-commaOperatorWithSecondOperandStringType.ts(32,34): error TS2304: Cannot find name 'Date'.
 commaOperatorWithSecondOperandStringType.ts(35,44): error TS2339: Property 'toString' does not exist on type 'number'.
-commaOperatorWithSecondOperandStringType.ts(36,29): error TS2304: Cannot find name 'Object'.
 
 
-==== commaOperatorWithSecondOperandStringType.ts (7 errors) ====
+==== commaOperatorWithSecondOperandStringType.ts (2 errors) ====
     var ANY: any;
     var BOOLEAN: boolean;
     var NUMBER: number;
     var STRING: string;
     var OBJECT: Object;
-                ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     
     var resultIsString: string;
     
@@ -35,26 +28,18 @@ commaOperatorWithSecondOperandStringType.ts(36,29): error TS2304: Cannot find na
     //Literal and expression
     null, STRING;
     ANY = new Date(), STRING;
-              ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     true, "";
     BOOLEAN == undefined, "";
     ["a", "b"], NUMBER.toString();
                        ~~~~~~~~
 !!! error TS2339: Property 'toString' does not exist on type 'number'.
     OBJECT = new Object, STRING + "string";
-                 ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.
     
     var resultIsString6 = (null, STRING);
     var resultIsString7 = (ANY = new Date(), STRING);
-                                     ~~~~
-!!! error TS2304: Cannot find name 'Date'.
     var resultIsString8 = (true, "");
     var resultIsString9 = (BOOLEAN == undefined, "");
     var resultIsString10 = (["a", "b"], NUMBER.toString());
                                                ~~~~~~~~
 !!! error TS2339: Property 'toString' does not exist on type 'number'.
     var resultIsString11 = (new Object, STRING + "string");
-                                ~~~~~~
-!!! error TS2304: Cannot find name 'Object'.

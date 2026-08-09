@@ -1,14 +1,11 @@
-privateNameNestedMethodAccess.ts(4,9): error TS1005: ';' expected.
 privateNameNestedMethodAccess.ts(7,22): error TS2304: Cannot find name 'D'.
 
 
-==== privateNameNestedMethodAccess.ts (2 errors) ====
+==== privateNameNestedMethodAccess.ts (1 errors) ====
     class C {
         #foo = 42;
         #bar() { new C().#baz; }
         get #baz() { return 42; }
-            ~~~~
-!!! error TS1005: ';' expected.
     
         m() {
             return class D {

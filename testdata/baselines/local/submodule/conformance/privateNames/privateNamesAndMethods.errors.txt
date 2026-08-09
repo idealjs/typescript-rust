@@ -1,36 +1,27 @@
 privateNamesAndMethods.ts(3,11): error TS1005: ';' expected.
-privateNamesAndMethods.ts(4,11): error TS1003: Identifier expected.
-privateNamesAndMethods.ts(4,12): error TS1005: ';' expected.
 privateNamesAndMethods.ts(7,5): error TS2564: Property '#_quux' has no initializer and is not definitely assigned in the constructor.
-privateNamesAndMethods.ts(8,9): error TS1005: ';' expected.
-privateNamesAndMethods.ts(11,9): error TS1005: ';' expected.
+privateNamesAndMethods.ts(18,14): error TS2339: Property '#quux' does not exist on type '{ #foo: (a: number) => any; async: any; #bar: (a: number) => any; #baz: (a: number) => any; #_quux: number }'.
+privateNamesAndMethods.ts(18,27): error TS2339: Property '#quux' does not exist on type '{ #foo: (a: number) => any; async: any; #bar: (a: number) => any; #baz: (a: number) => any; #_quux: number }'.
+privateNamesAndMethods.ts(19,14): error TS2339: Property '#quux' does not exist on type '{ #foo: (a: number) => any; async: any; #bar: (a: number) => any; #baz: (a: number) => any; #_quux: number }'.
 privateNamesAndMethods.ts(26,9): error TS2349: This expression is not callable.
 
 
-==== privateNamesAndMethods.ts (7 errors) ====
+==== privateNamesAndMethods.ts (6 errors) ====
     class A {
         #foo(a: number) {}
         async #bar(a: number) {}
               ~~~~
 !!! error TS1005: ';' expected.
         async *#baz(a: number) {
-              ~
-!!! error TS1003: Identifier expected.
-               ~~~~
-!!! error TS1005: ';' expected.
             return 3;
         }
         #_quux: number;
         ~~~~~~
 !!! error TS2564: Property '#_quux' has no initializer and is not definitely assigned in the constructor.
         get #quux (): number {
-            ~~~~~
-!!! error TS1005: ';' expected.
             return this.#_quux;
         }
         set #quux (val: number) {
-            ~~~~~
-!!! error TS1005: ';' expected.
             this.#_quux = val;
         }
         constructor () {
@@ -38,7 +29,13 @@ privateNamesAndMethods.ts(26,9): error TS2349: This expression is not callable.
             this.#bar(30);
             this.#baz(30);
             this.#quux = this.#quux + 1;
+                 ~~~~~
+!!! error TS2339: Property '#quux' does not exist on type '{ #foo: (a: number) => any; async: any; #bar: (a: number) => any; #baz: (a: number) => any; #_quux: number }'.
+                              ~~~~~
+!!! error TS2339: Property '#quux' does not exist on type '{ #foo: (a: number) => any; async: any; #bar: (a: number) => any; #baz: (a: number) => any; #_quux: number }'.
             this.#quux++;
+                 ~~~~~
+!!! error TS2339: Property '#quux' does not exist on type '{ #foo: (a: number) => any; async: any; #bar: (a: number) => any; #baz: (a: number) => any; #_quux: number }'.
      }
     }
     
