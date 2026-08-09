@@ -6749,12 +6749,155 @@ impl Checker {
     /// It follows the linear antecedent chain (and label antecedents) without
     /// handling branch joins — sufficient for the common single-assignment-
     /// before-use pattern.
+    ///
+    /// Additionally, we use a pre-scan heuristic (mirroring Go's
+    /// `markNodeAssignmentsWorker`): if there is ANY assignment to `symbol`
+    /// within the same enclosing function (even in a conditional branch), we
+    /// suppress TS2454. This avoids false positives from imprecise flow
+    /// analysis at the cost of missing some genuine errors.
     fn is_symbol_definitely_assigned_at(&mut self, node: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
+        // Pre-scan heuristic: check if there's any assignment to this symbol
+        // in the enclosing function body. This mirrors Go's conservative
+        // `markNodeAssignmentsWorker` which records `lastAssignmentPos` and
+        // uses it to suppress TS2454 when any assignment exists in the same
+        // function scope.
+        if self.symbol_has_assignment_in_enclosing_function(node, symbol) {
+            return true;
+        }
+        // Flow graph analysis for more precise checking.
         let flow = match self.program.symbol_map().flow_node_of(node) {
             Some(f) => Arc::clone(f),
             None => return true, // no flow info → assume assigned (no false positive)
         };
         self.flow_has_assignment_to_symbol(&flow, symbol, &mut HashSet::new(), 0)
+    }
+
+    /// Pre-scan heuristic: walk the enclosing function body looking for any
+    /// assignment (=, +=, ++, etc.) whose target resolves to `symbol`.
+    /// Mirrors Go's `markNodeAssignmentsWorker` (flow.go:2673-2694) which
+    /// records `lastAssignmentPos` for each symbol in the same function.
+    fn symbol_has_assignment_in_enclosing_function(
+        &self,
+        node: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+    ) -> bool {
+        // Find the enclosing function or source file.
+        let func_body = match self.find_enclosing_function_body(node) {
+            Some(b) => b,
+            None => return false,
+        };
+        // Walk the function body looking for assignments.
+        self.scan_for_assignment(&func_body, symbol, &mut HashSet::new())
+    }
+
+    /// Find the body (Block) of the enclosing function or arrow function.
+    fn find_enclosing_function_body(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+        let mut current = node.parent.as_ref()?;
+        loop {
+            match current.kind {
+                SyntaxKind::FunctionDeclaration
+                | SyntaxKind::FunctionExpression
+                | SyntaxKind::ArrowFunction
+                | SyntaxKind::MethodDeclaration
+                | SyntaxKind::Constructor
+                | SyntaxKind::GetAccessor
+                | SyntaxKind::SetAccessor => {
+                    // Return the function body if present.
+                    return crate::ast::node_data_generated::for_each_child(current, |child| {
+                        child.kind != SyntaxKind::Block && child.kind != SyntaxKind::Identifier
+                    })
+                    .then(|| Arc::clone(current))
+                    .or_else(|| {
+                        // Find Block child.
+                        let mut body = None;
+                        crate::ast::node_data_generated::for_each_child(current, |child| {
+                            if child.kind == SyntaxKind::Block {
+                                body = Some(Arc::clone(child));
+                                false // stop
+                            } else {
+                                true // continue
+                            }
+                        });
+                        body
+                    });
+                }
+                SyntaxKind::SourceFile => return None,
+                _ => {
+                    current = current.parent.as_ref()?;
+                }
+            }
+        }
+    }
+
+    /// Recursively scan a node tree for assignments targeting `symbol`.
+    fn scan_for_assignment(
+        &self,
+        node: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+        visited: &mut HashSet<usize>,
+    ) -> bool {
+        let key = Arc::as_ptr(node) as *const Node as usize;
+        if !visited.insert(key) {
+            return false;
+        }
+        // Check if this node is an assignment targeting the symbol.
+        if self.is_assignment_to_symbol(node, symbol) {
+            return true;
+        }
+        // Recurse into children using for_each_child.
+        let mut found = false;
+        crate::ast::node_data_generated::for_each_child(node, |child| {
+            if self.scan_for_assignment(child, symbol, visited) {
+                found = true;
+                false // stop
+            } else {
+                true // continue
+            }
+        });
+        found
+    }
+
+    /// Whether `node` is an assignment expression targeting `symbol`.
+    fn is_assignment_to_symbol(&self, node: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
+        use crate::ast::NodeData::*;
+        match &node.data {
+            BinaryExpression(bin) => {
+                if is_compound_or_simple_assignment(bin.operator_token.kind) {
+                    return self.identifier_is_symbol(&bin.left, symbol);
+                }
+                false
+            }
+            PostfixUnaryExpression(unary) => {
+                (unary.operator == SyntaxKind::PlusPlusToken
+                    || unary.operator == SyntaxKind::MinusMinusToken)
+                    && self.identifier_is_symbol(&unary.operand, symbol)
+            }
+            PrefixUnaryExpression(unary) => {
+                (unary.operator == SyntaxKind::PlusPlusToken
+                    || unary.operator == SyntaxKind::MinusMinusToken)
+                    && self.identifier_is_symbol(&unary.operand, symbol)
+            }
+            // ForOfStatement / ForInStatement: the loop variable is assigned.
+            ForInOrOfStatement(for_loop) => {
+                self.for_initializer_targets_symbol(&for_loop.initializer, symbol)
+            }
+            _ => false,
+        }
+    }
+
+    /// Check if a for-loop initializer (`var x`, `let x`, or `x`) targets
+    /// `symbol`. Used for for-of/for-in definite assignment.
+    fn for_initializer_targets_symbol(&self, init: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
+        match &init.data {
+            NodeData::VariableDeclarationList(vdl) => vdl.declarations.iter().any(|decl| {
+                if let NodeData::VariableDeclaration(vd) = &decl.data {
+                    self.identifier_is_symbol(&vd.name, symbol)
+                } else {
+                    false
+                }
+            }),
+            _ => self.identifier_is_symbol(init, symbol),
+        }
     }
 
     /// Recursive helper: walk the flow graph backwards looking for an
