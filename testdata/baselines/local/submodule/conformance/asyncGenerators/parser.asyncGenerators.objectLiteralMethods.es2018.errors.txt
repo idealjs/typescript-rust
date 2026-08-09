@@ -1,995 +1,176 @@
-asyncGeneratorGetAccessorIsError.ts(2,5): error TS2304: Cannot find name 'async'.
-asyncGeneratorGetAccessorIsError.ts(2,11): error TS1005: ',' expected.
-asyncGeneratorGetAccessorIsError.ts(2,13): error TS1005: ',' expected.
-asyncGeneratorGetAccessorIsError.ts(2,13): error TS2304: Cannot find name 'get'.
-asyncGeneratorGetAccessorIsError.ts(2,17): error TS1005: ',' expected.
-asyncGeneratorGetAccessorIsError.ts(2,17): error TS2304: Cannot find name 'x'.
+asyncGeneratorGetAccessorIsError.ts(2,17): error TS1005: '(' expected.
 asyncGeneratorGetAccessorIsError.ts(2,18): error TS1005: ',' expected.
-asyncGeneratorGetAccessorIsError.ts(2,19): error TS1005: ',' expected.
-asyncGeneratorGetAccessorIsError.ts(2,21): error TS1005: ',' expected.
-asyncGeneratorGetAccessorIsError.ts(3,9): error TS1005: ',' expected.
-asyncGeneratorGetAccessorIsError.ts(3,9): error TS2304: Cannot find name 'return'.
-asyncGeneratorGetAccessorIsError.ts(3,16): error TS1005: ',' expected.
-asyncGeneratorGetAccessorIsError.ts(3,17): error TS1005: ',' expected.
-asyncGeneratorGetAccessorIsError.ts(5,1): error TS1128: Declaration or statement expected.
-asyncGeneratorPropertyIsError.ts(2,5): error TS2304: Cannot find name 'async'.
-asyncGeneratorPropertyIsError.ts(2,11): error TS1005: ',' expected.
-asyncGeneratorPropertyIsError.ts(2,13): error TS1005: ',' expected.
+asyncGeneratorPropertyIsError.ts(2,14): error TS1005: '(' expected.
+asyncGeneratorPropertyIsError.ts(2,16): error TS1003: Identifier expected.
 asyncGeneratorPropertyIsError.ts(2,17): error TS1005: ',' expected.
-asyncGeneratorSetAccessorIsError.ts(2,5): error TS2304: Cannot find name 'async'.
-asyncGeneratorSetAccessorIsError.ts(2,11): error TS1005: ',' expected.
-asyncGeneratorSetAccessorIsError.ts(2,13): error TS1005: ',' expected.
-asyncGeneratorSetAccessorIsError.ts(2,13): error TS2304: Cannot find name 'set'.
-asyncGeneratorSetAccessorIsError.ts(2,17): error TS1005: ',' expected.
-asyncGeneratorSetAccessorIsError.ts(2,17): error TS2304: Cannot find name 'x'.
+asyncGeneratorPropertyIsError.ts(3,1): error TS1138: Parameter declaration expected.
+asyncGeneratorPropertyIsError.ts(3,2): error TS1005: ',' expected.
+asyncGeneratorPropertyIsError.ts(3,3): error TS1005: '}' expected.
+asyncGeneratorSetAccessorIsError.ts(2,17): error TS1005: '(' expected.
 asyncGeneratorSetAccessorIsError.ts(2,18): error TS1005: ',' expected.
-asyncGeneratorSetAccessorIsError.ts(2,19): error TS1005: ',' expected.
-asyncGeneratorSetAccessorIsError.ts(2,26): error TS2304: Cannot find name 'number'.
-asyncGeneratorSetAccessorIsError.ts(2,32): error TS1005: ',' expected.
-asyncGeneratorSetAccessorIsError.ts(2,34): error TS1005: ',' expected.
-asyncGeneratorSetAccessorIsError.ts(4,1): error TS1128: Declaration or statement expected.
-awaitAsTypeIsOk.ts(3,5): error TS2304: Cannot find name 'async'.
-awaitAsTypeIsOk.ts(3,11): error TS1005: ',' expected.
-awaitAsTypeIsOk.ts(3,13): error TS1005: ',' expected.
-awaitAsTypeIsOk.ts(3,13): error TS2304: Cannot find name 'f'.
-awaitAsTypeIsOk.ts(3,14): error TS1005: ',' expected.
-awaitAsTypeIsOk.ts(3,15): error TS1005: ',' expected.
-awaitAsTypeIsOk.ts(3,17): error TS1005: ',' expected.
-awaitAsTypeIsOk.ts(4,9): error TS1005: ',' expected.
-awaitAsTypeIsOk.ts(4,9): error TS2304: Cannot find name 'let'.
-awaitAsTypeIsOk.ts(4,13): error TS1005: ',' expected.
-awaitAsTypeIsOk.ts(4,21): error TS1005: ',' expected.
-awaitAsTypeIsOk.ts(6,1): error TS1128: Declaration or statement expected.
-awaitInParameterInitializerIsError.ts(2,5): error TS2304: Cannot find name 'async'.
-awaitInParameterInitializerIsError.ts(2,11): error TS1005: ',' expected.
-awaitInParameterInitializerIsError.ts(2,13): error TS1005: ',' expected.
-awaitInParameterInitializerIsError.ts(2,13): error TS2304: Cannot find name 'f'.
-awaitInParameterInitializerIsError.ts(2,14): error TS1005: ',' expected.
-awaitInParameterInitializerIsError.ts(2,15): error TS1005: ',' expected.
-awaitInParameterInitializerIsError.ts(2,15): error TS2304: Cannot find name 'a'.
-awaitInParameterInitializerIsError.ts(2,17): error TS1005: ',' expected.
-awaitInParameterInitializerIsError.ts(2,19): error TS1005: ',' expected.
-awaitInParameterInitializerIsError.ts(2,25): error TS1005: ',' expected.
-awaitInParameterInitializerIsError.ts(2,26): error TS1005: ',' expected.
-awaitInParameterInitializerIsError.ts(2,28): error TS1005: ',' expected.
-awaitInParameterInitializerIsError.ts(4,1): error TS1128: Declaration or statement expected.
-awaitMethodNameIsOk.ts(2,5): error TS2304: Cannot find name 'async'.
-awaitMethodNameIsOk.ts(2,11): error TS1005: ',' expected.
-awaitMethodNameIsOk.ts(2,13): error TS1005: ',' expected.
-awaitMethodNameIsOk.ts(2,18): error TS1005: ',' expected.
-awaitMethodNameIsOk.ts(2,19): error TS1005: ',' expected.
-awaitMethodNameIsOk.ts(2,21): error TS1005: ',' expected.
-awaitMethodNameIsOk.ts(4,1): error TS1128: Declaration or statement expected.
-awaitMissingValueIsError.ts(2,5): error TS2304: Cannot find name 'async'.
-awaitMissingValueIsError.ts(2,11): error TS1005: ',' expected.
-awaitMissingValueIsError.ts(2,13): error TS1005: ',' expected.
-awaitMissingValueIsError.ts(2,13): error TS2304: Cannot find name 'f'.
-awaitMissingValueIsError.ts(2,14): error TS1005: ',' expected.
-awaitMissingValueIsError.ts(2,15): error TS1005: ',' expected.
-awaitMissingValueIsError.ts(2,17): error TS1005: ',' expected.
-awaitMissingValueIsError.ts(3,9): error TS1005: ',' expected.
-awaitMissingValueIsError.ts(3,14): error TS1005: ',' expected.
-awaitMissingValueIsError.ts(5,1): error TS1128: Declaration or statement expected.
-awaitParameterIsError.ts(2,5): error TS2304: Cannot find name 'async'.
-awaitParameterIsError.ts(2,11): error TS1005: ',' expected.
-awaitParameterIsError.ts(2,13): error TS1005: ',' expected.
-awaitParameterIsError.ts(2,13): error TS2304: Cannot find name 'f'.
-awaitParameterIsError.ts(2,14): error TS1005: ',' expected.
-awaitParameterIsError.ts(2,15): error TS1005: ',' expected.
-awaitParameterIsError.ts(2,20): error TS1005: ',' expected.
-awaitParameterIsError.ts(2,22): error TS1005: ',' expected.
-awaitParameterIsError.ts(4,1): error TS1128: Declaration or statement expected.
-awaitWithValueIsOk.ts(2,5): error TS2304: Cannot find name 'async'.
-awaitWithValueIsOk.ts(2,11): error TS1005: ',' expected.
-awaitWithValueIsOk.ts(2,13): error TS1005: ',' expected.
-awaitWithValueIsOk.ts(2,13): error TS2304: Cannot find name 'f'.
-awaitWithValueIsOk.ts(2,14): error TS1005: ',' expected.
-awaitWithValueIsOk.ts(2,15): error TS1005: ',' expected.
-awaitWithValueIsOk.ts(2,17): error TS1005: ',' expected.
-awaitWithValueIsOk.ts(3,9): error TS1005: ',' expected.
-awaitWithValueIsOk.ts(3,15): error TS1005: ',' expected.
-awaitWithValueIsOk.ts(3,16): error TS1005: ',' expected.
-awaitWithValueIsOk.ts(5,1): error TS1128: Declaration or statement expected.
-methodIsOk.ts(2,5): error TS2304: Cannot find name 'async'.
-methodIsOk.ts(2,11): error TS1005: ',' expected.
-methodIsOk.ts(2,13): error TS1005: ',' expected.
-methodIsOk.ts(2,13): error TS2304: Cannot find name 'f'.
-methodIsOk.ts(2,14): error TS1005: ',' expected.
-methodIsOk.ts(2,15): error TS1005: ',' expected.
-methodIsOk.ts(2,17): error TS1005: ',' expected.
-methodIsOk.ts(4,1): error TS1128: Declaration or statement expected.
-nestedAsyncGeneratorIsOk.ts(2,5): error TS2304: Cannot find name 'async'.
-nestedAsyncGeneratorIsOk.ts(2,11): error TS1005: ',' expected.
-nestedAsyncGeneratorIsOk.ts(2,13): error TS1005: ',' expected.
-nestedAsyncGeneratorIsOk.ts(2,13): error TS2304: Cannot find name 'f'.
-nestedAsyncGeneratorIsOk.ts(2,14): error TS1005: ',' expected.
-nestedAsyncGeneratorIsOk.ts(2,15): error TS1005: ',' expected.
-nestedAsyncGeneratorIsOk.ts(2,17): error TS1005: ',' expected.
-nestedAsyncGeneratorIsOk.ts(3,9): error TS1005: ',' expected.
-nestedAsyncGeneratorIsOk.ts(3,9): error TS2304: Cannot find name 'async'.
-nestedAsyncGeneratorIsOk.ts(3,15): error TS1005: ',' expected.
-nestedAsyncGeneratorIsOk.ts(3,15): error TS2304: Cannot find name 'function'.
-nestedAsyncGeneratorIsOk.ts(3,24): error TS1005: ',' expected.
-nestedAsyncGeneratorIsOk.ts(3,26): error TS1005: ',' expected.
-nestedAsyncGeneratorIsOk.ts(3,26): error TS2304: Cannot find name 'g'.
-nestedAsyncGeneratorIsOk.ts(3,27): error TS1005: ',' expected.
-nestedAsyncGeneratorIsOk.ts(3,28): error TS1005: ',' expected.
-nestedAsyncGeneratorIsOk.ts(3,30): error TS1005: ',' expected.
-nestedAsyncGeneratorIsOk.ts(5,5): error TS1128: Declaration or statement expected.
-nestedFunctionDeclarationNamedAwaitIsError.ts(2,5): error TS2304: Cannot find name 'async'.
-nestedFunctionDeclarationNamedAwaitIsError.ts(2,11): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedAwaitIsError.ts(2,13): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedAwaitIsError.ts(2,13): error TS2304: Cannot find name 'f'.
-nestedFunctionDeclarationNamedAwaitIsError.ts(2,14): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedAwaitIsError.ts(2,15): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedAwaitIsError.ts(2,17): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedAwaitIsError.ts(3,9): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedAwaitIsError.ts(3,9): error TS2304: Cannot find name 'function'.
-nestedFunctionDeclarationNamedAwaitIsError.ts(3,18): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedAwaitIsError.ts(3,23): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedAwaitIsError.ts(3,24): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedAwaitIsError.ts(3,26): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedAwaitIsError.ts(5,5): error TS1128: Declaration or statement expected.
-nestedFunctionDeclarationNamedYieldIsError.ts(2,5): error TS2304: Cannot find name 'async'.
-nestedFunctionDeclarationNamedYieldIsError.ts(2,11): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedYieldIsError.ts(2,13): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedYieldIsError.ts(2,13): error TS2304: Cannot find name 'f'.
-nestedFunctionDeclarationNamedYieldIsError.ts(2,14): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedYieldIsError.ts(2,15): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedYieldIsError.ts(2,17): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedYieldIsError.ts(3,9): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedYieldIsError.ts(3,9): error TS2304: Cannot find name 'function'.
-nestedFunctionDeclarationNamedYieldIsError.ts(3,18): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedYieldIsError.ts(3,23): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedYieldIsError.ts(3,24): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedYieldIsError.ts(3,26): error TS1005: ',' expected.
-nestedFunctionDeclarationNamedYieldIsError.ts(5,5): error TS1128: Declaration or statement expected.
-nestedFunctionExpressionNamedAwaitIsError.ts(2,5): error TS2304: Cannot find name 'async'.
-nestedFunctionExpressionNamedAwaitIsError.ts(2,11): error TS1005: ',' expected.
-nestedFunctionExpressionNamedAwaitIsError.ts(2,13): error TS1005: ',' expected.
-nestedFunctionExpressionNamedAwaitIsError.ts(2,13): error TS2304: Cannot find name 'f'.
-nestedFunctionExpressionNamedAwaitIsError.ts(2,14): error TS1005: ',' expected.
-nestedFunctionExpressionNamedAwaitIsError.ts(2,15): error TS1005: ',' expected.
-nestedFunctionExpressionNamedAwaitIsError.ts(2,17): error TS1005: ',' expected.
-nestedFunctionExpressionNamedAwaitIsError.ts(3,9): error TS1005: ',' expected.
-nestedFunctionExpressionNamedAwaitIsError.ts(3,9): error TS2304: Cannot find name 'const'.
-nestedFunctionExpressionNamedAwaitIsError.ts(3,15): error TS1005: ',' expected.
-nestedFunctionExpressionNamedAwaitIsError.ts(3,15): error TS2304: Cannot find name 'x'.
-nestedFunctionExpressionNamedAwaitIsError.ts(3,17): error TS1005: ',' expected.
-nestedFunctionExpressionNamedAwaitIsError.ts(3,19): error TS1005: ',' expected.
-nestedFunctionExpressionNamedAwaitIsError.ts(3,19): error TS2304: Cannot find name 'function'.
-nestedFunctionExpressionNamedAwaitIsError.ts(3,28): error TS1005: ',' expected.
-nestedFunctionExpressionNamedAwaitIsError.ts(3,33): error TS1005: ',' expected.
-nestedFunctionExpressionNamedAwaitIsError.ts(3,34): error TS1005: ',' expected.
-nestedFunctionExpressionNamedAwaitIsError.ts(3,36): error TS1005: ',' expected.
-nestedFunctionExpressionNamedAwaitIsError.ts(5,5): error TS1128: Declaration or statement expected.
-nestedFunctionExpressionNamedYieldIsError.ts(2,5): error TS2304: Cannot find name 'async'.
-nestedFunctionExpressionNamedYieldIsError.ts(2,11): error TS1005: ',' expected.
-nestedFunctionExpressionNamedYieldIsError.ts(2,13): error TS1005: ',' expected.
-nestedFunctionExpressionNamedYieldIsError.ts(2,13): error TS2304: Cannot find name 'f'.
-nestedFunctionExpressionNamedYieldIsError.ts(2,14): error TS1005: ',' expected.
-nestedFunctionExpressionNamedYieldIsError.ts(2,15): error TS1005: ',' expected.
-nestedFunctionExpressionNamedYieldIsError.ts(2,17): error TS1005: ',' expected.
-nestedFunctionExpressionNamedYieldIsError.ts(3,9): error TS1005: ',' expected.
-nestedFunctionExpressionNamedYieldIsError.ts(3,9): error TS2304: Cannot find name 'const'.
-nestedFunctionExpressionNamedYieldIsError.ts(3,15): error TS1005: ',' expected.
-nestedFunctionExpressionNamedYieldIsError.ts(3,15): error TS2304: Cannot find name 'x'.
-nestedFunctionExpressionNamedYieldIsError.ts(3,17): error TS1005: ',' expected.
-nestedFunctionExpressionNamedYieldIsError.ts(3,19): error TS1005: ',' expected.
-nestedFunctionExpressionNamedYieldIsError.ts(3,19): error TS2304: Cannot find name 'function'.
-nestedFunctionExpressionNamedYieldIsError.ts(3,28): error TS1005: ',' expected.
-nestedFunctionExpressionNamedYieldIsError.ts(3,33): error TS1005: ',' expected.
-nestedFunctionExpressionNamedYieldIsError.ts(3,34): error TS1005: ',' expected.
-nestedFunctionExpressionNamedYieldIsError.ts(3,36): error TS1005: ',' expected.
-nestedFunctionExpressionNamedYieldIsError.ts(5,5): error TS1128: Declaration or statement expected.
-yieldAsTypeIsOk.ts(3,5): error TS2304: Cannot find name 'async'.
-yieldAsTypeIsOk.ts(3,11): error TS1005: ',' expected.
-yieldAsTypeIsOk.ts(3,13): error TS1005: ',' expected.
-yieldAsTypeIsOk.ts(3,13): error TS2304: Cannot find name 'f'.
-yieldAsTypeIsOk.ts(3,14): error TS1005: ',' expected.
-yieldAsTypeIsOk.ts(3,15): error TS1005: ',' expected.
-yieldAsTypeIsOk.ts(3,17): error TS1005: ',' expected.
-yieldAsTypeIsOk.ts(4,9): error TS1005: ',' expected.
-yieldAsTypeIsOk.ts(4,9): error TS2304: Cannot find name 'let'.
-yieldAsTypeIsOk.ts(4,13): error TS1005: ',' expected.
-yieldAsTypeIsOk.ts(4,21): error TS1005: ',' expected.
-yieldAsTypeIsOk.ts(6,1): error TS1128: Declaration or statement expected.
-yieldInNestedComputedPropertyIsOk.ts(2,5): error TS2304: Cannot find name 'async'.
-yieldInNestedComputedPropertyIsOk.ts(2,11): error TS1005: ',' expected.
-yieldInNestedComputedPropertyIsOk.ts(2,13): error TS1005: ',' expected.
-yieldInNestedComputedPropertyIsOk.ts(2,13): error TS2304: Cannot find name 'f'.
-yieldInNestedComputedPropertyIsOk.ts(2,14): error TS1005: ',' expected.
-yieldInNestedComputedPropertyIsOk.ts(2,15): error TS1005: ',' expected.
-yieldInNestedComputedPropertyIsOk.ts(2,17): error TS1005: ',' expected.
-yieldInNestedComputedPropertyIsOk.ts(3,9): error TS1005: ',' expected.
-yieldInNestedComputedPropertyIsOk.ts(3,9): error TS2304: Cannot find name 'const'.
-yieldInNestedComputedPropertyIsOk.ts(3,15): error TS1005: ',' expected.
-yieldInNestedComputedPropertyIsOk.ts(3,15): error TS2304: Cannot find name 'x'.
-yieldInNestedComputedPropertyIsOk.ts(3,17): error TS1005: ',' expected.
-yieldInNestedComputedPropertyIsOk.ts(3,19): error TS1005: ',' expected.
-yieldInNestedComputedPropertyIsOk.ts(3,21): error TS1005: ',' expected.
-yieldInNestedComputedPropertyIsOk.ts(4,5): error TS1128: Declaration or statement expected.
-yieldInParameterInitializerIsError.ts(2,5): error TS2304: Cannot find name 'async'.
-yieldInParameterInitializerIsError.ts(2,11): error TS1005: ',' expected.
-yieldInParameterInitializerIsError.ts(2,13): error TS1005: ',' expected.
-yieldInParameterInitializerIsError.ts(2,13): error TS2304: Cannot find name 'f'.
-yieldInParameterInitializerIsError.ts(2,14): error TS1005: ',' expected.
-yieldInParameterInitializerIsError.ts(2,15): error TS1005: ',' expected.
-yieldInParameterInitializerIsError.ts(2,15): error TS2304: Cannot find name 'a'.
-yieldInParameterInitializerIsError.ts(2,17): error TS1005: ',' expected.
-yieldInParameterInitializerIsError.ts(2,19): error TS1005: ',' expected.
-yieldInParameterInitializerIsError.ts(2,24): error TS1005: ',' expected.
-yieldInParameterInitializerIsError.ts(2,26): error TS1005: ',' expected.
-yieldInParameterInitializerIsError.ts(4,1): error TS1128: Declaration or statement expected.
-yieldIsOk.ts(2,5): error TS2304: Cannot find name 'async'.
-yieldIsOk.ts(2,11): error TS1005: ',' expected.
-yieldIsOk.ts(2,13): error TS1005: ',' expected.
-yieldIsOk.ts(2,13): error TS2304: Cannot find name 'f'.
-yieldIsOk.ts(2,14): error TS1005: ',' expected.
-yieldIsOk.ts(2,15): error TS1005: ',' expected.
-yieldIsOk.ts(2,17): error TS1005: ',' expected.
-yieldIsOk.ts(3,9): error TS1005: ',' expected.
-yieldIsOk.ts(3,14): error TS1005: ',' expected.
-yieldIsOk.ts(5,1): error TS1128: Declaration or statement expected.
-yieldMethodNameIsOk.ts(2,5): error TS2304: Cannot find name 'async'.
-yieldMethodNameIsOk.ts(2,11): error TS1005: ',' expected.
-yieldMethodNameIsOk.ts(2,13): error TS1005: ',' expected.
-yieldMethodNameIsOk.ts(2,18): error TS1005: ',' expected.
-yieldMethodNameIsOk.ts(2,19): error TS1005: ',' expected.
-yieldMethodNameIsOk.ts(2,21): error TS1005: ',' expected.
-yieldMethodNameIsOk.ts(4,1): error TS1128: Declaration or statement expected.
-yieldParameterIsError.ts(2,5): error TS2304: Cannot find name 'async'.
-yieldParameterIsError.ts(2,11): error TS1005: ',' expected.
-yieldParameterIsError.ts(2,13): error TS1005: ',' expected.
-yieldParameterIsError.ts(2,13): error TS2304: Cannot find name 'f'.
-yieldParameterIsError.ts(2,14): error TS1005: ',' expected.
-yieldParameterIsError.ts(2,15): error TS1005: ',' expected.
-yieldParameterIsError.ts(2,20): error TS1005: ',' expected.
-yieldParameterIsError.ts(2,22): error TS1005: ',' expected.
-yieldParameterIsError.ts(4,1): error TS1128: Declaration or statement expected.
-yieldStarMissingValueIsError.ts(2,5): error TS2304: Cannot find name 'async'.
-yieldStarMissingValueIsError.ts(2,11): error TS1005: ',' expected.
-yieldStarMissingValueIsError.ts(2,13): error TS1005: ',' expected.
-yieldStarMissingValueIsError.ts(2,13): error TS2304: Cannot find name 'f'.
-yieldStarMissingValueIsError.ts(2,14): error TS1005: ',' expected.
-yieldStarMissingValueIsError.ts(2,15): error TS1005: ',' expected.
-yieldStarMissingValueIsError.ts(2,17): error TS1005: ',' expected.
-yieldStarMissingValueIsError.ts(3,9): error TS1005: ',' expected.
-yieldStarMissingValueIsError.ts(3,15): error TS1005: ',' expected.
-yieldStarMissingValueIsError.ts(3,16): error TS1005: ',' expected.
-yieldStarMissingValueIsError.ts(5,1): error TS1128: Declaration or statement expected.
-yieldStarWithValueIsOk.ts(2,5): error TS2304: Cannot find name 'async'.
-yieldStarWithValueIsOk.ts(2,11): error TS1005: ',' expected.
-yieldStarWithValueIsOk.ts(2,13): error TS1005: ',' expected.
-yieldStarWithValueIsOk.ts(2,13): error TS2304: Cannot find name 'f'.
-yieldStarWithValueIsOk.ts(2,14): error TS1005: ',' expected.
-yieldStarWithValueIsOk.ts(2,15): error TS1005: ',' expected.
-yieldStarWithValueIsOk.ts(2,17): error TS1005: ',' expected.
-yieldStarWithValueIsOk.ts(3,9): error TS1005: ',' expected.
-yieldStarWithValueIsOk.ts(3,15): error TS1005: ',' expected.
-yieldStarWithValueIsOk.ts(3,17): error TS1005: ',' expected.
-yieldStarWithValueIsOk.ts(3,18): error TS1012: Unexpected token.
-yieldStarWithValueIsOk.ts(3,19): error TS1005: ']' expected.
-yieldStarWithValueIsOk.ts(5,1): error TS1128: Declaration or statement expected.
-yieldWithValueIsOk.ts(2,5): error TS2304: Cannot find name 'async'.
-yieldWithValueIsOk.ts(2,11): error TS1005: ',' expected.
-yieldWithValueIsOk.ts(2,13): error TS1005: ',' expected.
-yieldWithValueIsOk.ts(2,13): error TS2304: Cannot find name 'f'.
-yieldWithValueIsOk.ts(2,14): error TS1005: ',' expected.
-yieldWithValueIsOk.ts(2,15): error TS1005: ',' expected.
-yieldWithValueIsOk.ts(2,17): error TS1005: ',' expected.
-yieldWithValueIsOk.ts(3,9): error TS1005: ',' expected.
-yieldWithValueIsOk.ts(3,15): error TS1005: ',' expected.
-yieldWithValueIsOk.ts(3,16): error TS1005: ',' expected.
-yieldWithValueIsOk.ts(5,1): error TS1128: Declaration or statement expected.
+yieldStarMissingValueIsError.ts(3,16): error TS1012: Unexpected token.
 
 
-==== methodIsOk.ts (8 errors) ====
+==== methodIsOk.ts (0 errors) ====
     const o1 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== awaitMethodNameIsOk.ts (7 errors) ====
+==== awaitMethodNameIsOk.ts (0 errors) ====
     const o2 = {
         async * await() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~~~~~
-!!! error TS1005: ',' expected.
-                     ~
-!!! error TS1005: ',' expected.
-                      ~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== yieldMethodNameIsOk.ts (7 errors) ====
+==== yieldMethodNameIsOk.ts (0 errors) ====
     const o3 = {
         async * yield() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~~~~~
-!!! error TS1005: ',' expected.
-                     ~
-!!! error TS1005: ',' expected.
-                      ~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== awaitParameterIsError.ts (9 errors) ====
+==== awaitParameterIsError.ts (0 errors) ====
     const o4 = {
         async * f(await) {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~~~~~
-!!! error TS1005: ',' expected.
-                       ~
-!!! error TS1005: ',' expected.
-                         ~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== yieldParameterIsError.ts (9 errors) ====
+==== yieldParameterIsError.ts (0 errors) ====
     const o5 = {
         async * f(yield) {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~~~~~
-!!! error TS1005: ',' expected.
-                       ~
-!!! error TS1005: ',' expected.
-                         ~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== awaitInParameterInitializerIsError.ts (13 errors) ====
+==== awaitInParameterInitializerIsError.ts (0 errors) ====
     const o6 = {
         async * f(a = await 1) {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name 'a'.
-                    ~
-!!! error TS1005: ',' expected.
-                      ~~~~~
-!!! error TS1005: ',' expected.
-                            ~
-!!! error TS1005: ',' expected.
-                             ~
-!!! error TS1005: ',' expected.
-                               ~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== yieldInParameterInitializerIsError.ts (12 errors) ====
+==== yieldInParameterInitializerIsError.ts (0 errors) ====
     const o7 = {
         async * f(a = yield) {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name 'a'.
-                    ~
-!!! error TS1005: ',' expected.
-                      ~~~~~
-!!! error TS1005: ',' expected.
-                           ~
-!!! error TS1005: ',' expected.
-                             ~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== nestedAsyncGeneratorIsOk.ts (18 errors) ====
+==== nestedAsyncGeneratorIsOk.ts (0 errors) ====
     const o8 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             async function * g() {
-            ~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-                  ~~~~~~~~
-!!! error TS1005: ',' expected.
-                  ~~~~~~~~
-!!! error TS2304: Cannot find name 'function'.
-                           ~
-!!! error TS1005: ',' expected.
-                             ~
-!!! error TS1005: ',' expected.
-                             ~
-!!! error TS2304: Cannot find name 'g'.
-                              ~
-!!! error TS1005: ',' expected.
-                               ~
-!!! error TS1005: ',' expected.
-                                 ~
-!!! error TS1005: ',' expected.
             }
         }
-        ~
-!!! error TS1128: Declaration or statement expected.
     };
-==== nestedFunctionDeclarationNamedYieldIsError.ts (14 errors) ====
+==== nestedFunctionDeclarationNamedYieldIsError.ts (0 errors) ====
     const o9 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             function yield() {
-            ~~~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~~~
-!!! error TS2304: Cannot find name 'function'.
-                     ~~~~~
-!!! error TS1005: ',' expected.
-                          ~
-!!! error TS1005: ',' expected.
-                           ~
-!!! error TS1005: ',' expected.
-                             ~
-!!! error TS1005: ',' expected.
             }
         }
-        ~
-!!! error TS1128: Declaration or statement expected.
     };
-==== nestedFunctionExpressionNamedYieldIsError.ts (19 errors) ====
+==== nestedFunctionExpressionNamedYieldIsError.ts (0 errors) ====
     const o10 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             const x = function yield() {
-            ~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~
-!!! error TS2304: Cannot find name 'const'.
-                  ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name 'x'.
-                    ~
-!!! error TS1005: ',' expected.
-                      ~~~~~~~~
-!!! error TS1005: ',' expected.
-                      ~~~~~~~~
-!!! error TS2304: Cannot find name 'function'.
-                               ~~~~~
-!!! error TS1005: ',' expected.
-                                    ~
-!!! error TS1005: ',' expected.
-                                     ~
-!!! error TS1005: ',' expected.
-                                       ~
-!!! error TS1005: ',' expected.
             };
         }
-        ~
-!!! error TS1128: Declaration or statement expected.
     };
-==== nestedFunctionDeclarationNamedAwaitIsError.ts (14 errors) ====
+==== nestedFunctionDeclarationNamedAwaitIsError.ts (0 errors) ====
     const o11 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             function await() {
-            ~~~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~~~
-!!! error TS2304: Cannot find name 'function'.
-                     ~~~~~
-!!! error TS1005: ',' expected.
-                          ~
-!!! error TS1005: ',' expected.
-                           ~
-!!! error TS1005: ',' expected.
-                             ~
-!!! error TS1005: ',' expected.
             }
         }
-        ~
-!!! error TS1128: Declaration or statement expected.
     };
-==== nestedFunctionExpressionNamedAwaitIsError.ts (19 errors) ====
+==== nestedFunctionExpressionNamedAwaitIsError.ts (0 errors) ====
     const o12 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             const x = function await() {
-            ~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~
-!!! error TS2304: Cannot find name 'const'.
-                  ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name 'x'.
-                    ~
-!!! error TS1005: ',' expected.
-                      ~~~~~~~~
-!!! error TS1005: ',' expected.
-                      ~~~~~~~~
-!!! error TS2304: Cannot find name 'function'.
-                               ~~~~~
-!!! error TS1005: ',' expected.
-                                    ~
-!!! error TS1005: ',' expected.
-                                     ~
-!!! error TS1005: ',' expected.
-                                       ~
-!!! error TS1005: ',' expected.
             };
         }
-        ~
-!!! error TS1128: Declaration or statement expected.
     };
-==== yieldIsOk.ts (10 errors) ====
+==== yieldIsOk.ts (0 errors) ====
     const o13 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             yield;
-            ~~~~~
-!!! error TS1005: ',' expected.
-                 ~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== yieldWithValueIsOk.ts (11 errors) ====
+==== yieldWithValueIsOk.ts (0 errors) ====
     const o14 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             yield 1;
-            ~~~~~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                   ~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== yieldStarMissingValueIsError.ts (11 errors) ====
+==== yieldStarMissingValueIsError.ts (1 errors) ====
     const o15 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             yield *;
-            ~~~~~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
                    ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== yieldStarWithValueIsOk.ts (13 errors) ====
+==== yieldStarWithValueIsOk.ts (0 errors) ====
     const o16 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             yield * [];
-            ~~~~~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
-                     ~
-!!! error TS1012: Unexpected token.
-                      ~
-!!! error TS1005: ']' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== awaitWithValueIsOk.ts (11 errors) ====
+==== awaitWithValueIsOk.ts (0 errors) ====
     const o17 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             await 1;
-            ~~~~~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                   ~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== awaitMissingValueIsError.ts (10 errors) ====
+==== awaitMissingValueIsError.ts (0 errors) ====
     const o18 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             await;
-            ~~~~~
-!!! error TS1005: ',' expected.
-                 ~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== awaitAsTypeIsOk.ts (12 errors) ====
+==== awaitAsTypeIsOk.ts (0 errors) ====
     interface await {}
     const o19 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             let x: await;
-            ~~~
-!!! error TS1005: ',' expected.
-            ~~~
-!!! error TS2304: Cannot find name 'let'.
-                ~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== yieldAsTypeIsOk.ts (12 errors) ====
+==== yieldAsTypeIsOk.ts (0 errors) ====
     interface yield {}
     const o20 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             let x: yield;
-            ~~~
-!!! error TS1005: ',' expected.
-            ~~~
-!!! error TS2304: Cannot find name 'let'.
-                ~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== yieldInNestedComputedPropertyIsOk.ts (15 errors) ====
+==== yieldInNestedComputedPropertyIsOk.ts (0 errors) ====
     const o21 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             const x = { [yield]: 1 };
-            ~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~
-!!! error TS2304: Cannot find name 'const'.
-                  ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name 'x'.
-                    ~
-!!! error TS1005: ',' expected.
-                      ~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS1005: ',' expected.
         }
-        ~
-!!! error TS1128: Declaration or statement expected.
     };
-==== asyncGeneratorGetAccessorIsError.ts (14 errors) ====
+==== asyncGeneratorGetAccessorIsError.ts (2 errors) ====
     const o22 = {
         async * get x() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~~~
-!!! error TS1005: ',' expected.
-                ~~~
-!!! error TS2304: Cannot find name 'get'.
                     ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name 'x'.
+!!! error TS1005: '(' expected.
                      ~
-!!! error TS1005: ',' expected.
-                      ~
-!!! error TS1005: ',' expected.
-                        ~
 !!! error TS1005: ',' expected.
             return 1;
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                   ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== asyncGeneratorSetAccessorIsError.ts (12 errors) ====
+==== asyncGeneratorSetAccessorIsError.ts (2 errors) ====
     const o23 = {
         async * set x(value: number) {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~~~
-!!! error TS1005: ',' expected.
-                ~~~
-!!! error TS2304: Cannot find name 'set'.
                     ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS2304: Cannot find name 'x'.
+!!! error TS1005: '(' expected.
                      ~
-!!! error TS1005: ',' expected.
-                      ~~~~~
-!!! error TS1005: ',' expected.
-                             ~~~~~~
-!!! error TS2304: Cannot find name 'number'.
-                                   ~
-!!! error TS1005: ',' expected.
-                                     ~
 !!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== asyncGeneratorPropertyIsError.ts (4 errors) ====
+==== asyncGeneratorPropertyIsError.ts (6 errors) ====
     const o24 = {
         async * x: 1;
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
+                 ~
+!!! error TS1005: '(' expected.
+                   ~
+!!! error TS1003: Identifier expected.
                     ~
 !!! error TS1005: ',' expected.
     };
+    ~
+!!! error TS1138: Parameter declaration expected.
+     ~
+!!! error TS1005: ',' expected.
+      
+!!! error TS1005: '}' expected.

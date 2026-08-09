@@ -1,27 +1,11 @@
-usingDeclarations.3.ts(2,34): error TS1005: ',' expected.
-usingDeclarations.3.ts(2,35): error TS1005: ',' expected.
-usingDeclarations.3.ts(2,37): error TS1005: ',' expected.
-usingDeclarations.3.ts(2,41): error TS1128: Declaration or statement expected.
 usingDeclarations.3.ts(3,11): error TS2304: Cannot find name 'd2'.
 usingDeclarations.3.ts(4,11): error TS2304: Cannot find name 'd3'.
 usingDeclarations.3.ts(5,11): error TS2304: Cannot find name 'd4'.
-usingDeclarations.3.ts(5,34): error TS1005: ',' expected.
-usingDeclarations.3.ts(5,35): error TS1005: ',' expected.
-usingDeclarations.3.ts(5,37): error TS1005: ',' expected.
-usingDeclarations.3.ts(5,40): error TS1128: Declaration or statement expected.
 
 
-==== usingDeclarations.3.ts (11 errors) ====
+==== usingDeclarations.3.ts (3 errors) ====
     {
         using d1 = { [Symbol.dispose]() {} },
-                                     ~
-!!! error TS1005: ',' expected.
-                                      ~
-!!! error TS1005: ',' expected.
-                                        ~
-!!! error TS1005: ',' expected.
-                                            ~
-!!! error TS1128: Declaration or statement expected.
               d2 = null,
               ~~
 !!! error TS2304: Cannot find name 'd2'.
@@ -31,12 +15,4 @@ usingDeclarations.3.ts(5,40): error TS1128: Declaration or statement expected.
               d4 = { [Symbol.dispose]() {} };
               ~~
 !!! error TS2304: Cannot find name 'd4'.
-                                     ~
-!!! error TS1005: ',' expected.
-                                      ~
-!!! error TS1005: ',' expected.
-                                        ~
-!!! error TS1005: ',' expected.
-                                           ~
-!!! error TS1128: Declaration or statement expected.
     }

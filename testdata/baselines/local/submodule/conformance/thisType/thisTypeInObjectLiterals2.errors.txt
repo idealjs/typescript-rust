@@ -1,170 +1,392 @@
-thisTypeInObjectLiterals2.ts(6,5): error TS2304: Cannot find name 'f'.
-thisTypeInObjectLiterals2.ts(6,6): error TS1005: ',' expected.
-thisTypeInObjectLiterals2.ts(6,7): error TS1005: ',' expected.
-thisTypeInObjectLiterals2.ts(6,9): error TS1005: ',' expected.
-thisTypeInObjectLiterals2.ts(7,9): error TS1005: ',' expected.
-thisTypeInObjectLiterals2.ts(7,9): error TS2304: Cannot find name 'return'.
-thisTypeInObjectLiterals2.ts(7,16): error TS1005: ',' expected.
-thisTypeInObjectLiterals2.ts(7,16): error TS2304: Cannot find name 'this'.
-thisTypeInObjectLiterals2.ts(7,20): error TS1005: ',' expected.
-thisTypeInObjectLiterals2.ts(7,21): error TS1005: ',' expected.
-thisTypeInObjectLiterals2.ts(7,21): error TS2304: Cannot find name 'a'.
-thisTypeInObjectLiterals2.ts(7,22): error TS1005: ',' expected.
-thisTypeInObjectLiterals2.ts(9,5): error TS2304: Cannot find name 'b'.
-thisTypeInObjectLiterals2.ts(9,6): error TS1005: ',' expected.
-thisTypeInObjectLiterals2.ts(9,8): error TS1134: Variable declaration expected.
-thisTypeInObjectLiterals2.ts(9,15): error TS1134: Variable declaration expected.
-thisTypeInObjectLiterals2.ts(11,13): error TS1003: Identifier expected.
-thisTypeInObjectLiterals2.ts(12,17): error TS1003: Identifier expected.
-thisTypeInObjectLiterals2.ts(14,5): error TS1128: Declaration or statement expected.
+thisTypeInObjectLiterals2.ts(15,10): error TS1005: '{' expected.
+thisTypeInObjectLiterals2.ts(15,11): error TS1012: Unexpected token.
+thisTypeInObjectLiterals2.ts(15,13): error TS1005: ')' expected.
+thisTypeInObjectLiterals2.ts(17,6): error TS1128: Declaration or statement expected.
+thisTypeInObjectLiterals2.ts(18,5): error TS2304: Cannot find name 'get'.
+thisTypeInObjectLiterals2.ts(18,9): error TS1005: ';' expected.
+thisTypeInObjectLiterals2.ts(18,9): error TS2304: Cannot find name 'e'.
+thisTypeInObjectLiterals2.ts(18,13): error TS1005: ';' expected.
+thisTypeInObjectLiterals2.ts(20,6): error TS1128: Declaration or statement expected.
+thisTypeInObjectLiterals2.ts(21,5): error TS2304: Cannot find name 'set'.
+thisTypeInObjectLiterals2.ts(21,9): error TS1005: ';' expected.
+thisTypeInObjectLiterals2.ts(21,9): error TS2304: Cannot find name 'e'.
+thisTypeInObjectLiterals2.ts(21,11): error TS2304: Cannot find name 'value'.
+thisTypeInObjectLiterals2.ts(21,18): error TS1005: ';' expected.
+thisTypeInObjectLiterals2.ts(22,18): error TS2304: Cannot find name 'value'.
+thisTypeInObjectLiterals2.ts(24,2): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(29,1): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(29,1): error TS2304: Cannot find name 'type'.
+thisTypeInObjectLiterals2.ts(29,6): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(29,6): error TS2304: Cannot find name 'Point'.
+thisTypeInObjectLiterals2.ts(29,12): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(29,14): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(30,5): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(30,8): error TS2304: Cannot find name 'number'.
+thisTypeInObjectLiterals2.ts(30,14): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(31,5): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(31,8): error TS2304: Cannot find name 'number'.
+thisTypeInObjectLiterals2.ts(31,14): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(32,5): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(32,5): error TS2304: Cannot find name 'z'.
+thisTypeInObjectLiterals2.ts(32,6): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(32,9): error TS2304: Cannot find name 'number'.
+thisTypeInObjectLiterals2.ts(32,15): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(33,5): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(33,54): error TS1005: '{' expected.
+thisTypeInObjectLiterals2.ts(36,1): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(36,1): error TS2304: Cannot find name 'let'.
+thisTypeInObjectLiterals2.ts(36,5): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(36,9): error TS2304: Cannot find name 'Point'.
+thisTypeInObjectLiterals2.ts(40,19): error TS2304: Cannot find name 'dx'.
+thisTypeInObjectLiterals2.ts(41,19): error TS2304: Cannot find name 'dy'.
+thisTypeInObjectLiterals2.ts(42,23): error TS2304: Cannot find name 'dz'.
+thisTypeInObjectLiterals2.ts(43,23): error TS2304: Cannot find name 'dz'.
+thisTypeInObjectLiterals2.ts(46,2): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(48,1): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(48,1): error TS2304: Cannot find name 'let'.
+thisTypeInObjectLiterals2.ts(48,5): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(48,9): error TS2304: Cannot find name 'Point'.
+thisTypeInObjectLiterals2.ts(52,19): error TS2304: Cannot find name 'dx'.
+thisTypeInObjectLiterals2.ts(53,19): error TS2304: Cannot find name 'dy'.
+thisTypeInObjectLiterals2.ts(54,23): error TS2304: Cannot find name 'dz'.
+thisTypeInObjectLiterals2.ts(55,23): error TS2304: Cannot find name 'dz'.
+thisTypeInObjectLiterals2.ts(58,2): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(60,1): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(60,1): error TS2304: Cannot find name 'let'.
+thisTypeInObjectLiterals2.ts(60,5): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(60,9): error TS2304: Cannot find name 'Point'.
+thisTypeInObjectLiterals2.ts(64,19): error TS2304: Cannot find name 'dx'.
+thisTypeInObjectLiterals2.ts(65,19): error TS2304: Cannot find name 'dy'.
+thisTypeInObjectLiterals2.ts(66,23): error TS2304: Cannot find name 'dz'.
+thisTypeInObjectLiterals2.ts(67,23): error TS2304: Cannot find name 'dz'.
+thisTypeInObjectLiterals2.ts(70,2): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(72,1): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(72,1): error TS2304: Cannot find name 'let'.
+thisTypeInObjectLiterals2.ts(72,5): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(72,9): error TS2304: Cannot find name 'Point'.
+thisTypeInObjectLiterals2.ts(76,19): error TS2304: Cannot find name 'dx'.
+thisTypeInObjectLiterals2.ts(77,19): error TS2304: Cannot find name 'dy'.
+thisTypeInObjectLiterals2.ts(78,23): error TS2304: Cannot find name 'dz'.
+thisTypeInObjectLiterals2.ts(79,23): error TS2304: Cannot find name 'dz'.
+thisTypeInObjectLiterals2.ts(82,2): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(84,1): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(84,1): error TS2304: Cannot find name 'declare'.
+thisTypeInObjectLiterals2.ts(84,9): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(84,9): error TS2304: Cannot find name 'function'.
+thisTypeInObjectLiterals2.ts(84,18): error TS1005: ',' expected.
+thisTypeInObjectLiterals2.ts(84,36): error TS1005: '{' expected.
+thisTypeInObjectLiterals2.ts(86,1): error TS2304: Cannot find name 'f1'.
+thisTypeInObjectLiterals2.ts(90,19): error TS2304: Cannot find name 'dx'.
+thisTypeInObjectLiterals2.ts(91,19): error TS2304: Cannot find name 'dy'.
+thisTypeInObjectLiterals2.ts(92,23): error TS2304: Cannot find name 'dz'.
+thisTypeInObjectLiterals2.ts(93,23): error TS2304: Cannot find name 'dz'.
+thisTypeInObjectLiterals2.ts(98,24): error TS2304: Cannot find name 'Point'.
+thisTypeInObjectLiterals2.ts(104,19): error TS2304: Cannot find name 'dx'.
+thisTypeInObjectLiterals2.ts(105,19): error TS2304: Cannot find name 'dy'.
+thisTypeInObjectLiterals2.ts(106,23): error TS2304: Cannot find name 'dz'.
+thisTypeInObjectLiterals2.ts(107,23): error TS2304: Cannot find name 'dz'.
+thisTypeInObjectLiterals2.ts(117,19): error TS2304: Cannot find name 'ThisType'.
+thisTypeInObjectLiterals2.ts(117,19): error TS2304: Cannot find name 'ThisType'.
+thisTypeInObjectLiterals2.ts(122,21): error TS2345: Argument of type '{ data: { x: 0; y: 0 }; methods: any }' is not assignable to parameter of type '{ data: D; methods: M & error }'.
+thisTypeInObjectLiterals2.ts(126,23): error TS2304: Cannot find name 'dx'.
+thisTypeInObjectLiterals2.ts(127,23): error TS2304: Cannot find name 'dy'.
+thisTypeInObjectLiterals2.ts(142,22): error TS2345: Argument of type '{ data: { x: 0; y: 0 }; methods: any }' is not assignable to parameter of type '{ data: D; methods: M & error }'.
+thisTypeInObjectLiterals2.ts(146,23): error TS2304: Cannot find name 'dx'.
+thisTypeInObjectLiterals2.ts(147,23): error TS2304: Cannot find name 'dy'.
+thisTypeInObjectLiterals2.ts(164,90): error TS2304: Cannot find name 'ThisType'.
+thisTypeInObjectLiterals2.ts(166,68): error TS2304: Cannot find name 'ThisType'.
+thisTypeInObjectLiterals2.ts(168,22): error TS2304: Cannot find name 'p1'.
+thisTypeInObjectLiterals2.ts(168,33): error TS2345: Argument of type '{ value: 42 }' is not assignable to parameter of type '{ value: T } & error'.
+thisTypeInObjectLiterals2.ts(171,22): error TS2304: Cannot find name 'p1'.
+thisTypeInObjectLiterals2.ts(176,18): error TS2304: Cannot find name 'value'.
+thisTypeInObjectLiterals2.ts(181,23): error TS2304: Cannot find name 'p1'.
+thisTypeInObjectLiterals2.ts(190,22): error TS2304: Cannot find name 'value'.
+thisTypeInObjectLiterals2.ts(216,19): error TS2345: Argument of type '{ data: () => { x: 1; y: 2 }; methods: any; computed: any }' is not assignable to parameter of type 'error & { data: D | (() => D); methods: M; computed: any }'.
+thisTypeInObjectLiterals2.ts(241,11): error TS1005: '}' expected.
 
 
-==== thisTypeInObjectLiterals2.ts (19 errors) ====
+==== thisTypeInObjectLiterals2.ts (105 errors) ====
     // In methods of an object literal with no contextual type, 'this' has the type
     // of the object literal.
     
     let obj1 = {
         a: 1,
         f() {
-        ~
-!!! error TS2304: Cannot find name 'f'.
-         ~
-!!! error TS1005: ',' expected.
-          ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS1005: ',' expected.
             return this.a;
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                   ~~~~
-!!! error TS1005: ',' expected.
-                   ~~~~
-!!! error TS2304: Cannot find name 'this'.
-                       ~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name 'a'.
-                         ~
-!!! error TS1005: ',' expected.
         },
         b: "hello",
-        ~
-!!! error TS2304: Cannot find name 'b'.
-         ~
-!!! error TS1005: ',' expected.
-           ~~~~~~~
-!!! error TS1134: Variable declaration expected.
-                  ~
-!!! error TS1134: Variable declaration expected.
         c: {
             g() {
-                ~
-!!! error TS1003: Identifier expected.
                 this.g();
-                    ~
-!!! error TS1003: Identifier expected.
             }
         },
-        ~
-!!! error TS1128: Declaration or statement expected.
         get d() {
+             ~
+!!! error TS1005: '{' expected.
+              ~
+!!! error TS1012: Unexpected token.
+                ~
+!!! error TS1005: ')' expected.
             return this.a;
         },
+         ~
+!!! error TS1128: Declaration or statement expected.
         get e() {
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+            ~
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS2304: Cannot find name 'e'.
+                ~
+!!! error TS1005: ';' expected.
             return this.b;
         },
+         ~
+!!! error TS1128: Declaration or statement expected.
         set e(value) {
+        ~~~
+!!! error TS2304: Cannot find name 'set'.
+            ~
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS2304: Cannot find name 'e'.
+              ~~~~~
+!!! error TS2304: Cannot find name 'value'.
+                     ~
+!!! error TS1005: ';' expected.
             this.b = value;
+                     ~~~~~
+!!! error TS2304: Cannot find name 'value'.
         }
     };
+     ~
+!!! error TS1005: ',' expected.
     
     // In methods of an object literal with a contextual type, 'this' has the
     // contextual type.
     
     type Point = {
+    ~~~~
+!!! error TS1005: ',' expected.
+    ~~~~
+!!! error TS2304: Cannot find name 'type'.
+         ~~~~~
+!!! error TS1005: ',' expected.
+         ~~~~~
+!!! error TS2304: Cannot find name 'Point'.
+               ~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS1005: ',' expected.
         x: number;
+        ~
+!!! error TS1005: ',' expected.
+           ~~~~~~
+!!! error TS2304: Cannot find name 'number'.
+                 ~
+!!! error TS1005: ',' expected.
         y: number;
+        ~
+!!! error TS1005: ',' expected.
+           ~~~~~~
+!!! error TS2304: Cannot find name 'number'.
+                 ~
+!!! error TS1005: ',' expected.
         z?: number;
+        ~
+!!! error TS1005: ',' expected.
+        ~
+!!! error TS2304: Cannot find name 'z'.
+         ~
+!!! error TS1005: ',' expected.
+            ~~~~~~
+!!! error TS2304: Cannot find name 'number'.
+                  ~
+!!! error TS1005: ',' expected.
         moveBy(dx: number, dy: number, dz?: number): void;
+        ~~~~~~
+!!! error TS1005: ',' expected.
+                                                         ~
+!!! error TS1005: '{' expected.
     }
     
     let p1: Point = {
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'let'.
+        ~~
+!!! error TS1005: ',' expected.
+            ~~~~~
+!!! error TS2304: Cannot find name 'Point'.
         x: 10,
         y: 20,
         moveBy(dx, dy, dz) {
             this.x += dx;
+                      ~~
+!!! error TS2304: Cannot find name 'dx'.
             this.y += dy;
+                      ~~
+!!! error TS2304: Cannot find name 'dy'.
             if (this.z && dz) {
+                          ~~
+!!! error TS2304: Cannot find name 'dz'.
                 this.z += dz;
+                          ~~
+!!! error TS2304: Cannot find name 'dz'.
             }
         }
     };
+     ~
+!!! error TS1005: ',' expected.
     
     let p2: Point | null = {
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'let'.
+        ~~
+!!! error TS1005: ',' expected.
+            ~~~~~
+!!! error TS2304: Cannot find name 'Point'.
         x: 10,
         y: 20,
         moveBy(dx, dy, dz) {
             this.x += dx;
+                      ~~
+!!! error TS2304: Cannot find name 'dx'.
             this.y += dy;
+                      ~~
+!!! error TS2304: Cannot find name 'dy'.
             if (this.z && dz) {
+                          ~~
+!!! error TS2304: Cannot find name 'dz'.
                 this.z += dz;
+                          ~~
+!!! error TS2304: Cannot find name 'dz'.
             }
         }
     };
+     ~
+!!! error TS1005: ',' expected.
     
     let p3: Point | undefined = {
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'let'.
+        ~~
+!!! error TS1005: ',' expected.
+            ~~~~~
+!!! error TS2304: Cannot find name 'Point'.
         x: 10,
         y: 20,
         moveBy(dx, dy, dz) {
             this.x += dx;
+                      ~~
+!!! error TS2304: Cannot find name 'dx'.
             this.y += dy;
+                      ~~
+!!! error TS2304: Cannot find name 'dy'.
             if (this.z && dz) {
+                          ~~
+!!! error TS2304: Cannot find name 'dz'.
                 this.z += dz;
+                          ~~
+!!! error TS2304: Cannot find name 'dz'.
             }
         }
     };
+     ~
+!!! error TS1005: ',' expected.
     
     let p4: Point | null | undefined = {
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'let'.
+        ~~
+!!! error TS1005: ',' expected.
+            ~~~~~
+!!! error TS2304: Cannot find name 'Point'.
         x: 10,
         y: 20,
         moveBy(dx, dy, dz) {
             this.x += dx;
+                      ~~
+!!! error TS2304: Cannot find name 'dx'.
             this.y += dy;
+                      ~~
+!!! error TS2304: Cannot find name 'dy'.
             if (this.z && dz) {
+                          ~~
+!!! error TS2304: Cannot find name 'dz'.
                 this.z += dz;
+                          ~~
+!!! error TS2304: Cannot find name 'dz'.
             }
         }
     };
+     ~
+!!! error TS1005: ',' expected.
     
     declare function f1(p: Point): void;
+    ~~~~~~~
+!!! error TS1005: ',' expected.
+    ~~~~~~~
+!!! error TS2304: Cannot find name 'declare'.
+            ~~~~~~~~
+!!! error TS1005: ',' expected.
+            ~~~~~~~~
+!!! error TS2304: Cannot find name 'function'.
+                     ~~
+!!! error TS1005: ',' expected.
+                                       ~
+!!! error TS1005: '{' expected.
     
     f1({
+    ~~
+!!! error TS2304: Cannot find name 'f1'.
         x: 10,
         y: 20,
         moveBy(dx, dy, dz) {
             this.x += dx;
+                      ~~
+!!! error TS2304: Cannot find name 'dx'.
             this.y += dy;
+                      ~~
+!!! error TS2304: Cannot find name 'dy'.
             if (this.z && dz) {
+                          ~~
+!!! error TS2304: Cannot find name 'dz'.
                 this.z += dz;
+                          ~~
+!!! error TS2304: Cannot find name 'dz'.
             }
         }
     });
     
     declare function f2(p: Point | null | undefined): void;
+                           ~~~~~
+!!! error TS2304: Cannot find name 'Point'.
     
     f2({
         x: 10,
         y: 20,
         moveBy(dx, dy, dz) {
             this.x += dx;
+                      ~~
+!!! error TS2304: Cannot find name 'dx'.
             this.y += dy;
+                      ~~
+!!! error TS2304: Cannot find name 'dy'.
             if (this.z && dz) {
+                          ~~
+!!! error TS2304: Cannot find name 'dz'.
                 this.z += dz;
+                          ~~
+!!! error TS2304: Cannot find name 'dz'.
             }
         }
     });
@@ -175,19 +397,37 @@ thisTypeInObjectLiterals2.ts(14,5): error TS1128: Declaration or statement expec
     type ObjectDescriptor<D, M> = {
         data?: D;
         methods?: M & ThisType<D & M>;  // Type of 'this' in methods is D & M
+                      ~~~~~~~~
+!!! error TS2304: Cannot find name 'ThisType'.
+                      ~~~~~~~~
+!!! error TS2304: Cannot find name 'ThisType'.
     }
     
     declare function makeObject<D, M>(desc: ObjectDescriptor<D, M>): D & M;
     
     let x1 = makeObject({
+                        ~
         data: { x: 0, y: 0 },
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
         methods: {
+    ~~~~~~~~~~~~~~
             moveBy(dx: number, dy: number) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 this.x += dx;  // Strongly typed this
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                          ~~
+!!! error TS2304: Cannot find name 'dx'.
                 this.y += dy;  // Strongly typed this
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                          ~~
+!!! error TS2304: Cannot find name 'dy'.
             }
+    ~~~~~~~~~
         }
+    ~~~~~
     });
+    ~
+!!! error TS2345: Argument of type '{ data: { x: 0; y: 0 }; methods: any }' is not assignable to parameter of type '{ data: D; methods: M & error }'.
     
     // In methods contained in an object literal with a contextual type that includes
     // some ThisType<T>, 'this' is of type T.
@@ -200,14 +440,28 @@ thisTypeInObjectLiterals2.ts(14,5): error TS1128: Declaration or statement expec
     declare function makeObject2<D, M>(desc: ObjectDescriptor<D, M>): D & M;
     
     let x2 = makeObject2({
+                         ~
         data: { x: 0, y: 0 },
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
         methods: {
+    ~~~~~~~~~~~~~~
             moveBy(dx: number, dy: number) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 this.x += dx;  // Strongly typed this
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                          ~~
+!!! error TS2304: Cannot find name 'dx'.
                 this.y += dy;  // Strongly typed this
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                          ~~
+!!! error TS2304: Cannot find name 'dy'.
             }
+    ~~~~~~~~~
         }
+    ~~~~~
     });
+    ~
+!!! error TS2345: Argument of type '{ data: { x: 0; y: 0 }; methods: any }' is not assignable to parameter of type '{ data: D; methods: M & error }'.
     
     // Check pattern similar to Object.defineProperty and Object.defineProperties
     
@@ -222,23 +476,37 @@ thisTypeInObjectLiterals2.ts(14,5): error TS1128: Declaration or statement expec
     }
     
     declare function defineProp<T, K extends string, U>(obj: T, name: K, desc: PropDesc<U> & ThisType<T>): T & Record<K, U>;
+                                                                                             ~~~~~~~~
+!!! error TS2304: Cannot find name 'ThisType'.
     
     declare function defineProps<T, U>(obj: T, descs: PropDescMap<U> & ThisType<T>): T & U;
+                                                                       ~~~~~~~~
+!!! error TS2304: Cannot find name 'ThisType'.
     
     let p10 = defineProp(p1, "foo", { value: 42 });
+                         ~~
+!!! error TS2304: Cannot find name 'p1'.
+                                    ~~~~~~~~~~~~~
+!!! error TS2345: Argument of type '{ value: 42 }' is not assignable to parameter of type '{ value: T } & error'.
     p10.foo = p10.foo + 1;
     
     let p11 = defineProp(p1, "bar", {
+                         ~~
+!!! error TS2304: Cannot find name 'p1'.
         get() {
             return this.x;
         },
         set(value: number) {
             this.x = value;
+                     ~~~~~
+!!! error TS2304: Cannot find name 'value'.
         }
     });
     p11.bar = p11.bar + 1;
     
     let p12 = defineProps(p1, {
+                          ~~
+!!! error TS2304: Cannot find name 'p1'.
         foo: {
             value: 42
         },
@@ -248,6 +516,8 @@ thisTypeInObjectLiterals2.ts(14,5): error TS1128: Declaration or statement expec
             },
             set(value: number) {
                 this.x = value;
+                         ~~~~~
+!!! error TS2304: Cannot find name 'value'.
             }
         }
     });
@@ -274,28 +544,51 @@ thisTypeInObjectLiterals2.ts(14,5): error TS1128: Declaration or statement expec
     declare const Vue: new <D, M, P>(options: VueOptions<D, M, P>) => D & M & P;
     
     let vue = new Vue({
+                      ~
         data: () => ({ x: 1, y: 2 }),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         methods: {
+    ~~~~~~~~~~~~~~
             f(x: string) {
+    ~~~~~~~~~~~~~~~~~~~~~~
                 return this.x;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
             }
+    ~~~~~~~~~
         },
+    ~~~~~~
         computed: {
+    ~~~~~~~~~~~~~~~
             test(): number {
+    ~~~~~~~~~~~~~~~~~~~~~~~~
                 return this.x;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
             },
+    ~~~~~~~~~~
             hello: {
+    ~~~~~~~~~~~~~~~~
                 get() {
+    ~~~~~~~~~~~~~~~~~~~
                     return "hi";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 },
+    ~~~~~~~~~~~~~~
                 set(value: string) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 }
+    ~~~~~~~~~~~~~
             }
+    ~~~~~~~~~
         }
+    ~~~~~
     });
+    ~
+!!! error TS2345: Argument of type '{ data: () => { x: 1; y: 2 }; methods: any; computed: any }' is not assignable to parameter of type 'error & { data: D | (() => D); methods: M; computed: any }'.
     
     vue;
     vue.x;
     vue.f("abc");
     vue.test;
     vue.hello;
+              
+!!! error TS1005: '}' expected.

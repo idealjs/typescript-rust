@@ -1,27 +1,9 @@
 error TS6053: File 'react.d.ts' not found.
 file.tsx(54,28): error TS2454: Variable 'obj3' is used before being assigned.
-file.tsx(55,30): error TS2304: Cannot find name 'onClick'.
-file.tsx(55,37): error TS1005: ',' expected.
-file.tsx(55,38): error TS1005: ',' expected.
-file.tsx(55,41): error TS2304: Cannot find name 'any'.
-file.tsx(55,44): error TS1005: ',' expected.
-file.tsx(55,46): error TS1005: ',' expected.
-file.tsx(56,30): error TS2304: Cannot find name 'onClick'.
-file.tsx(56,37): error TS1005: ',' expected.
-file.tsx(56,38): error TS1005: ',' expected.
-file.tsx(56,41): error TS2304: Cannot find name 'any'.
-file.tsx(56,44): error TS1005: ',' expected.
-file.tsx(56,45): error TS1005: ',' expected.
-file.tsx(57,30): error TS2304: Cannot find name 'onClick'.
-file.tsx(57,37): error TS1005: ',' expected.
-file.tsx(57,38): error TS1005: ',' expected.
-file.tsx(57,41): error TS2304: Cannot find name 'any'.
-file.tsx(57,44): error TS1005: ',' expected.
-file.tsx(57,45): error TS1005: ',' expected.
 
 
 !!! error TS6053: File '/.lib/react.d.ts' not found.
-==== file.tsx (19 errors) ====
+==== file.tsx (1 errors) ====
     /// <reference path="/.lib/react.d.ts" />
     
     import React = require('react')
@@ -79,42 +61,6 @@ file.tsx(57,45): error TS1005: ',' expected.
                                ~~~~
 !!! error TS2454: Variable 'obj3' is used before being assigned.
     const b5 = <MainButton {...{ onClick(e: any) { } }} {...obj0} />;  // Spread retain method declaration (see GitHub #13365), so now there is an extra attributes
-                                 ~~~~~~~
-!!! error TS2304: Cannot find name 'onClick'.
-                                        ~
-!!! error TS1005: ',' expected.
-                                         ~
-!!! error TS1005: ',' expected.
-                                            ~~~
-!!! error TS2304: Cannot find name 'any'.
-                                               ~
-!!! error TS1005: ',' expected.
-                                                 ~
-!!! error TS1005: ',' expected.
     const b6 = <MainButton {...{ onClick(e: any){} }} children={10} />;  // incorrect type for optional attribute
-                                 ~~~~~~~
-!!! error TS2304: Cannot find name 'onClick'.
-                                        ~
-!!! error TS1005: ',' expected.
-                                         ~
-!!! error TS1005: ',' expected.
-                                            ~~~
-!!! error TS2304: Cannot find name 'any'.
-                                               ~
-!!! error TS1005: ',' expected.
-                                                ~
-!!! error TS1005: ',' expected.
     const b7 = <MainButton {...{ onClick(e: any){} }} children="hello" className />;  // incorrect type for optional attribute
-                                 ~~~~~~~
-!!! error TS2304: Cannot find name 'onClick'.
-                                        ~
-!!! error TS1005: ',' expected.
-                                         ~
-!!! error TS1005: ',' expected.
-                                            ~~~
-!!! error TS2304: Cannot find name 'any'.
-                                               ~
-!!! error TS1005: ',' expected.
-                                                ~
-!!! error TS1005: ',' expected.
     const b8 = <MainButton data-format />;  // incorrect type for specified hyphanated name

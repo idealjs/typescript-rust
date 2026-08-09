@@ -1,25 +1,10 @@
 index.js(3,7): error TS1003: Identifier expected.
 index.js(3,8): error TS1005: ';' expected.
 index.js(3,8): error TS2304: Cannot find name 'exports'.
-index.js(4,18): error TS1005: ',' expected.
-index.js(4,19): error TS1005: ',' expected.
-index.js(4,19): error TS2304: Cannot find name 'x'.
-index.js(4,21): error TS1005: ',' expected.
-index.js(4,23): error TS1005: ',' expected.
-index.js(4,25): error TS1005: ',' expected.
-index.js(4,27): error TS1005: ',' expected.
-index.js(5,9): error TS1005: ',' expected.
-index.js(5,9): error TS2304: Cannot find name 'return'.
-index.js(5,16): error TS1005: ',' expected.
 index.js(5,16): error TS2304: Cannot find name 'x'.
-index.js(5,17): error TS1005: ',' expected.
-index.js(7,5): error TS2304: Cannot find name 'items'.
-index.js(7,10): error TS1005: ';' expected.
-index.js(8,19): error TS1005: ';' expected.
-index.js(10,1): error TS1128: Declaration or statement expected.
 
 
-==== index.js (19 errors) ====
+==== index.js (4 errors) ====
     const TopLevelSym = Symbol();
     const InnerSym = Symbol();
     module.exports = {
@@ -30,44 +15,14 @@ index.js(10,1): error TS1128: Declaration or statement expected.
            ~~~~~~~
 !!! error TS2304: Cannot find name 'exports'.
         [TopLevelSym](x = 12) {
-                     ~
-!!! error TS1005: ',' expected.
-                      ~
-!!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name 'x'.
-                        ~
-!!! error TS1005: ',' expected.
-                          ~~
-!!! error TS1005: ',' expected.
-                            ~
-!!! error TS1005: ',' expected.
-                              ~
-!!! error TS1005: ',' expected.
             return x;
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                   ~
-!!! error TS1005: ',' expected.
                    ~
 !!! error TS2304: Cannot find name 'x'.
-                    ~
-!!! error TS1005: ',' expected.
         },
         items: {
-        ~~~~~
-!!! error TS2304: Cannot find name 'items'.
-             ~
-!!! error TS1005: ';' expected.
             [InnerSym]: (arg = {x: 12}) => arg.x
-                      ~
-!!! error TS1005: ';' expected.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
     
 ==== index2.js (0 errors) ====
     const TopLevelSym = Symbol();

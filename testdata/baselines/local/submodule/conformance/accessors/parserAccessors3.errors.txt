@@ -1,25 +1,19 @@
-parserAccessors3.ts(1,11): error TS2304: Cannot find name 'get'.
-parserAccessors3.ts(1,15): error TS1005: ',' expected.
-parserAccessors3.ts(1,15): error TS2304: Cannot find name 'Foo'.
-parserAccessors3.ts(1,18): error TS1005: ',' expected.
-parserAccessors3.ts(1,19): error TS1005: ',' expected.
-parserAccessors3.ts(1,21): error TS1005: ',' expected.
-parserAccessors3.ts(1,25): error TS1128: Declaration or statement expected.
+parserAccessors3.ts(1,18): error TS1005: '{' expected.
+parserAccessors3.ts(1,19): error TS1012: Unexpected token.
+parserAccessors3.ts(1,21): error TS1005: ')' expected.
+parserAccessors3.ts(1,26): error TS1005: ',' expected.
+parserAccessors3.ts(1,27): error TS1005: '}' expected.
 
 
-==== parserAccessors3.ts (7 errors) ====
+==== parserAccessors3.ts (5 errors) ====
     var v = { get Foo() { } };
-              ~~~
-!!! error TS2304: Cannot find name 'get'.
-                  ~~~
-!!! error TS1005: ',' expected.
-                  ~~~
-!!! error TS2304: Cannot find name 'Foo'.
                      ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
                       ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                         ~
+!!! error TS1005: ')' expected.
+                             ~
 !!! error TS1005: ',' expected.
-                            ~
-!!! error TS1128: Declaration or statement expected.
+                              
+!!! error TS1005: '}' expected.

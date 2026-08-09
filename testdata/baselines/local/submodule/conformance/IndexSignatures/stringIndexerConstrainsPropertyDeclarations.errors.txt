@@ -3,19 +3,19 @@ stringIndexerConstrainsPropertyDeclarations.ts(8,15): error TS1005: ';' expected
 stringIndexerConstrainsPropertyDeclarations.ts(23,9): error TS1005: ';' expected.
 stringIndexerConstrainsPropertyDeclarations.ts(26,9): error TS1005: ';' expected.
 stringIndexerConstrainsPropertyDeclarations.ts(36,16): error TS1005: ';' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(90,5): error TS2304: Cannot find name 'get'.
-stringIndexerConstrainsPropertyDeclarations.ts(90,9): error TS1005: ',' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(90,10): error TS1005: ',' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(90,11): error TS1005: ',' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(90,13): error TS1005: ',' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(91,9): error TS1005: ',' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(91,9): error TS2304: Cannot find name 'return'.
-stringIndexerConstrainsPropertyDeclarations.ts(91,16): error TS1005: ',' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(91,18): error TS1005: ',' expected.
+stringIndexerConstrainsPropertyDeclarations.ts(90,10): error TS1005: '{' expected.
+stringIndexerConstrainsPropertyDeclarations.ts(90,11): error TS1012: Unexpected token.
+stringIndexerConstrainsPropertyDeclarations.ts(90,13): error TS1005: ')' expected.
+stringIndexerConstrainsPropertyDeclarations.ts(92,6): error TS1128: Declaration or statement expected.
 stringIndexerConstrainsPropertyDeclarations.ts(93,5): error TS2304: Cannot find name 'set'.
-stringIndexerConstrainsPropertyDeclarations.ts(93,9): error TS1005: ',' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(93,10): error TS1005: ',' expected.
-stringIndexerConstrainsPropertyDeclarations.ts(93,12): error TS1005: ',' expected.
+stringIndexerConstrainsPropertyDeclarations.ts(93,9): error TS1005: ';' expected.
+stringIndexerConstrainsPropertyDeclarations.ts(93,9): error TS2304: Cannot find name 'X'.
+stringIndexerConstrainsPropertyDeclarations.ts(93,11): error TS2304: Cannot find name 'v'.
+stringIndexerConstrainsPropertyDeclarations.ts(93,14): error TS1005: ';' expected.
+stringIndexerConstrainsPropertyDeclarations.ts(93,17): error TS1128: Declaration or statement expected.
+stringIndexerConstrainsPropertyDeclarations.ts(94,5): error TS2304: Cannot find name 'foo'.
+stringIndexerConstrainsPropertyDeclarations.ts(94,11): error TS1005: ';' expected.
+stringIndexerConstrainsPropertyDeclarations.ts(97,2): error TS1005: '}' expected.
 
 
 ==== stringIndexerConstrainsPropertyDeclarations.ts (18 errors) ====
@@ -119,36 +119,36 @@ stringIndexerConstrainsPropertyDeclarations.ts(93,12): error TS1005: ',' expecte
         f: <MyString>null, 
     
         get X() { 
-        ~~~
-!!! error TS2304: Cannot find name 'get'.
-            ~
-!!! error TS1005: ',' expected.
              ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
               ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                 ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ')' expected.
             return '';
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                   ~~
-!!! error TS1005: ',' expected.
-                     ~
-!!! error TS1005: ',' expected.
         },
+         ~
+!!! error TS1128: Declaration or statement expected.
         set X(v) { }, 
         ~~~
 !!! error TS2304: Cannot find name 'set'.
             ~
-!!! error TS1005: ',' expected.
-             ~
-!!! error TS1005: ',' expected.
-               ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS2304: Cannot find name 'X'.
+              ~
+!!! error TS2304: Cannot find name 'v'.
+                 ~
+!!! error TS1005: ';' expected.
+                    ~
+!!! error TS1128: Declaration or statement expected.
         foo() { 
+        ~~~
+!!! error TS2304: Cannot find name 'foo'.
+              ~
+!!! error TS1005: ';' expected.
             return '';
         }
     }
+     
+!!! error TS1005: '}' expected.

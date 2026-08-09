@@ -2,6 +2,7 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(6,19): err
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(6,28): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(9,19): error TS2304: Cannot find name 'Array'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(13,19): error TS2304: Cannot find name 'String'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(22,19): error TS2304: Cannot find name 'Boolean'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,11): error TS2304: Cannot find name 'foo'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,14): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,15): error TS1005: ',' expected.
@@ -11,19 +12,16 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,17): er
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,25): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,25): error TS2304: Cannot find name 'RegExp'.
 objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,31): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,32): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,33): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,36): error TS2304: Cannot find name 'T'.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,37): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,39): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,41): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,41): error TS2304: Cannot find name 'return'.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,48): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,50): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,54): error TS1128: Declaration or statement expected.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(40,20): error TS2304: Cannot find name 'Number'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(41,20): error TS2304: Cannot find name 'Number'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(61,20): error TS2304: Cannot find name 'Number'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(69,20): error TS2304: Cannot find name 'Number'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(84,21): error TS2304: Cannot find name 'Number'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(92,21): error TS2304: Cannot find name 'Number'.
+objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(96,21): error TS2304: Cannot find name 'Number'.
 
 
-==== objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts (23 errors) ====
+==== objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts (21 errors) ====
     // Two call or construct signatures are considered identical when they have the same number of type parameters and, considering those 
     // parameters pairwise identical, have identical type parameter constraints, identical number of parameters with identical kind(required, 
     // optional or rest) and types, and identical return types.
@@ -54,6 +52,8 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,54): er
     
     interface I2 {
         foo<T extends Boolean>(x: T): string;
+                      ~~~~~~~
+!!! error TS2304: Cannot find name 'Boolean'.
     }
     
     var a: { foo<T extends Array<string>>(x: T): string }
@@ -76,26 +76,6 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,54): er
 !!! error TS2304: Cannot find name 'RegExp'.
                                   ~
 !!! error TS1005: ',' expected.
-                                   ~
-!!! error TS1005: ',' expected.
-                                    ~
-!!! error TS1005: ',' expected.
-                                       ~
-!!! error TS2304: Cannot find name 'T'.
-                                        ~
-!!! error TS1005: ',' expected.
-                                          ~
-!!! error TS1005: ',' expected.
-                                            ~~~~~~
-!!! error TS1005: ',' expected.
-                                            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                                                   ~~
-!!! error TS1005: ',' expected.
-                                                     ~
-!!! error TS1005: ',' expected.
-                                                         ~
-!!! error TS1128: Declaration or statement expected.
     
     function foo1(x: A);
     function foo1(x: A); // error
@@ -110,7 +90,11 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,54): er
     function foo1c(x: any) { }
     
     function foo2(x: I<Number>);
+                       ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
     function foo2(x: I<Number>); // error
+                       ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
     function foo2(x: any) { }
     
     function foo3(x: typeof a);
@@ -131,6 +115,8 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,54): er
     
     function foo6(x: A);
     function foo6(x: I<Number>); // ok
+                       ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
     function foo6(x: any) { }
     
     function foo7(x: A);
@@ -139,6 +125,8 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,54): er
     
     function foo8(x: B<Array<number>>);
     function foo8(x: I<Number>); // ok
+                       ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
     function foo8(x: any) { }
     
     function foo9(x: B<Array<number>>);
@@ -154,6 +142,8 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,54): er
     function foo11(x: any) { }
     
     function foo12(x: I<Number>);
+                        ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
     function foo12(x: C<String>); // ok
     function foo12(x: any) { }
     
@@ -162,10 +152,14 @@ objectTypesIdentityWithGenericCallSignaturesDifferingByConstraints.ts(26,54): er
     function foo12b(x: any) { }
     
     function foo13(x: I<Number>);
+                        ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
     function foo13(x: typeof a); // ok
     function foo13(x: any) { }
     
     function foo14(x: I<Number>);
+                        ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
     function foo14(x: typeof b); // ok
     function foo14(x: any) { }
     

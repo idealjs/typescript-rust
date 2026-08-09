@@ -1,63 +1,16 @@
 awaitUsingDeclarations.17.ts(1,9): error TS2304: Cannot find name 'Math'.
-awaitUsingDeclarations.17.ts(3,29): error TS2304: Cannot find name 'async'.
-awaitUsingDeclarations.17.ts(3,35): error TS1005: ',' expected.
-awaitUsingDeclarations.17.ts(3,56): error TS1005: ',' expected.
-awaitUsingDeclarations.17.ts(3,57): error TS1005: ',' expected.
-awaitUsingDeclarations.17.ts(3,59): error TS1005: ',' expected.
-awaitUsingDeclarations.17.ts(4,9): error TS1105: A 'break' statement can only be used within an enclosing iteration or switch statement.
-awaitUsingDeclarations.17.ts(6,5): error TS2304: Cannot find name 'case'.
-awaitUsingDeclarations.17.ts(6,10): error TS1005: ';' expected.
-awaitUsingDeclarations.17.ts(6,11): error TS1005: ';' expected.
-awaitUsingDeclarations.17.ts(7,29): error TS2304: Cannot find name 'async'.
-awaitUsingDeclarations.17.ts(7,35): error TS1005: ',' expected.
-awaitUsingDeclarations.17.ts(7,56): error TS1005: ',' expected.
-awaitUsingDeclarations.17.ts(7,57): error TS1005: ',' expected.
-awaitUsingDeclarations.17.ts(7,59): error TS1005: ',' expected.
-awaitUsingDeclarations.17.ts(7,62): error TS1128: Declaration or statement expected.
 
 
-==== awaitUsingDeclarations.17.ts (16 errors) ====
+==== awaitUsingDeclarations.17.ts (1 errors) ====
     switch (Math.random()) {
             ~~~~
 !!! error TS2304: Cannot find name 'Math'.
         case 0:
             await using d20 = { async [Symbol.asyncDispose]() {} };
-                                ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-                                      ~
-!!! error TS1005: ',' expected.
-                                                           ~
-!!! error TS1005: ',' expected.
-                                                            ~
-!!! error TS1005: ',' expected.
-                                                              ~
-!!! error TS1005: ',' expected.
             break;
-            ~~~~~~
-    
     
         case 1:
-    ~~~~
-!!! error TS1105: A 'break' statement can only be used within an enclosing iteration or switch statement.
-        ~~~~
-!!! error TS2304: Cannot find name 'case'.
-             ~
-!!! error TS1005: ';' expected.
-              ~
-!!! error TS1005: ';' expected.
             await using d21 = { async [Symbol.asyncDispose]() {} };
-                                ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-                                      ~
-!!! error TS1005: ',' expected.
-                                                           ~
-!!! error TS1005: ',' expected.
-                                                            ~
-!!! error TS1005: ',' expected.
-                                                              ~
-!!! error TS1005: ',' expected.
-                                                                 ~
-!!! error TS1128: Declaration or statement expected.
             break;
     
         default:

@@ -1,22 +1,19 @@
-parserES5ComputedPropertyName4.ts(1,11): error TS2304: Cannot find name 'get'.
-parserES5ComputedPropertyName4.ts(1,15): error TS1005: ',' expected.
-parserES5ComputedPropertyName4.ts(1,18): error TS1005: ',' expected.
-parserES5ComputedPropertyName4.ts(1,19): error TS1005: ',' expected.
-parserES5ComputedPropertyName4.ts(1,21): error TS1005: ',' expected.
-parserES5ComputedPropertyName4.ts(1,25): error TS1128: Declaration or statement expected.
+parserES5ComputedPropertyName4.ts(1,18): error TS1005: '{' expected.
+parserES5ComputedPropertyName4.ts(1,19): error TS1012: Unexpected token.
+parserES5ComputedPropertyName4.ts(1,21): error TS1005: ')' expected.
+parserES5ComputedPropertyName4.ts(1,26): error TS1005: ',' expected.
+parserES5ComputedPropertyName4.ts(1,27): error TS1005: '}' expected.
 
 
-==== parserES5ComputedPropertyName4.ts (6 errors) ====
+==== parserES5ComputedPropertyName4.ts (5 errors) ====
     var v = { get [e]() { } };
-              ~~~
-!!! error TS2304: Cannot find name 'get'.
-                  ~
-!!! error TS1005: ',' expected.
                      ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
                       ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                         ~
+!!! error TS1005: ')' expected.
+                             ~
 !!! error TS1005: ',' expected.
-                            ~
-!!! error TS1128: Declaration or statement expected.
+                              
+!!! error TS1005: '}' expected.

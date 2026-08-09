@@ -7,21 +7,10 @@ objectTypesIdentityWithGenericCallSignatures2.ts(24,15): error TS1005: ',' expec
 objectTypesIdentityWithGenericCallSignatures2.ts(24,15): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericCallSignatures2.ts(24,18): error TS2304: Cannot find name 'U'.
 objectTypesIdentityWithGenericCallSignatures2.ts(24,19): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignatures2.ts(24,20): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignatures2.ts(24,21): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignatures2.ts(24,24): error TS2304: Cannot find name 'T'.
-objectTypesIdentityWithGenericCallSignatures2.ts(24,30): error TS2304: Cannot find name 'U'.
-objectTypesIdentityWithGenericCallSignatures2.ts(24,31): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignatures2.ts(24,33): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignatures2.ts(24,35): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignatures2.ts(24,35): error TS2304: Cannot find name 'return'.
-objectTypesIdentityWithGenericCallSignatures2.ts(24,42): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignatures2.ts(24,42): error TS2304: Cannot find name 'x'.
-objectTypesIdentityWithGenericCallSignatures2.ts(24,43): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignatures2.ts(24,47): error TS1128: Declaration or statement expected.
 
 
-==== objectTypesIdentityWithGenericCallSignatures2.ts (21 errors) ====
+==== objectTypesIdentityWithGenericCallSignatures2.ts (10 errors) ====
     // object types are identical structurally
     
     class A {
@@ -64,30 +53,8 @@ objectTypesIdentityWithGenericCallSignatures2.ts(24,47): error TS1128: Declarati
 !!! error TS2304: Cannot find name 'U'.
                       ~
 !!! error TS1005: ',' expected.
-                       ~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS1005: ',' expected.
-                           ~
-!!! error TS2304: Cannot find name 'T'.
-                                 ~
-!!! error TS2304: Cannot find name 'U'.
-                                  ~
-!!! error TS1005: ',' expected.
-                                    ~
-!!! error TS1005: ',' expected.
-                                      ~~~~~~
-!!! error TS1005: ',' expected.
-                                      ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                                             ~
-!!! error TS1005: ',' expected.
                                              ~
 !!! error TS2304: Cannot find name 'x'.
-                                              ~
-!!! error TS1005: ',' expected.
-                                                  ~
-!!! error TS1128: Declaration or statement expected.
     
     function foo1(x: A);
     function foo1(x: A); // error

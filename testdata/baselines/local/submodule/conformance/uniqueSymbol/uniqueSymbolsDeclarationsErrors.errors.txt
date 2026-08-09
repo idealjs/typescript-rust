@@ -1,25 +1,12 @@
-uniqueSymbolsDeclarationsErrors.ts(7,5): error TS2304: Cannot find name 'method1'.
-uniqueSymbolsDeclarationsErrors.ts(7,12): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(7,13): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(7,24): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(7,36): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(8,9): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(8,16): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(8,17): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(10,5): error TS2304: Cannot find name 'method2'.
-uniqueSymbolsDeclarationsErrors.ts(10,14): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(10,16): error TS2448: Block-scoped variable 'I' used before its declaration.
-uniqueSymbolsDeclarationsErrors.ts(10,34): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(10,37): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(10,37): error TS1182: A destructuring declaration must have an initializer.
-uniqueSymbolsDeclarationsErrors.ts(10,38): error TS1181: Array element destructuring pattern expected.
-uniqueSymbolsDeclarationsErrors.ts(10,54): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(11,16): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(11,17): error TS1005: ',' expected.
-uniqueSymbolsDeclarationsErrors.ts(13,1): error TS1128: Declaration or statement expected.
+uniqueSymbolsDeclarationsErrors.ts(8,16): error TS2304: Cannot find name 'p'.
+uniqueSymbolsDeclarationsErrors.ts(11,16): error TS2304: Cannot find name 'p'.
+uniqueSymbolsDeclarationsErrors.ts(55,9): error TS1005: ';' expected.
+uniqueSymbolsDeclarationsErrors.ts(56,9): error TS1005: ';' expected.
+uniqueSymbolsDeclarationsErrors.ts(57,16): error TS1005: ';' expected.
+uniqueSymbolsDeclarationsErrors.ts(58,16): error TS1005: ';' expected.
 
 
-==== uniqueSymbolsDeclarationsErrors.ts (19 errors) ====
+==== uniqueSymbolsDeclarationsErrors.ts (6 errors) ====
     declare const s: unique symbol;
     interface I { readonly readonlyType: unique symbol; }
     
@@ -27,50 +14,16 @@ uniqueSymbolsDeclarationsErrors.ts(13,1): error TS1128: Declaration or statement
     
     export const obj = {
         method1(p: typeof s): typeof s {
-        ~~~~~~~
-!!! error TS2304: Cannot find name 'method1'.
-               ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                           ~
-!!! error TS1005: ',' expected.
-                                       ~
-!!! error TS1005: ',' expected.
             return p;
-            ~~~~~~
-!!! error TS1005: ',' expected.
                    ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
+!!! error TS2304: Cannot find name 'p'.
         },
         method2(p: I["readonlyType"]): I["readonlyType"] {
-        ~~~~~~~
-!!! error TS2304: Cannot find name 'method2'.
-                 ~
-!!! error TS1005: ',' expected.
-                   ~
-!!! error TS2448: Block-scoped variable 'I' used before its declaration.
-                                     ~
-!!! error TS1005: ',' expected.
-                                        ~
-!!! error TS1005: ',' expected.
-                                        ~~~~~~~~~~~~~~~~~
-!!! error TS1182: A destructuring declaration must have an initializer.
-                                         ~~~~~~~~~~~~~~
-!!! error TS1181: Array element destructuring pattern expected.
-                                                         ~
-!!! error TS1005: ',' expected.
             return p;
                    ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
+!!! error TS2304: Cannot find name 'p'.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
     
     export const classExpression = class {
         method1(p: typeof s): typeof s {
@@ -113,7 +66,15 @@ uniqueSymbolsDeclarationsErrors.ts(13,1): error TS1128: Declaration or statement
     
     export class ClassWithPrivateNamedAccessors {
         get [s](): any { return undefined; }
+            ~
+!!! error TS1005: ';' expected.
         set [s](v: any) { }
+            ~
+!!! error TS1005: ';' expected.
         static get [s](): any { return undefined; }
+                   ~
+!!! error TS1005: ';' expected.
         static set [s](v: any) { }
+                   ~
+!!! error TS1005: ';' expected.
     }

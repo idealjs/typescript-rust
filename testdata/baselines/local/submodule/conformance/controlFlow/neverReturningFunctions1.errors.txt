@@ -9,84 +9,12 @@ neverReturningFunctions1.ts(68,19): error TS2304: Cannot find name 'Error'.
 neverReturningFunctions1.ts(72,11): error TS2339: Property 'length' does not exist on type 'undefined | string'.
 neverReturningFunctions1.ts(157,43): error TS2304: Cannot find name 'Error'.
 neverReturningFunctions1.ts(204,87): error TS2304: Cannot find name 'ThisType'.
-neverReturningFunctions1.ts(210,4): error TS2304: Cannot find name 'parse'.
-neverReturningFunctions1.ts(210,9): error TS1005: ',' expected.
-neverReturningFunctions1.ts(210,10): error TS1005: ',' expected.
-neverReturningFunctions1.ts(210,12): error TS1005: ',' expected.
-neverReturningFunctions1.ts(211,5): error TS1005: ',' expected.
-neverReturningFunctions1.ts(211,5): error TS2304: Cannot find name 'return'.
-neverReturningFunctions1.ts(211,12): error TS1005: ',' expected.
-neverReturningFunctions1.ts(211,18): error TS1005: ',' expected.
-neverReturningFunctions1.ts(217,2): error TS2304: Cannot find name 'init'.
-neverReturningFunctions1.ts(217,2): error TS2554: Expected 2 arguments, but got 16.
-neverReturningFunctions1.ts(217,9): error TS1005: ',' expected.
-neverReturningFunctions1.ts(218,3): error TS2304: Cannot find name 'this'.
-neverReturningFunctions1.ts(218,7): error TS1005: ',' expected.
-neverReturningFunctions1.ts(218,8): error TS1005: ',' expected.
-neverReturningFunctions1.ts(218,8): error TS2304: Cannot find name 'data'.
-neverReturningFunctions1.ts(218,12): error TS1005: ',' expected.
-neverReturningFunctions1.ts(218,13): error TS1005: ',' expected.
-neverReturningFunctions1.ts(218,13): error TS2304: Cannot find name 'num'.
-neverReturningFunctions1.ts(218,17): error TS1005: ',' expected.
-neverReturningFunctions1.ts(218,19): error TS1005: ',' expected.
-neverReturningFunctions1.ts(218,20): error TS1005: ',' expected.
-neverReturningFunctions1.ts(219,3): error TS1005: ',' expected.
-neverReturningFunctions1.ts(219,3): error TS2304: Cannot find name 'this'.
-neverReturningFunctions1.ts(219,7): error TS1005: ',' expected.
-neverReturningFunctions1.ts(219,8): error TS1005: ',' expected.
-neverReturningFunctions1.ts(219,8): error TS2304: Cannot find name 'el'.
-neverReturningFunctions1.ts(219,10): error TS1005: ',' expected.
-neverReturningFunctions1.ts(219,11): error TS1005: ',' expected.
-neverReturningFunctions1.ts(219,11): error TS2304: Cannot find name 'setAttribute'.
-neverReturningFunctions1.ts(219,23): error TS1005: ',' expected.
-neverReturningFunctions1.ts(219,24): error TS1005: ',' expected.
-neverReturningFunctions1.ts(219,58): error TS1005: ',' expected.
-neverReturningFunctions1.ts(219,59): error TS1005: ',' expected.
-neverReturningFunctions1.ts(221,2): error TS2304: Cannot find name 'update'.
-neverReturningFunctions1.ts(221,11): error TS1005: ',' expected.
-neverReturningFunctions1.ts(222,2): error TS2304: Cannot find name 'tick'.
-neverReturningFunctions1.ts(222,9): error TS1005: ',' expected.
-neverReturningFunctions1.ts(223,2): error TS2304: Cannot find name 'remove'.
-neverReturningFunctions1.ts(223,11): error TS1005: ',' expected.
-neverReturningFunctions1.ts(224,2): error TS2304: Cannot find name 'pause'.
-neverReturningFunctions1.ts(224,10): error TS1005: ',' expected.
-neverReturningFunctions1.ts(225,2): error TS2304: Cannot find name 'play'.
-neverReturningFunctions1.ts(225,9): error TS1005: ',' expected.
-neverReturningFunctions1.ts(227,2): error TS2304: Cannot find name 'multiply'.
-neverReturningFunctions1.ts(227,11): error TS2304: Cannot find name 'f'.
-neverReturningFunctions1.ts(227,12): error TS1005: ',' expected.
-neverReturningFunctions1.ts(227,14): error TS2304: Cannot find name 'number'.
-neverReturningFunctions1.ts(227,22): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,3): error TS2304: Cannot find name 'return'.
-neverReturningFunctions1.ts(229,10): error TS1005: ',' expected.
 neverReturningFunctions1.ts(229,10): error TS2304: Cannot find name 'f'.
-neverReturningFunctions1.ts(229,12): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,14): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,14): error TS2304: Cannot find name 'this'.
-neverReturningFunctions1.ts(229,18): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,19): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,19): error TS2304: Cannot find name 'data'.
-neverReturningFunctions1.ts(229,23): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,24): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,24): error TS2304: Cannot find name 'num'.
-neverReturningFunctions1.ts(229,28): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,30): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,30): error TS2304: Cannot find name 'this'.
-neverReturningFunctions1.ts(229,34): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,35): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,35): error TS2304: Cannot find name 'system'.
-neverReturningFunctions1.ts(229,41): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,42): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,43): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,43): error TS2304: Cannot find name 'data'.
-neverReturningFunctions1.ts(229,47): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,48): error TS1005: ',' expected.
-neverReturningFunctions1.ts(229,48): error TS2304: Cannot find name 'counter'.
-neverReturningFunctions1.ts(229,55): error TS1005: ',' expected.
-neverReturningFunctions1.ts(231,1): error TS1005: ',' expected.
+neverReturningFunctions1.ts(237,19): error TS2304: Cannot find name 'Error'.
+neverReturningFunctions1.ts(256,1): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
 
 
-==== neverReturningFunctions1.ts (86 errors) ====
+==== neverReturningFunctions1.ts (14 errors) ====
     function fail(message?: string): never {
         throw new Error(message);
                   ~~~~~
@@ -337,197 +265,37 @@ neverReturningFunctions1.ts(231,1): error TS1005: ',' expected.
     		myProperty: {
     			default: [],
     			parse() {
-    			~~~~~
-!!! error TS2304: Cannot find name 'parse'.
-    			     ~
-!!! error TS1005: ',' expected.
-    			      ~
-!!! error TS1005: ',' expected.
-    			        ~
-!!! error TS1005: ',' expected.
     				return [true];
-    				~~~~~~
-!!! error TS1005: ',' expected.
-    				~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-    				       ~
-!!! error TS1005: ',' expected.
-    				             ~
-!!! error TS1005: ',' expected.
     			}
     		},
     		string: { type: 'string' },
     		num: 0
     	},
     	init() {
-    	~~~~
-!!! error TS2304: Cannot find name 'init'.
-    	~~~~~~~~
-    	       ~
-!!! error TS1005: ',' expected.
     		this.data.num = 0;
-    ~~~~~~~~~~~~~~~~~~~~
-    		~~~~
-!!! error TS2304: Cannot find name 'this'.
-    		    ~
-!!! error TS1005: ',' expected.
-    		     ~~~~
-!!! error TS1005: ',' expected.
-    		     ~~~~
-!!! error TS2304: Cannot find name 'data'.
-    		         ~
-!!! error TS1005: ',' expected.
-    		          ~~~
-!!! error TS1005: ',' expected.
-    		          ~~~
-!!! error TS2304: Cannot find name 'num'.
-    		              ~
-!!! error TS1005: ',' expected.
-    		                ~
-!!! error TS1005: ',' expected.
-    		                 ~
-!!! error TS1005: ',' expected.
     		this.el.setAttribute('custom-attribute', 'custom-value');
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    		~~~~
-!!! error TS1005: ',' expected.
-    		~~~~
-!!! error TS2304: Cannot find name 'this'.
-    		    ~
-!!! error TS1005: ',' expected.
-    		     ~~
-!!! error TS1005: ',' expected.
-    		     ~~
-!!! error TS2304: Cannot find name 'el'.
-    		       ~
-!!! error TS1005: ',' expected.
-    		        ~~~~~~~~~~~~
-!!! error TS1005: ',' expected.
-    		        ~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'setAttribute'.
-    		                    ~
-!!! error TS1005: ',' expected.
-    		                     ~~~~~~~~~~~~~~~~~~
-!!! error TS1005: ',' expected.
-    		                                                       ~
-!!! error TS1005: ',' expected.
-    		                                                        ~
-!!! error TS1005: ',' expected.
     	},
-    ~~~
     	update() {},
-    ~~~~~~~~~~~~~
-    	~~~~~~
-!!! error TS2304: Cannot find name 'update'.
-    	         ~
-!!! error TS1005: ',' expected.
     	tick() {},
-    ~~~~~~~~~~~
-    	~~~~
-!!! error TS2304: Cannot find name 'tick'.
-    	       ~
-!!! error TS1005: ',' expected.
     	remove() {},
-    ~~~~~~~~~~~~~
-    	~~~~~~
-!!! error TS2304: Cannot find name 'remove'.
-    	         ~
-!!! error TS1005: ',' expected.
     	pause() {},
-    ~~~~~~~~~~~~
-    	~~~~~
-!!! error TS2304: Cannot find name 'pause'.
-    	        ~
-!!! error TS1005: ',' expected.
     	play() {},
-    ~~~~~~~~~~~
-    	~~~~
-!!! error TS2304: Cannot find name 'play'.
-    	       ~
-!!! error TS1005: ',' expected.
-    
     
     	multiply(f: number) {
-    ~~~~~~~~~~~~~~~~~~~~~~
-    	~~~~~~~~
-!!! error TS2304: Cannot find name 'multiply'.
-    	         ~
-!!! error TS2304: Cannot find name 'f'.
-    	          ~
-!!! error TS1005: ',' expected.
-    	            ~~~~~~
-!!! error TS2304: Cannot find name 'number'.
-    	                    ~
-!!! error TS1005: ',' expected.
     		// Reference to system because both were registered with the same name.
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     		return f * this.data.num * this.system!.data.counter;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    		~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-    		       ~
-!!! error TS1005: ',' expected.
     		       ~
 !!! error TS2304: Cannot find name 'f'.
-    		         ~
-!!! error TS1005: ',' expected.
-    		           ~~~~
-!!! error TS1005: ',' expected.
-    		           ~~~~
-!!! error TS2304: Cannot find name 'this'.
-    		               ~
-!!! error TS1005: ',' expected.
-    		                ~~~~
-!!! error TS1005: ',' expected.
-    		                ~~~~
-!!! error TS2304: Cannot find name 'data'.
-    		                    ~
-!!! error TS1005: ',' expected.
-    		                     ~~~
-!!! error TS1005: ',' expected.
-    		                     ~~~
-!!! error TS2304: Cannot find name 'num'.
-    		                         ~
-!!! error TS1005: ',' expected.
-    		                           ~~~~
-!!! error TS1005: ',' expected.
-    		                           ~~~~
-!!! error TS2304: Cannot find name 'this'.
-    		                               ~
-!!! error TS1005: ',' expected.
-    		                                ~~~~~~
-!!! error TS1005: ',' expected.
-    		                                ~~~~~~
-!!! error TS2304: Cannot find name 'system'.
-    		                                      ~
-!!! error TS1005: ',' expected.
-    		                                       ~
-!!! error TS1005: ',' expected.
-    		                                        ~~~~
-!!! error TS1005: ',' expected.
-    		                                        ~~~~
-!!! error TS2304: Cannot find name 'data'.
-    		                                            ~
-!!! error TS1005: ',' expected.
-    		                                             ~~~~~~~
-!!! error TS1005: ',' expected.
-    		                                             ~~~~~~~
-!!! error TS2304: Cannot find name 'counter'.
-    		                                                    ~
-!!! error TS1005: ',' expected.
     	}
-    ~~
     });
-    
-!!! error TS2554: Expected 2 arguments, but got 16.
-    ~
-!!! error TS1005: ',' expected.
     
     // Repro from #36147
     
     class MyThrowable {
         throw(): never {
             throw new Error();
+                      ~~~~~
+!!! error TS2304: Cannot find name 'Error'.
         }
     }
     
@@ -547,9 +315,17 @@ neverReturningFunctions1.ts(231,1): error TS1005: ',' expected.
     }
     
     function foo(services: Readonly<Services>, s: string | null): string {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         if (s === null) {
+    ~~~~~~~~~~~~~~~~~~~~~
             services.panic("ouch");
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         } else {
+    ~~~~~~~~~~~~
             return s;
+    ~~~~~~~~~~~~~~~~~
         }
+    ~~~~~
     }
+    ~
+!!! error TS2366: Function lacks ending return statement and return type does not include 'undefined'.

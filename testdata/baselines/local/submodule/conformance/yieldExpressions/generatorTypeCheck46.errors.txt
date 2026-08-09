@@ -1,63 +1,15 @@
-generatorTypeCheck46.ts(3,1): error TS2554: Expected 3 arguments, but got 2.
-generatorTypeCheck46.ts(5,9): error TS1003: Identifier expected.
-generatorTypeCheck46.ts(5,10): error TS1005: ',' expected.
-generatorTypeCheck46.ts(5,27): error TS1005: ',' expected.
-generatorTypeCheck46.ts(5,28): error TS1005: ',' expected.
-generatorTypeCheck46.ts(5,30): error TS1005: ',' expected.
-generatorTypeCheck46.ts(6,13): error TS1005: ',' expected.
-generatorTypeCheck46.ts(6,13): error TS2304: Cannot find name 'yield'.
-generatorTypeCheck46.ts(6,19): error TS1005: ',' expected.
-generatorTypeCheck46.ts(6,19): error TS2304: Cannot find name 'x'.
-generatorTypeCheck46.ts(6,21): error TS1005: ',' expected.
-generatorTypeCheck46.ts(6,24): error TS1005: ',' expected.
-generatorTypeCheck46.ts(6,24): error TS2304: Cannot find name 'x'.
-generatorTypeCheck46.ts(6,25): error TS1005: ',' expected.
-generatorTypeCheck46.ts(6,26): error TS1005: ',' expected.
-generatorTypeCheck46.ts(6,26): error TS2304: Cannot find name 'length'.
-generatorTypeCheck46.ts(9,1): error TS1005: ',' expected.
+generatorTypeCheck46.ts(3,5): error TS2345: Argument of type '""' is not assignable to parameter of type 'U'.
 
 
-==== generatorTypeCheck46.ts (17 errors) ====
+==== generatorTypeCheck46.ts (1 errors) ====
     declare function foo<T, U>(x: T, fun: () => Iterable<(x: T) => U>, fun2: (y: U) => T): T;
     
     foo("", function* () {
-    ~~~
-!!! error TS2554: Expected 3 arguments, but got 2.
+        ~~
+!!! error TS2345: Argument of type '""' is not assignable to parameter of type 'U'.
         yield* {
             *[Symbol.iterator]() {
-            ~
-!!! error TS1003: Identifier expected.
-             ~
-!!! error TS1005: ',' expected.
-                              ~
-!!! error TS1005: ',' expected.
-                               ~
-!!! error TS1005: ',' expected.
-                                 ~
-!!! error TS1005: ',' expected.
                 yield x => x.length
-                ~~~~~
-!!! error TS1005: ',' expected.
-                ~~~~~
-!!! error TS2304: Cannot find name 'yield'.
-                      ~
-!!! error TS1005: ',' expected.
-                      ~
-!!! error TS2304: Cannot find name 'x'.
-                        ~~
-!!! error TS1005: ',' expected.
-                           ~
-!!! error TS1005: ',' expected.
-                           ~
-!!! error TS2304: Cannot find name 'x'.
-                            ~
-!!! error TS1005: ',' expected.
-                             ~~~~~~
-!!! error TS1005: ',' expected.
-                             ~~~~~~
-!!! error TS2304: Cannot find name 'length'.
             }
         }
     }, p => undefined); // T is fixed, should be string
-    ~
-!!! error TS1005: ',' expected.

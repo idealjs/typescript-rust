@@ -1,18 +1,22 @@
 accessorWithES5.ts(2,9): error TS1005: ';' expected.
 accessorWithES5.ts(8,9): error TS1005: ';' expected.
-accessorWithES5.ts(13,5): error TS2304: Cannot find name 'get'.
-accessorWithES5.ts(13,9): error TS1005: ',' expected.
-accessorWithES5.ts(13,9): error TS2304: Cannot find name 'a'.
-accessorWithES5.ts(13,10): error TS1005: ',' expected.
-accessorWithES5.ts(13,11): error TS1005: ',' expected.
-accessorWithES5.ts(13,13): error TS1005: ',' expected.
-accessorWithES5.ts(13,15): error TS1005: ',' expected.
-accessorWithES5.ts(13,15): error TS2304: Cannot find name 'return'.
-accessorWithES5.ts(13,22): error TS1005: ',' expected.
-accessorWithES5.ts(14,1): error TS1128: Declaration or statement expected.
+accessorWithES5.ts(13,10): error TS1005: '{' expected.
+accessorWithES5.ts(13,11): error TS1012: Unexpected token.
+accessorWithES5.ts(13,13): error TS1005: ')' expected.
+accessorWithES5.ts(16,1): error TS1005: ',' expected.
+accessorWithES5.ts(16,1): error TS2304: Cannot find name 'var'.
+accessorWithES5.ts(16,5): error TS1005: ',' expected.
+accessorWithES5.ts(16,5): error TS2304: Cannot find name 'y'.
+accessorWithES5.ts(16,7): error TS1005: ',' expected.
+accessorWithES5.ts(16,9): error TS1005: ',' expected.
+accessorWithES5.ts(17,5): error TS1005: ',' expected.
+accessorWithES5.ts(17,10): error TS1005: '{' expected.
+accessorWithES5.ts(17,11): error TS2304: Cannot find name 'v'.
+accessorWithES5.ts(17,14): error TS1005: ';' expected.
+accessorWithES5.ts(18,2): error TS1005: '}' expected.
 
 
-==== accessorWithES5.ts (12 errors) ====
+==== accessorWithES5.ts (16 errors) ====
     class C {
         get x() {
             ~
@@ -30,28 +34,36 @@ accessorWithES5.ts(14,1): error TS1128: Declaration or statement expected.
     
     var x = {
         get a() { return 1 }
-        ~~~
-!!! error TS2304: Cannot find name 'get'.
-            ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name 'a'.
              ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
               ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                 ~
-!!! error TS1005: ',' expected.
-                  ~~~~~~
-!!! error TS1005: ',' expected.
-                  ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                         ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ')' expected.
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
     
     var y = {
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~
+!!! error TS1005: ',' expected.
+        ~
+!!! error TS2304: Cannot find name 'y'.
+          ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS1005: ',' expected.
         set b(v) { }
+        ~~~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: '{' expected.
+              ~
+!!! error TS2304: Cannot find name 'v'.
+                 ~
+!!! error TS1005: ';' expected.
     }
+     
+!!! error TS1005: '}' expected.

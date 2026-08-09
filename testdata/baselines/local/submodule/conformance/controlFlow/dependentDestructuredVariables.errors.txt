@@ -4,35 +4,28 @@ dependentDestructuredVariables.ts(195,9): error TS2367: This comparison appears 
 dependentDestructuredVariables.ts(204,9): error TS2367: This comparison appears to be unintentional because the types '["A", number] | ["B", string]' and '"A"' have no overlap.
 dependentDestructuredVariables.ts(213,9): error TS2367: This comparison appears to be unintentional because the types '["A", number] | ["B"]' and '"A"' have no overlap.
 dependentDestructuredVariables.ts(228,13): error TS2339: Property 'message' does not exist on type '[null, unknown[]] | [error, undefined]'.
-dependentDestructuredVariables.ts(258,3): error TS2304: Cannot find name 'method'.
-dependentDestructuredVariables.ts(258,3): error TS2353: Object literal may only specify known properties, and 'method' does not exist in type 'object'.
-dependentDestructuredVariables.ts(258,9): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(258,10): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(258,10): error TS2304: Cannot find name 'type'.
-dependentDestructuredVariables.ts(258,18): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(258,20): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(259,5): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(259,5): error TS2304: Cannot find name 'if'.
-dependentDestructuredVariables.ts(259,8): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(259,9): error TS1005: ',' expected.
 dependentDestructuredVariables.ts(259,9): error TS2304: Cannot find name 'type'.
-dependentDestructuredVariables.ts(259,14): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(259,17): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(259,22): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(259,24): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(260,7): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(260,9): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(260,10): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(260,13): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(261,7): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(261,12): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(261,12): error TS1182: A destructuring declaration must have an initializer.
-dependentDestructuredVariables.ts(262,9): error TS1005: ',' expected.
-dependentDestructuredVariables.ts(262,15): error TS1005: ':' expected.
-dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement expected.
+dependentDestructuredVariables.ts(260,7): error TS2304: Cannot find name 'cb'.
+dependentDestructuredVariables.ts(262,7): error TS2304: Cannot find name 'cb'.
+dependentDestructuredVariables.ts(276,9): error TS2304: Cannot find name 'type'.
+dependentDestructuredVariables.ts(277,7): error TS2304: Cannot find name 'cb'.
+dependentDestructuredVariables.ts(279,7): error TS2304: Cannot find name 'cb'.
+dependentDestructuredVariables.ts(293,9): error TS2304: Cannot find name 'type'.
+dependentDestructuredVariables.ts(294,7): error TS2304: Cannot find name 'cb'.
+dependentDestructuredVariables.ts(296,7): error TS2304: Cannot find name 'cb'.
+dependentDestructuredVariables.ts(310,9): error TS2304: Cannot find name 'type'.
+dependentDestructuredVariables.ts(311,7): error TS2304: Cannot find name 'cb'.
+dependentDestructuredVariables.ts(313,7): error TS2304: Cannot find name 'cb'.
+dependentDestructuredVariables.ts(323,9): error TS2367: This comparison appears to be unintentional because the types 'T' and '"a"' have no overlap.
+dependentDestructuredVariables.ts(393,35): error TS2304: Cannot find name 'CloseEvent'.
+dependentDestructuredVariables.ts(397,52): error TS2304: Cannot find name 'K'.
+dependentDestructuredVariables.ts(431,15): error TS2322: Type 'any' is not assignable to type 'never'.
+dependentDestructuredVariables.ts(438,7): error TS2304: Cannot find name 'Math'.
+dependentDestructuredVariables.ts(447,7): error TS2304: Cannot find name 'Math'.
+dependentDestructuredVariables.ts(458,7): error TS2304: Cannot find name 'Math'.
 
 
-==== dependentDestructuredVariables.ts (32 errors) ====
+==== dependentDestructuredVariables.ts (25 errors) ====
     type Action =
         | { kind: 'A', payload: number }
         | { kind: 'B', payload: string };
@@ -303,67 +296,18 @@ dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement
     
     let fooM: FooMethod = {
       method(type, cb) {
-      ~~~~~~
-!!! error TS2304: Cannot find name 'method'.
-      ~~~~~~
-!!! error TS2353: Object literal may only specify known properties, and 'method' does not exist in type 'object'.
-            ~
-!!! error TS1005: ',' expected.
-             ~~~~
-!!! error TS1005: ',' expected.
-             ~~~~
-!!! error TS2304: Cannot find name 'type'.
-                     ~
-!!! error TS1005: ',' expected.
-                       ~
-!!! error TS1005: ',' expected.
         if (type == 'num') {
-        ~~
-!!! error TS1005: ',' expected.
-        ~~
-!!! error TS2304: Cannot find name 'if'.
-           ~
-!!! error TS1005: ',' expected.
-            ~~~~
-!!! error TS1005: ',' expected.
             ~~~~
 !!! error TS2304: Cannot find name 'type'.
-                 ~~
-!!! error TS1005: ',' expected.
-                    ~~~~~
-!!! error TS1005: ',' expected.
-                         ~
-!!! error TS1005: ',' expected.
-                           ~
-!!! error TS1005: ',' expected.
           cb(123)
           ~~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS1005: ',' expected.
-             ~~~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
+!!! error TS2304: Cannot find name 'cb'.
         } else {
-          ~~~~
-!!! error TS1005: ',' expected.
-               ~
-!!! error TS1005: ',' expected.
-               ~
           cb("abc")
-    ~~~~~~~~~~~~~~~
-            ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ':' expected.
+          ~~
+!!! error TS2304: Cannot find name 'cb'.
         }
-    ~~~~~
       }
-    ~~
-!!! error TS1182: A destructuring declaration must have an initializer.
-      ~
-!!! error TS1128: Declaration or statement expected.
     };
     
     type FooAsyncMethod = {
@@ -376,9 +320,15 @@ dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement
     let fooAsyncM: FooAsyncMethod = {
       async method(type, cb) {
         if (type == 'num') {
+            ~~~~
+!!! error TS2304: Cannot find name 'type'.
           cb(123)
+          ~~
+!!! error TS2304: Cannot find name 'cb'.
         } else {
           cb("abc")
+          ~~
+!!! error TS2304: Cannot find name 'cb'.
         }
       }
     };
@@ -393,9 +343,15 @@ dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement
     let fooGenM: FooGenMethod = {
       *method(type, cb) {
         if (type == 'num') {
+            ~~~~
+!!! error TS2304: Cannot find name 'type'.
           cb(123)
+          ~~
+!!! error TS2304: Cannot find name 'cb'.
         } else {
           cb("abc")
+          ~~
+!!! error TS2304: Cannot find name 'cb'.
         }
       }
     };
@@ -410,9 +366,15 @@ dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement
     let fooAsyncGenM: FooAsyncGenMethod = {
       async *method(type, cb) {
         if (type == 'num') {
+            ~~~~
+!!! error TS2304: Cannot find name 'type'.
           cb(123)
+          ~~
+!!! error TS2304: Cannot find name 'cb'.
         } else {
           cb("abc")
+          ~~
+!!! error TS2304: Cannot find name 'cb'.
         }
       }
     };
@@ -423,6 +385,8 @@ dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement
     
     const f60: Func = (kind, payload) => {
         if (kind === "a") {
+            ~~~~~~~~~~~~
+!!! error TS2367: This comparison appears to be unintentional because the types 'T' and '"a"' have no overlap.
             payload.toFixed();  // error
         }
         if (kind === "b") {
@@ -493,10 +457,14 @@ dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement
     interface ClientEvents {
         warn: [message: string];
         shardDisconnect: [closeEvent: CloseEvent, shardId: number];
+                                      ~~~~~~~~~~
+!!! error TS2304: Cannot find name 'CloseEvent'.
     }
       
     declare class Client {
         public on<K extends keyof ClientEvents>(event: K, listener: (...args: ClientEvents[K]) => void): void;
+                                                       ~
+!!! error TS2304: Cannot find name 'K'.
     }
     
     const bot = new Client();
@@ -531,6 +499,8 @@ dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement
     function tooNarrow([x, y]: [1, 1] | [1, 2] | [1]) {
         if (y === undefined) {
             const shouldNotBeOk: never = x;  // Error
+                  ~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'any' is not assignable to type 'never'.
         }
     }
     
@@ -538,6 +508,8 @@ dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement
     
     function parameterReassigned1([x, y]: [1, 2] | [3, 4]) {
       if (Math.random()) {
+          ~~~~
+!!! error TS2304: Cannot find name 'Math'.
         x = 1;
       }
       if (y === 2) {
@@ -547,6 +519,8 @@ dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement
     
     function parameterReassigned2([x, y]: [1, 2] | [3, 4]) {
       if (Math.random()) {
+          ~~~~
+!!! error TS2304: Cannot find name 'Math'.
         y = 2;
       }
       if (y === 2) {
@@ -558,6 +532,8 @@ dependentDestructuredVariables.ts(264,3): error TS1128: Declaration or statement
     
     const parameterReassignedContextualRest1: (...args: [1, 2] | [3, 4]) => void = (x, y) => {
       if (Math.random()) {
+          ~~~~
+!!! error TS2304: Cannot find name 'Math'.
         y = 2;
       }
       if (y === 2) {

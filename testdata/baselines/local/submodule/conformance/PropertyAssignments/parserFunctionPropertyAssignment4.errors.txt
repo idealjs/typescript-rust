@@ -2,13 +2,9 @@ parserFunctionPropertyAssignment4.ts(1,12): error TS1005: ',' expected.
 parserFunctionPropertyAssignment4.ts(1,13): error TS1005: ',' expected.
 parserFunctionPropertyAssignment4.ts(1,13): error TS2304: Cannot find name 'T'.
 parserFunctionPropertyAssignment4.ts(1,14): error TS1005: ',' expected.
-parserFunctionPropertyAssignment4.ts(1,15): error TS1005: ',' expected.
-parserFunctionPropertyAssignment4.ts(1,16): error TS1005: ',' expected.
-parserFunctionPropertyAssignment4.ts(1,18): error TS1005: ',' expected.
-parserFunctionPropertyAssignment4.ts(1,22): error TS1128: Declaration or statement expected.
 
 
-==== parserFunctionPropertyAssignment4.ts (8 errors) ====
+==== parserFunctionPropertyAssignment4.ts (4 errors) ====
     var v = { 0<T>() { } };
                ~
 !!! error TS1005: ',' expected.
@@ -18,11 +14,3 @@ parserFunctionPropertyAssignment4.ts(1,22): error TS1128: Declaration or stateme
 !!! error TS2304: Cannot find name 'T'.
                  ~
 !!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                   ~
-!!! error TS1005: ',' expected.
-                     ~
-!!! error TS1005: ',' expected.
-                         ~
-!!! error TS1128: Declaration or statement expected.

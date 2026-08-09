@@ -3,22 +3,23 @@ numericIndexerConstrainsPropertyDeclarations.ts(8,15): error TS1005: ';' expecte
 numericIndexerConstrainsPropertyDeclarations.ts(23,9): error TS1005: ';' expected.
 numericIndexerConstrainsPropertyDeclarations.ts(26,9): error TS1005: ';' expected.
 numericIndexerConstrainsPropertyDeclarations.ts(36,16): error TS1005: ';' expected.
-numericIndexerConstrainsPropertyDeclarations.ts(90,5): error TS2304: Cannot find name 'get'.
-numericIndexerConstrainsPropertyDeclarations.ts(90,9): error TS1005: ',' expected.
-numericIndexerConstrainsPropertyDeclarations.ts(90,10): error TS1005: ',' expected.
-numericIndexerConstrainsPropertyDeclarations.ts(90,11): error TS1005: ',' expected.
-numericIndexerConstrainsPropertyDeclarations.ts(90,13): error TS1005: ',' expected.
-numericIndexerConstrainsPropertyDeclarations.ts(91,9): error TS1005: ',' expected.
-numericIndexerConstrainsPropertyDeclarations.ts(91,9): error TS2304: Cannot find name 'return'.
-numericIndexerConstrainsPropertyDeclarations.ts(91,16): error TS1005: ',' expected.
-numericIndexerConstrainsPropertyDeclarations.ts(91,18): error TS1005: ',' expected.
+numericIndexerConstrainsPropertyDeclarations.ts(88,9): error TS2304: Cannot find name 'Myn'.
+numericIndexerConstrainsPropertyDeclarations.ts(90,10): error TS1005: '{' expected.
+numericIndexerConstrainsPropertyDeclarations.ts(90,11): error TS1012: Unexpected token.
+numericIndexerConstrainsPropertyDeclarations.ts(90,13): error TS1005: ')' expected.
+numericIndexerConstrainsPropertyDeclarations.ts(92,6): error TS1128: Declaration or statement expected.
 numericIndexerConstrainsPropertyDeclarations.ts(93,5): error TS2304: Cannot find name 'set'.
-numericIndexerConstrainsPropertyDeclarations.ts(93,9): error TS1005: ',' expected.
-numericIndexerConstrainsPropertyDeclarations.ts(93,10): error TS1005: ',' expected.
-numericIndexerConstrainsPropertyDeclarations.ts(93,12): error TS1005: ',' expected.
+numericIndexerConstrainsPropertyDeclarations.ts(93,9): error TS1005: ';' expected.
+numericIndexerConstrainsPropertyDeclarations.ts(93,9): error TS2304: Cannot find name 'X'.
+numericIndexerConstrainsPropertyDeclarations.ts(93,11): error TS2304: Cannot find name 'v'.
+numericIndexerConstrainsPropertyDeclarations.ts(93,14): error TS1005: ';' expected.
+numericIndexerConstrainsPropertyDeclarations.ts(93,17): error TS1128: Declaration or statement expected.
+numericIndexerConstrainsPropertyDeclarations.ts(94,5): error TS2304: Cannot find name 'foo'.
+numericIndexerConstrainsPropertyDeclarations.ts(94,11): error TS1005: ';' expected.
+numericIndexerConstrainsPropertyDeclarations.ts(97,2): error TS1005: '}' expected.
 
 
-==== numericIndexerConstrainsPropertyDeclarations.ts (18 errors) ====
+==== numericIndexerConstrainsPropertyDeclarations.ts (19 errors) ====
     // String indexer types constrain the types of named properties in their containing type
     
     interface MyNumber extends Number {
@@ -117,38 +118,40 @@ numericIndexerConstrainsPropertyDeclarations.ts(93,12): error TS1005: ',' expect
         "3.0": '', 
         "4.0": 1, 
         f: <Myn>null, 
+            ~~~
+!!! error TS2304: Cannot find name 'Myn'.
     
         get X() { 
-        ~~~
-!!! error TS2304: Cannot find name 'get'.
-            ~
-!!! error TS1005: ',' expected.
              ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
               ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                 ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ')' expected.
             return '';
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                   ~~
-!!! error TS1005: ',' expected.
-                     ~
-!!! error TS1005: ',' expected.
         },
+         ~
+!!! error TS1128: Declaration or statement expected.
         set X(v) { }, 
         ~~~
 !!! error TS2304: Cannot find name 'set'.
             ~
-!!! error TS1005: ',' expected.
-             ~
-!!! error TS1005: ',' expected.
-               ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS2304: Cannot find name 'X'.
+              ~
+!!! error TS2304: Cannot find name 'v'.
+                 ~
+!!! error TS1005: ';' expected.
+                    ~
+!!! error TS1128: Declaration or statement expected.
         foo() { 
+        ~~~
+!!! error TS2304: Cannot find name 'foo'.
+              ~
+!!! error TS1005: ';' expected.
             return '';
         }
     }
+     
+!!! error TS1005: '}' expected.

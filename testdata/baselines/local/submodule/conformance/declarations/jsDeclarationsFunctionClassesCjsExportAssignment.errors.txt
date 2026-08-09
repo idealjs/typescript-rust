@@ -1,24 +1,8 @@
 context.js(38,9): error TS2339: Property 'prototype' does not exist on type '(input: any) => any'.
-context.js(44,5): error TS2304: Cannot find name 'construct'.
-context.js(44,14): error TS1005: ',' expected.
-context.js(44,15): error TS1005: ',' expected.
-context.js(44,15): error TS2304: Cannot find name 'input'.
-context.js(44,22): error TS2304: Cannot find name 'handle'.
-context.js(44,29): error TS1005: ',' expected.
-context.js(44,31): error TS1005: ',' expected.
-context.js(44,32): error TS1005: ',' expected.
-context.js(44,34): error TS1005: ',' expected.
-context.js(44,37): error TS1005: ',' expected.
-context.js(44,37): error TS2304: Cannot find name 'void'.
-context.js(44,42): error TS1005: ',' expected.
-context.js(44,43): error TS1005: ',' expected.
-context.js(44,45): error TS1005: ',' expected.
-context.js(45,9): error TS1005: ',' expected.
-context.js(45,9): error TS2304: Cannot find name 'return'.
-context.js(45,16): error TS1005: ',' expected.
 context.js(45,16): error TS2304: Cannot find name 'input'.
-context.js(45,21): error TS1005: ',' expected.
-context.js(47,1): error TS1128: Declaration or statement expected.
+context.js(48,7): error TS1003: Identifier expected.
+context.js(48,8): error TS1005: ';' expected.
+context.js(48,8): error TS2304: Cannot find name 'exports'.
 hook.js(10,7): error TS1003: Identifier expected.
 hook.js(10,8): error TS1005: ';' expected.
 hook.js(10,8): error TS2304: Cannot find name 'exports'.
@@ -59,7 +43,7 @@ timer.js(7,8): error TS2304: Cannot find name 'exports'.
            ~~~~~~~
 !!! error TS2304: Cannot find name 'exports'.
     
-==== context.js (21 errors) ====
+==== context.js (5 errors) ====
     /**
      * Imports
      *
@@ -106,47 +90,15 @@ timer.js(7,8): error TS2304: Cannot find name 'exports'.
          * @returns {State}
          */
         construct(input, handle = () => void 0) {
-        ~~~~~~~~~
-!!! error TS2304: Cannot find name 'construct'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~~~~~
-!!! error TS1005: ',' expected.
-                  ~~~~~
-!!! error TS2304: Cannot find name 'input'.
-                         ~~~~~~
-!!! error TS2304: Cannot find name 'handle'.
-                                ~
-!!! error TS1005: ',' expected.
-                                  ~
-!!! error TS1005: ',' expected.
-                                   ~
-!!! error TS1005: ',' expected.
-                                     ~~
-!!! error TS1005: ',' expected.
-                                        ~~~~
-!!! error TS1005: ',' expected.
-                                        ~~~~
-!!! error TS2304: Cannot find name 'void'.
-                                             ~
-!!! error TS1005: ',' expected.
-                                              ~
-!!! error TS1005: ',' expected.
-                                                ~
-!!! error TS1005: ',' expected.
             return input;
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                   ~~~~~
-!!! error TS1005: ',' expected.
                    ~~~~~
 !!! error TS2304: Cannot find name 'input'.
-                        ~
-!!! error TS1005: ',' expected.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
     module.exports = Context;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.

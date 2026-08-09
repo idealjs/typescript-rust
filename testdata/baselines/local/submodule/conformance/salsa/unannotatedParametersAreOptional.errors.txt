@@ -2,19 +2,9 @@ test.js(2,1): error TS2554: Expected 1 arguments, but got 0.
 test.js(10,3): error TS2339: Property 'm' does not exist on type 'object'.
 test.js(11,5): error TS2349: This expression is not callable.
 test.js(12,5): error TS2349: This expression is not callable.
-test.js(15,3): error TS2304: Cannot find name 'm'.
-test.js(15,4): error TS1005: ',' expected.
-test.js(15,5): error TS1005: ',' expected.
-test.js(15,5): error TS2448: Block-scoped variable 'x' used before its declaration.
-test.js(15,6): error TS1005: ',' expected.
-test.js(15,8): error TS1005: ',' expected.
-test.js(16,3): error TS2304: Cannot find name 'p'.
-test.js(16,4): error TS1005: ',' expected.
-test.js(16,8): error TS1005: ';' expected.
-test.js(17,1): error TS1128: Declaration or statement expected.
 
 
-==== test.js (14 errors) ====
+==== test.js (4 errors) ====
     function f(x) {}
     f(); // Always been ok
     ~
@@ -38,28 +28,8 @@ test.js(17,1): error TS1128: Declaration or statement expected.
     
     const obj = {
       m(x) {},
-      ~
-!!! error TS2304: Cannot find name 'm'.
-       ~
-!!! error TS1005: ',' expected.
-        ~
-!!! error TS1005: ',' expected.
-        ~
-!!! error TS2448: Block-scoped variable 'x' used before its declaration.
-         ~
-!!! error TS1005: ',' expected.
-           ~
-!!! error TS1005: ',' expected.
       p: x => {}
-      ~
-!!! error TS2304: Cannot find name 'p'.
-       ~
-!!! error TS1005: ',' expected.
-           ~~
-!!! error TS1005: ';' expected.
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
     
     obj.m(); // Always been ok
     obj.p(); // Always been ok

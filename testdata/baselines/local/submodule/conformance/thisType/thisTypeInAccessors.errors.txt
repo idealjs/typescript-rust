@@ -1,9 +1,6 @@
-thisTypeInAccessors.ts(8,5): error TS2304: Cannot find name 'get'.
-thisTypeInAccessors.ts(8,9): error TS1005: ',' expected.
-thisTypeInAccessors.ts(8,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-thisTypeInAccessors.ts(8,10): error TS1005: ',' expected.
-thisTypeInAccessors.ts(8,11): error TS1005: ',' expected.
-thisTypeInAccessors.ts(8,20): error TS1005: ',' expected.
+thisTypeInAccessors.ts(8,10): error TS1005: '{' expected.
+thisTypeInAccessors.ts(8,15): error TS1005: ')' expected.
+thisTypeInAccessors.ts(8,20): error TS1005: ';' expected.
 thisTypeInAccessors.ts(8,23): error TS2304: Cannot find name 'number'.
 thisTypeInAccessors.ts(8,30): error TS1005: ',' expected.
 thisTypeInAccessors.ts(8,32): error TS1005: ',' expected.
@@ -22,7 +19,7 @@ thisTypeInAccessors.ts(9,10): error TS1005: ',' expected.
 thisTypeInAccessors.ts(9,31): error TS1005: ',' expected.
 
 
-==== thisTypeInAccessors.ts (22 errors) ====
+==== thisTypeInAccessors.ts (19 errors) ====
     interface Foo {
         n: number;
         x: number;
@@ -31,18 +28,12 @@ thisTypeInAccessors.ts(9,31): error TS1005: ',' expected.
     const explicit = {
         n: 12,
         get x(this: Foo): number { return this.n; },
-        ~~~
-!!! error TS2304: Cannot find name 'get'.
-            ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS2448: Block-scoped variable 'x' used before its declaration.
              ~
-!!! error TS1005: ',' expected.
-              ~~~~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
+                  ~
+!!! error TS1005: ')' expected.
                        ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ';' expected.
                           ~~~~~~
 !!! error TS2304: Cannot find name 'number'.
                                  ~

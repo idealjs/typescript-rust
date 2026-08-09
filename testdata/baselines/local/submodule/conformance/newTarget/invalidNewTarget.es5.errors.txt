@@ -2,25 +2,22 @@ invalidNewTarget.es5.ts(7,9): error TS1005: ';' expected.
 invalidNewTarget.es5.ts(8,9): error TS1005: ';' expected.
 invalidNewTarget.es5.ts(13,16): error TS1005: ';' expected.
 invalidNewTarget.es5.ts(14,16): error TS1005: ';' expected.
-invalidNewTarget.es5.ts(20,5): error TS2304: Cannot find name 'k'.
-invalidNewTarget.es5.ts(20,6): error TS1005: ',' expected.
-invalidNewTarget.es5.ts(20,7): error TS1005: ',' expected.
-invalidNewTarget.es5.ts(20,9): error TS1005: ',' expected.
-invalidNewTarget.es5.ts(20,11): error TS1005: ',' expected.
-invalidNewTarget.es5.ts(20,11): error TS2304: Cannot find name 'return'.
-invalidNewTarget.es5.ts(20,18): error TS1005: ',' expected.
-invalidNewTarget.es5.ts(20,18): error TS2304: Cannot find name 'new'.
-invalidNewTarget.es5.ts(20,21): error TS1005: ',' expected.
-invalidNewTarget.es5.ts(20,22): error TS1005: ',' expected.
-invalidNewTarget.es5.ts(20,22): error TS2304: Cannot find name 'target'.
-invalidNewTarget.es5.ts(20,28): error TS1005: ',' expected.
-invalidNewTarget.es5.ts(21,5): error TS2304: Cannot find name 'get'.
-invalidNewTarget.es5.ts(21,9): error TS1005: ',' expected.
-invalidNewTarget.es5.ts(21,10): error TS1005: ',' expected.
-invalidNewTarget.es5.ts(21,11): error TS1134: Variable declaration expected.
+invalidNewTarget.es5.ts(21,10): error TS1005: '{' expected.
+invalidNewTarget.es5.ts(21,11): error TS1012: Unexpected token.
+invalidNewTarget.es5.ts(21,13): error TS1005: ')' expected.
+invalidNewTarget.es5.ts(21,35): error TS1128: Declaration or statement expected.
+invalidNewTarget.es5.ts(22,5): error TS2304: Cannot find name 'set'.
+invalidNewTarget.es5.ts(22,9): error TS1005: ';' expected.
+invalidNewTarget.es5.ts(22,9): error TS2304: Cannot find name 'm'.
+invalidNewTarget.es5.ts(22,11): error TS2304: Cannot find name '_'.
+invalidNewTarget.es5.ts(22,14): error TS1005: ';' expected.
+invalidNewTarget.es5.ts(22,16): error TS2304: Cannot find name '_'.
+invalidNewTarget.es5.ts(22,33): error TS1128: Declaration or statement expected.
+invalidNewTarget.es5.ts(24,1): error TS1012: Unexpected token.
+invalidNewTarget.es5.ts(24,3): error TS1005: '}' expected.
 
 
-==== invalidNewTarget.es5.ts (20 errors) ====
+==== invalidNewTarget.es5.ts (17 errors) ====
     const a = new.target;
     const b = () => new.target;
     
@@ -49,39 +46,33 @@ invalidNewTarget.es5.ts(21,11): error TS1134: Variable declaration expected.
     const O = {
         [new.target]: undefined,
         k() { return new.target; },
-        ~
-!!! error TS2304: Cannot find name 'k'.
-         ~
-!!! error TS1005: ',' expected.
-          ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS1005: ',' expected.
-              ~~~~~~
-!!! error TS1005: ',' expected.
-              ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                     ~~~
-!!! error TS1005: ',' expected.
-                     ~~~
-!!! error TS2304: Cannot find name 'new'.
-                        ~
-!!! error TS1005: ',' expected.
-                         ~~~~~~
-!!! error TS1005: ',' expected.
-                         ~~~~~~
-!!! error TS2304: Cannot find name 'target'.
-                               ~
-!!! error TS1005: ',' expected.
         get l() { return new.target; },
-        ~~~
-!!! error TS2304: Cannot find name 'get'.
-            ~
-!!! error TS1005: ',' expected.
              ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
               ~
-!!! error TS1134: Variable declaration expected.
+!!! error TS1012: Unexpected token.
+                ~
+!!! error TS1005: ')' expected.
+                                      ~
+!!! error TS1128: Declaration or statement expected.
         set m(_) { _ = new.target; },
+        ~~~
+!!! error TS2304: Cannot find name 'set'.
+            ~
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS2304: Cannot find name 'm'.
+              ~
+!!! error TS2304: Cannot find name '_'.
+                 ~
+!!! error TS1005: ';' expected.
+                   ~
+!!! error TS2304: Cannot find name '_'.
+                                    ~
+!!! error TS1128: Declaration or statement expected.
         n: new.target,
     };
+    ~
+!!! error TS1012: Unexpected token.
+      
+!!! error TS1005: '}' expected.

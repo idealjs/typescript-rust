@@ -2,17 +2,9 @@ privateNameInObjectLiteral-3.ts(2,5): error TS2304: Cannot find name 'get'.
 privateNameInObjectLiteral-3.ts(2,9): error TS1005: ',' expected.
 privateNameInObjectLiteral-3.ts(2,9): error TS1127: Invalid character.
 privateNameInObjectLiteral-3.ts(2,10): error TS1005: ',' expected.
-privateNameInObjectLiteral-3.ts(2,10): error TS2304: Cannot find name 'foo'.
-privateNameInObjectLiteral-3.ts(2,13): error TS1005: ',' expected.
-privateNameInObjectLiteral-3.ts(2,14): error TS1005: ',' expected.
-privateNameInObjectLiteral-3.ts(2,16): error TS1005: ',' expected.
-privateNameInObjectLiteral-3.ts(3,9): error TS1005: ',' expected.
-privateNameInObjectLiteral-3.ts(3,9): error TS2304: Cannot find name 'return'.
-privateNameInObjectLiteral-3.ts(3,16): error TS1005: ',' expected.
-privateNameInObjectLiteral-3.ts(5,1): error TS1128: Declaration or statement expected.
 
 
-==== privateNameInObjectLiteral-3.ts (12 errors) ====
+==== privateNameInObjectLiteral-3.ts (4 errors) ====
     const obj = {
         get #foo() {
         ~~~
@@ -23,22 +15,6 @@ privateNameInObjectLiteral-3.ts(5,1): error TS1128: Declaration or statement exp
 !!! error TS1127: Invalid character.
              ~~~
 !!! error TS1005: ',' expected.
-             ~~~
-!!! error TS2304: Cannot find name 'foo'.
-                ~
-!!! error TS1005: ',' expected.
-                 ~
-!!! error TS1005: ',' expected.
-                   ~
-!!! error TS1005: ',' expected.
             return ""
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                   ~~
-!!! error TS1005: ',' expected.
         }
     };
-    ~
-!!! error TS1128: Declaration or statement expected.

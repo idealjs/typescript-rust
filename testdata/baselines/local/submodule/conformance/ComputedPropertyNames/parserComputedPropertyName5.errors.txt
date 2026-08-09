@@ -1,28 +1,25 @@
 parserComputedPropertyName5.ts(1,11): error TS2304: Cannot find name 'public'.
 parserComputedPropertyName5.ts(1,18): error TS1005: ',' expected.
-parserComputedPropertyName5.ts(1,18): error TS2304: Cannot find name 'get'.
-parserComputedPropertyName5.ts(1,22): error TS1005: ',' expected.
-parserComputedPropertyName5.ts(1,25): error TS1005: ',' expected.
-parserComputedPropertyName5.ts(1,26): error TS1005: ',' expected.
-parserComputedPropertyName5.ts(1,28): error TS1005: ',' expected.
-parserComputedPropertyName5.ts(1,32): error TS1128: Declaration or statement expected.
+parserComputedPropertyName5.ts(1,25): error TS1005: '{' expected.
+parserComputedPropertyName5.ts(1,26): error TS1012: Unexpected token.
+parserComputedPropertyName5.ts(1,28): error TS1005: ')' expected.
+parserComputedPropertyName5.ts(1,33): error TS1005: ',' expected.
+parserComputedPropertyName5.ts(1,34): error TS1005: '}' expected.
 
 
-==== parserComputedPropertyName5.ts (8 errors) ====
+==== parserComputedPropertyName5.ts (7 errors) ====
     var v = { public get [e]() { } };
               ~~~~~~
 !!! error TS2304: Cannot find name 'public'.
                      ~~~
 !!! error TS1005: ',' expected.
-                     ~~~
-!!! error TS2304: Cannot find name 'get'.
-                         ~
-!!! error TS1005: ',' expected.
                             ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
                              ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                                ~
+!!! error TS1005: ')' expected.
+                                    ~
 !!! error TS1005: ',' expected.
-                                   ~
-!!! error TS1128: Declaration or statement expected.
+                                     
+!!! error TS1005: '}' expected.

@@ -1,23 +1,12 @@
 a.js(12,10): error TS2339: Property 'prototype' does not exist on type '() => void'.
-a.js(17,5): error TS2304: Cannot find name 'get'.
-a.js(17,8): error TS1005: ',' expected.
-a.js(17,9): error TS1005: ',' expected.
-a.js(17,9): error TS2304: Cannot find name 'key'.
-a.js(17,12): error TS1005: ',' expected.
-a.js(17,14): error TS1005: ',' expected.
-a.js(18,9): error TS1005: ',' expected.
-a.js(18,9): error TS2304: Cannot find name 'return'.
-a.js(18,16): error TS1005: ',' expected.
-a.js(18,16): error TS2304: Cannot find name 'this'.
-a.js(18,20): error TS1005: ',' expected.
-a.js(18,21): error TS1005: ',' expected.
-a.js(18,21): error TS2304: Cannot find name '_map'.
-a.js(18,25): error TS1005: ',' expected.
-a.js(18,35): error TS1005: ',' expected.
-a.js(20,1): error TS1128: Declaration or statement expected.
+a.js(18,26): error TS2304: Cannot find name 'key'.
+a.js(33,11): error TS2339: Property 'prototype' does not exist on type '() => void'.
+a.js(50,4): error TS2339: Property 'Multimap3' does not exist on type 'object'.
+a.js(55,4): error TS2339: Property 'Multimap3' does not exist on type 'object'.
+a.js(61,26): error TS2304: Cannot find name 'key'.
 
 
-==== a.js (17 errors) ====
+==== a.js (6 errors) ====
     /**
      * Should work for function declarations
      * @constructor
@@ -37,41 +26,11 @@ a.js(20,1): error TS1128: Declaration or statement expected.
          * @returns {V} the value ok
          */
         get(key) {
-        ~~~
-!!! error TS2304: Cannot find name 'get'.
-           ~
-!!! error TS1005: ',' expected.
-            ~~~
-!!! error TS1005: ',' expected.
-            ~~~
-!!! error TS2304: Cannot find name 'key'.
-               ~
-!!! error TS1005: ',' expected.
-                 ~
-!!! error TS1005: ',' expected.
             return this._map[key + ''];
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                   ~~~~
-!!! error TS1005: ',' expected.
-                   ~~~~
-!!! error TS2304: Cannot find name 'this'.
-                       ~
-!!! error TS1005: ',' expected.
-                        ~~~~
-!!! error TS1005: ',' expected.
-                        ~~~~
-!!! error TS2304: Cannot find name '_map'.
-                            ~
-!!! error TS1005: ',' expected.
-                                      ~
-!!! error TS1005: ',' expected.
+                             ~~~
+!!! error TS2304: Cannot find name 'key'.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
     
     /**
      * Should work for initialisers too
@@ -85,6 +44,8 @@ a.js(20,1): error TS1128: Declaration or statement expected.
     };
     
     Multimap2.prototype = {
+              ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
         /**
          * @param {K} key the key ok
          * @returns {V} the value ok
@@ -102,17 +63,23 @@ a.js(20,1): error TS1128: Declaration or statement expected.
      * @template V
      */
     Ns.Multimap3 = function() {
+       ~~~~~~~~~
+!!! error TS2339: Property 'Multimap3' does not exist on type 'object'.
         /** @type {Object<string, V>} TODO: Remove the prototype from the fresh object */
         this._map = {};
     };
     
     Ns.Multimap3.prototype = {
+       ~~~~~~~~~
+!!! error TS2339: Property 'Multimap3' does not exist on type 'object'.
         /**
          * @param {K} key the key ok
          * @returns {V} the value ok
          */
         get(key) {
             return this._map[key + ''];
+                             ~~~
+!!! error TS2304: Cannot find name 'key'.
         }
     }
     

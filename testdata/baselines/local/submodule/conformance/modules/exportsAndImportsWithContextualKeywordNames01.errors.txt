@@ -1,11 +1,10 @@
 t1.ts(1,1): error TS2304: Cannot find name 'let'.
 t1.ts(1,5): error TS1005: ';' expected.
-t1.ts(2,9): error TS1005: ',' expected.
-t1.ts(2,9): error TS2304: Cannot find name 'foo'.
-t1.ts(2,12): error TS1005: ',' expected.
-t1.ts(2,13): error TS1005: ',' expected.
+t1.ts(2,12): error TS1005: '{' expected.
+t1.ts(2,13): error TS2304: Cannot find name 'x'.
+t1.ts(2,14): error TS1005: ')' expected.
 t1.ts(2,16): error TS2304: Cannot find name 'number'.
-t1.ts(2,22): error TS1005: ',' expected.
+t1.ts(2,22): error TS1005: ';' expected.
 t1.ts(2,24): error TS1005: ',' expected.
 t1.ts(4,1): error TS1128: Declaration or statement expected.
 
@@ -13,25 +12,23 @@ t1.ts(4,1): error TS1128: Declaration or statement expected.
 ==== exportsAndImportsWithContextualKeywordNames01.ts (0 errors) ====
     ﻿// @module: commonjs
     
-==== t1.ts (10 errors) ====
+==== t1.ts (9 errors) ====
     let set = {
     ~~~
 !!! error TS2304: Cannot find name 'let'.
         ~~~
 !!! error TS1005: ';' expected.
         set foo(x: number) {
-            ~~~
-!!! error TS1005: ',' expected.
-            ~~~
-!!! error TS2304: Cannot find name 'foo'.
                ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
                 ~
-!!! error TS1005: ',' expected.
+!!! error TS2304: Cannot find name 'x'.
+                 ~
+!!! error TS1005: ')' expected.
                    ~~~~~~
 !!! error TS2304: Cannot find name 'number'.
                          ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ';' expected.
                            ~
 !!! error TS1005: ',' expected.
         }

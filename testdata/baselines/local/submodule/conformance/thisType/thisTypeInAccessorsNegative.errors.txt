@@ -1,9 +1,6 @@
-thisTypeInAccessorsNegative.ts(10,5): error TS2304: Cannot find name 'get'.
-thisTypeInAccessorsNegative.ts(10,9): error TS1005: ',' expected.
-thisTypeInAccessorsNegative.ts(10,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-thisTypeInAccessorsNegative.ts(10,10): error TS1005: ',' expected.
-thisTypeInAccessorsNegative.ts(10,11): error TS1005: ',' expected.
-thisTypeInAccessorsNegative.ts(10,20): error TS1005: ',' expected.
+thisTypeInAccessorsNegative.ts(10,10): error TS1005: '{' expected.
+thisTypeInAccessorsNegative.ts(10,15): error TS1005: ')' expected.
+thisTypeInAccessorsNegative.ts(10,20): error TS1005: ';' expected.
 thisTypeInAccessorsNegative.ts(10,22): error TS1005: ',' expected.
 thisTypeInAccessorsNegative.ts(10,24): error TS1005: ',' expected.
 thisTypeInAccessorsNegative.ts(10,24): error TS2304: Cannot find name 'return'.
@@ -20,7 +17,7 @@ thisTypeInAccessorsNegative.ts(11,10): error TS1005: ',' expected.
 thisTypeInAccessorsNegative.ts(11,23): error TS1005: ',' expected.
 
 
-==== thisTypeInAccessorsNegative.ts (20 errors) ====
+==== thisTypeInAccessorsNegative.ts (17 errors) ====
     interface Foo {
         n: number;
         x: number;
@@ -31,18 +28,12 @@ thisTypeInAccessorsNegative.ts(11,23): error TS1005: ',' expected.
     const mismatch = {
         n: 13,
         get x(this: Foo) { return this.n; },
-        ~~~
-!!! error TS2304: Cannot find name 'get'.
-            ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS2448: Block-scoped variable 'x' used before its declaration.
              ~
-!!! error TS1005: ',' expected.
-              ~~~~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
+                  ~
+!!! error TS1005: ')' expected.
                        ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ';' expected.
                          ~
 !!! error TS1005: ',' expected.
                            ~~~~~~

@@ -1,34 +1,7 @@
-thisTypeInFunctions2.ts(22,5): error TS2304: Cannot find name 'init'.
-thisTypeInFunctions2.ts(22,9): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(22,10): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(22,12): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(23,9): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(23,9): error TS2304: Cannot find name 'this'.
-thisTypeInFunctions2.ts(25,9): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(25,9): error TS2304: Cannot find name 'this'.
-thisTypeInFunctions2.ts(25,13): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(25,14): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(25,14): error TS2304: Cannot find name 'willDestroy'.
-thisTypeInFunctions2.ts(27,5): error TS2304: Cannot find name 'mine'.
-thisTypeInFunctions2.ts(27,5): error TS2554: Expected 1 arguments, but got 5.
-thisTypeInFunctions2.ts(27,9): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(28,5): error TS2304: Cannot find name 'foo'.
-thisTypeInFunctions2.ts(28,11): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(29,9): error TS2304: Cannot find name 'this'.
-thisTypeInFunctions2.ts(29,13): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(29,14): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(29,14): error TS2304: Cannot find name 'url'.
-thisTypeInFunctions2.ts(29,17): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(30,9): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(30,9): error TS2304: Cannot find name 'this'.
-thisTypeInFunctions2.ts(30,13): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(30,14): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(30,14): error TS2304: Cannot find name 'willDestroy'.
-thisTypeInFunctions2.ts(30,25): error TS1005: ',' expected.
-thisTypeInFunctions2.ts(32,1): error TS1005: ',' expected.
+thisTypeInFunctions2.ts(47,16): error TS2304: Cannot find name 'n'.
 
 
-==== thisTypeInFunctions2.ts (28 errors) ====
+==== thisTypeInFunctions2.ts (1 errors) ====
     interface IndexedWithThis {
         // this is a workaround for React
         init?: (this: this) => void;
@@ -51,77 +24,16 @@ thisTypeInFunctions2.ts(32,1): error TS1005: ',' expected.
     
     extend1({
         init() {
-        ~~~~
-!!! error TS2304: Cannot find name 'init'.
-            ~
-!!! error TS1005: ',' expected.
-             ~
-!!! error TS1005: ',' expected.
-               ~
-!!! error TS1005: ',' expected.
             this // this: IndexedWithThis because of contextual typing.
-            ~~~~
-!!! error TS1005: ',' expected.
-            ~~~~
-!!! error TS2304: Cannot find name 'this'.
             // this.mine
             this.willDestroy
-            ~~~~
-!!! error TS1005: ',' expected.
-            ~~~~
-!!! error TS2304: Cannot find name 'this'.
-                ~
-!!! error TS1005: ',' expected.
-                 ~~~~~~~~~~~
-!!! error TS1005: ',' expected.
-                 ~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'willDestroy'.
         },
         mine: 12,
-        ~~~~
-!!! error TS2304: Cannot find name 'mine'.
-        ~~~~~~~~~
-            ~
-!!! error TS1005: ',' expected.
         foo() {
-    ~~~~~~~~~~~
-        ~~~
-!!! error TS2304: Cannot find name 'foo'.
-              ~
-!!! error TS1005: ',' expected.
             this.url; // this: any because 'foo' matches the string indexer
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            ~~~~
-!!! error TS2304: Cannot find name 'this'.
-                ~
-!!! error TS1005: ',' expected.
-                 ~~~
-!!! error TS1005: ',' expected.
-                 ~~~
-!!! error TS2304: Cannot find name 'url'.
-                    ~
-!!! error TS1005: ',' expected.
             this.willDestroy;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~
-            ~~~~
-!!! error TS1005: ',' expected.
-            ~~~~
-!!! error TS2304: Cannot find name 'this'.
-                ~
-!!! error TS1005: ',' expected.
-                 ~~~~~~~~~~~
-!!! error TS1005: ',' expected.
-                 ~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'willDestroy'.
-                            ~
-!!! error TS1005: ',' expected.
         }
-    ~~~~~
     });
-    
-!!! error TS2554: Expected 1 arguments, but got 5.
-    ~
-!!! error TS1005: ',' expected.
     extend2({
         init() {
             this // this: IndexedWithoutThis because of contextual typing
@@ -137,6 +49,8 @@ thisTypeInFunctions2.ts(32,1): error TS1005: ',' expected.
     simple({
         foo(n) {
             return n.length + this.bar();
+                   ~
+!!! error TS2304: Cannot find name 'n'.
         },
         bar() {
             return 14;

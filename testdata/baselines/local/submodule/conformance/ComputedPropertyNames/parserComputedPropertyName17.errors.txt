@@ -1,25 +1,13 @@
-parserComputedPropertyName17.ts(1,11): error TS2304: Cannot find name 'set'.
-parserComputedPropertyName17.ts(1,15): error TS1005: ',' expected.
-parserComputedPropertyName17.ts(1,18): error TS1005: ',' expected.
-parserComputedPropertyName17.ts(1,19): error TS1005: ',' expected.
-parserComputedPropertyName17.ts(1,20): error TS1005: ',' expected.
-parserComputedPropertyName17.ts(1,22): error TS1005: ',' expected.
-parserComputedPropertyName17.ts(1,26): error TS1128: Declaration or statement expected.
+parserComputedPropertyName17.ts(1,18): error TS1005: '{' expected.
+parserComputedPropertyName17.ts(1,22): error TS1005: ';' expected.
+parserComputedPropertyName17.ts(1,27): error TS1005: '}' expected.
 
 
-==== parserComputedPropertyName17.ts (7 errors) ====
+==== parserComputedPropertyName17.ts (3 errors) ====
     var v = { set [e](v) { } }
-              ~~~
-!!! error TS2304: Cannot find name 'set'.
-                  ~
-!!! error TS1005: ',' expected.
                      ~
-!!! error TS1005: ',' expected.
-                      ~
-!!! error TS1005: ',' expected.
-                       ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
                          ~
-!!! error TS1005: ',' expected.
-                             ~
-!!! error TS1128: Declaration or statement expected.
+!!! error TS1005: ';' expected.
+                              
+!!! error TS1005: '}' expected.

@@ -3,14 +3,9 @@ usingDeclarationsInForAwaitOf.ts(2,22): error TS1005: ';' expected.
 usingDeclarationsInForAwaitOf.ts(2,22): error TS2304: Cannot find name 'd1'.
 usingDeclarationsInForAwaitOf.ts(2,25): error TS1005: ';' expected.
 usingDeclarationsInForAwaitOf.ts(2,25): error TS2304: Cannot find name 'of'.
-usingDeclarationsInForAwaitOf.ts(2,47): error TS1005: ',' expected.
-usingDeclarationsInForAwaitOf.ts(2,48): error TS1005: ',' expected.
-usingDeclarationsInForAwaitOf.ts(2,50): error TS1005: ',' expected.
-usingDeclarationsInForAwaitOf.ts(2,53): error TS1005: ']' expected.
-usingDeclarationsInForAwaitOf.ts(2,71): error TS1005: ';' expected.
 
 
-==== usingDeclarationsInForAwaitOf.ts (10 errors) ====
+==== usingDeclarationsInForAwaitOf.ts (5 errors) ====
     async function main() {
         for await (using d1 of [{ [Symbol.dispose]() {} }, null, undefined]) {
                    ~~~~~
@@ -23,15 +18,5 @@ usingDeclarationsInForAwaitOf.ts(2,71): error TS1005: ';' expected.
 !!! error TS1005: ';' expected.
                             ~~
 !!! error TS2304: Cannot find name 'of'.
-                                                  ~
-!!! error TS1005: ',' expected.
-                                                   ~
-!!! error TS1005: ',' expected.
-                                                     ~
-!!! error TS1005: ',' expected.
-                                                        ~
-!!! error TS1005: ']' expected.
-                                                                          ~
-!!! error TS1005: ';' expected.
         }
     }

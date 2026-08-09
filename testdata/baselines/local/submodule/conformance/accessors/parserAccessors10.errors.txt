@@ -1,33 +1,27 @@
 parserAccessors10.ts(2,3): error TS2304: Cannot find name 'public'.
 parserAccessors10.ts(2,10): error TS1005: ',' expected.
-parserAccessors10.ts(2,10): error TS2304: Cannot find name 'get'.
-parserAccessors10.ts(2,14): error TS1005: ',' expected.
-parserAccessors10.ts(2,14): error TS2304: Cannot find name 'foo'.
-parserAccessors10.ts(2,17): error TS1005: ',' expected.
-parserAccessors10.ts(2,18): error TS1005: ',' expected.
-parserAccessors10.ts(2,20): error TS1005: ',' expected.
-parserAccessors10.ts(3,1): error TS1128: Declaration or statement expected.
+parserAccessors10.ts(2,17): error TS1005: '{' expected.
+parserAccessors10.ts(2,18): error TS1012: Unexpected token.
+parserAccessors10.ts(2,20): error TS1005: ')' expected.
+parserAccessors10.ts(3,2): error TS1005: ',' expected.
+parserAccessors10.ts(3,3): error TS1005: '}' expected.
 
 
-==== parserAccessors10.ts (9 errors) ====
+==== parserAccessors10.ts (7 errors) ====
     var v = {
       public get foo() { }
       ~~~~~~
 !!! error TS2304: Cannot find name 'public'.
              ~~~
 !!! error TS1005: ',' expected.
-             ~~~
-!!! error TS2304: Cannot find name 'get'.
-                 ~~~
-!!! error TS1005: ',' expected.
-                 ~~~
-!!! error TS2304: Cannot find name 'foo'.
                     ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
                      ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                        ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ')' expected.
     };
-    ~
-!!! error TS1128: Declaration or statement expected.
+     ~
+!!! error TS1005: ',' expected.
+      
+!!! error TS1005: '}' expected.

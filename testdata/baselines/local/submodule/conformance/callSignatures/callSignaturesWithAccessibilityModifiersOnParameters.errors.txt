@@ -42,20 +42,15 @@ callSignaturesWithAccessibilityModifiersOnParameters.ts(30,16): error TS1005: ',
 callSignaturesWithAccessibilityModifiersOnParameters.ts(30,27): error TS1005: ',' expected.
 callSignaturesWithAccessibilityModifiersOnParameters.ts(31,18): error TS1005: ',' expected.
 callSignaturesWithAccessibilityModifiersOnParameters.ts(31,36): error TS1005: ',' expected.
-callSignaturesWithAccessibilityModifiersOnParameters.ts(35,8): error TS1005: ',' expected.
-callSignaturesWithAccessibilityModifiersOnParameters.ts(35,9): error TS1005: ',' expected.
-callSignaturesWithAccessibilityModifiersOnParameters.ts(35,9): error TS2304: Cannot find name 'public'.
 callSignaturesWithAccessibilityModifiersOnParameters.ts(35,16): error TS1005: ',' expected.
-callSignaturesWithAccessibilityModifiersOnParameters.ts(35,20): error TS1005: ',' expected.
-callSignaturesWithAccessibilityModifiersOnParameters.ts(35,22): error TS1005: ',' expected.
-callSignaturesWithAccessibilityModifiersOnParameters.ts(36,6): error TS1005: ',' expected.
-callSignaturesWithAccessibilityModifiersOnParameters.ts(36,17): error TS1005: ',' expected.
-callSignaturesWithAccessibilityModifiersOnParameters.ts(36,20): error TS1005: ',' expected.
 callSignaturesWithAccessibilityModifiersOnParameters.ts(36,40): error TS1005: ',' expected.
-callSignaturesWithAccessibilityModifiersOnParameters.ts(36,49): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(37,19): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(37,22): error TS2304: Cannot find name 'T'.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(37,33): error TS1005: ',' expected.
+callSignaturesWithAccessibilityModifiersOnParameters.ts(37,36): error TS2304: Cannot find name 'T'.
 
 
-==== callSignaturesWithAccessibilityModifiersOnParameters.ts (55 errors) ====
+==== callSignaturesWithAccessibilityModifiersOnParameters.ts (50 errors) ====
     // Call signature parameters do not allow accessibility modifiers
     
     function foo(public x, private y) { }
@@ -179,28 +174,18 @@ callSignaturesWithAccessibilityModifiersOnParameters.ts(36,49): error TS1005: ',
     
     var b = {
         foo(public x, y) { },
-           ~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'public'.
                    ~
 !!! error TS1005: ',' expected.
-                       ~
-!!! error TS1005: ',' expected.
-                         ~
-!!! error TS1005: ',' expected.
         a: function foo(x: number, private y: string) { },
-         ~
-!!! error TS1005: ',' expected.
-                    ~~~
-!!! error TS1005: ',' expected.
-                       ~
-!!! error TS1005: ',' expected.
                                            ~
 !!! error TS1005: ',' expected.
-                                                    ~
-!!! error TS1005: ',' expected.
         b: <T>(public x: T, private y: T) => { }
+                      ~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS2304: Cannot find name 'T'.
+                                    ~
+!!! error TS1005: ',' expected.
+                                       ~
+!!! error TS2304: Cannot find name 'T'.
     }

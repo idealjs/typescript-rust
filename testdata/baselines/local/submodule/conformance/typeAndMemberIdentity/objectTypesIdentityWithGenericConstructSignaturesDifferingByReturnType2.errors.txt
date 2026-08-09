@@ -9,20 +9,15 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,17
 objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,25): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,25): error TS2304: Cannot find name 'Date'.
 objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,29): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,30): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,31): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,34): error TS2304: Cannot find name 'T'.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,35): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,37): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,39): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,39): error TS2304: Cannot find name 'return'.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,46): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,46): error TS2304: Cannot find name 'null'.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,50): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,54): error TS1128: Declaration or statement expected.
+objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(32,20): error TS2304: Cannot find name 'Date'.
+objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(33,20): error TS2304: Cannot find name 'Date'.
+objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(45,20): error TS2304: Cannot find name 'Date'.
+objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(60,21): error TS2304: Cannot find name 'Date'.
+objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(68,21): error TS2304: Cannot find name 'Date'.
+objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(72,21): error TS2304: Cannot find name 'Date'.
 
 
-==== objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts (22 errors) ====
+==== objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts (17 errors) ====
     // Two call or construct signatures are considered identical when they have the same number of type parameters and, considering those 
     // parameters pairwise identical, have identical type parameter constraints, identical number of parameters with identical kind(required, 
     // optional or rest) and types, and identical return types.
@@ -67,28 +62,6 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,54
 !!! error TS2304: Cannot find name 'Date'.
                                 ~
 !!! error TS1005: ',' expected.
-                                 ~
-!!! error TS1005: ',' expected.
-                                  ~
-!!! error TS1005: ',' expected.
-                                     ~
-!!! error TS2304: Cannot find name 'T'.
-                                      ~
-!!! error TS1005: ',' expected.
-                                        ~
-!!! error TS1005: ',' expected.
-                                          ~~~~~~
-!!! error TS1005: ',' expected.
-                                          ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                                                 ~~~~
-!!! error TS1005: ',' expected.
-                                                 ~~~~
-!!! error TS2304: Cannot find name 'null'.
-                                                     ~
-!!! error TS1005: ',' expected.
-                                                         ~
-!!! error TS1128: Declaration or statement expected.
     
     function foo1b(x: B<Date>);
     function foo1b(x: B<Date>); // error
@@ -99,7 +72,11 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,54
     function foo1c(x: any) { }
     
     function foo2(x: I<Date>);
+                       ~~~~
+!!! error TS2304: Cannot find name 'Date'.
     function foo2(x: I<Date>); // error
+                       ~~~~
+!!! error TS2304: Cannot find name 'Date'.
     function foo2(x: any) { }
     
     function foo3(x: typeof a);
@@ -112,6 +89,8 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,54
     
     function foo8(x: B<Date>);
     function foo8(x: I<Date>); // ok
+                       ~~~~
+!!! error TS2304: Cannot find name 'Date'.
     function foo8(x: any) { }
     
     function foo9(x: B<Date>);
@@ -127,6 +106,8 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,54
     function foo11(x: any) { }
     
     function foo12(x: I<Date>);
+                        ~~~~
+!!! error TS2304: Cannot find name 'Date'.
     function foo12(x: C<Date>); // ok
     function foo12(x: any) { }
     
@@ -135,10 +116,14 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingByReturnType2.ts(22,54
     function foo12b(x: any) { }
     
     function foo13(x: I<Date>);
+                        ~~~~
+!!! error TS2304: Cannot find name 'Date'.
     function foo13(x: typeof a); // ok
     function foo13(x: any) { }
     
     function foo14(x: I<Date>);
+                        ~~~~
+!!! error TS2304: Cannot find name 'Date'.
     function foo14(x: typeof b); // ok
     function foo14(x: any) { }
     

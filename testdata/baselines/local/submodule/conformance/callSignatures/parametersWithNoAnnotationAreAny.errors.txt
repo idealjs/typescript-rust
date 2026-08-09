@@ -1,19 +1,8 @@
 parametersWithNoAnnotationAreAny.ts(4,11): error TS2304: Cannot find name 'T'.
-parametersWithNoAnnotationAreAny.ts(22,8): error TS1005: ',' expected.
-parametersWithNoAnnotationAreAny.ts(22,9): error TS1005: ',' expected.
-parametersWithNoAnnotationAreAny.ts(22,10): error TS1005: ',' expected.
-parametersWithNoAnnotationAreAny.ts(22,12): error TS1005: ',' expected.
-parametersWithNoAnnotationAreAny.ts(23,9): error TS1005: ',' expected.
-parametersWithNoAnnotationAreAny.ts(23,9): error TS2304: Cannot find name 'return'.
-parametersWithNoAnnotationAreAny.ts(23,16): error TS1005: ',' expected.
-parametersWithNoAnnotationAreAny.ts(23,17): error TS1005: ',' expected.
-parametersWithNoAnnotationAreAny.ts(25,6): error TS1005: ',' expected.
-parametersWithNoAnnotationAreAny.ts(25,17): error TS1005: ',' expected.
-parametersWithNoAnnotationAreAny.ts(25,20): error TS1005: ',' expected.
-parametersWithNoAnnotationAreAny.ts(25,22): error TS1005: ',' expected.
+parametersWithNoAnnotationAreAny.ts(23,16): error TS2304: Cannot find name 'x'.
 
 
-==== parametersWithNoAnnotationAreAny.ts (13 errors) ====
+==== parametersWithNoAnnotationAreAny.ts (2 errors) ====
     function foo(x) { return x; }
     var f = function foo(x) { return x; }
     var f2 = (x) => x;
@@ -38,33 +27,11 @@ parametersWithNoAnnotationAreAny.ts(25,22): error TS1005: ',' expected.
     
     var b = {
         foo(x) {
-           ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS1005: ',' expected.
-             ~
-!!! error TS1005: ',' expected.
-               ~
-!!! error TS1005: ',' expected.
             return x;
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
                    ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
+!!! error TS2304: Cannot find name 'x'.
         },
         a: function foo(x) {
-         ~
-!!! error TS1005: ',' expected.
-                    ~~~
-!!! error TS1005: ',' expected.
-                       ~
-!!! error TS1005: ',' expected.
-                         ~
-!!! error TS1005: ',' expected.
             return x;
         },
         b: (x) => x

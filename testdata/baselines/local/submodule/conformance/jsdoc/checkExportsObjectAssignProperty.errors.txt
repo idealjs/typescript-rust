@@ -6,34 +6,24 @@ mod1.js(2,1): error TS2304: Cannot find name 'Object'.
 mod1.js(2,23): error TS2304: Cannot find name 'exports'.
 mod1.js(3,1): error TS2304: Cannot find name 'Object'.
 mod1.js(3,23): error TS2304: Cannot find name 'exports'.
-mod1.js(3,49): error TS2304: Cannot find name 'get'.
-mod1.js(3,52): error TS1005: ',' expected.
-mod1.js(3,53): error TS1005: ',' expected.
-mod1.js(3,55): error TS1005: ',' expected.
-mod1.js(3,57): error TS1005: ',' expected.
-mod1.js(3,57): error TS2304: Cannot find name 'return'.
-mod1.js(3,64): error TS1005: ',' expected.
-mod1.js(3,73): error TS2304: Cannot find name 'set'.
-mod1.js(3,77): error TS2304: Cannot find name '_'.
-mod1.js(3,80): error TS1005: ',' expected.
-mod1.js(3,95): error TS1005: ',' expected.
+mod1.js(4,1): error TS2304: Cannot find name 'Object'.
+mod1.js(4,23): error TS2304: Cannot find name 'exports'.
+mod1.js(5,1): error TS2304: Cannot find name 'Object'.
+mod1.js(5,23): error TS2304: Cannot find name 'exports'.
+mod1.js(8,28): error TS2304: Cannot find name 'Number'.
+mod1.js(8,35): error TS2304: Cannot find name 'str'.
 mod2.js(1,1): error TS2304: Cannot find name 'Object'.
 mod2.js(1,23): error TS2304: Cannot find name 'module'.
 mod2.js(2,1): error TS2304: Cannot find name 'Object'.
 mod2.js(2,23): error TS2304: Cannot find name 'module'.
 mod2.js(3,1): error TS2304: Cannot find name 'Object'.
 mod2.js(3,23): error TS2304: Cannot find name 'module'.
-mod2.js(3,56): error TS2304: Cannot find name 'get'.
-mod2.js(3,59): error TS1005: ',' expected.
-mod2.js(3,60): error TS1005: ',' expected.
-mod2.js(3,62): error TS1005: ',' expected.
-mod2.js(3,64): error TS1005: ',' expected.
-mod2.js(3,64): error TS2304: Cannot find name 'return'.
-mod2.js(3,71): error TS1005: ',' expected.
-mod2.js(3,80): error TS2304: Cannot find name 'set'.
-mod2.js(3,84): error TS2304: Cannot find name '_'.
-mod2.js(3,87): error TS1005: ',' expected.
-mod2.js(3,102): error TS1005: ',' expected.
+mod2.js(4,1): error TS2304: Cannot find name 'Object'.
+mod2.js(4,23): error TS2304: Cannot find name 'module'.
+mod2.js(5,1): error TS2304: Cannot find name 'Object'.
+mod2.js(5,23): error TS2304: Cannot find name 'module'.
+mod2.js(8,28): error TS2304: Cannot find name 'Number'.
+mod2.js(8,35): error TS2304: Cannot find name 'str'.
 validator.ts(5,1): error TS2304: Cannot find name 'm1'.
 validator.ts(6,1): error TS2304: Cannot find name 'm1'.
 validator.ts(7,1): error TS2304: Cannot find name 'm1'.
@@ -62,7 +52,7 @@ validator.ts(40,1): error TS2304: Cannot find name 'm2'.
 validator.ts(41,1): error TS2304: Cannot find name 'm2'.
 
 
-==== mod1.js (17 errors) ====
+==== mod1.js (12 errors) ====
     Object.defineProperty(exports, "thing", { value: 42, writable: true });
     ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
@@ -78,37 +68,27 @@ validator.ts(41,1): error TS2304: Cannot find name 'm2'.
 !!! error TS2304: Cannot find name 'Object'.
                           ~~~~~~~
 !!! error TS2304: Cannot find name 'exports'.
-                                                    ~~~
-!!! error TS2304: Cannot find name 'get'.
-                                                       ~
-!!! error TS1005: ',' expected.
-                                                        ~
-!!! error TS1005: ',' expected.
-                                                          ~
-!!! error TS1005: ',' expected.
-                                                            ~~~~~~
-!!! error TS1005: ',' expected.
-                                                            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                                                                   ~~~~~
-!!! error TS1005: ',' expected.
-                                                                            ~~~
-!!! error TS2304: Cannot find name 'set'.
-                                                                                ~
-!!! error TS2304: Cannot find name '_'.
-                                                                                   ~
-!!! error TS1005: ',' expected.
-                                                                                                  ~
-!!! error TS1005: ',' expected.
     Object.defineProperty(exports, "readonlyAccessor", { get() { return 21.75 } });
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                          ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
     Object.defineProperty(exports, "setonlyAccessor", {
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                          ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
         /** @param {string} str */
         set(str) {
             this.rwAccessors = Number(str) 
+                               ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
+                                      ~~~
+!!! error TS2304: Cannot find name 'str'.
         }
     });
     
-==== mod2.js (17 errors) ====
+==== mod2.js (12 errors) ====
     Object.defineProperty(module.exports, "thing", { value: "yes", writable: true });
     ~~~~~~
 !!! error TS2304: Cannot find name 'Object'.
@@ -124,33 +104,23 @@ validator.ts(41,1): error TS2304: Cannot find name 'm2'.
 !!! error TS2304: Cannot find name 'Object'.
                           ~~~~~~
 !!! error TS2304: Cannot find name 'module'.
-                                                           ~~~
-!!! error TS2304: Cannot find name 'get'.
-                                                              ~
-!!! error TS1005: ',' expected.
-                                                               ~
-!!! error TS1005: ',' expected.
-                                                                 ~
-!!! error TS1005: ',' expected.
-                                                                   ~~~~~~
-!!! error TS1005: ',' expected.
-                                                                   ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                                                                          ~~~~~
-!!! error TS1005: ',' expected.
-                                                                                   ~~~
-!!! error TS2304: Cannot find name 'set'.
-                                                                                       ~
-!!! error TS2304: Cannot find name '_'.
-                                                                                          ~
-!!! error TS1005: ',' expected.
-                                                                                                         ~
-!!! error TS1005: ',' expected.
     Object.defineProperty(module.exports, "readonlyAccessor", { get() { return 21.75 } });
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                          ~~~~~~
+!!! error TS2304: Cannot find name 'module'.
     Object.defineProperty(module.exports, "setonlyAccessor", {
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                          ~~~~~~
+!!! error TS2304: Cannot find name 'module'.
         /** @param {string} str */
         set(str) {
             this.rwAccessors = Number(str) 
+                               ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
+                                      ~~~
+!!! error TS2304: Cannot find name 'str'.
         }
     });
     

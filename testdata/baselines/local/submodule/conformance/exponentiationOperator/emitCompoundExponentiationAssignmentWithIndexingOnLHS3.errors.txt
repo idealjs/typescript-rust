@@ -1,68 +1,129 @@
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,5): error TS2304: Cannot find name 'get'.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,9): error TS1005: ',' expected.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,10): error TS1005: ',' expected.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,11): error TS1005: ',' expected.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,13): error TS1005: ',' expected.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,9): error TS1005: ',' expected.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,9): error TS2304: Cannot find name 'return'.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,16): error TS1005: ',' expected.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,16): error TS2304: Cannot find name 'this'.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,20): error TS1005: ',' expected.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,21): error TS1005: ',' expected.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,21): error TS2304: Cannot find name '_0'.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(6,23): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,10): error TS1005: '{' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,11): error TS1012: Unexpected token.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(5,13): error TS1005: ')' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(7,6): error TS1128: Declaration or statement expected.
 emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(8,5): error TS2304: Cannot find name 'set'.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(8,9): error TS1005: ',' expected.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(8,10): error TS1134: Variable declaration expected.
-emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(8,20): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(8,9): error TS1005: ';' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(8,9): error TS2349: This expression is not callable.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(8,11): error TS2304: Cannot find name 'x'.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(8,12): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(8,14): error TS2304: Cannot find name 'number'.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(8,22): error TS1005: ';' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(9,19): error TS2304: Cannot find name 'x'.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(10,6): error TS1128: Declaration or statement expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(12,1): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(12,7): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(12,11): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(12,15): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(12,21): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(12,24): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(13,1): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(13,7): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(13,11): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(13,15): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(13,21): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(13,25): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(13,29): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(13,30): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(14,1): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(14,7): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(14,11): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(14,15): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(14,21): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(14,25): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(14,28): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(14,29): error TS1005: ',' expected.
+emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts(14,30): error TS1005: '}' expected.
 
 
-==== emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts (17 errors) ====
+==== emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts (36 errors) ====
     ﻿// @target: es5, es2015
     
     var object = {
         _0: 2,
         get 0() {
-     ~~~
-!!! error TS2304: Cannot find name 'get'.
-         ~
-!!! error TS1005: ',' expected.
           ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
            ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
              ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ')' expected.
             return this._0;
-         ~~~~~~
-!!! error TS1005: ',' expected.
-         ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                ~~~~
-!!! error TS1005: ',' expected.
-                ~~~~
-!!! error TS2304: Cannot find name 'this'.
-                    ~
-!!! error TS1005: ',' expected.
-                     ~~
-!!! error TS1005: ',' expected.
-                     ~~
-!!! error TS2304: Cannot find name '_0'.
-                       ~
-!!! error TS1005: ',' expected.
         },
+      ~
+!!! error TS1128: Declaration or statement expected.
         set 0(x: number) {
      ~~~
 !!! error TS2304: Cannot find name 'set'.
          ~
+!!! error TS1005: ';' expected.
+         ~
+!!! error TS2349: This expression is not callable.
+           ~
+!!! error TS2304: Cannot find name 'x'.
+            ~
 !!! error TS1005: ',' expected.
-          ~
-!!! error TS1134: Variable declaration expected.
-                    ~
-!!! error TS1005: ',' expected.
+              ~~~~~~
+!!! error TS2304: Cannot find name 'number'.
+                      ~
+!!! error TS1005: ';' expected.
             this._0 = x;
+                   ~
+!!! error TS2304: Cannot find name 'x'.
         },
+      ~
+!!! error TS1128: Declaration or statement expected.
+          
     }
+    ~
     object[0] **= object[0];
+    ~~~
+!!! error TS1005: ',' expected.
+       ~
+!!! error TS1005: ',' expected.
+           ~~~
+!!! error TS1005: ',' expected.
+               ~~~~~~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1005: ',' expected.
+                        ~
+!!! error TS1005: ',' expected.
+                          ~~
     object[0] **= object[0] **= 2;
+    ~~~
+!!! error TS1005: ',' expected.
+       ~
+!!! error TS1005: ',' expected.
+           ~~~
+!!! error TS1005: ',' expected.
+               ~~~~~~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1005: ',' expected.
+                         ~~~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1005: ',' expected.
+                                ~~
     object[0] **= object[0] ** 2;
+    ~~~
+!!! error TS1005: ',' expected.
+       ~
+!!! error TS1005: ',' expected.
+           ~~~
+!!! error TS1005: ',' expected.
+               ~~~~~~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1005: ',' expected.
+                         ~~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: ',' expected.
+                              
+!!! error TS1005: '}' expected.

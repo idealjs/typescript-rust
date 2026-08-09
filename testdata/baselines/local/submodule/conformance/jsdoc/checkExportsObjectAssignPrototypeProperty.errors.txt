@@ -5,21 +5,19 @@ mod1.js(12,1): error TS2304: Cannot find name 'Object'.
 mod1.js(12,30): error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
 mod1.js(13,1): error TS2304: Cannot find name 'Object'.
 mod1.js(13,30): error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
-mod1.js(13,58): error TS2304: Cannot find name 'get'.
-mod1.js(13,61): error TS1005: ',' expected.
-mod1.js(13,62): error TS1005: ',' expected.
-mod1.js(13,64): error TS1005: ',' expected.
-mod1.js(13,66): error TS1005: ',' expected.
-mod1.js(13,66): error TS2304: Cannot find name 'return'.
-mod1.js(13,73): error TS1005: ',' expected.
-mod1.js(13,82): error TS2304: Cannot find name 'set'.
-mod1.js(13,86): error TS2304: Cannot find name '_'.
-mod1.js(13,89): error TS1005: ',' expected.
-mod1.js(13,104): error TS1005: ',' expected.
+mod1.js(14,1): error TS2304: Cannot find name 'Object'.
+mod1.js(14,30): error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
+mod1.js(15,1): error TS2304: Cannot find name 'Object'.
+mod1.js(15,30): error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
+mod1.js(18,28): error TS2304: Cannot find name 'Number'.
+mod1.js(18,35): error TS2304: Cannot find name 'str'.
+mod1.js(21,7): error TS1003: Identifier expected.
+mod1.js(21,8): error TS1005: ';' expected.
+mod1.js(21,8): error TS2304: Cannot find name 'exports'.
 validator.ts(5,16): error TS2351: This expression is not constructable.
 
 
-==== mod1.js (18 errors) ====
+==== mod1.js (16 errors) ====
     /**
      * @constructor
      * @param {string} name
@@ -47,36 +45,32 @@ validator.ts(5,16): error TS2351: This expression is not constructable.
 !!! error TS2304: Cannot find name 'Object'.
                                  ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
-                                                             ~~~
-!!! error TS2304: Cannot find name 'get'.
-                                                                ~
-!!! error TS1005: ',' expected.
-                                                                 ~
-!!! error TS1005: ',' expected.
-                                                                   ~
-!!! error TS1005: ',' expected.
-                                                                     ~~~~~~
-!!! error TS1005: ',' expected.
-                                                                     ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                                                                            ~~~~~
-!!! error TS1005: ',' expected.
-                                                                                     ~~~
-!!! error TS2304: Cannot find name 'set'.
-                                                                                         ~
-!!! error TS2304: Cannot find name '_'.
-                                                                                            ~
-!!! error TS1005: ',' expected.
-                                                                                                           ~
-!!! error TS1005: ',' expected.
     Object.defineProperty(Person.prototype, "readonlyAccessor", { get() { return 21.75 } });
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                                 ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
     Object.defineProperty(Person.prototype, "setonlyAccessor", {
+    ~~~~~~
+!!! error TS2304: Cannot find name 'Object'.
+                                 ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '(name: any) => void'.
         /** @param {string} str */
         set(str) {
             this.rwAccessors = Number(str)
+                               ~~~~~~
+!!! error TS2304: Cannot find name 'Number'.
+                                      ~~~
+!!! error TS2304: Cannot find name 'str'.
         }
     });
     module.exports = Person;
+          ~
+!!! error TS1003: Identifier expected.
+           ~~~~~~~
+!!! error TS1005: ';' expected.
+           ~~~~~~~
+!!! error TS2304: Cannot find name 'exports'.
     
 ==== validator.ts (1 errors) ====
     import "./";

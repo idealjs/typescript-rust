@@ -5,19 +5,29 @@ privateNameBadDeclaration.ts(3,4): error TS1005: ',' expected.
 privateNameBadDeclaration.ts(4,3): error TS1003: Identifier expected.
 privateNameBadDeclaration.ts(4,3): error TS1127: Invalid character.
 privateNameBadDeclaration.ts(4,4): error TS1005: ',' expected.
-privateNameBadDeclaration.ts(4,4): error TS2304: Cannot find name 'm'.
-privateNameBadDeclaration.ts(4,5): error TS1005: ',' expected.
-privateNameBadDeclaration.ts(4,6): error TS1005: ',' expected.
-privateNameBadDeclaration.ts(4,8): error TS1005: ',' expected.
 privateNameBadDeclaration.ts(5,3): error TS2304: Cannot find name 'get'.
-privateNameBadDeclaration.ts(5,7): error TS1005: ';' expected.
+privateNameBadDeclaration.ts(5,7): error TS1005: ',' expected.
 privateNameBadDeclaration.ts(5,7): error TS1127: Invalid character.
-privateNameBadDeclaration.ts(5,8): error TS2304: Cannot find name 'p'.
-privateNameBadDeclaration.ts(5,12): error TS1005: ';' expected.
-privateNameBadDeclaration.ts(6,1): error TS1128: Declaration or statement expected.
+privateNameBadDeclaration.ts(5,8): error TS1005: ',' expected.
+privateNameBadDeclaration.ts(8,3): error TS2339: Property 'prototype' does not exist on type 'object'.
+privateNameBadDeclaration.ts(9,3): error TS1003: Identifier expected.
+privateNameBadDeclaration.ts(9,3): error TS1127: Invalid character.
+privateNameBadDeclaration.ts(9,4): error TS1005: ',' expected.
+privateNameBadDeclaration.ts(10,3): error TS1003: Identifier expected.
+privateNameBadDeclaration.ts(10,3): error TS1127: Invalid character.
+privateNameBadDeclaration.ts(10,4): error TS1005: ',' expected.
+privateNameBadDeclaration.ts(11,3): error TS2304: Cannot find name 'get'.
+privateNameBadDeclaration.ts(11,7): error TS1005: ',' expected.
+privateNameBadDeclaration.ts(11,7): error TS1127: Invalid character.
+privateNameBadDeclaration.ts(11,8): error TS1005: ',' expected.
+privateNameBadDeclaration.ts(15,10): error TS1003: Identifier expected.
+privateNameBadDeclaration.ts(15,10): error TS1127: Invalid character.
+privateNameBadDeclaration.ts(15,10): error TS2339: Property '#' does not exist on type 'object'.
+privateNameBadDeclaration.ts(15,11): error TS1005: ';' expected.
+privateNameBadDeclaration.ts(15,11): error TS2304: Cannot find name 'z'.
 
 
-==== privateNameBadDeclaration.ts (17 errors) ====
+==== privateNameBadDeclaration.ts (27 errors) ====
     function A() { }
     A.prototype = {
       ~~~~~~~~~
@@ -36,36 +46,56 @@ privateNameBadDeclaration.ts(6,1): error TS1128: Declaration or statement expect
 !!! error TS1127: Invalid character.
        ~
 !!! error TS1005: ',' expected.
-       ~
-!!! error TS2304: Cannot find name 'm'.
-        ~
+      get #p() { return "" } // Error
+      ~~~
+!!! error TS2304: Cannot find name 'get'.
+          ~
 !!! error TS1005: ',' expected.
-         ~
-!!! error TS1005: ',' expected.
+          ~
+!!! error TS1127: Invalid character.
            ~
+!!! error TS1005: ',' expected.
+    }
+    class B { }
+    B.prototype = {
+      ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type 'object'.
+      #y: 2,         // Error
+      ~
+!!! error TS1003: Identifier expected.
+      ~
+!!! error TS1127: Invalid character.
+       ~
+!!! error TS1005: ',' expected.
+      #m() {},       // Error
+      ~
+!!! error TS1003: Identifier expected.
+      ~
+!!! error TS1127: Invalid character.
+       ~
 !!! error TS1005: ',' expected.
       get #p() { return "" } // Error
       ~~~
 !!! error TS2304: Cannot find name 'get'.
           ~
-!!! error TS1005: ';' expected.
+!!! error TS1005: ',' expected.
           ~
 !!! error TS1127: Invalid character.
            ~
-!!! error TS2304: Cannot find name 'p'.
-               ~
-!!! error TS1005: ';' expected.
-    }
-    ~
-!!! error TS1128: Declaration or statement expected.
-    class B { }
-    B.prototype = {
-      #y: 2,         // Error
-      #m() {},       // Error
-      get #p() { return "" } // Error
+!!! error TS1005: ',' expected.
     }
     class C {
       constructor() {
         this.#z = 3;
+             ~
+!!! error TS1003: Identifier expected.
+             ~
+!!! error TS1127: Invalid character.
+             ~
+!!! error TS2339: Property '#' does not exist on type 'object'.
+              ~
+!!! error TS1005: ';' expected.
+              ~
+!!! error TS2304: Cannot find name 'z'.
       }
     }

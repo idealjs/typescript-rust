@@ -21,16 +21,6 @@ asyncAwait_es2017.ts(20,19): error TS1005: ',' expected.
 asyncAwait_es2017.ts(20,30): error TS1005: ',' expected.
 asyncAwait_es2017.ts(20,37): error TS1005: ',' expected.
 asyncAwait_es2017.ts(20,39): error TS1005: ';' expected.
-asyncAwait_es2017.ts(23,2): error TS2304: Cannot find name 'async'.
-asyncAwait_es2017.ts(23,8): error TS1005: ',' expected.
-asyncAwait_es2017.ts(23,8): error TS2304: Cannot find name 'm1'.
-asyncAwait_es2017.ts(23,10): error TS1005: ',' expected.
-asyncAwait_es2017.ts(23,11): error TS1005: ',' expected.
-asyncAwait_es2017.ts(23,13): error TS1005: ',' expected.
-asyncAwait_es2017.ts(24,2): error TS2304: Cannot find name 'async'.
-asyncAwait_es2017.ts(24,8): error TS1005: ',' expected.
-asyncAwait_es2017.ts(24,10): error TS1005: ',' expected.
-asyncAwait_es2017.ts(24,11): error TS1134: Variable declaration expected.
 
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'void'.
@@ -38,7 +28,7 @@ asyncAwait_es2017.ts(24,11): error TS1134: Variable declaration expected.
 !!! error TS2451: Cannot redeclare block-scoped variable 'Promise'.
 
 !!! error TS2451: Cannot redeclare block-scoped variable 'number'.
-==== asyncAwait_es2017.ts (30 errors) ====
+==== asyncAwait_es2017.ts (20 errors) ====
     type MyPromise<T> = Promise<T>;
     declare var MyPromise: typeof Promise;
     declare var p: Promise<number>;
@@ -102,27 +92,7 @@ asyncAwait_es2017.ts(24,11): error TS1134: Variable declaration expected.
     
     let o = {
     	async m1() { },
-    	~~~~~
-!!! error TS2304: Cannot find name 'async'.
-    	      ~~
-!!! error TS1005: ',' expected.
-    	      ~~
-!!! error TS2304: Cannot find name 'm1'.
-    	        ~
-!!! error TS1005: ',' expected.
-    	         ~
-!!! error TS1005: ',' expected.
-    	           ~
-!!! error TS1005: ',' expected.
     	async m2(): Promise<void> { },
-    	~~~~~
-!!! error TS2304: Cannot find name 'async'.
-    	      ~~
-!!! error TS1005: ',' expected.
-    	        ~
-!!! error TS1005: ',' expected.
-    	         ~
-!!! error TS1134: Variable declaration expected.
     	async m3(): MyPromise<void> { }
     };
     

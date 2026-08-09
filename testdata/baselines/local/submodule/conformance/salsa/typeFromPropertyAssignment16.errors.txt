@@ -1,13 +1,9 @@
 a.js(3,7): error TS2339: Property 'Inner' does not exist on type 'object'.
 a.js(4,7): error TS2339: Property 'Inner' does not exist on type 'object'.
-a.js(6,5): error TS2304: Cannot find name 'm'.
-a.js(6,6): error TS1005: ',' expected.
-a.js(6,7): error TS1005: ',' expected.
-a.js(6,9): error TS1005: ',' expected.
-a.js(7,1): error TS1128: Declaration or statement expected.
+a.js(13,22): error TS2339: Property 'Inner' does not exist on type 'object'.
 
 
-==== a.js (7 errors) ====
+==== a.js (3 errors) ====
     var Outer = {};
     
     Outer.Inner = function () {}
@@ -18,22 +14,14 @@ a.js(7,1): error TS1128: Declaration or statement expected.
 !!! error TS2339: Property 'Inner' does not exist on type 'object'.
         x: 1,
         m() { }
-        ~
-!!! error TS2304: Cannot find name 'm'.
-         ~
-!!! error TS1005: ',' expected.
-          ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS1005: ',' expected.
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
     
     /** @type {Outer.Inner} */
     var inner
     inner.x
     inner.m()
     var inno = new Outer.Inner()
+                         ~~~~~
+!!! error TS2339: Property 'Inner' does not exist on type 'object'.
     inno.x
     inno.m()

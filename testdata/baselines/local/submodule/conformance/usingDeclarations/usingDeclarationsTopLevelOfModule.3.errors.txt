@@ -1,21 +1,10 @@
-usingDeclarationsTopLevelOfModule.3.ts(3,29): error TS1005: ',' expected.
-usingDeclarationsTopLevelOfModule.3.ts(3,30): error TS1005: ',' expected.
-usingDeclarationsTopLevelOfModule.3.ts(3,32): error TS1005: ',' expected.
-usingDeclarationsTopLevelOfModule.3.ts(3,35): error TS1128: Declaration or statement expected.
+usingDeclarationsTopLevelOfModule.3.ts(10,17): error TS2304: Cannot find name 'y'.
 
 
-==== usingDeclarationsTopLevelOfModule.3.ts (4 errors) ====
+==== usingDeclarationsTopLevelOfModule.3.ts (1 errors) ====
     export { y };
     
     using z = { [Symbol.dispose]() {} };
-                                ~
-!!! error TS1005: ',' expected.
-                                 ~
-!!! error TS1005: ',' expected.
-                                   ~
-!!! error TS1005: ',' expected.
-                                      ~
-!!! error TS1128: Declaration or statement expected.
     
     if (false) {
         var y = 1;
@@ -23,5 +12,7 @@ usingDeclarationsTopLevelOfModule.3.ts(3,35): error TS1128: Declaration or state
     
     function f() {
         console.log(y, z);
+                    ~
+!!! error TS2304: Cannot find name 'y'.
     }
     

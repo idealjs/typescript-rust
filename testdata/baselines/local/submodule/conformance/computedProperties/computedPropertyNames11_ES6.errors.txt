@@ -1,69 +1,121 @@
-error TS2451: Cannot redeclare block-scoped variable 's'.
-error TS2451: Cannot redeclare block-scoped variable 's'.
-computedPropertyNames11_ES6.ts(5,9): error TS1005: ',' expected.
-computedPropertyNames11_ES6.ts(5,12): error TS1005: ',' expected.
-computedPropertyNames11_ES6.ts(5,13): error TS1005: ',' expected.
-computedPropertyNames11_ES6.ts(5,15): error TS1005: ',' expected.
-computedPropertyNames11_ES6.ts(5,17): error TS1005: ',' expected.
-computedPropertyNames11_ES6.ts(5,17): error TS2304: Cannot find name 'return'.
-computedPropertyNames11_ES6.ts(5,24): error TS1005: ',' expected.
-computedPropertyNames11_ES6.ts(5,25): error TS1005: ',' expected.
+computedPropertyNames11_ES6.ts(5,12): error TS1005: '{' expected.
+computedPropertyNames11_ES6.ts(5,13): error TS1012: Unexpected token.
+computedPropertyNames11_ES6.ts(5,15): error TS1005: ')' expected.
+computedPropertyNames11_ES6.ts(5,28): error TS1128: Declaration or statement expected.
 computedPropertyNames11_ES6.ts(6,5): error TS2304: Cannot find name 'set'.
-computedPropertyNames11_ES6.ts(6,16): error TS1005: ',' expected.
-computedPropertyNames11_ES6.ts(6,16): error TS1182: A destructuring declaration must have an initializer.
-computedPropertyNames11_ES6.ts(7,9): error TS1005: ',' expected.
-computedPropertyNames11_ES6.ts(7,12): error TS1005: ',' expected.
-computedPropertyNames11_ES6.ts(7,16): error TS1005: ',' expected.
-computedPropertyNames11_ES6.ts(7,17): error TS1134: Variable declaration expected.
+computedPropertyNames11_ES6.ts(6,16): error TS1005: ';' expected.
+computedPropertyNames11_ES6.ts(6,19): error TS1128: Declaration or statement expected.
+computedPropertyNames11_ES6.ts(7,5): error TS2304: Cannot find name 'get'.
+computedPropertyNames11_ES6.ts(7,19): error TS1005: ';' expected.
+computedPropertyNames11_ES6.ts(7,32): error TS1128: Declaration or statement expected.
+computedPropertyNames11_ES6.ts(8,5): error TS2304: Cannot find name 'set'.
+computedPropertyNames11_ES6.ts(8,20): error TS1005: ';' expected.
+computedPropertyNames11_ES6.ts(8,23): error TS1128: Declaration or statement expected.
+computedPropertyNames11_ES6.ts(9,5): error TS2304: Cannot find name 'get'.
+computedPropertyNames11_ES6.ts(9,16): error TS1005: ';' expected.
+computedPropertyNames11_ES6.ts(9,29): error TS1128: Declaration or statement expected.
+computedPropertyNames11_ES6.ts(10,5): error TS2304: Cannot find name 'set'.
+computedPropertyNames11_ES6.ts(10,17): error TS1005: ';' expected.
+computedPropertyNames11_ES6.ts(10,20): error TS1128: Declaration or statement expected.
+computedPropertyNames11_ES6.ts(11,5): error TS2304: Cannot find name 'get'.
+computedPropertyNames11_ES6.ts(11,15): error TS1005: ';' expected.
+computedPropertyNames11_ES6.ts(11,28): error TS1128: Declaration or statement expected.
+computedPropertyNames11_ES6.ts(12,5): error TS2304: Cannot find name 'set'.
+computedPropertyNames11_ES6.ts(12,16): error TS1005: ';' expected.
+computedPropertyNames11_ES6.ts(12,19): error TS1128: Declaration or statement expected.
+computedPropertyNames11_ES6.ts(13,5): error TS2304: Cannot find name 'get'.
+computedPropertyNames11_ES6.ts(13,23): error TS1005: ';' expected.
+computedPropertyNames11_ES6.ts(13,36): error TS1128: Declaration or statement expected.
+computedPropertyNames11_ES6.ts(14,5): error TS2304: Cannot find name 'set'.
+computedPropertyNames11_ES6.ts(14,26): error TS1005: ';' expected.
+computedPropertyNames11_ES6.ts(14,29): error TS1128: Declaration or statement expected.
+computedPropertyNames11_ES6.ts(15,5): error TS2304: Cannot find name 'get'.
+computedPropertyNames11_ES6.ts(15,30): error TS1005: ';' expected.
+computedPropertyNames11_ES6.ts(16,2): error TS1005: '}' expected.
 
 
-!!! error TS2451: Cannot redeclare block-scoped variable 's'.
-
-!!! error TS2451: Cannot redeclare block-scoped variable 's'.
-==== computedPropertyNames11_ES6.ts (15 errors) ====
+==== computedPropertyNames11_ES6.ts (34 errors) ====
     var s: string;
     var n: number;
     var a: any;
     var v = {
         get [s]() { return 0; },
-            ~
-!!! error TS1005: ',' expected.
                ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
                 ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                   ~
-!!! error TS1005: ',' expected.
-                    ~~~~~~
-!!! error TS1005: ',' expected.
-                    ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                           ~
-!!! error TS1005: ',' expected.
-                            ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ')' expected.
+                               ~
+!!! error TS1128: Declaration or statement expected.
         set [n](v) { },
         ~~~
 !!! error TS2304: Cannot find name 'set'.
                    ~
-!!! error TS1005: ',' expected.
-                   ~~~
-!!! error TS1182: A destructuring declaration must have an initializer.
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1128: Declaration or statement expected.
         get [s + s]() { return 0; },
-            ~
-!!! error TS1005: ',' expected.
-               ~
-!!! error TS1005: ',' expected.
-                   ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1134: Variable declaration expected.
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+                      ~
+!!! error TS1005: ';' expected.
+                                   ~
+!!! error TS1128: Declaration or statement expected.
         set [s + n](v) { },
+        ~~~
+!!! error TS2304: Cannot find name 'set'.
+                       ~
+!!! error TS1005: ';' expected.
+                          ~
+!!! error TS1128: Declaration or statement expected.
         get [+s]() { return 0; },
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+                   ~
+!!! error TS1005: ';' expected.
+                                ~
+!!! error TS1128: Declaration or statement expected.
         set [""](v) { },
+        ~~~
+!!! error TS2304: Cannot find name 'set'.
+                    ~
+!!! error TS1005: ';' expected.
+                       ~
+!!! error TS1128: Declaration or statement expected.
         get [0]() { return 0; },
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+                  ~
+!!! error TS1005: ';' expected.
+                               ~
+!!! error TS1128: Declaration or statement expected.
         set [a](v) { },
+        ~~~
+!!! error TS2304: Cannot find name 'set'.
+                   ~
+!!! error TS1005: ';' expected.
+                      ~
+!!! error TS1128: Declaration or statement expected.
         get [<any>true]() { return 0; },
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+                          ~
+!!! error TS1005: ';' expected.
+                                       ~
+!!! error TS1128: Declaration or statement expected.
         set [`hello bye`](v) { },
+        ~~~
+!!! error TS2304: Cannot find name 'set'.
+                             ~
+!!! error TS1005: ';' expected.
+                                ~
+!!! error TS1128: Declaration or statement expected.
         get [`hello ${a} bye`]() { return 0; }
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+                                 ~
+!!! error TS1005: ';' expected.
     }
+     
+!!! error TS1005: '}' expected.

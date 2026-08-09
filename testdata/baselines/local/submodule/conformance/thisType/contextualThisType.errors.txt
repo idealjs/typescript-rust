@@ -1,19 +1,8 @@
-contextualThisType.ts(9,5): error TS2304: Cannot find name 'a'.
-contextualThisType.ts(9,5): error TS2353: Object literal may only specify known properties, and 'a' does not exist in type 'object'.
-contextualThisType.ts(9,6): error TS1005: ',' expected.
-contextualThisType.ts(9,7): error TS1005: ',' expected.
-contextualThisType.ts(9,7): error TS2304: Cannot find name 'p'.
-contextualThisType.ts(9,8): error TS1005: ',' expected.
-contextualThisType.ts(9,10): error TS1005: ',' expected.
-contextualThisType.ts(10,9): error TS1005: ',' expected.
-contextualThisType.ts(10,9): error TS2304: Cannot find name 'return'.
-contextualThisType.ts(10,16): error TS1005: ',' expected.
 contextualThisType.ts(10,16): error TS2304: Cannot find name 'p'.
-contextualThisType.ts(10,17): error TS1005: ',' expected.
-contextualThisType.ts(12,1): error TS1128: Declaration or statement expected.
+contextualThisType.ts(14,11): error TS2339: Property 'a' does not exist on type 'object'.
 
 
-==== contextualThisType.ts (13 errors) ====
+==== contextualThisType.ts (2 errors) ====
     interface X {
         a: (p: this) => this;
     }
@@ -23,34 +12,12 @@ contextualThisType.ts(12,1): error TS1128: Declaration or statement expected.
     
     var x: Y = {
         a(p) {
-        ~
-!!! error TS2304: Cannot find name 'a'.
-        ~
-!!! error TS2353: Object literal may only specify known properties, and 'a' does not exist in type 'object'.
-         ~
-!!! error TS1005: ',' expected.
-          ~
-!!! error TS1005: ',' expected.
-          ~
-!!! error TS2304: Cannot find name 'p'.
-           ~
-!!! error TS1005: ',' expected.
-             ~
-!!! error TS1005: ',' expected.
             return p;
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                   ~
-!!! error TS1005: ',' expected.
                    ~
 !!! error TS2304: Cannot find name 'p'.
-                    ~
-!!! error TS1005: ',' expected.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
     
     var y = x.a(x);
+              ~
+!!! error TS2339: Property 'a' does not exist on type 'object'.

@@ -1,12 +1,7 @@
 invalidUndefinedValues.ts(10,11): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-invalidUndefinedValues.ts(22,7): error TS2304: Cannot find name 'f'.
-invalidUndefinedValues.ts(22,8): error TS1005: ',' expected.
-invalidUndefinedValues.ts(22,9): error TS1005: ',' expected.
-invalidUndefinedValues.ts(22,11): error TS1005: ',' expected.
-invalidUndefinedValues.ts(22,15): error TS1128: Declaration or statement expected.
 
 
-==== invalidUndefinedValues.ts (6 errors) ====
+==== invalidUndefinedValues.ts (1 errors) ====
     var x: typeof undefined;
     
     x = 1;
@@ -31,16 +26,6 @@ invalidUndefinedValues.ts(22,15): error TS1128: Declaration or statement expecte
     x = M;
     
     x = { f() { } }
-          ~
-!!! error TS2304: Cannot find name 'f'.
-           ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS1005: ',' expected.
-              ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1128: Declaration or statement expected.
     
     function f<T>(a: T) {
         x = a;

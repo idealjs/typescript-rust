@@ -5,13 +5,9 @@ invalidVoidAssignments.ts(8,11): error TS2564: Property 'foo' has no initializer
 invalidVoidAssignments.ts(12,5): error TS2322: Type 'void' is not assignable to type '{ bar: string }'.
 invalidVoidAssignments.ts(14,5): error TS2322: Type 'number' is not assignable to type '{ baz: string }'.
 invalidVoidAssignments.ts(15,5): error TS2322: Type 'number' is not assignable to type '{ 0: number }'.
-invalidVoidAssignments.ts(29,8): error TS1005: ',' expected.
-invalidVoidAssignments.ts(29,9): error TS1005: ',' expected.
-invalidVoidAssignments.ts(29,11): error TS1005: ',' expected.
-invalidVoidAssignments.ts(29,15): error TS1128: Declaration or statement expected.
 
 
-==== invalidVoidAssignments.ts (11 errors) ====
+==== invalidVoidAssignments.ts (7 errors) ====
     var x: void;
     
     var a: boolean = x;
@@ -55,11 +51,3 @@ invalidVoidAssignments.ts(29,15): error TS1128: Declaration or statement expecte
     x = E.A;
     
     x = { f() { } }
-           ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS1005: ',' expected.
-              ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1128: Declaration or statement expected.

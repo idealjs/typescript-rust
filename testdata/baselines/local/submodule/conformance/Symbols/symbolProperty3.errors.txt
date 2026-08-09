@@ -1,41 +1,23 @@
-symbolProperty3.ts(4,8): error TS1005: ',' expected.
-symbolProperty3.ts(4,9): error TS1005: ',' expected.
-symbolProperty3.ts(4,11): error TS1005: ',' expected.
-symbolProperty3.ts(5,5): error TS2304: Cannot find name 'get'.
-symbolProperty3.ts(5,15): error TS1005: ',' expected.
-symbolProperty3.ts(5,15): error TS1182: A destructuring declaration must have an initializer.
-symbolProperty3.ts(6,16): error TS1005: ',' expected.
-symbolProperty3.ts(6,17): error TS1005: ':' expected.
-symbolProperty3.ts(8,1): error TS1128: Declaration or statement expected.
+symbolProperty3.ts(5,12): error TS1005: '{' expected.
+symbolProperty3.ts(5,13): error TS1012: Unexpected token.
+symbolProperty3.ts(5,15): error TS1005: ')' expected.
+symbolProperty3.ts(8,2): error TS1005: '}' expected.
 
 
-==== symbolProperty3.ts (9 errors) ====
+==== symbolProperty3.ts (4 errors) ====
     var s = Symbol;
     var x = {
         [s]: 0,
         [s]() { },
-           ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS1005: ',' expected.
-              ~
-!!! error TS1005: ',' expected.
         get [s]() {
-        ~~~
-!!! error TS2304: Cannot find name 'get'.
+               ~
+!!! error TS1005: '{' expected.
+                ~
+!!! error TS1012: Unexpected token.
                   ~
-!!! error TS1005: ',' expected.
-                  ~
+!!! error TS1005: ')' expected.
             return 0;
-    ~~~~~~~~~~~~~~~~~
-                   ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ':' expected.
         }
-    ~~~~~
     }
-    
-!!! error TS1182: A destructuring declaration must have an initializer.
-    ~
-!!! error TS1128: Declaration or statement expected.
+     
+!!! error TS1005: '}' expected.

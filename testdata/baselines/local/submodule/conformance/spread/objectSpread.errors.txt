@@ -8,19 +8,39 @@ objectSpread.ts(9,40): error TS1128: Declaration or statement expected.
 objectSpread.ts(10,7): error TS1128: Declaration or statement expected.
 objectSpread.ts(10,13): error TS2304: Cannot find name 'b'.
 objectSpread.ts(10,14): error TS1005: ';' expected.
-objectSpread.ts(23,12): error TS2304: Cannot find name 'get'.
-objectSpread.ts(23,16): error TS1005: ',' expected.
-objectSpread.ts(23,16): error TS2304: Cannot find name 'a'.
-objectSpread.ts(23,18): error TS1005: ',' expected.
-objectSpread.ts(23,19): error TS1005: ',' expected.
-objectSpread.ts(23,21): error TS1005: ',' expected.
-objectSpread.ts(23,23): error TS1005: ',' expected.
-objectSpread.ts(23,23): error TS2304: Cannot find name 'return'.
-objectSpread.ts(23,30): error TS1005: ',' expected.
-objectSpread.ts(23,34): error TS1128: Declaration or statement expected.
+objectSpread.ts(23,18): error TS1005: '{' expected.
+objectSpread.ts(23,19): error TS1012: Unexpected token.
+objectSpread.ts(23,21): error TS1005: ')' expected.
+objectSpread.ts(23,35): error TS1005: ',' expected.
+objectSpread.ts(24,1): error TS1005: ',' expected.
+objectSpread.ts(24,1): error TS2304: Cannot find name 'let'.
+objectSpread.ts(24,5): error TS1005: ',' expected.
+objectSpread.ts(24,18): error TS2304: Cannot find name 'number'.
+objectSpread.ts(24,29): error TS2304: Cannot find name 'number'.
+objectSpread.ts(26,1): error TS1005: ',' expected.
+objectSpread.ts(26,1): error TS2304: Cannot find name 'getter'.
+objectSpread.ts(26,7): error TS1005: ',' expected.
+objectSpread.ts(26,8): error TS1005: ',' expected.
+objectSpread.ts(26,8): error TS2448: Block-scoped variable 'a' used before its declaration.
+objectSpread.ts(26,10): error TS1005: ',' expected.
+objectSpread.ts(26,12): error TS1005: ',' expected.
+objectSpread.ts(26,14): error TS1005: ',' expected.
+objectSpread.ts(29,1): error TS1005: ',' expected.
+objectSpread.ts(29,1): error TS2304: Cannot find name 'let'.
+objectSpread.ts(29,5): error TS1005: ',' expected.
+objectSpread.ts(29,5): error TS2304: Cannot find name 'spreadFunc'.
+objectSpread.ts(29,16): error TS1005: ',' expected.
+objectSpread.ts(29,18): error TS1005: ',' expected.
+objectSpread.ts(29,20): error TS1005: ',' expected.
+objectSpread.ts(70,22): error TS2454: Variable 'anything' is used before being assigned.
+objectSpread.ts(74,16): error TS2351: This expression is not constructable.
+objectSpread.ts(116,5): error TS2349: This expression is not callable.
+objectSpread.ts(118,5): error TS2349: This expression is not callable.
+objectSpread.ts(120,5): error TS2349: This expression is not callable.
+objectSpread.ts(122,5): error TS2349: This expression is not callable.
 
 
-==== objectSpread.ts (20 errors) ====
+==== objectSpread.ts (40 errors) ====
     let o = { a: 1, b: 'no' }
     let o2 = { b: 'yes', c: true }
     let swap = { a: 'yes', b: -1 };
@@ -64,32 +84,60 @@ objectSpread.ts(23,34): error TS1128: Declaration or statement expected.
     // accessors don't copy the descriptor
     // (which means that readonly getters become read/write properties)
     let op = { get a () { return 6 } };
-               ~~~
-!!! error TS2304: Cannot find name 'get'.
-                   ~
-!!! error TS1005: ',' expected.
-                   ~
-!!! error TS2304: Cannot find name 'a'.
                      ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
                       ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                         ~
+!!! error TS1005: ')' expected.
+                                      ~
 !!! error TS1005: ',' expected.
-                          ~~~~~~
-!!! error TS1005: ',' expected.
-                          ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                                 ~
-!!! error TS1005: ',' expected.
-                                     ~
-!!! error TS1128: Declaration or statement expected.
     let getter: { a: number, c: number } =
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'let'.
+        ~~~~~~
+!!! error TS1005: ',' expected.
+                     ~~~~~~
+!!! error TS2304: Cannot find name 'number'.
+                                ~~~~~~
+!!! error TS2304: Cannot find name 'number'.
         { ...op, c: 7 }
     getter.a = 12;
+    ~~~~~~
+!!! error TS1005: ',' expected.
+    ~~~~~~
+!!! error TS2304: Cannot find name 'getter'.
+          ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS1005: ',' expected.
+           ~
+!!! error TS2448: Block-scoped variable 'a' used before its declaration.
+             ~
+!!! error TS1005: ',' expected.
+               ~~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS1005: ',' expected.
     
     // functions result in { }
     let spreadFunc = { ...(function () { }) };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'let'.
+        ~~~~~~~~~~
+!!! error TS1005: ',' expected.
+        ~~~~~~~~~~
+!!! error TS2304: Cannot find name 'spreadFunc'.
+                   ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1005: ',' expected.
+                       ~~~
+!!! error TS1005: ',' expected.
     
     type Header = { head: string, body: string, authToken: string }
     function from16326(this: { header: Header }, header: Header, authToken: string): Header {
@@ -131,10 +179,14 @@ objectSpread.ts(23,34): error TS1128: Declaration or statement expected.
     // any results in any
     let anything: any;
     let spreadAny = { ...anything };
+                         ~~~~~~~~
+!!! error TS2454: Variable 'anything' is used before being assigned.
     
     // methods are not enumerable
     class C { p = 1; m() { } }
     let c: C = new C()
+                   ~
+!!! error TS2351: This expression is not constructable.
     let spreadC: { p: number } = { ...c }
     
     // own methods are enumerable
@@ -177,12 +229,20 @@ objectSpread.ts(23,34): error TS1128: Declaration or statement expected.
     
     let exclusive: { id: string, a: number, b: string, c: string, d: boolean } =
         f({ a: 1, b: 'yes' }, { c: 'no', d: false })
+        ~
+!!! error TS2349: This expression is not callable.
     let overlap: { id: string, a: number, b: string } =
         f({ a: 1 }, { a: 2, b: 'extra' })
+        ~
+!!! error TS2349: This expression is not callable.
     let overlapConflict: { id:string, a: string } =
         f({ a: 1 }, { a: 'mismatch' })
+        ~
+!!! error TS2349: This expression is not callable.
     let overwriteId: { id: string, a: number, c: number, d: string } =
         f({ a: 1, id: true }, { c: 1, d: 'no' })
+        ~
+!!! error TS2349: This expression is not callable.
     
     function genericSpread<T, U>(t: T, u: U, v: T | U, w: T | { s: string }, obj: { x: number }) {
         let x01 = { ...t };

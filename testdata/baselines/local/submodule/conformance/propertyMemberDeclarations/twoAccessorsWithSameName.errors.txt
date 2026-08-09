@@ -4,22 +4,34 @@ twoAccessorsWithSameName.ts(7,9): error TS1005: ';' expected.
 twoAccessorsWithSameName.ts(8,9): error TS1005: ';' expected.
 twoAccessorsWithSameName.ts(12,9): error TS1005: ';' expected.
 twoAccessorsWithSameName.ts(15,9): error TS1005: ';' expected.
-twoAccessorsWithSameName.ts(19,5): error TS2304: Cannot find name 'get'.
-twoAccessorsWithSameName.ts(19,9): error TS1005: ',' expected.
-twoAccessorsWithSameName.ts(19,10): error TS1005: ',' expected.
-twoAccessorsWithSameName.ts(19,11): error TS1005: ',' expected.
-twoAccessorsWithSameName.ts(19,13): error TS1005: ',' expected.
-twoAccessorsWithSameName.ts(20,9): error TS1005: ',' expected.
-twoAccessorsWithSameName.ts(20,9): error TS2304: Cannot find name 'return'.
-twoAccessorsWithSameName.ts(20,16): error TS1005: ',' expected.
-twoAccessorsWithSameName.ts(20,17): error TS1005: ',' expected.
+twoAccessorsWithSameName.ts(19,10): error TS1005: '{' expected.
+twoAccessorsWithSameName.ts(19,11): error TS1012: Unexpected token.
+twoAccessorsWithSameName.ts(19,13): error TS1005: ')' expected.
+twoAccessorsWithSameName.ts(21,6): error TS1128: Declaration or statement expected.
 twoAccessorsWithSameName.ts(24,5): error TS2304: Cannot find name 'get'.
-twoAccessorsWithSameName.ts(24,9): error TS1005: ',' expected.
-twoAccessorsWithSameName.ts(24,10): error TS1005: ',' expected.
-twoAccessorsWithSameName.ts(24,11): error TS1134: Variable declaration expected.
+twoAccessorsWithSameName.ts(24,9): error TS1005: ';' expected.
+twoAccessorsWithSameName.ts(24,9): error TS2349: This expression is not callable.
+twoAccessorsWithSameName.ts(24,13): error TS1005: ';' expected.
+twoAccessorsWithSameName.ts(29,1): error TS1005: ',' expected.
+twoAccessorsWithSameName.ts(29,1): error TS2304: Cannot find name 'var'.
+twoAccessorsWithSameName.ts(29,5): error TS1005: ',' expected.
+twoAccessorsWithSameName.ts(29,5): error TS2304: Cannot find name 'y'.
+twoAccessorsWithSameName.ts(29,7): error TS1005: ',' expected.
+twoAccessorsWithSameName.ts(29,9): error TS1005: ',' expected.
+twoAccessorsWithSameName.ts(30,5): error TS1005: ',' expected.
+twoAccessorsWithSameName.ts(30,10): error TS1005: '{' expected.
+twoAccessorsWithSameName.ts(30,11): error TS1012: Unexpected token.
+twoAccessorsWithSameName.ts(30,13): error TS1005: ')' expected.
+twoAccessorsWithSameName.ts(32,6): error TS1128: Declaration or statement expected.
+twoAccessorsWithSameName.ts(33,5): error TS2304: Cannot find name 'set'.
+twoAccessorsWithSameName.ts(33,9): error TS1005: ';' expected.
+twoAccessorsWithSameName.ts(33,9): error TS2349: This expression is not callable.
+twoAccessorsWithSameName.ts(33,11): error TS2304: Cannot find name 'v'.
+twoAccessorsWithSameName.ts(33,14): error TS1005: ';' expected.
+twoAccessorsWithSameName.ts(34,2): error TS1005: '}' expected.
 
 
-==== twoAccessorsWithSameName.ts (19 errors) ====
+==== twoAccessorsWithSameName.ts (31 errors) ====
     class C {
         get x() { return 1; }
             ~
@@ -51,44 +63,68 @@ twoAccessorsWithSameName.ts(24,11): error TS1134: Variable declaration expected.
     
     var x = {
         get x() {
-        ~~~
-!!! error TS2304: Cannot find name 'get'.
-            ~
-!!! error TS1005: ',' expected.
              ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
               ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                 ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ')' expected.
             return 1;
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                   ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
         },
+         ~
+!!! error TS1128: Declaration or statement expected.
     
         // error
         get x() {
         ~~~
 !!! error TS2304: Cannot find name 'get'.
             ~
-!!! error TS1005: ',' expected.
-             ~
-!!! error TS1005: ',' expected.
-              ~
-!!! error TS1134: Variable declaration expected.
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS2349: This expression is not callable.
+                ~
+!!! error TS1005: ';' expected.
             return 1;
         }
     }
     
     var y = {
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~
+!!! error TS1005: ',' expected.
+        ~
+!!! error TS2304: Cannot find name 'y'.
+          ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS1005: ',' expected.
         get x() {
+        ~~~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: '{' expected.
+              ~
+!!! error TS1012: Unexpected token.
+                ~
+!!! error TS1005: ')' expected.
             return 1;
         },
+         ~
+!!! error TS1128: Declaration or statement expected.
         set x(v) { }
+        ~~~
+!!! error TS2304: Cannot find name 'set'.
+            ~
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS2349: This expression is not callable.
+              ~
+!!! error TS2304: Cannot find name 'v'.
+                 ~
+!!! error TS1005: ';' expected.
     }
+     
+!!! error TS1005: '}' expected.

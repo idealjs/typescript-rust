@@ -1,12 +1,8 @@
 definiteAssignmentAssertionsWithObjectShortHand.ts(2,16): error TS1005: ',' expected.
 definiteAssignmentAssertionsWithObjectShortHand.ts(5,7): error TS1005: ',' expected.
-definiteAssignmentAssertionsWithObjectShortHand.ts(5,9): error TS1005: ',' expected.
-definiteAssignmentAssertionsWithObjectShortHand.ts(5,10): error TS1005: ',' expected.
-definiteAssignmentAssertionsWithObjectShortHand.ts(5,12): error TS1005: ',' expected.
-definiteAssignmentAssertionsWithObjectShortHand.ts(6,1): error TS1128: Declaration or statement expected.
 
 
-==== definiteAssignmentAssertionsWithObjectShortHand.ts (6 errors) ====
+==== definiteAssignmentAssertionsWithObjectShortHand.ts (2 errors) ====
     const a: string | undefined = 'ff';
     const foo = { a! }
                    ~
@@ -16,12 +12,4 @@ definiteAssignmentAssertionsWithObjectShortHand.ts(6,1): error TS1128: Declarati
         a ? () { }
           ~
 !!! error TS1005: ',' expected.
-            ~
-!!! error TS1005: ',' expected.
-             ~
-!!! error TS1005: ',' expected.
-               ~
-!!! error TS1005: ',' expected.
     }
-    ~
-!!! error TS1128: Declaration or statement expected.

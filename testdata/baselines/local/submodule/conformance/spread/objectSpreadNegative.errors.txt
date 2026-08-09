@@ -1,14 +1,13 @@
-objectSpreadNegative.ts(62,25): error TS2304: Cannot find name 'set'.
-objectSpreadNegative.ts(62,29): error TS1005: ',' expected.
-objectSpreadNegative.ts(62,31): error TS1005: ',' expected.
-objectSpreadNegative.ts(62,32): error TS1005: ',' expected.
+objectSpreadNegative.ts(62,31): error TS1005: '{' expected.
+objectSpreadNegative.ts(62,32): error TS2304: Cannot find name 'bad'.
+objectSpreadNegative.ts(62,35): error TS1005: ')' expected.
 objectSpreadNegative.ts(62,37): error TS2304: Cannot find name 'number'.
-objectSpreadNegative.ts(62,43): error TS1005: ',' expected.
+objectSpreadNegative.ts(62,43): error TS1005: ';' expected.
 objectSpreadNegative.ts(62,45): error TS1005: ',' expected.
 objectSpreadNegative.ts(62,51): error TS1128: Declaration or statement expected.
 
 
-==== objectSpreadNegative.ts (8 errors) ====
+==== objectSpreadNegative.ts (7 errors) ====
     let o = { a: 1, b: 'no' }
     
     /// private propagates
@@ -71,18 +70,16 @@ objectSpreadNegative.ts(62,51): error TS1128: Declaration or statement expected.
     
     // write-only properties get skipped
     let setterOnly = { ...{ set b (bad: number) { } } };
-                            ~~~
-!!! error TS2304: Cannot find name 'set'.
-                                ~
-!!! error TS1005: ',' expected.
                                   ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
                                    ~~~
-!!! error TS1005: ',' expected.
+!!! error TS2304: Cannot find name 'bad'.
+                                      ~
+!!! error TS1005: ')' expected.
                                         ~~~~~~
 !!! error TS2304: Cannot find name 'number'.
                                               ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ';' expected.
                                                 ~
 !!! error TS1005: ',' expected.
                                                       ~

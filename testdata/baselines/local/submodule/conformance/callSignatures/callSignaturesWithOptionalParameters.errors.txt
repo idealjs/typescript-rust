@@ -2,20 +2,9 @@ callSignaturesWithOptionalParameters.ts(38,1): error TS2349: This expression is 
 callSignaturesWithOptionalParameters.ts(39,1): error TS2349: This expression is not callable.
 callSignaturesWithOptionalParameters.ts(40,3): error TS2339: Property 'foo' does not exist on type 'object'.
 callSignaturesWithOptionalParameters.ts(41,3): error TS2339: Property 'foo' does not exist on type 'object'.
-callSignaturesWithOptionalParameters.ts(44,8): error TS1005: ',' expected.
-callSignaturesWithOptionalParameters.ts(44,9): error TS1005: ',' expected.
-callSignaturesWithOptionalParameters.ts(44,10): error TS1005: ',' expected.
-callSignaturesWithOptionalParameters.ts(44,19): error TS1005: ',' expected.
-callSignaturesWithOptionalParameters.ts(44,21): error TS1005: ',' expected.
-callSignaturesWithOptionalParameters.ts(45,6): error TS1005: ',' expected.
-callSignaturesWithOptionalParameters.ts(45,17): error TS1005: ',' expected.
-callSignaturesWithOptionalParameters.ts(45,20): error TS1005: ',' expected.
-callSignaturesWithOptionalParameters.ts(45,33): error TS1005: ',' expected.
-callSignaturesWithOptionalParameters.ts(45,34): error TS1134: Variable declaration expected.
-callSignaturesWithOptionalParameters.ts(45,42): error TS1005: ',' expected.
 
 
-==== callSignaturesWithOptionalParameters.ts (15 errors) ====
+==== callSignaturesWithOptionalParameters.ts (4 errors) ====
     // Optional parameters should be valid in all the below casts
     
     function foo(x?: number) { }
@@ -68,29 +57,7 @@ callSignaturesWithOptionalParameters.ts(45,42): error TS1005: ',' expected.
     
     var b = {
         foo(x?: number) { },
-           ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS1005: ',' expected.
-             ~
-!!! error TS1005: ',' expected.
-                      ~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS1005: ',' expected.
         a: function foo(x: number, y?: number) { },
-         ~
-!!! error TS1005: ',' expected.
-                    ~~~
-!!! error TS1005: ',' expected.
-                       ~
-!!! error TS1005: ',' expected.
-                                    ~
-!!! error TS1005: ',' expected.
-                                     ~
-!!! error TS1134: Variable declaration expected.
-                                             ~
-!!! error TS1005: ',' expected.
         b: (x?: number) => { }
     }
     

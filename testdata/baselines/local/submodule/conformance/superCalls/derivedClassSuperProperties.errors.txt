@@ -35,28 +35,81 @@ derivedClassSuperProperties.ts(255,31): error TS2304: Cannot find name 'extends'
 derivedClassSuperProperties.ts(255,39): error TS1005: '{' expected.
 derivedClassSuperProperties.ts(255,44): error TS1005: ';' expected.
 derivedClassSuperProperties.ts(260,9): error TS2349: This expression is not callable.
-derivedClassSuperProperties.ts(268,13): error TS2304: Cannot find name 'get'.
-derivedClassSuperProperties.ts(268,17): error TS1005: ',' expected.
-derivedClassSuperProperties.ts(268,21): error TS1005: ',' expected.
-derivedClassSuperProperties.ts(268,22): error TS1005: ',' expected.
-derivedClassSuperProperties.ts(268,24): error TS1005: ',' expected.
-derivedClassSuperProperties.ts(269,17): error TS1005: ',' expected.
-derivedClassSuperProperties.ts(269,17): error TS2304: Cannot find name 'return'.
-derivedClassSuperProperties.ts(269,24): error TS1005: ',' expected.
-derivedClassSuperProperties.ts(269,24): error TS2304: Cannot find name 'true'.
-derivedClassSuperProperties.ts(269,28): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(268,21): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(268,22): error TS1012: Unexpected token.
+derivedClassSuperProperties.ts(268,24): error TS1005: ')' expected.
+derivedClassSuperProperties.ts(270,14): error TS1128: Declaration or statement expected.
 derivedClassSuperProperties.ts(271,13): error TS2304: Cannot find name 'set'.
-derivedClassSuperProperties.ts(271,17): error TS1005: ',' expected.
-derivedClassSuperProperties.ts(271,21): error TS1005: ',' expected.
-derivedClassSuperProperties.ts(271,27): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(271,17): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(271,17): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(271,22): error TS2304: Cannot find name 'param'.
 derivedClassSuperProperties.ts(271,29): error TS1005: ';' expected.
-derivedClassSuperProperties.ts(272,21): error TS1005: ';' expected.
-derivedClassSuperProperties.ts(272,22): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(272,22): error TS2339: Property '_prop' does not exist on type '{ receivesAnything: (param: any) => any; prop: true }'.
 derivedClassSuperProperties.ts(272,30): error TS2304: Cannot find name 'param'.
-derivedClassSuperProperties.ts(274,9): error TS1128: Declaration or statement expected.
+derivedClassSuperProperties.ts(274,10): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(275,9): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(275,16): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(284,32): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(284,33): error TS1012: Unexpected token.
+derivedClassSuperProperties.ts(284,35): error TS1005: ')' expected.
+derivedClassSuperProperties.ts(286,14): error TS1128: Declaration or statement expected.
+derivedClassSuperProperties.ts(287,13): error TS2304: Cannot find name 'set'.
+derivedClassSuperProperties.ts(287,33): error TS2304: Cannot find name 'param'.
+derivedClassSuperProperties.ts(287,40): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(288,22): error TS2339: Property '_prop' does not exist on type '{ receivesAnything: (param: any) => any; propName: "prop" }'.
+derivedClassSuperProperties.ts(288,30): error TS2304: Cannot find name 'param'.
+derivedClassSuperProperties.ts(290,10): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(291,9): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(291,16): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(300,21): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(300,22): error TS1012: Unexpected token.
+derivedClassSuperProperties.ts(300,24): error TS1005: ')' expected.
+derivedClassSuperProperties.ts(301,29): error TS2339: Property '_prop' does not exist on type '{ receivesAnything: (param: any) => any; propName: "prop" }'.
+derivedClassSuperProperties.ts(302,14): error TS1128: Declaration or statement expected.
+derivedClassSuperProperties.ts(303,13): error TS2304: Cannot find name 'set'.
+derivedClassSuperProperties.ts(303,17): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(303,17): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(303,22): error TS2304: Cannot find name 'param'.
+derivedClassSuperProperties.ts(303,29): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(304,22): error TS2339: Property '_prop' does not exist on type '{ receivesAnything: (param: any) => any; propName: "prop" }'.
+derivedClassSuperProperties.ts(304,30): error TS2304: Cannot find name 'param'.
+derivedClassSuperProperties.ts(306,10): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(307,9): error TS1005: ',' expected.
+derivedClassSuperProperties.ts(307,16): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(317,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(327,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(339,9): error TS2349: This expression is not callable.
+derivedClassSuperProperties.ts(346,11): error TS2304: Cannot find name 'extends'.
+derivedClassSuperProperties.ts(346,19): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(346,24): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(352,11): error TS2304: Cannot find name 'extends'.
+derivedClassSuperProperties.ts(352,19): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(352,24): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(358,11): error TS2304: Cannot find name 'extends'.
+derivedClassSuperProperties.ts(358,19): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(358,24): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(364,11): error TS2304: Cannot find name 'extends'.
+derivedClassSuperProperties.ts(364,19): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(364,24): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(370,11): error TS2304: Cannot find name 'extends'.
+derivedClassSuperProperties.ts(370,19): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(370,24): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(376,11): error TS2304: Cannot find name 'extends'.
+derivedClassSuperProperties.ts(376,19): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(376,24): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(382,11): error TS2304: Cannot find name 'extends'.
+derivedClassSuperProperties.ts(382,19): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(382,24): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(388,11): error TS2304: Cannot find name 'extends'.
+derivedClassSuperProperties.ts(388,19): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(388,24): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(394,11): error TS2304: Cannot find name 'extends'.
+derivedClassSuperProperties.ts(394,19): error TS1005: '{' expected.
+derivedClassSuperProperties.ts(394,24): error TS1005: ';' expected.
+derivedClassSuperProperties.ts(400,2): error TS1005: '}' expected.
 
 
-==== derivedClassSuperProperties.ts (56 errors) ====
+==== derivedClassSuperProperties.ts (109 errors) ====
     declare const decorate: any;
     
     class Base {
@@ -399,51 +452,41 @@ derivedClassSuperProperties.ts(274,9): error TS1128: Declaration or statement ex
         constructor() {
             const obj = {
                 get prop() {
-                ~~~
-!!! error TS2304: Cannot find name 'get'.
-                    ~~~~
-!!! error TS1005: ',' expected.
                         ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
                          ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                            ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ')' expected.
                     return true;
-                    ~~~~~~
-!!! error TS1005: ',' expected.
-                    ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                           ~~~~
-!!! error TS1005: ',' expected.
-                           ~~~~
-!!! error TS2304: Cannot find name 'true'.
-                               ~
-!!! error TS1005: ',' expected.
                 },
+                 ~
+!!! error TS1128: Declaration or statement expected.
                 set prop(param) {
                 ~~~
 !!! error TS2304: Cannot find name 'set'.
                     ~~~~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS1005: ',' expected.
-                              ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ';' expected.
+                    ~~~~
+!!! error TS2349: This expression is not callable.
+                         ~~~~~
+!!! error TS2304: Cannot find name 'param'.
                                 ~
 !!! error TS1005: ';' expected.
                     this._prop = param;
-                        ~
-!!! error TS1005: ';' expected.
                          ~~~~~
-!!! error TS1005: ';' expected.
+!!! error TS2339: Property '_prop' does not exist on type '{ receivesAnything: (param: any) => any; prop: true }'.
                                  ~~~~~
 !!! error TS2304: Cannot find name 'param'.
                 }
             };
-            ~
-!!! error TS1128: Declaration or statement expected.
+             ~
+!!! error TS1005: ',' expected.
             super();
+            ~~~~~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS1005: '{' expected.
         }
     }
     
@@ -453,13 +496,37 @@ derivedClassSuperProperties.ts(274,9): error TS1128: Declaration or statement ex
             const obj = {
                 _prop: "prop",
                 get [this.propName]() {
+                                   ~
+!!! error TS1005: '{' expected.
+                                    ~
+!!! error TS1012: Unexpected token.
+                                      ~
+!!! error TS1005: ')' expected.
                     return true;
                 },
+                 ~
+!!! error TS1128: Declaration or statement expected.
                 set [this.propName](param) {
+                ~~~
+!!! error TS2304: Cannot find name 'set'.
+                                    ~~~~~
+!!! error TS2304: Cannot find name 'param'.
+                                           ~
+!!! error TS1005: ';' expected.
                     this._prop = param;
+                         ~~~~~
+!!! error TS2339: Property '_prop' does not exist on type '{ receivesAnything: (param: any) => any; propName: "prop" }'.
+                                 ~~~~~
+!!! error TS2304: Cannot find name 'param'.
                 }
             };
+             ~
+!!! error TS1005: ',' expected.
             super();
+            ~~~~~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS1005: '{' expected.
         }
     }
     
@@ -469,13 +536,43 @@ derivedClassSuperProperties.ts(274,9): error TS1128: Declaration or statement ex
             const obj = {
                 _prop: "prop",
                 get prop() {
+                        ~
+!!! error TS1005: '{' expected.
+                         ~
+!!! error TS1012: Unexpected token.
+                           ~
+!!! error TS1005: ')' expected.
                     return this._prop;
+                                ~~~~~
+!!! error TS2339: Property '_prop' does not exist on type '{ receivesAnything: (param: any) => any; propName: "prop" }'.
                 },
+                 ~
+!!! error TS1128: Declaration or statement expected.
                 set prop(param) {
+                ~~~
+!!! error TS2304: Cannot find name 'set'.
+                    ~~~~
+!!! error TS1005: ';' expected.
+                    ~~~~
+!!! error TS2349: This expression is not callable.
+                         ~~~~~
+!!! error TS2304: Cannot find name 'param'.
+                                ~
+!!! error TS1005: ';' expected.
                     this._prop = param;
+                         ~~~~~
+!!! error TS2339: Property '_prop' does not exist on type '{ receivesAnything: (param: any) => any; propName: "prop" }'.
+                                 ~~~~~
+!!! error TS2304: Cannot find name 'param'.
                 }
             };
+             ~
+!!! error TS1005: ',' expected.
             super();
+            ~~~~~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS1005: '{' expected.
         }
     }
     
@@ -486,6 +583,8 @@ derivedClassSuperProperties.ts(274,9): error TS1128: Declaration or statement ex
                 prop: this.propName,
             };
             super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
         }
     }
     
@@ -496,6 +595,8 @@ derivedClassSuperProperties.ts(274,9): error TS1128: Declaration or statement ex
                 [this.propName]: true,
             };
             super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
         }
     }
     
@@ -508,6 +609,8 @@ derivedClassSuperProperties.ts(274,9): error TS1128: Declaration or statement ex
                 },
             };
             super();
+            ~~~~~
+!!! error TS2349: This expression is not callable.
         }
     }
     
@@ -515,57 +618,113 @@ derivedClassSuperProperties.ts(274,9): error TS1128: Declaration or statement ex
     
     const DerivedWithLoops = [
         class extends Base {
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                      ~~~~
+!!! error TS1005: '{' expected.
+                           ~
+!!! error TS1005: ';' expected.
             prop = true;
             constructor() {
                 for(super();;) {}
             }
         },
         class extends Base {
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                      ~~~~
+!!! error TS1005: '{' expected.
+                           ~
+!!! error TS1005: ';' expected.
             prop = true;
             constructor() {
                 for(a; super();) {}
             }
         },
         class extends Base {
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                      ~~~~
+!!! error TS1005: '{' expected.
+                           ~
+!!! error TS1005: ';' expected.
             prop = true;
             constructor() {
                 for(a; b; super()) {}
             }
         },
         class extends Base {
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                      ~~~~
+!!! error TS1005: '{' expected.
+                           ~
+!!! error TS1005: ';' expected.
             prop = true;
             constructor() {
                 for(; ; super()) { break; }
             }
         },
         class extends Base {
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                      ~~~~
+!!! error TS1005: '{' expected.
+                           ~
+!!! error TS1005: ';' expected.
             prop = true;
             constructor() {
                 for (const x of super()) {}
             }
         },
         class extends Base {
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                      ~~~~
+!!! error TS1005: '{' expected.
+                           ~
+!!! error TS1005: ';' expected.
             prop = true;
             constructor() {
                 while (super()) {}
             }
         },
         class extends Base {
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                      ~~~~
+!!! error TS1005: '{' expected.
+                           ~
+!!! error TS1005: ';' expected.
             prop = true;
             constructor() {
                 do {} while (super());
             }
         },
         class extends Base {
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                      ~~~~
+!!! error TS1005: '{' expected.
+                           ~
+!!! error TS1005: ';' expected.
             prop = true;
             constructor() {
                 if (super()) {}
             }
         },
         class extends Base {
+              ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                      ~~~~
+!!! error TS1005: '{' expected.
+                           ~
+!!! error TS1005: ';' expected.
             prop = true;
             constructor() {
                 switch (super()) {}
             }
         },
     ]
+     
+!!! error TS1005: '}' expected.

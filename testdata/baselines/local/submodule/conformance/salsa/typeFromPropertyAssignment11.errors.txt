@@ -1,40 +1,28 @@
 module.js(2,7): error TS2339: Property 'prototype' does not exist on type '() => void'.
-module.js(3,5): error TS2304: Cannot find name 'm'.
-module.js(3,6): error TS1005: ',' expected.
-module.js(3,7): error TS1005: ',' expected.
-module.js(3,9): error TS1005: ',' expected.
-module.js(4,5): error TS2304: Cannot find name 'i'.
-module.js(4,6): error TS1005: ';' expected.
-module.js(5,1): error TS1128: Declaration or statement expected.
+module.js(7,7): error TS2339: Property 'prototype' does not exist on type '() => void'.
+module.js(9,7): error TS2339: Property 'prototype' does not exist on type '() => void'.
+module.js(10,17): error TS2351: This expression is not constructable.
 
 
-==== module.js (8 errors) ====
+==== module.js (4 errors) ====
     var Inner = function() {}
     Inner.prototype = {
           ~~~~~~~~~
 !!! error TS2339: Property 'prototype' does not exist on type '() => void'.
         m() { },
-        ~
-!!! error TS2304: Cannot find name 'm'.
-         ~
-!!! error TS1005: ',' expected.
-          ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS1005: ',' expected.
         i: 1
-        ~
-!!! error TS2304: Cannot find name 'i'.
-         ~
-!!! error TS1005: ';' expected.
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
     // incremental assignments still work
     Inner.prototype.j = 2
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
     /** @type {string} */
     Inner.prototype.k;
+          ~~~~~~~~~
+!!! error TS2339: Property 'prototype' does not exist on type '() => void'.
     var inner = new Inner()
+                    ~~~~~
+!!! error TS2351: This expression is not constructable.
     inner.m()
     inner.i
     inner.j

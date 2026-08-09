@@ -1,16 +1,11 @@
 jsdocTypeReferenceToMergedClass.js(6,11): error TS2339: Property 'Project' does not exist on type 'object'.
 jsdocTypeReferenceToMergedClass.js(7,11): error TS2339: Property 'Project' does not exist on type 'object'.
-jsdocTypeReferenceToMergedClass.js(8,3): error TS2304: Cannot find name 'isServiceProject'.
-jsdocTypeReferenceToMergedClass.js(8,19): error TS1005: ',' expected.
-jsdocTypeReferenceToMergedClass.js(8,20): error TS1005: ',' expected.
-jsdocTypeReferenceToMergedClass.js(8,22): error TS1005: ',' expected.
-jsdocTypeReferenceToMergedClass.js(9,1): error TS1128: Declaration or statement expected.
 
 
 ==== jsdocTypeReferenceToMergedClass.ts (0 errors) ====
     // https://github.com/microsoft/TypeScript/issues/34685
     
-==== jsdocTypeReferenceToMergedClass.js (7 errors) ====
+==== jsdocTypeReferenceToMergedClass.js (2 errors) ====
     var Workspace = {}
     /** @type {Workspace.Project} */
     var p;
@@ -23,14 +18,4 @@ jsdocTypeReferenceToMergedClass.js(9,1): error TS1128: Declaration or statement 
               ~~~~~~~
 !!! error TS2339: Property 'Project' does not exist on type 'object'.
       isServiceProject() {}
-      ~~~~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'isServiceProject'.
-                      ~
-!!! error TS1005: ',' expected.
-                       ~
-!!! error TS1005: ',' expected.
-                         ~
-!!! error TS1005: ',' expected.
     }
-    ~
-!!! error TS1128: Declaration or statement expected.

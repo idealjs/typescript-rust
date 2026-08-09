@@ -6,17 +6,11 @@ callSignaturesWithDuplicateParameters.ts(13,17): error TS2304: Cannot find name 
 callSignaturesWithDuplicateParameters.ts(13,23): error TS2304: Cannot find name 'T'.
 callSignaturesWithDuplicateParameters.ts(18,16): error TS2304: Cannot find name 'T'.
 callSignaturesWithDuplicateParameters.ts(18,22): error TS2304: Cannot find name 'T'.
-callSignaturesWithDuplicateParameters.ts(35,8): error TS1005: ',' expected.
-callSignaturesWithDuplicateParameters.ts(35,9): error TS1005: ',' expected.
-callSignaturesWithDuplicateParameters.ts(35,13): error TS1005: ',' expected.
-callSignaturesWithDuplicateParameters.ts(35,15): error TS1005: ',' expected.
-callSignaturesWithDuplicateParameters.ts(36,6): error TS1005: ',' expected.
-callSignaturesWithDuplicateParameters.ts(36,17): error TS1005: ',' expected.
-callSignaturesWithDuplicateParameters.ts(36,20): error TS1005: ',' expected.
-callSignaturesWithDuplicateParameters.ts(36,41): error TS1005: ',' expected.
+callSignaturesWithDuplicateParameters.ts(37,15): error TS2304: Cannot find name 'T'.
+callSignaturesWithDuplicateParameters.ts(37,21): error TS2304: Cannot find name 'T'.
 
 
-==== callSignaturesWithDuplicateParameters.ts (16 errors) ====
+==== callSignaturesWithDuplicateParameters.ts (10 errors) ====
     // Duplicate parameter names are always an error
     
     function foo(x, x) { }
@@ -68,22 +62,10 @@ callSignaturesWithDuplicateParameters.ts(36,41): error TS1005: ',' expected.
     
     var b = {
         foo(x, x) { },
-           ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
         a: function foo(x: number, x: string) { },
-         ~
-!!! error TS1005: ',' expected.
-                    ~~~
-!!! error TS1005: ',' expected.
-                       ~
-!!! error TS1005: ',' expected.
-                                            ~
-!!! error TS1005: ',' expected.
         b: <T>(x: T, x: T) => { }
+                  ~
+!!! error TS2304: Cannot find name 'T'.
+                        ~
+!!! error TS2304: Cannot find name 'T'.
     }

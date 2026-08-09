@@ -3,28 +3,13 @@ typeOfThisInAccessor.ts(7,16): error TS1005: ';' expected.
 typeOfThisInAccessor.ts(14,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 typeOfThisInAccessor.ts(15,9): error TS1005: ';' expected.
 typeOfThisInAccessor.ts(20,16): error TS1005: ';' expected.
-typeOfThisInAccessor.ts(27,5): error TS2304: Cannot find name 'get'.
-typeOfThisInAccessor.ts(27,9): error TS1005: ',' expected.
-typeOfThisInAccessor.ts(27,9): error TS2304: Cannot find name 'a'.
-typeOfThisInAccessor.ts(27,10): error TS1005: ',' expected.
-typeOfThisInAccessor.ts(27,11): error TS1005: ',' expected.
-typeOfThisInAccessor.ts(27,13): error TS1005: ',' expected.
-typeOfThisInAccessor.ts(28,9): error TS1005: ',' expected.
-typeOfThisInAccessor.ts(28,9): error TS2304: Cannot find name 'var'.
-typeOfThisInAccessor.ts(28,13): error TS1005: ',' expected.
-typeOfThisInAccessor.ts(28,13): error TS2304: Cannot find name 'r3'.
-typeOfThisInAccessor.ts(28,16): error TS1005: ',' expected.
-typeOfThisInAccessor.ts(28,18): error TS1005: ',' expected.
-typeOfThisInAccessor.ts(28,18): error TS2304: Cannot find name 'this'.
-typeOfThisInAccessor.ts(28,22): error TS1005: ',' expected.
-typeOfThisInAccessor.ts(29,9): error TS1005: ',' expected.
-typeOfThisInAccessor.ts(29,9): error TS2304: Cannot find name 'return'.
-typeOfThisInAccessor.ts(29,16): error TS1005: ',' expected.
-typeOfThisInAccessor.ts(29,17): error TS1005: ',' expected.
-typeOfThisInAccessor.ts(31,1): error TS1128: Declaration or statement expected.
+typeOfThisInAccessor.ts(27,10): error TS1005: '{' expected.
+typeOfThisInAccessor.ts(27,11): error TS1012: Unexpected token.
+typeOfThisInAccessor.ts(27,13): error TS1005: ')' expected.
+typeOfThisInAccessor.ts(31,2): error TS1005: '}' expected.
 
 
-==== typeOfThisInAccessor.ts (24 errors) ====
+==== typeOfThisInAccessor.ts (9 errors) ====
     class C {
         get x() {
             ~
@@ -62,45 +47,15 @@ typeOfThisInAccessor.ts(31,1): error TS1128: Declaration or statement expected.
     
     var x = {
         get a() {
-        ~~~
-!!! error TS2304: Cannot find name 'get'.
-            ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name 'a'.
              ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
               ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                 ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ')' expected.
             var r3 = this; // any
-            ~~~
-!!! error TS1005: ',' expected.
-            ~~~
-!!! error TS2304: Cannot find name 'var'.
-                ~~
-!!! error TS1005: ',' expected.
-                ~~
-!!! error TS2304: Cannot find name 'r3'.
-                   ~
-!!! error TS1005: ',' expected.
-                     ~~~~
-!!! error TS1005: ',' expected.
-                     ~~~~
-!!! error TS2304: Cannot find name 'this'.
-                         ~
-!!! error TS1005: ',' expected.
             return 1;
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                   ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
+     
+!!! error TS1005: '}' expected.

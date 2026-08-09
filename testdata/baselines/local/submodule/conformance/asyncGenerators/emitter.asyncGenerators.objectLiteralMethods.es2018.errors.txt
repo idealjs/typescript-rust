@@ -1,394 +1,46 @@
-O1.ts(2,5): error TS2304: Cannot find name 'async'.
-O1.ts(2,11): error TS1005: ',' expected.
-O1.ts(2,13): error TS1005: ',' expected.
-O1.ts(2,13): error TS2304: Cannot find name 'f'.
-O1.ts(2,14): error TS1005: ',' expected.
-O1.ts(2,15): error TS1005: ',' expected.
-O1.ts(2,17): error TS1005: ',' expected.
-O1.ts(4,1): error TS1128: Declaration or statement expected.
-O2.ts(2,5): error TS2304: Cannot find name 'async'.
-O2.ts(2,11): error TS1005: ',' expected.
-O2.ts(2,13): error TS1005: ',' expected.
-O2.ts(2,13): error TS2304: Cannot find name 'f'.
-O2.ts(2,14): error TS1005: ',' expected.
-O2.ts(2,15): error TS1005: ',' expected.
-O2.ts(2,17): error TS1005: ',' expected.
-O2.ts(3,9): error TS1005: ',' expected.
-O2.ts(3,9): error TS2304: Cannot find name 'const'.
-O2.ts(3,15): error TS1005: ',' expected.
-O2.ts(3,15): error TS2304: Cannot find name 'x'.
-O2.ts(3,17): error TS1005: ',' expected.
-O2.ts(3,19): error TS1005: ',' expected.
 O2.ts(3,19): error TS2304: Cannot find name 'yield'.
-O2.ts(3,24): error TS1005: ',' expected.
-O2.ts(5,1): error TS1128: Declaration or statement expected.
-O3.ts(2,5): error TS2304: Cannot find name 'async'.
-O3.ts(2,11): error TS1005: ',' expected.
-O3.ts(2,13): error TS1005: ',' expected.
-O3.ts(2,13): error TS2304: Cannot find name 'f'.
-O3.ts(2,14): error TS1005: ',' expected.
-O3.ts(2,15): error TS1005: ',' expected.
-O3.ts(2,17): error TS1005: ',' expected.
-O3.ts(3,9): error TS1005: ',' expected.
-O3.ts(3,9): error TS2304: Cannot find name 'const'.
-O3.ts(3,15): error TS1005: ',' expected.
-O3.ts(3,15): error TS2304: Cannot find name 'x'.
-O3.ts(3,17): error TS1005: ',' expected.
-O3.ts(3,19): error TS1005: ',' expected.
-O3.ts(3,19): error TS2304: Cannot find name 'yield'.
-O3.ts(3,25): error TS1005: ',' expected.
-O3.ts(3,26): error TS1005: ',' expected.
-O3.ts(5,1): error TS1128: Declaration or statement expected.
-O4.ts(2,5): error TS2304: Cannot find name 'async'.
-O4.ts(2,11): error TS1005: ',' expected.
-O4.ts(2,13): error TS1005: ',' expected.
-O4.ts(2,13): error TS2304: Cannot find name 'f'.
-O4.ts(2,14): error TS1005: ',' expected.
-O4.ts(2,15): error TS1005: ',' expected.
-O4.ts(2,17): error TS1005: ',' expected.
-O4.ts(3,9): error TS1005: ',' expected.
-O4.ts(3,9): error TS2304: Cannot find name 'const'.
-O4.ts(3,15): error TS1005: ',' expected.
-O4.ts(3,15): error TS2304: Cannot find name 'x'.
-O4.ts(3,17): error TS1005: ',' expected.
-O4.ts(3,19): error TS1005: ',' expected.
-O4.ts(3,19): error TS2304: Cannot find name 'yield'.
-O4.ts(3,24): error TS1005: ',' expected.
-O4.ts(3,26): error TS1005: ',' expected.
-O4.ts(3,29): error TS1005: ',' expected.
-O4.ts(5,1): error TS1128: Declaration or statement expected.
-O5.ts(2,5): error TS2304: Cannot find name 'async'.
-O5.ts(2,11): error TS1005: ',' expected.
-O5.ts(2,13): error TS1005: ',' expected.
-O5.ts(2,13): error TS2304: Cannot find name 'f'.
-O5.ts(2,14): error TS1005: ',' expected.
-O5.ts(2,15): error TS1005: ',' expected.
-O5.ts(2,17): error TS1005: ',' expected.
-O5.ts(3,9): error TS1005: ',' expected.
-O5.ts(3,9): error TS2304: Cannot find name 'const'.
-O5.ts(3,15): error TS1005: ',' expected.
-O5.ts(3,15): error TS2304: Cannot find name 'x'.
-O5.ts(3,17): error TS1005: ',' expected.
-O5.ts(3,19): error TS1005: ',' expected.
-O5.ts(3,19): error TS2304: Cannot find name 'yield'.
-O5.ts(3,24): error TS1005: ',' expected.
-O5.ts(3,26): error TS1005: ',' expected.
-O5.ts(3,27): error TS1005: ',' expected.
-O5.ts(3,27): error TS2304: Cannot find name 'async'.
-O5.ts(3,33): error TS1005: ',' expected.
-O5.ts(3,33): error TS2304: Cannot find name 'function'.
-O5.ts(3,41): error TS1005: ',' expected.
-O5.ts(3,42): error TS1005: ',' expected.
-O5.ts(3,43): error TS1005: ',' expected.
-O5.ts(3,45): error TS1005: ',' expected.
-O5.ts(3,47): error TS1005: ',' expected.
-O5.ts(3,47): error TS2304: Cannot find name 'yield'.
-O5.ts(3,53): error TS1005: ',' expected.
-O5.ts(3,54): error TS1005: ',' expected.
-O5.ts(3,57): error TS1005: ',' expected.
-O6.ts(2,5): error TS2304: Cannot find name 'async'.
-O6.ts(2,11): error TS1005: ',' expected.
-O6.ts(2,13): error TS1005: ',' expected.
-O6.ts(2,13): error TS2304: Cannot find name 'f'.
-O6.ts(2,14): error TS1005: ',' expected.
-O6.ts(2,15): error TS1005: ',' expected.
-O6.ts(2,17): error TS1005: ',' expected.
-O6.ts(3,9): error TS1005: ',' expected.
-O6.ts(3,9): error TS2304: Cannot find name 'const'.
-O6.ts(3,15): error TS1005: ',' expected.
-O6.ts(3,15): error TS2304: Cannot find name 'x'.
-O6.ts(3,17): error TS1005: ',' expected.
-O6.ts(3,19): error TS1005: ',' expected.
-O6.ts(3,19): error TS2304: Cannot find name 'await'.
-O6.ts(3,25): error TS1005: ',' expected.
-O6.ts(3,26): error TS1005: ',' expected.
-O6.ts(5,1): error TS1128: Declaration or statement expected.
-O7.ts(2,5): error TS2304: Cannot find name 'async'.
-O7.ts(2,11): error TS1005: ',' expected.
-O7.ts(2,13): error TS1005: ',' expected.
-O7.ts(2,13): error TS2304: Cannot find name 'f'.
-O7.ts(2,14): error TS1005: ',' expected.
-O7.ts(2,15): error TS1005: ',' expected.
-O7.ts(2,17): error TS1005: ',' expected.
-O7.ts(3,9): error TS1005: ',' expected.
-O7.ts(3,9): error TS2304: Cannot find name 'return'.
-O7.ts(3,16): error TS1005: ',' expected.
-O7.ts(3,17): error TS1005: ',' expected.
-O7.ts(5,1): error TS1128: Declaration or statement expected.
 
 
-==== O1.ts (8 errors) ====
+==== O1.ts (0 errors) ====
     const o1 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== O2.ts (16 errors) ====
+==== O2.ts (1 errors) ====
     const o2 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             const x = yield;
-            ~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~
-!!! error TS2304: Cannot find name 'const'.
-                  ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name 'x'.
-                    ~
-!!! error TS1005: ',' expected.
-                      ~~~~~
-!!! error TS1005: ',' expected.
                       ~~~~~
 !!! error TS2304: Cannot find name 'yield'.
-                           ~
-!!! error TS1005: ',' expected.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== O3.ts (17 errors) ====
+==== O3.ts (0 errors) ====
     const o3 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             const x = yield 1;
-            ~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~
-!!! error TS2304: Cannot find name 'const'.
-                  ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name 'x'.
-                    ~
-!!! error TS1005: ',' expected.
-                      ~~~~~
-!!! error TS1005: ',' expected.
-                      ~~~~~
-!!! error TS2304: Cannot find name 'yield'.
-                            ~
-!!! error TS1005: ',' expected.
-                             ~
-!!! error TS1005: ',' expected.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== O4.ts (18 errors) ====
+==== O4.ts (0 errors) ====
     const o4 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             const x = yield* [1];
-            ~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~
-!!! error TS2304: Cannot find name 'const'.
-                  ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name 'x'.
-                    ~
-!!! error TS1005: ',' expected.
-                      ~~~~~
-!!! error TS1005: ',' expected.
-                      ~~~~~
-!!! error TS2304: Cannot find name 'yield'.
-                           ~
-!!! error TS1005: ',' expected.
-                             ~
-!!! error TS1005: ',' expected.
-                                ~
-!!! error TS1005: ',' expected.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== O5.ts (29 errors) ====
+==== O5.ts (0 errors) ====
     const o5 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             const x = yield* (async function*() { yield 1; })();
-            ~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~
-!!! error TS2304: Cannot find name 'const'.
-                  ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name 'x'.
-                    ~
-!!! error TS1005: ',' expected.
-                      ~~~~~
-!!! error TS1005: ',' expected.
-                      ~~~~~
-!!! error TS2304: Cannot find name 'yield'.
-                           ~
-!!! error TS1005: ',' expected.
-                             ~
-!!! error TS1005: ',' expected.
-                              ~~~~~
-!!! error TS1005: ',' expected.
-                              ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-                                    ~~~~~~~~
-!!! error TS1005: ',' expected.
-                                    ~~~~~~~~
-!!! error TS2304: Cannot find name 'function'.
-                                            ~
-!!! error TS1005: ',' expected.
-                                             ~
-!!! error TS1005: ',' expected.
-                                              ~
-!!! error TS1005: ',' expected.
-                                                ~
-!!! error TS1005: ',' expected.
-                                                  ~~~~~
-!!! error TS1005: ',' expected.
-                                                  ~~~~~
-!!! error TS2304: Cannot find name 'yield'.
-                                                        ~
-!!! error TS1005: ',' expected.
-                                                         ~
-!!! error TS1005: ',' expected.
-                                                            ~
-!!! error TS1005: ',' expected.
         }
     }
-==== O6.ts (17 errors) ====
+==== O6.ts (0 errors) ====
     const o6 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             const x = await 1;
-            ~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~
-!!! error TS2304: Cannot find name 'const'.
-                  ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS2304: Cannot find name 'x'.
-                    ~
-!!! error TS1005: ',' expected.
-                      ~~~~~
-!!! error TS1005: ',' expected.
-                      ~~~~~
-!!! error TS2304: Cannot find name 'await'.
-                            ~
-!!! error TS1005: ',' expected.
-                             ~
-!!! error TS1005: ',' expected.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
-==== O7.ts (12 errors) ====
+==== O7.ts (0 errors) ====
     const o7 = {
         async * f() {
-        ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-              ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS2304: Cannot find name 'f'.
-                 ~
-!!! error TS1005: ',' expected.
-                  ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
             return 1;
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                   ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.

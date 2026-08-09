@@ -1,12 +1,15 @@
-constAssertions.ts(37,37): error TS1005: ',' expected.
-constAssertions.ts(37,38): error TS1005: ',' expected.
-constAssertions.ts(37,40): error TS1005: ',' expected.
-constAssertions.ts(37,54): error TS1005: ',' expected.
-constAssertions.ts(37,56): error TS1134: Variable declaration expected.
-constAssertions.ts(37,58): error TS1128: Declaration or statement expected.
+constAssertions.ts(53,11): error TS2304: Cannot find name 'const'.
+constAssertions.ts(54,11): error TS2304: Cannot find name 'const'.
+constAssertions.ts(55,11): error TS2304: Cannot find name 'const'.
+constAssertions.ts(56,11): error TS2304: Cannot find name 'const'.
+constAssertions.ts(57,11): error TS2304: Cannot find name 'const'.
+constAssertions.ts(91,11): error TS2322: Type 'string | string' is not assignable to type '"verify" | "write"'.
+constAssertions.ts(92,11): error TS2322: Type 'string | string' is not assignable to type '"match" | "nonMatch"'.
+constAssertions.ts(93,11): error TS2322: Type 'string' is not assignable to type '`${"verify" | "write"}_${"match" | "nonMatch"}`'.
+constAssertions.ts(116,7): error TS2322: Type '{ a: 1; b: 3 }' is not assignable to type '{ a: 1; b: 2 }'.
 
 
-==== constAssertions.ts (6 errors) ====
+==== constAssertions.ts (9 errors) ====
     let v1 = 'abc' as const;
     let v2 = `abc` as const;
     let v3 = 10 as const;
@@ -44,18 +47,6 @@ constAssertions.ts(37,58): error TS1128: Declaration or statement expected.
     
     let o1 = { x: 10, y: 20 } as const;
     let o2 = { a: 1, 'b': 2, ['c']: 3, d() {}, ['e' + '']: 4 } as const;
-                                        ~
-!!! error TS1005: ',' expected.
-                                         ~
-!!! error TS1005: ',' expected.
-                                           ~
-!!! error TS1005: ',' expected.
-                                                         ~
-!!! error TS1005: ',' expected.
-                                                           ~
-!!! error TS1134: Variable declaration expected.
-                                                             ~
-!!! error TS1128: Declaration or statement expected.
     let o3 = { ...o1, ...o2 } as const;
     let o4 = { a: 1, b: 2 };
     let o5 = { ...o4 } as const;
@@ -72,10 +63,20 @@ constAssertions.ts(37,58): error TS1128: Declaration or statement expected.
     let x1 = { x: 10, y: [20, 30], z: { a: { b: 42 } } } as const;
     
     let q1 = <const> 10;
+              ~~~~~
+!!! error TS2304: Cannot find name 'const'.
     let q2 = <const> 'abc';
+              ~~~~~
+!!! error TS2304: Cannot find name 'const'.
     let q3 = <const> true;
+              ~~~~~
+!!! error TS2304: Cannot find name 'const'.
     let q4 = <const> [1, 2, 3];
+              ~~~~~
+!!! error TS2304: Cannot find name 'const'.
     let q5 = <const> { x: 10, y: 20 };
+              ~~~~~
+!!! error TS2304: Cannot find name 'const'.
     
     declare function id<T>(x: T): T;
     
@@ -110,8 +111,14 @@ constAssertions.ts(37,58): error TS1128: Declaration or statement expected.
     
     function ff4(verify: boolean, contentMatches: boolean) {
         const action : Action = verify ? `verify` : `write`;
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'string | string' is not assignable to type '"verify" | "write"'.
         const contentMatch: ContentMatch = contentMatches ? `match` : `nonMatch`;
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'string | string' is not assignable to type '"match" | "nonMatch"'.
         const outcome: Outcome = `${action}_${contentMatch}` as const;
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type 'string' is not assignable to type '`${"verify" | "write"}_${"match" | "nonMatch"}`'.
         return outcome;
     }
     
@@ -135,6 +142,11 @@ constAssertions.ts(37,58): error TS1128: Declaration or statement expected.
     }
     
     const fooConst54374: Foo54374 = {
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~
       a: 1,
+    ~~~~~~~
       b: 3
+    ~~~~~~
     } as const
+    ~~~~~~~~~~
+!!! error TS2322: Type '{ a: 1; b: 3 }' is not assignable to type '{ a: 1; b: 2 }'.

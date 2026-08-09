@@ -1,21 +1,26 @@
-thisTypeInFunctions.ts(41,5): error TS2304: Cannot find name 'explicitVoid1'.
-thisTypeInFunctions.ts(41,18): error TS1005: ',' expected.
-thisTypeInFunctions.ts(41,19): error TS1005: ',' expected.
-thisTypeInFunctions.ts(41,21): error TS1005: ',' expected.
-thisTypeInFunctions.ts(41,23): error TS1005: ',' expected.
-thisTypeInFunctions.ts(41,30): error TS1005: ',' expected.
-thisTypeInFunctions.ts(41,32): error TS1005: ',' expected.
-thisTypeInFunctions.ts(42,5): error TS2554: Expected 2 arguments, but got 0.
-thisTypeInFunctions.ts(42,26): error TS1005: ',' expected.
-thisTypeInFunctions.ts(42,26): error TS1182: A destructuring declaration must have an initializer.
-thisTypeInFunctions.ts(43,16): error TS1005: ',' expected.
-thisTypeInFunctions.ts(43,20): error TS1005: ',' expected.
-thisTypeInFunctions.ts(43,22): error TS1005: ',' expected.
-thisTypeInFunctions.ts(45,22): error TS1005: ',' expected.
-thisTypeInFunctions.ts(45,23): error TS1134: Variable declaration expected.
+thisTypeInFunctions.ts(62,1): error TS2554: Expected 2 arguments, but got 1.
+thisTypeInFunctions.ts(69,1): error TS2554: Expected 2 arguments, but got 1.
+thisTypeInFunctions.ts(70,1): error TS2554: Expected 2 arguments, but got 1.
+thisTypeInFunctions.ts(71,1): error TS2554: Expected 2 arguments, but got 1.
+thisTypeInFunctions.ts(72,1): error TS2554: Expected 2 arguments, but got 1.
+thisTypeInFunctions.ts(73,1): error TS2554: Expected 2 arguments, but got 1.
+thisTypeInFunctions.ts(74,1): error TS2554: Expected 2 arguments, but got 1.
+thisTypeInFunctions.ts(83,5): error TS2353: Object literal may only specify known properties, and 'explicitThis' does not exist in type '{ n: number; explicitProperty: (this: { n: number }, m: number) => number }'.
+thisTypeInFunctions.ts(88,15): error TS2339: Property 'explicitThis' does not exist on type '{ n: number; explicitProperty: (this: { n: number }, m: number) => number }'.
+thisTypeInFunctions.ts(89,1): error TS2554: Expected 2 arguments, but got 1.
+thisTypeInFunctions.ts(90,34): error TS2339: Property 'explicitVoid' does not exist on type '{ n: number; explicitProperty: (this: { n: number }, m: number) => number }'.
+thisTypeInFunctions.ts(95,5): error TS2322: Type '(x: number) => number' is not assignable to type '(this: { y: number }, x: number) => number'.
+thisTypeInFunctions.ts(99,5): error TS2322: Type '(x: number) => number' is not assignable to type '(this: { y: number }, x: number) => number'.
+thisTypeInFunctions.ts(100,5): error TS2322: Type '(this: void, x: number) => number' is not assignable to type '(this: { y: number }, x: number) => number'.
+thisTypeInFunctions.ts(145,69): error TS2339: Property 'y' does not exist on type '{ x: number; polymorphic: (this: error) => number; explicit: (this: error) => number }'.
+thisTypeInFunctions.ts(154,49): error TS2339: Property 'x' does not exist on type '{ y: number; polymorphic: (this: error) => number; explicit: (this: error) => number }'.
+thisTypeInFunctions.ts(182,25): error TS2351: This expression is not constructable.
+thisTypeInFunctions.ts(183,27): error TS2351: This expression is not constructable.
+thisTypeInFunctions.ts(184,19): error TS2351: This expression is not constructable.
+thisTypeInFunctions.ts(191,19): error TS2339: Property 'call' does not exist on type 'object'.
 
 
-==== thisTypeInFunctions.ts (15 errors) ====
+==== thisTypeInFunctions.ts (20 errors) ====
     // body checking
     class B {
         n: number;
@@ -57,42 +62,10 @@ thisTypeInFunctions.ts(45,23): error TS1134: Variable declaration expected.
         a: 12,
         explicitVoid2: () => this.a, // ok, this: any because it refers to some outer object (window?)
         explicitVoid1() { return 12; },
-        ~~~~~~~~~~~~~
-!!! error TS2304: Cannot find name 'explicitVoid1'.
-                     ~
-!!! error TS1005: ',' expected.
-                      ~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS1005: ',' expected.
-                          ~~~~~~
-!!! error TS1005: ',' expected.
-                                 ~~
-!!! error TS1005: ',' expected.
-                                   ~
-!!! error TS1005: ',' expected.
         explicitStructural() {
-        ~~~~~~~~~~~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 0.
-                             ~
-!!! error TS1005: ',' expected.
-                             ~
             return this.a;
-    ~~~~~~~~~~~~~~~~~~~~~~
-                   ~~~~
-!!! error TS1005: ',' expected.
-                       ~
-!!! error TS1005: ',' expected.
-                         ~
-!!! error TS1005: ',' expected.
         },
-    ~~~~~
-!!! error TS1182: A destructuring declaration must have an initializer.
         explicitInterface() {
-                         ~
-!!! error TS1005: ',' expected.
-                          ~
-!!! error TS1134: Variable declaration expected.
             return this.a;
         },
         explicitThis() {
@@ -110,6 +83,8 @@ thisTypeInFunctions.ts(45,23): error TS1134: Variable declaration expected.
     let ok: {y: number, f: (this: { y: number }, x: number) => number} = { y: 12, f: explicitStructural };
     let implicitAnyOk: {notSpecified: number, f: (x: number) => number} = { notSpecified: 12, f: implicitThis };
     ok.f(13);
+    ~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
     implicitThis(12);
     implicitAnyOk.f(12);
     
@@ -117,11 +92,23 @@ thisTypeInFunctions.ts(45,23): error TS1134: Variable declaration expected.
     let d = new D();
     let ripped = c.explicitC;
     c.explicitC(12);
+    ~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
     c.explicitProperty(12);
+    ~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
     c.explicitThis(12);
+    ~~~~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
     d.explicitC(12);
+    ~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
     d.explicitProperty(12);
+    ~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
     d.explicitThis(12);
+    ~~~~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
     let reconstructed: { 
         n: number,
         explicitThis(this: C, m: number): number, // note: this: this is not allowed in an object literal type.
@@ -131,23 +118,37 @@ thisTypeInFunctions.ts(45,23): error TS1134: Variable declaration expected.
     } = { 
         n: 12,
         explicitThis: c.explicitThis,
+        ~~~~~~~~~~~~
+!!! error TS2353: Object literal may only specify known properties, and 'explicitThis' does not exist in type '{ n: number; explicitProperty: (this: { n: number }, m: number) => number }'.
         explicitC: c.explicitC,
         explicitProperty: c.explicitProperty,
         explicitVoid: c.explicitVoid
     };
     reconstructed.explicitThis(10);
+                  ~~~~~~~~~~~~
+!!! error TS2339: Property 'explicitThis' does not exist on type '{ n: number; explicitProperty: (this: { n: number }, m: number) => number }'.
     reconstructed.explicitProperty(11);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
     let explicitVoid = reconstructed.explicitVoid;
+                                     ~~~~~~~~~~~~
+!!! error TS2339: Property 'explicitVoid' does not exist on type '{ n: number; explicitProperty: (this: { n: number }, m: number) => number }'.
     explicitVoid(12);
     // assignment checking
     let unboundToSpecified: (this: { y: number }, x: number) => number = x => x + this.y; // ok, this:any
     let specifiedToSpecified: (this: {y: number}, x: number) => number = explicitStructural;
     let anyToSpecified: (this: { y: number }, x: number) => number = function(x: number): number { return x + 12; };
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '(x: number) => number' is not assignable to type '(this: { y: number }, x: number) => number'.
     
     let unspecifiedLambda: (x: number) => number = x => x + 12;
     let specifiedLambda: (this: void, x: number) => number = x => x + 12;
     let unspecifiedLambdaToSpecified: (this: {y: number}, x: number) => number = unspecifiedLambda;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '(x: number) => number' is not assignable to type '(this: { y: number }, x: number) => number'.
     let specifiedLambdaToSpecified: (this: {y: number}, x: number) => number = specifiedLambda;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2322: Type '(this: void, x: number) => number' is not assignable to type '(this: { y: number }, x: number) => number'.
     
     
     declare let explicitCFunction: (this: C, m: number) => number;
@@ -193,6 +194,8 @@ thisTypeInFunctions.ts(45,23): error TS1134: Variable declaration expected.
         public polymorphic(this: this): number { return this.x; }
         explicit(this: Base1): number { return this.x; }
         static explicitStatic(this: typeof Base1): number { return this.y; }
+                                                                        ~
+!!! error TS2339: Property 'y' does not exist on type '{ x: number; polymorphic: (this: error) => number; explicit: (this: error) => number }'.
         static y: number;
     }
     class Derived1 extends Base1 {
@@ -202,6 +205,8 @@ thisTypeInFunctions.ts(45,23): error TS1134: Variable declaration expected.
         y: number
         polymorphic(this: this): number { return this.y; }
         explicit(this: Base1): number { return this.x; }
+                                                    ~
+!!! error TS2339: Property 'x' does not exist on type '{ y: number; polymorphic: (this: error) => number; explicit: (this: error) => number }'.
     }
     class Derived2 extends Base2 {
         x: number
@@ -230,8 +235,14 @@ thisTypeInFunctions.ts(45,23): error TS1134: Variable declaration expected.
         this.x = "ok";
     }
     let interfaceThis = new InterfaceThis();
+                            ~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
     let literalTypeThis = new LiteralTypeThis();
+                              ~~~~~~~~~~~~~~~
+!!! error TS2351: This expression is not constructable.
     let anyThis = new AnyThis();
+                      ~~~~~~~
+!!! error TS2351: This expression is not constructable.
     
     //// type parameter inference ////
     declare var f: { 
@@ -239,5 +250,7 @@ thisTypeInFunctions.ts(45,23): error TS1134: Variable declaration expected.
         call<U>(this: (...argArray: any[]) => U, ...argArray: any[]): U;
     };
     let n: number = f.call(12);
+                      ~~~~
+!!! error TS2339: Property 'call' does not exist on type 'object'.
     
     function missingTypeIsImplicitAny(this, a: number) { return this.anything + a; } 

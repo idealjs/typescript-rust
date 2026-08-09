@@ -1,48 +1,12 @@
-awaitUsingDeclarations.2.ts(2,24): error TS2304: Cannot find name 'async'.
-awaitUsingDeclarations.2.ts(2,30): error TS1005: ',' expected.
-awaitUsingDeclarations.2.ts(2,51): error TS1005: ',' expected.
-awaitUsingDeclarations.2.ts(2,52): error TS1005: ',' expected.
-awaitUsingDeclarations.2.ts(2,54): error TS1005: ',' expected.
-awaitUsingDeclarations.2.ts(2,58): error TS1128: Declaration or statement expected.
 awaitUsingDeclarations.2.ts(3,17): error TS2304: Cannot find name 'd2'.
-awaitUsingDeclarations.2.ts(3,24): error TS2304: Cannot find name 'async'.
-awaitUsingDeclarations.2.ts(3,30): error TS1005: ',' expected.
-awaitUsingDeclarations.2.ts(3,51): error TS1005: ',' expected.
-awaitUsingDeclarations.2.ts(3,52): error TS1005: ',' expected.
-awaitUsingDeclarations.2.ts(3,54): error TS1005: ',' expected.
-awaitUsingDeclarations.2.ts(3,57): error TS1128: Declaration or statement expected.
 
 
-==== awaitUsingDeclarations.2.ts (13 errors) ====
+==== awaitUsingDeclarations.2.ts (1 errors) ====
     {
         await using d1 = { async [Symbol.asyncDispose]() {} },
-                           ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-                                 ~
-!!! error TS1005: ',' expected.
-                                                      ~
-!!! error TS1005: ',' expected.
-                                                       ~
-!!! error TS1005: ',' expected.
-                                                         ~
-!!! error TS1005: ',' expected.
-                                                             ~
-!!! error TS1128: Declaration or statement expected.
                     d2 = { async [Symbol.asyncDispose]() {} };
                     ~~
 !!! error TS2304: Cannot find name 'd2'.
-                           ~~~~~
-!!! error TS2304: Cannot find name 'async'.
-                                 ~
-!!! error TS1005: ',' expected.
-                                                      ~
-!!! error TS1005: ',' expected.
-                                                       ~
-!!! error TS1005: ',' expected.
-                                                         ~
-!!! error TS1005: ',' expected.
-                                                            ~
-!!! error TS1128: Declaration or statement expected.
     }
     
     export {};

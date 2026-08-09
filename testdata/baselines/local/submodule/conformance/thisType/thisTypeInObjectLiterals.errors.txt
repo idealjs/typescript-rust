@@ -1,69 +1,16 @@
-thisTypeInObjectLiterals.ts(3,5): error TS2304: Cannot find name 'm'.
-thisTypeInObjectLiterals.ts(3,6): error TS1005: ',' expected.
-thisTypeInObjectLiterals.ts(3,7): error TS1005: ',' expected.
-thisTypeInObjectLiterals.ts(3,9): error TS1005: ',' expected.
-thisTypeInObjectLiterals.ts(4,9): error TS1005: ',' expected.
-thisTypeInObjectLiterals.ts(4,9): error TS2304: Cannot find name 'return'.
-thisTypeInObjectLiterals.ts(4,16): error TS1005: ',' expected.
-thisTypeInObjectLiterals.ts(4,16): error TS2304: Cannot find name 'this'.
-thisTypeInObjectLiterals.ts(4,20): error TS1005: ',' expected.
-thisTypeInObjectLiterals.ts(4,21): error TS1005: ',' expected.
-thisTypeInObjectLiterals.ts(4,21): error TS2304: Cannot find name 'd'.
-thisTypeInObjectLiterals.ts(4,22): error TS1005: ',' expected.
-thisTypeInObjectLiterals.ts(4,23): error TS1005: ',' expected.
-thisTypeInObjectLiterals.ts(4,23): error TS2304: Cannot find name 'length'.
-thisTypeInObjectLiterals.ts(4,29): error TS1005: ',' expected.
-thisTypeInObjectLiterals.ts(6,5): error TS2304: Cannot find name 'f'.
-thisTypeInObjectLiterals.ts(6,6): error TS1005: ',' expected.
-thisTypeInObjectLiterals.ts(6,16): error TS1005: ',' expected.
-thisTypeInObjectLiterals.ts(6,17): error TS1134: Variable declaration expected.
+thisTypeInObjectLiterals.ts(17,26): error TS2304: Cannot find name 'n'.
+thisTypeInObjectLiterals.ts(20,13): error TS2304: Cannot find name 'n'.
+thisTypeInObjectLiterals.ts(21,37): error TS2304: Cannot find name 'n'.
+thisTypeInObjectLiterals.ts(23,16): error TS2304: Cannot find name 'n'.
 
 
-==== thisTypeInObjectLiterals.ts (19 errors) ====
+==== thisTypeInObjectLiterals.ts (4 errors) ====
     let o = {
         d: "bar",
         m() {
-        ~
-!!! error TS2304: Cannot find name 'm'.
-         ~
-!!! error TS1005: ',' expected.
-          ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS1005: ',' expected.
             return this.d.length;
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                   ~~~~
-!!! error TS1005: ',' expected.
-                   ~~~~
-!!! error TS2304: Cannot find name 'this'.
-                       ~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name 'd'.
-                         ~
-!!! error TS1005: ',' expected.
-                          ~~~~~~
-!!! error TS1005: ',' expected.
-                          ~~~~~~
-!!! error TS2304: Cannot find name 'length'.
-                                ~
-!!! error TS1005: ',' expected.
         },
         f: function() {
-        ~
-!!! error TS2304: Cannot find name 'f'.
-         ~
-!!! error TS1005: ',' expected.
-                   ~
-!!! error TS1005: ',' expected.
-                    ~
-!!! error TS1134: Variable declaration expected.
             return this.d.length;
         }
     }
@@ -75,12 +22,20 @@ thisTypeInObjectLiterals.ts(6,17): error TS1134: Variable declaration expected.
         },
         passthrough(n: number) {
             return this.sub1(n);
+                             ~
+!!! error TS2304: Cannot find name 'n'.
         },
         sub1(n: number): number {
             if (n > 0) {
+                ~
+!!! error TS2304: Cannot find name 'n'.
                 return this.passthrough(n - 1);
+                                        ~
+!!! error TS2304: Cannot find name 'n'.
             }
             return n;
+                   ~
+!!! error TS2304: Cannot find name 'n'.
         }
     }
     var i: number = mutuallyRecursive.start();

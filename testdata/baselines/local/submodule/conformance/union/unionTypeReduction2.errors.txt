@@ -12,15 +12,10 @@ unionTypeReduction2.ts(33,5): error TS2349: This expression is not callable.
 unionTypeReduction2.ts(34,5): error TS2349: This expression is not callable.
 unionTypeReduction2.ts(48,7): error TS2339: Property 'f' does not exist on type 'object | object'.
 unionTypeReduction2.ts(49,7): error TS2339: Property 'f' does not exist on type 'object | object'.
-unionTypeReduction2.ts(58,24): error TS2304: Cannot find name 'something'.
-unionTypeReduction2.ts(58,33): error TS1005: ',' expected.
-unionTypeReduction2.ts(58,33): error TS2353: Object literal may only specify known properties, and '(' does not exist in type '{ something: () => void }'.
-unionTypeReduction2.ts(58,34): error TS1005: ',' expected.
-unionTypeReduction2.ts(58,36): error TS1005: ',' expected.
-unionTypeReduction2.ts(58,40): error TS1128: Declaration or statement expected.
+unionTypeReduction2.ts(62,31): error TS2339: Property 'something' does not exist on type 'object'.
 
 
-==== unionTypeReduction2.ts (20 errors) ====
+==== unionTypeReduction2.ts (15 errors) ====
     function f1(x: { f(): void }, y: { f(x?: string): void }) {
         let z = !!true ? x : y;  // { f(x?: string): void }
         z.f();
@@ -107,21 +102,11 @@ unionTypeReduction2.ts(58,40): error TS1128: Declaration or statement expected.
     }
     
     const k: ReturnVal = { something() { } }
-                           ~~~~~~~~~
-!!! error TS2304: Cannot find name 'something'.
-                                    ~
-!!! error TS1005: ',' expected.
-                                    ~
-!!! error TS2353: Object literal may only specify known properties, and '(' does not exist in type '{ something: () => void }'.
-                                     ~
-!!! error TS1005: ',' expected.
-                                       ~
-!!! error TS1005: ',' expected.
-                                           ~
-!!! error TS1128: Declaration or statement expected.
     
     declare const val: ReturnVal;
     function run(options: { something?(b?: string): void }) {
         const something = options.something ?? val.something;
+                                  ~~~~~~~~~
+!!! error TS2339: Property 'something' does not exist on type 'object'.
         something('');
     }

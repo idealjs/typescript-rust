@@ -1,23 +1,41 @@
-accessorsOverrideProperty8.ts(15,5): error TS2304: Cannot find name 'get'.
-accessorsOverrideProperty8.ts(15,9): error TS1005: ',' expected.
-accessorsOverrideProperty8.ts(15,9): error TS2304: Cannot find name 'x'.
-accessorsOverrideProperty8.ts(15,10): error TS1005: ',' expected.
-accessorsOverrideProperty8.ts(15,11): error TS1005: ',' expected.
-accessorsOverrideProperty8.ts(15,13): error TS1005: ',' expected.
-accessorsOverrideProperty8.ts(15,15): error TS1005: ',' expected.
-accessorsOverrideProperty8.ts(15,15): error TS2304: Cannot find name 'return'.
-accessorsOverrideProperty8.ts(15,22): error TS1005: ',' expected.
-accessorsOverrideProperty8.ts(15,32): error TS1005: ',' expected.
-accessorsOverrideProperty8.ts(15,32): error TS2304: Cannot find name 'as'.
-accessorsOverrideProperty8.ts(15,35): error TS1005: ',' expected.
-accessorsOverrideProperty8.ts(15,35): error TS2304: Cannot find name 'const'.
-accessorsOverrideProperty8.ts(16,5): error TS2304: Cannot find name 'y'.
-accessorsOverrideProperty8.ts(16,6): error TS1005: ',' expected.
-accessorsOverrideProperty8.ts(16,8): error TS2554: Expected 2 arguments, but got 3.
-accessorsOverrideProperty8.ts(17,1): error TS1135: Argument expression expected.
+accessorsOverrideProperty8.ts(14,14): error TS2554: Expected 2 arguments, but got 1.
+accessorsOverrideProperty8.ts(15,10): error TS1005: '{' expected.
+accessorsOverrideProperty8.ts(15,11): error TS1012: Unexpected token.
+accessorsOverrideProperty8.ts(15,13): error TS1005: ')' expected.
+accessorsOverrideProperty8.ts(15,42): error TS1128: Declaration or statement expected.
+accessorsOverrideProperty8.ts(17,1): error TS1012: Unexpected token.
+accessorsOverrideProperty8.ts(18,2): error TS1005: ';' expected.
+accessorsOverrideProperty8.ts(18,3): error TS1005: ',' expected.
+accessorsOverrideProperty8.ts(20,1): error TS1005: ',' expected.
+accessorsOverrideProperty8.ts(20,1): error TS2304: Cannot find name 'class'.
+accessorsOverrideProperty8.ts(20,7): error TS1005: ',' expected.
+accessorsOverrideProperty8.ts(20,7): error TS2304: Cannot find name 'MyClass'.
+accessorsOverrideProperty8.ts(20,15): error TS1005: ',' expected.
+accessorsOverrideProperty8.ts(20,15): error TS2304: Cannot find name 'extends'.
+accessorsOverrideProperty8.ts(20,23): error TS1005: ',' expected.
+accessorsOverrideProperty8.ts(20,28): error TS1005: ',' expected.
+accessorsOverrideProperty8.ts(21,5): error TS1005: ',' expected.
+accessorsOverrideProperty8.ts(21,10): error TS1005: '{' expected.
+accessorsOverrideProperty8.ts(21,11): error TS1012: Unexpected token.
+accessorsOverrideProperty8.ts(21,13): error TS1005: ')' expected.
+accessorsOverrideProperty8.ts(24,5): error TS2304: Cannot find name 'get'.
+accessorsOverrideProperty8.ts(24,9): error TS1005: ';' expected.
+accessorsOverrideProperty8.ts(24,9): error TS2304: Cannot find name 'y'.
+accessorsOverrideProperty8.ts(24,13): error TS1005: ';' expected.
+accessorsOverrideProperty8.ts(29,1): error TS1005: ',' expected.
+accessorsOverrideProperty8.ts(29,1): error TS2304: Cannot find name 'const'.
+accessorsOverrideProperty8.ts(29,7): error TS1005: ',' expected.
+accessorsOverrideProperty8.ts(29,7): error TS2304: Cannot find name 'mine'.
+accessorsOverrideProperty8.ts(29,12): error TS1005: ',' expected.
+accessorsOverrideProperty8.ts(29,14): error TS1005: ',' expected.
+accessorsOverrideProperty8.ts(29,14): error TS2304: Cannot find name 'new'.
+accessorsOverrideProperty8.ts(29,18): error TS1005: ',' expected.
+accessorsOverrideProperty8.ts(29,27): error TS1005: '{' expected.
+accessorsOverrideProperty8.ts(30,15): error TS2304: Cannot find name 'mine'.
+accessorsOverrideProperty8.ts(31,1): error TS1005: '}' expected.
 
 
-==== accessorsOverrideProperty8.ts (17 errors) ====
+==== accessorsOverrideProperty8.ts (35 errors) ====
     type Types = 'boolean' | 'unknown' | 'string';
     
     type Properties<T extends { [key: string]: Types }> = {
@@ -32,54 +50,90 @@ accessorsOverrideProperty8.ts(17,1): error TS1135: Argument expression expected.
     };
     
     const Base = classWithProperties({
+                 ~~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
         get x() { return 'boolean' as const },
-        ~~~
-!!! error TS2304: Cannot find name 'get'.
-            ~
-!!! error TS1005: ',' expected.
-            ~
-!!! error TS2304: Cannot find name 'x'.
              ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
               ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                 ~
-!!! error TS1005: ',' expected.
-                  ~~~~~~
-!!! error TS1005: ',' expected.
-                  ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                         ~~~~~~~~~
-!!! error TS1005: ',' expected.
-                                   ~~
-!!! error TS1005: ',' expected.
-                                   ~~
-!!! error TS2304: Cannot find name 'as'.
-                                      ~~~~~
-!!! error TS1005: ',' expected.
-                                      ~~~~~
-!!! error TS2304: Cannot find name 'const'.
+!!! error TS1005: ')' expected.
+                                             ~
+!!! error TS1128: Declaration or statement expected.
         y: 'string',
-        ~
-!!! error TS2304: Cannot find name 'y'.
-         ~
-!!! error TS1005: ',' expected.
-           ~~~~~~~~
-!!! error TS2554: Expected 2 arguments, but got 3.
     }, class Base {
     ~
-!!! error TS1135: Argument expression expected.
+!!! error TS1012: Unexpected token.
     });
+     ~
+!!! error TS1005: ';' expected.
+      ~
+!!! error TS1005: ',' expected.
     
     class MyClass extends Base {
+    ~~~~~
+!!! error TS1005: ',' expected.
+    ~~~~~
+!!! error TS2304: Cannot find name 'class'.
+          ~~~~~~~
+!!! error TS1005: ',' expected.
+          ~~~~~~~
+!!! error TS2304: Cannot find name 'MyClass'.
+                  ~~~~~~~
+!!! error TS1005: ',' expected.
+                  ~~~~~~~
+!!! error TS2304: Cannot find name 'extends'.
+                          ~~~~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS1005: ',' expected.
         get x() {
+        ~~~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: '{' expected.
+              ~
+!!! error TS1012: Unexpected token.
+                ~
+!!! error TS1005: ')' expected.
             return false;
         }
         get y() {
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+            ~
+!!! error TS1005: ';' expected.
+            ~
+!!! error TS2304: Cannot find name 'y'.
+                ~
+!!! error TS1005: ';' expected.
             return 'hi'
         }
     }
     
     const mine = new MyClass();
+    ~~~~~
+!!! error TS1005: ',' expected.
+    ~~~~~
+!!! error TS2304: Cannot find name 'const'.
+          ~~~~
+!!! error TS1005: ',' expected.
+          ~~~~
+!!! error TS2304: Cannot find name 'mine'.
+               ~
+!!! error TS1005: ',' expected.
+                 ~~~
+!!! error TS1005: ',' expected.
+                 ~~~
+!!! error TS2304: Cannot find name 'new'.
+                     ~~~~~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1005: '{' expected.
     const value = mine.x;
+                  ~~~~
+!!! error TS2304: Cannot find name 'mine'.
     
+    
+!!! error TS1005: '}' expected.

@@ -1,55 +1,382 @@
-objectLiteralGettersAndSetters.ts(2,20): error TS2304: Cannot find name 'get'.
-objectLiteralGettersAndSetters.ts(2,24): error TS1005: ',' expected.
-objectLiteralGettersAndSetters.ts(2,27): error TS1005: ',' expected.
-objectLiteralGettersAndSetters.ts(2,28): error TS1005: ',' expected.
-objectLiteralGettersAndSetters.ts(2,30): error TS1005: ',' expected.
-objectLiteralGettersAndSetters.ts(2,32): error TS1005: ',' expected.
-objectLiteralGettersAndSetters.ts(2,32): error TS2304: Cannot find name 'return'.
-objectLiteralGettersAndSetters.ts(2,39): error TS1005: ',' expected.
-objectLiteralGettersAndSetters.ts(2,41): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(2,27): error TS1005: '{' expected.
+objectLiteralGettersAndSetters.ts(2,28): error TS1012: Unexpected token.
+objectLiteralGettersAndSetters.ts(2,30): error TS1005: ')' expected.
+objectLiteralGettersAndSetters.ts(2,44): error TS1128: Declaration or statement expected.
 objectLiteralGettersAndSetters.ts(2,46): error TS2304: Cannot find name 'set'.
-objectLiteralGettersAndSetters.ts(2,50): error TS1005: ',' expected.
-objectLiteralGettersAndSetters.ts(2,51): error TS1005: ',' expected.
-objectLiteralGettersAndSetters.ts(2,53): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(2,50): error TS1005: ';' expected.
+objectLiteralGettersAndSetters.ts(2,50): error TS2304: Cannot find name 'a'.
+objectLiteralGettersAndSetters.ts(2,52): error TS2304: Cannot find name 'n'.
+objectLiteralGettersAndSetters.ts(2,55): error TS1005: ';' expected.
+objectLiteralGettersAndSetters.ts(2,65): error TS2304: Cannot find name 'n'.
+objectLiteralGettersAndSetters.ts(2,86): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(3,1): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(3,1): error TS2304: Cannot find name 'var'.
+objectLiteralGettersAndSetters.ts(3,5): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(3,5): error TS2304: Cannot find name 'sameName2a'.
+objectLiteralGettersAndSetters.ts(3,16): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(3,18): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(3,20): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(3,27): error TS1005: '{' expected.
+objectLiteralGettersAndSetters.ts(3,28): error TS1012: Unexpected token.
+objectLiteralGettersAndSetters.ts(3,30): error TS1005: ')' expected.
+objectLiteralGettersAndSetters.ts(3,44): error TS1128: Declaration or statement expected.
+objectLiteralGettersAndSetters.ts(3,46): error TS2304: Cannot find name 'set'.
+objectLiteralGettersAndSetters.ts(3,50): error TS1005: ';' expected.
+objectLiteralGettersAndSetters.ts(3,50): error TS2349: This expression is not callable.
+objectLiteralGettersAndSetters.ts(3,52): error TS2304: Cannot find name 'n'.
+objectLiteralGettersAndSetters.ts(3,55): error TS1005: ';' expected.
+objectLiteralGettersAndSetters.ts(3,65): error TS2304: Cannot find name 'n'.
+objectLiteralGettersAndSetters.ts(3,86): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(4,1): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(4,1): error TS2304: Cannot find name 'var'.
+objectLiteralGettersAndSetters.ts(4,5): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(4,5): error TS2304: Cannot find name 'sameName3a'.
+objectLiteralGettersAndSetters.ts(4,16): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(4,18): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(4,20): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(4,28): error TS1005: '{' expected.
+objectLiteralGettersAndSetters.ts(4,29): error TS1012: Unexpected token.
+objectLiteralGettersAndSetters.ts(4,31): error TS1005: ')' expected.
+objectLiteralGettersAndSetters.ts(4,45): error TS1128: Declaration or statement expected.
+objectLiteralGettersAndSetters.ts(4,47): error TS2304: Cannot find name 'set'.
+objectLiteralGettersAndSetters.ts(4,51): error TS1005: ';' expected.
+objectLiteralGettersAndSetters.ts(4,51): error TS2349: This expression is not callable.
+objectLiteralGettersAndSetters.ts(4,57): error TS2304: Cannot find name 'n'.
+objectLiteralGettersAndSetters.ts(4,60): error TS1005: ';' expected.
+objectLiteralGettersAndSetters.ts(4,70): error TS2304: Cannot find name 'n'.
+objectLiteralGettersAndSetters.ts(4,91): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(5,1): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(5,1): error TS2304: Cannot find name 'var'.
+objectLiteralGettersAndSetters.ts(5,5): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(5,5): error TS2304: Cannot find name 'sameName4a'.
+objectLiteralGettersAndSetters.ts(5,16): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(5,18): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(5,20): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(5,26): error TS1005: '{' expected.
+objectLiteralGettersAndSetters.ts(5,27): error TS1012: Unexpected token.
+objectLiteralGettersAndSetters.ts(5,29): error TS1005: ')' expected.
+objectLiteralGettersAndSetters.ts(5,43): error TS1128: Declaration or statement expected.
+objectLiteralGettersAndSetters.ts(5,45): error TS2304: Cannot find name 'set'.
+objectLiteralGettersAndSetters.ts(5,49): error TS1005: ';' expected.
+objectLiteralGettersAndSetters.ts(5,49): error TS2349: This expression is not callable.
+objectLiteralGettersAndSetters.ts(5,52): error TS2304: Cannot find name 'n'.
+objectLiteralGettersAndSetters.ts(5,55): error TS1005: ';' expected.
+objectLiteralGettersAndSetters.ts(5,65): error TS2304: Cannot find name 'n'.
+objectLiteralGettersAndSetters.ts(5,86): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(6,1): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(6,1): error TS2304: Cannot find name 'var'.
+objectLiteralGettersAndSetters.ts(6,5): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(6,5): error TS2304: Cannot find name 'sameName5a'.
+objectLiteralGettersAndSetters.ts(6,16): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(6,18): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(6,20): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(6,28): error TS1005: '{' expected.
+objectLiteralGettersAndSetters.ts(6,29): error TS1012: Unexpected token.
+objectLiteralGettersAndSetters.ts(6,31): error TS1005: ')' expected.
+objectLiteralGettersAndSetters.ts(6,45): error TS1128: Declaration or statement expected.
+objectLiteralGettersAndSetters.ts(6,47): error TS2304: Cannot find name 'set'.
+objectLiteralGettersAndSetters.ts(6,51): error TS1005: ';' expected.
+objectLiteralGettersAndSetters.ts(6,51): error TS2349: This expression is not callable.
+objectLiteralGettersAndSetters.ts(6,56): error TS2304: Cannot find name 'n'.
+objectLiteralGettersAndSetters.ts(6,59): error TS1005: ';' expected.
+objectLiteralGettersAndSetters.ts(6,69): error TS2304: Cannot find name 'n'.
+objectLiteralGettersAndSetters.ts(6,90): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(7,1): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(7,1): error TS2304: Cannot find name 'var'.
+objectLiteralGettersAndSetters.ts(7,5): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(7,5): error TS2304: Cannot find name 'sameName6a'.
+objectLiteralGettersAndSetters.ts(7,16): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(7,18): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(7,20): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(7,27): error TS1005: '{' expected.
+objectLiteralGettersAndSetters.ts(7,28): error TS1012: Unexpected token.
+objectLiteralGettersAndSetters.ts(7,30): error TS1005: ')' expected.
+objectLiteralGettersAndSetters.ts(7,44): error TS1128: Declaration or statement expected.
+objectLiteralGettersAndSetters.ts(7,46): error TS2304: Cannot find name 'set'.
+objectLiteralGettersAndSetters.ts(7,50): error TS1005: ';' expected.
+objectLiteralGettersAndSetters.ts(7,50): error TS2304: Cannot find name 'a'.
+objectLiteralGettersAndSetters.ts(7,52): error TS2304: Cannot find name 'n'.
+objectLiteralGettersAndSetters.ts(7,55): error TS1005: ';' expected.
+objectLiteralGettersAndSetters.ts(7,65): error TS2304: Cannot find name 'n'.
+objectLiteralGettersAndSetters.ts(7,86): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(10,1): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(10,1): error TS2304: Cannot find name 'var'.
+objectLiteralGettersAndSetters.ts(10,5): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(10,14): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(10,16): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(10,18): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(18,22): error TS1005: '{' expected.
+objectLiteralGettersAndSetters.ts(18,23): error TS1012: Unexpected token.
+objectLiteralGettersAndSetters.ts(18,24): error TS1005: ')' expected.
+objectLiteralGettersAndSetters.ts(18,26): error TS2304: Cannot find name 'string'.
+objectLiteralGettersAndSetters.ts(18,33): error TS1005: ';' expected.
+objectLiteralGettersAndSetters.ts(18,56): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(19,1): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(19,1): error TS2304: Cannot find name 'var'.
+objectLiteralGettersAndSetters.ts(19,5): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(19,16): error TS2304: Cannot find name 'readonly'.
+objectLiteralGettersAndSetters.ts(19,25): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(19,28): error TS2304: Cannot find name 'string'.
+objectLiteralGettersAndSetters.ts(19,34): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(22,1): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(22,1): error TS2304: Cannot find name 'var'.
+objectLiteralGettersAndSetters.ts(22,5): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(22,5): error TS2304: Cannot find name 'getter2'.
+objectLiteralGettersAndSetters.ts(22,13): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(22,15): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(22,17): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(22,22): error TS1005: '{' expected.
+objectLiteralGettersAndSetters.ts(22,23): error TS1012: Unexpected token.
+objectLiteralGettersAndSetters.ts(22,25): error TS1005: ')' expected.
+objectLiteralGettersAndSetters.ts(22,41): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(23,1): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(23,1): error TS2304: Cannot find name 'var'.
+objectLiteralGettersAndSetters.ts(23,5): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(23,16): error TS2304: Cannot find name 'readonly'.
+objectLiteralGettersAndSetters.ts(23,25): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(23,28): error TS2304: Cannot find name 'string'.
+objectLiteralGettersAndSetters.ts(23,34): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(26,1): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(26,1): error TS2304: Cannot find name 'var'.
+objectLiteralGettersAndSetters.ts(26,5): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(26,5): error TS2304: Cannot find name 'setter1'.
+objectLiteralGettersAndSetters.ts(26,13): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(26,15): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(26,17): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(26,22): error TS1005: '{' expected.
+objectLiteralGettersAndSetters.ts(26,23): error TS2304: Cannot find name 'n'.
+objectLiteralGettersAndSetters.ts(26,24): error TS1005: ')' expected.
+objectLiteralGettersAndSetters.ts(26,26): error TS2304: Cannot find name 'number'.
+objectLiteralGettersAndSetters.ts(26,32): error TS1005: ';' expected.
+objectLiteralGettersAndSetters.ts(26,34): error TS1005: ',' expected.
+objectLiteralGettersAndSetters.ts(26,38): error TS1128: Declaration or statement expected.
 
 
-==== objectLiteralGettersAndSetters.ts (13 errors) ====
+==== objectLiteralGettersAndSetters.ts (152 errors) ====
     // Get and set accessor with the same name
     var sameName1a = { get 'a'() { return ''; }, set a(n) { var p = n; var p: string; } };
-                       ~~~
-!!! error TS2304: Cannot find name 'get'.
-                           ~~~
-!!! error TS1005: ',' expected.
                               ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
                                ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                                  ~
-!!! error TS1005: ',' expected.
-                                   ~~~~~~
-!!! error TS1005: ',' expected.
-                                   ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                                          ~~
-!!! error TS1005: ',' expected.
-                                            ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ')' expected.
+                                               ~
+!!! error TS1128: Declaration or statement expected.
                                                  ~~~
 !!! error TS2304: Cannot find name 'set'.
                                                      ~
-!!! error TS1005: ',' expected.
-                                                      ~
-!!! error TS1005: ',' expected.
-                                                        ~
+!!! error TS1005: ';' expected.
+                                                     ~
+!!! error TS2304: Cannot find name 'a'.
+                                                       ~
+!!! error TS2304: Cannot find name 'n'.
+                                                          ~
+!!! error TS1005: ';' expected.
+                                                                    ~
+!!! error TS2304: Cannot find name 'n'.
+                                                                                         ~
 !!! error TS1005: ',' expected.
     var sameName2a = { get 0.0() { return ''; }, set 0(n) { var p = n; var p: string; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~~~~~~~~
+!!! error TS1005: ',' expected.
+        ~~~~~~~~~~
+!!! error TS2304: Cannot find name 'sameName2a'.
+                   ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1005: ',' expected.
+                       ~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1005: '{' expected.
+                               ~
+!!! error TS1012: Unexpected token.
+                                 ~
+!!! error TS1005: ')' expected.
+                                               ~
+!!! error TS1128: Declaration or statement expected.
+                                                 ~~~
+!!! error TS2304: Cannot find name 'set'.
+                                                     ~
+!!! error TS1005: ';' expected.
+                                                     ~
+!!! error TS2349: This expression is not callable.
+                                                       ~
+!!! error TS2304: Cannot find name 'n'.
+                                                          ~
+!!! error TS1005: ';' expected.
+                                                                    ~
+!!! error TS2304: Cannot find name 'n'.
+                                                                                         ~
+!!! error TS1005: ',' expected.
     var sameName3a = { get 0x20() { return ''; }, set 3.2e1(n) { var p = n; var p: string; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~~~~~~~~
+!!! error TS1005: ',' expected.
+        ~~~~~~~~~~
+!!! error TS2304: Cannot find name 'sameName3a'.
+                   ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1005: ',' expected.
+                       ~~~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS1005: '{' expected.
+                                ~
+!!! error TS1012: Unexpected token.
+                                  ~
+!!! error TS1005: ')' expected.
+                                                ~
+!!! error TS1128: Declaration or statement expected.
+                                                  ~~~
+!!! error TS2304: Cannot find name 'set'.
+                                                      ~~~~~
+!!! error TS1005: ';' expected.
+                                                      ~~~~~
+!!! error TS2349: This expression is not callable.
+                                                            ~
+!!! error TS2304: Cannot find name 'n'.
+                                                               ~
+!!! error TS1005: ';' expected.
+                                                                         ~
+!!! error TS2304: Cannot find name 'n'.
+                                                                                              ~
+!!! error TS1005: ',' expected.
     var sameName4a = { get ''() { return ''; }, set ""(n) { var p = n; var p: string; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~~~~~~~~
+!!! error TS1005: ',' expected.
+        ~~~~~~~~~~
+!!! error TS2304: Cannot find name 'sameName4a'.
+                   ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1005: ',' expected.
+                       ~~~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: '{' expected.
+                              ~
+!!! error TS1012: Unexpected token.
+                                ~
+!!! error TS1005: ')' expected.
+                                              ~
+!!! error TS1128: Declaration or statement expected.
+                                                ~~~
+!!! error TS2304: Cannot find name 'set'.
+                                                    ~~
+!!! error TS1005: ';' expected.
+                                                    ~~
+!!! error TS2349: This expression is not callable.
+                                                       ~
+!!! error TS2304: Cannot find name 'n'.
+                                                          ~
+!!! error TS1005: ';' expected.
+                                                                    ~
+!!! error TS2304: Cannot find name 'n'.
+                                                                                         ~
+!!! error TS1005: ',' expected.
     var sameName5a = { get '\t'() { return ''; }, set '\t'(n) { var p = n; var p: string; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~~~~~~~~
+!!! error TS1005: ',' expected.
+        ~~~~~~~~~~
+!!! error TS2304: Cannot find name 'sameName5a'.
+                   ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1005: ',' expected.
+                       ~~~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS1005: '{' expected.
+                                ~
+!!! error TS1012: Unexpected token.
+                                  ~
+!!! error TS1005: ')' expected.
+                                                ~
+!!! error TS1128: Declaration or statement expected.
+                                                  ~~~
+!!! error TS2304: Cannot find name 'set'.
+                                                      ~~~~
+!!! error TS1005: ';' expected.
+                                                      ~~~~
+!!! error TS2349: This expression is not callable.
+                                                           ~
+!!! error TS2304: Cannot find name 'n'.
+                                                              ~
+!!! error TS1005: ';' expected.
+                                                                        ~
+!!! error TS2304: Cannot find name 'n'.
+                                                                                             ~
+!!! error TS1005: ',' expected.
     var sameName6a = { get 'a'() { return ''; }, set a(n) { var p = n; var p: string; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~~~~~~~~
+!!! error TS1005: ',' expected.
+        ~~~~~~~~~~
+!!! error TS2304: Cannot find name 'sameName6a'.
+                   ~
+!!! error TS1005: ',' expected.
+                     ~
+!!! error TS1005: ',' expected.
+                       ~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1005: '{' expected.
+                               ~
+!!! error TS1012: Unexpected token.
+                                 ~
+!!! error TS1005: ')' expected.
+                                               ~
+!!! error TS1128: Declaration or statement expected.
+                                                 ~~~
+!!! error TS2304: Cannot find name 'set'.
+                                                     ~
+!!! error TS1005: ';' expected.
+                                                     ~
+!!! error TS2304: Cannot find name 'a'.
+                                                       ~
+!!! error TS2304: Cannot find name 'n'.
+                                                          ~
+!!! error TS1005: ';' expected.
+                                                                    ~
+!!! error TS2304: Cannot find name 'n'.
+                                                                                         ~
+!!! error TS1005: ',' expected.
     
     // PropertyName CallSignature{FunctionBody} is equivalent to PropertyName:function CallSignature{FunctionBody}
     var callSig1 = { num(n: number) { return '' } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~~~~~~
+!!! error TS1005: ',' expected.
+                 ~
+!!! error TS1005: ',' expected.
+                   ~
+!!! error TS1005: ',' expected.
+                     ~~~
+!!! error TS1005: ',' expected.
     var callSig1: { num: (n: number) => string; };
     var callSig2 = { num: function (n: number) { return '' } };
     var callSig2: { num: (n: number) => string; };
@@ -58,14 +385,104 @@ objectLiteralGettersAndSetters.ts(2,53): error TS1005: ',' expected.
     
     // Get accessor only, type of the property is the annotated return type of the get accessor
     var getter1 = { get x(): string { return undefined; } };
+                         ~
+!!! error TS1005: '{' expected.
+                          ~
+!!! error TS1012: Unexpected token.
+                           ~
+!!! error TS1005: ')' expected.
+                             ~~~~~~
+!!! error TS2304: Cannot find name 'string'.
+                                    ~
+!!! error TS1005: ';' expected.
+                                                           ~
+!!! error TS1005: ',' expected.
     var getter1: { readonly x: string; }
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~~~~~
+!!! error TS1005: ',' expected.
+                   ~~~~~~~~
+!!! error TS2304: Cannot find name 'readonly'.
+                            ~
+!!! error TS1005: ',' expected.
+                               ~~~~~~
+!!! error TS2304: Cannot find name 'string'.
+                                     ~
+!!! error TS1005: ',' expected.
     
     // Get accessor only, type of the property is the inferred return type of the get accessor
     var getter2 = { get x() { return ''; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~~~~~
+!!! error TS1005: ',' expected.
+        ~~~~~~~
+!!! error TS2304: Cannot find name 'getter2'.
+                ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1005: ',' expected.
+                    ~~~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1005: '{' expected.
+                          ~
+!!! error TS1012: Unexpected token.
+                            ~
+!!! error TS1005: ')' expected.
+                                            ~
+!!! error TS1005: ',' expected.
     var getter2: { readonly x: string; }
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~~~~~
+!!! error TS1005: ',' expected.
+                   ~~~~~~~~
+!!! error TS2304: Cannot find name 'readonly'.
+                            ~
+!!! error TS1005: ',' expected.
+                               ~~~~~~
+!!! error TS2304: Cannot find name 'string'.
+                                     ~
+!!! error TS1005: ',' expected.
     
     // Set accessor only, type of the property is the param type of the set accessor
     var setter1 = { set x(n: number) { } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~~~~~
+!!! error TS1005: ',' expected.
+        ~~~~~~~
+!!! error TS2304: Cannot find name 'setter1'.
+                ~
+!!! error TS1005: ',' expected.
+                  ~
+!!! error TS1005: ',' expected.
+                    ~~~
+!!! error TS1005: ',' expected.
+                         ~
+!!! error TS1005: '{' expected.
+                          ~
+!!! error TS2304: Cannot find name 'n'.
+                           ~
+!!! error TS1005: ')' expected.
+                             ~~~~~~
+!!! error TS2304: Cannot find name 'number'.
+                                   ~
+!!! error TS1005: ';' expected.
+                                     ~
+!!! error TS1005: ',' expected.
+                                         ~
+!!! error TS1128: Declaration or statement expected.
     var setter1: { x: number };
     
     // Set accessor only, type of the property is Any for an unannotated set accessor

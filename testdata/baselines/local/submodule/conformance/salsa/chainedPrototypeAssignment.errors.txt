@@ -1,24 +1,12 @@
 mod.js(10,3): error TS2339: Property 'prototype' does not exist on type '() => void'.
 mod.js(10,17): error TS2339: Property 'prototype' does not exist on type '() => void'.
-mod.js(12,5): error TS2304: Cannot find name 'm'.
-mod.js(12,6): error TS1005: ',' expected.
-mod.js(12,7): error TS1005: ',' expected.
-mod.js(12,7): error TS2304: Cannot find name 'n'.
-mod.js(12,8): error TS1005: ',' expected.
-mod.js(12,10): error TS1005: ',' expected.
-mod.js(13,9): error TS1005: ',' expected.
-mod.js(13,9): error TS2304: Cannot find name 'return'.
-mod.js(13,16): error TS1005: ',' expected.
 mod.js(13,16): error TS2304: Cannot find name 'n'.
-mod.js(13,18): error TS1005: ',' expected.
-mod.js(13,20): error TS1005: ',' expected.
-mod.js(15,1): error TS1128: Declaration or statement expected.
 
 
 ==== types.d.ts (0 errors) ====
     declare function require(name: string): any;
     declare var exports: any;
-==== mod.js (15 errors) ====
+==== mod.js (3 errors) ====
     /// <reference path='./types.d.ts'/>
     var A = function A() {
         this.a = 1
@@ -35,35 +23,11 @@ mod.js(15,1): error TS1128: Declaration or statement expected.
 !!! error TS2339: Property 'prototype' does not exist on type '() => void'.
         /** @param {number} n */
         m(n) {
-        ~
-!!! error TS2304: Cannot find name 'm'.
-         ~
-!!! error TS1005: ',' expected.
-          ~
-!!! error TS1005: ',' expected.
-          ~
-!!! error TS2304: Cannot find name 'n'.
-           ~
-!!! error TS1005: ',' expected.
-             ~
-!!! error TS1005: ',' expected.
             return n + 1
-            ~~~~~~
-!!! error TS1005: ',' expected.
-            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                   ~
-!!! error TS1005: ',' expected.
                    ~
 !!! error TS2304: Cannot find name 'n'.
-                     ~
-!!! error TS1005: ',' expected.
-                       ~
-!!! error TS1005: ',' expected.
         }
     }
-    ~
-!!! error TS1128: Declaration or statement expected.
     
 ==== use.js (0 errors) ====
     /// <reference path='./types.d.ts'/>

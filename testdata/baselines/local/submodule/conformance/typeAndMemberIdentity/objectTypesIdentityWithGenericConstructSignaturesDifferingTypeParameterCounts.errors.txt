@@ -6,20 +6,17 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts
 objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(20,27): error TS2304: Cannot find name 'E'.
 objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(20,30): error TS2304: Cannot find name 'F'.
 objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(20,31): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(20,32): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(20,33): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(20,36): error TS2304: Cannot find name 'A'.
-objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(20,37): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(20,39): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(20,41): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(20,41): error TS2304: Cannot find name 'return'.
-objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(20,48): error TS1005: ',' expected.
 objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(20,48): error TS2304: Cannot find name 'x'.
-objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(20,49): error TS1005: ',' expected.
-objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(20,53): error TS1128: Declaration or statement expected.
+objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(43,45): error TS2304: Cannot find name 'Date'.
+objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(58,48): error TS2304: Cannot find name 'Date'.
+objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(66,29): error TS2304: Cannot find name 'Date'.
+objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(66,35): error TS2304: Cannot find name 'RegExp'.
+objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(66,43): error TS2304: Cannot find name 'Date'.
+objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(70,29): error TS2304: Cannot find name 'Date'.
+objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts(70,35): error TS2304: Cannot find name 'RegExp'.
 
 
-==== objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts (19 errors) ====
+==== objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts (16 errors) ====
     // object types are identical structurally
     
     class B<U, V> {
@@ -56,28 +53,8 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts
 !!! error TS2304: Cannot find name 'F'.
                                   ~
 !!! error TS1005: ',' expected.
-                                   ~
-!!! error TS1005: ',' expected.
-                                    ~
-!!! error TS1005: ',' expected.
-                                       ~
-!!! error TS2304: Cannot find name 'A'.
-                                        ~
-!!! error TS1005: ',' expected.
-                                          ~
-!!! error TS1005: ',' expected.
-                                            ~~~~~~
-!!! error TS1005: ',' expected.
-                                            ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                                                   ~
-!!! error TS1005: ',' expected.
                                                    ~
 !!! error TS2304: Cannot find name 'x'.
-                                                    ~
-!!! error TS1005: ',' expected.
-                                                        ~
-!!! error TS1128: Declaration or statement expected.
     
     function foo1b(x: B<string, string>);
     function foo1b(x: B<string, string>); // error
@@ -101,6 +78,8 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts
     
     function foo8(x: B<string, string>);
     function foo8(x: I<string, string, boolean, Date>); // BUG 832086
+                                                ~~~~
+!!! error TS2304: Cannot find name 'Date'.
     function foo8(x: any) { }
     
     function foo9(x: B<string, number>);
@@ -116,6 +95,8 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts
     function foo11(x: any) { }
     
     function foo12(x: I<B<string, number>, number, Date, string>);
+                                                   ~~~~
+!!! error TS2304: Cannot find name 'Date'.
     function foo12(x: C<B<string, number>, number, Date>); // ok
     function foo12(x: any) { }
     
@@ -124,9 +105,19 @@ objectTypesIdentityWithGenericConstructSignaturesDifferingTypeParameterCounts.ts
     function foo12b(x: any) { }
     
     function foo13(x: I<string, Date, RegExp, Date>);
+                                ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+                                      ~~~~~~
+!!! error TS2304: Cannot find name 'RegExp'.
+                                              ~~~~
+!!! error TS2304: Cannot find name 'Date'.
     function foo13(x: typeof a); // ok
     function foo13(x: any) { }
     
     function foo14(x: I<string, Date, RegExp, boolean>);
+                                ~~~~
+!!! error TS2304: Cannot find name 'Date'.
+                                      ~~~~~~
+!!! error TS2304: Cannot find name 'RegExp'.
     function foo14(x: typeof b); // ok
     function foo14(x: any) { }

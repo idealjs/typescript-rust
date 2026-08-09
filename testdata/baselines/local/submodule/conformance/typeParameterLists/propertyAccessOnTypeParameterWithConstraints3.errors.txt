@@ -18,19 +18,14 @@ propertyAccessOnTypeParameterWithConstraints3.ts(56,8): error TS1005: ',' expect
 propertyAccessOnTypeParameterWithConstraints3.ts(56,10): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints3.ts(56,11): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints3.ts(56,12): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints3.ts(56,12): error TS2304: Cannot find name 'foo'.
-propertyAccessOnTypeParameterWithConstraints3.ts(56,15): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints3.ts(56,16): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints3.ts(56,16): error TS2304: Cannot find name 'new'.
 propertyAccessOnTypeParameterWithConstraints3.ts(56,20): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints3.ts(56,21): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints3.ts(56,22): error TS1005: ',' expected.
-propertyAccessOnTypeParameterWithConstraints3.ts(56,23): error TS1005: ',' expected.
+propertyAccessOnTypeParameterWithConstraints3.ts(56,23): error TS1005: '{' expected.
 propertyAccessOnTypeParameterWithConstraints3.ts(56,24): error TS1005: ',' expected.
 propertyAccessOnTypeParameterWithConstraints3.ts(56,62): error TS1005: '}' expected.
 
 
-==== propertyAccessOnTypeParameterWithConstraints3.ts (30 errors) ====
+==== propertyAccessOnTypeParameterWithConstraints3.ts (25 errors) ====
     // generic types should behave as if they have properties of their constraint type
     
     class A {
@@ -127,22 +122,12 @@ propertyAccessOnTypeParameterWithConstraints3.ts(56,62): error TS1005: '}' expec
 !!! error TS1005: ',' expected.
                ~~~
 !!! error TS1005: ',' expected.
-               ~~~
-!!! error TS2304: Cannot find name 'foo'.
-                  ~
-!!! error TS1005: ',' expected.
-                   ~~~
-!!! error TS1005: ',' expected.
-                   ~~~
-!!! error TS2304: Cannot find name 'new'.
                        ~
 !!! error TS1005: ',' expected.
                         ~
 !!! error TS1005: ',' expected.
-                         ~
-!!! error TS1005: ',' expected.
                           ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
                            ~
 !!! error TS1005: ',' expected.
                                                                  

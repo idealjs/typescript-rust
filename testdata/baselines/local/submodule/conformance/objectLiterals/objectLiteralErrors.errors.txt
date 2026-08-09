@@ -1,17 +1,279 @@
-objectLiteralErrors.ts(22,18): error TS2304: Cannot find name 'get'.
-objectLiteralErrors.ts(22,22): error TS1005: ',' expected.
-objectLiteralErrors.ts(22,22): error TS2304: Cannot find name 'a'.
-objectLiteralErrors.ts(22,23): error TS1005: ',' expected.
-objectLiteralErrors.ts(22,24): error TS1005: ',' expected.
-objectLiteralErrors.ts(22,26): error TS1005: ',' expected.
-objectLiteralErrors.ts(22,28): error TS1005: ',' expected.
-objectLiteralErrors.ts(22,28): error TS2304: Cannot find name 'return'.
-objectLiteralErrors.ts(22,35): error TS1005: ',' expected.
-objectLiteralErrors.ts(22,36): error TS1005: ',' expected.
-objectLiteralErrors.ts(22,40): error TS1128: Declaration or statement expected.
+objectLiteralErrors.ts(22,23): error TS1005: '{' expected.
+objectLiteralErrors.ts(22,24): error TS1012: Unexpected token.
+objectLiteralErrors.ts(22,26): error TS1005: ')' expected.
+objectLiteralErrors.ts(22,41): error TS1005: ',' expected.
+objectLiteralErrors.ts(23,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(23,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(23,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(23,5): error TS2304: Cannot find name 'f2'.
+objectLiteralErrors.ts(23,8): error TS1005: ',' expected.
+objectLiteralErrors.ts(23,10): error TS1005: ',' expected.
+objectLiteralErrors.ts(23,12): error TS1005: ',' expected.
+objectLiteralErrors.ts(23,24): error TS1005: '{' expected.
+objectLiteralErrors.ts(23,25): error TS1012: Unexpected token.
+objectLiteralErrors.ts(23,27): error TS1005: ')' expected.
+objectLiteralErrors.ts(23,43): error TS1005: ',' expected.
+objectLiteralErrors.ts(24,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(24,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(24,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(24,5): error TS2304: Cannot find name 'f3'.
+objectLiteralErrors.ts(24,8): error TS1005: ',' expected.
+objectLiteralErrors.ts(24,10): error TS1005: ',' expected.
+objectLiteralErrors.ts(24,12): error TS1005: ',' expected.
+objectLiteralErrors.ts(24,23): error TS1005: '{' expected.
+objectLiteralErrors.ts(24,24): error TS1012: Unexpected token.
+objectLiteralErrors.ts(24,26): error TS1005: ')' expected.
+objectLiteralErrors.ts(24,42): error TS1005: ',' expected.
+objectLiteralErrors.ts(25,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(25,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(25,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(25,5): error TS2304: Cannot find name 'f4'.
+objectLiteralErrors.ts(25,8): error TS1005: ',' expected.
+objectLiteralErrors.ts(25,10): error TS1005: ',' expected.
+objectLiteralErrors.ts(25,12): error TS1005: ',' expected.
+objectLiteralErrors.ts(25,26): error TS1005: '{' expected.
+objectLiteralErrors.ts(25,27): error TS1012: Unexpected token.
+objectLiteralErrors.ts(25,29): error TS1005: ')' expected.
+objectLiteralErrors.ts(25,48): error TS1005: ',' expected.
+objectLiteralErrors.ts(26,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(26,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(26,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(26,5): error TS2304: Cannot find name 'f5'.
+objectLiteralErrors.ts(26,8): error TS1005: ',' expected.
+objectLiteralErrors.ts(26,10): error TS1005: ',' expected.
+objectLiteralErrors.ts(26,12): error TS1005: ',' expected.
+objectLiteralErrors.ts(26,24): error TS1005: '{' expected.
+objectLiteralErrors.ts(26,25): error TS1012: Unexpected token.
+objectLiteralErrors.ts(26,27): error TS1005: ')' expected.
+objectLiteralErrors.ts(26,43): error TS1005: ',' expected.
+objectLiteralErrors.ts(27,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(27,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(27,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(27,5): error TS2304: Cannot find name 'f6'.
+objectLiteralErrors.ts(27,8): error TS1005: ',' expected.
+objectLiteralErrors.ts(27,10): error TS1005: ',' expected.
+objectLiteralErrors.ts(27,12): error TS1005: ',' expected.
+objectLiteralErrors.ts(27,25): error TS1005: '{' expected.
+objectLiteralErrors.ts(27,26): error TS1012: Unexpected token.
+objectLiteralErrors.ts(27,28): error TS1005: ')' expected.
+objectLiteralErrors.ts(27,43): error TS1005: ',' expected.
+objectLiteralErrors.ts(28,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(28,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(28,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(28,5): error TS2304: Cannot find name 'f7'.
+objectLiteralErrors.ts(28,8): error TS1005: ',' expected.
+objectLiteralErrors.ts(28,10): error TS1005: ',' expected.
+objectLiteralErrors.ts(28,12): error TS1005: ',' expected.
+objectLiteralErrors.ts(28,25): error TS1005: '{' expected.
+objectLiteralErrors.ts(28,26): error TS1012: Unexpected token.
+objectLiteralErrors.ts(28,28): error TS1005: ')' expected.
+objectLiteralErrors.ts(28,43): error TS1005: ',' expected.
+objectLiteralErrors.ts(29,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(29,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(29,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(29,5): error TS2304: Cannot find name 'f8'.
+objectLiteralErrors.ts(29,8): error TS1005: ',' expected.
+objectLiteralErrors.ts(29,10): error TS1005: ',' expected.
+objectLiteralErrors.ts(29,12): error TS1005: ',' expected.
+objectLiteralErrors.ts(29,27): error TS1005: '{' expected.
+objectLiteralErrors.ts(29,28): error TS1012: Unexpected token.
+objectLiteralErrors.ts(29,30): error TS1005: ')' expected.
+objectLiteralErrors.ts(29,45): error TS1005: ',' expected.
+objectLiteralErrors.ts(30,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(30,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(30,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(30,5): error TS2304: Cannot find name 'f9'.
+objectLiteralErrors.ts(30,8): error TS1005: ',' expected.
+objectLiteralErrors.ts(30,10): error TS1005: ',' expected.
+objectLiteralErrors.ts(30,12): error TS1005: ',' expected.
+objectLiteralErrors.ts(30,27): error TS1005: '{' expected.
+objectLiteralErrors.ts(30,28): error TS1012: Unexpected token.
+objectLiteralErrors.ts(30,30): error TS1005: ')' expected.
+objectLiteralErrors.ts(30,45): error TS1005: ',' expected.
+objectLiteralErrors.ts(31,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(31,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(31,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(31,5): error TS2304: Cannot find name 'f10'.
+objectLiteralErrors.ts(31,9): error TS1005: ',' expected.
+objectLiteralErrors.ts(31,11): error TS1005: ',' expected.
+objectLiteralErrors.ts(31,13): error TS1005: ',' expected.
+objectLiteralErrors.ts(31,28): error TS1005: '{' expected.
+objectLiteralErrors.ts(31,29): error TS1012: Unexpected token.
+objectLiteralErrors.ts(31,31): error TS1005: ')' expected.
+objectLiteralErrors.ts(31,46): error TS1005: ',' expected.
+objectLiteralErrors.ts(32,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(32,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(32,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(32,5): error TS2304: Cannot find name 'f11'.
+objectLiteralErrors.ts(32,9): error TS1005: ',' expected.
+objectLiteralErrors.ts(32,11): error TS1005: ',' expected.
+objectLiteralErrors.ts(32,13): error TS1005: ',' expected.
+objectLiteralErrors.ts(32,28): error TS1005: '{' expected.
+objectLiteralErrors.ts(32,29): error TS1012: Unexpected token.
+objectLiteralErrors.ts(32,31): error TS1005: ')' expected.
+objectLiteralErrors.ts(32,46): error TS1005: ',' expected.
+objectLiteralErrors.ts(33,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(33,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(33,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(33,5): error TS2304: Cannot find name 'f12'.
+objectLiteralErrors.ts(33,9): error TS1005: ',' expected.
+objectLiteralErrors.ts(33,11): error TS1005: ',' expected.
+objectLiteralErrors.ts(33,13): error TS1005: ',' expected.
+objectLiteralErrors.ts(33,24): error TS1005: '{' expected.
+objectLiteralErrors.ts(33,25): error TS1012: Unexpected token.
+objectLiteralErrors.ts(33,27): error TS1005: ')' expected.
+objectLiteralErrors.ts(33,42): error TS1005: ',' expected.
+objectLiteralErrors.ts(34,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(34,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(34,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(34,5): error TS2304: Cannot find name 'f13'.
+objectLiteralErrors.ts(34,9): error TS1005: ',' expected.
+objectLiteralErrors.ts(34,11): error TS1005: ',' expected.
+objectLiteralErrors.ts(34,13): error TS1005: ',' expected.
+objectLiteralErrors.ts(34,24): error TS1005: '{' expected.
+objectLiteralErrors.ts(34,25): error TS1012: Unexpected token.
+objectLiteralErrors.ts(34,27): error TS1005: ')' expected.
+objectLiteralErrors.ts(34,42): error TS1005: ',' expected.
+objectLiteralErrors.ts(35,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(35,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(35,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(35,5): error TS2304: Cannot find name 'f14'.
+objectLiteralErrors.ts(35,9): error TS1005: ',' expected.
+objectLiteralErrors.ts(35,11): error TS1005: ',' expected.
+objectLiteralErrors.ts(35,13): error TS1005: ',' expected.
+objectLiteralErrors.ts(35,26): error TS1005: '{' expected.
+objectLiteralErrors.ts(35,27): error TS1012: Unexpected token.
+objectLiteralErrors.ts(35,29): error TS1005: ')' expected.
+objectLiteralErrors.ts(35,44): error TS1005: ',' expected.
+objectLiteralErrors.ts(36,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(36,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(36,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(36,5): error TS2304: Cannot find name 'f14'.
+objectLiteralErrors.ts(36,9): error TS1005: ',' expected.
+objectLiteralErrors.ts(36,11): error TS1005: ',' expected.
+objectLiteralErrors.ts(36,13): error TS1005: ',' expected.
+objectLiteralErrors.ts(36,26): error TS1005: '{' expected.
+objectLiteralErrors.ts(36,27): error TS1012: Unexpected token.
+objectLiteralErrors.ts(36,29): error TS1005: ')' expected.
+objectLiteralErrors.ts(36,44): error TS1005: ',' expected.
+objectLiteralErrors.ts(37,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(37,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(37,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(37,5): error TS2304: Cannot find name 'f15'.
+objectLiteralErrors.ts(37,9): error TS1005: ',' expected.
+objectLiteralErrors.ts(37,11): error TS1005: ',' expected.
+objectLiteralErrors.ts(37,13): error TS1005: ',' expected.
+objectLiteralErrors.ts(37,30): error TS1005: '{' expected.
+objectLiteralErrors.ts(37,31): error TS1012: Unexpected token.
+objectLiteralErrors.ts(37,33): error TS1005: ')' expected.
+objectLiteralErrors.ts(37,48): error TS1005: ',' expected.
+objectLiteralErrors.ts(38,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(38,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(38,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(38,5): error TS2304: Cannot find name 'f16'.
+objectLiteralErrors.ts(38,9): error TS1005: ',' expected.
+objectLiteralErrors.ts(38,11): error TS1005: ',' expected.
+objectLiteralErrors.ts(38,13): error TS1005: ',' expected.
+objectLiteralErrors.ts(38,31): error TS1005: '{' expected.
+objectLiteralErrors.ts(38,32): error TS1012: Unexpected token.
+objectLiteralErrors.ts(38,34): error TS1005: ')' expected.
+objectLiteralErrors.ts(38,49): error TS1005: ',' expected.
+objectLiteralErrors.ts(39,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(39,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(39,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(39,5): error TS2304: Cannot find name 'f17'.
+objectLiteralErrors.ts(39,9): error TS1005: ',' expected.
+objectLiteralErrors.ts(39,11): error TS1005: ',' expected.
+objectLiteralErrors.ts(39,13): error TS1005: ',' expected.
+objectLiteralErrors.ts(39,24): error TS1005: '{' expected.
+objectLiteralErrors.ts(39,25): error TS1012: Unexpected token.
+objectLiteralErrors.ts(39,27): error TS1005: ')' expected.
+objectLiteralErrors.ts(39,40): error TS1128: Declaration or statement expected.
+objectLiteralErrors.ts(39,42): error TS2304: Cannot find name 'get'.
+objectLiteralErrors.ts(39,46): error TS1005: ';' expected.
+objectLiteralErrors.ts(39,46): error TS2304: Cannot find name 'a'.
+objectLiteralErrors.ts(39,50): error TS1005: ';' expected.
+objectLiteralErrors.ts(39,65): error TS1005: ',' expected.
+objectLiteralErrors.ts(42,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(42,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(42,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(42,5): error TS2304: Cannot find name 'g1'.
+objectLiteralErrors.ts(42,8): error TS1005: ',' expected.
+objectLiteralErrors.ts(42,10): error TS1005: ',' expected.
+objectLiteralErrors.ts(42,12): error TS1005: ',' expected.
+objectLiteralErrors.ts(42,17): error TS1005: '{' expected.
+objectLiteralErrors.ts(42,18): error TS1012: Unexpected token.
+objectLiteralErrors.ts(42,19): error TS1005: ')' expected.
+objectLiteralErrors.ts(42,21): error TS2304: Cannot find name 'number'.
+objectLiteralErrors.ts(42,28): error TS1005: ';' expected.
+objectLiteralErrors.ts(42,41): error TS1128: Declaration or statement expected.
+objectLiteralErrors.ts(42,43): error TS2304: Cannot find name 'set'.
+objectLiteralErrors.ts(42,47): error TS1005: ';' expected.
+objectLiteralErrors.ts(42,47): error TS2304: Cannot find name 'a'.
+objectLiteralErrors.ts(42,49): error TS2304: Cannot find name 'n'.
+objectLiteralErrors.ts(42,50): error TS1005: ',' expected.
+objectLiteralErrors.ts(42,52): error TS2304: Cannot find name 'string'.
+objectLiteralErrors.ts(42,60): error TS1005: ';' expected.
+objectLiteralErrors.ts(42,65): error TS1005: ',' expected.
+objectLiteralErrors.ts(43,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(43,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(43,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(43,5): error TS2304: Cannot find name 'g2'.
+objectLiteralErrors.ts(43,8): error TS1005: ',' expected.
+objectLiteralErrors.ts(43,10): error TS1005: ',' expected.
+objectLiteralErrors.ts(43,12): error TS1005: ',' expected.
+objectLiteralErrors.ts(43,17): error TS1005: '{' expected.
+objectLiteralErrors.ts(43,18): error TS1012: Unexpected token.
+objectLiteralErrors.ts(43,20): error TS1005: ')' expected.
+objectLiteralErrors.ts(43,33): error TS1128: Declaration or statement expected.
+objectLiteralErrors.ts(43,35): error TS2304: Cannot find name 'set'.
+objectLiteralErrors.ts(43,39): error TS1005: ';' expected.
+objectLiteralErrors.ts(43,39): error TS2304: Cannot find name 'a'.
+objectLiteralErrors.ts(43,41): error TS2304: Cannot find name 'n'.
+objectLiteralErrors.ts(43,42): error TS1005: ',' expected.
+objectLiteralErrors.ts(43,44): error TS2304: Cannot find name 'string'.
+objectLiteralErrors.ts(43,52): error TS1005: ';' expected.
+objectLiteralErrors.ts(43,57): error TS1005: ',' expected.
+objectLiteralErrors.ts(44,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(44,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(44,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(44,5): error TS2304: Cannot find name 'g3'.
+objectLiteralErrors.ts(44,8): error TS1005: ',' expected.
+objectLiteralErrors.ts(44,10): error TS1005: ',' expected.
+objectLiteralErrors.ts(44,12): error TS1005: ',' expected.
+objectLiteralErrors.ts(44,17): error TS1005: '{' expected.
+objectLiteralErrors.ts(44,18): error TS1012: Unexpected token.
+objectLiteralErrors.ts(44,19): error TS1005: ')' expected.
+objectLiteralErrors.ts(44,21): error TS2304: Cannot find name 'number'.
+objectLiteralErrors.ts(44,28): error TS1005: ';' expected.
+objectLiteralErrors.ts(44,49): error TS1128: Declaration or statement expected.
+objectLiteralErrors.ts(44,51): error TS2304: Cannot find name 'set'.
+objectLiteralErrors.ts(44,55): error TS1005: ';' expected.
+objectLiteralErrors.ts(44,55): error TS2304: Cannot find name 'a'.
+objectLiteralErrors.ts(44,57): error TS2304: Cannot find name 'n'.
+objectLiteralErrors.ts(44,58): error TS1005: ',' expected.
+objectLiteralErrors.ts(44,60): error TS2304: Cannot find name 'string'.
+objectLiteralErrors.ts(44,68): error TS1005: ';' expected.
+objectLiteralErrors.ts(44,73): error TS1005: ',' expected.
+objectLiteralErrors.ts(47,1): error TS1005: ',' expected.
+objectLiteralErrors.ts(47,1): error TS2304: Cannot find name 'var'.
+objectLiteralErrors.ts(47,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(47,5): error TS2304: Cannot find name 'h1'.
+objectLiteralErrors.ts(47,8): error TS1005: ',' expected.
+objectLiteralErrors.ts(47,10): error TS1005: ',' expected.
+objectLiteralErrors.ts(48,5): error TS1005: ',' expected.
+objectLiteralErrors.ts(48,5): error TS2304: Cannot find name 'x'.
+objectLiteralErrors.ts(48,7): error TS1005: ',' expected.
+objectLiteralErrors.ts(48,9): error TS1005: ',' expected.
+objectLiteralErrors.ts(49,5): error TS2304: Cannot find name 'y'.
+objectLiteralErrors.ts(49,7): error TS1005: ',' expected.
+objectLiteralErrors.ts(49,9): error TS1005: ',' expected.
+objectLiteralErrors.ts(50,5): error TS1003: Identifier expected.
+objectLiteralErrors.ts(50,5): error TS1127: Invalid character.
+objectLiteralErrors.ts(50,6): error TS1005: ',' expected.
 
 
-==== objectLiteralErrors.ts (11 errors) ====
+==== objectLiteralErrors.ts (273 errors) ====
     // Multiple properties with the same name
     var e1 = { a: 0, a: 0 };
     var e2 = { a: '', a: '' };
@@ -34,54 +296,578 @@ objectLiteralErrors.ts(22,40): error TS1128: Declaration or statement expected.
     
     // Accessor and property with the same name
     var f1 = { a: 0, get a() { return 0; } };
-                     ~~~
-!!! error TS2304: Cannot find name 'get'.
-                         ~
-!!! error TS1005: ',' expected.
-                         ~
-!!! error TS2304: Cannot find name 'a'.
                           ~
+!!! error TS1005: '{' expected.
+                           ~
+!!! error TS1012: Unexpected token.
+                             ~
+!!! error TS1005: ')' expected.
+                                            ~
+!!! error TS1005: ',' expected.
+    var f2 = { a: '', get a() { return ''; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+        ~~
+!!! error TS2304: Cannot find name 'f2'.
+           ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+               ~
 !!! error TS1005: ',' expected.
                            ~
+!!! error TS1005: '{' expected.
+                            ~
+!!! error TS1012: Unexpected token.
+                              ~
+!!! error TS1005: ')' expected.
+                                              ~
+!!! error TS1005: ',' expected.
+    var f3 = { a: 0, get a() { return ''; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+        ~~
+!!! error TS2304: Cannot find name 'f3'.
+           ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1005: ',' expected.
+                          ~
+!!! error TS1005: '{' expected.
+                           ~
+!!! error TS1012: Unexpected token.
+                             ~
+!!! error TS1005: ')' expected.
+                                             ~
+!!! error TS1005: ',' expected.
+    var f4 = { a: true, get a() { return false; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+        ~~
+!!! error TS2304: Cannot find name 'f4'.
+           ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+               ~
 !!! error TS1005: ',' expected.
                              ~
+!!! error TS1005: '{' expected.
+                              ~
+!!! error TS1012: Unexpected token.
+                                ~
+!!! error TS1005: ')' expected.
+                                                   ~
 !!! error TS1005: ',' expected.
-                               ~~~~~~
+    var f5 = { a: {}, get a() { return {}; } };
+    ~~~
 !!! error TS1005: ',' expected.
-                               ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                                      ~
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
 !!! error TS1005: ',' expected.
-                                       ~
+        ~~
+!!! error TS2304: Cannot find name 'f5'.
+           ~
 !!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS1005: '{' expected.
+                            ~
+!!! error TS1012: Unexpected token.
+                              ~
+!!! error TS1005: ')' expected.
+                                              ~
+!!! error TS1005: ',' expected.
+    var f6 = { a: 0, get 'a'() { return 0; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+        ~~
+!!! error TS2304: Cannot find name 'f6'.
+           ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+               ~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS1005: '{' expected.
+                             ~
+!!! error TS1012: Unexpected token.
+                               ~
+!!! error TS1005: ')' expected.
+                                              ~
+!!! error TS1005: ',' expected.
+    var f7 = { 'a': 0, get a() { return 0; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+        ~~
+!!! error TS2304: Cannot find name 'f7'.
+           ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+               ~~~
+!!! error TS1005: ',' expected.
+                            ~
+!!! error TS1005: '{' expected.
+                             ~
+!!! error TS1012: Unexpected token.
+                               ~
+!!! error TS1005: ')' expected.
+                                              ~
+!!! error TS1005: ',' expected.
+    var f8 = { 'a': 0, get "a"() { return 0; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+        ~~
+!!! error TS2304: Cannot find name 'f8'.
+           ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+               ~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1005: '{' expected.
+                               ~
+!!! error TS1012: Unexpected token.
+                                 ~
+!!! error TS1005: ')' expected.
+                                                ~
+!!! error TS1005: ',' expected.
+    var f9 = { 'a': 0, get 'a'() { return 0; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+        ~~
+!!! error TS2304: Cannot find name 'f9'.
+           ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+               ~~~
+!!! error TS1005: ',' expected.
+                              ~
+!!! error TS1005: '{' expected.
+                               ~
+!!! error TS1012: Unexpected token.
+                                 ~
+!!! error TS1005: ')' expected.
+                                                ~
+!!! error TS1005: ',' expected.
+    var f10 = { "a": 0, get 'a'() { return 0; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~
+!!! error TS1005: ',' expected.
+        ~~~
+!!! error TS2304: Cannot find name 'f10'.
+            ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+                ~~~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS1005: '{' expected.
+                                ~
+!!! error TS1012: Unexpected token.
+                                  ~
+!!! error TS1005: ')' expected.
+                                                 ~
+!!! error TS1005: ',' expected.
+    var f11 = { 1.0: 0, get '1'() { return 0; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~
+!!! error TS1005: ',' expected.
+        ~~~
+!!! error TS2304: Cannot find name 'f11'.
+            ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+                ~~~
+!!! error TS1005: ',' expected.
+                               ~
+!!! error TS1005: '{' expected.
+                                ~
+!!! error TS1012: Unexpected token.
+                                  ~
+!!! error TS1005: ')' expected.
+                                                 ~
+!!! error TS1005: ',' expected.
+    var f12 = { 0: 0, get 0() { return 0; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~
+!!! error TS1005: ',' expected.
+        ~~~
+!!! error TS2304: Cannot find name 'f12'.
+            ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS1005: '{' expected.
+                            ~
+!!! error TS1012: Unexpected token.
+                              ~
+!!! error TS1005: ')' expected.
+                                             ~
+!!! error TS1005: ',' expected.
+    var f13 = { 0: 0, get 0() { return 0; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~
+!!! error TS1005: ',' expected.
+        ~~~
+!!! error TS2304: Cannot find name 'f13'.
+            ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS1005: '{' expected.
+                            ~
+!!! error TS1012: Unexpected token.
+                              ~
+!!! error TS1005: ')' expected.
+                                             ~
+!!! error TS1005: ',' expected.
+    var f14 = { 0: 0, get 0x0() { return 0; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~
+!!! error TS1005: ',' expected.
+        ~~~
+!!! error TS2304: Cannot find name 'f14'.
+            ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: '{' expected.
+                              ~
+!!! error TS1012: Unexpected token.
+                                ~
+!!! error TS1005: ')' expected.
+                                               ~
+!!! error TS1005: ',' expected.
+    var f14 = { 0: 0, get 0o0() { return 0; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~
+!!! error TS1005: ',' expected.
+        ~~~
+!!! error TS2304: Cannot find name 'f14'.
+            ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS1005: ',' expected.
+                             ~
+!!! error TS1005: '{' expected.
+                              ~
+!!! error TS1012: Unexpected token.
+                                ~
+!!! error TS1005: ')' expected.
+                                               ~
+!!! error TS1005: ',' expected.
+    var f15 = { "100": 0, get 1e2() { return 0; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~
+!!! error TS1005: ',' expected.
+        ~~~
+!!! error TS2304: Cannot find name 'f15'.
+            ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+                ~~~~~
+!!! error TS1005: ',' expected.
+                                 ~
+!!! error TS1005: '{' expected.
+                                  ~
+!!! error TS1012: Unexpected token.
+                                    ~
+!!! error TS1005: ')' expected.
+                                                   ~
+!!! error TS1005: ',' expected.
+    var f16 = { 0x20: 0, get 3.2e1() { return 0; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~
+!!! error TS1005: ',' expected.
+        ~~~
+!!! error TS2304: Cannot find name 'f16'.
+            ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+                ~~~~
+!!! error TS1005: ',' expected.
+                                  ~
+!!! error TS1005: '{' expected.
+                                   ~
+!!! error TS1012: Unexpected token.
+                                     ~
+!!! error TS1005: ')' expected.
+                                                    ~
+!!! error TS1005: ',' expected.
+    var f17 = { a: 0, get b() { return 1; }, get a() { return 0; } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~~
+!!! error TS1005: ',' expected.
+        ~~~
+!!! error TS2304: Cannot find name 'f17'.
+            ~
+!!! error TS1005: ',' expected.
+              ~
+!!! error TS1005: ',' expected.
+                ~
+!!! error TS1005: ',' expected.
+                           ~
+!!! error TS1005: '{' expected.
+                            ~
+!!! error TS1012: Unexpected token.
+                              ~
+!!! error TS1005: ')' expected.
                                            ~
 !!! error TS1128: Declaration or statement expected.
-    var f2 = { a: '', get a() { return ''; } };
-    var f3 = { a: 0, get a() { return ''; } };
-    var f4 = { a: true, get a() { return false; } };
-    var f5 = { a: {}, get a() { return {}; } };
-    var f6 = { a: 0, get 'a'() { return 0; } };
-    var f7 = { 'a': 0, get a() { return 0; } };
-    var f8 = { 'a': 0, get "a"() { return 0; } };
-    var f9 = { 'a': 0, get 'a'() { return 0; } };
-    var f10 = { "a": 0, get 'a'() { return 0; } };
-    var f11 = { 1.0: 0, get '1'() { return 0; } };
-    var f12 = { 0: 0, get 0() { return 0; } };
-    var f13 = { 0: 0, get 0() { return 0; } };
-    var f14 = { 0: 0, get 0x0() { return 0; } };
-    var f14 = { 0: 0, get 0o0() { return 0; } };
-    var f15 = { "100": 0, get 1e2() { return 0; } };
-    var f16 = { 0x20: 0, get 3.2e1() { return 0; } };
-    var f17 = { a: 0, get b() { return 1; }, get a() { return 0; } };
+                                             ~~~
+!!! error TS2304: Cannot find name 'get'.
+                                                 ~
+!!! error TS1005: ';' expected.
+                                                 ~
+!!! error TS2304: Cannot find name 'a'.
+                                                     ~
+!!! error TS1005: ';' expected.
+                                                                    ~
+!!! error TS1005: ',' expected.
     
     // Get and set accessor with mismatched type annotations (only g2 is an error after #43662 implemented)
     var g1 = { get a(): number { return 4; }, set a(n: string) { } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+        ~~
+!!! error TS2304: Cannot find name 'g1'.
+           ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+               ~~~
+!!! error TS1005: ',' expected.
+                    ~
+!!! error TS1005: '{' expected.
+                     ~
+!!! error TS1012: Unexpected token.
+                      ~
+!!! error TS1005: ')' expected.
+                        ~~~~~~
+!!! error TS2304: Cannot find name 'number'.
+                               ~
+!!! error TS1005: ';' expected.
+                                            ~
+!!! error TS1128: Declaration or statement expected.
+                                              ~~~
+!!! error TS2304: Cannot find name 'set'.
+                                                  ~
+!!! error TS1005: ';' expected.
+                                                  ~
+!!! error TS2304: Cannot find name 'a'.
+                                                    ~
+!!! error TS2304: Cannot find name 'n'.
+                                                     ~
+!!! error TS1005: ',' expected.
+                                                       ~~~~~~
+!!! error TS2304: Cannot find name 'string'.
+                                                               ~
+!!! error TS1005: ';' expected.
+                                                                    ~
+!!! error TS1005: ',' expected.
     var g2 = { get a() { return 4; }, set a(n: string) { } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+        ~~
+!!! error TS2304: Cannot find name 'g2'.
+           ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+               ~~~
+!!! error TS1005: ',' expected.
+                    ~
+!!! error TS1005: '{' expected.
+                     ~
+!!! error TS1012: Unexpected token.
+                       ~
+!!! error TS1005: ')' expected.
+                                    ~
+!!! error TS1128: Declaration or statement expected.
+                                      ~~~
+!!! error TS2304: Cannot find name 'set'.
+                                          ~
+!!! error TS1005: ';' expected.
+                                          ~
+!!! error TS2304: Cannot find name 'a'.
+                                            ~
+!!! error TS2304: Cannot find name 'n'.
+                                             ~
+!!! error TS1005: ',' expected.
+                                               ~~~~~~
+!!! error TS2304: Cannot find name 'string'.
+                                                       ~
+!!! error TS1005: ';' expected.
+                                                            ~
+!!! error TS1005: ',' expected.
     var g3 = { get a(): number { return undefined; }, set a(n: string) { } };
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+        ~~
+!!! error TS2304: Cannot find name 'g3'.
+           ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
+               ~~~
+!!! error TS1005: ',' expected.
+                    ~
+!!! error TS1005: '{' expected.
+                     ~
+!!! error TS1012: Unexpected token.
+                      ~
+!!! error TS1005: ')' expected.
+                        ~~~~~~
+!!! error TS2304: Cannot find name 'number'.
+                               ~
+!!! error TS1005: ';' expected.
+                                                    ~
+!!! error TS1128: Declaration or statement expected.
+                                                      ~~~
+!!! error TS2304: Cannot find name 'set'.
+                                                          ~
+!!! error TS1005: ';' expected.
+                                                          ~
+!!! error TS2304: Cannot find name 'a'.
+                                                            ~
+!!! error TS2304: Cannot find name 'n'.
+                                                             ~
+!!! error TS1005: ',' expected.
+                                                               ~~~~~~
+!!! error TS2304: Cannot find name 'string'.
+                                                                       ~
+!!! error TS1005: ';' expected.
+                                                                            ~
+!!! error TS1005: ',' expected.
     
     // did you mean colon errors
     var h1 = {
+    ~~~
+!!! error TS1005: ',' expected.
+    ~~~
+!!! error TS2304: Cannot find name 'var'.
+        ~~
+!!! error TS1005: ',' expected.
+        ~~
+!!! error TS2304: Cannot find name 'h1'.
+           ~
+!!! error TS1005: ',' expected.
+             ~
+!!! error TS1005: ',' expected.
         x = 1,
+        ~
+!!! error TS1005: ',' expected.
+        ~
+!!! error TS2304: Cannot find name 'x'.
+          ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS1005: ',' expected.
         y = 2,
+        ~
+!!! error TS2304: Cannot find name 'y'.
+          ~
+!!! error TS1005: ',' expected.
+            ~
+!!! error TS1005: ',' expected.
         #z: 3
+        ~
+!!! error TS1003: Identifier expected.
+        ~
+!!! error TS1127: Invalid character.
+         ~
+!!! error TS1005: ',' expected.
     }

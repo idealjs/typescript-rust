@@ -4018,8 +4018,58 @@ impl Parser {
                 TextRange::new(pos, end),
             ));
         }
-        // Simplified: property assignment
+
+        // Check for `get`/`set` accessor keywords in object literal.
+        // Only treat as accessor when followed by a property name (not when
+        // `get`/`set` is the actual property name: `{ get: 1 }` vs `{ get x() {} }`).
+        if self.token == SyntaxKind::GetKeyword && self.is_get_or_set_accessor() {
+            return self.parse_object_accessor(pos, /* is_get */ true);
+        }
+        if self.token == SyntaxKind::SetKeyword && self.is_get_or_set_accessor() {
+            return self.parse_object_accessor(pos, /* is_get */ false);
+        }
+
+        // Check for `async` method prefix.
+        let is_async = self.token == SyntaxKind::AsyncKeyword;
+        if is_async {
+            self.next_token();
+        }
+
+        // Check for generator method (`*name() {}`).
+        let asterisk = self.parse_optional_token(SyntaxKind::AsteriskToken);
+
+        // Parse the property name.
         let name = self.parse_property_name();
+
+        // Method shorthand: `{ name() {} }`, `{ async name() {} }`, `{ *name() {} }`.
+        if self.token == SyntaxKind::OpenParenToken || asterisk.is_some() || is_async {
+            let parameters = self.parse_parameter_list();
+            // Optional return type annotation.
+            let type_node = if self.token == SyntaxKind::ColonToken {
+                self.next_token();
+                Some(self.parse_type())
+            } else {
+                None
+            };
+            let body = self.parse_block();
+            let end = body.end();
+            return Arc::new(Node::with_loc(
+                SyntaxKind::MethodDeclaration,
+                NodeData::MethodDeclaration(MethodDeclarationData {
+                    modifiers: None,
+                    asterisk_token: asterisk,
+                    name,
+                    postfix_token: None,
+                    type_parameters: None,
+                    parameters,
+                    type_node,
+                    full_signature: None,
+                    body: Some(body),
+                }),
+                TextRange::new(pos, end),
+            ));
+        }
+
         if self.token == SyntaxKind::ColonToken {
             self.next_token();
             let initializer = self.parse_assignment_expression();
@@ -4059,6 +4109,57 @@ impl Parser {
                 TextRange::new(pos, end),
             ))
         }
+    }
+
+    /// Check if `get`/`set` keyword is followed by a property name (accessor)
+    /// rather than being the property name itself.
+    fn is_get_or_set_accessor(&self) -> bool {
+        let mut scanner = self.scanner.clone();
+        let next = scanner.scan();
+        // If the next token is a valid property name start, it's an accessor.
+        matches!(
+            next,
+            SyntaxKind::Identifier
+                | SyntaxKind::StringLiteral
+                | SyntaxKind::NumericLiteral
+                | SyntaxKind::OpenBracketToken
+                | SyntaxKind::PrivateIdentifier
+        )
+    }
+
+    /// Parse a `get`/`set` accessor in an object literal.
+    fn parse_object_accessor(&mut self, pos: usize, is_get: bool) -> Arc<Node> {
+        self.next_token(); // consume `get`/`set`
+        let name = self.parse_property_name();
+        let body = self.parse_block();
+        let end = body.end();
+        let kind = if is_get {
+            SyntaxKind::GetAccessor
+        } else {
+            SyntaxKind::SetAccessor
+        };
+        let data = if is_get {
+            NodeData::GetAccessorDeclaration(GetAccessorDeclarationData {
+                modifiers: None,
+                name,
+                type_parameters: None,
+                parameters: Arc::new(NodeList::default()),
+                type_node: None,
+                full_signature: None,
+                body: Some(body),
+            })
+        } else {
+            NodeData::SetAccessorDeclaration(SetAccessorDeclarationData {
+                modifiers: None,
+                name,
+                type_parameters: None,
+                parameters: Arc::new(NodeList::default()),
+                type_node: None,
+                full_signature: None,
+                body: Some(body),
+            })
+        };
+        Arc::new(Node::with_loc(kind, data, TextRange::new(pos, end)))
     }
 
     fn parse_jsx_element_or_fragment(&mut self, in_expression_context: bool) -> Arc<Node> {

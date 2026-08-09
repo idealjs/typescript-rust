@@ -1,84 +1,84 @@
-computedPropertyNames50_ES5.ts(3,5): error TS2304: Cannot find name 'get'.
-computedPropertyNames50_ES5.ts(3,9): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(3,9): error TS2304: Cannot find name 'foo'.
-computedPropertyNames50_ES5.ts(3,12): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(3,13): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(3,15): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(4,9): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(4,9): error TS2304: Cannot find name 'if'.
-computedPropertyNames50_ES5.ts(4,12): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(4,13): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(4,15): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(4,18): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(4,19): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(4,21): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(5,13): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(5,13): error TS2304: Cannot find name 'return'.
-computedPropertyNames50_ES5.ts(5,20): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(5,22): error TS1005: ',' expected.
-computedPropertyNames50_ES5.ts(7,5): error TS1128: Declaration or statement expected.
+computedPropertyNames50_ES5.ts(3,12): error TS1005: '{' expected.
+computedPropertyNames50_ES5.ts(3,13): error TS1012: Unexpected token.
+computedPropertyNames50_ES5.ts(3,15): error TS1005: ')' expected.
+computedPropertyNames50_ES5.ts(7,6): error TS1128: Declaration or statement expected.
+computedPropertyNames50_ES5.ts(8,5): error TS2304: Cannot find name 'get'.
+computedPropertyNames50_ES5.ts(8,19): error TS1005: ';' expected.
+computedPropertyNames50_ES5.ts(10,6): error TS1128: Declaration or statement expected.
+computedPropertyNames50_ES5.ts(11,5): error TS2304: Cannot find name 'set'.
+computedPropertyNames50_ES5.ts(11,19): error TS1005: ';' expected.
+computedPropertyNames50_ES5.ts(14,6): error TS1128: Declaration or statement expected.
+computedPropertyNames50_ES5.ts(15,5): error TS2304: Cannot find name 'get'.
+computedPropertyNames50_ES5.ts(15,19): error TS1005: ';' expected.
+computedPropertyNames50_ES5.ts(17,6): error TS1128: Declaration or statement expected.
+computedPropertyNames50_ES5.ts(18,5): error TS2304: Cannot find name 'get'.
+computedPropertyNames50_ES5.ts(18,9): error TS1005: ';' expected.
+computedPropertyNames50_ES5.ts(18,9): error TS2304: Cannot find name 'foo'.
+computedPropertyNames50_ES5.ts(18,15): error TS1005: ';' expected.
+computedPropertyNames50_ES5.ts(22,6): error TS1128: Declaration or statement expected.
+computedPropertyNames50_ES5.ts(24,2): error TS1005: '}' expected.
 
 
 ==== computedPropertyNames50_ES5.ts (19 errors) ====
     var x = {
         p1: 10,
         get foo() {
-        ~~~
-!!! error TS2304: Cannot find name 'get'.
-            ~~~
-!!! error TS1005: ',' expected.
-            ~~~
-!!! error TS2304: Cannot find name 'foo'.
                ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: '{' expected.
                 ~
-!!! error TS1005: ',' expected.
+!!! error TS1012: Unexpected token.
                   ~
-!!! error TS1005: ',' expected.
+!!! error TS1005: ')' expected.
             if (1 == 1) {
-            ~~
-!!! error TS1005: ',' expected.
-            ~~
-!!! error TS2304: Cannot find name 'if'.
-               ~
-!!! error TS1005: ',' expected.
-                ~
-!!! error TS1005: ',' expected.
-                  ~~
-!!! error TS1005: ',' expected.
-                     ~
-!!! error TS1005: ',' expected.
-                      ~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS1005: ',' expected.
                 return 10;
-                ~~~~~~
-!!! error TS1005: ',' expected.
-                ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                       ~~
-!!! error TS1005: ',' expected.
-                         ~
-!!! error TS1005: ',' expected.
             }
         },
-        ~
+         ~
 !!! error TS1128: Declaration or statement expected.
         get [1 + 1]() {
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+                      ~
+!!! error TS1005: ';' expected.
             throw 10;
         },
+         ~
+!!! error TS1128: Declaration or statement expected.
         set [1 + 1]() {
+        ~~~
+!!! error TS2304: Cannot find name 'set'.
+                      ~
+!!! error TS1005: ';' expected.
             // just throw
             throw 10;
         },
+         ~
+!!! error TS1128: Declaration or statement expected.
         get [1 + 1]() {
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+                      ~
+!!! error TS1005: ';' expected.
             return 10;
         },
+         ~
+!!! error TS1128: Declaration or statement expected.
         get foo() {
+        ~~~
+!!! error TS2304: Cannot find name 'get'.
+            ~~~
+!!! error TS1005: ';' expected.
+            ~~~
+!!! error TS2304: Cannot find name 'foo'.
+                  ~
+!!! error TS1005: ';' expected.
             if (2 == 2) {
                 return 20;
             }
         },
+         ~
+!!! error TS1128: Declaration or statement expected.
         p2: 20
     }
+     
+!!! error TS1005: '}' expected.

@@ -5,20 +5,10 @@ objectTypesIdentityWithGenericCallSignatures.ts(24,14): error TS1005: ',' expect
 objectTypesIdentityWithGenericCallSignatures.ts(24,15): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignatures.ts(24,15): error TS2304: Cannot find name 'T'.
 objectTypesIdentityWithGenericCallSignatures.ts(24,16): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignatures.ts(24,17): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignatures.ts(24,18): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignatures.ts(24,21): error TS2304: Cannot find name 'T'.
-objectTypesIdentityWithGenericCallSignatures.ts(24,22): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignatures.ts(24,24): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignatures.ts(24,26): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignatures.ts(24,26): error TS2304: Cannot find name 'return'.
-objectTypesIdentityWithGenericCallSignatures.ts(24,33): error TS1005: ',' expected.
 objectTypesIdentityWithGenericCallSignatures.ts(24,33): error TS2304: Cannot find name 'x'.
-objectTypesIdentityWithGenericCallSignatures.ts(24,34): error TS1005: ',' expected.
-objectTypesIdentityWithGenericCallSignatures.ts(24,38): error TS1128: Declaration or statement expected.
 
 
-==== objectTypesIdentityWithGenericCallSignatures.ts (18 errors) ====
+==== objectTypesIdentityWithGenericCallSignatures.ts (8 errors) ====
     // object types are identical structurally
     
     class A {
@@ -57,28 +47,8 @@ objectTypesIdentityWithGenericCallSignatures.ts(24,38): error TS1128: Declaratio
 !!! error TS2304: Cannot find name 'T'.
                    ~
 !!! error TS1005: ',' expected.
-                    ~
-!!! error TS1005: ',' expected.
-                     ~
-!!! error TS1005: ',' expected.
-                        ~
-!!! error TS2304: Cannot find name 'T'.
-                         ~
-!!! error TS1005: ',' expected.
-                           ~
-!!! error TS1005: ',' expected.
-                             ~~~~~~
-!!! error TS1005: ',' expected.
-                             ~~~~~~
-!!! error TS2304: Cannot find name 'return'.
-                                    ~
-!!! error TS1005: ',' expected.
                                     ~
 !!! error TS2304: Cannot find name 'x'.
-                                     ~
-!!! error TS1005: ',' expected.
-                                         ~
-!!! error TS1128: Declaration or statement expected.
     
     function foo1(x: A);
     function foo1(x: A); // error
