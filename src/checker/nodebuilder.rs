@@ -594,6 +594,19 @@ impl Checker {
             }
         }
 
+        // Constructor types: when a class symbol's type has construct
+        // signatures (i.e. it's the constructor function type, not the
+        // instance type), print as `typeof ClassName`. Mirrors Go's
+        // `TypeToString` which checks `constructSignatureCount > 0` and the
+        // symbol is a class.
+        if sym.flags.contains(SymbolFlags::Class) {
+            if let Some(structured) = t.as_structured() {
+                if !structured.construct_signatures().is_empty() {
+                    return format!("typeof {}", sym.name);
+                }
+            }
+        }
+
         sym.name.clone()
     }
 

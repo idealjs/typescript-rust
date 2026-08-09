@@ -1,5 +1,5 @@
-literals.ts(19,9): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
-literals.ts(24,9): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+literals.ts(19,9): error TS1121: Octal literals are not allowed. Use the syntax '0o01'.
+literals.ts(24,9): error TS1121: Octal literals are not allowed. Use the syntax '0o03'.
 literals.ts(35,8): error TS2304: Cannot find name 'RegExp'.
 
 
@@ -24,14 +24,14 @@ literals.ts(35,8): error TS2304: Cannot find name 'RegExp'.
     var n = 1e4;
     var n = 001; // Error in ES5
             ~~~
-!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+!!! error TS1121: Octal literals are not allowed. Use the syntax '0o01'.
     var n = 0x1;
     var n = -1;
     var n = -1.0;
     var n = -1e-4;
     var n = -003; // Error in ES5
             ~~~~
-!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+!!! error TS1121: Octal literals are not allowed. Use the syntax '0o03'.
     var n = -0x1;
     
     var s: string;

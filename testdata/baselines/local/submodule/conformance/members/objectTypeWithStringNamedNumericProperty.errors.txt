@@ -2,25 +2,25 @@ objectTypeWithStringNamedNumericProperty.ts(7,11): error TS2304: Cannot find nam
 objectTypeWithStringNamedNumericProperty.ts(11,12): error TS2304: Cannot find name 'Date'.
 objectTypeWithStringNamedNumericProperty.ts(12,13): error TS2304: Cannot find name 'RegExp'.
 objectTypeWithStringNamedNumericProperty.ts(13,11): error TS2304: Cannot find name 'Date'.
-objectTypeWithStringNamedNumericProperty.ts(33,13): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
-objectTypeWithStringNamedNumericProperty.ts(34,13): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+objectTypeWithStringNamedNumericProperty.ts(33,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
+objectTypeWithStringNamedNumericProperty.ts(34,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
 objectTypeWithStringNamedNumericProperty.ts(38,11): error TS2304: Cannot find name 'Object'.
 objectTypeWithStringNamedNumericProperty.ts(42,12): error TS2304: Cannot find name 'Date'.
 objectTypeWithStringNamedNumericProperty.ts(43,13): error TS2304: Cannot find name 'RegExp'.
 objectTypeWithStringNamedNumericProperty.ts(44,11): error TS2304: Cannot find name 'Date'.
-objectTypeWithStringNamedNumericProperty.ts(64,13): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
-objectTypeWithStringNamedNumericProperty.ts(65,13): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+objectTypeWithStringNamedNumericProperty.ts(64,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
+objectTypeWithStringNamedNumericProperty.ts(65,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
 objectTypeWithStringNamedNumericProperty.ts(69,11): error TS2304: Cannot find name 'Object'.
 objectTypeWithStringNamedNumericProperty.ts(73,12): error TS2304: Cannot find name 'Date'.
 objectTypeWithStringNamedNumericProperty.ts(74,13): error TS2304: Cannot find name 'RegExp'.
 objectTypeWithStringNamedNumericProperty.ts(75,11): error TS2304: Cannot find name 'Date'.
-objectTypeWithStringNamedNumericProperty.ts(94,13): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
-objectTypeWithStringNamedNumericProperty.ts(95,13): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+objectTypeWithStringNamedNumericProperty.ts(94,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
+objectTypeWithStringNamedNumericProperty.ts(95,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
 objectTypeWithStringNamedNumericProperty.ts(99,15): error TS2304: Cannot find name 'Object'.
 objectTypeWithStringNamedNumericProperty.ts(103,16): error TS2304: Cannot find name 'Date'.
 objectTypeWithStringNamedNumericProperty.ts(105,11): error TS2304: Cannot find name 'Date'.
-objectTypeWithStringNamedNumericProperty.ts(124,13): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
-objectTypeWithStringNamedNumericProperty.ts(125,13): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+objectTypeWithStringNamedNumericProperty.ts(124,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
+objectTypeWithStringNamedNumericProperty.ts(125,13): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
 
 
 ==== objectTypeWithStringNamedNumericProperty.ts (23 errors) ====
@@ -66,10 +66,10 @@ objectTypeWithStringNamedNumericProperty.ts(125,13): error TS1121: Octal literal
     var r11 = i[-0x1]
     var r12 = i[01]
                 ~~
-!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+!!! error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
     var r13 = i[-01]
                 ~~~
-!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+!!! error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
     
     interface I {
         "0.1": void;
@@ -109,10 +109,10 @@ objectTypeWithStringNamedNumericProperty.ts(125,13): error TS1121: Octal literal
     var r11 = i[-0x1]
     var r12 = i[01]
                 ~~
-!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+!!! error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
     var r13 = i[-01]
                 ~~~
-!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+!!! error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
     
     declare var a: {
         "0.1": void;
@@ -151,10 +151,10 @@ objectTypeWithStringNamedNumericProperty.ts(125,13): error TS1121: Octal literal
     var r11 = i[-0x1]
     var r12 = i[01]
                 ~~
-!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+!!! error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
     var r13 = i[-01]
                 ~~~
-!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+!!! error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
     
     var b = {
         "0.1": <void>null,
@@ -191,7 +191,7 @@ objectTypeWithStringNamedNumericProperty.ts(125,13): error TS1121: Octal literal
     var r11 = i[-0x1]
     var r12 = i[01]
                 ~~
-!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+!!! error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
     var r13 = i[-01]
                 ~~~
-!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+!!! error TS1121: Octal literals are not allowed. Use the syntax '0o1'.

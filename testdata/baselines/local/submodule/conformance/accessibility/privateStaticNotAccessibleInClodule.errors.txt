@@ -1,5 +1,5 @@
 privateStaticNotAccessibleInClodule.ts(4,13): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-privateStaticNotAccessibleInClodule.ts(9,22): error TS2339: Property 'bar' does not exist on type 'C'.
+privateStaticNotAccessibleInClodule.ts(9,22): error TS2339: Property 'bar' does not exist on type 'typeof C'.
 
 
 ==== privateStaticNotAccessibleInClodule.ts (2 errors) ====
@@ -15,5 +15,5 @@ privateStaticNotAccessibleInClodule.ts(9,22): error TS2339: Property 'bar' does 
     namespace C {
         export var y = C.bar; // error
                          ~~~
-!!! error TS2339: Property 'bar' does not exist on type 'C'.
+!!! error TS2339: Property 'bar' does not exist on type 'typeof C'.
     }

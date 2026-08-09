@@ -1,6 +1,6 @@
 ClassAndModuleThatMergeWithModulesExportedStaticFunctionUsingClassPrivateStatics.ts(2,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
 ClassAndModuleThatMergeWithModulesExportedStaticFunctionUsingClassPrivateStatics.ts(3,5): error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
-ClassAndModuleThatMergeWithModulesExportedStaticFunctionUsingClassPrivateStatics.ts(11,24): error TS2339: Property 'sfn' does not exist on type 'clodule'.
+ClassAndModuleThatMergeWithModulesExportedStaticFunctionUsingClassPrivateStatics.ts(11,24): error TS2339: Property 'sfn' does not exist on type 'typeof clodule'.
 
 
 ==== ClassAndModuleThatMergeWithModulesExportedStaticFunctionUsingClassPrivateStatics.ts (3 errors) ====
@@ -20,7 +20,7 @@ ClassAndModuleThatMergeWithModulesExportedStaticFunctionUsingClassPrivateStatics
         export function fn<T>(x: T, y: T): number {
             return clodule.sfn('a');
                            ~~~
-!!! error TS2339: Property 'sfn' does not exist on type 'clodule'.
+!!! error TS2339: Property 'sfn' does not exist on type 'typeof clodule'.
         }
     }
     

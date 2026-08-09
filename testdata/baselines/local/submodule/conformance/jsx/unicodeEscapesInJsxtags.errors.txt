@@ -8,17 +8,17 @@ file.tsx(20,6): error TS1127: Invalid character.
 file.tsx(20,6): error TS2339: Property 'unknown' does not exist on type '{ video: () => null }'.
 file.tsx(21,4): error TS1127: Invalid character.
 file.tsx(21,7): error TS1005: '...' expected.
-file.tsx(21,7): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+file.tsx(21,7): error TS1121: Octal literals are not allowed. Use the syntax '0o061'.
 file.tsx(22,4): error TS1127: Invalid character.
 file.tsx(22,7): error TS1005: '...' expected.
-file.tsx(22,7): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+file.tsx(22,7): error TS1121: Octal literals are not allowed. Use the syntax '0o061'.
 file.tsx(23,6): error TS1127: Invalid character.
 file.tsx(23,9): error TS1005: '...' expected.
-file.tsx(23,9): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+file.tsx(23,9): error TS1121: Octal literals are not allowed. Use the syntax '0o063'.
 file.tsx(24,4): error TS2304: Cannot find name 'Comp'.
 file.tsx(24,8): error TS1127: Invalid character.
 file.tsx(24,11): error TS1005: '...' expected.
-file.tsx(24,11): error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+file.tsx(24,11): error TS1121: Octal literals are not allowed. Use the syntax '0o061'.
 file.tsx(27,14): error TS1127: Invalid character.
 file.tsx(28,9): error TS1127: Invalid character.
 
@@ -65,21 +65,21 @@ file.tsx(28,9): error TS1127: Invalid character.
           ~~~~
 !!! error TS1005: '...' expected.
           ~~~~
-!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+!!! error TS1121: Octal literals are not allowed. Use the syntax '0o061'.
     ; <\u{0061}-b></a-b>
        ~
 !!! error TS1127: Invalid character.
           ~~~~
 !!! error TS1005: '...' expected.
           ~~~~
-!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+!!! error TS1121: Octal literals are not allowed. Use the syntax '0o061'.
     ; <a-\u{0063}></a-c>
          ~
 !!! error TS1127: Invalid character.
             ~~~~
 !!! error TS1005: '...' expected.
             ~~~~
-!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+!!! error TS1121: Octal literals are not allowed. Use the syntax '0o063'.
     ; <Comp\u{0061} x={12} />
        ~~~~
 !!! error TS2304: Cannot find name 'Comp'.
@@ -88,7 +88,7 @@ file.tsx(28,9): error TS1127: Invalid character.
               ~~~~
 !!! error TS1005: '...' expected.
               ~~~~
-!!! error TS1121: Octal literals are not allowed. Use the syntax '{0}'.
+!!! error TS1121: Octal literals are not allowed. Use the syntax '0o061'.
     
     // attribute name
     ;<video data-\u0076ideo />

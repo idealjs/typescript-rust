@@ -188,7 +188,17 @@ impl Parser {
             };
             parser.diagnostics.push(ParserDiagnostic {
                 message,
-                message_args: Vec::new(),
+                message_args: match err.kind {
+                    crate::scanner::DiagnosticKind::OctalLiteralNotAllowed => {
+                        // Build the replacement syntax: `0o` + octal digits
+                        // extracted from the source text.
+                        let token_text = &text[err.pos..err.pos + err.length];
+                        let octal_digits = token_text.strip_prefix('-').unwrap_or(token_text);
+                        let digits = octal_digits.strip_prefix('0').unwrap_or(octal_digits);
+                        vec![format!("0o{digits}")]
+                    }
+                    _ => Vec::new(),
+                },
                 range: TextRange::new(err.pos, err.pos + err.length),
             });
         }

@@ -1,5 +1,5 @@
-protectedStaticNotAccessibleInClodule.ts(9,22): error TS2339: Property 'foo' does not exist on type 'C'.
-protectedStaticNotAccessibleInClodule.ts(10,22): error TS2339: Property 'bar' does not exist on type 'C'.
+protectedStaticNotAccessibleInClodule.ts(9,22): error TS2339: Property 'foo' does not exist on type 'typeof C'.
+protectedStaticNotAccessibleInClodule.ts(10,22): error TS2339: Property 'bar' does not exist on type 'typeof C'.
 
 
 ==== protectedStaticNotAccessibleInClodule.ts (2 errors) ====
@@ -13,8 +13,8 @@ protectedStaticNotAccessibleInClodule.ts(10,22): error TS2339: Property 'bar' do
     namespace C {
         export var f = C.foo; // OK
                          ~~~
-!!! error TS2339: Property 'foo' does not exist on type 'C'.
+!!! error TS2339: Property 'foo' does not exist on type 'typeof C'.
         export var b = C.bar; // error
                          ~~~
-!!! error TS2339: Property 'bar' does not exist on type 'C'.
+!!! error TS2339: Property 'bar' does not exist on type 'typeof C'.
     }
