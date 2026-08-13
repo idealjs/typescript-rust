@@ -1,0 +1,3 @@
+argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(74,12): error TS1005: ';' expected.
+argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(76,13): error TS1003: Identifier expected.
+argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(81,1): error TS1128: Declaration or statement expected.

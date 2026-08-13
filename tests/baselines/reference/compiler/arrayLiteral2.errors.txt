@@ -1,0 +1,1 @@
+arrayLiteral2.ts(1,19): error TS2304: Cannot find name 'v31'.

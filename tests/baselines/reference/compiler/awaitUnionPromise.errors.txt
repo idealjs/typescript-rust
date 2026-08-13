@@ -1,0 +1,1 @@
+awaitUnionPromise.ts(13,11): error TS2322: Type 'null' is not assignable to type '{ next1: () => object; next2: () => object | object; next3: () => object; next4: () => object }'.

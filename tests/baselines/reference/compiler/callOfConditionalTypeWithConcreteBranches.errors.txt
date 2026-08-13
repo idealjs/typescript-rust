@@ -1,0 +1,6 @@
+callOfConditionalTypeWithConcreteBranches.ts(5,3): error TS2349: This expression is not callable.
+callOfConditionalTypeWithConcreteBranches.ts(8,21): error TS2345: Argument of type '(m: any) => any' is not assignable to parameter of type 'never'.
+callOfConditionalTypeWithConcreteBranches.ts(9,12): error TS2345: Argument of type '(m: any) => any' is not assignable to parameter of type 'never'.
+callOfConditionalTypeWithConcreteBranches.ts(25,3): error TS2349: This expression is not callable.
+callOfConditionalTypeWithConcreteBranches.ts(28,22): error TS2345: Argument of type '(m: any) => any' is not assignable to parameter of type 'never'.
+callOfConditionalTypeWithConcreteBranches.ts(29,13): error TS2345: Argument of type '(m: any) => any' is not assignable to parameter of type 'never'.

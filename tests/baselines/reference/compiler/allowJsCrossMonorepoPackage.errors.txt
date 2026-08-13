@@ -1,0 +1,20 @@
+/packages/main/index.ts(1,19): error TS2307: Cannot find module 'shared' or its corresponding type declarations.
+/packages/main/package.json(2,11): error TS1005: ';' expected.
+/packages/main/package.json(3,14): error TS1005: ';' expected.
+/packages/main/package.json(4,11): error TS1005: ';' expected.
+/packages/main/package.json(5,19): error TS1005: ';' expected.
+/packages/main/package.json(6,17): error TS1005: ';' expected.
+/packages/main/tsconfig.json(2,22): error TS1005: ';' expected.
+/packages/main/tsconfig.json(3,17): error TS1005: ';' expected.
+/packages/main/tsconfig.json(4,18): error TS1005: ';' expected.
+/packages/main/tsconfig.json(5,17): error TS1005: ';' expected.
+/packages/main/tsconfig.json(6,17): error TS1005: ';' expected.
+/packages/main/tsconfig.json(7,27): error TS1005: ';' expected.
+/packages/main/tsconfig.json(8,26): error TS1005: ';' expected.
+/packages/main/tsconfig.json(9,5): error TS1012: Unexpected token.
+/packages/main/tsconfig.json(13,1): error TS1005: '}' expected.
+/packages/shared/package.json(2,11): error TS1005: ';' expected.
+/packages/shared/package.json(3,14): error TS1005: ';' expected.
+/packages/shared/package.json(4,11): error TS1005: ';' expected.
+/packages/shared/package.json(5,14): error TS1005: ';' expected.
+/packages/shared/utils.js(1,21): error TS2307: Cannot find module 'pkg' or its corresponding type declarations.

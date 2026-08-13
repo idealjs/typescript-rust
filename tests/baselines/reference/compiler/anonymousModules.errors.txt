@@ -1,0 +1,3 @@
+anonymousModules.ts(1,8): error TS1003: Identifier expected.
+anonymousModules.ts(4,9): error TS1003: Identifier expected.
+anonymousModules.ts(6,2): error TS1128: Declaration or statement expected.

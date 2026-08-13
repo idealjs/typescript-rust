@@ -1,0 +1,28 @@
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'y'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'y'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'y'.
+capturedLetConstInLoop1_ES6.ts(12,17): error TS2448: Block-scoped variable 'x' used before its declaration.
+capturedLetConstInLoop1_ES6.ts(12,26): error TS2448: Block-scoped variable 'x' used before its declaration.
+capturedLetConstInLoop1_ES6.ts(29,17): error TS2448: Block-scoped variable 'y' used before its declaration.
+capturedLetConstInLoop1_ES6.ts(29,26): error TS2448: Block-scoped variable 'y' used before its declaration.
+capturedLetConstInLoop1_ES6.ts(35,17): error TS2448: Block-scoped variable 'y' used before its declaration.
+capturedLetConstInLoop1_ES6.ts(35,17): error TS2588: Cannot assign to 'y' because it is a constant.
+capturedLetConstInLoop1_ES6.ts(35,24): error TS2448: Block-scoped variable 'x' used before its declaration.
+capturedLetConstInLoop1_ES6.ts(35,33): error TS2448: Block-scoped variable 'x' used before its declaration.
+capturedLetConstInLoop1_ES6.ts(52,17): error TS2448: Block-scoped variable 'y' used before its declaration.
+capturedLetConstInLoop1_ES6.ts(52,26): error TS2448: Block-scoped variable 'y' used before its declaration.
+capturedLetConstInLoop1_ES6.ts(69,19): error TS2448: Block-scoped variable 'x' used before its declaration.
+capturedLetConstInLoop1_ES6.ts(86,19): error TS2448: Block-scoped variable 'y' used before its declaration.
+capturedLetConstInLoop1_ES6.ts(92,19): error TS2448: Block-scoped variable 'y' used before its declaration.
+capturedLetConstInLoop1_ES6.ts(92,19): error TS2588: Cannot assign to 'y' because it is a constant.
+capturedLetConstInLoop1_ES6.ts(98,18): error TS2448: Block-scoped variable 'y' used before its declaration.
+capturedLetConstInLoop1_ES6.ts(98,18): error TS2588: Cannot assign to 'y' because it is a constant.
+capturedLetConstInLoop1_ES6.ts(104,18): error TS2448: Block-scoped variable 'y' used before its declaration.
+capturedLetConstInLoop1_ES6.ts(104,18): error TS2588: Cannot assign to 'y' because it is a constant.

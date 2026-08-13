@@ -1,0 +1,6 @@
+aliasUsageInOrExpression_main.ts(7,15): error TS2304: Cannot find name 'moduleA'.
+aliasUsageInOrExpression_main.ts(8,39): error TS2304: Cannot find name 'moduleA'.
+aliasUsageInOrExpression_main.ts(9,34): error TS2304: Cannot find name 'moduleA'.
+aliasUsageInOrExpression_main.ts(10,84): error TS2304: Cannot find name 'moduleA'.
+aliasUsageInOrExpression_main.ts(11,5): error TS2741: Property 'x' is missing in type '{ x: any } | null' but required in type '{ x: { VisualizationModel: error } }'.
+aliasUsageInOrExpression_main.ts(11,83): error TS2304: Cannot find name 'moduleA'.

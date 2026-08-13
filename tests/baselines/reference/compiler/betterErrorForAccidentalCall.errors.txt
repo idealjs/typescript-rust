@@ -1,0 +1,5 @@
+betterErrorForAccidentalCall.ts(3,1): error TS2349: This expression is not callable.
+betterErrorForAccidentalCall.ts(5,1): error TS2349: This expression is not callable.
+betterErrorForAccidentalCall.ts(7,1): error TS2349: This expression is not callable.
+betterErrorForAccidentalCall.ts(10,1): error TS2349: This expression is not callable.
+betterErrorForAccidentalCall.ts(13,1): error TS2349: This expression is not callable.

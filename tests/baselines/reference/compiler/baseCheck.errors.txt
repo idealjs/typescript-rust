@@ -1,0 +1,12 @@
+baseCheck.ts(4,9): error TS2349: This expression is not callable.
+baseCheck.ts(9,9): error TS2349: This expression is not callable.
+baseCheck.ts(9,18): error TS2304: Cannot find name 'loc'.
+baseCheck.ts(17,53): error TS2349: This expression is not callable.
+baseCheck.ts(17,64): error TS2339: Property 'z' does not exist on type 'object'.
+baseCheck.ts(18,53): error TS2349: This expression is not callable.
+baseCheck.ts(18,67): error TS2339: Property 'z' does not exist on type 'object'.
+baseCheck.ts(19,53): error TS2349: This expression is not callable.
+baseCheck.ts(19,73): error TS2339: Property 'z' does not exist on type 'object'.
+baseCheck.ts(22,9): error TS2304: Cannot find name 'x'.
+baseCheck.ts(23,7): error TS2304: Cannot find name 'x'.
+baseCheck.ts(26,9): error TS2304: Cannot find name 'x'.

@@ -1,0 +1,12 @@
+capturedLetConstInLoop2.ts(55,21): error TS2304: Cannot find name 'y'.
+capturedLetConstInLoop2.ts(57,34): error TS2304: Cannot find name 'y'.
+capturedLetConstInLoop2.ts(58,20): error TS2304: Cannot find name 'y'.
+capturedLetConstInLoop2.ts(142,23): error TS2304: Cannot find name 'y'.
+capturedLetConstInLoop2.ts(144,34): error TS2304: Cannot find name 'y'.
+capturedLetConstInLoop2.ts(145,20): error TS2304: Cannot find name 'y'.
+capturedLetConstInLoop2.ts(152,22): error TS2304: Cannot find name 'y'.
+capturedLetConstInLoop2.ts(154,34): error TS2304: Cannot find name 'y'.
+capturedLetConstInLoop2.ts(155,20): error TS2304: Cannot find name 'y'.
+capturedLetConstInLoop2.ts(161,22): error TS2304: Cannot find name 'y'.
+capturedLetConstInLoop2.ts(163,34): error TS2304: Cannot find name 'y'.
+capturedLetConstInLoop2.ts(164,20): error TS2304: Cannot find name 'y'.

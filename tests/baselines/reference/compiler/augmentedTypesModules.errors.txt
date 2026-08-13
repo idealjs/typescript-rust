@@ -1,0 +1,5 @@
+error TS2300: Duplicate identifier 'm1'.
+error TS2300: Duplicate identifier 'm1a'.
+error TS2300: Duplicate identifier 'm1b'.
+error TS2300: Duplicate identifier 'm1c'.
+error TS2300: Duplicate identifier 'm1d'.

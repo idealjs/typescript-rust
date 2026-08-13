@@ -1,0 +1,3 @@
+betterErrorForUnionCall.ts(2,1): error TS2349: This expression is not callable.
+betterErrorForUnionCall.ts(5,1): error TS2349: This expression is not callable.
+betterErrorForUnionCall.ts(8,1): error TS2349: This expression is not callable.

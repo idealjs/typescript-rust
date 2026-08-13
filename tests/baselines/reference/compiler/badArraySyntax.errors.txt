@@ -1,0 +1,11 @@
+badArraySyntax.ts(6,16): error TS1012: Unexpected token.
+badArraySyntax.ts(6,17): error TS1005: ']' expected.
+badArraySyntax.ts(7,16): error TS1012: Unexpected token.
+badArraySyntax.ts(7,19): error TS1005: ']' expected.
+badArraySyntax.ts(8,21): error TS1012: Unexpected token.
+badArraySyntax.ts(8,22): error TS1005: ']' expected.
+badArraySyntax.ts(9,21): error TS1012: Unexpected token.
+badArraySyntax.ts(9,24): error TS1005: ']' expected.
+badArraySyntax.ts(10,36): error TS1012: Unexpected token.
+badArraySyntax.ts(10,43): error TS1012: Unexpected token.
+badArraySyntax.ts(10,44): error TS1005: ']' expected.

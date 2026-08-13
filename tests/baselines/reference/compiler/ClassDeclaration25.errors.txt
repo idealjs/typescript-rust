@@ -1,0 +1,1 @@
+ClassDeclaration25.ts(5,1): error TS2420: Class 'List' incorrectly implements interface '{ data: () => U; next: () => string }'.

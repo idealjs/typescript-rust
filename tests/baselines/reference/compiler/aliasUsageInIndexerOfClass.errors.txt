@@ -1,0 +1,1 @@
+aliasUsageInIndexerOfClass_main.ts(8,9): error TS2304: Cannot find name 'moduleA'.

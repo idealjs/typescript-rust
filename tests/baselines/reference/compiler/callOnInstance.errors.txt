@@ -1,0 +1,4 @@
+error TS2300: Duplicate identifier 'D'.
+callOnInstance.ts(5,18): error TS2349: This expression is not callable.
+callOnInstance.ts(7,18): error TS2349: This expression is not callable.
+callOnInstance.ts(10,1): error TS2349: This expression is not callable.

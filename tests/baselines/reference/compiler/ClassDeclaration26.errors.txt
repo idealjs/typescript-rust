@@ -1,0 +1,4 @@
+ClassDeclaration26.ts(2,18): error TS1005: ';' expected.
+ClassDeclaration26.ts(2,22): error TS1005: ';' expected.
+ClassDeclaration26.ts(2,29): error TS1005: ';' expected.
+ClassDeclaration26.ts(4,9): error TS1005: ';' expected.

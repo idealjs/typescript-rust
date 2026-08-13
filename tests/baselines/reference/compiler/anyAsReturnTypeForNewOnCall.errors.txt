@@ -1,0 +1,1 @@
+anyAsReturnTypeForNewOnCall.ts(9,13): error TS2351: This expression is not constructable.

@@ -1,0 +1,3 @@
+bindingPatternCannotBeOnlyInferenceSource.ts(22,26): error TS2349: This expression is not callable.
+bindingPatternCannotBeOnlyInferenceSource.ts(23,26): error TS2349: This expression is not callable.
+bindingPatternCannotBeOnlyInferenceSource.ts(24,26): error TS2349: This expression is not callable.

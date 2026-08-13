@@ -157,6 +157,9 @@ impl Parser {
         for err in &scanner_errors {
             let message = match err.kind {
                 crate::scanner::DiagnosticKind::InvalidCharacter => diagnostics::INVALID_CHARACTER,
+                crate::scanner::DiagnosticKind::FileAppearsToBeBinary => {
+                    diagnostics::FILE_APPEARS_TO_BE_BINARY
+                }
                 crate::scanner::DiagnosticKind::UnterminatedStringLiteral => {
                     diagnostics::UNTERMINATED_STRING_LITERAL
                 }
@@ -2866,6 +2869,17 @@ impl Parser {
 
     fn parse_property_name(&mut self) -> Arc<Node> {
         match self.token {
+            SyntaxKind::PrivateIdentifier => {
+                let text = self.scanner.token_text().to_string();
+                let pos = self.token_pos();
+                let end = self.token_end();
+                self.next_token();
+                Arc::new(Node::with_loc(
+                    SyntaxKind::PrivateIdentifier,
+                    NodeData::PrivateIdentifier(PrivateIdentifierData { text }),
+                    TextRange::new(pos, end),
+                ))
+            }
             SyntaxKind::StringLiteral => {
                 let text = self.scanner.token_value();
                 let pos = self.token_pos();
@@ -2981,6 +2995,19 @@ impl Parser {
         // Go: parseAssignmentExpressionOrHigher — check yield first.
         if self.is_yield_expression() {
             return self.parse_yield_expression();
+        }
+        // Generic arrow function: `[async] <T, U>(params) => body`.
+        // Speculative — backtracks if the leading `<` is actually a comparison
+        // or `async` isn't followed by `<`. Disabled in JSX. Mirrors Go's
+        // `tryParseParenthesizedArrowFunction` `<` path. Tried before the
+        // plain async/parenthesized-arrow checks so `async <T>() =>` works.
+        if self.token == SyntaxKind::LessThanToken
+            || (self.token == SyntaxKind::AsyncKeyword
+                && self.look_ahead_token() == SyntaxKind::LessThanToken)
+        {
+            if let Some(arrow) = self.try_parse_generic_arrow_function() {
+                return arrow;
+            }
         }
         if self.token == SyntaxKind::AsyncKeyword && self.is_async_arrow_function() {
             // Capture the async modifier before consuming it.
@@ -3278,6 +3305,95 @@ impl Parser {
             }),
             TextRange::new(pos, end),
         ))
+    }
+
+    /// Speculatively parse a (possibly `async`) generic arrow function
+    /// `[async] <T, U>(params) => body`. The leading `<` is ambiguous with a
+    /// comparison (`a < b`), so this snapshots the scanner/token/diagnostics
+    /// and commits only when the whole `[async] <TypeParams> ( Params ) : RetType? =>`
+    /// prefix is matched with no parse errors; otherwise it backtracks, leaving
+    /// the tokens for the binary-expression / async-arrow paths. Mirrors Go's
+    /// `tryParseParenthesizedArrowFunction` `<` branch. Disabled in JSX/TSX
+    /// (where `<T>` is a JSX element).
+    fn try_parse_generic_arrow_function(&mut self) -> Option<Arc<Node>> {
+        let starts_with_async = self.token == SyntaxKind::AsyncKeyword;
+        if !starts_with_async
+            && (self.token != SyntaxKind::LessThanToken
+                || self.language_variant == LanguageVariant::Jsx)
+        {
+            return None;
+        }
+        // Quick reject: there must be `[async] <` then an identifier/`const`
+        // (a type-parameter name), `async` on the same line as `<`. Mirrors
+        // Go's `nextIsParenthesizedArrowFunction`.
+        {
+            let mut s = self.scanner.clone();
+            if starts_with_async {
+                let after = s.scan();
+                if s.has_preceding_line_break() || after != SyntaxKind::LessThanToken {
+                    return None;
+                }
+            }
+            let t1 = s.scan();
+            if !(t1 == SyntaxKind::Identifier
+                || t1 == SyntaxKind::ConstKeyword
+                || (t1 as i16) > (SyntaxKind::WithKeyword as i16))
+            {
+                return None;
+            }
+        }
+
+        let saved_scanner = self.scanner.clone();
+        let saved_token = self.token;
+        let diag_len = self.diagnostics.len();
+        let pos = self.token_pos();
+
+        if starts_with_async {
+            self.next_token(); // consume `async`
+        }
+        // Current token is now `<`.
+        let type_parameters = self.parse_optional_type_parameters();
+        // Commit requires clean type params + a following parameter list.
+        if type_parameters.is_none()
+            || self.token != SyntaxKind::OpenParenToken
+            || self.diagnostics.len() != diag_len
+        {
+            self.scanner = saved_scanner;
+            self.token = saved_token;
+            self.diagnostics.truncate(diag_len);
+            return None;
+        }
+        let parameters = self.parse_parameter_list();
+        let type_node = self.parse_optional_return_type();
+        // The arrow itself must follow with no errors during the attempt.
+        if self.token != SyntaxKind::EqualsGreaterThanToken || self.diagnostics.len() != diag_len {
+            self.scanner = saved_scanner;
+            self.token = saved_token;
+            self.diagnostics.truncate(diag_len);
+            return None;
+        }
+        // Committed — parse the arrow token and body (no further backtracking).
+        let equals_greater_than_token = self.create_token_node();
+        self.next_token();
+        let body = if self.token == SyntaxKind::OpenBraceToken {
+            self.parse_block()
+        } else {
+            self.parse_assignment_expression()
+        };
+        let end = body.end();
+        Some(Arc::new(Node::with_loc(
+            SyntaxKind::ArrowFunction,
+            NodeData::ArrowFunction(ArrowFunctionData {
+                modifiers: None,
+                type_parameters,
+                parameters,
+                type_node,
+                equals_greater_than_token,
+                body,
+                full_signature: None,
+            }),
+            TextRange::new(pos, end),
+        )))
     }
 
     fn parse_simple_arrow_function_with_async(
@@ -3705,10 +3821,16 @@ impl Parser {
                 }
                 SyntaxKind::LessThanToken => {
                     let pos = expr.pos();
-                    let type_arguments = self.parse_optional_type_arguments();
-                    if self.token != SyntaxKind::OpenParenToken {
-                        break;
-                    }
+                    // `<` is ambiguous in expression context: type arguments
+                    // `f<T>(…)` vs a less-than comparison `a < b`. Speculatively
+                    // parse type arguments and commit only if they close cleanly
+                    // AND are followed by `(`; otherwise backtrack so `<` is
+                    // handled as a binary operator. Mirrors Go's
+                    // `tryParseTypeArguments`.
+                    let type_arguments = match self.try_parse_type_arguments(true) {
+                        Some(ta) => ta,
+                        None => break,
+                    };
                     let arguments = self.parse_argument_list();
                     let end = arguments.end();
                     expr = Arc::new(Node::with_loc(
@@ -3716,7 +3838,7 @@ impl Parser {
                         NodeData::CallExpression(CallExpressionData {
                             expression: expr,
                             question_dot_token: None,
-                            type_arguments,
+                            type_arguments: Some(type_arguments),
                             arguments,
                         }),
                         TextRange::new(pos, end),
@@ -3776,6 +3898,49 @@ impl Parser {
         // Re-scan `>>` as `>` so nested generics like `Array<Array<T>>` work.
         self.re_scan_greater_than();
         self.expect(SyntaxKind::GreaterThanToken);
+        let end = self.token_pos();
+        Some(Arc::new(NodeList {
+            loc: TextRange::new(pos, end),
+            nodes: args.nodes,
+        }))
+    }
+
+    /// Speculatively parse a type-argument list `<T, U, …>` used in expression
+    /// context, where `<` is ambiguous between type arguments (`f<T>(…)`) and a
+    /// less-than comparison (`a < b`). Mirrors Go's `tryParseTypeArguments`.
+    ///
+    /// Snapshots the scanner, current token, and diagnostics; if the list does
+    /// not close cleanly with `>` (no diagnostics emitted during the attempt),
+    /// or — when `require_following_paren` — is not followed by `(`, everything
+    /// is rolled back and `None` is returned, leaving `<` as the current token
+    /// so the caller treats it as a binary operator. The `(` requirement
+    /// disambiguates `f<T>(x)` (a generic call) from `a < b > c` (comparisons).
+    fn try_parse_type_arguments(&mut self, require_following_paren: bool) -> Option<Arc<NodeList>> {
+        if self.token != SyntaxKind::LessThanToken {
+            return None;
+        }
+        let saved_scanner = self.scanner.clone();
+        let saved_token = self.token;
+        let diag_len = self.diagnostics.len();
+        let pos = self.token_pos();
+        self.next_token(); // consume `<`
+        let args = self.parse_delimited_list(ParsingContext::TypeArguments, Parser::parse_type);
+        self.re_scan_greater_than();
+        let closed_cleanly =
+            self.token == SyntaxKind::GreaterThanToken && self.diagnostics.len() == diag_len;
+        if !closed_cleanly {
+            self.scanner = saved_scanner;
+            self.token = saved_token;
+            self.diagnostics.truncate(diag_len);
+            return None;
+        }
+        self.next_token(); // consume `>`
+        if require_following_paren && self.token != SyntaxKind::OpenParenToken {
+            self.scanner = saved_scanner;
+            self.token = saved_token;
+            self.diagnostics.truncate(diag_len);
+            return None;
+        }
         let end = self.token_pos();
         Some(Arc::new(NodeList {
             loc: TextRange::new(pos, end),
@@ -4048,52 +4213,90 @@ impl Parser {
             ));
         }
 
-        // Check for `get`/`set` accessor keywords in object literal.
-        // Only treat as accessor when followed by a property name (not when
-        // `get`/`set` is the actual property name: `{ get: 1 }` vs `{ get x() {} }`).
-        if self.token == SyntaxKind::GetKeyword && self.is_get_or_set_accessor() {
-            return self.parse_object_accessor(pos, /* is_get */ true);
-        }
-        if self.token == SyntaxKind::SetKeyword && self.is_get_or_set_accessor() {
-            return self.parse_object_accessor(pos, /* is_get */ false);
+        // `get`/`set` accessor: `{ get foo() {} }` / `{ set foo(v) {} }`.
+        // `get`/`set` is an accessor only when followed by a property name (or
+        // `[`), NOT by `(`/`:`/`;` (so `{ get: 1 }`, `{ get() {} }` remain
+        // ordinary members named `get`). Mirrors Go's
+        // `parseObjectLiteralElement` accessor handling.
+        if self.token == SyntaxKind::GetKeyword || self.token == SyntaxKind::SetKeyword {
+            let mut s = self.scanner.clone();
+            s.scan();
+            if Self::token_can_follow_get_or_set(s.token()) {
+                let accessor_kind = self.token;
+                self.next_token(); // consume `get`/`set`
+                let name = self.parse_property_name();
+                let type_parameters = self.parse_optional_type_parameters();
+                let parameters = self.parse_parameter_list();
+                let type_node = self.parse_optional_return_type();
+                // Object-literal accessors must have a body (unlike ambient
+                // class members). A missing `{` reports TS1005 "'{' expected",
+                // matching the Go oracle.
+                let body = if self.token == SyntaxKind::OpenBraceToken {
+                    Some(self.parse_block())
+                } else {
+                    self.expect(SyntaxKind::OpenBraceToken);
+                    None
+                };
+                let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
+                let range = TextRange::new(pos, end);
+                return match accessor_kind {
+                    SyntaxKind::GetKeyword => Arc::new(Node::with_loc(
+                        SyntaxKind::GetAccessor,
+                        NodeData::GetAccessorDeclaration(GetAccessorDeclarationData {
+                            modifiers: None,
+                            name,
+                            type_parameters,
+                            parameters,
+                            type_node,
+                            full_signature: None,
+                            body,
+                        }),
+                        range,
+                    )),
+                    _ => Arc::new(Node::with_loc(
+                        SyntaxKind::SetAccessor,
+                        NodeData::SetAccessorDeclaration(SetAccessorDeclarationData {
+                            modifiers: None,
+                            name,
+                            type_parameters,
+                            parameters,
+                            type_node,
+                            full_signature: None,
+                            body,
+                        }),
+                        range,
+                    )),
+                };
+            }
         }
 
-        // Check for `async` method prefix.
+        // `async` method prefix: `{ async name() {} }`.
         let is_async = self.token == SyntaxKind::AsyncKeyword;
         if is_async {
             self.next_token();
         }
 
-        // Check for generator method (`*name() {}`).
-        let asterisk = self.parse_optional_token(SyntaxKind::AsteriskToken);
+        // Generator method: `{ *foo() {} }`.
+        let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
 
-        // Parse the property name.
         let name = self.parse_property_name();
-
-        // Method shorthand: `{ name() {} }`, `{ async name() {} }`, `{ *name() {} }`.
-        if self.token == SyntaxKind::OpenParenToken || asterisk.is_some() || is_async {
+        if self.token == SyntaxKind::OpenParenToken
+            || self.token == SyntaxKind::LessThanToken
+            || asterisk_token.is_some()
+            || is_async
+        {
+            // Method: `{ foo() {} }` / `{ foo<T>(x: T): void {} }`.
+            let type_parameters = self.parse_optional_type_parameters();
             let parameters = self.parse_parameter_list();
-            // Optional return type annotation.
-            let type_node = if self.token == SyntaxKind::ColonToken {
-                self.next_token();
-                Some(self.parse_type())
+            let type_node = self.parse_optional_return_type();
+            // Object-literal methods must have a body.
+            let body = if self.token == SyntaxKind::OpenBraceToken {
+                Some(self.parse_block())
             } else {
+                self.expect(SyntaxKind::OpenBraceToken);
                 None
             };
-            let body = self.parse_block();
-            let end = body.end();
-            return Arc::new(Node::with_loc(
-                SyntaxKind::MethodDeclaration,
-                NodeData::MethodDeclaration(MethodDeclarationData {
-                    modifiers: None,
-                    asterisk_token: asterisk,
-                    name,
-                    postfix_token: None,
-                    type_parameters: None,
-                    parameters,
-                    type_node,
-                    full_signature: None,
-                    body: Some(body),
+            let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
                 }),
                 TextRange::new(pos, end),
             ));
@@ -5806,6 +6009,42 @@ impl Parser {
 
     fn parse_parameter(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
+        // Parameter modifiers (a.k.a. parameter properties): `public`/
+        // `private`/`protected`/`readonly`/`override`. The parser accepts them
+        // on any parameter; the checker reports TS2369 ("A parameter property
+        // is only allowed in a constructor") when they appear elsewhere (e.g.
+        // on an accessor). Mirrors Go's `tryParseParameterModifiers`. A
+        // modifier is only consumed when the following token can start the
+        // parameter name/pattern, so `(public)` keeps `public` as the name.
+        let mut mods: Vec<(SyntaxKind, usize, usize)> = Vec::new();
+        loop {
+            if !matches!(
+                self.token,
+                SyntaxKind::PublicKeyword
+                    | SyntaxKind::PrivateKeyword
+                    | SyntaxKind::ProtectedKeyword
+                    | SyntaxKind::ReadonlyKeyword
+                    | SyntaxKind::OverrideKeyword
+            ) {
+                break;
+            }
+            let mut s = self.scanner.clone();
+            s.scan();
+            if s.has_preceding_line_break() || !Self::token_can_follow_modifier(s.token()) {
+                break;
+            }
+            let kind = self.token;
+            let mpos = self.token_pos();
+            let mend = self.token_end();
+            self.next_token();
+            mods.push((kind, mpos, mend));
+        }
+        let modifiers = if mods.is_empty() {
+            None
+        } else {
+            Some(self.make_modifier_list(mods))
+        };
+
         let dot_dot_dot_token = self.parse_optional_token(SyntaxKind::DotDotDotToken);
 
         // Parse TypeScript parameter modifiers (public, private, protected,
@@ -6039,6 +6278,18 @@ impl Parser {
             || token == SyntaxKind::BigIntLiteral
     }
 
+    /// Mirrors Go's `canFollowGetOrSetKeyword` (parser.go:4042): a property
+    /// name start (identifier/keyword or string/numeric/bigint literal) or `[`
+    /// (computed). Narrower than `token_can_follow_modifier` — excludes `{`,
+    /// `*`, `...` so that `get *()`, `get {...}`, `get ...` are NOT accessors.
+    fn token_can_follow_get_or_set(token: SyntaxKind) -> bool {
+        token == SyntaxKind::OpenBracketToken
+            || is_identifier_or_keyword(token)
+            || token == SyntaxKind::StringLiteral
+            || token == SyntaxKind::NumericLiteral
+            || token == SyntaxKind::BigIntLiteral
+    }
+
     fn is_index_signature_start(&self) -> bool {
         // Go: isIndexSignature — token is `[` and lookahead nextIsUnambiguouslyIndexSignature.
         if self.token != SyntaxKind::OpenBracketToken {
@@ -6242,19 +6493,32 @@ impl Parser {
             }
         }
 
-        // Handle `get`/`set` accessors in class body.
-        // `get x() {}` — only treat `get` as accessor keyword when followed by
-        // a property name. `{ get: 1 }` is a regular property named "get".
-        if self.token == SyntaxKind::GetKeyword && self.is_get_or_set_accessor() {
-            return self.parse_class_accessor(pos, modifiers, true);
+        // Index signature: `[key: string]: T`. Classes (like interfaces/type
+        // literals) may declare index signatures. Without this check `[idx:`
+        // is mis-parsed as a computed property name, cascading into TS1005.
+        // Mirrors Go's `parseClassElement` index-signature handling.
+        if self.is_index_signature_start() {
+            return self.parse_index_signature(pos, modifiers);
         }
-        if self.token == SyntaxKind::SetKeyword && self.is_get_or_set_accessor() {
-            return self.parse_class_accessor(pos, modifiers, false);
+
+        // get/set accessor: `get name() {}` / `set name(v) {}`.
+        // Mirrors Go `parseClassElement` lines 1862-1867. `get`/`set` is an
+        // accessor only when followed by a property name (or `[` computed) —
+        // NOT by `(` / `:` / `;` (so `get() {}`, `get: number`, `get;` remain
+        // ordinary members named `get`). Speculative scan via scanner clone.
+        if self.token == SyntaxKind::GetKeyword || self.token == SyntaxKind::SetKeyword {
+            let mut s = self.scanner.clone();
+            s.scan();
+            let next = s.token();
+            let is_accessor = Self::token_can_follow_get_or_set(next);
+            if is_accessor {
+                let accessor_kind = self.token;
+                return self.parse_accessor_declaration(pos, modifiers, accessor_kind);
+            }
         }
 
         // Generator method: `*name() {}` or `async *name() {}`.
         let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
-
         let name = self.parse_property_name();
         let postfix_token = self
             .parse_optional_token(SyntaxKind::QuestionToken)
@@ -6340,6 +6604,61 @@ impl Parser {
             }),
             TextRange::new(pos, end),
         ))
+    }
+
+    /// Parse a `get`/`set` accessor declaration. Mirrors Go's
+    /// `parseAccessorDeclaration` (parser.go:3432-3450). `accessor_kind` is
+    /// `GetKeyword` or `SetKeyword` (already recognized by the caller); we
+    /// consume it, then parse the property name + type parameters + parameter
+    /// list + optional return type + body (or `;` for ambient).
+    fn parse_accessor_declaration(
+        &mut self,
+        pos: usize,
+        modifiers: Option<Arc<ModifierList>>,
+        accessor_kind: SyntaxKind,
+    ) -> Arc<Node> {
+        // Consume the `get`/`set` keyword.
+        self.next_token();
+        let name = self.parse_property_name();
+        let type_parameters = self.parse_optional_type_parameters();
+        let parameters = self.parse_parameter_list();
+        let type_node = self.parse_optional_return_type();
+        let body = if self.token == SyntaxKind::OpenBraceToken {
+            Some(self.parse_block())
+        } else {
+            self.parse_semicolon();
+            None
+        };
+        let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
+        let range = TextRange::new(pos, end);
+        match accessor_kind {
+            SyntaxKind::GetKeyword => Arc::new(Node::with_loc(
+                SyntaxKind::GetAccessor,
+                NodeData::GetAccessorDeclaration(GetAccessorDeclarationData {
+                    modifiers,
+                    name,
+                    type_parameters,
+                    parameters,
+                    type_node,
+                    full_signature: None,
+                    body,
+                }),
+                range,
+            )),
+            _ => Arc::new(Node::with_loc(
+                SyntaxKind::SetAccessor,
+                NodeData::SetAccessorDeclaration(SetAccessorDeclarationData {
+                    modifiers,
+                    name,
+                    type_parameters,
+                    parameters,
+                    type_node,
+                    full_signature: None,
+                    body,
+                }),
+                range,
+            )),
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -6440,6 +6759,129 @@ mod tests {
         let mut p = Parser::new("\"hello\"");
         let node = p.parse_expression();
         assert_eq!(node.kind, SyntaxKind::StringLiteral);
+    }
+
+    #[test]
+    fn parse_private_identifier_class_field() {
+        // `#name: string` — private class field. The scanner yields a single
+        // PrivateIdentifier token; parse_property_name should produce a
+        // PrivateIdentifier name node, so the field parses with no diagnostics.
+        let (_, diags) = Parser::parse_source_file_text_with_diagnostics(
+            "a.ts",
+            "class C { #name: string; }".to_string(),
+        );
+        assert!(
+            diags.is_empty(),
+            "expected no diagnostics, got: {:?}",
+            diags
+        );
+    }
+
+    #[test]
+    fn parse_private_identifier_member_access() {
+        // `this.#name` — private member access. The name after `.` is a
+        // PrivateIdentifier and should parse cleanly.
+        let mut p = Parser::new("this.#name");
+        let node = p.parse_expression();
+        assert_eq!(node.kind, SyntaxKind::PropertyAccessExpression);
+        assert!(
+            p.diagnostics().is_empty(),
+            "expected no diagnostics, got: {:?}",
+            p.diagnostics()
+        );
+    }
+
+    #[test]
+    fn parse_less_than_is_comparison_not_type_args() {
+        // `x < 10` is a comparison, not type arguments `x<10>`. The parser must
+        // backtrack and leave no `>`-expected diagnostic. Mirrors Go's
+        // `tryParseTypeArguments`.
+        let mut p = Parser::new("if (x < 10) { }");
+        let _ = p.parse_expression();
+        assert!(
+            p.diagnostics().iter().all(|d| {
+                let msg = format!("{}", d.message);
+                !msg.contains("expected")
+            }),
+            "expected no 'expected' diagnostics, got: {:?}",
+            p.diagnostics()
+        );
+    }
+
+    #[test]
+    fn parse_generic_call_keeps_type_arguments() {
+        // `f<T>(x)` — a generic call. `<T>` must still be parsed as type
+        // arguments (not backtracked as a comparison).
+        let mut p = Parser::new("f<string>(x)");
+        let node = p.parse_expression();
+        assert_eq!(node.kind, SyntaxKind::CallExpression);
+        assert!(
+            p.diagnostics().is_empty(),
+            "expected no diagnostics, got: {:?}",
+            p.diagnostics()
+        );
+    }
+
+    #[test]
+    fn parse_generic_arrow_function() {
+        // `<T>(x: T): T => x` — a generic arrow function. The leading `<T>`
+        // must be parsed as type parameters, not backtracked as a comparison.
+        let mut p = Parser::new("<T>(x: T): T => x");
+        let node = p.parse_expression();
+        assert_eq!(node.kind, SyntaxKind::ArrowFunction);
+        assert!(
+            p.diagnostics().is_empty(),
+            "expected no diagnostics, got: {:?}",
+            p.diagnostics()
+        );
+    }
+
+    #[test]
+    fn parse_async_generic_arrow_function() {
+        // `async <T>(value: T): Promise<T> => value` — an async generic arrow.
+        let mut p = Parser::new("async <T>(value: T): T => value");
+        let node = p.parse_expression();
+        assert_eq!(node.kind, SyntaxKind::ArrowFunction);
+        assert!(
+            p.diagnostics().is_empty(),
+            "expected no diagnostics, got: {:?}",
+            p.diagnostics()
+        );
+    }
+
+    #[test]
+    fn parse_generic_arrow_not_confused_with_comparison() {
+        // `a < b` must still parse as a comparison even though `<` could start
+        // a generic arrow. The generic-arrow speculative parse backtracks when
+        // no `=>` follows.
+        let mut p = Parser::new("let r = a < b;");
+        let _ = p.parse_expression();
+        assert!(
+            p.diagnostics().iter().all(|d| {
+                let msg = format!("{}", d.message);
+                !msg.contains("expected")
+            }),
+            "expected no 'expected' diagnostics, got: {:?}",
+            p.diagnostics()
+        );
+    }
+
+    #[test]
+    fn parse_for_loop_condition_less_than() {
+        // `for (let i = 0; i < n; i++)` — the `i < n` condition must not be
+        // mis-parsed as type arguments.
+        let (_, diags) = Parser::parse_source_file_text_with_diagnostics(
+            "a.ts",
+            "function f() { for (let i = 0; i < n; i++) { } }".to_string(),
+        );
+        assert!(
+            diags.iter().all(|d| {
+                let msg = format!("{}", d.message);
+                !msg.contains("expected")
+            }),
+            "expected no 'expected' diagnostics, got: {:?}",
+            diags
+        );
     }
 
     #[test]

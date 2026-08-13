@@ -1,0 +1,1 @@
+g.ts(35,2): error TS1005: ';' expected.

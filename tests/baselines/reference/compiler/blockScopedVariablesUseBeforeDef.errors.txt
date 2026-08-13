@@ -1,0 +1,7 @@
+error TS2300: Duplicate identifier 'Iterator'.
+error TS2451: Cannot redeclare block-scoped variable 'number'.
+blockScopedVariablesUseBeforeDef.ts(110,11): error TS1012: Unexpected token.
+blockScopedVariablesUseBeforeDef.ts(110,12): error TS1005: ')' expected.
+blockScopedVariablesUseBeforeDef.ts(110,14): error TS1182: A destructuring declaration must have an initializer.
+blockScopedVariablesUseBeforeDef.ts(110,31): error TS1005: ';' expected.
+blockScopedVariablesUseBeforeDef.ts(118,6): error TS1128: Declaration or statement expected.

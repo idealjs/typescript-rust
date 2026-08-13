@@ -1,0 +1,1 @@
+assignToPrototype1.ts(5,7): error TS2339: Property 'prototype' does not exist on type 'object'.

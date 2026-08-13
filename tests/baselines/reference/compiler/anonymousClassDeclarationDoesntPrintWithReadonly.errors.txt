@@ -1,0 +1,3 @@
+anonymousClassDeclarationDoesntPrintWithReadonly.ts(6,18): error TS2304: Cannot find name 'extends'.
+anonymousClassDeclarationDoesntPrintWithReadonly.ts(6,26): error TS1005: '{' expected.
+anonymousClassDeclarationDoesntPrintWithReadonly.ts(6,28): error TS1005: ';' expected.

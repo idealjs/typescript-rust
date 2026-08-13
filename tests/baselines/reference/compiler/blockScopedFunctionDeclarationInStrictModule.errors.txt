@@ -1,0 +1,1 @@
+blockScopedFunctionDeclarationInStrictModule.ts(6,10): error TS2304: Cannot find name 'foo'.

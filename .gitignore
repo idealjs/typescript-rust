@@ -2,3 +2,6 @@ target
 *.rs.bk
 Cargo.lock.bak
 node_modules
+
+# baseline test output: reference/ 入库为标准答案，local/ 是本次产出不入库
+tests/baselines/local/

@@ -1,0 +1,6 @@
+asyncFunctionReturnType.2.ts(4,9): error TS2304: Cannot find name 'async'.
+asyncFunctionReturnType.2.ts(4,17): error TS1005: ';' expected.
+asyncFunctionReturnType.2.ts(4,19): error TS1005: ';' expected.
+asyncFunctionReturnType.2.ts(4,33): error TS1005: '(' expected.
+asyncFunctionReturnType.2.ts(4,40): error TS1005: ',' expected.
+asyncFunctionReturnType.2.ts(5,1): error TS1138: Parameter declaration expected.

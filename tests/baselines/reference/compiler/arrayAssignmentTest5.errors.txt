@@ -1,0 +1,2 @@
+arrayAssignmentTest5.ts(23,17): error TS2322: Type '{ startIndex: number }[]' is not assignable to type '{ state: object }[]'.
+arrayAssignmentTest5.ts(29,20): error TS2322: Type 'null' is not assignable to type '{ tokens: { startIndex: number }[]; endState: object }'.

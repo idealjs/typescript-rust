@@ -1,0 +1,2 @@
+builtinIterator.ts(27,25): error TS2339: Property 'map' does not exist on type 'void'.
+builtinIterator.ts(74,21): error TS2339: Property 'flatMap' does not exist on type 'object'.

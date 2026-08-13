@@ -1,0 +1,2 @@
+error TS2300: Duplicate identifier 'Foo'.
+callOverloads2.ts(20,14): error TS2351: This expression is not constructable.

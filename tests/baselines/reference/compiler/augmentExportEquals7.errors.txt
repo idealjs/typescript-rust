@@ -1,0 +1,2 @@
+error TS2300: Duplicate identifier 'lib'.
+/node_modules/@types/lib-extender/index.d.ts(1,22): error TS2307: Cannot find module 'lib' or its corresponding type declarations.

@@ -1,0 +1,28 @@
+bigintWithLib.ts(3,25): error TS2304: Cannot find name 'BigInt'.
+bigintWithLib.ts(4,13): error TS2304: Cannot find name 'BigInt'.
+bigintWithLib.ts(5,5): error TS2304: Cannot find name 'BigInt'.
+bigintWithLib.ts(6,13): error TS2304: Cannot find name 'BigInt'.
+bigintWithLib.ts(6,36): error TS1005: ',' expected.
+bigintWithLib.ts(6,36): error TS2304: Cannot find name 'n'.
+bigintWithLib.ts(7,13): error TS2304: Cannot find name 'BigInt'.
+bigintWithLib.ts(7,37): error TS1005: ',' expected.
+bigintWithLib.ts(7,37): error TS2304: Cannot find name 'n'.
+bigintWithLib.ts(17,18): error TS2304: Cannot find name 'BigInt64Array'.
+bigintWithLib.ts(17,38): error TS2304: Cannot find name 'BigInt64Array'.
+bigintWithLib.ts(18,19): error TS2304: Cannot find name 'BigInt64Array'.
+bigintWithLib.ts(19,19): error TS2304: Cannot find name 'BigInt64Array'.
+bigintWithLib.ts(20,19): error TS2304: Cannot find name 'BigInt64Array'.
+bigintWithLib.ts(21,19): error TS2304: Cannot find name 'BigInt64Array'.
+bigintWithLib.ts(22,19): error TS2304: Cannot find name 'BigInt64Array'.
+bigintWithLib.ts(23,19): error TS2304: Cannot find name 'BigInt64Array'.
+bigintWithLib.ts(29,19): error TS2304: Cannot find name 'BigUint64Array'.
+bigintWithLib.ts(29,40): error TS2304: Cannot find name 'BigUint64Array'.
+bigintWithLib.ts(30,20): error TS2304: Cannot find name 'BigUint64Array'.
+bigintWithLib.ts(31,20): error TS2304: Cannot find name 'BigUint64Array'.
+bigintWithLib.ts(32,20): error TS2304: Cannot find name 'BigUint64Array'.
+bigintWithLib.ts(33,20): error TS2304: Cannot find name 'BigUint64Array'.
+bigintWithLib.ts(34,20): error TS2304: Cannot find name 'BigUint64Array'.
+bigintWithLib.ts(35,20): error TS2304: Cannot find name 'BigUint64Array'.
+bigintWithLib.ts(56,7): error TS2322: Type 'bigint' is not assignable to type '12n'.
+bigintWithLib.ts(60,10): error TS2339: Property 'NumberFormat' does not exist on type 'Intl'.
+bigintWithLib.ts(61,10): error TS2339: Property 'NumberFormat' does not exist on type 'Intl'.

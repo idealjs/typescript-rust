@@ -1,0 +1,9 @@
+# Triaged baseline diffs — known differences we intend to fix. Each group
+# should include a reference (issue link or description) to the gap.
+#
+# Format: one entry per line, relative to tests/baselines/reference/, e.g.
+#   compiler/foo.errors.txt
+# Lines starting with `#` (incl. `## group ##` headers) and blank lines are
+# ignored.
+#
+# (empty during initial bring-up; populate as specific checker gaps are filed)

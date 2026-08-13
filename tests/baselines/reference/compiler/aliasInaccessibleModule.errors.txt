@@ -1,0 +1,4 @@
+aliasInaccessibleModule.ts(4,12): error TS1005: '{' expected.
+aliasInaccessibleModule.ts(4,21): error TS1003: Identifier expected.
+aliasInaccessibleModule.ts(4,24): error TS1003: Identifier expected.
+aliasInaccessibleModule.ts(5,2): error TS1005: '}' expected.

@@ -1,0 +1,9 @@
+# Accepted baseline diffs — intentional, permanent differences between the
+# Rust port and the TypeScript/tsgo behavior. These do NOT block CI.
+#
+# Format: one entry per line, relative to tests/baselines/reference/, e.g.
+#   compiler/foo.errors.txt
+# Lines starting with `#` (incl. `## group ##` headers) and blank lines are
+# ignored. Group related entries under a `## description ##` header.
+#
+# (empty during initial bring-up; populate as cases are compared against tsgo)

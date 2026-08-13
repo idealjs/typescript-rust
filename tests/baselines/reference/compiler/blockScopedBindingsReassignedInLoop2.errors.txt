@@ -1,0 +1,32 @@
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+error TS2451: Cannot redeclare block-scoped variable 'x'.
+blockScopedBindingsReassignedInLoop2.ts(1,17): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(1,24): error TS2448: Block-scoped variable 'x' used before its declaration.
+blockScopedBindingsReassignedInLoop2.ts(1,28): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(1,33): error TS2448: Block-scoped variable 'x' used before its declaration.
+blockScopedBindingsReassignedInLoop2.ts(1,38): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(2,25): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(3,9): error TS2448: Block-scoped variable 'x' used before its declaration.
+blockScopedBindingsReassignedInLoop2.ts(7,9): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(11,17): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(11,24): error TS2448: Block-scoped variable 'x' used before its declaration.
+blockScopedBindingsReassignedInLoop2.ts(11,28): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(11,33): error TS2448: Block-scoped variable 'x' used before its declaration.
+blockScopedBindingsReassignedInLoop2.ts(11,38): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(12,25): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(13,9): error TS2448: Block-scoped variable 'x' used before its declaration.
+blockScopedBindingsReassignedInLoop2.ts(17,9): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(22,17): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(22,24): error TS2448: Block-scoped variable 'x' used before its declaration.
+blockScopedBindingsReassignedInLoop2.ts(22,28): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(22,33): error TS2448: Block-scoped variable 'x' used before its declaration.
+blockScopedBindingsReassignedInLoop2.ts(22,38): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(23,25): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(24,9): error TS2448: Block-scoped variable 'x' used before its declaration.
+blockScopedBindingsReassignedInLoop2.ts(28,9): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(33,17): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(33,28): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(33,38): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(34,25): error TS2304: Cannot find name 'y'.
+blockScopedBindingsReassignedInLoop2.ts(39,9): error TS2304: Cannot find name 'y'.

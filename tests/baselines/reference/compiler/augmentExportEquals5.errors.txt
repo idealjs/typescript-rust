@@ -1,0 +1,3 @@
+augmentation.ts(2,20): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+consumer.ts(1,25): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+consumer.ts(4,11): error TS2454: Variable 'x' is used before being assigned.

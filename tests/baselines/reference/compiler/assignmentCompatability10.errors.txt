@@ -1,0 +1,3 @@
+assignmentCompatability10.ts(6,158): error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+assignmentCompatability10.ts(9,11): error TS2339: Property '__val__x4' does not exist on type '__test2__'.
+assignmentCompatability10.ts(9,33): error TS2339: Property '__val__obj4' does not exist on type '__test1__'.

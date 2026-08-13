@@ -1,0 +1,1 @@
+cachedContextualTypes.ts(20,27): error TS2304: Cannot find name 'bar'.

@@ -1,0 +1,2 @@
+baseConstraintOfDecorator.ts(2,18): error TS2304: Cannot find name 'decoratorFunc'.
+baseConstraintOfDecorator.ts(12,18): error TS2304: Cannot find name 'decoratorFunc'.

@@ -1,0 +1,2 @@
+assignmentToConditionalBrandedStringTemplateOrMapping.ts(10,1): error TS2304: Cannot find name 'intrinsic'.
+assignmentToConditionalBrandedStringTemplateOrMapping.ts(10,1): error TS2304: Cannot find name 'intrinsic'.

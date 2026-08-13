@@ -1,0 +1,2 @@
+accessorDeclarationOrder.ts(31,4): error TS2339: Property 'name' does not exist on type '{ #name: string }'.
+accessorDeclarationOrder.ts(34,4): error TS2339: Property 'name' does not exist on type '{ #name: string }'.

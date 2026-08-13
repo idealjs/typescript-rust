@@ -1,0 +1,2 @@
+aliasAssignments_1.ts(2,9): error TS2304: Cannot find name 'moduleA'.
+aliasAssignments_1.ts(5,5): error TS2304: Cannot find name 'moduleA'.

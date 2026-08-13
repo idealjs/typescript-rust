@@ -1,0 +1,1 @@
+aliasUsageInGenericFunction_main.ts(9,18): error TS2304: Cannot find name 'moduleA'.

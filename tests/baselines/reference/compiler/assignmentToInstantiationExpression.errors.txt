@@ -1,0 +1,14 @@
+assignmentToInstantiationExpression.ts(2,5): error TS2741: Property 'fn' is missing in type 'object' but required in type '{ fn: () => error }'.
+assignmentToInstantiationExpression.ts(3,8): error TS2304: Cannot find name 'number'.
+assignmentToInstantiationExpression.ts(3,16): error TS1012: Unexpected token.
+assignmentToInstantiationExpression.ts(3,21): error TS1005: ';' expected.
+assignmentToInstantiationExpression.ts(7,1): error TS2454: Variable 'getValue' is used before being assigned.
+assignmentToInstantiationExpression.ts(7,10): error TS2304: Cannot find name 'number'.
+assignmentToInstantiationExpression.ts(7,18): error TS1012: Unexpected token.
+assignmentToInstantiationExpression.ts(7,23): error TS1005: ';' expected.
+assignmentToInstantiationExpression.ts(10,14): error TS1005: ',' expected.
+assignmentToInstantiationExpression.ts(10,15): error TS1134: Variable declaration expected.
+assignmentToInstantiationExpression.ts(10,17): error TS1134: Variable declaration expected.
+assignmentToInstantiationExpression.ts(10,19): error TS1005: ',' expected.
+assignmentToInstantiationExpression.ts(10,20): error TS1134: Variable declaration expected.
+assignmentToInstantiationExpression.ts(10,21): error TS1134: Variable declaration expected.

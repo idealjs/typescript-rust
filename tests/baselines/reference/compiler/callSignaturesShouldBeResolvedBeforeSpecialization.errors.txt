@@ -1,0 +1,4 @@
+callSignaturesShouldBeResolvedBeforeSpecialization.ts(7,13): error TS1005: ',' expected.
+callSignaturesShouldBeResolvedBeforeSpecialization.ts(7,14): error TS1134: Variable declaration expected.
+callSignaturesShouldBeResolvedBeforeSpecialization.ts(7,18): error TS1005: ',' expected.
+callSignaturesShouldBeResolvedBeforeSpecialization.ts(7,25): error TS1005: ',' expected.

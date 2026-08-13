@@ -1,0 +1,1 @@
+callExpressionWithTypeParameterConstrainedToOuterTypeParameter.ts(5,11): error TS2345: Argument of type '""' is not assignable to parameter of type 'U'.

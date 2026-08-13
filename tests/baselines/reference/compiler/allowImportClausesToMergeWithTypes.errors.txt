@@ -1,0 +1,4 @@
+a.ts(1,16): error TS2304: Cannot find name 'interface'.
+a.ts(1,26): error TS1005: ';' expected.
+a.ts(1,30): error TS1005: ';' expected.
+a.ts(2,8): error TS2304: Cannot find name 'string'.

@@ -1,0 +1,5 @@
+index.ts(13,9): error TS2349: This expression is not callable.
+wrapClass.ts(2,18): error TS2304: Cannot find name 'Wrapped'.
+wrapClass.ts(12,18): error TS2304: Cannot find name 'extends'.
+wrapClass.ts(12,26): error TS1005: '{' expected.
+wrapClass.ts(12,31): error TS1005: ';' expected.

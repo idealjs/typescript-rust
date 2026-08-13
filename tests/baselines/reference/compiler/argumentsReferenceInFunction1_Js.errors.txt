@@ -1,0 +1,1 @@
+index.js(14,17): error TS2339: Property 'apply' does not exist on type '(f: any) => any'.

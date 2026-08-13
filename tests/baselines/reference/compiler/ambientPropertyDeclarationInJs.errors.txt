@@ -1,0 +1,2 @@
+/test.js(7,13): error TS1005: ';' expected.
+/test.js(10,19): error TS2339: Property 'foo' does not exist on type 'string'.

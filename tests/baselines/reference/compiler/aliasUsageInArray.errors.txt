@@ -1,0 +1,2 @@
+aliasUsageInArray_main.ts(7,37): error TS2304: Cannot find name 'moduleA'.
+aliasUsageInArray_main.ts(8,30): error TS2304: Cannot find name 'moduleA'.

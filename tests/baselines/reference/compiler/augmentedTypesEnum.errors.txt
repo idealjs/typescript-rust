@@ -1,0 +1,4 @@
+error TS2300: Duplicate identifier 'e1111'.
+error TS2300: Duplicate identifier 'e2'.
+error TS2300: Duplicate identifier 'e3'.
+error TS2300: Duplicate identifier 'e4'.

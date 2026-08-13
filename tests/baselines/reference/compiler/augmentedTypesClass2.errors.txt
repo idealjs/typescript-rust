@@ -1,0 +1,2 @@
+error TS2300: Duplicate identifier 'c11'.
+error TS2300: Duplicate identifier 'c33'.

@@ -1,0 +1,1 @@
+arrayToLocaleStringES2015.ts(17,47): error TS2339: Property 'toLocaleString' does not exist on type 'object'.

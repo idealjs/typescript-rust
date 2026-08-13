@@ -1,0 +1,5 @@
+assignmentCompatability_checking-call-member-off-of-function-interface.ts(22,4): error TS2345: Argument of type '""' is not assignable to parameter of type '{ call: (blah: any) => any }'.
+assignmentCompatability_checking-call-member-off-of-function-interface.ts(23,4): error TS2345: Argument of type 'string[]' is not assignable to parameter of type '{ call: (blah: any) => any }'.
+assignmentCompatability_checking-call-member-off-of-function-interface.ts(24,4): error TS2345: Argument of type '4' is not assignable to parameter of type '{ call: (blah: any) => any }'.
+assignmentCompatability_checking-call-member-off-of-function-interface.ts(25,4): error TS2345: Argument of type 'object' is not assignable to parameter of type '{ call: (blah: any) => any }'.
+assignmentCompatability_checking-call-member-off-of-function-interface.ts(29,4): error TS2345: Argument of type '(a: any) => void' is not assignable to parameter of type '{ call: (blah: any) => any }'.

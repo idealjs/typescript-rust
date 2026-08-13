@@ -1,0 +1,4 @@
+error TS2300: Duplicate identifier 'x5'.
+error TS2300: Duplicate identifier 'x6'.
+error TS2300: Duplicate identifier 'x6a'.
+error TS2300: Duplicate identifier 'x6b'.

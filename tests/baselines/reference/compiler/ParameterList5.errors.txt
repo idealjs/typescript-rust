@@ -1,0 +1,4 @@
+ParameterList5.ts(1,16): error TS2304: Cannot find name 'public'.
+ParameterList5.ts(1,23): error TS1005: ')' expected.
+ParameterList5.ts(1,23): error TS2304: Cannot find name 'B'.
+ParameterList5.ts(1,24): error TS1005: ';' expected.

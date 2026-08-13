@@ -276,22 +276,35 @@ impl Program {
                         crate::core::compiler_options::ModuleKind::None,
                         None,
                     );
-                    if let Some(resolved_module) = resolved {
-                        if resolved_module.is_resolved() {
-                            let resolved_path = resolved_module.resolved_file_name.as_str();
-                            if visited.insert(resolved_path.to_string()) {
-                                if let Some(sf) = load_source_file(
-                                    resolved_path,
-                                    host.as_ref(),
-                                    &mut source_files,
-                                    &mut by_name,
-                                    &mut diagnostics,
-                                    allow_js,
-                                ) {
-                                    queue.push(sf);
-                                }
+                    let is_resolved = resolved.as_ref().map(|m| m.is_resolved()).unwrap_or(false);
+                    if is_resolved {
+                        let resolved_module = resolved.unwrap();
+                        let resolved_path = resolved_module.resolved_file_name.as_str();
+                        if visited.insert(resolved_path.to_string()) {
+                            if let Some(sf) = load_source_file(
+                                resolved_path,
+                                host.as_ref(),
+                                &mut source_files,
+                                &mut by_name,
+                                &mut diagnostics,
+                                allow_js,
+                            ) {
+                                queue.push(sf);
                             }
                         }
+                    } else {
+                        // Module resolution failed — report TS2307 ("Cannot
+                        // find module"). `file.imports` only contains real
+                        // import/export specifiers (ambient `declare module
+                        // "x"` names are collected separately), so every entry
+                        // here is a genuine import worth reporting. Mirrors
+                        // Go's `fileLoader` recording unresolved imports.
+                        diagnostics.push(Arc::new(crate::ast::Diagnostic::new(
+                            Some(file.clone()),
+                            import_node.loc,
+                            crate::diagnostics::CANNOT_FIND_MODULE_0_OR_ITS_CORRESPONDING_TYPE_DECLARATIONS,
+                            vec![module_spec.to_string()],
+                        )));
                     }
                 }
             }

@@ -20,6 +20,11 @@ pub type ErrorCallback = fn(kind: DiagnosticKind, start: usize, length: usize);
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DiagnosticKind {
     InvalidCharacter,
+    /// File appears to be binary (TS1490). Emitted once when the scanner hits
+    /// a UTF-8 replacement character (U+FFFD, the Rust `chars()` decode failure
+    /// sentinel) — mirrors Go's `File_appears_to_be_binary` at scanner.go:937.
+    /// After emitting, the scanner jumps to end-of-file.
+    FileAppearsToBeBinary,
     UnterminatedStringLiteral,
     UnterminatedTemplateLiteral,
     UnterminatedRegularExpression,
@@ -767,48 +772,32 @@ impl Scanner {
                 }
             }
 
-            // Private identifier: `#name` (ES2022 class fields).
-            // Mirrors Go scanner.go:897-925.
+            // Shebang: `#!` at the very start of the file is trivia spanning the
+            // rest of the line. Mirrors Go's `#` case (`scanner.go:898-910`).
+            // Must be the first non-trivia byte (no leading whitespace).
+            if c == '#'
+                && self.pos == 0
+                && self.pos + 1 < self.end
+                && self.text.as_bytes()[self.pos + 1] == b'!'
+            {
+                self.pos += 2;
+                while self.pos < self.end {
+                    let ch = self.text[self.pos..].chars().next().unwrap();
+                    if ch == '\n' || ch == '\r' {
+                        break;
+                    }
+                    self.pos += ch.len_utf8();
+                }
+                continue;
+            }
+
+            // Private identifier: `#name`. Mirrors Go's `#` case
+            // (`scanner.go:911-925`) — `#` followed by identifier characters
+            // scans as a single `PrivateIdentifier` token whose text includes
+            // the leading `#` (invalid `#` reports InvalidCharacter, matching
+            // Go).
             if c == '#' {
-                // Skip shebang at position 0.
-                if self.pos == 0
-                    && self.pos + 1 < self.end
-                    && self.text.as_bytes()[self.pos + 1] == b'!'
-                {
-                    // Shebang trivia — skip to end of line.
-                    self.pos += 2;
-                    while self.pos < self.end {
-                        let ch = self.text[self.pos..].chars().next().unwrap();
-                        if ch == '\n' || ch == '\r' {
-                            break;
-                        }
-                        self.pos += ch.len_utf8();
-                    }
-                    self.preceding_line_break = true;
-                    continue;
-                }
-                // Check if `#` is followed by an identifier start.
-                self.pos += 1; // consume `#`
-                if self.pos < self.end {
-                    let next_ch = self.text[self.pos..].chars().next().unwrap();
-                    if is_identifier_start(next_ch) {
-                        // Scan the identifier part after `#`.
-                        let text_str: &str = &self.text;
-                        while self.pos < self.end {
-                            let (nc, ns) = decode_char(text_str, self.pos);
-                            if !is_identifier_part(nc) {
-                                break;
-                            }
-                            self.pos += ns;
-                        }
-                        self.token_end = self.pos;
-                        self.token = SyntaxKind::PrivateIdentifier;
-                        break self.token;
-                    }
-                }
-                // Not a private identifier — report as hash token.
-                self.token_end = self.pos;
-                break SyntaxKind::HashToken;
+                break self.scan_private_identifier();
             }
 
             // Punctuation
@@ -959,6 +948,43 @@ impl Scanner {
         self.token_end = self.pos;
         let text = &self.text[start..self.pos];
         self.token = string_to_keyword(text).unwrap_or(SyntaxKind::Identifier);
+        self.token
+    }
+
+    /// Scan a private identifier (`#name`). Mirrors Go's `#` case
+    /// (`scanner.go:921-925`): `self.pos` is at the `#`. We advance past it,
+    /// then consume the following identifier characters. The token text
+    /// (accessed via `token_text()`) includes the leading `#`. If `#` is not
+    /// followed by an identifier-start character, Go reports an error and
+    /// yields a `PrivateIdentifier` whose value is just `"#"`.
+    fn scan_private_identifier(&mut self) -> SyntaxKind {
+        // Consume the leading `#`.
+        self.pos += 1;
+        // Scan the identifier part following `#`.
+        if self.pos < self.end {
+            let next_c = self.text[self.pos..].chars().next().unwrap();
+            if is_identifier_start(next_c) {
+                self.pos += next_c.len_utf8();
+                while self.pos < self.end {
+                    let c = self.text[self.pos..].chars().next().unwrap();
+                    if !is_identifier_part(c) {
+                        break;
+                    }
+                    self.pos += c.len_utf8();
+                }
+            } else {
+                // `#` not followed by an identifier start — report and yield a
+                // minimal `#` private identifier, matching Go
+                // (`scanner.go:922-923`).
+                self.report_error(
+                    DiagnosticKind::InvalidCharacter,
+                    self.pos,
+                    next_c.len_utf8(),
+                );
+            }
+        }
+        self.token_end = self.pos;
+        self.token = SyntaxKind::PrivateIdentifier;
         self.token
     }
 
@@ -1486,6 +1512,17 @@ impl Scanner {
             // Unknown character — advance by the full UTF-8 character length
             // to avoid leaving pos in the middle of a multi-byte character.
             let c = self.text[start..].chars().next().unwrap();
+            // Mirrors Go scanner.go:935-940: a UTF-8 RuneError (Rust surfaces
+            // invalid bytes as U+FFFD) means the file is likely binary. Report
+            // TS1490 once and skip to end-of-file instead of emitting one
+            // diagnostic per invalid byte (which explodes for binary inputs).
+            if c == '\u{fffd}' {
+                self.report_error(DiagnosticKind::FileAppearsToBeBinary, 0, 0);
+                self.pos = self.text.len();
+                self.token_end = self.pos;
+                self.token = SyntaxKind::EndOfFile;
+                return SyntaxKind::EndOfFile;
+            }
             let len = c.len_utf8();
             self.pos += len;
             self.token_end = self.pos;
@@ -2697,6 +2734,28 @@ mod tests {
         assert_eq!(s.scan(), SyntaxKind::LetKeyword);
         assert_eq!(s.token_text(), "let");
         assert_eq!(s.scan(), SyntaxKind::EndOfFile);
+    }
+
+    #[test]
+    fn scan_private_identifier() {
+        // `#name` scans as a single PrivateIdentifier token whose text includes
+        // the leading `#`. Mirrors Go scanner.go:897-925.
+        let mut s = Scanner::new("#name = 1");
+        assert_eq!(s.scan(), SyntaxKind::PrivateIdentifier);
+        assert_eq!(s.token_text(), "#name");
+        assert_eq!(s.scan(), SyntaxKind::EqualsToken);
+        assert_eq!(s.scan(), SyntaxKind::NumericLiteral);
+        assert_eq!(s.scan(), SyntaxKind::EndOfFile);
+    }
+
+    #[test]
+    fn scan_shebang_at_file_start_is_trivia() {
+        // `#!` at the very start of the file is shebang trivia (consumed), so
+        // the first real token is the following identifier.
+        let mut s = Scanner::new("#!/usr/bin/env node\nlet x = 1;");
+        assert_eq!(s.scan(), SyntaxKind::LetKeyword);
+        assert_eq!(s.scan(), SyntaxKind::Identifier);
+        assert_eq!(s.token_text(), "x");
     }
 
     #[test]

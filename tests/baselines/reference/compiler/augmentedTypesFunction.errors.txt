@@ -1,0 +1,3 @@
+error TS2300: Duplicate identifier 'y3'.
+error TS2300: Duplicate identifier 'y3a'.
+error TS2300: Duplicate identifier 'y4'.

@@ -1,0 +1,2 @@
+awaitedTypeStrictNull.ts(40,9): error TS2454: Variable 'aaa' is used before being assigned.
+awaitedTypeStrictNull.ts(41,9): error TS2454: Variable 'bbb' is used before being assigned.

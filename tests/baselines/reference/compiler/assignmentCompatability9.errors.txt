@@ -1,0 +1,2 @@
+assignmentCompatability9.ts(9,11): error TS2339: Property '__val__x3' does not exist on type '__test2__'.
+assignmentCompatability9.ts(9,33): error TS2339: Property '__val__obj4' does not exist on type '__test1__'.

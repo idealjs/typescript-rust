@@ -1,0 +1,1 @@
+assignmentCompatability44.ts(5,7): error TS2322: Type 'object' is not assignable to type 'object'.

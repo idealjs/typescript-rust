@@ -1,0 +1,1 @@
+baseTypeWrappingInstantiationChain.ts(22,23): error TS2554: Expected 0 arguments, but got 1.

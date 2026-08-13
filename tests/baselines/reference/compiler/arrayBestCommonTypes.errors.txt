@@ -1,0 +1,28 @@
+arrayBestCommonTypes.ts(16,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(17,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(18,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(19,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(20,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(21,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(23,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(24,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(25,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(26,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(27,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(28,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(30,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(43,17): error TS2322: Type 'null' is not assignable to type 'object'.
+arrayBestCommonTypes.ts(69,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(70,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(71,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(72,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(73,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(74,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(76,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(77,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(78,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(79,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(80,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(81,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(83,22): error TS2554: Expected 2 arguments, but got 1.
+arrayBestCommonTypes.ts(96,17): error TS2322: Type 'null' is not assignable to type '{ x: string }'.

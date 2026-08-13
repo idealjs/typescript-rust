@@ -1,0 +1,3 @@
+/a.js(15,8): error TS2339: Property 'x' does not exist on type '{ m: (foo: any) => any }'.
+/a.js(20,8): error TS2339: Property 'y' does not exist on type '{ m: (foo: any) => any }'.
+/a.js(20,18): error TS2339: Property 'arguments' does not exist on type '{ m: (foo: any) => any }'.

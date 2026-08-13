@@ -1,0 +1,3 @@
+aliasOnMergedModuleInterface_1.ts(2,22): error TS2307: Cannot find module 'foo' or its corresponding type declarations.
+aliasOnMergedModuleInterface_1.ts(3,16): error TS2304: Cannot find name 'foo'.
+aliasOnMergedModuleInterface_1.ts(5,16): error TS2304: Cannot find name 'foo'.

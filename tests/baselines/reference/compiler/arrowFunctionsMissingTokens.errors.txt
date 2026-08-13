@@ -1,0 +1,13 @@
+arrowFunctionsMissingTokens.ts(3,14): error TS1012: Unexpected token.
+arrowFunctionsMissingTokens.ts(3,16): error TS1005: ')' expected.
+arrowFunctionsMissingTokens.ts(3,16): error TS1182: A destructuring declaration must have an initializer.
+arrowFunctionsMissingTokens.ts(5,14): error TS1012: Unexpected token.
+arrowFunctionsMissingTokens.ts(5,15): error TS1005: ')' expected.
+arrowFunctionsMissingTokens.ts(5,22): error TS1005: ',' expected.
+arrowFunctionsMissingTokens.ts(5,22): error TS1182: A destructuring declaration must have an initializer.
+arrowFunctionsMissingTokens.ts(7,14): error TS2304: Cannot find name 'x'.
+arrowFunctionsMissingTokens.ts(7,17): error TS1005: ',' expected.
+arrowFunctionsMissingTokens.ts(7,17): error TS1182: A destructuring declaration must have an initializer.
+arrowFunctionsMissingTokens.ts(9,14): error TS2304: Cannot find name 'x'.
+arrowFunctionsMissingTokens.ts(9,15): error TS1005: ')' expected.
+arrowFunctionsMissingTokens.ts(9,34): error TS1005: ',' expected.

@@ -1,0 +1,4 @@
+accessOverriddenBaseClassMember1.ts(4,28): error TS2339: Property 'x' does not exist on type '{ toString: () => any }'.
+accessOverriddenBaseClassMember1.ts(4,45): error TS2339: Property 'y' does not exist on type '{ toString: () => any }'.
+accessOverriddenBaseClassMember1.ts(9,9): error TS2349: This expression is not callable.
+accessOverriddenBaseClassMember1.ts(12,52): error TS2339: Property 'color' does not exist on type '{ toString: () => any }'.

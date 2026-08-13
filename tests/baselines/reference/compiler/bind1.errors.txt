@@ -1,0 +1,1 @@
+bind1.ts(2,31): error TS2304: Cannot find name 'I'.

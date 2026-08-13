@@ -1,0 +1,1 @@
+arrayAssignmentTest2.ts(5,1): error TS2420: Class 'C1' incorrectly implements interface '{ IM1: () => void[] }'.

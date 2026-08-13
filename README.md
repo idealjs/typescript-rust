@@ -48,6 +48,8 @@ and prints a clear skip reason when none is found.
 
 - [`TODO.md`](./TODO.md) — migration goals, staged tasks, progress snapshot,
   and next priorities. **Start here.**
+- [`TESTING.md`](./TESTING.md) — all test methods, execution commands, and the
+  current test baseline. **For running tests, start here.**
 - [`INTEGRATION_TEST.md`](./INTEGRATION_TEST.md) — real-project integration
   test results (ai-Color-toner): JS/d.ts byte-identical to Go, 0 diagnostics.
 - [`MIGRATION.md`](./MIGRATION.md) — flow audits and behavior-diff details by

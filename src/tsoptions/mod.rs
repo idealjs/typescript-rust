@@ -1790,59 +1790,63 @@ fn split_response_file(content: &str, file_name: &str) -> (Vec<String>, Vec<Diag
 
 fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
     let t = Tristate::from(b);
-    match name {
-        "noEmit" => options.no_emit = t,
-        "noCheck" => options.no_check = t,
-        "noLib" => options.no_lib = t,
-        "skipLibCheck" => options.skip_lib_check = t,
-        "skipDefaultLibCheck" => options.skip_default_lib_check = t,
-        "strictNullChecks" => options.strict_null_checks = t,
-        "strictFunctionTypes" => options.strict_function_types = t,
-        "strictBindCallApply" => options.strict_bind_call_apply = t,
-        "strictPropertyInitialization" => options.strict_property_initialization = t,
-        "strictBuiltinIteratorReturn" => options.strict_builtin_iterator_return = t,
-        "noImplicitAny" => options.no_implicit_any = t,
-        "noImplicitThis" => options.no_implicit_this = t,
-        "noImplicitOverride" => options.no_implicit_override = t,
-        "noUnusedLocals" => options.no_unused_locals = t,
-        "noUnusedParameters" => options.no_unused_parameters = t,
-        "noFallthroughCasesInSwitch" => options.no_fallthrough_cases_in_switch = t,
-        "noUncheckedIndexedAccess" => options.no_unchecked_indexed_access = t,
-        "noPropertyAccessFromIndexSignature" => options.no_property_access_from_index_signature = t,
-        "noErrorTruncation" => options.no_error_truncation = t,
-        "noEmitOnError" => options.no_emit_on_error = t,
-        "noResolve" => options.no_resolve = t,
-        "useUnknownInCatchVariables" => options.use_unknown_in_catch_variables = t,
-        "exactOptionalPropertyTypes" => options.exact_optional_property_types = t,
-        "esModuleInterop" => options.es_module_interop = t,
-        "allowSyntheticDefaultImports" => options.allow_synthetic_default_imports = t,
-        "allowJs" => options.allow_js = t,
-        "checkJs" => options.check_js = t,
+    // Case-insensitive: `apply_test_settings` lowercases directive names
+    // (`// @allowjs: true` → `"allowjs"`) while tsconfig parsing keeps the
+    // camelCase JSON keys (`"allowJs"`). Normalize so both paths apply.
+    let name = name.to_ascii_lowercase();
+    match name.as_str() {
+        "noemit" => options.no_emit = t,
+        "nocheck" => options.no_check = t,
+        "nolib" => options.no_lib = t,
+        "skiplibcheck" => options.skip_lib_check = t,
+        "skipdefaultlibcheck" => options.skip_default_lib_check = t,
+        "strictnullchecks" => options.strict_null_checks = t,
+        "strictfunctiontypes" => options.strict_function_types = t,
+        "strictbindcallapply" => options.strict_bind_call_apply = t,
+        "strictpropertyinitialization" => options.strict_property_initialization = t,
+        "strictbuiltiniteratorreturn" => options.strict_builtin_iterator_return = t,
+        "noimplicitany" => options.no_implicit_any = t,
+        "noimplicitthis" => options.no_implicit_this = t,
+        "noimplicitoverride" => options.no_implicit_override = t,
+        "nounusedlocals" => options.no_unused_locals = t,
+        "nounusedparameters" => options.no_unused_parameters = t,
+        "nofallthroughcasesinswitch" => options.no_fallthrough_cases_in_switch = t,
+        "nouncheckedindexedaccess" => options.no_unchecked_indexed_access = t,
+        "nopropertyaccessfromindexsignature" => options.no_property_access_from_index_signature = t,
+        "noerrortruncation" => options.no_error_truncation = t,
+        "noemitonerror" => options.no_emit_on_error = t,
+        "noresolve" => options.no_resolve = t,
+        "useunknownincatchvariables" => options.use_unknown_in_catch_variables = t,
+        "exactoptionalpropertytypes" => options.exact_optional_property_types = t,
+        "esmoduleinterop" => options.es_module_interop = t,
+        "allowsyntheticdefaultimports" => options.allow_synthetic_default_imports = t,
+        "allowjs" => options.allow_js = t,
+        "checkjs" => options.check_js = t,
         "composite" => options.composite = t,
         "declaration" => options.declaration = t,
-        "declarationMap" => options.declaration_map = t,
-        "emitDeclarationOnly" => options.emit_declaration_only = t,
-        "sourceMap" => options.source_map = t,
-        "inlineSourceMap" => options.inline_source_map = t,
-        "inlineSources" => options.inline_sources = t,
-        "removeComments" => options.remove_comments = t,
-        "isolatedModules" => options.isolated_modules = t,
-        "isolatedDeclarations" => options.isolated_declarations = t,
-        "verbatimModuleSyntax" => options.verbatim_module_syntax = t,
-        "preserveConstEnums" => options.preserve_const_enums = t,
-        "importHelpers" => options.import_helpers = t,
-        "experimentalDecorators" => options.experimental_decorators = t,
-        "emitDecoratorMetadata" => options.emit_decorator_metadata = t,
-        "forceConsistentCasingInFileNames" => options.force_consistent_casing_in_file_names = t,
-        "listFiles" => options.list_files = t,
-        "listFilesOnly" => options.list_files_only = t,
-        "listEmittedFiles" => options.list_emitted_files = t,
-        "explainFiles" => options.explain_files = t,
-        "extendedDiagnostics" => options.extended_diagnostics = t,
+        "declarationmap" => options.declaration_map = t,
+        "emitdeclarationonly" => options.emit_declaration_only = t,
+        "sourcemap" => options.source_map = t,
+        "inlinesourcemap" => options.inline_source_map = t,
+        "inlinesources" => options.inline_sources = t,
+        "removecomments" => options.remove_comments = t,
+        "isolatedmodules" => options.isolated_modules = t,
+        "isolateddeclarations" => options.isolated_declarations = t,
+        "verbatimmodulesyntax" => options.verbatim_module_syntax = t,
+        "preserveconstenums" => options.preserve_const_enums = t,
+        "importhelpers" => options.import_helpers = t,
+        "experimentaldecorators" => options.experimental_decorators = t,
+        "emitdecoratormetadata" => options.emit_decorator_metadata = t,
+        "forceconsistentcasinginfilenames" => options.force_consistent_casing_in_file_names = t,
+        "listfiles" => options.list_files = t,
+        "listfilesonly" => options.list_files_only = t,
+        "listemittedfiles" => options.list_emitted_files = t,
+        "explainfiles" => options.explain_files = t,
+        "extendeddiagnostics" => options.extended_diagnostics = t,
         "diagnostics" => options.diagnostics = t,
         "pretty" => options.pretty = t,
-        "showConfig" => options.show_config = t,
-        "ignoreConfig" => options.ignore_config = t,
+        "showconfig" => options.show_config = t,
+        "ignoreconfig" => options.ignore_config = t,
         "incremental" => options.incremental = t,
         "watch" => options.watch = t,
         "version" => options.version = t,
@@ -1850,7 +1854,7 @@ fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
         "all" => options.all = t,
         "init" => options.init = t,
         "build" => options.build = t,
-        "singleThreaded" => options.single_threaded = t,
+        "singlethreaded" => options.single_threaded = t,
         "quiet" => options.quiet = t,
         "strict" => {
             options.strict = t;
@@ -1867,6 +1871,155 @@ fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
         }
         _ => {}
     }
+}
+
+/// Apply a map of TypeScript test-directive settings (as written in official
+/// test cases, e.g. `// @module: commonjs`, `// @strict: true`, `// @lib: es2020,dom`)
+/// onto a fresh [`CompilerOptions`].
+///
+/// This is the public entry point used by the baseline test runner; it reuses
+/// the same string→enum/tristate mapping as `apply_options`/`set_bool`. Returns
+/// the resulting options plus the list of directive names that were **not**
+/// recognized (callers like `SkipUnsupportedCompilerOptions` use that to skip
+/// tests exercising options the port doesn't yet support).
+///
+/// Each value is classified as: `true`/`false` (case-insensitive) → boolean;
+/// for known list-valued options (`lib`, `types`, `typeRoots`, `rootDirs`)
+/// the comma-separated value is split into a list; everything else is treated
+/// as a plain string.
+pub fn apply_test_settings(settings: &HashMap<String, String>) -> (CompilerOptions, Vec<String>) {
+    // Names of directives this function understands. Anything else is reported
+    // as unrecognized so the test runner can skip those cases rather than run
+    // them with silently-defaulted options.
+    const KNOWN_BOOL_OPTIONS: &[&str] = &[
+        "noemit",
+        "nocheck",
+        "nolib",
+        "skiplibcheck",
+        "skipdefaultlibcheck",
+        "strictnullchecks",
+        "strictfunctiontypes",
+        "strictbindcallapply",
+        "strictpropertyinitialization",
+        "strictbuiltiniteratorreturn",
+        "noimplicitany",
+        "noimplicitthis",
+        "noimplicitoverride",
+        "nounsusedlocals",
+        "nounsusedparameters",
+        "nofallthroughcasesinswitch",
+        "nouncheckedindexedaccess",
+        "nopropertyaccessfromindexsignature",
+        "noerrortruncation",
+        "noemitonerror",
+        "noresolve",
+        "useunknownincatchvariables",
+        "exactoptionalpropertytypes",
+        "esmoduleinterop",
+        "allowsyntheticdefaultimports",
+        "allowjs",
+        "checkjs",
+        "composite",
+        "declaration",
+        "declarationmap",
+        "emitdeclarationonly",
+        "sourcemap",
+        "inlinesourcemap",
+        "inlinesources",
+        "removecomments",
+        "isolatedmodules",
+        "isolateddeclarations",
+        "verbatimmodulesyntax",
+        "preserveconstenums",
+        "importhelpers",
+        "experimentaldecorators",
+        "emitdecoratormetadata",
+        "forceconsistencingcasingfilenames",
+        "listfiles",
+        "listfilesonly",
+        "listemittedfiles",
+        "explainfiles",
+        "extendeddiagnostics",
+        "diagnostics",
+        "pretty",
+        "showconfig",
+        "ignoreconfig",
+        "incremental",
+        "watch",
+        "version",
+        "help",
+        "all",
+        "init",
+        "build",
+        "singlethreaded",
+        "quiet",
+        "strict",
+        "alwaysstrict",
+    ];
+    const KNOWN_STR_OPTIONS: &[&str] = &[
+        "target",
+        "module",
+        "moduleresolution",
+        "jsx",
+        "newline",
+        "moduledetection",
+        "outdir",
+        "outfile",
+        "rootdir",
+        "declarationdir",
+        "tsbuildinfofile",
+        "sourceroot",
+        "maproot",
+        "jsxfactory",
+        "jsxfragmentfactory",
+        "jsximportsource",
+        "reactnamespace",
+        "locale",
+        "baseurl",
+        "modulosuffixes",
+        "customconditions",
+        "jsxmode",
+    ];
+    const KNOWN_LIST_OPTIONS: &[&str] = &["lib", "types", "typeroots", "rootdirs"];
+
+    let mut options = CompilerOptions::default();
+    let mut unrecognized: Vec<String> = Vec::new();
+
+    for (name, raw_value) in settings {
+        let lower = name.to_lowercase();
+        let trimmed = raw_value.trim().trim_end_matches(';').to_string();
+
+        let known = KNOWN_BOOL_OPTIONS.contains(&lower.as_str())
+            || KNOWN_STR_OPTIONS.contains(&lower.as_str())
+            || KNOWN_LIST_OPTIONS.contains(&lower.as_str());
+
+        if !known {
+            unrecognized.push(name.clone());
+            continue;
+        }
+
+        // Classify the value and apply it.
+        let is_bool_val = matches!(trimmed.as_str(), "true" | "false")
+            && KNOWN_BOOL_OPTIONS.contains(&lower.as_str());
+        if is_bool_val {
+            set_bool(&mut options, &lower, trimmed.eq_ignore_ascii_case("true"));
+        } else if KNOWN_LIST_OPTIONS.contains(&lower.as_str()) {
+            let list: Vec<String> = trimmed
+                .split(',')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
+            let mut map = HashMap::new();
+            map.insert(lower.clone(), OptValue::List(list));
+            apply_options(&map, &mut options);
+        } else {
+            let mut map = HashMap::new();
+            map.insert(lower.clone(), OptValue::Str(trimmed.clone()));
+            apply_options(&map, &mut options);
+        }
+    }
+
+    (options, unrecognized)
 }
 
 fn apply_options(options: &HashMap<String, OptValue>, out: &mut CompilerOptions) {

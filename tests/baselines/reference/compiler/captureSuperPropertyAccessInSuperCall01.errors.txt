@@ -1,0 +1,1 @@
+captureSuperPropertyAccessInSuperCall01.ts(9,3): error TS2349: This expression is not callable.

@@ -1,0 +1,9 @@
+bases.ts(7,14): error TS2339: Property 'y' does not exist on type 'object'.
+bases.ts(7,15): error TS1005: ';' expected.
+bases.ts(7,17): error TS2304: Cannot find name 'any'.
+bases.ts(11,1): error TS2420: Class 'C' incorrectly implements interface '{ x: error }'.
+bases.ts(13,14): error TS2339: Property 'x' does not exist on type 'object'.
+bases.ts(13,15): error TS1005: ';' expected.
+bases.ts(13,17): error TS2304: Cannot find name 'any'.
+bases.ts(17,5): error TS2349: This expression is not callable.
+bases.ts(18,5): error TS2349: This expression is not callable.

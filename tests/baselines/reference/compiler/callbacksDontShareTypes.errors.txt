@@ -1,0 +1,2 @@
+callbacksDontShareTypes.ts(16,21): error TS2345: Argument of type '(x: number) => any' is not assignable to parameter of type '(x: T) => any'.
+callbacksDontShareTypes.ts(18,37): error TS2345: Argument of type '(x: number) => any' is not assignable to parameter of type '(x: T) => any'.
