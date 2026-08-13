@@ -1,0 +1,1 @@
+checkDestructuringShorthandAssigment2.ts(5,24): error TS2454: Variable 'o' is used before being assigned.

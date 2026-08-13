@@ -1,0 +1,19 @@
+classUpdateTests.ts(39,18): error TS2349: This expression is not callable.
+classUpdateTests.ts(43,18): error TS2349: This expression is not callable.
+classUpdateTests.ts(47,18): error TS2349: This expression is not callable.
+classUpdateTests.ts(52,3): error TS2349: This expression is not callable.
+classUpdateTests.ts(59,3): error TS2349: This expression is not callable.
+classUpdateTests.ts(65,3): error TS2349: This expression is not callable.
+classUpdateTests.ts(72,3): error TS2349: This expression is not callable.
+classUpdateTests.ts(93,3): error TS2304: Cannot find name 'public'.
+classUpdateTests.ts(93,10): error TS1005: ';' expected.
+classUpdateTests.ts(93,10): error TS2304: Cannot find name 'p1'.
+classUpdateTests.ts(99,3): error TS2304: Cannot find name 'private'.
+classUpdateTests.ts(99,11): error TS1005: ';' expected.
+classUpdateTests.ts(99,11): error TS2304: Cannot find name 'p1'.
+classUpdateTests.ts(105,3): error TS2304: Cannot find name 'public'.
+classUpdateTests.ts(105,10): error TS1005: ';' expected.
+classUpdateTests.ts(105,15): error TS2339: Property 'p1' does not exist on type 'object'.
+classUpdateTests.ts(111,3): error TS2304: Cannot find name 'private'.
+classUpdateTests.ts(111,11): error TS1005: ';' expected.
+classUpdateTests.ts(111,16): error TS2339: Property 'p1' does not exist on type 'object'.

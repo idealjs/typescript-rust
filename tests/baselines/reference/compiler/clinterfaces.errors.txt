@@ -1,0 +1,2 @@
+error TS2300: Duplicate identifier 'Foo'.
+error TS2300: Duplicate identifier 'Bar'.

@@ -1,0 +1,16 @@
+coAndContraVariantInferences3.ts(90,20): error TS2349: This expression is not callable.
+coAndContraVariantInferences3.ts(90,44): error TS2304: Cannot find name 'node'.
+coAndContraVariantInferences3.ts(90,61): error TS2304: Cannot find name 'importClause'.
+coAndContraVariantInferences3.ts(90,75): error TS2304: Cannot find name 'moduleSpecifier'.
+coAndContraVariantInferences3.ts(90,92): error TS2304: Cannot find name 'assertClause'.
+coAndContraVariantInferences3.ts(94,20): error TS2349: This expression is not callable.
+coAndContraVariantInferences3.ts(94,44): error TS2304: Cannot find name 'node'.
+coAndContraVariantInferences3.ts(94,61): error TS2304: Cannot find name 'importClause'.
+coAndContraVariantInferences3.ts(94,75): error TS2304: Cannot find name 'moduleSpecifier'.
+coAndContraVariantInferences3.ts(94,92): error TS2304: Cannot find name 'assertClause'.
+coAndContraVariantInferences3.ts(100,58): error TS2345: Argument of type '(node: { kind: 0 | 1 | 2 | 3 | 4 }) => boolean' is not assignable to parameter of type '(element: T, index: number) => boolean'.
+coAndContraVariantInferences3.ts(106,60): error TS2345: Argument of type '(node: { kind: 0 | 1 | 2 | 3 | 4 }) => boolean' is not assignable to parameter of type '(element: T, index: number) => boolean'.
+coAndContraVariantInferences3.ts(121,11): error TS2345: Argument of type '{ kind: error }[] | { kind: error }[]' is not assignable to parameter of type 'T[]'.
+coAndContraVariantInferences3.ts(121,22): error TS2345: Argument of type '(node: { kind: 0 | 1 | 2 | 3 | 4 }) => boolean' is not assignable to parameter of type '(element: T, index: number) => boolean'.
+coAndContraVariantInferences3.ts(122,11): error TS2345: Argument of type '{ kind: error }[] | { kind: error }[]' is not assignable to parameter of type 'T[]'.
+coAndContraVariantInferences3.ts(122,22): error TS2345: Argument of type '(node: { kind: 0 | 1 | 2 | 3 | 4 }) => boolean' is not assignable to parameter of type '(element: T, index: number) => boolean'.

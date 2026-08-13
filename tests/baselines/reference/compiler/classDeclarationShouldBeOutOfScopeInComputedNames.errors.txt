@@ -1,0 +1,1 @@
+classDeclarationShouldBeOutOfScopeInComputedNames.ts(6,33): error TS1003: Identifier expected.

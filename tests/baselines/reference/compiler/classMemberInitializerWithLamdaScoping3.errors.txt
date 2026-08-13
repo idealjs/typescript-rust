@@ -1,0 +1,1 @@
+classMemberInitializerWithLamdaScoping3_1.ts(8,17): error TS2339: Property 'log' does not exist on type 'object'.

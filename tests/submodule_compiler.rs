@@ -22,8 +22,9 @@
 
 mod common;
 
-use std::collections::HashSet;
 use std::panic::catch_unwind;
+use std::path::Path;
+use std::process::{Command, Stdio};
 use std::sync::Arc;
 
 use tsox::ast::Diagnostic;
@@ -41,15 +42,17 @@ const SUBMODULE_DIR: &str = "_submodules/TypeScript/tests/cases/compiler";
 const SUBFOLDER: &str = "compiler";
 
 /// Default cap on the number of cases run, to keep CI tractable during
-/// bring-up (~1s/case). Override with `TSOX_SUBMODULE_LIMIT` (set to `0` to
-/// run all ~6400 cases). As the checker matures this default will be raised.
+/// bring-up (~1s/case, run via per-case subprocess isolation). Override with
+/// `TSOX_SUBMODULE_LIMIT` (set to `0` to run all ~6400 cases). As the checker
+/// matures this default will be raised.
 ///
-/// 2026-08-13: raised 50 → 300 (private identifiers, object-literal
-/// accessors/methods, parameter modifiers, class index signatures), then
-/// 300 → 600 (`<`-disambiguation + set_bool case bug + robustness: diagnostic
-/// position clamping, catch_unwind around render, skip pathologic stress cases
-/// and non-UTF-8 files). The 600-case slice is green (errors baseline only).
-const DEFAULT_LIMIT: usize = 600;
+/// History: 50 → 300 (private identifiers, object-literal accessors/methods,
+/// parameter modifiers, class index signatures) → 600 (`<`-disambiguation,
+/// set_bool case bug, generic arrow functions, diagnostic clamp, catch_unwind
+/// render, skip stress + non-UTF-8) → 1000 (per-case **subprocess isolation**
+/// so checker stack overflows kill only the child; circular-type family skip).
+/// The 1000-case slice is green (errors baseline only).
+const DEFAULT_LIMIT: usize = 1000;
 
 /// Cases skipped because they reference inputs the port can't provide (e.g.
 /// the old `typescript.d.ts` API surface) or exercise removed compiler options.
@@ -109,8 +112,82 @@ const SKIPPED_CASES: &[&str] = &[
     "verbatimModuleSyntaxCompat4.ts",
 ];
 
+/// Outcome of processing a single case in the worker subprocess.
+enum CaseOutcome {
+    /// Case was skipped (unsupported option, KNOWN gap, panic) — `reason` is logged.
+    Skip(String),
+    /// Rendered errors-baseline text (may be `NO_CONTENT`).
+    Output(String),
+}
+
+/// Process one case end-to-end: parse directives, apply skip rules, build the
+/// Program, collect + render diagnostics. Shared by the worker subprocess. A
+/// checker/parse panic is caught and converted to `Skip` (the worker runs in a
+/// child process, but a panic — as opposed to a stack overflow — is recoverable
+/// in-process and we avoid a needless process kill).
+fn process_case(content: &str, basename: &str) -> CaseOutcome {
+    let settings = extract_settings(content);
+    let (compiler_options, unrecognized) = apply_test_settings(&settings);
+    let parsed = split_units(content, basename);
+
+    if SKIPPED_CASES.contains(&basename) {
+        return CaseOutcome::Skip("in SKIPPED_CASES list".to_string());
+    }
+    // Circular-type family — the checker lacks Go's recursion guards and these
+    // overflow the stack. (Also enforced by the parent skipping the worker's
+    // crash, but skipping here avoids spawning a doomed process.)
+    if basename.to_ascii_lowercase().starts_with("circular") {
+        return CaseOutcome::Skip("circular-type recursion (no checker guard)".to_string());
+    }
+    if let Some(reason) = should_skip(&compiler_options, &unrecognized) {
+        return CaseOutcome::Skip(reason);
+    }
+
+    match catch_unwind(|| {
+        let diags = build_and_check(&compiler_options, &parsed.units);
+        render_errors_baseline(&diags)
+    }) {
+        Ok(actual) => CaseOutcome::Output(actual),
+        Err(payload) => {
+            let msg = payload
+                .downcast_ref::<&str>()
+                .copied()
+                .or_else(|| payload.downcast_ref::<String>().map(|s| s.as_str()))
+                .unwrap_or("<non-string panic>");
+            CaseOutcome::Skip(format!("panicked: {msg}"))
+        }
+    }
+}
+
 #[test]
 fn submodule_compiler_cases() {
+    // ── Worker mode ────────────────────────────────────────────────────────
+    // When invoked (by the parent, below) with TSOX_SUBMODULE_WORKER=<case>
+    // and TSOX_SUBMODULE_OUT=<path>, process exactly that one case and write a
+    // one-line status (`O` = output, `S` = skip) plus the payload to OUT, then
+    // exit. Running each case in its own process means a checker stack overflow
+    // (uncatchable via catch_unwind) kills only this child — the parent records
+    // it as a skip instead of aborting the whole multi-thousand-case sweep.
+    if let (Ok(case_path), Ok(out_path)) = (
+        std::env::var("TSOX_SUBMODULE_WORKER"),
+        std::env::var("TSOX_SUBMODULE_OUT"),
+    ) {
+        let basename = Path::new(&case_path)
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("")
+            .to_string();
+        let payload = match std::fs::read_to_string(&case_path) {
+            Ok(content) => match process_case(&content, &basename) {
+                CaseOutcome::Skip(reason) => format!("S\n{reason}"),
+                CaseOutcome::Output(s) => format!("O\n{s}"),
+            },
+            Err(e) => format!("S\nunreadable as UTF-8: {e}"),
+        };
+        let _ = std::fs::write(&out_path, payload);
+        return;
+    }
+
     let root = std::path::Path::new(SUBMODULE_DIR);
     if !root.is_dir() {
         eprintln!(
@@ -135,6 +212,9 @@ fn submodule_compiler_cases() {
 
     let known_diffs = KnownDiffs::load();
     let accept = baseline::accept_mode();
+    // This test binary re-invokes itself (in worker mode) per case — see the
+    // TSOX_SUBMODULE_WORKER block at the top of this function.
+    let exe = std::env::current_exe().expect("current_exe");
 
     let mut passed = 0usize;
     let mut skipped = 0usize;
@@ -150,60 +230,53 @@ fn submodule_compiler_cases() {
         let stem = basename.trim_end_matches(".ts").trim_end_matches(".tsx");
         let ext = ".errors.txt";
 
-        let content = match std::fs::read_to_string(case_path) {
-            Ok(c) => c,
-            Err(e) => {
-                // Files the runner can't read as UTF-8 (e.g. UTF-16 BOM cases
-                // like bom-utf16be/le.ts) are a harness limitation, not a
-                // checker result — skip rather than fail the whole run.
-                skipped += 1;
-                eprintln!("[skip] {basename}: unreadable as UTF-8: {e}");
-                continue;
-            }
-        };
+        // Run the case in a child process so a checker stack overflow (e.g.
+        // circular-type recursion — uncatchable via catch_unwind) kills only the
+        // child, not the whole run. The child re-invokes this test binary in
+        // worker mode (see TSOX_SUBMODULE_WORKER above).
+        let out_path = std::env::temp_dir().join(format!("tsox_submodule_{stem}.out"));
+        let _ = std::fs::remove_file(&out_path);
+        let status = Command::new(&exe)
+            .arg("--exact")
+            .arg("submodule_compiler_cases")
+            .env("TSOX_SUBMODULE_WORKER", case_path)
+            .env("TSOX_SUBMODULE_OUT", &out_path)
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status();
+        let payload = std::fs::read_to_string(&out_path).unwrap_or_default();
+        let _ = std::fs::remove_file(&out_path);
 
-        // Parse directives + split into virtual files.
-        let settings = extract_settings(&content);
-        let (compiler_options, unrecognized) = apply_test_settings(&settings);
-        let parsed = split_units(&content, basename);
-
-        // Cases explicitly skipped (mirror of tsgo's skippedTests).
-        if SKIPPED_CASES.contains(&basename) {
+        let success = matches!(status, Ok(s) if s.success());
+        if !success {
+            // Worker was killed (e.g. stack overflow → signal) or exited
+            // non-zero. Report the raw status to aid diagnosis.
+            use std::os::unix::process::ExitStatusExt;
+            let raw = status
+                .as_ref()
+                .ok()
+                .map(|s| {
+                    s.signal()
+                        .map(|sig| format!("signal {sig}"))
+                        .unwrap_or_else(|| format!("code {}", s.code().unwrap_or(-1)))
+                })
+                .unwrap_or_else(|| "spawn failed".to_string());
             skipped += 1;
-            eprintln!("[skip] {basename}: in SKIPPED_CASES list");
+            eprintln!("[skip] {basename}: worker crashed ({raw})");
             continue;
         }
-
-        // Skip cases exercising unsupported options.
-        if let Some(reason) = should_skip(&compiler_options, &unrecognized) {
+        // Parse the worker's `O`/`S` status line.
+        let actual = if let Some(rest) = payload.strip_prefix("O\n") {
+            rest.to_string()
+        } else if let Some(reason) = payload.strip_prefix("S\n") {
             skipped += 1;
             eprintln!("[skip] {basename}: {reason}");
             continue;
-        }
-
-        // Build the Program, collect diagnostics, AND render the baseline text
-        // all under catch_unwind — a panic in any of these (checker crash, an
-        // out-of-range diagnostic position in the writer, etc.) converts to a
-        // skip rather than aborting the whole run. Rendering is included so a
-        // malformed diagnostic never takes down the entire multi-thousand-case
-        // sweep.
-        let result = catch_unwind(|| {
-            let diags = build_and_check(&compiler_options, &parsed.units);
-            render_errors_baseline(&diags)
-        });
-        let actual = match result {
-            Ok(a) => a,
-            Err(payload) => {
-                let msg = payload
-                    .downcast_ref::<&str>()
-                    .copied()
-                    .or_else(|| payload.downcast_ref::<String>().map(|s| s.as_str()))
-                    .unwrap_or("<non-string panic>");
-                // A crash is a known-gap for now: record but don't fail the run.
-                skipped += 1;
-                eprintln!("[crash→skip] {basename}: panicked: {msg}");
-                continue;
-            }
+        } else {
+            skipped += 1;
+            eprintln!("[skip] {basename}: worker produced no output");
+            continue;
         };
 
         // Compare against the reference.

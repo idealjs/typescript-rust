@@ -1,0 +1,2 @@
+capturedVarInLoop.ts(2,20): error TS2304: Cannot find name 'len'.
+capturedVarInLoop.ts(4,33): error TS2304: Cannot find name 'len'.

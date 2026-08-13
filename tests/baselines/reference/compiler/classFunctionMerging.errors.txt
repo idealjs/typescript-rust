@@ -1,0 +1,2 @@
+error TS2300: Duplicate identifier 'Foo'.
+classFunctionMerging.ts(12,11): error TS2349: This expression is not callable.

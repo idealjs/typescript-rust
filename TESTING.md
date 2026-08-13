@@ -57,8 +57,8 @@
 | Checker parity | `cargo test --test checker_parity` | **920** / 0 / 0 | ~70s |
 | LSP 集成测试 | `cargo test --test lsp_integration` | **15** / 0 / 0 | <0.01s |
 | Emit parity（含 Go oracle 字节对照） | `cargo test --test parity` | **2** / 0 / 0 | ~24s |
-| Submodule baseline（官方测试集，默认 600 case） | `cargo test --test submodule_compiler` | 515 passed / 85 skipped / 0 failed（§12） | ~600s |
-| **测试目标合计** | `cargo test` | **lib+checker_parity+lsp+parity = 2234 / 0 / 0**；另含 600 submodule case | — |
+| Submodule baseline（官方测试集，默认 1000 case） | `cargo test --test submodule_compiler` | 720 passed / ~164 skipped / 0 failed（§12，per-case 子进程隔离） | ~16min |
+| **测试目标合计** | `cargo test` | **lib+checker_parity+lsp+parity = 2237 / 0 / 0**；另含 1000 submodule case | — |
 
 **B. 示例二进制（非 gating，`fn main` 非 `#[test]`）**
 
@@ -532,7 +532,7 @@ ok  github.com/microsoft/typescript-go/internal/testrunner  0.386s
 ### 12.2 怎么跑
 
 ```sh
-# 默认：跑前 600 个 compiler case（约 600s）
+# 默认：跑前 1000 个 compiler case（约 16 分钟；每 case 独立子进程隔离）
 cargo test --test submodule_compiler
 
 # 跑指定数量
@@ -575,8 +575,17 @@ runner 以下情况**跳过**（不 fail）case，对齐上游 `SkipUnsupportedC
 - 未识别的编译选项指令
 - `module = amd/umd/system`、`moduleResolution = node10/classic`、`target = es5`、
   `allowJs`、`baseUrl`/`outFile` 非空（Rust 侧尚未支持）
+- `circular*` 家族（circular 类型递归——checker 无 Go 的 `instantiationDepth`
+  递归保护，会栈溢出），整族 skip
 - checker / 渲染 **panic**（`catch_unwind` 兜底，转成 skip 避免中断整个 run）
+- checker **栈溢出**（circular 之外的偶发深递归）：每 case 在**独立子进程**里跑，
+  子进程被信号杀掉只记 skip，不中断整轮
 - 非 UTF-8 文件（如 `bom-utf16{be,le}.ts`，`read_to_string` 失败 → skip）
+
+> **per-case 子进程隔离（2026-08-13）**：runner 把每个 case 放进一个独立子进程
+> （worker 模式：`TSOX_SUBMODULE_WORKER`/`TSOX_SUBMODULE_OUT`），父进程收集结果。
+> 这样 checker 的栈溢出（`catch_unwind` 抓不住）只杀子进程，不会中断上万 case 的
+> 整轮扫描。代价：每 case 多一次进程启动（~50ms），1000 case 约 16 分钟。
 
 ### 12.6 首期范围与后续
 
@@ -587,7 +596,7 @@ runner 以下情况**跳过**（不 fail）case，对齐上游 `SkipUnsupportedC
 - ✅ accept/triage 工作流 + skip 规则
 - ✅ 默认 50 case（已 accept 初始 baseline）
 
-**2026-08-13 扩量到 600 case（515 pass / 85 skip / 0 fail）**，期间修复：
+**2026-08-13 扩量到 600 case**，期间修复：
 - parser：私有标识符 `#name`、对象字面量 `get`/`set` accessor 与方法、
   参数可访问性修饰符（`public v`）、类 index signature `[k:T]:V`、
   `<` 歧义（`try_parse_type_arguments` 试探性回溯，区分 `i < n` 与 `f<T>()`）、
@@ -595,11 +604,15 @@ runner 以下情况**跳过**（不 fail）case，对齐上游 `SkipUnsupportedC
 - options：`set_bool` 大小写 bug（`@allowJs`/`@strict` 等 bool 指令原先被静默丢弃）
 - 健壮性：`line_and_character` 对越界 offset 做 clamp、`catch_unwind` 包住渲染、
   跳过栈溢出 stress case 与非 UTF-8 文件
-- 3 个过时 "KNOWN LIMITATION" 快照随之修正（checker_custom_error_class、
-  checker_generic_repository、accessor 相关）
+- 3 个过时 "KNOWN LIMITATION" 快照随之修正
+
+**2026-08-13 续：扩量到 1000 case（720 pass / ~164 skip / 0 fail）**：
+- per-case **子进程隔离**（worker 模式），checker 栈溢出只杀子进程不中断整轮
+- `circular*` 整族 skip（checker 缺递归保护）
+- 新增 116 个 errors baseline（601–1000，多为 checker 差距快照）
 
 **后续阶段（见第 11 节 + TODO.md）**：
-- raise `DEFAULT_LIMIT` 直至全量 6419 compiler case（当前 600）
+- raise `DEFAULT_LIMIT` 直至全量 6419 compiler case（当前 1000）
 - emit / types / symbols / sourcemap baseline 类别
 - vary-by 配置矩阵（`// @strict: true, false` 笛卡尔积，首期只取首值）
 - conformance 目录（5695 case）

@@ -1,0 +1,13 @@
+collisionExportsRequireAndInternalModuleAliasInGlobalFile.ts(7,5): error TS2304: Cannot find name 'exports'.
+collisionExportsRequireAndInternalModuleAliasInGlobalFile.ts(8,5): error TS2304: Cannot find name 'require'.
+collisionExportsRequireAndInternalModuleAliasInGlobalFile.ts(13,9): error TS2304: Cannot find name 'exports'.
+collisionExportsRequireAndInternalModuleAliasInGlobalFile.ts(14,9): error TS2304: Cannot find name 'require'.
+collisionExportsRequireAndInternalModuleAliasInGlobalFile.ts(18,12): error TS1005: '{' expected.
+collisionExportsRequireAndInternalModuleAliasInGlobalFile.ts(18,27): error TS1003: Identifier expected.
+collisionExportsRequireAndInternalModuleAliasInGlobalFile.ts(18,41): error TS1003: Identifier expected.
+collisionExportsRequireAndInternalModuleAliasInGlobalFile.ts(18,43): error TS1003: Identifier expected.
+collisionExportsRequireAndInternalModuleAliasInGlobalFile.ts(19,27): error TS1003: Identifier expected.
+collisionExportsRequireAndInternalModuleAliasInGlobalFile.ts(19,41): error TS1003: Identifier expected.
+collisionExportsRequireAndInternalModuleAliasInGlobalFile.ts(19,43): error TS1003: Identifier expected.
+collisionExportsRequireAndInternalModuleAliasInGlobalFile.ts(20,16): error TS1003: Identifier expected.
+collisionExportsRequireAndInternalModuleAliasInGlobalFile.ts(20,17): error TS1003: Identifier expected.

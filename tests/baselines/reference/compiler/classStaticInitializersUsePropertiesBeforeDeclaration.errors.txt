@@ -1,0 +1,1 @@
+classStaticInitializersUsePropertiesBeforeDeclaration.ts(4,31): error TS2448: Block-scoped variable 'ObjLiteral' used before its declaration.

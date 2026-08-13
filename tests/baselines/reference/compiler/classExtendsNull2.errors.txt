@@ -1,0 +1,2 @@
+error TS2300: Duplicate identifier 'C'.
+classExtendsNull2.ts(8,5): error TS2349: This expression is not callable.

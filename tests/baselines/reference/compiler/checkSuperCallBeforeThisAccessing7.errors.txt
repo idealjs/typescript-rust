@@ -1,0 +1,1 @@
+checkSuperCallBeforeThisAccessing7.ts(8,9): error TS2349: This expression is not callable.

@@ -1,0 +1,1 @@
+chainedAssignment3.ts(15,3): error TS18048: 'a' is possibly 'undefined'.

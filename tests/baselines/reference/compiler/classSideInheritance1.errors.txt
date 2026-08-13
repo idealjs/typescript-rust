@@ -1,0 +1,2 @@
+classSideInheritance1.ts(14,3): error TS2339: Property 'bar' does not exist on type 'object'.
+classSideInheritance1.ts(15,4): error TS2339: Property 'bar' does not exist on type 'object'.

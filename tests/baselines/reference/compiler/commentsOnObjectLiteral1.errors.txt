@@ -1,0 +1,1 @@
+commentsOnObjectLiteral1.ts(1,14): error TS2304: Cannot find name 'makeClass'.

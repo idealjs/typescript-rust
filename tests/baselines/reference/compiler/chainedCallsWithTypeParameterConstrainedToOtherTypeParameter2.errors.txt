@@ -1,0 +1,10 @@
+chainedCallsWithTypeParameterConstrainedToOtherTypeParameter2.ts(4,14): error TS1005: ',' expected.
+chainedCallsWithTypeParameterConstrainedToOtherTypeParameter2.ts(4,15): error TS1134: Variable declaration expected.
+chainedCallsWithTypeParameterConstrainedToOtherTypeParameter2.ts(5,14): error TS1005: ',' expected.
+chainedCallsWithTypeParameterConstrainedToOtherTypeParameter2.ts(5,15): error TS1134: Variable declaration expected.
+chainedCallsWithTypeParameterConstrainedToOtherTypeParameter2.ts(27,14): error TS1005: ',' expected.
+chainedCallsWithTypeParameterConstrainedToOtherTypeParameter2.ts(27,15): error TS1134: Variable declaration expected.
+chainedCallsWithTypeParameterConstrainedToOtherTypeParameter2.ts(28,14): error TS1005: ',' expected.
+chainedCallsWithTypeParameterConstrainedToOtherTypeParameter2.ts(28,15): error TS1134: Variable declaration expected.
+chainedCallsWithTypeParameterConstrainedToOtherTypeParameter2.ts(29,14): error TS1005: ',' expected.
+chainedCallsWithTypeParameterConstrainedToOtherTypeParameter2.ts(29,15): error TS1134: Variable declaration expected.

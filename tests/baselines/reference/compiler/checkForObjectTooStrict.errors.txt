@@ -1,0 +1,2 @@
+checkForObjectTooStrict.ts(15,9): error TS2349: This expression is not callable.
+checkForObjectTooStrict.ts(26,9): error TS2349: This expression is not callable.

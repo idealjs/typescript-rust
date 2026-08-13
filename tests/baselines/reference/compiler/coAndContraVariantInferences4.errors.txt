@@ -1,0 +1,2 @@
+coAndContraVariantInferences4.ts(22,22): error TS2345: Argument of type '(node: { kind: 0 | 1 }) => boolean' is not assignable to parameter of type '(element: T) => boolean'.
+coAndContraVariantInferences4.ts(23,22): error TS2345: Argument of type '(node: { kind: 0 | 1 }) => boolean' is not assignable to parameter of type '(element: T) => boolean'.

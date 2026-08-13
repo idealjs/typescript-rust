@@ -1,0 +1,1 @@
+commentsOnObjectLiteral3.ts(16,15): error TS2304: Cannot find name 'value'.

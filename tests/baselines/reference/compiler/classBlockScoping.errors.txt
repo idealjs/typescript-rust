@@ -1,0 +1,1 @@
+classBlockScoping.ts(4,17): error TS2454: Variable 'Foo' is used before being assigned.

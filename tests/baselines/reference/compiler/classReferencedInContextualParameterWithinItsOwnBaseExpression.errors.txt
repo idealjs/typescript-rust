@@ -1,0 +1,3 @@
+classReferencedInContextualParameterWithinItsOwnBaseExpression.ts(17,11): error TS2304: Cannot find name 'Fields'.
+classReferencedInContextualParameterWithinItsOwnBaseExpression.ts(18,24): error TS2304: Cannot find name 'Self'.
+classReferencedInContextualParameterWithinItsOwnBaseExpression.ts(19,23): error TS2304: Cannot find name 'Fields'.

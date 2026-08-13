@@ -1,0 +1,2 @@
+collisionSuperAndParameter.ts(36,9): error TS2349: This expression is not callable.
+collisionSuperAndParameter.ts(53,9): error TS2349: This expression is not callable.

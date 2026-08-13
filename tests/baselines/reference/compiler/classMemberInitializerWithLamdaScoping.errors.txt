@@ -1,0 +1,5 @@
+classMemberInitializerWithLamdaScoping.ts(8,26): error TS2339: Property 'field' does not exist on type '{ messageHandler: () => void }'.
+classMemberInitializerWithLamdaScoping.ts(9,17): error TS2339: Property 'log' does not exist on type 'object'.
+classMemberInitializerWithLamdaScoping.ts(14,17): error TS2339: Property 'log' does not exist on type 'object'.
+classMemberInitializerWithLamdaScoping.ts(23,17): error TS2339: Property 'log' does not exist on type 'object'.
+classMemberInitializerWithLamdaScoping.ts(28,17): error TS2339: Property 'log' does not exist on type 'object'.

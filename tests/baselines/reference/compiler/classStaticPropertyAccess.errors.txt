@@ -1,0 +1,3 @@
+classStaticPropertyAccess.ts(13,3): error TS2339: Property 'y' does not exist on type 'object'.
+classStaticPropertyAccess.ts(14,3): error TS2339: Property '_b' does not exist on type 'object'.
+classStaticPropertyAccess.ts(15,3): error TS2339: Property 'a' does not exist on type 'object'.

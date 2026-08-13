@@ -1,0 +1,3 @@
+class2.ts(1,29): error TS2304: Cannot find name 'static'.
+class2.ts(1,36): error TS1005: ';' expected.
+class2.ts(1,36): error TS2304: Cannot find name 'f'.
