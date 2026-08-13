@@ -225,10 +225,13 @@ fn checker_const_declaration_no_error() {
 fn checker_multiple_var_declarations_no_error() {
     let diags = check_source("let a = 1, b = 2, c = 3;");
     let count = diags.iter().filter(|d| d.code == 2304).count();
+    // All three declarators bind correctly now (variable initializers use
+    // assignment-expression, so the comma separates declarators instead of
+    // being swallowed as a sequence operator). Previously a KNOWN LIMITATION
+    // snapshot asserting 2 spurious TS2304 for 'b'/'c'. Oracle: 0 errors.
     assert_eq!(
-        count, 2,
-        "Expected 2 TS2304 errors for 'b' and 'c', got {}",
-        count
+        count, 0,
+        "Expected 0 TS2304 errors for `let a = 1, b = 2, c = 3;`, got {count}"
     );
 }
 

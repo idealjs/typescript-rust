@@ -1394,7 +1394,11 @@ impl Parser {
         let type_node = self.parse_optional_type_annotation();
         let initializer = if self.token == SyntaxKind::EqualsToken {
             self.next_token();
-            Some(self.parse_expression())
+            // Use assignment-expression (NOT parse_expression) so the comma
+            // separates declarators (`let a = 1, b = 2`) rather than being
+            // swallowed as a comma/sequence operator. Mirrors Go's
+            // `parseAssignmentExpressionOrHigher` for variable initializers.
+            Some(self.parse_assignment_expression())
         } else {
             None
         };
@@ -6880,6 +6884,25 @@ mod tests {
                 !msg.contains("expected")
             }),
             "expected no 'expected' diagnostics, got: {:?}",
+            diags
+        );
+    }
+
+    #[test]
+    fn parse_multi_declarator_variable_list() {
+        // `let a = 1, b = 2, c = 3;` — three declarators. The initializer must
+        // use assignment-expression so the comma separates declarators rather
+        // than being swallowed as a sequence (comma) operator.
+        let (_, diags) = Parser::parse_source_file_text_with_diagnostics(
+            "a.ts",
+            "let a = 1, b = 2, c = 3;\na; b; c;".to_string(),
+        );
+        assert!(
+            diags.iter().all(|d| {
+                let msg = format!("{}", d.message);
+                !msg.contains("expected")
+            }),
+            "expected no parse errors, got: {:?}",
             diags
         );
     }

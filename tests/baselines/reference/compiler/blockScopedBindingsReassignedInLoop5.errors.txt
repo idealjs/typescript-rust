@@ -1,5 +1,0 @@
-blockScopedBindingsReassignedInLoop5.ts(1,17): error TS2304: Cannot find name 'y'.
-blockScopedBindingsReassignedInLoop5.ts(1,28): error TS2304: Cannot find name 'y'.
-blockScopedBindingsReassignedInLoop5.ts(1,38): error TS2304: Cannot find name 'y'.
-blockScopedBindingsReassignedInLoop5.ts(2,25): error TS2304: Cannot find name 'y'.
-blockScopedBindingsReassignedInLoop5.ts(6,9): error TS2304: Cannot find name 'y'.

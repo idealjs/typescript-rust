@@ -53,7 +53,7 @@
 
 | 目标 | 命令 | 通过 / 失败 / 忽略 | 耗时 |
 |------|------|---------------------|------|
-| 库单元测试 | `cargo test --lib` | **1300** / 0 / 0 | 2.2s |
+| 库单元测试 | `cargo test --lib` | **1301** / 0 / 0 | 2.2s |
 | Checker parity | `cargo test --test checker_parity` | **920** / 0 / 0 | ~70s |
 | LSP 集成测试 | `cargo test --test lsp_integration` | **15** / 0 / 0 | <0.01s |
 | Emit parity（含 Go oracle 字节对照） | `cargo test --test parity` | **2** / 0 / 0 | ~24s |
