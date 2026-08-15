@@ -8447,7 +8447,64 @@ impl Checker {
         if let crate::ast::NodeData::EnumMember(data) = &node.data {
             if let Some(init) = &data.initializer {
                 self.check_expression(init);
+                // TS1066: ambient-enum member initializers must be constant
+                // expressions (Go's computeConstantValue ambient branch).
+                let ambient = node
+                    .parent
+                    .as_ref()
+                    .is_some_and(|p| p.has_syntactic_modifier(ModifierFlags::Ambient))
+                    || self.ambient_context_depth > 0
+                    || self
+                        .current_file
+                        .as_ref()
+                        .is_some_and(|f| f.is_declaration_file);
+                if ambient && !Self::is_constant_enum_initializer(init) {
+                    let file = self.current_file.clone();
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        file,
+                        init.loc,
+                        crate::diagnostics::messages_generated::
+                            IN_AMBIENT_ENUM_DECLARATIONS_MEMBER_INITIALIZER_MUST_BE_CONSTANT_EXPRESSION,
+                        vec![],
+                    ));
+                }
             }
+        }
+    }
+
+    /// Whether an enum-member initializer is a compile-time constant
+    /// expression: literals, member references, unary ±, and arithmetic /
+    /// bitwise combinations thereof.
+    fn is_constant_enum_initializer(init: &Arc<Node>) -> bool {
+        match &init.data {
+            crate::ast::NodeData::NumericLiteral(_)
+            | crate::ast::NodeData::StringLiteral(_) => true,
+            crate::ast::NodeData::Identifier(_) => true,
+            crate::ast::NodeData::PrefixUnaryExpression(u) => {
+                matches!(u.operator, SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::TildeToken)
+                    && Self::is_constant_enum_initializer(&u.operand)
+            }
+            crate::ast::NodeData::BinaryExpression(b) => {
+                matches!(
+                    b.operator_token.kind,
+                    SyntaxKind::PlusToken
+                        | SyntaxKind::MinusToken
+                        | SyntaxKind::AsteriskToken
+                        | SyntaxKind::SlashToken
+                        | SyntaxKind::PercentToken
+                        | SyntaxKind::LessThanLessThanToken
+                        | SyntaxKind::GreaterThanGreaterThanToken
+                        | SyntaxKind::GreaterThanGreaterThanGreaterThanToken
+                        | SyntaxKind::AmpersandToken
+                        | SyntaxKind::BarToken
+                        | SyntaxKind::CaretToken
+                ) && Self::is_constant_enum_initializer(&b.left)
+                    && Self::is_constant_enum_initializer(&b.right)
+            }
+            crate::ast::NodeData::ParenthesizedExpression(p) => {
+                Self::is_constant_enum_initializer(&p.expression)
+            }
+            _ => false,
         }
     }
 

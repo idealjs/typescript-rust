@@ -707,10 +707,22 @@ impl Binder {
             || existing_flags.contains(SymbolFlags::TypeAlias);
         let new_type_only = new_flags.contains(SymbolFlags::Interface)
             || new_flags.contains(SymbolFlags::TypeAlias);
-        if existing_type_only && !new_type_only && !new_flags.contains(SymbolFlags::Class) {
+        // Interfaces/type aliases coexist with ANY value-side symbol —
+        // including classes (`declare class X` + `interface X`) and
+        // functions, like Go's binder.
+        if existing_type_only && !new_type_only {
             return true;
         }
-        if new_type_only && !existing_type_only && !existing_flags.contains(SymbolFlags::Class) {
+        if new_type_only && !existing_type_only {
+            return true;
+        }
+        // Class + Function merge (`declare class X` + `function X`).
+        let class_fn = SymbolFlags::Class.union(SymbolFlags::Function);
+        if existing_flags.intersects(class_fn)
+            && new_flags.intersects(class_fn)
+            && !existing_flags.intersects(SymbolFlags::FunctionScopedVariable)
+            && !new_flags.intersects(SymbolFlags::FunctionScopedVariable)
+        {
             return true;
         }
         // Namespace merging: a ValueModule can merge with another ValueModule,
