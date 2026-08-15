@@ -151,8 +151,6 @@ compiler/ambiguousGenericAssertion1.errors.txt
 ##  (e) TS18048 possibly-undefined narrowing through optional chains
 ##  (f) TS2362/TS2365 arithmetic operand checks + per-expression
 ##      diagnostic suppression ordering
-compiler/arithmeticOnInvalidTypes.errors.txt
-compiler/arithmeticOnInvalidTypes2.errors.txt
 compiler/arrayAssignmentTest1.errors.txt
 compiler/arrayAssignmentTest2.errors.txt
 compiler/arrayAssignmentTest4.errors.txt
@@ -285,3 +283,74 @@ compiler/asyncYieldStarContextualType.errors.txt
 
 ## 2026-08-16 batch #300-#399: export= augmentation resolution ##
 compiler/augmentExportEquals1.errors.txt
+
+## 2026-08-16 batch #400-#499: module augmentation via export= —
+## TS2671 non-module-entity resolution, merged symbol exports ##
+compiler/augmentExportEquals2.errors.txt
+compiler/augmentExportEquals3.errors.txt
+compiler/augmentExportEquals4.errors.txt
+compiler/augmentExportEquals5.errors.txt
+compiler/augmentExportEquals6.errors.txt
+compiler/augmentExportEquals7.errors.txt
+compiler/augmentedClassWithPrototypePropertyOnModule.errors.txt
+compiler/augmentedTypesClass.errors.txt
+compiler/augmentedTypesClass2.errors.txt
+compiler/augmentedTypesClass2a.errors.txt
+compiler/augmentedTypesEnum.errors.txt
+compiler/augmentedTypesEnum2.errors.txt
+compiler/augmentedTypesEnum3.errors.txt
+compiler/augmentedTypesFunction.errors.txt
+compiler/augmentedTypesInterface.errors.txt
+compiler/augmentedTypesModules.errors.txt
+compiler/augmentedTypesModules2.errors.txt
+compiler/augmentedTypesModules3.errors.txt
+compiler/augmentedTypesVar.errors.txt
+
+## 2026-08-16 batch #400-#499: Awaited<T> conditional-type evaluation
+## and await-specific operand typing ##
+compiler/awaitCallExpressionInSyncFunction.errors.txt
+compiler/awaitInNonAsyncFunction.errors.txt
+compiler/awaitLiteralValues.errors.txt
+compiler/awaitUnionPromise.errors.txt
+compiler/awaitedType.errors.txt
+compiler/awaitedTypeCrash.errors.txt
+compiler/awaitedTypeNoLib.errors.txt
+compiler/awaitedTypeStrictNull.errors.txt
+
+## 2026-08-16 batch #400-#499: bigint literal typing + target gating
+## (ES2016 exponentiation, bigint index/property names) ##
+compiler/bigIntWithTargetES2016.errors.txt
+compiler/bigIntWithTargetLessThanES2016.errors.txt
+compiler/bigint64ArraySubarray.errors.txt
+compiler/bigintAmbientMinimal(target=es2015).errors.txt
+compiler/bigintArbirtraryIdentifier.errors.txt
+compiler/bigintIndex.errors.txt
+compiler/bigintPropertyName.errors.txt
+compiler/bigintWithLib.errors.txt
+compiler/bigintWithoutLib(target=es2015).errors.txt
+
+## 2026-08-16 batch #400-#499: class heritage checks — base-member
+## relation errors, index-signature resolution through bases,
+## private-member clash, improved mismatch messages ##
+compiler/baseClassImprovedMismatchErrors.errors.txt
+compiler/baseExpressionTypeParameters.errors.txt
+compiler/baseIndexSignatureResolution.errors.txt
+compiler/baseTypePrivateMemberClash.errors.txt
+compiler/bases.errors.txt
+
+## 2026-08-16 batch #400-#499: inference & error-form misc — best-common-
+## type contextual ranking, accidental-call/union-call error forms,
+## destructuring/binding-pattern inference, bad-array recovery ##
+compiler/autoLift2.errors.txt
+compiler/autoTypeAssignedUsingDestructuringFromNeverNoCrash.errors.txt
+compiler/avoid.errors.txt
+compiler/avoidListingPropertiesForTypesWithOnlyCallOrConstructSignatures.errors.txt
+compiler/badArrayIndex.errors.txt
+compiler/badArraySyntax.errors.txt
+compiler/badInferenceLowerPriorityThanGoodInference.errors.txt
+compiler/bestChoiceType.errors.txt
+compiler/bestCommonTypeWithContextualTyping.errors.txt
+compiler/betterErrorForAccidentalCall.errors.txt
+compiler/betterErrorForUnionCall.errors.txt
+compiler/bindingPatternCannotBeOnlyInferenceSource.errors.txt
+compiler/bindingPatternContextualTypeDoesNotCauseWidening.errors.txt

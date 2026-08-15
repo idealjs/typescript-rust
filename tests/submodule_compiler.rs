@@ -1090,7 +1090,9 @@ fn render_errors_baseline(diags: &[Diagnostic]) -> String {
         a.0.cmp(&b.0)
             .then(a.1.cmp(&b.1))
             .then(a.2.cmp(&b.2))
-            .then(a.3.cmp(&b.3))
+        // NOTE: no code tiebreak — same-position diagnostics keep EMISSION
+        // order, which is what the official baselines record (Go's checker
+        // emits in evaluation order).
     });
 
     let mut out = String::new();

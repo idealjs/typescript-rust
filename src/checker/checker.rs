@@ -5599,6 +5599,7 @@ impl Checker {
                     SyntaxKind::Block | SyntaxKind::ModuleBlock | SyntaxKind::SourceFile
                 )
             })
+            && !Self::inside_function_body(node)
         {
             let block_id = node.parent.as_ref().unwrap().id();
             if !self.ambient_ts1036_reported_blocks.contains(&block_id) {
@@ -9244,6 +9245,203 @@ impl Checker {
     /// Check an expression node: resolve identifier references and recurse
     /// into sub-expressions.
     ///
+    /// Display string for arithmetic/bitwise operator tokens (the parsed
+    /// operator node carries no text).
+    fn op_display(kind: crate::ast::SyntaxKind) -> &'static str {
+        use crate::ast::SyntaxKind::*;
+        match kind {
+            AsteriskToken => "*",
+            AsteriskAsteriskToken => "**",
+            AsteriskEqualsToken => "*=",
+            AsteriskAsteriskEqualsToken => "**=",
+            SlashToken => "/",
+            SlashEqualsToken => "/=",
+            PercentToken => "%",
+            PercentEqualsToken => "%=",
+            MinusToken => "-",
+            MinusEqualsToken => "-=",
+            PlusToken => "+",
+            PlusEqualsToken => "+=",
+            LessThanLessThanToken => "<<",
+            LessThanLessThanEqualsToken => "<<=",
+            GreaterThanGreaterThanToken => ">>",
+            GreaterThanGreaterThanEqualsToken => ">>=",
+            GreaterThanGreaterThanGreaterThanToken => ">>>",
+            GreaterThanGreaterThanGreaterThanEqualsToken => ">>>=",
+            BarToken => "|",
+            BarEqualsToken => "|=",
+            CaretToken => "^",
+            CaretEqualsToken => "^=",
+            AmpersandToken => "&",
+            AmpersandEqualsToken => "&=",
+            _ => "?",
+        }
+    }
+
+    /// Non-plus arithmetic/bitwise operand checks (Go's
+    /// checkBinaryLikeExpression): TS18050 for null/undefined literals,
+    /// TS2447 for boolean operand pairs (suggesting the logical operator),
+    /// TS2362/TS2363 when an operand isn't assignable to number|bigint.
+    /// Runs on declared (pre-flow) types, before the operand expressions'
+    /// identifier checks.
+    fn check_binary_arith_pre(
+        &mut self,
+        node: &Arc<Node>,
+        data: &crate::ast::node_data_generated::BinaryExpressionData,
+    ) {
+        use crate::ast::SyntaxKind::*;
+        let op = data.operator_token.kind;
+        let arith_nonplus = matches!(
+            op,
+            AsteriskToken
+                | AsteriskAsteriskToken
+                | AsteriskEqualsToken
+                | AsteriskAsteriskEqualsToken
+                | SlashToken
+                | SlashEqualsToken
+                | PercentToken
+                | PercentEqualsToken
+                | MinusToken
+                | MinusEqualsToken
+                | LessThanLessThanToken
+                | LessThanLessThanEqualsToken
+                | GreaterThanGreaterThanToken
+                | GreaterThanGreaterThanEqualsToken
+                | GreaterThanGreaterThanGreaterThanToken
+                | GreaterThanGreaterThanGreaterThanEqualsToken
+                | BarToken
+                | BarEqualsToken
+                | CaretToken
+                | CaretEqualsToken
+                | AmpersandToken
+                | AmpersandEqualsToken
+        );
+        let plus = op == PlusToken || op == PlusEqualsToken;
+        if !arith_nonplus && !plus {
+            return;
+        }
+        for operand in [&data.left, &data.right] {
+            if matches!(operand.kind, NullKeyword | UndefinedKeyword) {
+                let word = if operand.kind == NullKeyword { "null" } else { "undefined" };
+                let file = self.current_file.clone();
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    operand.loc,
+                    crate::diagnostics::messages_generated::THE_VALUE_0_CANNOT_BE_USED_HERE,
+                    vec![word.to_string()],
+                ));
+            }
+        }
+        if !arith_nonplus {
+            return;
+        }
+        let lt = self.get_type_of_node(&data.left);
+        let rt = self.get_type_of_node(&data.right);
+        let boolean_like =
+            |t: &Arc<Type>| t.flags.intersects(TypeFlags::Boolean | TypeFlags::BooleanLiteral);
+        if boolean_like(&lt) && boolean_like(&rt) {
+            let suggested = match op {
+                AmpersandToken | AmpersandEqualsToken => Some("&&"),
+                BarToken | BarEqualsToken => Some("||"),
+                CaretToken | CaretEqualsToken => Some("!=="),
+                _ => None,
+            };
+            if let Some(sugg) = suggested {
+                let file = self.current_file.clone();
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    node.loc,
+                    crate::diagnostics::messages_generated::
+                        THE_0_OPERATOR_IS_NOT_ALLOWED_FOR_BOOLEAN_TYPES_CONSIDER_USING_1_INSTEAD,
+                    vec![Self::op_display(op).to_string(), sugg.to_string()],
+                ));
+            }
+            return;
+        }
+        fn ok_number(c: &mut Checker, t: &Arc<Type>) -> bool {
+            let n = c.number_type();
+            if c.is_type_assignable_to(t, &n) {
+                return true;
+            }
+            let b = c.bigint_type();
+            c.is_type_assignable_to(t, &b)
+        }
+        // Null/undefined literals already reported TS18050 — Go's
+        // checkNonNullType short-circuits their operand type check.
+        let left_is_literal = matches!(data.left.kind, NullKeyword | UndefinedKeyword);
+        let right_is_literal = matches!(data.right.kind, NullKeyword | UndefinedKeyword);
+        if !left_is_literal && !ok_number(self, &lt) {
+            let file = self.current_file.clone();
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file,
+                data.left.loc,
+                crate::diagnostics::messages_generated::
+                    THE_LEFT_HAND_SIDE_OF_AN_ARITHMETIC_OPERATION_MUST_BE_OF_TYPE_ANY_NUMBER_BIGINT_OR_AN_ENUM_TYPE,
+                Vec::new(),
+            ));
+        }
+        if !right_is_literal && !ok_number(self, &rt) {
+            let file = self.current_file.clone();
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file,
+                data.right.loc,
+                crate::diagnostics::messages_generated::
+                    THE_RIGHT_HAND_SIDE_OF_AN_ARITHMETIC_OPERATION_MUST_BE_OF_TYPE_ANY_NUMBER_BIGINT_OR_AN_ENUM_TYPE,
+                Vec::new(),
+            ));
+        }
+    }
+
+    /// `+` operator error (TS2365): neither string-like, number-like,
+    /// bigint-like, nor any operands — Go's checkAddition resultType==nil
+    /// path. Runs after the operand expressions are checked.
+    fn check_binary_plus_operator_error(
+        &mut self,
+        node: &Arc<Node>,
+        data: &crate::ast::node_data_generated::BinaryExpressionData,
+    ) {
+        use crate::ast::SyntaxKind::*;
+        let op = data.operator_token.kind;
+        if op != PlusToken && op != PlusEqualsToken {
+            return;
+        }
+        let lt = self.get_type_of_node(&data.left);
+        let rt = self.get_type_of_node(&data.right);
+        let number_like = |t: &Arc<Type>| {
+            t.flags.intersects(
+                TypeFlags::Number
+                    | TypeFlags::NumberLiteral
+                    | TypeFlags::EnumLiteral
+                    | TypeFlags::Union,
+            )
+        };
+        let bigint_like = |t: &Arc<Type>| {
+            t.flags.intersects(
+                TypeFlags::BigInt | TypeFlags::BigIntLiteral | TypeFlags::Union,
+            )
+        };
+        let string_like =
+            |t: &Arc<Type>| t.flags.intersects(TypeFlags::String | TypeFlags::StringLiteral);
+        let valid = (number_like(&lt) && number_like(&rt))
+            || (bigint_like(&lt) && bigint_like(&rt))
+            || string_like(&lt)
+            || string_like(&rt)
+            || lt.flags.contains(TypeFlags::Any)
+            || rt.flags.contains(TypeFlags::Any);
+        if !valid {
+            let lt_str = self.type_to_string(&lt);
+            let rt_str = self.type_to_string(&rt);
+            let file = self.current_file.clone();
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file,
+                node.loc,
+                crate::diagnostics::messages_generated::
+                    OPERATOR_0_CANNOT_BE_APPLIED_TO_TYPES_1_AND_2,
+                vec!["+".to_string(), lt_str, rt_str],
+            ));
+        }
+    }
+
     /// Go: `Checker.checkExpression`.
     pub fn check_expression(&mut self, node: &Arc<Node>) {
         self.current_node = Some(Arc::clone(node));
@@ -9265,8 +9463,13 @@ impl Checker {
             }
             SyntaxKind::BinaryExpression => {
                 if let crate::ast::NodeData::BinaryExpression(data) = &node.data {
+                    // Arithmetic/bitwise operand checks on DECLARED types run
+                    // before flow analysis (official baseline emission order:
+                    // TS2362/TS2363 precede TS2454 at the same position).
+                    self.check_binary_arith_pre(node, data);
                     self.check_expression(&data.left);
                     self.check_expression(&data.right);
+                    self.check_binary_plus_operator_error(node, data);
                     use crate::ast::SyntaxKind::*;
                     // NOTE: Go emits TS2872/2873 ("always truthy"/"always
                     // falsy") only from `checkTruthinessOfType` at
@@ -10095,18 +10298,18 @@ impl Checker {
     /// distance wins. Mirrors Go's spelling-correction suggestions.
     fn find_name_suggestion(&self, name: &str, meaning: SymbolFlags) -> Option<String> {
         let lower = name.to_ascii_lowercase();
-        // Candidate names filtered by MEANING like Go's `getCandidateName`
+        // Candidate symbols filtered by MEANING like Go's `getCandidateName`
         // (a type-only global such as `IArguments` is never suggested for a
         // VALUE reference like `arguments`).
-        let mut candidates: Vec<&String> = Vec::new();
+        let mut candidates: Vec<&Arc<Symbol>> = Vec::new();
         let symbol_map = self.program.symbol_map();
         fn push_symbol<'a>(
-            cands: &mut Vec<&'a String>,
+            cands: &mut Vec<&'a Arc<Symbol>>,
             sym: &'a Arc<Symbol>,
             meaning: SymbolFlags,
         ) {
             if sym.flags.intersects(meaning) {
-                cands.push(&sym.name);
+                cands.push(sym);
             }
         }
         for &container_id in self.scope_stack.iter() {
@@ -10127,19 +10330,72 @@ impl Checker {
         for sym in self.globals.entries.values() {
             push_symbol(&mut candidates, sym, meaning);
         }
-        let mut best: Option<(usize, &String)> = None;
-        for cand in candidates {
+        let mut best: Option<(usize, (usize, usize), &String)> = None;
+        for sym in candidates {
+            let cand: &String = &sym.name;
             if cand.len() < 2 || cand == name {
                 continue;
             }
             let d = edit_distance(&lower, &cand.to_ascii_lowercase());
-            // Ties go to the later candidate — globals are collected
-            // last, matching Go's preference in this corpus.
-            if d <= 1 && best.is_none_or(|(bd, _)| d <= bd) {
-                best = Some((d, cand));
+            if d > 1 {
+                continue;
+            }
+            // Go's tie-break (compareSymbols → compareNodes): earliest
+            // (program file index, declaration position) wins — this also
+            // makes the result deterministic over HashMap iteration order.
+            let key = self.suggestion_order_key(sym);
+            let replace = match &best {
+                None => true,
+                Some((bd, bkey, _)) => d < *bd || (d == *bd && key < *bkey),
+            };
+            if replace {
+                best = Some((d, key, cand));
             }
         }
-        best.map(|(_, c)| c.clone())
+        best.map(|(_, _, c)| c.clone())
+    }
+
+    /// Ordering key for spelling-suggestion ties (Go's compareNodes):
+    /// (program file index, first-declaration position). Symbols without
+    /// declarations sort last.
+    fn suggestion_order_key(&self, sym: &Arc<Symbol>) -> (usize, usize) {
+        let Some(decl) = sym.declarations.first() else {
+            return (usize::MAX, usize::MAX);
+        };
+        let Some(sf) = self.get_source_file_of_node(decl) else {
+            return (usize::MAX, usize::MAX);
+        };
+        let idx = self
+            .files
+            .iter()
+            .position(|f| f.node.id() == sf.node.id())
+            .unwrap_or(usize::MAX);
+        (idx, decl.loc.pos())
+    }
+
+    /// Whether `node` sits inside a function-like/accessor body (before any
+    /// module boundary) — statements there are covered by TS1183 (ambient
+    /// implementations), not TS1036 (Go's checkGrammarStatementInAmbientContext
+    /// function-like-parent branch).
+    fn inside_function_body(node: &Arc<Node>) -> bool {
+        let mut anc = node.parent.as_ref();
+        while let Some(a) = anc {
+            match a.kind {
+                SyntaxKind::FunctionDeclaration
+                | SyntaxKind::FunctionExpression
+                | SyntaxKind::ArrowFunction
+                | SyntaxKind::MethodDeclaration
+                | SyntaxKind::Constructor
+                | SyntaxKind::GetAccessor
+                | SyntaxKind::SetAccessor => return true,
+                SyntaxKind::ModuleBlock | SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration => {
+                    return false
+                }
+                _ => {}
+            }
+            anc = a.parent.as_ref();
+        }
+        false
     }
 
     /// TS2654/TS2416: class-heritage member checks for a derived class —
