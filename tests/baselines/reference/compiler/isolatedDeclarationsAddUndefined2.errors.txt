@@ -1,0 +1,7 @@
+isolatedDeclarationsAddUndefined2.ts(4,29): error TS2314: Generic type 'Array<T>' requires 1 type argument(s).
+isolatedDeclarationsAddUndefined2.ts(8,29): error TS2314: Generic type 'Array<T>' requires 1 type argument(s).
+isolatedDeclarationsAddUndefined2.ts(12,28): error TS2314: Generic type 'Array<T>' requires 1 type argument(s).
+isolatedDeclarationsAddUndefined2.ts(16,28): error TS2314: Generic type 'Array<T>' requires 1 type argument(s).
+isolatedDeclarationsAddUndefined2.ts(19,27): error TS2314: Generic type 'Array<T>' requires 1 type argument(s).
+isolatedDeclarationsAddUndefined2.ts(21,27): error TS2304: Cannot find name 'Unresolved'.
+isolatedDeclarationsAddUndefined2.ts(23,27): error TS2304: Cannot find name 'Unresolved'.

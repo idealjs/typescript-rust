@@ -1,0 +1,12 @@
+dissallowSymbolAsWeakType.ts(3,16): error TS2769: No overload matches this call.
+dissallowSymbolAsWeakType.ts(4,8): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(5,8): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(6,11): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(8,16): error TS2769: No overload matches this call.
+dissallowSymbolAsWeakType.ts(9,8): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(10,8): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(11,8): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(12,11): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(14,24): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(18,12): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(19,14): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.

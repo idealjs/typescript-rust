@@ -1,0 +1,1 @@
+circularBaseConstraint.ts(14,8): error TS2304: Cannot find name 'a'.

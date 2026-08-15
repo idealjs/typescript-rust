@@ -1,0 +1,1 @@
+concatError.ts(10,6): error TS2454: Variable 'fa' is used before being assigned.

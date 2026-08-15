@@ -1,0 +1,1 @@
+localAliasExportAssignment_0.ts(5,10): error TS2454: Variable 'server' is used before being assigned.

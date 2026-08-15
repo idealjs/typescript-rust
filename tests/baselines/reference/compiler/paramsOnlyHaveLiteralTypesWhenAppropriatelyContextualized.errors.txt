@@ -1,0 +1,2 @@
+paramsOnlyHaveLiteralTypesWhenAppropriatelyContextualized.ts(27,23): error TS2345: Argument of type '{ x?: number[] | undefined; y?: string[] | undefined; }' is not assignable to parameter of type '{ y?: number[] | undefined; }'.
+paramsOnlyHaveLiteralTypesWhenAppropriatelyContextualized.ts(28,23): error TS2345: Argument of type '{ x?: number[] | undefined; y?: string[] | undefined; }' is not assignable to parameter of type '{ x?: string[] | undefined; }'.

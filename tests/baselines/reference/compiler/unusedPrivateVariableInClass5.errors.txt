@@ -1,0 +1,1 @@
+unusedPrivateVariableInClass5.ts(3,13): error TS6133: 'y' is declared but its value is never read.

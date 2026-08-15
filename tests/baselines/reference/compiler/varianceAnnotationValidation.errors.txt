@@ -1,0 +1,2 @@
+varianceAnnotationValidation.ts(5,22): error TS2636: Type 'Controller<sub-T>' is not assignable to type 'Controller<super-T>' as implied by variance annotation.
+varianceAnnotationValidation.ts(27,1): error TS2322: Type 'AnimalContainer<Animal>' is not assignable to type 'AnimalContainer<Dog>'.

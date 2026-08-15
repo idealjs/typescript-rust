@@ -1,0 +1,1 @@
+typeParameterEquality.ts(2,31): error TS2322: Type 'null' is not assignable to type '<T>(a: T) => T'.

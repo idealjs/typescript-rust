@@ -1,0 +1,4 @@
+letDeclarations-scopes2.ts(8,5): error TS2552: Cannot find name 'local2'. Did you mean 'local'?
+letDeclarations-scopes2.ts(20,5): error TS2552: Cannot find name 'local2'. Did you mean 'local'?
+letDeclarations-scopes2.ts(23,1): error TS2304: Cannot find name 'local'.
+letDeclarations-scopes2.ts(25,1): error TS2304: Cannot find name 'local2'.

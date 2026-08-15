@@ -1,0 +1,6 @@
+useBeforeDeclaration_propertyAssignment.ts(2,27): error TS2729: Property 'b' is used before its initialization.
+useBeforeDeclaration_propertyAssignment.ts(2,38): error TS2729: Property 'c' is used before its initialization.
+useBeforeDeclaration_propertyAssignment.ts(2,47): error TS2729: Property 'b' is used before its initialization.
+useBeforeDeclaration_propertyAssignment.ts(2,59): error TS2729: Property 'c' is used before its initialization.
+useBeforeDeclaration_propertyAssignment.ts(8,32): error TS2729: Property 'B' is used before its initialization.
+useBeforeDeclaration_propertyAssignment.ts(13,12): error TS2729: Property 'D' is used before its initialization.

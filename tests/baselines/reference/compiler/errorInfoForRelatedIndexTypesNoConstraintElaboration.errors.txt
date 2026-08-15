@@ -1,0 +1,1 @@
+errorInfoForRelatedIndexTypesNoConstraintElaboration.ts(6,15): error TS2322: Type 'IntrinsicElements[T1]' is not assignable to type 'IntrinsicElements[T2]'.

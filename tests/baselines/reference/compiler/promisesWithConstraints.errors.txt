@@ -1,0 +1,2 @@
+promisesWithConstraints.ts(15,1): error TS2322: Type 'Promise<Foo>' is not assignable to type 'Promise<Bar>'.
+promisesWithConstraints.ts(20,1): error TS2322: Type 'CPromise<Foo>' is not assignable to type 'CPromise<Bar>'.

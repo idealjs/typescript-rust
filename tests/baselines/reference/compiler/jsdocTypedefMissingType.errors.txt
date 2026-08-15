@@ -1,0 +1,1 @@
+/a.js(2,14): error TS8021: JSDoc '@typedef' tag should either have a type annotation or be followed by '@property' or '@member' tags.

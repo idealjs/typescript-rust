@@ -1,0 +1,2 @@
+bestCommonTypeReturnStatement.ts(11,32): error TS2322: Type 'null' is not assignable to type 'IPromise<void>'.
+bestCommonTypeReturnStatement.ts(12,31): error TS2322: Type 'null' is not assignable to type 'IPromise<any>'.

@@ -1,0 +1,1 @@
+file2.ts(1,50): error TS6133: 't2' is declared but its value is never read.

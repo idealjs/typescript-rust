@@ -1,0 +1,2 @@
+declarationEmitDestructuringWithOptionalBindingParameters.ts(1,14): error TS2463: A binding pattern parameter cannot be optional in an implementation signature.
+declarationEmitDestructuringWithOptionalBindingParameters.ts(3,16): error TS2463: A binding pattern parameter cannot be optional in an implementation signature.

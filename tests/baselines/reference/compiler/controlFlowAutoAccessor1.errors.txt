@@ -1,0 +1,1 @@
+controlFlowAutoAccessor1.ts(54,19): error TS7008: Member 'value' implicitly has an 'any' type.

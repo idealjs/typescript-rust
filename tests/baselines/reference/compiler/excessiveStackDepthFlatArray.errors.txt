@@ -1,0 +1,1 @@
+index.tsx(35,13): error TS2322: Type '{ key: string; }' is not assignable to type 'HTMLAttributes<HTMLLIElement>'.

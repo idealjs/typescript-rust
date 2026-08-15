@@ -1,0 +1,1 @@
+bar.d.ts(1,10): error TS2305: Module '"./foo"' has no exported member 'Bar'.

@@ -1,0 +1,2 @@
+errorTypesAsTypeArguments.ts(2,16): error TS2304: Cannot find name 'B'.
+errorTypesAsTypeArguments.ts(2,25): error TS2304: Cannot find name 'C'.

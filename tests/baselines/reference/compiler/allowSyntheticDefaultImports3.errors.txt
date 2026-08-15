@@ -1,0 +1,2 @@
+a.ts(1,8): error TS1192: Module '"b"' has no default export.
+b.ts(2,2): error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.

@@ -1,0 +1,2 @@
+arrayConcatMap.ts(1,20): error TS2769: No overload matches this call.
+arrayConcatMap.ts(2,23): error TS2339: Property 'a' does not exist on type 'never'.

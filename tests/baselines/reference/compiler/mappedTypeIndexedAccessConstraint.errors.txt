@@ -1,0 +1,5 @@
+mappedTypeIndexedAccessConstraint.ts(12,5): error TS18048: 'm1' is possibly 'undefined'.
+mappedTypeIndexedAccessConstraint.ts(14,5): error TS18048: 'm2' is possibly 'undefined'.
+mappedTypeIndexedAccessConstraint.ts(16,5): error TS18048: 'm3' is possibly 'undefined'.
+mappedTypeIndexedAccessConstraint.ts(29,66): error TS2532: Object is possibly 'undefined'.
+mappedTypeIndexedAccessConstraint.ts(53,34): error TS2722: Cannot invoke an object which is possibly 'undefined'.

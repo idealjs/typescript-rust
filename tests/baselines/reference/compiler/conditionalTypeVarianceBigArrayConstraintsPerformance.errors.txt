@@ -1,0 +1,1 @@
+conditionalTypeVarianceBigArrayConstraintsPerformance.ts(9,5): error TS2322: Type 'Stuff<U>' is not assignable to type 'Stuff<T>'.

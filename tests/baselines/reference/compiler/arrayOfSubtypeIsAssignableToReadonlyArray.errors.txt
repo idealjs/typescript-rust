@@ -1,0 +1,2 @@
+arrayOfSubtypeIsAssignableToReadonlyArray.ts(13,1): error TS2322: Type 'A[]' is not assignable to type 'readonly B[]'.
+arrayOfSubtypeIsAssignableToReadonlyArray.ts(18,1): error TS2322: Type 'C<A>' is not assignable to type 'readonly B[]'.

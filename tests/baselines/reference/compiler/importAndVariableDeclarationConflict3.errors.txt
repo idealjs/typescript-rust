@@ -1,0 +1,2 @@
+importAndVariableDeclarationConflict3.ts(5,8): error TS2300: Duplicate identifier 'x'.
+importAndVariableDeclarationConflict3.ts(6,8): error TS2300: Duplicate identifier 'x'.

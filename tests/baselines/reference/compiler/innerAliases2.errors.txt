@@ -1,0 +1,1 @@
+innerAliases2.ts(11,21): error TS2322: Type 'null' is not assignable to type 'UsefulClass'.

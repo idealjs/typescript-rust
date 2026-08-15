@@ -1,0 +1,13 @@
+es6ImportNamedImportIdentifiersParsing.ts(1,10): error TS2300: Duplicate identifier 'yield'.
+es6ImportNamedImportIdentifiersParsing.ts(1,23): error TS2307: Cannot find module 'somemodule' or its corresponding type declarations.
+es6ImportNamedImportIdentifiersParsing.ts(2,10): error TS1003: Identifier expected.
+es6ImportNamedImportIdentifiersParsing.ts(2,10): error TS2300: Duplicate identifier 'default'.
+es6ImportNamedImportIdentifiersParsing.ts(2,25): error TS2307: Cannot find module 'somemodule' or its corresponding type declarations.
+es6ImportNamedImportIdentifiersParsing.ts(3,19): error TS1003: Identifier expected.
+es6ImportNamedImportIdentifiersParsing.ts(3,19): error TS2300: Duplicate identifier 'default'.
+es6ImportNamedImportIdentifiersParsing.ts(3,34): error TS2307: Cannot find module 'somemodule' or its corresponding type declarations.
+es6ImportNamedImportIdentifiersParsing.ts(4,21): error TS2300: Duplicate identifier 'yield'.
+es6ImportNamedImportIdentifiersParsing.ts(4,34): error TS2307: Cannot find module 'somemodule' or its corresponding type declarations.
+es6ImportNamedImportIdentifiersParsing.ts(5,21): error TS1003: Identifier expected.
+es6ImportNamedImportIdentifiersParsing.ts(5,21): error TS2300: Duplicate identifier 'default'.
+es6ImportNamedImportIdentifiersParsing.ts(5,36): error TS2307: Cannot find module 'somemodule' or its corresponding type declarations.

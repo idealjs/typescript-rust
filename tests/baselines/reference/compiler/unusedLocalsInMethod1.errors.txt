@@ -1,0 +1,1 @@
+unusedLocalsInMethod1.ts(3,13): error TS6133: 'x' is declared but its value is never read.

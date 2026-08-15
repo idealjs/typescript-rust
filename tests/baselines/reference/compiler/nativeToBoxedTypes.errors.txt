@@ -1,0 +1,5 @@
+nativeToBoxedTypes.ts(3,1): error TS2322: Type 'Number' is not assignable to type 'number'.
+nativeToBoxedTypes.ts(7,1): error TS2322: Type 'String' is not assignable to type 'string'.
+nativeToBoxedTypes.ts(11,1): error TS2322: Type 'Boolean' is not assignable to type 'boolean'.
+nativeToBoxedTypes.ts(15,1): error TS2322: Type 'Symbol' is not assignable to type 'symbol'.
+nativeToBoxedTypes.ts(15,7): error TS2454: Variable 'Sym' is used before being assigned.

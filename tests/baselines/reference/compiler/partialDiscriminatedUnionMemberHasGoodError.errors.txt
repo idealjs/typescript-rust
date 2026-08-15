@@ -1,0 +1,1 @@
+partialDiscriminatedUnionMemberHasGoodError.ts(20,13): error TS2322: Type '{ type: "A"; }' is not assignable to type 'ValidType'.

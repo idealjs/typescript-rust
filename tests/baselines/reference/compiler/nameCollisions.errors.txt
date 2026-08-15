@@ -1,0 +1,14 @@
+nameCollisions.ts(2,9): error TS2300: Duplicate identifier 'x'.
+nameCollisions.ts(4,15): error TS2300: Duplicate identifier 'x'.
+nameCollisions.ts(6,13): error TS2564: Property 'test' has no initializer and is not definitely assigned in the constructor.
+nameCollisions.ts(10,15): error TS2300: Duplicate identifier 'z'.
+nameCollisions.ts(13,9): error TS2300: Duplicate identifier 'z'.
+nameCollisions.ts(15,15): error TS2434: A namespace declaration cannot be located prior to a class or function with which it is merged.
+nameCollisions.ts(24,9): error TS2300: Duplicate identifier 'f'.
+nameCollisions.ts(25,14): error TS2300: Duplicate identifier 'f'.
+nameCollisions.ts(27,14): error TS2300: Duplicate identifier 'f2'.
+nameCollisions.ts(28,9): error TS2300: Duplicate identifier 'f2'.
+nameCollisions.ts(33,11): error TS2813: Class declaration cannot implement overload list for 'C'.
+nameCollisions.ts(34,14): error TS2814: Function with bodies can only merge with classes that are ambient.
+nameCollisions.ts(36,14): error TS2814: Function with bodies can only merge with classes that are ambient.
+nameCollisions.ts(37,11): error TS2813: Class declaration cannot implement overload list for 'C2'.

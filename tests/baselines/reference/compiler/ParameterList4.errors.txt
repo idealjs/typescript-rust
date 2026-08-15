@@ -1,0 +1,2 @@
+ParameterList4.ts(1,12): error TS2369: A parameter property is only allowed in a constructor implementation.
+ParameterList4.ts(1,12): error TS7006: Parameter 'A' implicitly has an 'any' type.

@@ -1,0 +1,1 @@
+classWithMultipleBaseClasses.ts(18,7): error TS2420: Class 'D' incorrectly implements interface 'I'.

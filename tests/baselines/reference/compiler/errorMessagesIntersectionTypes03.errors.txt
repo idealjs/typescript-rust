@@ -1,0 +1,5 @@
+errorMessagesIntersectionTypes03.ts(17,5): error TS2322: Type 'A & B' is not assignable to type 'T'.
+errorMessagesIntersectionTypes03.ts(18,5): error TS2322: Type 'A & B' is not assignable to type 'U'.
+errorMessagesIntersectionTypes03.ts(19,5): error TS2322: Type 'A & B' is not assignable to type 'V'.
+errorMessagesIntersectionTypes03.ts(22,5): error TS2322: Type 'T & B' is not assignable to type 'U'.
+errorMessagesIntersectionTypes03.ts(23,5): error TS2322: Type 'T & B' is not assignable to type 'V'.

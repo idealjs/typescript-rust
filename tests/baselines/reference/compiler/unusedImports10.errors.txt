@@ -1,0 +1,1 @@
+unusedImports10.ts(9,12): error TS6133: 'a' is declared but its value is never read.

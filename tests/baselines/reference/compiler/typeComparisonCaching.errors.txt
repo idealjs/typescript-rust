@@ -1,0 +1,2 @@
+typeComparisonCaching.ts(26,1): error TS2322: Type 'B' is not assignable to type 'A'.
+typeComparisonCaching.ts(27,1): error TS2322: Type 'D' is not assignable to type 'C'.

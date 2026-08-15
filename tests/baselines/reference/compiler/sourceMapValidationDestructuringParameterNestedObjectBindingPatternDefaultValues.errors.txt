@@ -1,0 +1,1 @@
+sourceMapValidationDestructuringParameterNestedObjectBindingPatternDefaultValues.ts(33,17): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.

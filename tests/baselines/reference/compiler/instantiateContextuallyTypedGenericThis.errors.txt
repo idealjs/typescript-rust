@@ -1,0 +1,2 @@
+instantiateContextuallyTypedGenericThis.ts(9,1): error TS2454: Variable '$' is used before being assigned.
+instantiateContextuallyTypedGenericThis.ts(9,8): error TS2454: Variable 'lines' is used before being assigned.

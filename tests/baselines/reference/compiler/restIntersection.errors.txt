@@ -1,0 +1,1 @@
+restIntersection.ts(4,22): error TS2454: Variable 'intersection' is used before being assigned.

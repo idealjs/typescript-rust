@@ -1,0 +1,1 @@
+unusedParametersinConstructor2.ts(2,17): error TS6133: 'param1' is declared but its value is never read.

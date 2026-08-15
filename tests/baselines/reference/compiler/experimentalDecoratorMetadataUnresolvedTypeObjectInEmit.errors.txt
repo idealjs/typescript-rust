@@ -1,0 +1,2 @@
+usage.ts(2,8): error TS2304: Cannot find name 'decorate'.
+usage.ts(2,31): error TS2694: Namespace 'A.B.C.D' has no exported member 'E'.

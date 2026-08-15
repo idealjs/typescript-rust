@@ -1,0 +1,2 @@
+a.js(2,8): error TS8009: The '?' modifier can only be used in TypeScript files.
+a.js(4,8): error TS8009: The '?' modifier can only be used in TypeScript files.

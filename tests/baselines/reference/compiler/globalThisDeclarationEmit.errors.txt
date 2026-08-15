@@ -1,0 +1,1 @@
+index.ts(2,14): error TS4025: Exported variable 'globalThis' has or is using private name 'globalThis'.

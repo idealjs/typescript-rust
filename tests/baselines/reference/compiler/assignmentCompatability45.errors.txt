@@ -1,0 +1,1 @@
+assignmentCompatability45.ts(7,7): error TS2322: Type 'typeof B' is not assignable to type 'typeof A'.

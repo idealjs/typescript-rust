@@ -1,0 +1,2 @@
+derivedTypeIncompatibleSignatures.ts(21,11): error TS2430: Interface 'F' incorrectly extends interface 'E'.
+derivedTypeIncompatibleSignatures.ts(29,11): error TS2430: Interface 'H' incorrectly extends interface 'G'.

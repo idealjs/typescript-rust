@@ -1,0 +1,1 @@
+genericTypeUsedWithoutTypeArguments1.ts(2,25): error TS2314: Generic type 'Foo<T>' requires 1 type argument(s).

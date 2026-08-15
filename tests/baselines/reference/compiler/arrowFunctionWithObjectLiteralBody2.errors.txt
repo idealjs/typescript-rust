@@ -1,0 +1,1 @@
+arrowFunctionWithObjectLiteralBody2.ts(1,9): error TS7006: Parameter 'a' implicitly has an 'any' type.

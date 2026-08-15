@@ -1,0 +1,1 @@
+index.js(2,25): error TS2307: Cannot find module './mod' or its corresponding type declarations.

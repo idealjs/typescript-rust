@@ -1,0 +1,2 @@
+checkSuperCallBeforeThisAccessing5.ts(1,27): error TS7019: Rest parameter 'arg' implicitly has an 'any[]' type.
+checkSuperCallBeforeThisAccessing5.ts(5,15): error TS17009: 'super' must be called before accessing 'this' in the constructor of a derived class.

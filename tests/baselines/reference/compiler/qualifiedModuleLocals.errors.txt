@@ -1,0 +1,1 @@
+qualifiedModuleLocals.ts(5,27): error TS2339: Property 'b' does not exist on type 'typeof A'.

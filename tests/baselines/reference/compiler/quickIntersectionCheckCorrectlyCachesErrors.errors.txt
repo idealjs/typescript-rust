@@ -1,0 +1,2 @@
+quickIntersectionCheckCorrectlyCachesErrors.tsx(9,15): error TS2345: Argument of type 'F<CP>' is not assignable to parameter of type 'F<unknown>'.
+quickIntersectionCheckCorrectlyCachesErrors.tsx(10,21): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.

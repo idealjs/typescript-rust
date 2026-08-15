@@ -1,0 +1,1 @@
+genericRecursiveImplicitConstructorErrors1.ts(9,49): error TS2314: Generic type 'PullTypeSymbol<A, B, C>' requires 3 type argument(s).

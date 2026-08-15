@@ -1,0 +1,1 @@
+noUnusedLocals_writeOnlyProperty_dynamicNames.ts(4,13): error TS6133: '[x]' is declared but its value is never read.

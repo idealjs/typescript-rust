@@ -1,0 +1,1 @@
+exportEqualCallable_0.ts(4,10): error TS2454: Variable 'server' is used before being assigned.

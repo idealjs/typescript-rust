@@ -1,0 +1,4 @@
+interfaceImplementation6.ts(6,12): error TS2564: Property 'item' has no initializer and is not definitely assigned in the constructor.
+interfaceImplementation6.ts(9,7): error TS2420: Class 'C2' incorrectly implements interface 'I1'.
+interfaceImplementation6.ts(10,13): error TS2564: Property 'item' has no initializer and is not definitely assigned in the constructor.
+interfaceImplementation6.ts(13,7): error TS2420: Class 'C3' incorrectly implements interface 'I1'.

@@ -1,0 +1,4 @@
+contextualTypingWithGenericAndNonGenericSignature.ts(8,7): error TS7006: Parameter 'x' implicitly has an 'any' type.
+contextualTypingWithGenericAndNonGenericSignature.ts(8,10): error TS7006: Parameter 'y' implicitly has an 'any' type.
+contextualTypingWithGenericAndNonGenericSignature.ts(15,7): error TS7006: Parameter 'x' implicitly has an 'any' type.
+contextualTypingWithGenericAndNonGenericSignature.ts(15,10): error TS7006: Parameter 'y' implicitly has an 'any' type.

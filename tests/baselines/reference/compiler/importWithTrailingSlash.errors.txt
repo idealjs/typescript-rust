@@ -1,0 +1,2 @@
+/a/b/test.ts(3,3): error TS2339: Property 'a' does not exist on type '{ aIndex: number; }'.
+/a/test.ts(3,3): error TS2339: Property 'a' does not exist on type '{ aIndex: number; }'.

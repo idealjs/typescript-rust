@@ -1,0 +1,2 @@
+parseCommaSeparatedNewlineNumber.ts(1,2): error TS2304: Cannot find name 'a'.
+parseCommaSeparatedNewlineNumber.ts(1,2): error TS2695: Left side of comma operator is unused and has no side effects.

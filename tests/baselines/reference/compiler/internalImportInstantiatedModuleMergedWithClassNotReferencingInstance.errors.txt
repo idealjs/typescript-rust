@@ -1,0 +1,2 @@
+internalImportInstantiatedModuleMergedWithClassNotReferencingInstance.ts(2,5): error TS2564: Property 'aProp' has no initializer and is not definitely assigned in the constructor.
+internalImportInstantiatedModuleMergedWithClassNotReferencingInstance.ts(11,16): error TS2437: Module 'A' is hidden by a local declaration with the same name.

@@ -1,0 +1,2 @@
+multipleExportAssignmentsInAmbientDeclaration.ts(4,14): error TS2300: Duplicate identifier 'export='.
+multipleExportAssignmentsInAmbientDeclaration.ts(5,14): error TS2300: Duplicate identifier 'export='.

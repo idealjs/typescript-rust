@@ -1,0 +1,1 @@
+sourceMapSample.ts(14,45): error TS2694: Namespace 'Foo.Bar' has no exported member 'Greeter'.

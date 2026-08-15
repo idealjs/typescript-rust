@@ -1,0 +1,3 @@
+destructuringControlFlowNoCrash.ts(3,3): error TS2339: Property 'date' does not exist on type '(inspectedElement: any) => number'.
+destructuringControlFlowNoCrash.ts(10,3): error TS2339: Property 'date2' does not exist on type '(inspectedElement: any) => any'.
+destructuringControlFlowNoCrash.ts(11,28): error TS1005: '=>' expected.

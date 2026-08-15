@@ -1,0 +1,2 @@
+classPropertyErrorOnNameOnly.ts(7,3): error TS2322: Type '(val: Values) => "1" | "2" | "3" | "4" | "5" | undefined' is not assignable to type 'FuncType'.
+classPropertyErrorOnNameOnly.ts(24,7): error TS2322: Type '(val: Values) => "1" | "2" | "3" | "4" | "5" | undefined' is not assignable to type 'FuncType'.

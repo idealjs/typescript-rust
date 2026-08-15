@@ -1,0 +1,1 @@
+thisShadowingErrorSpans.ts(5,13): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.

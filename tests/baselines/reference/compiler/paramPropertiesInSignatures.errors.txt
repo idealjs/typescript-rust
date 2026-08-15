@@ -1,0 +1,5 @@
+paramPropertiesInSignatures.ts(2,14): error TS2369: A parameter property is only allowed in a constructor implementation.
+paramPropertiesInSignatures.ts(3,14): error TS2369: A parameter property is only allowed in a constructor implementation.
+paramPropertiesInSignatures.ts(8,14): error TS2369: A parameter property is only allowed in a constructor implementation.
+paramPropertiesInSignatures.ts(9,14): error TS2369: A parameter property is only allowed in a constructor implementation.
+paramPropertiesInSignatures.ts(10,14): error TS2369: A parameter property is only allowed in a constructor implementation.

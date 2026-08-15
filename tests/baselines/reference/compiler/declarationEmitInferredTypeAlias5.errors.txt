@@ -1,0 +1,1 @@
+1.ts(3,9): error TS2872: This kind of expression is always truthy.

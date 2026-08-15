@@ -1,0 +1,1 @@
+unknownTypeErrors.ts(1,10): error TS2304: Cannot find name 'Unknown'.

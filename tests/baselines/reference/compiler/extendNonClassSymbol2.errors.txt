@@ -1,0 +1,1 @@
+extendNonClassSymbol2.ts(5,17): error TS2507: Type '() => void' is not a constructor function type.

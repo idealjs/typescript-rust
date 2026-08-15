@@ -1,0 +1,2 @@
+targetTypeCastTest.ts(1,13): error TS2300: Duplicate identifier 'Point'.
+targetTypeCastTest.ts(3,10): error TS2300: Duplicate identifier 'Point'.

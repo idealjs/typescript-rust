@@ -1,0 +1,1 @@
+switchAssignmentCompat.ts(4,10): error TS2678: Type 'typeof Foo' is not comparable to type '0'.

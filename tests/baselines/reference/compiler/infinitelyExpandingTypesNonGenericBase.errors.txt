@@ -1,0 +1,2 @@
+infinitelyExpandingTypesNonGenericBase.ts(2,5): error TS2564: Property 'property' has no initializer and is not definitely assigned in the constructor.
+infinitelyExpandingTypesNonGenericBase.ts(9,5): error TS2564: Property 'options' has no initializer and is not definitely assigned in the constructor.

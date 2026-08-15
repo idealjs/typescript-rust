@@ -1,0 +1,4 @@
+mutrec.ts(11,3): error TS2454: Variable 'b' is used before being assigned.
+mutrec.ts(27,3): error TS2454: Variable 'i2' is used before being assigned.
+mutrec.ts(29,3): error TS2454: Variable 'i3' is used before being assigned.
+mutrec.ts(40,3): error TS2454: Variable 'i4' is used before being assigned.

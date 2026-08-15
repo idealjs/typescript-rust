@@ -1,0 +1,3 @@
+typeParameterDiamond3.ts(8,13): error TS2322: Type 'T | U' is not assignable to type 'Top'.
+typeParameterDiamond3.ts(9,13): error TS2322: Type 'Bottom' is not assignable to type 'T | U'.
+typeParameterDiamond3.ts(10,13): error TS2322: Type 'Bottom' is not assignable to type 'Top'.

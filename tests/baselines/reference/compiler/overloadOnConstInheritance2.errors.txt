@@ -1,0 +1,1 @@
+overloadOnConstInheritance2.ts(5,11): error TS2430: Interface 'Deriver' incorrectly extends interface 'Base'.

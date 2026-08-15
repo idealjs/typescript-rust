@@ -1,0 +1,1 @@
+unusedVariablesinForLoop.ts(2,13): error TS6133: 'i' is declared but its value is never read.

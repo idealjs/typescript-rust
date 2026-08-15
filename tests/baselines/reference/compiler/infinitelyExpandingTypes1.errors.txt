@@ -1,0 +1,7 @@
+infinitelyExpandingTypes1.ts(17,1): error TS2454: Variable 'l' is used before being assigned.
+infinitelyExpandingTypes1.ts(17,6): error TS2454: Variable 'm' is used before being assigned.
+infinitelyExpandingTypes1.ts(21,1): error TS2454: Variable 'l' is used before being assigned.
+infinitelyExpandingTypes1.ts(21,1): error TS2367: This comparison appears to be unintentional because the types 'List<number>' and 'List<string>' have no overlap.
+infinitelyExpandingTypes1.ts(21,6): error TS2454: Variable 'l2' is used before being assigned.
+infinitelyExpandingTypes1.ts(23,1): error TS2454: Variable 'l' is used before being assigned.
+infinitelyExpandingTypes1.ts(23,6): error TS2454: Variable 'l' is used before being assigned.

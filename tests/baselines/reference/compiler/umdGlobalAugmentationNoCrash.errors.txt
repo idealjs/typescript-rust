@@ -1,0 +1,2 @@
+global.d.ts(2,11): error TS2451: Cannot redeclare block-scoped variable 'React'.
+module.d.ts(1,21): error TS2451: Cannot redeclare block-scoped variable 'React'.

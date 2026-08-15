@@ -1,0 +1,2 @@
+contextualSignatureInstantiationWithTypeParameterConstrainedToOuterTypeParameter.ts(2,40): error TS2322: Type 'null' is not assignable to type 'U'.
+contextualSignatureInstantiationWithTypeParameterConstrainedToOuterTypeParameter.ts(6,9): error TS2454: Variable 'h' is used before being assigned.

@@ -1,0 +1,1 @@
+esModuleInteropUsesExportStarWhenDefaultPlusNames.ts(1,28): error TS2307: Cannot find module './dep' or its corresponding type declarations.

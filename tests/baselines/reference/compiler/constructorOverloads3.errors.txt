@@ -1,0 +1,1 @@
+constructorOverloads3.ts(12,5): error TS2377: Constructors for derived classes must contain a 'super' call.

@@ -1,0 +1,1 @@
+interfaceInheritance2.ts(8,1): error TS2454: Variable 'v1' is used before being assigned.

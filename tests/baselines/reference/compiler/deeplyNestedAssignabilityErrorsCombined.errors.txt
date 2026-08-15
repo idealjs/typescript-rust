@@ -1,0 +1,2 @@
+deeplyNestedAssignabilityErrorsCombined.ts(3,1): error TS2322: Type '{ a: { b: { c: { d: { e: { f(): { g: number; }; }; }; }; }; }; }' is not assignable to type '{ a: { b: { c: { d: { e: { f(): { g: string; }; }; }; }; }; }; }'.
+deeplyNestedAssignabilityErrorsCombined.ts(15,1): error TS2322: Type '{ a: { b: { c: { d: { e: { f: typeof Ctor2; }; }; }; }; }; }' is not assignable to type '{ a: { b: { c: { d: { e: { f: typeof Ctor1; }; }; }; }; }; }'.

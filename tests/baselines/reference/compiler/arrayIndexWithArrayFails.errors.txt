@@ -1,0 +1,1 @@
+arrayIndexWithArrayFails.ts(3,16): error TS2538: Type 'string[]' cannot be used as an index type.

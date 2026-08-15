@@ -1,0 +1,1 @@
+narrowingUnionToNeverAssigment.ts(8,15): error TS2322: Type '"c" | "d"' is not assignable to type 'never'.

@@ -1,0 +1,2 @@
+jsxInExtendsClause.tsx(9,12): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxInExtendsClause.tsx(9,31): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.

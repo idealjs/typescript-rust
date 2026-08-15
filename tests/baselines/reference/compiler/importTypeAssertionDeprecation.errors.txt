@@ -1,0 +1,4 @@
+/main.ts(1,38): error TS2880: Import assertions have been replaced by import attributes. Use 'with' instead of 'assert'.
+/main.ts(2,38): error TS2880: Import assertions have been replaced by import attributes. Use 'with' instead of 'assert'.
+/main.ts(4,31): error TS2880: Import assertions have been replaced by import attributes. Use 'with' instead of 'assert'.
+/main.ts(5,31): error TS2880: Import assertions have been replaced by import attributes. Use 'with' instead of 'assert'.

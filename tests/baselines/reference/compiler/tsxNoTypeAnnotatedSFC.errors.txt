@@ -1,0 +1,3 @@
+tsxNoTypeAnnotatedSFC.tsx(2,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+tsxNoTypeAnnotatedSFC.tsx(4,23): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxNoTypeAnnotatedSFC.tsx(6,24): error TS7006: Parameter 'props' implicitly has an 'any' type.

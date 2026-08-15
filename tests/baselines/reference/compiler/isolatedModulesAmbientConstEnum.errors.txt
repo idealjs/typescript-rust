@@ -1,0 +1,1 @@
+file1.ts(2,16): error TS2748: Cannot access ambient const enums when 'isolatedModules' is enabled.

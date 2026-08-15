@@ -1,0 +1,2 @@
+classCannotExtendVar.ts(1,5): error TS2300: Duplicate identifier 'Markup'.
+classCannotExtendVar.ts(3,7): error TS2300: Duplicate identifier 'Markup'.

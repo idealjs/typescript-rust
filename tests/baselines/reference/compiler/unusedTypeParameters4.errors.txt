@@ -1,0 +1,1 @@
+unusedTypeParameters4.ts(2,13): error TS6133: 'U' is declared but its value is never read.

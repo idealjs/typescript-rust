@@ -1,0 +1,3 @@
+narrowingPastLastAssignment.ts(88,9): error TS7034: Variable 'x' implicitly has type 'any' in some locations where its type cannot be determined.
+narrowingPastLastAssignment.ts(90,20): error TS7005: Variable 'x' implicitly has an 'any' type.
+narrowingPastLastAssignment.ts(161,9): error TS18048: 'foo' is possibly 'undefined'.

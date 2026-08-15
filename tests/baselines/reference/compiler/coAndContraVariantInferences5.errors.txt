@@ -1,0 +1,1 @@
+coAndContraVariantInferences5.ts(9,9): error TS2322: Type '(status: Thing | null) => void' is not assignable to type '(key: string) => void'.

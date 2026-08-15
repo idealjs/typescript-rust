@@ -1,0 +1,1 @@
+unusedLocalsinConstructor1.ts(3,13): error TS6133: 'unused' is declared but its value is never read.

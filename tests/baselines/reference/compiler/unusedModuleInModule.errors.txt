@@ -1,0 +1,1 @@
+unusedModuleInModule.ts(2,15): error TS6133: 'B' is declared but its value is never read.

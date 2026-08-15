@@ -1,0 +1,4 @@
+privacyTopLevelAmbientExternalModuleImportWithExport_core.ts(15,12): error TS2323: Cannot redeclare exported variable 'publicUse_im_public_mi_public'.
+privacyTopLevelAmbientExternalModuleImportWithExport_core.ts(17,12): error TS2323: Cannot redeclare exported variable 'publicUse_im_public_mi_public'.
+privacyTopLevelAmbientExternalModuleImportWithExport_require.ts(3,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+privacyTopLevelAmbientExternalModuleImportWithExport_require1.ts(2,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.

@@ -1,0 +1,2 @@
+numericIndexerConstraint3.ts(2,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+numericIndexerConstraint3.ts(6,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.

@@ -1,0 +1,4 @@
+noCrashOnMixin2.ts(11,33): error TS2370: A rest parameter must be of an array type.
+noCrashOnMixin2.ts(11,40): error TS1047: A rest parameter cannot be optional.
+noCrashOnMixin2.ts(14,12): error TS2545: A mixin class must have a constructor with a single rest parameter of type 'any[]'.
+noCrashOnMixin2.ts(23,9): error TS2674: Constructor of class 'Abstract' is protected and only accessible within the class declaration.

@@ -1,0 +1,1 @@
+second.d.ts(1,27): error TS2503: Cannot find namespace 'CompletelyMissing'.

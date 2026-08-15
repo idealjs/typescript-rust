@@ -1,0 +1,1 @@
+objectLiteralThisWidenedOnUse.ts(8,21): error TS2345: Argument of type '{ prop1: number; prop2: number; prop3: number; test(): void; accept_foo(foo: Foo): boolean; }' is not assignable to parameter of type 'Foo'.

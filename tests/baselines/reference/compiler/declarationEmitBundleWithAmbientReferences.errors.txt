@@ -1,0 +1,1 @@
+src/conditional_directive_field.ts(4,2): error TS2322: Type 'null' is not assignable to type 'T<string>'.

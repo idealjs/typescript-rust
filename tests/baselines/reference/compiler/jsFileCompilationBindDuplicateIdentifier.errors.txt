@@ -1,0 +1,2 @@
+a.js(1,5): error TS2300: Duplicate identifier 'a'.
+a.js(2,7): error TS2300: Duplicate identifier 'a'.

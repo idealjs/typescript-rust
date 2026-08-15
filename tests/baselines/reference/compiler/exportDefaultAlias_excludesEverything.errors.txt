@@ -1,0 +1,2 @@
+exportDefaultAlias_excludesEverything.ts(1,26): error TS2528: A module cannot have multiple default exports.
+exportDefaultAlias_excludesEverything.ts(3,16): error TS2528: A module cannot have multiple default exports.

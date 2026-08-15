@@ -1,0 +1,2 @@
+cyclicGenericTypeInstantiation.ts(6,12): error TS2454: Variable 'y' is used before being assigned.
+cyclicGenericTypeInstantiation.ts(15,12): error TS2454: Variable 'y' is used before being assigned.

@@ -1,0 +1,2 @@
+optionalParamTypeComparison.ts(4,1): error TS2322: Type '(s: string, b?: boolean | undefined) => void' is not assignable to type '(s: string, n?: number | undefined) => void'.
+optionalParamTypeComparison.ts(5,1): error TS2322: Type '(s: string, n?: number | undefined) => void' is not assignable to type '(s: string, b?: boolean | undefined) => void'.

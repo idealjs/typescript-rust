@@ -1,0 +1,1 @@
+errorLocationForInterfaceExtension.ts(3,21): error TS2840: An interface cannot extend a primitive type like 'string'. It can only extend other named object types.

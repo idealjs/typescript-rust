@@ -1,0 +1,5 @@
+typePredicateInherit.ts(11,3): error TS2416: Property 'method1' in type 'B' is not assignable to the same property in base type 'A'.
+typePredicateInherit.ts(13,3): error TS2416: Property 'method2' in type 'B' is not assignable to the same property in base type 'A'.
+typePredicateInherit.ts(15,3): error TS2416: Property 'method3' in type 'B' is not assignable to the same property in base type 'A'.
+typePredicateInherit.ts(41,3): error TS2416: Property 'method1' in type 'D' is not assignable to the same property in base type 'C'.
+typePredicateInherit.ts(50,3): error TS2416: Property 'method3' in type 'D' is not assignable to the same property in base type 'C'.

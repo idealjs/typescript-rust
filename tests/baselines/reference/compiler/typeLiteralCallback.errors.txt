@@ -1,0 +1,2 @@
+typeLiteralCallback.ts(12,1): error TS2454: Variable 'test' is used before being assigned.
+typeLiteralCallback.ts(13,1): error TS2454: Variable 'test' is used before being assigned.

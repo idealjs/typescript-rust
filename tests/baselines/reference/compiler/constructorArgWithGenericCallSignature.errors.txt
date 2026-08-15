@@ -1,0 +1,2 @@
+constructorArgWithGenericCallSignature.ts(12,8): error TS2454: Variable 'func' is used before being assigned.
+constructorArgWithGenericCallSignature.ts(13,29): error TS2454: Variable 'func' is used before being assigned.

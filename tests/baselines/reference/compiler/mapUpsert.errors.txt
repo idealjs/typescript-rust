@@ -1,0 +1,14 @@
+mapUpsert.ts(14,5): error TS2554: Expected 2 arguments, but got 1.
+mapUpsert.ts(15,24): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+mapUpsert.ts(16,24): error TS2345: Argument of type '() => number' is not assignable to parameter of type 'number'.
+mapUpsert.ts(17,5): error TS2554: Expected 2 arguments, but got 1.
+mapUpsert.ts(18,32): error TS2345: Argument of type 'number' is not assignable to parameter of type '(key: string) => number'.
+mapUpsert.ts(19,38): error TS2322: Type 'string' is not assignable to type 'number'.
+mapUpsert.ts(20,6): error TS2554: Expected 2 arguments, but got 1.
+mapUpsert.ts(21,22): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+mapUpsert.ts(22,22): error TS2345: Argument of type '() => number' is not assignable to parameter of type 'number'.
+mapUpsert.ts(23,6): error TS2554: Expected 2 arguments, but got 1.
+mapUpsert.ts(24,30): error TS2345: Argument of type 'number' is not assignable to parameter of type '(key: object) => number'.
+mapUpsert.ts(25,36): error TS2322: Type 'string' is not assignable to type 'number'.
+mapUpsert.ts(28,6): error TS2339: Property 'getOrInsert' does not exist on type 'ReadonlyMap<string, number>'.
+mapUpsert.ts(29,6): error TS2339: Property 'getOrInsertComputed' does not exist on type 'ReadonlyMap<string, number>'.

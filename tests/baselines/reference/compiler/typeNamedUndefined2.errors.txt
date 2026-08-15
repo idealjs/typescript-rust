@@ -1,0 +1,2 @@
+typeNamedUndefined2.ts(4,21): error TS2457: Type alias name cannot be 'undefined'.
+typeNamedUndefined2.ts(17,17): error TS2457: Type alias name cannot be 'undefined'.

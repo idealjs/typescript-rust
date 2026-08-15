@@ -1,0 +1,5 @@
+thisInPropertyBoundDeclarations.ts(2,13): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+thisInPropertyBoundDeclarations.ts(18,9): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
+thisInPropertyBoundDeclarations.ts(23,13): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
+thisInPropertyBoundDeclarations.ts(25,15): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
+thisInPropertyBoundDeclarations.ts(30,13): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.

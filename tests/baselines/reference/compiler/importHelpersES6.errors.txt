@@ -1,0 +1,1 @@
+a.ts(2,1): error TS2354: This syntax requires an imported helper but module 'tslib' cannot be found.

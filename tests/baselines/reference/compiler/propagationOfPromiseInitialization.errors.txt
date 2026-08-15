@@ -1,0 +1,1 @@
+propagationOfPromiseInitialization.ts(6,1): error TS2454: Variable 'foo' is used before being assigned.

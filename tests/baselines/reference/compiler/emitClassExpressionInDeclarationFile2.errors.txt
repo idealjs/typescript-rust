@@ -1,0 +1,4 @@
+emitClassExpressionInDeclarationFile2.ts(1,12): error TS4094: Property 'p' of exported anonymous class type may not be private or protected.
+emitClassExpressionInDeclarationFile2.ts(1,12): error TS4094: Property 'ps' of exported anonymous class type may not be private or protected.
+emitClassExpressionInDeclarationFile2.ts(16,17): error TS4094: Property 'property' of exported anonymous class type may not be private or protected.
+emitClassExpressionInDeclarationFile2.ts(23,14): error TS4094: Property 'property' of exported anonymous class type may not be private or protected.

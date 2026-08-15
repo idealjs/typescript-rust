@@ -1,0 +1,9 @@
+typeParamExtendsOtherTypeParam.ts(3,5): error TS2564: Property 'data' has no initializer and is not definitely assigned in the constructor.
+typeParamExtendsOtherTypeParam.ts(12,26): error TS2344: Type '{ b: string; }' does not satisfy the constraint '{ a: string; }'.
+typeParamExtendsOtherTypeParam.ts(13,26): error TS2344: Type '{ a: number; }' does not satisfy the constraint '{ a: string; }'.
+typeParamExtendsOtherTypeParam.ts(14,26): error TS2344: Type '{ b: string; }' does not satisfy the constraint '{ a: string; }'.
+typeParamExtendsOtherTypeParam.ts(15,26): error TS2344: Type '{ a: number; }' does not satisfy the constraint '{ a: string; }'.
+typeParamExtendsOtherTypeParam.ts(16,37): error TS2344: Type '{ a: string; }' does not satisfy the constraint '{ a: string; b: number; }'.
+typeParamExtendsOtherTypeParam.ts(17,37): error TS2344: Type '{ a: string; }' does not satisfy the constraint '{ a: string; b: number; }'.
+typeParamExtendsOtherTypeParam.ts(28,15): error TS2344: Type 'I1' does not satisfy the constraint 'I2'.
+typeParamExtendsOtherTypeParam.ts(29,15): error TS2344: Type 'I1' does not satisfy the constraint 'I2'.

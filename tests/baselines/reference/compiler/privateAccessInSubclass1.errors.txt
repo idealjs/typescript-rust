@@ -1,0 +1,1 @@
+privateAccessInSubclass1.ts(7,10): error TS2341: Property 'options' is private and only accessible within class 'Base'.

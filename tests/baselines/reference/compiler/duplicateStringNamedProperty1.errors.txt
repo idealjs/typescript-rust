@@ -1,0 +1,2 @@
+duplicateStringNamedProperty1.ts(2,5): error TS2300: Duplicate identifier 'artist'.
+duplicateStringNamedProperty1.ts(3,5): error TS2300: Duplicate identifier 'artist'.

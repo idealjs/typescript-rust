@@ -1,0 +1,3 @@
+propertyAssignment.ts(4,22): error TS2304: Cannot find name 'index'.
+propertyAssignment.ts(12,1): error TS2322: Type '{ x: number; }' is not assignable to type 'new () => any'.
+propertyAssignment.ts(14,1): error TS2322: Type '{ x: number; }' is not assignable to type '() => void'.

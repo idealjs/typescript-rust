@@ -1,0 +1,1 @@
+arrayBindingPatternOmittedExpressions.ts(4,22): error TS2454: Variable 'results' is used before being assigned.

@@ -1,0 +1,1 @@
+index.ts(9,10): error TS2709: Cannot use namespace 'OriginalB' as a type.

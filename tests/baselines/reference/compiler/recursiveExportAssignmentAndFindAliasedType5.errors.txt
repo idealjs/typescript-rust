@@ -1,0 +1,1 @@
+recursiveExportAssignmentAndFindAliasedType5_moduleD.ts(1,1): error TS2303: Circular definition of import alias 'self'.

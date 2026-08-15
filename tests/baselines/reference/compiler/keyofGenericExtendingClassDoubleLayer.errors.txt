@@ -1,0 +1,2 @@
+keyofGenericExtendingClassDoubleLayer.ts(2,12): error TS2564: Property 'createdAt' has no initializer and is not definitely assigned in the constructor.
+keyofGenericExtendingClassDoubleLayer.ts(10,12): error TS2564: Property 'age' has no initializer and is not definitely assigned in the constructor.

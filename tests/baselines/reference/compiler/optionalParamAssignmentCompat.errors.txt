@@ -1,0 +1,1 @@
+optionalParamAssignmentCompat.ts(10,13): error TS2322: Type '(p1?: string | undefined) => I1' is not assignable to type 'I1'.

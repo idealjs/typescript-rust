@@ -1,0 +1,1 @@
+exactOptionalPropertyTypesIdentical.ts(2,12): error TS2322: Type '<T>() => T extends { a?: string; } ? 0 : 1' is not assignable to type '<T>() => T extends { a?: string | undefined; } ? 0 : 1'.

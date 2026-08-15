@@ -1,0 +1,16 @@
+main.ts(96,6): error TS2454: Variable 't1' is used before being assigned.
+main.ts(96,15): error TS2454: Variable 't2' is used before being assigned.
+main.ts(96,24): error TS2454: Variable 't3' is used before being assigned.
+main.ts(96,42): error TS2454: Variable 't2' is used before being assigned.
+main.ts(96,51): error TS2454: Variable 't3' is used before being assigned.
+main.ts(96,78): error TS2454: Variable 't3' is used before being assigned.
+main.ts(97,6): error TS2454: Variable 't5' is used before being assigned.
+main.ts(97,15): error TS2454: Variable 't6' is used before being assigned.
+main.ts(97,24): error TS2454: Variable 't7' is used before being assigned.
+main.ts(97,42): error TS2454: Variable 't6' is used before being assigned.
+main.ts(97,51): error TS2454: Variable 't7' is used before being assigned.
+main.ts(97,78): error TS2454: Variable 't7' is used before being assigned.
+main.ts(98,6): error TS2454: Variable 't12' is used before being assigned.
+main.ts(98,16): error TS2454: Variable 't13' is used before being assigned.
+main.ts(98,26): error TS2454: Variable 't14' is used before being assigned.
+main.ts(98,36): error TS2454: Variable 't15' is used before being assigned.

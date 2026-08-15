@@ -16,15 +16,55 @@ cargo build
 # run the compiler
 cargo run -- --help
 cargo run -- --version
-
-# run all library tests (gating)
-cargo test --lib
-
-# run the parity integration test (gating)
-# without a Go oracle this still exercises the Rust smoke cases and
-# skips the oracle comparison gracefully
-cargo test --test parity
 ```
+
+## Running the tests manually
+
+Five test targets make up the suite (see [`TESTING.md`](./TESTING.md) for
+full details). Run each with `cargo test --test <name>`:
+
+```sh
+cargo test --lib                    # 1301 library unit tests (~2s)
+cargo test --test checker_parity    # 921 checker parity tests (~50s)
+cargo test --test lsp_integration   # 15 LSP integration tests (<1s)
+cargo test --test parity            # 2 emit-parity tests, incl. Go-oracle
+                                     # comparison when the oracle is available
+cargo test --test submodule_compiler  # official TypeScript test cases
+
+# everything above in one command
+cargo test
+```
+
+The `submodule_compiler` target replays TypeScript's official compiler test
+cases against committed snapshots in `tests/baselines/reference/`:
+
+```sh
+# one-time: fetch the official test corpus (~6500 cases)
+git submodule update --init
+
+# run the default slice (first 1000 cases, ~15 min)
+cargo test --test submodule_compiler
+
+# run ALL cases (~6500, ~100 min)
+TSOX_SUBMODULE_LIMIT=0 cargo test --test submodule_compiler
+
+# run only the first N cases
+TSOX_SUBMODULE_LIMIT=200 cargo test --test submodule_compiler
+```
+
+On mismatch, the actual output is written under `tests/baselines/local/` for
+inspection. To accept new output (after verifying it matches the official
+baselines), re-run with `TSOX_BASELINE_ACCEPT=1`; known gaps go into
+`tests/baselines/reference/triaged.txt`.
+
+**CPU usage**: the test suite (especially `submodule_compiler`, which spawns
+one subprocess per case) can saturate all cores. To keep the machine
+responsive, pin the run to a few cores, e.g. on Linux:
+
+```sh
+taskset -c 0-3 cargo test --test submodule_compiler   # ≤400% CPU
+```
+
 
 ## Parity tests against the Go oracle
 

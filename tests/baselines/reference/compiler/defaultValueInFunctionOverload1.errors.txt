@@ -1,0 +1,1 @@
+defaultValueInFunctionOverload1.ts(1,14): error TS2371: A parameter initializer is only allowed in a function or constructor implementation.

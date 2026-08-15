@@ -1,0 +1,3 @@
+jsxNamespacePrefixIntrinsics.tsx(15,18): error TS2339: Property 'element' does not exist on type 'JSX.IntrinsicElements'.
+jsxNamespacePrefixIntrinsics.tsx(16,30): error TS2322: Type '{ attribute: string; }' is not assignable to type '{ "ns:attribute": string; }'.
+jsxNamespacePrefixIntrinsics.tsx(17,30): error TS2322: Type '{ "ns:invalid": string; }' is not assignable to type '{ "ns:attribute": string; }'.

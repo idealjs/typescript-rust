@@ -1,0 +1,1 @@
+privacyCheckExportAssignmentOnExportedGenericInterface1.ts(8,10): error TS2454: Variable 'Foo' is used before being assigned.

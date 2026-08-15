@@ -1,0 +1,6 @@
+typeCheckTypeArgument.ts(1,19): error TS2304: Cannot find name 'UNKNOWN'.
+typeCheckTypeArgument.ts(3,26): error TS2304: Cannot find name 'UNKNOWN'.
+typeCheckTypeArgument.ts(5,21): error TS2304: Cannot find name 'UNKNOWN'.
+typeCheckTypeArgument.ts(7,24): error TS2304: Cannot find name 'UNKNOWN'.
+typeCheckTypeArgument.ts(10,22): error TS2304: Cannot find name 'UNKNOWN'.
+typeCheckTypeArgument.ts(13,13): error TS2304: Cannot find name 'UNKNOWN'.

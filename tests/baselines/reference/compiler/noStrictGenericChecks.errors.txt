@@ -1,0 +1,1 @@
+noStrictGenericChecks.ts(5,5): error TS2322: Type 'B' is not assignable to type 'A'.

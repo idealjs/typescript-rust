@@ -1,0 +1,10 @@
+privacyGloVar.ts(11,17): error TS2564: Property 'C3_v1_private' has no initializer and is not definitely assigned in the constructor.
+privacyGloVar.ts(12,16): error TS2564: Property 'C3_v2_public' has no initializer and is not definitely assigned in the constructor.
+privacyGloVar.ts(13,17): error TS2564: Property 'C3_v3_private' has no initializer and is not definitely assigned in the constructor.
+privacyGloVar.ts(14,16): error TS2564: Property 'C3_v4_public' has no initializer and is not definitely assigned in the constructor.
+privacyGloVar.ts(28,17): error TS2564: Property 'C4_v1_private' has no initializer and is not definitely assigned in the constructor.
+privacyGloVar.ts(29,16): error TS2564: Property 'C4_v2_public' has no initializer and is not definitely assigned in the constructor.
+privacyGloVar.ts(30,17): error TS2564: Property 'C4_v3_private' has no initializer and is not definitely assigned in the constructor.
+privacyGloVar.ts(31,16): error TS2564: Property 'C4_v4_public' has no initializer and is not definitely assigned in the constructor.
+privacyGloVar.ts(66,13): error TS2564: Property 'glo_C3_v1_private' has no initializer and is not definitely assigned in the constructor.
+privacyGloVar.ts(67,12): error TS2564: Property 'glo_C3_v2_public' has no initializer and is not definitely assigned in the constructor.

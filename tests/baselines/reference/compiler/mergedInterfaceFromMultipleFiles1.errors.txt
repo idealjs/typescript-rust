@@ -1,0 +1,4 @@
+mergedInterfaceFromMultipleFiles1_1.ts(10,17): error TS2454: Variable 'c' is used before being assigned.
+mergedInterfaceFromMultipleFiles1_1.ts(11,17): error TS2454: Variable 'c' is used before being assigned.
+mergedInterfaceFromMultipleFiles1_1.ts(12,17): error TS2454: Variable 'c' is used before being assigned.
+mergedInterfaceFromMultipleFiles1_1.ts(13,15): error TS2454: Variable 'c' is used before being assigned.

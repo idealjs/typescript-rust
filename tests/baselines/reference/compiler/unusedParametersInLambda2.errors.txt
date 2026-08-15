@@ -1,0 +1,1 @@
+unusedParametersInLambda2.ts(3,17): error TS6133: 'X' is declared but its value is never read.

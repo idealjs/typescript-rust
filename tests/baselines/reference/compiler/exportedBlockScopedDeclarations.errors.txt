@@ -1,0 +1,8 @@
+exportedBlockScopedDeclarations.ts(1,13): error TS2448: Block-scoped variable 'foo' used before its declaration.
+exportedBlockScopedDeclarations.ts(2,20): error TS2448: Block-scoped variable 'bar' used before its declaration.
+exportedBlockScopedDeclarations.ts(4,15): error TS2448: Block-scoped variable 'bar' used before its declaration.
+exportedBlockScopedDeclarations.ts(7,22): error TS2448: Block-scoped variable 'bar' used before its declaration.
+exportedBlockScopedDeclarations.ts(10,12): error TS2448: Block-scoped variable 'foo1' used before its declaration.
+exportedBlockScopedDeclarations.ts(11,19): error TS2448: Block-scoped variable 'bar1' used before its declaration.
+exportedBlockScopedDeclarations.ts(13,14): error TS2448: Block-scoped variable 'bar1' used before its declaration.
+exportedBlockScopedDeclarations.ts(16,21): error TS2448: Block-scoped variable 'bar1' used before its declaration.

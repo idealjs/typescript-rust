@@ -1,0 +1,6 @@
+genericClasses3.ts(2,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+genericClasses3.ts(3,5): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+genericClasses3.ts(7,12): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+genericClasses3.ts(12,9): error TS2454: Variable 'v2' is used before being assigned.
+genericClasses3.ts(13,9): error TS2454: Variable 'v2' is used before being assigned.
+genericClasses3.ts(15,9): error TS2454: Variable 'v2' is used before being assigned.

@@ -1,0 +1,1 @@
+declarationEmitTypeAliasTypeParameterExtendingUnknownSymbol.ts(1,18): error TS2304: Cannot find name 'Unknown'.

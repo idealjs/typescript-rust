@@ -1,0 +1,1 @@
+addMoreOverloadsToBaseSignature.ts(5,11): error TS2430: Interface 'Bar' incorrectly extends interface 'Foo'.

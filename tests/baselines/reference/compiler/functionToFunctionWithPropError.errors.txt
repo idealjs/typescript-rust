@@ -1,0 +1,1 @@
+functionToFunctionWithPropError.ts(4,1): error TS2741: Property 'prop' is missing in type '() => string' but required in type '{ (): string; prop: number; }'.

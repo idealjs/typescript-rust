@@ -1,0 +1,1 @@
+unusedTypeParameterInMethod5.ts(2,25): error TS6133: 'X' is declared but its value is never read.

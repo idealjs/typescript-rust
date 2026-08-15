@@ -1,0 +1,1 @@
+/index.ts(7,7): error TS2322: Type '{ default: { configs: { 'stage-0': PluginConfig; }; }; configs: { 'stage-0': PluginConfig; }; }' is not assignable to type 'Plugin'.

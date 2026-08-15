@@ -1,0 +1,7 @@
+errorsOnUnionsOfOverlappingObjects01.ts(18,3): error TS2345: Argument of type '{ a: string; b: string; }' is not assignable to parameter of type 'Foo | Other'.
+errorsOnUnionsOfOverlappingObjects01.ts(19,12): error TS2322: Type 'string' is not assignable to type 'number'.
+errorsOnUnionsOfOverlappingObjects01.ts(24,5): error TS2353: Object literal may only specify known properties, and 'a' does not exist in type 'Bar | Other'.
+errorsOnUnionsOfOverlappingObjects01.ts(42,10): error TS2345: Argument of type '{ dog: string; }' is not assignable to parameter of type 'ExoticAnimal'.
+errorsOnUnionsOfOverlappingObjects01.ts(43,10): error TS2345: Argument of type '{ man: string; bear: string; }' is not assignable to parameter of type 'ExoticAnimal'.
+errorsOnUnionsOfOverlappingObjects01.ts(46,26): error TS2353: Object literal may only specify known properties, and 'beer' does not exist in type 'ExoticAnimal'.
+errorsOnUnionsOfOverlappingObjects01.ts(47,10): error TS2345: Argument of type '{ man: string; beer: string; }' is not assignable to parameter of type 'ExoticAnimal'.

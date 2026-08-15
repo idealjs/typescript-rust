@@ -1,0 +1,6 @@
+/b.ts(1,1): error TS6192: All imports in import declaration are unused.
+/b.ts(2,1): error TS6192: All imports in import declaration are unused.
+/b.ts(4,19): error TS6133: 'a2' is declared but its value is never read.
+/b.ts(4,28): error TS6133: 'b2' is declared but its value is never read.
+/b.ts(6,17): error TS6133: 'ns2' is declared but its value is never read.
+/b.ts(8,8): error TS6133: 'd5' is declared but its value is never read.

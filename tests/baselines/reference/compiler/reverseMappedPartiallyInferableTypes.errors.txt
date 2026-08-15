@@ -1,0 +1,1 @@
+reverseMappedPartiallyInferableTypes.ts(91,20): error TS18046: 'k' is of type 'unknown'.

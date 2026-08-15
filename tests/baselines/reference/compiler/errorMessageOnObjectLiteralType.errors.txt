@@ -1,0 +1,2 @@
+errorMessageOnObjectLiteralType.ts(5,3): error TS2339: Property 'getOwnPropertyNamess' does not exist on type '{ a: string; b: number; }'.
+errorMessageOnObjectLiteralType.ts(6,8): error TS2551: Property 'getOwnPropertyNamess' does not exist on type 'ObjectConstructor'. Did you mean 'getOwnPropertyNames'?

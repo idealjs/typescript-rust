@@ -1,0 +1,2 @@
+unusedClassesinNamespace5.ts(10,11): error TS6196: 'c3' is declared but never used.
+unusedClassesinNamespace5.ts(11,16): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.

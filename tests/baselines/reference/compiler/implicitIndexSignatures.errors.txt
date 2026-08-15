@@ -1,0 +1,7 @@
+implicitIndexSignatures.ts(10,7): error TS2454: Variable 'empty2' is used before being assigned.
+implicitIndexSignatures.ts(12,7): error TS2454: Variable 'names2' is used before being assigned.
+implicitIndexSignatures.ts(21,36): error TS2454: Variable 'o2' is used before being assigned.
+implicitIndexSignatures.ts(28,36): error TS2454: Variable 'o2' is used before being assigned.
+implicitIndexSignatures.ts(35,36): error TS2454: Variable 'o2' is used before being assigned.
+implicitIndexSignatures.ts(42,36): error TS2454: Variable 'o2' is used before being assigned.
+implicitIndexSignatures.ts(44,36): error TS2454: Variable 'o2' is used before being assigned.

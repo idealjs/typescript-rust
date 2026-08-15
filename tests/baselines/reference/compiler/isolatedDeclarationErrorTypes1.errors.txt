@@ -1,0 +1,1 @@
+isolatedDeclarationErrorTypes1.ts(3,28): error TS2307: Cannot find module 'foo' or its corresponding type declarations.

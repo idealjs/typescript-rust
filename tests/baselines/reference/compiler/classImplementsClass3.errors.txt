@@ -1,0 +1,1 @@
+classImplementsClass3.ts(13,5): error TS2454: Variable 'c2' is used before being assigned.

@@ -1,0 +1,9 @@
+index.js(1,16): error TS7006: Parameter 'obj' implicitly has an 'any' type.
+index.js(6,21): error TS7006: Parameter 'ratio' implicitly has an 'any' type.
+index.js(7,20): error TS7006: Parameter 'ratio' implicitly has an 'any' type.
+index.js(8,22): error TS7006: Parameter 'ratio' implicitly has an 'any' type.
+index.js(9,24): error TS7006: Parameter 'ratio' implicitly has an 'any' type.
+index.js(10,20): error TS7006: Parameter 'ratio' implicitly has an 'any' type.
+index.js(11,21): error TS7006: Parameter 'ratio' implicitly has an 'any' type.
+index.js(13,21): error TS7006: Parameter 'ratio' implicitly has an 'any' type.
+index.js(14,35): error TS2339: Property 'rgb' does not exist on type 'Color'.

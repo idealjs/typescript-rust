@@ -1,0 +1,3 @@
+inheritedConstructorWithRestParams2.ts(32,13): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+inheritedConstructorWithRestParams2.ts(33,5): error TS2769: No overload matches this call.
+inheritedConstructorWithRestParams2.ts(34,5): error TS2769: No overload matches this call.

@@ -1,0 +1,4 @@
+multiExtendsSplitInterfaces2.ts(19,9): error TS2454: Variable 'i' is used before being assigned.
+multiExtendsSplitInterfaces2.ts(20,10): error TS2454: Variable 'i' is used before being assigned.
+multiExtendsSplitInterfaces2.ts(21,9): error TS2454: Variable 'i' is used before being assigned.
+multiExtendsSplitInterfaces2.ts(22,10): error TS2454: Variable 'i' is used before being assigned.

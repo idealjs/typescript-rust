@@ -1,0 +1,8 @@
+constIndexedAccess.ts(13,9): error TS2454: Variable 'test' is used before being assigned.
+constIndexedAccess.ts(14,9): error TS2454: Variable 'test' is used before being assigned.
+constIndexedAccess.ts(16,10): error TS2454: Variable 'test' is used before being assigned.
+constIndexedAccess.ts(17,10): error TS2454: Variable 'test' is used before being assigned.
+constIndexedAccess.ts(19,10): error TS2454: Variable 'test' is used before being assigned.
+constIndexedAccess.ts(20,10): error TS2454: Variable 'test' is used before being assigned.
+constIndexedAccess.ts(27,10): error TS2454: Variable 'test' is used before being assigned.
+constIndexedAccess.ts(28,10): error TS2454: Variable 'test' is used before being assigned.

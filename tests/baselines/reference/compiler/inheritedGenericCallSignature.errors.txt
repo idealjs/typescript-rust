@@ -1,0 +1,2 @@
+inheritedGenericCallSignature.ts(24,9): error TS2454: Variable 'x' is used before being assigned.
+inheritedGenericCallSignature.ts(24,11): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'Date[]'.

@@ -1,0 +1,5 @@
+objectCreationOfElementAccessExpression.ts(23,13): error TS2564: Property 'isDairyFree' has no initializer and is not definitely assigned in the constructor.
+objectCreationOfElementAccessExpression.ts(53,25): error TS2538: Type 'Cookie' cannot be used as an index type.
+objectCreationOfElementAccessExpression.ts(53,63): error TS2348: Value of type 'typeof Cookie' is not callable. Did you mean to include 'new'?
+objectCreationOfElementAccessExpression.ts(54,41): error TS2538: Type 'Cookie' cannot be used as an index type.
+objectCreationOfElementAccessExpression.ts(54,79): error TS2348: Value of type 'typeof Cookie' is not callable. Did you mean to include 'new'?

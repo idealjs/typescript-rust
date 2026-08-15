@@ -1,0 +1,1 @@
+selfReferencingFile2.ts(1,21): error TS6053: File '../selfReferencingFile2.ts' not found.

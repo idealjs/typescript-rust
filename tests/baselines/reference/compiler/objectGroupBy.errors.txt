@@ -1,0 +1,1 @@
+objectGroupBy.ts(9,49): error TS2322: Type 'Employee' is not assignable to type 'PropertyKey'.

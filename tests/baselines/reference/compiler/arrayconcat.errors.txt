@@ -1,0 +1,3 @@
+arrayconcat.ts(12,9): error TS2564: Property 'options' has no initializer and is not definitely assigned in the constructor.
+arrayconcat.ts(16,25): error TS18048: 'a.name' is possibly 'undefined'.
+arrayconcat.ts(17,25): error TS18048: 'b.name' is possibly 'undefined'.

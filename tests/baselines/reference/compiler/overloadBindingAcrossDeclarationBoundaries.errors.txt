@@ -1,0 +1,3 @@
+overloadBindingAcrossDeclarationBoundaries.ts(32,10): error TS2454: Variable 'a' is used before being assigned.
+overloadBindingAcrossDeclarationBoundaries.ts(33,10): error TS2454: Variable 'a' is used before being assigned.
+overloadBindingAcrossDeclarationBoundaries.ts(34,14): error TS2454: Variable 'a' is used before being assigned.

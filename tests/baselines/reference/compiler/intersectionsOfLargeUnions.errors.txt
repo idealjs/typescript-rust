@@ -1,0 +1,2 @@
+intersectionsOfLargeUnions.ts(21,15): error TS2536: Type 'T' cannot be used to index type 'HTMLElementTagNameMap'.
+intersectionsOfLargeUnions.ts(21,15): error TS2536: Type 'P' cannot be used to index type 'HTMLElementTagNameMap[T]'.

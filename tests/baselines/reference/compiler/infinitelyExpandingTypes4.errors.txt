@@ -1,0 +1,2 @@
+infinitelyExpandingTypes4.ts(21,6): error TS2454: Variable 'q2' is used before being assigned.
+infinitelyExpandingTypes4.ts(22,6): error TS2454: Variable 'q3' is used before being assigned.

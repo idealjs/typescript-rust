@@ -1,0 +1,4 @@
+tooManyTypeParameters1.ts(2,3): error TS2558: Expected 1 type arguments, but got 2.
+tooManyTypeParameters1.ts(5,3): error TS2558: Expected 1 type arguments, but got 2.
+tooManyTypeParameters1.ts(8,15): error TS2558: Expected 1 type arguments, but got 2.
+tooManyTypeParameters1.ts(11,8): error TS2314: Generic type 'I<T>' requires 1 type argument(s).

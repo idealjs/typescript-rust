@@ -1,0 +1,1 @@
+inheritSameNamePropertiesWithDifferentOptionality.ts(9,11): error TS2320: Interface 'A' cannot simultaneously extend types 'C' and 'C2'.

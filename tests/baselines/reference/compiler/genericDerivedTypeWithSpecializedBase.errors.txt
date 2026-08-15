@@ -1,0 +1,3 @@
+genericDerivedTypeWithSpecializedBase.ts(2,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+genericDerivedTypeWithSpecializedBase.ts(6,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+genericDerivedTypeWithSpecializedBase.ts(11,1): error TS2322: Type 'B<number>' is not assignable to type 'A<number>'.

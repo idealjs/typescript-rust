@@ -1,0 +1,2 @@
+letInVarDeclOfForOf_ES6.ts(2,10): error TS1212: Identifier expected. 'let' is a reserved word in strict mode.
+letInVarDeclOfForOf_ES6.ts(5,11): error TS1212: Identifier expected. 'let' is a reserved word in strict mode.

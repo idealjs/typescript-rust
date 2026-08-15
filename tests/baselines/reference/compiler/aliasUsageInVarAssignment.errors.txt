@@ -1,0 +1,2 @@
+aliasUsageInVarAssignment_backbone.ts(2,12): error TS2564: Property 'someData' has no initializer and is not definitely assigned in the constructor.
+aliasUsageInVarAssignment_main.ts(7,25): error TS2454: Variable 'i' is used before being assigned.

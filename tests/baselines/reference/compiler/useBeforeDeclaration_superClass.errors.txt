@@ -1,0 +1,1 @@
+useBeforeDeclaration_superClass.ts(25,18): error TS2729: Property 'x' is used before its initialization.

@@ -1,0 +1,4 @@
+privateFieldsInClassExpressionDeclaration.ts(1,14): error TS4094: Property '#context' of exported anonymous class type may not be private or protected.
+privateFieldsInClassExpressionDeclaration.ts(1,14): error TS4094: Property '#method' of exported anonymous class type may not be private or protected.
+privateFieldsInClassExpressionDeclaration.ts(8,14): error TS4094: Property '#instancePrivate' of exported anonymous class type may not be private or protected.
+privateFieldsInClassExpressionDeclaration.ts(8,14): error TS4094: Property '#staticPrivate' of exported anonymous class type may not be private or protected.

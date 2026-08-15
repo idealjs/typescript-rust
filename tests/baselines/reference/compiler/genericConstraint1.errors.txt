@@ -1,0 +1,2 @@
+genericConstraint1.ts(3,9): error TS2322: Type 'null' is not assignable to type 'T'.
+genericConstraint1.ts(8,8): error TS2344: Type 'string' does not satisfy the constraint 'number'.

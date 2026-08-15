@@ -1,0 +1,10 @@
+inheritedOverloadedSpecializedSignatures.ts(11,1): error TS2454: Variable 'b' is used before being assigned.
+inheritedOverloadedSpecializedSignatures.ts(44,20): error TS2454: Variable 'c' is used before being assigned.
+inheritedOverloadedSpecializedSignatures.ts(45,18): error TS2454: Variable 'c' is used before being assigned.
+inheritedOverloadedSpecializedSignatures.ts(46,19): error TS2454: Variable 'c' is used before being assigned.
+inheritedOverloadedSpecializedSignatures.ts(47,18): error TS2454: Variable 'c' is used before being assigned.
+inheritedOverloadedSpecializedSignatures.ts(48,16): error TS2454: Variable 'c' is used before being assigned.
+inheritedOverloadedSpecializedSignatures.ts(49,20): error TS2454: Variable 'c' is used before being assigned.
+inheritedOverloadedSpecializedSignatures.ts(50,21): error TS2454: Variable 'c' is used before being assigned.
+inheritedOverloadedSpecializedSignatures.ts(51,18): error TS2454: Variable 'c' is used before being assigned.
+inheritedOverloadedSpecializedSignatures.ts(52,16): error TS2454: Variable 'c' is used before being assigned.

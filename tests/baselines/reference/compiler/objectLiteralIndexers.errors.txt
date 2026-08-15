@@ -1,0 +1,4 @@
+objectLiteralIndexers.ts(13,51): error TS2454: Variable 'a' is used before being assigned.
+objectLiteralIndexers.ts(13,57): error TS2454: Variable 'b' is used before being assigned.
+objectLiteralIndexers.ts(14,11): error TS2454: Variable 'b' is used before being assigned.
+objectLiteralIndexers.ts(15,17): error TS2454: Variable 'b' is used before being assigned.

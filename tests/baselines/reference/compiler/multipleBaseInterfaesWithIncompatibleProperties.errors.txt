@@ -1,0 +1,1 @@
+multipleBaseInterfaesWithIncompatibleProperties.ts(6,11): error TS2320: Interface 'C' cannot simultaneously extend types 'A<string>' and 'A<number>'.

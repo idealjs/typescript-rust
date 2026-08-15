@@ -1,0 +1,1 @@
+promiseTest.ts(7,5): error TS2322: Type 'null' is not assignable to type 'Promise<number>'.

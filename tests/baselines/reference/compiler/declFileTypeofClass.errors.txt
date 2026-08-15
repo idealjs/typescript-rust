@@ -1,0 +1,2 @@
+declFileTypeofClass.ts(4,13): error TS2564: Property 'x3' has no initializer and is not definitely assigned in the constructor.
+declFileTypeofClass.ts(5,12): error TS2564: Property 'y3' has no initializer and is not definitely assigned in the constructor.

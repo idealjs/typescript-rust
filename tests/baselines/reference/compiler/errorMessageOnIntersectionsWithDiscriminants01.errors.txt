@@ -1,0 +1,1 @@
+errorMessageOnIntersectionsWithDiscriminants01.ts(8,1): error TS2322: Type 'A' is not assignable to type 'B'.

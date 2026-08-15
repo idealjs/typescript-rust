@@ -1,0 +1,4 @@
+user.ts(1,8): error TS2395: Individual declarations in merged declaration 'Obj' must be all exported or all local.
+user.ts(1,8): error TS2440: Import declaration conflicts with local declaration of 'Obj'.
+user.ts(3,14): error TS2395: Individual declarations in merged declaration 'Obj' must be all exported or all local.
+user.ts(3,25): error TS2448: Block-scoped variable 'Obj' used before its declaration.

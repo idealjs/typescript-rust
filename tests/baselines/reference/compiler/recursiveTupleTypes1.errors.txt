@@ -1,0 +1,1 @@
+recursiveTupleTypes1.ts(11,9): error TS2454: Variable 'tree2' is used before being assigned.

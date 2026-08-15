@@ -1,0 +1,1 @@
+index.js(5,21): error TS2339: Property 'fn' does not exist on type '{ (...args: any[]): void; readonly name: string; }'.

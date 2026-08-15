@@ -1,0 +1,11 @@
+typeGuardConstructorPrimitiveTypes.ts(3,5): error TS2454: Variable 'var1' is used before being assigned.
+typeGuardConstructorPrimitiveTypes.ts(6,5): error TS2454: Variable 'var1' is used before being assigned.
+typeGuardConstructorPrimitiveTypes.ts(9,5): error TS2454: Variable 'var1' is used before being assigned.
+typeGuardConstructorPrimitiveTypes.ts(12,5): error TS2454: Variable 'var1' is used before being assigned.
+typeGuardConstructorPrimitiveTypes.ts(15,5): error TS2454: Variable 'var1' is used before being assigned.
+typeGuardConstructorPrimitiveTypes.ts(18,5): error TS2454: Variable 'var1' is used before being assigned.
+typeGuardConstructorPrimitiveTypes.ts(24,5): error TS2454: Variable 'var2' is used before being assigned.
+typeGuardConstructorPrimitiveTypes.ts(27,5): error TS2454: Variable 'var2' is used before being assigned.
+typeGuardConstructorPrimitiveTypes.ts(30,5): error TS2454: Variable 'var2' is used before being assigned.
+typeGuardConstructorPrimitiveTypes.ts(33,5): error TS2454: Variable 'var2' is used before being assigned.
+typeGuardConstructorPrimitiveTypes.ts(36,5): error TS2454: Variable 'var2' is used before being assigned.

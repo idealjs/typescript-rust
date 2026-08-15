@@ -1,0 +1,2 @@
+styledComponentsInstantiaionLimitNotReached.ts(172,39): error TS2344: Type 'WithC' does not satisfy the constraint 'ComponentType<any>'.
+styledComponentsInstantiaionLimitNotReached.ts(195,65): error TS2344: Type 'AnyStyledComponent & C' does not satisfy the constraint 'ComponentType<any>'.

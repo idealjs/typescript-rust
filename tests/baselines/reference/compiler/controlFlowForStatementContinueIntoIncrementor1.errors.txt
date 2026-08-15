@@ -1,0 +1,2 @@
+controlFlowForStatementContinueIntoIncrementor1.ts(8,5): error TS2322: Type 'string | number' is not assignable to type 'number'.
+controlFlowForStatementContinueIntoIncrementor1.ts(23,5): error TS2322: Type 'string | number' is not assignable to type 'number'.

@@ -1,0 +1,2 @@
+decoratorMetadataNoLibIsolatedModulesTypes.ts(2,6): error TS2304: Cannot find name 'Decorate'.
+decoratorMetadataNoLibIsolatedModulesTypes.ts(3,13): error TS2583: Cannot find name 'Map'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2015' or later.

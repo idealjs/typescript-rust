@@ -1,0 +1,2 @@
+collisionExportsRequireAndAmbientModule_externalmodule.ts(8,5): error TS2322: Type 'null' is not assignable to type 'I'.
+collisionExportsRequireAndAmbientModule_externalmodule.ts(17,5): error TS2322: Type 'null' is not assignable to type 'I'.

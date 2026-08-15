@@ -1,0 +1,2 @@
+reachabilityChecks9.ts(7,7): error TS7027: Unreachable code detected.
+reachabilityChecks9.ts(20,7): error TS7027: Unreachable code detected.

@@ -1,0 +1,1 @@
+b.ts(2,14): error TS2527: The inferred type of 'A1' references an inaccessible 'unique symbol' type. A type annotation is necessary.

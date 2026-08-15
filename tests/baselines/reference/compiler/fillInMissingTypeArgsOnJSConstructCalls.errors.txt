@@ -1,0 +1,7 @@
+BaseB.js(2,24): error TS8004: Type parameter declarations can only be used in TypeScript files.
+BaseB.js(2,25): error TS1005: ',' expected.
+BaseB.js(3,14): error TS2304: Cannot find name 'Class'.
+BaseB.js(3,14): error TS8010: Type annotations can only be used in TypeScript files.
+BaseB.js(4,25): error TS2304: Cannot find name 'Class'.
+BaseB.js(4,25): error TS8010: Type annotations can only be used in TypeScript files.
+SubB.js(3,41): error TS8011: Type arguments can only be used in TypeScript files.

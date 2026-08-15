@@ -1,0 +1,1 @@
+exportSpecifierReferencingOuterDeclaration3.ts(6,30): error TS2694: Namespace 'X' has no exported member 'bar'.

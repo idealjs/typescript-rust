@@ -1,0 +1,1 @@
+errorMessagesIntersectionTypes02.ts(14,5): error TS2322: Type '{ fooProp: "frizzlebizzle"; } & Bar' is not assignable to type 'FooBar'.

@@ -1,0 +1,7 @@
+overloadresolutionWithConstraintCheckingDeferred.ts(14,22): error TS2769: No overload matches this call.
+overloadresolutionWithConstraintCheckingDeferred.ts(14,37): error TS2345: Argument of type 'D' is not assignable to parameter of type 'A'.
+overloadresolutionWithConstraintCheckingDeferred.ts(16,23): error TS2769: No overload matches this call.
+overloadresolutionWithConstraintCheckingDeferred.ts(16,38): error TS2344: Type 'D' does not satisfy the constraint 'A'.
+overloadresolutionWithConstraintCheckingDeferred.ts(18,27): error TS2769: No overload matches this call.
+overloadresolutionWithConstraintCheckingDeferred.ts(19,14): error TS2344: Type 'D' does not satisfy the constraint 'A'.
+overloadresolutionWithConstraintCheckingDeferred.ts(19,32): error TS2345: Argument of type 'D' is not assignable to parameter of type 'A'.

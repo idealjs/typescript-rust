@@ -1,0 +1,2 @@
+contextualSignatureInstantiation2.ts(5,15): error TS2454: Variable 'id' is used before being assigned.
+contextualSignatureInstantiation2.ts(5,19): error TS2454: Variable 'id' is used before being assigned.

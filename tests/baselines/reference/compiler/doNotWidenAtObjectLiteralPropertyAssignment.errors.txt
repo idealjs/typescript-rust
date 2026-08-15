@@ -1,0 +1,1 @@
+doNotWidenAtObjectLiteralPropertyAssignment.ts(10,60): error TS2322: Type 'null' is not assignable to type 'IIntervalTreeNode[] | undefined'.

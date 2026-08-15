@@ -1,0 +1,1 @@
+unknownSymbolOffContextualType1.ts(16,18): error TS2339: Property 'xyxyxyx' does not exist on type 'HTMLElement'.

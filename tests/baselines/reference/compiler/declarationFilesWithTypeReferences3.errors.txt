@@ -1,0 +1,1 @@
+/a/app.ts(3,5): error TS2322: Type 'undefined' is not assignable to type 'Error2'.

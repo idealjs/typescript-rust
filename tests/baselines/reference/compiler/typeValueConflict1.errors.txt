@@ -1,0 +1,1 @@
+typeValueConflict1.ts(8,21): error TS2339: Property 'A' does not exist on type 'number'.

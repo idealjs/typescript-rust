@@ -1,0 +1,8 @@
+index.js(2,19): error TS2315: Type 'Boolean' is not generic.
+index2.js(2,19): error TS2315: Type 'Void' is not generic.
+index3.js(2,19): error TS2315: Type 'Undefined' is not generic.
+index4.js(2,19): error TS2315: Type 'Function' is not generic.
+index5.js(2,19): error TS2315: Type 'String' is not generic.
+index6.js(2,19): error TS2315: Type 'Number' is not generic.
+index7.js(2,19): error TS2315: Type 'Object' is not generic.
+index8.js(4,15): error TS2304: Cannot find name 'T'.

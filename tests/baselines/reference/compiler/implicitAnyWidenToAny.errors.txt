@@ -1,0 +1,2 @@
+implicitAnyWidenToAny.ts(20,25): error TS2322: Type 'null' is not assignable to type 'number'.
+implicitAnyWidenToAny.ts(20,31): error TS2322: Type 'undefined' is not assignable to type 'number'.

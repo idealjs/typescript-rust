@@ -1,0 +1,3 @@
+noImplicitAnyInCastExpression.ts(9,2): error TS2352: Conversion of type '{ a: null; }' to type 'IFoo' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+noImplicitAnyInCastExpression.ts(12,2): error TS2352: Conversion of type '{ a: number; b: undefined; }' to type 'IFoo' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+noImplicitAnyInCastExpression.ts(15,2): error TS2352: Conversion of type '{ c: null; }' to type 'IFoo' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.

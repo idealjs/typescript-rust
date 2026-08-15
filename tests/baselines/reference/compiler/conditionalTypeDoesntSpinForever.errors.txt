@@ -1,0 +1,12 @@
+conditionalTypeDoesntSpinForever.ts(23,15): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.
+conditionalTypeDoesntSpinForever.ts(24,20): error TS2322: Type 'undefined' is not assignable to type 'TYPE'.
+conditionalTypeDoesntSpinForever.ts(36,19): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.
+conditionalTypeDoesntSpinForever.ts(53,21): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.
+conditionalTypeDoesntSpinForever.ts(53,45): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.
+conditionalTypeDoesntSpinForever.ts(54,26): error TS2322: Type 'undefined' is not assignable to type 'TYPE'.
+conditionalTypeDoesntSpinForever.ts(65,17): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.
+conditionalTypeDoesntSpinForever.ts(66,22): error TS2322: Type 'undefined' is not assignable to type 'TYPE'.
+conditionalTypeDoesntSpinForever.ts(78,38): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.
+conditionalTypeDoesntSpinForever.ts(94,21): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.
+conditionalTypeDoesntSpinForever.ts(96,41): error TS2769: No overload matches this call.
+conditionalTypeDoesntSpinForever.ts(97,71): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.

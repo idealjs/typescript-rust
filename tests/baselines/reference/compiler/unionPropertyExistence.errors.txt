@@ -1,0 +1,8 @@
+unionPropertyExistence.ts(27,3): error TS2339: Property 'nope' does not exist on type '"bar" | "foo"'.
+unionPropertyExistence.ts(28,6): error TS2339: Property 'onlyInB' does not exist on type '"foo" | B'.
+unionPropertyExistence.ts(30,6): error TS2339: Property 'length' does not exist on type '"foo" | B'.
+unionPropertyExistence.ts(32,4): error TS2339: Property 'onlyInB' does not exist on type 'AB'.
+unionPropertyExistence.ts(35,5): error TS2339: Property 'notInC' does not exist on type 'ABC'.
+unionPropertyExistence.ts(36,4): error TS2551: Property 'notInB' does not exist on type 'AB'. Did you mean 'notInC'?
+unionPropertyExistence.ts(37,5): error TS2339: Property 'notInB' does not exist on type 'ABC'.
+unionPropertyExistence.ts(40,5): error TS2339: Property 'inNone' does not exist on type 'ABC'.

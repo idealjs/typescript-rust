@@ -1,0 +1,4 @@
+infiniteConstraints.ts(4,37): error TS2536: Type '"val"' cannot be used to index type 'B[Exclude<keyof B, K>]'.
+infiniteConstraints.ts(31,43): error TS2322: Type 'Value<"dup">' is not assignable to type 'never'.
+infiniteConstraints.ts(31,63): error TS2322: Type 'Value<"dup">' is not assignable to type 'never'.
+infiniteConstraints.ts(36,71): error TS2536: Type '"foo"' cannot be used to index type 'T[keyof T]'.

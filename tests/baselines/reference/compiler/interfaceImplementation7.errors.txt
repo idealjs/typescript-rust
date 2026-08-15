@@ -1,0 +1,2 @@
+interfaceImplementation7.ts(4,11): error TS2320: Interface 'i3' cannot simultaneously extend types 'i1' and 'i2'.
+interfaceImplementation7.ts(8,12): error TS2416: Property 'name' in type 'C1' is not assignable to the same property in base type 'i4'.

@@ -1,0 +1,14 @@
+duplicateClassElements.ts(3,12): error TS2300: Duplicate identifier 'a'.
+duplicateClassElements.ts(4,12): error TS2393: Duplicate function implementation.
+duplicateClassElements.ts(6,12): error TS2393: Duplicate function implementation.
+duplicateClassElements.ts(8,12): error TS2300: Duplicate identifier 'x'.
+duplicateClassElements.ts(9,9): error TS2300: Duplicate identifier 'x'.
+duplicateClassElements.ts(12,9): error TS2300: Duplicate identifier 'x'.
+duplicateClassElements.ts(21,12): error TS2300: Duplicate identifier 'z'.
+duplicateClassElements.ts(23,9): error TS2300: Duplicate identifier 'z'.
+duplicateClassElements.ts(26,9): error TS2300: Duplicate identifier 'z'.
+duplicateClassElements.ts(34,12): error TS2300: Duplicate identifier 'x2'.
+duplicateClassElements.ts(34,12): error TS2717: Subsequent property declarations must have the same type.  Property 'x2' must be of type 'number', but here has type 'any'.
+duplicateClassElements.ts(36,9): error TS2300: Duplicate identifier 'z2'.
+duplicateClassElements.ts(39,9): error TS2300: Duplicate identifier 'z2'.
+duplicateClassElements.ts(41,12): error TS2300: Duplicate identifier 'z2'.

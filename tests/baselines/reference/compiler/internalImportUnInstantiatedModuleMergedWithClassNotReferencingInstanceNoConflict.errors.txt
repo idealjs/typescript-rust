@@ -1,0 +1,1 @@
+internalImportUnInstantiatedModuleMergedWithClassNotReferencingInstanceNoConflict.ts(2,5): error TS2564: Property 'aProp' has no initializer and is not definitely assigned in the constructor.

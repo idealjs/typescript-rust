@@ -1,0 +1,9 @@
+varianceMeasurement.ts(10,7): error TS2322: Type 'Foo1<string>' is not assignable to type 'Foo1<"a">'.
+varianceMeasurement.ts(21,7): error TS2322: Type 'Foo2<string>' is not assignable to type 'Foo2<"a">'.
+varianceMeasurement.ts(22,7): error TS2322: Type 'Foo2<string>' is not assignable to type 'Foo2<unknown>'.
+varianceMeasurement.ts(33,7): error TS2322: Type 'Foo3<string>' is not assignable to type 'Foo3<"a">'.
+varianceMeasurement.ts(44,7): error TS2322: Type 'Foo4<string>' is not assignable to type 'Foo4<"a">'.
+varianceMeasurement.ts(45,7): error TS2322: Type 'Foo4<string>' is not assignable to type 'Foo4<unknown>'.
+varianceMeasurement.ts(57,7): error TS2322: Type 'Fn<string, number>' is not assignable to type 'Fn<unknown, number>'.
+varianceMeasurement.ts(62,7): error TS2322: Type 'Fn<string, number>' is not assignable to type 'Fn<string, 0>'.
+varianceMeasurement.ts(75,7): error TS2322: Type 'C<unknown, number>' is not assignable to type 'C<unknown, string>'.

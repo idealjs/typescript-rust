@@ -1,0 +1,1 @@
+bar.ts(1,1): error TS2322: Type 'string' is not assignable to type 'number'.

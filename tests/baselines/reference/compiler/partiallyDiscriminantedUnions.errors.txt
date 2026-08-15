@@ -1,0 +1,2 @@
+partiallyDiscriminantedUnions.ts(30,16): error TS2564: Property 'kind' has no initializer and is not definitely assigned in the constructor.
+partiallyDiscriminantedUnions.ts(31,16): error TS2564: Property 'kind' has no initializer and is not definitely assigned in the constructor.

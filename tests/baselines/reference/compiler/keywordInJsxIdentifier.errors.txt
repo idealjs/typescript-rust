@@ -1,0 +1,4 @@
+keywordInJsxIdentifier.tsx(2,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+keywordInJsxIdentifier.tsx(3,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+keywordInJsxIdentifier.tsx(4,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+keywordInJsxIdentifier.tsx(5,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.

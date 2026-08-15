@@ -1,0 +1,1 @@
+mutuallyRecursiveGenericBaseTypes2.ts(3,24): error TS2322: Type 'null' is not assignable to type 'foo2<T[]>'.

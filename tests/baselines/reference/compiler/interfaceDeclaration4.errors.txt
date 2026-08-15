@@ -1,0 +1,8 @@
+interfaceDeclaration4.ts(9,9): error TS2564: Property 'item' has no initializer and is not definitely assigned in the constructor.
+interfaceDeclaration4.ts(18,11): error TS2430: Interface 'I3' incorrectly extends interface 'I1'.
+interfaceDeclaration4.ts(27,7): error TS2420: Class 'C2' incorrectly implements interface 'I4'.
+interfaceDeclaration4.ts(28,12): error TS2564: Property 'token' has no initializer and is not definitely assigned in the constructor.
+interfaceDeclaration4.ts(36,7): error TS2420: Class 'C3' incorrectly implements interface 'I1'.
+interfaceDeclaration4.ts(39,14): error TS1005: '{' expected.
+interfaceDeclaration4.ts(39,15): error TS1434: Unexpected keyword or identifier.
+interfaceDeclaration4.ts(39,15): error TS2304: Cannot find name 'I1'.

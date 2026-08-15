@@ -1,0 +1,2 @@
+a.ts(4,1): error TS2454: Variable 'a' is used before being assigned.
+b.ts(4,1): error TS2454: Variable 'a' is used before being assigned.

@@ -1,0 +1,4 @@
+implementGenericWithMismatchedTypes.ts(8,5): error TS2416: Property 'foo' in type 'C<T>' is not assignable to the same property in base type 'IFoo<T>'.
+implementGenericWithMismatchedTypes.ts(9,9): error TS2322: Type 'null' is not assignable to type 'number'.
+implementGenericWithMismatchedTypes.ts(17,5): error TS2416: Property 'foo' in type 'C2<T>' is not assignable to the same property in base type 'IFoo2<T>'.
+implementGenericWithMismatchedTypes.ts(18,9): error TS2322: Type 'null' is not assignable to type 'number'.

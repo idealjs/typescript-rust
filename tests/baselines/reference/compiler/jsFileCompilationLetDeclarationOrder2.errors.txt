@@ -1,0 +1,1 @@
+a.ts(2,1): error TS2448: Block-scoped variable 'a' used before its declaration.

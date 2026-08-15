@@ -1,0 +1,2 @@
+genericAssignmentCompatOfFunctionSignatures1.ts(4,1): error TS2322: Type '<T, U extends { a: T; b: number; }>(x: T, z: U) => void' is not assignable to type '<T, U extends { a: T; b: string; }>(x: T, z: U) => void'.
+genericAssignmentCompatOfFunctionSignatures1.ts(5,1): error TS2322: Type '<T, U extends { a: T; b: string; }>(x: T, z: U) => void' is not assignable to type '<T, U extends { a: T; b: number; }>(x: T, z: U) => void'.

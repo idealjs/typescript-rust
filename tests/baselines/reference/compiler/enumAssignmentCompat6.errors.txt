@@ -1,0 +1,8 @@
+a.ts(36,5): error TS2322: Type 'strings.DiagnosticCategory' is not assignable to type 'numerics.DiagnosticCategory'.
+a.ts(37,5): error TS2322: Type 'numerics.DiagnosticCategory' is not assignable to type 'strings.DiagnosticCategory'.
+a.ts(41,5): error TS2322: Type 'DiagnosticCategory' is not assignable to type 'DiagnosticCategory2'.
+a.ts(42,5): error TS2322: Type 'DiagnosticCategory2' is not assignable to type 'DiagnosticCategory'.
+a.ts(51,5): error TS2322: Type 'ambients.DiagnosticCategory' is not assignable to type 'strings.DiagnosticCategory'.
+a.ts(52,5): error TS2322: Type 'strings.DiagnosticCategory' is not assignable to type 'ambients.DiagnosticCategory'.
+f.ts(18,9): error TS2322: Type 'DiagnosticCategory' is not assignable to type 'import("f").DiagnosticCategory'.
+f.ts(19,9): error TS2322: Type 'import("f").DiagnosticCategory' is not assignable to type 'DiagnosticCategory'.

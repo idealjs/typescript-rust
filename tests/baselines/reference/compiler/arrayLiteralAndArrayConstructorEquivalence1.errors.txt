@@ -1,0 +1,1 @@
+arrayLiteralAndArrayConstructorEquivalence1.ts(3,22): error TS2314: Generic type 'Array<T>' requires 1 type argument(s).

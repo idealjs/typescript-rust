@@ -1,0 +1,2 @@
+moduleSharesNameWithImportDeclarationInsideIt3.ts(10,12): error TS2300: Duplicate identifier 'M'.
+moduleSharesNameWithImportDeclarationInsideIt3.ts(11,12): error TS2300: Duplicate identifier 'M'.

@@ -1,0 +1,1 @@
+component.d.ts(2,41): error TS7008: Member 'props' implicitly has an 'any' type.

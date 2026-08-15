@@ -1,0 +1,4 @@
+a.js(1,5): error TS2451: Cannot redeclare block-scoped variable 'C'.
+a.js(2,5): error TS2451: Cannot redeclare block-scoped variable 'C'.
+a.js(6,5): error TS7027: Unreachable code detected.
+a.js(11,9): error TS1100: Invalid use of 'arguments' in strict mode.

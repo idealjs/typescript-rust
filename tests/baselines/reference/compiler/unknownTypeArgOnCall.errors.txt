@@ -1,0 +1,1 @@
+unknownTypeArgOnCall.ts(7,17): error TS2304: Cannot find name 'Uhhhh'.

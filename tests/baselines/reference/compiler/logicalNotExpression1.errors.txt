@@ -1,0 +1,1 @@
+logicalNotExpression1.ts(1,2): error TS2304: Cannot find name 'foo'.

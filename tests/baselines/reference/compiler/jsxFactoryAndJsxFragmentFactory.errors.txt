@@ -1,0 +1,6 @@
+jsxFactoryAndJsxFragmentFactory.tsx(5,3): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxFactoryAndJsxFragmentFactory.tsx(5,10): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxFactoryAndJsxFragmentFactory.tsx(5,19): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxFactoryAndJsxFragmentFactory.tsx(5,28): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxFactoryAndJsxFragmentFactory.tsx(5,35): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxFactoryAndJsxFragmentFactory.tsx(5,44): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.

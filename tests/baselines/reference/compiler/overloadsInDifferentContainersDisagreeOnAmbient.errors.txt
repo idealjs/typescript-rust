@@ -1,0 +1,1 @@
+overloadsInDifferentContainersDisagreeOnAmbient.ts(7,21): error TS2384: Overload signatures must all be ambient or non-ambient.

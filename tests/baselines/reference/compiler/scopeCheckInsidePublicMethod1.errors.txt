@@ -1,0 +1,1 @@
+scopeCheckInsidePublicMethod1.ts(4,7): error TS2662: Cannot find name 's'. Did you mean the static member 'C.s'?

@@ -1,0 +1,1 @@
+genericObjectLitReturnType.ts(8,10): error TS2454: Variable 'x' is used before being assigned.

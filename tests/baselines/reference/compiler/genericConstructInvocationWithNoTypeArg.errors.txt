@@ -1,0 +1,1 @@
+genericConstructInvocationWithNoTypeArg.ts(4,27): error TS2693: 'Foo' only refers to a type, but is being used as a value here.

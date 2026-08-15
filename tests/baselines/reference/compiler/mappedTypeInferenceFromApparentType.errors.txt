@@ -1,0 +1,1 @@
+mappedTypeInferenceFromApparentType.ts(10,1): error TS2322: Type 'foo' is not assignable to type 'bar'.

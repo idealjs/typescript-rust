@@ -1,0 +1,1 @@
+indexedAccessWithFreshObjectLiteral.ts(34,10): error TS2339: Property 'z' does not exist on type '{ a: number; b: string; c: boolean; }'.

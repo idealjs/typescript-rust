@@ -1,0 +1,2 @@
+multiLineErrors.ts(3,22): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
+multiLineErrors.ts(21,1): error TS2322: Type 'A2' is not assignable to type 'A1'.

@@ -1,0 +1,2 @@
+/types.js(3,21): error TS2304: Cannot find name 'Keyword'.
+/types.js(3,30): error TS2304: Cannot find name 'ParamValueTyped'.

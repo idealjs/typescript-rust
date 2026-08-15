@@ -1,0 +1,1 @@
+jsxEmptyExpressionNotCountedAsChild2.tsx(28,2): error TS2322: Type '{}' is not assignable to type '{ bar?: number | undefined; } & { __children__: () => number; }'.

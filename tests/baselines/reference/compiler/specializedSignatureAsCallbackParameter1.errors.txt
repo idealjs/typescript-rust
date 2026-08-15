@@ -1,0 +1,2 @@
+specializedSignatureAsCallbackParameter1.ts(7,1): error TS2769: No overload matches this call.
+specializedSignatureAsCallbackParameter1.ts(8,1): error TS2769: No overload matches this call.

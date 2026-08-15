@@ -1,0 +1,1 @@
+superCallFromClassThatDerivesNonGenericTypeButWithTypeArguments1.ts(7,17): error TS2315: Type 'A' is not generic.

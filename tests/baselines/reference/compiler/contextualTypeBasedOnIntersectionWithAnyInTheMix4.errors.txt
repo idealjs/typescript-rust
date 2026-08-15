@@ -1,0 +1,2 @@
+contextualTypeBasedOnIntersectionWithAnyInTheMix4.ts(33,12): error TS2322: Type '"bar"' is not assignable to type '"foo"'.
+contextualTypeBasedOnIntersectionWithAnyInTheMix4.ts(48,15): error TS2322: Type '"bar"' is not assignable to type '"foo"'.

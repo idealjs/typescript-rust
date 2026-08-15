@@ -1,0 +1,1 @@
+reorderProperties.ts(18,38): error TS2454: Variable 'c' is used before being assigned.

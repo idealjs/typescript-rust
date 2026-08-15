@@ -1,0 +1,2 @@
+sourceMapValidationStatements.ts(43,5): error TS1101: 'with' statements are not allowed in strict mode.
+sourceMapValidationStatements.ts(43,5): error TS2410: The 'with' statement is not supported. All symbols in a 'with' block will have type 'any'.

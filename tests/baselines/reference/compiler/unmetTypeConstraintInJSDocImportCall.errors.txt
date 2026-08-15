@@ -1,0 +1,1 @@
+file2.js(3,36): error TS2344: Type 'T' does not satisfy the constraint 'string'.

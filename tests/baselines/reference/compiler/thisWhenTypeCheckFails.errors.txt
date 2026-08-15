@@ -1,0 +1,1 @@
+thisWhenTypeCheckFails.ts(4,17): error TS2322: Type 'void' is not assignable to type 'string'.

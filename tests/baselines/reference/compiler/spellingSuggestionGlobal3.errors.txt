@@ -1,0 +1,1 @@
+spellingSuggestionGlobal3.ts(2,1): error TS2552: Cannot find name 'globals'. Did you mean 'global'?

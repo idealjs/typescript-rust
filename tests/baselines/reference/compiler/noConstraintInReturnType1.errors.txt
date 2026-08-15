@@ -1,0 +1,1 @@
+noConstraintInReturnType1.ts(2,45): error TS2322: Type 'null' is not assignable to type 'List<T>'.

@@ -1,0 +1,1 @@
+genericRecursiveImplicitConstructorErrors2.ts(20,7): error TS2322: Type 'undefined' is not assignable to type 'PullTypeSymbol<A, B, C>'.

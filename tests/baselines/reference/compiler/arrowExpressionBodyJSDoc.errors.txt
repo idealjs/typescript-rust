@@ -1,0 +1,2 @@
+mytest.js(6,44): error TS2322: Type 'string' is not assignable to type 'T'.
+mytest.js(13,44): error TS2322: Type 'string' is not assignable to type 'T'.

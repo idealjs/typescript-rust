@@ -1,0 +1,1 @@
+exportSpecifierAndLocalMemberDeclaration.ts(11,20): error TS2503: Cannot find namespace 'X'.

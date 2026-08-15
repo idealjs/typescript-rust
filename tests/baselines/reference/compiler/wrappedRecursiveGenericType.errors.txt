@@ -1,0 +1,2 @@
+wrappedRecursiveGenericType.ts(13,1): error TS2322: Type 'number' is not assignable to type 'X<number>'.
+wrappedRecursiveGenericType.ts(14,1): error TS2322: Type 'number' is not assignable to type 'X<number>'.

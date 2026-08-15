@@ -1,0 +1,1 @@
+generics5.ts(10,14): error TS2344: Type 'A' does not satisfy the constraint 'B'.

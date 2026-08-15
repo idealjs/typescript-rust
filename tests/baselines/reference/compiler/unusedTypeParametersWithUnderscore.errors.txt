@@ -1,0 +1,6 @@
+unusedTypeParametersWithUnderscore.ts(1,16): error TS6133: 'U' is declared but its value is never read.
+unusedTypeParametersWithUnderscore.ts(3,12): error TS6133: 'U' is declared but its value is never read.
+unusedTypeParametersWithUnderscore.ts(5,17): error TS6133: 'U' is declared but its value is never read.
+unusedTypeParametersWithUnderscore.ts(7,13): error TS6133: 'U' is declared but its value is never read.
+unusedTypeParametersWithUnderscore.ts(8,18): error TS6133: 'W' is declared but its value is never read.
+unusedTypeParametersWithUnderscore.ts(11,14): error TS6133: 'U' is declared but its value is never read.

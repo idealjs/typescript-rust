@@ -1,0 +1,6 @@
+unionTypeErrorMessageTypeRefs01.ts(25,1): error TS2322: Type 'A<Foo>' is not assignable to type 'A<Bar> | B<Baz> | C<Kwah>'.
+unionTypeErrorMessageTypeRefs01.ts(26,1): error TS2322: Type 'B<Foo>' is not assignable to type 'A<Bar> | B<Baz> | C<Kwah>'.
+unionTypeErrorMessageTypeRefs01.ts(27,1): error TS2322: Type 'C<Foo>' is not assignable to type 'A<Bar> | B<Baz> | C<Kwah>'.
+unionTypeErrorMessageTypeRefs01.ts(48,1): error TS2322: Type 'X<Foo>' is not assignable to type 'X<Bar> | Y<Baz> | Z<Kwah>'.
+unionTypeErrorMessageTypeRefs01.ts(49,1): error TS2322: Type 'Y<Foo>' is not assignable to type 'X<Bar> | Y<Baz> | Z<Kwah>'.
+unionTypeErrorMessageTypeRefs01.ts(50,1): error TS2322: Type 'Z<Foo>' is not assignable to type 'X<Bar> | Y<Baz> | Z<Kwah>'.

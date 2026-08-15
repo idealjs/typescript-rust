@@ -1,0 +1,1 @@
+contextualSignatureInArrayElementLibEs2015.ts(8,4): error TS7006: Parameter 'arg' implicitly has an 'any' type.

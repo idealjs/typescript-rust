@@ -1,0 +1,6 @@
+declFileGenericType.ts(5,40): error TS2322: Type 'null' is not assignable to type 'A<B>'.
+declFileGenericType.ts(6,45): error TS2322: Type 'null' is not assignable to type 'A<B>'.
+declFileGenericType.ts(7,47): error TS2322: Type 'null' is not assignable to type 'A<B>[]'.
+declFileGenericType.ts(8,65): error TS2322: Type 'null' is not assignable to type 'A<B>[]'.
+declFileGenericType.ts(10,34): error TS2322: Type 'null' is not assignable to type 'T'.
+declFileGenericType.ts(12,51): error TS2322: Type 'null' is not assignable to type 'T'.

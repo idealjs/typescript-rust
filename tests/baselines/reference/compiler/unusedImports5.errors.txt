@@ -1,0 +1,1 @@
+file2.ts(1,27): error TS6133: 'test2' is declared but its value is never read.

@@ -1,0 +1,2 @@
+indexedAccessKeyofNestedSimplifiedSubstituteUnwrapped.ts(13,2): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+indexedAccessKeyofNestedSimplifiedSubstituteUnwrapped.ts(21,2): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.

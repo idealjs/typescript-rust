@@ -1,0 +1,1 @@
+excessPropertiesInOverloads.ts(3,6): error TS2769: No overload matches this call.

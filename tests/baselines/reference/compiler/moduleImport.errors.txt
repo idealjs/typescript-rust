@@ -1,0 +1,1 @@
+moduleImport.ts(2,17): error TS2694: Namespace 'X' has no exported member 'Y'.

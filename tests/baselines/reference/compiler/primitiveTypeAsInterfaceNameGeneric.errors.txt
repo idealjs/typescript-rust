@@ -1,0 +1,1 @@
+primitiveTypeAsInterfaceNameGeneric.ts(1,11): error TS2427: Interface name cannot be 'number'.

@@ -1,0 +1,4 @@
+temporal.ts(25,13): error TS2339: Property 'year' does not exist on type 'Instant'.
+temporal.ts(1504,8): error TS2339: Property 'month' does not exist on type 'PlainMonthDay'.
+temporal.ts(1514,8): error TS2339: Property 'month' does not exist on type 'PlainMonthDay'.
+temporal.ts(1520,8): error TS2339: Property 'month' does not exist on type 'PlainMonthDay'.

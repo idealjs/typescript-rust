@@ -1,0 +1,1 @@
+propertyAccessOfReadonlyIndexSignature.ts(6,1): error TS2542: Index signature in type 'Test' only permits reading.

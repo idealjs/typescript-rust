@@ -1,0 +1,1 @@
+intraBindingPatternReferences.ts(18,71): error TS7006: Parameter 'x' implicitly has an 'any' type.

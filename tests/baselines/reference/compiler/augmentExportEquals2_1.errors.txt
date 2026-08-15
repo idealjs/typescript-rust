@@ -1,0 +1,2 @@
+file2.ts(5,16): error TS2671: Cannot augment module 'file1' because it resolves to a non-module entity.
+file3.ts(3,8): error TS2503: Cannot find namespace 'x'.

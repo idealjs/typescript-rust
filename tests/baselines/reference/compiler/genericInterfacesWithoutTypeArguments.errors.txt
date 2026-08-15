@@ -1,0 +1,2 @@
+genericInterfacesWithoutTypeArguments.ts(3,8): error TS2314: Generic type 'I<T>' requires 1 type argument(s).
+genericInterfacesWithoutTypeArguments.ts(4,10): error TS2314: Generic type 'I<T>' requires 1 type argument(s).

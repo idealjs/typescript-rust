@@ -1,0 +1,2 @@
+index.js(17,15): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+index.js(28,15): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.

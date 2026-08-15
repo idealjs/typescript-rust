@@ -1,0 +1,1 @@
+notmodule.cts(1,23): error TS2354: This syntax requires an imported helper but module 'tslib' cannot be found.

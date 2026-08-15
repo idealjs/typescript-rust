@@ -1,0 +1,2 @@
+narrowingOfQualifiedNames.ts(33,25): error TS2532: Object is possibly 'undefined'.
+narrowingOfQualifiedNames.ts(38,29): error TS2532: Object is possibly 'undefined'.

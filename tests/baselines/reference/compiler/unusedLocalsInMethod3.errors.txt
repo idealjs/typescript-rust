@@ -1,0 +1,1 @@
+unusedLocalsInMethod3.ts(3,9): error TS6199: All variables are unused.

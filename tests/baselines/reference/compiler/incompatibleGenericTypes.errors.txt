@@ -1,0 +1,2 @@
+incompatibleGenericTypes.ts(9,5): error TS2322: Type 'I1<boolean>' is not assignable to type 'I1<number>'.
+incompatibleGenericTypes.ts(9,22): error TS2454: Variable 'v1' is used before being assigned.

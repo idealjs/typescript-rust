@@ -1,0 +1,1 @@
+recursiveIdenticalAssignment.ts(10,20): error TS2454: Variable 'a' is used before being assigned.

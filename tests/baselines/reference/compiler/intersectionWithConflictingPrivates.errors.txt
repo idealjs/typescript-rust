@@ -1,0 +1,2 @@
+intersectionWithConflictingPrivates.ts(5,4): error TS2339: Property 'y' does not exist on type 'never'.
+intersectionWithConflictingPrivates.ts(6,1): error TS2322: Type '{}' is not assignable to type 'never'.

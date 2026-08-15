@@ -1,0 +1,1 @@
+reactReduxLikeDeferredInferenceAllowsAssignment.ts(76,50): error TS2344: Type 'GetProps<C>' does not satisfy the constraint 'Shared<TInjectedProps, GetProps<C>>'.

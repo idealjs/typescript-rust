@@ -1,0 +1,38 @@
+predicateSemantics.ts(7,16): error TS2871: This expression is always nullish.
+predicateSemantics.ts(10,16): error TS2869: Right operand of ?? is unreachable because the left operand is never nullish.
+predicateSemantics.ts(26,13): error TS2869: Right operand of ?? is unreachable because the left operand is never nullish.
+predicateSemantics.ts(27,13): error TS2869: Right operand of ?? is unreachable because the left operand is never nullish.
+predicateSemantics.ts(28,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(29,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(30,13): error TS2872: This kind of expression is always truthy.
+predicateSemantics.ts(31,13): error TS2872: This kind of expression is always truthy.
+predicateSemantics.ts(32,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(32,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(33,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(34,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(34,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(36,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(37,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(38,21): error TS2871: This expression is always nullish.
+predicateSemantics.ts(39,21): error TS2871: This expression is always nullish.
+predicateSemantics.ts(40,21): error TS2871: This expression is always nullish.
+predicateSemantics.ts(40,21): error TS2871: This expression is always nullish.
+predicateSemantics.ts(41,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(42,13): error TS2869: Right operand of ?? is unreachable because the left operand is never nullish.
+predicateSemantics.ts(43,13): error TS2869: Right operand of ?? is unreachable because the left operand is never nullish.
+predicateSemantics.ts(45,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(45,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(45,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(46,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(46,13): error TS2869: Right operand of ?? is unreachable because the left operand is never nullish.
+predicateSemantics.ts(47,13): error TS2871: This expression is always nullish.
+predicateSemantics.ts(47,13): error TS2869: Right operand of ?? is unreachable because the left operand is never nullish.
+predicateSemantics.ts(50,8): error TS2872: This kind of expression is always truthy.
+predicateSemantics.ts(51,11): error TS2872: This kind of expression is always truthy.
+predicateSemantics.ts(52,8): error TS2872: This kind of expression is always truthy.
+predicateSemantics.ts(53,8): error TS2872: This kind of expression is always truthy.
+predicateSemantics.ts(70,14): error TS2869: Right operand of ?? is unreachable because the left operand is never nullish.
+predicateSemantics.ts(71,14): error TS2695: Left side of comma operator is unused and has no side effects.
+predicateSemantics.ts(71,14): error TS2869: Right operand of ?? is unreachable because the left operand is never nullish.
+predicateSemantics.ts(89,1): error TS2869: Right operand of ?? is unreachable because the left operand is never nullish.
+predicateSemantics.ts(90,1): error TS2869: Right operand of ?? is unreachable because the left operand is never nullish.

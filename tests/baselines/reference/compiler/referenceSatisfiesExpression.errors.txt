@@ -1,0 +1,2 @@
+referenceSatisfiesExpression.ts(9,2): error TS2454: Variable 'b' is used before being assigned.
+referenceSatisfiesExpression.ts(12,3): error TS2454: Variable 'c' is used before being assigned.

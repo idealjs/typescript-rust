@@ -1,0 +1,9 @@
+importDecl_require.ts(2,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+importDecl_require.ts(5,28): error TS2322: Type 'null' is not assignable to type 'd'.
+importDecl_require1.ts(2,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+importDecl_require1.ts(5,28): error TS2322: Type 'null' is not assignable to type 'd'.
+importDecl_require2.ts(2,5): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+importDecl_require2.ts(5,28): error TS2322: Type 'null' is not assignable to type 'd'.
+importDecl_require3.ts(2,5): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
+importDecl_require3.ts(5,28): error TS2322: Type 'null' is not assignable to type 'd'.
+importDecl_require4.ts(2,32): error TS2322: Type 'null' is not assignable to type 'd'.

@@ -1,0 +1,1 @@
+/a/b/c/d/e/app.ts(1,17): error TS2307: Cannot find module 'foo' or its corresponding type declarations.

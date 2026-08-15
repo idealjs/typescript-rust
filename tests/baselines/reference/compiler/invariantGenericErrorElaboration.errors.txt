@@ -1,0 +1,2 @@
+invariantGenericErrorElaboration.ts(3,7): error TS2322: Type 'Num' is not assignable to type 'Runtype<any>'.
+invariantGenericErrorElaboration.ts(4,19): error TS2322: Type 'Num' is not assignable to type 'Runtype<any>'.

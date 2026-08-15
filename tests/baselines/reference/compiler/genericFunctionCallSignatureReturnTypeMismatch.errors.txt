@@ -1,0 +1,1 @@
+genericFunctionCallSignatureReturnTypeMismatch.ts(6,1): error TS2322: Type '<S>() => S[]' is not assignable to type '<T>(x: T) => T'.

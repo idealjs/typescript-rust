@@ -1,0 +1,1 @@
+lambdaPropSelf.ts(21,13): error TS2331: 'this' cannot be referenced in a module or namespace body.

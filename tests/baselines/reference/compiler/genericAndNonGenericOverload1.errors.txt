@@ -1,0 +1,1 @@
+genericAndNonGenericOverload1.ts(6,1): error TS2454: Variable 'c2' is used before being assigned.

@@ -1,0 +1,1 @@
+extendConstructSignatureInInterface.ts(6,17): error TS2454: Variable 'CStatic' is used before being assigned.

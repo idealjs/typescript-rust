@@ -1,0 +1,2 @@
+externalModuleExportingGenericClass_file0.ts(2,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+externalModuleExportingGenericClass_file1.ts(2,8): error TS2314: Generic type 'C<T>' requires 1 type argument(s).

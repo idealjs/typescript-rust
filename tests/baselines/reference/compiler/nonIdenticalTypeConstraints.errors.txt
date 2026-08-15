@@ -1,0 +1,14 @@
+nonIdenticalTypeConstraints.ts(2,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+nonIdenticalTypeConstraints.ts(3,5): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+nonIdenticalTypeConstraints.ts(4,5): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
+nonIdenticalTypeConstraints.ts(7,7): error TS2428: All declarations of 'Foo' must have identical type parameters.
+nonIdenticalTypeConstraints.ts(8,5): error TS2564: Property 'n' has no initializer and is not definitely assigned in the constructor.
+nonIdenticalTypeConstraints.ts(10,11): error TS2428: All declarations of 'Foo' must have identical type parameters.
+nonIdenticalTypeConstraints.ts(13,11): error TS2428: All declarations of 'Qux' must have identical type parameters.
+nonIdenticalTypeConstraints.ts(16,7): error TS2428: All declarations of 'Qux' must have identical type parameters.
+nonIdenticalTypeConstraints.ts(17,5): error TS2564: Property 'n' has no initializer and is not definitely assigned in the constructor.
+nonIdenticalTypeConstraints.ts(21,5): error TS2564: Property 'n' has no initializer and is not definitely assigned in the constructor.
+nonIdenticalTypeConstraints.ts(30,5): error TS2564: Property 'n' has no initializer and is not definitely assigned in the constructor.
+nonIdenticalTypeConstraints.ts(33,7): error TS2428: All declarations of 'Quux' must have identical type parameters.
+nonIdenticalTypeConstraints.ts(34,5): error TS2564: Property 'n' has no initializer and is not definitely assigned in the constructor.
+nonIdenticalTypeConstraints.ts(36,11): error TS2428: All declarations of 'Quux' must have identical type parameters.

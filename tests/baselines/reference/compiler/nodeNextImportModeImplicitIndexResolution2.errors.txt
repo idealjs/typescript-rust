@@ -1,0 +1,2 @@
+/index.cts(4,21): error TS2307: Cannot find module 'dedent4' or its corresponding type declarations.
+/index.mts(4,21): error TS2307: Cannot find module 'dedent4' or its corresponding type declarations.

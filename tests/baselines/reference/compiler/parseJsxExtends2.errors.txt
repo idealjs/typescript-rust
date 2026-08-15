@@ -1,0 +1,1 @@
+index.tsx(5,13): error TS2304: Cannot find name 'T'.

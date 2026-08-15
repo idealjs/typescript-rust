@@ -1,0 +1,3 @@
+externalModuleAssignToVar_core_require.ts(1,18): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+externalModuleAssignToVar_core_require2.ts(1,11): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+externalModuleAssignToVar_ext.ts(1,11): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.

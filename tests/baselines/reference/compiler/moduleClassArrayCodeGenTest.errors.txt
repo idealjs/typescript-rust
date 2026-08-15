@@ -1,0 +1,1 @@
+moduleClassArrayCodeGenTest.ts(10,11): error TS2694: Namespace 'M' has no exported member 'B'.

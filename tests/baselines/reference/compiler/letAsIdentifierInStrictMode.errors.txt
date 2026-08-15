@@ -1,0 +1,4 @@
+letAsIdentifierInStrictMode.ts(2,5): error TS1212: Identifier expected. 'let' is a reserved word in strict mode.
+letAsIdentifierInStrictMode.ts(3,5): error TS2300: Duplicate identifier 'a'.
+letAsIdentifierInStrictMode.ts(4,1): error TS1212: Identifier expected. 'let' is a reserved word in strict mode.
+letAsIdentifierInStrictMode.ts(6,1): error TS2300: Duplicate identifier 'a'.

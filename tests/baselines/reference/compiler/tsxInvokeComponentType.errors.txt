@@ -1,0 +1,1 @@
+tsxInvokeComponentType.tsx(6,14): error TS2741: Property 'someKey' is missing in type '{}' but required in type '{ someKey: string; }'.

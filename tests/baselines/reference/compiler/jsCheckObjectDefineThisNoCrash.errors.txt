@@ -1,0 +1,1 @@
+jsCheckObjectDefineThisNoCrash.js(5,36): error TS2339: Property '_prop' does not exist on type 'C'.

@@ -1,0 +1,7 @@
+genericSpecializations3.ts(9,5): error TS2416: Property 'foo' in type 'IntFooBad' is not assignable to the same property in base type 'IFoo<number>'.
+genericSpecializations3.ts(9,30): error TS2322: Type 'null' is not assignable to type 'string'.
+genericSpecializations3.ts(15,30): error TS2322: Type 'null' is not assignable to type 'number'.
+genericSpecializations3.ts(21,30): error TS2322: Type 'null' is not assignable to type 'string'.
+genericSpecializations3.ts(28,1): error TS2322: Type 'StringFoo2' is not assignable to type 'IntFoo'.
+genericSpecializations3.ts(29,1): error TS2322: Type 'IntFoo' is not assignable to type 'StringFoo2'.
+genericSpecializations3.ts(33,23): error TS2322: Type 'null' is not assignable to type 'T'.

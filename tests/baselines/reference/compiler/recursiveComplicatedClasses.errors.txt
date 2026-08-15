@@ -1,0 +1,6 @@
+recursiveComplicatedClasses.ts(2,12): error TS2322: Type 'null' is not assignable to type 'ParameterSymbol[]'.
+recursiveComplicatedClasses.ts(9,7): error TS2300: Duplicate identifier 'Symbol'.
+recursiveComplicatedClasses.ts(10,12): error TS2564: Property 'bound' has no initializer and is not definitely assigned in the constructor.
+recursiveComplicatedClasses.ts(13,27): error TS2345: Argument of type 'TypeSymbol' is not assignable to parameter of type 'Symbol'.
+recursiveComplicatedClasses.ts(13,27): error TS2454: Variable 'b' is used before being assigned.
+recursiveComplicatedClasses.ts(17,31): error TS2507: Type 'SymbolConstructor' is not a constructor function type.

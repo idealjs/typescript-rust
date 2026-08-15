@@ -1,0 +1,1 @@
+contextualSignatureInstatiationContravariance.ts(8,1): error TS2322: Type '<T extends Animal>(x: T, y: T) => void' is not assignable to type '(g: Giraffe, e: Elephant) => void'.

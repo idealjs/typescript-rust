@@ -1,0 +1,1 @@
+unknownSymbolInGenericReturnType.ts(2,61): error TS2304: Cannot find name 'A'.

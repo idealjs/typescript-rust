@@ -1,0 +1,3 @@
+classImplementsClass5.ts(5,7): error TS2720: Class 'C' incorrectly implements class 'A'. Did you mean to extend 'A' and inherit its members as a subclass?
+classImplementsClass5.ts(16,1): error TS2322: Type 'C2' is not assignable to type 'C'.
+classImplementsClass5.ts(17,1): error TS2322: Type 'C' is not assignable to type 'C2'.

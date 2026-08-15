@@ -1,0 +1,1 @@
+/a.ts(1,17): error TS6142: Module './jsx' was resolved to '/jsx.jsx', but '--jsx' is not set.

@@ -1,0 +1,1 @@
+typeInferenceTypePredicate.ts(1,50): error TS2677: A type predicate's type must be assignable to its parameter's type.

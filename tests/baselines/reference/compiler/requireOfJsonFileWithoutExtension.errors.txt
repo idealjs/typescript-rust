@@ -1,0 +1,1 @@
+file1.ts(1,21): error TS2307: Cannot find module './b' or its corresponding type declarations.

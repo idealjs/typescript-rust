@@ -1,0 +1,1 @@
+undeclaredBase.ts(1,40): error TS2339: Property 'I' does not exist on type 'typeof M'.

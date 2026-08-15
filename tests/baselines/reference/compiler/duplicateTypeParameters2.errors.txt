@@ -1,0 +1,1 @@
+duplicateTypeParameters2.ts(4,26): error TS2300: Duplicate identifier 'T'.

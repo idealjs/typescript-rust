@@ -1,0 +1,2 @@
+genericTypeWithMultipleBases3.ts(17,9): error TS2454: Variable 'c' is used before being assigned.
+genericTypeWithMultipleBases3.ts(19,9): error TS2454: Variable 'c' is used before being assigned.

@@ -1,0 +1,3 @@
+moduleWithNoValuesAsType.ts(2,8): error TS2709: Cannot use namespace 'A' as a type.
+moduleWithNoValuesAsType.ts(7,8): error TS2709: Cannot use namespace 'B' as a type.
+moduleWithNoValuesAsType.ts(15,8): error TS2709: Cannot use namespace 'C' as a type.

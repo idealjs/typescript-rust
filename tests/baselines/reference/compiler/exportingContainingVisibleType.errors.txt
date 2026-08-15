@@ -1,0 +1,1 @@
+exportingContainingVisibleType.ts(4,16): error TS2454: Variable 'i' is used before being assigned.

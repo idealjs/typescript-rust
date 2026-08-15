@@ -1,0 +1,5 @@
+letDeclarations-scopes.ts(27,1): error TS1101: 'with' statements are not allowed in strict mode.
+letDeclarations-scopes.ts(27,1): error TS2410: The 'with' statement is not supported. All symbols in a 'with' block will have type 'any'.
+letDeclarations-scopes.ts(43,5): error TS1344: A label is not allowed here.
+letDeclarations-scopes.ts(48,21): error TS1344: A label is not allowed here.
+letDeclarations-scopes.ts(119,5): error TS1344: A label is not allowed here.

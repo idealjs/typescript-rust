@@ -1,0 +1,6 @@
+constructorParametersInVariableDeclarations.ts(2,17): error TS2301: Initializer of instance member variable 'a' cannot reference identifier 'x' declared in the constructor.
+constructorParametersInVariableDeclarations.ts(3,22): error TS2301: Initializer of instance member variable 'b' cannot reference identifier 'x' declared in the constructor.
+constructorParametersInVariableDeclarations.ts(4,23): error TS2301: Initializer of instance member variable 'c' cannot reference identifier 'x' declared in the constructor.
+constructorParametersInVariableDeclarations.ts(10,17): error TS2301: Initializer of instance member variable 'a' cannot reference identifier 'x' declared in the constructor.
+constructorParametersInVariableDeclarations.ts(11,22): error TS2301: Initializer of instance member variable 'b' cannot reference identifier 'x' declared in the constructor.
+constructorParametersInVariableDeclarations.ts(12,23): error TS2301: Initializer of instance member variable 'c' cannot reference identifier 'x' declared in the constructor.

@@ -1,0 +1,1 @@
+unusedClassesinModule1.ts(2,11): error TS6196: 'Calculator' is declared but never used.

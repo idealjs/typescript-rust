@@ -1,0 +1,2 @@
+indexSignaturesInferentialTyping.ts(1,53): error TS2322: Type 'undefined' is not assignable to type 'T'.
+indexSignaturesInferentialTyping.ts(2,53): error TS2322: Type 'undefined' is not assignable to type 'T'.

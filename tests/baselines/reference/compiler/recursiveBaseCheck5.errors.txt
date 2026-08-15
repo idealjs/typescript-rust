@@ -1,0 +1,3 @@
+recursiveBaseCheck5.ts(1,11): error TS2310: Type 'I1<T>' recursively references itself as a base type.
+recursiveBaseCheck5.ts(2,11): error TS2310: Type 'I2<T>' recursively references itself as a base type.
+recursiveBaseCheck5.ts(4,9): error TS2339: Property 'blah' does not exist on type 'X<unknown, unknown>'.

@@ -1,0 +1,4 @@
+superWithGenericSpecialization.ts(2,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+superWithGenericSpecialization.ts(6,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+superWithGenericSpecialization.ts(13,17): error TS2454: Variable 'd' is used before being assigned.
+superWithGenericSpecialization.ts(14,18): error TS2454: Variable 'd' is used before being assigned.

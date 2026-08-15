@@ -1,0 +1,1 @@
+promiseEmptyTupleNoException.ts(3,3): error TS2322: Type 'any[]' is not assignable to type '[]'.

@@ -1,0 +1,1 @@
+stringIndexerAssignments1.ts(5,1): error TS2322: Type '{ one: number; two: string; }' is not assignable to type '{ [index: string]: string; one: string; }'.

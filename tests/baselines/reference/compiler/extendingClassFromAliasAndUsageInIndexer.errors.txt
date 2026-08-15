@@ -1,0 +1,2 @@
+extendingClassFromAliasAndUsageInIndexer_backbone.ts(2,12): error TS2564: Property 'someData' has no initializer and is not definitely assigned in the constructor.
+extendingClassFromAliasAndUsageInIndexer_main.ts(13,30): error TS2454: Variable 'moduleName' is used before being assigned.

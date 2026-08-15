@@ -1,0 +1,2 @@
+missingDiscriminants2.ts(30,23): error TS2353: Object literal may only specify known properties, and 'subkind' does not exist in type '{ kind: "b"; }'.
+missingDiscriminants2.ts(31,34): error TS2353: Object literal may only specify known properties, and 'subkind' does not exist in type '{ kind: "b"; }'.

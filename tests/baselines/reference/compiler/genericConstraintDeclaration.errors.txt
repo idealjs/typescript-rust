@@ -1,0 +1,1 @@
+genericConstraintDeclaration.ts(2,43): error TS2322: Type 'null' is not assignable to type 'List<T>'.

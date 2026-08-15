@@ -1,0 +1,1 @@
+contextualTyping33.ts(1,90): error TS2322: Type '() => string' is not assignable to type '{ (): number; (i: number): number; }'.

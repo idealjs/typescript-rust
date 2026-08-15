@@ -1,0 +1,1 @@
+invalidConstraint1.ts(4,11): error TS2344: Type '{ a: number; }' does not satisfy the constraint '{ a: string; }'.

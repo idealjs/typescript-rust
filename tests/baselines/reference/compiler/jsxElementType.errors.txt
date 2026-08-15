@@ -1,0 +1,20 @@
+jsxElementType.tsx(34,2): error TS2741: Property 'title' is missing in type '{}' but required in type '{ title: string; }'.
+jsxElementType.tsx(36,16): error TS2322: Type '{ excessProp: true; }' is not assignable to type 'IntrinsicAttributes & { title: string; }'.
+jsxElementType.tsx(40,2): error TS2741: Property 'title' is missing in type '{}' but required in type '{ title: string; }'.
+jsxElementType.tsx(42,15): error TS2322: Type '{ excessProp: true; }' is not assignable to type 'IntrinsicAttributes & { title: string; }'.
+jsxElementType.tsx(46,2): error TS2741: Property 'title' is missing in type '{}' but required in type '{ title: string; }'.
+jsxElementType.tsx(48,15): error TS2322: Type '{ excessProp: true; }' is not assignable to type 'IntrinsicAttributes & { title: string; }'.
+jsxElementType.tsx(52,2): error TS2741: Property 'title' is missing in type '{}' but required in type '{ title: string; }'.
+jsxElementType.tsx(54,14): error TS2322: Type '{ excessProp: true; }' is not assignable to type 'IntrinsicAttributes & { title: string; }'.
+jsxElementType.tsx(59,2): error TS2741: Property 'title' is missing in type '{}' but required in type '{ title: string; }'.
+jsxElementType.tsx(61,16): error TS2322: Type '{ excessProp: true; }' is not assignable to type 'IntrinsicAttributes & { title: string; }'.
+jsxElementType.tsx(70,2): error TS2769: No overload matches this call.
+jsxElementType.tsx(72,20): error TS2769: No overload matches this call.
+jsxElementType.tsx(78,1): error TS2339: Property 'boop' does not exist on type 'JSX.IntrinsicElements'.
+jsxElementType.tsx(79,1): error TS2339: Property 'my-undeclared-custom-element' does not exist on type 'JSX.IntrinsicElements'.
+jsxElementType.tsx(91,2): error TS2786: 'ReactNativeFlatList' cannot be used as a JSX component.
+jsxElementType.tsx(95,11): error TS2322: Type '{}' is not assignable to type 'LibraryManagedAttributes<T, {}>'.
+jsxElementType.tsx(98,2): error TS2304: Cannot find name 'Unresolved'.
+jsxElementType.tsx(99,2): error TS2304: Cannot find name 'Unresolved'.
+jsxElementType.tsx(110,6): error TS2322: Type '{ b: string; }' is not assignable to type '{ a: string; }'.
+jsxElementType.tsx(111,19): error TS2322: Type '{ a: string; b: string; }' is not assignable to type '{ a: string; }'.

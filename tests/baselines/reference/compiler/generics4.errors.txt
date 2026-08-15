@@ -1,0 +1,2 @@
+generics4.ts(1,22): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+generics4.ts(7,1): error TS2322: Type 'C<Y>' is not assignable to type 'C<X>'.

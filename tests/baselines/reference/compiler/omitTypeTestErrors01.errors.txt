@@ -1,0 +1,2 @@
+omitTypeTestErrors01.ts(11,16): error TS2339: Property 'c' does not exist on type 'Bar'.
+omitTypeTestErrors01.ts(15,16): error TS2339: Property 'b' does not exist on type 'Baz'.

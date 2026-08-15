@@ -1,0 +1,2 @@
+arrayFrom.ts(20,7): error TS2322: Type 'A[]' is not assignable to type 'B[]'.
+arrayFrom.ts(23,7): error TS2322: Type 'A[]' is not assignable to type 'B[]'.

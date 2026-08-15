@@ -1,0 +1,1 @@
+declareClassInterfaceImplementation.ts(5,15): error TS2420: Class 'Buffer' incorrectly implements interface 'IBuffer'.

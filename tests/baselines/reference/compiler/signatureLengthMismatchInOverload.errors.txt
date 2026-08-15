@@ -1,0 +1,1 @@
+signatureLengthMismatchInOverload.ts(5,3): error TS2769: No overload matches this call.

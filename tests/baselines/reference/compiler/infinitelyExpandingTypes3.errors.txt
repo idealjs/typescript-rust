@@ -1,0 +1,1 @@
+infinitelyExpandingTypes3.ts(18,6): error TS2454: Variable 'o2' is used before being assigned.

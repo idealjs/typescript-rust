@@ -1,0 +1,1 @@
+objectLiteralFreshnessWithSpread.ts(2,35): error TS2353: Object literal may only specify known properties, and 'z' does not exist in type '{ a: any; b: any; }'.

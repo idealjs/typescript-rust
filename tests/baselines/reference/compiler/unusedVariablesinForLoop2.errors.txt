@@ -1,0 +1,1 @@
+unusedVariablesinForLoop2.ts(2,16): error TS6133: 'elem' is declared but its value is never read.

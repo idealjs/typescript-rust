@@ -1,0 +1,2 @@
+mappedTypeIndexedAccess.ts(18,5): error TS2322: Type '{ key: "foo"; value: number; }' is not assignable to type 'Pair<FooBar>'.
+mappedTypeIndexedAccess.ts(24,5): error TS2322: Type '{ key: "foo"; value: number; }' is not assignable to type '{ key: "bar"; value: number; } | { key: "foo"; value: string; }'.

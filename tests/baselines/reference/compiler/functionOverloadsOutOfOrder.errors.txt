@@ -1,0 +1,2 @@
+functionOverloadsOutOfOrder.ts(6,13): error TS2391: Function implementation is missing or not immediately following the declaration.
+functionOverloadsOutOfOrder.ts(14,13): error TS2391: Function implementation is missing or not immediately following the declaration.

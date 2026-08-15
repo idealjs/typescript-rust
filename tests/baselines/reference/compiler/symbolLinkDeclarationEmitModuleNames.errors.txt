@@ -1,0 +1,1 @@
+monorepo/context/src/bindingkey.ts(3,12): error TS2564: Property '__type' has no initializer and is not definitely assigned in the constructor.

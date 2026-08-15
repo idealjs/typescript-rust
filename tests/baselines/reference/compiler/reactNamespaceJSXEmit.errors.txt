@@ -1,0 +1,2 @@
+reactNamespaceJSXEmit.tsx(7,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+reactNamespaceJSXEmit.tsx(9,1): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.

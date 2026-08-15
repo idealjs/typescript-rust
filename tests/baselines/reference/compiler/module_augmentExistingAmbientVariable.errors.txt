@@ -1,0 +1,2 @@
+module_augmentExistingAmbientVariable.ts(1,13): error TS2300: Duplicate identifier 'console'.
+module_augmentExistingAmbientVariable.ts(3,11): error TS2300: Duplicate identifier 'console'.

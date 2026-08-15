@@ -1,0 +1,4 @@
+tsxNotUsingApparentTypeOfSFC.tsx(14,14): error TS2322: Type '{}' is not assignable to type 'P'.
+tsxNotUsingApparentTypeOfSFC.tsx(15,14): error TS2769: No overload matches this call.
+tsxNotUsingApparentTypeOfSFC.tsx(17,14): error TS2322: Type 'P' is not assignable to type 'IntrinsicAttributes & P'.
+tsxNotUsingApparentTypeOfSFC.tsx(18,14): error TS2769: No overload matches this call.

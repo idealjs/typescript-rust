@@ -1,0 +1,1 @@
+es6MemberScoping.ts(7,21): error TS2301: Initializer of instance member variable '_store' cannot reference identifier 'store' declared in the constructor.

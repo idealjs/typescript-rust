@@ -1,0 +1,16 @@
+newOperator.ts(3,13): error TS2693: 'ifc' only refers to a type, but is being used as a value here.
+newOperator.ts(10,14): error TS2351: This expression is not constructable.
+newOperator.ts(11,14): error TS2351: This expression is not constructable.
+newOperator.ts(12,5): error TS2693: 'string' only refers to a type, but is being used as a value here.
+newOperator.ts(18,14): error TS2693: 'string' only refers to a type, but is being used as a value here.
+newOperator.ts(18,21): error TS1011: An element access expression should take an argument.
+newOperator.ts(21,1): error TS2693: 'string' only refers to a type, but is being used as a value here.
+newOperator.ts(22,2): error TS1011: An element access expression should take an argument.
+newOperator.ts(28,13): error TS2304: Cannot find name 'q'.
+newOperator.ts(31,14): error TS2351: This expression is not constructable.
+newOperator.ts(38,5): error TS2351: This expression is not constructable.
+newOperator.ts(42,5): error TS2351: This expression is not constructable.
+newOperator.ts(46,5): error TS2351: This expression is not constructable.
+newOperator.ts(50,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+newOperator.ts(56,20): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'typeof T'.
+newOperator.ts(56,24): error TS1011: An element access expression should take an argument.

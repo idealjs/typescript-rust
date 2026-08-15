@@ -1,0 +1,3 @@
+inlinedAliasAssignableToConstraintSameAsAlias.ts(12,3): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+inlinedAliasAssignableToConstraintSameAsAlias.ts(13,3): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+inlinedAliasAssignableToConstraintSameAsAlias.ts(14,3): error TS2564: Property 'z' has no initializer and is not definitely assigned in the constructor.

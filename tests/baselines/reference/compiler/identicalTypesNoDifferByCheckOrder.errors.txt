@@ -1,0 +1,2 @@
+identicalTypesNoDifferByCheckOrder.ts(32,30): error TS2322: Type 'FunctionComponent2<SomePropsCloneX>' is not assignable to type 'FunctionComponent2<SomeProps>'.
+identicalTypesNoDifferByCheckOrder.ts(36,30): error TS2322: Type 'FunctionComponent1<SomePropsX>' is not assignable to type 'FunctionComponent1<SomeProps>'.

@@ -1,0 +1,4 @@
+narrowTypeByInstanceof.ts(18,5): error TS2454: Variable 'elementA' is used before being assigned.
+narrowTypeByInstanceof.ts(18,38): error TS2454: Variable 'elementB' is used before being assigned.
+narrowTypeByInstanceof.ts(21,12): error TS2454: Variable 'elementA' is used before being assigned.
+narrowTypeByInstanceof.ts(21,41): error TS2454: Variable 'elementB' is used before being assigned.

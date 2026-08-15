@@ -1,0 +1,9 @@
+jsxFactoryButNoJsxFragmentFactory.tsx(3,1): error TS17016: The 'jsxFragmentFactory' compiler option must be provided to use JSX fragments with the 'jsxFactory' compiler option.
+jsxFactoryButNoJsxFragmentFactory.tsx(4,1): error TS17016: The 'jsxFragmentFactory' compiler option must be provided to use JSX fragments with the 'jsxFactory' compiler option.
+jsxFactoryButNoJsxFragmentFactory.tsx(4,3): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxFactoryButNoJsxFragmentFactory.tsx(4,10): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxFactoryButNoJsxFragmentFactory.tsx(4,17): error TS17016: The 'jsxFragmentFactory' compiler option must be provided to use JSX fragments with the 'jsxFactory' compiler option.
+jsxFactoryButNoJsxFragmentFactory.tsx(4,19): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxFactoryButNoJsxFragmentFactory.tsx(4,28): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxFactoryButNoJsxFragmentFactory.tsx(4,35): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxFactoryButNoJsxFragmentFactory.tsx(4,44): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.

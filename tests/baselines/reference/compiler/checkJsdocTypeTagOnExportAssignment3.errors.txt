@@ -1,0 +1,1 @@
+a.js(10,16): error TS2739: Type '{ c: number; }' is missing the following properties from type 'Foo': a, b

@@ -1,0 +1,1 @@
+main.js(2,25): error TS2307: Cannot find module 'bar' or its corresponding type declarations.

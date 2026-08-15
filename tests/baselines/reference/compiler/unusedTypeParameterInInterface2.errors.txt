@@ -1,0 +1,1 @@
+unusedTypeParameterInInterface2.ts(1,18): error TS6133: 'U' is declared but its value is never read.

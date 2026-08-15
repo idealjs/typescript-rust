@@ -1,0 +1,4 @@
+thislessFunctionsNotContextSensitive3.ts(62,9): error TS2783: 'editor' is specified more than once, so this usage will be overwritten.
+thislessFunctionsNotContextSensitive3.ts(81,9): error TS2783: 'editor' is specified more than once, so this usage will be overwritten.
+thislessFunctionsNotContextSensitive3.ts(96,3): error TS2353: Object literal may only specify known properties, and 'child' does not exist in type 'Partial<{ parent: string; overwrite: string; }>'.
+thislessFunctionsNotContextSensitive3.ts(108,3): error TS2353: Object literal may only specify known properties, and 'child' does not exist in type 'Partial<{ parent: string; overwrite: string; }>'.

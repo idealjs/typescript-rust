@@ -1,0 +1,1 @@
+spyComparisonChecking.ts(20,32): error TS2339: Property 'returnValue' does not exist on type 'Function'.

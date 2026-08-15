@@ -1,0 +1,1 @@
+assignToModule.ts(2,1): error TS2708: Cannot use namespace 'A' as a value.

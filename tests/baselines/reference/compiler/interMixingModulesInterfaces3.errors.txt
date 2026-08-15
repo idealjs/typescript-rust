@@ -1,0 +1,2 @@
+interMixingModulesInterfaces3.ts(5,13): error TS2322: Type 'null' is not assignable to type 'B'.
+interMixingModulesInterfaces3.ts(15,5): error TS2322: Type 'null' is not assignable to type 'B'.

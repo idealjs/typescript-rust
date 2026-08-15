@@ -1,0 +1,5 @@
+enumLiteralAssignableToEnumInsideUnion.ts(24,7): error TS2322: Type 'Foo.A' is not assignable to type 'boolean | Foo'.
+enumLiteralAssignableToEnumInsideUnion.ts(25,7): error TS2322: Type 'Foo.A' is not assignable to type 'boolean | Foo'.
+enumLiteralAssignableToEnumInsideUnion.ts(26,7): error TS2322: Type 'Foo.A' is not assignable to type 'boolean | Foo.B'.
+enumLiteralAssignableToEnumInsideUnion.ts(27,7): error TS2322: Type 'Foo.A' is not assignable to type 'boolean | Foo.A'.
+enumLiteralAssignableToEnumInsideUnion.ts(28,7): error TS2322: Type 'Foo.A' is not assignable to type 'boolean | Foo'.

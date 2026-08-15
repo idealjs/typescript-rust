@@ -1,0 +1,1 @@
+contextualTyping24.ts(1,55): error TS2322: Type '(this: void, a: string) => number' is not assignable to type '(a: { (): number; (i: number): number; }) => number'.

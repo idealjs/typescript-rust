@@ -1,0 +1,1 @@
+constraintsThatReferenceOtherContstraints1.ts(5,5): error TS2564: Property 'data' has no initializer and is not definitely assigned in the constructor.

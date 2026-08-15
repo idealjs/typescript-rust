@@ -1,0 +1,1 @@
+objectLiteralReferencingInternalProperties.ts(1,21): error TS2304: Cannot find name 'b'.

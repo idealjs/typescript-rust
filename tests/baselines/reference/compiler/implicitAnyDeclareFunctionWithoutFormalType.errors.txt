@@ -1,0 +1,6 @@
+implicitAnyDeclareFunctionWithoutFormalType.ts(2,14): error TS7006: Parameter 'x' implicitly has an 'any' type.
+implicitAnyDeclareFunctionWithoutFormalType.ts(3,25): error TS7006: Parameter 'y' implicitly has an 'any' type.
+implicitAnyDeclareFunctionWithoutFormalType.ts(4,16): error TS7006: Parameter 'a' implicitly has an 'any' type.
+implicitAnyDeclareFunctionWithoutFormalType.ts(4,19): error TS7006: Parameter 'b' implicitly has an 'any' type.
+implicitAnyDeclareFunctionWithoutFormalType.ts(4,22): error TS7006: Parameter 'c' implicitly has an 'any' type.
+implicitAnyDeclareFunctionWithoutFormalType.ts(5,16): error TS7019: Rest parameter 'args' implicitly has an 'any[]' type.

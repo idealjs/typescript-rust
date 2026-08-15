@@ -1,0 +1,8 @@
+spellingSuggestionJSXAttribute.tsx(8,4): error TS2322: Type '{ class: string; }' is not assignable to type 'DetailedHTMLProps<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>'.
+spellingSuggestionJSXAttribute.tsx(9,4): error TS2322: Type '{ for: string; }' is not assignable to type 'DetailedHTMLProps<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>'.
+spellingSuggestionJSXAttribute.tsx(10,8): error TS2322: Type '{ for: string; }' is not assignable to type 'DetailedHTMLProps<LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>'.
+spellingSuggestionJSXAttribute.tsx(11,8): error TS2322: Type '{ for: string; class: string; }' is not assignable to type 'DetailedHTMLProps<LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>'.
+spellingSuggestionJSXAttribute.tsx(12,9): error TS2769: No overload matches this call.
+spellingSuggestionJSXAttribute.tsx(13,10): error TS2322: Type '{ class: string; }' is not assignable to type 'IntrinsicAttributes & { className?: string | undefined; htmlFor?: string | undefined; }'.
+spellingSuggestionJSXAttribute.tsx(14,9): error TS2769: No overload matches this call.
+spellingSuggestionJSXAttribute.tsx(15,10): error TS2322: Type '{ for: string; }' is not assignable to type 'IntrinsicAttributes & { className?: string | undefined; htmlFor?: string | undefined; }'.

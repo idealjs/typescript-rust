@@ -1,0 +1,1 @@
+/a.js(1,7): error TS6133: 'x' is declared but its value is never read.

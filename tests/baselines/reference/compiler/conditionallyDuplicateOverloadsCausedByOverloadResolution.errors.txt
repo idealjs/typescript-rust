@@ -1,0 +1,1 @@
+conditionallyDuplicateOverloadsCausedByOverloadResolution.ts(19,12): error TS2454: Variable 'bar' is used before being assigned.

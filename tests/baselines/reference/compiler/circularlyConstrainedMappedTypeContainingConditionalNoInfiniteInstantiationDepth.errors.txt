@@ -1,0 +1,1 @@
+circularlyConstrainedMappedTypeContainingConditionalNoInfiniteInstantiationDepth.ts(63,84): error TS2344: Type 'GetProps<C>' does not satisfy the constraint 'Shared<TInjectedProps, GetProps<C>>'.

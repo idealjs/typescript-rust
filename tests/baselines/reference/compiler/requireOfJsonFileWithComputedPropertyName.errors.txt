@@ -1,0 +1,1 @@
+b.json(2,5): error TS1327: String literal with double quotes expected.

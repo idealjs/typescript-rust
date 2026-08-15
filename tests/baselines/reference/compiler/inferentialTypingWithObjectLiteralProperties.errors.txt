@@ -1,0 +1,2 @@
+inferentialTypingWithObjectLiteralProperties.ts(4,1): error TS2322: Type 'string' is not assignable to type 'number'.
+inferentialTypingWithObjectLiteralProperties.ts(5,1): error TS2322: Type 'string' is not assignable to type 'number'.

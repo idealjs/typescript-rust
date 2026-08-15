@@ -1,0 +1,1 @@
+copyrightWithoutNewLine1.ts(4,24): error TS2307: Cannot find module './greeter' or its corresponding type declarations.

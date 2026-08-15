@@ -1,0 +1,1 @@
+interfaceDeclaration6.ts(3,11): error TS2430: Interface 'i3' incorrectly extends interface 'i1'.

@@ -1,0 +1,4 @@
+overloadsWithProvisionalErrors.ts(6,1): error TS2769: No overload matches this call.
+overloadsWithProvisionalErrors.ts(7,17): error TS2304: Cannot find name 'blah'.
+overloadsWithProvisionalErrors.ts(8,1): error TS2769: No overload matches this call.
+overloadsWithProvisionalErrors.ts(8,17): error TS2304: Cannot find name 'blah'.

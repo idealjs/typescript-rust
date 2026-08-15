@@ -1,0 +1,4 @@
+tooFewArgumentsInGenericFunctionTypedArgument.ts(12,11): error TS2454: Variable '_' is used before being assigned.
+tooFewArgumentsInGenericFunctionTypedArgument.ts(12,17): error TS2454: Variable 'c2' is used before being assigned.
+tooFewArgumentsInGenericFunctionTypedArgument.ts(14,11): error TS2454: Variable '_' is used before being assigned.
+tooFewArgumentsInGenericFunctionTypedArgument.ts(14,17): error TS2454: Variable 'c2' is used before being assigned.

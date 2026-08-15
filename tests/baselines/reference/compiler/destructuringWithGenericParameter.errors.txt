@@ -1,0 +1,1 @@
+destructuringWithGenericParameter.ts(2,5): error TS2564: Property 'payload' has no initializer and is not definitely assigned in the constructor.

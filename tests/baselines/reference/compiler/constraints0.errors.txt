@@ -1,0 +1,1 @@
+constraints0.ts(14,19): error TS2344: Type 'B' does not satisfy the constraint 'A'.

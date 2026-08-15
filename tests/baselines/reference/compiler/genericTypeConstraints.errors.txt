@@ -1,0 +1,1 @@
+genericTypeConstraints.ts(9,31): error TS2344: Type 'FooExtended' does not satisfy the constraint 'Foo'.

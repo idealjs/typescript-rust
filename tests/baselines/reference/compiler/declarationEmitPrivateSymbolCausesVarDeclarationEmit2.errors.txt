@@ -1,0 +1,1 @@
+c.ts(4,14): error TS2415: Class 'D' incorrectly extends base class 'C'.

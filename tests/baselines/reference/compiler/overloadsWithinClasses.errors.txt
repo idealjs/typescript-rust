@@ -1,0 +1,2 @@
+overloadsWithinClasses.ts(3,12): error TS2393: Duplicate function implementation.
+overloadsWithinClasses.ts(5,12): error TS2393: Duplicate function implementation.

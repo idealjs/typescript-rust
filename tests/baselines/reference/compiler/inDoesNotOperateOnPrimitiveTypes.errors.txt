@@ -1,0 +1,10 @@
+inDoesNotOperateOnPrimitiveTypes.ts(12,17): error TS2322: Type 'T' is not assignable to type 'object'.
+inDoesNotOperateOnPrimitiveTypes.ts(19,17): error TS2322: Type 'T' is not assignable to type 'object'.
+inDoesNotOperateOnPrimitiveTypes.ts(23,12): error TS2322: Type 'T | U' is not assignable to type 'object'.
+inDoesNotOperateOnPrimitiveTypes.ts(27,12): error TS2322: Type 'T | U' is not assignable to type 'object'.
+inDoesNotOperateOnPrimitiveTypes.ts(34,12): error TS2322: Type 'string | number | T' is not assignable to type 'object'.
+inDoesNotOperateOnPrimitiveTypes.ts(36,14): error TS2322: Type 'T' is not assignable to type 'object'.
+inDoesNotOperateOnPrimitiveTypes.ts(41,12): error TS2322: Type 'T' is not assignable to type 'object'.
+inDoesNotOperateOnPrimitiveTypes.ts(53,14): error TS2322: Type 'T | U' is not assignable to type 'object'.
+inDoesNotOperateOnPrimitiveTypes.ts(60,12): error TS2322: Type 'T & U' is not assignable to type 'object'.
+inDoesNotOperateOnPrimitiveTypes.ts(64,12): error TS2322: Type 'T & (0 | 1 | 2)' is not assignable to type 'object'.

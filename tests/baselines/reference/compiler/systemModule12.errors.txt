@@ -1,0 +1,1 @@
+systemModule12.ts(2,15): error TS2792: Cannot find module 'file1'. Did you mean to set the 'moduleResolution' option to 'nodenext', or to add aliases to the 'paths' option?

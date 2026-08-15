@@ -1,0 +1,1 @@
+jsxImportForSideEffectsNonExtantNoError.tsx(4,8): error TS2882: Cannot find module or type declarations for side-effect import of './App.css'.

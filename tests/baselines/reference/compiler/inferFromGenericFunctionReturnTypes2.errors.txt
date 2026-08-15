@@ -1,0 +1,1 @@
+inferFromGenericFunctionReturnTypes2.ts(27,3): error TS2564: Property '_store' has no initializer and is not definitely assigned in the constructor.

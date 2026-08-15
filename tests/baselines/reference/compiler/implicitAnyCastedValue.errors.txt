@@ -1,0 +1,2 @@
+implicitAnyCastedValue.ts(53,24): error TS7006: Parameter 'x' implicitly has an 'any' type.
+implicitAnyCastedValue.ts(62,24): error TS7006: Parameter 'x' implicitly has an 'any' type.

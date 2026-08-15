@@ -1,0 +1,5 @@
+deeplyNestedMappedTypes.ts(9,7): error TS2322: Type 'Id<{ x: { y: { z: { a: { b: { c: number; }; }; }; }; }; }>' is not assignable to type 'Id<{ x: { y: { z: { a: { b: { c: string; }; }; }; }; }; }>'.
+deeplyNestedMappedTypes.ts(17,7): error TS2322: Type 'Id2<{ x: { y: { z: { a: { b: { c: number; }; }; }; }; }; }>' is not assignable to type 'Id2<{ x: { y: { z: { a: { b: { c: string; }; }; }; }; }; }>'.
+deeplyNestedMappedTypes.ts(69,5): error TS2322: Type '{ level1: { level2: { foo: string; }; }; }[]' is not assignable to type '{ level1: { level2: { foo: string; bar: string; }; }; }[]'.
+deeplyNestedMappedTypes.ts(73,5): error TS2322: Type '{ level1: { level2: { foo: string; }; }; }[]' is not assignable to type 'T'.
+deeplyNestedMappedTypes.ts(77,5): error TS2322: Type '{ level1: { level2: { foo: string; }; }; }[]' is not assignable to type '{ level1: { level2: { foo: string; bar: string; }; }; }[]'.

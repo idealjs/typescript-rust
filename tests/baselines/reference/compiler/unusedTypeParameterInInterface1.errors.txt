@@ -1,0 +1,1 @@
+unusedTypeParameterInInterface1.ts(1,14): error TS6133: 'T' is declared but its value is never read.

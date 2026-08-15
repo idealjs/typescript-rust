@@ -1,0 +1,6 @@
+bar.ts(1,10): error TS2305: Module '"./foo"' has no exported member 'Bar'.
+bar.ts(1,15): error TS2305: Module '"./foo"' has no exported member 'toString'.
+bar.ts(3,10): error TS2305: Module '"./foo2"' has no exported member 'a'.
+bar.ts(3,13): error TS2305: Module '"./foo2"' has no exported member 'b'.
+bar.ts(3,19): error TS2305: Module '"./foo2"' has no exported member 'd'.
+bar.ts(3,22): error TS2305: Module '"./foo2"' has no exported member 'toString'.

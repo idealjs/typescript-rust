@@ -1,0 +1,1 @@
+contextualTyping38.ts(1,38): error TS7006: Parameter 'a' implicitly has an 'any' type.

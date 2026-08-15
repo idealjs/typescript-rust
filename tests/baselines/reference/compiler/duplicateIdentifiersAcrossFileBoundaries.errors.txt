@@ -1,0 +1,7 @@
+file1.ts(3,7): error TS2813: Class declaration cannot implement overload list for 'C2'.
+file1.ts(4,10): error TS2814: Function with bodies can only merge with classes that are ambient.
+file1.ts(8,12): error TS2300: Duplicate identifier 'x'.
+file2.ts(3,10): error TS2814: Function with bodies can only merge with classes that are ambient.
+file2.ts(4,7): error TS2813: Class declaration cannot implement overload list for 'f'.
+file2.ts(7,11): error TS2433: A namespace declaration cannot be in a different file from a class or function with which it is merged.
+file2.ts(8,16): error TS2300: Duplicate identifier 'x'.

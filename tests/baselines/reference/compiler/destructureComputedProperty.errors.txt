@@ -1,0 +1,5 @@
+destructureComputedProperty.ts(5,19): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
+destructureComputedProperty.ts(7,9): error TS2341: Property 'p' is private and only accessible within class 'C'.
+destructureComputedProperty.ts(8,9): error TS2341: Property 'p' is private and only accessible within class 'C'.
+destructureComputedProperty.ts(9,9): error TS2341: Property 'p' is private and only accessible within class 'C'.
+destructureComputedProperty.ts(10,9): error TS2341: Property 'p' is private and only accessible within class 'C'.

@@ -1,0 +1,1 @@
+recursiveTypeComparison.ts(14,31): error TS2454: Variable 'p' is used before being assigned.

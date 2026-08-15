@@ -1,0 +1,52 @@
+isolatedDeclarationErrorsExpressions.ts(3,14): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(4,14): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(5,14): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(8,14): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(9,14): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(10,14): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(13,14): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(17,14): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(18,14): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(19,14): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(20,14): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(23,12): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(24,12): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(25,12): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(28,12): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(29,12): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(30,12): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(33,12): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(49,12): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(50,12): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(51,12): error TS9010: Variable must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(53,18): error TS9017: Only const arrays can be inferred with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(55,38): error TS9018: Arrays with spread elements can't inferred with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(59,12): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(60,12): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(61,12): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(64,12): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(65,12): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(66,12): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(69,12): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(78,14): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(79,14): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(80,14): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(83,14): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(84,14): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(85,14): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(88,14): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(91,14): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(92,14): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(93,14): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(102,5): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(103,5): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(104,5): error TS9012: Property must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(109,37): error TS9011: Parameter must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(110,37): error TS9011: Parameter must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(111,37): error TS9011: Parameter must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(114,37): error TS9011: Parameter must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(115,37): error TS9011: Parameter must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(116,37): error TS9011: Parameter must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(119,36): error TS9011: Parameter must have an explicit type annotation with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(127,16): error TS9019: Binding elements can't be exported directly with --isolatedDeclarations.
+isolatedDeclarationErrorsExpressions.ts(128,19): error TS9019: Binding elements can't be exported directly with --isolatedDeclarations.

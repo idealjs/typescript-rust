@@ -1,0 +1,10 @@
+declarationEmitNestedBindingPattern.ts(3,17): error TS1187: A parameter property may not be declared using a binding pattern.
+declarationEmitNestedBindingPattern.ts(8,17): error TS1187: A parameter property may not be declared using a binding pattern.
+declarationEmitNestedBindingPattern.ts(13,17): error TS1187: A parameter property may not be declared using a binding pattern.
+declarationEmitNestedBindingPattern.ts(18,17): error TS1187: A parameter property may not be declared using a binding pattern.
+declarationEmitNestedBindingPattern.ts(23,17): error TS1187: A parameter property may not be declared using a binding pattern.
+declarationEmitNestedBindingPattern.ts(28,17): error TS1187: A parameter property may not be declared using a binding pattern.
+declarationEmitNestedBindingPattern.ts(34,9): error TS1187: A parameter property may not be declared using a binding pattern.
+declarationEmitNestedBindingPattern.ts(35,9): error TS1187: A parameter property may not be declared using a binding pattern.
+declarationEmitNestedBindingPattern.ts(41,17): error TS1187: A parameter property may not be declared using a binding pattern.
+declarationEmitNestedBindingPattern.ts(46,17): error TS1187: A parameter property may not be declared using a binding pattern.

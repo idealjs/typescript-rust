@@ -1,0 +1,1 @@
+errorForBareSpecifierWithImplicitModuleResolutionNone.ts(3,23): error TS2307: Cannot find module 'non-existent-module' or its corresponding type declarations.

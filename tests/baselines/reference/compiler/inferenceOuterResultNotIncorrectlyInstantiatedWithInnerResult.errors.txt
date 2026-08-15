@@ -1,0 +1,2 @@
+inferenceOuterResultNotIncorrectlyInstantiatedWithInnerResult.ts(35,15): error TS2322: Type '{ x: number; }' is not assignable to type 'Assign<T, { x: number; }>'.
+inferenceOuterResultNotIncorrectlyInstantiatedWithInnerResult.ts(35,59): error TS2769: No overload matches this call.

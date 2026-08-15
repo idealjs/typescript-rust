@@ -1,0 +1,1 @@
+typeParameterAsElementType.ts(3,16): error TS2454: Variable 't' is used before being assigned.

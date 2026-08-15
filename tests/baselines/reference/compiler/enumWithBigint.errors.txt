@@ -1,0 +1,1 @@
+enumWithBigint.ts(2,3): error TS2452: An enum member cannot have a numeric name.

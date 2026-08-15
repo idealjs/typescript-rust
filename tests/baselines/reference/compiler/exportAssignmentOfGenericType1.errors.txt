@@ -1,0 +1,2 @@
+exportAssignmentOfGenericType1_0.ts(2,14): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+exportAssignmentOfGenericType1_1.ts(6,17): error TS2454: Variable 'm' is used before being assigned.

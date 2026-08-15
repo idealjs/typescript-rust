@@ -1,0 +1,2 @@
+multipleExportAssignments.ts(13,10): error TS2300: Duplicate identifier 'export='.
+multipleExportAssignments.ts(14,10): error TS2300: Duplicate identifier 'export='.

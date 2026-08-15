@@ -1,0 +1,2 @@
+narrowByClauseExpressionInSwitchTrue6.ts(70,15): error TS2339: Property 'bProps' does not exist on type 'A | B'.
+narrowByClauseExpressionInSwitchTrue6.ts(73,15): error TS2339: Property 'cProps' does not exist on type 'MyType'.

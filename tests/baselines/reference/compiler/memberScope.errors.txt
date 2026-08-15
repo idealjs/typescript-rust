@@ -1,0 +1,1 @@
+memberScope.ts(4,11): error TS2708: Cannot use namespace 'Basil' as a value.

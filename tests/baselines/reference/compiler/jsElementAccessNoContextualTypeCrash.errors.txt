@@ -1,0 +1,1 @@
+jsElementAccessNoContextualTypeCrash.js(2,1): error TS2741: Property 'localize' is missing in type '{}' but required in type 'typeof Common'.

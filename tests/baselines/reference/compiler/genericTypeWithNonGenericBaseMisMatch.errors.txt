@@ -1,0 +1,2 @@
+genericTypeWithNonGenericBaseMisMatch.ts(5,2): error TS2416: Property 'f' in type 'X<T>' is not assignable to the same property in base type 'I'.
+genericTypeWithNonGenericBaseMisMatch.ts(8,5): error TS2322: Type 'X<{ a: string; }>' is not assignable to type 'I'.

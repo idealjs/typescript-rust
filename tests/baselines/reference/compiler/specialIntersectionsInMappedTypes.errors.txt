@@ -1,0 +1,1 @@
+specialIntersectionsInMappedTypes.ts(14,1): error TS18048: 'a.other' is possibly 'undefined'.

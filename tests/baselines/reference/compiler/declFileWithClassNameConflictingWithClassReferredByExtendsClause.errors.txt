@@ -1,0 +1,2 @@
+declFileWithClassNameConflictingWithClassReferredByExtendsClause.ts(9,9): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+declFileWithClassNameConflictingWithClassReferredByExtendsClause.ts(16,9): error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.

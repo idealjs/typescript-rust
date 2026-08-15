@@ -1,0 +1,2 @@
+functionAndPropertyNameConflict.ts(2,12): error TS2300: Duplicate identifier 'aaaaa'.
+functionAndPropertyNameConflict.ts(3,16): error TS2300: Duplicate identifier 'aaaaa'.

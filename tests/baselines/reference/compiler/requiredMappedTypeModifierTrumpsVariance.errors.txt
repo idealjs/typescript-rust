@@ -1,0 +1,8 @@
+requiredMappedTypeModifierTrumpsVariance.ts(5,1): error TS2741: Property 'a' is missing in type 'Required<{ b?: 1 | undefined; x: 1; }>' but required in type 'Required<{ a?: 1 | undefined; x: 1; }>'.
+requiredMappedTypeModifierTrumpsVariance.ts(6,1): error TS2741: Property 'b' is missing in type 'Required<{ a?: 1 | undefined; x: 1; }>' but required in type 'Required<{ b?: 1 | undefined; x: 1; }>'.
+requiredMappedTypeModifierTrumpsVariance.ts(8,3): error TS2339: Property 'b' does not exist on type 'Required<{ a?: 1 | undefined; x: 1; }>'.
+requiredMappedTypeModifierTrumpsVariance.ts(9,3): error TS2339: Property 'a' does not exist on type 'Required<{ b?: 1 | undefined; x: 1; }>'.
+requiredMappedTypeModifierTrumpsVariance.ts(18,1): error TS2322: Type 'Foo<{ b?: 1 | undefined; x: 1; }>' is not assignable to type 'Foo<{ a?: 1 | undefined; x: 1; }>'.
+requiredMappedTypeModifierTrumpsVariance.ts(19,1): error TS2322: Type 'Foo<{ a?: 1 | undefined; x: 1; }>' is not assignable to type 'Foo<{ b?: 1 | undefined; x: 1; }>'.
+requiredMappedTypeModifierTrumpsVariance.ts(21,6): error TS2339: Property 'b' does not exist on type 'Required<{ a?: 1 | undefined; x: 1; }>'.
+requiredMappedTypeModifierTrumpsVariance.ts(22,6): error TS2339: Property 'a' does not exist on type 'Required<{ b?: 1 | undefined; x: 1; }>'.

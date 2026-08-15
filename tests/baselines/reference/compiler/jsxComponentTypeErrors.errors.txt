@@ -1,0 +1,7 @@
+jsxComponentTypeErrors.tsx(16,11): error TS2786: 'this' cannot be used as a JSX component.
+jsxComponentTypeErrors.tsx(25,16): error TS2786: 'FunctionComponent' cannot be used as a JSX component.
+jsxComponentTypeErrors.tsx(26,16): error TS2786: 'FunctionComponent' cannot be used as a JSX component.
+jsxComponentTypeErrors.tsx(27,16): error TS2786: 'ClassComponent' cannot be used as a JSX component.
+jsxComponentTypeErrors.tsx(28,16): error TS2786: 'MixedComponent' cannot be used as a JSX component.
+jsxComponentTypeErrors.tsx(37,16): error TS2786: 'obj.MemberFunctionComponent' cannot be used as a JSX component.
+jsxComponentTypeErrors.tsx(38,16): error TS2786: 'obj. MemberClassComponent' cannot be used as a JSX component.

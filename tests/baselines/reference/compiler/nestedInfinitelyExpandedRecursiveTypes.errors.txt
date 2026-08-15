@@ -1,0 +1,1 @@
+nestedInfinitelyExpandedRecursiveTypes.ts(10,5): error TS2454: Variable 'g' is used before being assigned.

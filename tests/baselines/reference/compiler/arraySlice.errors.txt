@@ -1,0 +1,1 @@
+arraySlice.ts(2,1): error TS2454: Variable 'arr' is used before being assigned.

@@ -1,0 +1,3 @@
+recursiveIdenticalOverloadResolution.ts(9,6): error TS2454: Variable 'i' is used before being assigned.
+recursiveIdenticalOverloadResolution.ts(11,8): error TS2454: Variable 'i' is used before being assigned.
+recursiveIdenticalOverloadResolution.ts(13,11): error TS2454: Variable 'i' is used before being assigned.

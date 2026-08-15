@@ -1,0 +1,2 @@
+contextualTypeFunctionObjectPropertyIntersection.ts(84,5): error TS2353: Object literal may only specify known properties, and 'bar' does not exist in type '{ FOO?: Action<{ type: "FOO"; }> | undefined; } & { "*"?: Action<{ type: "FOO"; } | { type: "bar"; }> | undefined; }'.
+contextualTypeFunctionObjectPropertyIntersection.ts(84,11): error TS7006: Parameter 'ev' implicitly has an 'any' type.

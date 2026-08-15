@@ -1,0 +1,7 @@
+instanceofWithStructurallyIdenticalTypes.ts(3,12): error TS2564: Property 'item' has no initializer and is not definitely assigned in the constructor.
+instanceofWithStructurallyIdenticalTypes.ts(4,12): error TS2564: Property 'item' has no initializer and is not definitely assigned in the constructor.
+instanceofWithStructurallyIdenticalTypes.ts(5,12): error TS2564: Property 'item' has no initializer and is not definitely assigned in the constructor.
+instanceofWithStructurallyIdenticalTypes.ts(32,18): error TS2339: Property 'item' does not exist on type 'never'.
+instanceofWithStructurallyIdenticalTypes.ts(39,11): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+instanceofWithStructurallyIdenticalTypes.ts(41,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+instanceofWithStructurallyIdenticalTypes.ts(42,21): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.

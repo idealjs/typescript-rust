@@ -1,0 +1,4 @@
+indexerConstraints.ts(17,5): error TS2413: 'number' index type 'A' is not assignable to 'string' index type 'B'.
+indexerConstraints.ts(25,5): error TS2413: 'number' index type 'A' is not assignable to 'string' index type 'B'.
+indexerConstraints.ts(33,5): error TS2413: 'number' index type 'A' is not assignable to 'string' index type 'B'.
+indexerConstraints.ts(41,5): error TS2413: 'number' index type 'A' is not assignable to 'string' index type 'B'.

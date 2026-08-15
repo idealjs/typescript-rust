@@ -1,0 +1,2 @@
+src/index.ts(3,14): error TS2883: The inferred type of 'foo' cannot be named without a reference to 'SomeType' from '../node_modules/some-dep/dist/inner'. This is likely not portable. A type annotation is necessary.
+src/index.ts(7,14): error TS2883: The inferred type of 'bar' cannot be named without a reference to 'Other' from '../node_modules/some-dep/dist/inner'. This is likely not portable. A type annotation is necessary.

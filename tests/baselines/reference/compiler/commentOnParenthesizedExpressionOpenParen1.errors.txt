@@ -1,0 +1,1 @@
+commentOnParenthesizedExpressionOpenParen1.ts(3,27): error TS2454: Variable 'f' is used before being assigned.

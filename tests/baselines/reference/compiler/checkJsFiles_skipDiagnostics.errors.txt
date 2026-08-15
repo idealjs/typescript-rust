@@ -1,0 +1,2 @@
+a.js(29,1): error TS2349: This expression is not callable.
+a.js(35,1): error TS2349: This expression is not callable.

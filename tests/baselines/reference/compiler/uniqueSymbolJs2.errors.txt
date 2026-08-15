@@ -1,0 +1,1 @@
+/index.js(9,1): error TS2367: This comparison appears to be unintentional because the types 'typeof x' and 'typeof y' have no overlap.

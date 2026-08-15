@@ -1,0 +1,2 @@
+inferentialTypingWithFunctionTypeZip.ts(3,14): error TS2454: Variable 'zipWith' is used before being assigned.
+inferentialTypingWithFunctionTypeZip.ts(3,42): error TS2454: Variable 'pair' is used before being assigned.

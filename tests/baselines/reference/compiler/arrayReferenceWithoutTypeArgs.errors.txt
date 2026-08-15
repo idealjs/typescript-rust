@@ -1,0 +1,1 @@
+arrayReferenceWithoutTypeArgs.ts(2,17): error TS2314: Generic type 'Array<T>' requires 1 type argument(s).

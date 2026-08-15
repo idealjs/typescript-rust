@@ -1,0 +1,1 @@
+a.js(1,13): error TS8009: The '?' modifier can only be used in TypeScript files.

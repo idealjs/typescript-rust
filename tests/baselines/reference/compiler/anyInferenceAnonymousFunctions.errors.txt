@@ -1,0 +1,5 @@
+anyInferenceAnonymousFunctions.ts(3,1): error TS2454: Variable 'paired' is used before being assigned.
+anyInferenceAnonymousFunctions.ts(9,1): error TS2454: Variable 'paired' is used before being assigned.
+anyInferenceAnonymousFunctions.ts(14,1): error TS2454: Variable 'paired' is used before being assigned.
+anyInferenceAnonymousFunctions.ts(16,1): error TS2454: Variable 'paired' is used before being assigned.
+anyInferenceAnonymousFunctions.ts(17,1): error TS2454: Variable 'paired' is used before being assigned.

@@ -1,0 +1,1 @@
+importAndVariableDeclarationConflict1.ts(5,1): error TS2440: Import declaration conflicts with local declaration of 'x'.

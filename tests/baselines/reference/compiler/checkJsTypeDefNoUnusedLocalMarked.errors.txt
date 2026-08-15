@@ -1,0 +1,2 @@
+file.ts(2,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+something.js(5,29): error TS2352: Conversion of type 'undefined' to type 'FooFun' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.

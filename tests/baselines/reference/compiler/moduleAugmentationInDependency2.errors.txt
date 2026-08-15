@@ -1,0 +1,1 @@
+/node_modules/A/index.ts(1,16): error TS2664: Invalid module name in augmentation, module 'ext' cannot be found.

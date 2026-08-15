@@ -1,0 +1,1 @@
+/a.js(4,13): error TS2314: Generic type 'C<T>' requires 1 type argument(s).

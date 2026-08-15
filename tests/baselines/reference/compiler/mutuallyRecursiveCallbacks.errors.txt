@@ -1,0 +1,1 @@
+mutuallyRecursiveCallbacks.ts(7,1): error TS2322: Type '<T>(bar: Bar<T>) => void' is not assignable to type 'Bar<{}>'.

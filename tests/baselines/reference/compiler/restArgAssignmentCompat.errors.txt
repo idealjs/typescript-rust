@@ -1,0 +1,1 @@
+restArgAssignmentCompat.ts(7,1): error TS2322: Type '(...x: number[]) => void' is not assignable to type '(x: number[], y: string) => void'.

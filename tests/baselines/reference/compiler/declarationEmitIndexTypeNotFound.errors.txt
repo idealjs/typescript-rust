@@ -1,0 +1,2 @@
+declarationEmitIndexTypeNotFound.ts(2,6): error TS1268: An index signature parameter type must be 'string', 'number', 'symbol', or a template literal type.
+declarationEmitIndexTypeNotFound.ts(2,13): error TS2304: Cannot find name 'TypeNotFound'.

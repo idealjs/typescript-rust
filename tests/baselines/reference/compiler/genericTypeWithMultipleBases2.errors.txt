@@ -1,0 +1,3 @@
+genericTypeWithMultipleBases2.ts(14,1): error TS2454: Variable 'x' is used before being assigned.
+genericTypeWithMultipleBases2.ts(15,1): error TS2454: Variable 'x' is used before being assigned.
+genericTypeWithMultipleBases2.ts(16,1): error TS2454: Variable 'x' is used before being assigned.

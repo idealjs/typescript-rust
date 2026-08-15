@@ -1,0 +1,1 @@
+unqualifiedCallToClassStatic1.ts(4,3): error TS2662: Cannot find name 'foo'. Did you mean the static member 'Vector.foo'?

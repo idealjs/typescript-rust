@@ -1,0 +1,3 @@
+typeGuardConstructorDerivedClass.ts(13,10): error TS2339: Property 'property1' does not exist on type 'never'.
+typeGuardConstructorDerivedClass.ts(52,5): error TS2564: Property 'property1' has no initializer and is not definitely assigned in the constructor.
+typeGuardConstructorDerivedClass.ts(56,5): error TS2564: Property 'property1' has no initializer and is not definitely assigned in the constructor.

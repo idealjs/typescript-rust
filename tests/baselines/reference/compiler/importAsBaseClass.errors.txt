@@ -1,0 +1,1 @@
+importAsBaseClass_1.ts(2,21): error TS2507: Type 'typeof import("importAsBaseClass_0")' is not a constructor function type.

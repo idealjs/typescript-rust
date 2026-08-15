@@ -1,0 +1,2 @@
+classExpressionTest2.ts(6,22): error TS2454: Variable 't' is used before being assigned.
+classExpressionTest2.ts(6,25): error TS2454: Variable 'x' is used before being assigned.

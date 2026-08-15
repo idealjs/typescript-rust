@@ -1,0 +1,1 @@
+dottedSymbolResolution1.ts(21,10): error TS2454: Variable 'x' is used before being assigned.

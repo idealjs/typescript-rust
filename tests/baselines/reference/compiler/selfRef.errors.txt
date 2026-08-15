@@ -1,0 +1,2 @@
+selfRef.ts(8,8): error TS2304: Cannot find name 'name'.
+selfRef.ts(12,18): error TS2304: Cannot find name 'name'.

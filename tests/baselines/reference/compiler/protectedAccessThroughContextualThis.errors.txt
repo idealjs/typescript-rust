@@ -1,0 +1,2 @@
+protectedAccessThroughContextualThis.ts(13,20): error TS2341: Property 'privat' is private and only accessible within class 'Foo'.
+protectedAccessThroughContextualThis.ts(20,20): error TS2341: Property 'privat' is private and only accessible within class 'Foo'.

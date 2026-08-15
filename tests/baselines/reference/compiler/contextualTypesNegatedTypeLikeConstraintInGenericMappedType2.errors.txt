@@ -1,0 +1,2 @@
+contextualTypesNegatedTypeLikeConstraintInGenericMappedType2.ts(24,3): error TS2322: Type '(_: any) => string' is not assignable to type 'never'.
+contextualTypesNegatedTypeLikeConstraintInGenericMappedType2.ts(24,7): error TS7006: Parameter '_' implicitly has an 'any' type.
