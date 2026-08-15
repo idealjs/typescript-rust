@@ -1030,7 +1030,18 @@ fn build_and_check(
             fs.insert_dir(&parent);
         }
         fs.insert_file(&abs, &unit.content);
-        file_names.push(abs);
+        // Only TypeScript units are compile roots (Go's makeUnitsFromTest
+        // hands every unit to the compiler host, but .json/.md units exist
+        // on the FS only — compiling them as TS produces parse errors the
+        // official baselines don't have).
+        let lower = abs.to_ascii_lowercase();
+        if lower.ends_with(".ts")
+            || lower.ends_with(".tsx")
+            || lower.ends_with(".mts")
+            || lower.ends_with(".cts")
+        {
+            file_names.push(abs);
+        }
     }
 
     // Wrap with BundledFS so lib.d.ts files resolve (unless the case set --noLib).

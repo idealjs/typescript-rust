@@ -122,3 +122,13 @@ compiler/allowImportClausesToMergeWithTypes.errors.txt
 ## typeof-import display ('typeof import("m")') and union-null TS2322
 ## (we emit TS2741 with { x: any } instead) ##
 compiler/aliasUsageInOrExpression.errors.txt
+
+## 2026-08-15 batch #101-#110: import-equals alias VALUE typing under
+## strict:false degrades to any — `Foo.default.bar()` misses TS2339
+## (Property 'default' does not exist on typeof import) ##
+compiler/allowSyntheticDefaultImports10.errors.txt
+
+## 2026-08-15 batch #101-#110: node_modules / package.json "exports"
+## monorepo module resolution ('shared' bare specifier through workspace
+## symlinks) not ported — TS2307 over-report ##
+compiler/allowJsCrossMonorepoPackage.errors.txt
