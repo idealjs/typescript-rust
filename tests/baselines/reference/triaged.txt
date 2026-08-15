@@ -535,3 +535,66 @@ compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsx,module=commonjs,modu
 compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsxdev,module=commonjs,moduledetection=auto).errors.txt
 compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsxdev,module=commonjs,moduledetection=force).errors.txt
 compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsxdev,module=commonjs,moduledetection=legacy).errors.txt
+
+## 2026-08-16 batch #1000-#1099: conditional-type evaluation —
+## checkType/extendsType resolution, distributive conditionals,
+## literal-object equality (extends the Awaited<T> triage group) ##
+compiler/conditionalAnyCheckTypePicksBothBranches.errors.txt
+compiler/conditionalDoesntLeakUninstantiatedTypeParameter.errors.txt
+compiler/conditionalEqualityOnLiteralObjects.errors.txt
+compiler/conditionalEqualityTestingNullability.errors.txt
+compiler/conditionalExpression1.errors.txt
+compiler/conditionalReturnExpression.errors.txt
+compiler/conditionalTypeBasedContextualTypeReturnTypeWidening.errors.txt
+compiler/conditionalTypeClassMembers.errors.txt
+compiler/conditionalTypeDoesntSpinForever.errors.txt
+compiler/conditionalTypeGenericInSignatureTypeParameterConstraint.errors.txt
+compiler/conditionalTypeRelaxingConstraintAssignability.errors.txt
+compiler/conditionalTypeVarianceBigArrayConstraintsPerformance.errors.txt
+compiler/conditionalTypesASI.errors.txt
+compiler/conditionalTypesSimplifyWhenTrivial.errors.txt
+
+## 2026-08-16 batch #1000-#1099: complex generic relations — recursive
+## base-class references, indexed-access keyof bounds, privacy through
+## generics, composite contextual signatures ##
+compiler/complexClassRelationships(target=es2015).errors.txt
+compiler/complexRecursiveCollections.errors.txt
+compiler/complicatedGenericRecursiveBaseClassReference.errors.txt
+compiler/complicatedIndexedAccessKeyofReliesOnKeyofNeverUpperBound.errors.txt
+compiler/complicatedIndexesOfIntersectionsAreInferencable.errors.txt
+compiler/complicatedPrivacy(target=es2015).errors.txt
+compiler/compositeContextualSignature.errors.txt
+compiler/compositeGenericFunction.errors.txt
+compiler/compositeWithNodeModulesSourceFile.errors.txt
+
+## 2026-08-16 batch #1000-#1099: computed properties — destructuring
+## computed keys, enum-member computed names (isolatedModules configs) ##
+compiler/computedEnumMemberSyntacticallyString(isolatedmodules=false).errors.txt
+compiler/computedEnumMemberSyntacticallyString(isolatedmodules=true).errors.txt
+compiler/computedEnumMemberSyntacticallyString2(isolatedmodules=false).errors.txt
+compiler/computedEnumMemberSyntacticallyString2(isolatedmodules=true).errors.txt
+compiler/computedPropertiesInDestructuring1.errors.txt
+compiler/computedPropertiesInDestructuring1_ES6.errors.txt
+compiler/computedPropertiesInDestructuring2.errors.txt
+compiler/computedPropertiesInDestructuring2_ES6.errors.txt
+compiler/computedPropertiesNarrowed.errors.txt
+compiler/computedPropertyBindingElementDeclarationNoCrash1.errors.txt
+
+## 2026-08-16 batch #1000-#1099: misc — missing-semicolon ASI
+## recovery, commonjs export= type decl, commonSourceDirectory paths,
+## type-parameter comments parser ##
+compiler/commentsTypeParameters.errors.txt
+compiler/commonJsExportTypeDeclarationError(target=es2015).errors.txt
+compiler/commonMissingSemicolons.errors.txt
+compiler/commonSourceDir5.errors.txt
+compiler/commonSourceDirectory.errors.txt
+compiler/commonSourceDirectory_dts.errors.txt
+compiler/conflictMarkerDiff3Trivia1.errors.txt
+compiler/conflictMarkerDiff3Trivia2.errors.txt
+compiler/conflictMarkerTrivia1.errors.txt
+compiler/conflictMarkerTrivia2.errors.txt
+compiler/conflictMarkerTrivia3.errors.txt
+compiler/conflictMarkerTrivia4.errors.txt
+compiler/conflictingDeclarationsImportFromNamespace1.errors.txt
+compiler/conflictingDeclarationsImportFromNamespace2.errors.txt
+compiler/conflictingMemberTypesInBases.errors.txt
