@@ -476,3 +476,36 @@ compiler/classSideInheritance1.errors.txt
 compiler/classStaticInitializersUsePropertiesBeforeDeclaration.errors.txt
 compiler/classStaticPropertyAccess(target=es2015).errors.txt
 compiler/classTypeParametersInStatics.errors.txt
+
+## 2026-08-16 batch #800-#899: variance inference — co/contravariant
+## inference ranking (extends the batch #101-#110 triage group) ##
+compiler/classVarianceResolveCircularity2.errors.txt
+compiler/coAndContraVariantInferences.errors.txt
+compiler/coAndContraVariantInferences2.errors.txt
+compiler/coAndContraVariantInferences4.errors.txt
+compiler/coAndContraVariantInferences5.errors.txt
+compiler/coAndContraVariantInferences6.errors.txt
+compiler/coAndContraVariantInferences7.errors.txt
+compiler/coAndContraVariantInferences8.errors.txt
+
+## 2026-08-16 batch #800-#899: class+namespace (clodule) merge across
+## files — TS2433 same-file rule, static-member merging, duplicate
+## members in merged clodules ##
+compiler/cloduleSplitAcrossFiles.errors.txt
+compiler/cloduleStaticMembers.errors.txt
+compiler/cloduleWithDuplicateMember1.errors.txt
+compiler/cloduleWithDuplicateMember2.errors.txt
+compiler/cloduleWithPriorInstantiatedModule.errors.txt
+compiler/clodulesDerivedClasses.errors.txt
+
+## 2026-08-16 batch #800-#899: misc — TS2717 property-redecl type
+## mismatch, reserved require/exports names (TS2441), collision
+## arguments, empty type-parameter list, class-variance circularity,
+## use-before-initialized class vars ##
+compiler/classUsedBeforeInitializedVariables(target=es2015).errors.txt
+compiler/classWithDuplicateIdentifier.errors.txt
+compiler/classWithEmptyTypeParameter.errors.txt
+compiler/classWithMultipleBaseClasses.errors.txt
+compiler/collisionArgumentsClassConstructor(target=es2015).errors.txt
+compiler/collisionArgumentsClassMethod(target=es2015).errors.txt
+compiler/collisionExportsRequireAndAlias.errors.txt

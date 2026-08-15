@@ -8699,6 +8699,56 @@ impl Checker {
         // duplicate modifiers, etc.) — Go's checkPropertyDeclaration /
         // checkMethodDeclaration call checkGrammarModifiers per member.
         self.check_grammar_modifiers(node);
+        // TS2300: same-name class members that can't merge (two properties,
+        // two methods of identical shape, property+method). Getter/setter
+        // pairs and method overloads are exempt (Go's
+        // checkClassMemberDuplicates through resolveDeclaredMembers).
+        {
+            let class_node = node.parent.clone();
+            if let Some(cls) = &class_node
+                && matches!(cls.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression)
+                && let crate::ast::NodeData::ClassDeclaration(cd) = &cls.data
+            {
+                let (my_name, my_loc) = match &node.data {
+                    crate::ast::NodeData::PropertyDeclaration(d) => {
+                        (d.name.text().to_string(), d.name.loc)
+                    }
+                    crate::ast::NodeData::MethodDeclaration(d) => {
+                        (d.name.text().to_string(), d.name.loc)
+                    }
+                    _ => (String::new(), node.loc),
+                };
+                if !my_name.is_empty() {
+                    let dup = cd.members.iter().any(|m| {
+                        if Arc::ptr_eq(m, node) || m.loc.pos() >= node.loc.pos() {
+                            return false;
+                        }
+                        match &m.data {
+                            crate::ast::NodeData::PropertyDeclaration(d) => {
+                                d.name.text() == my_name
+                            }
+                            // Method pairs: only BOTH-bodied duplicates conflict
+                            // (overload + implementation is legal).
+                            crate::ast::NodeData::MethodDeclaration(d) => {
+                                d.name.text() == my_name
+                                    && d.body.is_some()
+                                    && matches!(&node.data, crate::ast::NodeData::MethodDeclaration(cur) if cur.body.is_some())
+                            }
+                            _ => false,
+                        }
+                    });
+                    if dup {
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            file,
+                            my_loc,
+                            crate::diagnostics::messages_generated::DUPLICATE_IDENTIFIER_0,
+                            vec![my_name],
+                        ));
+                    }
+                }
+            }
+        }
         match node.kind {
             SyntaxKind::MethodDeclaration
             | SyntaxKind::Constructor
