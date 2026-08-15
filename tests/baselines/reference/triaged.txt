@@ -509,3 +509,29 @@ compiler/classWithMultipleBaseClasses.errors.txt
 compiler/collisionArgumentsClassConstructor(target=es2015).errors.txt
 compiler/collisionArgumentsClassMethod(target=es2015).errors.txt
 compiler/collisionExportsRequireAndAlias.errors.txt
+
+## 2026-08-16 batch #900-#999: comment placement parser recovery —
+## comments between array elements/elisions, parenthesized assertions,
+## class members, JSX expression comments (multi-config jsx/module
+## varyBy baselines) ##
+compiler/commentEmitOnParenthesizedAssertionInReturnStatement.errors.txt
+compiler/commentEmitOnParenthesizedAssertionInReturnStatement2.errors.txt
+compiler/commentOnArrayElement10.errors.txt
+compiler/commentOnArrayElement11.errors.txt
+compiler/commentOnArrayElement12.errors.txt
+compiler/commentOnArrayElement3.errors.txt
+compiler/commentsClassMembers(target=es2015).errors.txt
+compiler/commentsExternalModules3(target=es2015).errors.txt
+compiler/commentsModules(target=es2015).errors.txt
+compiler/commentsOnJSXExpressionsArePreserved(jsx=preserve,module=commonjs,moduledetection=auto).errors.txt
+compiler/commentsOnJSXExpressionsArePreserved(jsx=preserve,module=commonjs,moduledetection=force).errors.txt
+compiler/commentsOnJSXExpressionsArePreserved(jsx=preserve,module=commonjs,moduledetection=legacy).errors.txt
+compiler/commentsOnJSXExpressionsArePreserved(jsx=react,module=commonjs,moduledetection=auto).errors.txt
+compiler/commentsOnJSXExpressionsArePreserved(jsx=react,module=commonjs,moduledetection=force).errors.txt
+compiler/commentsOnJSXExpressionsArePreserved(jsx=react,module=commonjs,moduledetection=legacy).errors.txt
+compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsx,module=commonjs,moduledetection=auto).errors.txt
+compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsx,module=commonjs,moduledetection=force).errors.txt
+compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsx,module=commonjs,moduledetection=legacy).errors.txt
+compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsxdev,module=commonjs,moduledetection=auto).errors.txt
+compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsxdev,module=commonjs,moduledetection=force).errors.txt
+compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsxdev,module=commonjs,moduledetection=legacy).errors.txt
