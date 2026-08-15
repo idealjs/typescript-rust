@@ -1,0 +1,2 @@
+blockScopedFunctionDeclarationES5.ts(2,14): error TS1250: Function declarations are not allowed inside blocks in strict mode when targeting 'ES5'.
+blockScopedFunctionDeclarationES5.ts(5,1): error TS2304: Cannot find name 'foo'.

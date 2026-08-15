@@ -1,0 +1,1 @@
+accessorInAmbientContextES5.ts(25,14): error TS2564: Property 'shouldError' has no initializer and is not definitely assigned in the constructor.

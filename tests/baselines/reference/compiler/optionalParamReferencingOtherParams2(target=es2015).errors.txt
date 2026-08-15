@@ -1,0 +1,1 @@
+optionalParamReferencingOtherParams2.ts(2,29): error TS2304: Cannot find name 'b'.

@@ -1,0 +1,4 @@
+functionLikeInParameterInitializer.ts(2,34): error TS2304: Cannot find name 'foo'.
+functionLikeInParameterInitializer.ts(6,44): error TS2304: Cannot find name 'foo'.
+functionLikeInParameterInitializer.ts(11,50): error TS2304: Cannot find name 'foo'.
+functionLikeInParameterInitializer.ts(16,41): error TS2304: Cannot find name 'foo'.

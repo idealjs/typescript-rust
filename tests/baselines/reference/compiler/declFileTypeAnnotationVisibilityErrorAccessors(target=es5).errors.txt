@@ -1,0 +1,6 @@
+declFileTypeAnnotationVisibilityErrorAccessors.ts(16,13): error TS2322: Type 'undefined' is not assignable to type 'private1'.
+declFileTypeAnnotationVisibilityErrorAccessors.ts(37,13): error TS2322: Type 'undefined' is not assignable to type 'private1'.
+declFileTypeAnnotationVisibilityErrorAccessors.ts(44,13): error TS2322: Type 'undefined' is not assignable to type 'public1'.
+declFileTypeAnnotationVisibilityErrorAccessors.ts(65,13): error TS2322: Type 'undefined' is not assignable to type 'public1'.
+declFileTypeAnnotationVisibilityErrorAccessors.ts(72,13): error TS2322: Type 'undefined' is not assignable to type 'public2'.
+declFileTypeAnnotationVisibilityErrorAccessors.ts(93,13): error TS2322: Type 'undefined' is not assignable to type 'public2'.

@@ -1,0 +1,1 @@
+Class2.ts(13,9): error TS2322: Type 'undefined' is not assignable to type 'Class1'.

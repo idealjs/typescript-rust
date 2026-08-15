@@ -1,0 +1,1 @@
+argumentsObjectIterator02_ES5.ts(5,21): error TS2802: Type 'ArrayIterator<any>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.

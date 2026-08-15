@@ -1,0 +1,3 @@
+commentsOnJSXExpressionsArePreserved.tsx(5,16): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+commentsOnJSXExpressionsArePreserved.tsx(5,16): error TS2792: Cannot find module 'react/jsx-runtime'. Did you mean to set the 'moduleResolution' option to 'nodenext', or to add aliases to the 'paths' option?
+commentsOnJSXExpressionsArePreserved.tsx(18,9): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.

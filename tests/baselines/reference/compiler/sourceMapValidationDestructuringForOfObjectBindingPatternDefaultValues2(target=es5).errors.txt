@@ -1,0 +1,12 @@
+sourceMapValidationDestructuringForOfObjectBindingPatternDefaultValues2.ts(57,17): error TS2454: Variable 'nameA' is used before being assigned.
+sourceMapValidationDestructuringForOfObjectBindingPatternDefaultValues2.ts(60,17): error TS2454: Variable 'nameA' is used before being assigned.
+sourceMapValidationDestructuringForOfObjectBindingPatternDefaultValues2.ts(63,17): error TS2454: Variable 'nameA' is used before being assigned.
+sourceMapValidationDestructuringForOfObjectBindingPatternDefaultValues2.ts(71,17): error TS2454: Variable 'primaryA' is used before being assigned.
+sourceMapValidationDestructuringForOfObjectBindingPatternDefaultValues2.ts(79,17): error TS2454: Variable 'primaryA' is used before being assigned.
+sourceMapValidationDestructuringForOfObjectBindingPatternDefaultValues2.ts(88,17): error TS2454: Variable 'primaryA' is used before being assigned.
+sourceMapValidationDestructuringForOfObjectBindingPatternDefaultValues2.ts(131,17): error TS2454: Variable 'nameA' is used before being assigned.
+sourceMapValidationDestructuringForOfObjectBindingPatternDefaultValues2.ts(134,17): error TS2454: Variable 'nameA' is used before being assigned.
+sourceMapValidationDestructuringForOfObjectBindingPatternDefaultValues2.ts(137,17): error TS2454: Variable 'nameA' is used before being assigned.
+sourceMapValidationDestructuringForOfObjectBindingPatternDefaultValues2.ts(146,17): error TS2454: Variable 'nameA' is used before being assigned.
+sourceMapValidationDestructuringForOfObjectBindingPatternDefaultValues2.ts(155,17): error TS2454: Variable 'nameA' is used before being assigned.
+sourceMapValidationDestructuringForOfObjectBindingPatternDefaultValues2.ts(165,17): error TS2454: Variable 'nameA' is used before being assigned.

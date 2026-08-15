@@ -1,0 +1,1 @@
+service.ts(1,8): error TS2613: Module '"db"' has no default export. Did you mean to use 'import { db } from "db"' instead?

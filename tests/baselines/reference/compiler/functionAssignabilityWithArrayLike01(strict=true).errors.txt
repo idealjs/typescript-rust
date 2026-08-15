@@ -1,0 +1,1 @@
+functionAssignabilityWithArrayLike01.ts(2,7): error TS2322: Type '() => void' is not assignable to type 'ArrayLike<any>'.

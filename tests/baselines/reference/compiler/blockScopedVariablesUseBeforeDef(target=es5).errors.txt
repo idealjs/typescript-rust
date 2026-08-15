@@ -1,0 +1,10 @@
+blockScopedVariablesUseBeforeDef.ts(2,13): error TS2448: Block-scoped variable 'x' used before its declaration.
+blockScopedVariablesUseBeforeDef.ts(58,20): error TS2448: Block-scoped variable 'x' used before its declaration.
+blockScopedVariablesUseBeforeDef.ts(65,20): error TS2448: Block-scoped variable 'x' used before its declaration.
+blockScopedVariablesUseBeforeDef.ts(100,12): error TS2448: Block-scoped variable 'x' used before its declaration.
+blockScopedVariablesUseBeforeDef.ts(111,28): error TS2448: Block-scoped variable 'a' used before its declaration.
+blockScopedVariablesUseBeforeDef.ts(112,21): error TS2448: Block-scoped variable 'a' used before its declaration.
+blockScopedVariablesUseBeforeDef.ts(122,22): error TS2448: Block-scoped variable 'a' used before its declaration.
+blockScopedVariablesUseBeforeDef.ts(128,9): error TS2448: Block-scoped variable 'foo' used before its declaration.
+blockScopedVariablesUseBeforeDef.ts(131,9): error TS2448: Block-scoped variable 'foo' used before its declaration.
+blockScopedVariablesUseBeforeDef.ts(153,20): error TS2450: Enum 'Enum' used before its declaration.

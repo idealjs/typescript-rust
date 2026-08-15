@@ -1,0 +1,1 @@
+test.ts(4,12): error TS2564: Property 'event' has no initializer and is not definitely assigned in the constructor.

@@ -148,8 +148,16 @@ pub fn split_units(content: &str, default_name: &str) -> ParsedCase {
 
         // A non-directive line — it belongs to the current file body.
         // Lines seen before the first @filename (comments, blank lines, a
-        // leading BOM) are simply discarded.
+        // leading BOM) are simply discarded. Leading blank lines of each unit
+        // are dropped too: Go's compiler-test parser inserts separators only
+        // between already-accumulated lines (`Len() != 0`), so a blank line
+        // before the unit's first content line never enters the virtual file
+        // and official baselines number lines from the first content line.
+        // Blank lines BETWEEN content lines are preserved.
         if current_name.is_some() {
+            if current_body.is_empty() && line_no_nl.trim().is_empty() {
+                continue;
+            }
             current_body.push_str(line);
         }
     }
@@ -161,11 +169,15 @@ pub fn split_units(content: &str, default_name: &str) -> ParsedCase {
     } else {
         // No @filename directive: the entire content (minus directives, which
         // were skipped above) is one file. We must re-extract the body without
-        // directive lines.
+        // directive lines, dropping leading blank lines like the multi-file
+        // path (official baselines number from the first content line).
         let mut body = String::new();
         for line in content.split_inclusive('\n') {
             let line_no_nl = line.trim_end_matches('\n').trim_end_matches('\r');
             if parse_directive_line(line_no_nl).is_some() {
+                continue;
+            }
+            if body.is_empty() && line_no_nl.trim().is_empty() {
                 continue;
             }
             body.push_str(line);

@@ -1,0 +1,2 @@
+downlevelLetConst12.ts(6,6): error TS2493: Tuple type '[]' of length '0' has no element at index '0'.
+downlevelLetConst12.ts(9,8): error TS2493: Tuple type '[]' of length '0' has no element at index '0'.

@@ -1,0 +1,1 @@
+accessorAccidentalCallDiagnostic.ts(6,14): error TS6234: This expression is not callable because it is a 'get' accessor. Did you mean to use it without '()'?

@@ -69,3 +69,14 @@ compiler/abstractClassUnionInstantiation.errors.txt
 ## run) and TS1012 fallbacks instead of TS1128 after `@` decorator garbage
 ## (parseErrorForMissingSemicolonAfter recovery path partially ported) ##
 compiler/TransportStream.errors.txt
+
+## 2026-08-15 batch #51-#60: abstract-class inheritance diagnostics not yet
+## ported — TS2654 (non-abstract class missing abstract member impls) and
+## TS2416 (derived property type not assignable to base property) require
+## the checkClassHeritage member-relation pass ##
+compiler/abstractPropertyNegative(target=es2015).errors.txt
+
+## 2026-08-15 batch #51-#60: WeakMap/WeakRef/FinalizationRegistry generic
+## inference from constructor tuple args (TS2345 over-report) + spurious
+## TS2300 'Iterator' duplicate under @lib esnext (lib dedup gap) ##
+compiler/acceptSymbolAsWeakType.errors.txt

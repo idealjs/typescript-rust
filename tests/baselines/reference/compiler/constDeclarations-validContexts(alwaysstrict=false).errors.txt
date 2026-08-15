@@ -1,0 +1,1 @@
+constDeclarations-validContexts.ts(18,1): error TS2410: The 'with' statement is not supported. All symbols in a 'with' block will have type 'any'.

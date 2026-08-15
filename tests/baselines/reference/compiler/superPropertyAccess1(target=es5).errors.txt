@@ -1,0 +1,3 @@
+superPropertyAccess1.ts(13,15): error TS2340: Only public and protected methods of the base class are accessible via the 'super' keyword.
+superPropertyAccess1.ts(19,15): error TS2340: Only public and protected methods of the base class are accessible via the 'super' keyword.
+superPropertyAccess1.ts(24,15): error TS2340: Only public and protected methods of the base class are accessible via the 'super' keyword.

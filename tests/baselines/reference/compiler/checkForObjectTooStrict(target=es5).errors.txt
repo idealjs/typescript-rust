@@ -1,0 +1,1 @@
+checkForObjectTooStrict.ts(3,18): error TS2725: Class name cannot be 'Object' when targeting ES5 and above with module CommonJS.

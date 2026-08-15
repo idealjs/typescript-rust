@@ -1,0 +1,4 @@
+readonlyInDeclarationFile.ts(8,22): error TS2564: Property 'a1' has no initializer and is not definitely assigned in the constructor.
+readonlyInDeclarationFile.ts(9,24): error TS2564: Property 'a2' has no initializer and is not definitely assigned in the constructor.
+readonlyInDeclarationFile.ts(10,21): error TS2564: Property 'a3' has no initializer and is not definitely assigned in the constructor.
+readonlyInDeclarationFile.ts(52,12): error TS2454: Variable 'x' is used before being assigned.

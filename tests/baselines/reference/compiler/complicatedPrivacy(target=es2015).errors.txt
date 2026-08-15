@@ -1,0 +1,3 @@
+complicatedPrivacy.ts(11,24): error TS1054: A 'get' accessor cannot have parameters.
+complicatedPrivacy.ts(35,6): error TS2693: 'number' only refers to a type, but is being used as a value here.
+complicatedPrivacy.ts(73,55): error TS2694: Namespace 'mglo5' has no exported member 'i6'.

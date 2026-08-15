@@ -5163,8 +5163,26 @@ impl Parser {
             SyntaxKind::VarKeyword | SyntaxKind::LetKeyword | SyntaxKind::ConstKeyword => {
                 self.parse_variable_statement_with_modifiers(modifiers)
             }
+            SyntaxKind::ImportKeyword => {
+                // `export import X = ...` — an exported import-alias
+                // declaration (Go's parseDeclaration routes KindImportKeyword
+                // to parseImportEqualsDeclaration with the modifiers).
+                self.parse_import_equals_declaration_with_modifiers(modifiers)
+            }
             _ => self.parse_expression_statement(),
         }
+    }
+
+    /// `import X = <entity | require(...)>` with leading modifiers
+    /// (e.g. `export import X = N;` inside a namespace).
+    fn parse_import_equals_declaration_with_modifiers(
+        &mut self,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> {
+        let pos = self.token_pos();
+        self.next_token(); // consume 'import'
+        let name = self.parse_identifier();
+        self.parse_import_equals_tail(pos, modifiers, name, false)
     }
 
     fn parse_function_declaration(&mut self) -> Arc<Node> {
@@ -5569,6 +5587,17 @@ impl Parser {
         name: Arc<Node>,
         is_type_only: bool,
     ) -> Arc<Node> {
+        self.parse_import_equals_tail(pos, None, name, is_type_only)
+    }
+
+    /// Shared tail of import-alias parsing: `= <module-reference> ;`.
+    fn parse_import_equals_tail(
+        &mut self,
+        pos: usize,
+        modifiers: Option<Arc<ModifierList>>,
+        name: Arc<Node>,
+        is_type_only: bool,
+    ) -> Arc<Node> {
         self.expect(SyntaxKind::EqualsToken);
         let module_reference = self.parse_module_reference();
         self.parse_semicolon();
@@ -5576,7 +5605,7 @@ impl Parser {
         Arc::new(Node::with_loc(
             SyntaxKind::ImportEqualsDeclaration,
             NodeData::ImportEqualsDeclaration(ImportEqualsDeclarationData {
-                modifiers: None,
+                modifiers,
                 is_type_only,
                 name,
                 module_reference,
@@ -5911,7 +5940,8 @@ impl Parser {
             | SyntaxKind::InterfaceKeyword
             | SyntaxKind::EnumKeyword
             | SyntaxKind::NamespaceKeyword
-            | SyntaxKind::ModuleKeyword => {
+            | SyntaxKind::ModuleKeyword
+            | SyntaxKind::ImportKeyword => {
                 return self.parse_declaration_with_modifiers(vec![(
                     SyntaxKind::ExportKeyword,
                     pos,

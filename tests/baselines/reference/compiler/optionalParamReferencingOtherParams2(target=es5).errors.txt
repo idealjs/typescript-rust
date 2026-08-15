@@ -1,0 +1,2 @@
+optionalParamReferencingOtherParams2.ts(2,29): error TS2373: Parameter 'y' cannot reference identifier 'b' declared after it.
+optionalParamReferencingOtherParams2.ts(2,29): error TS2454: Variable 'b' is used before being assigned.

@@ -1,0 +1,1 @@
+/main.ts(5,17): error TS2737: BigInt literals are not available when targeting lower than ES2020.

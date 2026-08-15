@@ -1,0 +1,3 @@
+complexClassRelationships.ts(2,23): error TS2449: Class 'Base' used before its declaration.
+complexClassRelationships.ts(14,5): error TS2564: Property 'ownerCollection' has no initializer and is not definitely assigned in the constructor.
+complexClassRelationships.ts(18,57): error TS2322: Type 'null' is not assignable to type 'ComponentCollection<any>'.

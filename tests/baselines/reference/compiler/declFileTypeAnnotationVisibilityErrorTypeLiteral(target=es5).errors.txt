@@ -1,0 +1,3 @@
+declFileTypeAnnotationVisibilityErrorTypeLiteral.ts(24,21): error TS2454: Variable 'x' is used before being assigned.
+declFileTypeAnnotationVisibilityErrorTypeLiteral.ts(28,21): error TS2454: Variable 'y' is used before being assigned.
+declFileTypeAnnotationVisibilityErrorTypeLiteral.ts(32,21): error TS2454: Variable 'z' is used before being assigned.

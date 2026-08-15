@@ -1,0 +1,2 @@
+accessorInAmbientContextES5.ts(25,14): error TS2564: Property 'shouldError' has no initializer and is not definitely assigned in the constructor.
+accessorInAmbientContextES5.ts(25,14): error TS18045: Properties with the 'accessor' modifier are only available when targeting ECMAScript 2015 and higher.

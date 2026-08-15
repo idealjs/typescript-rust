@@ -345,6 +345,36 @@ impl Checker {
             // Enum: build a union of all enum member literal types.
             return self.resolve_enum_type(&symbol);
         }
+        if symbol.flags.contains(SymbolFlags::Class) {
+            // Class annotation (`x: MyClass`): the instance type built from
+            // the class's members (including `extends` bases). Memoized on
+            // the class symbol; guarded against self-referential hierarchies
+            // (`class A extends A`).
+            let key = Arc::as_ptr(&symbol) as *const crate::ast::Symbol;
+            if let Some(cached) = self
+                .type_alias_links
+                .get(&symbol)
+                .and_then(|l| l.declared_type.clone())
+            {
+                return cached;
+            }
+            if !self.resolving_type_aliases.insert(key) {
+                return self.error_type();
+            }
+            let class_node = symbol
+                .declarations
+                .iter()
+                .find(|d| d.kind == SyntaxKind::ClassDeclaration)
+                .cloned();
+            let instance_type = match class_node {
+                Some(node) => self.build_class_instance_type_with_base(&node),
+                None => self.error_type(),
+            };
+            self.resolving_type_aliases.remove(&key);
+            self.type_alias_links.get_or_default(&symbol).declared_type =
+                Some(Arc::clone(&instance_type));
+            return instance_type;
+        }
         if !symbol.flags.contains(SymbolFlags::TypeAlias) {
             // Class/etc.: defer to error_type (any) for now.
             return self.error_type();
@@ -826,6 +856,104 @@ impl Checker {
                     );
                     symbol_table.insert(name, Arc::clone(&symbol));
                     props.push(symbol);
+                }
+                NodeData::GetAccessorDeclaration(data) => {
+                    if is_static_modifier(&data.modifiers) {
+                        continue;
+                    }
+                    let name = data.name.text().to_string();
+                    if name.is_empty() {
+                        continue;
+                    }
+                    // The accessor pair shares one property symbol: a getter
+                    // defines the property's type (its return annotation);
+                    // a setter-only property uses the parameter type.
+                    let prop_type = match data.type_node.as_ref() {
+                        Some(tn) => self.get_type_from_type_node(tn),
+                        None => self.get_any_type(),
+                    };
+                    match symbol_table.get(&name).cloned() {
+                        Some(existing) => {
+                            // Setter (or earlier getter) already inserted —
+                            // union the accessor flag and refresh the type
+                            // from the getter.
+                            let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
+                            unsafe {
+                                (*existing_mut).flags |= SymbolFlags::GetAccessor;
+                                (*existing_mut).declarations.push(Arc::clone(member));
+                            }
+                            self.value_symbol_links.insert(
+                                &existing,
+                                ValueSymbolLinks {
+                                    resolved_type: Some(prop_type),
+                                    ..Default::default()
+                                },
+                            );
+                        }
+                        None => {
+                            let mut symbol =
+                                Symbol::new(SymbolFlags::Property | SymbolFlags::GetAccessor, name.clone());
+                            symbol.declarations.push(Arc::clone(member));
+                            let symbol = Arc::new(symbol);
+                            self.value_symbol_links.insert(
+                                &symbol,
+                                ValueSymbolLinks {
+                                    resolved_type: Some(prop_type),
+                                    ..Default::default()
+                                },
+                            );
+                            symbol_table.insert(name, Arc::clone(&symbol));
+                            props.push(symbol);
+                        }
+                    }
+                }
+                NodeData::SetAccessorDeclaration(data) => {
+                    if is_static_modifier(&data.modifiers) {
+                        continue;
+                    }
+                    let name = data.name.text().to_string();
+                    if name.is_empty() {
+                        continue;
+                    }
+                    // Setter-only property: type from the value parameter.
+                    let prop_type = data
+                        .parameters
+                        .iter()
+                        .next()
+                        .and_then(|p| {
+                            if let NodeData::ParameterDeclaration(pd) = &p.data {
+                                pd.type_node.as_ref().map(|tn| self.get_type_from_type_node(tn))
+                            } else {
+                                None
+                            }
+                        })
+                        .unwrap_or_else(|| self.get_any_type());
+                    match symbol_table.get(&name).cloned() {
+                        Some(existing) => {
+                            // A getter already defined the property — just
+                            // attach the setter declaration.
+                            let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
+                            unsafe {
+                                (*existing_mut).flags |= SymbolFlags::SetAccessor;
+                                (*existing_mut).declarations.push(Arc::clone(member));
+                            }
+                        }
+                        None => {
+                            let mut symbol =
+                                Symbol::new(SymbolFlags::Property | SymbolFlags::SetAccessor, name.clone());
+                            symbol.declarations.push(Arc::clone(member));
+                            let symbol = Arc::new(symbol);
+                            self.value_symbol_links.insert(
+                                &symbol,
+                                ValueSymbolLinks {
+                                    resolved_type: Some(prop_type),
+                                    ..Default::default()
+                                },
+                            );
+                            symbol_table.insert(name, Arc::clone(&symbol));
+                            props.push(symbol);
+                        }
+                    }
                 }
                 NodeData::CallSignatureDeclaration(data) => {
                     // Suppress TS2304 while resolving the signature's

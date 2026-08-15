@@ -1,0 +1,1 @@
+modularizeLibrary_ErrorFromUsingES6ArrayWithOnlyES6ArrayLib.ts(3,12): error TS2693: 'Array' only refers to a type, but is being used as a value here.

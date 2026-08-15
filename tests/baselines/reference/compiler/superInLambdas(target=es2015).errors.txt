@@ -1,0 +1,4 @@
+superInLambdas.ts(47,49): error TS2855: Class field 'name' defined by the parent class is not accessible in the child class via super.
+superInLambdas.ts(51,49): error TS2855: Class field 'name' defined by the parent class is not accessible in the child class via super.
+superInLambdas.ts(61,34): error TS1034: 'super' must be followed by an argument list or member access.
+superInLambdas.ts(65,34): error TS1034: 'super' must be followed by an argument list or member access.

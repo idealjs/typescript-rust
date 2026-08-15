@@ -1,0 +1,2 @@
+derivedClassConstructorWithExplicitReturns01.ts(31,13): error TS2322: Type 'null' is not assignable to type 'D'.
+derivedClassConstructorWithExplicitReturns01.ts(31,13): error TS2409: Return type of constructor signature must be assignable to the instance type of the class.

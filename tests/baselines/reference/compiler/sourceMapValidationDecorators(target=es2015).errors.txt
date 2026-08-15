@@ -1,0 +1,5 @@
+sourceMapValidationDecorators.ts(12,8): error TS1239: Unable to resolve signature of parameter decorator when called as an expression.
+sourceMapValidationDecorators.ts(13,8): error TS1239: Unable to resolve signature of parameter decorator when called as an expression.
+sourceMapValidationDecorators.ts(16,8): error TS1239: Unable to resolve signature of parameter decorator when called as an expression.
+sourceMapValidationDecorators.ts(17,8): error TS1239: Unable to resolve signature of parameter decorator when called as an expression.
+sourceMapValidationDecorators.ts(29,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.

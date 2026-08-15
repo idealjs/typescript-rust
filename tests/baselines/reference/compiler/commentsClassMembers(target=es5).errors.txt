@@ -1,0 +1,9 @@
+commentsClassMembers.ts(4,12): error TS2564: Property 'p1' has no initializer and is not definitely assigned in the constructor.
+commentsClassMembers.ts(18,13): error TS2564: Property 'pp1' has no initializer and is not definitely assigned in the constructor.
+commentsClassMembers.ts(48,12): error TS2564: Property 'nc_p1' has no initializer and is not definitely assigned in the constructor.
+commentsClassMembers.ts(58,13): error TS2564: Property 'nc_pp1' has no initializer and is not definitely assigned in the constructor.
+commentsClassMembers.ts(80,12): error TS2564: Property 'a_p1' has no initializer and is not definitely assigned in the constructor.
+commentsClassMembers.ts(94,13): error TS2564: Property 'a_pp1' has no initializer and is not definitely assigned in the constructor.
+commentsClassMembers.ts(125,12): error TS2564: Property 'b_p1' has no initializer and is not definitely assigned in the constructor.
+commentsClassMembers.ts(139,13): error TS2564: Property 'b_pp1' has no initializer and is not definitely assigned in the constructor.
+commentsClassMembers.ts(195,13): error TS2564: Property 'val' has no initializer and is not definitely assigned in the constructor.

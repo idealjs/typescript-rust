@@ -1,0 +1,6 @@
+b.mts(15,1): error TS2349: This expression is not callable.
+b.mts(16,1): error TS2349: This expression is not callable.
+b.mts(17,1): error TS2349: This expression is not callable.
+b.mts(18,1): error TS2349: This expression is not callable.
+b.mts(19,6): error TS2349: This expression is not callable.
+b.mts(20,6): error TS2349: This expression is not callable.

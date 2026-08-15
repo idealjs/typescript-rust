@@ -1,0 +1,1 @@
+/test.tsx(7,2): error TS2741: Property 'offspring' is missing in type '{ children: string; }' but required in type '{ offspring: string; }'.

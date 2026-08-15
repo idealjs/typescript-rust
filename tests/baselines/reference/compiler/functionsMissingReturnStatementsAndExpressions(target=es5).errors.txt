@@ -1,0 +1,10 @@
+functionsMissingReturnStatementsAndExpressions.ts(1,16): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
+functionsMissingReturnStatementsAndExpressions.ts(7,5): error TS2322: Type 'undefined' is not assignable to type 'string'.
+functionsMissingReturnStatementsAndExpressions.ts(30,5): error TS2322: Type 'null' is not assignable to type 'void'.
+functionsMissingReturnStatementsAndExpressions.ts(45,5): error TS2322: Type 'null' is not assignable to type 'void'.
+functionsMissingReturnStatementsAndExpressions.ts(74,5): error TS2322: Type 'undefined' is not assignable to type 'number'.
+functionsMissingReturnStatementsAndExpressions.ts(99,17): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
+functionsMissingReturnStatementsAndExpressions.ts(107,17): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
+functionsMissingReturnStatementsAndExpressions.ts(130,16): error TS2378: A 'get' accessor must return a value.
+functionsMissingReturnStatementsAndExpressions.ts(152,15): error TS18050: The value 'undefined' cannot be used here.
+functionsMissingReturnStatementsAndExpressions.ts(153,5): error TS1003: Identifier expected.

@@ -1,0 +1,10 @@
+collisionArgumentsInType.ts(1,24): error TS1100: Invalid use of 'arguments' in strict mode.
+collisionArgumentsInType.ts(2,11): error TS1100: Invalid use of 'arguments' in strict mode.
+collisionArgumentsInType.ts(4,6): error TS1100: Invalid use of 'arguments' in strict mode.
+collisionArgumentsInType.ts(5,10): error TS1100: Invalid use of 'arguments' in strict mode.
+collisionArgumentsInType.ts(6,9): error TS1100: Invalid use of 'arguments' in strict mode.
+collisionArgumentsInType.ts(7,12): error TS1100: Invalid use of 'arguments' in strict mode.
+collisionArgumentsInType.ts(10,20): error TS1100: Invalid use of 'arguments' in strict mode.
+collisionArgumentsInType.ts(11,24): error TS1100: Invalid use of 'arguments' in strict mode.
+collisionArgumentsInType.ts(12,23): error TS1100: Invalid use of 'arguments' in strict mode.
+collisionArgumentsInType.ts(13,26): error TS1100: Invalid use of 'arguments' in strict mode.

@@ -1,0 +1,3 @@
+asiPublicPrivateProtected.ts(1,1): error TS2304: Cannot find name 'public'.
+asiPublicPrivateProtected.ts(12,1): error TS2304: Cannot find name 'private'.
+asiPublicPrivateProtected.ts(23,1): error TS2304: Cannot find name 'protected'.

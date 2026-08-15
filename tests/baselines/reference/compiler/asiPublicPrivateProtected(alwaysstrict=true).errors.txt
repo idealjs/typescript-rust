@@ -1,0 +1,6 @@
+asiPublicPrivateProtected.ts(1,1): error TS1212: Identifier expected. 'public' is a reserved word in strict mode.
+asiPublicPrivateProtected.ts(1,1): error TS2304: Cannot find name 'public'.
+asiPublicPrivateProtected.ts(12,1): error TS1212: Identifier expected. 'private' is a reserved word in strict mode.
+asiPublicPrivateProtected.ts(12,1): error TS2304: Cannot find name 'private'.
+asiPublicPrivateProtected.ts(23,1): error TS1212: Identifier expected. 'protected' is a reserved word in strict mode.
+asiPublicPrivateProtected.ts(23,1): error TS2304: Cannot find name 'protected'.

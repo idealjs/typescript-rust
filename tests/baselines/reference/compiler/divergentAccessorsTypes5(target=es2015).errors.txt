@@ -1,0 +1,3 @@
+divergentAccessorsTypes5.ts(8,3): error TS2564: Property 'prop2' has no initializer and is not definitely assigned in the constructor.
+divergentAccessorsTypes5.ts(31,1): error TS2322: Type '42' is not assignable to type '"hello"'.
+divergentAccessorsTypes5.ts(36,1): error TS2322: Type '"hello"' is not assignable to type '42'.

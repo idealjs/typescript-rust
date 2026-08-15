@@ -1,0 +1,4 @@
+superPropertyAccess.ts(21,15): error TS2855: Class field 'm2' defined by the parent class is not accessible in the child class via super.
+superPropertyAccess.ts(23,15): error TS2341: Property 'p1' is private and only accessible within class 'MyBase'.
+superPropertyAccess.ts(25,24): error TS2855: Class field 'd1' defined by the parent class is not accessible in the child class via super.
+superPropertyAccess.ts(27,24): error TS2855: Class field 'd2' defined by the parent class is not accessible in the child class via super.

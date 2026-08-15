@@ -151,42 +151,286 @@ enum CaseOutcome {
     Output(String),
 }
 
-/// Process one case end-to-end: parse directives, apply skip rules, build the
+/// One (configuration, outcome) pair. A case with no multi-value `varyBy`
+/// directive has exactly one configuration whose suffix is empty (baseline
+/// name = plain `<stem>.errors.txt`); a case like `// @target: ES5, ES2015`
+/// gets one per value, each comparing against
+/// `<stem>(target=es5).errors.txt` etc.
+struct ConfigOutcome {
+    /// Baseline-name suffix, e.g. `target=es2015` (empty for the default
+    /// configuration). Keys sorted, comma-joined, all lowercased — mirrors
+    /// Go's `getFileBasedTestConfigurationDescription`.
+    suffix: String,
+    outcome: CaseOutcome,
+}
+
+/// Options whose multi-value `// @opt: v1, v2` directives expand into one
+/// configuration per value. Mirrors Go's `compilerVaryBy`: boolean/enum
+/// options that affect diagnostics, emit, or program structure, plus explicit
+/// `noEmit`/`isolatedModules`. List options (`lib`, `types`, ...) are NOT
+/// varyBy — their commas are list values, not variations.
+const VARY_BY: &[&str] = &[
+    // enum options
+    "jsx", "module", "moduledetection", "moduleresolution", "newline", "target",
+    // boolean options
+    "allowarbitraryextensions", "allowimportingtsextensions", "allowjs",
+    "allowsyntheticdefaultimports", "allowumdglobalaccess", "allowunreachablecode",
+    "allowunusedlabels", "alwaysstrict", "assumechangesonlyaffectdirectdependencies",
+    "checkjs", "composite", "declaration", "declarationmap", "deduplicatepackages",
+    "disablesizelimit", "downleveliteration", "emitbom", "emitdeclarationonly",
+    "emitdecoratormetadata", "erasablesyntaxonly", "esmoduleinterop",
+    "exactoptionalpropertytypes", "experimentaldecorators",
+    "forceconsistentcasinginfilenames", "importhelpers", "inlinesourcemap",
+    "inlinesources", "isolateddeclarations", "isolatedmodules", "libreplacement",
+    "noemit", "noemithelpers", "noemitonerror", "noerrortruncation",
+    "nofallthroughcasesinswitch", "noimplicitany", "noimplicitoverride",
+    "noimplicitreturns", "noimplicitthis", "nolib", "nopropertyaccessfromindexsignature",
+    "noresolve", "nouncheckedindexedaccess", "nouncheckedsideeffectimports",
+    "nounusedlocals", "nounusedparameters", "preserveconstenums", "removecomments",
+    "resolvejsonmodule", "resolvepackagejsonexports", "resolvepackagejsonimports",
+    "rewriterelativeimportextensions", "skipdefaultlibcheck", "skiplibcheck",
+    "sourcemap", "stabletypeordering", "strict", "strictbindcallapply",
+    "strictbuiltiniteratorreturn", "strictfunctiontypes", "strictnullchecks",
+    "strictpropertyinitialization", "stripinternal", "usedefineforclassfields",
+    "useunknownincatchvariables", "verbatimmodulesyntax",
+];
+
+/// All declared values of an enum option, in declaration order (Go
+/// `getAllValuesForOption` via the option's `EnumMap`) — used when a
+/// directive value is `*`. Booleans yield `["true", "false"]`.
+fn all_enum_values(option: &str) -> &'static [&'static str] {
+    match option {
+        "target" => &[
+            "es5", "es6", "es2015", "es2016", "es2017", "es2018", "es2019", "es2020", "es2021",
+            "es2022", "es2023", "es2024", "es2025", "esnext",
+        ],
+        "module" => &[
+            "commonjs", "amd", "system", "umd", "es6", "es2015", "es2020", "es2022", "esnext",
+            "node16", "node18", "node20", "nodenext", "preserve",
+        ],
+        "moduleresolution" => &[
+            "node16", "nodenext", "bundler", "classic", "node", "node10",
+        ],
+        "jsx" => &["preserve", "react-native", "react-jsx", "react-jsxdev", "react"],
+        "moduledetection" => &["auto", "legacy", "force"],
+        "newline" => &["crlf", "lf"],
+        _ => &[],
+    }
+}
+
+/// Canonical comparison key for a raw option value, so `es6` and `es2015`
+/// dedupe to one variation (Go compares parsed `CompilerOptionsValue`s).
+fn canonical_value(option: &str, raw: &str) -> String {
+    let lower = raw.trim().to_ascii_lowercase();
+    match option {
+        "target" => match lower.as_str() {
+            "es6" => "es2015".to_string(),
+            other => other.to_string(),
+        },
+        "module" => match lower.as_str() {
+            "es6" => "es2015".to_string(),
+            other => other.to_string(),
+        },
+        "moduleresolution" => match lower.as_str() {
+            "node" => "node10".to_string(),
+            other => other.to_string(),
+        },
+        // Boolean options: truthiness spelling collapses to true/false.
+        _ if VARY_BY.contains(&option) && !all_enum_values(option).is_empty() => lower,
+        _ if VARY_BY.contains(&option) => match lower.as_str() {
+            "true" => "true".to_string(),
+            _ => "false".to_string(),
+        },
+        _ => lower,
+    }
+}
+
+/// Split a multi-value directive into variation values (raw strings, first
+/// occurrence kept on dedupe). Handles `*` (all values) and `-`/`!`
+/// exclusions. Returns `None` when the value has no variation content.
+/// Mirrors Go's `splitOptionValues`.
+fn split_option_values(value: &str, option: &str) -> Option<Vec<String>> {
+    let mut star = false;
+    let mut includes: Vec<String> = Vec::new();
+    let mut excludes: Vec<String> = Vec::new();
+    for part in value.split(',') {
+        let s = part.trim();
+        if s.is_empty() {
+            continue;
+        }
+        if s == "*" {
+            star = true;
+        } else if let Some(rest) = s.strip_prefix('-').or_else(|| s.strip_prefix('!')) {
+            excludes.push(rest.trim().to_string());
+        } else {
+            includes.push(s.to_string());
+        }
+    }
+    if includes.is_empty() && !star && excludes.is_empty() {
+        return None;
+    }
+    if star {
+        if all_enum_values(option).is_empty() {
+            includes.push("true".to_string());
+            includes.push("false".to_string());
+        } else {
+            includes.extend(all_enum_values(option).iter().map(|s| s.to_string()));
+        }
+    }
+    // Dedupe by canonical value, keeping the first raw spelling (it names the
+    // baseline, e.g. `target=es6` for `// @target: ES6, ES2015`).
+    let mut seen: Vec<String> = Vec::new();
+    let mut raws: Vec<String> = Vec::new();
+    for raw in includes {
+        let canon = canonical_value(option, &raw);
+        if !seen.contains(&canon) {
+            seen.push(canon);
+            raws.push(raw);
+        }
+    }
+    for ex in excludes {
+        let canon = canonical_value(option, &ex);
+        if let Some(pos) = seen.iter().position(|c| *c == canon) {
+            seen.remove(pos);
+            raws.remove(pos);
+        }
+    }
+    Some(raws)
+}
+
+/// Expand `settings` into per-value configurations. Returns one entry per
+/// configuration — `(suffix, merged-settings)` — or a skip reason when the
+/// variations exceed Go's cap of 25 (Go `t.Fatal`s there; we skip honestly).
+/// Mirrors Go's `GetFileBasedTestConfigurations` + cartesian product.
+fn compute_configurations(
+    settings: &std::collections::HashMap<String, String>,
+) -> Result<Vec<(String, std::collections::HashMap<String, String>)>, String> {
+    let mut varying: Vec<(String, Vec<String>)> = Vec::new();
+    let mut base = settings.clone();
+    for key in settings.keys() {
+        if !VARY_BY.contains(&key.as_str()) {
+            continue;
+        }
+        let value = &settings[key];
+        if !value.contains(',') && value.trim() != "*" {
+            // Single value (no `,`): nothing to vary — Go keeps it as a
+            // non-varying option with the raw value.
+            continue;
+        }
+        let Some(values) = split_option_values(value, key) else {
+            continue;
+        };
+        if values.len() <= 1 {
+            if let [only] = values.as_slice() {
+                base.insert(key.clone(), only.clone());
+            }
+            continue;
+        }
+        varying.push((key.clone(), values));
+    }
+
+    if varying.is_empty() {
+        return Ok(vec![(String::new(), base)]);
+    }
+
+    // Cartesian product, capped at 25 like Go.
+    let mut count = 1usize;
+    for (_, values) in &varying {
+        count *= values.len();
+        if count > 25 {
+            return Err(format!("too many option variations ({count})"));
+        }
+    }
+
+    let mut configs: Vec<std::collections::HashMap<String, String>> =
+        vec![std::collections::HashMap::new()];
+    for (key, values) in &varying {
+        let mut next = Vec::with_capacity(configs.len() * values.len());
+        for config in &configs {
+            for value in values {
+                let mut c = config.clone();
+                c.insert(key.clone(), value.clone());
+                next.push(c);
+            }
+        }
+        configs = next;
+    }
+
+    let mut out = Vec::with_capacity(configs.len());
+    for config in configs {
+        // Suffix: sorted `key=value` (both lowercased), comma-joined.
+        let mut parts: Vec<String> = config
+            .iter()
+            .map(|(k, v)| format!("{}={}", k.to_ascii_lowercase(), v.to_ascii_lowercase()))
+            .collect();
+        parts.sort();
+        let suffix = parts.join(",");
+        let mut merged = base.clone();
+        for (k, v) in config {
+            merged.insert(k, v);
+        }
+        out.push((suffix, merged));
+    }
+    Ok(out)
+}
+
+/// Process one case end-to-end: parse directives, expand multi-value `varyBy`
+/// directives into configurations, apply per-config skip rules, build the
 /// Program, collect + render diagnostics. Shared by the worker subprocess. A
-/// checker/parse panic is caught and converted to `Skip` (the worker runs in a
-/// child process, but a panic — as opposed to a stack overflow — is recoverable
-/// in-process and we avoid a needless process kill).
-fn process_case(content: &str, basename: &str) -> CaseOutcome {
+/// checker/parse panic is caught and converted to `Skip` for that
+/// configuration (the worker runs in a child process, but a panic — as
+/// opposed to a stack overflow — is recoverable in-process and we avoid a
+/// needless process kill).
+fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
     let settings = extract_settings(content);
-    let (compiler_options, unrecognized) = apply_test_settings(&settings);
-    let parsed = split_units(content, basename);
 
     if SKIPPED_CASES.contains(&basename) {
-        return CaseOutcome::Skip("in SKIPPED_CASES list".to_string());
+        return vec![ConfigOutcome {
+            suffix: String::new(),
+            outcome: CaseOutcome::Skip("in SKIPPED_CASES list".to_string()),
+        }];
     }
     // Circular-type family — the checker lacks Go's recursion guards and these
     // overflow the stack. (Also enforced by the parent skipping the worker's
     // crash, but skipping here avoids spawning a doomed process.)
     if basename.to_ascii_lowercase().starts_with("circular") {
-        return CaseOutcome::Skip("circular-type recursion (no checker guard)".to_string());
-    }
-    if let Some(reason) = should_skip(&compiler_options, &unrecognized) {
-        return CaseOutcome::Skip(reason);
+        return vec![ConfigOutcome {
+            suffix: String::new(),
+            outcome: CaseOutcome::Skip("circular-type recursion (no checker guard)".to_string()),
+        }];
     }
 
-    match catch_unwind(|| {
-        let diags = build_and_check(&compiler_options, &parsed.units);
-        render_errors_baseline(&diags)
-    }) {
-        Ok(actual) => CaseOutcome::Output(actual),
-        Err(payload) => {
-            let msg = payload
-                .downcast_ref::<&str>()
-                .copied()
-                .or_else(|| payload.downcast_ref::<String>().map(|s| s.as_str()))
-                .unwrap_or("<non-string panic>");
-            CaseOutcome::Skip(format!("panicked: {msg}"))
-        }
+    let parsed = split_units(content, basename);
+    match compute_configurations(&settings) {
+        Err(reason) => vec![ConfigOutcome {
+            suffix: String::new(),
+            outcome: CaseOutcome::Skip(reason),
+        }],
+        Ok(configs) => configs
+            .into_iter()
+            .map(|(suffix, config_settings)| {
+                let (compiler_options, unrecognized) = apply_test_settings(&config_settings);
+                let outcome = if let Some(reason) = should_skip(&compiler_options, &unrecognized) {
+                    CaseOutcome::Skip(reason)
+                } else {
+                    match catch_unwind(|| {
+                        let diags = build_and_check(&compiler_options, &parsed.units);
+                        render_errors_baseline(&diags)
+                    }) {
+                        Ok(actual) => CaseOutcome::Output(actual),
+                        Err(payload) => {
+                            let msg = payload
+                                .downcast_ref::<&str>()
+                                .copied()
+                                .or_else(|| payload.downcast_ref::<String>().map(|s| s.as_str()))
+                                .unwrap_or("<non-string panic>");
+                            CaseOutcome::Skip(format!("panicked: {msg}"))
+                        }
+                    }
+                };
+                ConfigOutcome { suffix, outcome }
+            })
+            .collect(),
     }
 }
 
@@ -200,8 +444,9 @@ enum StepOutcome {
 }
 
 /// Run one case end-to-end from the parent side: spawn the worker subprocess
-/// (with timeout), read its payload, compare against the reference baseline.
-/// Returns the outcome plus a human-readable detail line for logging.
+/// (with timeout), read its payload, compare each configuration against the
+/// reference baseline. Returns the aggregated outcome, the display names of
+/// failing configurations, and a human-readable detail line for logging.
 fn run_case(
     case_path: &Path,
     idx: usize,
@@ -209,7 +454,7 @@ fn run_case(
     timeout: std::time::Duration,
     known_diffs: &KnownDiffs,
     accept: bool,
-) -> (StepOutcome, String, String) {
+) -> (StepOutcome, Vec<String>, String) {
     let basename = case_path
         .file_name()
         .and_then(|n| n.to_str())
@@ -272,31 +517,106 @@ fn run_case(
                 .unwrap_or_else(|| format!("code {}", s.code().unwrap_or(-1))),
             Err(reason) => reason.clone(),
         };
-        return (StepOutcome::Skipped, basename, format!("worker crashed ({raw})"));
+        return (
+            StepOutcome::Skipped,
+            Vec::new(),
+            format!("worker crashed ({raw})"),
+        );
     }
-    // Parse the worker's `O`/`S` status line.
-    let actual = if let Some(rest) = payload.strip_prefix("O\n") {
-        rest.to_string()
-    } else if let Some(reason) = payload.strip_prefix("S\n") {
-        return (StepOutcome::Skipped, basename, reason.to_string());
-    } else {
-        return (StepOutcome::Skipped, basename, "worker produced no output".to_string());
+    // Parse the worker's JSON payload: one entry per configuration with
+    // `suffix` (baseline-name infix), and either `skip` (reason) or `text`
+    // (rendered baseline).
+    let entries: Vec<serde_json::Value> = match serde_json::from_str(&payload) {
+        Ok(v) => v,
+        Err(_) => {
+            return (
+                StepOutcome::Skipped,
+                Vec::new(),
+                "worker produced no parseable output".to_string(),
+            )
+        }
     };
+    if entries.is_empty() {
+        return (
+            StepOutcome::Skipped,
+            Vec::new(),
+            "worker produced no configurations".to_string(),
+        );
+    }
 
-    match baseline::compare(SUBFOLDER, stem, ext, &actual) {
-        baseline::Outcome::Passed => (StepOutcome::Passed, basename, String::new()),
-        baseline::Outcome::Failed { .. } => {
-            if known_diffs.contains(SUBFOLDER, stem, ext) {
-                (StepOutcome::AcceptedDiff, basename, "known diff (triaged/accepted)".to_string())
-            } else if accept {
-                // shouldn't happen (compare returns Passed in accept mode),
-                // but be defensive.
-                (StepOutcome::Passed, basename, String::new())
-            } else {
-                (StepOutcome::Failed, basename, String::new())
+    // Compare each configuration against its (possibly suffixed) baseline;
+    // aggregate: any fail → Failed, else any triaged diff → AcceptedDiff,
+    // else any pass → Passed, all skipped → Skipped.
+    let mut overall = StepOutcome::Skipped;
+    let mut failed_names = Vec::new();
+    let mut notes: Vec<String> = Vec::new();
+    for entry in &entries {
+        let suffix = entry["suffix"].as_str().unwrap_or("");
+        let display = if suffix.is_empty() {
+            basename.clone()
+        } else {
+            format!("{basename}({suffix})")
+        };
+        let name = if suffix.is_empty() {
+            stem.to_string()
+        } else {
+            format!("{stem}({suffix})")
+        };
+        let label = if suffix.is_empty() { "default" } else { suffix };
+        if let Some(reason) = entry["skip"].as_str() {
+            notes.push(format!("{label}: skip ({reason})"));
+            continue;
+        }
+        let Some(actual) = entry["text"].as_str() else {
+            notes.push(format!("{label}: malformed entry"));
+            failed_names.push(display);
+            overall = StepOutcome::Failed;
+            continue;
+        };
+        match baseline::compare(SUBFOLDER, &name, ext, actual) {
+            baseline::Outcome::Passed => {
+                notes.push(format!("{label}: pass"));
+                if !matches!(overall, StepOutcome::Failed | StepOutcome::AcceptedDiff) {
+                    overall = StepOutcome::Passed;
+                }
+            }
+            baseline::Outcome::Failed { .. } => {
+                if known_diffs.contains(SUBFOLDER, &name, ext) {
+                    notes.push(format!("{label}: known diff (triaged/accepted)"));
+                    if !matches!(overall, StepOutcome::Failed) {
+                        overall = StepOutcome::AcceptedDiff;
+                    }
+                } else if accept {
+                    // shouldn't happen (compare returns Passed in accept
+                    // mode), but be defensive.
+                    notes.push(format!("{label}: pass"));
+                    if !matches!(overall, StepOutcome::Failed | StepOutcome::AcceptedDiff) {
+                        overall = StepOutcome::Passed;
+                    }
+                } else {
+                    notes.push(format!("{label}: baseline mismatch"));
+                    failed_names.push(display);
+                    overall = StepOutcome::Failed;
+                }
             }
         }
     }
+    // Single-configuration cases keep the historical compact detail format
+    // (bare skip reason / empty for pass); only multi-config cases spell out
+    // per-configuration results.
+    let detail = if entries.len() == 1 {
+        notes
+            .into_iter()
+            .next()
+            .unwrap_or_default()
+            .strip_prefix("default: ")
+            .map(str::to_string)
+            .filter(|s| s != "pass")
+            .unwrap_or_default()
+    } else {
+        notes.join("; ")
+    };
+    (overall, failed_names, detail)
 }
 
 #[test]
@@ -317,12 +637,34 @@ fn submodule_compiler_cases() {
             .and_then(|n| n.to_str())
             .unwrap_or("")
             .to_string();
+        // Payload: one JSON array entry per configuration —
+        // `{"suffix": "...", "skip": null, "text": "..."}` for output,
+        // `{"suffix": "...", "skip": "reason", "text": null}` for a skip.
+        // (JSON framing keeps multi-line baseline text unambiguous.)
         let payload = match std::fs::read_to_string(&case_path) {
-            Ok(content) => match process_case(&content, &basename) {
-                CaseOutcome::Skip(reason) => format!("S\n{reason}"),
-                CaseOutcome::Output(s) => format!("O\n{s}"),
-            },
-            Err(e) => format!("S\nunreadable as UTF-8: {e}"),
+            Ok(content) => {
+                let configs = process_case(&content, &basename);
+                serde_json::to_string(
+                    &configs
+                        .iter()
+                        .map(|c| {
+                            let mut entry = serde_json::json!({ "suffix": c.suffix });
+                            match &c.outcome {
+                                CaseOutcome::Skip(reason) => {
+                                    entry["skip"] = serde_json::json!(reason);
+                                }
+                                CaseOutcome::Output(text) => {
+                                    entry["text"] = serde_json::json!(text);
+                                }
+                            }
+                            entry
+                        })
+                        .collect::<Vec<_>>(),
+                )
+                .unwrap_or_else(|_| "[]".to_string())
+            }
+            Err(e) => serde_json::json!([{ "suffix": "", "skip": format!("unreadable as UTF-8: {e}") }])
+                .to_string(),
         };
         let _ = std::fs::write(&out_path, payload);
         return;
@@ -549,7 +891,7 @@ fn submodule_compiler_cases() {
                     .unwrap_or("<bad-name>");
                 log.line(&format!("[w{wid}] #{}/{selected_total} START {name}", i + 1));
                 let t0 = std::time::Instant::now();
-                let (outcome, _basename, detail) = run_case(
+                let (outcome, failed_configs, detail) = run_case(
                     case_path,
                     i,
                     &exe,
@@ -573,7 +915,10 @@ fn submodule_compiler_cases() {
                     }
                     StepOutcome::Failed => {
                         failed.fetch_add(1, Ordering::Relaxed);
-                        failed_non_crash.lock().unwrap().push(name.to_string());
+                        failed_non_crash
+                            .lock()
+                            .unwrap()
+                            .extend(failed_configs.iter().cloned());
                     }
                     StepOutcome::Skipped => {
                         skipped.fetch_add(1, Ordering::Relaxed);

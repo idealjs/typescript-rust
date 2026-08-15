@@ -1,0 +1,3 @@
+iterableWithNeverAsUnionMember.ts(2,7): error TS2488: Type 'never' must have a '[Symbol.iterator]()' method that returns an iterator.
+iterableWithNeverAsUnionMember.ts(25,7): error TS2488: Type 'T' must have a '[Symbol.iterator]()' method that returns an iterator.
+iterableWithNeverAsUnionMember.ts(29,7): error TS2488: Type 'never' must have a '[Symbol.iterator]()' method that returns an iterator.

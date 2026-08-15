@@ -1,0 +1,14 @@
+commentsInheritance.ts(21,12): error TS2564: Property 'i1_p1' has no initializer and is not definitely assigned in the constructor.
+commentsInheritance.ts(25,12): error TS2564: Property 'i1_l1' has no initializer and is not definitely assigned in the constructor.
+commentsInheritance.ts(26,12): error TS2564: Property 'i1_nc_p1' has no initializer and is not definitely assigned in the constructor.
+commentsInheritance.ts(29,12): error TS2564: Property 'i1_nc_l1' has no initializer and is not definitely assigned in the constructor.
+commentsInheritance.ts(31,12): error TS2564: Property 'p1' has no initializer and is not definitely assigned in the constructor.
+commentsInheritance.ts(36,12): error TS2564: Property 'l1' has no initializer and is not definitely assigned in the constructor.
+commentsInheritance.ts(38,12): error TS2564: Property 'nc_p1' has no initializer and is not definitely assigned in the constructor.
+commentsInheritance.ts(43,12): error TS2564: Property 'nc_l1' has no initializer and is not definitely assigned in the constructor.
+commentsInheritance.ts(59,12): error TS2564: Property 'c2_nc_p1' has no initializer and is not definitely assigned in the constructor.
+commentsInheritance.ts(66,12): error TS2564: Property 'p1' has no initializer and is not definitely assigned in the constructor.
+commentsInheritance.ts(74,12): error TS2564: Property 'nc_p1' has no initializer and is not definitely assigned in the constructor.
+commentsInheritance.ts(90,12): error TS2564: Property 'p1' has no initializer and is not definitely assigned in the constructor.
+commentsInheritance.ts(98,12): error TS2564: Property 'nc_p1' has no initializer and is not definitely assigned in the constructor.
+commentsInheritance.ts(149,8): error TS2454: Variable 'i3_i' is used before being assigned.

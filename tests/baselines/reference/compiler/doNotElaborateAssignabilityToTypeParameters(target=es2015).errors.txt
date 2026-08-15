@@ -1,0 +1,1 @@
+doNotElaborateAssignabilityToTypeParameters.ts(3,3): error TS2322: Type 'Yadda | Awaited<T>' is not assignable to type 'T'.

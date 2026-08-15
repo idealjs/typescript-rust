@@ -1,0 +1,6 @@
+downlevelLetConst16.ts(151,15): error TS2493: Tuple type '[]' of length '0' has no element at index '0'.
+downlevelLetConst16.ts(164,17): error TS2493: Tuple type '[]' of length '0' has no element at index '0'.
+downlevelLetConst16.ts(195,14): error TS2488: Type 'undefined' must have a '[Symbol.iterator]()' method that returns an iterator.
+downlevelLetConst16.ts(202,15): error TS2339: Property 'a' does not exist on type 'undefined'.
+downlevelLetConst16.ts(216,16): error TS2488: Type 'undefined' must have a '[Symbol.iterator]()' method that returns an iterator.
+downlevelLetConst16.ts(223,17): error TS2339: Property 'a' does not exist on type 'undefined'.

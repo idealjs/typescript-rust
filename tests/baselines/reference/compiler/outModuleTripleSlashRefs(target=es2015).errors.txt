@@ -1,0 +1,2 @@
+ref/a.ts(3,2): error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.
+ref/b.ts(3,2): error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.

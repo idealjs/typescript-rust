@@ -1,0 +1,2 @@
+commentsVarDecl.ts(39,10): error TS2454: Variable 'z2' is used before being assigned.
+commentsVarDecl.ts(42,6): error TS2454: Variable 'z2' is used before being assigned.

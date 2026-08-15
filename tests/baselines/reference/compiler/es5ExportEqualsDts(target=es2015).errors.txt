@@ -1,0 +1,1 @@
+es5ExportEqualsDts.ts(4,16): error TS2454: Variable 'aVal' is used before being assigned.

@@ -1,0 +1,16 @@
+operationsAvailableOnPromisedType.ts(11,9): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+operationsAvailableOnPromisedType.ts(12,5): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+operationsAvailableOnPromisedType.ts(13,5): error TS2365: Operator '+' cannot be applied to types 'number' and 'Promise<number>'.
+operationsAvailableOnPromisedType.ts(14,5): error TS2365: Operator '>' cannot be applied to types 'number' and 'Promise<number>'.
+operationsAvailableOnPromisedType.ts(15,5): error TS2356: An arithmetic operand must be of type 'any', 'number', 'bigint' or an enum type.
+operationsAvailableOnPromisedType.ts(16,7): error TS2356: An arithmetic operand must be of type 'any', 'number', 'bigint' or an enum type.
+operationsAvailableOnPromisedType.ts(17,5): error TS2367: This comparison appears to be unintentional because the types 'number' and 'Promise<number>' have no overlap.
+operationsAvailableOnPromisedType.ts(18,9): error TS2488: Type 'Promise<string[]>' must have a '[Symbol.iterator]()' method that returns an iterator.
+operationsAvailableOnPromisedType.ts(19,21): error TS2488: Type 'Promise<string[]>' must have a '[Symbol.iterator]()' method that returns an iterator.
+operationsAvailableOnPromisedType.ts(20,12): error TS2345: Argument of type 'Promise<number>' is not assignable to parameter of type 'number'.
+operationsAvailableOnPromisedType.ts(21,11): error TS2339: Property 'prop' does not exist on type 'Promise<{ prop: string; }>'.
+operationsAvailableOnPromisedType.ts(23,27): error TS2504: Type 'Promise<string[]>' must have a '[Symbol.asyncIterator]()' method that returns an async iterator.
+operationsAvailableOnPromisedType.ts(24,5): error TS2349: This expression is not callable.
+operationsAvailableOnPromisedType.ts(25,5): error TS2349: This expression is not callable.
+operationsAvailableOnPromisedType.ts(26,9): error TS2351: This expression is not constructable.
+operationsAvailableOnPromisedType.ts(27,5): error TS2349: This expression is not callable.

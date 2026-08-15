@@ -1,0 +1,11 @@
+argumentsSpreadRestIterables.tsx(3,28): error TS2802: Type 'Iterable<number>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+argumentsSpreadRestIterables.tsx(4,35): error TS2802: Type 'Iterable<number>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+argumentsSpreadRestIterables.tsx(5,41): error TS2802: Type 'Iterable<number>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+argumentsSpreadRestIterables.tsx(8,21): error TS2802: Type '"hello"' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+argumentsSpreadRestIterables.tsx(9,21): error TS2802: Type 'Iterable<number>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+argumentsSpreadRestIterables.tsx(10,27): error TS2802: Type '"hello"' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+argumentsSpreadRestIterables.tsx(11,27): error TS2802: Type 'Iterable<number>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+argumentsSpreadRestIterables.tsx(15,19): error TS2802: Type '"hello"' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+argumentsSpreadRestIterables.tsx(16,19): error TS2802: Type 'Iterable<number>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+argumentsSpreadRestIterables.tsx(17,25): error TS2802: Type '"hello"' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+argumentsSpreadRestIterables.tsx(18,25): error TS2802: Type 'Iterable<number>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.

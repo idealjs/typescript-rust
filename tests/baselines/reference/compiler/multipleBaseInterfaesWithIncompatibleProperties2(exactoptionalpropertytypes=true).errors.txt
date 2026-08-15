@@ -1,0 +1,1 @@
+multipleBaseInterfaesWithIncompatibleProperties2.ts(19,11): error TS2320: Interface 'AgentOptions' cannot simultaneously extend types 'AgentOptions' and 'ConnectionOptions'.

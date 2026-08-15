@@ -1,0 +1,2 @@
+commentsOnJSXExpressionsArePreserved.tsx(5,16): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+commentsOnJSXExpressionsArePreserved.tsx(18,9): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.

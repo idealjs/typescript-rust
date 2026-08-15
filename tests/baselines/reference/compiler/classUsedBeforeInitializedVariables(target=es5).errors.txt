@@ -1,0 +1,8 @@
+classUsedBeforeInitializedVariables.ts(4,15): error TS2729: Property 'p4' is used before its initialization.
+classUsedBeforeInitializedVariables.ts(13,34): error TS2729: Property 'directlyAssigned' is used before its initialization.
+classUsedBeforeInitializedVariables.ts(18,16): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
+classUsedBeforeInitializedVariables.ts(22,15): error TS2729: Property 'withinObjectLiteral' is used before its initialization.
+classUsedBeforeInitializedVariables.ts(26,19): error TS2729: Property 'withinObjectLiteralGetterName' is used before its initialization.
+classUsedBeforeInitializedVariables.ts(32,19): error TS2729: Property 'withinObjectLiteralSetterName' is used before its initialization.
+classUsedBeforeInitializedVariables.ts(35,64): error TS2729: Property 'withinClassDeclarationExtension' is used before its initialization.
+classUsedBeforeInitializedVariables.ts(44,16): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.

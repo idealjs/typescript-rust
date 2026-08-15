@@ -1,0 +1,1 @@
+moduleAugmentationGlobal8.ts(2,13): error TS2669: Augmentations for the global scope can only be directly nested in external modules or ambient module declarations.

@@ -1,0 +1,1 @@
+metadataOfClassFromModule.ts(8,17): error TS2564: Property 'leftLeg' has no initializer and is not definitely assigned in the constructor.

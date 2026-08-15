@@ -1,0 +1,5 @@
+regularExpressionUnicodePropertyValueExpressionSuggestions.ts(1,19): error TS1529: Unknown Unicode property name or value.
+regularExpressionUnicodePropertyValueExpressionSuggestions.ts(1,28): error TS1524: Unknown Unicode property name.
+regularExpressionUnicodePropertyValueExpressionSuggestions.ts(1,45): error TS1526: Unknown Unicode property value.
+regularExpressionUnicodePropertyValueExpressionSuggestions.ts(1,57): error TS1524: Unknown Unicode property name.
+regularExpressionUnicodePropertyValueExpressionSuggestions.ts(1,93): error TS1526: Unknown Unicode property value.

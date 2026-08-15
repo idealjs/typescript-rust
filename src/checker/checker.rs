@@ -271,6 +271,19 @@ pub struct BreakContinueContext {
     pub is_iteration: bool,
 }
 
+/// The nearest non-arrow "this container" enclosing the current check point
+/// (Go's `getThisContainer`). Determines which class-member suggestion the
+/// checker offers when a bare identifier fails to resolve inside a class.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ThisContainerKind {
+    /// Directly inside a `static` class member.
+    StaticMember,
+    /// Directly inside an instance member (method/constructor/accessor).
+    InstanceMember,
+    /// Inside a nested non-arrow function (the class-member chain is broken).
+    PlainFunction,
+}
+
 /// The type checker. This is the core of the TypeScript compiler.
 ///
 /// In Go, this struct has ~320 fields. The Rust port organizes them into
@@ -533,6 +546,14 @@ pub struct Checker {
     /// from within its declaring class. Empty outside any class body.
     pub enclosing_class_stack: Vec<Arc<Node>>,
 
+    /// Nearest "this container" context (Go's `getThisContainer` with
+    /// `includeArrowFunctions=false`): `StaticMember`/`InstanceMember` while
+    /// directly inside a class member, `PlainFunction` inside a nested
+    /// non-arrow function declaration/expression. Arrow functions don't push
+    /// (they inherit the enclosing context). Used by the TS2662/TS2663
+    /// fallback when a bare name fails to resolve inside a class.
+    pub this_container_stack: Vec<ThisContainerKind>,
+
     /// Contextual-parameter counts for arrow/function-expression arguments
     /// currently being checked (one entry per enclosing call-argument arrow;
     /// consumed by the ArrowFunction/FunctionExpression check so their
@@ -792,6 +813,7 @@ impl Checker {
             arrow_function_scope_count: 0,
             globals_populated: false,
             break_continue_context_stack: Vec::new(),
+            this_container_stack: Vec::new(),
             this_type_stack: Vec::new(),
             enclosing_class_stack: Vec::new(),
             call_arg_arrow_context: Vec::new(),
@@ -4524,6 +4546,9 @@ impl Checker {
                 // Non-structured callee (primitive like `number`, `string`,
                 // etc.) is never callable/constructable. Mirrors Go's
                 // `invocationError` for types with no signatures.
+                if !is_new && self.report_get_accessor_call(callee_expr) {
+                    return;
+                }
                 let file = self.current_file.clone();
                 self.diagnostics.add(crate::ast::Diagnostic::new(
                     file,
@@ -4542,6 +4567,9 @@ impl Checker {
             // calling a plain object literal or a number. Mirrors Go's
             // `invocationError` head message ("This expression is not
             // callable" / "This expression is not constructable").
+            if !is_new && self.report_get_accessor_call(callee_expr) {
+                return;
+            }
             let file = self.current_file.clone();
             self.diagnostics.add(crate::ast::Diagnostic::new(
                 file,
@@ -5577,11 +5605,17 @@ impl Checker {
                 };
                 self.return_type_stack.push(declared_return.clone());
                 self.in_ctor_body_stack.push(false);
+                // A nested function declaration breaks the class-member
+                // "this container" chain (Go's getThisContainer treats plain
+                // functions as this containers — TS2663 no longer applies).
+                self.this_container_stack
+                    .push(ThisContainerKind::PlainFunction);
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(body) = &data.body {
                         self.check_statement(body);
                     }
                 }
+                self.this_container_stack.pop();
                 // TS2355 vs TS2366 (Go `checkFunctionAndBodies`): with a
                 // declared return type that isn't `undefined`/`void`/`any`:
                 //  - no `return` anywhere in the body → TS2355 on the
@@ -5707,7 +5741,13 @@ impl Checker {
             | SyntaxKind::ExportSpecifier
             | SyntaxKind::ImportSpecifier => {
                 // No expression-position children to check — all type-level
-                // or import-level.
+                // or import-level. Type-alias RHS still gets grammar checks
+                // (TS1183 for accessors with bodies in a type literal).
+                if node.kind == SyntaxKind::TypeAliasDeclaration
+                    && let crate::ast::NodeData::TypeAliasDeclaration(d) = &node.data
+                {
+                    self.check_type_annotation(&d.type_node);
+                }
             }
             SyntaxKind::EnumDeclaration => {
                 // Reserved type names (TS2431): `enum any {}` etc.
@@ -6192,7 +6232,7 @@ impl Checker {
     /// Mirrors Go's `getBaseTypeNodeTypes`/property inheritance:
     /// `class D extends B {}` gives D's instance type all of B's properties
     /// plus D's own.
-    fn build_class_instance_type_with_base(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn build_class_instance_type_with_base(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let (members, heritage_clauses) = match &node.data {
             crate::ast::NodeData::ClassDeclaration(data) => {
                 (&data.members, data.heritage_clauses.clone())
@@ -6923,6 +6963,21 @@ impl Checker {
                     self.check_type_annotation(&d.index_type);
                 }
             }
+            SyntaxKind::TypeLiteral => {
+                // TS1183: accessors with bodies inside a type literal are
+                // implementations in a type context (Go's
+                // `checkGrammarAccessor` Parent==KindTypeLiteral branch).
+                if let crate::ast::NodeData::TypeLiteralNode(d) = &tn.data {
+                    for member in d.members.iter() {
+                        if matches!(
+                            member.kind,
+                            SyntaxKind::GetAccessor | SyntaxKind::SetAccessor
+                        ) {
+                            self.check_accessor_in_type_context(member);
+                        }
+                    }
+                }
+            }
             _ => {}
         }
     }
@@ -6954,6 +7009,62 @@ impl Checker {
             found
         }
         walk(body)
+    }
+
+    /// TS6234: `x.prop()` where `prop` is a `get` accessor — the callee's
+    /// type (the getter's return type) has no call signatures, but the
+    /// intended fix is dropping the `()`, so the message says so. Mirrors
+    /// Go's `resolveErrorCall` → get-accessor special case. Returns true when
+    /// the diagnostic was emitted.
+    fn report_get_accessor_call(&mut self, callee_expr: &Arc<Node>) -> bool {
+        let crate::ast::NodeData::PropertyAccessExpression(pa) = &callee_expr.data else {
+            return false;
+        };
+        if pa.name.kind != SyntaxKind::Identifier {
+            return false;
+        }
+        let target_type = self.get_type_of_node(&pa.expression);
+        let name = pa.name.text().to_string();
+        let is_getter = target_type
+            .as_structured()
+            .and_then(|s| s.properties.iter().find(|p| p.name == name))
+            .is_some_and(|sym| sym.flags.contains(SymbolFlags::GetAccessor));
+        if !is_getter {
+            return false;
+        }
+        let file = self.current_file.clone();
+        self.diagnostics.add(crate::ast::Diagnostic::new(
+            file,
+            // On the property NAME (Go anchors at the accessor name, e.g.
+            // `x.property()` reports on `property`).
+            pa.name.loc,
+            crate::diagnostics::messages_generated::
+                THIS_EXPRESSION_IS_NOT_CALLABLE_BECAUSE_IT_IS_A_GET_ACCESSOR_DID_YOU_MEAN_TO_USE_IT_WITHOUT,
+            vec![],
+        ));
+        true
+    }
+
+    /// TS1183: an accessor (or method) with a body inside an interface or a
+    /// type literal is an implementation in an ambient/type context. Mirrors
+    /// Go's `checkGrammarAccessor` body-present branch. Reported on the body
+    /// node, like Go.
+    fn check_accessor_in_type_context(&mut self, member: &Arc<Node>) {
+        let body = match &member.data {
+            crate::ast::NodeData::GetAccessorDeclaration(d) => d.body.clone(),
+            crate::ast::NodeData::SetAccessorDeclaration(d) => d.body.clone(),
+            _ => return,
+        };
+        if let Some(body) = body {
+            let file = self.current_file.clone();
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file,
+                body.loc,
+                crate::diagnostics::messages_generated::
+                    AN_IMPLEMENTATION_CANNOT_BE_DECLARED_IN_AMBIENT_CONTEXTS,
+                vec![],
+            ));
+        }
     }
 
     /// Interface-member checks: signature parameters (TS2369 parameter
@@ -7040,6 +7151,11 @@ impl Checker {
                     if let crate::ast::NodeData::PropertySignatureDeclaration(d) = &member.data {
                         self.check_type_annotation(&d.type_node);
                     }
+                }
+                // TS1183: accessors with bodies are implementations, which an
+                // interface (ambient context) cannot contain.
+                SyntaxKind::GetAccessor | SyntaxKind::SetAccessor => {
+                    self.check_accessor_in_type_context(member);
                 }
                 _ => {}
             }
@@ -7282,6 +7398,95 @@ impl Checker {
                     }
                     _ => (None, None, None),
                 };
+                // Accessor grammar (Go `checkGrammarAccessor`): a body-less
+                // accessor in a non-ambient class needs `abstract` (TS1005
+                // "'{' expected" at the trailing `;`); an abstract accessor
+                // cannot have a body (TS1310).
+                if matches!(node.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor) {
+                    let ambient = self
+                        .enclosing_class_stack
+                        .last()
+                        .is_some_and(|c| c.has_syntactic_modifier(ModifierFlags::Ambient))
+                        || self
+                            .current_file
+                            .as_ref()
+                            .is_some_and(|f| f.is_declaration_file);
+                    let is_abstract = node.has_syntactic_modifier(ModifierFlags::Abstract);
+                    if body.is_none() && !ambient && !is_abstract && node.loc.end() > 0 {
+                        // Locate the trailing `;` (Go reports at
+                        // accessor.End()-1; our spans may swallow trailing
+                        // CRLF, so trim whitespace back first).
+                        let file = self.current_file.clone();
+                        let mut p = node.loc.end();
+                        if let Some(f) = file.as_ref() {
+                            while p > node.loc.pos()
+                                && matches!(
+                                    f.text.as_bytes()[p - 1],
+                                    b'\r' | b'\n' | b' ' | b'\t'
+                                )
+                            {
+                                p -= 1;
+                            }
+                        }
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            file,
+                            crate::core::text::TextRange::new(p - 1, p),
+                            crate::diagnostics::messages_generated::X_0_EXPECTED,
+                            vec!["{".to_string()],
+                        ));
+                    }
+                    if body.is_some() && is_abstract {
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            file,
+                            node.loc,
+                            crate::diagnostics::messages_generated::
+                                AN_ABSTRACT_ACCESSOR_CANNOT_HAVE_AN_IMPLEMENTATION,
+                            vec![],
+                        ));
+                    }
+                    // TS2676: a get/set pair must be uniformly abstract or
+                    // non-abstract (reported once, from the getter, on both
+                    // names — Go's checkAccessor pair check).
+                    if node.kind == SyntaxKind::GetAccessor
+                        && let Some(class) = self.enclosing_class_stack.last().cloned()
+                        && let crate::ast::NodeData::GetAccessorDeclaration(gd) = &node.data
+                        && gd.name.kind == SyntaxKind::Identifier
+                    {
+                        let setter = Self::class_members_of(&class).iter().find_map(|m| {
+                            if let crate::ast::NodeData::SetAccessorDeclaration(sd) = &m.data
+                                && sd.name.kind == SyntaxKind::Identifier
+                                && sd.name.text() == gd.name.text()
+                            {
+                                Some((Arc::clone(m), sd.name.loc))
+                            } else {
+                                None
+                            }
+                        });
+                        if let Some((setter_node, setter_name_loc)) = setter {
+                            let getter_abstract = is_abstract;
+                            let setter_abstract =
+                                setter_node.has_syntactic_modifier(ModifierFlags::Abstract);
+                            if getter_abstract != setter_abstract {
+                                let file = self.current_file.clone();
+                                self.diagnostics.add(crate::ast::Diagnostic::new(
+                                    file.clone(),
+                                    gd.name.loc,
+                                    crate::diagnostics::messages_generated::
+                                        ACCESSORS_MUST_BOTH_BE_ABSTRACT_OR_NON_ABSTRACT,
+                                    vec![],
+                                ));
+                                self.diagnostics.add(crate::ast::Diagnostic::new(
+                                    file,
+                                    setter_name_loc,
+                                    crate::diagnostics::messages_generated::
+                                        ACCESSORS_MUST_BOTH_BE_ABSTRACT_OR_NON_ABSTRACT,
+                                    vec![],
+                                ));
+                            }
+                        }
+                    }
+                }
                 // TS2369: parameter properties are only allowed in a
                 // constructor IMPLEMENTATION (one with a body).
                 if let Some(params) = &parameters {
@@ -7305,6 +7510,18 @@ impl Checker {
                             && let Some(pt) = &pd.type_node
                         {
                             self.check_type_annotation(pt);
+                            // Accessor parameters don't go through
+                            // `get_type_of_function_like` (methods get their
+                            // annotations resolved during instance-type
+                            // building), so resolve them explicitly — Go's
+                            // checkParameter resolves every annotation,
+                            // reporting TS2304 for unresolved names.
+                            if matches!(
+                                node.kind,
+                                SyntaxKind::GetAccessor | SyntaxKind::SetAccessor
+                            ) {
+                                let _ = self.get_type_from_type_node(pt);
+                            }
                         }
                     }
                 }
@@ -7335,6 +7552,16 @@ impl Checker {
                     }
                 }
                 if let Some(body) = body {
+                    // TS2662/TS2663 context: while directly inside this
+                    // member's body, a bare name failing to resolve checks
+                    // the class's static/instance members for a suggestion
+                    // (Go's `checkAndReportErrorForMissingPrefix`).
+                    let is_static = node.has_syntactic_modifier(ModifierFlags::Static);
+                    self.this_container_stack.push(if is_static {
+                        ThisContainerKind::StaticMember
+                    } else {
+                        ThisContainerKind::InstanceMember
+                    });
                     self.push_function_scope(node);
                     // TS2715 context: constructor bodies count; other
                     // function-likes (and anything nested in them) do not.
@@ -7354,6 +7581,7 @@ impl Checker {
                     self.return_type_stack.pop();
                     self.in_ctor_body_stack.pop();
                     self.pop_function_scope();
+                    self.this_container_stack.pop();
                     // TS2355 (methods): declared non-`undefined`/`void`/`any`
                     // return type + no `return` anywhere in the body →
                     // "must return a value", on the annotation (Go
@@ -7400,7 +7628,17 @@ impl Checker {
                         }
                     }
                     if let Some(init) = &data.initializer {
+                        // TS2662/TS2663 context for property initializers
+                        // (Go's `checkAndReportErrorForMissingPrefix` also
+                        // fires here — `a = inst` suggests `this.inst`).
+                        let is_static = node.has_syntactic_modifier(ModifierFlags::Static);
+                        self.this_container_stack.push(if is_static {
+                            ThisContainerKind::StaticMember
+                        } else {
+                            ThisContainerKind::InstanceMember
+                        });
                         self.check_expression(init);
+                        self.this_container_stack.pop();
                     }
                 }
             }
@@ -7409,7 +7647,12 @@ impl Checker {
             }
             SyntaxKind::ClassStaticBlockDeclaration => {
                 if let crate::ast::NodeData::ClassStaticBlockDeclaration(data) = &node.data {
+                    // Static blocks are static `this` contexts (TS2662
+                    // suggestions apply; instance members aren't suggested).
+                    self.this_container_stack
+                        .push(ThisContainerKind::StaticMember);
                     self.check_statement(&data.body);
+                    self.this_container_stack.pop();
                 }
             }
             _ => {
@@ -7781,7 +8024,17 @@ impl Checker {
                     }
                     _ => {}
                 }
+                // A function expression is its own "this container" (breaks
+                // the class-member chain for TS2663); arrow functions are
+                // NOT (Go's getThisContainer skips arrows).
+                if matches!(node.data, crate::ast::NodeData::FunctionExpression(_)) {
+                    self.this_container_stack
+                        .push(ThisContainerKind::PlainFunction);
+                }
                 self.check_function_like_body(node);
+                if matches!(node.data, crate::ast::NodeData::FunctionExpression(_)) {
+                    self.this_container_stack.pop();
+                }
             }
             SyntaxKind::TemplateExpression => {
                 if let crate::ast::NodeData::TemplateExpression(data) = &node.data {
@@ -8153,11 +8406,103 @@ impl Checker {
             return;
         }
 
-        // Emit TS2304 "Cannot find name '{0}'."
+        // Emit TS2662/TS2663 when inside a class and a static/instance member
+        // with this name exists (Go's `checkAndReportErrorForMissingPrefix`:
+        // a matching static member wins regardless of context; a matching
+        // instance member suggests `this.x` only from directly inside an
+        // instance member). Otherwise TS2304 "Cannot find name '{0}'."
         let file = self.current_file.clone();
-        let diagnostic =
-            crate::ast::Diagnostic::new(file, node.loc, CANNOT_FIND_NAME_0, vec![name.to_string()]);
+        let diagnostic = if let Some(class) = self.enclosing_class_stack.last().cloned() {
+            let class_name = Self::class_name_text(&class);
+            if let Some(is_member_static) = self.class_member_static_by_name(&class, name) {
+                if is_member_static {
+                    crate::ast::Diagnostic::new(
+                        file,
+                        node.loc,
+                        crate::diagnostics::messages_generated::
+                            CANNOT_FIND_NAME_0_DID_YOU_MEAN_THE_STATIC_MEMBER_1_0,
+                        vec![name.to_string(), class_name],
+                    )
+                } else if self.this_container_stack.last() == Some(&ThisContainerKind::InstanceMember)
+                {
+                    crate::ast::Diagnostic::new(
+                        file,
+                        node.loc,
+                        crate::diagnostics::messages_generated::
+                            CANNOT_FIND_NAME_0_DID_YOU_MEAN_THE_INSTANCE_MEMBER_THIS_0,
+                        vec![name.to_string()],
+                    )
+                } else {
+                    crate::ast::Diagnostic::new(
+                        file,
+                        node.loc,
+                        CANNOT_FIND_NAME_0,
+                        vec![name.to_string()],
+                    )
+                }
+            } else {
+                crate::ast::Diagnostic::new(
+                    file,
+                    node.loc,
+                    CANNOT_FIND_NAME_0,
+                    vec![name.to_string()],
+                )
+            }
+        } else {
+            crate::ast::Diagnostic::new(file, node.loc, CANNOT_FIND_NAME_0, vec![name.to_string()])
+        };
         self.diagnostics.add(diagnostic);
+    }
+
+    /// The member list of a class-like node (empty for other kinds).
+    fn class_members_of(class: &Arc<Node>) -> &Arc<NodeList> {
+        match &class.data {
+            crate::ast::NodeData::ClassDeclaration(d) => &d.members,
+            crate::ast::NodeData::ClassExpression(d) => &d.members,
+            _ => {
+                static EMPTY: std::sync::OnceLock<Arc<NodeList>> = std::sync::OnceLock::new();
+                EMPTY.get_or_init(|| Arc::new(NodeList::default()))
+            }
+        }
+    }
+
+    /// The source text of a class declaration's name ("" when anonymous).
+    fn class_name_text(class: &Arc<Node>) -> String {
+        match &class.data {
+            crate::ast::NodeData::ClassDeclaration(d) => {
+                d.name.as_ref().map(|n| n.text().to_string()).unwrap_or_default()
+            }
+            crate::ast::NodeData::ClassExpression(d) => {
+                d.name.as_ref().map(|n| n.text().to_string()).unwrap_or_default()
+            }
+            _ => String::new(),
+        }
+    }
+
+    /// Whether the class has a property/method/accessor member named `name`
+    /// and, if so, whether that member is `static`. Scans the class's member
+    /// list declarationally (Go consults the constructor type's properties
+    /// and the instance type — equivalent for direct members; inherited
+    /// statics/instance members from base classes are not yet considered).
+    fn class_member_static_by_name(&self, class: &Arc<Node>, name: &str) -> Option<bool> {
+        let members = match &class.data {
+            crate::ast::NodeData::ClassDeclaration(d) => &d.members,
+            crate::ast::NodeData::ClassExpression(d) => &d.members,
+            _ => return None,
+        };
+        for member in members.iter() {
+            let member_name = match &member.data {
+                crate::ast::NodeData::PropertyDeclaration(d) => &d.name,
+                crate::ast::NodeData::MethodDeclaration(d) => &d.name,
+                crate::ast::NodeData::GetAccessorDeclaration(d) => &d.name,
+                crate::ast::NodeData::SetAccessorDeclaration(d) => &d.name,
+                _ => continue,
+            };
+            if member_name.kind == SyntaxKind::Identifier && member_name.text() == name {
+                return Some(member.has_syntactic_modifier(ModifierFlags::Static));
+            }
+        }
+        None
     }
 
     /// TS2448: Check if a block-scoped variable (`let`/`const`/`class`) is
@@ -8645,11 +8990,18 @@ impl Checker {
                 }
             }
             // Check the container's symbol members (function-scoped
-            // declarations like parameters, class members, etc.).
+            // declarations like parameters, enum members, etc.).
             if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
-                if let Some(sym) = container_sym.members.get(name) {
-                    if sym.flags.intersects(meaning) {
-                        return self.follow_alias(sym);
+                // Class members are NOT lexically visible: `foo` inside a
+                // method must be written `this.foo` / `C.foo` (Go's
+                // `resolveName` never consults class `Members`; the checker
+                // instead reports TS2662/TS2663 suggestions when a bare name
+                // fails to resolve inside a class).
+                if !container_sym.flags.intersects(SymbolFlags::Class) {
+                    if let Some(sym) = container_sym.members.get(name) {
+                        if sym.flags.intersects(meaning) {
+                            return self.follow_alias(sym);
+                        }
                     }
                 }
                 // Module/namespace export lookup.

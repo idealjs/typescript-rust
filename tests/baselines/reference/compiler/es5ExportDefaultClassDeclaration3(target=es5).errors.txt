@@ -1,0 +1,1 @@
+es5ExportDefaultClassDeclaration3.ts(1,21): error TS2449: Class 'C' used before its declaration.
