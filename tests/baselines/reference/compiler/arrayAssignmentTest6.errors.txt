@@ -1,1 +1,1 @@
-arrayAssignmentTest6.ts(16,20): error TS2322: Type 'null' is not assignable to type '{ tokens: { startIndex: number }[]; endState: object }'.
+arrayAssignmentTest6.ts(16,13): error TS2322: Type 'null' is not assignable to type 'ILineTokens'.

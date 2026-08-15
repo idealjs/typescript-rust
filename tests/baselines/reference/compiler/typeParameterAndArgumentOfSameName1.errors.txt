@@ -1,1 +1,2 @@
 typeParameterAndArgumentOfSameName1.ts(3,5): error TS2322: Type 'null' is not assignable to type 'A'.
+  'A' could be instantiated with an arbitrary type which could be unrelated to 'null'.

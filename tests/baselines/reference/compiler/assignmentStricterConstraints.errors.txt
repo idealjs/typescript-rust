@@ -1,1 +1,4 @@
-assignmentStricterConstraints.ts(8,6): error TS2345: Argument of type '""' is not assignable to parameter of type 'T'.
+assignmentStricterConstraints.ts(7,1): error TS2322: Type '<T, S extends T>(x: T, y: S) => void' is not assignable to type '<T, S>(x: T, y: S) => void'.
+  Types of parameters 'y' and 'y' are incompatible.
+    Type 'S' is not assignable to type 'T'.
+      'T' could be instantiated with an arbitrary type which could be unrelated to 'S'.

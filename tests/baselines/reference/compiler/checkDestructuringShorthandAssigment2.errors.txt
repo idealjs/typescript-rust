@@ -1,1 +1,1 @@
-checkDestructuringShorthandAssigment2.ts(5,24): error TS2454: Variable 'o' is used before being assigned.
+checkDestructuringShorthandAssigment2.ts(4,27): error TS2353: Object literal may only specify known properties, and '[k]' does not exist in type '{ x: any; }'.

@@ -1,2 +1,14 @@
 identicalTypesNoDifferByCheckOrder.ts(32,30): error TS2322: Type 'FunctionComponent2<SomePropsCloneX>' is not assignable to type 'FunctionComponent2<SomeProps>'.
+  Types of parameters 'props' and 'props' are incompatible.
+    Type 'SomeProps & { children?: unknown; }' is not assignable to type 'Required<Pick<SomePropsClone, "x">> & Omit<SomePropsClone, "x"> & { children?: unknown; }'.
+      Type 'SomeProps & { children?: unknown; }' is not assignable to type 'Required<Pick<SomePropsClone, "x">>'.
+        Types of property 'x' are incompatible.
+          Type 'string | undefined' is not assignable to type 'string'.
+            Type 'undefined' is not assignable to type 'string'.
 identicalTypesNoDifferByCheckOrder.ts(36,30): error TS2322: Type 'FunctionComponent1<SomePropsX>' is not assignable to type 'FunctionComponent1<SomeProps>'.
+  Types of parameters 'props' and 'props' are incompatible.
+    Type 'SomeProps & { children?: unknown; }' is not assignable to type 'Required<Pick<SomeProps, "x">> & Omit<SomeProps, "x"> & { children?: unknown; }'.
+      Type 'SomeProps & { children?: unknown; }' is not assignable to type 'Required<Pick<SomeProps, "x">>'.
+        Types of property 'x' are incompatible.
+          Type 'string | undefined' is not assignable to type 'string'.
+            Type 'undefined' is not assignable to type 'string'.

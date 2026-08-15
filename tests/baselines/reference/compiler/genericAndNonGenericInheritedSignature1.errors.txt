@@ -1,1 +1,2 @@
 genericAndNonGenericInheritedSignature1.ts(7,11): error TS2320: Interface 'Hello' cannot simultaneously extend types 'Foo' and 'Bar'.
+  Named property 'f' of types 'Foo' and 'Bar' are not identical.

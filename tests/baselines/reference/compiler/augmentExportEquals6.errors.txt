@@ -1,2 +1,0 @@
-file2.ts(2,1): error TS2304: Cannot find name 'x'.
-file3.ts(5,9): error TS2304: Cannot find name 'x'.

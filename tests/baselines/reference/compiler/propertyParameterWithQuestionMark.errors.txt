@@ -1,1 +1,2 @@
 propertyParameterWithQuestionMark.ts(9,5): error TS2322: Type 'C' is not assignable to type '{ x: any; }'.
+  Property 'x' is optional in type 'C' but required in type '{ x: any; }'.

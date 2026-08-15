@@ -1,3 +1,11 @@
-argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(74,12): error TS1005: ';' expected.
-argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(76,13): error TS1003: Identifier expected.
-argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(81,1): error TS1128: Declaration or statement expected.
+argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(3,10): error TS2815: 'arguments' cannot be referenced in property initializers or class static initialization blocks.
+argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(9,10): error TS2815: 'arguments' cannot be referenced in property initializers or class static initialization blocks.
+argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(15,15): error TS2815: 'arguments' cannot be referenced in property initializers or class static initialization blocks.
+argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(21,15): error TS2815: 'arguments' cannot be referenced in property initializers or class static initialization blocks.
+argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(33,16): error TS2815: 'arguments' cannot be referenced in property initializers or class static initialization blocks.
+argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(40,7): error TS2815: 'arguments' cannot be referenced in property initializers or class static initialization blocks.
+argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(42,16): error TS2815: 'arguments' cannot be referenced in property initializers or class static initialization blocks.
+argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(75,7): error TS2815: 'arguments' cannot be referenced in property initializers or class static initialization blocks.
+argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(77,9): error TS2815: 'arguments' cannot be referenced in property initializers or class static initialization blocks.
+argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(96,26): error TS2815: 'arguments' cannot be referenced in property initializers or class static initialization blocks.
+argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.ts(102,15): error TS2815: 'arguments' cannot be referenced in property initializers or class static initialization blocks.

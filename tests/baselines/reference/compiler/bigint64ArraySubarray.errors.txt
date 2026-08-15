@@ -1,1 +1,0 @@
-bigint64ArraySubarray.ts(3,19): error TS2304: Cannot find name 'BigInt64Array'.

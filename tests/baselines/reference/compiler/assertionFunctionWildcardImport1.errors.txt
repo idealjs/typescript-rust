@@ -1,2 +1,0 @@
-src/core/foo.ts(4,1): error TS2304: Cannot find name 'ts'.
-src/other/bar.ts(4,1): error TS2304: Cannot find name 'ts'.

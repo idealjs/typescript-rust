@@ -1,5 +1,6 @@
 genericPrototypeProperty3.ts(2,5): error TS2564: Property 'target' has no initializer and is not definitely assigned in the constructor.
 genericPrototypeProperty3.ts(6,5): error TS2416: Property 'target' in type 'MyEvent<T>' is not assignable to the same property in base type 'BaseEvent'.
+  Type 'T' is not assignable to type '{}'.
 genericPrototypeProperty3.ts(6,5): error TS2564: Property 'target' has no initializer and is not definitely assigned in the constructor.
 genericPrototypeProperty3.ts(9,5): error TS2564: Property 't' has no initializer and is not definitely assigned in the constructor.
 genericPrototypeProperty3.ts(13,5): error TS2564: Property 't' has no initializer and is not definitely assigned in the constructor.

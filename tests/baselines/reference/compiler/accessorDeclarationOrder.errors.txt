@@ -1,2 +1,2 @@
-accessorDeclarationOrder.ts(31,4): error TS2339: Property 'name' does not exist on type '{ #name: string }'.
-accessorDeclarationOrder.ts(34,4): error TS2339: Property 'name' does not exist on type '{ #name: string }'.
+accessorDeclarationOrder.ts(2,5): error TS2564: Property '#name' has no initializer and is not definitely assigned in the constructor.
+accessorDeclarationOrder.ts(14,5): error TS2564: Property '#name' has no initializer and is not definitely assigned in the constructor.

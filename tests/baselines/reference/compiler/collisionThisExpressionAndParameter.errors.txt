@@ -1,2 +1,0 @@
-collisionThisExpressionAndParameter.ts(47,20): error TS2339: Property 'log' does not exist on type 'object'.
-collisionThisExpressionAndParameter.ts(82,20): error TS2339: Property 'log' does not exist on type 'object'.

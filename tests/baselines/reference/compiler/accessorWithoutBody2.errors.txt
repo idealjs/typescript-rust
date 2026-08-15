@@ -1,1 +1,0 @@
-accessorWithoutBody2.ts(1,22): error TS1005: '{' expected.

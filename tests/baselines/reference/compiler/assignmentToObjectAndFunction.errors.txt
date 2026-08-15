@@ -1,4 +1,5 @@
-assignmentToObjectAndFunction.ts(1,5): error TS2739: Type '{ toString: 0 }' is missing the following properties from type '{ constructor: { apply: (this: error, thisArg: any, argArray: any) => any; call: (this: error, thisArg: any, argArray: any[]) => any; bind: (this: error, thisArg: any, argArray: any[]) => any; toString: () => string; prototype: any; length: number; arguments: any; caller: error }; toString: () => string; toLocaleString: () => string; valueOf: () => error; hasOwnProperty: (v: string | number | symbol) => boolean; isPrototypeOf: (v: error) => boolean; propertyIsEnumerable: (v: string | number | symbol) => boolean }': constructor, toLocaleString, valueOf, hasOwnProperty, isPrototypeOf, propertyIsEnumerable
-assignmentToObjectAndFunction.ts(15,5): error TS2322: Type 'foo' is not assignable to type 'object'.
-assignmentToObjectAndFunction.ts(22,5): error TS2322: Type 'bar' is not assignable to type 'object'.
-assignmentToObjectAndFunction.ts(29,5): error TS2322: Type 'bad' is not assignable to type 'object'.
+assignmentToObjectAndFunction.ts(1,24): error TS2322: Type 'number' is not assignable to type '() => string'.
+assignmentToObjectAndFunction.ts(8,5): error TS2740: Type '{}' is missing the following properties from type 'Function': apply, call, bind, prototype, and 5 more.
+assignmentToObjectAndFunction.ts(29,5): error TS2322: Type 'typeof bad' is not assignable to type 'Function'.
+  Types of property 'apply' are incompatible.
+    Type 'number' is not assignable to type '(this: Function, thisArg: any, argArray?: any) => any'.

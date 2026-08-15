@@ -1,4 +1,12 @@
 overloadsWithProvisionalErrors.ts(6,1): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(s: string): number', gave the following error.
+    Argument of type '(s: string) => {}' is not assignable to parameter of type 'string'.
+  Overload 2 of 2, '(lambda: (s: string) => { a: number; b: number; }): string', gave the following error.
+    Type '{}' is missing the following properties from type '{ a: number; b: number; }': a, b
 overloadsWithProvisionalErrors.ts(7,17): error TS2304: Cannot find name 'blah'.
 overloadsWithProvisionalErrors.ts(8,1): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(s: string): number', gave the following error.
+    Argument of type '(s: string) => { a: any; }' is not assignable to parameter of type 'string'.
+  Overload 2 of 2, '(lambda: (s: string) => { a: number; b: number; }): string', gave the following error.
+    Property 'b' is missing in type '{ a: any; }' but required in type '{ a: number; b: number; }'.
 overloadsWithProvisionalErrors.ts(8,17): error TS2304: Cannot find name 'blah'.

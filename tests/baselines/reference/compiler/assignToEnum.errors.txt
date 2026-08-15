@@ -1,1 +1,4 @@
-assignToEnum.ts(3,7): error TS18048: 'A' is possibly 'undefined'.
+assignToEnum.ts(2,1): error TS2628: Cannot assign to 'A' because it is an enum.
+assignToEnum.ts(3,1): error TS2628: Cannot assign to 'A' because it is an enum.
+assignToEnum.ts(4,3): error TS2540: Cannot assign to 'foo' because it is a read-only property.
+assignToEnum.ts(5,3): error TS2540: Cannot assign to 'foo' because it is a read-only property.

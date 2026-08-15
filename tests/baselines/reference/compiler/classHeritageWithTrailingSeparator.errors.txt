@@ -1,1 +1,2 @@
-classHeritageWithTrailingSeparator.ts(3,2): error TS1005: '{' expected.
+classHeritageWithTrailingSeparator.ts(1,11): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+classHeritageWithTrailingSeparator.ts(2,18): error TS1009: Trailing comma not allowed.

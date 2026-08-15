@@ -1,1 +1,0 @@
-ambientModules.ts(3,1): error TS2304: Cannot find name 'Foo'.

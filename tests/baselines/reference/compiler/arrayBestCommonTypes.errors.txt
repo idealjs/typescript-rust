@@ -1,28 +1,229 @@
-arrayBestCommonTypes.ts(16,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(17,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(18,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(19,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(20,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(21,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(23,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(24,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(25,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(26,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(27,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(28,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(30,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(43,17): error TS2322: Type 'null' is not assignable to type 'object'.
-arrayBestCommonTypes.ts(69,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(70,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(71,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(72,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(73,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(74,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(76,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(77,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(78,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(79,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(80,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(81,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(83,22): error TS2554: Expected 2 arguments, but got 1.
-arrayBestCommonTypes.ts(96,17): error TS2322: Type 'null' is not assignable to type '{ x: string }'.
+arrayBestCommonTypes.ts(16,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(17,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(18,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'boolean'.
+      Type 'null' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'number'.
+      Type 'null' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(19,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'boolean'.
+      Type 'null' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'number'.
+      Type 'null' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(20,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null | undefined' is not assignable to parameter of type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null | undefined' is not assignable to parameter of type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(23,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(24,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(25,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'boolean'.
+      Type 'null' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'number'.
+      Type 'null' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(26,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'boolean'.
+      Type 'null' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'number'.
+      Type 'null' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(27,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null | undefined' is not assignable to parameter of type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null | undefined' is not assignable to parameter of type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(29,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'boolean'.
+      Type 'null' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'number'.
+      Type 'null' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(34,52): error TS2322: Type 'undefined' is not assignable to type 'string'.
+arrayBestCommonTypes.ts(42,17): error TS2322: Type 'null' is not assignable to type 'iface'.
+arrayBestCommonTypes.ts(56,35): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+arrayBestCommonTypes.ts(56,46): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+arrayBestCommonTypes.ts(57,36): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+arrayBestCommonTypes.ts(57,47): error TS2564: Property 'z' has no initializer and is not definitely assigned in the constructor.
+arrayBestCommonTypes.ts(58,34): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+arrayBestCommonTypes.ts(69,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(70,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(71,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'boolean'.
+      Type 'null' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'number'.
+      Type 'null' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(72,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'boolean'.
+      Type 'null' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'number'.
+      Type 'null' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(73,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null | undefined' is not assignable to parameter of type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null | undefined' is not assignable to parameter of type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(76,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(77,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(78,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'boolean'.
+      Type 'null' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'number'.
+      Type 'null' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(79,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'boolean'.
+      Type 'null' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'number'.
+      Type 'null' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(80,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null | undefined' is not assignable to parameter of type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'string | null | undefined' is not assignable to parameter of type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(82,37): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(x: boolean, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'boolean'.
+      Type 'null' is not assignable to type 'boolean'.
+  Overload 2 of 3, '(x: string, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 3 of 3, '(x: number, y?: boolean | undefined): number', gave the following error.
+    Argument of type 'number | null' is not assignable to parameter of type 'number'.
+      Type 'null' is not assignable to type 'number'.
+arrayBestCommonTypes.ts(87,52): error TS2322: Type 'undefined' is not assignable to type 'string'.
+arrayBestCommonTypes.ts(95,17): error TS2322: Type 'null' is not assignable to type 'iface'.

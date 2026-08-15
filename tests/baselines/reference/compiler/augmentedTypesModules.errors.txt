@@ -1,5 +1,9 @@
-error TS2300: Duplicate identifier 'm1'.
-error TS2300: Duplicate identifier 'm1a'.
-error TS2300: Duplicate identifier 'm1b'.
-error TS2300: Duplicate identifier 'm1c'.
-error TS2300: Duplicate identifier 'm1d'.
+augmentedTypesModules.ts(5,11): error TS2300: Duplicate identifier 'm1a'.
+augmentedTypesModules.ts(6,5): error TS2300: Duplicate identifier 'm1a'.
+augmentedTypesModules.ts(8,11): error TS2300: Duplicate identifier 'm1b'.
+augmentedTypesModules.ts(9,5): error TS2300: Duplicate identifier 'm1b'.
+augmentedTypesModules.ts(16,11): error TS2300: Duplicate identifier 'm1d'.
+augmentedTypesModules.ts(19,5): error TS2300: Duplicate identifier 'm1d'.
+augmentedTypesModules.ts(25,11): error TS2434: A namespace declaration cannot be located prior to a class or function with which it is merged.
+augmentedTypesModules.ts(28,11): error TS2434: A namespace declaration cannot be located prior to a class or function with which it is merged.
+augmentedTypesModules.ts(51,11): error TS2434: A namespace declaration cannot be located prior to a class or function with which it is merged.

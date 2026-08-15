@@ -1,4 +1,0 @@
-commentsExternalModules_1.ts(3,1): error TS2304: Cannot find name 'extMod'.
-commentsExternalModules_1.ts(4,25): error TS2304: Cannot find name 'extMod'.
-commentsExternalModules_1.ts(5,1): error TS2304: Cannot find name 'extMod'.
-commentsExternalModules_1.ts(6,26): error TS2304: Cannot find name 'extMod'.

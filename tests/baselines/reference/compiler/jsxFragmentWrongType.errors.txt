@@ -1,2 +1,4 @@
 a.tsx(6,28): error TS2322: Type '{ children: () => string; }' is not assignable to type '{ children?: ReactNode; }'.
+  Types of property 'children' are incompatible.
+    Type '() => string' is not assignable to type 'ReactNode'.
 a.tsx(7,47): error TS2322: Type '() => string' is not assignable to type 'ReactNode'.

@@ -1,1 +1,0 @@
-error TS2300: Duplicate identifier 'B'.

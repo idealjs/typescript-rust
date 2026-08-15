@@ -1,3 +1,15 @@
 genericCallAtYieldExpressionInGenericCall1.ts(26,25): error TS2488: Type '() => T' must have a '[Symbol.iterator]()' method that returns an iterator.
 genericCallAtYieldExpressionInGenericCall1.ts(56,8): error TS2345: Argument of type '<T>(value: T) => Generator<number, void, any>' is not assignable to parameter of type '(value: unknown) => Generator<never, unknown, unknown>'.
+  Call signature return types 'Generator<number, void, any>' and 'Generator<never, unknown, unknown>' are incompatible.
+    The types returned by 'next(...)' are incompatible between these types.
+      Type 'IteratorResult<number, void>' is not assignable to type 'IteratorResult<never, unknown>'.
+        Type 'IteratorYieldResult<number>' is not assignable to type 'IteratorResult<never, unknown>'.
+          Type 'IteratorYieldResult<number>' is not assignable to type 'IteratorYieldResult<never>'.
+            Type 'number' is not assignable to type 'never'.
 genericCallAtYieldExpressionInGenericCall1.ts(61,8): error TS2345: Argument of type '<T>(value: T) => Generator<number, void, any>' is not assignable to parameter of type '(value: unknown) => Generator<never, unknown, unknown>'.
+  Call signature return types 'Generator<number, void, any>' and 'Generator<never, unknown, unknown>' are incompatible.
+    The types returned by 'next(...)' are incompatible between these types.
+      Type 'IteratorResult<number, void>' is not assignable to type 'IteratorResult<never, unknown>'.
+        Type 'IteratorYieldResult<number>' is not assignable to type 'IteratorResult<never, unknown>'.
+          Type 'IteratorYieldResult<number>' is not assignable to type 'IteratorYieldResult<never>'.
+            Type 'number' is not assignable to type 'never'.

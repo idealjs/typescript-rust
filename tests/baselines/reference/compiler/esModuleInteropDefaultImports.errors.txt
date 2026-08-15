@@ -1,6 +1,12 @@
 b.ts(15,1): error TS2349: This expression is not callable.
+  Type 'typeof import("mod")' has no call signatures.
 b.ts(16,1): error TS2349: This expression is not callable.
+  Type 'typeof import("mod")' has no call signatures.
 b.ts(17,1): error TS2349: This expression is not callable.
+  Type 'typeof import("mod")' has no call signatures.
 b.ts(18,1): error TS2349: This expression is not callable.
+  Type 'typeof import("mod")' has no call signatures.
 b.ts(19,6): error TS2349: This expression is not callable.
+  Type 'typeof import("mod")' has no call signatures.
 b.ts(20,6): error TS2349: This expression is not callable.
+  Type 'typeof import("mod")' has no call signatures.

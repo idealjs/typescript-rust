@@ -1,4 +1,10 @@
 mismatchedGenericArguments1.ts(5,4): error TS2416: Property 'foo' in type 'C<T>' is not assignable to the same property in base type 'IFoo<T>'.
+  Type '(x: string) => number' is not assignable to type '<T>(x: T) => T'.
+    Types of parameters 'x' and 'x' are incompatible.
+      Type 'T' is not assignable to type 'string'.
 mismatchedGenericArguments1.ts(6,6): error TS2322: Type 'null' is not assignable to type 'number'.
 mismatchedGenericArguments1.ts(11,4): error TS2416: Property 'foo' in type 'C2<T>' is not assignable to the same property in base type 'IFoo<T>'.
+  Type '<U>(x: string) => number' is not assignable to type '<T>(x: T) => T'.
+    Types of parameters 'x' and 'x' are incompatible.
+      Type 'T' is not assignable to type 'string'.
 mismatchedGenericArguments1.ts(12,6): error TS2322: Type 'null' is not assignable to type 'number'.

@@ -1,1 +1,1 @@
-classMemberInitializerWithLamdaScoping2_1.ts(8,17): error TS2339: Property 'log' does not exist on type 'object'.
+classMemberInitializerWithLamdaScoping2_1.ts(8,21): error TS2301: Initializer of instance member variable 'messageHandler' cannot reference identifier 'field1' declared in the constructor.

@@ -1,1 +1,13 @@
-abstractPropertyInConstructor.ts(59,17): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+abstractPropertyInConstructor.ts(4,24): error TS2715: Abstract property 'prop' in class 'AbstractClass' cannot be accessed in the constructor.
+abstractPropertyInConstructor.ts(7,18): error TS2715: Abstract property 'prop' in class 'AbstractClass' cannot be accessed in the constructor.
+abstractPropertyInConstructor.ts(9,14): error TS2715: Abstract property 'cb' in class 'AbstractClass' cannot be accessed in the constructor.
+abstractPropertyInConstructor.ts(25,18): error TS2715: Abstract property 'prop' in class 'AbstractClass' cannot be accessed in the constructor.
+abstractPropertyInConstructor.ts(25,18): error TS2729: Property 'prop' is used before its initialization.
+abstractPropertyInConstructor.ts(39,22): error TS2715: Abstract property 'prop' in class 'AbstractClass' cannot be accessed in the constructor.
+abstractPropertyInConstructor.ts(78,15): error TS2715: Abstract property 'x' in class 'C1' cannot be accessed in the constructor.
+abstractPropertyInConstructor.ts(78,18): error TS2715: Abstract property 'y' in class 'C1' cannot be accessed in the constructor.
+abstractPropertyInConstructor.ts(79,12): error TS2715: Abstract property 'x' in class 'C1' cannot be accessed in the constructor.
+abstractPropertyInConstructor.ts(79,15): error TS2715: Abstract property 'y' in class 'C1' cannot be accessed in the constructor.
+abstractPropertyInConstructor.ts(79,22): error TS2715: Abstract property 'y' in class 'C1' cannot be accessed in the constructor.
+abstractPropertyInConstructor.ts(84,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+abstractPropertyInConstructor.ts(85,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.

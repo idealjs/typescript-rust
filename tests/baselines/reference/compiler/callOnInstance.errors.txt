@@ -1,4 +1,4 @@
-error TS2300: Duplicate identifier 'D'.
-callOnInstance.ts(5,18): error TS2349: This expression is not callable.
 callOnInstance.ts(7,18): error TS2349: This expression is not callable.
+  Type 'D' has no call signatures.
 callOnInstance.ts(10,1): error TS2349: This expression is not callable.
+  Type 'C' has no call signatures.

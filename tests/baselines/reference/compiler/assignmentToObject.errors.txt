@@ -1,2 +1,3 @@
-assignmentToObject.ts(2,5): error TS2353: Object literal may only specify known properties, and 'toString' does not exist in type 'object'.
-assignmentToObject.ts(3,5): error TS2739: Type '{ toString: number }' is missing the following properties from type '{ constructor: { apply: (this: error, thisArg: any, argArray: any) => any; call: (this: error, thisArg: any, argArray: any[]) => any; bind: (this: error, thisArg: any, argArray: any[]) => any; toString: () => string; prototype: any; length: number; arguments: any; caller: error }; toString: () => string; toLocaleString: () => string; valueOf: () => error; hasOwnProperty: (v: string | number | symbol) => boolean; isPrototypeOf: (v: error) => boolean; propertyIsEnumerable: (v: string | number | symbol) => boolean }': constructor, toLocaleString, valueOf, hasOwnProperty, isPrototypeOf, propertyIsEnumerable
+assignmentToObject.ts(3,5): error TS2322: Type '{ toString: number; }' is not assignable to type 'Object'.
+  Types of property 'toString' are incompatible.
+    Type 'number' is not assignable to type '() => string'.

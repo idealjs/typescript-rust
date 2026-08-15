@@ -1,1 +1,0 @@
-classPropertyInferenceFromBroaderTypeConst.ts(30,3): error TS2339: Property 'SD' does not exist on type 'object'.

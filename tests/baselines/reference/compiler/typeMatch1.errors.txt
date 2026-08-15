@@ -1,3 +1,4 @@
 typeMatch1.ts(18,1): error TS2322: Type 'D' is not assignable to type 'C'.
+  Types have separate declarations of a private property 'x'.
 typeMatch1.ts(19,4): error TS2741: Property 'x' is missing in type 'typeof C' but required in type 'C'.
 typeMatch1.ts(20,1): error TS2367: This comparison appears to be unintentional because the types 'typeof C' and 'typeof D' have no overlap.

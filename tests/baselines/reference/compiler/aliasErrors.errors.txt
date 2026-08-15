@@ -1,5 +1,7 @@
+aliasErrors.ts(11,12): error TS2503: Cannot find namespace 'no'.
+aliasErrors.ts(12,13): error TS2503: Cannot find namespace 'no'.
 aliasErrors.ts(13,12): error TS1003: Identifier expected.
 aliasErrors.ts(14,12): error TS1003: Identifier expected.
-aliasErrors.ts(19,13): error TS2304: Cannot find name 'provide'.
-aliasErrors.ts(23,3): error TS2304: Cannot find name 'beez'.
-aliasErrors.ts(27,17): error TS2304: Cannot find name 'provide'.
+aliasErrors.ts(15,12): error TS1359: Identifier expected. 'null' is a reserved word that cannot be used here.
+aliasErrors.ts(16,12): error TS2503: Cannot find namespace 'undefined'.
+aliasErrors.ts(26,15): error TS2694: Namespace 'foo.bar.baz' has no exported member 'bar'.

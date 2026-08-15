@@ -1,1 +1,3 @@
+error TS5107: Option 'module=AMD' is deprecated and will stop functioning in TypeScript 7.0. Specify compilerOption '"ignoreDeprecations": "6.0"' to silence this error.
 instanceOfInExternalModules_require.ts(1,20): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+!!! error TS5107: Option 'module=AMD' is deprecated and will stop functioning in TypeScript 7.0. Specify compilerOption '"ignoreDeprecations": "6.0"' to silence this error.

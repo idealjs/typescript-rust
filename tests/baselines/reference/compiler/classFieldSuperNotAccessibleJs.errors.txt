@@ -1,7 +1,4 @@
-index.js(6,14): error TS2339: Property 'roots' does not exist on type '{ b: () => void }'.
-index.js(8,14): error TS2339: Property 'justProp' does not exist on type '{ b: () => void }'.
-index.js(15,14): error TS2339: Property 'foo' does not exist on type '{ b: () => void }'.
-index.js(21,22): error TS2339: Property 'roots' does not exist on type '{ b: () => void }'.
-index.js(24,22): error TS2339: Property 'foo' does not exist on type '{ b: () => void }'.
-index.js(27,22): error TS2339: Property 'justProp' does not exist on type '{ b: () => void }'.
-index.js(30,22): error TS2339: Property 'literalElementAccess' does not exist on type '{ b: () => void }'.
+index.js(20,22): error TS2855: Class field 'roots' defined by the parent class is not accessible in the child class via super.
+index.js(23,22): error TS2855: Class field 'foo' defined by the parent class is not accessible in the child class via super.
+index.js(26,22): error TS2855: Class field 'justProp' defined by the parent class is not accessible in the child class via super.
+index.js(29,22): error TS2855: Class field ''literalElementAccess'' defined by the parent class is not accessible in the child class via super.

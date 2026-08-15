@@ -1,2 +1,2 @@
-ambientExternalModuleInAnotherExternalModule.ts(10,22): error TS2307: Cannot find module 'ext' or its corresponding type declarations.
-ambientExternalModuleInAnotherExternalModule.ts(11,9): error TS2304: Cannot find name 'ext'.
+ambientExternalModuleInAnotherExternalModule.ts(4,16): error TS2664: Invalid module name in augmentation, module 'ext' cannot be found.
+ambientExternalModuleInAnotherExternalModule.ts(9,22): error TS2307: Cannot find module 'ext' or its corresponding type declarations.

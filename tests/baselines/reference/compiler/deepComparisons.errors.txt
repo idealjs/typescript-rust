@@ -1,3 +1,12 @@
 deepComparisons.ts(2,9): error TS2322: Type 'T' is not assignable to type 'Extract<T, string>'.
 deepComparisons.ts(3,9): error TS2322: Type 'T[K1]' is not assignable to type 'Extract<T[K1], string>'.
+  Type 'T[keyof T]' is not assignable to type 'Extract<T[K1], string>'.
+    Type 'T[string] | T[number] | T[symbol]' is not assignable to type 'Extract<T[K1], string>'.
+      Type 'T[string]' is not assignable to type 'Extract<T[K1], string>'.
 deepComparisons.ts(4,9): error TS2322: Type 'T[K1][K2]' is not assignable to type 'Extract<T[K1][K2], string>'.
+  Type 'T[K1][keyof T[K1]]' is not assignable to type 'Extract<T[K1][K2], string>'.
+    Type 'T[K1][string] | T[K1][number] | T[K1][symbol]' is not assignable to type 'Extract<T[K1][K2], string>'.
+      Type 'T[K1][string]' is not assignable to type 'Extract<T[K1][K2], string>'.
+        Type 'T[keyof T][string]' is not assignable to type 'Extract<T[K1][K2], string>'.
+          Type 'T[string][string] | T[number][string] | T[symbol][string]' is not assignable to type 'Extract<T[K1][K2], string>'.
+            Type 'T[string][string]' is not assignable to type 'Extract<T[K1][K2], string>'.

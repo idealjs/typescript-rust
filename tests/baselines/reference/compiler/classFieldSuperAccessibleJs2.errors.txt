@@ -1,1 +1,0 @@
-index.js(24,3): error TS2339: Property 'prototype' does not exist on type 'object'.

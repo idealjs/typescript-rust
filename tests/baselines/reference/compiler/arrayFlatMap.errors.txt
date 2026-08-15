@@ -1,3 +1,0 @@
-arrayFlatMap.ts(3,7): error TS2739: Type 'any[]' is missing the following properties from type '{ flatMap: (callback: (this: This, value: number, index: number, array: number[]) => U | error, thisArg: This) => U[]; flat: (this: A, depth: D) => any[] }': flatMap, flat
-arrayFlatMap.ts(4,44): error TS2322: Type 'any[]' is not assignable to type '{ flatMap: (callback: (this: This, value: number, index: number, array: number[]) => U | error, thisArg: This) => U[]; flat: (this: A, depth: D) => any[] }'.
-arrayFlatMap.ts(5,52): error TS2322: Type 'any[]' is not assignable to type '{ flatMap: (callback: (this: This, value: number, index: number, array: number[]) => U | error, thisArg: This) => U[]; flat: (this: A, depth: D) => any[] }'.

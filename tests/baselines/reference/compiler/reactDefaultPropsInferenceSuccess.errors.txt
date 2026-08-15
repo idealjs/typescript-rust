@@ -1,3 +1,25 @@
 reactDefaultPropsInferenceSuccess.tsx(27,36): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: Readonly<Props>): FieldFeedback<Props>', gave the following error.
+    Type '(value: string) => void' is not assignable to type '"a" | "b" | ((value: string) => boolean) | undefined'.
+      Type '(value: string) => void' is not assignable to type '(value: string) => boolean'.
+        Type 'void' is not assignable to type 'boolean'.
+  Overload 2 of 2, '(props: Props, context?: any): FieldFeedback<Props>', gave the following error.
+    Type '(value: string) => void' is not assignable to type '"a" | "b" | ((value: string) => boolean) | undefined'.
+      Type '(value: string) => void' is not assignable to type '(value: string) => boolean'.
+        Type 'void' is not assignable to type 'boolean'.
 reactDefaultPropsInferenceSuccess.tsx(43,41): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: Readonly<Props>): FieldFeedbackBeta<Props>', gave the following error.
+    Type '(value: string) => void' is not assignable to type '"a" | "b" | ((value: string) => boolean) | undefined'.
+      Type '(value: string) => void' is not assignable to type '(value: string) => boolean'.
+        Type 'void' is not assignable to type 'boolean'.
+  Overload 2 of 2, '(props: Props, context?: any): FieldFeedbackBeta<Props>', gave the following error.
+    Type '(value: string) => void' is not assignable to type '"a" | "b" | ((value: string) => boolean) | undefined'.
+      Type '(value: string) => void' is not assignable to type '(value: string) => boolean'.
+        Type 'void' is not assignable to type 'boolean'.
 reactDefaultPropsInferenceSuccess.tsx(64,37): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: Readonly<MyPropsProps>): FieldFeedback2<MyPropsProps>', gave the following error.
+    Type '(value: string) => void' is not assignable to type '(value: string) => boolean'.
+      Type 'void' is not assignable to type 'boolean'.
+  Overload 2 of 2, '(props: MyPropsProps, context?: any): FieldFeedback2<MyPropsProps>', gave the following error.
+    Type '(value: string) => void' is not assignable to type '(value: string) => boolean'.
+      Type 'void' is not assignable to type 'boolean'.

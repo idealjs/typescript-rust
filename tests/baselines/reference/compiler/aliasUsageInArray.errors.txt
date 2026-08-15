@@ -1,2 +1,1 @@
-aliasUsageInArray_main.ts(7,37): error TS2304: Cannot find name 'moduleA'.
-aliasUsageInArray_main.ts(8,30): error TS2304: Cannot find name 'moduleA'.
+aliasUsageInArray_backbone.ts(2,12): error TS2564: Property 'someData' has no initializer and is not definitely assigned in the constructor.

@@ -1,1 +1,3 @@
-error TS2300: Duplicate identifier 'bar'.
+classOverloadForFunction2.ts(1,10): error TS2391: Function implementation is missing or not immediately following the declaration.
+classOverloadForFunction2.ts(1,10): error TS2814: Function with bodies can only merge with classes that are ambient.
+classOverloadForFunction2.ts(2,7): error TS2813: Class declaration cannot implement overload list for 'bar'.

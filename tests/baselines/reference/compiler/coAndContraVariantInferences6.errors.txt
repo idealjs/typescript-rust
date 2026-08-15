@@ -1,1 +1,1 @@
-coAndContraVariantInferences6.ts(35,23): error TS2345: Argument of type '((props: { value: "A" | "B" }) => { type: any } | null) | object' is not assignable to parameter of type '((props: P) => { type: any } | null) | object | string'.
+coAndContraVariantInferences6.ts(34,42): error TS2322: Type '"C"' is not assignable to type '"A" | "B"'.

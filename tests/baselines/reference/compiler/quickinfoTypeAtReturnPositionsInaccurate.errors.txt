@@ -1,1 +1,2 @@
 quickinfoTypeAtReturnPositionsInaccurate.ts(33,15): error TS2339: Property 'numExclusive' does not exist on type 'NumClass<number> | StrClass<string>'.
+  Property 'numExclusive' does not exist on type 'StrClass<string>'.

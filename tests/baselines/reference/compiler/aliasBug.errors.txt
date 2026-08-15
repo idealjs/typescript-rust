@@ -1,2 +1,1 @@
-aliasBug.ts(12,13): error TS2304: Cannot find name 'provide'.
-aliasBug.ts(18,17): error TS2304: Cannot find name 'provide'.
+aliasBug.ts(16,15): error TS2694: Namespace 'foo.bar.baz' has no exported member 'bar'.

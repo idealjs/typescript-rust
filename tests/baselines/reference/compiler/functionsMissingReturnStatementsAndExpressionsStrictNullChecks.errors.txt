@@ -1,6 +1,8 @@
 functionsMissingReturnStatementsAndExpressionsStrictNullChecks.ts(5,17): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
 functionsMissingReturnStatementsAndExpressionsStrictNullChecks.ts(9,17): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
 functionsMissingReturnStatementsAndExpressionsStrictNullChecks.ts(21,7): error TS2322: Type '() => void' is not assignable to type '() => number'.
+  Type 'void' is not assignable to type 'number'.
 functionsMissingReturnStatementsAndExpressionsStrictNullChecks.ts(29,23): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
 functionsMissingReturnStatementsAndExpressionsStrictNullChecks.ts(33,23): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
 functionsMissingReturnStatementsAndExpressionsStrictNullChecks.ts(52,3): error TS2345: Argument of type '() => void' is not assignable to parameter of type '() => undefined'.
+  Type 'void' is not assignable to type 'undefined'.

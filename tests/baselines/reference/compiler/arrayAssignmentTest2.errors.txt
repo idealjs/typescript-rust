@@ -1,1 +1,13 @@
-arrayAssignmentTest2.ts(5,1): error TS2420: Class 'C1' incorrectly implements interface '{ IM1: () => void[] }'.
+arrayAssignmentTest2.ts(47,1): error TS2322: Type 'C2[]' is not assignable to type 'C3[]'.
+  Property 'CM3M1' is missing in type 'C2' but required in type 'C3'.
+arrayAssignmentTest2.ts(48,1): error TS2322: Type 'C1[]' is not assignable to type 'C3[]'.
+  Property 'CM3M1' is missing in type 'C1' but required in type 'C3'.
+arrayAssignmentTest2.ts(49,1): error TS2322: Type 'I1[]' is not assignable to type 'C3[]'.
+  Property 'CM3M1' is missing in type 'I1' but required in type 'C3'.
+arrayAssignmentTest2.ts(51,1): error TS2322: Type '() => C1' is not assignable to type 'any[]'.
+arrayAssignmentTest2.ts(52,1): error TS2322: Type '() => any' is not assignable to type 'any[]'.
+arrayAssignmentTest2.ts(53,1): error TS2740: Type '{ one: number; }' is missing the following properties from type 'any[]': length, pop, push, concat, and 25 more.
+arrayAssignmentTest2.ts(55,1): error TS2740: Type 'C1' is missing the following properties from type 'any[]': length, pop, push, concat, and 25 more.
+arrayAssignmentTest2.ts(56,1): error TS2740: Type 'C2' is missing the following properties from type 'any[]': length, pop, push, concat, and 25 more.
+arrayAssignmentTest2.ts(57,1): error TS2740: Type 'C3' is missing the following properties from type 'any[]': length, pop, push, concat, and 25 more.
+arrayAssignmentTest2.ts(58,1): error TS2740: Type 'I1' is missing the following properties from type 'any[]': length, pop, push, concat, and 25 more.

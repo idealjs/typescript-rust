@@ -1,2 +1,1 @@
-assignmentCompatability36.ts(9,11): error TS2339: Property '__val__aa' does not exist on type '__test2__'.
-assignmentCompatability36.ts(9,33): error TS2339: Property '__val__obj4' does not exist on type '__test1__'.
+assignmentCompatability36.ts(7,28): error TS2454: Variable 'aa' is used before being assigned.

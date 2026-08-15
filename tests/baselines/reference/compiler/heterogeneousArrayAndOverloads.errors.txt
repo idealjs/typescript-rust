@@ -1,1 +1,3 @@
 heterogeneousArrayAndOverloads.ts(9,26): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(arg1: number[]): any', gave the following error.
+    Type 'string' is not assignable to type 'number'.

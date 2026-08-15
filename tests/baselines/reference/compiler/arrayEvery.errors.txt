@@ -1,1 +1,0 @@
-arrayEvery.ts(6,10): error TS2339: Property 'slice' does not exist on type 'number | string'.

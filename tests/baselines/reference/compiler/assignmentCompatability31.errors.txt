@@ -1,2 +1,3 @@
-assignmentCompatability31.ts(9,11): error TS2339: Property '__val__aa' does not exist on type '__test2__'.
-assignmentCompatability31.ts(9,33): error TS2339: Property '__val__obj4' does not exist on type '__test1__'.
+assignmentCompatability31.ts(9,1): error TS2322: Type 'interfaceWithPublicAndOptional<number, string>' is not assignable to type '{ one: string[]; }'.
+  Types of property 'one' are incompatible.
+    Type 'number' is not assignable to type 'string[]'.

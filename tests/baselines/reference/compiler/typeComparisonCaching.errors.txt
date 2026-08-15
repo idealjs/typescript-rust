@@ -1,2 +1,6 @@
 typeComparisonCaching.ts(26,1): error TS2322: Type 'B' is not assignable to type 'A'.
+  Types of property 's' are incompatible.
+    Type 'number' is not assignable to type 'string'.
 typeComparisonCaching.ts(27,1): error TS2322: Type 'D' is not assignable to type 'C'.
+  The types of 'q.s' are incompatible between these types.
+    Type 'number' is not assignable to type 'string'.

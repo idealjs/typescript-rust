@@ -1,1 +1,1 @@
-avoidListingPropertiesForTypesWithOnlyCallOrConstructSignatures.ts(7,12): error TS2741: Property 'barkable' is missing in type '() => { barkable: true }' but required in type '{ barkable: true }'.
+avoidListingPropertiesForTypesWithOnlyCallOrConstructSignatures.ts(7,20): error TS2322: Type '() => Dog' is not assignable to type 'Dog'.

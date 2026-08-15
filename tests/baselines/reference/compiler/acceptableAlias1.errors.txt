@@ -1,4 +1,0 @@
-acceptableAlias1.ts(4,12): error TS1005: '{' expected.
-acceptableAlias1.ts(4,21): error TS1003: Identifier expected.
-acceptableAlias1.ts(4,24): error TS1003: Identifier expected.
-acceptableAlias1.ts(7,16): error TS1005: '}' expected.

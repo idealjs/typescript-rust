@@ -1,2 +1,0 @@
-error TS2300: Duplicate identifier 'Iterator'.
-classExtendingAbstractClassWithMemberCalledTheSameAsItsOwnTypeParam.ts(15,17): error TS2420: Class 'ConvenientObservable' incorrectly implements interface '{ get: () => T; TChange: error }'.

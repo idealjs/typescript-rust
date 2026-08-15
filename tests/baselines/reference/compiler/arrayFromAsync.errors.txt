@@ -1,2 +1,0 @@
-arrayFromAsync.ts(33,6): error TS2339: Property 'fromAsync' does not exist on type '(n: any) => void'.
-arrayFromAsync.ts(34,29): error TS2339: Property 'fromAsync' does not exist on type '(n: any) => void'.

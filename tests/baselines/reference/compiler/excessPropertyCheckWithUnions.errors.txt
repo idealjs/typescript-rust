@@ -1,13 +1,18 @@
 excessPropertyCheckWithUnions.ts(10,30): error TS2353: Object literal may only specify known properties, and 'a1' does not exist in type '{ tag: "T"; }'.
 excessPropertyCheckWithUnions.ts(11,21): error TS2353: Object literal may only specify known properties, and 'd20' does not exist in type '{ tag: "A"; a1: string; }'.
 excessPropertyCheckWithUnions.ts(12,1): error TS2322: Type '{ tag: "D"; }' is not assignable to type 'ADT'.
+  Property 'd20' is missing in type '{ tag: "D"; }' but required in type '{ tag: "D"; d20: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20; }'.
 excessPropertyCheckWithUnions.ts(33,28): error TS2353: Object literal may only specify known properties, and 'extra' does not exist in type '{ tag: "A"; x: string; } | { tag: "A"; y: number; }'.
 excessPropertyCheckWithUnions.ts(34,26): error TS2353: Object literal may only specify known properties, and 'extra' does not exist in type '{ tag: "A"; x: string; } | { tag: "A"; y: number; }'.
 excessPropertyCheckWithUnions.ts(37,1): error TS2322: Type '{ tag: "A"; }' is not assignable to type 'Ambiguous'.
+  Type '{ tag: "A"; }' is not assignable to type '{ tag: "A"; x: string; } | { tag: "A"; y: number; }'.
+    Property 'y' is missing in type '{ tag: "A"; }' but required in type '{ tag: "A"; y: number; }'.
 excessPropertyCheckWithUnions.ts(38,19): error TS2353: Object literal may only specify known properties, and 'z' does not exist in type '{ tag: "A"; x: string; } | { tag: "A"; y: number; }'.
 excessPropertyCheckWithUnions.ts(47,35): error TS2353: Object literal may only specify known properties, and 'second' does not exist in type '{ a: 1; b: 1; first: string; }'.
 excessPropertyCheckWithUnions.ts(48,35): error TS2353: Object literal may only specify known properties, and 'third' does not exist in type '{ a: 1; b: 1; first: string; }'.
 excessPropertyCheckWithUnions.ts(64,9): error TS2322: Type '{ kind: "A"; n: { a: string; b: string; }; }' is not assignable to type 'AB'.
+  Types of property 'n' are incompatible.
+    Object literal may only specify known properties, and 'b' does not exist in type 'AN'.
 excessPropertyCheckWithUnions.ts(85,5): error TS2353: Object literal may only specify known properties, and 'href' does not exist in type 'Button'.
 excessPropertyCheckWithUnions.ts(106,5): error TS2322: Type 'string' is not assignable to type 'IValue'.
 excessPropertyCheckWithUnions.ts(111,67): error TS2322: Type 'string' is not assignable to type 'number'.

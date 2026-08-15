@@ -1,2 +1,0 @@
-assertionFunctionsCanNarrowByDiscriminant.ts(18,8): error TS2339: Property 'canMeow' does not exist on type '{ type: "cat"; canMeow: true } | { type: "dog"; canBark: true }'.
-assertionFunctionsCanNarrowByDiscriminant.ts(23,15): error TS2339: Property 'canMeow' does not exist on type '{ type: "cat"; canMeow: true } | { type: "dog"; canBark: true } | undefined'.

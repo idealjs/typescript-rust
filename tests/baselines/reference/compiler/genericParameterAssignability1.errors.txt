@@ -1,1 +1,2 @@
 genericParameterAssignability1.ts(1,26): error TS2322: Type 'null' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'null'.

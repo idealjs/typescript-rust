@@ -1,2 +1,2 @@
-error TS2300: Duplicate identifier 'Foo'.
-error TS2300: Duplicate identifier 'Bar'.
+clinterfaces.ts(13,5): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+clinterfaces.ts(17,5): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.

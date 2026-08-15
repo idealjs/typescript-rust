@@ -3,4 +3,17 @@ unionTypeWithRecursiveSubtypeReduction2.ts(6,12): error TS2564: Property 'member
 unionTypeWithRecursiveSubtypeReduction2.ts(10,12): error TS2564: Property 'parent' has no initializer and is not definitely assigned in the constructor.
 unionTypeWithRecursiveSubtypeReduction2.ts(14,12): error TS2564: Property 'parent' has no initializer and is not definitely assigned in the constructor.
 unionTypeWithRecursiveSubtypeReduction2.ts(19,1): error TS2322: Type 'Property' is not assignable to type 'Class'.
+  Types of property 'parent' are incompatible.
+    Type 'Class | Module' is not assignable to type 'Namespace'.
+      Property 'members' is missing in type 'Class' but required in type 'Namespace'.
 unionTypeWithRecursiveSubtypeReduction2.ts(20,1): error TS2322: Type 'Class' is not assignable to type 'Property'.
+  Types of property 'parent' are incompatible.
+    Type 'Namespace' is not assignable to type 'Class | Module'.
+      Type 'Namespace' is not assignable to type 'Module'.
+        Types of property 'members' are incompatible.
+          Type '(Class | Property)[]' is not assignable to type 'Class[]'.
+            Type 'Class | Property' is not assignable to type 'Class'.
+              Type 'Property' is not assignable to type 'Class'.
+                Types of property 'parent' are incompatible.
+                  Type 'Class | Module' is not assignable to type 'Namespace'.
+                    Property 'members' is missing in type 'Class' but required in type 'Namespace'.

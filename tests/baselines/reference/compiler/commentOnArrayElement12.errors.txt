@@ -1,1 +1,0 @@
-commentOnArrayElement12.ts(3,5): error TS1012: Unexpected token.

@@ -58,3 +58,14 @@ compiler/classImplementsPrimitive.errors.txt
 compiler/classUpdateTests.errors.txt
 compiler/cloduleTest2.errors.txt
 compiler/capturedLetConstInLoop5_ES6.errors.txt
+
+## 2026-08-15 batch #41-#50: generic array-method instantiation
+## (3x TS2511 for `new cls()` inside .map callbacks requires generic
+## signature instantiation of Array#map) ##
+compiler/abstractClassUnionInstantiation.errors.txt
+
+## 2026-08-15 batch #41-#50: binary-file recovery order — TS1490 scanner
+## error no longer collected (recovery aborts before scanning the binary
+## run) and TS1012 fallbacks instead of TS1128 after `@` decorator garbage
+## (parseErrorForMissingSemicolonAfter recovery path partially ported) ##
+compiler/TransportStream.errors.txt

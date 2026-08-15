@@ -1,5 +1,0 @@
-classFieldSuperAccessible.ts(2,12): error TS1005: ';' expected.
-classFieldSuperAccessible.ts(3,16): error TS1005: ';' expected.
-classFieldSuperAccessible.ts(3,17): error TS1005: ';' expected.
-classFieldSuperAccessible.ts(3,26): error TS1005: ',' expected.
-classFieldSuperAccessible.ts(5,1): error TS1128: Declaration or statement expected.

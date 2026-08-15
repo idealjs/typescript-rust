@@ -1,2 +1,0 @@
-blockScopedEnumVariablesUseBeforeDef_preserve.ts(4,5): error TS7027: Unreachable code detected.
-blockScopedEnumVariablesUseBeforeDef_preserve.ts(9,11): error TS7027: Unreachable code detected.

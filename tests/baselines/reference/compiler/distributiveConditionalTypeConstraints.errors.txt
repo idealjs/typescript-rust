@@ -1,6 +1,9 @@
 distributiveConditionalTypeConstraints.ts(4,9): error TS2322: Type 'boolean' is not assignable to type 'true'.
 distributiveConditionalTypeConstraints.ts(5,9): error TS2322: Type 'boolean' is not assignable to type 'false'.
 distributiveConditionalTypeConstraints.ts(10,9): error TS2322: Type 'IsArray<T>' is not assignable to type 'false'.
+  Type 'true' is not assignable to type 'false'.
 distributiveConditionalTypeConstraints.ts(15,9): error TS2322: Type 'IsArray<T>' is not assignable to type 'false'.
+  Type 'true' is not assignable to type 'false'.
 distributiveConditionalTypeConstraints.ts(19,9): error TS2322: Type 'IsArray<T>' is not assignable to type 'true'.
+  Type 'false' is not assignable to type 'true'.
 distributiveConditionalTypeConstraints.ts(38,9): error TS2322: Type 'boolean' is not assignable to type 'false'.

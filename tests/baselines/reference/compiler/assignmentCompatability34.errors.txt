@@ -1,2 +1,2 @@
-assignmentCompatability34.ts(9,11): error TS2339: Property '__val__obj' does not exist on type '__test2__'.
-assignmentCompatability34.ts(9,34): error TS2339: Property '__val__obj4' does not exist on type '__test1__'.
+assignmentCompatability34.ts(9,1): error TS2322: Type 'interfaceWithPublicAndOptional<number, string>' is not assignable to type '<Tnumber>(a: Tnumber) => Tnumber'.
+  Type 'interfaceWithPublicAndOptional<number, string>' provides no match for the signature '<Tnumber>(a: Tnumber): Tnumber'.

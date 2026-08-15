@@ -1,1 +1,2 @@
 compositeGenericFunction.ts(3,44): error TS2322: Type 'null' is not assignable to type 'R'.
+  'R' could be instantiated with an arbitrary type which could be unrelated to 'null'.

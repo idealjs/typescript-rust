@@ -1,7 +1,2 @@
-ParameterList6.ts(2,19): error TS2304: Cannot find name 'public'.
-ParameterList6.ts(2,26): error TS1005: ')' expected.
-ParameterList6.ts(2,29): error TS1005: ';' expected.
-ParameterList6.ts(2,32): error TS1005: ';' expected.
-ParameterList6.ts(2,35): error TS1005: ';' expected.
-ParameterList6.ts(2,37): error TS1005: ';' expected.
-ParameterList6.ts(4,1): error TS1128: Declaration or statement expected.
+ParameterList6.ts(2,19): error TS2369: A parameter property is only allowed in a constructor implementation.
+ParameterList6.ts(2,19): error TS7006: Parameter 'A' implicitly has an 'any' type.

@@ -1,1 +1,0 @@
-collisionThisExpressionAndNameResolution.ts(8,21): error TS2339: Property 'log' does not exist on type 'object'.

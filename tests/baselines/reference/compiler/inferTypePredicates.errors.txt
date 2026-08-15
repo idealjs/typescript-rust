@@ -1,11 +1,21 @@
 inferTypePredicates.ts(4,7): error TS2322: Type '(number | null)[]' is not assignable to type 'number[]'.
+  Type 'number | null' is not assignable to type 'number'.
+    Type 'null' is not assignable to type 'number'.
 inferTypePredicates.ts(7,7): error TS2322: Type '(number | null)[]' is not assignable to type 'number[]'.
+  Type 'number | null' is not assignable to type 'number'.
+    Type 'null' is not assignable to type 'number'.
 inferTypePredicates.ts(14,7): error TS2322: Type '(number | null)[]' is not assignable to type 'number[]'.
+  Type 'number | null' is not assignable to type 'number'.
+    Type 'null' is not assignable to type 'number'.
 inferTypePredicates.ts(52,17): error TS18048: 'arr' is possibly 'undefined'.
 inferTypePredicates.ts(54,28): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
 inferTypePredicates.ts(65,28): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
 inferTypePredicates.ts(90,8): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
 inferTypePredicates.ts(113,7): error TS2322: Type 'string | number' is not assignable to type 'string'.
+  Type 'number' is not assignable to type 'string'.
 inferTypePredicates.ts(115,7): error TS2322: Type 'string | number' is not assignable to type 'number'.
+  Type 'string' is not assignable to type 'number'.
 inferTypePredicates.ts(133,7): error TS2740: Type '{}' is missing the following properties from type 'Date': toDateString, toTimeString, toLocaleDateString, toLocaleTimeString, and 38 more.
 inferTypePredicates.ts(205,7): error TS2741: Property 'z' is missing in type 'C1' but required in type 'C2'.

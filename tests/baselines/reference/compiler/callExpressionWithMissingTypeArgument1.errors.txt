@@ -1,7 +1,4 @@
 callExpressionWithMissingTypeArgument1.ts(1,1): error TS2304: Cannot find name 'Foo'.
 callExpressionWithMissingTypeArgument1.ts(1,5): error TS2304: Cannot find name 'a'.
-callExpressionWithMissingTypeArgument1.ts(1,7): error TS1012: Unexpected token.
-callExpressionWithMissingTypeArgument1.ts(1,8): error TS1005: ';' expected.
+callExpressionWithMissingTypeArgument1.ts(1,7): error TS1110: Type expected.
 callExpressionWithMissingTypeArgument1.ts(1,8): error TS2304: Cannot find name 'b'.
-callExpressionWithMissingTypeArgument1.ts(1,11): error TS1012: Unexpected token.
-callExpressionWithMissingTypeArgument1.ts(1,12): error TS1005: ')' expected.

@@ -1,2 +1,6 @@
 overloadOnConstNoStringImplementation2.ts(18,9): error TS2345: Argument of type '(x: "bye") => number' is not assignable to parameter of type '(x: "hi") => number'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type '"hi"' is not assignable to type '"bye"'.
 overloadOnConstNoStringImplementation2.ts(20,9): error TS2345: Argument of type '(x: number) => number' is not assignable to parameter of type '(x: "hi") => number'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'string' is not assignable to type 'number'.

@@ -1,3 +1,1 @@
-aliasUsageInObjectLiteral_main.ts(6,37): error TS2304: Cannot find name 'moduleA'.
-aliasUsageInObjectLiteral_main.ts(7,45): error TS2304: Cannot find name 'moduleA'.
-aliasUsageInObjectLiteral_main.ts(8,57): error TS2304: Cannot find name 'moduleA'.
+aliasUsageInObjectLiteral_backbone.ts(2,12): error TS2564: Property 'someData' has no initializer and is not definitely assigned in the constructor.

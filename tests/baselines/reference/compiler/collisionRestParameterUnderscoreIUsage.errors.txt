@@ -1,1 +1,0 @@
-collisionRestParameterUnderscoreIUsage.ts(5,17): error TS2339: Property 'log' does not exist on type 'object'.

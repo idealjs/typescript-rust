@@ -1,5 +1,11 @@
 interfaceClassMerging.ts(9,5): error TS2564: Property 'additionalProperty' has no initializer and is not definitely assigned in the constructor.
 interfaceClassMerging.ts(17,5): error TS2416: Property 'method' in type 'Bar' is not assignable to the same property in base type 'Foo'.
+  Type '(a: number) => string | undefined' is not assignable to type '(a: number) => string'.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
 interfaceClassMerging.ts(25,1): error TS2722: Cannot invoke an object which is possibly 'undefined'.
 interfaceClassMerging.ts(38,7): error TS2454: Variable 'obj' is used before being assigned.
 interfaceClassMerging.ts(39,1): error TS2322: Type 'Bar' is not assignable to type '{ method(a: number): string; property: string; additionalProperty: string; additionalMethod(a: number): string; }'.
+  The types returned by 'method(...)' are incompatible between these types.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.

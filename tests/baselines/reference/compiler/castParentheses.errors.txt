@@ -1,3 +1,0 @@
-castParentheses.ts(8,17): error TS2339: Property 'b' does not exist on type 'object'.
-castParentheses.ts(9,17): error TS2339: Property 'b' does not exist on type 'object'.
-castParentheses.ts(11,21): error TS2339: Property 'b' does not exist on type 'object'.

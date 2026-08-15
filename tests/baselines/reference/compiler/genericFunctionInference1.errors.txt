@@ -1,1 +1,2 @@
 genericFunctionInference1.ts(135,14): error TS2345: Argument of type '<a>(value: { key: a; }) => a' is not assignable to parameter of type '(value: Data) => string'.
+  Type 'number' is not assignable to type 'string'.

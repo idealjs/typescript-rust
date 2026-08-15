@@ -1,7 +1,1 @@
-classExpressionWithDecorator1.ts(1,9): error TS1012: Unexpected token.
-classExpressionWithDecorator1.ts(1,10): error TS1005: ',' expected.
-classExpressionWithDecorator1.ts(1,19): error TS1005: ',' expected.
-classExpressionWithDecorator1.ts(1,25): error TS1005: ',' expected.
-classExpressionWithDecorator1.ts(1,27): error TS1005: ',' expected.
-classExpressionWithDecorator1.ts(1,27): error TS1182: A destructuring declaration must have an initializer.
-classExpressionWithDecorator1.ts(1,36): error TS1005: ',' expected.
+classExpressionWithDecorator1.ts(1,9): error TS1206: Decorators are not valid here.

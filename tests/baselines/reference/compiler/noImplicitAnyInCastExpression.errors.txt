@@ -1,3 +1,7 @@
 noImplicitAnyInCastExpression.ts(9,2): error TS2352: Conversion of type '{ a: null; }' to type 'IFoo' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'b' is missing in type '{ a: null; }' but required in type 'IFoo'.
 noImplicitAnyInCastExpression.ts(12,2): error TS2352: Conversion of type '{ a: number; b: undefined; }' to type 'IFoo' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'b' are incompatible.
+    Type 'undefined' is not comparable to type 'string'.
 noImplicitAnyInCastExpression.ts(15,2): error TS2352: Conversion of type '{ c: null; }' to type 'IFoo' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ c: null; }' is missing the following properties from type 'IFoo': a, b

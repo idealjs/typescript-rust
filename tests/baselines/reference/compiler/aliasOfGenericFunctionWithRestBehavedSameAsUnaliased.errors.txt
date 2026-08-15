@@ -1,2 +1,0 @@
-aliasOfGenericFunctionWithRestBehavedSameAsUnaliased.ts(7,5): error TS2322: Type 'string' is not assignable to type '"n"'.
-aliasOfGenericFunctionWithRestBehavedSameAsUnaliased.ts(17,5): error TS2322: Type 'string' is not assignable to type '"n"'.

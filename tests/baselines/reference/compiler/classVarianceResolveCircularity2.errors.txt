@@ -1,2 +1,0 @@
-classVarianceResolveCircularity2.ts(8,24): error TS2448: Block-scoped variable 'Foo' used before its declaration.
-classVarianceResolveCircularity2.ts(9,32): error TS2448: Block-scoped variable 'Foo' used before its declaration.

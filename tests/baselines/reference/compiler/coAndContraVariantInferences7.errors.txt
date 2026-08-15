@@ -1,2 +1,0 @@
-coAndContraVariantInferences7.ts(16,7): error TS2345: Argument of type '{ pre: (_: { query: unknown; body: unknown }) => void; schema: { query: "" }; handle: (req: { query: unknown }) => void }' is not assignable to parameter of type '{ pre: (a: TSchema) => void; schema: TSchema; handle: (req: { query: unknown }) => void }'.
-coAndContraVariantInferences7.ts(22,11): error TS2322: Type 'unknown' is not assignable to type 'string'.

@@ -1,3 +1,4 @@
 privateInterfaceProperties.ts(4,7): error TS2420: Class 'c1' incorrectly implements interface 'i1'.
+  Property 'name' is private in type 'c1' but not in type 'i1'.
 privateInterfaceProperties.ts(4,34): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
 privateInterfaceProperties.ts(7,33): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.

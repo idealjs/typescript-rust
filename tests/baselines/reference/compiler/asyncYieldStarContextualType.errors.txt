@@ -1,4 +1,0 @@
-asyncYieldStarContextualType.ts(13,33): error TS2304: Cannot find name 'AsyncGenerator'.
-asyncYieldStarContextualType.ts(15,22): error TS2304: Cannot find name 'AsyncGenerator'.
-asyncYieldStarContextualType.ts(18,39): error TS2339: Property 'then' does not exist on type 'object'.
-asyncYieldStarContextualType.ts(23,46): error TS2339: Property 'then' does not exist on type 'object'.

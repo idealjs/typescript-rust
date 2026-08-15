@@ -1,3 +1,7 @@
-bluebirdStaticThis.ts(130,19): error TS2339: Property 'try' does not exist on type 'Promise'.
-bluebirdStaticThis.ts(133,19): error TS2339: Property 'try' does not exist on type 'Promise'.
-bluebirdStaticThis.ts(136,19): error TS2339: Property 'try' does not exist on type 'Promise'.
+bluebirdStaticThis.ts(5,22): error TS2420: Class 'Promise<R>' incorrectly implements interface 'Thenable<R>'.
+  Property 'then' is missing in type 'Promise<R>' but required in type 'Thenable<R>'.
+bluebirdStaticThis.ts(22,51): error TS2694: Namespace '"bluebirdStaticThis".Promise' has no exported member 'Resolver'.
+bluebirdStaticThis.ts(57,109): error TS2694: Namespace '"bluebirdStaticThis".Promise' has no exported member 'Inspection'.
+bluebirdStaticThis.ts(58,91): error TS2694: Namespace '"bluebirdStaticThis".Promise' has no exported member 'Inspection'.
+bluebirdStaticThis.ts(59,91): error TS2694: Namespace '"bluebirdStaticThis".Promise' has no exported member 'Inspection'.
+bluebirdStaticThis.ts(60,73): error TS2694: Namespace '"bluebirdStaticThis".Promise' has no exported member 'Inspection'.

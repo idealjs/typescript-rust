@@ -1,3 +1,6 @@
-assigningFromObjectToAnythingElse.ts(5,39): error TS2345: Argument of type '""' is not assignable to parameter of type 'object | null'.
-assigningFromObjectToAnythingElse.ts(6,39): error TS2345: Argument of type '1' is not assignable to parameter of type 'object | null'.
-assigningFromObjectToAnythingElse.ts(8,5): error TS2739: Type '{ constructor: { apply: (this: error, thisArg: any, argArray: any) => any; call: (this: error, thisArg: any, argArray: any[]) => any; bind: (this: error, thisArg: any, argArray: any[]) => any; toString: () => string; prototype: any; length: number; arguments: any; caller: error }; toString: () => string; toLocaleString: () => string; valueOf: () => error; hasOwnProperty: (v: string | number | symbol) => boolean; isPrototypeOf: (v: error) => boolean; propertyIsEnumerable: (v: string | number | symbol) => boolean }' is missing the following properties from type '{ name: string; message: string; stack?: string | undefined }': name, message
+assigningFromObjectToAnythingElse.ts(3,1): error TS2696: The 'Object' type is assignable to very few other types. Did you mean to use the 'any' type instead?
+  Type 'Object' is missing the following properties from type 'RegExp': exec, test, source, global, and 11 more.
+assigningFromObjectToAnythingElse.ts(5,31): error TS2558: Expected 0 type arguments, but got 1.
+assigningFromObjectToAnythingElse.ts(6,31): error TS2558: Expected 0 type arguments, but got 1.
+assigningFromObjectToAnythingElse.ts(8,5): error TS2696: The 'Object' type is assignable to very few other types. Did you mean to use the 'any' type instead?
+  Type 'Object' is missing the following properties from type 'Error': name, message

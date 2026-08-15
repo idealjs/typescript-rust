@@ -1,2 +1,22 @@
 styledComponentsInstantiaionLimitNotReached.ts(172,39): error TS2344: Type 'WithC' does not satisfy the constraint 'ComponentType<any>'.
+  Type 'AnyStyledComponent' is not assignable to type 'ComponentType<any>'.
+    Type 'StyledComponent<any, any, any, any>' is not assignable to type 'ComponentType<any>'.
+      Type 'StyledComponent<any, any, any, any>' is not assignable to type 'StatelessComponent<any>'.
+        Types of property 'propTypes' are incompatible.
+          Type 'WeakValidationMap<Omit<Omit<any, any> & Partial<Pick<any, any>>, "theme"> & ({ theme?: any; } | ({ theme?: any; } & { children?: ReactNode; }))> | undefined' is not assignable to type 'ValidationMap<any> | undefined'.
+            Type 'WeakValidationMap<Omit<Omit<any, any> & Partial<Pick<any, any>>, "theme"> & { theme?: any; }>' is not assignable to type 'ValidationMap<any>'.
+              'string' index signatures are incompatible.
+                Type 'Validator<any> | undefined' is not assignable to type 'Validator<any>'.
+                  Type 'undefined' is not assignable to type 'Validator<any>'.
+                    Type 'WithC' is not assignable to type 'StatelessComponent<any>'.
+                      Type 'AnyStyledComponent' is not assignable to type 'StatelessComponent<any>'.
+                        Type 'StyledComponent<any, any, any, any>' is not assignable to type 'StatelessComponent<any>'.
+                          Types of property 'propTypes' are incompatible.
+                            Type 'WeakValidationMap<Omit<Omit<any, any> & Partial<Pick<any, any>>, "theme"> & ({ theme?: any; } | ({ theme?: any; } & { children?: ReactNode; }))> | undefined' is not assignable to type 'ValidationMap<any> | undefined'.
+                              Type 'WeakValidationMap<Omit<Omit<any, any> & Partial<Pick<any, any>>, "theme"> & { theme?: any; }>' is not assignable to type 'ValidationMap<any>'.
+                                'string' index signatures are incompatible.
+                                  Type 'Validator<any> | undefined' is not assignable to type 'Validator<any>'.
+                                    Type 'undefined' is not assignable to type 'Validator<any>'.
 styledComponentsInstantiaionLimitNotReached.ts(195,65): error TS2344: Type 'AnyStyledComponent & C' does not satisfy the constraint 'ComponentType<any>'.
+  Type 'string & StyledComponentBase<any, any, any, any> & NonReactStatics<any, {}> & C' is not assignable to type 'ComponentType<any>'.
+    Type 'string & StyledComponentBase<any, any, any, any> & NonReactStatics<any, {}> & C' is not assignable to type 'StatelessComponent<any>'.

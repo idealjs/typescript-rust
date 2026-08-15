@@ -1,1 +1,3 @@
-baseIndexSignatureResolution.ts(11,5): error TS2322: Type 'null' is not assignable to type 'object'.
+baseIndexSignatureResolution.ts(1,22): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+baseIndexSignatureResolution.ts(2,38): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+baseIndexSignatureResolution.ts(11,5): error TS2322: Type 'null' is not assignable to type 'FooOf<Derived>'.

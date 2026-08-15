@@ -1,5 +1,6 @@
 optionalPropertiesInClasses.ts(7,9): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
 optionalPropertiesInClasses.ts(10,7): error TS2420: Class 'C2' incorrectly implements interface 'ifoo'.
+  Property 'y' is missing in type 'C2' but required in type 'ifoo'.
 optionalPropertiesInClasses.ts(11,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 optionalPropertiesInClasses.ts(15,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 optionalPropertiesInClasses.ts(16,9): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.

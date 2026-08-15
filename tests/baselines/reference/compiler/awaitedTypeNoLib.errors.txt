@@ -1,3 +1,29 @@
-awaitedTypeNoLib.ts(14,24): error TS2304: Cannot find name 'TResult'.
-awaitedTypeNoLib.ts(15,23): error TS2304: Cannot find name 'TResult'.
-awaitedTypeNoLib.ts(25,23): error TS2304: Cannot find name 'TResult'.
+error TS2318: Cannot find global type 'Array'.
+error TS2318: Cannot find global type 'Awaited'.
+error TS2318: Cannot find global type 'Boolean'.
+error TS2318: Cannot find global type 'CallableFunction'.
+error TS2318: Cannot find global type 'Function'.
+error TS2318: Cannot find global type 'IArguments'.
+error TS2318: Cannot find global type 'NewableFunction'.
+error TS2318: Cannot find global type 'Number'.
+error TS2318: Cannot find global type 'Object'.
+error TS2318: Cannot find global type 'RegExp'.
+error TS2318: Cannot find global type 'String'.
+awaitedTypeNoLib.ts(3,15): error TS2304: Cannot find name 'PromiseLike'.
+awaitedTypeNoLib.ts(18,27): error TS2345: Argument of type 'Thenable<NotPromise<TResult>> | NotPromise<TResult>' is not assignable to parameter of type 'Thenable<TResult>'.
+  Type 'NotPromise<TResult>' is not assignable to type 'Thenable<TResult>'.
+    Type 'TResult | (TResult extends PromiseLike<unknown> ? never : TResult)' is not assignable to type 'Thenable<TResult>'.
+      Type 'Thenable<unknown> & TResult' is not assignable to type 'Thenable<TResult>'.
+        Type 'unknown' is not assignable to type 'TResult'.
+          'TResult' could be instantiated with an arbitrary type which could be unrelated to 'unknown'.
+!!! error TS2318: Cannot find global type 'Array'.
+!!! error TS2318: Cannot find global type 'Awaited'.
+!!! error TS2318: Cannot find global type 'Boolean'.
+!!! error TS2318: Cannot find global type 'CallableFunction'.
+!!! error TS2318: Cannot find global type 'Function'.
+!!! error TS2318: Cannot find global type 'IArguments'.
+!!! error TS2318: Cannot find global type 'NewableFunction'.
+!!! error TS2318: Cannot find global type 'Number'.
+!!! error TS2318: Cannot find global type 'Object'.
+!!! error TS2318: Cannot find global type 'RegExp'.
+!!! error TS2318: Cannot find global type 'String'.

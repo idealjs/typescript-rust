@@ -1,12 +1,19 @@
 conditionalTypeDoesntSpinForever.ts(23,15): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.
 conditionalTypeDoesntSpinForever.ts(24,20): error TS2322: Type 'undefined' is not assignable to type 'TYPE'.
+  'TYPE' could be instantiated with an arbitrary type which could be unrelated to 'undefined'.
 conditionalTypeDoesntSpinForever.ts(36,19): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.
 conditionalTypeDoesntSpinForever.ts(53,21): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.
 conditionalTypeDoesntSpinForever.ts(53,45): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.
 conditionalTypeDoesntSpinForever.ts(54,26): error TS2322: Type 'undefined' is not assignable to type 'TYPE'.
+  'TYPE' could be instantiated with an arbitrary type which could be unrelated to 'undefined'.
 conditionalTypeDoesntSpinForever.ts(65,17): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.
 conditionalTypeDoesntSpinForever.ts(66,22): error TS2322: Type 'undefined' is not assignable to type 'TYPE'.
+  'TYPE' could be instantiated with an arbitrary type which could be unrelated to 'undefined'.
 conditionalTypeDoesntSpinForever.ts(78,38): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.
 conditionalTypeDoesntSpinForever.ts(94,21): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.
 conditionalTypeDoesntSpinForever.ts(96,41): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(o: {}): string[]', gave the following error.
+    Argument of type 'SO_FAR' is not assignable to parameter of type '{}'.
+  Overload 2 of 2, '(o: object): string[]', gave the following error.
+    Argument of type 'SO_FAR' is not assignable to parameter of type 'object'.
 conditionalTypeDoesntSpinForever.ts(97,71): error TS2322: Type 'SO_FAR' is not assignable to type 'object'.

@@ -1,6 +1,4 @@
-awaitedType.ts(170,47): error TS2349: This expression is not callable.
-awaitedType.ts(174,31): error TS2345: Argument of type '() => number' is not assignable to parameter of type '(args: any[]) => object'.
-awaitedType.ts(183,7): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
-awaitedType.ts(225,40): error TS2345: Argument of type 'object' is not assignable to parameter of type '{ select: string; include: string }'.
-awaitedType.ts(226,41): error TS2345: Argument of type '{ select: "foo" }' is not assignable to parameter of type '{ select: string; include: string }'.
-awaitedType.ts(227,41): error TS2345: Argument of type '{ include: "bar" }' is not assignable to parameter of type '{ select: string; include: string }'.
+awaitedType.ts(22,12): error TS2589: Type instantiation is excessively deep and possibly infinite.
+awaitedType.ts(26,12): error TS2589: Type instantiation is excessively deep and possibly infinite.
+awaitedType.ts(29,22): error TS7010: 'then', which lacks return-type annotation, implicitly has an 'any' return type.
+awaitedType.ts(236,28): error TS2493: Tuple type '[number]' of length '1' has no element at index '1'.

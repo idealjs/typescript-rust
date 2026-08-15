@@ -1,1 +1,8 @@
 /index.ts(7,7): error TS2322: Type '{ default: { configs: { 'stage-0': PluginConfig; }; }; configs: { 'stage-0': PluginConfig; }; }' is not assignable to type 'Plugin'.
+  Types of property 'configs' are incompatible.
+    Type '{ 'stage-0': PluginConfig; }' is not assignable to type 'Record<string, { parser: string | null; }>'.
+      Property ''stage-0'' is incompatible with index signature.
+        Type 'PluginConfig' is not assignable to type '{ parser: string | null; }'.
+          Types of property 'parser' are incompatible.
+            Type 'string | null | undefined' is not assignable to type 'string | null'.
+              Type 'undefined' is not assignable to type 'string | null'.

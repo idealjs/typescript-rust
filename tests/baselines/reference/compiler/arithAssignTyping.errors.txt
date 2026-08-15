@@ -1,2 +1,12 @@
-arithAssignTyping.ts(13,6): error TS1012: Unexpected token.
-arithAssignTyping.ts(13,8): error TS1005: ';' expected.
+arithAssignTyping.ts(3,1): error TS2629: Cannot assign to 'f' because it is a class.
+arithAssignTyping.ts(4,1): error TS2629: Cannot assign to 'f' because it is a class.
+arithAssignTyping.ts(5,1): error TS2629: Cannot assign to 'f' because it is a class.
+arithAssignTyping.ts(6,1): error TS2629: Cannot assign to 'f' because it is a class.
+arithAssignTyping.ts(7,1): error TS2629: Cannot assign to 'f' because it is a class.
+arithAssignTyping.ts(8,1): error TS2629: Cannot assign to 'f' because it is a class.
+arithAssignTyping.ts(9,1): error TS2629: Cannot assign to 'f' because it is a class.
+arithAssignTyping.ts(10,1): error TS2629: Cannot assign to 'f' because it is a class.
+arithAssignTyping.ts(11,1): error TS2629: Cannot assign to 'f' because it is a class.
+arithAssignTyping.ts(12,1): error TS2629: Cannot assign to 'f' because it is a class.
+arithAssignTyping.ts(13,1): error TS2629: Cannot assign to 'f' because it is a class.
+arithAssignTyping.ts(14,1): error TS2629: Cannot assign to 'f' because it is a class.

@@ -1,24 +1,9 @@
-classImplementsPrimitive.ts(3,20): error TS1109: Expression expected.
-classImplementsPrimitive.ts(4,1): error TS1005: ',' expected.
-classImplementsPrimitive.ts(4,21): error TS1109: Expression expected.
-classImplementsPrimitive.ts(5,1): error TS1005: ',' expected.
-classImplementsPrimitive.ts(5,21): error TS1109: Expression expected.
-classImplementsPrimitive.ts(7,1): error TS1005: ',' expected.
-classImplementsPrimitive.ts(7,10): error TS1005: ',' expected.
-classImplementsPrimitive.ts(7,29): error TS1109: Expression expected.
-classImplementsPrimitive.ts(8,1): error TS1005: ',' expected.
-classImplementsPrimitive.ts(8,10): error TS1005: ',' expected.
-classImplementsPrimitive.ts(8,29): error TS1109: Expression expected.
-classImplementsPrimitive.ts(9,1): error TS1005: ',' expected.
-classImplementsPrimitive.ts(9,10): error TS1005: ',' expected.
-classImplementsPrimitive.ts(9,29): error TS1109: Expression expected.
-classImplementsPrimitive.ts(11,1): error TS1005: ',' expected.
-classImplementsPrimitive.ts(11,10): error TS1005: ',' expected.
-classImplementsPrimitive.ts(11,31): error TS1109: Expression expected.
-classImplementsPrimitive.ts(12,1): error TS1005: ',' expected.
-classImplementsPrimitive.ts(12,10): error TS1005: ',' expected.
-classImplementsPrimitive.ts(12,31): error TS1109: Expression expected.
-classImplementsPrimitive.ts(13,1): error TS1005: ',' expected.
-classImplementsPrimitive.ts(13,10): error TS1005: ',' expected.
-classImplementsPrimitive.ts(13,31): error TS1109: Expression expected.
-classImplementsPrimitive.ts(14,1): error TS1005: '{' expected.
+classImplementsPrimitive.ts(3,20): error TS2864: A class cannot implement a primitive type like 'number'. It can only implement other named object types.
+classImplementsPrimitive.ts(4,21): error TS2864: A class cannot implement a primitive type like 'string'. It can only implement other named object types.
+classImplementsPrimitive.ts(5,21): error TS2864: A class cannot implement a primitive type like 'boolean'. It can only implement other named object types.
+classImplementsPrimitive.ts(7,29): error TS2864: A class cannot implement a primitive type like 'number'. It can only implement other named object types.
+classImplementsPrimitive.ts(8,29): error TS2864: A class cannot implement a primitive type like 'string'. It can only implement other named object types.
+classImplementsPrimitive.ts(9,29): error TS2864: A class cannot implement a primitive type like 'boolean'. It can only implement other named object types.
+classImplementsPrimitive.ts(11,31): error TS2864: A class cannot implement a primitive type like 'number'. It can only implement other named object types.
+classImplementsPrimitive.ts(12,31): error TS2864: A class cannot implement a primitive type like 'string'. It can only implement other named object types.
+classImplementsPrimitive.ts(13,31): error TS2864: A class cannot implement a primitive type like 'boolean'. It can only implement other named object types.

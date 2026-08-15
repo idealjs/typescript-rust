@@ -35,6 +35,7 @@ DIAG_RE = re.compile(r"^\S+\(\d+,\d+\): error TS\d+: ")
 
 
 def main() -> None:
+    force = "--force" in sys.argv
     dry = "--dry" in sys.argv
     cases = sorted(
         str(p.relative_to(CASES_DIR))
@@ -45,12 +46,18 @@ def main() -> None:
     for rel in cases:
         stem = Path(rel).stem
         ours = OURS / f"{stem}.errors.txt"
-        if ours.exists():
-            kept += 1
-            continue
         official = OFFICIAL / f"{stem}.errors.txt"
         if not official.is_file():
-            no_official += 1
+            # No official baseline → the official expectation is ZERO errors;
+            # with --force remove any stale port-authored reference.
+            if force and ours.exists():
+                if not dry:
+                    ours.unlink()
+                created += 1
+            elif ours.exists():
+                kept += 1
+            else:
+                no_official += 1
             continue
         text = official.read_text(encoding="utf-8-sig", errors="replace")
         lines = [
@@ -59,17 +66,19 @@ def main() -> None:
             if DIAG_RE.match(line)
         ]
         if not lines:
-            # Official file exists but holds no parseable error lines (e.g. a
-            # baseline for a runner mode we don't model). Treat as no-errors.
             no_official += 1
+            continue
+        content = "\n".join(lines) + "\n"
+        if ours.exists() and (not force or ours.read_text(encoding="utf-8", errors="replace") == content):
+            kept += 1
             continue
         if not dry:
             OURS.mkdir(parents=True, exist_ok=True)
-            ours.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            ours.write_text(content, encoding="utf-8")
         created += 1
     print(
-        f"{len(cases)} cases: {created} refs seeded, {kept} refs kept, "
-        f"{no_official} with no official errors baseline"
+        f"{len(cases)} cases: {created} refs {'overwritten' if force else 'seeded'}, "
+        f"{kept} refs already official-exact, {no_official} with no official errors baseline"
     )
 
 

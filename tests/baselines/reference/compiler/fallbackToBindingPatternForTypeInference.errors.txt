@@ -1,5 +1,15 @@
 fallbackToBindingPatternForTypeInference.ts(2,7): error TS2345: Argument of type '({ a }: { a: any; }) => any' is not assignable to parameter of type '(x: unknown) => string'.
+  Types of parameters '__0' and 'x' are incompatible.
+    Type 'unknown' is not assignable to type '{ a: any; }'.
 fallbackToBindingPatternForTypeInference.ts(3,7): error TS2345: Argument of type '([b, c]: [any, any]) => string' is not assignable to parameter of type '(x: unknown) => string'.
+  Types of parameters '__0' and 'x' are incompatible.
+    Type 'unknown' is not assignable to type '[any, any]'.
 fallbackToBindingPatternForTypeInference.ts(4,7): error TS2345: Argument of type '({ d: [e, f] }: { d: [any, any]; }) => string' is not assignable to parameter of type '(x: unknown) => string'.
+  Types of parameters '__0' and 'x' are incompatible.
+    Type 'unknown' is not assignable to type '{ d: [any, any]; }'.
 fallbackToBindingPatternForTypeInference.ts(5,7): error TS2345: Argument of type '([{ g }, { h }]: [{ g: any; }, { h: any; }]) => string' is not assignable to parameter of type '(x: unknown) => string'.
+  Types of parameters '__0' and 'x' are incompatible.
+    Type 'unknown' is not assignable to type '[{ g: any; }, { h: any; }]'.
 fallbackToBindingPatternForTypeInference.ts(6,7): error TS2345: Argument of type '({ a, b }: { a: any; b?: number | undefined; }) => any' is not assignable to parameter of type '(x: unknown) => string'.
+  Types of parameters '__0' and 'x' are incompatible.
+    Type 'unknown' is not assignable to type '{ a: any; b?: number | undefined; }'.

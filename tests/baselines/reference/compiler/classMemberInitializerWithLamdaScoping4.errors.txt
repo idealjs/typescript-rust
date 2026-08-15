@@ -1,1 +1,1 @@
-classMemberInitializerWithLamdaScoping3_1.ts(8,17): error TS2339: Property 'log' does not exist on type 'object'.
+classMemberInitializerWithLamdaScoping3_1.ts(8,21): error TS2663: Cannot find name 'field1'. Did you mean the instance member 'this.field1'?

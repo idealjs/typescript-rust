@@ -1,8 +1,0 @@
-error TS2300: Duplicate identifier 'c'.
-error TS2300: Duplicate identifier 'c'.
-commentsModules.ts(46,5): error TS2304: Cannot find name 'm2'.
-commentsModules.ts(53,5): error TS2304: Cannot find name 'm3'.
-commentsModules.ts(62,5): error TS2304: Cannot find name 'm4'.
-commentsModules.ts(72,5): error TS2304: Cannot find name 'm5'.
-commentsModules.ts(80,5): error TS2304: Cannot find name 'm6'.
-commentsModules.ts(97,5): error TS2304: Cannot find name 'm7'.

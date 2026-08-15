@@ -1,1 +1,0 @@
-cloduleTest1.ts(10,15): error TS2349: This expression is not callable.

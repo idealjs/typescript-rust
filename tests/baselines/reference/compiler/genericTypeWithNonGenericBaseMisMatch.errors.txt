@@ -1,2 +1,12 @@
 genericTypeWithNonGenericBaseMisMatch.ts(5,2): error TS2416: Property 'f' in type 'X<T>' is not assignable to the same property in base type 'I'.
+  Type '(a: T) => void' is not assignable to type '(a: { a: number; }) => void'.
+    Types of parameters 'a' and 'a' are incompatible.
+      Type '{ a: number; }' is not assignable to type 'T'.
+        'T' could be instantiated with an arbitrary type which could be unrelated to '{ a: number; }'.
 genericTypeWithNonGenericBaseMisMatch.ts(8,5): error TS2322: Type 'X<{ a: string; }>' is not assignable to type 'I'.
+  Types of property 'f' are incompatible.
+    Type '(a: { a: string; }) => void' is not assignable to type '(a: { a: number; }) => void'.
+      Types of parameters 'a' and 'a' are incompatible.
+        Type '{ a: number; }' is not assignable to type '{ a: string; }'.
+          Types of property 'a' are incompatible.
+            Type 'number' is not assignable to type 'string'.

@@ -1,1 +1,1 @@
-autolift4.ts(19,70): error TS2339: Property 'm' does not exist on type '{ x: number; y: number; getDist: () => any; z: number }'.
+autolift4.ts(19,70): error TS2339: Property 'm' does not exist on type 'Point3D'.

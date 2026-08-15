@@ -1,1 +1,2 @@
 undefinedArgumentInference.ts(3,4): error TS2322: Type 'undefined' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'undefined'.

@@ -1,5 +1,5 @@
-ambiguousGenericAssertion1.ts(4,10): error TS1012: Unexpected token.
-ambiguousGenericAssertion1.ts(4,12): error TS1005: ',' expected.
-ambiguousGenericAssertion1.ts(4,13): error TS1005: ',' expected.
-ambiguousGenericAssertion1.ts(4,14): error TS1134: Variable declaration expected.
+ambiguousGenericAssertion1.ts(4,10): error TS1109: Expression expected.
+ambiguousGenericAssertion1.ts(4,15): error TS2304: Cannot find name 'x'.
+ambiguousGenericAssertion1.ts(4,16): error TS1005: ')' expected.
 ambiguousGenericAssertion1.ts(4,19): error TS1005: ',' expected.
+ambiguousGenericAssertion1.ts(4,21): error TS1005: ';' expected.

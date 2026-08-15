@@ -1,4 +1,1 @@
-a.ts(1,16): error TS2304: Cannot find name 'interface'.
-a.ts(1,26): error TS1005: ';' expected.
-a.ts(1,30): error TS1005: ';' expected.
-a.ts(2,8): error TS2304: Cannot find name 'string'.
+index.ts(9,10): error TS2749: 'originalZZZ' refers to a value, but is being used as a type here. Did you mean 'typeof originalZZZ'?

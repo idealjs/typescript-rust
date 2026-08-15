@@ -1,3 +1,5 @@
+error TS5107: Option 'module=AMD' is deprecated and will stop functioning in TypeScript 7.0. Specify compilerOption '"ignoreDeprecations": "6.0"' to silence this error.
 genericTypeWithMultipleBases2.ts(14,1): error TS2454: Variable 'x' is used before being assigned.
 genericTypeWithMultipleBases2.ts(15,1): error TS2454: Variable 'x' is used before being assigned.
 genericTypeWithMultipleBases2.ts(16,1): error TS2454: Variable 'x' is used before being assigned.
+!!! error TS5107: Option 'module=AMD' is deprecated and will stop functioning in TypeScript 7.0. Specify compilerOption '"ignoreDeprecations": "6.0"' to silence this error.

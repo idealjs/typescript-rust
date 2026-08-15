@@ -1,1 +1,2 @@
-ClassDeclaration25.ts(5,1): error TS2420: Class 'List' incorrectly implements interface '{ data: () => U; next: () => string }'.
+ClassDeclaration25.ts(6,5): error TS2391: Function implementation is missing or not immediately following the declaration.
+ClassDeclaration25.ts(7,5): error TS2391: Function implementation is missing or not immediately following the declaration.

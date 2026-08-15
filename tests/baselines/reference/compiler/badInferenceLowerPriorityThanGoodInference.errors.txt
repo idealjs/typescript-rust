@@ -1,1 +1,0 @@
-badInferenceLowerPriorityThanGoodInference.ts(10,32): error TS2345: Argument of type '() => { a: { BLAH: 33 }; b: (x: any) => void }' is not assignable to parameter of type '() => { a: A; b: (x: A) => void }'.

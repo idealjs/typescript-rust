@@ -1,1 +1,2 @@
-aliasUsageInIndexerOfClass_main.ts(8,9): error TS2304: Cannot find name 'moduleA'.
+aliasUsageInIndexerOfClass_backbone.ts(2,12): error TS2564: Property 'someData' has no initializer and is not definitely assigned in the constructor.
+aliasUsageInIndexerOfClass_main.ts(12,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.

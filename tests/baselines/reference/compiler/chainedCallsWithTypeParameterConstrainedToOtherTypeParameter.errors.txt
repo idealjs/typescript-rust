@@ -1,1 +1,2 @@
-chainedCallsWithTypeParameterConstrainedToOtherTypeParameter.ts(19,25): error TS2345: Argument of type '(a: T) => { x: any; y: any }' is not assignable to parameter of type '(x: T) => S'.
+chainedCallsWithTypeParameterConstrainedToOtherTypeParameter.ts(19,64): error TS2741: Property 'z' is missing in type 'B' but required in type 'C'.
+chainedCallsWithTypeParameterConstrainedToOtherTypeParameter.ts(19,81): error TS2739: Type 'A' is missing the following properties from type 'C': z, y

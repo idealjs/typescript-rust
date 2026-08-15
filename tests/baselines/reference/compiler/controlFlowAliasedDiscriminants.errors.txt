@@ -3,4 +3,6 @@ controlFlowAliasedDiscriminants.ts(40,9): error TS18048: 'data2' is possibly 'un
 controlFlowAliasedDiscriminants.ts(65,9): error TS18048: 'bar2' is possibly 'undefined'.
 controlFlowAliasedDiscriminants.ts(66,9): error TS18048: 'bar3' is possibly 'undefined'.
 controlFlowAliasedDiscriminants.ts(86,14): error TS1360: Type 'string | number' does not satisfy the expected type 'string'.
+  Type 'number' is not assignable to type 'string'.
 controlFlowAliasedDiscriminants.ts(98,19): error TS1360: Type 'string | number' does not satisfy the expected type 'string'.
+  Type 'number' is not assignable to type 'string'.

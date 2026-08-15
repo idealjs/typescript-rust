@@ -1,1 +1,2 @@
 genericIndexedAccessVarianceComparisonResultCorrect.ts(25,1): error TS2322: Type 'T<A>' is not assignable to type 'T<B>'.
+  Property 'z' is missing in type 'A' but required in type 'B'.

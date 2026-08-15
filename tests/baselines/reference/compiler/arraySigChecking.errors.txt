@@ -1,3 +1,4 @@
-arraySigChecking.ts(18,5): error TS2322: Type 'void[]' is not assignable to type 'string[]'.
-arraySigChecking.ts(28,9): error TS2345: Argument of type 'any[]' is not assignable to parameter of type '{ length: number }'.
-arraySigChecking.ts(31,9): error TS2345: Argument of type 'string[]' is not assignable to parameter of type '{ length: number }'.
+arraySigChecking.ts(11,17): error TS1268: An index signature parameter type must be 'string', 'number', 'symbol', or a template literal type.
+arraySigChecking.ts(18,27): error TS2322: Type 'void' is not assignable to type 'string'.
+arraySigChecking.ts(22,13): error TS2322: Type 'number' is not assignable to type 'number[]'.
+arraySigChecking.ts(22,16): error TS2322: Type 'number' is not assignable to type 'number[]'.

@@ -1,1 +1,4 @@
 genericRestTypes.ts(21,11): error TS2322: Type '(cb: (x: string, ...rest: T) => void) => void' is not assignable to type '(cb: (...args: never) => void) => void'.
+  Types of parameters 'cb' and 'cb' are incompatible.
+    Types of parameters 'args' and 'x' are incompatible.
+      Type '[x: string, ...rest: T]' is not assignable to type 'never'.

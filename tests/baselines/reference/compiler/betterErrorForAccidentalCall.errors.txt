@@ -1,5 +1,10 @@
 betterErrorForAccidentalCall.ts(3,1): error TS2349: This expression is not callable.
+  Type 'String' has no call signatures.
 betterErrorForAccidentalCall.ts(5,1): error TS2349: This expression is not callable.
+  Type 'String' has no call signatures.
 betterErrorForAccidentalCall.ts(7,1): error TS2349: This expression is not callable.
+  Type 'String' has no call signatures.
 betterErrorForAccidentalCall.ts(10,1): error TS2349: This expression is not callable.
+  Type 'String' has no call signatures.
 betterErrorForAccidentalCall.ts(13,1): error TS2349: This expression is not callable.
+  Type 'String' has no call signatures.

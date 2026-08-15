@@ -1,1 +1,5 @@
 index.ts(3,3): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(opts?: Whatever | undefined): void', gave the following error.
+    Argument of type 'number' is not assignable to parameter of type 'Whatever'.
+  Overload 2 of 2, '(cb: Function, opts?: Whatever | undefined): void', gave the following error.
+    Argument of type 'number' is not assignable to parameter of type 'Function'.

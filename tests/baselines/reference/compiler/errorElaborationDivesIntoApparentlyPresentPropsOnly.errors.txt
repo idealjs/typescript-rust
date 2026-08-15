@@ -1,3 +1,6 @@
 errorElaborationDivesIntoApparentlyPresentPropsOnly.ts(2,5): error TS2322: Type '{ a: string; b: number; c: number; }' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to '{ a: string; b: number; c: number; }'.
 errorElaborationDivesIntoApparentlyPresentPropsOnly.ts(6,5): error TS2322: Type '{ a: number; }' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to '{ a: number; }'.
 errorElaborationDivesIntoApparentlyPresentPropsOnly.ts(10,5): error TS2322: Type '{ a: string; }' is not assignable to type 'T'.
+  '{ a: string; }' is assignable to the constraint of type 'T', but 'T' could be instantiated with a different subtype of constraint '{ a: string; }'.

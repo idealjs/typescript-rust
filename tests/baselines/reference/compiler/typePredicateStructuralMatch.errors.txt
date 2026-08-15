@@ -1,2 +1,4 @@
 typePredicateStructuralMatch.ts(13,18): error TS2339: Property 'hasOwnProperty' does not exist on type 'T | { data: T; }'.
+  Property 'hasOwnProperty' does not exist on type 'T'.
 typePredicateStructuralMatch.ts(21,19): error TS2339: Property 'hasOwnProperty' does not exist on type 'T | { data: T; }'.
+  Property 'hasOwnProperty' does not exist on type 'T'.

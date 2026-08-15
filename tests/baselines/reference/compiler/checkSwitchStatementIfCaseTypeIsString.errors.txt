@@ -1,1 +1,0 @@
-checkSwitchStatementIfCaseTypeIsString.ts(5,11): error TS2339: Property 'forEach' does not exist on type 'object'.

@@ -1,2 +1,2 @@
-assignLambdaToNominalSubtypeOfFunction.ts(7,4): error TS2345: Argument of type '(a: any, b: any) => boolean' is not assignable to parameter of type '{ x: number }'.
-assignLambdaToNominalSubtypeOfFunction.ts(8,4): error TS2345: Argument of type '(a: any, b: any) => boolean' is not assignable to parameter of type '{ x: number }'.
+assignLambdaToNominalSubtypeOfFunction.ts(7,4): error TS2345: Argument of type '(a: any, b: any) => boolean' is not assignable to parameter of type 'IResultCallback'.
+assignLambdaToNominalSubtypeOfFunction.ts(8,4): error TS2345: Argument of type '(a: any, b: any) => boolean' is not assignable to parameter of type 'IResultCallback'.

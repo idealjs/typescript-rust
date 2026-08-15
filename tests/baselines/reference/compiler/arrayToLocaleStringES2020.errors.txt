@@ -1,6 +1,0 @@
-arrayToLocaleStringES2020.ts(16,47): error TS2339: Property 'toLocaleString' does not exist on type 'object'.
-arrayToLocaleStringES2020.ts(18,18): error TS2304: Cannot find name 'BigInt'.
-arrayToLocaleStringES2020.ts(18,29): error TS2304: Cannot find name 'BigInt'.
-arrayToLocaleStringES2020.ts(18,40): error TS2304: Cannot find name 'BigInt'.
-arrayToLocaleStringES2020.ts(68,27): error TS2304: Cannot find name 'BigInt64Array'.
-arrayToLocaleStringES2020.ts(73,31): error TS2304: Cannot find name 'BigUint64Array'.

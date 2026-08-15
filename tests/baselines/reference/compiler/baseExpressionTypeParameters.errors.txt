@@ -1,2 +1,1 @@
-baseExpressionTypeParameters.ts(5,22): error TS2302: Static members cannot reference class type parameters.
-baseExpressionTypeParameters.ts(13,14): error TS2339: Property 'prop' does not exist on type 'object'.
+baseExpressionTypeParameters.ts(10,27): error TS2562: Base class expressions cannot reference class type parameters.

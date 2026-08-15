@@ -1,3 +1,4 @@
-error TS2300: Duplicate identifier 'Foo'.
-callOverloads4.ts(16,1): error TS2349: This expression is not callable.
-callOverloads4.ts(17,1): error TS2349: This expression is not callable.
+callOverloads4.ts(1,10): error TS2814: Function with bodies can only merge with classes that are ambient.
+callOverloads4.ts(2,10): error TS2391: Function implementation is missing or not immediately following the declaration.
+callOverloads4.ts(2,10): error TS2814: Function with bodies can only merge with classes that are ambient.
+callOverloads4.ts(3,7): error TS2813: Class declaration cannot implement overload list for 'Foo'.

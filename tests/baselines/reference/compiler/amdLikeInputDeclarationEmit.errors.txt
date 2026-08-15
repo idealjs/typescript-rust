@@ -1,4 +1,0 @@
-ExtendedClass.js(9,37): error TS2339: Property 'extends' does not exist on type 'unknown[]'.
-ExtendedClass.js(17,11): error TS1003: Identifier expected.
-ExtendedClass.js(17,12): error TS1005: ';' expected.
-ExtendedClass.js(17,12): error TS2304: Cannot find name 'exports'.

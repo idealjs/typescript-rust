@@ -1,6 +1,18 @@
 unionTypeErrorMessageTypeRefs01.ts(25,1): error TS2322: Type 'A<Foo>' is not assignable to type 'A<Bar> | B<Baz> | C<Kwah>'.
+  Type 'A<Foo>' is not assignable to type 'A<Bar>'.
+    Property 'bar' is missing in type 'Foo' but required in type 'Bar'.
 unionTypeErrorMessageTypeRefs01.ts(26,1): error TS2322: Type 'B<Foo>' is not assignable to type 'A<Bar> | B<Baz> | C<Kwah>'.
+  Type 'B<Foo>' is not assignable to type 'B<Baz>'.
+    Property 'baz' is missing in type 'Foo' but required in type 'Baz'.
 unionTypeErrorMessageTypeRefs01.ts(27,1): error TS2322: Type 'C<Foo>' is not assignable to type 'A<Bar> | B<Baz> | C<Kwah>'.
+  Type 'C<Foo>' is not assignable to type 'C<Kwah>'.
+    Property 'kwah' is missing in type 'Foo' but required in type 'Kwah'.
 unionTypeErrorMessageTypeRefs01.ts(48,1): error TS2322: Type 'X<Foo>' is not assignable to type 'X<Bar> | Y<Baz> | Z<Kwah>'.
+  Type 'X<Foo>' is not assignable to type 'X<Bar>'.
+    Property 'bar' is missing in type 'Foo' but required in type 'Bar'.
 unionTypeErrorMessageTypeRefs01.ts(49,1): error TS2322: Type 'Y<Foo>' is not assignable to type 'X<Bar> | Y<Baz> | Z<Kwah>'.
+  Type 'Y<Foo>' is not assignable to type 'Y<Baz>'.
+    Property 'baz' is missing in type 'Foo' but required in type 'Baz'.
 unionTypeErrorMessageTypeRefs01.ts(50,1): error TS2322: Type 'Z<Foo>' is not assignable to type 'X<Bar> | Y<Baz> | Z<Kwah>'.
+  Type 'Z<Foo>' is not assignable to type 'Z<Kwah>'.
+    Property 'kwah' is missing in type 'Foo' but required in type 'Kwah'.

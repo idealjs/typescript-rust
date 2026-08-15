@@ -1,2 +1,7 @@
 inferenceOuterResultNotIncorrectlyInstantiatedWithInnerResult.ts(35,15): error TS2322: Type '{ x: number; }' is not assignable to type 'Assign<T, { x: number; }>'.
+  Type '{ x: number; }' is not assignable to type 'Omit<T, "x">'.
 inferenceOuterResultNotIncorrectlyInstantiatedWithInnerResult.ts(35,59): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(target: {}, source: { x: number; }): { x: number; }', gave the following error.
+    Argument of type 'T' is not assignable to parameter of type '{}'.
+  Overload 2 of 4, '(target: object, ...sources: any[]): any', gave the following error.
+    Argument of type 'T' is not assignable to parameter of type 'object'.

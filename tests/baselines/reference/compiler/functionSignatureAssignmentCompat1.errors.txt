@@ -1,1 +1,3 @@
 functionSignatureAssignmentCompat1.ts(10,21): error TS2322: Type '(delimiter?: string | undefined) => ParserFunc' is not assignable to type 'ParserFunc'.
+  Types of parameters 'delimiter' and 'eventEmitter' are incompatible.
+    Type 'number' is not assignable to type 'string'.
