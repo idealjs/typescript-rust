@@ -2131,6 +2131,32 @@ impl Parser {
 
     fn parse_entity_name(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
+        // Entity-name positions reject literals and reserved words with
+        // dedicated errors (Go's parseEntityName → parseIdentifierName
+        // error reporting): `import q = null;` → TS1359, `import n = 5;`
+        // → TS1003.
+        match self.token {
+            SyntaxKind::NullKeyword
+            | SyntaxKind::TrueKeyword
+            | SyntaxKind::FalseKeyword => {
+                let text = self.scanner.token_text().to_string();
+                let text_str = text.as_str();
+                self.parse_error_at_current_token(
+                    crate::diagnostics::messages_generated::
+                        IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_THAT_CANNOT_BE_USED_HERE,
+                    &[text_str],
+                );
+            }
+            SyntaxKind::NumericLiteral
+            | SyntaxKind::BigIntLiteral
+            | SyntaxKind::StringLiteral => {
+                self.parse_error_at_current_token(
+                    crate::diagnostics::messages_generated::IDENTIFIER_EXPECTED,
+                    &[],
+                );
+            }
+            _ => {}
+        }
         let mut left = self.parse_identifier();
         while self.parse_optional(SyntaxKind::DotToken) {
             let right = self.parse_identifier();

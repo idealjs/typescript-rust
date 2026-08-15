@@ -96,15 +96,11 @@ compiler/addMoreOverloadsToBaseSignature.errors.txt
 ## (TS2694 namespace has no exported member, qualified-name alias chasing
 ## for `import x = a.b.c`) not ported ##
 compiler/aliasAssignments.errors.txt
-compiler/aliasBug.errors.txt
-compiler/aliasDoesNotDuplicateSignatures.errors.txt
-compiler/aliasErrors.errors.txt
 
 ## 2026-08-15 batch #81-#90: cross-file import-alias resolution (`import X =
 ## require('./f')` across @filename units — TS2304/TS2307 for moduleA-style
 ## references; TS2708 namespace-as-value) — same alias-resolution family as
 ## batch #71-#80 ##
-compiler/aliasOnMergedModuleInterface.errors.txt
 
 ## 2026-08-15 batch #81-#90: TS2352 assertion overlap comparability
 ## (related-info chain for intersection/construct-signature comparisons)

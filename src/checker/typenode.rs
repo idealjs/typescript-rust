@@ -312,11 +312,45 @@ impl Checker {
                     return self.error_type();
                 }
             }
-        } else {
-            match self.resolve_qualified_symbol(type_name) {
-                Some(s) => s,
-                None => return self.error_type(),
+        } else if matches!(
+            type_name.kind,
+            SyntaxKind::Identifier | SyntaxKind::QualifiedName
+        ) {
+            match self.resolve_qualified_symbol_traced(type_name) {
+                Ok(s) => s,
+                Err((segment, ns_path, member)) => {
+                    // TS2694: the namespace resolved but lacks the member;
+                    // TS2503: a namespace segment itself didn't resolve.
+                    if self.suppress_cannot_find_name_in_type_nodes == 0
+                        && self
+                            .current_file
+                            .as_ref()
+                            .is_some_and(|f| !f.file_name.starts_with("bundled://"))
+                    {
+                        let file = self.current_file.clone();
+                        if ns_path.is_empty() {
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                file,
+                                segment.loc,
+                                crate::diagnostics::messages_generated::
+                                    CANNOT_FIND_NAMESPACE_0,
+                                vec![segment.text().to_string()],
+                            ));
+                        } else {
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                file,
+                                segment.loc,
+                                crate::diagnostics::messages_generated::
+                                    NAMESPACE_0_HAS_NO_EXPORTED_MEMBER_1,
+                                vec![ns_path, member],
+                            ));
+                        }
+                    }
+                    return self.error_type();
+                }
             }
+        } else {
+            return self.error_type();
         };
         // Type parameter: build a TypeParameter type with the constraint
         // resolved from the declaration (`<T extends Constraint>`).

@@ -561,6 +561,9 @@ pub struct Checker {
     /// grammar checks are suppressed there.
     pub ambient_context_depth: usize,
 
+    /// Recursion depth guard for `namespace_has_value_side`.
+    pub namespace_value_depth: u8,
+
     /// Expected return type for a getter without its own annotation, taken
     /// from the paired setter's parameter annotation (the accessor pair's
     /// property type). Consumed by the getter's body check.
@@ -827,6 +830,7 @@ impl Checker {
             break_continue_context_stack: Vec::new(),
             this_container_stack: Vec::new(),
             ambient_context_depth: 0,
+            namespace_value_depth: 0,
             accessor_pair_return_hint: None,
             this_type_stack: Vec::new(),
             enclosing_class_stack: Vec::new(),
@@ -2851,6 +2855,14 @@ impl Checker {
     /// (e.g. `if (x !== null)` narrows `x` in the then-branch).
     fn get_type_of_identifier(&mut self, node: &Arc<Node>) -> Arc<Type> {
         if let Some(symbol) = self.resolve_identifier(node) {
+            // A named import (`import { f } from 'm'`) types as the
+            // imported module's exported member (following an `export =`
+            // alias one level).
+            if symbol.flags == SymbolFlags::Alias {
+                if let Some(t) = self.type_of_imported_symbol(&symbol) {
+                    return t;
+                }
+            }
             let flow = self.program.symbol_map().flow_node_of(node).map(Arc::clone);
             let narrowed = self.get_narrowed_type_of_symbol(&symbol, flow.as_ref());
             // When the reference is `x` in `x.length`, `x.push(value)`,
@@ -3690,6 +3702,55 @@ impl Checker {
             crate::ast::NodeData::PropertyAccessExpression(data) => (&data.expression, &data.name),
             _ => return self.get_any_type(),
         };
+        // A property of a NAMESPACE used as a value (`NS.f`) — resolve the
+        // member through the namespace symbol's tables (exports, members,
+        // and the declaration's locals for ambient namespaces) and type it
+        // from its declaration.
+        if obj_expr.kind == SyntaxKind::Identifier
+            && let Some(sym) = self.resolve_identifier(obj_expr)
+        {
+            let base = self.resolve_alias_base(sym);
+            if base.flags.contains(SymbolFlags::ValueModule) {
+                let name_text = name.text();
+                let member = base
+                    .exports
+                    .get(name_text)
+                    .or_else(|| base.members.get(name_text))
+                    .cloned()
+                    .or_else(|| {
+                        base.declarations
+                            .iter()
+                            .filter(|d| d.kind == SyntaxKind::ModuleDeclaration)
+                            .find_map(|d| {
+                                self.program
+                                    .symbol_map()
+                                    .locals
+                                    .get(&d.id())
+                                    .and_then(|l| l.get(name_text).cloned())
+                            })
+                    });
+                if let Some(member) = member {
+                    if let Some(t) = self
+                        .value_symbol_links
+                        .get(&member)
+                        .and_then(|l| l.resolved_type.clone())
+                    {
+                        return t;
+                    }
+                    for decl in &member.declarations {
+                        match decl.kind {
+                            SyntaxKind::FunctionDeclaration => {
+                                return self.get_type_of_function_like(decl);
+                            }
+                            SyntaxKind::ClassDeclaration => {
+                                return self.get_type_of_class_declaration(decl);
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+            }
+        }
         let obj_type = self.get_type_of_node(obj_expr);
         let name_text = name.text();
         if let Some(t) = self.get_property_type_of_type(&obj_type, name_text) {
@@ -4377,6 +4438,30 @@ impl Checker {
         // the corresponding constructor interface, mirroring the Array fix.
         if self.global_constructor_value_has_property(obj_expr, name_text) {
             return;
+        }
+        // A NAMESPACE property access (`NS.f`) resolves through the
+        // namespace's symbol tables — if present, no TS2339 (the property's
+        // TYPE is recovered by `get_type_of_property_access`).
+        if obj_expr.kind == SyntaxKind::Identifier
+            && let Some(sym) = self.resolve_identifier(obj_expr)
+        {
+            let base = self.resolve_alias_base(sym);
+            if base.flags.contains(SymbolFlags::ValueModule) {
+                let found = base.exports.entries.contains_key(name_text)
+                    || base.members.entries.contains_key(name_text)
+                    || base.declarations.iter().any(|d| {
+                        d.kind == SyntaxKind::ModuleDeclaration
+                            && self
+                                .program
+                                .symbol_map()
+                                .locals
+                                .get(&d.id())
+                                .is_some_and(|l| l.entries.contains_key(name_text))
+                    });
+                if found {
+                    return;
+                }
+            }
         }
         let file = self.current_file.clone();
         let type_str = self.type_to_string(&obj_type);
@@ -5781,6 +5866,69 @@ impl Checker {
                 {
                     self.check_type_annotation(&d.type_node);
                 }
+                // `import X = <entity>` — eagerly resolve the entity so a
+                // bad namespace path reports at the import (TS2503/TS2694),
+                // like Go's checkImportEqualsDeclaration.
+                if node.kind == SyntaxKind::ImportEqualsDeclaration
+                    && let crate::ast::NodeData::ImportEqualsDeclaration(d) = &node.data
+                    && matches!(
+                        d.module_reference.kind,
+                        SyntaxKind::Identifier | SyntaxKind::QualifiedName
+                    )
+                {
+                    let entity_ok = match &d.module_reference.data {
+                        crate::ast::NodeData::Identifier(id) => {
+                            is_valid_identifier_text(&id.text)
+                                && !matches!(id.text.as_str(), "null" | "true" | "false")
+                        }
+                        _ => true,
+                    };
+                    // A non-namespace leftmost segment (`import r =
+                    // undefined;`) is TS2503 like an unresolved one.
+                    let base_is_namespace = match &d.module_reference.data {
+                        crate::ast::NodeData::Identifier(_) => {
+                            self.resolve_identifier(&d.module_reference).is_none_or(|s| {
+                                let b = self.resolve_alias_base(s);
+                                b.flags.contains(SymbolFlags::ValueModule)
+                            })
+                        }
+                        _ => true,
+                    };
+                    let traced_err = if entity_ok && !base_is_namespace {
+                        Some((Arc::clone(&d.module_reference), String::new(), String::new()))
+                    } else if entity_ok {
+                        match self.resolve_qualified_symbol_traced(&d.module_reference) {
+                            Err(e) => Some(e),
+                            Ok(_) => None,
+                        }
+                    } else {
+                        None
+                    };
+                    if let Some((segment, ns_path, member)) = traced_err
+                        && self
+                            .current_file
+                            .as_ref()
+                            .is_some_and(|f| !f.file_name.starts_with("bundled://"))
+                    {
+                        let file = self.current_file.clone();
+                        if ns_path.is_empty() {
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                file,
+                                segment.loc,
+                                crate::diagnostics::messages_generated::CANNOT_FIND_NAMESPACE_0,
+                                vec![segment.text().to_string()],
+                            ));
+                        } else {
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                file,
+                                segment.loc,
+                                crate::diagnostics::messages_generated::
+                                    NAMESPACE_0_HAS_NO_EXPORTED_MEMBER_1,
+                                vec![ns_path, member],
+                            ));
+                        }
+                    }
+                }
             }
             SyntaxKind::EnumDeclaration => {
                 // Reserved type names (TS2431): `enum any {}` etc.
@@ -7141,6 +7289,248 @@ impl Checker {
         self.globals
             .get(name)
             .is_some_and(|s| s.flags.intersects(type_meaning))
+    }
+
+
+    /// Whether a namespace/module symbol has a VALUE side: any exported or
+    /// local member with value meaning, following an `export =` target one
+    /// level (Go's export-assignment alias resolution).
+    fn namespace_has_value_side(&mut self, namespace: &Arc<Symbol>) -> bool {
+        let value_flags = SymbolFlags::Function
+            | SymbolFlags::Class
+            | SymbolFlags::FunctionScopedVariable
+            | SymbolFlags::BlockScopedVariable
+            | SymbolFlags::RegularEnum
+            | SymbolFlags::ConstEnum
+            | SymbolFlags::Method;
+        let has_value_member = |table: &crate::ast::SymbolTable| {
+            table.iter().any(|(name, s)| {
+                name != "export=" && s.flags.intersects(value_flags)
+            })
+        };
+        if has_value_member(&namespace.exports) || has_value_member(&namespace.members) {
+            return true;
+        }
+        // A nested namespace with its own value side makes this one a
+        // value too (`namespace Outer { export namespace Inner { export
+        // class C {} } }` — Outer is a value). Depth-limited recursion.
+        if self.namespace_value_depth < 4 {
+            self.namespace_value_depth += 1;
+            let nested = namespace
+                .exports
+                .iter()
+                .chain(namespace.members.iter())
+                .any(|(name, s)| {
+                    name != "export="
+                        && s.flags.contains(SymbolFlags::ValueModule)
+                        && self.namespace_has_value_side(s)
+                });
+            self.namespace_value_depth -= 1;
+            if nested {
+                return true;
+            }
+        }
+        // Ambient namespaces implicitly export their members — the binder
+        // routes un-exported `declare namespace` members to the module
+        // node's LOCALS, so scan those too.
+        for decl in &namespace.declarations {
+            if decl.kind == SyntaxKind::ModuleDeclaration
+                && let Some(locals) = self.program.symbol_map().locals.get(&decl.id())
+                && locals.iter().any(|(name, s)| {
+                    name != "export=" && s.flags.intersects(value_flags)
+                })
+            {
+                return true;
+            }
+        }
+        // `export = <entity>`: the namespace is value-ful iff the target is.
+        if let Some(export_equals) = namespace.exports.get("export=") {
+            for decl in &export_equals.declarations {
+                if let crate::ast::NodeData::ExportAssignment(ea) = &decl.data
+                    && ea.is_export_equals
+                    && matches!(
+                        ea.expression.kind,
+                        SyntaxKind::Identifier | SyntaxKind::QualifiedName
+                    )
+                {
+                    // The export= expression lives inside the namespace's
+                    // body — resolve it in that scope.
+                    let scope_decl = namespace
+                        .declarations
+                        .iter()
+                        .find(|d| d.kind == SyntaxKind::ModuleDeclaration)
+                        .cloned();
+                    if let Some(scope_decl) = scope_decl {
+                        self.push_scope(&scope_decl);
+                        let target = self.resolve_qualified_symbol(&ea.expression);
+                        self.pop_scope();
+                        if let Some(target) = target {
+                            if target.flags.intersects(value_flags) {
+                                return true;
+                            }
+                            if target.flags.contains(SymbolFlags::ValueModule) {
+                                return self.namespace_has_value_side(&target);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        false
+    }
+
+
+    /// The type of a named-import alias: resolve the import's module,
+    /// look the imported name up in its exports/members/locals, following
+    /// an `export = <entity>` target one level.
+    fn type_of_imported_symbol(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+        let decl = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::ImportSpecifier)?;
+        let name = match &decl.data {
+            crate::ast::NodeData::ImportSpecifier(d) => d.name.text().to_string(),
+            _ => return None,
+        };
+        // Walk up through NamedImports/ImportClause to the ImportDeclaration.
+        let mut import_decl = decl.parent.as_ref()?;
+        while !matches!(import_decl.data, crate::ast::NodeData::ImportDeclaration(_)) {
+            import_decl = import_decl.parent.as_ref()?;
+        }
+        let module_spec = match &import_decl.data {
+            crate::ast::NodeData::ImportDeclaration(d) => d.module_specifier.text().to_string(),
+            _ => return None,
+        };
+        let module_sym = self.resolve_module_file_symbol(&module_spec)?;
+        let member = self.namespace_member_recursive(&module_sym, &name)?;
+        if let Some(t) = self
+            .value_symbol_links
+            .get(&member)
+            .and_then(|l| l.resolved_type.clone())
+        {
+            return Some(t);
+        }
+        for d in &member.declarations {
+            match d.kind {
+                SyntaxKind::FunctionDeclaration => {
+                    return Some(self.get_type_of_function_like(d));
+                }
+                SyntaxKind::ClassDeclaration => {
+                    return Some(self.get_type_of_class_declaration(d));
+                }
+                _ => {}
+            }
+        }
+        None
+    }
+
+    /// Look up `name` in a namespace/module's exports, members, and the
+    /// declaration's locals (ambient namespaces), following an `export =`
+    /// target one level.
+    fn namespace_member_recursive(
+        &mut self,
+        namespace: &Arc<Symbol>,
+        name: &str,
+    ) -> Option<Arc<Symbol>> {
+        if let Some(s) = namespace.exports.get(name).or_else(|| namespace.members.get(name)) {
+            return Some(Arc::clone(s));
+        }
+        for d in &namespace.declarations {
+            if d.kind == SyntaxKind::ModuleDeclaration
+                && let Some(s) = self
+                    .program
+                    .symbol_map()
+                    .locals
+                    .get(&d.id())
+                    .and_then(|l| l.get(name))
+            {
+                return Some(Arc::clone(s));
+            }
+        }
+        // `export = <entity>`: resolve the target and look there.
+        let export_equals = namespace.exports.get("export=")?;
+        for d in &export_equals.declarations {
+            if let crate::ast::NodeData::ExportAssignment(ea) = &d.data
+                && ea.is_export_equals
+                && matches!(
+                    ea.expression.kind,
+                    SyntaxKind::Identifier | SyntaxKind::QualifiedName
+                )
+            {
+                let scope_decl = namespace
+                    .declarations
+                    .iter()
+                    .find(|d| d.kind == SyntaxKind::ModuleDeclaration)
+                    .cloned();
+                let target = scope_decl.and_then(|scope_decl| {
+                    self.push_scope(&scope_decl);
+                    let t = self.resolve_qualified_symbol(&ea.expression);
+                    self.pop_scope();
+                    t
+                });
+                if let Some(mut target) = target {
+                    // `import X = NS` entity-name aliases (an `export =`
+                    // target commonly is one) follow to the namespace.
+                    for _ in 0..4 {
+                        if target.flags.contains(SymbolFlags::ValueModule) {
+                            break;
+                        }
+                        if target.flags != SymbolFlags::Alias {
+                            break;
+                        }
+                        let next = target
+                            .declarations
+                            .iter()
+                            .find(|d| d.kind == SyntaxKind::ImportEqualsDeclaration)
+                            .and_then(|d| {
+                                if let crate::ast::NodeData::ImportEqualsDeclaration(ied) = &d.data
+                                    && matches!(
+                                        ied.module_reference.kind,
+                                        SyntaxKind::Identifier | SyntaxKind::QualifiedName
+                                    )
+                                {
+                                    Some(self.resolve_qualified_symbol(&ied.module_reference))
+                                } else {
+                                    None
+                                }
+                            })
+                            .flatten();
+                        match next {
+                            Some(n) => target = n,
+                            None => break,
+                        }
+                    }
+                    if target.flags.contains(SymbolFlags::ValueModule) {
+                        return self.namespace_member_recursive(&target, name);
+                    }
+                    return Some(target);
+                }
+            }
+        }
+        None
+    }
+
+
+    /// The dotted full path of a namespace symbol — from its
+    /// (nested) ModuleDeclaration chain: `foo.bar.baz`.
+    fn namespace_full_path(symbol: &Arc<Symbol>) -> String {
+        let decl = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::ModuleDeclaration);
+        let Some(decl) = decl else {
+            return symbol.name.clone();
+        };
+        let mut parts: Vec<String> = Vec::new();
+        let mut current: Option<&Arc<Node>> = Some(decl);
+        while let Some(n) = current {
+            if let crate::ast::NodeData::ModuleDeclaration(md) = &n.data {
+                parts.push(md.name.text().to_string());
+            }
+            current = n.parent.as_ref();
+        }
+        parts.reverse();
+        parts.join(".")
     }
 
     /// TS2352: `expr as T` where neither type sufficiently overlaps the
@@ -8730,6 +9120,27 @@ impl Checker {
         }
 
         if let Some(symbol) = self.resolve_identifier(node) {
+            // TS2708: a types-only namespace used as a VALUE. Follow the
+            // alias base (import-equals → module), then require the
+            // namespace to have at least one value member (Go's
+            // checkAndReportErrorForUsingNamespaceAsTypeOrValue).
+            let base = self.resolve_alias_base(Arc::clone(&symbol));
+            if base.flags.contains(SymbolFlags::ValueModule)
+                && base
+                    .declarations
+                    .iter()
+                    .any(|d| d.kind == SyntaxKind::ModuleDeclaration)
+                && !self.namespace_has_value_side(&base)
+            {
+                let file = self.current_file.clone();
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    node.loc,
+                    crate::diagnostics::messages_generated::CANNOT_USE_NAMESPACE_0_AS_A_VALUE,
+                    vec![name.to_string()],
+                ));
+                return;
+            }
             // TS2448: Block-scoped variable used before its declaration
             // (temporal dead zone). When a `let`/`const`/`class` variable is
             // referenced before its declaration position, report TS2448.
@@ -9074,12 +9485,28 @@ impl Checker {
     /// an `import X = require("...")` alias resolves to the module file's
     /// symbol (Go: `resolveEntityName` + `resolveExternalModuleName`).
     pub fn resolve_qualified_symbol(&self, name: &Arc<Node>) -> Option<Arc<Symbol>> {
+        match self.resolve_qualified_symbol_traced(name) {
+            Ok(s) => Some(s),
+            Err(_) => None,
+        }
+    }
+
+    /// Traced qualified-name resolution: on failure, reports WHERE the
+    /// chain broke — (segment node, namespace-path text, member name) —
+    /// enough for the caller to emit TS2503 (unresolved namespace) or
+    /// TS2694 (namespace has no exported member).
+    pub fn resolve_qualified_symbol_traced(
+        &self,
+        name: &Arc<Node>,
+    ) -> Result<Arc<Symbol>, (Arc<Node>, String, String)> {
         match &name.data {
-            crate::ast::NodeData::Identifier(_) => {
-                self.resolve_identifier(name)
-            }
+            crate::ast::NodeData::Identifier(_) => match self.resolve_identifier(name) {
+                Some(s) => Ok(s),
+                None => Err((Arc::clone(name), String::new(), String::new())),
+            },
             crate::ast::NodeData::QualifiedName(data) => {
-                let mut symbol = self.resolve_qualified_symbol(&data.left)?;
+                let mut symbol = self.resolve_qualified_symbol_traced(&data.left)?;
+                let path_so_far = qualified_name_text(&data.left);
                 symbol = self.resolve_alias_base(symbol);
                 // `right` is always an Identifier in valid syntax.
                 let text = data.right.text();
@@ -9087,10 +9514,23 @@ impl Checker {
                     .exports
                     .get(text)
                     .or_else(|| symbol.members.get(text))
-                    .cloned()?;
-                self.follow_alias(&next)
+                    .cloned();
+                match next {
+                    Some(next) => match self.follow_alias(&next) {
+                        Some(f) => Ok(f),
+                        None => Ok(next),
+                    },
+                    None => {
+                        let _ = path_so_far;
+                        Err((
+                            Arc::clone(&data.right),
+                            Self::namespace_full_path(&symbol),
+                            text.to_string(),
+                        ))
+                    }
+                }
             }
-            _ => None,
+            _ => Err((Arc::clone(name), String::new(), String::new())),
         }
     }
 
@@ -9106,13 +9546,52 @@ impl Checker {
             .iter()
             .find(|d| d.kind == SyntaxKind::ImportEqualsDeclaration)
         {
-            if let crate::ast::NodeData::ImportEqualsDeclaration(data) = &decl.data
-                && let crate::ast::NodeData::ExternalModuleReference(ext) =
+            if let crate::ast::NodeData::ImportEqualsDeclaration(data) = &decl.data {
+                // `import X = require("...")` — the module file/ambient
+                // module symbol.
+                if let crate::ast::NodeData::ExternalModuleReference(ext) =
                     &data.module_reference.data
-                && ext.expression.kind == SyntaxKind::StringLiteral
-                && let Some(module_sym) = self.resolve_module_file_symbol(&ext.expression.text())
-            {
-                return module_sym;
+                    && ext.expression.kind == SyntaxKind::StringLiteral
+                    && let Some(module_sym) =
+                        self.resolve_module_file_symbol(&ext.expression.text())
+                {
+                    return module_sym;
+                }
+                // `import X = NS.Path` — follow the entity-name target
+                // (up to four alias hops to avoid cycles).
+                if matches!(
+                    data.module_reference.kind,
+                    SyntaxKind::Identifier | SyntaxKind::QualifiedName
+                ) {
+                    let mut current = Arc::clone(&symbol);
+                    for _ in 0..4 {
+                        let next = current
+                            .declarations
+                            .iter()
+                            .find(|d| d.kind == SyntaxKind::ImportEqualsDeclaration)
+                            .and_then(|d| {
+                                if let crate::ast::NodeData::ImportEqualsDeclaration(ied) = &d.data
+                                    && matches!(
+                                        ied.module_reference.kind,
+                                        SyntaxKind::Identifier | SyntaxKind::QualifiedName
+                                    )
+                                {
+                                    Some(self.resolve_qualified_symbol(&ied.module_reference))
+                                } else {
+                                    None
+                                }
+                            })
+                            .flatten();
+                        match next {
+                            Some(n) => current = n,
+                            None => break,
+                        }
+                        if !current.flags.intersects(SymbolFlags::Alias) {
+                            return current;
+                        }
+                    }
+                    return current;
+                }
             }
         }
         symbol
@@ -9123,6 +9602,21 @@ impl Checker {
     /// TypeScript extension/index forms.
     pub(crate) fn resolve_module_file_symbol(&self, specifier: &str) -> Option<Arc<Symbol>> {
         if !specifier.starts_with('.') {
+            // Ambient module: a top-level `declare module "name"` in any
+            // loaded file (Go's resolveExternalModuleName consults the
+            // global module map).
+            for file in self.program.source_files() {
+                if let crate::ast::NodeData::SourceFile(sf) = &file.node.data {
+                    for stmt in sf.statements.iter() {
+                        if let crate::ast::NodeData::ModuleDeclaration(md) = &stmt.data
+                            && md.name.kind == SyntaxKind::StringLiteral
+                            && md.name.text().trim_matches(['"', '\'']) == specifier
+                        {
+                            return self.program.symbol_map().symbol_of(stmt).cloned();
+                        }
+                    }
+                }
+            }
             return None;
         }
         let current = self.current_file.as_ref()?;
@@ -11015,5 +11509,15 @@ mod tests {
         assert!(outer_begin_idx < inner_begin_idx);
         assert!(inner_begin_idx < inner_end_idx);
         assert!(inner_end_idx < outer_end_idx);
+    }
+}
+
+/// The dotted source text of a (possibly qualified) entity name.
+fn qualified_name_text(name: &Arc<Node>) -> String {
+    match &name.data {
+        crate::ast::NodeData::QualifiedName(d) => {
+            format!("{}.{}", qualified_name_text(&d.left), d.right.text())
+        }
+        _ => name.text().to_string(),
     }
 }

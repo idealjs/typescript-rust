@@ -294,9 +294,14 @@ impl Program {
                                 queue.push(sf);
                             }
                         }
-                    } else {
+                    } else if module_spec.starts_with('.')
+                        || !ambient_module_exists(&source_files, module_spec)
+                    {
                         // Module resolution failed — report TS2307 ("Cannot
-                        // find module"). `file.imports` only contains real
+                        // find module"), unless the specifier names an
+                        // ambient module declared in a loaded file
+                        // (`declare module "x"`), which resolves globally
+                        // (Go's global module map). `file.imports` only contains real
                         // import/export specifiers (ambient `declare module
                         // "x"` names are collected separately), so every entry
                         // here is a genuine import worth reporting. Mirrors
@@ -2093,5 +2098,39 @@ mod tests {
                 .map(|f| f.file_name.as_str())
                 .collect::<Vec<_>>()
         );
+    }
+}
+
+/// Whether a top-level ambient module declaration (`declare module "name"`)
+/// exists in any of the given source files.
+fn ambient_module_exists(
+    source_files: &[Arc<crate::ast::SourceFile>],
+    name: &str,
+) -> bool {
+    for file in source_files {
+        if let crate::ast::NodeData::SourceFile(sf) = &file.node.data {
+            for stmt in sf.statements.iter() {
+                if let crate::ast::NodeData::ModuleDeclaration(md) = &stmt.data
+                    && md.name.kind == crate::ast::SyntaxKind::StringLiteral
+                    && strip_quotes(md.name.text()) == name
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    false
+}
+
+/// Strip one layer of surrounding double/single quotes from a module-name
+/// string literal's text (module names keep their quotes in the AST).
+fn strip_quotes(s: &str) -> &str {
+    let b = s.as_bytes();
+    if b.len() >= 2
+        && ((b[0] == b'"' && b[b.len() - 1] == b'"') || (b[0] == b'\'' && b[b.len() - 1] == b'\''))
+    {
+        &s[1..s.len() - 1]
+    } else {
+        s
     }
 }
