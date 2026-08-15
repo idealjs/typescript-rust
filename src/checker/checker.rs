@@ -5961,6 +5961,28 @@ impl Checker {
                 }
             }
             SyntaxKind::ModuleDeclaration => {
+                // TS2664: a module AUGMENTATION (`declare module "x"` inside
+                // an external-module file) whose target cannot be found.
+                if let crate::ast::NodeData::ModuleDeclaration(data) = &node.data
+                    && data.name.kind == SyntaxKind::StringLiteral
+                    && self.current_file.as_ref().is_some_and(|f| {
+                        f.external_module_indicator.is_some()
+                            && !f.file_name.starts_with("bundled://")
+                    })
+                {
+                    let module_name = data.name.text().trim_matches(['"', '\'']).to_string();
+                    let resolvable = self.resolve_module_file_symbol(&module_name).is_some();
+                    if !resolvable {
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            file,
+                            data.name.loc,
+                            crate::diagnostics::messages_generated::
+                                INVALID_MODULE_NAME_IN_AUGMENTATION_MODULE_0_CANNOT_BE_FOUND,
+                            vec![module_name],
+                        ));
+                    }
+                }
                 // Check the module body. A `declare namespace/module` makes
                 // everything inside ambient (Go's NodeFlagsAmbient
                 // propagation).
@@ -6108,12 +6130,38 @@ impl Checker {
     fn check_variable_declaration_list(&mut self, node: &Arc<Node>) {
         if let crate::ast::NodeData::VariableDeclarationList(data) = &node.data {
             for decl in data.declarations.iter() {
+                // TS1039: variable initializers are not allowed in ambient
+                // contexts (`declare var x = 4;`).
+                if let crate::ast::NodeData::VariableDeclaration(vd) = &decl.data
+                    && let Some(init) = &vd.initializer
+                    && (node.has_syntactic_modifier(ModifierFlags::Ambient)
+                        || node.parent.as_ref().is_some_and(|p| {
+                            p.has_syntactic_modifier(ModifierFlags::Ambient)
+                        })
+                        || self.ambient_context_depth > 0
+                        || self
+                            .current_file
+                            .as_ref()
+                            .is_some_and(|f| f.is_declaration_file))
+                    && self
+                        .current_file
+                        .as_ref()
+                        .is_some_and(|f| !f.file_name.starts_with("bundled://"))
+                {
+                    let file = self.current_file.clone();
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        file,
+                        init.loc,
+                        crate::diagnostics::messages_generated::
+                            INITIALIZERS_ARE_NOT_ALLOWED_IN_AMBIENT_CONTEXTS,
+                        vec![],
+                    ));
+                }
                 // TS1100/TS1215: `var arguments` / `var eval` in strict code
                 // (alwaysStrict, modules, or a "use strict" prologue) —
                 // Go's binder checkStrictModeEvalOrArguments.
                 if let crate::ast::NodeData::VariableDeclaration(vd) = &decl.data
                     && vd.name.kind == SyntaxKind::Identifier
-                    && matches!(vd.name.text(), "eval" | "arguments")
                     && matches!(vd.name.text(), "eval" | "arguments")
                     && self.in_strict_context()
                 {
@@ -9886,6 +9934,11 @@ impl Checker {
             // loaded file (Go's resolveExternalModuleName consults the
             // global module map).
             for file in self.program.source_files() {
+                // Augmentations (declare module inside an external-module
+                // file) don't make the name resolvable.
+                if file.external_module_indicator.is_some() {
+                    continue;
+                }
                 if let crate::ast::NodeData::SourceFile(sf) = &file.node.data {
                     for stmt in sf.statements.iter() {
                         if let crate::ast::NodeData::ModuleDeclaration(md) = &stmt.data

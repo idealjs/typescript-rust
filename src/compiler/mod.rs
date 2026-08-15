@@ -2110,9 +2110,14 @@ fn ambient_module_exists(
     for file in source_files {
         if let crate::ast::NodeData::SourceFile(sf) = &file.node.data {
             for stmt in sf.statements.iter() {
+                // A `declare module "x"` inside an EXTERNAL module file is
+                // an augmentation, not a global ambient module — it doesn't
+                // make the name resolvable.
+                let file_is_external = file.external_module_indicator.is_some();
                 if let crate::ast::NodeData::ModuleDeclaration(md) = &stmt.data
                     && md.name.kind == crate::ast::SyntaxKind::StringLiteral
                     && strip_quotes(md.name.text()) == name
+                    && !file_is_external
                 {
                     return true;
                 }

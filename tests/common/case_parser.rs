@@ -158,7 +158,10 @@ pub fn split_units(content: &str, default_name: &str) -> ParsedCase {
         // and official baselines number lines from the first content line.
         // Blank lines BETWEEN content lines are preserved.
         if current_name.is_some() {
-            if current_body.is_empty() && line_no_nl.trim().is_empty() {
+            // Go's compiler-test parser drops LEADING truly-empty lines
+            // (`Len() != 0` separator rule); a whitespace-only line is
+            // content and keeps its line number.
+            if current_body.is_empty() && line_no_nl.is_empty() {
                 continue;
             }
             current_body.push_str(line);
@@ -180,7 +183,7 @@ pub fn split_units(content: &str, default_name: &str) -> ParsedCase {
             if parse_directive_line(line_no_nl).is_some() {
                 continue;
             }
-            if body.is_empty() && line_no_nl.trim().is_empty() {
+            if body.is_empty() && line_no_nl.is_empty() {
                 continue;
             }
             body.push_str(line);
