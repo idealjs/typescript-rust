@@ -54,6 +54,13 @@ const SUBFOLDER: &str = "compiler";
 /// The 1000-case slice is green (errors baseline only).
 const DEFAULT_LIMIT: usize = 1000;
 
+/// Per-case wall-clock budget for the worker subprocess. Cases normally
+/// finish in well under a second; a case exceeding this is almost certainly
+/// stuck (checker infinite loop or combinatorial blow-up) and is killed and
+/// recorded as a skip rather than hanging the whole sweep. Override with
+/// `TSOX_SUBMODULE_TIMEOUT_SECS`.
+const CASE_TIMEOUT_DEFAULT_SECS: u64 = 30;
+
 /// Cases skipped because they reference inputs the port can't provide (e.g.
 /// the old `typescript.d.ts` API surface) or exercise removed compiler options.
 /// Mirrors tsgo's `skippedTests` (`internal/testrunner/compiler_runner.go`).
@@ -212,6 +219,12 @@ fn submodule_compiler_cases() {
 
     let known_diffs = KnownDiffs::load();
     let accept = baseline::accept_mode();
+    let case_timeout = std::time::Duration::from_secs(
+        std::env::var("TSOX_SUBMODULE_TIMEOUT_SECS")
+            .ok()
+            .and_then(|s| s.parse::<u64>().ok())
+            .unwrap_or(CASE_TIMEOUT_DEFAULT_SECS),
+    );
     // This test binary re-invokes itself (in worker mode) per case — see the
     // TSOX_SUBMODULE_WORKER block at the top of this function.
     let exe = std::env::current_exe().expect("current_exe");
@@ -231,12 +244,15 @@ fn submodule_compiler_cases() {
         let ext = ".errors.txt";
 
         // Run the case in a child process so a checker stack overflow (e.g.
-        // circular-type recursion — uncatchable via catch_unwind) kills only the
-        // child, not the whole run. The child re-invokes this test binary in
-        // worker mode (see TSOX_SUBMODULE_WORKER above).
+        // circular-type recursion — uncatchable via catch_unwind) kills only
+        // the child, not the whole run. The child re-invokes this test binary
+        // in worker mode (see TSOX_SUBMODULE_WORKER above). A case that runs
+        // longer than `CASE_TIMEOUT` (e.g. a checker infinite loop or
+        // combinatorial blow-up) is killed and recorded as a skip — mirroring
+        // tsgo's per-case timeout — instead of hanging the whole sweep.
         let out_path = std::env::temp_dir().join(format!("tsox_submodule_{stem}.out"));
         let _ = std::fs::remove_file(&out_path);
-        let status = Command::new(&exe)
+        let worker = Command::new(&exe)
             .arg("--exact")
             .arg("submodule_compiler_cases")
             .env("TSOX_SUBMODULE_WORKER", case_path)
@@ -244,24 +260,40 @@ fn submodule_compiler_cases() {
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::null())
-            .status();
+            .spawn();
+        let status = worker.map(|mut child| {
+            let deadline = std::time::Instant::now() + case_timeout;
+            loop {
+                match child.try_wait() {
+                    Ok(Some(status)) => return Ok(status),
+                    Ok(None) => {
+                        if std::time::Instant::now() >= deadline {
+                            let _ = child.kill();
+                            let _ = child.wait();
+                            return Err("timed out".to_string());
+                        }
+                        std::thread::sleep(std::time::Duration::from_millis(100));
+                    }
+                    Err(e) => return Err(e.to_string()),
+                }
+            }
+        })
+        .unwrap_or_else(|e| Err(e.to_string()));
         let payload = std::fs::read_to_string(&out_path).unwrap_or_default();
         let _ = std::fs::remove_file(&out_path);
 
-        let success = matches!(status, Ok(s) if s.success());
+        let success = matches!(&status, Ok(s) if s.success());
         if !success {
-            // Worker was killed (e.g. stack overflow → signal) or exited
-            // non-zero. Report the raw status to aid diagnosis.
+            // Worker was killed (e.g. stack overflow → signal), timed out, or
+            // exited non-zero. Report the raw status to aid diagnosis.
             use std::os::unix::process::ExitStatusExt;
-            let raw = status
-                .as_ref()
-                .ok()
-                .map(|s| {
-                    s.signal()
-                        .map(|sig| format!("signal {sig}"))
-                        .unwrap_or_else(|| format!("code {}", s.code().unwrap_or(-1)))
-                })
-                .unwrap_or_else(|| "spawn failed".to_string());
+            let raw = match &status {
+                Ok(s) => s
+                    .signal()
+                    .map(|sig| format!("signal {sig}"))
+                    .unwrap_or_else(|| format!("code {}", s.code().unwrap_or(-1))),
+                Err(reason) => reason.clone(),
+            };
             skipped += 1;
             eprintln!("[skip] {basename}: worker crashed ({raw})");
             continue;

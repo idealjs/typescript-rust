@@ -1367,6 +1367,17 @@ fn checker_for_loop_no_error() {
 }
 
 #[test]
+fn checker_for_loop_block_scope_no_redeclare() {
+    // Two for-loops in the same block each declaring `let i` must NOT collide
+    // (TS2451) — each for-statement has its own block scope. Also checks the
+    // multi-declarator init `let i = 0, j = 1` binds both. Oracle: 0 errors.
+    let diags =
+        check_source("for (let i = 0, j = 1; i < 10; i++) {}\nfor (let i = 0; i < 5; i++) {}");
+    let redeclare = diags.iter().filter(|d| d.code == 2451).count();
+    assert_eq!(redeclare, 0, "for-loop block scope should not redeclare");
+}
+
+#[test]
 fn checker_switch_statement_no_error() {
     let diags = check_source("let x = 1;\nswitch (x) { case 1: break; default: break; }");
     assert_no_diagnostics(&diags);
@@ -8920,8 +8931,11 @@ fn checker_mixin_pattern_no_error() {
     let diags = check_source(
         "type Constructor<T = {}> = new (...args: any[]) => T;\nfunction Timestamped<TBase extends Constructor>(Base: TBase) {\n  return class extends Base {\n    timestamp = Date.now();\n  };\n}\nclass User {}\nconst TimestampedUser = Timestamped(User);\nlet u = new TimestampedUser();",
     );
-    // KNOWN LIMITATION: mixin class expression with extends not supported (TS2304, TS2345).
-    assert_diagnostic_count(&diags, 2304, 1);
+    // KNOWN LIMITATION: mixin class expression — `class extends Base` now
+    // parses (anonymous class with heritage; no more TS2304 on `extends`),
+    // but the mixin's generic base resolution still yields a spurious
+    // TS2345 on `new TimestampedUser()`.
+    assert_diagnostic_count(&diags, 2304, 0);
     assert_diagnostic_count(&diags, 2345, 1);
 }
 
