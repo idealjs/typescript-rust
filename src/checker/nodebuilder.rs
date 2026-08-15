@@ -609,6 +609,13 @@ impl Checker {
             }
         }
 
+        // Namespace value types print as `typeof N` (Go's TypeReference
+        // display for ValueModule symbols, e.g. TS2339 on `N.x` reads
+        // "Property 'x' does not exist on type 'typeof N'").
+        if sym.flags.contains(SymbolFlags::ValueModule) {
+            return format!("typeof {}", sym.name);
+        }
+
         sym.name.clone()
     }
 
@@ -2216,7 +2223,10 @@ mod tests {
                     if members.is_empty() {
                         "{}".into()
                     } else {
-                        format!("{{ {} }}", members.join("; "))
+                        // Trailing `;` like Go's printer (declaration emit
+                        // and checker display both render
+                        // `{ a: number; b: string; }`).
+                        format!("{{ {}; }}", members.join("; "))
                     }
                 } else {
                     "?".into()

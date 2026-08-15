@@ -393,14 +393,22 @@ impl Checker {
             // Class annotation (`x: MyClass`): the instance type built from
             // the class's members (including `extends` bases). Memoized on
             // the class symbol; guarded against self-referential hierarchies
-            // (`class A extends A`).
+            // (`class A extends A`). For a class MERGED with a namespace
+            // (`class N {} namespace N {}`), the shared declared-type slot
+            // also receives namespace/merged VALUE-side types (constructor +
+            // exports) — bypass it so the annotation keeps getting the
+            // instance type, like Go's distinct class-instance vs
+            // getDeclaredTypeOfSymbol types.
             let key = Arc::as_ptr(&symbol) as *const crate::ast::Symbol;
-            if let Some(cached) = self
-                .type_alias_links
-                .get(&symbol)
-                .and_then(|l| l.declared_type.clone())
-            {
-                return cached;
+            let merged_with_ns = symbol.flags.contains(SymbolFlags::ValueModule);
+            if !merged_with_ns {
+                if let Some(cached) = self
+                    .type_alias_links
+                    .get(&symbol)
+                    .and_then(|l| l.declared_type.clone())
+                {
+                    return cached;
+                }
             }
             if !self.resolving_type_aliases.insert(key) {
                 return self.error_type();
@@ -415,8 +423,10 @@ impl Checker {
                 None => self.error_type(),
             };
             self.resolving_type_aliases.remove(&key);
-            self.type_alias_links.get_or_default(&symbol).declared_type =
-                Some(Arc::clone(&instance_type));
+            if !merged_with_ns {
+                self.type_alias_links.get_or_default(&symbol).declared_type =
+                    Some(Arc::clone(&instance_type));
+            }
             return instance_type;
         }
         if !symbol.flags.contains(SymbolFlags::TypeAlias) {

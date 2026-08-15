@@ -3033,9 +3033,14 @@ impl Checker {
     /// Mirrors the namespace slice of Go's `getDeclaredTypeOfSymbol`, which
     /// folds the value-side type into the namespace object type.
     fn get_type_of_merged_namespace_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
-        // Cached merged type on `type_alias_links[symbol].declared_type`.
+        // Cached merged type on `declared_type_links[symbol].declared_type`.
+        // This is a VALUE-side type (call/construct signatures + namespace
+        // exports) and must NOT share `type_alias_links`'s declared-type
+        // slot with the class INSTANCE type that `resolve_type_reference`'s
+        // Class arm builds for the same merged symbol — Go keeps them
+        // distinct (`getDeclaredTypeOfSymbol` vs the class instance type).
         if let Some(cached) = self
-            .type_alias_links
+            .declared_type_links
             .get(symbol)
             .and_then(|l| l.declared_type.clone())
         {
@@ -3048,9 +3053,10 @@ impl Checker {
         let value_type = self.get_value_type_of_symbol(symbol);
 
         // 2. Resolve the namespace members. `resolve_namespace_type` caches
-        //    its result on `type_alias_links[symbol].declared_type`; we
-        //    overwrite that cache with the merged type below so subsequent
-        //    lookups see the combined type.
+        //    its result on `type_alias_links[symbol].declared_type` — for a
+        //    symbol merged with a class, resolve_type_reference's Class arm
+        //    bypasses that slot, so the pollution is harmless there; the
+        //    merged type below is cached separately on declared_type_links.
         let ns_type = self.resolve_namespace_type(symbol);
 
         // 3. Build the merged type: take the namespace object type (which
@@ -3081,7 +3087,7 @@ impl Checker {
                     // Namespace type isn't an object (unexpected); nothing
                     // to merge into, so return the value type which carries
                     // the signatures.
-                    self.type_alias_links.get_or_default(symbol).declared_type =
+                    self.declared_type_links.get_or_default(symbol).declared_type =
                         Some(Arc::clone(&value_type));
                     return value_type;
                 }
@@ -3121,7 +3127,7 @@ impl Checker {
         };
 
         // Cache the merged type so future lookups hit the cache above.
-        self.type_alias_links.get_or_default(symbol).declared_type = Some(Arc::clone(&merged));
+        self.declared_type_links.get_or_default(symbol).declared_type = Some(Arc::clone(&merged));
         merged
     }
 
@@ -4440,8 +4446,10 @@ impl Checker {
             return;
         }
         // A NAMESPACE property access (`NS.f`) resolves through the
-        // namespace's symbol tables — if present, no TS2339 (the property's
-        // TYPE is recovered by `get_type_of_property_access`).
+        // namespace's EXPORTS only — non-exported members live in the
+        // namespace's locals and are not visible from outside (Go's
+        // resolveEntityName consults `exports`; TS2339 otherwise). The
+        // property's TYPE is recovered by `get_type_of_property_access`.
         if obj_expr.kind == SyntaxKind::Identifier
             && let Some(sym) = self.resolve_identifier(obj_expr)
         {
@@ -4449,15 +4457,7 @@ impl Checker {
             if base.flags.contains(SymbolFlags::ValueModule) {
                 let found = base.exports.entries.contains_key(name_text)
                     || base.members.entries.contains_key(name_text)
-                    || base.declarations.iter().any(|d| {
-                        d.kind == SyntaxKind::ModuleDeclaration
-                            && self
-                                .program
-                                .symbol_map()
-                                .locals
-                                .get(&d.id())
-                                .is_some_and(|l| l.entries.contains_key(name_text))
-                    });
+                    || self.ambient_namespace_local(&base, name_text).is_some();
                 if found {
                     return;
                 }
@@ -5808,8 +5808,15 @@ impl Checker {
                         }
                     }
                     // Overload-consecutiveness check (TS2389/2390/2391).
-                    // Ambient (`declare class`) members are exempt.
-                    if !node.has_syntactic_modifier(ModifierFlags::Ambient) {
+                    // Ambient (`declare class` OR inside a `declare
+                    // module`/namespace) members are exempt.
+                    if !node.has_syntactic_modifier(ModifierFlags::Ambient)
+                        && self.ambient_context_depth == 0
+                        && !self
+                            .current_file
+                            .as_ref()
+                            .is_some_and(|f| f.is_declaration_file)
+                    {
                         self.check_class_member_overloads(&data.members);
                     }
                     // Check member initializers / method bodies.
@@ -5872,6 +5879,50 @@ impl Checker {
                     && let crate::ast::NodeData::TypeAliasDeclaration(d) = &node.data
                 {
                     self.check_type_annotation(&d.type_node);
+                }
+                // TS2439: an import inside an ambient module declaration
+                // can't use a relative module name (both `import ... from`
+                // and `import x = require(...)` forms).
+                if matches!(
+                    node.kind,
+                    SyntaxKind::ImportDeclaration | SyntaxKind::ImportEqualsDeclaration
+                ) && self.ambient_context_depth > 0
+                    && self
+                        .current_file
+                        .as_ref()
+                        .is_some_and(|f| !f.file_name.starts_with("bundled://"))
+                {
+                    let spec = match &node.data {
+                        crate::ast::NodeData::ImportDeclaration(d) => {
+                            Some(d.module_specifier.text().to_string())
+                        }
+                        crate::ast::NodeData::ImportEqualsDeclaration(d) => {
+                            if let crate::ast::NodeData::ExternalModuleReference(ext) =
+                                &d.module_reference.data
+                            {
+                                Some(ext.expression.text().to_string())
+                            } else {
+                                None
+                            }
+                        }
+                        _ => None,
+                    };
+                    if let Some(spec) = spec {
+                        let relative = spec.starts_with("./")
+                            || spec.starts_with("../")
+                            || spec.starts_with(".\\")
+                            || spec.starts_with("..\\");
+                        if relative {
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                file,
+                                node.loc,
+                                crate::diagnostics::messages_generated::
+                                    IMPORT_OR_EXPORT_DECLARATION_IN_AN_AMBIENT_MODULE_DECLARATION_CANNOT_REFERENCE_MODULE_THROUGH_RELATIVE_MODULE_NAME,
+                                vec![],
+                            ));
+                        }
+                    }
                 }
                 // `import X = <entity>` — eagerly resolve the entity so a
                 // bad namespace path reports at the import (TS2503/TS2694),
@@ -5961,6 +6012,50 @@ impl Checker {
                 }
             }
             SyntaxKind::ModuleDeclaration => {
+                // TS2436: ambient module declarations can't use RELATIVE
+                // module names (`declare module "./foo"`).
+                if let crate::ast::NodeData::ModuleDeclaration(data) = &node.data
+                    && data.name.kind == SyntaxKind::StringLiteral
+                    && self
+                        .current_file
+                        .as_ref()
+                        .is_some_and(|f| !f.file_name.starts_with("bundled://"))
+                {
+                    let raw = data.name.text();
+                    let module_name = raw.trim_matches(['"', '\'']);
+                    let relative = module_name.starts_with("./")
+                        || module_name.starts_with("../")
+                        || module_name.starts_with(".\\")
+                        || module_name.starts_with("..\\");
+                    let ambient = node.has_syntactic_modifier(ModifierFlags::Ambient)
+                        || self.ambient_context_depth > 0
+                        || self
+                            .current_file
+                            .as_ref()
+                            .is_some_and(|f| f.is_declaration_file);
+                    // Inside an ambient module, an import/export through a
+                    // relative name is TS2439 (checked at the import sites
+                    // instead).
+                    if relative && ambient {
+                        // Only the DECLARATION itself is TS2436 when it's
+                        // top-level-ish; imports inside are TS2439 — handled
+                        // in the import walker.
+                        let is_decl_name_direct = !self
+                            .current_file
+                            .as_ref()
+                            .is_some_and(|f| f.external_module_indicator.is_some());
+                        if is_decl_name_direct {
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                file,
+                                data.name.loc,
+                                crate::diagnostics::messages_generated::
+                                    AMBIENT_MODULE_DECLARATION_CANNOT_SPECIFY_RELATIVE_MODULE_NAME,
+                                vec![],
+                            ));
+                        }
+                    }
+                }
                 // TS2664: a module AUGMENTATION (`declare module "x"` inside
                 // an external-module file) whose target cannot be found.
                 if let crate::ast::NodeData::ModuleDeclaration(data) = &node.data
@@ -6130,8 +6225,11 @@ impl Checker {
     fn check_variable_declaration_list(&mut self, node: &Arc<Node>) {
         if let crate::ast::NodeData::VariableDeclarationList(data) = &node.data {
             for decl in data.declarations.iter() {
-                // TS1039: variable initializers are not allowed in ambient
-                // contexts (`declare var x = 4;`).
+                // Ambient initializers (Go's checkGrammarVariableDeclaration):
+                // - `var`/`let` with an initializer → TS1039.
+                // - `const` (no type annotation) requires a simple literal or
+                //   literal enum reference → else the const-initializer
+                //   message.
                 if let crate::ast::NodeData::VariableDeclaration(vd) = &decl.data
                     && let Some(init) = &vd.initializer
                     && (node.has_syntactic_modifier(ModifierFlags::Ambient)
@@ -6148,14 +6246,45 @@ impl Checker {
                         .as_ref()
                         .is_some_and(|f| !f.file_name.starts_with("bundled://"))
                 {
-                    let file = self.current_file.clone();
-                    self.diagnostics.add(crate::ast::Diagnostic::new(
-                        file,
-                        init.loc,
-                        crate::diagnostics::messages_generated::
-                            INITIALIZERS_ARE_NOT_ALLOWED_IN_AMBIENT_CONTEXTS,
-                        vec![],
-                    ));
+                    let is_const = node.flags.contains(NodeFlags::Const);
+                    let is_simple_literal = match &init.data {
+                        crate::ast::NodeData::StringLiteral(_)
+                        | crate::ast::NodeData::NumericLiteral(_)
+                        | crate::ast::NodeData::BigIntLiteral(_)
+                        | crate::ast::NodeData::NoSubstitutionTemplateLiteral(_) => true,
+                        _ if matches!(init.kind, SyntaxKind::TrueKeyword | SyntaxKind::FalseKeyword) => {
+                            true
+                        }
+                        // Literal enum reference: `Enum.member` and
+                        // `Enum["member"]` / Enum[`member`].
+                        crate::ast::NodeData::PropertyAccessExpression(_)
+                        | crate::ast::NodeData::ElementAccessExpression(_) => true,
+                        _ => false,
+                    };
+                    let message = if is_const && vd.type_node.is_none() {
+                        if is_simple_literal {
+                            None
+                        } else {
+                            Some(
+                                crate::diagnostics::messages_generated::
+                                    A_CONST_INITIALIZER_IN_AN_AMBIENT_CONTEXT_MUST_BE_A_STRING_OR_NUMERIC_LITERAL_OR_LITERAL_ENUM_REFERENCE,
+                            )
+                        }
+                    } else {
+                        Some(
+                            crate::diagnostics::messages_generated::
+                                INITIALIZERS_ARE_NOT_ALLOWED_IN_AMBIENT_CONTEXTS,
+                        )
+                    };
+                    if let Some(message) = message {
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            file,
+                            init.loc,
+                            message,
+                            vec![],
+                        ));
+                    }
                 }
                 // TS1100/TS1215: `var arguments` / `var eval` in strict code
                 // (alwaysStrict, modules, or a "use strict" prologue) —
@@ -7812,6 +7941,73 @@ impl Checker {
         }
     }
 
+    /// TS2813/TS2814: a NON-ambient class declaration cannot share a symbol
+    /// with function declarations — the class "cannot implement overload
+    /// list" (TS2813, on each class name) and functions with bodies can only
+    /// merge with ambient classes (TS2814, on each function name). Ambient
+    /// classes (`declare class X` + `function X` declarations) merge cleanly.
+    /// Go: checkFunctionOrConstructorSymbol's `hasNonAmbientClass && Flags&
+    /// Function != 0` arm — reported on every declaration of the symbol.
+    fn check_class_function_merge(&mut self, statements: &[Arc<Node>]) {
+        let mut groups: std::collections::BTreeMap<String, Vec<Arc<Node>>> =
+            std::collections::BTreeMap::new();
+        for s in statements {
+            match &s.data {
+                crate::ast::NodeData::ClassDeclaration(d) => {
+                    if let Some(n) = &d.name
+                        && n.kind == SyntaxKind::Identifier
+                    {
+                        groups.entry(n.text().to_string()).or_default().push(Arc::clone(s));
+                    }
+                }
+                crate::ast::NodeData::FunctionDeclaration(d) => {
+                    if let Some(n) = &d.name
+                        && n.kind == SyntaxKind::Identifier
+                    {
+                        groups.entry(n.text().to_string()).or_default().push(Arc::clone(s));
+                    }
+                }
+                _ => {}
+            }
+        }
+        for (name, decls) in groups {
+            let has_non_ambient_class = decls.iter().any(|d| {
+                d.kind == SyntaxKind::ClassDeclaration
+                    && self.ambient_context_depth == 0
+                    && !d.has_syntactic_modifier(ModifierFlags::Ambient)
+            });
+            let has_function = decls
+                .iter()
+                .any(|d| d.kind == SyntaxKind::FunctionDeclaration);
+            if !(has_non_ambient_class && has_function) {
+                continue;
+            }
+            for d in decls {
+                let (name_node, message): (Option<&Arc<Node>>, _) = match &d.data {
+                    crate::ast::NodeData::ClassDeclaration(cd) => (
+                        cd.name.as_ref(),
+                        crate::diagnostics::messages_generated::
+                            CLASS_DECLARATION_CANNOT_IMPLEMENT_OVERLOAD_LIST_FOR_0,
+                    ),
+                    crate::ast::NodeData::FunctionDeclaration(fd) => (
+                        fd.name.as_ref(),
+                        crate::diagnostics::messages_generated::
+                            FUNCTION_WITH_BODIES_CAN_ONLY_MERGE_WITH_CLASSES_THAT_ARE_AMBIENT,
+                    ),
+                    _ => continue,
+                };
+                let Some(name_node) = name_node else { continue };
+                let file = self.current_file.clone();
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    name_node.loc,
+                    message,
+                    vec![name.clone()],
+                ));
+            }
+        }
+    }
+
     /// `check_statement_function_overloads` over a statement list AND the
     /// nested statement lists of blocks and namespace bodies — overloads
     /// declared inside `{ ... }` blocks or `namespace N { ... }` follow the
@@ -7828,6 +8024,7 @@ impl Checker {
             return;
         }
         self.check_statement_function_overloads(statements);
+        self.check_class_function_merge(statements);
         for s in statements {
             match &s.data {
                 crate::ast::NodeData::Block(d) => {
@@ -7869,6 +8066,22 @@ impl Checker {
     /// Ambient (`declare function`) signatures are exempt from the
     /// implementation requirement.
     fn check_statement_function_overloads(&mut self, statements: &[Arc<Node>]) {
+        // Ambient function declarations (`declare function f();`, or any
+        // function inside a `declare namespace` / .d.ts) are exempt from
+        // the implementation-must-follow rule.
+        let ambient_context = self.ambient_context_depth > 0
+            || self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| f.is_declaration_file);
+        let statements: Vec<Arc<Node>> = statements
+            .iter()
+            .filter(|s| {
+                !matches!(s.kind, SyntaxKind::FunctionDeclaration)
+                    || !(ambient_context || s.has_syntactic_modifier(ModifierFlags::Ambient))
+            })
+            .cloned()
+            .collect();
         let mut groups: std::collections::BTreeMap<String, Vec<usize>> =
             std::collections::BTreeMap::new();
         for (idx, s) in statements.iter().enumerate() {
@@ -7893,7 +8106,7 @@ impl Checker {
                 if !body {
                     if let Some(p) = prev {
                         if p + 1 != idx {
-                            self.report_function_impl_expected(statements, p);
+                            self.report_function_impl_expected(&statements, p);
                         }
                     }
                 } else {
@@ -7904,7 +8117,7 @@ impl Checker {
             if !has_body {
                 let last = idxs[idxs.len() - 1];
                 if !statements[last].has_syntactic_modifier(ModifierFlags::Ambient) {
-                    self.report_function_impl_expected(statements, last);
+                    self.report_function_impl_expected(&statements, last);
                 }
             }
         }
@@ -8526,7 +8739,8 @@ impl Checker {
     fn is_constant_enum_initializer(init: &Arc<Node>) -> bool {
         match &init.data {
             crate::ast::NodeData::NumericLiteral(_)
-            | crate::ast::NodeData::StringLiteral(_) => true,
+            | crate::ast::NodeData::StringLiteral(_)
+            | crate::ast::NodeData::NoSubstitutionTemplateLiteral(_) => true,
             crate::ast::NodeData::Identifier(_) => true,
             crate::ast::NodeData::PrefixUnaryExpression(u) => {
                 matches!(u.operator, SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::TildeToken)
@@ -8684,25 +8898,15 @@ impl Checker {
                     self.check_expression(&data.left);
                     self.check_expression(&data.right);
                     use crate::ast::SyntaxKind::*;
-                    // TS2873: a `null`-typed operand of a logical operator
-                    // (`||`/`&&`/`??`) is always falsy (Go's
-                    // checkBinaryLikeExpression truthiness check).
-                    if matches!(
-                        data.operator_token.kind,
-                        BarBarToken | AmpersandAmpersandToken | QuestionQuestionToken
-                    ) {
-                        let left_type = self.get_type_of_node(&data.left);
-                        if left_type.flags.contains(TypeFlags::Null) {
-                            let file = self.current_file.clone();
-                            self.diagnostics.add(crate::ast::Diagnostic::new(
-                                file,
-                                data.left.loc,
-                                crate::diagnostics::messages_generated::
-                                    THIS_KIND_OF_EXPRESSION_IS_ALWAYS_FALSY,
-                                vec![],
-                            ));
-                        }
-                    }
+                    // NOTE: Go emits TS2872/2873 ("always truthy"/"always
+                    // falsy") only from `checkTruthinessOfType` at
+                    // truthiness-test positions (if/while/ternary/`!`) via
+                    // SYNTACTIC predicate semantics — never for the operand
+                    // TYPES of `&&`/`||`/`??` (a null-typed identifier like
+                    // `let x = null; x ?? 5` is Go-legal). The syntactic
+                    // predicate-semantics family (TS2869/2871/2872/2873 over
+                    // ??/&&/|| chains, predicateSemantics.ts) is ported with
+                    // its test batch.
                     // TS2540: `obj.prop = value` where `prop` is declared
                     // `readonly` (a `readonly` modifier on a class property
                     // or parameter property). Mirrors Go's
@@ -9803,7 +10007,8 @@ impl Checker {
                     .exports
                     .get(text)
                     .or_else(|| symbol.members.get(text))
-                    .cloned();
+                    .cloned()
+                    .or_else(|| self.ambient_namespace_local(&symbol, text));
                 // Single-hop `export = <ns>` chase: when the module
                 // exports a namespace via export=, members resolve there
                 // (Go's resolveEntityName through export assignments). No
@@ -9844,10 +10049,39 @@ impl Checker {
                     }
                 }
                 match next {
-                    Some(next) => match self.follow_alias(&next) {
-                        Some(f) => Ok(f),
-                        None => Ok(next),
-                    },
+                    Some(next) => {
+                        // An alias member (`export import X = N` inside the
+                        // namespace) resolves through its declaration's
+                        // reference — Go's resolveAlias → resolveEntityName —
+                        // evaluated in the scope of the module declaring it
+                        // (the bare target name `N` is not visible from
+                        // here). Non-alias members keep the export_symbol
+                        // chase.
+                        let resolved = if next.flags.intersects(SymbolFlags::Alias) {
+                            let scope = symbol
+                                .declarations
+                                .iter()
+                                .find(|d| {
+                                    d.kind == SyntaxKind::ModuleDeclaration
+                                        || d.kind == SyntaxKind::SourceFile
+                                })
+                                .cloned();
+                            if let Some(ref scope) = scope {
+                                self.push_scope(scope);
+                            }
+                            let base = self.resolve_alias_base(Arc::clone(&next));
+                            if scope.is_some() {
+                                self.pop_scope();
+                            }
+                            base
+                        } else {
+                            match self.follow_alias(&next) {
+                                Some(f) => f,
+                                None => next,
+                            }
+                        };
+                        Ok(resolved)
+                    }
                     None => {
                         let _ = path_so_far;
                         Err((
@@ -9860,6 +10094,47 @@ impl Checker {
             }
             _ => Err((Arc::clone(name), String::new(), String::new())),
         }
+    }
+
+    /// Go's implicit export for ambient containers (`setExportContextFlag` +
+    /// `declareModuleMember`): every member of an ambient namespace (a
+    /// `declare namespace`, or a namespace in a .d.ts) is exported when the
+    /// container has no explicit export declarations. The binder keeps such
+    /// members in the namespace's LOCALS (routing them into `exports`
+    /// perturbs lazily-resolved lib types), so outside visibility of ambient
+    /// locals is decided here.
+    pub(crate) fn ambient_namespace_locals_visible(&self, ns: &Arc<Symbol>) -> bool {
+        if std::env::var_os("TSOX_NO_AMBIENT").is_some() {
+            return false;
+        }
+        ns.declarations.iter().any(|d| {
+            d.kind == SyntaxKind::ModuleDeclaration
+                && (d.has_syntactic_modifier(ModifierFlags::Ambient)
+                    || self
+                        .get_source_file_of_node(d)
+                        .is_some_and(|f| f.is_declaration_file))
+                && !crate::binder::Binder::has_export_declarations(d)
+        })
+    }
+
+    /// Ambient member lookup: the namespace's locals when the namespace is
+    /// an implicit-export ambient container (see
+    /// [`Self::ambient_namespace_locals_visible`]).
+    fn ambient_namespace_local(&self, ns: &Arc<Symbol>, name: &str) -> Option<Arc<Symbol>> {
+        if !self.ambient_namespace_locals_visible(ns) {
+            return None;
+        }
+        ns.declarations
+            .iter()
+            .filter(|d| d.kind == SyntaxKind::ModuleDeclaration)
+            .find_map(|d| {
+                self.program
+                    .symbol_map()
+                    .locals
+                    .get(&d.id())
+                    .and_then(|l| l.get(name))
+                    .cloned()
+            })
     }
 
     /// Resolve an alias symbol to its underlying base symbol: follows the
@@ -10558,6 +10833,68 @@ impl Checker {
             }
         }
 
+        // 1b. Node-location ancestry walk (Go's NameResolver resolves by the
+        // reference's lexical location, not the checker's dynamic position).
+        // Interface types are built lazily and may first be resolved from a
+        // foreign context (another file/statement), where the dynamic scope
+        // stack above doesn't contain the declaration's enclosing
+        // namespaces — walk the reference node's own parent chain instead.
+        // Runs after the dynamic walk so shadowing behavior is unchanged;
+        // only names that would otherwise be unresolved are recovered.
+        {
+            // Only true LEXICAL containers participate — object literals,
+            // interfaces, classes, and property-like nodes are not
+            // name-resolution scopes in Go (a sibling property `{ a: a }'
+            // must not satisfy the value reference).
+            const ANCESTRY_CONTAINERS: &[SyntaxKind] = &[
+                SyntaxKind::SourceFile,
+                SyntaxKind::ModuleDeclaration,
+                SyntaxKind::Block,
+                SyntaxKind::CatchClause,
+                SyntaxKind::ForStatement,
+                SyntaxKind::ForInStatement,
+                SyntaxKind::ForOfStatement,
+                SyntaxKind::FunctionDeclaration,
+                SyntaxKind::FunctionExpression,
+                SyntaxKind::ArrowFunction,
+                SyntaxKind::MethodDeclaration,
+                SyntaxKind::Constructor,
+                SyntaxKind::GetAccessor,
+                SyntaxKind::SetAccessor,
+                SyntaxKind::EnumDeclaration,
+            ];
+            let mut ancestor = node.parent.as_ref();
+            while let Some(a) = ancestor {
+                if !ANCESTRY_CONTAINERS.contains(&a.kind) {
+                    ancestor = a.parent.as_ref();
+                    continue;
+                }
+                let aid = a.id();
+                if let Some(locals) = symbol_map.locals.get(&aid) {
+                    if let Some(sym) = locals.get(name)
+                        && sym.flags.intersects(meaning)
+                    {
+                        return self.follow_alias(sym);
+                    }
+                }
+                if let Some(a_sym) = symbol_map.symbols.get(&aid)
+                    && !a_sym.flags.intersects(SymbolFlags::Class)
+                {
+                    if let Some(sym) = a_sym.members.get(name)
+                        && sym.flags.intersects(meaning)
+                    {
+                        return self.follow_alias(sym);
+                    }
+                    if a_sym.flags.intersects(SymbolFlags::MODULE | SymbolFlags::ENUM)
+                        && let Some(sym) = a_sym.exports.get(name)
+                        && sym.flags.intersects(meaning)
+                    {
+                        return self.follow_alias(sym);
+                    }
+                }
+                ancestor = a.parent.as_ref();
+            }
+        }
         // 2. Check for special built-in symbols.
         // `arguments` is in scope inside function declarations, but not arrow functions.
         if self.function_scope_count > 0
@@ -10601,16 +10938,26 @@ impl Checker {
         if !is_pure_alias {
             return Some(Arc::clone(symbol));
         }
-        // Follow the export_symbol chain.
-        // Simple implementation without cycle detection (aliases are not
-        // created yet in the current binder).
+        // Follow the export_symbol chain, stopping on any cycle. Exported
+        // module members carry a self-referential export link (binder's
+        // single-symbol export pattern), so a pure alias whose export_symbol
+        // points back into the chain must not be chased forever — Go's eager
+        // alias resolution (aliasMarker) never re-enters an alias being
+        // resolved; on a cycle it yields the alias itself.
         let mut current = Arc::clone(symbol);
+        let mut seen: Vec<*const Symbol> = vec![Arc::as_ptr(symbol)];
         loop {
             if let Some(ref target) = current.export_symbol {
+                let target_ptr = Arc::as_ptr(target);
+                if seen.contains(&target_ptr) {
+                    // Cycle (A→A, A→B→A, …) — return the alias itself.
+                    return Some(Arc::clone(&current));
+                }
                 let is_pure = target.flags == SymbolFlags::Alias
                     || (target.flags.intersects(SymbolFlags::Alias)
                         && target.flags.intersects(SymbolFlags::Assignment));
                 if is_pure {
+                    seen.push(target_ptr);
                     current = Arc::clone(target);
                     continue;
                 }

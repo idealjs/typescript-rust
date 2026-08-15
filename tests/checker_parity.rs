@@ -6759,9 +6759,11 @@ fn checker_ts2451_const_then_let_redeclare() {
 
 #[test]
 fn checker_ts2451_triple_redeclare_reports_two() {
-    // Three `let x` → TS2451 reported for the 2nd and 3rd declarations.
+    // Three `let x` → TS2451 on EVERY declaration (verified against
+    // typescript-go: one error per line, deduplicated — the middle
+    // declaration is reported once even though two conflicts touch it).
     let diags = check_source("let x = 1;\nlet x = 2;\nlet x = 3;");
-    assert_diagnostic_count(&diags, 2451, 2);
+    assert_diagnostic_count(&diags, 2451, 3);
 }
 
 #[test]
@@ -7076,16 +7078,22 @@ fn checker_ts2300_duplicate_imports() {
 
 #[test]
 fn checker_ts2300_class_then_function() {
-    // A class and a function with the same name cannot merge → TS2300.
+    // A non-ambient class cannot merge with function declarations —
+    // current Go reports TS2813 (class) + TS2814 (function), not TS2300.
+    // Verified against typescript-go: `class C {}; function C() {}` →
+    // TS2813 at the class name, TS2814 at the function name.
     let diags = check_source("class C {}\nfunction C() {}");
-    assert_diagnostic_code(&diags, 2300);
+    assert_diagnostic_code(&diags, 2813);
+    assert_diagnostic_code(&diags, 2814);
 }
 
 #[test]
 fn checker_ts2300_function_then_class() {
-    // Reverse order: function then class → TS2300.
+    // Reverse order: same TS2813 + TS2814 pair (Go reports on every
+    // declaration of the merged symbol regardless of order).
     let diags = check_source("function C() {}\nclass C {}");
-    assert_diagnostic_code(&diags, 2300);
+    assert_diagnostic_code(&diags, 2813);
+    assert_diagnostic_code(&diags, 2814);
 }
 
 #[test]
@@ -7580,16 +7588,12 @@ fn checker_static_method_call_no_error() {
 #[test]
 fn checker_getter_setter_no_error() {
     // `get`/`set` accessors: reading and writing `value` route through the
-    // accessors and produce no diagnostics.
+    // accessors and produce no diagnostics (verified against typescript-go).
+    // The checker now models accessor members on the class type.
     let diags = check_source(
         "class C {\n  _v: number = 0;\n  get value(): number { return this._v; }\n  set value(v: number) { this._v = v; }\n}\nconst c = new C();\nc.value = 5;\nlet x = c.value;",
     );
-    // KNOWN LIMITATION: the parser now correctly parses `get`/`set` accessors
-    // (previously they misparsed as properties, so `value` resolved as a plain
-    // property and this passed). The checker does not yet model accessor
-    // members on the class type, so `c.value` is unresolved → TS2339 x2.
-    // Flip back to assert_no_diagnostics once the checker handles accessors.
-    assert_diagnostic_count(&diags, 2339, 2);
+    assert_no_diagnostics(&diags);
 }
 
 #[test]

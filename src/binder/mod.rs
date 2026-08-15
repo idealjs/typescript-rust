@@ -83,6 +83,10 @@ struct ActiveLabel {
 pub struct Binder {
     /// Side table mapping nodes to symbols, locals, and flow nodes.
     pub symbol_map: NodeSymbolMap,
+    /// The file currently being bound — attached to binder diagnostics
+    /// (TS2300/TS2451 …) so they render with file/position like Go's
+    /// `binder.createDiagnosticForNode`.
+    current_source_file: Option<Arc<SourceFile>>,
     /// The current container node (where members/exports go).
     container: Option<Arc<Node>>,
     /// The current block-scoped container (where block-scoped locals go).
@@ -144,6 +148,7 @@ impl Binder {
     pub fn new() -> Self {
         Self {
             symbol_map: NodeSymbolMap::new(),
+            current_source_file: None,
             container: None,
             block_scope_container: None,
             this_container: None,
@@ -164,7 +169,8 @@ impl Binder {
     /// Bind a source file: walk the AST and create symbols.
     ///
     /// Mirrors `binder.BindSourceFile` in Go.
-    pub fn bind_source_file(&mut self, file: &SourceFile) -> &NodeSymbolMap {
+    pub fn bind_source_file(&mut self, file: &Arc<SourceFile>) -> &NodeSymbolMap {
+        self.current_source_file = Some(Arc::clone(file));
         // Populate parent pointers before binding so the binder can locate
         // enclosing containers (e.g. the `ConditionalType` that owns an
         // `infer R` type parameter). Mirrors Go's parser, which sets
@@ -366,14 +372,45 @@ impl Binder {
             let both_block_scoped_var = existing.flags.contains(SymbolFlags::BlockScopedVariable)
                 && includes.contains(SymbolFlags::BlockScopedVariable);
             if !name.is_empty() {
-                if both_block_scoped_var {
-                    if Self::is_let_or_const_declaration(node) {
-                        self.symbol_map.binder_diagnostics.push(Diagnostic::new(
-                            None,
-                            node.loc,
-                            CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0,
+                // Go reports the conflict on EVERY declaration of the
+                // existing symbol (name node, falling back to the node) and
+                // then on the new declaration's name — so `class C{} class
+                // C{}` yields two TS2300s, one per declaration.
+                let report_all = |b: &mut Self, message: &'static crate::diagnostics::Message| {
+                    // Identical duplicates (the middle declarations of a
+                    // triple `let x` redeclare) collapse — Go's diagnostics
+                    // are deduplicated before reporting.
+                    let mut push = |b: &mut Self, loc: crate::core::text::TextRange| {
+                        if b
+                            .symbol_map
+                            .binder_diagnostics
+                            .iter()
+                            .any(|d| d.loc == loc && d.code == message.code)
+                        {
+                            return;
+                        }
+                        b.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                            b.current_source_file.clone(),
+                            loc,
+                            *message,
                             vec![name.clone()],
                         ));
+                    };
+                    for d in &existing.declarations {
+                        let name_node = crate::ast::utilities::get_name_of_declaration(d)
+                            .unwrap_or_else(|| Arc::clone(d));
+                        push(b, name_node.loc);
+                    }
+                    let name_node = crate::ast::utilities::get_name_of_declaration(node)
+                        .unwrap_or_else(|| Arc::clone(node));
+                    push(b, name_node.loc);
+                };
+                if both_block_scoped_var {
+                    if Self::is_let_or_const_declaration(node) {
+                        report_all(
+                            self,
+                            &CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0,
+                        );
                     }
                     // else: `var` + `var` — redeclaration is legal, no error.
                 } else {
@@ -432,12 +469,7 @@ impl Binder {
                             && other_is_fn_or_class(existing.flags))
                             || (existing_is_var && other_is_fn_or_class(includes));
                         if !var_with_fn_or_class {
-                            self.symbol_map.binder_diagnostics.push(Diagnostic::new(
-                                None,
-                                node.loc,
-                                DUPLICATE_IDENTIFIER_0,
-                                vec![name.clone()],
-                            ));
+                            report_all(self, &DUPLICATE_IDENTIFIER_0);
                         }
                     }
                 }
@@ -478,6 +510,15 @@ impl Binder {
                 // Use combined modifier flags to handle `export const x`
                 // where the `Export` modifier is on the parent
                 // VariableStatement, not the VariableDeclaration itself.
+                //
+                // NOTE Go's implicit export (`setExportContextFlag`: an
+                // ambient container with no explicit export declarations
+                // exports everything) is NOT applied when routing here —
+                // routing ambient members into `exports` perturbs the
+                // checker's lazily-resolved lib types. Ambient visibility
+                // from outside is handled by the checker consulting the
+                // namespace's locals for ambient containers (see
+                // `ambient_namespace_locals_visible`).
                 let has_export = self
                     .get_combined_modifier_flags(node)
                     .contains(ModifierFlags::Export);
@@ -703,26 +744,34 @@ impl Binder {
         // name. This is how lib files declare `interface Object` alongside
         // `declare var Object: ObjectConstructor;`, or `type NodeFilter`
         // alongside `declare var NodeFilter: { ... }`.
-        let existing_type_only = existing_flags.contains(SymbolFlags::Interface)
-            || existing_flags.contains(SymbolFlags::TypeAlias);
-        let new_type_only = new_flags.contains(SymbolFlags::Interface)
-            || new_flags.contains(SymbolFlags::TypeAlias);
-        // Interfaces/type aliases coexist with ANY value-side symbol —
-        // including classes (`declare class X` + `interface X`) and
-        // functions, like Go's binder.
-        if existing_type_only && !new_type_only {
-            return true;
-        }
-        if new_type_only && !existing_type_only {
-            return true;
-        }
-        // Class + Function merge (`declare class X` + `function X`).
-        let class_fn = SymbolFlags::Class.union(SymbolFlags::Function);
-        if existing_flags.intersects(class_fn)
-            && new_flags.intersects(class_fn)
-            && !existing_flags.intersects(SymbolFlags::FunctionScopedVariable)
-            && !new_flags.intersects(SymbolFlags::FunctionScopedVariable)
+        // Go's excludes table: InterfaceExcludes = Type & ^(Interface |
+        // Class) — an interface coexists with ANY value-side symbol
+        // including classes (`declare class X` + `interface X`).
+        // TypeAliasExcludes = Type — a type alias coexists with
+        // value-side symbols EXCEPT classes (`class X` + `type X` is
+        // TS2300, but `type T` + `var T` / `function T` merge).
+        let existing_interface = existing_flags.contains(SymbolFlags::Interface);
+        let new_interface = new_flags.contains(SymbolFlags::Interface);
+        let existing_type_alias = existing_flags.contains(SymbolFlags::TypeAlias);
+        let new_type_alias = new_flags.contains(SymbolFlags::TypeAlias);
+        let class_side = SymbolFlags::Class;
+        if (existing_interface && !new_interface && !new_type_alias)
+            || (new_interface && !existing_interface && !existing_type_alias)
+            || (existing_type_alias && !new_type_alias && !new_flags.intersects(class_side) && !new_interface)
+            || (new_type_alias && !existing_type_alias && !existing_flags.intersects(class_side) && !existing_interface)
         {
+            return true;
+        }
+        // Class + Function merge (`declare class X` + `function X`) — Go's
+        // ClassExcludes/FunctionExcludes re-enable Function/Class. Cross-kind
+        // only: Class + Class is TS2300 (Class stays excluded), and the
+        // checker reports TS2813/TS2814 when a non-ambient class meets
+        // function declarations.
+        let existing_class = existing_flags.contains(SymbolFlags::Class);
+        let new_class = new_flags.contains(SymbolFlags::Class);
+        let existing_fn = existing_flags.contains(SymbolFlags::Function);
+        let new_fn = new_flags.contains(SymbolFlags::Function);
+        if (existing_class && new_fn) || (existing_fn && new_class) {
             return true;
         }
         // Namespace merging: a ValueModule can merge with another ValueModule,
@@ -785,6 +834,30 @@ impl Binder {
             }
         }
         true
+    }
+
+    /// Whether a container (SourceFile / ModuleDeclaration) has any explicit
+    /// export statements (`export ...` / `export = ...`). Go's
+    /// `hasExportDeclarations`: an ambient container WITHOUT such statements
+    /// is an implicit-export context (everything inside is exported).
+    pub(crate) fn has_export_declarations(container: &Arc<Node>) -> bool {
+        let statements: &[Arc<Node>] = match &container.data {
+            crate::ast::NodeData::SourceFile(sf) => &sf.statements.nodes,
+            crate::ast::NodeData::ModuleDeclaration(md) => {
+                if let Some(body) = &md.body
+                    && body.kind == SyntaxKind::ModuleBlock
+                    && let crate::ast::NodeData::ModuleBlock(block) = &body.data
+                {
+                    &block.statements.nodes
+                } else {
+                    &[]
+                }
+            }
+            _ => &[],
+        };
+        statements.iter().any(|s| {
+            s.kind == SyntaxKind::ExportDeclaration || s.kind == SyntaxKind::ExportAssignment
+        })
     }
 
     /// Whether `node` is a function-scoped `var` declaration (as opposed to a
@@ -2895,7 +2968,7 @@ fn has_locals(kind: SyntaxKind) -> bool {
 }
 
 /// Bind a source file using a fresh binder.
-pub fn bind_source_file(file: &SourceFile) -> NodeSymbolMap {
+pub fn bind_source_file(file: &Arc<SourceFile>) -> NodeSymbolMap {
     let mut binder = Binder::new();
     binder.bind_source_file(file);
     std::mem::take(&mut binder.symbol_map)
@@ -2929,9 +3002,9 @@ mod tests {
     use super::*;
     use crate::parser::Parser;
 
-    fn parse_and_bind(source: &str) -> (SourceFile, NodeSymbolMap) {
-        let source_file = Parser::parse_source_file_text("test.ts", source.to_string());
-        let symbol_map = bind_source_file(&source_file);
+    fn parse_and_bind(source: &str) -> (Arc<SourceFile>, NodeSymbolMap) {
+        let source_file = Arc::new(Parser::parse_source_file_text("test.ts", source.to_string()));
+        let symbol_map = bind_source_file(&Arc::clone(&source_file));
         (source_file, symbol_map)
     }
 
@@ -2948,7 +3021,7 @@ mod tests {
         assert_eq!(var_stmt.kind, SyntaxKind::VariableStatement);
         // Symbol count should be > 0 (file symbol + variable symbol)
         let mut binder = Binder::new();
-        binder.bind_source_file(&file);
+        binder.bind_source_file(&Arc::clone(&file));
         assert!(binder.symbol_count() >= 2);
         let _ = map;
     }
@@ -2957,7 +3030,7 @@ mod tests {
     fn bind_function_declaration() {
         let (file, _map) = parse_and_bind("function foo() { return 42; }");
         let mut binder = Binder::new();
-        binder.bind_source_file(&file);
+        binder.bind_source_file(&Arc::clone(&file));
         assert!(binder.symbol_count() >= 2);
     }
 
@@ -2965,7 +3038,7 @@ mod tests {
     fn bind_class_declaration() {
         let (file, _map) = parse_and_bind("class Foo { bar() {} }");
         let mut binder = Binder::new();
-        binder.bind_source_file(&file);
+        binder.bind_source_file(&Arc::clone(&file));
         assert!(binder.symbol_count() >= 3); // file + class + method
     }
 

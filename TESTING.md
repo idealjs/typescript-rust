@@ -1,22 +1,22 @@
 # 测试流程
 
-1. 每次测试 10 个测试用例,不需要考虑回归。指令如下
+1. 每次测试 100 个测试用例,不需要考虑回归。指令如下
 
 ```
-TSOX_SUBMODULE_START=0 TSOX_SUBMODULE_END=10 TSOX_SUBMODULE_JOBS=4 cargo test --test submodule_compiler
+TSOX_SUBMODULE_START=0 TSOX_SUBMODULE_END=99 TSOX_SUBMODULE_JOBS=4 cargo test --test submodule_compiler
 ```
 
 2. 测试完成后，检查测试日志，对比 go 版，是否符合测试预期。
   - 如果不符合预期，检查原逻辑，尝试修复，重复测试步骤
-  - 如果符合测试预期，记录到`当前批次`后，执行后10个测试用例，重复测试步骤
+  - 如果符合测试预期，记录到`当前批次`后，执行后100个测试用例，重复测试步骤
 
-3. 严格 10 个一批、只向前、不做回归
+3. 严格 100 个一批、只向前、不做回归
 4. 不允许原逻辑未跳过的情况下，进行跳过测试用例
 
 # 当前批次
 
-- start: 141
-- end: 150
+- start: 100
+- end: 199
 
 # 测试流程修改
 
