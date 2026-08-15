@@ -278,34 +278,44 @@ impl Checker {
             }
             _ => return self.error_type(),
         };
-        // Only Identifier names are handled for now; QualifiedName
-        // (e.g. `A.B`) needs module/namespace resolution.
-        if type_name.kind != SyntaxKind::Identifier {
+        // Qualified names (`A.B`) resolve through module/namespace exports
+        // (Go's resolveEntityName); identifiers use the scope stack.
+        // `intrinsic` is TypeScript's special keyword type (the alias bodies
+        // of `Uppercase`/`Lowercase`/… in lib.es5.d.ts) — never resolved as
+        // a name and never reported.
+        if type_name.kind == SyntaxKind::Identifier && type_name.text() == "intrinsic" {
             return self.error_type();
         }
-        let symbol = match self.resolve_identifier(type_name) {
-            Some(s) => s,
-            None => {
-                // Report TS2304 "Cannot find name '{0}'." for unresolved type
-                // references. Mirrors Go's NameResolver which is called with
-                // `nameNotFoundMessage = Cannot_find_name_0` for type nodes.
-                //
-                // Suppressed while building interface call/construct
-                // signatures (see `suppress_cannot_find_name_in_type_nodes`),
-                // where lib.d.ts signatures may reference signature-level type
-                // parameters the binder has no symbol for.
-                if self.suppress_cannot_find_name_in_type_nodes == 0 {
-                    use crate::diagnostics::messages_generated::CANNOT_FIND_NAME_0;
-                    let name_text = type_name.text();
-                    let file = self.current_file.clone();
-                    self.diagnostics.add(crate::ast::Diagnostic::new(
-                        file,
-                        type_name.loc,
-                        CANNOT_FIND_NAME_0,
-                        vec![name_text.to_string()],
-                    ));
+        let symbol = if type_name.kind == SyntaxKind::Identifier {
+            match self.resolve_identifier(type_name) {
+                Some(s) => s,
+                None => {
+                    // Report TS2304 "Cannot find name '{0}'." for unresolved type
+                    // references. Mirrors Go's NameResolver which is called with
+                    // `nameNotFoundMessage = Cannot_find_name_0` for type nodes.
+                    //
+                    // Suppressed while building interface call/construct
+                    // signatures (see `suppress_cannot_find_name_in_type_nodes`),
+                    // where lib.d.ts signatures may reference signature-level type
+                    // parameters the binder has no symbol for.
+                    if self.suppress_cannot_find_name_in_type_nodes == 0 {
+                        use crate::diagnostics::messages_generated::CANNOT_FIND_NAME_0;
+                        let name_text = type_name.text();
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            file,
+                            type_name.loc,
+                            CANNOT_FIND_NAME_0,
+                            vec![name_text.to_string()],
+                        ));
+                    }
+                    return self.error_type();
                 }
-                return self.error_type();
+            }
+        } else {
+            match self.resolve_qualified_symbol(type_name) {
+                Some(s) => s,
+                None => return self.error_type(),
             }
         };
         // Type parameter: build a TypeParameter type with the constraint
@@ -376,6 +386,46 @@ impl Checker {
             return instance_type;
         }
         if !symbol.flags.contains(SymbolFlags::TypeAlias) {
+            // A pure VALUE symbol (a variable/value import) in a type
+            // position is TS2749 (suggest `typeof`). Reported for
+            // identifier names; suppressed in signature-building contexts
+            // like TS2304 above.
+            if type_name.kind == SyntaxKind::Identifier
+                && symbol.flags.intersects(
+                    SymbolFlags::BlockScopedVariable
+                        | SymbolFlags::FunctionScopedVariable
+                        | SymbolFlags::Function,
+                )
+                && !symbol.flags.intersects(
+                    SymbolFlags::Interface
+                        | SymbolFlags::Class
+                        | SymbolFlags::TypeParameter
+                        | SymbolFlags::TypeAlias
+                        // Import aliases may legitimately name types
+                        // (`import A = NS; let x: A.B`, or a module whose
+                        // default export is an interface) — resolving the
+                        // alias target is future work.
+                        | SymbolFlags::Alias,
+                )
+                && self.suppress_cannot_find_name_in_type_nodes == 0
+                && !self.has_same_named_type_symbol(type_name.text())
+                // Only user files: lib.d.ts var+interface merges keep
+                // separate symbols in our binder and would over-report.
+                && self
+                    .current_file
+                    .as_ref()
+                    .is_some_and(|f| !f.file_name.starts_with("bundled://"))
+            {
+                let name_text = type_name.text().to_string();
+                let file = self.current_file.clone();
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    type_name.loc,
+                    crate::diagnostics::messages_generated::
+                        X_0_REFERS_TO_A_VALUE_BUT_IS_BEING_USED_AS_A_TYPE_HERE_DID_YOU_MEAN_TYPEOF_0,
+                    vec![name_text.clone(), name_text],
+                ));
+            }
             // Class/etc.: defer to error_type (any) for now.
             return self.error_type();
         }
@@ -500,7 +550,7 @@ impl Checker {
     ///
     /// Heritage clauses (`extends A`) are not yet merged — only the
     /// interface's own members are included.
-    fn resolve_interface_type(
+    pub(crate) fn resolve_interface_type(
         &mut self,
         symbol: &Arc<Symbol>,
         type_arguments: Option<Arc<NodeList>>,
@@ -602,11 +652,116 @@ impl Checker {
                 // `lastLocation` is a static member.
                 let saved_static = self.in_static_member_type;
                 self.in_static_member_type = false;
-                let result = self.build_interface_type_from_members(&merged_list);
+                let own_result = self.build_interface_type_from_members(&merged_list);
                 self.in_static_member_type = saved_static;
+                // `extends` bases: merge each base interface's members and
+                // signatures into the derived type. Derived members override
+                // same-named base members; CALL signatures concatenate (the
+                // derived interface overloads the base — `interface Bar
+                // extends Foo { (key: string): string }` keeps Foo's
+                // `(): string` too). Mirrors Go's `resolveBaseTypes` +
+                // `resolveDeclaredMembers` for interfaces. Resolved INSIDE
+                // the interface's scope so its type parameters resolve in
+                // base references (`extends Base<T>`).
+                let mut base_types: Vec<Arc<Type>> = Vec::new();
+                for decl in &interface_decls {
+                    if let NodeData::InterfaceDeclaration(d) = &decl.data {
+                        if let Some(heritage) = &d.heritage_clauses {
+                            for clause in heritage.iter() {
+                                if let NodeData::HeritageClause(hc) = &clause.data
+                                    && hc.token == SyntaxKind::ExtendsKeyword
+                                {
+                                    for type_ref in hc.types.iter() {
+                                        base_types.push(self.get_type_from_type_node(type_ref));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
                 self.pop_scope();
                 if has_type_args {
                     self.type_argument_stack.pop();
+                }
+                let result = if base_types.is_empty() {
+                    own_result.clone()
+                } else {
+                    let mut merged = own_result.clone();
+                    for base in &base_types {
+                        merged = self.merge_interface_type_with_base(&merged, base);
+                    }
+                    merged
+                };
+                // TS2430: a derived interface member must be assignable to
+                // the same-named base member (`interface Bar extends Foo`).
+                // Checked against the OWN members (before merging) so
+                // inherited members don't self-compare. Reported on the
+                // interface's name (Go's checkTypeStack relation error).
+                if !base_types.is_empty() {
+                    let own_structured = match &own_result.data {
+                        TypeData::Object(o) => Some(&o.structured),
+                        _ => None,
+                    };
+                    let name_loc = interface_decls.first().and_then(|d| {
+                        match &d.data {
+                            NodeData::InterfaceDeclaration(d) => Some(d.name.loc),
+                            _ => None,
+                        }
+                    });
+                                            if let (Some(own), Some(name_loc)) = (own_structured, name_loc) {
+                        for base in &base_types {
+                            let base_structured = match &base.data {
+                                TypeData::Object(o) => Some(&o.structured),
+                                _ => None,
+                            };
+                            let Some(base_structured) = base_structured else {
+                                continue;
+                            };
+                            for own_prop in &own.properties {
+                                let Some(base_prop) = base_structured
+                                    .members
+                                    .get(&own_prop.name)
+                                else {
+                                    continue;
+                                };
+                                let derived_type = self
+                                    .value_symbol_links
+                                    .get(own_prop)
+                                    .and_then(|l| l.resolved_type.clone());
+                                let base_type = self
+                                    .value_symbol_links
+                                    .get(base_prop)
+                                    .and_then(|l| l.resolved_type.clone());
+                                if let (Some(dt), Some(bt)) = (derived_type, base_type) {
+                                    if !self.is_type_assignable_to(&dt, &bt) {
+                                        let base_name = base
+                                            .symbol
+                                            .as_ref()
+                                            .map(|s| s.name.clone())
+                                            .unwrap_or_default();
+                                        let file = self.current_file.clone();
+                                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                                            file,
+                                            name_loc,
+                                            crate::diagnostics::messages_generated::
+                                                INTERFACE_0_INCORRECTLY_EXTENDS_INTERFACE_1,
+                                            vec![symbol.name.clone(), base_name],
+                                        ));
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                // Attach the interface symbol so the type printer uses the
+                // declared name (Go's `Type.Symbol`). The type was just
+                // created above and is not yet shared.
+                {
+                    let result_mut = Arc::as_ptr(&result) as *mut crate::checker::types::Type;
+                    unsafe {
+                        (*result_mut).symbol = Some(Arc::clone(symbol));
+                    }
                 }
                 result
             }
@@ -1076,6 +1231,75 @@ impl Checker {
         })
     }
 
+    /// Merge a derived interface type with one of its `extends` base types:
+    /// derived members override same-named base members (base keeps list
+    /// position), and base call/construct signatures are concatenated so
+    /// both overload sets remain callable.
+    fn merge_interface_type_with_base(
+        &mut self,
+        derived: &Arc<Type>,
+        base: &Arc<Type>,
+    ) -> Arc<Type> {
+        if base.flags.contains(TypeFlags::Any) {
+            return Arc::clone(derived);
+        }
+        let derived_data = match &derived.data {
+            TypeData::Object(o) => &o.structured,
+            _ => return Arc::clone(derived),
+        };
+        let base_data = match &base.data {
+            TypeData::Object(o) => &o.structured,
+            _ => return Arc::clone(derived),
+        };
+        let mut symbol_table = SymbolTable::new();
+        let mut props: Vec<Arc<Symbol>> = Vec::new();
+        for prop in &base_data.properties {
+            symbol_table.insert(prop.name.clone(), Arc::clone(prop));
+            props.push(Arc::clone(prop));
+        }
+        for prop in &derived_data.properties {
+            if symbol_table.get(&prop.name).is_some() {
+                symbol_table.insert(prop.name.clone(), Arc::clone(prop));
+                if let Some(slot) = props.iter_mut().find(|p| p.name == prop.name) {
+                    *slot = Arc::clone(prop);
+                }
+            } else {
+                symbol_table.insert(prop.name.clone(), Arc::clone(prop));
+                props.push(Arc::clone(prop));
+            }
+        }
+        let mut index_infos = base_data.index_infos.clone();
+        index_infos.extend(derived_data.index_infos.iter().cloned());
+        // Concatenate overload sets: base call signatures first (matching
+        // Go's member resolution order), then derived; construct signatures
+        // after call signatures (StructuredTypeData layout).
+        let mut call_signatures: Vec<Arc<Signature>> =
+            base_data.call_signatures().to_vec();
+        let base_call_count = call_signatures.len();
+        call_signatures.extend(derived_data.call_signatures().iter().cloned());
+        let mut signatures = call_signatures;
+        signatures.extend(base_data.construct_signatures().iter().cloned());
+        signatures.extend(derived_data.construct_signatures().iter().cloned());
+        Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Anonymous,
+            id: 0,
+            symbol: None,
+            alias: None,
+            data: TypeData::Object(ObjectTypeData {
+                structured: StructuredTypeData {
+                    members: symbol_table,
+                    properties: props,
+                    index_infos,
+                    signatures,
+                    call_signature_count: base_call_count + derived_data.call_signatures().len(),
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        })
+    }
+
     /// Resolve an `enum` declaration to a union of its member literal types.
     ///
     /// Mirrors Go's `getEnumMemberType`/enum resolution in
@@ -1309,18 +1533,64 @@ impl Checker {
         let NodeData::TypeQueryNode(d) = &node.data else {
             return self.error_type();
         };
-        if d.expr_name.kind != SyntaxKind::Identifier {
-            // Qualified `typeof a.b` — not yet resolved.
-            return self.error_type();
-        }
-        let Some(symbol) = self.resolve_identifier(&d.expr_name) else {
-            return self.error_type();
-        };
-        // A class reference yields the class (constructor) type.
-        for decl in &symbol.declarations {
-            if decl.kind == SyntaxKind::ClassDeclaration {
-                return self.get_type_of_class_declaration(decl);
+        // Qualified `typeof a.b` — resolve the entity name to a symbol,
+        // then its value/constructor type.
+        let symbol = if d.expr_name.kind == SyntaxKind::Identifier {
+            match self.resolve_identifier(&d.expr_name) {
+                Some(s) => s,
+                None => return self.error_type(),
             }
+        } else {
+            match self.resolve_qualified_symbol(&d.expr_name) {
+                Some(s) => s,
+                None => return self.error_type(),
+            }
+        };
+        // A class reference yields the class (constructor) type; with type
+        // arguments (`typeof Cls<number>`) the class's type parameters are
+        // substituted while building (Go's instantiation of the typeof
+        // target).
+        let class_decl = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::ClassDeclaration)
+            .cloned();
+        if let Some(decl) = class_decl {
+            let subst = d.type_arguments.as_ref().map(|args| {
+                let sym_map = self.program.symbol_map();
+                let tp_symbols: Vec<Arc<crate::ast::Symbol>> = match &decl.data {
+                    NodeData::ClassDeclaration(cd) => match &cd.type_parameters {
+                        Some(tps) => tps
+                            .iter()
+                            .filter_map(|tp| sym_map.symbol_of(tp).map(Arc::clone))
+                            .collect(),
+                        None => Vec::new(),
+                    },
+                    _ => Vec::new(),
+                };
+                let arg_types: Vec<Arc<Type>> = args
+                    .iter()
+                    .map(|a| self.get_type_from_type_node(a))
+                    .collect();
+                let mut mapping = HashMap::new();
+                for (i, tp) in tp_symbols.iter().enumerate() {
+                    if i < arg_types.len() {
+                        mapping.insert(
+                            Arc::as_ptr(tp) as *const crate::ast::Symbol,
+                            Arc::clone(&arg_types[i]),
+                        );
+                    }
+                }
+                mapping
+            });
+            if let Some(mapping) = subst {
+                self.type_argument_stack.push(mapping);
+            }
+            let t = self.get_type_of_class_declaration(&decl);
+            if d.type_arguments.is_some() {
+                self.type_argument_stack.pop();
+            }
+            return t;
         }
         // Other values: reuse the symbol's resolved value type when present.
         if let Some(links) = self.value_symbol_links.get(&symbol)
@@ -1510,13 +1780,14 @@ impl Checker {
     fn get_type_from_function_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
         match &node.data {
             NodeData::FunctionTypeNode(data) => {
-                // Suppress TS2304 while resolving the signature's parameter/
-                // return types: function-type annotations may reference
-                // signature-level type parameters (e.g. `<T>(x: T) => T`)
-                // that have no binder symbol in type-node resolution context.
-                // Such names degrade to `any` instead of erroring, matching
-                // the behavior for CallSignature/ConstructSignature.
-                self.suppress_cannot_find_name_in_type_nodes += 1;
+                // Resolve parameter and return types WITHOUT suppressing
+                // TS2304: unresolved names in a function-type annotation
+                // (`(b: B) => C2`) are reported like any other type
+                // reference (Go's checker resolves the signature parts with
+                // the normal nameNotFoundMessage). Signature-level type
+                // parameters (`<T>(x: T) => T`) resolve through the
+                // function-type's own scope pushed by
+                // build_signature_from_function_like_type_node.
                 let return_type = match data.type_node.as_ref() {
                     Some(tn) => self.get_type_from_type_node(tn),
                     None => self.get_any_type(),
@@ -1528,7 +1799,6 @@ impl Checker {
                     /* contextual_signature */ None,
                     /* declaration */ Some(Arc::clone(node)),
                 );
-                self.suppress_cannot_find_name_in_type_nodes -= 1;
                 self.create_function_or_constructor_type(vec![sig], false)
             }
             _ => self.error_type(),

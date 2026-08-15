@@ -5874,6 +5874,8 @@ impl Parser {
 
         // export default ...
         if self.token == SyntaxKind::DefaultKeyword {
+            let default_pos = self.token_pos();
+            let default_end = self.token_end();
             self.next_token(); // consume 'default'
             if self.token == SyntaxKind::FunctionKeyword {
                 let func = self.parse_function_declaration();
@@ -5882,6 +5884,15 @@ impl Parser {
             if self.token == SyntaxKind::ClassKeyword {
                 let class = self.parse_class_declaration();
                 return class; // export default class → ClassDeclaration
+            }
+            // `export default interface I {}` — a default-exported
+            // interface declaration (Go routes KindInterfaceKeyword through
+            // parseDeclaration with the export/default modifiers).
+            if self.token == SyntaxKind::InterfaceKeyword {
+                return self.parse_declaration_with_modifiers(vec![
+                    (SyntaxKind::ExportKeyword, pos, export_end),
+                    (SyntaxKind::DefaultKeyword, default_pos, default_end),
+                ]);
             }
             // export default <expression>
             let expr = self.parse_assignment_expression();

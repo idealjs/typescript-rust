@@ -74,7 +74,6 @@ compiler/TransportStream.errors.txt
 ## ported — TS2654 (non-abstract class missing abstract member impls) and
 ## TS2416 (derived property type not assignable to base property) require
 ## the checkClassHeritage member-relation pass ##
-compiler/abstractPropertyNegative(target=es2015).errors.txt
 
 ## 2026-08-15 batch #51-#60: WeakMap/WeakRef/FinalizationRegistry generic
 ## inference from constructor tuple args (TS2345 over-report) + spurious
@@ -91,8 +90,6 @@ compiler/accessorInferredReturnTypeErrorInReturnStatement.errors.txt
 ## signatures or merge method overloads (TS2554/TS2345 over-reports;
 ## TS2430 incorrectly-extends check missing; TS2454 var definite-assignment
 ## for unassigned `var a: Bar; a()` also missing) ##
-compiler/addMoreCallSignaturesToBaseSignature.errors.txt
-compiler/addMoreCallSignaturesToBaseSignature2.errors.txt
 compiler/addMoreOverloadsToBaseSignature.errors.txt
 
 ## 2026-08-15 batch #71-#80: import-alias / namespace export resolution
@@ -108,13 +105,14 @@ compiler/aliasErrors.errors.txt
 ## references; TS2708 namespace-as-value) — same alias-resolution family as
 ## batch #71-#80 ##
 compiler/aliasOnMergedModuleInterface.errors.txt
-compiler/aliasUsageInAccessorsOfClass(target=es2015).errors.txt
-compiler/aliasUsageInArray.errors.txt
-compiler/aliasUsageInFunctionExpression.errors.txt
-compiler/aliasUsageInGenericFunction.errors.txt
 
 ## 2026-08-15 batch #81-#90: TS2352 assertion overlap comparability
 ## (related-info chain for intersection/construct-signature comparisons)
 ## not ported ##
 compiler/aliasInstantiationExpressionGenericIntersectionNoCrash1.errors.txt
 compiler/aliasInstantiationExpressionGenericIntersectionNoCrash2.errors.txt
+
+## 2026-08-15 diff-fix round: TS2749 for default-import aliases requires
+## alias-target resolution (a module's default export may be an interface —
+## `export default interface` / `export { x as default }` chains) ##
+compiler/allowImportClausesToMergeWithTypes.errors.txt

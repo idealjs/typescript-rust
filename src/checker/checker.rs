@@ -5727,6 +5727,7 @@ impl Checker {
                     // TS2564: Check property initialization under
                     // strictPropertyInitialization.
                     self.check_property_initialization(node);
+                    self.check_class_heritage_members(node);
                 }
                 self.pop_scope();
                 self.this_type_stack.pop();
@@ -5755,6 +5756,14 @@ impl Checker {
                         &crate::diagnostics::messages_generated::INTERFACE_NAME_CANNOT_BE_0,
                     );
                     self.check_interface_members(&data.members);
+                }
+                // Force interface-type resolution so `extends` relation
+                // errors (TS2430) and base merging run even when the
+                // interface is never referenced (Go resolves declared
+                // interface types during checking).
+                let iface_sym = self.program.symbol_map().symbol_of(node).cloned();
+                if let Some(sym) = iface_sym {
+                    let _ = self.resolve_interface_type(&sym, None);
                 }
             }
             SyntaxKind::TypeAliasDeclaration
@@ -6274,6 +6283,15 @@ impl Checker {
         };
         // Build the derived class's own instance type.
         let own_type = self.build_interface_type_from_members(members);
+        // Attach the class symbol so the type printer uses the declared
+        // name (Go's `Type.Symbol`). The type was just created and is not
+        // yet shared.
+        if let Some(class_sym) = self.program.symbol_map().symbol_of(node) {
+            let own_mut = Arc::as_ptr(&own_type) as *mut crate::checker::types::Type;
+            unsafe {
+                (*own_mut).symbol = Some(Arc::clone(class_sym));
+            }
+        }
         // Find the `extends` clause and resolve the base class.
         let mut base_type: Option<Arc<Type>> = None;
         if let Some(ref heritage) = heritage_clauses {
@@ -7087,6 +7105,88 @@ impl Checker {
         true
     }
 
+    /// Whether a same-named symbol with TYPE meaning (interface/class/
+    /// enum/alias/type-param) is visible from the current scope — lib.d.ts
+    /// merges `interface X` + `declare var X` as one logical entity (though
+    /// our binder may keep separate symbols), and merged names are legal
+    /// type references.
+    pub(crate) fn has_same_named_type_symbol(&self, name: &str) -> bool {
+        let type_meaning = SymbolFlags::Interface
+            | SymbolFlags::Class
+            | SymbolFlags::TypeParameter
+            | SymbolFlags::TypeAlias
+            | SymbolFlags::RegularEnum
+            | SymbolFlags::ConstEnum;
+        let symbol_map = self.program.symbol_map();
+        for &container_id in self.scope_stack.iter().rev() {
+            if let Some(locals) = symbol_map.locals.get(&container_id)
+                && let Some(sym) = locals.get(name)
+                && sym.flags.intersects(type_meaning)
+            {
+                return true;
+            }
+            if let Some(container_sym) = symbol_map.symbols.get(&container_id)
+                && (container_sym
+                    .members
+                    .get(name)
+                    .is_some_and(|s| s.flags.intersects(type_meaning))
+                    || container_sym
+                        .exports
+                        .get(name)
+                        .is_some_and(|s| s.flags.intersects(type_meaning)))
+            {
+                return true;
+            }
+        }
+        self.globals
+            .get(name)
+            .is_some_and(|s| s.flags.intersects(type_meaning))
+    }
+
+    /// TS2352: `expr as T` where neither type sufficiently overlaps the
+    /// other. Mirrors Go's `checkAssertionDeferred`: literal source types
+    /// are widened first, and the types must be comparable (approximated
+    /// here as assignable in either direction — Go's
+    /// `isTypeComparableTo`); `as const` and error/any/unknown/never types
+    /// are exempt.
+    fn check_assertion_overlap(&mut self, node: &Arc<Node>, expr: &Arc<Node>, type_node: &Arc<Node>) {
+        // `x as const` is a const assertion, not a cast — exempt.
+        if type_node.kind == SyntaxKind::TypeReference && type_node.text() == "const" {
+            return;
+        }
+        let expr_type = self.get_type_of_node(expr);
+        let target_type = self.get_type_from_type_node(type_node);
+        let error_type = self.error_type();
+        let exempt = |t: &Arc<Type>| {
+            Arc::ptr_eq(t, &error_type)
+                || t.flags.contains(TypeFlags::Any)
+                || t.flags.contains(TypeFlags::Unknown)
+                || t.flags.contains(TypeFlags::Never)
+        };
+        if exempt(&expr_type) || exempt(&target_type) {
+            return;
+        }
+        let expr_base = if crate::checker::is_literal_type(&expr_type) {
+            self.get_base_type_of_literal_type(&expr_type)
+        } else {
+            expr_type
+        };
+        let comparable = self.is_type_assignable_to(&expr_base, &target_type)
+            || self.is_type_assignable_to(&target_type, &expr_base);
+        if !comparable {
+            let source_str = self.type_to_string(&expr_base);
+            let target_str = self.type_to_string(&target_type);
+            let file = self.current_file.clone();
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file,
+                node.loc,
+                crate::diagnostics::messages_generated::
+                    CONVERSION_OF_TYPE_0_TO_TYPE_1_MAY_BE_A_MISTAKE_BECAUSE_NEITHER_TYPE_SUFFICIENTLY_OVERLAPS_WITH_THE_OTHER_IF_THIS_WAS_INTENTIONAL_CONVERT_THE_EXPRESSION_TO_UNKNOWN_FIRST,
+                vec![source_str, target_str],
+            ));
+        }
+    }
+
     /// TS1183: an accessor (or method) with a body inside an interface or a
     /// type literal is an implementation in an ambient/type context. Mirrors
     /// Go's `checkGrammarAccessor` body-present branch. Reported on the body
@@ -7596,14 +7696,13 @@ impl Checker {
                                     vec![],
                                 ));
                             }
-                            // Accessor-pair type reconciliation: the property's
-                            // type is the getter's annotated return type (or,
-                            // when the getter is unannotated, the setter's
-                            // parameter annotation — mirrored by the instance
-                            // type builder). When both are annotated and the
-                            // getter type isn't assignable to the setter's,
-                            // TS2322 on the setter's parameter annotation
-                            // (Go's checkAccessor pair typing).
+                            // The pair's property type: getter annotation,
+                            // else the setter's parameter annotation. A
+                            // getter without its own annotation checks its
+                            // return statements against the setter's param
+                            // type (Go's getTypeOfAccessors ordering). NB:
+                            // DIFFERENTLY annotated get/set types are legal —
+                            // no both-annotated conflict error.
                             let setter_param_type_node =
                                 if let crate::ast::NodeData::SetAccessorDeclaration(sd) =
                                     &setter_node.data
@@ -7620,26 +7719,6 @@ impl Checker {
                                 } else {
                                     None
                                 };
-                            if let (Some(getter_tn), Some(setter_tn)) =
-                                (&gd.type_node, &setter_param_type_node)
-                            {
-                                let getter_type = self.get_type_from_type_node(getter_tn);
-                                let setter_type = self.get_type_from_type_node(setter_tn);
-                                if !self.is_type_assignable_to(&getter_type, &setter_type) {
-                                    let file = self.current_file.clone();
-                                    let source_str = self.type_to_string(&getter_type);
-                                    let target_str = self.type_to_string(&setter_type);
-                                    self.diagnostics.add(crate::ast::Diagnostic::new(
-                                        file,
-                                        setter_tn.loc,
-                                        TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                                        vec![source_str, target_str],
-                                    ));
-                                }
-                            }
-                            // Getter without a return annotation takes the
-                            // setter's parameter annotation as its expected
-                            // return type (`return expr` checks against it).
                             if gd.type_node.is_none() && let Some(setter_tn) = setter_param_type_node
                             {
                                 self.accessor_pair_return_hint =
@@ -8296,12 +8375,22 @@ impl Checker {
                 // The left side is an expression; the right side is a type.
                 if let crate::ast::NodeData::AsExpression(data) = &node.data {
                     self.check_expression(&data.expression);
+                    self.check_assertion_overlap(
+                        node,
+                        &data.expression,
+                        &data.type_node,
+                    );
                 }
             }
             SyntaxKind::TypeAssertionExpression => {
                 // `<T>x`: the left side is a type; the right is an expression.
                 if let crate::ast::NodeData::TypeAssertion(data) = &node.data {
                     self.check_expression(&data.expression);
+                    self.check_assertion_overlap(
+                        node,
+                        &data.expression,
+                        &data.type_node,
+                    );
                 }
             }
             SyntaxKind::NonNullExpression => {
@@ -8684,6 +8773,130 @@ impl Checker {
         self.diagnostics.add(diagnostic);
     }
 
+    /// TS2654/TS2416: class-heritage member checks for a derived class —
+    /// abstract members of the base chain not implemented by a non-abstract
+    /// class, and derived property types not assignable to the same-named
+    /// base property (Go's `checkClassHeritage` member relation).
+    fn check_class_heritage_members(&mut self, node: &Arc<Node>) {
+        let crate::ast::NodeData::ClassDeclaration(data) = &node.data else {
+            return;
+        };
+        let Some((base_node, _base_sym)) = self.extends_base_of(node) else {
+            return;
+        };
+        let class_name = data
+            .name
+            .as_ref()
+            .map(|n| n.text().to_string())
+            .unwrap_or_default();
+        let base_name = Self::class_name_text(&base_node);
+        // TS2654: only non-abstract classes must implement abstract members.
+        if !node.has_syntactic_modifier(ModifierFlags::Abstract) {
+            let mut missing: Vec<String> = Vec::new();
+            Self::collect_unimplemented_abstract_members(node, &base_node, &mut missing);
+            missing.dedup();
+            if !missing.is_empty() {
+                let file = self.current_file.clone();
+                let name_loc = data
+                    .name
+                    .as_ref()
+                    .map(|n| n.loc)
+                    .unwrap_or(node.loc);
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    name_loc,
+                    crate::diagnostics::messages_generated::
+                        NON_ABSTRACT_CLASS_0_IS_MISSING_IMPLEMENTATIONS_FOR_THE_FOLLOWING_MEMBERS_OF_1_COLON_2,
+                    vec![
+                        class_name.clone(),
+                        base_name.clone(),
+                        missing
+                            .iter()
+                            .map(|m| format!("'{m}'"))
+                            .collect::<Vec<_>>()
+                            .join(", "),
+                    ],
+                ));
+            }
+        }
+        // TS2416: each own property or accessor that shadows a base
+        // member must have a type assignable to the base member's.
+        for member in data.members.iter() {
+            let (name_node, own_type): (&Arc<Node>, Option<Arc<Type>>) = match &member.data {
+                crate::ast::NodeData::PropertyDeclaration(pd) => {
+                    if pd.name.kind != SyntaxKind::Identifier {
+                        continue;
+                    }
+                    let t = if let Some(tn) = &pd.type_node {
+                        Some(self.get_type_from_type_node(tn))
+                    } else {
+                        pd.initializer
+                            .as_ref()
+                            .map(|init| self.get_type_of_node(init))
+                    };
+                    (&pd.name, t)
+                }
+                crate::ast::NodeData::GetAccessorDeclaration(gd) => {
+                    if gd.name.kind != SyntaxKind::Identifier {
+                        continue;
+                    }
+                    // Annotated return type, else inferred from the body's
+                    // return expressions.
+                    let t = if let Some(tn) = &gd.type_node {
+                        Some(self.get_type_from_type_node(tn))
+                    } else {
+                        Self::first_return_expression(gd.body.as_ref())
+                            .map(|e| self.get_type_of_node(&e))
+                    };
+                    (&gd.name, t)
+                }
+                _ => continue,
+            };
+            let Some(own_type) = own_type else { continue };
+            let prop_name = name_node.text().to_string();
+            let Some(base_member) = Self::find_class_member_by_name(&base_node, &prop_name)
+            else {
+                continue;
+            };
+            let base_tn = match &base_member.data {
+                crate::ast::NodeData::PropertyDeclaration(pd) => pd.type_node.clone(),
+                crate::ast::NodeData::GetAccessorDeclaration(gd) => gd.type_node.clone(),
+                crate::ast::NodeData::SetAccessorDeclaration(sd) => sd
+                    .parameters
+                    .iter()
+                    .next()
+                    .and_then(|p| {
+                        if let crate::ast::NodeData::ParameterDeclaration(pd) = &p.data {
+                            pd.type_node.clone()
+                        } else {
+                            None
+                        }
+                    }),
+                _ => None,
+            };
+            let Some(base_tn) = base_tn else {
+                continue;
+            };
+            let base_type = self.get_type_from_type_node(&base_tn);
+            if !own_type.flags.contains(TypeFlags::Any)
+                && !self.is_type_assignable_to(&own_type, &base_type)
+            {
+                let file = self.current_file.clone();
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    name_node.loc,
+                    crate::diagnostics::messages_generated::
+                        PROPERTY_0_IN_TYPE_1_IS_NOT_ASSIGNABLE_TO_THE_SAME_PROPERTY_IN_BASE_TYPE_2,
+                    vec![
+                        prop_name,
+                        class_name.clone(),
+                        base_name.clone(),
+                    ],
+                ));
+            }
+        }
+    }
+
     /// The member list of a class-like node (empty for other kinds).
     fn class_members_of(class: &Arc<Node>) -> &Arc<NodeList> {
         match &class.data {
@@ -8694,6 +8907,121 @@ impl Checker {
                 EMPTY.get_or_init(|| Arc::new(NodeList::default()))
             }
         }
+    }
+
+    /// Find a class member by (identifier) name.
+    fn find_class_member_by_name(class: &Arc<Node>, name: &str) -> Option<Arc<Node>> {
+        Self::class_members_of(class)
+            .iter()
+            .find(|m| {
+                let n = match &m.data {
+                    crate::ast::NodeData::PropertyDeclaration(d) => &d.name,
+                    crate::ast::NodeData::MethodDeclaration(d) => &d.name,
+                    crate::ast::NodeData::GetAccessorDeclaration(d) => &d.name,
+                    crate::ast::NodeData::SetAccessorDeclaration(d) => &d.name,
+                    _ => return false,
+                };
+                n.kind == SyntaxKind::Identifier && n.text() == name
+            })
+            .cloned()
+    }
+
+    /// Collect abstract members of the base chain that `class` (and its
+    /// bases) don't implement concretely. Walks the `extends` chain.
+    fn collect_unimplemented_abstract_members(
+        class: &Arc<Node>,
+        base: &Arc<Node>,
+        out: &mut Vec<String>,
+    ) {
+        for member in Self::class_members_of(base).iter() {
+            let (name_node, is_abstract_member) = match &member.data {
+                crate::ast::NodeData::PropertyDeclaration(d) => {
+                    (&d.name, member.has_syntactic_modifier(ModifierFlags::Abstract))
+                }
+                crate::ast::NodeData::MethodDeclaration(d) => {
+                    (&d.name, member.has_syntactic_modifier(ModifierFlags::Abstract))
+                }
+                crate::ast::NodeData::GetAccessorDeclaration(d) => (
+                    &d.name,
+                    member.has_syntactic_modifier(ModifierFlags::Abstract),
+                ),
+                crate::ast::NodeData::SetAccessorDeclaration(d) => (
+                    &d.name,
+                    member.has_syntactic_modifier(ModifierFlags::Abstract),
+                ),
+                _ => continue,
+            };
+            if name_node.kind != SyntaxKind::Identifier {
+                continue;
+            }
+            let name = name_node.text();
+            if is_abstract_member {
+                // Implemented if ANY class in the derived chain (starting
+                // at `class`) declares a non-abstract member with the name.
+                if !Self::chain_implements(class, name) {
+                    out.push(name.to_string());
+                }
+            } else if out.iter().any(|m| m == name) {
+                // A later concrete base member implements an earlier
+                // abstract one.
+                out.retain(|m| m != name);
+            }
+        }
+    }
+
+    /// The expression of the first `return <expr>;` in a body (used to
+    /// infer a getter's return type when unannotated).
+    fn first_return_expression(body: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+        fn walk(n: &Arc<Node>) -> Option<Arc<Node>> {
+            if let crate::ast::NodeData::ReturnStatement(d) = &n.data
+                && let Some(e) = &d.expression
+            {
+                return Some(Arc::clone(e));
+            }
+            let mut found: Option<Arc<Node>> = None;
+            crate::ast::node_data_generated::for_each_child(n, |child| {
+                if found.is_none() {
+                    found = walk(child);
+                }
+                found.is_some()
+            });
+            found
+        }
+        body.and_then(walk)
+    }
+
+    /// Whether `class` or any of its bases declares a CONCRETE member named
+    /// `name`.
+    fn chain_implements(class: &Arc<Node>, name: &str) -> bool {
+        for member in Self::class_members_of(class).iter() {
+            let (name_node, is_abstract) = match &member.data {
+                crate::ast::NodeData::PropertyDeclaration(d) => {
+                    (&d.name, member.has_syntactic_modifier(ModifierFlags::Abstract))
+                }
+                crate::ast::NodeData::MethodDeclaration(d) => {
+                    (&d.name, member.has_syntactic_modifier(ModifierFlags::Abstract))
+                }
+                crate::ast::NodeData::GetAccessorDeclaration(d) => (
+                    &d.name,
+                    member.has_syntactic_modifier(ModifierFlags::Abstract),
+                ),
+                crate::ast::NodeData::SetAccessorDeclaration(d) => (
+                    &d.name,
+                    member.has_syntactic_modifier(ModifierFlags::Abstract),
+                ),
+                _ => continue,
+            };
+            if name_node.kind == SyntaxKind::Identifier
+                && name_node.text() == name
+                && !is_abstract
+            {
+                return true;
+            }
+        }
+        // Recurse into this class's own base (node-linked via heritage
+        // identifiers is not available without resolution; single-level
+        // check covers direct implementation).
+        false
     }
 
     /// Find `<name> = <rhs>` assignments in a body: returns the LHS
@@ -8718,6 +9046,92 @@ impl Checker {
         }
         walk(body, name, &mut found);
         found
+    }
+
+    /// Resolve a (possibly qualified) entity name — `A`, `A.B`, `A.B.C` —
+    /// to a symbol: the leftmost identifier through the scope stack, then
+    /// each subsequent segment through the previous symbol's exports
+    /// (modules/namespaces) or members. Follows alias symbols along the way;
+    /// an `import X = require("...")` alias resolves to the module file's
+    /// symbol (Go: `resolveEntityName` + `resolveExternalModuleName`).
+    pub fn resolve_qualified_symbol(&self, name: &Arc<Node>) -> Option<Arc<Symbol>> {
+        match &name.data {
+            crate::ast::NodeData::Identifier(_) => {
+                self.resolve_identifier(name)
+            }
+            crate::ast::NodeData::QualifiedName(data) => {
+                let mut symbol = self.resolve_qualified_symbol(&data.left)?;
+                symbol = self.resolve_alias_base(symbol);
+                // `right` is always an Identifier in valid syntax.
+                let text = data.right.text();
+                let next = symbol
+                    .exports
+                    .get(text)
+                    .or_else(|| symbol.members.get(text))
+                    .cloned()?;
+                self.follow_alias(&next)
+            }
+            _ => None,
+        }
+    }
+
+    /// Resolve an alias symbol to its underlying base symbol: follows the
+    /// `export_symbol` chain, and for `import X = require("./m")` aliases
+    /// resolves the module file's symbol from the program's loaded files.
+    fn resolve_alias_base(&self, symbol: Arc<Symbol>) -> Arc<Symbol> {
+        if !symbol.flags.intersects(SymbolFlags::Alias) {
+            return symbol;
+        }
+        if let Some(decl) = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::ImportEqualsDeclaration)
+        {
+            if let crate::ast::NodeData::ImportEqualsDeclaration(data) = &decl.data
+                && let crate::ast::NodeData::ExternalModuleReference(ext) =
+                    &data.module_reference.data
+                && ext.expression.kind == SyntaxKind::StringLiteral
+                && let Some(module_sym) = self.resolve_module_file_symbol(&ext.expression.text())
+            {
+                return module_sym;
+            }
+        }
+        symbol
+    }
+
+    /// Find the file symbol of an already-loaded module by specifier
+    /// (relative to the current file's directory), trying the common
+    /// TypeScript extension/index forms.
+    pub(crate) fn resolve_module_file_symbol(&self, specifier: &str) -> Option<Arc<Symbol>> {
+        if !specifier.starts_with('.') {
+            return None;
+        }
+        let current = self.current_file.as_ref()?;
+        let dir = match current.file_name.rfind('/') {
+            Some(i) => &current.file_name[..i],
+            None => "",
+        };
+        let stem = specifier.strip_prefix("./").unwrap_or(specifier);
+        let symbol_map = self.program.symbol_map();
+        for cand in [
+            format!("{dir}/{stem}.ts"),
+            format!("{dir}/{stem}.tsx"),
+            format!("{dir}/{stem}.d.ts"),
+            format!("{dir}/{stem}/index.ts"),
+            format!("{dir}/{stem}/index.d.ts"),
+        ] {
+            if let Some(sf) = self
+                .program
+                .source_files()
+                .iter()
+                .find(|f| f.file_name == cand)
+            {
+                if let Some(sym) = symbol_map.symbol_of(&sf.node) {
+                    return Some(Arc::clone(sym));
+                }
+            }
+        }
+        None
     }
 
     /// The source text of a class declaration's name ("" when anonymous).
@@ -8880,11 +9294,9 @@ impl Checker {
         let Some(declaration) = declaration else {
             return;
         };
-        // Skip `var` declarations — only `let`/`const` are subject to
-        // definite-assignment analysis.
-        if !is_let_or_const_declaration(declaration) {
-            return;
-        }
+        // `var` is subject to the same definite-assignment check as
+        // `let`/`const` under strictNullChecks (Go's flow analysis reports
+        // `var x: number; use(x)` too).
         let crate::ast::NodeData::VariableDeclaration(vd) = &declaration.data else {
             return;
         };

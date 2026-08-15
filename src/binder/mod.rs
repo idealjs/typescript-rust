@@ -900,6 +900,10 @@ impl Binder {
             NodeData::GetAccessorDeclaration(data) => self.node_text(&data.name),
             NodeData::SetAccessorDeclaration(data) => self.node_text(&data.name),
             NodeData::TypeParameterDeclaration(data) => self.node_text(&data.name),
+            // `import X = ...` / `import * as X from ...` — the alias binds
+            // under its own name (Go's getDeclarationName reads Name()).
+            NodeData::ImportEqualsDeclaration(data) => self.node_text(&data.name),
+            NodeData::NamespaceImport(data) => self.node_text(&data.name),
             NodeData::Identifier(data) => data.text.clone(),
             // `export default <expr>` → "default"; `export = <expr>` → "export=".
             // Mirrors Go's `getDeclarationName` for `KindExportAssignment`.
