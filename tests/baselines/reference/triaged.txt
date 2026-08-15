@@ -85,3 +85,20 @@ compiler/acceptSymbolAsWeakType.errors.txt
 ## object-literal getters referencing themselves via `this` (deferred flow
 ## analysis) ##
 compiler/accessorInferredReturnTypeErrorInReturnStatement.errors.txt
+
+## 2026-08-15 batch #71-#80: interface `extends` member/call-signature
+## merging not ported — derived interfaces don't inherit base call
+## signatures or merge method overloads (TS2554/TS2345 over-reports;
+## TS2430 incorrectly-extends check missing; TS2454 var definite-assignment
+## for unassigned `var a: Bar; a()` also missing) ##
+compiler/addMoreCallSignaturesToBaseSignature.errors.txt
+compiler/addMoreCallSignaturesToBaseSignature2.errors.txt
+compiler/addMoreOverloadsToBaseSignature.errors.txt
+
+## 2026-08-15 batch #71-#80: import-alias / namespace export resolution
+## (TS2694 namespace has no exported member, qualified-name alias chasing
+## for `import x = a.b.c`) not ported ##
+compiler/aliasAssignments.errors.txt
+compiler/aliasBug.errors.txt
+compiler/aliasDoesNotDuplicateSignatures.errors.txt
+compiler/aliasErrors.errors.txt

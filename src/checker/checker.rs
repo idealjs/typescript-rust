@@ -561,6 +561,11 @@ pub struct Checker {
     /// grammar checks are suppressed there.
     pub ambient_context_depth: usize,
 
+    /// Expected return type for a getter without its own annotation, taken
+    /// from the paired setter's parameter annotation (the accessor pair's
+    /// property type). Consumed by the getter's body check.
+    pub accessor_pair_return_hint: Option<Arc<Type>>,
+
     /// Contextual-parameter counts for arrow/function-expression arguments
     /// currently being checked (one entry per enclosing call-argument arrow;
     /// consumed by the ArrowFunction/FunctionExpression check so their
@@ -822,6 +827,7 @@ impl Checker {
             break_continue_context_stack: Vec::new(),
             this_container_stack: Vec::new(),
             ambient_context_depth: 0,
+            accessor_pair_return_hint: None,
             this_type_stack: Vec::new(),
             enclosing_class_stack: Vec::new(),
             call_arg_arrow_context: Vec::new(),
@@ -5418,11 +5424,21 @@ impl Checker {
                             if !actual.flags.contains(TypeFlags::Any)
                                 && !self.is_type_assignable_to(&actual, &expected)
                             {
-                                let actual_str = self.type_to_string(&actual);
+                                // Go's checkReturnExpression anchors on the
+                                // RETURN STATEMENT (not the expression) for
+                                // plain return statements, and widens literal
+                                // source types for display.
+                                let display_type =
+                                    if crate::checker::is_literal_type(&actual) {
+                                        self.get_base_type_of_literal_type(&actual)
+                                    } else {
+                                        actual.clone()
+                                    };
+                                let actual_str = self.type_to_string(&display_type);
                                 let expected_str = self.type_to_string(&expected);
                                 self.diagnostics.add(crate::ast::Diagnostic::new(
                                     self.current_file.clone(),
-                                    expr.loc,
+                                    node.loc,
                                     TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
                                     vec![actual_str, expected_str],
                                 ));
@@ -7424,6 +7440,33 @@ impl Checker {
                     }
                     _ => (None, None, None),
                 };
+                // Ambient context (declare class / declare namespace / .d.ts):
+                // a body here is an implementation in an ambient context —
+                // TS1183 on the body's first token (Go's
+                // checkGrammarStatementInAmbientContext; the ambient flag
+                // propagates from any ambient ancestor, e.g. a declared
+                // namespace).
+                if body.is_some()
+                    && (self
+                        .enclosing_class_stack
+                        .last()
+                        .is_some_and(|c| c.has_syntactic_modifier(ModifierFlags::Ambient))
+                        || self.ambient_context_depth > 0
+                        || self
+                            .current_file
+                            .as_ref()
+                            .is_some_and(|f| f.is_declaration_file))
+                    && let Some(body) = &body
+                {
+                    let file = self.current_file.clone();
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        file,
+                        crate::core::text::TextRange::new(body.loc.pos(), body.loc.pos() + 1),
+                        crate::diagnostics::messages_generated::
+                            AN_IMPLEMENTATION_CANNOT_BE_DECLARED_IN_AMBIENT_CONTEXTS,
+                        vec![],
+                    ));
+                }
                 // Accessor grammar (Go `checkGrammarAccessor`): a body-less
                 // accessor in a non-ambient class needs `abstract` (TS1005
                 // "'{' expected" at the trailing `;`); an abstract accessor
@@ -7502,6 +7545,8 @@ impl Checker {
                             vec!["{".to_string()],
                         ));
                     }
+                    // TS1183 for accessor bodies in ambient contexts is
+                    // handled above (shared with methods/constructors).
                     if body.is_some() && is_abstract {
                         let file = self.current_file.clone();
                         self.diagnostics.add(crate::ast::Diagnostic::new(
@@ -7551,8 +7596,116 @@ impl Checker {
                                     vec![],
                                 ));
                             }
+                            // Accessor-pair type reconciliation: the property's
+                            // type is the getter's annotated return type (or,
+                            // when the getter is unannotated, the setter's
+                            // parameter annotation — mirrored by the instance
+                            // type builder). When both are annotated and the
+                            // getter type isn't assignable to the setter's,
+                            // TS2322 on the setter's parameter annotation
+                            // (Go's checkAccessor pair typing).
+                            let setter_param_type_node =
+                                if let crate::ast::NodeData::SetAccessorDeclaration(sd) =
+                                    &setter_node.data
+                                {
+                                    sd.parameters.iter().next().and_then(|p| {
+                                        if let crate::ast::NodeData::ParameterDeclaration(pd) =
+                                            &p.data
+                                        {
+                                            pd.type_node.clone()
+                                        } else {
+                                            None
+                                        }
+                                    })
+                                } else {
+                                    None
+                                };
+                            if let (Some(getter_tn), Some(setter_tn)) =
+                                (&gd.type_node, &setter_param_type_node)
+                            {
+                                let getter_type = self.get_type_from_type_node(getter_tn);
+                                let setter_type = self.get_type_from_type_node(setter_tn);
+                                if !self.is_type_assignable_to(&getter_type, &setter_type) {
+                                    let file = self.current_file.clone();
+                                    let source_str = self.type_to_string(&getter_type);
+                                    let target_str = self.type_to_string(&setter_type);
+                                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                                        file,
+                                        setter_tn.loc,
+                                        TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                                        vec![source_str, target_str],
+                                    ));
+                                }
+                            }
+                            // Getter without a return annotation takes the
+                            // setter's parameter annotation as its expected
+                            // return type (`return expr` checks against it).
+                            if gd.type_node.is_none() && let Some(setter_tn) = setter_param_type_node
+                            {
+                                self.accessor_pair_return_hint =
+                                    Some(self.get_type_from_type_node(&setter_tn));
+                            }
                         }
                     }
+                        // Setter-side pair typing: an unannotated setter
+                        // parameter carries the paired getter's annotated
+                        // return type, so `param = expr` assignments in the
+                        // setter body are checked against it (TS2322 at the
+                        // parameter reference — Go types the parameter symbol
+                        // from the pair).
+                        if node.kind == SyntaxKind::SetAccessor
+                            && let Some(class) = self.enclosing_class_stack.last().cloned()
+                            && let crate::ast::NodeData::SetAccessorDeclaration(sd) = &node.data
+                            && sd.name.kind == SyntaxKind::Identifier
+                            && let Some(param) = sd.parameters.iter().next()
+                            && let crate::ast::NodeData::ParameterDeclaration(pd) = &param.data
+                            && pd.type_node.is_none()
+                            && let Some(param_name) = (if pd.name.kind == SyntaxKind::Identifier {
+                                Some(pd.name.text().to_string())
+                            } else {
+                                None
+                            })
+                        {
+                            let getter_type = Self::class_members_of(&class)
+                                .iter()
+                                .find_map(|m| {
+                                    if let crate::ast::NodeData::GetAccessorDeclaration(gd) =
+                                        &m.data
+                                        && gd.name.kind == SyntaxKind::Identifier
+                                        && gd.name.text() == sd.name.text()
+                                        && let Some(tn) = &gd.type_node
+                                    {
+                                        Some(self.get_type_from_type_node(tn))
+                                    } else {
+                                        None
+                                    }
+                                });
+                            if let (Some(expected), Some(body)) = (getter_type, &sd.body) {
+                                for (lhs_loc, rhs) in
+                                    Self::assignments_to_name(body, &param_name)
+                                {
+                                    let actual = self.get_type_of_node(&rhs);
+                                    if !actual.flags.contains(TypeFlags::Any)
+                                        && !self.is_type_assignable_to(&actual, &expected)
+                                    {
+                                        let display_type =
+                                            if crate::checker::is_literal_type(&actual) {
+                                                self.get_base_type_of_literal_type(&actual)
+                                            } else {
+                                                actual.clone()
+                                            };
+                                        let actual_str = self.type_to_string(&display_type);
+                                        let expected_str = self.type_to_string(&expected);
+                                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                                            self.current_file.clone(),
+                                            lhs_loc,
+                                            TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                                            vec![actual_str, expected_str],
+                                        ));
+                                    }
+                                }
+                            }
+                        }
                 }
                 // TS2369: parameter properties are only allowed in a
                 // constructor IMPLEMENTATION (one with a body).
@@ -7637,9 +7790,19 @@ impl Checker {
                     // Push the declared return type so `return expr;`
                     // statements in the body can be checked against it.
                     // `None` means no explicit return-type annotation.
-                    let declared_return = type_node
-                        .as_ref()
-                        .map(|tn| self.get_type_from_type_node(tn));
+                    // A getter without an annotation inherits the paired
+                    // setter's parameter annotation (the pair's property
+                    // type).
+                    let declared_return = if node.kind == SyntaxKind::GetAccessor
+                        && type_node.is_none()
+                        && let Some(hint) = self.accessor_pair_return_hint.take()
+                    {
+                        Some(hint)
+                    } else {
+                        type_node
+                            .as_ref()
+                            .map(|tn| self.get_type_from_type_node(tn))
+                    };
                     self.return_type_stack.push(declared_return.clone());
                     match body.kind {
                         SyntaxKind::Block => self.check_statement(&body),
@@ -8531,6 +8694,30 @@ impl Checker {
                 EMPTY.get_or_init(|| Arc::new(NodeList::default()))
             }
         }
+    }
+
+    /// Find `<name> = <rhs>` assignments in a body: returns the LHS
+    /// identifier's location and the RHS node for each.
+    fn assignments_to_name(
+        body: &Arc<Node>,
+        name: &str,
+    ) -> Vec<(crate::core::text::TextRange, Arc<Node>)> {
+        let mut found = Vec::new();
+        fn walk(n: &Arc<Node>, name: &str, found: &mut Vec<(crate::core::text::TextRange, Arc<Node>)>) {
+            if let crate::ast::NodeData::BinaryExpression(data) = &n.data
+                && data.operator_token.kind == SyntaxKind::EqualsToken
+                && data.left.kind == SyntaxKind::Identifier
+                && data.left.text() == name
+            {
+                found.push((data.left.loc, Arc::clone(&data.right)));
+            }
+            crate::ast::node_data_generated::for_each_child(n, |child| {
+                walk(child, name, found);
+                false
+            });
+        }
+        walk(body, name, &mut found);
+        found
     }
 
     /// The source text of a class declaration's name ("" when anonymous).
