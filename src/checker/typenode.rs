@@ -298,10 +298,15 @@ impl Checker {
                     // signatures (see `suppress_cannot_find_name_in_type_nodes`),
                     // where lib.d.ts signatures may reference signature-level type
                     // parameters the binder has no symbol for.
-                    if self.suppress_cannot_find_name_in_type_nodes == 0 {
+                    if self.ts2304_reporting_allowed_for(type_name) {
                         use crate::diagnostics::messages_generated::CANNOT_FIND_NAME_0;
                         let name_text = type_name.text();
-                        let file = self.current_file.clone();
+                        // Attribute to the reference node's own file — the
+                        // resolution may be triggered from a foreign file's
+                        // processing (cross-file global lookup).
+                        let file = self
+                            .get_source_file_of_node(type_name)
+                            .or_else(|| self.current_file.clone());
                         self.diagnostics.add(crate::ast::Diagnostic::new(
                             file,
                             type_name.loc,
@@ -321,13 +326,15 @@ impl Checker {
                 Err((segment, ns_path, member)) => {
                     // TS2694: the namespace resolved but lacks the member;
                     // TS2503: a namespace segment itself didn't resolve.
-                    if self.suppress_cannot_find_name_in_type_nodes == 0
+                    if self.ts2304_reporting_allowed_for(type_name)
                         && self
                             .current_file
                             .as_ref()
                             .is_some_and(|f| !f.file_name.starts_with("bundled://"))
                     {
-                        let file = self.current_file.clone();
+                        let file = self
+                            .get_source_file_of_node(type_name)
+                            .or_else(|| self.current_file.clone());
                         if ns_path.is_empty() {
                             self.diagnostics.add(crate::ast::Diagnostic::new(
                                 file,
@@ -451,7 +458,7 @@ impl Checker {
                         // alias target is future work.
                         | SymbolFlags::Alias,
                 )
-                && self.suppress_cannot_find_name_in_type_nodes == 0
+                && self.ts2304_reporting_allowed_for(type_name)
                 && !self.has_same_named_type_symbol(type_name.text())
                 // Only user files: lib.d.ts var+interface merges keep
                 // separate symbols in our binder and would over-report.
@@ -1159,10 +1166,18 @@ impl Checker {
                     // parameter/return types: lib.d.ts call/construct
                     // signatures may reference signature-level type parameters
                     // (e.g. `<TArrayBuffer>`) that have no binder symbol; such
-                    // names degrade to `any` instead of erroring. The
-                    // suppression is scoped to this signature's type
-                    // resolution only.
-                    self.suppress_cannot_find_name_in_type_nodes += 1;
+                    // names degrade to `any` instead of erroring. Scoped to
+                    // BUNDLED lib files only — user files report normally
+                    // (Go resolves signature-scoped type parameters; the
+                    // blanket suppression hid valid errors like
+                    // `typeof arguments` in call-signature params).
+                    let suppress = self
+                        .current_file
+                        .as_ref()
+                        .is_some_and(|f| f.file_name.starts_with("bundled://"));
+                    if suppress {
+                        self.push_ts2304_suppression();
+                    }
                     let return_type = match data.type_node.as_ref() {
                         Some(tn) => self.get_type_from_type_node(tn),
                         None => self.get_any_type(),
@@ -1174,11 +1189,19 @@ impl Checker {
                         /* contextual_signature */ None,
                         /* declaration */ Some(Arc::clone(member)),
                     );
-                    self.suppress_cannot_find_name_in_type_nodes -= 1;
+                    if suppress {
+                        self.pop_ts2304_suppression();
+                    }
                     call_signatures.push(sig);
                 }
                 NodeData::ConstructSignatureDeclaration(data) => {
-                    self.suppress_cannot_find_name_in_type_nodes += 1;
+                    let suppress = self
+                        .current_file
+                        .as_ref()
+                        .is_some_and(|f| f.file_name.starts_with("bundled://"));
+                    if suppress {
+                        self.push_ts2304_suppression();
+                    }
                     let return_type = match data.type_node.as_ref() {
                         Some(tn) => self.get_type_from_type_node(tn),
                         None => self.get_any_type(),
@@ -1190,7 +1213,9 @@ impl Checker {
                         /* contextual_signature */ None,
                         /* declaration */ Some(Arc::clone(member)),
                     );
-                    self.suppress_cannot_find_name_in_type_nodes -= 1;
+                    if suppress {
+                        self.pop_ts2304_suppression();
+                    }
                     construct_signatures.push(sig);
                 }
                 NodeData::ConstructorDeclaration(data) => {
@@ -1579,15 +1604,35 @@ impl Checker {
         };
         // Qualified `typeof a.b` — resolve the entity name to a symbol,
         // then its value/constructor type.
+        fn report_unresolved(c: &mut Checker, seg: &Arc<Node>) {
+            if c.ts2304_reporting_allowed_for(seg) {
+                use crate::diagnostics::messages_generated::CANNOT_FIND_NAME_0;
+                let file = c
+                    .get_source_file_of_node(seg)
+                    .or_else(|| c.current_file.clone());
+                c.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    seg.loc,
+                    CANNOT_FIND_NAME_0,
+                    vec![seg.text().to_string()],
+                ));
+            }
+        }
         let symbol = if d.expr_name.kind == SyntaxKind::Identifier {
             match self.resolve_identifier(&d.expr_name) {
                 Some(s) => s,
-                None => return self.error_type(),
+                None => {
+                    report_unresolved(self, &d.expr_name);
+                    return self.error_type();
+                }
             }
         } else {
             match self.resolve_qualified_symbol(&d.expr_name) {
                 Some(s) => s,
-                None => return self.error_type(),
+                None => {
+                    report_unresolved(self, &d.expr_name);
+                    return self.error_type();
+                }
             }
         };
         // A class reference yields the class (constructor) type; with type
@@ -1727,7 +1772,12 @@ impl Checker {
         self.cache_type(node, self.error_type());
         let result = match &node.data {
             NodeData::TypeLiteralNode(data) => {
-                self.get_type_from_type_literal_members(&data.members)
+                // Reuse the interface member builder — it covers ALL member
+                // kinds (call/construct signatures, method signatures,
+                // optionality), while the old literal-only walker skipped
+                // signatures (`{ (n: number): string }` lost its call
+                // signature → false TS2349).
+                self.build_interface_type_from_members(&data.members)
             }
             NodeData::FunctionTypeNode(_) => self.get_type_from_function_type_node(node),
             NodeData::ConstructorTypeNode(_) => self.get_type_from_constructor_type_node(node),
@@ -1855,8 +1905,9 @@ impl Checker {
     fn get_type_from_constructor_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
         match &node.data {
             NodeData::ConstructorTypeNode(data) => {
-                // Same TS2304 suppression as FunctionTypeNode above.
-                self.suppress_cannot_find_name_in_type_nodes += 1;
+                // No TS2304 suppression — same policy as FunctionTypeNode
+                // above: unresolved names in a constructor-type annotation
+                // are reported like any other type reference.
                 let return_type = match data.type_node.as_ref() {
                     Some(tn) => self.get_type_from_type_node(tn),
                     None => self.get_any_type(),
@@ -1868,7 +1919,6 @@ impl Checker {
                     /* contextual_signature */ None,
                     /* declaration */ Some(Arc::clone(node)),
                 );
-                self.suppress_cannot_find_name_in_type_nodes -= 1;
                 self.create_function_or_constructor_type(vec![sig], true)
             }
             _ => self.error_type(),
@@ -2113,6 +2163,38 @@ impl Checker {
             };
             let object_type = self.get_type_from_type_node(&object_type_node);
             let index_type = self.get_type_from_type_node(&index_type_node);
+            // TS2538: only string/number-literal (or unique symbol) types
+            // can index — array/tuple/object/boolean index types report at
+            // the index node (Go's checkIndexType in
+            // getTypeFromIndexedAccessTypeNode).
+            if !index_type.flags.intersects(
+                crate::checker::types::TypeFlags::Any
+                    | crate::checker::types::TypeFlags::Unknown
+                    | crate::checker::types::TypeFlags::String
+                    | crate::checker::types::TypeFlags::Number
+                    | crate::checker::types::TypeFlags::StringLiteral
+                    | crate::checker::types::TypeFlags::NumberLiteral
+                    | crate::checker::types::TypeFlags::UniqueESSymbol
+                    | crate::checker::types::TypeFlags::Union
+                    | crate::checker::types::TypeFlags::EnumLiteral
+                    | crate::checker::types::TypeFlags::TemplateLiteral
+                    | crate::checker::types::TypeFlags::TypeParameter
+                    | crate::checker::types::TypeFlags::Index,
+            ) && self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| !f.file_name.starts_with("bundled://"))
+            {
+                let display = self.type_to_string(&index_type);
+                let file = self.current_file.clone();
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    index_type_node.loc,
+                    crate::diagnostics::messages_generated::
+                        TYPE_0_CANNOT_BE_USED_AS_AN_INDEX_TYPE,
+                    vec![display],
+                ));
+            }
             self.get_indexed_access_type(&object_type, &index_type)
         };
         self.cache_type(node, result.clone());
@@ -2721,6 +2803,25 @@ impl Checker {
             _ => return self.error_type(),
         };
         let constraint_type = self.get_type_from_type_node(&constraint_node);
+        // TS7039: a mapped type with no template (`{[P in K]}`) has an
+        // implicit `any` template — reported under noImplicitAny at the
+        // mapped-type node (Go's checkMappedType).
+        if data.type_node.is_none()
+            && self.no_implicit_any
+            && self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| !f.file_name.starts_with("bundled://"))
+        {
+            let file = self.current_file.clone();
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file,
+                node.loc,
+                crate::diagnostics::messages_generated::
+                    MAPPED_OBJECT_TYPE_IMPLICITLY_HAS_AN_ANY_TEMPLATE_TYPE,
+                Vec::new(),
+            ));
+        }
         // Get the set of key names from the constraint. Only concrete
         // unions of string literals (or a single string literal) can be
         // eagerly resolved.

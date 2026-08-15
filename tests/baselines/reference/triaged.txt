@@ -128,3 +128,13 @@ compiler/allowJsCrossMonorepoPackage.errors.txt
 ## 2026-08-15 batch #111-#120: TS5101 outFile-deprecation warnings not
 ## emitted by the options layer ##
 compiler/alwaysStrictModule2.errors.txt
+
+## 2026-08-16 batch #100-#199: parser recovery for contextual `module`
+## keyword (TS2591 needs `module {` to reparse as an expression
+## identifier — we emit only the TS1437 half) ##
+compiler/anonymousModules.errors.txt
+
+## 2026-08-16 batch #100-#199: `<<` re-scan for ambiguous generic
+## assertions (`<<T>(x: T) => T>f` parses `<<` as shift; Go re-lexes and
+## reports TS1109/TS2304/TS1005 recovery chain — parser speculation work) ##
+compiler/ambiguousGenericAssertion1.errors.txt

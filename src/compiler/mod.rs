@@ -883,6 +883,12 @@ fn extract_reference_path_directives(text: &str, containing_file: &str) -> Vec<S
         let Some(rest) = trimmed.strip_prefix("///") else {
             continue;
         };
+        // Only `<reference path=... />` directives load files — other
+        // triple-slash comments carrying a `path=` attribute (e.g.
+        // `///<amd-dependency path='bar'/>`) are emit-only metadata.
+        if !rest.trim_start().starts_with("<reference") {
+            continue;
+        }
         if let Some(start) = rest.find("path=\"") {
             let after = &rest[start + 6..];
             if let Some(end) = after.find('"') {

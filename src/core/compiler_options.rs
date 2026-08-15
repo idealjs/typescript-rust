@@ -412,6 +412,11 @@ impl CompilerOptions {
         if value != Tristate::Unknown {
             return value == Tristate::True;
         }
+        // An unset `strict`-family option resolves ON (verified against the
+        // typescript-go CLI: `var n: number; let m = n` reports TS2454 with
+        // no flags; `--strict false` suppresses it). `var x: any` cases
+        // (anyPlusAny1) stay clean via the checker's any exemption, not the
+        // default.
         self.strict != Tristate::False
     }
 

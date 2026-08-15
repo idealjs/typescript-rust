@@ -93,6 +93,19 @@ fn check_source_named_with_lib(
     program.get_semantic_diagnostics()
 }
 
+/// Like [`check_source`] but with `--strictNullChecks` — strict-family
+/// behavior is OFF by default (TypeScript semantics; the oracle CLI and
+/// test runner both materialize `strict: false`), so tests exercising
+/// strict-null diagnostics opt in explicitly.
+fn check_source_strict(source: &str) -> Vec<tsox::ast::Diagnostic> {
+    check_source_with_lib_args(source, &["--strictNullChecks"])
+}
+
+/// Like [`check_source`] but with `--strict` (all strict-family checks on).
+fn check_source_all_strict(source: &str) -> Vec<tsox::ast::Diagnostic> {
+    check_source_with_lib_args(source, &["--strict"])
+}
+
 /// Like `check_source_with_lib` but with extra CLI args (e.g. `--lib`).
 fn check_source_with_lib_args(source: &str, extra_args: &[&str]) -> Vec<tsox::ast::Diagnostic> {
     let fs = Arc::new(InMemoryFS::new());
@@ -1043,7 +1056,7 @@ fn checker_interface_with_optional_property_no_error() {
 
 #[test]
 fn checker_interface_with_method_no_error() {
-    let diags = check_source("interface Callback { (err: Error | null): void; }");
+    let diags = check_source("interface Callback { (err: unknown): void; }");
     assert_no_diagnostics(&diags);
 }
 
@@ -2538,7 +2551,7 @@ fn checker_narrowing_null_removed_in_true_branch() {
 fn checker_narrowing_null_kept_in_false_branch() {
     // `x !== null` is false → `x` is `null` in the else branch.
     // Assigning `x` to `null` should succeed.
-    let diags = check_source(
+    let diags = check_source_strict(
         "let x: string | null = null;\
          if (x !== null) {\
              x = null;\
@@ -2807,7 +2820,7 @@ fn checker_narrowing_equality_replaces_number_with_literal() {
 #[test]
 fn checker_narrowing_equality_strict_null_vs_undefined() {
     // `x === undefined` narrows to `undefined` only (not `null`).
-    let diags = check_source(
+    let diags = check_source_strict(
         "let x: string | null | undefined = null;\
          if (x === undefined) {\
              let y: undefined = x;\
@@ -2819,7 +2832,7 @@ fn checker_narrowing_equality_strict_null_vs_undefined() {
 #[test]
 fn checker_narrowing_equality_strict_null_kept() {
     // `x === null` narrows to `null` only (not `undefined`).
-    let diags = check_source(
+    let diags = check_source_strict(
         "let x: string | null | undefined = undefined;\
          if (x === null) {\
              let y: null = x;\
@@ -3273,7 +3286,7 @@ fn checker_narrowing_or_branch_union() {
 fn checker_narrowing_loose_equality_eq_null() {
     // `x == null` (loose equality) narrows to null | undefined in the true
     // branch (both null and undefined match under `==`).
-    let diags = check_source(
+    let diags = check_source_strict(
         "let x: string | null | undefined = null;\
          if (x == null) {\
              let y: null | undefined = x;\
@@ -6617,7 +6630,7 @@ fn checker_ts2448_class_used_after_declaration_no_error() {
 #[test]
 fn checker_ts2454_let_uninitialized_used_before_assignment() {
     // `let v: number;` then read before assignment → TS2454.
-    let diags = check_source("let v: number;\nlet y = v;\nv = 1;");
+    let diags = check_source_strict("let v: number;\nlet y = v;\nv = 1;");
     assert_diagnostic_code(&diags, 2454);
 }
 
@@ -6667,7 +6680,7 @@ fn checker_ts2454_declare_let_no_error() {
 #[test]
 fn checker_ts2454_let_string_uninitialized_used_before_assignment() {
     // Non-number type: `let s: string;` read before assignment → TS2454.
-    let diags = check_source("let s: string;\nlet y = s;\ns = \"hi\";");
+    let diags = check_source_strict("let s: string;\nlet y = s;\ns = \"hi\";");
     assert_diagnostic_code(&diags, 2454);
 }
 
@@ -6678,7 +6691,7 @@ fn checker_ts2454_let_string_uninitialized_used_before_assignment() {
 #[test]
 fn checker_ts18048_property_access_on_possibly_undefined() {
     // Accessing `.a` on `{ a: number } | undefined` → TS18048.
-    let diags = check_source("let x: { a: number } | undefined = { a: 1 };\nx.a;");
+    let diags = check_source_strict("let x: { a: number } | undefined = { a: 1 };\nx.a;");
     assert_diagnostic_code(&diags, 18048);
 }
 
@@ -6721,7 +6734,7 @@ fn checker_ts18048_property_access_after_narrowing_no_error() {
 #[test]
 fn checker_ts18048_property_access_on_possibly_null_union() {
     // `{ a: number } | null` — accessing `.a` → TS18048.
-    let diags = check_source("let x: { a: number } | null = { a: 1 };\nx.a;");
+    let diags = check_source_strict("let x: { a: number } | null = { a: 1 };\nx.a;");
     assert_diagnostic_code(&diags, 18048);
 }
 
@@ -7019,14 +7032,14 @@ fn checker_ts2448_class_instantiation_before_declaration() {
 #[test]
 fn checker_ts2454_boolean_uninitialized_used_before_assignment() {
     // `let v: boolean;` read before assignment → TS2454.
-    let diags = check_source("let v: boolean;\nlet y = v;\nv = true;");
+    let diags = check_source_strict("let v: boolean;\nlet y = v;\nv = true;");
     assert_diagnostic_code(&diags, 2454);
 }
 
 #[test]
 fn checker_ts2454_annotated_assignment_after_use() {
     // Reading `v` (typed `number`) before its later assignment → TS2454.
-    let diags = check_source("let v: number;\nconst y: number = v;\nv = 5;");
+    let diags = check_source_strict("let v: number;\nconst y: number = v;\nv = 5;");
     assert_diagnostic_code(&diags, 2454);
 }
 
@@ -7037,7 +7050,7 @@ fn checker_ts2454_annotated_assignment_after_use() {
 #[test]
 fn checker_ts18048_nullable_via_type_alias() {
     // A type-aliased object type unioned with `undefined` → TS18048.
-    let diags = check_source(
+    let diags = check_source_strict(
         "type Box = { v: number };\n\
          let x: Box | undefined = { v: 1 };\n\
          x.v;",
@@ -7048,7 +7061,7 @@ fn checker_ts18048_nullable_via_type_alias() {
 #[test]
 fn checker_ts18048_chained_property_access_on_possibly_undefined() {
     // `x.a.b` where `x` is possibly undefined → TS18048.
-    let diags = check_source(
+    let diags = check_source_strict(
         "let x: { a: { b: number } } | undefined = { a: { b: 1 } };\n\
          x.a.b;",
     );
@@ -7112,30 +7125,34 @@ fn checker_ts2300_two_type_aliases() {
 
 #[test]
 fn checker_ts2300_var_then_function_no_error() {
-    // A function-scoped `var` may coexist with a function → no TS2300.
+    // Current Go (TS 6 merging rules): `var x` + `function x` conflict —
+    // TS2300 on both declarations (verified against typescript-go).
     let diags = check_source("var x;\nfunction x() {}");
-    assert_diagnostic_count(&diags, 2300, 0);
+    assert_diagnostic_count(&diags, 2300, 2);
 }
 
 #[test]
 fn checker_ts2300_function_then_var_no_error() {
-    // Reverse order: function then `var` → no TS2300.
+    // Current Go: function then `var` conflict — TS2300 on both (verified
+    // against typescript-go).
     let diags = check_source("function x() {}\nvar x;");
-    assert_diagnostic_count(&diags, 2300, 0);
+    assert_diagnostic_count(&diags, 2300, 2);
 }
 
 #[test]
 fn checker_ts2300_var_then_class_no_error() {
-    // A function-scoped `var` may coexist with a class → no TS2300.
+    // Current Go: `var` + `class` conflict — TS2300 on both (verified
+    // against typescript-go).
     let diags = check_source("var x;\nclass x {}");
-    assert_diagnostic_count(&diags, 2300, 0);
+    assert_diagnostic_count(&diags, 2300, 2);
 }
 
 #[test]
 fn checker_ts2300_class_then_var_no_error() {
-    // Reverse order: class then `var` → no TS2300.
+    // Current Go: class then `var` conflict — TS2300 on both (verified
+    // against typescript-go).
     let diags = check_source("class x {}\nvar x;");
-    assert_diagnostic_count(&diags, 2300, 0);
+    assert_diagnostic_count(&diags, 2300, 2);
 }
 
 #[test]
@@ -8314,7 +8331,7 @@ fn checker_generic_constraint_call_no_error() {
 fn checker_generic_class_instantiation_no_error() {
     // Oracle-verified (tsgo): `x: T` without initializer reports TS2564 under
     // strictNullChecks + strictPropertyInitialization even in generic classes.
-    let diags = check_source("class C<T> { x: T; }\nlet c = new C<number>();");
+    let diags = check_source_all_strict("class C<T> { x: T; }\nlet c = new C<number>();");
     assert_diagnostic_code(&diags, 2564);
 }
 
@@ -8642,8 +8659,9 @@ fn checker_recursive_generic_no_error() {
     let diags = check_source(
         "type Tree<T> = { value: T; left?: Tree<T>; right?: Tree<T>; };\nlet t: Tree<number> = { value: 1 };",
     );
-    // KNOWN LIMITATION: object literal with missing optional properties triggers TS2739.
-    assert_diagnostic_count(&diags, 2739, 1);
+    // Object literals may omit OPTIONAL properties (type literals now model
+    // optionality via build_interface_type_from_members — matches Go).
+    assert_no_diagnostics(&diags);
 }
 
 #[test]
@@ -8888,8 +8906,9 @@ fn checker_react_like_component_no_error() {
     let diags = check_source(
         "interface Props { name: string; age: number; }\nfunction Greet(props: Props): string {\n  return props.name + props.age;\n}\nlet r = Greet({ name: \"a\", age: 1 });",
     );
-    // KNOWN LIMITATION: string + number binary expression inferred as number instead of string (TS2322).
-    assert_diagnostic_count(&diags, 2322, 1);
+    // `string + number` infers `string` (Go's checkAddition rule) — the
+    // historical TS2322 (number result) no longer fires.
+    assert_no_diagnostics(&diags);
 }
 
 #[test]
@@ -9250,7 +9269,7 @@ fn checker_custom_type_guard_with_this_no_error() {
 
 #[test]
 fn checker_assertion_function_no_error() {
-    let diags = check_source(
+    let diags = check_source_strict(
         "function assert(cond: boolean): asserts cond {\n  if (!cond) throw new Error();\n}\nlet x: number | undefined = 1;\nassert(x !== undefined);\nlet y: number = x;",
     );
     // 'Error' resolves through the built-in ES globals table (TS2304 gone);
@@ -9270,8 +9289,11 @@ fn checker_discriminated_union_with_array_no_error() {
 #[test]
 fn checker_narrow_optional_chain_method_no_error() {
     let diags = check_source("let obj: { f?: () => number } = {};\nlet x = obj?.f?.() ?? 0;");
-    // KNOWN LIMITATION: optional chaining method call not fully supported (TS2741).
-    assert_diagnostic_count(&diags, 2741, 1);
+    // KNOWN LIMITATION: optional-method members now build function types
+    // (the old TS2741 is gone), but `?.()` optional calls don't strip
+    // `undefined` from the target — `(() => number) | undefined` reports
+    // TS2349. Go reports nothing here.
+    assert_diagnostic_count(&diags, 2349, 1);
 }
 
 #[test]
@@ -9294,7 +9316,7 @@ fn checker_multiple_narrowing_conditions_no_error() {
 
 #[test]
 fn checker_nullish_coalescing_narrowing_no_error() {
-    let diags = check_source("let x: string | null = null;\nlet y: string = x ?? \"default\";");
+    let diags = check_source_strict("let x: string | null = null;\nlet y: string = x ?? \"default\";");
     // KNOWN LIMITATION: nullish coalescing doesn't narrow away null/undefined (TS2322).
     assert_diagnostic_count(&diags, 2322, 1);
 }
